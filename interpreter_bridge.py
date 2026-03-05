@@ -135,27 +135,15 @@ def configure_interpreter(model: str, agent_key: str) -> None:
     else:
         logger.warning("Unknown model prefix: %s — defaulting to Ollama", model)
 
-async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
-    """Execute a task using Open Interpreter with the specified model.
-    
-    Args:
-        model: Model string with provider prefix (e.g. "openrouter/...")
-        task: User task description
-        agent_key: Agent identifier for system prompt selection
-        
-    Returns:
-        Concatenated output from interpreter
-    """
+async def _raw_run(model: str, task: str, agent_key: str) -> str:
+    """Execute interpreter.chat in thread pool and format output."""
     configure_interpreter(model, agent_key)
-    
-    # Run in thread pool to avoid blocking asyncio
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
-        lambda: interpreter.chat(task, display=False)
+        lambda: interpreter.chat(task, display=False),
     )
-    
-    # Collect all message content
+
     output_parts = []
     for msg in result:
         if msg.get("type") == "message":
@@ -170,9 +158,84 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
             console_out = msg.get("content", "")
             if console_out.strip():
                 output_parts.append(f"Output: {console_out}")
-    
+
     full_output = "\n\n".join(output_parts)
     return full_output if full_output else "Task completed (no output generated)"
+
+
+async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
+    """Execute a task with caching, metrics, error recovery, and cost tracking.
+
+    Pipeline:
+      1. Check semantic cache → return hit immediately.
+      2. Apply dynamic model routing (may downgrade to cheaper tier).
+      3. Run with circuit-breaker + multi-level fallback.
+      4. Store result in cache, record metrics and usage cost.
+
+    Args:
+        model: Model string with provider prefix (e.g. "openrouter/...")
+        task: User task description
+        agent_key: Agent identifier for system prompt selection
+
+    Returns:
+        Concatenated output from interpreter
+    """
+    # --- 1. Semantic cache check ---
+    cached_result: str | None = None
+    try:
+        from memory.semantic_cache import get_cache
+        from observability.metrics import record_cache_event
+        cache = get_cache()
+        cached = cache.get(task, agent_key)
+        if cached and cached != "__EVICTED__":
+            record_cache_event(agent_key, hit=True)
+            logger.debug("Cache hit for agent=%s", agent_key)
+            return cached
+        record_cache_event(agent_key, hit=False)
+    except Exception as exc:
+        logger.debug("Cache check skipped: %s", exc)
+
+    # --- 2. Dynamic model routing ---
+    effective_model = model
+    try:
+        from reliability.model_router import select_model
+        effective_model = select_model(agent_key, task) or model
+    except Exception as exc:
+        logger.debug("Model router skipped: %s", exc)
+
+    # --- 3. Error recovery wrapper ---
+    async def _run_fn(t: str) -> str:
+        return await _raw_run(effective_model, t, agent_key)
+
+    result: str
+    try:
+        from reliability.error_recovery import get_recovery
+        from observability.metrics import trace_agent
+        async with trace_agent(agent_key):
+            result = await get_recovery().execute(task, agent_key, _run_fn)
+    except Exception as exc:
+        logger.warning("Error recovery pipeline failed, running directly: %s", exc)
+        result = await _raw_run(effective_model, task, agent_key)
+
+    # --- 4. Store in cache and record usage ---
+    try:
+        from memory.semantic_cache import get_cache
+        get_cache().set(task, agent_key, result)
+    except Exception:
+        pass
+
+    try:
+        from optimization.usage_tracker import get_tracker
+        # Token counts are not available from OI; use rough estimate
+        estimated_in = len(task.split()) * 1_000 // 750
+        estimated_out = len(result.split()) * 1_000 // 750
+        alert = get_tracker().record(effective_model, estimated_in, estimated_out)
+        if alert:
+            logger.warning("Usage alert: %s", alert)
+    except Exception:
+        pass
+
+    return result
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
     """Split text into chunks safe for Telegram's message length limit.
