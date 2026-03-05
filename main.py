@@ -5,6 +5,9 @@ Commands:
     /start          — Show help menu
     /run <task>     — Auto-detect agent by keyword and execute
     /agent <n> <t>  — Force a specific agent
+    /thread <name>  — Switch to a thread (project context)
+    /threads        — List all active threads
+    /context        — Show current thread context
     /scrape <url>   — Scrape page text via Playwright
     /shot <url>     — Screenshot a URL, send as photo
     /models         — Show active agent roster
@@ -49,6 +52,10 @@ if not ALLOWED_USER_ID:
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
+# ── Thread tracking (user_id → thread_id) ───────────────────────────────────────────────
+
+current_thread: dict[int, str] = {}
+
 
 # ── Auth guard ──────────────────────────────────────────────────────────────────────────
 
@@ -87,11 +94,17 @@ async def cmd_start(message: Message) -> None:
 
     help_text = (
         "<b>LegionSwarm 10/10</b> — 7-Agent AI Swarm\n\n"
+        "<b>Core Commands</b>\n"
         "<b>/run</b> <i>&lt;task&gt;</i> — auto-route to best agent\n"
         "<b>/agent</b> <i>&lt;name&gt; &lt;task&gt;</i> — force a specific agent\n"
-        "<b>/scrape</b> <i>&lt;url&gt;</i> — extract page text\n"
-        "<b>/shot</b> <i>&lt;url&gt;</i> — take a screenshot\n"
         "<b>/models</b> — show agent roster\n\n"
+        "<b>Thread System</b> (conversation memory)\n"
+        "<b>/thread</b> <i>&lt;name&gt;</i> — switch to a project thread\n"
+        "<b>/threads</b> — list all active threads\n"
+        "<b>/context</b> — show current thread history\n\n"
+        "<b>Web Tools</b>\n"
+        "<b>/scrape</b> <i>&lt;url&gt;</i> — extract page text\n"
+        "<b>/shot</b> <i>&lt;url&gt;</i> — take a screenshot\n\n"
         f"<b>Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}"
     )
     await message.answer(help_text, parse_mode="HTML")
@@ -104,6 +117,80 @@ async def cmd_models(message: Message) -> None:
         await _deny(message)
         return
     await message.answer(agents.list_agents(), parse_mode="HTML")
+
+
+@dp.message(Command("thread"))
+async def cmd_thread(message: Message) -> None:
+    """Switch to a conversation thread.
+    
+    Usage: /thread <name>
+    Example: /thread workernet_training
+    """
+    if not _authorized(message):
+        await _deny(message)
+        return
+    
+    args = (message.text or "").split(maxsplit=1)
+    if len(args) < 2 or not args[1].strip():
+        await message.answer(
+            "Usage: <code>/thread &lt;name&gt;</code>\n\n"
+            "Example: <code>/thread workernet_training</code>\n\n"
+            "Threads let agents reference each other's outputs within a project.",
+            parse_mode="HTML"
+        )
+        return
+    
+    thread_id = args[1].strip().lower().replace(" ", "_")
+    user_id = message.from_user.id
+    current_thread[user_id] = thread_id
+    
+    await message.answer(
+        f"📌 Switched to thread: <b>{thread_id}</b>\n\n"
+        "All <code>/run</code> commands will now add to this conversation history.",
+        parse_mode="HTML"
+    )
+    logger.info("User %s switched to thread '%s'", user_id, thread_id)
+
+
+@dp.message(Command("threads"))
+async def cmd_threads(message: Message) -> None:
+    """List all active conversation threads."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    
+    await message.answer(agents.list_threads(), parse_mode="HTML")
+
+
+@dp.message(Command("context"))
+async def cmd_context(message: Message) -> None:
+    """Show the current thread's conversation history."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    
+    user_id = message.from_user.id
+    if user_id not in current_thread:
+        await message.answer(
+            "No active thread. Use <code>/thread &lt;name&gt;</code> to start one.",
+            parse_mode="HTML"
+        )
+        return
+    
+    thread_id = current_thread[user_id]
+    context = agents.get_thread_context(thread_id, last_n=5)
+    
+    if not context:
+        await message.answer(
+            f"Thread <b>{thread_id}</b> has no history yet.",
+            parse_mode="HTML"
+        )
+        return
+    
+    await message.answer(
+        f"<b>Thread: {thread_id}</b>\n\n<pre>{context}</pre>",
+        parse_mode="HTML"
+    )
 
 
 @dp.message(Command("run"))
@@ -122,8 +209,18 @@ async def cmd_run(message: Message) -> None:
         return
 
     task = args[1].strip()
+    original_task = task  # Save for thread storage
     agent_key = agents.detect_agent(task)
     model = agents.get_model(agent_key)
+    user_id = message.from_user.id
+
+    # Add thread context if active
+    thread_id = current_thread.get(user_id)
+    if thread_id:
+        context = agents.get_thread_context(thread_id)
+        if context:
+            task = f"{context}\n\nCurrent task: {task}"
+            logger.info("Added thread context for '%s'", thread_id)
 
     await message.answer(
         f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
@@ -153,6 +250,10 @@ async def cmd_run(message: Message) -> None:
         else:
             result = f"Error: {exc}"
 
+    # Store in thread if active
+    if thread_id:
+        agents.add_to_thread(thread_id, agent_key, original_task, result)
+
     await _send_chunks(message, result)
 
 
@@ -177,7 +278,9 @@ async def cmd_agent(message: Message) -> None:
 
     agent_key = args[1].strip().lower()
     task = args[2].strip()
+    original_task = task
     model = agents.get_model(agent_key)
+    user_id = message.from_user.id
 
     if model is None:
         roster = ", ".join(agents.AGENT_MODELS.keys())
@@ -186,6 +289,13 @@ async def cmd_agent(message: Message) -> None:
             parse_mode="HTML",
         )
         return
+
+    # Add thread context if active
+    thread_id = current_thread.get(user_id)
+    if thread_id:
+        context = agents.get_thread_context(thread_id)
+        if context:
+            task = f"{context}\n\nCurrent task: {task}"
 
     await message.answer(
         f"Using <b>{agent_key}</b> (<code>{model}</code>)…",
@@ -197,6 +307,10 @@ async def cmd_agent(message: Message) -> None:
     except Exception as exc:
         logger.exception("agent run_task failed: %s", exc)
         result = f"Error: {exc}"
+
+    # Store in thread if active
+    if thread_id:
+        agents.add_to_thread(thread_id, agent_key, original_task, result)
 
     await _send_chunks(message, result)
 
