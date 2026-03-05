@@ -2,103 +2,69 @@
 """Agent router: keyword-based task detection and model registry."""
 
 from __future__ import annotations
-
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Full model registry — keys match /agent <name> command
+# Primary model registry - Best in class as of March 2026
 AGENT_MODELS: dict[str, str] = {
-    "vision": "ollama_chat/gemma3:12b",
-    "coding": "ollama_chat/qwen3.5:35b",
-    "debug": "ollama_chat/exaone-deep:32b",
-    "math": "ollama_chat/phi4",
-    "architect": "ollama_chat/llama3.3:70b",
+    "vision":    "ollama_chat/gemma3:12b",                        # Local - privacy critical
+    "coding":    "openrouter/mistralai/devstral-2512:free",      # SWE-bench 72.2%
+    "debug":     "zai/glm-4",                                     # GPQA Diamond 85.7%
+    "math":      "zai/glm-4",                                     # AIME 2025 95.7%
+    "architect": "cerebras/qwen3-235b-a22b",                      # 1,500 tok/s, 131K context
+    "mentor":    "gemini/gemini-3.1-pro",                         # 1M context, Gemini Pro sub
+    "analyst":   "groq/moonshotai/kimi-k2-instruct",             # 1T MoE, deep reasoning
+}
+
+# Fallback models when primary hits rate limit
+FALLBACK_MODELS: dict[str, str] = {
+    "coding":    "openrouter/qwen/qwen3-coder:free",
+    "debug":     "cerebras/qwen3-235b-a22b",
+    "math":      "cerebras/qwen3-235b-a22b",
+    "architect": "openrouter/openai/gpt-oss-120b:free",
+    "mentor":    "gemini/gemma-3-27b-it",
+    "analyst":   "openrouter/openai/gpt-oss-120b:free",
 }
 
 # Keyword → agent mapping (auto-routing via /run command)
-# IMPORTANT: Always show the full dict when editing this.
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
-        "screenshot",
-        "image",
-        "photo",
-        "ui",
-        "visual",
-        "look at",
-        "describe",
-        "ocr",
-        "pixel",
-        "multimodal",
+        "screenshot", "image", "photo", "ui", "visual", "ocr", 
+        "pixel", "multimodal", "look at", "describe"
     ],
     "coding": [
-        "code",
-        "function",
-        "script",
-        "write",
-        "implement",
-        "class",
-        "module",
-        "refactor",
-        "generate",
-        "syntax",
-        "api",
-        "endpoint",
-        "database",
-        "sql",
-        "query",
+        "code", "function", "script", "implement", "class", "module", 
+        "refactor", "generate", "syntax", "endpoint", "sql", "query",
+        "write code", "build", "create file", "add feature", "api"
     ],
     "debug": [
-        "debug",
-        "error",
-        "traceback",
-        "exception",
-        "crash",
-        "fix",
-        "bug",
-        "cuda",
-        "pytorch",
-        "torch",
-        "workernet",
-        "nan",
-        "oom",
-        "out of memory",
-        "gradient",
-        "backward",
-        "loss",
+        "debug", "traceback", "exception", "crash", "fix", "bug", 
+        "cuda", "pytorch", "torch", "workernet", "nan", "oom", 
+        "out of memory", "backward", "loss spike", "error in"
     ],
     "math": [
-        "math",
-        "tensor",
-        "matrix",
-        "equation",
-        "derivative",
-        "integral",
-        "gradient descent",
-        "backprop",
-        "linear algebra",
-        "eigenvalue",
-        "softmax",
-        "norm",
-        "convolution",
-        "fourier",
+        "tensor", "matrix", "equation", "derivative", "integral", 
+        "gradient descent", "backprop", "linear algebra", "eigenvalue", 
+        "softmax", "norm", "convolution", "fourier", "calculate",
+        "mathematical", "formula", "proof"
     ],
     "architect": [
-        "design",
-        "architecture",
-        "plan",
-        "system",
-        "pipeline",
-        "overview",
-        "summarize",
-        "explain",
-        "high level",
-        "strategy",
-        "structure",
-        "long",
-        "document",
-        "thesis",
-        "research",
+        "design", "architecture", "plan", "system", "pipeline", 
+        "structure", "strategy", "high level", "document", "thesis",
+        "overview", "framework", "organize"
+    ],
+    "mentor": [
+        "explain", "teach me", "i don't understand", "eli5", 
+        "what does this mean", "walk me through", "what is", 
+        "how does", "why does", "in simple terms", "beginner", 
+        "step by step", "like a professor", "break it down"
+    ],
+    "analyst": [
+        "analyze", "plot", "chart", "csv", "dataframe", "log", 
+        "trend", "statistics", "distribution", "compare results", 
+        "training run", "metrics", "performance", "insight", 
+        "nvidia-smi", "visualize", "summarize data"
     ],
 }
 
@@ -135,16 +101,18 @@ def detect_agent(task: str) -> str:
     return best_agent
 
 
-def get_model(agent_key: str) -> str | None:
-    """Return the Ollama model string for an agent key, or None if unknown.
-
+def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
+    """Return the model string for an agent key.
+    
     Args:
         agent_key: One of the keys in AGENT_MODELS.
+        use_fallback: If True, return fallback model instead of primary.
 
     Returns:
-        Full model string (e.g. "ollama_chat/phi4") or None.
+        Full model string (e.g. "zai/glm-4") or None.
     """
-    return AGENT_MODELS.get(agent_key)
+    registry = FALLBACK_MODELS if use_fallback else AGENT_MODELS
+    return registry.get(agent_key)
 
 
 def list_agents() -> str:
@@ -153,7 +121,7 @@ def list_agents() -> str:
     Returns:
         Formatted string suitable for Telegram HTML message.
     """
-    lines = ["<b>Active Agent Roster</b>\n"]
+    lines = ["<b>LegionSwarm 10/10 — Active Agents</b>\n"]
     for key, model in AGENT_MODELS.items():
         lines.append(f"  <b>{key}</b> → <code>{model}</code>")
     return "\n".join(lines)
