@@ -11,7 +11,6 @@ Commands:
 """
 
 from __future__ import annotations
-
 import asyncio
 import logging
 import os
@@ -34,7 +33,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ── Secrets ──────────────────────────────────────────────────────────────────
+# ── Secrets ────────────────────────────────────────────────────────────────────────
 
 TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 _raw_uid = os.getenv("ALLOWED_USER_ID", "")
@@ -45,13 +44,13 @@ if not TELEGRAM_BOT_TOKEN:
 if not ALLOWED_USER_ID:
     raise RuntimeError("ALLOWED_USER_ID not set or invalid in .env")
 
-# ── Bot setup ─────────────────────────────────────────────────────────────────
+# ── Bot setup ─────────────────────────────────────────────────────────────────────────
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
 
-# ── Auth guard ────────────────────────────────────────────────────────────────
+# ── Auth guard ──────────────────────────────────────────────────────────────────────────
 
 def _authorized(message: Message) -> bool:
     """Return True only if the sender is the configured ALLOWED_USER_ID."""
@@ -63,7 +62,7 @@ async def _deny(message: Message) -> None:
     logger.warning("Unauthorized access attempt from user_id=%s", message.from_user and message.from_user.id)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────────────
 
 async def _send_chunks(message: Message, text: str) -> None:
     """Send text split into ≤4000-char chunks as HTML messages.
@@ -77,7 +76,7 @@ async def _send_chunks(message: Message, text: str) -> None:
         await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML")
 
 
-# ── Handlers ──────────────────────────────────────────────────────────────────
+# ── Handlers ──────────────────────────────────────────────────────────────────────────
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message) -> None:
@@ -87,13 +86,13 @@ async def cmd_start(message: Message) -> None:
         return
 
     help_text = (
-        "<b>LegionSwarm</b> — Local AI Swarm Control\n\n"
+        "<b>LegionSwarm 10/10</b> — 7-Agent AI Swarm\n\n"
         "<b>/run</b> <i>&lt;task&gt;</i> — auto-route to best agent\n"
         "<b>/agent</b> <i>&lt;name&gt; &lt;task&gt;</i> — force a specific agent\n"
         "<b>/scrape</b> <i>&lt;url&gt;</i> — extract page text\n"
         "<b>/shot</b> <i>&lt;url&gt;</i> — take a screenshot\n"
         "<b>/models</b> — show agent roster\n\n"
-        f"Agents: {', '.join(agents.AGENT_MODELS.keys())}"
+        f"<b>Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}"
     )
     await message.answer(help_text, parse_mode="HTML")
 
@@ -132,10 +131,27 @@ async def cmd_run(message: Message) -> None:
     )
 
     try:
-        result = await interpreter_bridge.run_task(model, task)
+        result = await interpreter_bridge.run_task(model, task, agent_key)
     except Exception as exc:
         logger.exception("run_task failed: %s", exc)
-        result = f"Error: {exc}"
+        # Try fallback
+        fallback_model = agents.get_model(agent_key, use_fallback=True)
+        if fallback_model and fallback_model != model:
+            await message.answer(
+                f"⚠️ Primary failed, trying fallback: <code>{fallback_model}</code>",
+                parse_mode="HTML"
+            )
+            try:
+                result = await interpreter_bridge.run_task(fallback_model, task, agent_key)
+            except Exception as fb_exc:
+                logger.exception("Fallback also failed: %s", fb_exc)
+                result = (
+                    f"❌ Both primary and fallback failed.\n\n"
+                    f"<b>Primary error:</b> {exc}\n\n"
+                    f"<b>Fallback error:</b> {fb_exc}"
+                )
+        else:
+            result = f"Error: {exc}"
 
     await _send_chunks(message, result)
 
@@ -177,7 +193,7 @@ async def cmd_agent(message: Message) -> None:
     )
 
     try:
-        result = await interpreter_bridge.run_task(model, task)
+        result = await interpreter_bridge.run_task(model, task, agent_key)
     except Exception as exc:
         logger.exception("agent run_task failed: %s", exc)
         result = f"Error: {exc}"
@@ -246,11 +262,11 @@ async def cmd_shot(message: Message) -> None:
             tmp_path.unlink(missing_ok=True)
 
 
-# ── Entrypoint ────────────────────────────────────────────────────────────────
+# ── Entrypoint ──────────────────────────────────────────────────────────────────────────
 
 async def main() -> None:
     """Start the bot and begin polling."""
-    logger.info("LegionSwarm starting — polling for updates")
+    logger.info("LegionSwarm 10/10 starting — polling for updates")
     await dp.start_polling(bot, skip_updates=True)
 
 
