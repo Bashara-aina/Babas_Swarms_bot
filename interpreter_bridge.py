@@ -1,136 +1,157 @@
 # /home/newadmin/swarm-bot/interpreter_bridge.py
-"""Open Interpreter ↔ Ollama bridge.
-
-Runs interpreter in a thread-pool executor to stay non-blocking.
-Output is chunked to 4000 chars for Telegram's hard message limit.
-"""
+"""Bridge between Telegram and Open Interpreter with multi-provider support."""
 
 from __future__ import annotations
-
 import asyncio
 import logging
-import subprocess
-from typing import AsyncIterator
-
+import os
 from interpreter import interpreter
 
 logger = logging.getLogger(__name__)
 
-TELEGRAM_CHUNK_SIZE = 4000
+# System prompts per agent
+SYSTEM_PROMPTS = {
+    "vision": "You analyze screenshots and images. Describe what you see clearly and concisely.",
+    "coding": "You are an expert software engineer. Write clean, production-ready code with error handling. Use agentic workflow: plan, implement, test, iterate.",
+    "debug": "You are a debugging expert. Analyze errors systematically: read the full traceback, identify root cause, explain why it failed, then provide the fix.",
+    "math": "You are a mathematics expert. Show step-by-step derivations. Verify numerical answers by writing and executing Python code.",
+    "architect": "You are a system architect. Design scalable, maintainable solutions at the conceptual level. Focus on structure, data flow, and component boundaries.",
+    "mentor": "You are a patient teacher. Explain complex concepts clearly using analogies and examples. Always say WHY, not just what. End with one actionable takeaway.",
+    "analyst": "You are a data analyst. Extract insights from data, identify trends and anomalies, and present findings with clear visualizations and statistics.",
+}
 
-
-def _configure_interpreter(model: str) -> None:
-    """Apply required interpreter settings for local Ollama use.
-
+def configure_interpreter(model: str, agent_key: str) -> None:
+    """Configure interpreter for the specified model and agent.
+    
     Args:
-        model: Full Ollama model string, e.g. "ollama_chat/phi4".
+        model: Model string with provider prefix (e.g. "zai/glm-4")
+        agent_key: Agent identifier for system prompt selection
     """
-    interpreter.llm.model = model
-    interpreter.llm.api_base = "http://localhost:11434"
-    interpreter.offline = True
+    
+    # Reset to defaults
     interpreter.auto_run = True
-    interpreter.safe_mode = False
+    interpreter.offline = True
+    interpreter.llm.api_base = "http://localhost:11434"
+    interpreter.llm.api_key = "ollama"
+    interpreter.system_message = SYSTEM_PROMPTS.get(agent_key, "")
+    
+    # Parse provider from model string
+    if model.startswith("ollama_chat/"):
+        # Local Ollama
+        interpreter.llm.model = model
+        interpreter.offline = True
+        logger.info("Using local Ollama: %s", model)
+        
+    elif model.startswith("openrouter/"):
+        # OpenRouter
+        model_name = model.replace("openrouter/", "")
+        interpreter.llm.model = model_name
+        interpreter.llm.api_base = "https://openrouter.ai/api/v1"
+        interpreter.llm.api_key = os.getenv("OPENROUTER_API_KEY")
+        interpreter.offline = False
+        logger.info("Using OpenRouter: %s", model_name)
+        
+    elif model.startswith("zai/"):
+        # Z.AI (GLM-4.7)
+        interpreter.llm.model = "glm-4"
+        interpreter.llm.api_base = "https://open.bigmodel.cn/api/paas/v4"
+        interpreter.llm.api_key = os.getenv("ZAI_API_KEY")
+        interpreter.offline = False
+        logger.info("Using Z.AI: glm-4")
+        
+    elif model.startswith("cerebras/"):
+        # Cerebras
+        model_name = model.replace("cerebras/", "")
+        interpreter.llm.model = model_name
+        interpreter.llm.api_base = "https://api.cerebras.ai/v1"
+        interpreter.llm.api_key = os.getenv("CEREBRAS_API_KEY")
+        interpreter.offline = False
+        logger.info("Using Cerebras: %s", model_name)
+        
+    elif model.startswith("gemini/"):
+        # Google AI Studio
+        model_name = model.replace("gemini/", "")
+        interpreter.llm.model = model_name
+        interpreter.llm.api_base = "https://generativelanguage.googleapis.com/v1beta/openai"
+        interpreter.llm.api_key = os.getenv("GEMINI_API_KEY")
+        interpreter.offline = False
+        logger.info("Using Gemini: %s", model_name)
+        
+    elif model.startswith("groq/"):
+        # Groq
+        model_name = model.replace("groq/", "")
+        interpreter.llm.model = model_name
+        interpreter.llm.api_base = "https://api.groq.com/openai/v1"
+        interpreter.llm.api_key = os.getenv("GROQ_API_KEY")
+        interpreter.offline = False
+        logger.info("Using Groq: %s", model_name)
+    
+    else:
+        logger.warning("Unknown model prefix: %s — defaulting to Ollama", model)
 
-
-def _prewarm_model(model: str) -> None:
-    """Ensure Ollama has the model loaded before interpreter starts.
-
-    Runs `ollama run <bare_model> ""` synchronously.
-
+async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
+    """Execute a task using Open Interpreter with the specified model.
+    
     Args:
-        model: Full model string like "ollama_chat/phi4".
-    """
-    bare = model.removeprefix("ollama_chat/")
-    logger.debug("Pre-warming Ollama model: %s", bare)
-    try:
-        subprocess.run(
-            ["ollama", "run", bare, ""],
-            timeout=60,
-            capture_output=True,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        logger.warning("Pre-warm timed out for %s — continuing anyway", bare)
-    except FileNotFoundError:
-        logger.error("ollama binary not found — skipping pre-warm")
-
-
-def _run_interpreter_sync(model: str, task: str) -> str:
-    """Blocking interpreter call — run this in an executor.
-
-    Args:
-        model: Full Ollama model string.
-        task: Task text to execute.
-
+        model: Model string with provider prefix (e.g. "openrouter/...")
+        task: User task description
+        agent_key: Agent identifier for system prompt selection
+        
     Returns:
-        Concatenated text output from interpreter.
+        Concatenated output from interpreter
     """
-    _configure_interpreter(model)
-    _prewarm_model(model)
-
-    try:
-        messages = interpreter.chat(task, display=False, stream=False)
-    except Exception as exc:
-        logger.exception("Interpreter error: %s", exc)
-        return f"Interpreter error: {exc}"
-
-    # Collect all text-type message content
-    parts: list[str] = []
-    for msg in messages:
-        if isinstance(msg, dict):
-            content = msg.get("content") or ""
-            if isinstance(content, str) and content.strip():
-                parts.append(content.strip())
-        elif isinstance(msg, str) and msg.strip():
-            parts.append(msg.strip())
-
-    return "\n\n".join(parts) if parts else "No output returned."
-
-
-async def run_task(model: str, task: str) -> str:
-    """Run an interpreter task asynchronously.
-
-    Args:
-        model: Full Ollama model string, e.g. "ollama_chat/coding".
-        task: Task description / code to execute.
-
-    Returns:
-        Full output string (may be multiple kilobytes).
-    """
+    configure_interpreter(model, agent_key)
+    
+    # Run in thread pool to avoid blocking asyncio
     loop = asyncio.get_event_loop()
-    result: str = await loop.run_in_executor(
-        None, _run_interpreter_sync, model, task
+    result = await loop.run_in_executor(
+        None,
+        lambda: interpreter.chat(task, display=False)
     )
-    return result
+    
+    # Collect all message content
+    output_parts = []
+    for msg in result:
+        if msg.get("type") == "message":
+            content = msg.get("content", "")
+            if isinstance(content, str) and content.strip():
+                output_parts.append(content)
+        elif msg.get("type") == "code":
+            code = msg.get("content", "")
+            if code.strip():
+                output_parts.append(f"```\n{code}\n```")
+        elif msg.get("type") == "console":
+            console_out = msg.get("content", "")
+            if console_out.strip():
+                output_parts.append(f"Output: {console_out}")
+    
+    full_output = "\n\n".join(output_parts)
+    return full_output if full_output else "Task completed (no output generated)"
 
-
-def chunk_output(text: str, size: int = TELEGRAM_CHUNK_SIZE) -> list[str]:
-    """Split text into Telegram-safe chunks.
-
+def chunk_output(text: str, max_length: int = 4000) -> list[str]:
+    """Split text into chunks safe for Telegram's message length limit.
+    
     Args:
-        text: Full output string.
-        size: Max chars per chunk (default 4000).
-
+        text: Full output text
+        max_length: Maximum characters per chunk (default 4000 for safety)
+        
     Returns:
-        List of string chunks, each ≤ size chars.
+        List of text chunks
     """
-    if not text:
-        return ["(empty output)"]
-    return [text[i : i + size] for i in range(0, len(text), size)]
-
-
-async def stream_chunks(model: str, task: str) -> AsyncIterator[str]:
-    """Async generator yielding output chunks as they become available.
-
-    Runs the full interpreter task then yields chunks sequentially.
-
-    Args:
-        model: Full Ollama model string.
-        task: Task to execute.
-
-    Yields:
-        String chunks ≤ TELEGRAM_CHUNK_SIZE chars.
-    """
-    full_output = await run_task(model, task)
-    for chunk in chunk_output(full_output):
-        yield chunk
+    if len(text) <= max_length:
+        return [text]
+    
+    chunks = []
+    current_chunk = ""
+    
+    for line in text.split("\n"):
+        if len(current_chunk) + len(line) + 1 > max_length:
+            chunks.append(current_chunk)
+            current_chunk = line + "\n"
+        else:
+            current_chunk += line + "\n"
+    
+    if current_chunk:
+        chunks.append(current_chunk)
+    
+    return chunks
