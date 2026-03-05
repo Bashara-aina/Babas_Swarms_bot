@@ -11,12 +11,20 @@ Commands:
     /scrape <url>   — Scrape page text via Playwright
     /shot <url>     — Screenshot a URL, send as photo
     /models         — Show active agent roster
+    
+Natural Mode:
+    Just talk normally! No slash needed. Examples:
+    - "debug this pytorch error: ..."
+    - "calculate the gradient of x^2"
+    - "explain transformers to me"
+    - "switch to workernet_training thread"
 """
 
 from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, F
@@ -52,7 +60,7 @@ if not ALLOWED_USER_ID:
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
-# ── Thread tracking (user_id → thread_id) ───────────────────────────────────────────────
+# ── Thread tracking (user_id → thread_id) ────────────────────────────────────────────────
 
 current_thread: dict[int, str] = {}
 
@@ -83,6 +91,56 @@ async def _send_chunks(message: Message, text: str) -> None:
         await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML")
 
 
+def _detect_intent(text: str) -> dict:
+    """Detect intent from natural language message.
+    
+    Returns dict with:
+        - action: 'run' | 'thread' | 'threads' | 'context' | 'models' | 'scrape' | 'shot' | 'help'
+        - content: extracted content (task, thread name, url, etc.)
+    """
+    text_lower = text.lower().strip()
+    
+    # Thread switching patterns
+    thread_patterns = [
+        r"switch to (\w+)",
+        r"use thread (\w+)",
+        r"change to (\w+) thread",
+        r"work on (\w+)",
+    ]
+    for pattern in thread_patterns:
+        match = re.search(pattern, text_lower)
+        if match:
+            return {"action": "thread", "content": match.group(1)}
+    
+    # List threads
+    if any(kw in text_lower for kw in ["show threads", "list threads", "my threads", "what threads"]):
+        return {"action": "threads", "content": ""}
+    
+    # Show context
+    if any(kw in text_lower for kw in ["show context", "thread history", "what did we discuss", "conversation history"]):
+        return {"action": "context", "content": ""}
+    
+    # Show models
+    if any(kw in text_lower for kw in ["show models", "list agents", "what agents", "available agents"]):
+        return {"action": "models", "content": ""}
+    
+    # Scrape URL
+    url_match = re.search(r"(https?://\S+)", text)
+    if url_match and any(kw in text_lower for kw in ["scrape", "extract", "get text from"]):
+        return {"action": "scrape", "content": url_match.group(1)}
+    
+    # Screenshot URL
+    if url_match and any(kw in text_lower for kw in ["screenshot", "capture", "shot of"]):
+        return {"action": "shot", "content": url_match.group(1)}
+    
+    # Help
+    if any(kw in text_lower for kw in ["help", "commands", "what can you do", "how do i"]):
+        return {"action": "help", "content": ""}
+    
+    # Default: treat as task to run
+    return {"action": "run", "content": text}
+
+
 # ── Handlers ──────────────────────────────────────────────────────────────────────────
 
 @dp.message(Command("start"))
@@ -94,17 +152,19 @@ async def cmd_start(message: Message) -> None:
 
     help_text = (
         "<b>LegionSwarm 10/10</b> — 7-Agent AI Swarm\n\n"
-        "<b>Core Commands</b>\n"
+        "<b>💬 Natural Mode (Recommended)</b>\n"
+        "Just talk normally! No slash needed:\n"
+        "  • <i>debug this pytorch error: ...</i>\n"
+        "  • <i>calculate the gradient of x^2</i>\n"
+        "  • <i>explain transformers to me</i>\n"
+        "  • <i>switch to workernet_training</i>\n"
+        "  • <i>show my threads</i>\n\n"
+        "<b>⚙️ Command Mode (Optional)</b>\n"
         "<b>/run</b> <i>&lt;task&gt;</i> — auto-route to best agent\n"
-        "<b>/agent</b> <i>&lt;name&gt; &lt;task&gt;</i> — force a specific agent\n"
-        "<b>/models</b> — show agent roster\n\n"
-        "<b>Thread System</b> (conversation memory)\n"
         "<b>/thread</b> <i>&lt;name&gt;</i> — switch to a project thread\n"
         "<b>/threads</b> — list all active threads\n"
-        "<b>/context</b> — show current thread history\n\n"
-        "<b>Web Tools</b>\n"
-        "<b>/scrape</b> <i>&lt;url&gt;</i> — extract page text\n"
-        "<b>/shot</b> <i>&lt;url&gt;</i> — take a screenshot\n\n"
+        "<b>/context</b> — show current thread history\n"
+        "<b>/models</b> — show agent roster\n\n"
         f"<b>Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}"
     )
     await message.answer(help_text, parse_mode="HTML")
@@ -134,8 +194,7 @@ async def cmd_thread(message: Message) -> None:
     if len(args) < 2 or not args[1].strip():
         await message.answer(
             "Usage: <code>/thread &lt;name&gt;</code>\n\n"
-            "Example: <code>/thread workernet_training</code>\n\n"
-            "Threads let agents reference each other's outputs within a project.",
+            "Or just say: <i>\"switch to workernet_training\"</i>",
             parse_mode="HTML"
         )
         return
@@ -145,8 +204,7 @@ async def cmd_thread(message: Message) -> None:
     current_thread[user_id] = thread_id
     
     await message.answer(
-        f"📌 Switched to thread: <b>{thread_id}</b>\n\n"
-        "All <code>/run</code> commands will now add to this conversation history.",
+        f"📌 Switched to thread: <b>{thread_id}</b>",
         parse_mode="HTML"
     )
     logger.info("User %s switched to thread '%s'", user_id, thread_id)
@@ -172,7 +230,7 @@ async def cmd_context(message: Message) -> None:
     user_id = message.from_user.id
     if user_id not in current_thread:
         await message.answer(
-            "No active thread. Use <code>/thread &lt;name&gt;</code> to start one.",
+            "No active thread. Say: <i>\"switch to workernet_training\"</i>",
             parse_mode="HTML"
         )
         return
@@ -208,53 +266,7 @@ async def cmd_run(message: Message) -> None:
         await message.answer("Usage: <code>/run &lt;task&gt;</code>", parse_mode="HTML")
         return
 
-    task = args[1].strip()
-    original_task = task  # Save for thread storage
-    agent_key = agents.detect_agent(task)
-    model = agents.get_model(agent_key)
-    user_id = message.from_user.id
-
-    # Add thread context if active
-    thread_id = current_thread.get(user_id)
-    if thread_id:
-        context = agents.get_thread_context(thread_id)
-        if context:
-            task = f"{context}\n\nCurrent task: {task}"
-            logger.info("Added thread context for '%s'", thread_id)
-
-    await message.answer(
-        f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
-        parse_mode="HTML",
-    )
-
-    try:
-        result = await interpreter_bridge.run_task(model, task, agent_key)
-    except Exception as exc:
-        logger.exception("run_task failed: %s", exc)
-        # Try fallback
-        fallback_model = agents.get_model(agent_key, use_fallback=True)
-        if fallback_model and fallback_model != model:
-            await message.answer(
-                f"⚠️ Primary failed, trying fallback: <code>{fallback_model}</code>",
-                parse_mode="HTML"
-            )
-            try:
-                result = await interpreter_bridge.run_task(fallback_model, task, agent_key)
-            except Exception as fb_exc:
-                logger.exception("Fallback also failed: %s", fb_exc)
-                result = (
-                    f"❌ Both primary and fallback failed.\n\n"
-                    f"<b>Primary error:</b> {exc}\n\n"
-                    f"<b>Fallback error:</b> {fb_exc}"
-                )
-        else:
-            result = f"Error: {exc}"
-
-    # Store in thread if active
-    if thread_id:
-        agents.add_to_thread(thread_id, agent_key, original_task, result)
-
-    await _send_chunks(message, result)
+    await _execute_task(message, args[1].strip())
 
 
 @dp.message(Command("agent"))
@@ -374,6 +386,132 @@ async def cmd_shot(message: Message) -> None:
     finally:
         if tmp_path is not None:
             tmp_path.unlink(missing_ok=True)
+
+
+# ── Natural Language Handler (no slash needed) ────────────────────────────────────────
+
+@dp.message(F.text)
+async def handle_natural_message(message: Message) -> None:
+    """Handle natural language messages without slash commands.
+    
+    Detects intent and routes to appropriate action.
+    """
+    if not _authorized(message):
+        await _deny(message)
+        return
+    
+    text = (message.text or "").strip()
+    if not text:
+        return
+    
+    intent = _detect_intent(text)
+    action = intent["action"]
+    content = intent["content"]
+    user_id = message.from_user.id
+    
+    logger.info("Natural intent detected: %s", action)
+    
+    if action == "thread":
+        thread_id = content.lower().replace(" ", "_")
+        current_thread[user_id] = thread_id
+        await message.answer(f"📌 Switched to thread: <b>{thread_id}</b>", parse_mode="HTML")
+    
+    elif action == "threads":
+        await message.answer(agents.list_threads(), parse_mode="HTML")
+    
+    elif action == "context":
+        if user_id not in current_thread:
+            await message.answer("No active thread. Say: <i>\"switch to workernet_training\"</i>", parse_mode="HTML")
+            return
+        thread_id = current_thread[user_id]
+        context = agents.get_thread_context(thread_id, last_n=5)
+        if not context:
+            await message.answer(f"Thread <b>{thread_id}</b> has no history yet.", parse_mode="HTML")
+        else:
+            await message.answer(f"<b>Thread: {thread_id}</b>\n\n<pre>{context}</pre>", parse_mode="HTML")
+    
+    elif action == "models":
+        await message.answer(agents.list_agents(), parse_mode="HTML")
+    
+    elif action == "scrape":
+        await message.answer(f"Scraping <code>{content}</code>…", parse_mode="HTML")
+        try:
+            text_result = await playwright_agent.scrape(content)
+        except Exception as exc:
+            text_result = f"Error: {exc}"
+        await _send_chunks(message, text_result)
+    
+    elif action == "shot":
+        await message.answer(f"Screenshotting <code>{content}</code>…", parse_mode="HTML")
+        tmp_path: Path | None = None
+        try:
+            tmp_path = await playwright_agent.screenshot(content)
+            image_bytes = tmp_path.read_bytes()
+            await message.answer_photo(
+                BufferedInputFile(image_bytes, filename="screenshot.png"),
+                caption=content,
+            )
+        except Exception as exc:
+            await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+        finally:
+            if tmp_path is not None:
+                tmp_path.unlink(missing_ok=True)
+    
+    elif action == "help":
+        await cmd_start(message)
+    
+    else:  # action == "run"
+        await _execute_task(message, content)
+
+
+async def _execute_task(message: Message, task: str) -> None:
+    """Execute a task with agent auto-detection and thread support."""
+    original_task = task
+    agent_key = agents.detect_agent(task)
+    model = agents.get_model(agent_key)
+    user_id = message.from_user.id
+
+    # Add thread context if active
+    thread_id = current_thread.get(user_id)
+    if thread_id:
+        context = agents.get_thread_context(thread_id)
+        if context:
+            task = f"{context}\n\nCurrent task: {task}"
+            logger.info("Added thread context for '%s'", thread_id)
+
+    await message.answer(
+        f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
+        parse_mode="HTML",
+    )
+
+    try:
+        result = await interpreter_bridge.run_task(model, task, agent_key)
+    except Exception as exc:
+        logger.exception("run_task failed: %s", exc)
+        # Try fallback
+        fallback_model = agents.get_model(agent_key, use_fallback=True)
+        if fallback_model and fallback_model != model:
+            await message.answer(
+                f"⚠️ Primary failed, trying fallback: <code>{fallback_model}</code>",
+                parse_mode="HTML"
+            )
+            try:
+                result = await interpreter_bridge.run_task(fallback_model, task, agent_key)
+            except Exception as fb_exc:
+                logger.exception("Fallback also failed: %s", fb_exc)
+                result = (
+                    f"❌ Both primary and fallback failed.\n\n"
+                    f"<b>Primary error:</b> {exc}\n\n"
+                    f"<b>Fallback error:</b> {fb_exc}"
+                )
+        else:
+            result = f"Error: {exc}"
+
+    # Store in thread if active
+    if thread_id:
+        agents.add_to_thread(thread_id, agent_key, original_task, result)
+
+    await _send_chunks(message, result)
 
 
 # ── Entrypoint ──────────────────────────────────────────────────────────────────────────
