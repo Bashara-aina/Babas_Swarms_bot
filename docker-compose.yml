@@ -1,0 +1,44 @@
+# /home/newadmin/swarm-bot/docker-compose.yml
+# Start: docker-compose up -d
+# Stop:  docker-compose down
+
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: swarm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: swarm-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ALLOW_RESET=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+    driver: local
+  chroma_data:
+    driver: local

@@ -32,3 +32,10 @@ requests
 
 # Safety
 pynput
+
+# Production optimization (Phase 2 — Master Prompt 2)
+chromadb
+redis
+sentence-transformers
+tenacity
+prometheus-client

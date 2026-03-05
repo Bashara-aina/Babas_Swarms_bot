@@ -21,6 +21,10 @@ Slash Commands (optional — natural language works too):
     /monitors       — List active monitors
     /cancel <id>    — Cancel a monitor
     /pending        — Show pending confirmations
+    /stats          — Performance + usage report
+    /circuits       — Circuit breaker status
+    /feedback <id> good|bad [comment]  — Rate a response
+    /usage          — Daily API usage + cost report
 
 Natural Language Examples:
     "debug this pytorch error: ..."
@@ -212,6 +216,15 @@ def _detect_intent(text: str) -> dict:
 
     if any(kw in t for kw in ["help", "what can you do", "commands"]):
         return {"action": "help", "content": ""}
+
+    if any(kw in t for kw in ["show stats", "performance stats", "usage stats", "/stats"]):
+        return {"action": "stats", "content": ""}
+
+    if any(kw in t for kw in ["circuit status", "circuit breaker", "/circuits"]):
+        return {"action": "circuits", "content": ""}
+
+    if any(kw in t for kw in ["usage report", "api usage", "cost report", "/usage"]):
+        return {"action": "usage", "content": ""}
 
     return {"action": "run", "content": text}
 
@@ -859,6 +872,15 @@ async def handle_natural(message: Message) -> None:
     elif action == "help":
         await cmd_start(message)
 
+    elif action == "stats":
+        await cmd_stats(message)
+
+    elif action == "circuits":
+        await cmd_circuits(message)
+
+    elif action == "usage":
+        await cmd_usage(message)
+
     else:
         await _execute_task(message, content)
 
@@ -866,7 +888,11 @@ async def handle_natural(message: Message) -> None:
 # ── Task Execution ─────────────────────────────────────────────────────────────
 
 async def _execute_task(message: Message, task: str) -> None:
-    """Auto-detect agent, inject thread context, run task, store result."""
+    """Auto-detect agent, inject thread context, run task, store result.
+
+    For complex tasks, delegates to hierarchical supervisor orchestration.
+    Every response is registered for optional user feedback.
+    """
     original_task = task
     agent_key = agents.detect_agent(task)
     model = agents.get_model(agent_key)
@@ -878,32 +904,151 @@ async def _execute_task(message: Message, task: str) -> None:
         if ctx:
             task = f"{ctx}\n\nCurrent task: {task}"
 
-    await message.answer(
-        f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
-        parse_mode="HTML",
-    )
-
+    # --- Try supervisor orchestration for complex tasks ---
+    result: str | None = None
     try:
-        result = await interpreter_bridge.run_task(model, task, agent_key)
+        from orchestration.supervisor import orchestrate
+
+        async def _run_fn(t: str, a: str = agent_key) -> str:
+            m = agents.get_model(a) or model
+            return await interpreter_bridge.run_task(m, t, a)
+
+        async def _progress_fn(msg: str) -> None:
+            await message.answer(f"⚙️ {msg}", parse_mode="HTML")
+
+        result = await orchestrate(task, _run_fn, _progress_fn)
+        if result:
+            await message.answer("✅ Multi-step task complete.", parse_mode="HTML")
     except Exception as exc:
-        logger.exception("Primary agent failed: %s", exc)
-        fallback = agents.get_model(agent_key, use_fallback=True)
-        if fallback and fallback != model:
-            await message.answer(
-                f"⚠️ Primary failed, trying fallback: <code>{fallback}</code>",
-                parse_mode="HTML",
-            )
-            try:
-                result = await interpreter_bridge.run_task(fallback, task, agent_key)
-            except Exception as fb_exc:
-                result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
-        else:
-            result = f"Error: {exc}"
+        logger.debug("Supervisor skipped: %s", exc)
+        result = None
+
+    # --- Direct agent execution (simple tasks or supervisor skipped) ---
+    if result is None:
+        await message.answer(
+            f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
+            parse_mode="HTML",
+        )
+        try:
+            result = await interpreter_bridge.run_task(model, task, agent_key)
+        except Exception as exc:
+            logger.exception("Primary agent failed: %s", exc)
+            fallback = agents.get_model(agent_key, use_fallback=True)
+            if fallback and fallback != model:
+                await message.answer(
+                    f"⚠️ Primary failed, trying fallback: <code>{fallback}</code>",
+                    parse_mode="HTML",
+                )
+                try:
+                    result = await interpreter_bridge.run_task(fallback, task, agent_key)
+                except Exception as fb_exc:
+                    result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
+            else:
+                result = f"Error: {exc}"
 
     if tid:
         agents.add_to_thread(tid, agent_key, original_task, result)
 
     await _send_chunks(message, result)
+
+    # --- Register for feedback ---
+    try:
+        from optimization.feedback_learner import get_learner
+        fid = get_learner().register_response(agent_key, original_task)
+        await message.answer(
+            f"<i>Rate this response: /feedback {fid} good|bad</i>",
+            parse_mode="HTML",
+        )
+    except Exception:
+        pass
+
+
+# ── Production Monitoring Commands ─────────────────────────────────────────────
+
+@dp.message(Command("stats"))
+async def cmd_stats(message: Message) -> None:
+    """Show performance metrics, cache stats, and feedback summary."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    parts = []
+    try:
+        from observability.metrics import format_stats
+        parts.append(format_stats())
+    except Exception as exc:
+        parts.append(f"Metrics unavailable: {exc}")
+    try:
+        from optimization.feedback_learner import get_learner
+        parts.append(get_learner().summary_report())
+    except Exception as exc:
+        parts.append(f"Feedback unavailable: {exc}")
+    await message.answer("\n\n".join(parts), parse_mode="HTML")
+
+
+@dp.message(Command("circuits"))
+async def cmd_circuits(message: Message) -> None:
+    """Show circuit breaker status for all agents."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    try:
+        from reliability.error_recovery import get_recovery
+        report = get_recovery().circuit_status()
+        await message.answer(report, parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Circuit status unavailable: {exc}", parse_mode="HTML")
+
+
+@dp.message(Command("usage"))
+async def cmd_usage(message: Message) -> None:
+    """Show daily API usage and estimated cost report."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    try:
+        from optimization.usage_tracker import get_tracker
+        report = get_tracker().daily_report()
+        await message.answer(report, parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Usage report unavailable: {exc}", parse_mode="HTML")
+
+
+@dp.message(Command("feedback"))
+async def cmd_feedback(message: Message) -> None:
+    """Rate a previous agent response.
+
+    Usage: /feedback <id> good|bad [optional comment]
+    """
+    if not _authorized(message):
+        await _deny(message)
+        return
+    args = (message.text or "").split(maxsplit=3)
+    if len(args) < 3:
+        await message.answer(
+            "Usage: <code>/feedback &lt;id&gt; good|bad [comment]</code>",
+            parse_mode="HTML",
+        )
+        return
+    fid = args[1].strip()
+    verdict = args[2].strip().lower()
+    comment = args[3].strip() if len(args) > 3 else ""
+
+    if verdict in ("good", "yes", "👍", "+1"):
+        rating = 1
+    elif verdict in ("bad", "no", "👎", "-1"):
+        rating = -1
+    else:
+        await message.answer(
+            "Rating must be <code>good</code> or <code>bad</code>.", parse_mode="HTML"
+        )
+        return
+
+    try:
+        from optimization.feedback_learner import get_learner
+        result = get_learner().record(fid, rating, comment)
+        await message.answer(result or "Feedback recorded.", parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
 
 
 # ── Entrypoint ─────────────────────────────────────────────────────────────────
