@@ -1,4 +1,34 @@
+# Core bot
 aiogram>=3.0
-open-interpreter
-playwright
 python-dotenv
+
+# LLM execution
+open-interpreter
+litellm
+
+# Web automation
+playwright
+
+# Computer control (Phase 1)
+pyautogui
+pytesseract
+pillow
+opencv-python-headless
+
+# Multi-modal (Phase 3)
+openai-whisper
+pypdf
+python-docx
+edge-tts
+
+# Document processing
+requests
+
+# Task orchestration (Phase 4)
+# (stdlib only: asyncio, uuid, dataclasses)
+
+# Window management (optional, needs wmctrl system package)
+# sudo apt install wmctrl tesseract-ocr
+
+# Safety
+pynput
