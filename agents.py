@@ -63,10 +63,16 @@ TASK_KEYWORDS: dict[str, list[str]] = {
         "step by step", "like a professor", "break it down"
     ],
     "analyst": [
-        "analyze", "plot", "chart", "csv", "dataframe", "log", 
-        "trend", "statistics", "distribution", "compare results", 
-        "training run", "metrics", "performance", "insight", 
+        "analyze", "plot", "chart", "csv", "dataframe", "log",
+        "trend", "statistics", "distribution", "compare results",
+        "training run", "metrics", "performance", "insight",
         "nvidia-smi", "visualize", "summarize data"
+    ],
+    "vision": [
+        "screenshot", "image", "photo", "ui", "visual", "ocr",
+        "pixel", "multimodal", "look at", "describe", "screen",
+        "what's on", "what is on", "desktop", "window", "read screen",
+        "find element", "click on", "click the", "what do you see"
     ],
 }
 
