@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 import logging
+import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,9 @@ TASK_KEYWORDS: dict[str, list[str]] = {
 # Default fallback agent when no keyword matches
 DEFAULT_AGENT = "coding"
 
+# Thread-based conversation memory
+ACTIVE_THREADS: dict[str, list[dict]] = {}
+
 
 def detect_agent(task: str) -> str:
     """Return the best agent key for a given task string.
@@ -125,3 +130,93 @@ def list_agents() -> str:
     for key, model in AGENT_MODELS.items():
         lines.append(f"  <b>{key}</b> → <code>{model}</code>")
     return "\n".join(lines)
+
+
+# ── Thread Management ────────────────────────────────────────────────────────
+
+def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
+    """Store a conversation turn in thread history.
+    
+    Args:
+        thread_id: Unique thread identifier (e.g. "workernet_training")
+        agent: Agent key that processed this turn
+        task: User's original task
+        result: Agent's response
+    """
+    if thread_id not in ACTIVE_THREADS:
+        ACTIVE_THREADS[thread_id] = []
+    
+    ACTIVE_THREADS[thread_id].append({
+        "agent": agent,
+        "task": task,
+        "result": result[:500],  # Store first 500 chars to avoid memory bloat
+        "timestamp": time.time()
+    })
+    
+    # Keep only last 10 turns per thread
+    if len(ACTIVE_THREADS[thread_id]) > 10:
+        ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
+    
+    logger.info("Added to thread '%s': %s agent", thread_id, agent)
+
+
+def get_thread_context(thread_id: str, last_n: int = 3) -> str:
+    """Get recent conversation context from a thread.
+    
+    Args:
+        thread_id: Thread to retrieve context from
+        last_n: Number of recent turns to include (default 3)
+    
+    Returns:
+        Formatted conversation history or empty string if thread doesn't exist
+    """
+    if thread_id not in ACTIVE_THREADS or not ACTIVE_THREADS[thread_id]:
+        return ""
+    
+    recent = ACTIVE_THREADS[thread_id][-last_n:]
+    context_lines = ["Previous conversation in this thread:\n"]
+    
+    for turn in recent:
+        time_str = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
+        context_lines.append(
+            f"[{time_str}] {turn['agent'].upper()}: {turn['task'][:100]}..."
+        )
+        context_lines.append(f"Response: {turn['result']}\n")
+    
+    return "\n".join(context_lines)
+
+
+def list_threads() -> str:
+    """List all active threads with turn counts.
+    
+    Returns:
+        Formatted list of threads for Telegram
+    """
+    if not ACTIVE_THREADS:
+        return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
+    
+    lines = ["<b>Active Threads</b>\n"]
+    for thread_id, turns in ACTIVE_THREADS.items():
+        last_turn = turns[-1]
+        time_str = datetime.fromtimestamp(last_turn["timestamp"]).strftime("%m/%d %H:%M")
+        lines.append(
+            f"📌 <b>{thread_id}</b> — {len(turns)} turns (last: {time_str})"
+        )
+    
+    return "\n".join(lines)
+
+
+def clear_thread(thread_id: str) -> bool:
+    """Delete a thread's history.
+    
+    Args:
+        thread_id: Thread to clear
+    
+    Returns:
+        True if thread existed and was cleared, False otherwise
+    """
+    if thread_id in ACTIVE_THREADS:
+        del ACTIVE_THREADS[thread_id]
+        logger.info("Cleared thread '%s'", thread_id)
+        return True
+    return False
