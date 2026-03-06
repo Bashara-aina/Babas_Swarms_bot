@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from optimization.feedback_learner import FeedbackLearner, POSITIVE, NEGATIVE
+from core.optimization.feedback_learner import FeedbackLearner, POSITIVE, NEGATIVE
 
 
 def _learner() -> FeedbackLearner:

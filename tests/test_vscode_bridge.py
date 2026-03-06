@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-import vscode_bridge
+import core.tools.vscode_bridge as vscode_bridge
 
 
 def test_read_file_not_found():

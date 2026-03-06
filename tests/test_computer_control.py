@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import pytest
 from unittest.mock import MagicMock, patch
 
-import computer_control
+import core.tools.computer_control as computer_control
 
 
 def test_is_destructive_detects_rm():

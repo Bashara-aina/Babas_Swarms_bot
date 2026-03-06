@@ -1,0 +1,103 @@
+# config/models.yaml — Free-tier model registry
+# All model IDs use litellm prefix convention
+
+providers:
+  openrouter:
+    base_url: "https://openrouter.ai/api/v1"
+    api_key_env: "OPENROUTER_API_KEY"
+    daily_limit: 1000
+
+  cerebras:
+    base_url: "https://api.cerebras.ai/v1"
+    api_key_env: "CEREBRAS_API_KEY"
+    daily_limit: 14400
+
+  zai:
+    base_url: "https://open.bigmodel.cn/api/paas/v4"
+    api_key_env: "ZAI_API_KEY"
+    daily_limit: null
+
+  groq:
+    base_url: "https://api.groq.com/openai/v1"
+    api_key_env: "GROQ_API_KEY"
+    daily_limit: 1000
+
+  gemini:
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+    api_key_env: "GEMINI_API_KEY"
+    daily_limit: 1000
+
+  ollama:
+    base_url: "http://localhost:11434"
+    api_key_env: null
+    daily_limit: null
+
+models:
+  devstral:
+    provider: openrouter
+    model_id: "openrouter/mistralai/devstral-2512:free"
+    context_window: 32768
+    strengths: [coding, multi-file, swe-bench]
+    cost_per_1m_tokens: 0.0
+
+  qwen3-235b:
+    provider: cerebras
+    model_id: "cerebras/qwen3-235b-a22b"
+    context_window: 131072
+    strengths: [reasoning, speed, general]
+    cost_per_1m_tokens: 0.0
+
+  glm-4:
+    provider: zai
+    model_id: "zai/glm-4"
+    context_window: 128000
+    strengths: [debug, math, reasoning]
+    cost_per_1m_tokens: 0.0
+
+  kimi-k2:
+    provider: groq
+    model_id: "groq/moonshotai/kimi-k2-instruct"
+    context_window: 200000
+    strengths: [deep-reasoning, analysis, long-context]
+    cost_per_1m_tokens: 0.0
+
+  gemini-3.1-pro:
+    provider: gemini
+    model_id: "gemini/gemini-3.1-pro"
+    context_window: 1000000
+    strengths: [teaching, general, long-context]
+    cost_per_1m_tokens: 0.035  # input, per 1M tokens
+
+  gemma3-12b:
+    provider: ollama
+    model_id: "ollama_chat/gemma3:12b"
+    context_window: 8192
+    strengths: [vision, local, privacy]
+    cost_per_1m_tokens: 0.0
+
+  llama3-70b:
+    provider: ollama
+    model_id: "ollama_chat/llama3.3:70b"
+    context_window: 8192
+    strengths: [general, local, fallback]
+    cost_per_1m_tokens: 0.0
+
+# Complexity tier → preferred provider order (first available wins)
+complexity_tiers:
+  lightweight:
+    - cerebras
+    - groq
+    - ollama
+
+  midweight:
+    - zai
+    - gemini
+    - cerebras
+    - groq
+
+  heavyweight:
+    - openrouter
+    - gemini
+    - zai
+    - cerebras
+    - ollama

@@ -62,18 +62,18 @@ from aiogram.types import (
 )
 from dotenv import load_dotenv
 
-import agents
-import computer_control
-import formatters
-import interpreter_bridge
-import multimodal_processor
-import notifications
-import playwright_agent
-import task_orchestrator
-import vscode_bridge
-from progress_tracker import TaskProgressTracker
-from streaming_response import StreamingResponseManager
-from telegram_ui import TelegramUI
+import core.agent_registry as agents
+import core.tools.computer_control as computer_control
+import core.utils.formatters as formatters
+import core.interpreter_bridge as interpreter_bridge
+import core.utils.multimodal_processor as multimodal_processor
+import core.utils.notifications as notifications
+import core.tools.playwright_agent as playwright_agent
+import core.nexus_orchestrator as task_orchestrator
+import core.tools.vscode_bridge as vscode_bridge
+from core.utils.progress_tracker import TaskProgressTracker
+from core.utils.streaming_response import StreamingResponseManager
+from core.utils.telegram_ui import TelegramUI
 
 load_dotenv()
 
@@ -1256,7 +1256,7 @@ async def _execute_task(
     # --- Try supervisor orchestration for complex tasks ---
     result: str | None = None
     try:
-        from orchestration.supervisor import orchestrate
+        from core.orchestration.supervisor import orchestrate
 
         async def _run_fn(t: str, a: str = agent_key) -> str:
             m = agents.get_model(a) or model
@@ -1316,14 +1316,114 @@ async def _execute_task(
     await _send_feedback_prompt(message, agent_key, original_task)
 
 
+# ── Agency Swarm — New Commands ──────────────────────────────────────────────────
+
+@dp.message(Command("dept"))
+async def cmd_dept(message: Message) -> None:
+    """/dept <department> <task> — Route to a specific department."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    args = (message.text or "").split(maxsplit=2)
+    if len(args) < 3:
+        depts = agents.list_all_departments()
+        await message.answer(
+            "<b>Usage:</b> <code>/dept &lt;department&gt; &lt;task&gt;</code>\n\n"
+            "<b>Departments:</b>\n" + "\n".join(f"• <code>{d}</code>" for d in depts),
+            parse_mode="HTML",
+        )
+        return
+    dept = args[1].strip().lower()
+    task = args[2].strip()
+    from core.nexus_orchestrator import nexus as _nexus
+    from core.agent_registry import list_all_departments
+    if dept not in list_all_departments():
+        await message.answer(
+            f"❌ Unknown department: <b>{dept}</b>\n\n"
+            "Available: " + ", ".join(f"<code>{d}</code>" for d in list_all_departments()),
+            parse_mode="HTML",
+        )
+        return
+    decision = await _nexus.route_to_dept(dept, task)
+    await message.answer(
+        f"🎯 Routing to <b>{decision.agent.name}</b> "
+        f"(<code>{decision.agent.department}</code>)\n"
+        f"Confidence: {decision.confidence:.0%} | Method: {decision.method}",
+        parse_mode="HTML",
+    )
+    result = await _nexus.execute_task(decision, task, message)
+    await _send_chunks(message, result)
+
+
+@dp.message(Command("swarm"))
+async def cmd_swarm(message: Message) -> None:
+    """/swarm <task> — Spawn a multi-agent swarm for complex tasks."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    args = (message.text or "").split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer(
+            "<b>Usage:</b> <code>/swarm &lt;complex task&gt;</code>\n\n"
+            "Example: <code>/swarm design and implement a FastAPI auth system</code>",
+            parse_mode="HTML",
+        )
+        return
+    task = args[1].strip()
+    await message.answer("🐝 <b>Swarm Mode Activated</b> — coordinating agents…", parse_mode="HTML")
+    from core.nexus_orchestrator import nexus as _nexus
+    result = await _nexus.run_swarm(task, message)
+    await _send_chunks(message, result)
+
+
+@dp.message(Command("status"))
+async def cmd_status(message: Message) -> None:
+    """/status — System dashboard: agents, circuit breakers, API usage."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    from core.agent_registry import get_agent_count, list_all_departments
+    counts = get_agent_count()
+    total = sum(counts.values())
+    lines = [
+        "📊 <b>Babas Agency Swarm — Status</b>\n",
+        f"<b>Agents loaded:</b> {total} across {len(counts)} departments",
+    ]
+    for dept, n in sorted(counts.items()):
+        lines.append(f"  • {dept.replace('_', ' ').title()}: {n}")
+    lines.append("")
+    lines.append("Use <code>/usage</code> for API costs | <code>/circuits</code> for circuit states")
+    await message.answer("\n".join(lines), parse_mode="HTML")
+
+
+@dp.message(Command("cost"))
+async def cmd_cost(message: Message) -> None:
+    """/cost — Alias for /usage (API usage + estimated costs)."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    # Delegate to /usage handler
+    await cmd_usage(message)
+
+
 # ── Entrypoint ──────────────────────────────────────────────────────────────────
 
 async def main() -> None:
-    """Start bot polling with all production modules initialized."""
+    """Start Babas Agency Swarm with all 76 agents + Nexus routing."""
     global _streamer
     _streamer = StreamingResponseManager(bot)
     notifications.init(bot, ALLOWED_USER_ID)
-    logger.info("LegionSwarm starting — polling for updates")
+
+    # Load agent registry
+    from core.agent_registry import load_registry
+    load_registry()
+    from core.agent_registry import AGENT_REGISTRY, DEPARTMENT_INDEX
+    logger.info(
+        "Babas Agency Swarm starting — %d agents across %d departments",
+        len(AGENT_REGISTRY),
+        len(DEPARTMENT_INDEX),
+    )
+
     await dp.start_polling(bot, skip_updates=True)
 
 

@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import asyncio
 import pytest
-import task_orchestrator
+import core.nexus_orchestrator as task_orchestrator
 
 
 def run(coro):

@@ -1,0 +1,710 @@
+# config/departments.yaml — 76 agents across 9 departments
+# Each agent: description, primary_model (ref models.yaml key), fallbacks, capabilities, tools, complexity_tier
+
+engineering:
+  default_agent: senior_python_dev
+  description: "Software development across all stacks — backend, frontend, systems, security"
+  agents:
+    senior_python_dev:
+      description: "Expert Python developer for backend systems, APIs, and async workflows"
+      primary_model: devstral
+      fallbacks: [qwen3-235b, llama3-70b]
+      capabilities: [python, backend, async, typing, fastapi, django, implement, function, class, script, code, write]
+      tools: [interpreter, vscode]
+      complexity_tier: heavyweight
+
+    frontend_react_dev:
+      description: "React/Next.js developer for modern web UIs and TypeScript apps"
+      primary_model: qwen3-235b
+      fallbacks: [devstral, llama3-70b]
+      capabilities: [react, typescript, nextjs, tailwind, frontend, ui, component, jsx, css, html]
+      tools: [interpreter, vscode]
+      complexity_tier: midweight
+
+    backend_fastapi_dev:
+      description: "FastAPI specialist for high-performance REST APIs, Pydantic, async"
+      primary_model: glm-4
+      fallbacks: [qwen3-235b, devstral]
+      capabilities: [fastapi, api, backend, endpoint, rest, pydantic, sqlalchemy, orm, database, async]
+      tools: [interpreter, vscode]
+      complexity_tier: heavyweight
+
+    rust_systems_dev:
+      description: "Rust systems programming, WASM, memory safety, performance-critical code"
+      primary_model: kimi-k2
+      fallbacks: [devstral, llama3-70b]
+      capabilities: [rust, systems, wasm, unsafe, cargo, memory, ownership, concurrency, performance]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    smart_contract_auditor:
+      description: "Solidity/EVM smart contract security audits and vulnerability detection"
+      primary_model: gemini-3.1-pro
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [solidity, smart_contract, audit, evm, blockchain, vulnerability, defi, web3]
+      tools: []
+      complexity_tier: heavyweight
+
+    security_pentester:
+      description: "Security testing, penetration testing, CVE analysis, OWASP"
+      primary_model: devstral
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [security, pentest, vulnerability, exploit, owasp, ctf, hardening]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    cuda_optimizer:
+      description: "CUDA/Triton kernel optimization, GPU memory management, profiling"
+      primary_model: glm-4
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [cuda, gpu, vram, triton, kernel, throughput, memory, profil, benchmark, nan, oom]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    debugging_specialist:
+      description: "Root cause analysis — tracebacks, PyTorch errors, async bugs, OOM, NaN"
+      primary_model: glm-4
+      fallbacks: [qwen3-235b, devstral]
+      capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    test_automation_engineer:
+      description: "pytest, hypothesis, coverage, CI test design, mocking strategies"
+      primary_model: qwen3-235b
+      fallbacks: [devstral, gemini-3.1-pro]
+      capabilities: [test, pytest, coverage, mock, hypothesis, tdd, selenium, unit, integration]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    cicd_architect:
+      description: "GitHub Actions, Docker, Kubernetes, systemd, deployment pipelines"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [cicd, github_actions, docker, kubernetes, deploy, pipeline, devops, systemd]
+      tools: []
+      complexity_tier: midweight
+
+    database_optimizer:
+      description: "SQL optimization, indexing, query performance, migrations, PostgreSQL"
+      primary_model: kimi-k2
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [sql, postgres, index, query, migration, database, optimization, orm]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    mlops_engineer:
+      description: "ML model deployment, monitoring, MLflow, Kubernetes serving infrastructure"
+      primary_model: glm-4
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [mlops, mlflow, kubernetes, serving, model, monitoring, docker, gpu, deploy]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    api_designer:
+      description: "REST/GraphQL API design, OpenAPI specs, versioning, documentation"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, devstral]
+      capabilities: [api, rest, graphql, openapi, design, versioning, swagger, documentation]
+      tools: []
+      complexity_tier: midweight
+
+    code_reviewer:
+      description: "Code review, best practices, refactoring suggestions, standards enforcement"
+      primary_model: gemini-3.1-pro
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [review, best-practices, refactor, standards, documentation, clean-code]
+      tools: []
+      complexity_tier: midweight
+
+    performance_tuner:
+      description: "Performance profiling, optimization, benchmarking, memory analysis"
+      primary_model: devstral
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [performance, profil, optimization, benchmark, memory, latency, throughput]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+design:
+  default_agent: ux_designer
+  description: "UI/UX design, branding, visual design, accessibility, prototyping"
+  agents:
+    ux_designer:
+      description: "UI/UX design, user research, wireframes, interaction design"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [ux, ui, figma, user-research, wireframe, interaction, design]
+      tools: []
+      complexity_tier: midweight
+
+    graphic_designer:
+      description: "Visual design, branding assets, typography, graphic creation"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [graphic, visual, typography, brand, design, assets, layout]
+      tools: []
+      complexity_tier: lightweight
+
+    branding_strategist:
+      description: "Brand strategy, identity, positioning, storytelling, voice"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [branding, strategy, identity, positioning, storytelling, logo]
+      tools: []
+      complexity_tier: midweight
+
+    motion_artist:
+      description: "Motion graphics, animation, After Effects concepts, video design"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [motion, animation, video, after-effects, kinetic, sequence]
+      tools: []
+      complexity_tier: midweight
+
+    spatial_designer:
+      description: "3D spatial design, AR/VR concepts, Blender, 3D modeling"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [3d, spatial, blender, ar, vr, modeling, rendering]
+      tools: []
+      complexity_tier: midweight
+
+    wireframe_specialist:
+      description: "Low-fidelity wireframes, information architecture, user flows"
+      primary_model: kimi-k2
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [wireframe, low-fidelity, balsamiq, information-architecture, sketching]
+      tools: []
+      complexity_tier: lightweight
+
+    color_expert:
+      description: "Color theory, palette design, psychology, accessibility contrast"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [color, palette, theory, psychology, contrast, accessibility]
+      tools: []
+      complexity_tier: lightweight
+
+    accessibility_auditor:
+      description: "WCAG compliance, a11y audits, screen reader testing, inclusive design"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [accessibility, wcag, a11y, screen-reader, inclusive, aria]
+      tools: []
+      complexity_tier: midweight
+
+    prototype_builder:
+      description: "Interactive prototypes, Framer, rapid iteration, coded prototypes"
+      primary_model: devstral
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [prototype, interactive, framer, rapid, iteration, code]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    user_flow_mapper:
+      description: "User flow diagrams, journey maps, process documentation"
+      primary_model: glm-4
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [flow, journey, diagram, process, map, user-experience]
+      tools: []
+      complexity_tier: lightweight
+
+research:
+  default_agent: deep_researcher
+  description: "Deep research, competitive analysis, data science, trend forecasting"
+  agents:
+    deep_researcher:
+      description: "Deep research, source synthesis, web search, academic rigor"
+      primary_model: gemini-3.1-pro
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [research, deep-dive, source, synthesis, academic, facts]
+      tools: [playwright]
+      complexity_tier: heavyweight
+
+    trend_forecaster:
+      description: "Trend analysis, market forecasting, signal detection, predictions"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [trend, forecast, prediction, signal, market, future]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    competitor_analyst:
+      description: "Competitive analysis, SWOT, benchmarking, market positioning"
+      primary_model: kimi-k2
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [competitor, competitive, benchmark, swot, market, positioning]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    data_scientist:
+      description: "Data analysis, statistics, ML modeling, pandas, matplotlib"
+      primary_model: kimi-k2
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [data, statistics, ml, pandas, dataframe, csv, visualization, analysis, analytics]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    web_scraper_coordinator:
+      description: "Web scraping orchestration, Playwright automation, structured extraction"
+      primary_model: devstral
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [scrape, crawl, playwright, extraction, automation, parsing, web]
+      tools: [playwright, interpreter]
+      complexity_tier: midweight
+
+    sentiment_analyst:
+      description: "Sentiment analysis, NLP, opinion mining, social listening"
+      primary_model: gemini-3.1-pro
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [sentiment, nlp, opinion, emotions, social, listening]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    market_intel:
+      description: "Market intelligence, business insights, competitive research"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [market, intel, business, competitive, insights, intelligence]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    survey_designer:
+      description: "Survey design, questionnaire methodology, sampling, bias reduction"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [survey, questionnaire, methodology, sampling, bias]
+      tools: []
+      complexity_tier: lightweight
+
+    interview_simulator:
+      description: "User interview simulation, qualitative research, empathy mapping"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [interview, qualitative, persona, empathy, user, questions]
+      tools: []
+      complexity_tier: midweight
+
+    patent_searcher:
+      description: "Patent research, prior art, IP analysis, technical documentation"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [patent, ip, prior-art, technical, legal, trademark]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    paper_summarizer:
+      description: "Academic paper summarization, arXiv reading, research synthesis"
+      primary_model: glm-4
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [paper, arxiv, academic, summarize, summary, research, source]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    stats_modeler:
+      description: "Statistical modeling, regression, hypothesis testing, R/Python"
+      primary_model: kimi-k2
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [statistics, regression, hypothesis, modeling, r, distribution]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+marketing:
+  default_agent: copywriter
+  description: "Marketing, copywriting, SEO, social media, growth, brand"
+  agents:
+    copywriter:
+      description: "Persuasive copywriting, headlines, landing pages, conversion optimization"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [copy, copywrite, persuasion, headline, landing, conversion, write]
+      tools: []
+      complexity_tier: midweight
+
+    seo_specialist:
+      description: "SEO optimization, keyword research, backlinks, technical SEO"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [seo, keyword, backlinks, on-page, technical, ranking]
+      tools: [playwright]
+      complexity_tier: midweight
+
+    social_media_strategist:
+      description: "Social media strategy, engagement, content calendar, platform expertise"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [social, twitter, instagram, engagement, content, platform, calendar]
+      tools: []
+      complexity_tier: midweight
+
+    growth_hacker:
+      description: "Growth hacking, viral experiments, funnel optimization, metrics"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [growth, viral, funnel, experiments, metrics, hack, acquisition]
+      tools: []
+      complexity_tier: midweight
+
+    content_strategist:
+      description: "Content strategy, editorial planning, topic clusters, SEO content"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [content, editorial, topics, strategy, distribution, cluster]
+      tools: []
+      complexity_tier: midweight
+
+    ad_copywriter:
+      description: "Ad copy, PPC campaigns, Facebook/Google ads, CTR optimization"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [ad, ppc, facebook, google-ads, ctr, copy, paid]
+      tools: []
+      complexity_tier: lightweight
+
+    viral_campaign_designer:
+      description: "Viral campaign concepts, memetics, shareability, creative hooks"
+      primary_model: gemini-3.1-pro
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [viral, campaign, hook, shareability, creative, memetics]
+      tools: []
+      complexity_tier: midweight
+
+    email_marketer:
+      description: "Email marketing, newsletters, automation flows, segmentation"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [email, newsletter, automation, segmentation, deliverability, drip]
+      tools: []
+      complexity_tier: lightweight
+
+    influencer_outreach:
+      description: "Influencer partnerships, outreach templates, ambassador programs"
+      primary_model: kimi-k2
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [influencer, outreach, partnership, ambassador, collaboration]
+      tools: []
+      complexity_tier: lightweight
+
+    analytics_interpreter:
+      description: "Marketing analytics, Google Analytics, attribution, dashboards"
+      primary_model: glm-4
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [analytics, attribution, dashboard, insights, ga4, metrics]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    brand_voice_developer:
+      description: "Brand voice design, tone guidelines, messaging frameworks, personality"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [brand, voice, tone, messaging, guidelines, personality]
+      tools: []
+      complexity_tier: midweight
+
+    pr_crisis_manager:
+      description: "PR crisis management, reputation repair, damage control, communication"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [crisis, pr, reputation, damage-control, communication, public-relations]
+      tools: []
+      complexity_tier: midweight
+
+operations:
+  default_agent: project_manager
+  description: "Project management, scheduling, resource allocation, reporting"
+  agents:
+    project_manager:
+      description: "Agile project management, sprint planning, stakeholder coordination"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [project, agile, scrum, sprint, planning, stakeholders, jira]
+      tools: []
+      complexity_tier: midweight
+
+    task_coordinator:
+      description: "Task delegation, tracking, prioritization, team coordination"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [task, coordinate, delegation, tracking, prioritize]
+      tools: []
+      complexity_tier: lightweight
+
+    scheduler:
+      description: "Scheduling, calendar management, deadline tracking, reminders"
+      primary_model: kimi-k2
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [schedule, calendar, deadline, time, reminder, timeline]
+      tools: []
+      complexity_tier: lightweight
+
+    cost_tracker:
+      description: "Financial tracking, budgeting, cost analysis, ROI estimation"
+      primary_model: glm-4
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [budget, finance, cost, roi, expense, financial]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    resource_allocator:
+      description: "Resource allocation, capacity planning, constraint optimization"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [resource, capacity, allocation, constraint, optimization]
+      tools: []
+      complexity_tier: midweight
+
+    workflow_optimizer:
+      description: "Workflow optimization, process improvement, bottleneck elimination"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [workflow, process, efficiency, bottleneck, automation, improve]
+      tools: []
+      complexity_tier: midweight
+
+    reporting_builder:
+      description: "Dashboard creation, KPI reporting, data visualization, metrics"
+      primary_model: devstral
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [dashboard, report, visualization, kpi, metrics, chart]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+legal_compliance:
+  default_agent: contract_reviewer
+  description: "Legal review, compliance, privacy, risk assessment, IP, ethics"
+  agents:
+    contract_reviewer:
+      description: "Contract review, clause analysis, legal risk identification"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [contract, legal, review, clause, risk, agreement]
+      tools: []
+      complexity_tier: heavyweight
+
+    gdpr_expert:
+      description: "Privacy compliance — GDPR, CCPA, data protection regulations"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [gdpr, privacy, ccpa, compliance, data-protection, regulation]
+      tools: []
+      complexity_tier: midweight
+
+    risk_assessor:
+      description: "Risk assessment, mitigation strategies, threat modeling"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [risk, assessment, mitigation, threat, vulnerability, model]
+      tools: []
+      complexity_tier: midweight
+
+    ip_lawyer:
+      description: "Intellectual property — patents, trademarks, copyright, licensing"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [patent, trademark, copyright, license, ip, intellectual-property]
+      tools: []
+      complexity_tier: heavyweight
+
+    ethics_auditor:
+      description: "AI ethics, bias detection, fairness evaluation, responsible AI"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [ethics, ai-ethics, bias, fairness, responsibility, discrimination]
+      tools: []
+      complexity_tier: midweight
+
+    compliance_checker:
+      description: "Regulatory compliance — SOX, HIPAA, audits, standards verification"
+      primary_model: glm-4
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [compliance, regulation, audit, sox, hipaa, standard, verify]
+      tools: []
+      complexity_tier: midweight
+
+product:
+  default_agent: product_manager
+  description: "Product management, roadmapping, user research, feature prioritization"
+  agents:
+    product_manager:
+      description: "Product strategy, roadmap, stakeholder alignment, vision definition"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [product, roadmap, strategy, stakeholder, vision, prd]
+      tools: []
+      complexity_tier: midweight
+
+    roadmap_planner:
+      description: "Roadmap planning, milestone definition, timeline management"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [roadmap, milestone, planning, timeline, quarter, priority]
+      tools: []
+      complexity_tier: midweight
+
+    user_research_lead:
+      description: "User research, interviews, personas, empathy maps, insights"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [user-research, interview, persona, empathy, insight, discovery]
+      tools: []
+      complexity_tier: midweight
+
+    feedback_analyzer:
+      description: "User feedback analysis — themes, sentiment, actionable insights"
+      primary_model: gemini-3.1-pro
+      fallbacks: [kimi-k2, qwen3-235b]
+      capabilities: [feedback, analysis, themes, sentiment, actionable, nps]
+      tools: [interpreter]
+      complexity_tier: midweight
+
+    feature_prioritizer:
+      description: "Feature prioritization — RICE, value vs effort, impact scoring"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [prioritize, prioritization, feature, value, effort, rice, impact]
+      tools: []
+      complexity_tier: lightweight
+
+    mvp_builder:
+      description: "MVP development, lean validation, rapid prototyping, scope control"
+      primary_model: devstral
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
+      capabilities: [mvp, minimum, prototype, lean, scope, validation, speed]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    beta_coordinator:
+      description: "Beta testing coordination, QA cycles, feedback loops, bug tracking"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [beta, testing, qa, feedback, bug, iteration, release]
+      tools: []
+      complexity_tier: lightweight
+
+    launch_strategist:
+      description: "Product launch strategy, go-to-market planning, channel selection"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [launch, go-to-market, channel, timing, announcement, strategy]
+      tools: []
+      complexity_tier: midweight
+
+creative:
+  default_agent: storyteller
+  description: "Creative content — storytelling, scripts, music, ideas, poetry"
+  agents:
+    storyteller:
+      description: "Narrative storytelling, character development, plot structure, world-building"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [story, narrative, character, plot, world, emotion]
+      tools: []
+      complexity_tier: midweight
+
+    script_writer:
+      description: "Screenwriting, dialogue, scene structure, screenplay format"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [script, screenplay, dialogue, scene, format, film]
+      tools: []
+      complexity_tier: midweight
+
+    video_concept_artist:
+      description: "Video concepts, storyboards, visual narratives, creative direction"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [video, storyboard, visual-narrative, creative-direction, concept]
+      tools: []
+      complexity_tier: midweight
+
+    music_composer:
+      description: "Music composition, theory, arrangement, MIDI, soundscape design"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, glm-4]
+      capabilities: [music, melody, composition, theory, arrangement, midi, sound]
+      tools: []
+      complexity_tier: midweight
+
+    meme_creator:
+      description: "Meme creation, internet humor, viral formats, cultural references"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, kimi-k2]
+      capabilities: [meme, humor, viral, internet, format, culture]
+      tools: []
+      complexity_tier: lightweight
+
+    idea_generator:
+      description: "Creative ideation, brainstorming, lateral thinking, concept generation"
+      primary_model: kimi-k2
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
+      capabilities: [idea, brainstorm, creative, innovation, concept, lateral, novel]
+      tools: []
+      complexity_tier: lightweight
+
+    poetry_specialist:
+      description: "Poetry composition — verse forms, metaphor, rhythm, imagery"
+      primary_model: gemini-3.1-pro
+      fallbacks: [qwen3-235b, kimi-k2]
+      capabilities: [poem, poetry, verse, metaphor, rhythm, rhyme, imagery]
+      tools: []
+      complexity_tier: lightweight
+
+    concept_artist:
+      description: "Concept art descriptions, visual design briefs, world-building details"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-3.1-pro, glm-4]
+      capabilities: [concept, art, visual, design, world-building, imagination]
+      tools: []
+      complexity_tier: midweight
+
+vision_multimodal:
+  default_agent: screenshot_analyzer
+  description: "Vision analysis — all local/private via Ollama, never sent to external APIs"
+  agents:
+    screenshot_analyzer:
+      description: "Screenshot analysis, desktop UI interpretation, visual debugging (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [screenshot, screen, ui, desktop, visual, local]
+      tools: []
+      complexity_tier: lightweight
+
+    diagram_interpreter:
+      description: "Diagram/flowchart/architecture interpretation, technical visuals (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [diagram, flowchart, architecture, chart, interpretation, local]
+      tools: []
+      complexity_tier: lightweight
+
+    ui_reviewer:
+      description: "UI/UX review from screenshots, usability heuristics, design critique (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [ui-review, usability, heuristics, critique, interface, local]
+      tools: []
+      complexity_tier: lightweight
+
+    image_descriptor:
+      description: "Image description, alt-text generation, accessibility captions (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [image, photo, picture, alt-text, description, caption, local]
+      tools: []
+      complexity_tier: lightweight
+
+    ocr_specialist:
+      description: "OCR text extraction, document scanning, text recognition (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [ocr, extract, text, scanning, recognition, document, local]
+      tools: []
+      complexity_tier: lightweight
+
+    video_frame_analyzer:
+      description: "Video frame analysis, scene detection, temporal understanding (local)"
+      primary_model: gemma3-12b
+      fallbacks: []
+      capabilities: [video, frame, clip, scene, temporal, detection, local]
+      tools: []
+      complexity_tier: lightweight
