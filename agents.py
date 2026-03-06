@@ -172,7 +172,7 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     Args:
         thread_id: Thread to retrieve context from
         last_n: Number of recent turns to include (default 3)
-    
+
     Returns:
         Formatted conversation history or empty string if thread doesn't exist
     """
@@ -210,6 +210,27 @@ def list_threads() -> str:
         )
     
     return "\n".join(lines)
+
+
+def get_all_threads() -> list[str]:
+    """Get list of all active thread IDs.
+    
+    Returns:
+        List of thread ID strings
+    """
+    return list(ACTIVE_THREADS.keys())
+
+
+def get_thread_turn_count(thread_id: str) -> int:
+    """Get number of turns in a thread.
+    
+    Args:
+        thread_id: Thread to count turns for
+    
+    Returns:
+        Number of turns (0 if thread doesn't exist)
+    """
+    return len(ACTIVE_THREADS.get(thread_id, []))
 
 
 def clear_thread(thread_id: str) -> bool:
