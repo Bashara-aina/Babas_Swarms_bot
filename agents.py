@@ -192,9 +192,14 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     return "\n".join(context_lines)
 
 
+def list_threads_raw() -> list[str]:
+    """Return list of active thread IDs (for button generation)."""
+    return list(ACTIVE_THREADS.keys())
+
+
 def list_threads() -> str:
     """List all active threads with turn counts.
-    
+
     Returns:
         Formatted list of threads for Telegram
     """

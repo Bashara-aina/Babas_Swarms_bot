@@ -2,7 +2,7 @@
 """LegionSwarm — Autonomous Desktop AI via Telegram.
 
 Slash Commands (optional — natural language works too):
-    /start          — Help menu
+    /start          — Help menu with interactive buttons
     /run <task>     — Auto-route to best agent
     /agent <n> <t>  — Force a specific agent
     /thread <name>  — Switch conversation thread
@@ -33,8 +33,11 @@ Natural Language Examples:
     "read /home/newadmin/swarm-bot/agents.py"
     "monitor my training every 5 minutes"
     [send voice message] → auto-transcribed
-    [upload PDF] → auto-extracted and analyzed
-    [upload screenshot] → auto-analyzed by vision model
+    [upload PDF] → file preview + action buttons
+    [upload screenshot] → image action buttons
+
+Shortcut Keyboard Buttons (shown at bottom of chat):
+    🐛 Debug | 💻 Code | 📊 Analyze | 💡 Explain | 📌 Threads | ⚙️ Settings
 """
 
 from __future__ import annotations
@@ -43,26 +46,34 @@ import asyncio
 import logging
 import os
 import re
+import time
 from pathlib import Path
+from typing import Optional
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import (
     BufferedInputFile,
-    Message,
-    Voice,
+    CallbackQuery,
     Document,
+    Message,
     PhotoSize,
+    Voice,
 )
 from dotenv import load_dotenv
 
 import agents
 import computer_control
+import formatters
 import interpreter_bridge
 import multimodal_processor
+import notifications
 import playwright_agent
 import task_orchestrator
 import vscode_bridge
+from progress_tracker import TaskProgressTracker
+from streaming_response import StreamingResponseManager
+from telegram_ui import TelegramUI
 
 load_dotenv()
 
@@ -72,7 +83,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ── Secrets ────────────────────────────────────────────────────────────────────
+# ── Secrets ─────────────────────────────────────────────────────────────────────
 
 TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 _raw_uid = os.getenv("ALLOWED_USER_ID", "")
@@ -83,60 +94,52 @@ if not TELEGRAM_BOT_TOKEN:
 if not ALLOWED_USER_ID:
     raise RuntimeError("ALLOWED_USER_ID not set or invalid in .env")
 
-# ── Bot Setup ──────────────────────────────────────────────────────────────────
+# ── Bot Setup ───────────────────────────────────────────────────────────────────
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
 
-# Per-user active thread tracking
+# Per-user active thread and settings
 current_thread: dict[int, str] = {}
+# User preferences: streaming, show_context, notifications
+_user_prefs: dict[int, dict] = {}
+
+# Cache of pending document file_ids for callback handling
+# {file_id: (raw_bytes, mime_type, filename)}
+_doc_cache: dict[str, tuple[bytes, str, str]] = {}
+_img_cache: dict[str, bytes] = {}
+
+_streamer: StreamingResponseManager | None = None
 
 
-# ── Auth Guard ─────────────────────────────────────────────────────────────────
+def _prefs(uid: int) -> dict:
+    """Get or create default prefs for a user."""
+    if uid not in _user_prefs:
+        _user_prefs[uid] = {"streaming": True, "show_context": True, "notifications": True}
+    return _user_prefs[uid]
+
+
+# ── Auth Guard ──────────────────────────────────────────────────────────────────
 
 def _authorized(message: Message) -> bool:
-    """Return True only if sender matches ALLOWED_USER_ID."""
     return message.from_user is not None and message.from_user.id == ALLOWED_USER_ID
 
 
 async def _deny(message: Message) -> None:
-    """Silently log unauthorized access — no reply."""
-    logger.warning(
-        "Unauthorized access from user_id=%s",
-        message.from_user and message.from_user.id,
-    )
+    logger.warning("Unauthorized access from user_id=%s", message.from_user and message.from_user.id)
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# ── Helpers ─────────────────────────────────────────────────────────────────────
 
-async def _send_chunks(message: Message, text: str) -> None:
-    """Send text in ≤4000-char HTML chunks.
-
-    Args:
-        message: Source message (for chat context).
-        text: Full output to send.
-    """
+async def _send_chunks(message: Message, text: str, reply_markup=None) -> None:
+    """Send text in ≤4000-char HTML chunks."""
     chunks = interpreter_bridge.chunk_output(text)
-    for chunk in chunks:
-        await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML")
-
-
-async def _notify(message: Message, text: str) -> None:
-    """Send a plain HTML notification (used by monitors).
-
-    Args:
-        message: Source message for chat context.
-        text: Message to send.
-    """
-    await message.answer(text, parse_mode="HTML")
+    for i, chunk in enumerate(chunks):
+        markup = reply_markup if i == len(chunks) - 1 else None
+        await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML", reply_markup=markup)
 
 
 async def _send_desktop_screenshot(message: Message) -> None:
-    """Take and send current desktop screenshot.
-
-    Args:
-        message: Source message.
-    """
     await message.answer("Taking desktop screenshot…")
     try:
         png_bytes = await computer_control.desktop_screenshot()
@@ -149,11 +152,7 @@ async def _send_desktop_screenshot(message: Message) -> None:
 
 
 def _detect_intent(text: str) -> dict:
-    """Classify natural language message into an action + content.
-
-    Returns:
-        dict with keys 'action' and 'content'.
-    """
+    """Classify natural language into action + content."""
     t = text.lower().strip()
 
     # Thread switching
@@ -169,7 +168,7 @@ def _detect_intent(text: str) -> dict:
     if any(kw in t for kw in ["show models", "list agents", "what agents"]):
         return {"action": "models", "content": ""}
 
-    # Desktop control
+    # Desktop
     if any(kw in t for kw in ["what's on my screen", "what is on screen", "describe my screen", "show my screen"]):
         return {"action": "analyze_screen", "content": text}
     if any(kw in t for kw in ["desktop screenshot", "screenshot my screen", "take a screenshot of desktop"]):
@@ -177,12 +176,12 @@ def _detect_intent(text: str) -> dict:
     if any(kw in t for kw in ["read my screen", "ocr screen", "what text is on screen"]):
         return {"action": "read_screen", "content": ""}
 
-    # Click element
+    # Click
     click_m = re.search(r"click (?:on )?['\"]?(.+?)['\"]?$", t)
     if click_m:
         return {"action": "click", "content": click_m.group(1).strip()}
 
-    # VSCode / file operations
+    # File/shell
     read_m = re.search(r"read (?:file )?([/~]?\S+\.\w+)", text)
     if read_m:
         return {"action": "read_file", "content": read_m.group(1)}
@@ -192,21 +191,18 @@ def _detect_intent(text: str) -> dict:
         return {"action": "terminal", "content": ""}
 
     # Monitor
-    monitor_m = re.search(r"monitor (.+?) every (\d+) min", t)
-    if monitor_m:
+    if re.search(r"monitor .+ every \d+ min", t):
         return {"action": "monitor", "content": text}
 
-    # Confirm/deny
+    # Confirmations
     if t.startswith("confirm yes") or t.startswith("yes confirm"):
         parts = t.split()
-        aid = parts[-1] if len(parts) > 2 else ""
-        return {"action": "confirm_yes", "content": aid}
+        return {"action": "confirm_yes", "content": parts[-1] if len(parts) > 2 else ""}
     if t.startswith("confirm no") or t.startswith("no confirm"):
         parts = t.split()
-        aid = parts[-1] if len(parts) > 2 else ""
-        return {"action": "confirm_no", "content": aid}
+        return {"action": "confirm_no", "content": parts[-1] if len(parts) > 2 else ""}
 
-    # URL operations
+    # URL ops
     url_m = re.search(r"(https?://\S+)", text)
     if url_m:
         if any(kw in t for kw in ["scrape", "extract text", "get text from"]):
@@ -214,65 +210,65 @@ def _detect_intent(text: str) -> dict:
         if any(kw in t for kw in ["screenshot", "capture", "shot of"]):
             return {"action": "shot", "content": url_m.group(1)}
 
+    # Navigation shortcuts from quick keyboard
+    if t.strip() in ("🐛 debug", "debug"):
+        return {"action": "quick_prompt", "content": "debug"}
+    if t.strip() in ("💻 code", "code"):
+        return {"action": "quick_prompt", "content": "code"}
+    if t.strip() in ("📊 analyze", "analyze"):
+        return {"action": "quick_prompt", "content": "analyze"}
+    if t.strip() in ("💡 explain", "explain"):
+        return {"action": "quick_prompt", "content": "explain"}
+    if t.strip() in ("📌 threads", "threads"):
+        return {"action": "threads", "content": ""}
+    if t.strip() in ("⚙️ settings", "settings"):
+        return {"action": "settings", "content": ""}
+
     if any(kw in t for kw in ["help", "what can you do", "commands"]):
         return {"action": "help", "content": ""}
-
-    if any(kw in t for kw in ["show stats", "performance stats", "usage stats", "/stats"]):
+    if any(kw in t for kw in ["show stats", "performance stats", "usage stats"]):
         return {"action": "stats", "content": ""}
-
-    if any(kw in t for kw in ["circuit status", "circuit breaker", "/circuits"]):
+    if any(kw in t for kw in ["circuit status", "circuit breaker"]):
         return {"action": "circuits", "content": ""}
-
-    if any(kw in t for kw in ["usage report", "api usage", "cost report", "/usage"]):
+    if any(kw in t for kw in ["usage report", "api usage", "cost report"]):
         return {"action": "usage", "content": ""}
 
     return {"action": "run", "content": text}
 
 
-# ── Slash Command Handlers ─────────────────────────────────────────────────────
+# ── Slash Command Handlers ──────────────────────────────────────────────────────
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message) -> None:
-    """Show help menu."""
     if not _authorized(message):
         await _deny(message)
         return
-
     await message.answer(
         "<b>LegionSwarm</b> — Autonomous Desktop AI\n\n"
-        "<b>Just talk naturally:</b>\n"
-        "  • <i>debug this pytorch error: ...</i>\n"
-        "  • <i>what's on my screen?</i>\n"
-        "  • <i>click on the terminal</i>\n"
-        "  • <i>read ~/swarm-bot/main.py</i>\n"
-        "  • <i>monitor training every 5 minutes</i>\n"
-        "  • [send voice] → auto-transcribed\n"
-        "  • [upload PDF] → auto-analyzed\n"
-        "  • [upload image] → vision analysis\n\n"
-        "<b>Commands:</b>\n"
-        "/desktop — screenshot this PC\n"
-        "/screen — OCR current desktop\n"
-        "/git — workspace git status\n"
-        "/monitors — active monitors\n"
-        "/pending — pending confirmations\n"
-        "/models — agent roster\n\n"
-        f"<b>Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}",
+        "Tap a button or just talk naturally:",
+        reply_markup=TelegramUI.main_menu(),
         parse_mode="HTML",
+    )
+    await message.answer(
+        "Keyboard shortcuts active 👇",
+        reply_markup=TelegramUI.quick_reply_keyboard(),
     )
 
 
 @dp.message(Command("models"))
 async def cmd_models(message: Message) -> None:
-    """Show agent roster."""
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer(agents.list_agents(), parse_mode="HTML")
+    await message.answer(
+        agents.list_agents(),
+        reply_markup=TelegramUI.back_to_menu(),
+        parse_mode="HTML",
+    )
 
 
 @dp.message(Command("desktop"))
 async def cmd_desktop(message: Message) -> None:
-    """Take and send desktop screenshot."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -281,7 +277,6 @@ async def cmd_desktop(message: Message) -> None:
 
 @dp.message(Command("screen"))
 async def cmd_screen(message: Message) -> None:
-    """OCR-read current desktop text."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -295,10 +290,6 @@ async def cmd_screen(message: Message) -> None:
 
 @dp.message(Command("click"))
 async def cmd_click(message: Message) -> None:
-    """Click a UI element by visible text.
-
-    Usage: /click <text on screen>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -320,10 +311,6 @@ async def cmd_click(message: Message) -> None:
 
 @dp.message(Command("read"))
 async def cmd_read_file(message: Message) -> None:
-    """Read a file from the workspace.
-
-    Usage: /read <path>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -343,10 +330,6 @@ async def cmd_read_file(message: Message) -> None:
 
 @dp.message(Command("cmd"))
 async def cmd_shell(message: Message) -> None:
-    """Run a shell command on this PC.
-
-    Usage: /cmd <shell command>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -356,7 +339,6 @@ async def cmd_shell(message: Message) -> None:
         return
     cmd = args[1].strip()
 
-    # Destructive command → queue for confirmation
     if computer_control.is_destructive(cmd):
         async def _run() -> str:
             return await vscode_bridge.run_command(cmd)
@@ -366,9 +348,8 @@ async def cmd_shell(message: Message) -> None:
         )
         await message.answer(
             f"⚠️ Destructive command queued.\n\n"
-            f"<code>{cmd}</code>\n\n"
-            f"Confirm: <code>/confirm yes {action_id}</code>\n"
-            f"Cancel:  <code>/confirm no {action_id}</code>",
+            f"<code>{cmd}</code>",
+            reply_markup=TelegramUI.confirmation(action_id),
             parse_mode="HTML",
         )
         return
@@ -383,7 +364,6 @@ async def cmd_shell(message: Message) -> None:
 
 @dp.message(Command("git"))
 async def cmd_git(message: Message) -> None:
-    """Show workspace git status."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -396,34 +376,43 @@ async def cmd_git(message: Message) -> None:
 
 @dp.message(Command("thread"))
 async def cmd_thread(message: Message) -> None:
-    """Switch to a conversation thread.
-
-    Usage: /thread <name>
-    """
     if not _authorized(message):
         await _deny(message)
         return
     args = (message.text or "").split(maxsplit=1)
     if len(args) < 2:
-        await message.answer("Usage: <code>/thread &lt;name&gt;</code>", parse_mode="HTML")
+        # Show thread selector
+        threads = agents.list_threads_raw()
+        if threads:
+            await message.answer(
+                "Select a thread:", reply_markup=TelegramUI.thread_selector(threads), parse_mode="HTML"
+            )
+        else:
+            await message.answer("Usage: <code>/thread &lt;name&gt;</code>", parse_mode="HTML")
         return
-    thread_id = args[1].strip().lower().replace(" ", "_")
-    current_thread[message.from_user.id] = thread_id
-    await message.answer(f"Switched to thread: <b>{thread_id}</b>", parse_mode="HTML")
+    tid = args[1].strip().lower().replace(" ", "_")
+    current_thread[message.from_user.id] = tid
+    await message.answer(f"Switched to thread: <b>{tid}</b>", parse_mode="HTML")
 
 
 @dp.message(Command("threads"))
 async def cmd_threads(message: Message) -> None:
-    """List active threads."""
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer(agents.list_threads(), parse_mode="HTML")
+    threads = agents.list_threads_raw()
+    if threads:
+        await message.answer(
+            "<b>Active Threads</b>",
+            reply_markup=TelegramUI.thread_selector(threads),
+            parse_mode="HTML",
+        )
+    else:
+        await message.answer(agents.list_threads(), parse_mode="HTML")
 
 
 @dp.message(Command("context"))
 async def cmd_context(message: Message) -> None:
-    """Show current thread history."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -433,18 +422,14 @@ async def cmd_context(message: Message) -> None:
         return
     tid = current_thread[uid]
     ctx = agents.get_thread_context(tid, last_n=5)
-    if not ctx:
-        await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
-    else:
+    if ctx:
         await message.answer(f"<b>Thread: {tid}</b>\n\n<pre>{ctx}</pre>", parse_mode="HTML")
+    else:
+        await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
 
 
 @dp.message(Command("run"))
 async def cmd_run(message: Message) -> None:
-    """Auto-detect agent and run task.
-
-    Usage: /run <task>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -457,18 +442,14 @@ async def cmd_run(message: Message) -> None:
 
 @dp.message(Command("agent"))
 async def cmd_agent(message: Message) -> None:
-    """Force a specific agent.
-
-    Usage: /agent <name> <task>
-    """
     if not _authorized(message):
         await _deny(message)
         return
     args = (message.text or "").split(maxsplit=2)
     if len(args) < 3:
         await message.answer(
-            f"Usage: <code>/agent &lt;name&gt; &lt;task&gt;</code>\n"
-            f"Agents: {', '.join(agents.AGENT_MODELS.keys())}",
+            f"Usage: <code>/agent &lt;name&gt; &lt;task&gt;</code>",
+            reply_markup=TelegramUI.agent_selector(),
             parse_mode="HTML",
         )
         return
@@ -489,21 +470,20 @@ async def cmd_agent(message: Message) -> None:
             full_task = f"{ctx}\n\nCurrent task: {task}"
 
     await message.answer(f"Using <b>{agent_key}</b> (<code>{model}</code>)…", parse_mode="HTML")
+    t0 = time.monotonic()
     try:
-        result = await interpreter_bridge.run_task(model, full_task, agent_key)
+        result = await _run_with_streaming(message, model, full_task, agent_key)
     except Exception as exc:
         result = f"Error: {exc}"
     if tid:
         agents.add_to_thread(tid, agent_key, task, result)
-    await _send_chunks(message, result)
+
+    await notifications.task_complete(task, time.monotonic() - t0, agent_key)
+    await _send_feedback_prompt(message, agent_key, task)
 
 
 @dp.message(Command("scrape"))
 async def cmd_scrape(message: Message) -> None:
-    """Scrape page text from a URL.
-
-    Usage: /scrape <url>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -522,10 +502,6 @@ async def cmd_scrape(message: Message) -> None:
 
 @dp.message(Command("shot"))
 async def cmd_shot(message: Message) -> None:
-    """Screenshot a URL.
-
-    Usage: /shot <url>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -551,10 +527,6 @@ async def cmd_shot(message: Message) -> None:
 
 @dp.message(Command("confirm"))
 async def cmd_confirm(message: Message) -> None:
-    """Approve or deny a queued destructive action.
-
-    Usage: /confirm yes <id> | /confirm no <id>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -566,26 +538,18 @@ async def cmd_confirm(message: Message) -> None:
             parse_mode="HTML",
         )
         return
-
     verdict = args[1].lower()
     action_id = args[2]
-
     if verdict in ("yes", "y"):
         result = await task_orchestrator.confirm_action(action_id)
         await _send_chunks(message, result)
     elif verdict in ("no", "n"):
         result = task_orchestrator.deny_action(action_id)
         await message.answer(result, parse_mode="HTML")
-    else:
-        await message.answer(
-            "Usage: <code>/confirm yes &lt;id&gt;</code> or <code>/confirm no &lt;id&gt;</code>",
-            parse_mode="HTML",
-        )
 
 
 @dp.message(Command("pending"))
 async def cmd_pending(message: Message) -> None:
-    """List pending confirmations."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -594,7 +558,6 @@ async def cmd_pending(message: Message) -> None:
 
 @dp.message(Command("monitors"))
 async def cmd_monitors(message: Message) -> None:
-    """List active monitoring tasks."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -603,10 +566,6 @@ async def cmd_monitors(message: Message) -> None:
 
 @dp.message(Command("cancel"))
 async def cmd_cancel(message: Message) -> None:
-    """Cancel an active monitor.
-
-    Usage: /cancel <task_id>
-    """
     if not _authorized(message):
         await _deny(message)
         return
@@ -618,16 +577,343 @@ async def cmd_cancel(message: Message) -> None:
     await message.answer(result, parse_mode="HTML")
 
 
-# ── Multi-Modal Input Handlers ─────────────────────────────────────────────────
+# ── Production Monitoring Commands ──────────────────────────────────────────────
 
-@dp.message(F.voice)
-async def handle_voice(message: Message) -> None:
-    """Transcribe voice message and process as text task."""
+@dp.message(Command("stats"))
+async def cmd_stats(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
+    parts = []
+    try:
+        from observability.metrics import format_stats
+        parts.append(format_stats())
+    except Exception as exc:
+        parts.append(f"Metrics unavailable: {exc}")
+    try:
+        from optimization.feedback_learner import get_learner
+        parts.append(get_learner().summary_report())
+    except Exception as exc:
+        parts.append(f"Feedback unavailable: {exc}")
+    await message.answer(
+        "\n\n".join(parts),
+        reply_markup=TelegramUI.back_to_menu(),
+        parse_mode="HTML",
+    )
 
-    await message.answer("Transcribing voice message…")
+
+@dp.message(Command("circuits"))
+async def cmd_circuits(message: Message) -> None:
+    if not _authorized(message):
+        await _deny(message)
+        return
+    try:
+        from reliability.error_recovery import get_recovery
+        report = get_recovery().circuit_status()
+        await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Circuit status unavailable: {exc}", parse_mode="HTML")
+
+
+@dp.message(Command("usage"))
+async def cmd_usage(message: Message) -> None:
+    if not _authorized(message):
+        await _deny(message)
+        return
+    try:
+        from optimization.usage_tracker import get_tracker
+        report = get_tracker().daily_report()
+        await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Usage report unavailable: {exc}", parse_mode="HTML")
+
+
+@dp.message(Command("feedback"))
+async def cmd_feedback(message: Message) -> None:
+    if not _authorized(message):
+        await _deny(message)
+        return
+    args = (message.text or "").split(maxsplit=3)
+    if len(args) < 3:
+        await message.answer(
+            "Usage: <code>/feedback &lt;id&gt; good|bad [comment]</code>",
+            parse_mode="HTML",
+        )
+        return
+    fid = args[1].strip()
+    verdict = args[2].strip().lower()
+    comment = args[3].strip() if len(args) > 3 else ""
+
+    if verdict in ("good", "yes", "+1"):
+        rating = 1
+    elif verdict in ("bad", "no", "-1"):
+        rating = -1
+    else:
+        await message.answer("Rating must be <code>good</code> or <code>bad</code>.", parse_mode="HTML")
+        return
+
+    try:
+        from optimization.feedback_learner import get_learner
+        result = get_learner().record(fid, rating, comment)
+        await message.answer(result or "Feedback recorded.", parse_mode="HTML")
+    except Exception as exc:
+        await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
+
+
+# ── Inline Callback Handlers ────────────────────────────────────────────────────
+
+@dp.callback_query(F.data.startswith("quick:"))
+async def cb_quick_action(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    action = callback.data.split(":", 1)[1]
+    prompts = {
+        "debug":   "🐛 <b>Debug Mode</b>\n\nSend me your error traceback or describe the issue.",
+        "code":    "💻 <b>Coding Mode</b>\n\nDescribe what you want to build or ask for code.",
+        "analyze": "📊 <b>Analysis Mode</b>\n\nUpload a file (CSV, JSON, logs) or paste data.",
+        "explain": "💡 <b>Explain Mode</b>\n\nAsk me to explain any concept, algorithm, or error.",
+        "design":  "🏗️ <b>Design Mode</b>\n\nDescribe the system you want to architect.",
+        "desktop": None,
+    }
+    if action == "desktop":
+        await callback.answer()
+        await _send_desktop_screenshot(callback.message)
+        return
+
+    text = prompts.get(action, "How can I help?")
+    await callback.message.answer(text, parse_mode="HTML")
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("nav:"))
+async def cb_nav(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    dest = callback.data.split(":", 1)[1]
+    if dest == "main_menu":
+        await callback.message.edit_text(
+            "<b>LegionSwarm</b> — Autonomous Desktop AI\n\nWhat would you like to do?",
+            reply_markup=TelegramUI.main_menu(),
+            parse_mode="HTML",
+        )
+    elif dest == "threads":
+        threads = agents.list_threads_raw()
+        if threads:
+            await callback.message.edit_text(
+                "<b>Active Threads</b>\n\nSelect one:",
+                reply_markup=TelegramUI.thread_selector(threads),
+                parse_mode="HTML",
+            )
+        else:
+            await callback.message.answer("No active threads yet.")
+    elif dest == "settings":
+        uid = callback.from_user.id
+        prefs = _prefs(uid)
+        await callback.message.edit_text(
+            "⚙️ <b>Settings</b>\n\nToggle preferences:",
+            reply_markup=TelegramUI.settings_menu(prefs),
+            parse_mode="HTML",
+        )
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("agent_force:"))
+async def cb_agent_force(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    agent_key = callback.data.split(":", 1)[1]
+    await callback.message.answer(
+        f"<b>{agent_key.upper()} agent selected.</b>\n\nSend your task:",
+        parse_mode="HTML",
+    )
+    # Store pending agent preference temporarily
+    _prefs(callback.from_user.id)["pending_agent"] = agent_key
+    await callback.answer(f"Agent: {agent_key}")
+
+
+@dp.callback_query(F.data.startswith("thread_switch:"))
+async def cb_thread_switch(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    tid = callback.data.split(":", 1)[1]
+    current_thread[callback.from_user.id] = tid
+    await callback.message.edit_text(
+        f"📌 Switched to thread: <b>{tid}</b>",
+        reply_markup=TelegramUI.back_to_menu(),
+        parse_mode="HTML",
+    )
+    await callback.answer(f"Thread: {tid}")
+
+
+@dp.callback_query(F.data == "thread_new")
+async def cb_thread_new(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    await callback.message.answer("Send a name for the new thread (e.g. <code>workernet</code>):", parse_mode="HTML")
+    _prefs(callback.from_user.id)["awaiting_thread_name"] = True
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("confirm_yes:"))
+async def cb_confirm_yes(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    action_id = callback.data.split(":", 1)[1]
+    await callback.message.edit_reply_markup(reply_markup=None)
+    result = await task_orchestrator.confirm_action(action_id)
+    await callback.message.answer(f"✅ {result}", parse_mode="HTML")
+    await callback.answer("Confirmed")
+
+
+@dp.callback_query(F.data.startswith("confirm_no:"))
+async def cb_confirm_no(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    action_id = callback.data.split(":", 1)[1]
+    await callback.message.edit_reply_markup(reply_markup=None)
+    result = task_orchestrator.deny_action(action_id)
+    await callback.message.answer(f"❌ {result}", parse_mode="HTML")
+    await callback.answer("Cancelled")
+
+
+@dp.callback_query(F.data.startswith("doc:"))
+async def cb_doc_action(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    parts = callback.data.split(":", 2)
+    action = parts[1]
+    file_id = parts[2] if len(parts) > 2 else ""
+    await callback.answer(f"Processing: {action}…")
+
+    cached = _doc_cache.get(file_id)
+    if not cached:
+        await callback.message.answer("Document no longer cached. Please re-upload.", parse_mode="HTML")
+        return
+
+    raw, mime, fname = cached
+    extracted, _label = await multimodal_processor.process_document(raw, mime, fname)
+    if not extracted:
+        await callback.message.answer("Could not extract text from this document.", parse_mode="HTML")
+        return
+
+    prompts_map = {
+        "summarize": f"Summarize this document concisely:\n\n{extracted[:6000]}",
+        "qa":        f"The following document has been uploaded. Await user questions.\n\n{extracted[:6000]}",
+        "extract":   f"Extract all tables, lists, and key data from this document:\n\n{extracted[:6000]}",
+        "analyze":   f"Perform a thorough analysis of this document:\n\n{extracted[:6000]}",
+    }
+    task = prompts_map.get(action, f"Analyze this document:\n\n{extracted[:6000]}")
+
+    if action == "qa":
+        uid = callback.from_user.id
+        tid = current_thread.get(uid, "doc_context")
+        agents.add_to_thread(tid, "document", f"Uploaded: {fname}", extracted[:2000])
+        current_thread[uid] = tid
+        await callback.message.answer(
+            f"📄 <b>{fname}</b> loaded into thread <b>{tid}</b>.\nAsk me anything about it.",
+            parse_mode="HTML",
+        )
+        return
+
+    model = agents.get_model("mentor") or agents.get_model("coding")
+    await callback.message.answer(f"Processing <code>{action}</code> on <b>{fname}</b>…", parse_mode="HTML")
+    result = await interpreter_bridge.run_task(model, task, "mentor")
+    formatted = formatters.format_response(result, "mentor", concept=fname)
+    await _send_chunks(callback.message, formatted)
+
+
+@dp.callback_query(F.data.startswith("img:"))
+async def cb_img_action(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    parts = callback.data.split(":", 2)
+    action = parts[1]
+    file_id = parts[2] if len(parts) > 2 else ""
+    await callback.answer(f"Processing: {action}…")
+
+    image_bytes = _img_cache.get(file_id)
+    if not image_bytes:
+        await callback.message.answer("Image no longer cached. Please re-upload.", parse_mode="HTML")
+        return
+
+    questions_map = {
+        "describe": "Describe this image in detail.",
+        "errors":   "Find and explain any errors, warnings, or problems visible in this image.",
+        "ocr":      "Extract and return all text visible in this image.",
+        "fix":      "Identify the issue shown and suggest a concrete fix.",
+    }
+    question = questions_map.get(action, "Describe this image.")
+    await callback.message.answer(f"Analyzing image: <i>{question}</i>…", parse_mode="HTML")
+    result = await multimodal_processor.analyze_image(image_bytes, question)
+    formatted = formatters.format_response(result, "vision")
+    await _send_chunks(callback.message, formatted)
+
+
+@dp.callback_query(F.data.startswith("fb:"))
+async def cb_feedback(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    parts = callback.data.split(":", 2)
+    verdict = parts[1]
+    fid = parts[2] if len(parts) > 2 else ""
+    rating = 1 if verdict == "good" else -1
+
+    try:
+        from optimization.feedback_learner import get_learner
+        result = get_learner().record(fid, rating)
+        await callback.message.edit_reply_markup(reply_markup=None)
+        await callback.answer(result or "Feedback recorded!")
+    except Exception as exc:
+        await callback.answer(f"Error: {exc}")
+
+
+@dp.callback_query(F.data.startswith("setting:toggle:"))
+async def cb_setting_toggle(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    key = callback.data.split(":", 2)[2]
+    uid = callback.from_user.id
+    prefs = _prefs(uid)
+    prefs[key] = not prefs.get(key, True)
+    await callback.message.edit_text(
+        "⚙️ <b>Settings</b>\n\nToggle preferences:",
+        reply_markup=TelegramUI.settings_menu(prefs),
+        parse_mode="HTML",
+    )
+    await callback.answer(f"{key}: {'On' if prefs[key] else 'Off'}")
+
+
+@dp.callback_query(F.data.startswith("task_cancel:"))
+async def cb_task_cancel(callback: CallbackQuery) -> None:
+    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
+        await callback.answer("Unauthorized")
+        return
+    task_id = callback.data.split(":", 1)[1]
+    result = task_orchestrator.cancel_monitor(task_id)
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.answer("Cancelled")
+    await callback.message.answer(result, parse_mode="HTML")
+
+
+# ── Multi-Modal Input Handlers ──────────────────────────────────────────────────
+
+@dp.message(F.voice)
+async def handle_voice(message: Message) -> None:
+    if not _authorized(message):
+        await _deny(message)
+        return
+    status_msg = await message.answer("🎤 Transcribing voice message…")
     try:
         voice: Voice = message.voice
         file = await bot.get_file(voice.file_id)
@@ -635,64 +921,47 @@ async def handle_voice(message: Message) -> None:
         audio_bytes = file_bytes.read()
 
         text = await multimodal_processor.transcribe_voice(audio_bytes, extension=".ogg")
-        await message.answer(f"<i>Heard:</i> {text}", parse_mode="HTML")
+        await status_msg.edit_text(
+            f"🎤 <b>Heard:</b>\n\n<i>{text}</i>\n\nProcessing…",
+            parse_mode="HTML",
+        )
         await _execute_task(message, text)
 
     except RuntimeError as exc:
-        await message.answer(f"Transcription unavailable: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"Transcription unavailable: {exc}", parse_mode="HTML")
     except Exception as exc:
         logger.exception("Voice handler error: %s", exc)
-        await message.answer(f"Voice error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"Voice error: {exc}", parse_mode="HTML")
 
 
 @dp.message(F.document)
 async def handle_document(message: Message) -> None:
-    """Extract document text and analyze it with the appropriate agent."""
     if not _authorized(message):
         await _deny(message)
         return
-
     doc: Document = message.document
     mime = doc.mime_type or ""
-    fname = doc.file_name or ""
-
-    await message.answer(f"Processing document: <code>{fname}</code>…", parse_mode="HTML")
+    fname = doc.file_name or "document"
+    size_kb = (doc.file_size or 0) / 1024
 
     try:
         file = await bot.get_file(doc.file_id)
         file_bytes_io = await bot.download_file(file.file_path)
         raw = file_bytes_io.read()
 
-        extracted, label = await multimodal_processor.process_document(raw, mime, fname)
+        # Cache for callback handling
+        _doc_cache[doc.file_id] = (raw, mime, fname)
+        # Evict old entries (keep last 10)
+        if len(_doc_cache) > 10:
+            oldest = next(iter(_doc_cache))
+            del _doc_cache[oldest]
 
-        if not extracted:
-            await message.answer(
-                f"Cannot process {label}. Supported: PDF, DOCX, TXT", parse_mode="HTML"
-            )
-            return
-
-        # Store in active thread if one is set
-        uid = message.from_user.id
-        tid = current_thread.get(uid)
-        if tid:
-            agents.add_to_thread(tid, "document", f"Uploaded: {fname}", extracted[:300])
-            await message.answer(
-                f"{label} added to thread <b>{tid}</b>. Ask me anything about it.",
-                parse_mode="HTML",
-            )
-        else:
-            await message.answer(
-                f"{label} extracted ({len(extracted)} chars). Summarizing with mentor agent…",
-                parse_mode="HTML",
-            )
-            model = agents.get_model("mentor") or agents.get_model("coding")
-            summary = await interpreter_bridge.run_task(
-                model,
-                f"Summarize this document concisely:\n\n{extracted[:6000]}",
-                "mentor",
-            )
-            await _send_chunks(message, summary)
-
+        preview = formatters.ResponseFormatter.file_preview(fname, size_kb, mime)
+        await message.answer(
+            preview,
+            reply_markup=TelegramUI.document_actions(doc.file_id),
+            parse_mode="HTML",
+        )
     except Exception as exc:
         logger.exception("Document handler error: %s", exc)
         await message.answer(f"Document error: {exc}", parse_mode="HTML")
@@ -700,46 +969,73 @@ async def handle_document(message: Message) -> None:
 
 @dp.message(F.photo)
 async def handle_photo(message: Message) -> None:
-    """Analyze uploaded photo with vision model."""
     if not _authorized(message):
         await _deny(message)
         return
-
-    # Get highest-resolution version
     photo: PhotoSize = message.photo[-1]
-    caption = message.caption or "Describe this image in detail. If it shows code or an error, analyze it."
 
-    await message.answer("Analyzing image with vision model…")
     try:
         file = await bot.get_file(photo.file_id)
         file_bytes_io = await bot.download_file(file.file_path)
         image_bytes = file_bytes_io.read()
 
-        analysis = await multimodal_processor.analyze_image(image_bytes, caption)
-        await _send_chunks(message, analysis)
+        # Cache for callback
+        _img_cache[photo.file_id] = image_bytes
+        if len(_img_cache) > 20:
+            oldest = next(iter(_img_cache))
+            del _img_cache[oldest]
 
+        caption = message.caption or ""
+        if caption:
+            # User provided a question — answer immediately
+            await message.answer("Analyzing image…")
+            result = await multimodal_processor.analyze_image(image_bytes, caption)
+            formatted = formatters.format_response(result, "vision")
+            await _send_chunks(message, formatted)
+        else:
+            # Show action buttons
+            await message.answer(
+                "📷 <b>Image received</b>\n\nWhat would you like me to do?",
+                reply_markup=TelegramUI.image_actions(photo.file_id),
+                parse_mode="HTML",
+            )
     except Exception as exc:
         logger.exception("Photo handler error: %s", exc)
-        await message.answer(f"Image analysis error: {exc}", parse_mode="HTML")
+        await message.answer(f"Image error: {exc}", parse_mode="HTML")
 
 
-# ── Natural Language Handler ───────────────────────────────────────────────────
+# ── Natural Language Handler ─────────────────────────────────────────────────────
 
 @dp.message(F.text)
 async def handle_natural(message: Message) -> None:
-    """Route natural language messages to the appropriate action."""
     if not _authorized(message):
         await _deny(message)
         return
-
     text = (message.text or "").strip()
     if not text:
         return
 
+    uid = message.from_user.id
+    prefs = _prefs(uid)
+
+    # Check if user was asked to name a new thread
+    if prefs.pop("awaiting_thread_name", False):
+        tid = text.strip().lower().replace(" ", "_")
+        current_thread[uid] = tid
+        await message.answer(f"✅ Created and switched to thread: <b>{tid}</b>", parse_mode="HTML")
+        return
+
+    # Check if a specific agent was pre-selected via button
+    forced_agent = prefs.pop("pending_agent", None)
+    if forced_agent:
+        model = agents.get_model(forced_agent)
+        if model:
+            await _execute_task(message, text, forced_agent=forced_agent)
+            return
+
     intent = _detect_intent(text)
     action = intent["action"]
     content = intent["content"]
-    uid = message.from_user.id
 
     if action == "thread":
         tid = content.lower().replace(" ", "_")
@@ -747,7 +1043,11 @@ async def handle_natural(message: Message) -> None:
         await message.answer(f"Switched to thread: <b>{tid}</b>", parse_mode="HTML")
 
     elif action == "threads":
-        await message.answer(agents.list_threads(), parse_mode="HTML")
+        threads = agents.list_threads_raw()
+        if threads:
+            await message.answer("Select a thread:", reply_markup=TelegramUI.thread_selector(threads), parse_mode="HTML")
+        else:
+            await message.answer(agents.list_threads(), parse_mode="HTML")
 
     elif action == "context":
         if uid not in current_thread:
@@ -769,13 +1069,13 @@ async def handle_natural(message: Message) -> None:
     elif action == "analyze_screen":
         await message.answer("Analyzing your screen…")
         try:
-            result = await computer_control.analyze_screen(content or "What is visible on screen?")
-            await _send_chunks(message, result)
+            result = await computer_control.analyze_screen(content or "What is visible?")
+            await _send_chunks(message, formatters.format_response(result, "vision"))
         except Exception as exc:
             await message.answer(f"Screen analysis error: {exc}", parse_mode="HTML")
 
     elif action == "read_screen":
-        await message.answer("Reading screen text via OCR…")
+        await message.answer("Reading screen via OCR…")
         try:
             text_out = await computer_control.read_screen()
             await _send_chunks(message, text_out or "(no text detected)")
@@ -786,10 +1086,8 @@ async def handle_natural(message: Message) -> None:
         await message.answer(f"Clicking: <code>{content}</code>…", parse_mode="HTML")
         try:
             found = await computer_control.click_on(content)
-            if found:
-                await message.answer(f"Clicked: <code>{content}</code>", parse_mode="HTML")
-            else:
-                await message.answer(f"Not found on screen: <code>{content}</code>", parse_mode="HTML")
+            status = f"Clicked: <code>{content}</code>" if found else f"Not found: <code>{content}</code>"
+            await message.answer(status, parse_mode="HTML")
         except Exception as exc:
             await message.answer(f"Click error: {exc}", parse_mode="HTML")
 
@@ -811,7 +1109,6 @@ async def handle_natural(message: Message) -> None:
         await _send_chunks(message, output)
 
     elif action == "monitor":
-        # Parse "monitor X every N minutes"
         m = re.search(r"monitor (.+?) every (\d+) min", text, re.IGNORECASE)
         if m:
             desc = m.group(1).strip()
@@ -823,12 +1120,11 @@ async def handle_natural(message: Message) -> None:
             async def _notify_fn(msg: str) -> None:
                 await message.answer(msg, parse_mode="HTML")
 
-            task_id = await task_orchestrator.start_monitor(
-                desc, interval, _monitor_fn, _notify_fn
-            )
+            task_id = await task_orchestrator.start_monitor(desc, interval, _monitor_fn, _notify_fn)
             await message.answer(
                 f"Monitor started: <b>{desc}</b> every {m.group(2)} min\n"
-                f"ID: <code>{task_id}</code> — cancel with <code>/cancel {task_id}</code>",
+                f"ID: <code>{task_id}</code>",
+                reply_markup=TelegramUI.task_controls(task_id),
                 parse_mode="HTML",
             )
         else:
@@ -869,6 +1165,22 @@ async def handle_natural(message: Message) -> None:
             if tmp_path:
                 tmp_path.unlink(missing_ok=True)
 
+    elif action == "quick_prompt":
+        prompts = {
+            "debug":   "🐛 <b>Debug Mode</b>\n\nSend me your error or traceback:",
+            "code":    "💻 <b>Coding Mode</b>\n\nDescribe what you want to build:",
+            "analyze": "📊 <b>Analysis Mode</b>\n\nUpload a file or paste data:",
+            "explain": "💡 <b>Explain Mode</b>\n\nWhat concept should I explain?",
+        }
+        await message.answer(prompts.get(content, "How can I help?"), parse_mode="HTML")
+
+    elif action == "settings":
+        await message.answer(
+            "⚙️ <b>Settings</b>",
+            reply_markup=TelegramUI.settings_menu(_prefs(uid)),
+            parse_mode="HTML",
+        )
+
     elif action == "help":
         await cmd_start(message)
 
@@ -885,19 +1197,56 @@ async def handle_natural(message: Message) -> None:
         await _execute_task(message, content)
 
 
-# ── Task Execution ─────────────────────────────────────────────────────────────
+# ── Task Execution ──────────────────────────────────────────────────────────────
 
-async def _execute_task(message: Message, task: str) -> None:
-    """Auto-detect agent, inject thread context, run task, store result.
+async def _run_with_streaming(
+    message: Message,
+    model: str,
+    task: str,
+    agent_key: str,
+) -> str:
+    """Run a task, streaming output if user pref is on, else buffered."""
+    uid = message.from_user.id if message.from_user else 0
+    use_streaming = _prefs(uid).get("streaming", True)
 
-    For complex tasks, delegates to hierarchical supervisor orchestration.
-    Every response is registered for optional user feedback.
-    """
+    if use_streaming and _streamer:
+        icon_map = {"vision":"👁️","coding":"💻","debug":"🐛","math":"🔢","architect":"🏗️","mentor":"📚","analyst":"📊"}
+        icon = icon_map.get(agent_key, "🤖")
+        header = f"<b>{icon} {agent_key.upper()}</b>"
+        return await _streamer.stream_task(message.chat.id, model, task, agent_key, header)
+    else:
+        result = await interpreter_bridge.run_task(model, task, agent_key)
+        formatted = formatters.format_response(result, agent_key)
+        await _send_chunks(message, formatted)
+        return result
+
+
+async def _send_feedback_prompt(message: Message, agent_key: str, task: str) -> None:
+    """Register response and show inline feedback buttons."""
+    try:
+        from optimization.feedback_learner import get_learner
+        fid = get_learner().register_response(agent_key, task)
+        await message.answer(
+            "<i>Rate this response:</i>",
+            reply_markup=TelegramUI.feedback_buttons(fid),
+            parse_mode="HTML",
+        )
+    except Exception:
+        pass
+
+
+async def _execute_task(
+    message: Message,
+    task: str,
+    forced_agent: Optional[str] = None,
+) -> None:
+    """Auto-detect agent, run task with progress tracking, store in thread."""
     original_task = task
-    agent_key = agents.detect_agent(task)
+    agent_key = forced_agent or agents.detect_agent(task)
     model = agents.get_model(agent_key)
-    uid = message.from_user.id
+    uid = message.from_user.id if message.from_user else 0
     tid = current_thread.get(uid)
+    show_ctx = _prefs(uid).get("show_context", True)
 
     if tid:
         ctx = agents.get_thread_context(tid)
@@ -913,24 +1262,22 @@ async def _execute_task(message: Message, task: str) -> None:
             m = agents.get_model(a) or model
             return await interpreter_bridge.run_task(m, t, a)
 
-        async def _progress_fn(msg: str) -> None:
-            await message.answer(f"⚙️ {msg}", parse_mode="HTML")
+        async def _progress_fn(msg_text: str) -> None:
+            await message.answer(f"⚙️ {msg_text}", parse_mode="HTML")
 
         result = await orchestrate(task, _run_fn, _progress_fn)
         if result:
-            await message.answer("✅ Multi-step task complete.", parse_mode="HTML")
+            formatted = formatters.format_response(result, agent_key)
+            await _send_chunks(message, formatted)
     except Exception as exc:
         logger.debug("Supervisor skipped: %s", exc)
         result = None
 
-    # --- Direct agent execution (simple tasks or supervisor skipped) ---
+    # --- Direct agent execution ---
     if result is None:
-        await message.answer(
-            f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
-            parse_mode="HTML",
-        )
+        t0 = time.monotonic()
         try:
-            result = await interpreter_bridge.run_task(model, task, agent_key)
+            result = await _run_with_streaming(message, model, task, agent_key)
         except Exception as exc:
             logger.exception("Primary agent failed: %s", exc)
             fallback = agents.get_model(agent_key, use_fallback=True)
@@ -940,121 +1287,42 @@ async def _execute_task(message: Message, task: str) -> None:
                     parse_mode="HTML",
                 )
                 try:
-                    result = await interpreter_bridge.run_task(fallback, task, agent_key)
+                    result = await _run_with_streaming(message, fallback, task, agent_key)
+                    await notifications.model_fallback_used(model, fallback, str(exc))
                 except Exception as fb_exc:
                     result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
+                    await _send_chunks(message, result)
             else:
                 result = f"Error: {exc}"
+                await message.answer(
+                    formatters.ResponseFormatter.error_box("Agent Error", str(exc)),
+                    parse_mode="HTML",
+                )
+                return
 
-    if tid:
+        await notifications.task_complete(original_task, time.monotonic() - t0, agent_key)
+
+    if tid and result:
         agents.add_to_thread(tid, agent_key, original_task, result)
 
-    await _send_chunks(message, result)
-
-    # --- Register for feedback ---
-    try:
-        from optimization.feedback_learner import get_learner
-        fid = get_learner().register_response(agent_key, original_task)
+    # Thread context bar
+    if tid and show_ctx and result:
+        turn = len(agents.get_thread_context(tid).split("\n\n")) if agents.get_thread_context(tid) else 1
         await message.answer(
-            f"<i>Rate this response: /feedback {fid} good|bad</i>",
+            formatters.ResponseFormatter.thread_status(tid, turn, agent_key),
             parse_mode="HTML",
         )
-    except Exception:
-        pass
+
+    await _send_feedback_prompt(message, agent_key, original_task)
 
 
-# ── Production Monitoring Commands ─────────────────────────────────────────────
-
-@dp.message(Command("stats"))
-async def cmd_stats(message: Message) -> None:
-    """Show performance metrics, cache stats, and feedback summary."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    parts = []
-    try:
-        from observability.metrics import format_stats
-        parts.append(format_stats())
-    except Exception as exc:
-        parts.append(f"Metrics unavailable: {exc}")
-    try:
-        from optimization.feedback_learner import get_learner
-        parts.append(get_learner().summary_report())
-    except Exception as exc:
-        parts.append(f"Feedback unavailable: {exc}")
-    await message.answer("\n\n".join(parts), parse_mode="HTML")
-
-
-@dp.message(Command("circuits"))
-async def cmd_circuits(message: Message) -> None:
-    """Show circuit breaker status for all agents."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    try:
-        from reliability.error_recovery import get_recovery
-        report = get_recovery().circuit_status()
-        await message.answer(report, parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"Circuit status unavailable: {exc}", parse_mode="HTML")
-
-
-@dp.message(Command("usage"))
-async def cmd_usage(message: Message) -> None:
-    """Show daily API usage and estimated cost report."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    try:
-        from optimization.usage_tracker import get_tracker
-        report = get_tracker().daily_report()
-        await message.answer(report, parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"Usage report unavailable: {exc}", parse_mode="HTML")
-
-
-@dp.message(Command("feedback"))
-async def cmd_feedback(message: Message) -> None:
-    """Rate a previous agent response.
-
-    Usage: /feedback <id> good|bad [optional comment]
-    """
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=3)
-    if len(args) < 3:
-        await message.answer(
-            "Usage: <code>/feedback &lt;id&gt; good|bad [comment]</code>",
-            parse_mode="HTML",
-        )
-        return
-    fid = args[1].strip()
-    verdict = args[2].strip().lower()
-    comment = args[3].strip() if len(args) > 3 else ""
-
-    if verdict in ("good", "yes", "👍", "+1"):
-        rating = 1
-    elif verdict in ("bad", "no", "👎", "-1"):
-        rating = -1
-    else:
-        await message.answer(
-            "Rating must be <code>good</code> or <code>bad</code>.", parse_mode="HTML"
-        )
-        return
-
-    try:
-        from optimization.feedback_learner import get_learner
-        result = get_learner().record(fid, rating, comment)
-        await message.answer(result or "Feedback recorded.", parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
-
-
-# ── Entrypoint ─────────────────────────────────────────────────────────────────
+# ── Entrypoint ──────────────────────────────────────────────────────────────────
 
 async def main() -> None:
-    """Start bot polling."""
+    """Start bot polling with all production modules initialized."""
+    global _streamer
+    _streamer = StreamingResponseManager(bot)
+    notifications.init(bot, ALLOWED_USER_ID)
     logger.info("LegionSwarm starting — polling for updates")
     await dp.start_polling(bot, skip_updates=True)
 
