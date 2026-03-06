@@ -1,8 +1,7 @@
-# /home/newadmin/swarm-bot/main.py
 """LegionSwarm — Autonomous Desktop AI via Telegram.
 
 Slash Commands (optional — natural language works too):
-    /start          — Help menu
+    /start          — Help menu with interactive buttons
     /run <task>     — Auto-route to best agent
     /agent <n> <t>  — Force a specific agent
     /thread <name>  — Switch conversation thread
@@ -25,6 +24,7 @@ Slash Commands (optional — natural language works too):
     /circuits       — Circuit breaker status
     /feedback <id> good|bad [comment]  — Rate a response
     /usage          — Daily API usage + cost report
+    /keyboard       — Toggle persistent keyboard shortcuts
 
 Natural Language Examples:
     "debug this pytorch error: ..."
@@ -33,8 +33,8 @@ Natural Language Examples:
     "read /home/newadmin/swarm-bot/agents.py"
     "monitor my training every 5 minutes"
     [send voice message] → auto-transcribed
-    [upload PDF] → auto-extracted and analyzed
-    [upload screenshot] → auto-analyzed by vision model
+    [upload PDF] → auto-extracted and analyzed with quick action buttons
+    [upload screenshot] → auto-analyzed by vision model with quick actions
 """
 
 from __future__ import annotations
@@ -63,6 +63,12 @@ import multimodal_processor
 import playwright_agent
 import task_orchestrator
 import vscode_bridge
+import telegram_ui
+import formatters
+import streaming_response
+import progress_tracker
+import notifications
+import callback_handlers
 
 load_dotenv()
 
@@ -91,6 +97,14 @@ dp = Dispatcher()
 # Per-user active thread tracking
 current_thread: dict[int, str] = {}
 
+# Per-user keyboard preference
+keyboard_enabled: dict[int, bool] = {}
+
+# Notification manager
+notif_manager = notifications.NotificationManager(bot)
+
+# Register all callback handlers
+callback_handlers.register_callback_handlers(dp, bot)
 
 # ── Auth Guard ─────────────────────────────────────────────────────────────────
 
@@ -109,16 +123,29 @@ async def _deny(message: Message) -> None:
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-async def _send_chunks(message: Message, text: str) -> None:
-    """Send text in ≤4000-char HTML chunks.
+async def _send_chunks(message: Message, text: str, agent: str = None) -> None:
+    """Send text in ≤4000-char HTML chunks with context bar.
 
     Args:
         message: Source message (for chat context).
         text: Full output to send.
+        agent: Optional agent name for context.
     """
     chunks = interpreter_bridge.chunk_output(text)
-    for chunk in chunks:
-        await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML")
+    uid = message.from_user.id
+    thread_id = current_thread.get(uid)
+    
+    context_bar = ""
+    if thread_id:
+        turn_count = agents.get_thread_turn_count(thread_id)
+        context_bar = f"\n\n<i>📍 Thread: {thread_id} • Turn {turn_count}</i>"
+    
+    for i, chunk in enumerate(chunks):
+        if agent and i == 0:
+            formatted = f"<b>{agent.upper()}</b>\n\n<pre>{chunk}</pre>{context_bar if i == len(chunks) - 1 else ''}"
+        else:
+            formatted = f"<pre>{chunk}</pre>{context_bar if i == len(chunks) - 1 else ''}"
+        await message.answer(formatted, parse_mode="HTML")
 
 
 async def _notify(message: Message, text: str) -> None:
@@ -137,15 +164,16 @@ async def _send_desktop_screenshot(message: Message) -> None:
     Args:
         message: Source message.
     """
-    await message.answer("Taking desktop screenshot…")
+    status_msg = await message.answer("📸 Taking desktop screenshot…")
     try:
         png_bytes = await computer_control.desktop_screenshot()
         await message.answer_photo(
             BufferedInputFile(png_bytes, filename="desktop.png"),
-            caption="Current desktop",
+            caption="Current desktop 🖥️",
         )
+        await status_msg.delete()
     except Exception as exc:
-        await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Screenshot failed: {exc}", parse_mode="HTML")
 
 
 def _detect_intent(text: str) -> dict:
@@ -233,41 +261,65 @@ def _detect_intent(text: str) -> dict:
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message) -> None:
-    """Show help menu."""
+    """Show interactive main menu with buttons."""
     if not _authorized(message):
         await _deny(message)
         return
 
+    uid = message.from_user.id
+    keyboard = telegram_ui.TelegramUI.power_user_keyboard() if keyboard_enabled.get(uid) else None
+    
     await message.answer(
-        "<b>LegionSwarm</b> — Autonomous Desktop AI\n\n"
-        "<b>Just talk naturally:</b>\n"
-        "  • <i>debug this pytorch error: ...</i>\n"
-        "  • <i>what's on my screen?</i>\n"
-        "  • <i>click on the terminal</i>\n"
-        "  • <i>read ~/swarm-bot/main.py</i>\n"
-        "  • <i>monitor training every 5 minutes</i>\n"
-        "  • [send voice] → auto-transcribed\n"
-        "  • [upload PDF] → auto-analyzed\n"
-        "  • [upload image] → vision analysis\n\n"
-        "<b>Commands:</b>\n"
-        "/desktop — screenshot this PC\n"
-        "/screen — OCR current desktop\n"
-        "/git — workspace git status\n"
-        "/monitors — active monitors\n"
-        "/pending — pending confirmations\n"
-        "/models — agent roster\n\n"
-        f"<b>Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}",
+        "🤖 <b>LegionSwarm 10/10</b>\n\n"
+        "Your autonomous AI assistant is ready!\n\n"
+        "<b>Quick Start:</b>\n"
+        "  • Tap buttons below for instant actions\n"
+        "  • Send voice messages for transcription\n"
+        "  • Upload files for automatic analysis\n"
+        "  • Just type naturally - I understand\n\n"
+        f"<b>Available Agents:</b> {', '.join(agents.AGENT_MODELS.keys())}",
         parse_mode="HTML",
+        reply_markup=telegram_ui.TelegramUI.main_menu(),
     )
+
+
+@dp.message(Command("keyboard"))
+async def cmd_keyboard(message: Message) -> None:
+    """Toggle persistent keyboard shortcuts."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    
+    uid = message.from_user.id
+    keyboard_enabled[uid] = not keyboard_enabled.get(uid, False)
+    
+    if keyboard_enabled[uid]:
+        await message.answer(
+            "⌨️ <b>Keyboard Shortcuts Enabled</b>\n\n"
+            "Quick action buttons are now visible at the bottom of your chat.",
+            parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.power_user_keyboard(),
+        )
+    else:
+        await message.answer(
+            "⌨️ <b>Keyboard Shortcuts Disabled</b>\n\n"
+            "Use /start to access the interactive menu.",
+            parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.remove_keyboard(),
+        )
 
 
 @dp.message(Command("models"))
 async def cmd_models(message: Message) -> None:
-    """Show agent roster."""
+    """Show agent roster with force selection buttons."""
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer(agents.list_agents(), parse_mode="HTML")
+    await message.answer(
+        agents.list_agents() + "\n\n<i>Tap below to force an agent:</i>",
+        parse_mode="HTML",
+        reply_markup=telegram_ui.TelegramUI.agent_selector(),
+    )
 
 
 @dp.message(Command("desktop"))
@@ -285,12 +337,13 @@ async def cmd_screen(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer("Reading screen text via OCR…")
+    status_msg = await message.answer("🔍 Reading screen text via OCR…")
     try:
         text = await computer_control.read_screen()
+        await status_msg.delete()
         await _send_chunks(message, text or "(no text detected)")
     except Exception as exc:
-        await message.answer(f"OCR failed: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ OCR failed: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("click"))
@@ -307,15 +360,15 @@ async def cmd_click(message: Message) -> None:
         await message.answer("Usage: <code>/click &lt;text&gt;</code>", parse_mode="HTML")
         return
     target = args[1].strip()
-    await message.answer(f"Looking for <code>{target}</code> on screen…", parse_mode="HTML")
+    status_msg = await message.answer(f"🎯 Looking for <code>{target}</code> on screen…", parse_mode="HTML")
     try:
         found = await computer_control.click_on(target)
         if found:
-            await message.answer(f"Clicked: <code>{target}</code>", parse_mode="HTML")
+            await status_msg.edit_text(f"✅ Clicked: <code>{target}</code>", parse_mode="HTML")
         else:
-            await message.answer(f"Element not found: <code>{target}</code>", parse_mode="HTML")
+            await status_msg.edit_text(f"❌ Element not found: <code>{target}</code>", parse_mode="HTML")
     except Exception as exc:
-        await message.answer(f"Click failed: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Click failed: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("read"))
@@ -332,13 +385,16 @@ async def cmd_read_file(message: Message) -> None:
         await message.answer("Usage: <code>/read &lt;path&gt;</code>", parse_mode="HTML")
         return
     path = args[1].strip()
+    status_msg = await message.answer(f"📖 Reading <code>{path}</code>…", parse_mode="HTML")
     try:
         content = await vscode_bridge.read_file(path)
-        await _send_chunks(message, content)
+        await status_msg.delete()
+        formatted = formatters.ResponseFormatter.format_code_response(content, "text")
+        await message.answer(formatted, parse_mode="HTML")
     except FileNotFoundError:
-        await message.answer(f"File not found: <code>{path}</code>", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ File not found: <code>{path}</code>", parse_mode="HTML")
     except Exception as exc:
-        await message.answer(f"Read error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Read error: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("cmd"))
@@ -365,20 +421,21 @@ async def cmd_shell(message: Message) -> None:
             f"Run: <code>{cmd}</code>", _run
         )
         await message.answer(
-            f"⚠️ Destructive command queued.\n\n"
+            f"⚠️ <b>Destructive Command Detected</b>\n\n"
             f"<code>{cmd}</code>\n\n"
-            f"Confirm: <code>/confirm yes {action_id}</code>\n"
-            f"Cancel:  <code>/confirm no {action_id}</code>",
+            f"Confirm to proceed:",
             parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.confirmation_buttons(action_id),
         )
         return
 
-    await message.answer(f"Running: <code>{cmd}</code>…", parse_mode="HTML")
+    status_msg = await message.answer(f"⚡ Running: <code>{cmd}</code>…", parse_mode="HTML")
     try:
         output = await vscode_bridge.run_command(cmd)
+        await status_msg.delete()
         await _send_chunks(message, output)
     except Exception as exc:
-        await message.answer(f"Command error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Command error: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("git"))
@@ -387,11 +444,13 @@ async def cmd_git(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
+    status_msg = await message.answer("🔄 Fetching git status…")
     try:
         status = await vscode_bridge.git_status()
+        await status_msg.delete()
         await _send_chunks(message, status)
     except Exception as exc:
-        await message.answer(f"Git error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Git error: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("thread"))
@@ -405,20 +464,50 @@ async def cmd_thread(message: Message) -> None:
         return
     args = (message.text or "").split(maxsplit=1)
     if len(args) < 2:
-        await message.answer("Usage: <code>/thread &lt;name&gt;</code>", parse_mode="HTML")
+        # Show thread selector
+        thread_list = agents.get_all_threads()
+        if thread_list:
+            await message.answer(
+                "📌 <b>Select a Thread</b>\n\nOr type: <code>/thread your_name</code>",
+                parse_mode="HTML",
+                reply_markup=telegram_ui.TelegramUI.thread_selector(thread_list),
+            )
+        else:
+            await message.answer(
+                "No active threads. Start one by typing: <code>/thread project_name</code>",
+                parse_mode="HTML"
+            )
         return
+    
     thread_id = args[1].strip().lower().replace(" ", "_")
     current_thread[message.from_user.id] = thread_id
-    await message.answer(f"Switched to thread: <b>{thread_id}</b>", parse_mode="HTML")
+    
+    turns = agents.get_thread_turn_count(thread_id)
+    ctx = agents.get_thread_context(thread_id, last_n=1)
+    
+    formatted = formatters.ResponseFormatter.format_thread_summary(
+        thread_id, turns, ctx[:100] if ctx else "(new thread)"
+    )
+    await message.answer(formatted, parse_mode="HTML")
 
 
 @dp.message(Command("threads"))
 async def cmd_threads(message: Message) -> None:
-    """List active threads."""
+    """List active threads with interactive buttons."""
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer(agents.list_threads(), parse_mode="HTML")
+    
+    thread_list = agents.get_all_threads()
+    if not thread_list:
+        await message.answer("📌 No active threads yet.", parse_mode="HTML")
+        return
+    
+    await message.answer(
+        agents.list_threads(),
+        parse_mode="HTML",
+        reply_markup=telegram_ui.TelegramUI.thread_selector(thread_list),
+    )
 
 
 @dp.message(Command("context"))
@@ -429,19 +518,22 @@ async def cmd_context(message: Message) -> None:
         return
     uid = message.from_user.id
     if uid not in current_thread:
-        await message.answer("No active thread.", parse_mode="HTML")
+        await message.answer("No active thread. Use /thread to create one.", parse_mode="HTML")
         return
     tid = current_thread[uid]
     ctx = agents.get_thread_context(tid, last_n=5)
+    turns = agents.get_thread_turn_count(tid)
+    
     if not ctx:
-        await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
+        await message.answer(f"📌 Thread <b>{tid}</b> is empty.", parse_mode="HTML")
     else:
-        await message.answer(f"<b>Thread: {tid}</b>\n\n<pre>{ctx}</pre>", parse_mode="HTML")
+        formatted = formatters.ResponseFormatter.format_thread_summary(tid, turns, ctx)
+        await message.answer(formatted, parse_mode="HTML")
 
 
 @dp.message(Command("run"))
 async def cmd_run(message: Message) -> None:
-    """Auto-detect agent and run task.
+    """Auto-detect agent and run task with streaming.
 
     Usage: /run <task>
     """
@@ -467,9 +559,10 @@ async def cmd_agent(message: Message) -> None:
     args = (message.text or "").split(maxsplit=2)
     if len(args) < 3:
         await message.answer(
-            f"Usage: <code>/agent &lt;name&gt; &lt;task&gt;</code>\n"
-            f"Agents: {', '.join(agents.AGENT_MODELS.keys())}",
+            f"Usage: <code>/agent &lt;name&gt; &lt;task&gt;</code>\n\n"
+            f"<b>Available agents:</b>\n{', '.join(agents.AGENT_MODELS.keys())}",
             parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.agent_selector(),
         )
         return
 
@@ -477,7 +570,11 @@ async def cmd_agent(message: Message) -> None:
     task = args[2].strip()
     model = agents.get_model(agent_key)
     if model is None:
-        await message.answer(f"Unknown agent: <b>{agent_key}</b>", parse_mode="HTML")
+        await message.answer(
+            f"❌ Unknown agent: <b>{agent_key}</b>\n\n"
+            f"Available: {', '.join(agents.AGENT_MODELS.keys())}",
+            parse_mode="HTML"
+        )
         return
 
     uid = message.from_user.id
@@ -488,14 +585,20 @@ async def cmd_agent(message: Message) -> None:
         if ctx:
             full_task = f"{ctx}\n\nCurrent task: {task}"
 
-    await message.answer(f"Using <b>{agent_key}</b> (<code>{model}</code>)…", parse_mode="HTML")
+    # Use streaming response
+    streamer = streaming_response.StreamingResponseManager(bot)
     try:
-        result = await interpreter_bridge.run_task(model, full_task, agent_key)
+        await streamer.stream_response(
+            message.chat.id,
+            interpreter_bridge.run_task_streaming(model, full_task, agent_key),
+            agent_key
+        )
     except Exception as exc:
-        result = f"Error: {exc}"
+        formatted = formatters.ResponseFormatter.format_error_analysis(str(exc), "Check logs for details")
+        await message.answer(formatted, parse_mode="HTML")
+    
     if tid:
-        agents.add_to_thread(tid, agent_key, task, result)
-    await _send_chunks(message, result)
+        agents.add_to_thread(tid, agent_key, task, "(streamed response)")
 
 
 @dp.message(Command("scrape"))
@@ -512,12 +615,13 @@ async def cmd_scrape(message: Message) -> None:
         await message.answer("Usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
         return
     url = args[1].strip()
-    await message.answer(f"Scraping <code>{url}</code>…", parse_mode="HTML")
+    status_msg = await message.answer(f"🌐 Scraping <code>{url}</code>…", parse_mode="HTML")
     try:
         text = await playwright_agent.scrape(url)
+        await status_msg.delete()
+        await _send_chunks(message, text)
     except Exception as exc:
-        text = f"Error: {exc}"
-    await _send_chunks(message, text)
+        await status_msg.edit_text(f"❌ Scraping failed: {exc}", parse_mode="HTML")
 
 
 @dp.message(Command("shot"))
@@ -534,16 +638,17 @@ async def cmd_shot(message: Message) -> None:
         await message.answer("Usage: <code>/shot &lt;url&gt;</code>", parse_mode="HTML")
         return
     url = args[1].strip()
-    await message.answer(f"Screenshotting <code>{url}</code>…", parse_mode="HTML")
+    status_msg = await message.answer(f"📸 Screenshotting <code>{url}</code>…", parse_mode="HTML")
     tmp_path: Path | None = None
     try:
         tmp_path = await playwright_agent.screenshot(url)
         await message.answer_photo(
             BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
-            caption=url,
+            caption=f"📸 {url}",
         )
+        await status_msg.delete()
     except Exception as exc:
-        await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Screenshot failed: {exc}", parse_mode="HTML")
     finally:
         if tmp_path:
             tmp_path.unlink(missing_ok=True)
@@ -622,12 +727,12 @@ async def cmd_cancel(message: Message) -> None:
 
 @dp.message(F.voice)
 async def handle_voice(message: Message) -> None:
-    """Transcribe voice message and process as text task."""
+    """Transcribe voice message and process as text task with progress."""
     if not _authorized(message):
         await _deny(message)
         return
 
-    await message.answer("Transcribing voice message…")
+    status_msg = await message.answer("🎤 Transcribing voice message…")
     try:
         voice: Voice = message.voice
         file = await bot.get_file(voice.file_id)
@@ -635,19 +740,22 @@ async def handle_voice(message: Message) -> None:
         audio_bytes = file_bytes.read()
 
         text = await multimodal_processor.transcribe_voice(audio_bytes, extension=".ogg")
-        await message.answer(f"<i>Heard:</i> {text}", parse_mode="HTML")
+        await status_msg.edit_text(
+            f"🎤 <b>Transcribed:</b>\n\n<i>{text}</i>\n\n⚡ Processing…",
+            parse_mode="HTML"
+        )
         await _execute_task(message, text)
 
     except RuntimeError as exc:
-        await message.answer(f"Transcription unavailable: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Transcription unavailable: {exc}", parse_mode="HTML")
     except Exception as exc:
         logger.exception("Voice handler error: %s", exc)
-        await message.answer(f"Voice error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Voice error: {exc}", parse_mode="HTML")
 
 
 @dp.message(F.document)
 async def handle_document(message: Message) -> None:
-    """Extract document text and analyze it with the appropriate agent."""
+    """Extract document text and provide quick action buttons."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -655,8 +763,15 @@ async def handle_document(message: Message) -> None:
     doc: Document = message.document
     mime = doc.mime_type or ""
     fname = doc.file_name or ""
+    file_size = doc.file_size / 1024  # KB
 
-    await message.answer(f"Processing document: <code>{fname}</code>…", parse_mode="HTML")
+    status_msg = await message.answer(
+        f"📄 <b>Processing Document</b>\n\n"
+        f"<b>Name:</b> {fname}\n"
+        f"<b>Size:</b> {file_size:.1f} KB\n\n"
+        f"Extracting content…",
+        parse_mode="HTML"
+    )
 
     try:
         file = await bot.get_file(doc.file_id)
@@ -666,74 +781,130 @@ async def handle_document(message: Message) -> None:
         extracted, label = await multimodal_processor.process_document(raw, mime, fname)
 
         if not extracted:
-            await message.answer(
-                f"Cannot process {label}. Supported: PDF, DOCX, TXT", parse_mode="HTML"
+            await status_msg.edit_text(
+                f"❌ Cannot process {label}. Supported: PDF, DOCX, TXT",
+                parse_mode="HTML"
             )
             return
 
-        # Store in active thread if one is set
+        # Store for quick actions
+        callback_handlers.file_states[doc.file_id] = {
+            "text": extracted,
+            "filename": fname,
+        }
+
+        # Show quick action buttons
+        await status_msg.edit_text(
+            f"📄 <b>{label} Ready</b>\n\n"
+            f"<b>Name:</b> {fname}\n"
+            f"<b>Size:</b> {file_size:.1f} KB\n"
+            f"<b>Extracted:</b> {len(extracted):,} characters\n\n"
+            f"What would you like me to do with it?",
+            parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.document_actions(doc.file_id),
+        )
+
+        # Add to thread if one is active
         uid = message.from_user.id
         tid = current_thread.get(uid)
         if tid:
             agents.add_to_thread(tid, "document", f"Uploaded: {fname}", extracted[:300])
-            await message.answer(
-                f"{label} added to thread <b>{tid}</b>. Ask me anything about it.",
-                parse_mode="HTML",
-            )
-        else:
-            await message.answer(
-                f"{label} extracted ({len(extracted)} chars). Summarizing with mentor agent…",
-                parse_mode="HTML",
-            )
-            model = agents.get_model("mentor") or agents.get_model("coding")
-            summary = await interpreter_bridge.run_task(
-                model,
-                f"Summarize this document concisely:\n\n{extracted[:6000]}",
-                "mentor",
-            )
-            await _send_chunks(message, summary)
 
     except Exception as exc:
         logger.exception("Document handler error: %s", exc)
-        await message.answer(f"Document error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Document error: {exc}", parse_mode="HTML")
 
 
 @dp.message(F.photo)
 async def handle_photo(message: Message) -> None:
-    """Analyze uploaded photo with vision model."""
+    """Analyze uploaded photo with quick action buttons."""
     if not _authorized(message):
         await _deny(message)
         return
 
     # Get highest-resolution version
     photo: PhotoSize = message.photo[-1]
-    caption = message.caption or "Describe this image in detail. If it shows code or an error, analyze it."
+    file_size = photo.file_size / 1024  # KB
+    caption = message.caption or "Describe this image in detail."
 
-    await message.answer("Analyzing image with vision model…")
+    status_msg = await message.answer(
+        f"📷 <b>Image Received</b>\n\n"
+        f"<b>Size:</b> {file_size:.1f} KB\n\n"
+        f"What would you like me to do?",
+        parse_mode="HTML"
+    )
+
     try:
         file = await bot.get_file(photo.file_id)
         file_bytes_io = await bot.download_file(file.file_path)
         image_bytes = file_bytes_io.read()
 
-        analysis = await multimodal_processor.analyze_image(image_bytes, caption)
-        await _send_chunks(message, analysis)
+        # Store for quick actions
+        callback_handlers.file_states[photo.file_id] = {
+            "bytes": image_bytes,
+        }
+
+        # Show quick action buttons
+        await status_msg.edit_text(
+            f"📷 <b>Image Ready</b>\n\n"
+            f"<b>Size:</b> {file_size:.1f} KB\n\n"
+            f"Choose an action:",
+            parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.photo_actions(photo.file_id),
+        )
 
     except Exception as exc:
         logger.exception("Photo handler error: %s", exc)
-        await message.answer(f"Image analysis error: {exc}", parse_mode="HTML")
+        await status_msg.edit_text(f"❌ Image error: {exc}", parse_mode="HTML")
 
 
 # ── Natural Language Handler ───────────────────────────────────────────────────
 
 @dp.message(F.text)
 async def handle_natural(message: Message) -> None:
-    """Route natural language messages to the appropriate action."""
+    """Route natural language messages with enhanced UX."""
     if not _authorized(message):
         await _deny(message)
         return
 
     text = (message.text or "").strip()
     if not text:
+        return
+
+    # Handle power keyboard buttons
+    keyboard_shortcuts = {
+        "🐛 Debug": "debug",
+        "💻 Code": "code",
+        "📊 Analyze": "analyze",
+        "💡 Explain": "explain",
+        "🖥️ Desktop": "desktop",
+        "📌 Threads": "threads",
+        "📈 Stats": "stats",
+        "⚙️ Settings": "settings",
+    }
+    
+    if text in keyboard_shortcuts:
+        action = keyboard_shortcuts[text]
+        if action == "desktop":
+            await _send_desktop_screenshot(message)
+        elif action == "threads":
+            await cmd_threads(message)
+        elif action == "stats":
+            await cmd_stats(message)
+        elif action == "settings":
+            await message.answer(
+                "⚙️ <b>Settings</b>\n\nConfigure your preferences:",
+                parse_mode="HTML",
+                reply_markup=telegram_ui.TelegramUI.settings_menu(),
+            )
+        else:
+            prompts = {
+                "debug": "🐛 <b>Debug Mode</b>\n\nSend your error or code issue.",
+                "code": "💻 <b>Coding Mode</b>\n\nDescribe what to build.",
+                "analyze": "📊 <b>Analysis Mode</b>\n\nUpload data or describe analysis needed.",
+                "explain": "💡 <b>Explanation Mode</b>\n\nWhat do you want explained?",
+            }
+            await message.answer(prompts.get(action, "Ready."), parse_mode="HTML")
         return
 
     intent = _detect_intent(text)
@@ -744,67 +915,53 @@ async def handle_natural(message: Message) -> None:
     if action == "thread":
         tid = content.lower().replace(" ", "_")
         current_thread[uid] = tid
-        await message.answer(f"Switched to thread: <b>{tid}</b>", parse_mode="HTML")
+        turns = agents.get_thread_turn_count(tid)
+        ctx = agents.get_thread_context(tid, last_n=1)
+        formatted = formatters.ResponseFormatter.format_thread_summary(
+            tid, turns, ctx[:100] if ctx else "(new thread)"
+        )
+        await message.answer(formatted, parse_mode="HTML")
 
     elif action == "threads":
-        await message.answer(agents.list_threads(), parse_mode="HTML")
+        thread_list = agents.get_all_threads()
+        if thread_list:
+            await message.answer(
+                agents.list_threads(),
+                parse_mode="HTML",
+                reply_markup=telegram_ui.TelegramUI.thread_selector(thread_list),
+            )
+        else:
+            await message.answer("📌 No active threads yet.", parse_mode="HTML")
 
     elif action == "context":
-        if uid not in current_thread:
-            await message.answer("No active thread.", parse_mode="HTML")
-            return
-        tid = current_thread[uid]
-        ctx = agents.get_thread_context(tid, last_n=5)
-        if ctx:
-            await message.answer(f"<b>Thread: {tid}</b>\n\n<pre>{ctx}</pre>", parse_mode="HTML")
-        else:
-            await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
+        await cmd_context(message)
 
     elif action == "models":
-        await message.answer(agents.list_agents(), parse_mode="HTML")
+        await cmd_models(message)
 
     elif action == "desktop_shot":
         await _send_desktop_screenshot(message)
 
     elif action == "analyze_screen":
-        await message.answer("Analyzing your screen…")
+        status_msg = await message.answer("👁️ Analyzing your screen…")
         try:
             result = await computer_control.analyze_screen(content or "What is visible on screen?")
-            await _send_chunks(message, result)
+            await status_msg.delete()
+            await _send_chunks(message, result, "vision")
         except Exception as exc:
-            await message.answer(f"Screen analysis error: {exc}", parse_mode="HTML")
+            await status_msg.edit_text(f"❌ Screen analysis error: {exc}", parse_mode="HTML")
 
     elif action == "read_screen":
-        await message.answer("Reading screen text via OCR…")
-        try:
-            text_out = await computer_control.read_screen()
-            await _send_chunks(message, text_out or "(no text detected)")
-        except Exception as exc:
-            await message.answer(f"OCR error: {exc}", parse_mode="HTML")
+        await cmd_screen(message)
 
     elif action == "click":
-        await message.answer(f"Clicking: <code>{content}</code>…", parse_mode="HTML")
-        try:
-            found = await computer_control.click_on(content)
-            if found:
-                await message.answer(f"Clicked: <code>{content}</code>", parse_mode="HTML")
-            else:
-                await message.answer(f"Not found on screen: <code>{content}</code>", parse_mode="HTML")
-        except Exception as exc:
-            await message.answer(f"Click error: {exc}", parse_mode="HTML")
+        await cmd_click(message)
 
     elif action == "read_file":
-        try:
-            file_content = await vscode_bridge.read_file(content)
-            await _send_chunks(message, file_content)
-        except FileNotFoundError:
-            await message.answer(f"File not found: <code>{content}</code>", parse_mode="HTML")
-        except Exception as exc:
-            await message.answer(f"Read error: {exc}", parse_mode="HTML")
+        await cmd_read_file(message)
 
     elif action == "git":
-        status = await vscode_bridge.git_status()
-        await _send_chunks(message, status)
+        await cmd_git(message)
 
     elif action == "terminal":
         output = await vscode_bridge.get_terminal_output()
@@ -827,9 +984,13 @@ async def handle_natural(message: Message) -> None:
                 desc, interval, _monitor_fn, _notify_fn
             )
             await message.answer(
-                f"Monitor started: <b>{desc}</b> every {m.group(2)} min\n"
-                f"ID: <code>{task_id}</code> — cancel with <code>/cancel {task_id}</code>",
+                f"📊 <b>Monitor Started</b>\n\n"
+                f"<b>Task:</b> {desc}\n"
+                f"<b>Interval:</b> Every {m.group(2)} minutes\n"
+                f"<b>ID:</b> <code>{task_id}</code>\n\n"
+                f"Cancel with: <code>/cancel {task_id}</code>",
                 parse_mode="HTML",
+                reply_markup=telegram_ui.TelegramUI.monitor_controls(task_id),
             )
         else:
             await _execute_task(message, text)
@@ -847,27 +1008,10 @@ async def handle_natural(message: Message) -> None:
             await message.answer(result, parse_mode="HTML")
 
     elif action == "scrape":
-        await message.answer(f"Scraping <code>{content}</code>…", parse_mode="HTML")
-        try:
-            scraped = await playwright_agent.scrape(content)
-        except Exception as exc:
-            scraped = f"Error: {exc}"
-        await _send_chunks(message, scraped)
+        await cmd_scrape(message)
 
     elif action == "shot":
-        await message.answer(f"Screenshotting <code>{content}</code>…", parse_mode="HTML")
-        tmp_path: Path | None = None
-        try:
-            tmp_path = await playwright_agent.screenshot(content)
-            await message.answer_photo(
-                BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
-                caption=content,
-            )
-        except Exception as exc:
-            await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
-        finally:
-            if tmp_path:
-                tmp_path.unlink(missing_ok=True)
+        await cmd_shot(message)
 
     elif action == "help":
         await cmd_start(message)
@@ -885,14 +1029,13 @@ async def handle_natural(message: Message) -> None:
         await _execute_task(message, content)
 
 
-# ── Task Execution ─────────────────────────────────────────────────────────────
+# ── Task Execution with Streaming ──────────────────────────────────────────────
 
 async def _execute_task(message: Message, task: str) -> None:
-    """Auto-detect agent, inject thread context, run task, store result.
-
-    For complex tasks, delegates to hierarchical supervisor orchestration.
-    Every response is registered for optional user feedback.
-    """
+    """Execute task with streaming responses and rich formatting."""
+    import time
+    start_time = time.time()
+    
     original_task = task
     agent_key = agents.detect_agent(task)
     model = agents.get_model(agent_key)
@@ -904,63 +1047,47 @@ async def _execute_task(message: Message, task: str) -> None:
         if ctx:
             task = f"{ctx}\n\nCurrent task: {task}"
 
-    # --- Try supervisor orchestration for complex tasks ---
+    # Try streaming response
+    streamer = streaming_response.StreamingResponseManager(bot)
     result: str | None = None
+    
     try:
-        from orchestration.supervisor import orchestrate
-
-        async def _run_fn(t: str, a: str = agent_key) -> str:
-            m = agents.get_model(a) or model
-            return await interpreter_bridge.run_task(m, t, a)
-
-        async def _progress_fn(msg: str) -> None:
-            await message.answer(f"⚙️ {msg}", parse_mode="HTML")
-
-        result = await orchestrate(task, _run_fn, _progress_fn)
-        if result:
-            await message.answer("✅ Multi-step task complete.", parse_mode="HTML")
-    except Exception as exc:
-        logger.debug("Supervisor skipped: %s", exc)
-        result = None
-
-    # --- Direct agent execution (simple tasks or supervisor skipped) ---
-    if result is None:
-        await message.answer(
-            f"Routing to <b>{agent_key}</b> (<code>{model}</code>)…",
-            parse_mode="HTML",
+        result = await streamer.stream_response(
+            message.chat.id,
+            interpreter_bridge.run_task_streaming(model, task, agent_key),
+            agent_key
         )
+    except Exception as exc:
+        logger.exception("Streaming failed: %s", exc)
+        # Fallback to regular execution
         try:
             result = await interpreter_bridge.run_task(model, task, agent_key)
-        except Exception as exc:
-            logger.exception("Primary agent failed: %s", exc)
-            fallback = agents.get_model(agent_key, use_fallback=True)
-            if fallback and fallback != model:
-                await message.answer(
-                    f"⚠️ Primary failed, trying fallback: <code>{fallback}</code>",
-                    parse_mode="HTML",
-                )
-                try:
-                    result = await interpreter_bridge.run_task(fallback, task, agent_key)
-                except Exception as fb_exc:
-                    result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
-            else:
-                result = f"Error: {exc}"
+            formatted = formatters.ResponseFormatter.format_agent_response(result, agent_key)
+            await message.answer(formatted, parse_mode="HTML")
+        except Exception as fb_exc:
+            formatted = formatters.ResponseFormatter.format_error_analysis(str(fb_exc), "Check logs")
+            await message.answer(formatted, parse_mode="HTML")
+    
+    duration = time.time() - start_time
+    
+    if tid and result:
+        agents.add_to_thread(tid, agent_key, original_task, result[:500])
 
-    if tid:
-        agents.add_to_thread(tid, agent_key, original_task, result)
-
-    await _send_chunks(message, result)
-
-    # --- Register for feedback ---
+    # Register for feedback
     try:
         from optimization.feedback_learner import get_learner
         fid = get_learner().register_response(agent_key, original_task)
         await message.answer(
-            f"<i>Rate this response: /feedback {fid} good|bad</i>",
+            f"<i>Rate this response:</i>",
             parse_mode="HTML",
+            reply_markup=telegram_ui.TelegramUI.feedback_buttons(fid),
         )
     except Exception:
         pass
+
+    # Check for rate limit warnings
+    if duration > 20:
+        await notif_manager.notify_long_task(uid, original_task, duration)
 
 
 # ── Production Monitoring Commands ─────────────────────────────────────────────
@@ -1046,7 +1173,8 @@ async def cmd_feedback(message: Message) -> None:
     try:
         from optimization.feedback_learner import get_learner
         result = get_learner().record(fid, rating, comment)
-        await message.answer(result or "Feedback recorded.", parse_mode="HTML")
+        formatted = formatters.ResponseFormatter.format_feedback_confirmation(verdict)
+        await message.answer(formatted, parse_mode="HTML")
     except Exception as exc:
         await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
 
@@ -1054,8 +1182,9 @@ async def cmd_feedback(message: Message) -> None:
 # ── Entrypoint ─────────────────────────────────────────────────────────────────
 
 async def main() -> None:
-    """Start bot polling."""
-    logger.info("LegionSwarm starting — polling for updates")
+    """Start bot polling with enhanced UX."""
+    logger.info("🚀 LegionSwarm starting with complete UX enhancement")
+    logger.info("📱 Interactive buttons, streaming, and progress tracking enabled")
     await dp.start_polling(bot, skip_updates=True)
 
 

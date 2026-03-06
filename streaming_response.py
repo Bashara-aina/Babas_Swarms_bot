@@ -1,5 +1,8 @@
-# /home/newadmin/swarm-bot/streaming_response.py
-"""Real-time streaming response manager for Telegram."""
+"""Real-time streaming response manager for Telegram bot.
+
+Provides live feedback during LLM generation, similar to ChatGPT's streaming experience.
+Users see responses appear in real-time instead of waiting for complete generation.
+"""
 
 from __future__ import annotations
 import time
@@ -13,114 +16,198 @@ logger = logging.getLogger(__name__)
 
 
 class StreamingResponseManager:
-    """Stream LLM outputs in real-time to Telegram (like ChatGPT)."""
+    """Manage real-time streaming of LLM responses to Telegram."""
 
     def __init__(self, bot: Bot):
+        """Initialize streaming manager.
+        
+        Args:
+            bot: Telegram Bot instance
+        """
         self.bot = bot
-        self.min_update_interval = 0.8  # seconds
-        self.min_chunk_size = 80  # characters
+        self.update_interval = 0.8  # Update every 0.8 seconds
+        self.min_chunk_size = 80  # Min characters before updating
 
     async def stream_response(
         self,
         chat_id: int,
         generator: AsyncGenerator[str, None],
         agent: str,
-        initial_msg: str = None,
     ) -> str:
-        """Stream chunks as they arrive from LLM.
-
+        """Stream LLM output chunks in real-time to Telegram.
+        
         Args:
             chat_id: Telegram chat ID
             generator: Async generator yielding text chunks
-            agent: Agent name for display
-            initial_msg: Optional initial message
-
+            agent: Agent name for formatting
+            
         Returns:
-            Final complete response text
+            Complete response text
         """
-        # Send initial thinking message
+        # Initial thinking message
         message = await self.bot.send_message(
             chat_id,
-            initial_msg or f"<b>{agent.upper()}</b> is thinking...",
+            f"<b>{agent.upper()}</b> is thinking...",
             parse_mode="HTML",
         )
 
         buffer = ""
         last_update = time.time()
-        error_count = 0
-        max_errors = 3
+        update_count = 0
+        complete_response = ""
 
         try:
             async for chunk in generator:
                 buffer += chunk
-                now = time.time()
+                complete_response += chunk
 
-                # Update conditions: enough time passed OR buffer is large
+                # Update when enough time passed or buffer is large
                 should_update = (
-                    now - last_update > self.min_update_interval
-                    or len(buffer) > self.min_chunk_size * 10
+                    time.time() - last_update > self.update_interval
+                    or len(buffer) > self.min_chunk_size
                 )
 
                 if should_update:
                     try:
+                        # Format with progress indicator
+                        display_text = self._format_streaming_text(buffer, agent, is_complete=False)
+                        
                         await message.edit_text(
-                            f"<b>{agent.upper()}</b>\n\n{buffer[:4000]}",
+                            display_text,
                             parse_mode="HTML",
                         )
-                        last_update = now
-                        error_count = 0  # Reset on success
+                        last_update = time.time()
+                        update_count += 1
+                        
                     except TelegramBadRequest as e:
                         # Message unchanged or too frequent updates
                         if "message is not modified" not in str(e).lower():
-                            logger.warning(f"Stream update failed: {e}")
-                            error_count += 1
-                            if error_count >= max_errors:
-                                logger.error("Too many stream errors, stopping updates")
-                                break
+                            logger.warning(f"Telegram update error: {e}")
+                    except Exception as e:
+                        logger.error(f"Streaming update error: {e}")
 
             # Final update with complete response
+            final_text = self._format_streaming_text(complete_response, agent, is_complete=True)
             try:
                 await message.edit_text(
-                    f"<b>{agent.upper()}</b>\n\n{buffer}\n\n✅ <i>Done</i>",
+                    final_text,
                     parse_mode="HTML",
                 )
             except TelegramBadRequest:
-                # If final edit fails, send new message
-                await self.bot.send_message(
-                    chat_id,
-                    f"<b>{agent.upper()}</b>\n\n{buffer}\n\n✅ <i>Done</i>",
-                    parse_mode="HTML",
-                )
+                # Already up to date
+                pass
 
-            return buffer
+            logger.info(f"Streaming complete: {update_count} updates, {len(complete_response)} chars")
+            return complete_response
 
         except Exception as exc:
-            logger.exception(f"Streaming error: {exc}")
-            await message.edit_text(
-                f"<b>{agent.upper()}</b>\n\n{buffer}\n\n❌ <i>Error: {exc}</i>",
-                parse_mode="HTML",
-            )
-            return buffer
+            error_text = f"<b>{agent.upper()}</b>\n\n❌ Error during streaming: {exc}"
+            try:
+                await message.edit_text(error_text, parse_mode="HTML")
+            except Exception:
+                pass
+            raise
 
-    async def stream_with_status(
+    def _format_streaming_text(self, text: str, agent: str, is_complete: bool) -> str:
+        """Format text for streaming display.
+        
+        Args:
+            text: Current response text
+            agent: Agent name
+            is_complete: Whether streaming is complete
+            
+        Returns:
+            Formatted HTML text
+        """
+        # Truncate if too long (Telegram limit is 4096 chars)
+        max_length = 3800
+        if len(text) > max_length:
+            text = text[:max_length] + "...\n\n<i>(truncated, see full response above)</i>"
+
+        # Add status indicator
+        if is_complete:
+            status = "✅"
+        else:
+            status = "⚡"
+
+        formatted = f"<b>{agent.upper()}</b> {status}\n\n{text}"
+        
+        return formatted
+
+    async def stream_with_progress(
         self,
         chat_id: int,
         generator: AsyncGenerator[str, None],
         agent: str,
-        show_typing: bool = True,
+        task_description: str,
     ) -> str:
-        """Stream with typing indicator.
-
+        """Stream response with task progress tracking.
+        
         Args:
             chat_id: Telegram chat ID
-            generator: Async generator
+            generator: Async generator yielding text chunks
             agent: Agent name
-            show_typing: Show typing indicator
-
+            task_description: Brief task description
+            
         Returns:
-            Final response
+            Complete response text
         """
-        if show_typing:
-            await self.bot.send_chat_action(chat_id, "typing")
+        message = await self.bot.send_message(
+            chat_id,
+            f"🚀 <b>Starting:</b> {task_description}\n\n"
+            f"<b>Agent:</b> {agent}\n"
+            f"<b>Status:</b> Initializing...",
+            parse_mode="HTML",
+        )
 
-        return await self.stream_response(chat_id, generator, agent)
+        buffer = ""
+        last_update = time.time()
+        char_count = 0
+        start_time = time.time()
+
+        try:
+            async for chunk in generator:
+                buffer += chunk
+                char_count += len(chunk)
+
+                if time.time() - last_update > self.update_interval:
+                    elapsed = time.time() - start_time
+                    try:
+                        status_text = (
+                            f"🚀 <b>Task:</b> {task_description}\n\n"
+                            f"<b>Agent:</b> {agent}\n"
+                            f"<b>Status:</b> Generating ({char_count} chars)\n"
+                            f"<b>Elapsed:</b> {elapsed:.1f}s\n\n"
+                            f"<pre>{buffer[:500]}...</pre>"
+                        )
+                        await message.edit_text(status_text, parse_mode="HTML")
+                        last_update = time.time()
+                    except TelegramBadRequest:
+                        pass
+
+            # Complete
+            duration = time.time() - start_time
+            final_text = (
+                f"✅ <b>Complete:</b> {task_description}\n\n"
+                f"<b>Agent:</b> {agent}\n"
+                f"<b>Duration:</b> {duration:.1f}s\n"
+                f"<b>Output:</b> {len(buffer)} characters\n\n"
+                f"<i>See full response below:</i>"
+            )
+            await message.edit_text(final_text, parse_mode="HTML")
+
+            # Send full response in chunks
+            await self.bot.send_message(
+                chat_id,
+                f"<pre>{buffer[:4000]}</pre>",
+                parse_mode="HTML",
+            )
+
+            return buffer
+
+        except Exception as exc:
+            await message.edit_text(
+                f"❌ <b>Error:</b> {task_description}\n\n{exc}",
+                parse_mode="HTML",
+            )
+            raise
