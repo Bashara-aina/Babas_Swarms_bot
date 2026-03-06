@@ -69,33 +69,93 @@ class ComputerController:
     """Desktop control interface using pyautogui + pytesseract + PIL."""
 
     def __init__(self) -> None:
+        """Initialize controller without loading GUI dependencies.
+
+        Defers pyautogui import until first actual use to prevent X11
+        connection errors when running in headless systemd service.
+        """
         self._action_count: int = 0
-        self._import_deps()
+        # Lazy-loaded dependencies (initialized on first GUI method call)
+        self._pyautogui = None
+        self._tesseract = None
+        self._PIL_Image = None
+        self._deps_loaded = False
 
     def _import_deps(self) -> None:
-        """Lazy-import heavy deps with helpful error messages."""
+        """Lazy-import GUI dependencies only when actually needed.
+
+        This prevents X11 DisplayConnectionError when running headless.
+        Only called when a method requiring GUI access is invoked.
+
+        The method is idempotent - safe to call multiple times.
+        """
+        if self._deps_loaded:
+            return  # Already loaded, skip re-import
+
+        # Attempt to import pyautogui (requires X11 display)
         try:
             import pyautogui
-            pyautogui.FAILSAFE = True  # Move mouse to corner to abort
-            pyautogui.PAUSE = 0.3     # 300ms between actions (safety)
+            pyautogui.FAILSAFE = True  # Emergency stop: move mouse to corner
+            pyautogui.PAUSE = 0.3      # 300ms safety delay between actions
             self._pyautogui = pyautogui
-        except ImportError:
-            logger.warning("pyautogui not installed — mouse/keyboard control disabled")
+            logger.info("✓ pyautogui loaded successfully (X11 display available)")
+        except ImportError as e:
+            logger.warning(f"pyautogui not installed: {e}")
+            self._pyautogui = None
+        except Exception as e:
+            # Catch X11 DisplayConnectionError and other runtime failures
+            logger.error(
+                f"pyautogui import failed - likely running headless without X11: {e}"
+            )
             self._pyautogui = None
 
+        # Attempt to import OCR engine
         try:
             import pytesseract
             self._tesseract = pytesseract
-        except ImportError:
-            logger.warning("pytesseract not installed — OCR disabled")
+            logger.debug("✓ pytesseract (OCR) loaded")
+        except ImportError as e:
+            logger.warning(f"pytesseract not installed: {e}")
             self._tesseract = None
 
+        # Attempt to import image processing library
         try:
             from PIL import Image
             self._PIL_Image = Image
-        except ImportError:
-            logger.warning("Pillow not installed — image processing disabled")
+            logger.debug("✓ PIL (Pillow) loaded")
+        except ImportError as e:
+            logger.warning(f"Pillow not installed: {e}")
             self._PIL_Image = None
+
+        self._deps_loaded = True
+
+    def _ensure_gui_available(self) -> None:
+        """Ensure GUI dependencies are loaded and available.
+
+        Attempts to load pyautogui/pytesseract/PIL if not already loaded.
+        Raises a helpful error if X11 display is unavailable (headless mode).
+
+        This method should be called as the first line in any method that
+        requires desktop automation capabilities.
+
+        Raises:
+            RuntimeError: If running in headless environment without X11 display.
+        """
+        # Trigger lazy import if not done yet
+        if not self._deps_loaded:
+            self._import_deps()
+
+        # Check if pyautogui successfully loaded
+        if self._pyautogui is None:
+            raise RuntimeError(
+                "❌ Desktop automation unavailable - running in headless mode.\n\n"
+                "Computer control features (/desktop, /click, /screen) require "
+                "a GUI environment with X11 display.\n\n"
+                "💡 To use these features:\n"
+                "  1. Run the bot in a desktop session (not systemd service), OR\n"
+                "  2. Set up a virtual display with Xvfb\n\n"
+                "✅ All other bot features work normally in headless mode."
+            )
 
     def reset_action_count(self) -> None:
         """Reset action counter at start of each command chain."""
@@ -128,6 +188,8 @@ class ComputerController:
         Raises:
             RuntimeError: If pyautogui or PIL is not available.
         """
+        self._ensure_gui_available()
+
         if self._pyautogui is None or self._PIL_Image is None:
             raise RuntimeError("pyautogui/Pillow not installed")
 
@@ -180,6 +242,8 @@ class ComputerController:
         Raises:
             RuntimeError: If pytesseract is not available.
         """
+        self._ensure_gui_available()
+
         if self._tesseract is None:
             raise RuntimeError("pytesseract not installed")
         if self._PIL_Image is None:
@@ -217,6 +281,8 @@ class ComputerController:
         Returns:
             (x, y) center coordinates of the element, or None if not found.
         """
+        self._ensure_gui_available()
+
         if self._tesseract is None or self._PIL_Image is None:
             raise RuntimeError("pytesseract/Pillow not installed")
 
@@ -250,6 +316,8 @@ class ComputerController:
         Returns:
             True if element was found and clicked, False otherwise.
         """
+        self._ensure_gui_available()
+
         if self._pyautogui is None:
             raise RuntimeError("pyautogui not installed")
 
@@ -271,6 +339,8 @@ class ComputerController:
             y: Y coordinate.
             button: 'left', 'right', or 'middle'.
         """
+        self._ensure_gui_available()
+
         if self._pyautogui is None:
             raise RuntimeError("pyautogui not installed")
 
@@ -285,6 +355,8 @@ class ComputerController:
             text: Text to type.
             interval: Seconds between keystrokes (default 50ms).
         """
+        self._ensure_gui_available()
+
         if self._pyautogui is None:
             raise RuntimeError("pyautogui not installed")
 
@@ -298,6 +370,8 @@ class ComputerController:
         Args:
             *keys: Key names, e.g. hotkey('ctrl', 'c').
         """
+        self._ensure_gui_available()
+
         if self._pyautogui is None:
             raise RuntimeError("pyautogui not installed")
 
@@ -395,7 +469,24 @@ class ComputerController:
 
 # ── Async wrappers ─────────────────────────────────────────────────────────────
 
-_controller = ComputerController()
+# Lazy singleton - only instantiate when first used
+# Prevents X11 connection attempt during module import in headless mode
+_controller: Optional[ComputerController] = None
+
+
+def _get_controller() -> ComputerController:
+    """Get or create the singleton ComputerController instance.
+
+    Uses lazy initialization to prevent X11 errors when importing this
+    module in headless environments (systemd service).
+
+    Returns:
+        ComputerController: Singleton instance.
+    """
+    global _controller
+    if _controller is None:
+        _controller = ComputerController()
+    return _controller
 
 
 async def desktop_screenshot(region: Optional[tuple] = None) -> bytes:
@@ -406,9 +497,12 @@ async def desktop_screenshot(region: Optional[tuple] = None) -> bytes:
 
     Returns:
         PNG image bytes.
+
+    Raises:
+        RuntimeError: If running headless without X11 display.
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _controller.screenshot, region)
+    return await loop.run_in_executor(None, _get_controller().screenshot, region)
 
 
 async def read_screen(region: Optional[tuple] = None) -> str:
@@ -419,9 +513,12 @@ async def read_screen(region: Optional[tuple] = None) -> str:
 
     Returns:
         OCR text from screen.
+
+    Raises:
+        RuntimeError: If running headless without X11 display.
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _controller.read_screen_text, region)
+    return await loop.run_in_executor(None, _get_controller().read_screen_text, region)
 
 
 async def analyze_screen(question: str, region: Optional[tuple] = None) -> str:
@@ -433,10 +530,13 @@ async def analyze_screen(question: str, region: Optional[tuple] = None) -> str:
 
     Returns:
         Vision model answer.
+
+    Raises:
+        RuntimeError: If running headless without X11 display.
     """
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
-        None, _controller.analyze_screen_sync, question, region
+        None, _get_controller().analyze_screen_sync, question, region
     )
 
 
@@ -448,9 +548,12 @@ async def click_on(text: str) -> bool:
 
     Returns:
         True if element was found and clicked.
+
+    Raises:
+        RuntimeError: If running headless without X11 display.
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _controller.click_element, text)
+    return await loop.run_in_executor(None, _get_controller().click_element, text)
 
 
 def is_destructive(command: str) -> bool:
