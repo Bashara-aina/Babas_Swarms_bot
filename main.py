@@ -1,4 +1,3 @@
-# /home/newadmin/swarm-bot/main.py
 """LegionSwarm — Autonomous Desktop AI via Telegram.
 
 Slash Commands (optional — natural language works too):
@@ -17,6 +16,7 @@ Slash Commands (optional — natural language works too):
     /cmd <shell>    — Run a shell command
     /git            — Git status of workspace
     /models         — Show agent roster
+    /commands       — Full command reference
     /confirm yes|no <id>  — Approve/deny queued action
     /monitors       — List active monitors
     /cancel <id>    — Cancel a monitor
@@ -74,6 +74,12 @@ import core.tools.vscode_bridge as vscode_bridge
 from core.utils.progress_tracker import TaskProgressTracker
 from core.utils.streaming_response import StreamingResponseManager
 from core.utils.telegram_ui import TelegramUI
+
+# 🎨 NEW: UI/UX Improvements
+from core.utils.loading_manager import LoadingManager
+from core.utils.error_formatter import ErrorFormatter
+from core.utils.feedback_animator import FeedbackAnimator
+from core.utils.help_formatter import HelpFormatter
 
 load_dotenv()
 
@@ -140,15 +146,29 @@ async def _send_chunks(message: Message, text: str, reply_markup=None) -> None:
 
 
 async def _send_desktop_screenshot(message: Message) -> None:
-    await message.answer("Taking desktop screenshot…")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, "Taking desktop screenshot", bot
+    )
     try:
         png_bytes = await computer_control.desktop_screenshot()
+        cancel.set()
+        await status_msg.delete()
         await message.answer_photo(
             BufferedInputFile(png_bytes, filename="desktop.png"),
             caption="Current desktop",
         )
     except Exception as exc:
-        await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Desktop Screenshot",
+            error=exc,
+            context="Capturing desktop screen",
+            recovery_actions=[
+                ("🔄 Retry", "quick:desktop"),
+                ("ℹ️ Get Help", "error:help"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 def _detect_intent(text: str) -> dict:
@@ -244,14 +264,27 @@ async def cmd_start(message: Message) -> None:
         await _deny(message)
         return
     await message.answer(
-        "<b>LegionSwarm</b> — Autonomous Desktop AI\n\n"
-        "Tap a button or just talk naturally:",
+        HelpFormatter.format_help_menu(),
         reply_markup=TelegramUI.main_menu(),
         parse_mode="HTML",
     )
     await message.answer(
-        "Keyboard shortcuts active 👇",
+        "⌨️ <b>Shortcuts activated</b> — see buttons below 👇",
         reply_markup=TelegramUI.quick_reply_keyboard(),
+        parse_mode="HTML",
+    )
+
+
+@dp.message(Command("commands"))
+async def cmd_commands(message: Message) -> None:
+    """Show full command reference."""
+    if not _authorized(message):
+        await _deny(message)
+        return
+    await message.answer(
+        HelpFormatter.format_command_list(),
+        reply_markup=TelegramUI.back_to_menu(),
+        parse_mode="HTML",
     )
 
 
@@ -261,7 +294,7 @@ async def cmd_models(message: Message) -> None:
         await _deny(message)
         return
     await message.answer(
-        agents.list_agents(),
+        HelpFormatter.format_agent_roster(),
         reply_markup=TelegramUI.back_to_menu(),
         parse_mode="HTML",
     )
@@ -280,12 +313,26 @@ async def cmd_screen(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
-    await message.answer("Reading screen text via OCR…")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, "Reading screen text via OCR", bot
+    )
     try:
         text = await computer_control.read_screen()
+        cancel.set()
+        await status_msg.delete()
         await _send_chunks(message, text or "(no text detected)")
     except Exception as exc:
-        await message.answer(f"OCR failed: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="OCR",
+            error=exc,
+            context="Reading screen text",
+            recovery_actions=[
+                ("🔄 Retry", "quick:screen"),
+                ("📸 Screenshot Instead", "quick:desktop"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("click"))
@@ -298,15 +345,40 @@ async def cmd_click(message: Message) -> None:
         await message.answer("Usage: <code>/click &lt;text&gt;</code>", parse_mode="HTML")
         return
     target = args[1].strip()
-    await message.answer(f"Looking for <code>{target}</code> on screen…", parse_mode="HTML")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, f"Looking for '{target}' on screen", bot
+    )
     try:
         found = await computer_control.click_on(target)
+        cancel.set()
         if found:
-            await message.answer(f"Clicked: <code>{target}</code>", parse_mode="HTML")
+            await FeedbackAnimator.success_animation(
+                bot, message.chat.id,
+                action="Element clicked",
+                details=f"Successfully clicked: <code>{target}</code>"
+            )
+            await status_msg.delete()
         else:
-            await message.answer(f"Element not found: <code>{target}</code>", parse_mode="HTML")
+            await status_msg.edit_text(
+                ErrorFormatter.format_validation_error(
+                    field="Target Element",
+                    issue=f"Element '{target}' not found on screen",
+                    suggestion="Try taking a screenshot first to see available elements"
+                ),
+                parse_mode="HTML"
+            )
     except Exception as exc:
-        await message.answer(f"Click failed: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Click",
+            error=exc,
+            context=f"Clicking element: {target}",
+            recovery_actions=[
+                ("🔄 Retry", f"retry:click:{target}"),
+                ("📸 Show Screen", "quick:desktop"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("read"))
@@ -319,13 +391,36 @@ async def cmd_read_file(message: Message) -> None:
         await message.answer("Usage: <code>/read &lt;path&gt;</code>", parse_mode="HTML")
         return
     path = args[1].strip()
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, f"Reading file: {path}", bot
+    )
     try:
         content = await vscode_bridge.read_file(path)
+        cancel.set()
+        await status_msg.delete()
         await _send_chunks(message, content)
     except FileNotFoundError:
-        await message.answer(f"File not found: <code>{path}</code>", parse_mode="HTML")
+        cancel.set()
+        await status_msg.edit_text(
+            ErrorFormatter.format_validation_error(
+                field="File Path",
+                issue=f"File not found: {path}",
+                suggestion="Check the path and try again. Use absolute paths like /home/user/file.py"
+            ),
+            parse_mode="HTML"
+        )
     except Exception as exc:
-        await message.answer(f"Read error: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="File Read",
+            error=exc,
+            context=f"Reading file: {path}",
+            recovery_actions=[
+                ("🔄 Retry", f"retry:read:{path}"),
+                ("📂 List Files", "quick:ls"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("cmd"))
@@ -354,12 +449,25 @@ async def cmd_shell(message: Message) -> None:
         )
         return
 
-    await message.answer(f"Running: <code>{cmd}</code>…", parse_mode="HTML")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, f"Running: {cmd}", bot
+    )
     try:
         output = await vscode_bridge.run_command(cmd)
+        cancel.set()
+        await status_msg.delete()
         await _send_chunks(message, output)
     except Exception as exc:
-        await message.answer(f"Command error: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Command Execution",
+            error=exc,
+            context=f"Running: {cmd}",
+            recovery_actions=[
+                ("🔄 Retry", f"retry:cmd:{cmd}"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("git"))
@@ -367,11 +475,25 @@ async def cmd_git(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, "Getting git status", bot
+    )
     try:
         status = await vscode_bridge.git_status()
+        cancel.set()
+        await status_msg.delete()
         await _send_chunks(message, status)
     except Exception as exc:
-        await message.answer(f"Git error: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Git",
+            error=exc,
+            context="Checking git status",
+            recovery_actions=[
+                ("🔄 Retry", "retry:git"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("thread"))
@@ -392,7 +514,11 @@ async def cmd_thread(message: Message) -> None:
         return
     tid = args[1].strip().lower().replace(" ", "_")
     current_thread[message.from_user.id] = tid
-    await message.answer(f"Switched to thread: <b>{tid}</b>", parse_mode="HTML")
+    await FeedbackAnimator.success_animation(
+        bot, message.chat.id,
+        action="Thread switched",
+        details=f"📌 Now working in: <b>{tid}</b>"
+    )
 
 
 @dp.message(Command("threads"))
@@ -492,12 +618,26 @@ async def cmd_scrape(message: Message) -> None:
         await message.answer("Usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
         return
     url = args[1].strip()
-    await message.answer(f"Scraping <code>{url}</code>…", parse_mode="HTML")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, f"Scraping {url}", bot
+    )
     try:
         text = await playwright_agent.scrape(url)
+        cancel.set()
+        await status_msg.delete()
+        await _send_chunks(message, text)
     except Exception as exc:
-        text = f"Error: {exc}"
-    await _send_chunks(message, text)
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Web Scrape",
+            error=exc,
+            context=f"Scraping {url}",
+            recovery_actions=[
+                ("🔄 Retry", f"retry:scrape:{url}"),
+                ("📸 Screenshot Instead", f"retry:shot:{url}"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(Command("shot"))
@@ -510,16 +650,30 @@ async def cmd_shot(message: Message) -> None:
         await message.answer("Usage: <code>/shot &lt;url&gt;</code>", parse_mode="HTML")
         return
     url = args[1].strip()
-    await message.answer(f"Screenshotting <code>{url}</code>…", parse_mode="HTML")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, f"Screenshotting {url}", bot
+    )
     tmp_path: Path | None = None
     try:
         tmp_path = await playwright_agent.screenshot(url)
+        cancel.set()
+        await status_msg.delete()
         await message.answer_photo(
             BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
             caption=url,
         )
     except Exception as exc:
-        await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Screenshot",
+            error=exc,
+            context=f"Taking screenshot of {url}",
+            recovery_actions=[
+                ("🔄 Retry", f"retry:shot:{url}"),
+                ("📝 Scrape Text Instead", f"retry:scrape:{url}"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
     finally:
         if tmp_path:
             tmp_path.unlink(missing_ok=True)
@@ -655,7 +809,12 @@ async def cmd_feedback(message: Message) -> None:
     try:
         from core.optimization.feedback_learner import get_learner
         result = get_learner().record(fid, rating, comment)
-        await message.answer(result or "Feedback recorded.", parse_mode="HTML")
+        await FeedbackAnimator.show_toast(
+            bot, message.chat.id,
+            message="Feedback recorded!",
+            duration=2.0,
+            icon="✅"
+        )
     except Exception as exc:
         await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
 
@@ -694,7 +853,7 @@ async def cb_nav(callback: CallbackQuery) -> None:
     dest = callback.data.split(":", 1)[1]
     if dest == "main_menu":
         await callback.message.edit_text(
-            "<b>LegionSwarm</b> — Autonomous Desktop AI\n\nWhat would you like to do?",
+            HelpFormatter.format_help_menu(),
             reply_markup=TelegramUI.main_menu(),
             parse_mode="HTML",
         )
@@ -865,7 +1024,7 @@ async def cb_feedback(callback: CallbackQuery) -> None:
         return
     parts = callback.data.split(":", 2)
     verdict = parts[1]
-    fid = parts[2] if len(parts) > 2 else ""
+    fid = parts[2] if len(parts) > 2 else """
     rating = 1 if verdict == "good" else -1
 
     try:
@@ -913,7 +1072,9 @@ async def handle_voice(message: Message) -> None:
     if not _authorized(message):
         await _deny(message)
         return
-    status_msg = await message.answer("🎤 Transcribing voice message…")
+    status_msg, cancel = await LoadingManager.show_progress(
+        message, "Transcribing voice message", bot
+    )
     try:
         voice: Voice = message.voice
         file = await bot.get_file(voice.file_id)
@@ -921,6 +1082,7 @@ async def handle_voice(message: Message) -> None:
         audio_bytes = file_bytes.read()
 
         text = await multimodal_processor.transcribe_voice(audio_bytes, extension=".ogg")
+        cancel.set()
         await status_msg.edit_text(
             f"🎤 <b>Heard:</b>\n\n<i>{text}</i>\n\nProcessing…",
             parse_mode="HTML",
@@ -928,10 +1090,28 @@ async def handle_voice(message: Message) -> None:
         await _execute_task(message, text)
 
     except RuntimeError as exc:
-        await status_msg.edit_text(f"Transcription unavailable: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Transcription",
+            error=exc,
+            context="Transcribing voice message",
+            recovery_actions=[
+                ("ℹ️ Get Help", "error:help"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
     except Exception as exc:
         logger.exception("Voice handler error: %s", exc)
-        await status_msg.edit_text(f"Voice error: {exc}", parse_mode="HTML")
+        cancel.set()
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Voice",
+            error=exc,
+            context="Processing voice message",
+            recovery_actions=[
+                ("🔄 Retry", "retry:voice"),
+            ]
+        )
+        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(F.document)
@@ -964,7 +1144,15 @@ async def handle_document(message: Message) -> None:
         )
     except Exception as exc:
         logger.exception("Document handler error: %s", exc)
-        await message.answer(f"Document error: {exc}", parse_mode="HTML")
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Document",
+            error=exc,
+            context=f"Processing document: {fname}",
+            recovery_actions=[
+                ("🔄 Re-upload", "retry:doc"),
+            ]
+        )
+        await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 @dp.message(F.photo)
@@ -1001,7 +1189,15 @@ async def handle_photo(message: Message) -> None:
             )
     except Exception as exc:
         logger.exception("Photo handler error: %s", exc)
-        await message.answer(f"Image error: {exc}", parse_mode="HTML")
+        error_msg, keyboard = ErrorFormatter.format_error(
+            error_type="Image",
+            error=exc,
+            context="Processing image",
+            recovery_actions=[
+                ("🔄 Re-send", "retry:photo"),
+            ]
+        )
+        await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
 
 # ── Natural Language Handler ─────────────────────────────────────────────────────
@@ -1022,7 +1218,11 @@ async def handle_natural(message: Message) -> None:
     if prefs.pop("awaiting_thread_name", False):
         tid = text.strip().lower().replace(" ", "_")
         current_thread[uid] = tid
-        await message.answer(f"✅ Created and switched to thread: <b>{tid}</b>", parse_mode="HTML")
+        await FeedbackAnimator.success_animation(
+            bot, message.chat.id,
+            action="Thread created",
+            details=f"📌 Now working in: <b>{tid}</b>"
+        )
         return
 
     # Check if a specific agent was pre-selected via button
@@ -1040,7 +1240,11 @@ async def handle_natural(message: Message) -> None:
     if action == "thread":
         tid = content.lower().replace(" ", "_")
         current_thread[uid] = tid
-        await message.answer(f"Switched to thread: <b>{tid}</b>", parse_mode="HTML")
+        await FeedbackAnimator.success_animation(
+            bot, message.chat.id,
+            action="Thread switched",
+            details=f"📌 Now working in: <b>{tid}</b>"
+        )
 
     elif action == "threads":
         threads = agents.list_threads_raw()
@@ -1061,7 +1265,7 @@ async def handle_natural(message: Message) -> None:
             await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
 
     elif action == "models":
-        await message.answer(agents.list_agents(), parse_mode="HTML")
+        await message.answer(HelpFormatter.format_agent_roster(), parse_mode="HTML")
 
     elif action == "desktop_shot":
         await _send_desktop_screenshot(message)
@@ -1072,33 +1276,102 @@ async def handle_natural(message: Message) -> None:
             result = await computer_control.analyze_screen(content or "What is visible?")
             await _send_chunks(message, formatters.format_response(result, "vision"))
         except Exception as exc:
-            await message.answer(f"Screen analysis error: {exc}", parse_mode="HTML")
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="Screen Analysis",
+                error=exc,
+                context="Analyzing screen content",
+                recovery_actions=[
+                    ("📸 Screenshot", "quick:desktop"),
+                ]
+            )
+            await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
     elif action == "read_screen":
-        await message.answer("Reading screen via OCR…")
+        status_msg, cancel = await LoadingManager.show_progress(
+            message, "Reading screen via OCR", bot
+        )
         try:
             text_out = await computer_control.read_screen()
+            cancel.set()
+            await status_msg.delete()
             await _send_chunks(message, text_out or "(no text detected)")
         except Exception as exc:
-            await message.answer(f"OCR error: {exc}", parse_mode="HTML")
+            cancel.set()
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="OCR",
+                error=exc,
+                context="Reading screen text",
+                recovery_actions=[
+                    ("🔄 Retry", "quick:screen"),
+                ]
+            )
+            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
     elif action == "click":
-        await message.answer(f"Clicking: <code>{content}</code>…", parse_mode="HTML")
+        status_msg, cancel = await LoadingManager.show_progress(
+            message, f"Clicking: {content}", bot
+        )
         try:
             found = await computer_control.click_on(content)
-            status = f"Clicked: <code>{content}</code>" if found else f"Not found: <code>{content}</code>"
-            await message.answer(status, parse_mode="HTML")
+            cancel.set()
+            if found:
+                await FeedbackAnimator.success_animation(
+                    bot, message.chat.id,
+                    action="Clicked",
+                    details=f"<code>{content}</code>"
+                )
+                await status_msg.delete()
+            else:
+                await status_msg.edit_text(
+                    ErrorFormatter.format_validation_error(
+                        field="Element",
+                        issue=f"'{content}' not found",
+                        suggestion="Try a screenshot to see available elements"
+                    ),
+                    parse_mode="HTML"
+                )
         except Exception as exc:
-            await message.answer(f"Click error: {exc}", parse_mode="HTML")
+            cancel.set()
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="Click",
+                error=exc,
+                context=f"Clicking: {content}",
+                recovery_actions=[
+                    ("🔄 Retry", f"retry:click:{content}"),
+                ]
+            )
+            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
     elif action == "read_file":
+        status_msg, cancel = await LoadingManager.show_progress(
+            message, f"Reading: {content}", bot
+        )
         try:
             file_content = await vscode_bridge.read_file(content)
+            cancel.set()
+            await status_msg.delete()
             await _send_chunks(message, file_content)
         except FileNotFoundError:
-            await message.answer(f"File not found: <code>{content}</code>", parse_mode="HTML")
+            cancel.set()
+            await status_msg.edit_text(
+                ErrorFormatter.format_validation_error(
+                    field="File Path",
+                    issue=f"Not found: {content}",
+                    suggestion="Check path and use absolute paths"
+                ),
+                parse_mode="HTML"
+            )
         except Exception as exc:
-            await message.answer(f"Read error: {exc}", parse_mode="HTML")
+            cancel.set()
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="File Read",
+                error=exc,
+                context=f"Reading: {content}",
+                recovery_actions=[
+                    ("🔄 Retry", f"retry:read:{content}"),
+                ]
+            )
+            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
     elif action == "git":
         status = await vscode_bridge.git_status()
@@ -1121,11 +1394,10 @@ async def handle_natural(message: Message) -> None:
                 await message.answer(msg, parse_mode="HTML")
 
             task_id = await task_orchestrator.start_monitor(desc, interval, _monitor_fn, _notify_fn)
-            await message.answer(
-                f"Monitor started: <b>{desc}</b> every {m.group(2)} min\n"
-                f"ID: <code>{task_id}</code>",
-                reply_markup=TelegramUI.task_controls(task_id),
-                parse_mode="HTML",
+            await FeedbackAnimator.success_animation(
+                bot, message.chat.id,
+                action="Monitor started",
+                details=f"<b>{desc}</b> every {m.group(2)} min\nID: <code>{task_id}</code>"
             )
         else:
             await _execute_task(message, text)
@@ -1143,24 +1415,50 @@ async def handle_natural(message: Message) -> None:
             await message.answer(result, parse_mode="HTML")
 
     elif action == "scrape":
-        await message.answer(f"Scraping <code>{content}</code>…", parse_mode="HTML")
+        status_msg, cancel = await LoadingManager.show_progress(
+            message, f"Scraping {content}", bot
+        )
         try:
             scraped = await playwright_agent.scrape(content)
+            cancel.set()
+            await status_msg.delete()
+            await _send_chunks(message, scraped)
         except Exception as exc:
-            scraped = f"Error: {exc}"
-        await _send_chunks(message, scraped)
+            cancel.set()
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="Scrape",
+                error=exc,
+                context=f"Scraping {content}",
+                recovery_actions=[
+                    ("🔄 Retry", f"retry:scrape:{content}"),
+                ]
+            )
+            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
 
     elif action == "shot":
-        await message.answer(f"Screenshotting <code>{content}</code>…", parse_mode="HTML")
+        status_msg, cancel = await LoadingManager.show_progress(
+            message, f"Screenshotting {content}", bot
+        )
         tmp_path: Path | None = None
         try:
             tmp_path = await playwright_agent.screenshot(content)
+            cancel.set()
+            await status_msg.delete()
             await message.answer_photo(
                 BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
                 caption=content,
             )
         except Exception as exc:
-            await message.answer(f"Screenshot failed: {exc}", parse_mode="HTML")
+            cancel.set()
+            error_msg, keyboard = ErrorFormatter.format_error(
+                error_type="Screenshot",
+                error=exc,
+                context=f"Screenshotting {content}",
+                recovery_actions=[
+                    ("🔄 Retry", f"retry:shot:{content}"),
+                ]
+            )
+            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
         finally:
             if tmp_path:
                 tmp_path.unlink(missing_ok=True)
@@ -1291,13 +1589,27 @@ async def _execute_task(
                     await notifications.model_fallback_used(model, fallback, str(exc))
                 except Exception as fb_exc:
                     result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
-                    await _send_chunks(message, result)
+                    error_msg, keyboard = ErrorFormatter.format_error(
+                        error_type="Agent Failure",
+                        error=fb_exc,
+                        context=f"Running task with {agent_key}",
+                        recovery_actions=[
+                            ("🔄 Retry", "retry:task"),
+                        ]
+                    )
+                    await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
+                    return
             else:
                 result = f"Error: {exc}"
-                await message.answer(
-                    formatters.ResponseFormatter.error_box("Agent Error", str(exc)),
-                    parse_mode="HTML",
+                error_msg, keyboard = ErrorFormatter.format_error(
+                    error_type="Agent Error",
+                    error=exc,
+                    context=f"Running task with {agent_key}",
+                    recovery_actions=[
+                        ("🔄 Retry", "retry:task"),
+                    ]
                 )
+                await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
                 return
 
         await notifications.task_complete(original_task, time.monotonic() - t0, agent_key)
@@ -1419,7 +1731,7 @@ async def main() -> None:
     load_registry()
     from core.agent_registry import AGENT_REGISTRY, DEPARTMENT_INDEX
     logger.info(
-        "Babas Agency Swarm starting — %d agents across %d departments",
+        "🎨 Babas Agency Swarm starting — %d agents across %d departments (UI/UX Enhanced)",
         len(AGENT_REGISTRY),
         len(DEPARTMENT_INDEX),
     )
