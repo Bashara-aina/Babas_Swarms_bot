@@ -59,6 +59,9 @@ class StreamingResponseManager:
         Returns:
             Full concatenated response text.
         """
+        # Check provider health and apply proactive fallback
+        effective_model = await self._select_healthy_provider(model, chat_id)
+        
         # Placeholder message
         label = header or f"<b>🤖 {agent_key.upper()}</b>"
         msg = await self.bot.send_message(
@@ -72,7 +75,7 @@ class StreamingResponseManager:
         # Run OI in thread, push chunks to queue
         loop = asyncio.get_event_loop()
         producer = loop.run_in_executor(
-            None, self._produce_chunks, model, task, agent_key, queue, loop
+            None, self._produce_chunks, effective_model, task, agent_key, queue, loop
         )
 
         # Consume queue and edit message
@@ -86,6 +89,60 @@ class StreamingResponseManager:
 
     # ── Internal helpers ───────────────────────────────────────────────────────
 
+    async def _select_healthy_provider(self, model: str, chat_id: int) -> str:
+        """Check provider health and proactively fallback if unavailable.
+        
+        Args:
+            model: Requested model string
+            chat_id: Telegram chat ID for status updates
+            
+        Returns:
+            Model string to use (original or fallback)
+        """
+        try:
+            from core.reliability.provider_health import (
+                check_provider_health,
+                get_healthy_provider,
+            )
+            
+            # Extract provider name
+            provider = model.split("/")[0] if "/" in model else "unknown"
+            
+            # Check health
+            status = check_provider_health(provider)
+            
+            if status == "unavailable":
+                # Circuit breaker open — immediately fallback
+                logger.warning(
+                    "Provider '%s' circuit open, using fallback for chat %d",
+                    provider, chat_id
+                )
+                await self.bot.send_message(
+                    chat_id,
+                    f"⚠️ <b>{provider}</b> is temporarily unavailable (rate limited).\n"
+                    f"Using local Ollama model instead…",
+                    parse_mode="HTML",
+                )
+                return "ollama_chat/qwen3.5:35b"
+            
+            elif status == "degraded":
+                # Recently rate-limited but usable — warn user
+                logger.info(
+                    "Provider '%s' degraded (recent rate limit) for chat %d",
+                    provider, chat_id
+                )
+                await self.bot.send_message(
+                    chat_id,
+                    f"⚠️ <b>{provider}</b> was recently rate limited.\n"
+                    f"Proceeding with caution…",
+                    parse_mode="HTML",
+                )
+            
+        except Exception as exc:
+            logger.debug("Provider health check skipped: %s", exc)
+        
+        return model
+
     def _produce_chunks(
         self,
         model: str,
@@ -98,8 +155,13 @@ class StreamingResponseManager:
 
         Implements exponential backoff retry strategy (5 attempts) with automatic
         fallback to local Ollama if OpenRouter rate limits persist.
+        Integrates request throttling to prevent future rate limits.
         """
         import time as _time
+        
+        # Apply request throttling before starting
+        self._apply_throttle_sync(model, loop)
+        
         max_retries = 5  # Increased from 2 to 5
         current_model = model
         
@@ -131,6 +193,10 @@ class StreamingResponseManager:
                 exc_msg = str(exc)
                 is_rate_limit = "RateLimitError" in exc_name or "429" in exc_msg
                 
+                if is_rate_limit:
+                    # Record rate limit for provider health tracking
+                    self._record_rate_limit_sync(current_model, loop)
+                
                 if is_rate_limit and attempt < max_retries:
                     # Exponential backoff: 3s, 6s, 12s, 24s, 48s
                     wait = (2 ** attempt) * 3
@@ -139,7 +205,10 @@ class StreamingResponseManager:
                         attempt + 1, max_retries, wait, exc,
                     )
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), retrying in {wait}s…\n"), 
+                        queue.put(
+                            f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), "
+                            f"retrying in {wait}s…\n"
+                        ), 
                         loop
                     )
                     _time.sleep(wait)
@@ -205,6 +274,44 @@ class StreamingResponseManager:
                     break
                     
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)  # sentinel
+
+    def _apply_throttle_sync(self, model: str, loop: asyncio.AbstractEventLoop) -> None:
+        """Apply request throttling in synchronous context (thread-safe).
+        
+        Args:
+            model: Model string
+            loop: Event loop for async calls
+        """
+        try:
+            from core.reliability.request_throttle import RequestThrottle
+            
+            # Run async throttle in the event loop
+            future = asyncio.run_coroutine_threadsafe(
+                RequestThrottle.acquire(model, timeout=30.0),
+                loop
+            )
+            acquired = future.result(timeout=35.0)
+            
+            if not acquired:
+                logger.warning("Request throttle timeout for model: %s", model)
+        except Exception as exc:
+            logger.debug("Request throttle skipped: %s", exc)
+
+    def _record_rate_limit_sync(self, model: str, loop: asyncio.AbstractEventLoop) -> None:
+        """Record rate limit event in synchronous context (thread-safe).
+        
+        Args:
+            model: Model string
+            loop: Event loop (unused but kept for consistency)
+        """
+        try:
+            from core.reliability.provider_health import record_rate_limit
+            
+            # Extract provider name
+            provider = model.split("/")[0] if "/" in model else "unknown"
+            record_rate_limit(provider)
+        except Exception as exc:
+            logger.debug("Rate limit recording skipped: %s", exc)
 
     async def _consume_and_edit(
         self,
