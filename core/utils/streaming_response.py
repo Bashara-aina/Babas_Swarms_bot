@@ -1,4 +1,3 @@
-# /home/newadmin/swarm-bot/streaming_response.py
 """Real-time streaming of LLM output to Telegram.
 
 Open Interpreter yields chunks synchronously.  We run it in a thread-pool
@@ -97,14 +96,17 @@ class StreamingResponseManager:
     ) -> None:
         """Synchronous producer: run in thread executor.
 
-        Retries up to 2 times on RateLimitError with 3-second backoff.
+        Implements exponential backoff retry strategy (5 attempts) with automatic
+        fallback to local Ollama if OpenRouter rate limits persist.
         """
         import time as _time
-        max_retries = 2
+        max_retries = 5  # Increased from 2 to 5
+        current_model = model
+        
         for attempt in range(max_retries + 1):
             try:
                 import core.interpreter_bridge as interpreter_bridge
-                interpreter_bridge.configure_interpreter(model, agent_key)
+                interpreter_bridge.configure_interpreter(current_model, agent_key)
                 from interpreter import interpreter
 
                 for chunk in interpreter.chat(task, stream=True, display=False):
@@ -123,25 +125,85 @@ class StreamingResponseManager:
                             queue.put(f"\n<code>$ {content}</code>\n"), loop
                         )
                 break  # Success — exit retry loop
+                
             except Exception as exc:
                 exc_name = type(exc).__name__
-                is_rate_limit = "RateLimitError" in exc_name or "429" in str(exc)
+                exc_msg = str(exc)
+                is_rate_limit = "RateLimitError" in exc_name or "429" in exc_msg
+                
                 if is_rate_limit and attempt < max_retries:
-                    wait = 3 * (attempt + 1)
+                    # Exponential backoff: 3s, 6s, 12s, 24s, 48s
+                    wait = (2 ** attempt) * 3
                     logger.warning(
                         "Rate limit on attempt %d/%d — retrying in %ds: %s",
                         attempt + 1, max_retries, wait, exc,
                     )
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n⏳ Rate limited, retrying in {wait}s…"), loop
+                        queue.put(f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), retrying in {wait}s…\n"), 
+                        loop
                     )
                     _time.sleep(wait)
+                    
+                elif is_rate_limit and attempt == max_retries:
+                    # Exhausted all retries — fallback to Ollama
+                    logger.error(
+                        "All %d retries exhausted for %s, falling back to local Ollama",
+                        max_retries, current_model
+                    )
+                    asyncio.run_coroutine_threadsafe(
+                        queue.put(
+                            "\n🔄 <b>OpenRouter rate limit persists.</b>\n"
+                            "Switching to local Ollama model for reliability…\n\n"
+                        ), 
+                        loop
+                    )
+                    # Switch to local Ollama and retry once
+                    current_model = "ollama_chat/qwen3.5:35b"
+                    _time.sleep(2)  # Brief pause before fallback attempt
+                    
+                    try:
+                        import core.interpreter_bridge as interpreter_bridge
+                        interpreter_bridge.configure_interpreter(current_model, agent_key)
+                        from interpreter import interpreter
+                        
+                        for chunk in interpreter.chat(task, stream=True, display=False):
+                            chunk_type = chunk.get("type", "")
+                            content = chunk.get("content", "")
+                            if not isinstance(content, str) or not content:
+                                continue
+                            if chunk_type == "message":
+                                asyncio.run_coroutine_threadsafe(queue.put(content), loop)
+                            elif chunk_type == "code":
+                                asyncio.run_coroutine_threadsafe(
+                                    queue.put(f"\n```\n{content}\n```\n"), loop
+                                )
+                            elif chunk_type == "console":
+                                asyncio.run_coroutine_threadsafe(
+                                    queue.put(f"\n<code>$ {content}</code>\n"), loop
+                                )
+                        break  # Ollama succeeded
+                        
+                    except Exception as fallback_exc:
+                        logger.error("Ollama fallback failed: %s", fallback_exc)
+                        asyncio.run_coroutine_threadsafe(
+                            queue.put(
+                                f"\n❌ <b>Critical error:</b> Both OpenRouter and Ollama failed.\n"
+                                f"OpenRouter: Rate limited\n"
+                                f"Ollama: {fallback_exc}\n\n"
+                                f"Please check system logs and ensure Ollama is running."
+                            ), 
+                            loop
+                        )
+                        break
                 else:
+                    # Non-rate-limit error or other failure
                     logger.error("Streaming producer error: %s", exc)
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n⚠️ Stream error: {exc}"), loop
+                        queue.put(f"\n⚠️ <b>Error:</b> {exc_name}\n{exc_msg[:200]}"), 
+                        loop
                     )
                     break
+                    
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)  # sentinel
 
     async def _consume_and_edit(
