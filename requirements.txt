@@ -6,16 +6,18 @@ python-dotenv>=1.0.0
 anthropic>=0.18.0
 litellm>=1.30.0
 
-# CRITICAL: Open Interpreter (your bot needs this)
-# Install separately if this fails: pip install open-interpreter --no-deps
+# CRITICAL: Open Interpreter - install WITHOUT dependencies first to avoid tiktoken build
+# Then install open-interpreter which will use the prebuilt tiktoken wheel
+tiktoken>=0.7.0,<0.13.0  # Use range that has prebuilt wheels for Python 3.13
 open-interpreter>=0.4.0
 
 # Web automation
 playwright>=1.40.0
 beautifulsoup4>=4.12.0
 
-# Computer control - SKIP pyautogui due to Python 3.13 incompatibility
-# pyautogui>=0.9.54  # BROKEN: mouseinfo segfaults on Python 3.13
+# Computer control
+# NOTE: pyautogui excluded due to mouseinfo segfault on Python 3.13
+# Install separately if needed: pip install pyautogui --no-deps
 pytesseract>=0.3.10
 pillow>=10.0.0
 opencv-python-headless>=4.8.0
@@ -28,7 +30,6 @@ requests>=2.31.0
 markdown>=3.5.0
 
 # Safety and monitoring
-# pynput>=1.7.6  # Skip if you don't need keyboard/mouse control
 watchdog>=3.0.0
 
 # Utilities
@@ -44,9 +45,8 @@ colorama>=0.4.6
 tenacity>=8.2.0
 
 # ============================================
-# Install these AFTER if needed:
+# Install these separately if needed:
 # ============================================
-# pip install pyautogui --no-deps  # Then manually: pip install python3-xlib pymsgbox pytweening pyscreeze pygetwindow
-# pip install pynput  # For keyboard/mouse automation
-# pip install redis  # For Redis caching
-# pip install chromadb  # For vector DB (has dependency issues)
+# pip install pyautogui --no-deps
+# pip install python3-xlib pymsgbox pytweening pyscreeze pygetwindow
+# pip install pynput  # Keyboard/mouse automation
