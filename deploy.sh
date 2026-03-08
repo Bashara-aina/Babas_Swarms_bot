@@ -15,11 +15,11 @@ if [ ! -f "main.py" ]; then
     exit 1
 fi
 
-echo "[1/5] Pulling latest changes from GitHub..."
+echo "[1/6] Pulling latest changes from GitHub..."
 git pull origin main
 
 echo ""
-echo "[2/5] Checking Ollama service..."
+echo "[2/6] Checking Ollama service..."
 if systemctl is-active --quiet ollama; then
     echo "  ✓ Ollama is running"
 else
@@ -35,7 +35,7 @@ else
 fi
 
 echo ""
-echo "[3/5] Verifying Ollama model..."
+echo "[3/6] Verifying Ollama model..."
 if ollama list | grep -q "qwen3.5:35b"; then
     echo "  ✓ qwen3.5:35b model found"
 else
@@ -45,11 +45,17 @@ else
 fi
 
 echo ""
-echo "[4/5] Restarting swarm-bot service..."
-sudo systemctl restart swarm-bot
+echo "[4/6] Stopping swarm-bot service (force Python to unload modules)..."
+sudo systemctl stop swarm-bot
+echo "  Waiting 3 seconds for clean shutdown..."
+sleep 3
 
 echo ""
-echo "[5/5] Waiting for service to start..."
+echo "[5/6] Starting swarm-bot service with fresh Python process..."
+sudo systemctl start swarm-bot
+
+echo ""
+echo "[6/6] Waiting for service to start..."
 sleep 3
 
 if systemctl is-active --quiet swarm-bot; then
@@ -67,7 +73,7 @@ if systemctl is-active --quiet swarm-bot; then
     echo ""
     echo "Recent logs:"
     echo "-------------------------------------"
-    sudo journalctl -u swarm-bot -n 20 --no-pager
+    sudo journalctl -u swarm-bot -n 30 --no-pager
 else
     echo "  ❌ Service failed to start"
     echo ""
