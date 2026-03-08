@@ -37,7 +37,7 @@ TIERS: dict[str, dict] = {
     },
     "heavyweight": {
         "models": [
-            "openrouter/mistralai/devstral-2512:free",  # SWE-bench 72.2%
+            "openrouter/qwen/qwen3-coder:free",          # QwQ-Coder free tier
             "gemini/gemini-3.1-pro",                     # 1M context
             "cerebras/qwen3-235b-a22b",                  # Fast fallback
         ],
@@ -116,7 +116,7 @@ def select_model(agent_key: str, task: str, force_tier: Optional[str] = None) ->
     Returns:
         Model string to use (e.g. 'cerebras/qwen3-235b-a22b').
     """
-    import agents as ag
+    import core.agent_registry as ag
 
     tier = force_tier or classify_complexity(task)
     primary = ag.get_model(agent_key) or ""

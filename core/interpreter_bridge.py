@@ -66,74 +66,89 @@ SYSTEM_PROMPTS = {
     ),
 }
 
+# Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
+_CONTEXT_WINDOWS: dict[str, int] = {
+    "openrouter/qwen/qwen3-coder:free":    131072,
+    "cerebras/qwen3-235b-a22b":            131072,
+    "gemini/gemini-2.0-flash":            1000000,
+    "groq/moonshotai/kimi-k2-instruct":    200000,
+    "zai/glm-4":                           128000,
+    "openrouter/openai/gpt-oss-120b:free":  32768,
+}
+_MAX_TOKENS = 4096
+
+
 def configure_interpreter(model: str, agent_key: str) -> None:
     """Configure interpreter for the specified model and agent.
-    
+
     Args:
-        model: Model string with provider prefix (e.g. "zai/glm-4")
+        model: Full LiteLLM model string with provider prefix (e.g. "cerebras/qwen3-235b-a22b")
         agent_key: Agent identifier for system prompt selection
     """
-    
-    # Reset to defaults
     interpreter.auto_run = True
-    interpreter.offline = True
-    interpreter.llm.api_base = "http://localhost:11434"
-    interpreter.llm.api_key = "ollama"
     interpreter.system_message = SYSTEM_PROMPTS.get(agent_key, "")
-    
-    # Parse provider from model string
+
     if model.startswith("ollama_chat/"):
-        # Local Ollama
         interpreter.llm.model = model
+        interpreter.llm.api_base = "http://localhost:11434"
+        interpreter.llm.api_key = "ollama"
+        interpreter.llm.context_window = 8192
+        interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
         logger.info("Using local Ollama: %s", model)
-        
-    elif model.startswith("openrouter/"):
-        # OpenRouter
-        model_name = model.replace("openrouter/", "")
-        interpreter.llm.model = model_name
-        interpreter.llm.api_base = "https://openrouter.ai/api/v1"
-        interpreter.llm.api_key = os.getenv("OPENROUTER_API_KEY")
-        interpreter.offline = False
-        logger.info("Using OpenRouter: %s", model_name)
-        
+
     elif model.startswith("zai/"):
-        # Z.AI (GLM-4.7)
-        interpreter.llm.model = "glm-4"
+        # Z.AI uses a custom base URL not natively in LiteLLM — use openai/ prefix
+        model_name = model.replace("zai/", "")
+        interpreter.llm.model = f"openai/{model_name}"
         interpreter.llm.api_base = "https://open.bigmodel.cn/api/paas/v4"
-        interpreter.llm.api_key = os.getenv("ZAI_API_KEY")
+        interpreter.llm.api_key = os.getenv("ZAI_API_KEY", "")
+        interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 128000)
+        interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = False
-        logger.info("Using Z.AI: glm-4")
-        
-    elif model.startswith("cerebras/"):
-        # Cerebras
-        model_name = model.replace("cerebras/", "")
-        interpreter.llm.model = model_name
-        interpreter.llm.api_base = "https://api.cerebras.ai/v1"
-        interpreter.llm.api_key = os.getenv("CEREBRAS_API_KEY")
+        logger.info("Using Z.AI: %s", model_name)
+
+    elif model.startswith(("openrouter/", "cerebras/", "gemini/", "groq/")):
+        # LiteLLM handles these providers natively via their prefix.
+        # Do NOT strip the prefix and do NOT set api_base — LiteLLM picks the right URL.
+        interpreter.llm.model = model
+        interpreter.llm.api_base = None  # Let LiteLLM use its built-in provider URL
+        interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 32768)
+        interpreter.llm.max_tokens = _MAX_TOKENS
+        provider = model.split("/")[0]
+        key_map = {
+            "openrouter": "OPENROUTER_API_KEY",
+            "cerebras":   "CEREBRAS_API_KEY",
+            "gemini":     "GEMINI_API_KEY",
+            "groq":       "GROQ_API_KEY",
+        }
+        env_var = key_map.get(provider, "")
+        api_key = os.getenv(env_var, "")
+        if not api_key:
+            logger.warning(
+                "No API key for provider '%s' — falling back to local Ollama", provider
+            )
+            interpreter.llm.model = "ollama_chat/qwen3.5:35b"
+            interpreter.llm.api_base = "http://localhost:11434"
+            interpreter.llm.api_key = "ollama"
+            interpreter.llm.context_window = 8192
+            interpreter.offline = True
+            return
+        # Set both the attribute AND the env var so LiteLLM picks it up as BYOK
+        interpreter.llm.api_key = api_key
+        if env_var:
+            os.environ[env_var] = api_key
         interpreter.offline = False
-        logger.info("Using Cerebras: %s", model_name)
-        
-    elif model.startswith("gemini/"):
-        # Google AI Studio
-        model_name = model.replace("gemini/", "")
-        interpreter.llm.model = model_name
-        interpreter.llm.api_base = "https://generativelanguage.googleapis.com/v1beta/openai"
-        interpreter.llm.api_key = os.getenv("GEMINI_API_KEY")
-        interpreter.offline = False
-        logger.info("Using Gemini: %s", model_name)
-        
-    elif model.startswith("groq/"):
-        # Groq
-        model_name = model.replace("groq/", "")
-        interpreter.llm.model = model_name
-        interpreter.llm.api_base = "https://api.groq.com/openai/v1"
-        interpreter.llm.api_key = os.getenv("GROQ_API_KEY")
-        interpreter.offline = False
-        logger.info("Using Groq: %s", model_name)
-    
+        logger.info("Using %s: %s", provider, model)
+
     else:
-        logger.warning("Unknown model prefix: %s — defaulting to Ollama", model)
+        logger.warning("Unknown model prefix '%s' — falling back to local Ollama", model)
+        interpreter.llm.model = "ollama_chat/qwen3.5:35b"
+        interpreter.llm.api_base = "http://localhost:11434"
+        interpreter.llm.api_key = "ollama"
+        interpreter.llm.context_window = 8192
+        interpreter.llm.max_tokens = _MAX_TOKENS
+        interpreter.offline = True
 
 async def _raw_run(model: str, task: str, agent_key: str) -> str:
     """Execute interpreter.chat in thread pool and format output."""
@@ -183,8 +198,8 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
     # --- 1. Semantic cache check ---
     cached_result: str | None = None
     try:
-        from memory.semantic_cache import get_cache
-        from observability.metrics import record_cache_event
+        from core.memory.semantic_cache import get_cache
+        from core.observability.metrics import record_cache_event
         cache = get_cache()
         cached = cache.get(task, agent_key)
         if cached and cached != "__EVICTED__":
@@ -198,7 +213,7 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
     # --- 2. Dynamic model routing ---
     effective_model = model
     try:
-        from reliability.model_router import select_model
+        from core.reliability.model_router import select_model
         effective_model = select_model(agent_key, task) or model
     except Exception as exc:
         logger.debug("Model router skipped: %s", exc)
@@ -209,8 +224,8 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
 
     result: str
     try:
-        from reliability.error_recovery import get_recovery
-        from observability.metrics import trace_agent
+        from core.reliability.error_recovery import get_recovery
+        from core.observability.metrics import trace_agent
         async with trace_agent(agent_key):
             result = await get_recovery().execute(task, agent_key, _run_fn)
     except Exception as exc:
@@ -219,13 +234,13 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
 
     # --- 4. Store in cache and record usage ---
     try:
-        from memory.semantic_cache import get_cache
+        from core.memory.semantic_cache import get_cache
         get_cache().set(task, agent_key, result)
     except Exception:
         pass
 
     try:
-        from optimization.usage_tracker import get_tracker
+        from core.optimization.usage_tracker import get_tracker
         # Token counts are not available from OI; use rough estimate
         estimated_in = len(task.split()) * 1_000 // 750
         estimated_out = len(result.split()) * 1_000 // 750

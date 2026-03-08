@@ -37,7 +37,7 @@ TIERS: dict[str, dict] = {
     },
     "heavyweight": {
         "models": [
-            "openrouter/mistralai/devstral-2512:free",  # SWE-bench 72.2%
+            "openrouter/qwen/qwen3-coder:free",          # QwQ-Coder free tier
             "gemini/gemini-3.1-pro",                     # 1M context
             "cerebras/qwen3-235b-a22b",                  # Fast fallback
         ],

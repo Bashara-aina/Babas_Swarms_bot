@@ -296,15 +296,15 @@ ACTIVE_THREADS: dict[str, list[dict]] = {}
 # Legacy model mappings for backwards compat (/agent coding, /agent debug, etc.)
 _LEGACY_AGENT_MODELS: dict[str, str] = {
     "vision":    "ollama_chat/gemma3:12b",
-    "coding":    "openrouter/mistralai/devstral-2512:free",
+    "coding":    "cerebras/qwen3-235b-a22b",       # 14,400 req/day, fast, reliable
     "debug":     "zai/glm-4",
     "math":      "zai/glm-4",
     "architect": "cerebras/qwen3-235b-a22b",
-    "mentor":    "gemini/gemini-3.1-pro",
+    "mentor":    "gemini/gemini-2.0-flash",
     "analyst":   "groq/moonshotai/kimi-k2-instruct",
 }
 _LEGACY_FALLBACK_MODELS: dict[str, str] = {
-    "coding":    "openrouter/qwen/qwen3-coder:free",
+    "coding":    "openrouter/qwen/qwen3-coder:free",  # fallback when cerebras unavailable
     "debug":     "cerebras/qwen3-235b-a22b",
     "math":      "cerebras/qwen3-235b-a22b",
     "architect": "openrouter/openai/gpt-oss-120b:free",

@@ -222,7 +222,7 @@ class FeedbackLearner:
         """Evict cache entry if feedback is negative."""
         if rating == NEGATIVE:
             try:
-                from memory.semantic_cache import get_cache
+                from core.memory.semantic_cache import get_cache
                 cache = get_cache()
                 # Evict by overwriting with a sentinel — simplest approach
                 # since SemanticCache doesn't expose a delete API
@@ -233,8 +233,8 @@ class FeedbackLearner:
 
     def _all_agents(self) -> list[str]:
         try:
-            from agents import AGENT_MODELS
-            return list(AGENT_MODELS.keys())
+            from core.agent_registry import AGENT_REGISTRY
+            return list(AGENT_REGISTRY.keys())
         except Exception:
             return ["vision", "coding", "debug", "math", "architect", "mentor", "analyst"]
 

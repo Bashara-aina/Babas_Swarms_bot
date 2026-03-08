@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Primary model registry - Best in class as of March 2026
 AGENT_MODELS: dict[str, str] = {
     "vision":    "ollama_chat/gemma3:12b",                        # Local - privacy critical
-    "coding":    "openrouter/mistralai/devstral-2512:free",      # SWE-bench 72.2%
+    "coding":    "cerebras/qwen3-235b-a22b",                      # 14,400 req/day, reliable
     "debug":     "zai/glm-4",                                     # GPQA Diamond 85.7%
     "math":      "zai/glm-4",                                     # AIME 2025 95.7%
     "architect": "cerebras/qwen3-235b-a22b",                      # 1,500 tok/s, 131K context

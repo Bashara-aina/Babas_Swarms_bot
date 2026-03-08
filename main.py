@@ -586,12 +586,12 @@ async def cmd_stats(message: Message) -> None:
         return
     parts = []
     try:
-        from observability.metrics import format_stats
+        from core.observability.metrics import format_stats
         parts.append(format_stats())
     except Exception as exc:
         parts.append(f"Metrics unavailable: {exc}")
     try:
-        from optimization.feedback_learner import get_learner
+        from core.optimization.feedback_learner import get_learner
         parts.append(get_learner().summary_report())
     except Exception as exc:
         parts.append(f"Feedback unavailable: {exc}")
@@ -608,7 +608,7 @@ async def cmd_circuits(message: Message) -> None:
         await _deny(message)
         return
     try:
-        from reliability.error_recovery import get_recovery
+        from core.reliability.error_recovery import get_recovery
         report = get_recovery().circuit_status()
         await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
     except Exception as exc:
@@ -621,7 +621,7 @@ async def cmd_usage(message: Message) -> None:
         await _deny(message)
         return
     try:
-        from optimization.usage_tracker import get_tracker
+        from core.optimization.usage_tracker import get_tracker
         report = get_tracker().daily_report()
         await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
     except Exception as exc:
@@ -653,7 +653,7 @@ async def cmd_feedback(message: Message) -> None:
         return
 
     try:
-        from optimization.feedback_learner import get_learner
+        from core.optimization.feedback_learner import get_learner
         result = get_learner().record(fid, rating, comment)
         await message.answer(result or "Feedback recorded.", parse_mode="HTML")
     except Exception as exc:
@@ -869,7 +869,7 @@ async def cb_feedback(callback: CallbackQuery) -> None:
     rating = 1 if verdict == "good" else -1
 
     try:
-        from optimization.feedback_learner import get_learner
+        from core.optimization.feedback_learner import get_learner
         result = get_learner().record(fid, rating)
         await callback.message.edit_reply_markup(reply_markup=None)
         await callback.answer(result or "Feedback recorded!")
@@ -1224,7 +1224,7 @@ async def _run_with_streaming(
 async def _send_feedback_prompt(message: Message, agent_key: str, task: str) -> None:
     """Register response and show inline feedback buttons."""
     try:
-        from optimization.feedback_learner import get_learner
+        from core.optimization.feedback_learner import get_learner
         fid = get_learner().register_response(agent_key, task)
         await message.answer(
             "<i>Rate this response:</i>",

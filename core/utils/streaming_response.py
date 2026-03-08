@@ -95,34 +95,54 @@ class StreamingResponseManager:
         queue: asyncio.Queue,
         loop: asyncio.AbstractEventLoop,
     ) -> None:
-        """Synchronous producer: run in thread executor."""
-        try:
-            import interpreter_bridge
-            interpreter_bridge.configure_interpreter(model, agent_key)
-            from interpreter import interpreter
+        """Synchronous producer: run in thread executor.
 
-            for chunk in interpreter.chat(task, stream=True, display=False):
-                chunk_type = chunk.get("type", "")
-                content = chunk.get("content", "")
-                if not isinstance(content, str) or not content:
-                    continue
-                if chunk_type == "message":
-                    asyncio.run_coroutine_threadsafe(queue.put(content), loop)
-                elif chunk_type == "code":
-                    asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n```\n{content}\n```\n"), loop
+        Retries up to 2 times on RateLimitError with 3-second backoff.
+        """
+        import time as _time
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                import core.interpreter_bridge as interpreter_bridge
+                interpreter_bridge.configure_interpreter(model, agent_key)
+                from interpreter import interpreter
+
+                for chunk in interpreter.chat(task, stream=True, display=False):
+                    chunk_type = chunk.get("type", "")
+                    content = chunk.get("content", "")
+                    if not isinstance(content, str) or not content:
+                        continue
+                    if chunk_type == "message":
+                        asyncio.run_coroutine_threadsafe(queue.put(content), loop)
+                    elif chunk_type == "code":
+                        asyncio.run_coroutine_threadsafe(
+                            queue.put(f"\n```\n{content}\n```\n"), loop
+                        )
+                    elif chunk_type == "console":
+                        asyncio.run_coroutine_threadsafe(
+                            queue.put(f"\n<code>$ {content}</code>\n"), loop
+                        )
+                break  # Success — exit retry loop
+            except Exception as exc:
+                exc_name = type(exc).__name__
+                is_rate_limit = "RateLimitError" in exc_name or "429" in str(exc)
+                if is_rate_limit and attempt < max_retries:
+                    wait = 3 * (attempt + 1)
+                    logger.warning(
+                        "Rate limit on attempt %d/%d — retrying in %ds: %s",
+                        attempt + 1, max_retries, wait, exc,
                     )
-                elif chunk_type == "console":
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n<code>$ {content}</code>\n"), loop
+                        queue.put(f"\n⏳ Rate limited, retrying in {wait}s…"), loop
                     )
-        except Exception as exc:
-            logger.error("Streaming producer error: %s", exc)
-            asyncio.run_coroutine_threadsafe(
-                queue.put(f"\n⚠️ Stream error: {exc}"), loop
-            )
-        finally:
-            asyncio.run_coroutine_threadsafe(queue.put(None), loop)  # sentinel
+                    _time.sleep(wait)
+                else:
+                    logger.error("Streaming producer error: %s", exc)
+                    asyncio.run_coroutine_threadsafe(
+                        queue.put(f"\n⚠️ Stream error: {exc}"), loop
+                    )
+                    break
+        asyncio.run_coroutine_threadsafe(queue.put(None), loop)  # sentinel
 
     async def _consume_and_edit(
         self,

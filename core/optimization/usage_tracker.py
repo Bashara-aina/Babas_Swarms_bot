@@ -27,7 +27,6 @@ PRICING: dict[str, dict[str, float]] = {
     "zai/glm-4":                                        {"input": 0.0, "output": 0.0},
     "cerebras/qwen3-235b-a22b":                         {"input": 0.0, "output": 0.0},
     "groq/moonshotai/kimi-k2-instruct":                 {"input": 0.0, "output": 0.0},
-    "openrouter/mistralai/devstral-2512:free":          {"input": 0.0, "output": 0.0},
     "openrouter/qwen/qwen3-coder:free":                 {"input": 0.0, "output": 0.0},
     "openrouter/openai/gpt-oss-120b:free":              {"input": 0.0, "output": 0.0},
     "gemini/gemini-3.1-pro":                            {"input": 0.035, "output": 0.105},

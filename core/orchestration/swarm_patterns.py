@@ -33,13 +33,13 @@ async def voting(
     Returns:
         Best solution as selected by the judge agent.
     """
-    import agents as ag
+    from core.agent_registry import get_model as ag_get_model
 
     logger.info("Voting: %d agents on task '%s'", len(agents), task[:60])
 
     # All agents solve in parallel
     async def _solve(agent_key: str) -> tuple[str, str]:
-        model = ag.get_model(agent_key) or ag.get_model("coding")
+        model = ag_get_model(agent_key) or ag_get_model("coding")
         try:
             result = await run_fn(model, task, agent_key)
         except Exception as exc:
@@ -64,7 +64,7 @@ async def voting(
         f"{solutions_text}"
     )
 
-    judge_model = ag.get_model(judge_agent) or ag.get_model("coding")
+    judge_model = ag_get_model(judge_agent) or ag_get_model("coding")
     try:
         best = await run_fn(judge_model, judge_prompt, judge_agent)
     except Exception as exc:
@@ -94,15 +94,15 @@ async def critique_refine(
     Returns:
         Refined solution after critique cycles.
     """
-    import agents as ag
+    from core.agent_registry import get_model as ag_get_model
 
     logger.info(
         "Critique-refine: producer=%s critic=%s iterations=%d",
         producer_agent, critic_agent, max_iterations,
     )
 
-    producer_model = ag.get_model(producer_agent) or ag.get_model("coding")
-    critic_model = ag.get_model(critic_agent) or ag.get_model("debug")
+    producer_model = ag_get_model(producer_agent) or ag_get_model("coding")
+    critic_model = ag_get_model(critic_agent) or ag_get_model("debug")
 
     # Initial solution
     solution = await run_fn(producer_model, task, producer_agent)
@@ -165,13 +165,13 @@ async def debate(
     Returns:
         Consensus solution synthesized from debate.
     """
-    import agents as ag
+    from core.agent_registry import get_model as ag_get_model
 
     logger.info("Debate: %d agents, %d rounds", len(debaters), rounds)
 
     # Initial proposals
     async def _propose(agent_key: str) -> tuple[str, str]:
-        model = ag.get_model(agent_key) or ag.get_model("coding")
+        model = ag_get_model(agent_key) or ag_get_model("coding")
         try:
             proposal = await run_fn(model, task, agent_key)
         except Exception as exc:
@@ -197,7 +197,7 @@ async def debate(
                 f"Incorporate the best ideas from others and improve your proposal. "
                 f"Keep what's strong, fix what's weak."
             )
-            model = ag.get_model(agent_key) or ag.get_model("coding")
+            model = ag_get_model(agent_key) or ag_get_model("coding")
             try:
                 refined = await run_fn(model, review_prompt, agent_key)
             except Exception as exc:
@@ -217,7 +217,7 @@ async def debate(
         f"Synthesize the strongest elements from all proposals into one optimal solution."
     )
 
-    synth_model = ag.get_model(synthesizer) or ag.get_model("architect")
+    synth_model = ag_get_model(synthesizer) or ag_get_model("architect")
     try:
         consensus = await run_fn(synth_model, synth_prompt, synthesizer)
     except Exception:

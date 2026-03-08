@@ -217,9 +217,9 @@ class ErrorRecoveryManager:
         Returns:
             Result string (never raises — always returns something).
         """
-        import agents as ag
+        from core.agent_registry import get_model as _get_model
 
-        primary_model = ag.get_model(agent_key)
+        primary_model = _get_model(agent_key)
         if not primary_model:
             return f"Unknown agent: {agent_key}"
 
@@ -235,7 +235,7 @@ class ErrorRecoveryManager:
             logger.warning("Primary failed for %s: %s", agent_key, exc)
 
         # 2. Fallback model
-        fallback_model = ag.get_model(agent_key, use_fallback=True)
+        fallback_model = _get_model(agent_key, use_fallback=True)
         if fallback_model and fallback_model != primary_model:
             try:
                 result = await run_fn(fallback_model, task, agent_key)
@@ -257,7 +257,7 @@ class ErrorRecoveryManager:
         }
         alt_key = alt_map.get(agent_key)
         if alt_key:
-            alt_model = ag.get_model(alt_key)
+            alt_model = _get_model(alt_key)
             if alt_model:
                 try:
                     result = await run_fn(alt_model, task, alt_key)

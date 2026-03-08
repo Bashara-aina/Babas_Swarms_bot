@@ -128,13 +128,13 @@ async def _llm_decompose(task: str, run_fn) -> list[SubTask]:
     Returns:
         List of SubTasks from LLM decomposition.
     """
-    import agents as ag
+    from core.agent_registry import get_model as _get_model, AGENT_REGISTRY as _AGENT_REGISTRY
 
     prompt = f"""Break this task into 2-5 atomic steps for AI agents.
 
 Task: {task}
 
-Available agents: {', '.join(ag.AGENT_MODELS.keys())}
+Available agents: {', '.join(_AGENT_REGISTRY.keys())}
 
 Respond ONLY with a numbered list, one step per line:
 1. [agent_name] description of step
@@ -142,7 +142,7 @@ Respond ONLY with a numbered list, one step per line:
 
 No preamble, no explanation. Just the numbered list."""
 
-    model = ag.get_model("architect")
+    model = _get_model("architect")
     try:
         response = await run_fn(model, prompt, "architect")
     except Exception as exc:
@@ -155,8 +155,7 @@ No preamble, no explanation. Just the numbered list."""
         if m:
             agent_key = m.group(1).lower()
             desc = m.group(2).strip()
-            import agents as ag2
-            if agent_key in ag2.AGENT_MODELS:
+            if agent_key in _AGENT_REGISTRY:
                 # Each step depends on the previous one (sequential by default)
                 deps = [len(steps) - 1] if steps else []
                 steps.append(SubTask(desc, agent_key, depends_on=deps))
@@ -224,8 +223,8 @@ async def orchestrate(
 
         async def _run_step(idx: int) -> tuple[int, str]:
             step = steps[idx]
-            import agents as ag
-            model = ag.get_model(step.agent_key) or ag.get_model("coding")
+            from core.agent_registry import get_model as _get_model
+            model = _get_model(step.agent_key) or _get_model("coding")
 
             # Inject prior results as context
             prior_context = ""
@@ -256,8 +255,8 @@ async def orchestrate(
         return steps[0].result
 
     # Use mentor to synthesize
-    import agents as ag
-    mentor_model = ag.get_model("mentor") or ag.get_model("coding")
+    from core.agent_registry import get_model as _get_model
+    mentor_model = _get_model("mentor") or _get_model("coding")
     synth_prompt = (
         f"Synthesize these agent results into a single coherent answer for:\n\n"
         f"Original task: {task}\n\n{all_results}\n\n"

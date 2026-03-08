@@ -23,7 +23,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-VISION_MODEL = "gemma3:12b"
+VISION_MODEL = "llava:13b"
 OLLAMA_BASE = "http://localhost:11434"
 TTS_VOICE = "en-US-AriaNeural"   # Change to "ja-JP-NanamiNeural" for Japanese
 MAX_CONTEXT_CHARS = 8_000        # Max chars stored from a document into thread context

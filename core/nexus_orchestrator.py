@@ -260,7 +260,7 @@ class NexusOrchestrator:
         dept_name = "engineering"  # ultimate fallback
         try:
             raw = await self._call_model(
-                "ollama_chat/gemma3:12b", "", prompt, max_tokens=15
+                "ollama_chat/qwen3.5:35b", "", prompt, max_tokens=15
             )
             candidate = raw.strip().lower().replace(" ", "_").replace("-", "_")
             if candidate in AGENT_REGISTRY or candidate in list_all_departments():
