@@ -15,17 +15,21 @@ from typing import Dict
 logger = logging.getLogger(__name__)
 
 # Per-provider rate limits (requests per minute)
+# Tuned based on observed API behavior
 _PROVIDER_LIMITS: Dict[str, float] = {
-    "openrouter": 6.0,      # OpenRouter free tier: ~6 requests/min
-    "cerebras": 10.0,       # Cerebras: more generous
+    "openrouter": 12.0,     # OpenRouter free tier: conservative 12 req/min (was 6)
+    "cerebras": 20.0,       # Cerebras: generous
     "groq": 30.0,           # Groq: high rate limit
     "gemini": 60.0,         # Gemini: very high rate limit
+    "anthropic": 50.0,      # Claude: high tier
+    "openai": 60.0,         # OpenAI: high tier  
     "ollama": 9999.0,       # Local: no limit
+    "ollama_chat": 9999.0,  # Local: no limit
 }
 
 # Token bucket state per provider
 _buckets: Dict[str, Dict[str, float]] = defaultdict(lambda: {
-    "tokens": 1.0,           # Start with 1 token available
+    "tokens": 2.0,           # Start with burst capacity (was 1.0)
     "last_update": time.monotonic(),
 })
 
@@ -61,15 +65,16 @@ class RequestThrottle:
             True if token acquired, False if timeout
         """
         provider = RequestThrottle._extract_provider(model)
-        rate_limit = _PROVIDER_LIMITS.get(provider, 10.0)  # Default: 10 req/min
+        rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)  # Default: 15 req/min (was 10)
         
-        # No throttling for local or high-limit providers
+        # No throttling for local or high-limit providers (>=60 req/min)
         if rate_limit >= 60:
+            logger.debug("No throttle needed for high-limit provider '%s'", provider)
             return True
         
         bucket = _buckets[provider]
         tokens_per_second = rate_limit / 60.0
-        max_tokens = 2.0  # Burst capacity
+        max_tokens = 3.0  # Burst capacity (was 2.0) - allows 3 rapid requests
         
         start_time = time.monotonic()
         
@@ -103,7 +108,7 @@ class RequestThrottle:
             
             # Wait for next token to become available
             wait_time = (1.0 - bucket["tokens"]) / tokens_per_second
-            wait_time = min(wait_time, 2.0)  # Cap at 2 seconds per iteration
+            wait_time = min(wait_time, 1.0)  # Cap at 1 second per iteration (was 2s)
             
             logger.debug(
                 "Provider '%s' throttled, waiting %.1fs for token",
@@ -120,7 +125,7 @@ class RequestThrottle:
         """
         if provider in _buckets:
             _buckets[provider] = {
-                "tokens": 1.0,
+                "tokens": 3.0,  # Reset with full burst capacity
                 "last_update": time.monotonic(),
             }
             logger.info("Request throttle reset for provider '%s'", provider)
@@ -136,7 +141,7 @@ class RequestThrottle:
             Estimated wait time in seconds (0 if ready immediately)
         """
         provider = RequestThrottle._extract_provider(model)
-        rate_limit = _PROVIDER_LIMITS.get(provider, 10.0)
+        rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)
         
         if rate_limit >= 60:
             return 0.0
