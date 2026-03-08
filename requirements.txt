@@ -1,48 +1,69 @@
-# Core bot
-aiogram>=3.0
-python-dotenv
+# Core bot framework
+aiogram>=3.4.0,<4.0.0
+python-dotenv>=1.0.0
 
 # LLM execution
-open-interpreter
-litellm
+open-interpreter>=0.2.0
+litellm>=1.30.0
+anthropoc>=0.18.0  # For Claude API support
 
 # Web automation
-playwright
+playwright>=1.40.0
+beautifulsoup4>=4.12.0  # HTML parsing
 
 # Computer control (Phase 1)
-pyautogui
-pytesseract
-pillow
-opencv-python-headless
+pyautogui>=0.9.54
+pytesseract>=0.3.10
+pillow>=10.0.0
+opencv-python-headless>=4.8.0
+screeninfo>=0.8.1  # Multi-monitor support
 
 # Multi-modal (Phase 3)
-openai-whisper
-pypdf
-python-docx
-edge-tts
+openai-whisper>=20231117
+pypdf>=3.17.0
+python-docx>=1.1.0
+edge-tts>=6.1.0
+PyPDF2>=3.0.0  # Additional PDF support
 
 # Document processing
-requests
+requests>=2.31.0
+markdown>=3.5.0  # For formatted responses
 
 # Task orchestration (Phase 4)
 # (stdlib only: asyncio, uuid, dataclasses)
 
 # Window management (optional, needs wmctrl system package)
-# sudo apt install wmctrl tesseract-ocr
+# System packages required:
+# sudo apt install wmctrl tesseract-ocr tesseract-ocr-eng
 
-# Safety
-pynput
+# Safety and monitoring
+pynput>=1.7.6
+watchdog>=3.0.0  # File system monitoring
 
-# Production optimization (Phase 2 — Master Prompt 2)
-chromadb
-redis
-sentence-transformers
-tenacity
-prometheus-client
+# Production optimization (Phase 2 - Master Prompt 2)
+chromadb>=0.4.22
+redis>=5.0.0
+sentence-transformers>=2.2.0
+tenacity>=8.2.0
+prometheus-client>=0.19.0
 
-# Agency Swarm additions (Phase 3 — Babas Agency Swarm)
+# Agency Swarm additions (Phase 3 - Babas Agency Swarm)
 jinja2>=3.1.2
 pyyaml>=6.0.1
-numpy
-psutil
+numpy>=1.24.0
+psutil>=5.9.0
+aiofiles>=23.2.0  # Async file operations
+aiohttp>=3.9.0  # Async HTTP client
 # faiss-cpu>=1.8.0  # optional: local vector index (uncomment to enable)
+
+# Development and debugging (optional)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# mypy>=1.7.0
+
+# Additional utilities
+python-dateutil>=2.8.0
+pytz>=2023.3
+aioredis>=2.0.1  # Async Redis client
+colorama>=0.4.6  # Colored terminal output for logging
