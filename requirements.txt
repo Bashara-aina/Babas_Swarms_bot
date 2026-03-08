@@ -1,4 +1,4 @@
-# Core bot framework (Python 3.13 compatible)
+# Core bot framework (Python 3.13 tested)
 aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
 
@@ -6,12 +6,16 @@ python-dotenv>=1.0.0
 anthropic>=0.18.0
 litellm>=1.30.0
 
+# CRITICAL: Open Interpreter (your bot needs this)
+# Install separately if this fails: pip install open-interpreter --no-deps
+open-interpreter>=0.4.0
+
 # Web automation
 playwright>=1.40.0
 beautifulsoup4>=4.12.0
 
-# Computer control
-pyautogui>=0.9.54
+# Computer control - SKIP pyautogui due to Python 3.13 incompatibility
+# pyautogui>=0.9.54  # BROKEN: mouseinfo segfaults on Python 3.13
 pytesseract>=0.3.10
 pillow>=10.0.0
 opencv-python-headless>=4.8.0
@@ -24,7 +28,7 @@ requests>=2.31.0
 markdown>=3.5.0
 
 # Safety and monitoring
-pynput>=1.7.6
+# pynput>=1.7.6  # Skip if you don't need keyboard/mouse control
 watchdog>=3.0.0
 
 # Utilities
@@ -40,19 +44,9 @@ colorama>=0.4.6
 tenacity>=8.2.0
 
 # ============================================
-# OPTIONAL: Advanced features (may have Python 3.13 issues)
-# Uncomment ONLY if needed and if installation succeeds
+# Install these AFTER if needed:
 # ============================================
-
-# open-interpreter>=0.4.0  # Code execution (complex dependencies)
-# openai-whisper>=20231117  # Audio transcription (requires numba)
-# edge-tts>=6.1.0  # Text-to-speech
-# PyPDF2>=3.0.0  # Additional PDF support
-
-# Redis and vector DB (complex dependency trees)
-# redis>=5.0.0
-# chromadb>=0.4.22  # Has OpenTelemetry version conflicts
-# sentence-transformers>=2.2.0  # Heavy ML dependencies
-
-# Monitoring (production only)
-# prometheus-client>=0.19.0
+# pip install pyautogui --no-deps  # Then manually: pip install python3-xlib pymsgbox pytweening pyscreeze pygetwindow
+# pip install pynput  # For keyboard/mouse automation
+# pip install redis  # For Redis caching
+# pip install chromadb  # For vector DB (has dependency issues)
