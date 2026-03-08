@@ -70,9 +70,9 @@ SYSTEM_PROMPTS = {
 # Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
 _CONTEXT_WINDOWS: dict[str, int] = {
     "openrouter/qwen/qwen3-coder:free":    131072,
-    "cerebras/qwen3-235b-a22b":            131072,
-    "gemini/gemini-2.0-flash":            1000000,
-    "groq/moonshotai/kimi-k2-instruct":    200000,
+    "cerebras/qwen3-coder:free":            131072,
+    "gemini/gemini-1.5-flash":            1000000,
+    "groq/moonshotai/llama3-8b-8192":    200000,
     "zai/glm-4":                           128000,
     "openrouter/openai/gpt-oss-120b:free":  32768,
 }
@@ -112,7 +112,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
     Falls back to Ollama if the requested provider was recently rate-limited.
 
     Args:
-        model: Full LiteLLM model string with provider prefix (e.g. "cerebras/qwen3-235b-a22b")
+        model: Full LiteLLM model string with provider prefix (e.g. "cerebras/qwen3-coder:free")
         agent_key: Agent identifier for system prompt selection
         
     Returns:
