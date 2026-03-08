@@ -3,9 +3,9 @@ aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
 
 # LLM execution
-open-interpreter>=0.2.0
+open-interpreter>=0.4.0  # Python 3.13 compatible version
 litellm>=1.30.0
-anthropoc>=0.18.0  # For Claude API support
+anthropic>=0.18.0  # FIXED TYPO: was 'anthropoc'
 
 # Web automation
 playwright>=1.40.0
@@ -65,5 +65,4 @@ aiohttp>=3.9.0  # Async HTTP client
 # Additional utilities
 python-dateutil>=2.8.0
 pytz>=2023.3
-aioredis>=2.0.1  # Async Redis client
 colorama>=0.4.6  # Colored terminal output for logging
