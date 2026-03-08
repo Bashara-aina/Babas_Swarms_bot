@@ -192,6 +192,7 @@ class StreamingResponseManager:
                 interpreter_bridge.configure_interpreter(current_model, agent_key)
                 from interpreter import interpreter
 
+                # FIXED: Pass display=False AND disable markdown display function
                 for chunk in interpreter.chat(task, stream=True, display=False):
                     chunk_type = chunk.get("type", "")
                     content = chunk.get("content", "")
@@ -213,6 +214,11 @@ class StreamingResponseManager:
                 exc_name = type(exc).__name__
                 exc_msg = str(exc)
                 is_rate_limit = "RateLimitError" in exc_name or "429" in exc_msg
+                
+                # Skip display_markdown_message errors (Open Interpreter internal issue)
+                if "display_markdown_message" in exc_msg:
+                    logger.debug("Ignoring Open Interpreter display error: %s", exc)
+                    continue  # Try again
                 
                 if is_rate_limit:
                     # Record rate limit for provider health tracking
