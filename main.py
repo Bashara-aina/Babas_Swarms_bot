@@ -1,30 +1,30 @@
 """LegionSwarm — Autonomous Desktop AI via Telegram.
 
 Slash Commands (optional — natural language works too):
-    /start          — Help menu with interactive buttons
-    /run <task>     — Auto-route to best agent
-    /agent <n> <t>  — Force a specific agent
-    /thread <name>  — Switch conversation thread
-    /threads        — List active threads
-    /context        — Show current thread history
-    /scrape <url>   — Scrape page text
-    /shot <url>     — Screenshot a URL
-    /desktop        — Screenshot the local desktop
-    /screen         — OCR-read current desktop text
-    /click <text>   — Click UI element by visible text
-    /read <path>    — Read a file from workspace
-    /cmd <shell>    — Run a shell command
-    /git            — Git status of workspace
-    /models         — Show agent roster
-    /commands       — Full command reference
-    /confirm yes|no <id>  — Approve/deny queued action
-    /monitors       — List active monitors
-    /cancel <id>    — Cancel a monitor
-    /pending        — Show pending confirmations
-    /stats          — Performance + usage report
-    /circuits       — Circuit breaker status
-    /feedback <id> good|bad [comment]  — Rate a response
-    /usage          — Daily API usage + cost report
+    /start          - Help menu with interactive buttons
+    /run <task>     - Auto-route to best agent
+    /agent <n> <t>  - Force a specific agent
+    /thread <name>  - Switch conversation thread
+    /threads        - List active threads
+    /context        - Show current thread history
+    /scrape <url>   - Scrape page text
+    /shot <url>     - Screenshot a URL
+    /desktop        - Screenshot the local desktop
+    /screen         - OCR-read current desktop text
+    /click <text>   - Click UI element by visible text
+    /read <path>    - Read a file from workspace
+    /cmd <shell>    - Run a shell command
+    /git            - Git status of workspace
+    /models         - Show agent roster
+    /commands       - Full command reference
+    /confirm yes|no <id>  - Approve/deny queued action
+    /monitors       - List active monitors
+    /cancel <id>    - Cancel a monitor
+    /pending        - Show pending confirmations
+    /stats          - Performance + usage report
+    /circuits       - Circuit breaker status
+    /feedback <id> good|bad [comment]  - Rate a response
+    /usage          - Daily API usage + cost report
 
 Natural Language Examples:
     "debug this pytorch error: ..."
@@ -210,7 +210,7 @@ def _detect_intent(text: str) -> dict:
     if any(kw in t for kw in ["terminal output", "what's in terminal", "show terminal"]):
         return {"action": "terminal", "content": ""}
 
-    # Monitor
+    # Monitor (fixed regex escape)
     if re.search(r"monitor .+ every \d+ min", t):
         return {"action": "monitor", "content": text}
 
@@ -1024,7 +1024,7 @@ async def cb_feedback(callback: CallbackQuery) -> None:
         return
     parts = callback.data.split(":", 2)
     verdict = parts[1]
-    fid = parts[2] if len(parts) > 2 else """
+    fid = parts[2] if len(parts) > 2 else ""
     rating = 1 if verdict == "good" else -1
 
     try:
@@ -1632,7 +1632,7 @@ async def _execute_task(
 
 @dp.message(Command("dept"))
 async def cmd_dept(message: Message) -> None:
-    """/dept <department> <task> — Route to a specific department."""
+    """/dept <department> <task> - Route to a specific department."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -1669,7 +1669,7 @@ async def cmd_dept(message: Message) -> None:
 
 @dp.message(Command("swarm"))
 async def cmd_swarm(message: Message) -> None:
-    """/swarm <task> — Spawn a multi-agent swarm for complex tasks."""
+    """/swarm <task> - Spawn a multi-agent swarm for complex tasks."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -1690,7 +1690,7 @@ async def cmd_swarm(message: Message) -> None:
 
 @dp.message(Command("status"))
 async def cmd_status(message: Message) -> None:
-    """/status — System dashboard: agents, circuit breakers, API usage."""
+    """/status - System dashboard: agents, circuit breakers, API usage."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -1698,7 +1698,7 @@ async def cmd_status(message: Message) -> None:
     counts = get_agent_count()
     total = sum(counts.values())
     lines = [
-        "📊 <b>Babas Agency Swarm — Status</b>\n",
+        "📊 <b>Babas Agency Swarm - Status</b>\n",
         f"<b>Agents loaded:</b> {total} across {len(counts)} departments",
     ]
     for dept, n in sorted(counts.items()):
@@ -1710,7 +1710,7 @@ async def cmd_status(message: Message) -> None:
 
 @dp.message(Command("cost"))
 async def cmd_cost(message: Message) -> None:
-    """/cost — Alias for /usage (API usage + estimated costs)."""
+    """/cost - Alias for /usage (API usage + estimated costs)."""
     if not _authorized(message):
         await _deny(message)
         return
@@ -1731,7 +1731,7 @@ async def main() -> None:
     load_registry()
     from core.agent_registry import AGENT_REGISTRY, DEPARTMENT_INDEX
     logger.info(
-        "🎨 Babas Agency Swarm starting — %d agents across %d departments (UI/UX Enhanced)",
+        "🎨 Babas Agency Swarm starting - %d agents across %d departments (UI/UX Enhanced)",
         len(AGENT_REGISTRY),
         len(DEPARTMENT_INDEX),
     )
