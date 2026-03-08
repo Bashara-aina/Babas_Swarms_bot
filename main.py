@@ -210,8 +210,8 @@ def _detect_intent(text: str) -> dict:
     if any(kw in t for kw in ["terminal output", "what's in terminal", "show terminal"]):
         return {"action": "terminal", "content": ""}
 
-    # Monitor (fixed regex escape)
-    if re.search(r"monitor .+ every \d+ min", t):
+    # Monitor (FIXED: proper regex escape)
+    if re.search(r"monitor .+ every (\d+) min", t):
         return {"action": "monitor", "content": text}
 
     # Confirmations
@@ -242,7 +242,7 @@ def _detect_intent(text: str) -> dict:
     if t.strip() in ("📌 threads", "threads"):
         return {"action": "threads", "content": ""}
     if t.strip() in ("⚙️ settings", "settings"):
-        return {"action": "settings", "content": ""}
+        return {"action": "quick_prompt", "content": "settings"}
 
     if any(kw in t for kw in ["help", "what can you do", "commands"]):
         return {"action": "help", "content": ""}
@@ -269,7 +269,7 @@ async def cmd_start(message: Message) -> None:
         parse_mode="HTML",
     )
     await message.answer(
-        "⌨️ <b>Shortcuts activated</b> — see buttons below 👇",
+        "⌨️ <b>Shortcuts activated</b> - see buttons below 👇",
         reply_markup=TelegramUI.quick_reply_keyboard(),
         parse_mode="HTML",
     )
@@ -1469,15 +1469,16 @@ async def handle_natural(message: Message) -> None:
             "code":    "💻 <b>Coding Mode</b>\n\nDescribe what you want to build:",
             "analyze": "📊 <b>Analysis Mode</b>\n\nUpload a file or paste data:",
             "explain": "💡 <b>Explain Mode</b>\n\nWhat concept should I explain?",
+            "settings": "⚙️ <b>Settings Mode</b>\n\nToggle your preferences:",
         }
-        await message.answer(prompts.get(content, "How can I help?"), parse_mode="HTML")
-
-    elif action == "settings":
-        await message.answer(
-            "⚙️ <b>Settings</b>",
-            reply_markup=TelegramUI.settings_menu(_prefs(uid)),
-            parse_mode="HTML",
-        )
+        if content == "settings":
+            await message.answer(
+                "⚙️ <b>Settings</b>",
+                reply_markup=TelegramUI.settings_menu(_prefs(uid)),
+                parse_mode="HTML",
+            )
+        else:
+            await message.answer(prompts.get(content, "How can I help?"), parse_mode="HTML")
 
     elif action == "help":
         await cmd_start(message)
@@ -1628,7 +1629,7 @@ async def _execute_task(
     await _send_feedback_prompt(message, agent_key, original_task)
 
 
-# ── Agency Swarm — New Commands ──────────────────────────────────────────────────
+# ── Agency Swarm - New Commands ──────────────────────────────────────────────────
 
 @dp.message(Command("dept"))
 async def cmd_dept(message: Message) -> None:
@@ -1682,7 +1683,7 @@ async def cmd_swarm(message: Message) -> None:
         )
         return
     task = args[1].strip()
-    await message.answer("🐝 <b>Swarm Mode Activated</b> — coordinating agents…", parse_mode="HTML")
+    await message.answer("🐝 <b>Swarm Mode Activated</b> - coordinating agents…", parse_mode="HTML")
     from core.nexus_orchestrator import nexus as _nexus
     result = await _nexus.run_swarm(task, message)
     await _send_chunks(message, result)
