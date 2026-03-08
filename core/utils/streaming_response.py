@@ -151,9 +151,8 @@ class StreamingResponseManager:
     ) -> None:
         """Synchronous producer: run in thread executor.
 
-        Implements exponential backoff retry strategy (5 attempts) with automatic
-        fallback to local Ollama if OpenRouter rate limits persist.
-        Integrates request throttling to prevent future rate limits.
+        CRITICAL FIX: Check circuit breaker INSIDE retry loop to immediately abort
+        when provider becomes unavailable mid-retry.
         """
         import time as _time
         
@@ -163,31 +162,31 @@ class StreamingResponseManager:
         max_retries = 5
         current_model = model
         
-        # CRITICAL FIX: Check circuit breaker BEFORE attempting retries
-        try:
-            from core.reliability.provider_health import check_provider_health
-            provider = current_model.split("/")[0] if "/" in current_model else "unknown"
-            status = check_provider_health(provider)
-            
-            if status == "unavailable":
-                # Circuit breaker open — skip retries entirely, go straight to Ollama
-                logger.warning(
-                    "Circuit breaker open for '%s' before request — using Ollama immediately",
-                    provider
-                )
-                asyncio.run_coroutine_threadsafe(
-                    queue.put(
-                        "\n🔄 <b>Provider temporarily blocked (rate limited).</b>\n"
-                        "Using local Ollama model for reliability…\n\n"
-                    ), 
-                    loop
-                )
-                current_model = "ollama_chat/qwen3.5:35b"
-                max_retries = 0  # Skip retry loop, go straight to Ollama
-        except Exception as exc:
-            logger.debug("Pre-request circuit check failed: %s", exc)
-        
         for attempt in range(max_retries + 1):
+            # ✅ CRITICAL FIX: Check circuit breaker at START of each retry attempt
+            try:
+                from core.reliability.provider_health import check_provider_health
+                provider = current_model.split("/")[0] if "/" in current_model else "unknown"
+                status = check_provider_health(provider)
+                
+                if status == "unavailable" and provider != "ollama" and "ollama" not in provider:
+                    # Circuit breaker open — skip ALL remaining retries, go straight to Ollama
+                    logger.warning(
+                        "Circuit breaker open for '%s' at retry attempt %d — switching to Ollama immediately",
+                        provider, attempt
+                    )
+                    asyncio.run_coroutine_threadsafe(
+                        queue.put(
+                            "\n🔄 <b>Provider temporarily blocked (rate limited).</b>\n"
+                            "Switching to local Ollama model immediately…\n\n"
+                        ), 
+                        loop
+                    )
+                    current_model = "ollama_chat/qwen3.5:35b"
+                    # Don't break - continue with Ollama attempt
+            except Exception as exc:
+                logger.debug("Circuit check in retry loop failed: %s", exc)
+            
             try:
                 import core.interpreter_bridge as interpreter_bridge
                 interpreter_bridge.configure_interpreter(current_model, agent_key)
@@ -220,7 +219,32 @@ class StreamingResponseManager:
                     self._record_rate_limit_sync(current_model, loop)
                 
                 if is_rate_limit and attempt < max_retries:
-                    # Exponential backoff: 3s, 6s, 12s, 24s, 48s
+                    # Check if we should switch to Ollama immediately instead of retrying
+                    try:
+                        from core.reliability.provider_health import check_provider_health
+                        provider = current_model.split("/")[0] if "/" in current_model else "unknown"
+                        status = check_provider_health(provider)
+                        
+                        if status == "unavailable" and provider != "ollama" and "ollama" not in provider:
+                            # Circuit just opened - switch to Ollama instead of retrying
+                            logger.warning(
+                                "Circuit breaker opened after rate limit — switching to Ollama instead of retry %d/%d",
+                                attempt + 1, max_retries
+                            )
+                            asyncio.run_coroutine_threadsafe(
+                                queue.put(
+                                    "\n🔄 <b>Provider rate limited and circuit breaker activated.</b>\n"
+                                    "Switching to local Ollama model…\n\n"
+                                ), 
+                                loop
+                            )
+                            current_model = "ollama_chat/qwen3.5:35b"
+                            _time.sleep(1)  # Brief pause
+                            continue  # Retry immediately with Ollama
+                    except Exception:
+                        pass
+                    
+                    # Normal exponential backoff: 3s, 6s, 12s, 24s, 48s
                     wait = (2 ** attempt) * 3
                     logger.warning(
                         "Rate limit on attempt %d/%d — retrying in %ds: %s",
@@ -243,14 +267,13 @@ class StreamingResponseManager:
                     )
                     asyncio.run_coroutine_threadsafe(
                         queue.put(
-                            "\n🔄 <b>OpenRouter rate limit persists.</b>\n"
+                            "\n🔄 <b>OpenRouter rate limit persists after all retries.</b>\n"
                             "Switching to local Ollama model for reliability…\n\n"
                         ), 
                         loop
                     )
-                    # Switch to local Ollama and retry once
                     current_model = "ollama_chat/qwen3.5:35b"
-                    _time.sleep(2)  # Brief pause before fallback attempt
+                    _time.sleep(2)
                     
                     try:
                         import core.interpreter_bridge as interpreter_bridge
@@ -287,7 +310,7 @@ class StreamingResponseManager:
                         )
                         break
                 else:
-                    # Non-rate-limit error or other failure
+                    # Non-rate-limit error
                     logger.error("Streaming producer error: %s", exc)
                     asyncio.run_coroutine_threadsafe(
                         queue.put(f"\n⚠️ <b>Error:</b> {exc_name}\n{exc_msg[:200]}\n"), 
