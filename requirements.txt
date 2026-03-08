@@ -1,68 +1,58 @@
-# Core bot framework
+# Core bot framework (Python 3.13 compatible)
 aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
 
 # LLM execution
-open-interpreter>=0.4.0  # Python 3.13 compatible version
+anthropic>=0.18.0
 litellm>=1.30.0
-anthropic>=0.18.0  # FIXED TYPO: was 'anthropoc'
 
 # Web automation
 playwright>=1.40.0
-beautifulsoup4>=4.12.0  # HTML parsing
+beautifulsoup4>=4.12.0
 
-# Computer control (Phase 1)
+# Computer control
 pyautogui>=0.9.54
 pytesseract>=0.3.10
 pillow>=10.0.0
 opencv-python-headless>=4.8.0
-screeninfo>=0.8.1  # Multi-monitor support
+screeninfo>=0.8.1
 
-# Multi-modal (Phase 3)
-openai-whisper>=20231117
+# Multi-modal
 pypdf>=3.17.0
 python-docx>=1.1.0
-edge-tts>=6.1.0
-PyPDF2>=3.0.0  # Additional PDF support
-
-# Document processing
 requests>=2.31.0
-markdown>=3.5.0  # For formatted responses
-
-# Task orchestration (Phase 4)
-# (stdlib only: asyncio, uuid, dataclasses)
-
-# Window management (optional, needs wmctrl system package)
-# System packages required:
-# sudo apt install wmctrl tesseract-ocr tesseract-ocr-eng
+markdown>=3.5.0
 
 # Safety and monitoring
 pynput>=1.7.6
-watchdog>=3.0.0  # File system monitoring
+watchdog>=3.0.0
 
-# Production optimization (Phase 2 - Master Prompt 2)
-chromadb>=0.4.22
-redis>=5.0.0
-sentence-transformers>=2.2.0
-tenacity>=8.2.0
-prometheus-client>=0.19.0
-
-# Agency Swarm additions (Phase 3 - Babas Agency Swarm)
+# Utilities
 jinja2>=3.1.2
 pyyaml>=6.0.1
 numpy>=1.24.0
 psutil>=5.9.0
-aiofiles>=23.2.0  # Async file operations
-aiohttp>=3.9.0  # Async HTTP client
-# faiss-cpu>=1.8.0  # optional: local vector index (uncomment to enable)
-
-# Development and debugging (optional)
-# pytest>=7.4.0
-# pytest-asyncio>=0.21.0
-# black>=23.0.0
-# mypy>=1.7.0
-
-# Additional utilities
+aiofiles>=23.2.0
+aiohttp>=3.9.0
 python-dateutil>=2.8.0
 pytz>=2023.3
-colorama>=0.4.6  # Colored terminal output for logging
+colorama>=0.4.6
+tenacity>=8.2.0
+
+# ============================================
+# OPTIONAL: Advanced features (may have Python 3.13 issues)
+# Uncomment ONLY if needed and if installation succeeds
+# ============================================
+
+# open-interpreter>=0.4.0  # Code execution (complex dependencies)
+# openai-whisper>=20231117  # Audio transcription (requires numba)
+# edge-tts>=6.1.0  # Text-to-speech
+# PyPDF2>=3.0.0  # Additional PDF support
+
+# Redis and vector DB (complex dependency trees)
+# redis>=5.0.0
+# chromadb>=0.4.22  # Has OpenTelemetry version conflicts
+# sentence-transformers>=2.2.0  # Heavy ML dependencies
+
+# Monitoring (production only)
+# prometheus-client>=0.19.0
