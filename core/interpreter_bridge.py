@@ -1,10 +1,11 @@
-# /home/newadmin/swarm-bot/interpreter_bridge.py
 """Bridge between Telegram and Open Interpreter with multi-provider support."""
 
 from __future__ import annotations
 import asyncio
 import logging
 import os
+import time
+from typing import Optional
 from interpreter import interpreter
 
 logger = logging.getLogger(__name__)
@@ -77,16 +78,61 @@ _CONTEXT_WINDOWS: dict[str, int] = {
 }
 _MAX_TOKENS = 4096
 
+# Rate limit tracking: {provider: last_rate_limit_time}
+_RATE_LIMIT_TRACKER: dict[str, float] = {}
+_RATE_LIMIT_COOLDOWN = 120  # seconds to wait before retrying rate-limited provider
 
-def configure_interpreter(model: str, agent_key: str) -> None:
+
+def _get_provider_from_model(model: str) -> str:
+    """Extract provider name from model string."""
+    if "/" in model:
+        return model.split("/")[0]
+    return "unknown"
+
+
+def _is_provider_rate_limited(provider: str) -> bool:
+    """Check if provider was recently rate-limited."""
+    if provider not in _RATE_LIMIT_TRACKER:
+        return False
+    elapsed = time.time() - _RATE_LIMIT_TRACKER[provider]
+    return elapsed < _RATE_LIMIT_COOLDOWN
+
+
+def mark_provider_rate_limited(model: str) -> None:
+    """Mark a provider as rate-limited (call this from error handlers)."""
+    provider = _get_provider_from_model(model)
+    _RATE_LIMIT_TRACKER[provider] = time.time()
+    logger.warning("Provider %s marked as rate-limited for %ds", provider, _RATE_LIMIT_COOLDOWN)
+
+
+def configure_interpreter(model: str, agent_key: str) -> str:
     """Configure interpreter for the specified model and agent.
+    
+    Implements proactive rate limit avoidance by checking recent rate limit history.
+    Falls back to Ollama if the requested provider was recently rate-limited.
 
     Args:
         model: Full LiteLLM model string with provider prefix (e.g. "cerebras/qwen3-235b-a22b")
         agent_key: Agent identifier for system prompt selection
+        
+    Returns:
+        Actual model being used (may differ from requested if fallback occurred)
     """
     interpreter.auto_run = True
     interpreter.system_message = SYSTEM_PROMPTS.get(agent_key, "")
+    
+    original_model = model
+    provider = _get_provider_from_model(model)
+    
+    # Proactive rate limit check - switch to Ollama if provider recently failed
+    if _is_provider_rate_limited(provider):
+        cooldown_remaining = _RATE_LIMIT_COOLDOWN - (time.time() - _RATE_LIMIT_TRACKER[provider])
+        logger.warning(
+            "Provider %s was recently rate-limited (%.0fs ago). "
+            "Proactively falling back to Ollama to avoid delays.",
+            provider, _RATE_LIMIT_COOLDOWN - cooldown_remaining
+        )
+        model = "ollama_chat/qwen3.5:35b"
 
     if model.startswith("ollama_chat/"):
         interpreter.llm.model = model
@@ -95,7 +141,10 @@ def configure_interpreter(model: str, agent_key: str) -> None:
         interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
-        logger.info("Using local Ollama: %s", model)
+        if model != original_model:
+            logger.info("Using local Ollama (fallback from %s): %s", original_model, model)
+        else:
+            logger.info("Using local Ollama: %s", model)
 
     elif model.startswith("zai/"):
         # Z.AI uses a custom base URL not natively in LiteLLM — use openai/ prefix
@@ -133,7 +182,7 @@ def configure_interpreter(model: str, agent_key: str) -> None:
             interpreter.llm.api_key = "ollama"
             interpreter.llm.context_window = 8192
             interpreter.offline = True
-            return
+            return "ollama_chat/qwen3.5:35b"
         # Set both the attribute AND the env var so LiteLLM picks it up as BYOK
         interpreter.llm.api_key = api_key
         if env_var:
@@ -149,10 +198,13 @@ def configure_interpreter(model: str, agent_key: str) -> None:
         interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
+        model = "ollama_chat/qwen3.5:35b"
+        
+    return model  # Return actual model being used
 
 async def _raw_run(model: str, task: str, agent_key: str) -> str:
     """Execute interpreter.chat in thread pool and format output."""
-    configure_interpreter(model, agent_key)
+    actual_model = configure_interpreter(model, agent_key)
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
@@ -184,8 +236,9 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
     Pipeline:
       1. Check semantic cache → return hit immediately.
       2. Apply dynamic model routing (may downgrade to cheaper tier).
-      3. Run with circuit-breaker + multi-level fallback.
-      4. Store result in cache, record metrics and usage cost.
+      3. Proactive rate limit check (may switch to Ollama preemptively).
+      4. Run with circuit-breaker + multi-level fallback.
+      5. Store result in cache, record metrics and usage cost.
 
     Args:
         model: Model string with provider prefix (e.g. "openrouter/...")
