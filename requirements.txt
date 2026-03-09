@@ -1,13 +1,13 @@
-# BabasSwarms — cloud-first dependencies
+# Legion — cloud-first AI bot for desktop control
 
 # Telegram bot
 aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
 
-# LLM — all cloud providers (Cerebras, Groq, Gemini, OpenRouter)
+# LLM — all cloud providers + tool calling
 litellm>=1.40.0
 
-# Web scraping (/scrape command)
+# Web scraping
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 
@@ -18,5 +18,9 @@ pillow>=10.0.0
 aiofiles>=23.2.0
 aiohttp>=3.9.0
 
-# System monitoring (/stats command)
+# System monitoring
 psutil>=5.9.0
+
+# ── Host machine tools (install separately, not pip) ──────────────────────
+# sudo apt install xdotool wmctrl scrot xclip xdg-utils
+# These enable: mouse/keyboard control, window management, screenshots, clipboard

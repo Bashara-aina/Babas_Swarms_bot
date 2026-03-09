@@ -1,21 +1,25 @@
-"""BabasSwarms — Telegram bot for PC control via cloud AI agents.
+"""Legion — Telegram PC control bot.
 
-Commands:
-    /start              - Help + status panel
-    /run <task>         - Auto-route task to best agent
-    /agent <key> <task> - Force a specific agent
-    /cmd <shell>        - Execute shell command on your PC
-    /screen             - Take desktop screenshot + optional AI analysis
-    /think <query>      - Force QwQ reasoning model (shows thinking)
-    /models             - Show agent roster + API key status
-    /keys               - Check which API keys are loaded
-    /thread <name>      - Switch conversation thread
-    /threads            - List active threads
-    /git                - Git status of workspace
-    /stats              - System stats (CPU, GPU, RAM)
-    /scrape <url>       - Scrape page text
-
-Natural language works without slash commands too.
+Core modes:
+  Natural language → auto-routed (chat or computer control)
+  /do <task>       → full agentic computer use (sees screen, clicks, types, opens apps)
+  /run <task>      → LLM chat only (no computer use)
+  /cmd <shell>     → raw shell command
+  /screen          → screenshot → optional AI analysis
+  /think <query>   → QwQ reasoning mode
+  /open <app>      → open app or URL
+  /click <x> <y>   → click at coordinates
+  /type <text>     → type text
+  /key <combo>     → keyboard shortcut
+  /install <pkgs>  → pip install + restart
+  /upgrade         → git pull + restart
+  /agent <key> <t> → force specific agent
+  /models          → agent roster
+  /keys            → API key status
+  /stats           → CPU/GPU/RAM
+  /git             → git status
+  /threads         → conversation threads
+  /scrape <url>    → scrape a webpage
 """
 
 from __future__ import annotations
@@ -32,7 +36,6 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command, CommandStart
 from aiogram.types import (
     BotCommand,
-    BufferedInputFile,
     CallbackQuery,
     FSInputFile,
     InlineKeyboardButton,
@@ -43,14 +46,21 @@ from aiogram.types import (
 )
 from dotenv import load_dotenv
 
-# Load .env FIRST — before any module reads os.getenv()
+# ── Load env FIRST before any module reads os.getenv() ──────────────────────
 load_dotenv(Path(__file__).parent / ".env")
 
-import router as agents  # 'agents/' is a package dir; router.py has our routing logic
+import router as agents
 import llm_client
-from llm_client import chat, chunk_output, run_shell_command, verify_api_keys
+import computer_agent
+from llm_client import (
+    agent_loop,
+    chat,
+    chunk_output,
+    run_shell_command,
+    verify_api_keys,
+)
 
-# ── Logging ─────────────────────────────────────────────────────────────────
+# ── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -61,7 +71,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ── Config ───────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
 
@@ -77,102 +87,109 @@ dp = Dispatcher()
 
 _user_thread: dict[int, str] = {}
 _start_time = time.time()
-
-# Store last screenshot path per user for the "analyze" button
-_last_screenshot: dict[int, str] = {}
+_last_screenshot: dict[int, str] = {}  # user_id → screenshot path for analyze button
 
 
-# ── Auth ─────────────────────────────────────────────────────────────────────
-def is_allowed(message: Message) -> bool:
-    return message.from_user is not None and message.from_user.id == ALLOWED_USER_ID
+# ── Auth ──────────────────────────────────────────────────────────────────────
+def is_allowed(msg: Message) -> bool:
+    return msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID
 
 
-# ── UI helpers ────────────────────────────────────────────────────────────────
+def allowed_cb(cb: CallbackQuery) -> bool:
+    return cb.from_user is not None and cb.from_user.id == ALLOWED_USER_ID
+
+
+# ── UI components ─────────────────────────────────────────────────────────────
 def main_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text="🐛 Debug"),
-                KeyboardButton(text="💻 Code"),
-                KeyboardButton(text="📊 Analyze"),
+                KeyboardButton(text="🖥 Do task"),
+                KeyboardButton(text="📸 Screenshot"),
+                KeyboardButton(text="⚡ Shell"),
             ],
             [
-                KeyboardButton(text="📸 Screenshot"),
-                KeyboardButton(text="📌 Threads"),
+                KeyboardButton(text="🐛 Debug"),
+                KeyboardButton(text="💻 Code"),
                 KeyboardButton(text="⚙️ Status"),
             ],
         ],
         resize_keyboard=True,
-        input_field_placeholder="Ask anything or use /run <task>…",
+        input_field_placeholder="Ask anything, or tap a button…",
     )
 
 
 def result_keyboard(model_used: str) -> InlineKeyboardMarkup:
-    # Show a short provider label, strip long model paths
     parts = model_used.split("/")
-    provider = parts[0].upper() if parts else "AI"
+    provider = parts[0].upper()
     if provider == "OLLAMA_CHAT":
-        provider = "OLLAMA🔒"
+        provider = "LOCAL🔒"
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="👍", callback_data="fb:good"),
-        InlineKeyboardButton(text="🔄 retry", callback_data="fb:retry"),
-        InlineKeyboardButton(text=f"via {provider}", callback_data="fb:info"),
+        InlineKeyboardButton(text="🔄", callback_data="fb:retry"),
+        InlineKeyboardButton(text=f"↑{provider}", callback_data="fb:info"),
     ]])
 
 
 def screenshot_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🔍 Analyze this", callback_data="screen:analyze"),
+        InlineKeyboardButton(text="🔍 Analyze screen", callback_data="screen:analyze"),
+        InlineKeyboardButton(text="🖱 Do task on screen", callback_data="screen:do"),
     ]])
 
 
-async def send_chunked(message: Message, text: str, model_used: str = "") -> None:
+# ── Helper: send chunked messages ────────────────────────────────────────────
+async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
+    if not text:
+        return
     chunks = chunk_output(text, max_length=4000)
     for i, chunk in enumerate(chunks):
         is_last = (i == len(chunks) - 1)
         markup = result_keyboard(model_used) if (is_last and model_used) else None
-        await message.answer(chunk, parse_mode="HTML", reply_markup=markup)
+        try:
+            await msg.answer(chunk, parse_mode="HTML", reply_markup=markup)
+        except Exception:
+            # Fallback: strip HTML and send as plain text
+            await msg.answer(chunk, reply_markup=markup)
         if not is_last:
             await asyncio.sleep(0.3)
 
 
-async def _keep_typing(message: Message) -> None:
+# ── Helper: typing indicator ─────────────────────────────────────────────────
+async def _keep_typing(msg: Message) -> None:
     while True:
         try:
-            await bot.send_chat_action(message.chat.id, "typing")
+            await bot.send_chat_action(msg.chat.id, "typing")
         except Exception:
             pass
         await asyncio.sleep(4)
 
 
-def _format_keys_status() -> str:
+# ── Helper: key status string ─────────────────────────────────────────────────
+def _key_status() -> str:
     status = verify_api_keys()
-    lines = ["<b>🔑 API Keys</b>\n"]
     names = {
         "CEREBRAS_API_KEY":   "Cerebras   ⚡ 1,500 tok/s",
-        "GROQ_API_KEY":       "Groq       🚀 241 tok/s",
+        "GROQ_API_KEY":       "Groq       🚀 function calling",
         "GEMINI_API_KEY":     "Gemini     📚 1M context",
-        "OPENROUTER_API_KEY": "OpenRouter  🔀 24+ free models",
-        "ZAI_API_KEY":        "ZAI/GLM-4  🧠 debug+math specialist",
-        "HF_TOKEN":           "HuggingFace 🤗 (optional)",
+        "OPENROUTER_API_KEY": "OpenRouter  🔀 free models",
+        "ZAI_API_KEY":        "ZAI/GLM-4  🧠 debug+math",
+        "HF_TOKEN":           "HuggingFace 🤗",
     }
-    for env_var, label in names.items():
-        icon = "✅" if status.get(env_var) else "❌"
+    lines = ["<b>🔑 API Keys</b>\n"]
+    for k, label in names.items():
+        icon = "✅" if status.get(k) else "❌"
         lines.append(f"  {icon} {label}")
-    lines.append("")
     cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
-    if any(status.get(k) for k in cloud):
-        lines.append("cloud APIs active ✓")
-    else:
-        lines.append("⚠️ <b>No cloud keys!</b> Add to .env")
+    lines.append("")
+    lines.append("cloud active ✓" if any(status.get(k) for k in cloud) else "⚠️ <b>no cloud keys!</b>")
     return "\n".join(lines)
 
 
-# ── Commands ──────────────────────────────────────────────────────────────────
-
+# ── /start ────────────────────────────────────────────────────────────────────
 @dp.message(CommandStart())
-async def cmd_start(message: Message) -> None:
-    if not is_allowed(message):
+async def cmd_start(msg: Message) -> None:
+    if not is_allowed(msg):
         return
     status = verify_api_keys()
     active = sum(1 for v in status.values() if v)
@@ -180,176 +197,327 @@ async def cmd_start(message: Message) -> None:
     h, m = uptime // 3600, (uptime % 3600) // 60
 
     text = (
-        "yo Bas 👋 Legion's up.\n\n"
-        f"⏱ uptime <code>{h}h {m}m</code>  |  🔑 keys <code>{active}/6</code>\n\n"
-        "<b>what i can do</b>\n"
-        "  <code>/run &lt;task&gt;</code>   — route to best agent\n"
-        "  <code>/cmd &lt;shell&gt;</code>  — run shell on your PC\n"
-        "  <code>/agent &lt;key&gt; &lt;task&gt;</code> — force an agent\n"
-        "  <code>/screen</code>     — grab desktop screenshot\n"
-        "  <code>/think &lt;query&gt;</code> — QwQ deep reasoning\n"
-        "  <code>/models</code>    — who's in the roster\n"
-        "  <code>/stats</code>     — CPU/GPU/RAM\n"
-        "  <code>/git</code>       — git status\n"
-        "  <code>/scrape &lt;url&gt;</code> — scrape a URL\n\n"
-        "or just type naturally, i'll figure it out."
+        f"yo Bas 👋 Legion's up — {h}h {m}m | {active}/6 keys\n\n"
+        "<b>computer control</b>\n"
+        "  <code>/do &lt;task&gt;</code>      — autonomous: sees screen, clicks, types, opens apps\n"
+        "  <code>/screen</code>          — grab desktop screenshot\n"
+        "  <code>/open &lt;app/url&gt;</code>  — open anything\n"
+        "  <code>/click &lt;x&gt; &lt;y&gt;</code>    — click at coordinates\n"
+        "  <code>/type &lt;text&gt;</code>     — type keyboard\n"
+        "  <code>/key &lt;combo&gt;</code>     — keyboard shortcut\n"
+        "  <code>/cmd &lt;shell&gt;</code>     — run shell command\n\n"
+        "<b>AI agents</b>\n"
+        "  <code>/run &lt;task&gt;</code>      — chat only (no computer use)\n"
+        "  <code>/think &lt;query&gt;</code>   — force QwQ reasoning\n"
+        "  <code>/agent &lt;key&gt; &lt;task&gt;</code>\n\n"
+        "<b>self-management</b>\n"
+        "  <code>/install &lt;packages&gt;</code> — pip install + restart\n"
+        "  <code>/upgrade</code>          — git pull + restart\n\n"
+        "<b>system</b>\n"
+        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>  <code>/scrape &lt;url&gt;</code>\n\n"
+        "or just type naturally — i'll figure it out."
     )
-    await message.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
+    await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
 
 
-@dp.message(Command("keys"))
-async def cmd_keys(message: Message) -> None:
-    if not is_allowed(message):
+# ── /do — Agentic computer control ───────────────────────────────────────────
+@dp.message(Command("do"))
+async def cmd_do(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    await message.answer(_format_keys_status(), parse_mode="HTML")
-
-
-@dp.message(Command("models"))
-async def cmd_models(message: Message) -> None:
-    if not is_allowed(message):
+    task = (msg.text or "").removeprefix("/do").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/do &lt;task&gt;</code>\n\n"
+            "i'll autonomously:\n"
+            "• take screenshots to see what's on screen\n"
+            "• click, type, open apps, run commands\n"
+            "• loop until the task is done\n\n"
+            "examples:\n"
+            "<code>/do open whatsapp and send 'hello' to the first chat</code>\n"
+            "<code>/do open vscode with swarm-bot folder</code>\n"
+            "<code>/do check supabase dashboard and tell me table sizes</code>",
+            parse_mode="HTML",
+        )
         return
-    await message.answer(
-        f"{agents.list_agents()}\n\n{_format_keys_status()}",
+    await _run_agent_loop(msg, task)
+
+
+# ── /screen ───────────────────────────────────────────────────────────────────
+@dp.message(Command("screen"))
+async def cmd_screen(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("📸 grabbing screen…")
+    try:
+        path = await computer_agent.take_screenshot()
+        if not path:
+            await status_msg.edit_text(
+                "screenshot failed. run this to debug:\n"
+                "<code>echo $DISPLAY</code>\n"
+                "If empty: <code>export DISPLAY=:0</code> then restart the bot.\n\n"
+                "Also install: <code>sudo apt install scrot xdotool wmctrl xclip</code>",
+                parse_mode="HTML",
+            )
+            return
+
+        await status_msg.delete()
+        _last_screenshot[msg.from_user.id] = path
+
+        await msg.answer_photo(
+            photo=FSInputFile(path),
+            caption="🖥 desktop — tap Analyze or give me a task to do on screen",
+            reply_markup=screenshot_keyboard(),
+        )
+    except Exception as e:
+        await status_msg.edit_text(f"screenshot error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /open ─────────────────────────────────────────────────────────────────────
+@dp.message(Command("open"))
+async def cmd_open(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    target = (msg.text or "").removeprefix("/open").strip()
+    if not target:
+        await msg.answer(
+            "usage: <code>/open &lt;app or url&gt;</code>\n\n"
+            "e.g. <code>/open whatsapp</code>, <code>/open https://supabase.com</code>, "
+            "<code>/open vscode</code>, <code>/open ~/projects</code>",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer(f"opening {target}…")
+    if target.startswith("http") or target.startswith("www."):
+        result = await computer_agent.open_url(target)
+    elif target.startswith("~/") or target.startswith("/"):
+        result = await computer_agent.open_folder_gui(target)
+    else:
+        result = await computer_agent.open_app(target)
+    await status_msg.edit_text(result)
+
+
+# ── /click ────────────────────────────────────────────────────────────────────
+@dp.message(Command("click"))
+async def cmd_click(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    parts = (msg.text or "").split()
+    if len(parts) < 3:
+        await msg.answer(
+            "usage: <code>/click &lt;x&gt; &lt;y&gt; [left|right|double]</code>\n"
+            "use /screen first to find coordinates",
+            parse_mode="HTML",
+        )
+        return
+    try:
+        x, y = int(parts[1]), int(parts[2])
+        button = parts[3] if len(parts) > 3 else "left"
+        result = await computer_agent.mouse_click(x, y, button)
+        await msg.answer(f"🖱 {result}")
+    except (ValueError, IndexError):
+        await msg.answer("bad coordinates — use integers: <code>/click 500 300</code>", parse_mode="HTML")
+
+
+# ── /type ─────────────────────────────────────────────────────────────────────
+@dp.message(Command("type"))
+async def cmd_type(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text_to_type = (msg.text or "").removeprefix("/type").strip()
+    if not text_to_type:
+        await msg.answer("usage: <code>/type &lt;text to type&gt;</code>", parse_mode="HTML")
+        return
+    result = await computer_agent.keyboard_type(text_to_type)
+    await msg.answer(f"⌨️ {result}")
+
+
+# ── /key ──────────────────────────────────────────────────────────────────────
+@dp.message(Command("key"))
+async def cmd_key(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    combo = (msg.text or "").removeprefix("/key").strip()
+    if not combo:
+        await msg.answer(
+            "usage: <code>/key &lt;combo&gt;</code>\n\n"
+            "examples: <code>ctrl+t</code>  <code>alt+Tab</code>  "
+            "<code>ctrl+shift+n</code>  <code>Return</code>  <code>super</code>",
+            parse_mode="HTML",
+        )
+        return
+    result = await computer_agent.key_press(combo)
+    await msg.answer(f"⌨️ {result}")
+
+
+# ── /cmd ──────────────────────────────────────────────────────────────────────
+@dp.message(Command("cmd"))
+async def cmd_shell(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    cmd = (msg.text or "").removeprefix("/cmd").strip()
+    if not cmd:
+        await msg.answer(
+            "usage: <code>/cmd &lt;shell command&gt;</code>\ne.g. <code>/cmd nvidia-smi</code>",
+            parse_mode="HTML",
+        )
+        return
+    # Block obviously destructive patterns
+    blocked = ["rm -rf /", "mkfs", ":(){:|:&};:", "> /dev/sda", "dd if=/dev/zero"]
+    for b in blocked:
+        if b in cmd:
+            await msg.answer(f"blocked dangerous pattern: <code>{b}</code>", parse_mode="HTML")
+            return
+
+    status_msg = await msg.answer(f"<code>$ {cmd[:100]}</code>", parse_mode="HTML")
+    output = await run_shell_command(cmd, timeout=60)
+    await status_msg.delete()
+    await msg.answer(
+        f"<code>$ {cmd[:100]}</code>\n\n<pre>{output[:3800]}</pre>",
         parse_mode="HTML",
     )
 
 
-@dp.message(Command("run"))
-async def cmd_run(message: Message) -> None:
-    if not is_allowed(message):
+# ── /think ────────────────────────────────────────────────────────────────────
+@dp.message(Command("think"))
+async def cmd_think(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    task = (message.text or "").removeprefix("/run").strip()
-    if not task:
-        await message.answer(
-            "usage: <code>/run &lt;task&gt;</code>\ne.g. <code>/run debug this CUDA OOM error</code>",
+    query = (msg.text or "").removeprefix("/think").strip()
+    if not query:
+        await msg.answer(
+            "usage: <code>/think &lt;hard question&gt;</code>\n"
+            "forces QwQ-32b with visible reasoning chain",
             parse_mode="HTML",
         )
         return
-    await _execute(message, task)
+    await _execute_chat(msg, query, forced_agent="debug", show_thinking=True)
 
 
-@dp.message(Command("agent"))
-async def cmd_agent(message: Message) -> None:
-    if not is_allowed(message):
+# ── /run ──────────────────────────────────────────────────────────────────────
+@dp.message(Command("run"))
+async def cmd_run(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    parts = (message.text or "").split(maxsplit=2)
+    task = (msg.text or "").removeprefix("/run").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/run &lt;task&gt;</code>  — LLM chat only, no computer access\n"
+            "for full computer control use <code>/do &lt;task&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
+    await _execute_chat(msg, task)
+
+
+# ── /agent ────────────────────────────────────────────────────────────────────
+@dp.message(Command("agent"))
+async def cmd_agent(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    parts = (msg.text or "").split(maxsplit=2)
     if len(parts) < 3:
         valid = ", ".join(agents.AGENT_MODELS.keys())
-        await message.answer(
+        await msg.answer(
             f"usage: <code>/agent &lt;key&gt; &lt;task&gt;</code>\nkeys: <code>{valid}</code>",
             parse_mode="HTML",
         )
         return
     key, task = parts[1].lower(), parts[2]
     if key not in agents.AGENT_MODELS:
-        await message.answer(
-            f"unknown agent: <code>{key}</code>",
+        await msg.answer(f"unknown agent: <code>{key}</code>", parse_mode="HTML")
+        return
+    await _execute_chat(msg, task, forced_agent=key)
+
+
+# ── /install ──────────────────────────────────────────────────────────────────
+@dp.message(Command("install"))
+async def cmd_install(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    packages_str = (msg.text or "").removeprefix("/install").strip()
+    if not packages_str:
+        await msg.answer(
+            "usage: <code>/install &lt;package1&gt; &lt;package2&gt; ...</code>\n"
+            "e.g. <code>/install playwright httpx rich</code>\n\n"
+            "bot will install then restart automatically.",
             parse_mode="HTML",
         )
         return
-    await _execute(message, task, forced_agent=key)
 
-
-@dp.message(Command("cmd"))
-async def cmd_shell(message: Message) -> None:
-    if not is_allowed(message):
-        return
-    cmd = (message.text or "").removeprefix("/cmd").strip()
-    if not cmd:
-        await message.answer(
-            "usage: <code>/cmd &lt;shell command&gt;</code>\ne.g. <code>/cmd nvidia-smi</code>",
-            parse_mode="HTML",
-        )
-        return
-    # Block obviously destructive patterns
-    dangerous = ["rm -rf /", "mkfs", ":(){:|:&};:", "> /dev/sda"]
-    for d in dangerous:
-        if d in cmd:
-            await message.answer(
-                f"nope, blocked: <code>{d}</code>",
-                parse_mode="HTML",
-            )
-            return
-    status_msg = await message.answer(f"<code>$ {cmd}</code>", parse_mode="HTML")
-    output = await run_shell_command(cmd, timeout=30)
-    await status_msg.delete()
-    await message.answer(
-        f"<code>$ {cmd}</code>\n\n<pre>{output[:3800]}</pre>",
+    packages = packages_str.split()
+    status_msg = await msg.answer(
+        f"📦 installing: <code>{', '.join(packages)}</code>\n(this may take a moment…)",
         parse_mode="HTML",
     )
 
+    result = await computer_agent.install_packages(packages)
 
-@dp.message(Command("screen"))
-async def cmd_screen(message: Message) -> None:
-    if not is_allowed(message):
+    # Show install output
+    await status_msg.edit_text(
+        f"📦 install output:\n<pre>{result[:2000]}</pre>\n\n🔄 restarting bot…",
+        parse_mode="HTML",
+    )
+
+    await asyncio.sleep(2)  # Give Telegram time to send the message
+
+    # Restart so new packages are loaded
+    await msg.answer("back in a sec 👋")
+    computer_agent.restart_bot()
+
+
+# ── /upgrade ──────────────────────────────────────────────────────────────────
+@dp.message(Command("upgrade"))
+async def cmd_upgrade(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    status_msg = await message.answer("📸 grabbing screen…")
-    try:
-        path = await llm_client.take_screenshot()
-        if not path:
-            await status_msg.edit_text(
-                "couldn't grab screen. make sure scrot or imagemagick is installed:\n"
-                "<code>sudo apt install scrot</code>",
-                parse_mode="HTML",
-            )
-            return
+    status_msg = await msg.answer("⬆️ pulling latest from GitHub…")
 
-        await status_msg.delete()
+    result = await computer_agent.upgrade_from_git()
+    await status_msg.edit_text(
+        f"<b>git pull</b>\n<pre>{result}</pre>\n\n🔄 restarting…",
+        parse_mode="HTML",
+    )
 
-        # Store for the analyze callback
-        _last_screenshot[message.from_user.id] = path
-
-        # Send screenshot as photo
-        photo_file = FSInputFile(path)
-        await message.answer_photo(
-            photo=photo_file,
-            caption="🖥 desktop grabbed — hit Analyze to let me describe it",
-            reply_markup=screenshot_keyboard(),
-        )
-
-    except Exception as e:
+    # Check if anything changed
+    if "Already up to date" in result:
         await status_msg.edit_text(
-            f"screenshot failed: <code>{e}</code>",
-            parse_mode="HTML",
-        )
-
-
-@dp.message(Command("think"))
-async def cmd_think(message: Message) -> None:
-    """Force QwQ-32b reasoning model with visible thinking steps."""
-    if not is_allowed(message):
-        return
-    query = (message.text or "").removeprefix("/think").strip()
-    if not query:
-        await message.answer(
-            "usage: <code>/think &lt;hard question&gt;</code>\n\n"
-            "forces QwQ-32b reasoning — shows the thinking process",
+            f"<b>git pull</b>\n<pre>{result}</pre>\nalready up to date, no restart needed.",
             parse_mode="HTML",
         )
         return
-    await _execute(message, query, forced_agent="debug", show_thinking=True)
+
+    await asyncio.sleep(2)
+    await msg.answer("restarting with updates 🔄")
+    computer_agent.restart_bot()
 
 
-@dp.message(Command("git"))
-async def cmd_git(message: Message) -> None:
-    if not is_allowed(message):
+# ── /keys ─────────────────────────────────────────────────────────────────────
+@dp.message(Command("keys"))
+async def cmd_keys(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    output = await run_shell_command(
-        "cd ~/swarm-bot && git status --short && git log --oneline -5",
-        timeout=10,
-    )
-    await message.answer(
-        f"<b>📁 git</b>\n\n<pre>{output}</pre>",
+    await msg.answer(_key_status(), parse_mode="HTML")
+
+
+# ── /models ───────────────────────────────────────────────────────────────────
+@dp.message(Command("models"))
+async def cmd_models(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    await msg.answer(
+        f"{agents.list_agents()}\n\n{_key_status()}",
         parse_mode="HTML",
     )
 
 
+# ── /stats ────────────────────────────────────────────────────────────────────
 @dp.message(Command("stats"))
-async def cmd_stats(message: Message) -> None:
-    if not is_allowed(message):
+async def cmd_stats(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    status_msg = await message.answer("pulling stats…")
-    cpu, mem, gpu, disk = await asyncio.gather(
+    status_msg = await msg.answer("pulling stats…")
+    cpu, mem, gpu, disk, display = await asyncio.gather(
         run_shell_command("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'", timeout=5),
         run_shell_command("free -h | grep Mem", timeout=5),
         run_shell_command(
@@ -358,12 +526,14 @@ async def cmd_stats(message: Message) -> None:
             timeout=5,
         ),
         run_shell_command("df -h / | tail -1", timeout=5),
+        computer_agent.detect_display(),
     )
     uptime = int(time.time() - _start_time)
     text = (
         f"<b>📊 system</b>\n\n"
         f"⏱ bot up: {uptime // 3600}h {(uptime % 3600) // 60}m\n"
         f"🖥 cpu: <code>{cpu.strip()}%</code>\n"
+        f"🖥 display: <code>{display}</code>\n"
         f"💾 mem:\n<pre>{mem.strip()}</pre>\n"
         f"🎮 gpu:\n<pre>{gpu.strip()}</pre>\n"
         f"💿 disk:\n<pre>{disk.strip()}</pre>"
@@ -371,179 +541,288 @@ async def cmd_stats(message: Message) -> None:
     await status_msg.edit_text(text, parse_mode="HTML")
 
 
-@dp.message(Command("thread"))
-async def cmd_thread(message: Message) -> None:
-    if not is_allowed(message):
+# ── /git ──────────────────────────────────────────────────────────────────────
+@dp.message(Command("git"))
+async def cmd_git(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    name = (message.text or "").removeprefix("/thread").strip()
+    output = await run_shell_command(
+        "cd ~/swarm-bot && git status --short && echo '---' && git log --oneline -5",
+        timeout=10,
+    )
+    await msg.answer(f"<b>📁 git</b>\n\n<pre>{output}</pre>", parse_mode="HTML")
+
+
+# ── /thread / /threads ────────────────────────────────────────────────────────
+@dp.message(Command("thread"))
+async def cmd_thread(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    name = (msg.text or "").removeprefix("/thread").strip()
     if not name:
-        current = _user_thread.get(message.from_user.id, "none")
-        await message.answer(
+        current = _user_thread.get(msg.from_user.id, "none")
+        await msg.answer(
             f"current thread: <b>{current}</b>\nuse: <code>/thread &lt;name&gt;</code>",
             parse_mode="HTML",
         )
         return
-    _user_thread[message.from_user.id] = name
-    await message.answer(f"📌 thread: <b>{name}</b>", parse_mode="HTML")
+    _user_thread[msg.from_user.id] = name
+    await msg.answer(f"📌 thread: <b>{name}</b>", parse_mode="HTML")
 
 
 @dp.message(Command("threads"))
-async def cmd_threads(message: Message) -> None:
-    if not is_allowed(message):
+async def cmd_threads(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    await message.answer(agents.list_threads(), parse_mode="HTML")
+    await msg.answer(agents.list_threads(), parse_mode="HTML")
 
 
+# ── /scrape ───────────────────────────────────────────────────────────────────
 @dp.message(Command("scrape"))
-async def cmd_scrape(message: Message) -> None:
-    if not is_allowed(message):
+async def cmd_scrape(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    url = (message.text or "").removeprefix("/scrape").strip()
+    url = (msg.text or "").removeprefix("/scrape").strip()
     if not url:
-        await message.answer("usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
+        await msg.answer("usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
         return
-    status_msg = await message.answer(f"🔍 scraping <code>{url}</code>…", parse_mode="HTML")
+    status_msg = await msg.answer(f"🔍 scraping <code>{url}</code>…", parse_mode="HTML")
     output = await run_shell_command(
-        f"curl -sL --max-time 15 '{url}' | "
+        f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
         "python3 -c \""
-        "import sys; from html.parser import HTMLParser; "
+        "import sys; from html.parser import HTMLParser\n"
         "class P(HTMLParser):\n"
         "    def __init__(self): super().__init__(); self.d=[]; self.skip=False\n"
-        "    def handle_starttag(self,t,a): self.skip=t in('script','style')\n"
+        "    def handle_starttag(self,t,a): self.skip=t in('script','style','head')\n"
         "    def handle_endtag(self,t): self.skip=False\n"
         "    def handle_data(self,d):\n"
         "        if not self.skip and d.strip(): self.d.append(d.strip())\n"
-        "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:80]))"
+        "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:100]))"
         "\"",
-        timeout=20,
+        timeout=25,
     )
     await status_msg.delete()
-    await message.answer(
-        f"<b>🌐 {url}</b>\n\n<pre>{output[:3000]}</pre>",
+    await msg.answer(
+        f"<b>🌐 {url}</b>\n\n<pre>{output[:3500]}</pre>",
         parse_mode="HTML",
     )
 
 
-# ── Keyboard shortcuts ────────────────────────────────────────────────────────
-
-@dp.message(F.text == "⚙️ Status")
-async def kbd_status(message: Message) -> None:
-    if is_allowed(message):
-        await cmd_stats(message)
-
-
-@dp.message(F.text == "📌 Threads")
-async def kbd_threads(message: Message) -> None:
-    if is_allowed(message):
-        await cmd_threads(message)
-
-
-@dp.message(F.text == "📸 Screenshot")
-async def kbd_screenshot(message: Message) -> None:
-    if is_allowed(message):
-        await cmd_screen(message)
-
-
-@dp.message(F.text == "⚡ Shell")
-async def kbd_shell_hint(message: Message) -> None:
-    if is_allowed(message):
-        await message.answer(
-            "type: <code>/cmd &lt;command&gt;</code>\n\ne.g.\n"
-            "<code>/cmd ps aux | grep python</code>\n"
-            "<code>/cmd nvidia-smi</code>",
+# ── Keyboard button shortcuts ─────────────────────────────────────────────────
+@dp.message(F.text == "🖥 Do task")
+async def kbd_do_hint(msg: Message) -> None:
+    if is_allowed(msg):
+        await msg.answer(
+            "tell me what to do on the computer:\n\n"
+            "just type your task naturally, or use <code>/do &lt;task&gt;</code>\n\n"
+            "examples:\n"
+            "• open whatsapp\n"
+            "• check what's in my swarm-bot folder\n"
+            "• take a screenshot and tell me what's open\n"
+            "• open supabase dashboard",
             parse_mode="HTML",
         )
 
 
-@dp.message(F.text.in_({"🐛 Debug", "💻 Code", "📊 Analyze"}))
-async def kbd_agent_hint(message: Message) -> None:
-    if not is_allowed(message):
+@dp.message(F.text == "📸 Screenshot")
+async def kbd_screenshot(msg: Message) -> None:
+    if is_allowed(msg):
+        await cmd_screen(msg)
+
+
+@dp.message(F.text == "⚡ Shell")
+async def kbd_shell_hint(msg: Message) -> None:
+    if is_allowed(msg):
+        await msg.answer(
+            "type: <code>/cmd &lt;command&gt;</code>\ne.g. <code>/cmd nvidia-smi</code>",
+            parse_mode="HTML",
+        )
+
+
+@dp.message(F.text == "⚙️ Status")
+async def kbd_status(msg: Message) -> None:
+    if is_allowed(msg):
+        await cmd_stats(msg)
+
+
+@dp.message(F.text.in_({"🐛 Debug", "💻 Code"}))
+async def kbd_agent_hint(msg: Message) -> None:
+    if not is_allowed(msg):
         return
-    shortcut_map = {"🐛 Debug": "debug", "💻 Code": "coding", "📊 Analyze": "analyst"}
-    key = shortcut_map.get(message.text, "general")
-    await message.answer(
-        f"ok, <b>{key}</b> agent locked in.\njust type your task or: <code>/agent {key} &lt;task&gt;</code>",
+    key = "debug" if "Debug" in msg.text else "coding"
+    await msg.answer(
+        f"<b>{key}</b> mode — just type your task:",
         parse_mode="HTML",
     )
 
 
 # ── Callbacks ─────────────────────────────────────────────────────────────────
-
 @dp.callback_query(F.data.startswith("fb:"))
-async def cb_feedback(callback: CallbackQuery) -> None:
-    action = callback.data.split(":")[1]
-    if action == "good":
-        await callback.answer("nice 👍")
-    elif action == "retry":
-        await callback.answer("re-send your message to try again")
-    elif action == "info":
-        await callback.answer("model info shown in button label")
+async def cb_feedback(cb: CallbackQuery) -> None:
+    action = cb.data.split(":")[1]
+    responses = {
+        "good":  "👍 nice",
+        "retry": "re-send your message to retry",
+        "info":  "provider shown in button label",
+    }
+    await cb.answer(responses.get(action, "ok"))
 
 
 @dp.callback_query(F.data == "screen:analyze")
-async def cb_analyze_screenshot(callback: CallbackQuery) -> None:
-    if callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("not authorized")
+async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
+    if not allowed_cb(cb):
+        await cb.answer("not authorized")
         return
 
-    user_id = callback.from_user.id
-    path = _last_screenshot.get(user_id)
+    path = _last_screenshot.get(cb.from_user.id)
     if not path or not Path(path).exists():
-        await callback.answer("screenshot expired — grab a new one with /screen")
+        await cb.answer("screenshot expired — grab a new one with /screen")
         return
 
-    await callback.answer("analyzing…")
-    status_msg = await callback.message.answer("🔍 analyzing screenshot…")
+    await cb.answer("analyzing…")
+    status_msg = await cb.message.answer("🔍 analyzing screen…")
+    typing_task = asyncio.create_task(_keep_typing(cb.message))
 
-    typing_task = asyncio.create_task(_keep_typing(callback.message))
     try:
         analysis, model_used = await llm_client.analyze_screenshot(
-            path, question="Describe what's on screen. What apps are open? Any errors? What's Bas doing?"
+            path,
+            question=(
+                "Describe everything you see on this screen in detail: "
+                "which applications are open, what content is visible, "
+                "any errors/warnings, what the user appears to be working on."
+            )
         )
         typing_task.cancel()
         await status_msg.delete()
-        await send_chunked(callback.message, analysis, model_used=model_used)
+        await send_chunked(cb.message, analysis, model_used=model_used)
 
-        # Clean up tmp file
+        # Cleanup
         try:
             Path(path).unlink(missing_ok=True)
-            del _last_screenshot[user_id]
+            del _last_screenshot[cb.from_user.id]
+        except Exception:
+            pass
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"analysis failed: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.callback_query(F.data == "screen:do")
+async def cb_screen_do(cb: CallbackQuery) -> None:
+    if not allowed_cb(cb):
+        await cb.answer("not authorized")
+        return
+    await cb.answer()
+    await cb.message.answer(
+        "what do you want me to do on screen?\n\n"
+        "just reply with your task, or use <code>/do &lt;task&gt;</code>",
+        parse_mode="HTML",
+    )
+
+
+# ── Natural language catch-all ────────────────────────────────────────────────
+@dp.message(F.text)
+async def handle_nl(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").strip()
+    if not task or task.startswith("/"):
+        return
+
+    # Detect if this is a computer-use request
+    computer_keywords = [
+        # English
+        "open", "launch", "click", "type", "press", "drag", "scroll",
+        "screenshot", "screen", "what's on", "what is on",
+        "check on my computer", "check on the computer", "show me",
+        "whatsapp", "browser", "chrome", "firefox", "email", "gmail",
+        "supabase", "telegram", "vscode", "folder", "file manager",
+        # Indonesian
+        "buka", "klik", "ketik", "screenshot", "layar", "komputer",
+        "cek langsung", "tolong cek", "lihat di", "buka whatsapp",
+        "buka browser", "tampilkan", "show", "periksa",
+    ]
+
+    task_lower = task.lower()
+    is_computer_task = any(kw in task_lower for kw in computer_keywords)
+
+    if is_computer_task:
+        await _run_agent_loop(msg, task)
+    else:
+        await _execute_chat(msg, task)
+
+
+# ── Core: agentic loop handler ────────────────────────────────────────────────
+async def _run_agent_loop(msg: Message, task: str) -> None:
+    """Run the agentic computer-use loop with live progress updates."""
+    thread_id = _user_thread.get(msg.from_user.id)
+
+    status_msg = await msg.answer("🤖 on it…")
+    step_count = 0
+
+    async def on_progress(step_text: str) -> None:
+        nonlocal step_count
+        step_count += 1
+        try:
+            await status_msg.edit_text(
+                f"<code>[{step_count}]</code> {step_text}",
+                parse_mode="HTML",
+            )
         except Exception:
             pass
 
+    async def on_photo(path: str) -> None:
+        try:
+            photo_file = FSInputFile(path)
+            await msg.answer_photo(
+                photo=photo_file,
+                caption="📸 current screen",
+                reply_markup=screenshot_keyboard(),
+            )
+            # Store for analyze button
+            _last_screenshot[msg.from_user.id] = path
+        except Exception as e:
+            logger.error("Failed to send screenshot photo: %s", e)
+
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        response, model_used = await agent_loop(
+            task,
+            progress_cb=on_progress,
+            photo_cb=on_photo,
+            thread_id=thread_id,
+        )
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, response, model_used=model_used)
+
     except Exception as e:
         typing_task.cancel()
+        err = str(e)
+        hint = ""
+        if "rate" in err.lower():
+            hint = "\n\nrate limited — try again in a minute"
+        elif "key" in err.lower() or "auth" in err.lower():
+            hint = "\n\napi key issue — check /keys"
         await status_msg.edit_text(
-            f"analysis failed: <code>{e}</code>",
+            f"<code>{err[:500]}</code>{hint}",
             parse_mode="HTML",
         )
 
 
-# ── Natural language catch-all ────────────────────────────────────────────────
-
-@dp.message(F.text)
-async def handle_nl(message: Message) -> None:
-    if not is_allowed(message):
-        return
-    task = (message.text or "").strip()
-    if not task or task.startswith("/"):
-        return
-    await _execute(message, task)
-
-
-# ── Core execution ────────────────────────────────────────────────────────────
-
-async def _execute(
-    message: Message,
+# ── Core: single-turn chat handler ────────────────────────────────────────────
+async def _execute_chat(
+    msg: Message,
     task: str,
     forced_agent: Optional[str] = None,
     show_thinking: bool = False,
 ) -> None:
+    """Single LLM call without computer tool use."""
     agent_key = forced_agent or agents.detect_agent(task)
-    thread_id = _user_thread.get(message.from_user.id)
+    thread_id = _user_thread.get(msg.from_user.id)
 
-    # Casual status — no more "🤖 SENIOR_PYTHON_DEV" robotic stuff
-    agent_labels = {
+    labels = {
         "coding":    "💻 coding…",
         "debug":     "🐛 debugging…",
         "math":      "📐 calculating…",
@@ -552,12 +831,11 @@ async def _execute(
         "vision":    "👁 looking…",
         "general":   "⚡ thinking…",
     }
-    label = agent_labels.get(agent_key, "⚡ thinking…")
-    status_msg = await message.answer(label)
-    typing_task = asyncio.create_task(_keep_typing(message))
+    status_msg = await msg.answer(labels.get(agent_key, "⚡ thinking…"))
+    typing_task = asyncio.create_task(_keep_typing(msg))
 
     try:
-        response, model_used = await llm_client.chat(
+        response, model_used = await chat(
             task,
             agent_key=agent_key,
             thread_id=thread_id,
@@ -565,17 +843,16 @@ async def _execute(
         )
         typing_task.cancel()
         await status_msg.delete()
-        await send_chunked(message, response, model_used=model_used)
+        await send_chunked(msg, response, model_used=model_used)
 
     except Exception as e:
         typing_task.cancel()
         err = str(e)
-        # Give useful hints on common errors
         hint = ""
         if "All models exhausted" in err:
-            hint = "\n\nall providers failed — run <code>/keys</code> to check"
+            hint = "\n\nall providers failed — check /keys"
         elif "Auth error" in err:
-            hint = "\n\nbad API key — check <code>/keys</code>"
+            hint = "\n\nbad api key — check /keys"
         await status_msg.edit_text(
             f"<code>{err[:400]}</code>{hint}",
             parse_mode="HTML",
@@ -583,34 +860,42 @@ async def _execute(
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
-
 async def on_startup() -> None:
     await bot.set_my_commands([
-        BotCommand(command="start",   description="Help + status"),
-        BotCommand(command="run",     description="Auto-route a task"),
-        BotCommand(command="cmd",     description="Run shell command"),
+        BotCommand(command="do",      description="Autonomous computer control"),
         BotCommand(command="screen",  description="Take desktop screenshot"),
+        BotCommand(command="open",    description="Open app or URL"),
+        BotCommand(command="click",   description="Click at x,y coordinates"),
+        BotCommand(command="type",    description="Type text on keyboard"),
+        BotCommand(command="key",     description="Press keyboard shortcut"),
+        BotCommand(command="cmd",     description="Run shell command"),
+        BotCommand(command="run",     description="LLM chat (no computer)"),
         BotCommand(command="think",   description="QwQ deep reasoning"),
         BotCommand(command="agent",   description="Force specific agent"),
+        BotCommand(command="install", description="pip install + restart"),
+        BotCommand(command="upgrade", description="git pull + restart"),
         BotCommand(command="models",  description="Agent roster"),
         BotCommand(command="keys",    description="API key status"),
-        BotCommand(command="stats",   description="CPU/GPU/RAM stats"),
+        BotCommand(command="stats",   description="CPU/GPU/RAM"),
         BotCommand(command="git",     description="Git status"),
-        BotCommand(command="thread",  description="Switch thread"),
-        BotCommand(command="threads", description="List threads"),
+        BotCommand(command="threads", description="Conversation threads"),
         BotCommand(command="scrape",  description="Scrape a URL"),
+        BotCommand(command="start",   description="Help + status"),
     ])
+
     key_status = verify_api_keys()
     active = [k for k, v in key_status.items() if v]
-    missing = [k for k, v in key_status.items() if not v]
-    logger.info("=" * 55)
-    logger.info("Legion starting up")
-    logger.info("✅ Keys: %s", ", ".join(active) or "NONE")
-    if missing:
-        logger.warning("❌ Missing: %s", ", ".join(missing))
     cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+
+    # Detect display at startup
+    display = await computer_agent.detect_display()
+
+    logger.info("=" * 55)
+    logger.info("Legion v2 starting")
+    logger.info("✅ Keys: %s", ", ".join(active) or "NONE")
+    logger.info("🖥 Display: %s", display)
     if not any(key_status.get(k) for k in cloud):
-        logger.critical("NO CLOUD KEYS — every request will fail!")
+        logger.critical("NO CLOUD KEYS — all requests will fail!")
     logger.info("=" * 55)
 
 
