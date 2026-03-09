@@ -1,6 +1,10 @@
-# Core bot framework (Python 3.13 tested)
+# BabasSwarms — cloud-first dependencies
+# Telegram
 aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
+
+# LLM — all cloud providers via litellm (Cerebras, Groq, Gemini, OpenRouter)
+litellm>=1.40.0
 
 # LLM execution
 anthropic>=0.18.0
