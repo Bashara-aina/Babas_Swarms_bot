@@ -195,6 +195,52 @@ async def _call_model(
     return await acompletion(**kwargs)
 
 
+# ── Context compaction ───────────────────────────────────────────────────────
+
+def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
+    """Summarize older messages to reduce context size.
+
+    Keeps: system prompt + last `keep_recent` messages.
+    Summarizes everything in between into a single context message.
+    """
+    if len(messages) <= keep_recent + 2:
+        return messages
+
+    system = messages[0]  # Always keep system prompt
+    recent = messages[-keep_recent:]  # Keep last N messages
+    middle = messages[1:-keep_recent]  # Summarize these
+
+    # Build a compact summary of middle messages
+    summary_parts = []
+    for m in middle:
+        role = m.get("role", "")
+        content = m.get("content", "")
+        if role == "assistant" and m.get("tool_calls"):
+            tool_names = [tc.get("function", {}).get("name", "?")
+                         for tc in m.get("tool_calls", [])]
+            summary_parts.append(f"Called tools: {', '.join(tool_names)}")
+        elif role == "tool":
+            # Truncate long tool results
+            truncated = content[:150] + "…" if len(content) > 150 else content
+            summary_parts.append(f"Tool result: {truncated}")
+        elif content:
+            truncated = content[:200] + "…" if len(content) > 200 else content
+            summary_parts.append(f"{role}: {truncated}")
+
+    summary = "\n".join(summary_parts)
+    compact_msg = {
+        "role": "user",
+        "content": (
+            f"[Context from {len(middle)} previous steps, compacted to save space:]\n"
+            f"{summary}\n\n"
+            "[Continue with the task based on the above context and recent messages.]"
+        ),
+    }
+
+    logger.info("Compacted %d messages → 1 summary", len(middle))
+    return [system, compact_msg] + recent
+
+
 # ── Agentic tool-calling loop ─────────────────────────────────────────────────
 
 # Model to use for the agentic loop (must support function calling)
@@ -211,7 +257,7 @@ async def agent_loop(
     task: str,
     progress_cb: ProgressCb = None,
     photo_cb: PhotoCb = None,
-    max_iterations: int = 12,
+    max_iterations: int = 20,
     thread_id: Optional[str] = None,
 ) -> tuple[str, str]:
     """Agentic loop: LLM calls computer tools until the task is complete.
@@ -238,6 +284,10 @@ async def agent_loop(
     steps_taken: list[str] = []
 
     for iteration in range(max_iterations):
+        # Context compaction: summarize old messages to stay within limits
+        if len(messages) > 12:
+            messages = _compact_messages(messages)
+
         try:
             response = await acompletion(
                 model=model,
@@ -367,6 +417,59 @@ def _tool_label(name: str, args: dict) -> str:
         "get_clipboard":    lambda a: "📋 get clipboard",
         "set_clipboard":    lambda a: "📋 set clipboard",
         "install_packages": lambda a: f"📦 pip install {' '.join(a.get('packages',[]))}",
+        # Web browsing
+        "web_browse":       lambda a: f"🌐 browsing {a.get('url','')}",
+        "web_search":       lambda a: f"🔍 searching: {a.get('query','')}",
+        "web_research":     lambda a: f"🔬 researching: {a.get('topic','')[:40]}…",
+        "web_fill_form":    lambda a: f"📝 filling form at {a.get('url','')}",
+        "web_get_links":    lambda a: f"🔗 getting links from {a.get('url','')}",
+        "web_click":        lambda a: f"🖱 clicking '{a.get('click_text','')}' on {a.get('url','')}",
+        # Document processing
+        "read_pdf":         lambda a: f"📄 reading PDF {a.get('path','')}",
+        "pdf_extract_tables": lambda a: f"📊 extracting tables from {a.get('path','')}",
+        "read_excel":       lambda a: f"📗 reading Excel {a.get('path','')}",
+        "write_excel":      lambda a: f"📗 writing Excel {a.get('path','')}",
+        "excel_update_cell": lambda a: f"📗 updating {a.get('cell','')} in {a.get('path','')}",
+        "ocr_image":        lambda a: f"🔤 OCR on {a.get('path','')}",
+        "ocr_pdf":          lambda a: f"🔤 OCR PDF {a.get('path','')}",
+        "read_docx":        lambda a: f"📝 reading Word {a.get('path','')}",
+        "organize_files":   lambda a: f"📂 organizing {a.get('directory','')}",
+        "find_files":       lambda a: f"🔎 finding {a.get('pattern','')} in {a.get('directory','')}",
+        "file_info":        lambda a: f"ℹ️ info: {a.get('path','')}",
+        # Email
+        "email_check_inbox": lambda a: "📧 checking inbox…",
+        "email_read":        lambda a: f"📧 reading email {a.get('uid','')}",
+        "email_send":        lambda a: f"📧 sending to {a.get('to','')}",
+        "email_reply":       lambda a: f"📧 replying to {a.get('uid','')}",
+        "email_search":      lambda a: f"🔍 searching emails: {a.get('query','')}",
+        "email_summarize":   lambda a: "📧 summarizing inbox…",
+        # Git operations
+        "git_status":        lambda a: f"📦 git status {a.get('repo_path','')}",
+        "git_diff":          lambda a: f"📦 git diff {a.get('repo_path','')}",
+        "git_log":           lambda a: f"📦 git log {a.get('repo_path','')}",
+        "git_commit":        lambda a: f"📦 git commit: {a.get('message','')[:40]}",
+        "git_branch":        lambda a: f"📦 git branch {a.get('action','list')}",
+        "git_pull":          lambda a: f"📦 git pull {a.get('repo_path','')}",
+        "git_push":          lambda a: f"📦 git push {a.get('repo_path','')}",
+        "git_stash":         lambda a: f"📦 git stash {a.get('action','push')}",
+        # Dev tools
+        "run_tests":         lambda a: f"🧪 running tests in {a.get('path','.')}",
+        "lint_code":         lambda a: f"🔍 linting {a.get('path','')}",
+        "format_code":       lambda a: f"✨ formatting {a.get('path','')}",
+        "find_in_codebase":  lambda a: f"🔎 grep '{a.get('pattern','')}'",
+        "analyze_codebase":  lambda a: f"📊 analyzing {a.get('path','.')}",
+        "db_query":          lambda a: f"🗄 SQL: {a.get('query','')[:40]}",
+        # Orchestration
+        "parallel_agents":   lambda a: f"🔄 swarm: {a.get('task','')[:40]}",
+        # System maintenance
+        "check_disk_space":      lambda a: "💾 checking disk space…",
+        "check_memory_usage":    lambda a: "🧠 checking memory…",
+        "check_gpu_health":      lambda a: "🎮 checking GPU health…",
+        "check_services":        lambda a: f"🔧 checking services: {a.get('services','swarm-bot,ollama')}",
+        "system_cleanup":        lambda a: f"🧹 {'previewing' if a.get('dry_run', True) else 'running'} cleanup…",
+        "check_updates":         lambda a: "📦 checking for updates…",
+        "driver_status":         lambda a: "🔧 checking drivers…",
+        "full_maintenance_check": lambda a: "🏥 full health check…",
     }
     fn = labels.get(name)
     return fn(args) if fn else f"🔧 {name}()"

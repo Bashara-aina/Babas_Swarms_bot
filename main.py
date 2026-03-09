@@ -88,6 +88,7 @@ dp = Dispatcher()
 _user_thread: dict[int, str] = {}
 _start_time = time.time()
 _last_screenshot: dict[int, str] = {}  # user_id → screenshot path for analyze button
+_scheduler = None  # initialized in on_startup
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -213,8 +214,11 @@ async def cmd_start(msg: Message) -> None:
         "<b>self-management</b>\n"
         "  <code>/install &lt;packages&gt;</code> — pip install + restart\n"
         "  <code>/upgrade</code>          — git pull + restart\n\n"
+        "<b>web &amp; research</b>\n"
+        "  <code>/scrape &lt;url&gt;</code>    — JS-rendered page scrape\n"
+        "  <code>/research &lt;topic&gt;</code> — deep multi-page research\n\n"
         "<b>system</b>\n"
-        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>  <code>/scrape &lt;url&gt;</code>\n\n"
+        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>\n\n"
         "or just type naturally — i'll figure it out."
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
@@ -587,25 +591,421 @@ async def cmd_scrape(msg: Message) -> None:
         await msg.answer("usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
         return
     status_msg = await msg.answer(f"🔍 scraping <code>{url}</code>…", parse_mode="HTML")
-    output = await run_shell_command(
-        f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
-        "python3 -c \""
-        "import sys; from html.parser import HTMLParser\n"
-        "class P(HTMLParser):\n"
-        "    def __init__(self): super().__init__(); self.d=[]; self.skip=False\n"
-        "    def handle_starttag(self,t,a): self.skip=t in('script','style','head')\n"
-        "    def handle_endtag(self,t): self.skip=False\n"
-        "    def handle_data(self,d):\n"
-        "        if not self.skip and d.strip(): self.d.append(d.strip())\n"
-        "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:100]))"
-        "\"",
-        timeout=25,
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from tools.web_browser import browse_url
+        result = await browse_url(url)
+        typing_task.cancel()
+        await status_msg.delete()
+
+        title = result.get("title", "")
+        text = result.get("text", "")[:3500]
+        screenshot_path = result.get("screenshot_path", "")
+
+        if screenshot_path and Path(screenshot_path).exists():
+            _last_screenshot[msg.from_user.id] = screenshot_path
+            await msg.answer_photo(
+                photo=FSInputFile(screenshot_path),
+                caption=f"🌐 {title[:100]}" if title else "🌐 page screenshot",
+            )
+
+        await msg.answer(
+            f"<b>🌐 {title}</b>\n\n<pre>{text}</pre>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        typing_task.cancel()
+        # Fallback to curl-based scraping if Playwright not installed
+        output = await run_shell_command(
+            f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
+            "python3 -c \""
+            "import sys; from html.parser import HTMLParser\n"
+            "class P(HTMLParser):\n"
+            "    def __init__(self): super().__init__(); self.d=[]; self.skip=False\n"
+            "    def handle_starttag(self,t,a): self.skip=t in('script','style','head')\n"
+            "    def handle_endtag(self,t): self.skip=False\n"
+            "    def handle_data(self,d):\n"
+            "        if not self.skip and d.strip(): self.d.append(d.strip())\n"
+            "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:100]))"
+            "\"",
+            timeout=25,
+        )
+        await status_msg.delete()
+        await msg.answer(
+            f"<b>🌐 {url}</b>\n\n<pre>{output[:3500]}</pre>",
+            parse_mode="HTML",
+        )
+
+
+# ── /research ────────────────────────────────────────────────────────────────
+@dp.message(Command("research"))
+async def cmd_research(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    topic = (msg.text or "").removeprefix("/research").strip()
+    if not topic:
+        await msg.answer(
+            "usage: <code>/research &lt;topic&gt;</code>\n\n"
+            "deep multi-page web research — searches, visits pages, "
+            "extracts and compiles findings.\n\n"
+            "examples:\n"
+            "<code>/research latest pytorch transformer architectures</code>\n"
+            "<code>/research padang food delivery market jakarta 2026</code>",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer(f"🔬 researching: <i>{topic[:80]}</i>…", parse_mode="HTML")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from tools.web_browser import deep_research
+        result = await deep_research(topic)
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used="playwright+web")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(
+            f"research failed: <code>{e}</code>\n\n"
+            "make sure Playwright is installed:\n"
+            "<code>/install playwright</code> then <code>playwright install chromium</code>",
+            parse_mode="HTML",
+        )
+
+
+# ── /monitor — background recurring task ─────────────────────────────────────
+@dp.message(Command("monitor"))
+async def cmd_monitor(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/monitor").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/monitor &lt;seconds&gt; &lt;command&gt;</code>\n\n"
+            "runs a command every N seconds in the background.\n\n"
+            "examples:\n"
+            "<code>/monitor 60 nvidia-smi</code>\n"
+            "<code>/monitor 300 df -h /</code>\n\n"
+            "add alert condition with --alert:\n"
+            "<code>/monitor 120 nvidia-smi --alert \"'90' in result\"</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    # Parse: <seconds> <command> [--alert "<condition>"]
+    alert_cond = ""
+    if "--alert" in text:
+        parts = text.split("--alert", 1)
+        text = parts[0].strip()
+        alert_cond = parts[1].strip().strip("'\"")
+
+    words = text.split(maxsplit=1)
+    if len(words) < 2:
+        await msg.answer("need both interval and command", parse_mode="HTML")
+        return
+
+    try:
+        interval = int(words[0])
+    except ValueError:
+        await msg.answer("first argument must be interval in seconds", parse_mode="HTML")
+        return
+
+    command = words[1]
+    global _scheduler
+    if not _scheduler:
+        await msg.answer("scheduler not initialized — try restarting bot")
+        return
+
+    task_id = await _scheduler.add_monitor(
+        description=command[:50],
+        command=command,
+        interval_sec=interval,
+        alert_condition=alert_cond,
     )
-    await status_msg.delete()
+    interval_str = f"{interval}s" if interval < 60 else f"{interval // 60}m"
+    response = f"🟢 monitor started: <code>{task_id}</code>\n  ↻ <code>{command}</code> every {interval_str}"
+    if alert_cond:
+        response += f"\n  🔔 alert: <code>{alert_cond}</code>"
+    await msg.answer(response, parse_mode="HTML")
+
+
+# ── /schedule — one-time future task ─────────────────────────────────────────
+@dp.message(Command("schedule"))
+async def cmd_schedule(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/schedule").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/schedule &lt;minutes&gt; &lt;command&gt;</code>\n\n"
+            "runs a command once after N minutes.\n\n"
+            "examples:\n"
+            "<code>/schedule 30 python3 ~/train.py</code>\n"
+            "<code>/schedule 5 echo 'reminder: standup meeting'</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    words = text.split(maxsplit=1)
+    if len(words) < 2:
+        await msg.answer("need both delay (minutes) and command")
+        return
+
+    try:
+        minutes = int(words[0])
+    except ValueError:
+        await msg.answer("first argument must be delay in minutes")
+        return
+
+    command = words[1]
+    run_at = time.time() + (minutes * 60)
+    global _scheduler
+    if not _scheduler:
+        await msg.answer("scheduler not initialized")
+        return
+
+    task_id = await _scheduler.add_scheduled(
+        description=command[:50],
+        command=command,
+        run_at=run_at,
+    )
     await msg.answer(
-        f"<b>🌐 {url}</b>\n\n<pre>{output[:3500]}</pre>",
+        f"⏰ scheduled: <code>{task_id}</code>\n"
+        f"  will run in {minutes}m: <code>{command}</code>",
         parse_mode="HTML",
     )
+
+
+# ── /tasks — list background tasks ──────────────────────────────────────────
+@dp.message(Command("tasks"))
+async def cmd_tasks(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    global _scheduler
+    if not _scheduler:
+        await msg.answer("scheduler not initialized")
+        return
+    result = await _scheduler.list_tasks()
+    await msg.answer(result, parse_mode="HTML")
+
+
+# ── /cancel — cancel a background task ──────────────────────────────────────
+@dp.message(Command("cancel"))
+async def cmd_cancel(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task_id = (msg.text or "").removeprefix("/cancel").strip()
+    if not task_id:
+        await msg.answer("usage: <code>/cancel &lt;task_id&gt;</code>", parse_mode="HTML")
+        return
+    global _scheduler
+    if not _scheduler:
+        await msg.answer("scheduler not initialized")
+        return
+    result = await _scheduler.cancel(task_id)
+    await msg.answer(f"❌ {result}")
+
+
+# ── /swarm — multi-agent parallel execution ──────────────────────────────────
+@dp.message(Command("swarm"))
+async def cmd_swarm(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/swarm").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/swarm &lt;complex task&gt;</code>\n\n"
+            "decomposes the task into sub-tasks and runs multiple "
+            "AI agents in parallel.\n\n"
+            "examples:\n"
+            "<code>/swarm write a FastAPI endpoint with tests and documentation</code>\n"
+            "<code>/swarm analyze my codebase and suggest improvements</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer("🧠 decomposing task…")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    async def on_progress(step_text: str) -> None:
+        try:
+            await status_msg.edit_text(step_text, parse_mode="HTML")
+        except Exception:
+            pass
+
+    try:
+        from tools.orchestrator import smart_route
+        result, model = await smart_route(task, progress_cb=on_progress)
+        typing_task.cancel()
+
+        if result:
+            await status_msg.delete()
+            await send_chunked(msg, result, model_used=model)
+        else:
+            # Fall back to regular agent loop
+            await status_msg.edit_text("single-agent task — routing to /do…")
+            typing_task.cancel()
+            await _run_agent_loop(msg, task)
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"swarm error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /email — email management ────────────────────────────────────────────────
+@dp.message(Command("email"))
+async def cmd_email(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/email").strip()
+
+    if not text:
+        # Default: summarize inbox
+        status_msg = await msg.answer("📧 checking inbox…")
+        typing_task = asyncio.create_task(_keep_typing(msg))
+        try:
+            from tools.email_client import check_inbox
+            result = await check_inbox(limit=10, unread_only=True)
+            typing_task.cancel()
+            await status_msg.delete()
+            await msg.answer(
+                f"<pre>{result[:3800]}</pre>",
+                parse_mode="HTML",
+            )
+        except Exception as e:
+            typing_task.cancel()
+            await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+        return
+
+    parts = text.split(maxsplit=1)
+    subcmd = parts[0].lower()
+    arg = parts[1] if len(parts) > 1 else ""
+
+    if subcmd == "check":
+        status_msg = await msg.answer("📧 checking…")
+        from tools.email_client import check_inbox
+        result = await check_inbox(limit=10, unread_only="unread" in arg or not arg)
+        await status_msg.delete()
+        await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+
+    elif subcmd == "read" and arg:
+        status_msg = await msg.answer("📧 reading…")
+        from tools.email_client import read_email
+        result = await read_email(arg.strip())
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used="email")
+
+    elif subcmd == "search" and arg:
+        status_msg = await msg.answer(f"🔍 searching: {arg}…")
+        from tools.email_client import search_emails
+        result = await search_emails(arg.strip())
+        await status_msg.delete()
+        await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+
+    else:
+        await msg.answer(
+            "usage:\n"
+            "  <code>/email</code>           — show unread\n"
+            "  <code>/email check</code>     — list unread\n"
+            "  <code>/email read &lt;uid&gt;</code>  — read email\n"
+            "  <code>/email search &lt;q&gt;</code>  — search by subject\n\n"
+            "or use <code>/do check my email</code> for AI-powered inbox management",
+            parse_mode="HTML",
+        )
+
+
+# ── /alert — conditional recurring alert ──────────────────────────────────────
+@dp.message(Command("alert"))
+async def cmd_alert(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/alert").strip()
+
+    if not text:
+        await msg.answer(
+            "usage: <code>/alert &lt;name&gt; &lt;seconds&gt; &lt;command&gt; --if &lt;condition&gt;</code>\n\n"
+            "examples:\n"
+            "<code>/alert gpu-temp 120 nvidia-smi --if \"'80' in result\"</code>\n"
+            "<code>/alert disk 3600 df -h / --if \"'9' in result.split()[4]\"</code>\n"
+            "<code>/alert high-mem 300 free -m --if \"int(result.split()[8]) < 1000\"</code>\n\n"
+            "condition has access to <code>result</code> (command output string)\n"
+            "alert triggers when condition evaluates to True",
+            parse_mode="HTML",
+        )
+        return
+
+    # Parse: name seconds command --if condition
+    if "--if" not in text:
+        await msg.answer(
+            "missing <code>--if</code> condition\n\n"
+            "example: <code>/alert gpu 120 nvidia-smi --if \"'80' in result\"</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    before_if, condition = text.split("--if", 1)
+    condition = condition.strip().strip("\"'")
+    parts = before_if.strip().split(maxsplit=2)
+
+    if len(parts) < 3:
+        await msg.answer(
+            "usage: <code>/alert &lt;name&gt; &lt;seconds&gt; &lt;command&gt; --if &lt;condition&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    name = parts[0]
+    try:
+        interval = int(parts[1])
+    except ValueError:
+        await msg.answer("interval must be a number (seconds)")
+        return
+
+    command = parts[2]
+
+    if not _scheduler:
+        await msg.answer("scheduler not initialized — check bot logs")
+        return
+
+    task_id = await _scheduler.add_monitor(
+        description=f"Alert: {name}",
+        command=command,
+        interval_sec=interval,
+        alert_condition=condition,
+    )
+    from tools.scheduler import _format_interval
+    await msg.answer(
+        f"🔔 Alert <code>{name}</code> created\n"
+        f"  ID: <code>{task_id}</code>\n"
+        f"  Check every: {_format_interval(interval)}\n"
+        f"  Command: <code>{command}</code>\n"
+        f"  Alert when: <code>{condition}</code>\n\n"
+        f"cancel with <code>/cancel {task_id}</code>",
+        parse_mode="HTML",
+    )
+
+
+# ── /maintenance — full system health check ───────────────────────────────────
+@dp.message(Command("maintenance"))
+async def cmd_maintenance(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+
+    status_msg = await msg.answer("🏥 running full system health check…")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from tools.system_maintenance import full_maintenance_check
+        result = await full_maintenance_check()
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used="maintenance")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(
+            f"maintenance check failed: <code>{e}</code>",
+            parse_mode="HTML",
+        )
 
 
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
@@ -731,16 +1131,30 @@ async def handle_nl(msg: Message) -> None:
 
     # Detect if this is a computer-use request
     computer_keywords = [
-        # English
+        # English — desktop
         "open", "launch", "click", "type", "press", "drag", "scroll",
         "screenshot", "screen", "what's on", "what is on",
         "check on my computer", "check on the computer", "show me",
         "whatsapp", "browser", "chrome", "firefox", "email", "gmail",
         "supabase", "telegram", "vscode", "folder", "file manager",
+        # English — web research & browsing
+        "search for", "search the web", "research", "find online",
+        "look up", "browse to", "scrape", "go to website",
+        "booking", "buy online", "purchase", "order online",
+        # Documents & files
+        "read pdf", "read excel", "extract table", "ocr", "read docx",
+        "organize files", "find files", "baca dokumen",
+        # Git & dev
+        "git status", "git commit", "git push", "git pull", "git diff",
+        "run tests", "pytest", "lint", "format code", "find in code",
+        # System
+        "disk space", "memory usage", "check services", "maintenance",
+        "system cleanup", "gpu health",
         # Indonesian
         "buka", "klik", "ketik", "screenshot", "layar", "komputer",
         "cek langsung", "tolong cek", "lihat di", "buka whatsapp",
         "buka browser", "tampilkan", "show", "periksa",
+        "cari di internet", "riset", "cari online",
     ]
 
     task_lower = task.lower()
@@ -861,6 +1275,18 @@ async def _execute_chat(
 
 # ── Startup ───────────────────────────────────────────────────────────────────
 async def on_startup() -> None:
+    # Initialize persistence and scheduler
+    global _scheduler
+    try:
+        from tools.persistence import init_db
+        from tools.scheduler import TaskScheduler
+        await init_db()
+        _scheduler = TaskScheduler(bot, ALLOWED_USER_ID)
+        await _scheduler.start()
+        logger.info("Scheduler initialized")
+    except Exception as e:
+        logger.warning("Scheduler init failed (non-fatal): %s", e)
+
     await bot.set_my_commands([
         BotCommand(command="do",      description="Autonomous computer control"),
         BotCommand(command="screen",  description="Take desktop screenshot"),
@@ -879,8 +1305,17 @@ async def on_startup() -> None:
         BotCommand(command="stats",   description="CPU/GPU/RAM"),
         BotCommand(command="git",     description="Git status"),
         BotCommand(command="threads", description="Conversation threads"),
-        BotCommand(command="scrape",  description="Scrape a URL"),
-        BotCommand(command="start",   description="Help + status"),
+        BotCommand(command="scrape",   description="Scrape a URL (JS-rendered)"),
+        BotCommand(command="research", description="Deep multi-page web research"),
+        BotCommand(command="swarm",    description="Multi-agent parallel execution"),
+        BotCommand(command="email",    description="Email inbox management"),
+        BotCommand(command="monitor",  description="Background recurring task"),
+        BotCommand(command="schedule", description="One-time scheduled task"),
+        BotCommand(command="tasks",    description="List background tasks"),
+        BotCommand(command="cancel",      description="Cancel a background task"),
+        BotCommand(command="alert",       description="Conditional recurring alert"),
+        BotCommand(command="maintenance", description="Full system health check"),
+        BotCommand(command="start",       description="Help + status"),
     ])
 
     key_status = verify_api_keys()

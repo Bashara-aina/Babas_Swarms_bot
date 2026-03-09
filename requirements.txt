@@ -1,4 +1,4 @@
-# Legion — cloud-first AI bot for desktop control
+# Legion v3 — full-stack AI workstation control
 
 # Telegram bot
 aiogram>=3.4.0,<4.0.0
@@ -7,7 +7,7 @@ python-dotenv>=1.0.0
 # LLM — all cloud providers + tool calling
 litellm>=1.40.0
 
-# Web scraping
+# Web scraping (legacy fallback)
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 
@@ -21,6 +21,23 @@ aiohttp>=3.9.0
 # System monitoring
 psutil>=5.9.0
 
+# ── Phase 1: Web browsing (JS-rendered) ──────────────────────────────────
+playwright>=1.40.0
+
+# ── Phase 2: Persistence ─────────────────────────────────────────────────
+aiosqlite>=0.20.0
+
+# ── Phase 3: Document processing ─────────────────────────────────────────
+openpyxl>=3.1.0
+pdfplumber>=0.10.0
+pytesseract>=0.3.10
+python-docx>=1.0.0
+
+# ── Phase 4: Email ───────────────────────────────────────────────────────
+aioimaplib>=1.1.0
+aiosmtplib>=3.0.0
+
 # ── Host machine tools (install separately, not pip) ──────────────────────
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
-# These enable: mouse/keyboard control, window management, screenshots, clipboard
+# sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
+# playwright install chromium
