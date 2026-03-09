@@ -26,6 +26,7 @@ AGENT_MODELS: dict[str, str] = {
     "math":      "zai/glm-4",                           # AIME 2025 95.7%
     "architect": "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
     "analyst":   "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
+    "computer":  "groq/llama-3.3-70b-versatile",        # agentic tool-calling loop
     "general":   "groq/llama-3.3-70b-versatile",        # reliable default ✓
 }
 
@@ -63,6 +64,11 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "groq/moonshotai/kimi-k2-instruct",
         "gemini/gemini-2.0-flash",
         "groq/llama-3.3-70b-versatile",
+    ],
+    "computer": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
     ],
     "general": [
         "groq/llama-3.3-70b-versatile",
@@ -104,6 +110,29 @@ TASK_KEYWORDS: dict[str, list[str]] = {
         "performance", "gpu", "training", "trend", "statistics",
         "compare", "nvidia-smi", "visualize",
     ],
+    "computer": [
+        # Web browsing & research
+        "browse", "search for", "research", "find online", "look up",
+        "scrape", "website", "web page", "cari di internet", "booking",
+        "google", "search the web",
+        # Documents
+        "pdf", "excel", "spreadsheet", "ocr", "word doc", "docx",
+        "extract table", "read document", "baca dokumen",
+        # Email
+        "email", "inbox", "send email", "kirim email", "mail",
+        "reply email", "check email", "cek email",
+        # Git
+        "git status", "git commit", "git push", "git pull", "git diff",
+        "git stash", "commit", "push to", "pull from",
+        # Dev tools
+        "run tests", "pytest", "lint", "ruff", "format code",
+        "find in code", "grep", "codebase", "db query", "sql",
+        # System / scheduling
+        "monitor", "schedule", "disk space", "memory usage",
+        "maintenance", "cleanup", "services", "system check",
+        # File management
+        "organize files", "find files", "sort files",
+    ],
 }
 
 DEFAULT_AGENT = "general"
@@ -134,7 +163,8 @@ def get_fallback_chain(agent_key: str) -> list[str]:
 def list_agents() -> str:
     icons = {
         "vision": "👁️", "coding": "💻", "debug": "🐛",
-        "math": "📐", "architect": "🏗️", "analyst": "📊", "general": "🧠",
+        "math": "📐", "architect": "🏗️", "analyst": "📊",
+        "computer": "🖥️", "general": "🧠",
     }
     lines = ["<b>🤖 Legion Agent Roster</b>\n"]
     for key, model in AGENT_MODELS.items():
