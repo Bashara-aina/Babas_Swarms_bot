@@ -1,43 +1,19 @@
-"""LegionSwarm — Autonomous Desktop AI via Telegram.
+"""BabasSwarms — Telegram bot for PC control via cloud AI agents.
 
-Slash Commands (optional — natural language works too):
-    /start          - Help menu with interactive buttons
-    /run <task>     - Auto-route to best agent
-    /agent <n> <t>  - Force a specific agent
-    /thread <name>  - Switch conversation thread
-    /threads        - List active threads
-    /context        - Show current thread history
-    /scrape <url>   - Scrape page text
-    /shot <url>     - Screenshot a URL
-    /desktop        - Screenshot the local desktop
-    /screen         - OCR-read current desktop text
-    /click <text>   - Click UI element by visible text
-    /read <path>    - Read a file from workspace
-    /cmd <shell>    - Run a shell command
-    /git            - Git status of workspace
-    /models         - Show agent roster
-    /commands       - Full command reference
-    /confirm yes|no <id>  - Approve/deny queued action
-    /monitors       - List active monitors
-    /cancel <id>    - Cancel a monitor
-    /pending        - Show pending confirmations
-    /stats          - Performance + usage report
-    /circuits       - Circuit breaker status
-    /feedback <id> good|bad [comment]  - Rate a response
-    /usage          - Daily API usage + cost report
+Commands:
+    /start        - Help + status panel
+    /run <task>   - Auto-route task to best agent
+    /agent <key> <task> - Force a specific agent
+    /cmd <shell>  - Execute shell command on your PC
+    /models       - Show agent roster + API key status
+    /keys         - Check which API keys are loaded
+    /thread <name>- Switch conversation thread
+    /threads      - List active threads
+    /git          - Git status of workspace
+    /stats        - System stats (CPU, GPU, RAM)
+    /scrape <url> - Scrape page text
 
-Natural Language Examples:
-    "debug this pytorch error: ..."
-    "what's on my screen right now?"
-    "click on the terminal"
-    "read /home/newadmin/swarm-bot/agents.py"
-    "monitor my training every 5 minutes"
-    [send voice message] → auto-transcribed
-    [upload PDF] → file preview + action buttons
-    [upload screenshot] → image action buttons
-
-Shortcut Keyboard Buttons (shown at bottom of chat):
-    🐛 Debug | 💻 Code | 📊 Analyze | 💡 Explain | 📌 Threads | ⚙️ Settings
+Natural language works without slash commands too.
 """
 
 from __future__ import annotations
@@ -46,1697 +22,479 @@ import asyncio
 import logging
 import os
 import re
+import sys
 import time
 from pathlib import Path
 from typing import Optional
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram.types import (
-    BufferedInputFile,
+    BotCommand,
     CallbackQuery,
-    Document,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
     Message,
-    PhotoSize,
-    Voice,
+    ReplyKeyboardMarkup,
 )
 from dotenv import load_dotenv
 
-import core.agent_registry as agents
-import core.tools.computer_control as computer_control
-import core.utils.formatters as formatters
-import core.interpreter_bridge as interpreter_bridge
-import core.utils.multimodal_processor as multimodal_processor
-import core.utils.notifications as notifications
-import core.tools.playwright_agent as playwright_agent
-import core.nexus_orchestrator as task_orchestrator
-import core.tools.vscode_bridge as vscode_bridge
-from core.utils.progress_tracker import TaskProgressTracker
-from core.utils.streaming_response import StreamingResponseManager
-from core.utils.telegram_ui import TelegramUI
+# Load .env FIRST — before any module reads os.getenv()
+load_dotenv(Path(__file__).parent / ".env")
 
-# 🎨 NEW: UI/UX Improvements
-from core.utils.loading_manager import LoadingManager
-from core.utils.error_formatter import ErrorFormatter
-from core.utils.feedback_animator import FeedbackAnimator
-from core.utils.help_formatter import HelpFormatter
+import agents
+import llm_client
+from llm_client import chat, chunk_output, run_shell_command, verify_api_keys
 
-load_dotenv()
-
+# ── Logging ─────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("bot.log", encoding="utf-8"),
+    ],
 )
 logger = logging.getLogger(__name__)
 
-# ── Secrets ─────────────────────────────────────────────────────────────────────
+# ── Config ───────────────────────────────────────────────────────────────────
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
 
-TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
-_raw_uid = os.getenv("ALLOWED_USER_ID", "")
-ALLOWED_USER_ID: int = int(_raw_uid) if _raw_uid.isdigit() else 0
-
-if not TELEGRAM_BOT_TOKEN:
-    raise RuntimeError("TELEGRAM_BOT_TOKEN not set in .env")
+if not BOT_TOKEN:
+    logger.critical("TELEGRAM_BOT_TOKEN not set in .env")
+    sys.exit(1)
 if not ALLOWED_USER_ID:
-    raise RuntimeError("ALLOWED_USER_ID not set or invalid in .env")
+    logger.critical("ALLOWED_USER_ID not set in .env")
+    sys.exit(1)
 
-# ── Bot Setup ───────────────────────────────────────────────────────────────────
-
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Per-user active thread and settings
-current_thread: dict[int, str] = {}
-# User preferences: streaming, show_context, notifications
-_user_prefs: dict[int, dict] = {}
-
-# Cache of pending document file_ids for callback handling
-# {file_id: (raw_bytes, mime_type, filename)}
-_doc_cache: dict[str, tuple[bytes, str, str]] = {}
-_img_cache: dict[str, bytes] = {}
-
-_streamer: StreamingResponseManager | None = None
+_user_thread: dict[int, str] = {}
+_start_time = time.time()
 
 
-def _prefs(uid: int) -> dict:
-    """Get or create default prefs for a user."""
-    if uid not in _user_prefs:
-        _user_prefs[uid] = {"streaming": True, "show_context": True, "notifications": True}
-    return _user_prefs[uid]
-
-
-# ── Auth Guard ──────────────────────────────────────────────────────────────────
-
-def _authorized(message: Message) -> bool:
+# ── Auth ─────────────────────────────────────────────────────────────────────
+def is_allowed(message: Message) -> bool:
     return message.from_user is not None and message.from_user.id == ALLOWED_USER_ID
 
 
-async def _deny(message: Message) -> None:
-    logger.warning("Unauthorized access from user_id=%s", message.from_user and message.from_user.id)
+# ── UI helpers ────────────────────────────────────────────────────────────────
+def main_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="🐛 Debug"),
+                KeyboardButton(text="💻 Code"),
+                KeyboardButton(text="📊 Analyze"),
+            ],
+            [
+                KeyboardButton(text="⚡ Shell"),
+                KeyboardButton(text="📌 Threads"),
+                KeyboardButton(text="⚙️ Status"),
+            ],
+        ],
+        resize_keyboard=True,
+        input_field_placeholder="Ask anything or use /run <task>…",
+    )
 
 
-# ── Helpers ─────────────────────────────────────────────────────────────────────
+def result_keyboard(model_used: str) -> InlineKeyboardMarkup:
+    provider = model_used.split("/")[0].upper() if model_used else "AI"
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="👍 Good", callback_data="fb:good"),
+        InlineKeyboardButton(text="👎 Retry", callback_data="fb:retry"),
+        InlineKeyboardButton(text=f"🤖 {provider}", callback_data="fb:info"),
+    ]])
 
-async def _send_chunks(message: Message, text: str, reply_markup=None) -> None:
-    """Send text in ≤4000-char HTML chunks."""
-    chunks = interpreter_bridge.chunk_output(text)
+
+async def send_chunked(message: Message, text: str, model_used: str = "") -> None:
+    chunks = chunk_output(text, max_length=4000)
     for i, chunk in enumerate(chunks):
-        markup = reply_markup if i == len(chunks) - 1 else None
-        await message.answer(f"<pre>{chunk}</pre>", parse_mode="HTML", reply_markup=markup)
+        is_last = (i == len(chunks) - 1)
+        markup = result_keyboard(model_used) if (is_last and model_used) else None
+        await message.answer(chunk, parse_mode="HTML", reply_markup=markup)
+        if not is_last:
+            await asyncio.sleep(0.3)
 
 
-async def _send_desktop_screenshot(message: Message) -> None:
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, "Taking desktop screenshot", bot
-    )
-    try:
-        png_bytes = await computer_control.desktop_screenshot()
-        cancel.set()
-        await status_msg.delete()
-        await message.answer_photo(
-            BufferedInputFile(png_bytes, filename="desktop.png"),
-            caption="Current desktop",
-        )
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Desktop Screenshot",
-            error=exc,
-            context="Capturing desktop screen",
-            recovery_actions=[
-                ("🔄 Retry", "quick:desktop"),
-                ("ℹ️ Get Help", "error:help"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
+async def _keep_typing(message: Message) -> None:
+    while True:
+        try:
+            await bot.send_chat_action(message.chat.id, "typing")
+        except Exception:
+            pass
+        await asyncio.sleep(4)
 
 
-def _detect_intent(text: str) -> dict:
-    """Classify natural language into action + content."""
-    t = text.lower().strip()
-
-    # Thread switching
-    for pattern in [r"switch to (\w+)", r"use thread (\w+)", r"work on (\w+)", r"change to (\w+) thread"]:
-        m = re.search(pattern, t)
-        if m:
-            return {"action": "thread", "content": m.group(1)}
-
-    if any(kw in t for kw in ["show threads", "list threads", "my threads"]):
-        return {"action": "threads", "content": ""}
-    if any(kw in t for kw in ["show context", "thread history", "what did we discuss"]):
-        return {"action": "context", "content": ""}
-    if any(kw in t for kw in ["show models", "list agents", "what agents"]):
-        return {"action": "models", "content": ""}
-
-    # Desktop
-    if any(kw in t for kw in ["what's on my screen", "what is on screen", "describe my screen", "show my screen"]):
-        return {"action": "analyze_screen", "content": text}
-    if any(kw in t for kw in ["desktop screenshot", "screenshot my screen", "take a screenshot of desktop"]):
-        return {"action": "desktop_shot", "content": ""}
-    if any(kw in t for kw in ["read my screen", "ocr screen", "what text is on screen"]):
-        return {"action": "read_screen", "content": ""}
-
-    # Click
-    click_m = re.search(r"click (?:on )?['\"]?(.+?)['\"]?$", t)
-    if click_m:
-        return {"action": "click", "content": click_m.group(1).strip()}
-
-    # File/shell
-    read_m = re.search(r"read (?:file )?([/~]?\S+\.\w+)", text)
-    if read_m:
-        return {"action": "read_file", "content": read_m.group(1)}
-    if any(kw in t for kw in ["git status", "git log", "show git"]):
-        return {"action": "git", "content": ""}
-    if any(kw in t for kw in ["terminal output", "what's in terminal", "show terminal"]):
-        return {"action": "terminal", "content": ""}
-
-    # Monitor (FIXED: proper regex escape)
-    if re.search(r"monitor .+ every (\d+) min", t):
-        return {"action": "monitor", "content": text}
-
-    # Confirmations
-    if t.startswith("confirm yes") or t.startswith("yes confirm"):
-        parts = t.split()
-        return {"action": "confirm_yes", "content": parts[-1] if len(parts) > 2 else ""}
-    if t.startswith("confirm no") or t.startswith("no confirm"):
-        parts = t.split()
-        return {"action": "confirm_no", "content": parts[-1] if len(parts) > 2 else ""}
-
-    # URL ops
-    url_m = re.search(r"(https?://\S+)", text)
-    if url_m:
-        if any(kw in t for kw in ["scrape", "extract text", "get text from"]):
-            return {"action": "scrape", "content": url_m.group(1)}
-        if any(kw in t for kw in ["screenshot", "capture", "shot of"]):
-            return {"action": "shot", "content": url_m.group(1)}
-
-    # Navigation shortcuts from quick keyboard
-    if t.strip() in ("🐛 debug", "debug"):
-        return {"action": "quick_prompt", "content": "debug"}
-    if t.strip() in ("💻 code", "code"):
-        return {"action": "quick_prompt", "content": "code"}
-    if t.strip() in ("📊 analyze", "analyze"):
-        return {"action": "quick_prompt", "content": "analyze"}
-    if t.strip() in ("💡 explain", "explain"):
-        return {"action": "quick_prompt", "content": "explain"}
-    if t.strip() in ("📌 threads", "threads"):
-        return {"action": "threads", "content": ""}
-    if t.strip() in ("⚙️ settings", "settings"):
-        return {"action": "quick_prompt", "content": "settings"}
-
-    if any(kw in t for kw in ["help", "what can you do", "commands"]):
-        return {"action": "help", "content": ""}
-    if any(kw in t for kw in ["show stats", "performance stats", "usage stats"]):
-        return {"action": "stats", "content": ""}
-    if any(kw in t for kw in ["circuit status", "circuit breaker"]):
-        return {"action": "circuits", "content": ""}
-    if any(kw in t for kw in ["usage report", "api usage", "cost report"]):
-        return {"action": "usage", "content": ""}
-
-    return {"action": "run", "content": text}
+def _format_keys_status() -> str:
+    status = verify_api_keys()
+    lines = ["<b>🔑 API Keys Status</b>\n"]
+    names = {
+        "CEREBRAS_API_KEY":   "Cerebras  ⚡ 1,500 tok/s  (fastest)",
+        "GROQ_API_KEY":       "Groq      🚀 241 tok/s   (fast)",
+        "GEMINI_API_KEY":     "Gemini    📚 1M context  (large)",
+        "OPENROUTER_API_KEY": "OpenRouter 🔀 24+ models  (variety)",
+        "ZAI_API_KEY":        "ZAI/GLM   🧠 reasoning   (optional)",
+        "HF_TOKEN":           "HuggingFace 🤗            (optional)",
+    }
+    for env_var, label in names.items():
+        icon = "✅" if status.get(env_var) else "❌"
+        lines.append(f"  {icon} {label}")
+    lines.append("")
+    cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+    if any(status.get(k) for k in cloud):
+        lines.append("✅ Cloud APIs active — no local models needed")
+    else:
+        lines.append("⚠️ <b>No cloud keys found!</b> Add to your .env file.")
+    return "\n".join(lines)
 
 
-# ── Slash Command Handlers ──────────────────────────────────────────────────────
+# ── Commands ──────────────────────────────────────────────────────────────────
 
-@dp.message(Command("start"))
+@dp.message(CommandStart())
 async def cmd_start(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+    if not is_allowed(message):
         return
-    await message.answer(
-        HelpFormatter.format_help_menu(),
-        reply_markup=TelegramUI.main_menu(),
-        parse_mode="HTML",
+    status = verify_api_keys()
+    active = sum(1 for v in status.values() if v)
+    uptime = int(time.time() - _start_time)
+    uptime_str = f"{uptime // 3600}h {(uptime % 3600) // 60}m"
+
+    text = (
+        "🤖 <b>BabasSwarms</b> — Cloud AI Swarm on your PC\n\n"
+        f"⏱ Uptime: <code>{uptime_str}</code>  |  🔑 Keys: <code>{active}/6</code>\n\n"
+        "<b>Commands</b>\n"
+        "  <code>/run &lt;task&gt;</code>   — Auto-route to best agent\n"
+        "  <code>/cmd &lt;shell&gt;</code>  — Run shell on your PC\n"
+        "  <code>/agent &lt;key&gt; &lt;task&gt;</code> — Force an agent\n"
+        "  <code>/models</code>   — Agent roster\n"
+        "  <code>/keys</code>     — API key status\n"
+        "  <code>/stats</code>    — CPU/GPU/RAM\n"
+        "  <code>/git</code>      — Git status\n"
+        "  <code>/threads</code>  — Conversation threads\n"
+        "  <code>/scrape &lt;url&gt;</code> — Scrape a URL\n\n"
+        "<b>Or just type naturally</b> — bot auto-routes."
     )
-    await message.answer(
-        "⌨️ <b>Shortcuts activated</b> - see buttons below 👇",
-        reply_markup=TelegramUI.quick_reply_keyboard(),
-        parse_mode="HTML",
-    )
+    await message.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
 
 
-@dp.message(Command("commands"))
-async def cmd_commands(message: Message) -> None:
-    """Show full command reference."""
-    if not _authorized(message):
-        await _deny(message)
+@dp.message(Command("keys"))
+async def cmd_keys(message: Message) -> None:
+    if not is_allowed(message):
         return
-    await message.answer(
-        HelpFormatter.format_command_list(),
-        reply_markup=TelegramUI.back_to_menu(),
-        parse_mode="HTML",
-    )
+    await message.answer(_format_keys_status(), parse_mode="HTML")
 
 
 @dp.message(Command("models"))
 async def cmd_models(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+    if not is_allowed(message):
         return
     await message.answer(
-        HelpFormatter.format_agent_roster(),
-        reply_markup=TelegramUI.back_to_menu(),
+        f"{agents.list_agents()}\n\n{_format_keys_status()}",
         parse_mode="HTML",
     )
-
-
-@dp.message(Command("desktop"))
-async def cmd_desktop(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    await _send_desktop_screenshot(message)
-
-
-@dp.message(Command("screen"))
-async def cmd_screen(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, "Reading screen text via OCR", bot
-    )
-    try:
-        text = await computer_control.read_screen()
-        cancel.set()
-        await status_msg.delete()
-        await _send_chunks(message, text or "(no text detected)")
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="OCR",
-            error=exc,
-            context="Reading screen text",
-            recovery_actions=[
-                ("🔄 Retry", "quick:screen"),
-                ("📸 Screenshot Instead", "quick:desktop"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("click"))
-async def cmd_click(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/click &lt;text&gt;</code>", parse_mode="HTML")
-        return
-    target = args[1].strip()
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, f"Looking for '{target}' on screen", bot
-    )
-    try:
-        found = await computer_control.click_on(target)
-        cancel.set()
-        if found:
-            await FeedbackAnimator.success_animation(
-                bot, message.chat.id,
-                action="Element clicked",
-                details=f"Successfully clicked: <code>{target}</code>"
-            )
-            await status_msg.delete()
-        else:
-            await status_msg.edit_text(
-                ErrorFormatter.format_validation_error(
-                    field="Target Element",
-                    issue=f"Element '{target}' not found on screen",
-                    suggestion="Try taking a screenshot first to see available elements"
-                ),
-                parse_mode="HTML"
-            )
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Click",
-            error=exc,
-            context=f"Clicking element: {target}",
-            recovery_actions=[
-                ("🔄 Retry", f"retry:click:{target}"),
-                ("📸 Show Screen", "quick:desktop"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("read"))
-async def cmd_read_file(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/read &lt;path&gt;</code>", parse_mode="HTML")
-        return
-    path = args[1].strip()
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, f"Reading file: {path}", bot
-    )
-    try:
-        content = await vscode_bridge.read_file(path)
-        cancel.set()
-        await status_msg.delete()
-        await _send_chunks(message, content)
-    except FileNotFoundError:
-        cancel.set()
-        await status_msg.edit_text(
-            ErrorFormatter.format_validation_error(
-                field="File Path",
-                issue=f"File not found: {path}",
-                suggestion="Check the path and try again. Use absolute paths like /home/user/file.py"
-            ),
-            parse_mode="HTML"
-        )
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="File Read",
-            error=exc,
-            context=f"Reading file: {path}",
-            recovery_actions=[
-                ("🔄 Retry", f"retry:read:{path}"),
-                ("📂 List Files", "quick:ls"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("cmd"))
-async def cmd_shell(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/cmd &lt;command&gt;</code>", parse_mode="HTML")
-        return
-    cmd = args[1].strip()
-
-    if computer_control.is_destructive(cmd):
-        async def _run() -> str:
-            return await vscode_bridge.run_command(cmd)
-
-        action_id = task_orchestrator.queue_confirmation(
-            f"Run: <code>{cmd}</code>", _run
-        )
-        await message.answer(
-            f"⚠️ Destructive command queued.\n\n"
-            f"<code>{cmd}</code>",
-            reply_markup=TelegramUI.confirmation(action_id),
-            parse_mode="HTML",
-        )
-        return
-
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, f"Running: {cmd}", bot
-    )
-    try:
-        output = await vscode_bridge.run_command(cmd)
-        cancel.set()
-        await status_msg.delete()
-        await _send_chunks(message, output)
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Command Execution",
-            error=exc,
-            context=f"Running: {cmd}",
-            recovery_actions=[
-                ("🔄 Retry", f"retry:cmd:{cmd}"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("git"))
-async def cmd_git(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, "Getting git status", bot
-    )
-    try:
-        status = await vscode_bridge.git_status()
-        cancel.set()
-        await status_msg.delete()
-        await _send_chunks(message, status)
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Git",
-            error=exc,
-            context="Checking git status",
-            recovery_actions=[
-                ("🔄 Retry", "retry:git"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("thread"))
-async def cmd_thread(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        # Show thread selector
-        threads = agents.list_threads_raw()
-        if threads:
-            await message.answer(
-                "Select a thread:", reply_markup=TelegramUI.thread_selector(threads), parse_mode="HTML"
-            )
-        else:
-            await message.answer("Usage: <code>/thread &lt;name&gt;</code>", parse_mode="HTML")
-        return
-    tid = args[1].strip().lower().replace(" ", "_")
-    current_thread[message.from_user.id] = tid
-    await FeedbackAnimator.success_animation(
-        bot, message.chat.id,
-        action="Thread switched",
-        details=f"📌 Now working in: <b>{tid}</b>"
-    )
-
-
-@dp.message(Command("threads"))
-async def cmd_threads(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    threads = agents.list_threads_raw()
-    if threads:
-        await message.answer(
-            "<b>Active Threads</b>",
-            reply_markup=TelegramUI.thread_selector(threads),
-            parse_mode="HTML",
-        )
-    else:
-        await message.answer(agents.list_threads(), parse_mode="HTML")
-
-
-@dp.message(Command("context"))
-async def cmd_context(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    uid = message.from_user.id
-    if uid not in current_thread:
-        await message.answer("No active thread.", parse_mode="HTML")
-        return
-    tid = current_thread[uid]
-    ctx = agents.get_thread_context(tid, last_n=5)
-    if ctx:
-        await message.answer(f"<b>Thread: {tid}</b>\n\n<pre>{ctx}</pre>", parse_mode="HTML")
-    else:
-        await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
 
 
 @dp.message(Command("run"))
 async def cmd_run(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+    if not is_allowed(message):
         return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/run &lt;task&gt;</code>", parse_mode="HTML")
+    task = (message.text or "").removeprefix("/run").strip()
+    if not task:
+        await message.answer(
+            "Usage: <code>/run &lt;task&gt;</code>\n\n"
+            "Example: <code>/run debug this CUDA OOM error</code>",
+            parse_mode="HTML",
+        )
         return
-    await _execute_task(message, args[1].strip())
+    await _execute(message, task)
 
 
 @dp.message(Command("agent"))
 async def cmd_agent(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+    if not is_allowed(message):
         return
-    args = (message.text or "").split(maxsplit=2)
-    if len(args) < 3:
+    parts = (message.text or "").split(maxsplit=2)
+    if len(parts) < 3:
+        valid = ", ".join(agents.AGENT_MODELS.keys())
         await message.answer(
-            f"Usage: <code>/agent &lt;name&gt; &lt;task&gt;</code>",
-            reply_markup=TelegramUI.agent_selector(),
+            f"Usage: <code>/agent &lt;key&gt; &lt;task&gt;</code>\nKeys: <code>{valid}</code>",
             parse_mode="HTML",
         )
         return
-
-    agent_key = args[1].strip().lower()
-    task = args[2].strip()
-    model = agents.get_model(agent_key)
-    if model is None:
-        await message.answer(f"Unknown agent: <b>{agent_key}</b>", parse_mode="HTML")
+    key, task = parts[1].lower(), parts[2]
+    if key not in agents.AGENT_MODELS:
+        await message.answer(
+            f"❌ Unknown agent: <code>{key}</code>",
+            parse_mode="HTML",
+        )
         return
+    await _execute(message, task, forced_agent=key)
 
-    uid = message.from_user.id
-    tid = current_thread.get(uid)
-    full_task = task
-    if tid:
-        ctx = agents.get_thread_context(tid)
-        if ctx:
-            full_task = f"{ctx}\n\nCurrent task: {task}"
 
-    await message.answer(f"Using <b>{agent_key}</b> (<code>{model}</code>)…", parse_mode="HTML")
-    t0 = time.monotonic()
-    try:
-        result = await _run_with_streaming(message, model, full_task, agent_key)
-    except Exception as exc:
-        result = f"Error: {exc}"
-    if tid:
-        agents.add_to_thread(tid, agent_key, task, result)
+@dp.message(Command("cmd"))
+async def cmd_shell(message: Message) -> None:
+    if not is_allowed(message):
+        return
+    cmd = (message.text or "").removeprefix("/cmd").strip()
+    if not cmd:
+        await message.answer(
+            "Usage: <code>/cmd &lt;shell command&gt;</code>\n"
+            "Example: <code>/cmd nvidia-smi</code>",
+            parse_mode="HTML",
+        )
+        return
+    dangerous = ["rm -rf /", "mkfs", ":(){:|:&};:", "> /dev/sda"]
+    for d in dangerous:
+        if d in cmd:
+            await message.answer(
+                f"⚠️ Blocked dangerous pattern: <code>{d}</code>",
+                parse_mode="HTML",
+            )
+            return
+    status_msg = await message.answer(
+        f"⚙️ <code>$ {cmd}</code>", parse_mode="HTML"
+    )
+    output = await run_shell_command(cmd, timeout=30)
+    await status_msg.delete()
+    await message.answer(
+        f"<code>$ {cmd}</code>\n\n<pre>{output[:3800]}</pre>",
+        parse_mode="HTML",
+    )
 
-    await notifications.task_complete(task, time.monotonic() - t0, agent_key)
-    await _send_feedback_prompt(message, agent_key, task)
+
+@dp.message(Command("git"))
+async def cmd_git(message: Message) -> None:
+    if not is_allowed(message):
+        return
+    output = await run_shell_command(
+        "cd ~/swarm-bot && git status --short && git log --oneline -5",
+        timeout=10,
+    )
+    await message.answer(
+        f"<b>📁 Git Status</b>\n\n<pre>{output}</pre>",
+        parse_mode="HTML",
+    )
+
+
+@dp.message(Command("stats"))
+async def cmd_stats(message: Message) -> None:
+    if not is_allowed(message):
+        return
+    status_msg = await message.answer("📊 Collecting stats…")
+    cpu, mem, gpu, disk = await asyncio.gather(
+        run_shell_command("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'", timeout=5),
+        run_shell_command("free -h | grep Mem", timeout=5),
+        run_shell_command(
+            "nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu"
+            " --format=csv,noheader,nounits 2>/dev/null || echo 'No GPU'",
+            timeout=5,
+        ),
+        run_shell_command("df -h / | tail -1", timeout=5),
+    )
+    uptime = int(time.time() - _start_time)
+    text = (
+        f"<b>📊 System Stats</b>\n\n"
+        f"⏱ <b>Bot uptime:</b> {uptime // 3600}h {(uptime % 3600) // 60}m\n"
+        f"🖥 <b>CPU:</b> <code>{cpu.strip()}%</code>\n"
+        f"💾 <b>Memory:</b>\n<pre>{mem.strip()}</pre>\n"
+        f"🎮 <b>GPU:</b>\n<pre>{gpu.strip()}</pre>\n"
+        f"💿 <b>Disk:</b>\n<pre>{disk.strip()}</pre>"
+    )
+    await status_msg.edit_text(text, parse_mode="HTML")
+
+
+@dp.message(Command("thread"))
+async def cmd_thread(message: Message) -> None:
+    if not is_allowed(message):
+        return
+    name = (message.text or "").removeprefix("/thread").strip()
+    if not name:
+        current = _user_thread.get(message.from_user.id, "none")
+        await message.answer(
+            f"Current thread: <b>{current}</b>\n"
+            "Usage: <code>/thread &lt;name&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
+    _user_thread[message.from_user.id] = name
+    await message.answer(f"📌 Thread: <b>{name}</b>", parse_mode="HTML")
+
+
+@dp.message(Command("threads"))
+async def cmd_threads(message: Message) -> None:
+    if not is_allowed(message):
+        return
+    await message.answer(agents.list_threads(), parse_mode="HTML")
 
 
 @dp.message(Command("scrape"))
 async def cmd_scrape(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+    if not is_allowed(message):
         return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/scrape &lt;url&gt;</code>", parse_mode="HTML")
-        return
-    url = args[1].strip()
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, f"Scraping {url}", bot
-    )
-    try:
-        text = await playwright_agent.scrape(url)
-        cancel.set()
-        await status_msg.delete()
-        await _send_chunks(message, text)
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Web Scrape",
-            error=exc,
-            context=f"Scraping {url}",
-            recovery_actions=[
-                ("🔄 Retry", f"retry:scrape:{url}"),
-                ("📸 Screenshot Instead", f"retry:shot:{url}"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(Command("shot"))
-async def cmd_shot(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: <code>/shot &lt;url&gt;</code>", parse_mode="HTML")
-        return
-    url = args[1].strip()
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, f"Screenshotting {url}", bot
-    )
-    tmp_path: Path | None = None
-    try:
-        tmp_path = await playwright_agent.screenshot(url)
-        cancel.set()
-        await status_msg.delete()
-        await message.answer_photo(
-            BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
-            caption=url,
-        )
-    except Exception as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Screenshot",
-            error=exc,
-            context=f"Taking screenshot of {url}",
-            recovery_actions=[
-                ("🔄 Retry", f"retry:shot:{url}"),
-                ("📝 Scrape Text Instead", f"retry:scrape:{url}"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-    finally:
-        if tmp_path:
-            tmp_path.unlink(missing_ok=True)
-
-
-@dp.message(Command("confirm"))
-async def cmd_confirm(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split()
-    if len(args) < 3:
-        pending = task_orchestrator.list_pending()
+    url = (message.text or "").removeprefix("/scrape").strip()
+    if not url:
         await message.answer(
-            f"Usage: <code>/confirm yes|no &lt;id&gt;</code>\n\n{pending}",
+            "Usage: <code>/scrape &lt;url&gt;</code>",
             parse_mode="HTML",
         )
         return
-    verdict = args[1].lower()
-    action_id = args[2]
-    if verdict in ("yes", "y"):
-        result = await task_orchestrator.confirm_action(action_id)
-        await _send_chunks(message, result)
-    elif verdict in ("no", "n"):
-        result = task_orchestrator.deny_action(action_id)
-        await message.answer(result, parse_mode="HTML")
-
-
-@dp.message(Command("pending"))
-async def cmd_pending(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    await message.answer(task_orchestrator.list_pending(), parse_mode="HTML")
-
-
-@dp.message(Command("monitors"))
-async def cmd_monitors(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    await message.answer(task_orchestrator.list_monitors(), parse_mode="HTML")
-
-
-@dp.message(Command("cancel"))
-async def cmd_cancel(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split()
-    if len(args) < 2:
-        await message.answer(task_orchestrator.list_monitors(), parse_mode="HTML")
-        return
-    result = task_orchestrator.cancel_monitor(args[1])
-    await message.answer(result, parse_mode="HTML")
-
-
-# ── Production Monitoring Commands ──────────────────────────────────────────────
-
-@dp.message(Command("stats"))
-async def cmd_stats(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    parts = []
-    try:
-        from core.observability.metrics import format_stats
-        parts.append(format_stats())
-    except Exception as exc:
-        parts.append(f"Metrics unavailable: {exc}")
-    try:
-        from core.optimization.feedback_learner import get_learner
-        parts.append(get_learner().summary_report())
-    except Exception as exc:
-        parts.append(f"Feedback unavailable: {exc}")
+    status_msg = await message.answer(
+        f"🔍 Scraping <code>{url}</code>…", parse_mode="HTML"
+    )
+    output = await run_shell_command(
+        f"curl -sL --max-time 15 '{url}' | "
+        "python3 -c \""
+        "import sys; from html.parser import HTMLParser; "
+        "class P(HTMLParser):\n"
+        "    def __init__(self): super().__init__(); self.d=[]; self.skip=False\n"
+        "    def handle_starttag(self,t,a): self.skip=t in('script','style')\n"
+        "    def handle_endtag(self,t): self.skip=False\n"
+        "    def handle_data(self,d):\n"
+        "        if not self.skip and d.strip(): self.d.append(d.strip())\n"
+        "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:80]))"
+        "\"",
+        timeout=20,
+    )
+    await status_msg.delete()
     await message.answer(
-        "\n\n".join(parts),
-        reply_markup=TelegramUI.back_to_menu(),
+        f"<b>🌐 {url}</b>\n\n<pre>{output[:3000]}</pre>",
         parse_mode="HTML",
     )
 
 
-@dp.message(Command("circuits"))
-async def cmd_circuits(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    try:
-        from core.reliability.error_recovery import get_recovery
-        report = get_recovery().circuit_status()
-        await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"Circuit status unavailable: {exc}", parse_mode="HTML")
+# ── Keyboard shortcuts ────────────────────────────────────────────────────────
+
+@dp.message(F.text == "⚙️ Status")
+async def kbd_status(message: Message) -> None:
+    if is_allowed(message):
+        await cmd_stats(message)
 
 
-@dp.message(Command("usage"))
-async def cmd_usage(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    try:
-        from core.optimization.usage_tracker import get_tracker
-        report = get_tracker().daily_report()
-        await message.answer(report, reply_markup=TelegramUI.back_to_menu(), parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"Usage report unavailable: {exc}", parse_mode="HTML")
+@dp.message(F.text == "📌 Threads")
+async def kbd_threads(message: Message) -> None:
+    if is_allowed(message):
+        await cmd_threads(message)
 
 
-@dp.message(Command("feedback"))
-async def cmd_feedback(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=3)
-    if len(args) < 3:
+@dp.message(F.text == "⚡ Shell")
+async def kbd_shell_hint(message: Message) -> None:
+    if is_allowed(message):
         await message.answer(
-            "Usage: <code>/feedback &lt;id&gt; good|bad [comment]</code>",
+            "Type a shell command:\n"
+            "<code>/cmd &lt;your command&gt;</code>\n\n"
+            "Examples:\n"
+            "<code>/cmd ps aux | grep python</code>\n"
+            "<code>/cmd nvidia-smi</code>\n"
+            "<code>/cmd ls ~/swarm-bot</code>",
             parse_mode="HTML",
         )
+
+
+@dp.message(F.text.in_({"🐛 Debug", "💻 Code", "📊 Analyze"}))
+async def kbd_agent_hint(message: Message) -> None:
+    if not is_allowed(message):
         return
-    fid = args[1].strip()
-    verdict = args[2].strip().lower()
-    comment = args[3].strip() if len(args) > 3 else ""
-
-    if verdict in ("good", "yes", "+1"):
-        rating = 1
-    elif verdict in ("bad", "no", "-1"):
-        rating = -1
-    else:
-        await message.answer("Rating must be <code>good</code> or <code>bad</code>.", parse_mode="HTML")
-        return
-
-    try:
-        from core.optimization.feedback_learner import get_learner
-        result = get_learner().record(fid, rating, comment)
-        await FeedbackAnimator.show_toast(
-            bot, message.chat.id,
-            message="Feedback recorded!",
-            duration=2.0,
-            icon="✅"
-        )
-    except Exception as exc:
-        await message.answer(f"Feedback error: {exc}", parse_mode="HTML")
-
-
-# ── Inline Callback Handlers ────────────────────────────────────────────────────
-
-@dp.callback_query(F.data.startswith("quick:"))
-async def cb_quick_action(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    action = callback.data.split(":", 1)[1]
-    prompts = {
-        "debug":   "🐛 <b>Debug Mode</b>\n\nSend me your error traceback or describe the issue.",
-        "code":    "💻 <b>Coding Mode</b>\n\nDescribe what you want to build or ask for code.",
-        "analyze": "📊 <b>Analysis Mode</b>\n\nUpload a file (CSV, JSON, logs) or paste data.",
-        "explain": "💡 <b>Explain Mode</b>\n\nAsk me to explain any concept, algorithm, or error.",
-        "design":  "🏗️ <b>Design Mode</b>\n\nDescribe the system you want to architect.",
-        "desktop": None,
-    }
-    if action == "desktop":
-        await callback.answer()
-        await _send_desktop_screenshot(callback.message)
-        return
-
-    text = prompts.get(action, "How can I help?")
-    await callback.message.answer(text, parse_mode="HTML")
-    await callback.answer()
-
-
-@dp.callback_query(F.data.startswith("nav:"))
-async def cb_nav(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    dest = callback.data.split(":", 1)[1]
-    if dest == "main_menu":
-        await callback.message.edit_text(
-            HelpFormatter.format_help_menu(),
-            reply_markup=TelegramUI.main_menu(),
-            parse_mode="HTML",
-        )
-    elif dest == "threads":
-        threads = agents.list_threads_raw()
-        if threads:
-            await callback.message.edit_text(
-                "<b>Active Threads</b>\n\nSelect one:",
-                reply_markup=TelegramUI.thread_selector(threads),
-                parse_mode="HTML",
-            )
-        else:
-            await callback.message.answer("No active threads yet.")
-    elif dest == "settings":
-        uid = callback.from_user.id
-        prefs = _prefs(uid)
-        await callback.message.edit_text(
-            "⚙️ <b>Settings</b>\n\nToggle preferences:",
-            reply_markup=TelegramUI.settings_menu(prefs),
-            parse_mode="HTML",
-        )
-    await callback.answer()
-
-
-@dp.callback_query(F.data.startswith("agent_force:"))
-async def cb_agent_force(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    agent_key = callback.data.split(":", 1)[1]
-    await callback.message.answer(
-        f"<b>{agent_key.upper()} agent selected.</b>\n\nSend your task:",
+    shortcut_map = {"🐛 Debug": "debug", "💻 Code": "coding", "📊 Analyze": "analyst"}
+    key = shortcut_map.get(message.text, "general")
+    await message.answer(
+        f"<b>{message.text}</b> selected.\n\n"
+        f"Type your task or use:\n<code>/agent {key} &lt;task&gt;</code>",
         parse_mode="HTML",
     )
-    # Store pending agent preference temporarily
-    _prefs(callback.from_user.id)["pending_agent"] = agent_key
-    await callback.answer(f"Agent: {agent_key}")
 
 
-@dp.callback_query(F.data.startswith("thread_switch:"))
-async def cb_thread_switch(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    tid = callback.data.split(":", 1)[1]
-    current_thread[callback.from_user.id] = tid
-    await callback.message.edit_text(
-        f"📌 Switched to thread: <b>{tid}</b>",
-        reply_markup=TelegramUI.back_to_menu(),
-        parse_mode="HTML",
-    )
-    await callback.answer(f"Thread: {tid}")
-
-
-@dp.callback_query(F.data == "thread_new")
-async def cb_thread_new(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    await callback.message.answer("Send a name for the new thread (e.g. <code>workernet</code>):", parse_mode="HTML")
-    _prefs(callback.from_user.id)["awaiting_thread_name"] = True
-    await callback.answer()
-
-
-@dp.callback_query(F.data.startswith("confirm_yes:"))
-async def cb_confirm_yes(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    action_id = callback.data.split(":", 1)[1]
-    await callback.message.edit_reply_markup(reply_markup=None)
-    result = await task_orchestrator.confirm_action(action_id)
-    await callback.message.answer(f"✅ {result}", parse_mode="HTML")
-    await callback.answer("Confirmed")
-
-
-@dp.callback_query(F.data.startswith("confirm_no:"))
-async def cb_confirm_no(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    action_id = callback.data.split(":", 1)[1]
-    await callback.message.edit_reply_markup(reply_markup=None)
-    result = task_orchestrator.deny_action(action_id)
-    await callback.message.answer(f"❌ {result}", parse_mode="HTML")
-    await callback.answer("Cancelled")
-
-
-@dp.callback_query(F.data.startswith("doc:"))
-async def cb_doc_action(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    parts = callback.data.split(":", 2)
-    action = parts[1]
-    file_id = parts[2] if len(parts) > 2 else ""
-    await callback.answer(f"Processing: {action}…")
-
-    cached = _doc_cache.get(file_id)
-    if not cached:
-        await callback.message.answer("Document no longer cached. Please re-upload.", parse_mode="HTML")
-        return
-
-    raw, mime, fname = cached
-    extracted, _label = await multimodal_processor.process_document(raw, mime, fname)
-    if not extracted:
-        await callback.message.answer("Could not extract text from this document.", parse_mode="HTML")
-        return
-
-    prompts_map = {
-        "summarize": f"Summarize this document concisely:\n\n{extracted[:6000]}",
-        "qa":        f"The following document has been uploaded. Await user questions.\n\n{extracted[:6000]}",
-        "extract":   f"Extract all tables, lists, and key data from this document:\n\n{extracted[:6000]}",
-        "analyze":   f"Perform a thorough analysis of this document:\n\n{extracted[:6000]}",
-    }
-    task = prompts_map.get(action, f"Analyze this document:\n\n{extracted[:6000]}")
-
-    if action == "qa":
-        uid = callback.from_user.id
-        tid = current_thread.get(uid, "doc_context")
-        agents.add_to_thread(tid, "document", f"Uploaded: {fname}", extracted[:2000])
-        current_thread[uid] = tid
-        await callback.message.answer(
-            f"📄 <b>{fname}</b> loaded into thread <b>{tid}</b>.\nAsk me anything about it.",
-            parse_mode="HTML",
-        )
-        return
-
-    model = agents.get_model("mentor") or agents.get_model("coding")
-    await callback.message.answer(f"Processing <code>{action}</code> on <b>{fname}</b>…", parse_mode="HTML")
-    result = await interpreter_bridge.run_task(model, task, "mentor")
-    formatted = formatters.format_response(result, "mentor", concept=fname)
-    await _send_chunks(callback.message, formatted)
-
-
-@dp.callback_query(F.data.startswith("img:"))
-async def cb_img_action(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    parts = callback.data.split(":", 2)
-    action = parts[1]
-    file_id = parts[2] if len(parts) > 2 else ""
-    await callback.answer(f"Processing: {action}…")
-
-    image_bytes = _img_cache.get(file_id)
-    if not image_bytes:
-        await callback.message.answer("Image no longer cached. Please re-upload.", parse_mode="HTML")
-        return
-
-    questions_map = {
-        "describe": "Describe this image in detail.",
-        "errors":   "Find and explain any errors, warnings, or problems visible in this image.",
-        "ocr":      "Extract and return all text visible in this image.",
-        "fix":      "Identify the issue shown and suggest a concrete fix.",
-    }
-    question = questions_map.get(action, "Describe this image.")
-    await callback.message.answer(f"Analyzing image: <i>{question}</i>…", parse_mode="HTML")
-    result = await multimodal_processor.analyze_image(image_bytes, question)
-    formatted = formatters.format_response(result, "vision")
-    await _send_chunks(callback.message, formatted)
-
+# ── Callbacks ─────────────────────────────────────────────────────────────────
 
 @dp.callback_query(F.data.startswith("fb:"))
 async def cb_feedback(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    parts = callback.data.split(":", 2)
-    verdict = parts[1]
-    fid = parts[2] if len(parts) > 2 else ""
-    rating = 1 if verdict == "good" else -1
-
-    try:
-        from core.optimization.feedback_learner import get_learner
-        result = get_learner().record(fid, rating)
-        await callback.message.edit_reply_markup(reply_markup=None)
-        await callback.answer(result or "Feedback recorded!")
-    except Exception as exc:
-        await callback.answer(f"Error: {exc}")
+    action = callback.data.split(":")[1]
+    if action == "good":
+        await callback.answer("Thanks! 👍")
+    elif action == "retry":
+        await callback.answer("Re-send your message to retry.")
+    elif action == "info":
+        await callback.answer("Provider shown in button label.")
 
 
-@dp.callback_query(F.data.startswith("setting:toggle:"))
-async def cb_setting_toggle(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    key = callback.data.split(":", 2)[2]
-    uid = callback.from_user.id
-    prefs = _prefs(uid)
-    prefs[key] = not prefs.get(key, True)
-    await callback.message.edit_text(
-        "⚙️ <b>Settings</b>\n\nToggle preferences:",
-        reply_markup=TelegramUI.settings_menu(prefs),
-        parse_mode="HTML",
-    )
-    await callback.answer(f"{key}: {'On' if prefs[key] else 'Off'}")
-
-
-@dp.callback_query(F.data.startswith("task_cancel:"))
-async def cb_task_cancel(callback: CallbackQuery) -> None:
-    if not callback.from_user or callback.from_user.id != ALLOWED_USER_ID:
-        await callback.answer("Unauthorized")
-        return
-    task_id = callback.data.split(":", 1)[1]
-    result = task_orchestrator.cancel_monitor(task_id)
-    await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.answer("Cancelled")
-    await callback.message.answer(result, parse_mode="HTML")
-
-
-# ── Multi-Modal Input Handlers ──────────────────────────────────────────────────
-
-@dp.message(F.voice)
-async def handle_voice(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    status_msg, cancel = await LoadingManager.show_progress(
-        message, "Transcribing voice message", bot
-    )
-    try:
-        voice: Voice = message.voice
-        file = await bot.get_file(voice.file_id)
-        file_bytes = await bot.download_file(file.file_path)
-        audio_bytes = file_bytes.read()
-
-        text = await multimodal_processor.transcribe_voice(audio_bytes, extension=".ogg")
-        cancel.set()
-        await status_msg.edit_text(
-            f"🎤 <b>Heard:</b>\n\n<i>{text}</i>\n\nProcessing…",
-            parse_mode="HTML",
-        )
-        await _execute_task(message, text)
-
-    except RuntimeError as exc:
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Transcription",
-            error=exc,
-            context="Transcribing voice message",
-            recovery_actions=[
-                ("ℹ️ Get Help", "error:help"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-    except Exception as exc:
-        logger.exception("Voice handler error: %s", exc)
-        cancel.set()
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Voice",
-            error=exc,
-            context="Processing voice message",
-            recovery_actions=[
-                ("🔄 Retry", "retry:voice"),
-            ]
-        )
-        await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(F.document)
-async def handle_document(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    doc: Document = message.document
-    mime = doc.mime_type or ""
-    fname = doc.file_name or "document"
-    size_kb = (doc.file_size or 0) / 1024
-
-    try:
-        file = await bot.get_file(doc.file_id)
-        file_bytes_io = await bot.download_file(file.file_path)
-        raw = file_bytes_io.read()
-
-        # Cache for callback handling
-        _doc_cache[doc.file_id] = (raw, mime, fname)
-        # Evict old entries (keep last 10)
-        if len(_doc_cache) > 10:
-            oldest = next(iter(_doc_cache))
-            del _doc_cache[oldest]
-
-        preview = formatters.ResponseFormatter.file_preview(fname, size_kb, mime)
-        await message.answer(
-            preview,
-            reply_markup=TelegramUI.document_actions(doc.file_id),
-            parse_mode="HTML",
-        )
-    except Exception as exc:
-        logger.exception("Document handler error: %s", exc)
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Document",
-            error=exc,
-            context=f"Processing document: {fname}",
-            recovery_actions=[
-                ("🔄 Re-upload", "retry:doc"),
-            ]
-        )
-        await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-@dp.message(F.photo)
-async def handle_photo(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
-        return
-    photo: PhotoSize = message.photo[-1]
-
-    try:
-        file = await bot.get_file(photo.file_id)
-        file_bytes_io = await bot.download_file(file.file_path)
-        image_bytes = file_bytes_io.read()
-
-        # Cache for callback
-        _img_cache[photo.file_id] = image_bytes
-        if len(_img_cache) > 20:
-            oldest = next(iter(_img_cache))
-            del _img_cache[oldest]
-
-        caption = message.caption or ""
-        if caption:
-            # User provided a question — answer immediately
-            await message.answer("Analyzing image…")
-            result = await multimodal_processor.analyze_image(image_bytes, caption)
-            formatted = formatters.format_response(result, "vision")
-            await _send_chunks(message, formatted)
-        else:
-            # Show action buttons
-            await message.answer(
-                "📷 <b>Image received</b>\n\nWhat would you like me to do?",
-                reply_markup=TelegramUI.image_actions(photo.file_id),
-                parse_mode="HTML",
-            )
-    except Exception as exc:
-        logger.exception("Photo handler error: %s", exc)
-        error_msg, keyboard = ErrorFormatter.format_error(
-            error_type="Image",
-            error=exc,
-            context="Processing image",
-            recovery_actions=[
-                ("🔄 Re-send", "retry:photo"),
-            ]
-        )
-        await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-
-# ── Natural Language Handler ─────────────────────────────────────────────────────
+# ── Natural language catch-all ────────────────────────────────────────────────
 
 @dp.message(F.text)
-async def handle_natural(message: Message) -> None:
-    if not _authorized(message):
-        await _deny(message)
+async def handle_nl(message: Message) -> None:
+    if not is_allowed(message):
         return
-    text = (message.text or "").strip()
-    if not text:
+    task = (message.text or "").strip()
+    if not task or task.startswith("/"):
         return
-
-    uid = message.from_user.id
-    prefs = _prefs(uid)
-
-    # Check if user was asked to name a new thread
-    if prefs.pop("awaiting_thread_name", False):
-        tid = text.strip().lower().replace(" ", "_")
-        current_thread[uid] = tid
-        await FeedbackAnimator.success_animation(
-            bot, message.chat.id,
-            action="Thread created",
-            details=f"📌 Now working in: <b>{tid}</b>"
-        )
-        return
-
-    # Check if a specific agent was pre-selected via button
-    forced_agent = prefs.pop("pending_agent", None)
-    if forced_agent:
-        model = agents.get_model(forced_agent)
-        if model:
-            await _execute_task(message, text, forced_agent=forced_agent)
-            return
-
-    intent = _detect_intent(text)
-    action = intent["action"]
-    content = intent["content"]
-
-    if action == "thread":
-        tid = content.lower().replace(" ", "_")
-        current_thread[uid] = tid
-        await FeedbackAnimator.success_animation(
-            bot, message.chat.id,
-            action="Thread switched",
-            details=f"📌 Now working in: <b>{tid}</b>"
-        )
-
-    elif action == "threads":
-        threads = agents.list_threads_raw()
-        if threads:
-            await message.answer("Select a thread:", reply_markup=TelegramUI.thread_selector(threads), parse_mode="HTML")
-        else:
-            await message.answer(agents.list_threads(), parse_mode="HTML")
-
-    elif action == "context":
-        if uid not in current_thread:
-            await message.answer("No active thread.", parse_mode="HTML")
-            return
-        tid = current_thread[uid]
-        ctx = agents.get_thread_context(tid, last_n=5)
-        if ctx:
-            await message.answer(f"<b>Thread: {tid}</b>\n\n<pre>{ctx}</pre>", parse_mode="HTML")
-        else:
-            await message.answer(f"Thread <b>{tid}</b> is empty.", parse_mode="HTML")
-
-    elif action == "models":
-        await message.answer(HelpFormatter.format_agent_roster(), parse_mode="HTML")
-
-    elif action == "desktop_shot":
-        await _send_desktop_screenshot(message)
-
-    elif action == "analyze_screen":
-        await message.answer("Analyzing your screen…")
-        try:
-            result = await computer_control.analyze_screen(content or "What is visible?")
-            await _send_chunks(message, formatters.format_response(result, "vision"))
-        except Exception as exc:
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="Screen Analysis",
-                error=exc,
-                context="Analyzing screen content",
-                recovery_actions=[
-                    ("📸 Screenshot", "quick:desktop"),
-                ]
-            )
-            await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-    elif action == "read_screen":
-        status_msg, cancel = await LoadingManager.show_progress(
-            message, "Reading screen via OCR", bot
-        )
-        try:
-            text_out = await computer_control.read_screen()
-            cancel.set()
-            await status_msg.delete()
-            await _send_chunks(message, text_out or "(no text detected)")
-        except Exception as exc:
-            cancel.set()
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="OCR",
-                error=exc,
-                context="Reading screen text",
-                recovery_actions=[
-                    ("🔄 Retry", "quick:screen"),
-                ]
-            )
-            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-    elif action == "click":
-        status_msg, cancel = await LoadingManager.show_progress(
-            message, f"Clicking: {content}", bot
-        )
-        try:
-            found = await computer_control.click_on(content)
-            cancel.set()
-            if found:
-                await FeedbackAnimator.success_animation(
-                    bot, message.chat.id,
-                    action="Clicked",
-                    details=f"<code>{content}</code>"
-                )
-                await status_msg.delete()
-            else:
-                await status_msg.edit_text(
-                    ErrorFormatter.format_validation_error(
-                        field="Element",
-                        issue=f"'{content}' not found",
-                        suggestion="Try a screenshot to see available elements"
-                    ),
-                    parse_mode="HTML"
-                )
-        except Exception as exc:
-            cancel.set()
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="Click",
-                error=exc,
-                context=f"Clicking: {content}",
-                recovery_actions=[
-                    ("🔄 Retry", f"retry:click:{content}"),
-                ]
-            )
-            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-    elif action == "read_file":
-        status_msg, cancel = await LoadingManager.show_progress(
-            message, f"Reading: {content}", bot
-        )
-        try:
-            file_content = await vscode_bridge.read_file(content)
-            cancel.set()
-            await status_msg.delete()
-            await _send_chunks(message, file_content)
-        except FileNotFoundError:
-            cancel.set()
-            await status_msg.edit_text(
-                ErrorFormatter.format_validation_error(
-                    field="File Path",
-                    issue=f"Not found: {content}",
-                    suggestion="Check path and use absolute paths"
-                ),
-                parse_mode="HTML"
-            )
-        except Exception as exc:
-            cancel.set()
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="File Read",
-                error=exc,
-                context=f"Reading: {content}",
-                recovery_actions=[
-                    ("🔄 Retry", f"retry:read:{content}"),
-                ]
-            )
-            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-    elif action == "git":
-        status = await vscode_bridge.git_status()
-        await _send_chunks(message, status)
-
-    elif action == "terminal":
-        output = await vscode_bridge.get_terminal_output()
-        await _send_chunks(message, output)
-
-    elif action == "monitor":
-        m = re.search(r"monitor (.+?) every (\d+) min", text, re.IGNORECASE)
-        if m:
-            desc = m.group(1).strip()
-            interval = int(m.group(2)) * 60
-
-            async def _monitor_fn() -> str:
-                return await vscode_bridge.run_command(f"echo 'Monitoring: {desc}'")
-
-            async def _notify_fn(msg: str) -> None:
-                await message.answer(msg, parse_mode="HTML")
-
-            task_id = await task_orchestrator.start_monitor(desc, interval, _monitor_fn, _notify_fn)
-            await FeedbackAnimator.success_animation(
-                bot, message.chat.id,
-                action="Monitor started",
-                details=f"<b>{desc}</b> every {m.group(2)} min\nID: <code>{task_id}</code>"
-            )
-        else:
-            await _execute_task(message, text)
-
-    elif action == "confirm_yes":
-        if content:
-            result = await task_orchestrator.confirm_action(content)
-            await _send_chunks(message, result)
-        else:
-            await message.answer(task_orchestrator.list_pending(), parse_mode="HTML")
-
-    elif action == "confirm_no":
-        if content:
-            result = task_orchestrator.deny_action(content)
-            await message.answer(result, parse_mode="HTML")
-
-    elif action == "scrape":
-        status_msg, cancel = await LoadingManager.show_progress(
-            message, f"Scraping {content}", bot
-        )
-        try:
-            scraped = await playwright_agent.scrape(content)
-            cancel.set()
-            await status_msg.delete()
-            await _send_chunks(message, scraped)
-        except Exception as exc:
-            cancel.set()
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="Scrape",
-                error=exc,
-                context=f"Scraping {content}",
-                recovery_actions=[
-                    ("🔄 Retry", f"retry:scrape:{content}"),
-                ]
-            )
-            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-
-    elif action == "shot":
-        status_msg, cancel = await LoadingManager.show_progress(
-            message, f"Screenshotting {content}", bot
-        )
-        tmp_path: Path | None = None
-        try:
-            tmp_path = await playwright_agent.screenshot(content)
-            cancel.set()
-            await status_msg.delete()
-            await message.answer_photo(
-                BufferedInputFile(tmp_path.read_bytes(), filename="screenshot.png"),
-                caption=content,
-            )
-        except Exception as exc:
-            cancel.set()
-            error_msg, keyboard = ErrorFormatter.format_error(
-                error_type="Screenshot",
-                error=exc,
-                context=f"Screenshotting {content}",
-                recovery_actions=[
-                    ("🔄 Retry", f"retry:shot:{content}"),
-                ]
-            )
-            await status_msg.edit_text(error_msg, reply_markup=keyboard, parse_mode="HTML")
-        finally:
-            if tmp_path:
-                tmp_path.unlink(missing_ok=True)
-
-    elif action == "quick_prompt":
-        prompts = {
-            "debug":   "🐛 <b>Debug Mode</b>\n\nSend me your error or traceback:",
-            "code":    "💻 <b>Coding Mode</b>\n\nDescribe what you want to build:",
-            "analyze": "📊 <b>Analysis Mode</b>\n\nUpload a file or paste data:",
-            "explain": "💡 <b>Explain Mode</b>\n\nWhat concept should I explain?",
-            "settings": "⚙️ <b>Settings Mode</b>\n\nToggle your preferences:",
-        }
-        if content == "settings":
-            await message.answer(
-                "⚙️ <b>Settings</b>",
-                reply_markup=TelegramUI.settings_menu(_prefs(uid)),
-                parse_mode="HTML",
-            )
-        else:
-            await message.answer(prompts.get(content, "How can I help?"), parse_mode="HTML")
-
-    elif action == "help":
-        await cmd_start(message)
-
-    elif action == "stats":
-        await cmd_stats(message)
-
-    elif action == "circuits":
-        await cmd_circuits(message)
-
-    elif action == "usage":
-        await cmd_usage(message)
-
-    else:
-        await _execute_task(message, content)
+    await _execute(message, task)
 
 
-# ── Task Execution ──────────────────────────────────────────────────────────────
+# ── Core execution ────────────────────────────────────────────────────────────
 
-async def _run_with_streaming(
-    message: Message,
-    model: str,
-    task: str,
-    agent_key: str,
-) -> str:
-    """Run a task, streaming output if user pref is on, else buffered."""
-    uid = message.from_user.id if message.from_user else 0
-    use_streaming = _prefs(uid).get("streaming", True)
-
-    if use_streaming and _streamer:
-        icon_map = {"vision":"👁️","coding":"💻","debug":"🐛","math":"🔢","architect":"🏗️","mentor":"📚","analyst":"📊"}
-        icon = icon_map.get(agent_key, "🤖")
-        header = f"<b>{icon} {agent_key.upper()}</b>"
-        return await _streamer.stream_task(message.chat.id, model, task, agent_key, header)
-    else:
-        result = await interpreter_bridge.run_task(model, task, agent_key)
-        formatted = formatters.format_response(result, agent_key)
-        await _send_chunks(message, formatted)
-        return result
-
-
-async def _send_feedback_prompt(message: Message, agent_key: str, task: str) -> None:
-    """Register response and show inline feedback buttons."""
-    try:
-        from core.optimization.feedback_learner import get_learner
-        fid = get_learner().register_response(agent_key, task)
-        await message.answer(
-            "<i>Rate this response:</i>",
-            reply_markup=TelegramUI.feedback_buttons(fid),
-            parse_mode="HTML",
-        )
-    except Exception:
-        pass
-
-
-async def _execute_task(
+async def _execute(
     message: Message,
     task: str,
     forced_agent: Optional[str] = None,
 ) -> None:
-    """Auto-detect agent, run task with progress tracking, store in thread."""
-    original_task = task
     agent_key = forced_agent or agents.detect_agent(task)
-    model = agents.get_model(agent_key)
-    uid = message.from_user.id if message.from_user else 0
-    tid = current_thread.get(uid)
-    show_ctx = _prefs(uid).get("show_context", True)
+    thread_id = _user_thread.get(message.from_user.id)
 
-    if tid:
-        ctx = agents.get_thread_context(tid)
-        if ctx:
-            task = f"{ctx}\n\nCurrent task: {task}"
-
-    # --- Try supervisor orchestration for complex tasks ---
-    result: str | None = None
-    try:
-        from core.orchestration.supervisor import orchestrate
-
-        async def _run_fn(t: str, a: str = agent_key) -> str:
-            m = agents.get_model(a) or model
-            return await interpreter_bridge.run_task(m, t, a)
-
-        async def _progress_fn(msg_text: str) -> None:
-            await message.answer(f"⚙️ {msg_text}", parse_mode="HTML")
-
-        result = await orchestrate(task, _run_fn, _progress_fn)
-        if result:
-            formatted = formatters.format_response(result, agent_key)
-            await _send_chunks(message, formatted)
-    except Exception as exc:
-        logger.debug("Supervisor skipped: %s", exc)
-        result = None
-
-    # --- Direct agent execution ---
-    if result is None:
-        t0 = time.monotonic()
-        try:
-            result = await _run_with_streaming(message, model, task, agent_key)
-        except Exception as exc:
-            logger.exception("Primary agent failed: %s", exc)
-            fallback = agents.get_model(agent_key, use_fallback=True)
-            if fallback and fallback != model:
-                await message.answer(
-                    f"⚠️ Primary failed, trying fallback: <code>{fallback}</code>",
-                    parse_mode="HTML",
-                )
-                try:
-                    result = await _run_with_streaming(message, fallback, task, agent_key)
-                    await notifications.model_fallback_used(model, fallback, str(exc))
-                except Exception as fb_exc:
-                    result = f"Both agents failed.\nPrimary: {exc}\nFallback: {fb_exc}"
-                    error_msg, keyboard = ErrorFormatter.format_error(
-                        error_type="Agent Failure",
-                        error=fb_exc,
-                        context=f"Running task with {agent_key}",
-                        recovery_actions=[
-                            ("🔄 Retry", "retry:task"),
-                        ]
-                    )
-                    await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
-                    return
-            else:
-                result = f"Error: {exc}"
-                error_msg, keyboard = ErrorFormatter.format_error(
-                    error_type="Agent Error",
-                    error=exc,
-                    context=f"Running task with {agent_key}",
-                    recovery_actions=[
-                        ("🔄 Retry", "retry:task"),
-                    ]
-                )
-                await message.answer(error_msg, reply_markup=keyboard, parse_mode="HTML")
-                return
-
-        await notifications.task_complete(original_task, time.monotonic() - t0, agent_key)
-
-    if tid and result:
-        agents.add_to_thread(tid, agent_key, original_task, result)
-
-    # Thread context bar
-    if tid and show_ctx and result:
-        turn = len(agents.get_thread_context(tid).split("\n\n")) if agents.get_thread_context(tid) else 1
-        await message.answer(
-            formatters.ResponseFormatter.thread_status(tid, turn, agent_key),
-            parse_mode="HTML",
-        )
-
-    await _send_feedback_prompt(message, agent_key, original_task)
-
-
-# ── Agency Swarm - New Commands ──────────────────────────────────────────────────
-
-@dp.message(Command("dept"))
-async def cmd_dept(message: Message) -> None:
-    """/dept <department> <task> - Route to a specific department."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=2)
-    if len(args) < 3:
-        depts = agents.list_all_departments()
-        await message.answer(
-            "<b>Usage:</b> <code>/dept &lt;department&gt; &lt;task&gt;</code>\n\n"
-            "<b>Departments:</b>\n" + "\n".join(f"• <code>{d}</code>" for d in depts),
-            parse_mode="HTML",
-        )
-        return
-    dept = args[1].strip().lower()
-    task = args[2].strip()
-    from core.nexus_orchestrator import nexus as _nexus
-    from core.agent_registry import list_all_departments
-    if dept not in list_all_departments():
-        await message.answer(
-            f"❌ Unknown department: <b>{dept}</b>\n\n"
-            "Available: " + ", ".join(f"<code>{d}</code>" for d in list_all_departments()),
-            parse_mode="HTML",
-        )
-        return
-    decision = await _nexus.route_to_dept(dept, task)
-    await message.answer(
-        f"🎯 Routing to <b>{decision.agent.name}</b> "
-        f"(<code>{decision.agent.department}</code>)\n"
-        f"Confidence: {decision.confidence:.0%} | Method: {decision.method}",
-        parse_mode="HTML",
+    status_msg = await message.answer(
+        f"⚡ <b>{agent_key}</b> thinking…", parse_mode="HTML"
     )
-    result = await _nexus.execute_task(decision, task, message)
-    await _send_chunks(message, result)
+    typing_task = asyncio.create_task(_keep_typing(message))
 
-
-@dp.message(Command("swarm"))
-async def cmd_swarm(message: Message) -> None:
-    """/swarm <task> - Spawn a multi-agent swarm for complex tasks."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    args = (message.text or "").split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer(
-            "<b>Usage:</b> <code>/swarm &lt;complex task&gt;</code>\n\n"
-            "Example: <code>/swarm design and implement a FastAPI auth system</code>",
+    try:
+        response, model_used = await llm_client.chat(
+            task, agent_key=agent_key, thread_id=thread_id
+        )
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(message, response, model_used=model_used)
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(
+            f"❌ <b>Error:</b> <code>{e}</code>\n\n"
+            "Run <code>/keys</code> to check your API keys.",
             parse_mode="HTML",
         )
-        return
-    task = args[1].strip()
-    await message.answer("🐝 <b>Swarm Mode Activated</b> - coordinating agents…", parse_mode="HTML")
-    from core.nexus_orchestrator import nexus as _nexus
-    result = await _nexus.run_swarm(task, message)
-    await _send_chunks(message, result)
 
 
-@dp.message(Command("status"))
-async def cmd_status(message: Message) -> None:
-    """/status - System dashboard: agents, circuit breakers, API usage."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    from core.agent_registry import get_agent_count, list_all_departments
-    counts = get_agent_count()
-    total = sum(counts.values())
-    lines = [
-        "📊 <b>Babas Agency Swarm - Status</b>\n",
-        f"<b>Agents loaded:</b> {total} across {len(counts)} departments",
-    ]
-    for dept, n in sorted(counts.items()):
-        lines.append(f"  • {dept.replace('_', ' ').title()}: {n}")
-    lines.append("")
-    lines.append("Use <code>/usage</code> for API costs | <code>/circuits</code> for circuit states")
-    await message.answer("\n".join(lines), parse_mode="HTML")
+# ── Startup ───────────────────────────────────────────────────────────────────
 
+async def on_startup() -> None:
+    await bot.set_my_commands([
+        BotCommand(command="start",   description="Help + status"),
+        BotCommand(command="run",     description="Auto-route a task"),
+        BotCommand(command="cmd",     description="Run shell command"),
+        BotCommand(command="agent",   description="Force specific agent"),
+        BotCommand(command="models",  description="Agent roster"),
+        BotCommand(command="keys",    description="API key status"),
+        BotCommand(command="stats",   description="CPU/GPU/RAM stats"),
+        BotCommand(command="git",     description="Git status"),
+        BotCommand(command="thread",  description="Switch thread"),
+        BotCommand(command="threads", description="List threads"),
+        BotCommand(command="scrape",  description="Scrape a URL"),
+    ])
+    key_status = verify_api_keys()
+    active = [k for k, v in key_status.items() if v]
+    missing = [k for k, v in key_status.items() if not v]
+    logger.info("=" * 55)
+    logger.info("🤖 BabasSwarms starting")
+    logger.info("✅ Keys: %s", ", ".join(active) or "NONE")
+    if missing:
+        logger.warning("❌ Missing: %s", ", ".join(missing))
+    cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+    if not any(key_status.get(k) for k in cloud):
+        logger.critical("NO CLOUD API KEYS — bot will fail on every request!")
+    logger.info("=" * 55)
 
-@dp.message(Command("cost"))
-async def cmd_cost(message: Message) -> None:
-    """/cost - Alias for /usage (API usage + estimated costs)."""
-    if not _authorized(message):
-        await _deny(message)
-        return
-    # Delegate to /usage handler
-    await cmd_usage(message)
-
-
-# ── Entrypoint ──────────────────────────────────────────────────────────────────
 
 async def main() -> None:
-    """Start Babas Agency Swarm with all 76 agents + Nexus routing."""
-    global _streamer
-    _streamer = StreamingResponseManager(bot)
-    notifications.init(bot, ALLOWED_USER_ID)
-
-    # Load agent registry
-    from core.agent_registry import load_registry
-    load_registry()
-    from core.agent_registry import AGENT_REGISTRY, DEPARTMENT_INDEX
-    logger.info(
-        "🎨 Babas Agency Swarm starting - %d agents across %d departments (UI/UX Enhanced)",
-        len(AGENT_REGISTRY),
-        len(DEPARTMENT_INDEX),
-    )
-
+    dp.startup.register(on_startup)
     await dp.start_polling(bot, skip_updates=True)
 
 
