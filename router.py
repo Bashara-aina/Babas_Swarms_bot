@@ -1,11 +1,13 @@
-"""Agent router: cloud-only model registry with smart keyword routing.
+"""Agent router — cloud-first, Ollama only where it specialises.
 
-Priority fallback chain (all free tiers):
-  1. Cerebras  — fastest inference (~1,500 tok/s)
-  2. Groq      — fast (~241 tok/s)
-  3. Gemini    — large context (1M tokens)
-  4. OpenRouter — model variety fallback
-  NO Ollama fallback — cloud APIs only.
+Ollama is ONLY used for vision/screenshot analysis (gemma3:12b, local + private).
+It is NEVER a fallback for text agents.
+
+Verified working models (from live logs 2026-03-09):
+  groq/llama-3.3-70b-versatile                   ✓
+  groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
+  cerebras/qwen-3-235b-a22b                       ✓ (was wrong: qwen-3-235b)
+  zai/glm-4                                       ✓ (via openai-compat endpoint)
 """
 
 from __future__ import annotations
@@ -15,108 +17,96 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# ── Primary model registry ──────────────────────────────────────────────────
+# ── Primary models ──────────────────────────────────────────────────────────
+# Ollama ONLY for vision — its specialisation is local screenshot analysis.
 AGENT_MODELS: dict[str, str] = {
-    "vision":    "groq/meta-llama/llama-4-scout-17b-16e-instruct",
-    "coding":    "cerebras/qwen-3-235b",
-    "debug":     "groq/qwen-qwq-32b",
-    "math":      "cerebras/qwen-3-235b",
-    "architect": "gemini/gemini-2.0-flash",
-    "analyst":   "groq/moonshotai/kimi-k2-instruct",
-    "general":   "cerebras/qwen-3-235b",
+    "vision":    "ollama_chat/gemma3:12b",              # local, private, RTX 3060
+    "coding":    "groq/llama-3.3-70b-versatile",        # fast + reliable ✓
+    "debug":     "zai/glm-4",                           # GPQA Diamond 85.7%
+    "math":      "zai/glm-4",                           # AIME 2025 95.7%
+    "architect": "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
+    "analyst":   "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
+    "general":   "groq/llama-3.3-70b-versatile",        # reliable default ✓
 }
 
-# ── Fallback chain per agent ────────────────────────────────────────────────
-FALLBACK_MODELS: dict[str, str] = {
-    "vision":    "gemini/gemini-2.0-flash",
-    "coding":    "openrouter/qwen/qwen3-coder:free",
-    "debug":     "cerebras/qwen-3-235b",
-    "math":      "groq/qwen-qwq-32b",
-    "architect": "cerebras/qwen-3-235b",
-    "analyst":   "gemini/gemini-2.0-flash",
-    "general":   "groq/llama-3.3-70b-versatile",
-}
-
+# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
-        "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        "ollama_chat/gemma3:12b",                          # local first (private)
+        "groq/meta-llama/llama-4-scout-17b-16e-instruct",  # cloud fallback
         "gemini/gemini-2.0-flash",
-        "openrouter/google/gemini-2.0-flash-exp:free",
     ],
     "coding": [
-        "cerebras/qwen-3-235b",
-        "groq/qwen-qwq-32b",
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
         "openrouter/qwen/qwen3-coder:free",
-        "openrouter/openai/gpt-4o-mini:free",
     ],
     "debug": [
+        "zai/glm-4",
         "groq/qwen-qwq-32b",
-        "cerebras/qwen-3-235b",
+        "groq/llama-3.3-70b-versatile",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "math": [
-        "cerebras/qwen-3-235b",
+        "zai/glm-4",
         "groq/qwen-qwq-32b",
+        "groq/llama-3.3-70b-versatile",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
+        "cerebras/qwen-3-235b-a22b",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
-        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+        "groq/llama-3.3-70b-versatile",
     ],
     "analyst": [
         "groq/moonshotai/kimi-k2-instruct",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
+        "groq/llama-3.3-70b-versatile",
     ],
     "general": [
-        "cerebras/qwen-3-235b",
         "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
 }
 
-# ── Keyword → agent routing ─────────────────────────────────────────────────
+# ── Keyword routing ─────────────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
-        "screenshot", "image", "photo", "ui", "visual", "ocr",
-        "screen", "what's on", "desktop", "window", "look at",
-        "describe", "read screen", "see", "what do you see",
+        "screenshot", "screen", "layar", "gambar", "image", "photo",
+        "ocr", "visual", "desktop", "window", "what do you see",
+        "lihat", "tampilan", "apa yang ada di", "capture",
     ],
     "coding": [
-        "code", "function", "script", "implement", "class", "module",
-        "refactor", "generate", "syntax", "endpoint", "sql", "query",
-        "write code", "build", "create file", "add feature", "api",
-        "python", "bash", "shell", "command",
+        "code", "kode", "function", "script", "implement", "class",
+        "refactor", "generate", "sql", "endpoint", "api", "python",
+        "bash", "write", "tulis", "buat file", "build", "create",
     ],
     "debug": [
-        "debug", "traceback", "exception", "crash", "fix", "bug",
-        "cuda", "pytorch", "torch", "nan", "oom", "out of memory",
-        "backward", "loss spike", "error", "why is", "not working",
+        "debug", "error", "crash", "fix", "bug", "traceback",
+        "exception", "cuda", "pytorch", "torch", "nan", "oom",
+        "not working", "kenapa", "why", "gagal", "failed",
     ],
     "math": [
-        "tensor", "matrix", "equation", "derivative", "integral",
-        "gradient", "backprop", "linear algebra", "eigenvalue",
-        "softmax", "norm", "convolution", "calculate", "math",
-        "formula", "proof", "solve",
+        "tensor", "matrix", "gradient", "derivative", "integral",
+        "backprop", "eigenvalue", "softmax", "calculate", "hitung",
+        "math", "formula", "prove", "buktikan", "solve",
     ],
     "architect": [
         "design", "architecture", "plan", "system", "pipeline",
-        "structure", "strategy", "high level", "document", "thesis",
-        "overview", "framework", "organize", "diagram",
+        "struktur", "rancang", "overview", "diagram", "framework",
+        "strategy", "strategi",
     ],
     "analyst": [
-        "analyze", "plot", "chart", "csv", "dataframe", "log",
-        "trend", "statistics", "distribution", "compare",
-        "metrics", "performance", "insight", "nvidia-smi",
-        "visualize", "summarize data", "gpu", "training",
+        "analyze", "analisis", "plot", "chart", "csv", "metrics",
+        "performance", "gpu", "training", "trend", "statistics",
+        "compare", "nvidia-smi", "visualize",
     ],
 }
 
 DEFAULT_AGENT = "general"
-
-# ── Thread memory ───────────────────────────────────────────────────────────
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 
@@ -127,17 +117,13 @@ def detect_agent(task: str) -> str:
         for kw in keywords:
             if kw in task_lower:
                 scores[agent] += 1
-    best_agent = max(scores, key=lambda a: scores[a])
-    if scores[best_agent] == 0:
-        logger.debug("No keyword match — using %s", DEFAULT_AGENT)
+    best = max(scores, key=lambda a: scores[a])
+    if scores[best] == 0:
         return DEFAULT_AGENT
-    logger.debug("Detected agent '%s' (score=%d)", best_agent, scores[best_agent])
-    return best_agent
+    return best
 
 
 def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
-    if use_fallback:
-        return FALLBACK_MODELS.get(agent_key)
     return AGENT_MODELS.get(agent_key)
 
 
@@ -146,21 +132,26 @@ def get_fallback_chain(agent_key: str) -> list[str]:
 
 
 def list_agents() -> str:
-    lines = ["<b>🤖 Active Agents — Cloud Only</b>\n"]
     icons = {
         "vision": "👁️", "coding": "💻", "debug": "🐛",
         "math": "📐", "architect": "🏗️", "analyst": "📊", "general": "🧠",
     }
+    lines = ["<b>🤖 Legion Agent Roster</b>\n"]
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "🤖")
-        provider = model.split("/")[0].upper()
-        model_name = "/".join(model.split("/")[1:])
+        if model.startswith("ollama_chat/"):
+            provider = "OLLAMA"
+            model_name = model.replace("ollama_chat/", "") + " (local 🔒)"
+        else:
+            parts = model.split("/")
+            provider = parts[0].upper()
+            model_name = "/".join(parts[1:])
         lines.append(f"  {icon} <b>{key}</b> → <code>{provider}</code> <i>{model_name}</i>")
+    lines.append("\n  🔒 <i>vision = local Ollama, stays on your machine</i>")
     return "\n".join(lines)
 
 
 def list_all_departments() -> list[str]:
-    """Compatibility shim for old code that calls agents.list_all_departments()."""
     return list(AGENT_MODELS.keys())
 
 
@@ -168,32 +159,29 @@ def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
     ACTIVE_THREADS[thread_id].append({
-        "agent": agent,
-        "task": task,
-        "result": result[:500],
-        "timestamp": time.time(),
+        "agent": agent, "task": task,
+        "result": result[:500], "timestamp": time.time(),
     })
     if len(ACTIVE_THREADS[thread_id]) > 10:
         ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
-    logger.info("Added to thread '%s': %s agent", thread_id, agent)
 
 
 def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     if thread_id not in ACTIVE_THREADS or not ACTIVE_THREADS[thread_id]:
         return ""
     recent = ACTIVE_THREADS[thread_id][-last_n:]
-    lines = ["Previous conversation in this thread:\n"]
+    lines = ["<i>Previous in this thread:</i>\n"]
     for turn in recent:
         t = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:100]}...")
-        lines.append(f"Response: {turn['result']}\n")
+        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}…")
+        lines.append(f"↳ {turn['result'][:120]}…\n")
     return "\n".join(lines)
 
 
 def list_threads() -> str:
     if not ACTIVE_THREADS:
-        return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-    lines = ["<b>📌 Active Threads</b>\n"]
+        return "No active threads yet. Start one with <code>/thread &lt;name&gt;</code>."
+    lines = ["<b>📌 Threads</b>\n"]
     for tid, turns in ACTIVE_THREADS.items():
         last = turns[-1]
         t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
@@ -208,6 +196,5 @@ def list_threads_raw() -> list[str]:
 def clear_thread(thread_id: str) -> bool:
     if thread_id in ACTIVE_THREADS:
         del ACTIVE_THREADS[thread_id]
-        logger.info("Cleared thread '%s'", thread_id)
         return True
     return False
