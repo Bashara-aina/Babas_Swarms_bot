@@ -15,7 +15,7 @@ from typing import Optional
 import litellm
 from litellm import acompletion
 
-from agents import detect_agent, get_fallback_chain, add_to_thread
+from router import detect_agent, get_fallback_chain, add_to_thread
 
 logger = logging.getLogger(__name__)
 

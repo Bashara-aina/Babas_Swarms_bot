@@ -43,7 +43,7 @@ from dotenv import load_dotenv
 # Load .env FIRST — before any module reads os.getenv()
 load_dotenv(Path(__file__).parent / ".env")
 
-import agents
+import router as agents   # 'agents/' is a package dir; router.py has our routing logic
 import llm_client
 from llm_client import chat, chunk_output, run_shell_command, verify_api_keys
 
