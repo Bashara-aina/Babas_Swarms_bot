@@ -15,26 +15,83 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+# ── Personality wrapper injected into EVERY agent system prompt ──────────────
+PERSONALITY_WRAPPER = """
+You are a brilliant, opinionated expert. You think out loud, use vivid examples,
+and speak like a sharp colleague over coffee — not a documentation page. Rules:
+- Use em-dashes, ellipses, contractions naturally
+- Open with your honest take, not a summary
+- Use analogies when explaining complex ideas
+- Disagree with conventional wisdom when you have good reason
+- Never use bullet-point walls for conversational answers
+- End with a question or a "the real insight here is..." observation
+- Match the user's language: if they write in Indonesian, respond in Indonesian
+  with the same casual/formal register
+- Use Telegram markdown: **bold** for emphasis, `code` for technical terms,
+  and 💡 🔥 ⚡ sparingly for genuine highlights
+"""
+
+# ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────
+DEBATE_PERSONAS = {
+    "strategist": (
+        "You think in 10-year timeframes. You prize leverage and compounding advantages. "
+        "You are skeptical of tactical solutions to strategic problems."
+    ),
+    "devil_advocate": (
+        "Your job is to be convinced of NOTHING. Attack every assumption. "
+        "Find the fatal flaw in even the best ideas. Your success = you made everyone think harder."
+    ),
+    "researcher": (
+        "You cite evidence. Every claim needs a source, precedent, or data point. "
+        "You are uncomfortable with speculation presented as fact."
+    ),
+    "pragmatist": (
+        "You ask: what breaks first? Who builds it? How long does it actually take? "
+        "You've seen 100 brilliant plans die in execution."
+    ),
+    "visionary": (
+        "You think 3 steps ahead. You see connections others miss. "
+        "You're willing to sound crazy if the logic holds."
+    ),
+    "critic": (
+        "You are a world-class editor. You find redundancy, weak framing, missing context. "
+        "You improve everything you touch."
+    ),
+}
+
+DEBATE_ICONS = {
+    "strategist": "⚔️",
+    "devil_advocate": "🔥",
+    "researcher": "📚",
+    "pragmatist": "🔧",
+    "visionary": "🚀",
+    "critic": "✂️",
+}
+
 # ── Primary model registry ──────────────────────────────────────────────────
 AGENT_MODELS: dict[str, str] = {
-    "vision":    "groq/meta-llama/llama-4-scout-17b-16e-instruct",
-    "coding":    "cerebras/qwen-3-235b",
-    "debug":     "groq/qwen-qwq-32b",
-    "math":      "cerebras/qwen-3-235b",
-    "architect": "gemini/gemini-2.0-flash",
-    "analyst":   "groq/moonshotai/kimi-k2-instruct",
-    "general":   "cerebras/qwen-3-235b",
+    "vision":     "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+    "coding":     "cerebras/qwen-3-235b",
+    "debug":      "groq/qwen-qwq-32b",
+    "math":       "cerebras/qwen-3-235b",
+    "architect":  "gemini/gemini-2.0-flash",
+    "analyst":    "groq/moonshotai/kimi-k2-instruct",
+    "general":    "cerebras/qwen-3-235b",
+    "research":   "gemini/gemini-2.0-flash",
+    "humanizer":  "groq/llama-3.3-70b-versatile",
 }
 
 # ── Fallback chain per agent ────────────────────────────────────────────────
 FALLBACK_MODELS: dict[str, str] = {
-    "vision":    "gemini/gemini-2.0-flash",
-    "coding":    "openrouter/qwen/qwen3-coder:free",
-    "debug":     "cerebras/qwen-3-235b",
-    "math":      "groq/qwen-qwq-32b",
-    "architect": "cerebras/qwen-3-235b",
-    "analyst":   "gemini/gemini-2.0-flash",
-    "general":   "groq/llama-3.3-70b-versatile",
+    "vision":     "gemini/gemini-2.0-flash",
+    "coding":     "openrouter/qwen/qwen3-coder:free",
+    "debug":      "groq/llama-3.3-70b-versatile",
+    "math":       "groq/qwen-qwq-32b",
+    "architect":  "cerebras/qwen-3-235b",
+    "analyst":    "gemini/gemini-2.0-flash",
+    "general":    "groq/llama-3.3-70b-versatile",
+    "research":   "cerebras/qwen-3-235b",
+    "humanizer":  "gemini/gemini-2.0-flash",
 }
 
 FALLBACK_CHAIN: dict[str, list[str]] = {
@@ -51,6 +108,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "debug": [
         "groq/qwen-qwq-32b",
+        "groq/llama-3.3-70b-versatile",
         "cerebras/qwen-3-235b",
         "openrouter/deepseek/deepseek-r1:free",
     ],
@@ -74,6 +132,18 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+        "openrouter/google/gemini-flash-1.5:free",
+    ],
+    "research": [
+        "gemini/gemini-2.0-flash",
+        "cerebras/qwen-3-235b",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/google/gemini-flash-1.5:free",
+    ],
+    "humanizer": [
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
+        "cerebras/qwen-3-235b",
     ],
 }
 
@@ -145,11 +215,17 @@ def get_fallback_chain(agent_key: str) -> list[str]:
     return FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
 
 
+def build_system_prompt(role_prompt: str) -> str:
+    """Prepend the personality wrapper to any agent system prompt."""
+    return PERSONALITY_WRAPPER.strip() + "\n\n" + role_prompt
+
+
 def list_agents() -> str:
     lines = ["<b>🤖 Active Agents — Cloud Only</b>\n"]
     icons = {
         "vision": "👁️", "coding": "💻", "debug": "🐛",
-        "math": "📐", "architect": "🏗️", "analyst": "📊", "general": "🧠",
+        "math": "📐", "architect": "🏗️", "analyst": "📊",
+        "general": "🧠", "research": "🔍", "humanizer": "✨",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "🤖")
