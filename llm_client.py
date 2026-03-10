@@ -273,12 +273,14 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
 
 # ── Agentic tool-calling loop ─────────────────────────────────────────────────
 
-# Fallback chain for the agentic loop (must support function calling)
+# Fallback chain for the agentic loop (must support function/tool calling)
+# Synced with router.py FALLBACK_CHAIN["computer"]
 _AGENT_CHAIN = [
-    "groq/llama-3.3-70b-versatile",
-    "cerebras/qwen-3-235b-a22b",
-    "gemini/gemini-2.0-flash",
-    "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+    "zai/glm-4",                                          # ZAI first: GPQA 85.7%, reliable tool-calls
+    "groq/llama-3.3-70b-versatile",                       # fast + reliable
+    "cerebras/qwen-3-235b-a22b",                          # 1500 tok/s, 131K ctx
+    "gemini/gemini-2.0-flash",                            # large ctx fallback
+    "openrouter/meta-llama/llama-3.3-70b-instruct:free",  # last resort
 ]
 
 # Callbacks: progress_cb(text) sends status to Telegram
