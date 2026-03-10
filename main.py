@@ -25,6 +25,7 @@ Core modes:
 from __future__ import annotations
 
 import asyncio
+import html as html_mod
 import logging
 import os
 import sys
@@ -150,8 +151,12 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
         try:
             await msg.answer(chunk, parse_mode="HTML", reply_markup=markup)
         except Exception:
-            # Fallback: strip HTML and send as plain text
-            await msg.answer(chunk, reply_markup=markup)
+            # HTML parse failed — escape entities and retry, then plain text fallback
+            try:
+                safe = html_mod.escape(chunk)
+                await msg.answer(safe, parse_mode="HTML", reply_markup=markup)
+            except Exception:
+                await msg.answer(chunk, reply_markup=markup)
         if not is_last:
             await asyncio.sleep(0.3)
 
@@ -1639,38 +1644,9 @@ async def handle_nl(msg: Message) -> None:
     if not task or task.startswith("/"):
         return
 
-    # Detect if this is a computer-use request
-    computer_keywords = [
-        # English — desktop
-        "open", "launch", "click", "type", "press", "drag", "scroll",
-        "screenshot", "screen", "what's on", "what is on",
-        "check on my computer", "check on the computer", "show me",
-        "whatsapp", "browser", "chrome", "firefox", "email", "gmail",
-        "supabase", "telegram", "vscode", "folder", "file manager",
-        # English — web research & browsing
-        "search for", "search the web", "research", "find online",
-        "look up", "browse to", "scrape", "go to website",
-        "booking", "buy online", "purchase", "order online",
-        # Documents & files
-        "read pdf", "read excel", "extract table", "ocr", "read docx",
-        "organize files", "find files", "baca dokumen",
-        # Git & dev
-        "git status", "git commit", "git push", "git pull", "git diff",
-        "run tests", "pytest", "lint", "format code", "find in code",
-        # System
-        "disk space", "memory usage", "check services", "maintenance",
-        "system cleanup", "gpu health",
-        # Indonesian
-        "buka", "klik", "ketik", "screenshot", "layar", "komputer",
-        "cek langsung", "tolong cek", "lihat di", "buka whatsapp",
-        "buka browser", "tampilkan", "show", "periksa",
-        "cari di internet", "riset", "cari online",
-    ]
-
     task_lower = task.lower()
-    is_computer_task = any(kw in task_lower for kw in computer_keywords)
 
-    # Check OpenClaw delegation
+    # Check OpenClaw delegation first
     try:
         from tools.openclaw_bridge import should_delegate_to_openclaw, is_openclaw_running, delegate_to_openclaw
         if should_delegate_to_openclaw(task):
@@ -1681,7 +1657,60 @@ async def handle_nl(msg: Message) -> None:
     except Exception:
         pass
 
-    if is_computer_task:
+    # ── Smart routing: question → chat, action → computer ──────────────
+
+    # Detect questions (knowledge queries → chat mode, no tools)
+    question_starters = [
+        "apa ", "berapa", "bagaimana", "kenapa", "mengapa", "siapa",
+        "dimana", "kapan", "gimana", "apakah", "bisakah",
+        "what ", "how ", "why ", "when ", "where ", "which ",
+        "who ", "is it", "are there", "does ", "do you", "can you",
+        "could you", "would you", "should ",
+        "ada berapa", "apa saja", "apa itu", "ada apa",
+    ]
+    is_question = (
+        task_lower.rstrip().endswith("?")
+        or any(task_lower.startswith(q) for q in question_starters)
+    )
+
+    # Strong computer keywords — always require computer access
+    strong_computer = [
+        "screenshot", "take screenshot",
+        "click on", "click at", "klik pada",
+        "drag", "scroll down", "scroll up",
+        # App launching (specific apps)
+        "open whatsapp", "buka whatsapp", "open chrome", "buka chrome",
+        "open browser", "buka browser", "open firefox", "buka firefox",
+        "open vscode", "buka vscode", "open terminal", "buka terminal",
+        "open supabase", "open gmail", "open spotify", "open telegram",
+        "launch ", "jalankan ",
+        # Web browsing actions
+        "search for", "search the web", "cari di internet",
+        "browse to", "go to website", "scrape",
+        # File/system actions
+        "read pdf", "read excel", "extract table",
+        "organize files", "baca dokumen",
+        "git commit", "git push", "git pull",
+        "run tests", "pytest", "format code",
+        "disk space", "check services", "system cleanup",
+    ]
+
+    # Soft keywords — trigger computer only if NOT a question
+    soft_computer = [
+        "open", "buka", "show me", "check on",
+        "cek langsung", "tolong cek", "lihat di",
+        "tampilkan", "periksa", "cari online",
+        "monitor", "research", "klik", "ketik",
+    ]
+
+    has_strong = any(kw in task_lower for kw in strong_computer)
+    has_soft = any(kw in task_lower for kw in soft_computer)
+
+    if has_strong:
+        await _run_agent_loop(msg, task)
+    elif is_question:
+        await _execute_chat(msg, task)
+    elif has_soft:
         await _run_agent_loop(msg, task)
     else:
         await _execute_chat(msg, task)
@@ -1734,14 +1763,17 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
 
     except Exception as e:
         typing_task.cancel()
-        err = str(e)
-        hint = ""
+        err = html_mod.escape(str(e))
         if "rate" in err.lower():
-            hint = "\n\nrate limited — try again in a minute"
+            hint = "⏳ rate limited — try again in a minute"
         elif "key" in err.lower() or "auth" in err.lower():
-            hint = "\n\napi key issue — check /keys"
+            hint = "🔑 api key issue — run /keys to check"
+        elif "all providers" in err.lower():
+            hint = "💀 all models failed — run /keys to check"
+        else:
+            hint = "❌ something went wrong"
         await status_msg.edit_text(
-            f"<code>{err[:500]}</code>{hint}",
+            f"{hint}\n\n<code>{err[:400]}</code>",
             parse_mode="HTML",
         )
 
@@ -1782,14 +1814,17 @@ async def _execute_chat(
 
     except Exception as e:
         typing_task.cancel()
-        err = str(e)
-        hint = ""
-        if "All models exhausted" in err:
-            hint = "\n\nall providers failed — check /keys"
-        elif "Auth error" in err:
-            hint = "\n\nbad api key — check /keys"
+        err = html_mod.escape(str(e))
+        if "All models exhausted" in err or "all providers" in err.lower():
+            hint = "💀 all models failed — run /keys to check"
+        elif "Auth error" in err or "auth" in err.lower():
+            hint = "🔑 bad api key — run /keys to check"
+        elif "rate" in err.lower():
+            hint = "⏳ rate limited — try again in a minute"
+        else:
+            hint = "❌ something went wrong"
         await status_msg.edit_text(
-            f"<code>{err[:400]}</code>{hint}",
+            f"{hint}\n\n<code>{err[:400]}</code>",
             parse_mode="HTML",
         )
 
