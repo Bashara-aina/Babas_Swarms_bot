@@ -5,7 +5,11 @@ aiogram>=3.4.0,<4.0.0
 python-dotenv>=1.0.0
 
 # LLM — all cloud providers + tool calling
-litellm>=1.40.0
+# 1.57+ required for Cerebras Qwen-3-235b-a22b + Groq Kimi-K2 support
+litellm>=1.57.0
+
+# HTTP client (used by litellm + web tools)
+httpx>=0.27.0
 
 # Web scraping (legacy fallback)
 requests>=2.31.0
@@ -39,6 +43,9 @@ aiosmtplib>=3.0.0
 
 # ── v4: RSS feeds ────────────────────────────────────────────────────────
 feedparser>=6.0.0
+
+# ── arXiv paper download ─────────────────────────────────────────────────
+arxiv>=2.1.0
 
 # ── Host machine tools (install separately, not pip) ──────────────────────
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
