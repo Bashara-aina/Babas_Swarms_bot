@@ -144,6 +144,30 @@ def _strip_think_tags(text: str) -> tuple[str, str]:
     return thinking, answer
 
 
+def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
+    """Parse Groq's malformed XML tool calls from BadRequestError messages.
+
+    Groq Llama models sometimes emit <function=name{args}></function> instead of
+    proper tool_calls. This extracts tool name + args from the error so we can
+    execute the tool and continue the agentic loop.
+    """
+    s = str(error_str)
+    for pat in [
+        r'function=(\w+)(\{[^}]*\})',       # <function=name{args}>
+        r"tool '(\w+)(\{[^}]*\})'",          # attempted to call tool 'name{args}'
+    ]:
+        m = re.search(pat, s)
+        if m:
+            name = m.group(1)
+            args_str = m.group(2).replace('\\"', '"')
+            try:
+                args = json.loads(args_str)
+            except json.JSONDecodeError:
+                args = {}
+            return name, args
+    return None
+
+
 # ── Core model call ──────────────────────────────────────────────────────────
 
 async def _call_model(
@@ -152,6 +176,7 @@ async def _call_model(
     max_tokens: int = 2048,
     tools: Optional[list[dict]] = None,
     tool_choice: str = "auto",
+    temperature: float = 0.7,
 ) -> Any:
     """Call a model and return the raw response object (not just content)."""
     provider = model.split("/")[0].lower()
@@ -159,7 +184,7 @@ async def _call_model(
         "model": model,
         "messages": messages,
         "max_tokens": max_tokens,
-        "temperature": 0.7,
+        "temperature": temperature,
     }
 
     if tools:
@@ -248,9 +273,13 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
 
 # ── Agentic tool-calling loop ─────────────────────────────────────────────────
 
-# Model to use for the agentic loop (must support function calling)
-_AGENT_MODEL = "groq/llama-3.3-70b-versatile"
-_AGENT_MODEL_FALLBACK = "cerebras/qwen-3-235b-a22b"
+# Fallback chain for the agentic loop (must support function calling)
+_AGENT_CHAIN = [
+    "groq/llama-3.3-70b-versatile",
+    "cerebras/qwen-3-235b-a22b",
+    "gemini/gemini-2.0-flash",
+    "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+]
 
 # Callbacks: progress_cb(text) sends status to Telegram
 # photo_cb(path) sends screenshot to Telegram
@@ -275,10 +304,25 @@ async def agent_loop(
 
     Returns (final_response, model_used)
     """
-    model = _AGENT_MODEL
-    groq_key = os.getenv("GROQ_API_KEY", "")
-    if not groq_key:
-        model = _AGENT_MODEL_FALLBACK
+    # Build fallback chain — skip rate-limited models
+    chain = [m for m in _AGENT_CHAIN if not _is_rate_limited(m)]
+    if not chain:
+        chain = list(_AGENT_CHAIN)
+    model = chain[0]
+    chain_idx = 0
+
+    def _advance_model() -> bool:
+        """Switch to next available model in chain. Returns False if exhausted."""
+        nonlocal model, chain_idx
+        chain_idx += 1
+        while chain_idx < len(chain):
+            candidate = chain[chain_idx]
+            if not _is_rate_limited(candidate):
+                model = candidate
+                logger.info("Switched to fallback: %s", model)
+                return True
+            chain_idx += 1
+        return False
 
     system = SYSTEM_PROMPTS["computer"]
     messages: list[dict] = [
@@ -294,25 +338,87 @@ async def agent_loop(
             messages = _compact_messages(messages)
 
         try:
-            response = await acompletion(
-                model=model,
-                messages=messages,
+            response = await _call_model(
+                model, messages,
+                max_tokens=2048,
                 tools=TOOL_DEFINITIONS,
                 tool_choice="auto",
-                max_tokens=2048,
-                temperature=0.3,  # lower temp for tool use accuracy
-                api_key=groq_key or os.getenv("CEREBRAS_API_KEY", ""),
+                temperature=0.3,
             )
         except litellm.RateLimitError:
             _mark_rate_limited(model)
-            # Try fallback
-            if model == _AGENT_MODEL:
-                model = _AGENT_MODEL_FALLBACK
+            if _advance_model():
                 continue
-            return "rate limited on all providers", model
-        except Exception as e:
-            logger.error("agent_loop model error: %s", e)
+            return "rate limited on all providers — try again in a minute", model
+
+        except litellm.BadRequestError as e:
+            error_str = str(e)
+            # Groq XML tool calls: model outputs <function=name{args}> instead of tool_calls
+            if "tool_use_failed" in error_str or "failed_generation" in error_str:
+                parsed = _parse_groq_xml_tool_call(error_str)
+                if parsed:
+                    tool_name, args = parsed
+                    logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()))
+                    if progress_cb:
+                        await progress_cb(_tool_label(tool_name, args))
+
+                    try:
+                        result = await execute_tool(tool_name, args)
+                    except Exception as te:
+                        result = f"tool error: {te}"
+                    result = str(result) if result is not None else "tool returned no output"
+
+                    # Screenshot special handling
+                    if tool_name == "take_screenshot":
+                        if result and result != "tool returned no output" and Path(result).exists():
+                            if photo_cb:
+                                await photo_cb(result)
+                            try:
+                                desc, _ = await analyze_screenshot(
+                                    result,
+                                    question="Describe exactly what's visible on screen."
+                                )
+                                result = f"Screenshot taken. Screen shows:\n{desc}"
+                            except Exception:
+                                result = "Screenshot taken (analysis failed)"
+                        else:
+                            result = "Screenshot failed"
+
+                    steps_taken.append(f"{tool_name} → {result[:80]}...")
+
+                    # Build synthetic tool call messages for conversation continuity
+                    tc_id = f"xml_{iteration}"
+                    messages.append({
+                        "role": "assistant",
+                        "content": "",
+                        "tool_calls": [{
+                            "id": tc_id,
+                            "type": "function",
+                            "function": {"name": tool_name, "arguments": json.dumps(args)}
+                        }],
+                    })
+                    messages.append({
+                        "role": "tool",
+                        "content": result[:4000],
+                        "tool_call_id": tc_id,
+                    })
+                    continue
+
+            # Non-recoverable BadRequest → try next model
+            logger.error("agent_loop BadRequest: %s", e)
+            if _advance_model():
+                continue
             return f"model error: {e}", model
+
+        except litellm.AuthenticationError:
+            logger.error("agent_loop auth error on %s — trying next", model)
+            if _advance_model():
+                continue
+            return "auth error on all providers — check /keys", model
+
+        except Exception as e:
+            logger.error("agent_loop error: %s", e)
+            return f"error: {e}", model
 
         # Guard against None/empty response
         if response is None or not hasattr(response, 'choices') or not response.choices:
@@ -514,6 +620,16 @@ async def chat(
 
     system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
 
+    # In chat mode (no tools), prevent hallucination of computer access
+    if agent_key not in ("computer", "vision"):
+        system_prompt += (
+            "\n\nYou are in CHAT-ONLY mode — no tools, no computer access right now. "
+            "Answer from your knowledge. Do NOT pretend to run commands, check files, "
+            "or access the desktop. Do NOT fabricate file contents or command output. "
+            "If the task requires computer access, tell Bas to use /do <task>. "
+            "For Legion status/config questions, suggest: /models, /keys, /stats, /gpu."
+        )
+
     if image_b64:
         user_content: Any = [
             {"type": "text", "text": task},
@@ -558,6 +674,10 @@ async def chat(
         except litellm.AuthenticationError:
             logger.error("Auth error: %s", model)
             last_error = Exception(f"Auth error: {model}")
+            continue
+        except litellm.BadRequestError as e:
+            logger.warning("BadRequest %s: %s", model, e)
+            last_error = e
             continue
         except ValueError as e:
             last_error = e
