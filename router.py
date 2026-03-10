@@ -20,14 +20,19 @@ logger = logging.getLogger(__name__)
 # ── Primary models ──────────────────────────────────────────────────────────
 # Ollama ONLY for vision — its specialisation is local screenshot analysis.
 AGENT_MODELS: dict[str, str] = {
-    "vision":    "ollama_chat/gemma3:12b",              # local, private, RTX 3060
-    "coding":    "groq/llama-3.3-70b-versatile",        # fast + reliable ✓
-    "debug":     "zai/glm-4",                           # GPQA Diamond 85.7%
-    "math":      "zai/glm-4",                           # AIME 2025 95.7%
-    "architect": "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
-    "analyst":   "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
-    "computer":  "groq/llama-3.3-70b-versatile",        # agentic tool-calling loop
-    "general":   "groq/llama-3.3-70b-versatile",        # reliable default ✓
+    "vision":     "ollama_chat/gemma3:12b",              # local, private, RTX 3060
+    "coding":     "groq/llama-3.3-70b-versatile",        # fast + reliable
+    "debug":      "zai/glm-4",                           # GPQA Diamond 85.7%
+    "math":       "zai/glm-4",                           # AIME 2025 95.7%
+    "architect":  "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
+    "analyst":    "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
+    "computer":   "groq/llama-3.3-70b-versatile",        # agentic tool-calling loop
+    "general":    "groq/llama-3.3-70b-versatile",        # reliable default
+    # v4 team agents (mapped through orchestrator)
+    "researcher": "groq/moonshotai/kimi-k2-instruct",    # academic research
+    "marketer":   "groq/llama-3.3-70b-versatile",        # content + social
+    "devops":     "groq/llama-3.3-70b-versatile",        # infra + deployment
+    "pm":         "cerebras/qwen-3-235b-a22b",           # project management
 }
 
 # ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
@@ -75,6 +80,26 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "cerebras/qwen-3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+    ],
+    "researcher": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+        "groq/llama-3.3-70b-versatile",
+    ],
+    "marketer": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
+    ],
+    "devops": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
+    ],
+    "pm": [
+        "cerebras/qwen-3-235b-a22b",
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
     ],
 }
 
@@ -165,6 +190,7 @@ def list_agents() -> str:
         "vision": "👁️", "coding": "💻", "debug": "🐛",
         "math": "📐", "architect": "🏗️", "analyst": "📊",
         "computer": "🖥️", "general": "🧠",
+        "researcher": "🔬", "marketer": "📢", "devops": "🔧", "pm": "📋",
     }
     lines = ["<b>🤖 Legion Agent Roster</b>\n"]
     for key, model in AGENT_MODELS.items():
