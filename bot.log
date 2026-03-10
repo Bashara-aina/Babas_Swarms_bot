@@ -1,0 +1,14 @@
+2026-03-10 14:05:16,472 [INFO] tools.persistence: Database initialized: /home/newadmin/swarm-bot/legion.db
+2026-03-10 14:05:16,473 [INFO] __main__: Scheduler initialized
+2026-03-10 14:05:16,474 [INFO] tools.memory: Memory DB initialized
+2026-03-10 14:05:16,475 [INFO] __main__: Memory DB initialized
+2026-03-10 14:05:16,475 [INFO] __main__: Daily briefing scheduled for 07:30
+2026-03-10 14:05:16,485 [INFO] tools.briefing: Next briefing in 62684 seconds (at 07:30)
+2026-03-10 14:05:19,033 [INFO] computer_agent: DISPLAY from env: :1
+2026-03-10 14:05:19,033 [INFO] __main__: =======================================================
+2026-03-10 14:05:19,033 [INFO] __main__: Legion v4 starting
+2026-03-10 14:05:19,033 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-10 14:05:19,033 [INFO] __main__: 🖥 Display: :1
+2026-03-10 14:05:19,033 [INFO] __main__: =======================================================
+2026-03-10 14:05:19,034 [INFO] aiogram.dispatcher: Start polling
+2026-03-10 14:05:19,289 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
