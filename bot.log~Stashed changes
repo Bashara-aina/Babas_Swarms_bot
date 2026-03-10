@@ -1,0 +1,732 @@
+nohup: ignoring input
+2026-03-08 18:43:18,583 [INFO] core.agent_registry: ✓ Loaded 84 agents across 9 departments
+2026-03-08 18:43:22,562 [INFO] sentence_transformers.SentenceTransformer: Use pytorch device_name: cuda:0
+2026-03-08 18:43:22,562 [INFO] sentence_transformers.SentenceTransformer: Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 8837.52it/s]
+[1mBertModel LOAD REPORT[0m from: sentence-transformers/all-MiniLM-L6-v2
+Key                     | Status     |  | 
+------------------------+------------+--+-
+embeddings.position_ids | UNEXPECTED |  | 
+
+[3mNotes:
+- UNEXPECTED[3m	:can be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  5.17it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  5.16it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 255.67it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 251.62it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 191.17it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 260.58it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 171.45it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 201.85it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 260.76it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 206.55it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 257.46it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 159.42it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 257.18it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 260.27it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 183.53it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 258.45it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 275.67it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 167.14it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 260.06it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 264.09it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 193.44it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 235.99it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 182.60it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 145.32it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 152.53it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 157.59it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 188.29it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 179.83it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 218.01it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 194.08it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 217.60it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 165.65it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 20.86it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 265.23it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 259.34it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 220.45it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 236.87it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 234.74it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 225.76it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 222.78it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 189.76it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 228.31it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 262.55it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 191.62it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 244.88it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 226.61it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 192.26it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 266.02it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 218.59it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 239.01it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 262.85it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 220.88it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 252.06it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 228.06it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 213.13it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 176.08it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 239.56it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 237.95it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 186.60it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 234.71it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 201.10it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 238.56it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 218.03it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 219.51it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 263.91it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 238.69it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 206.31it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 216.78it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 230.51it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 190.90it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 189.47it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 231.26it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 273.62it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 213.04it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 217.43it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 198.59it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 178.73it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 210.06it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 255.19it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 266.15it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 165.74it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 210.94it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 257.19it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 182.43it/s]
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 213.22it/s]
+2026-03-08 18:43:26,310 [INFO] core.agent_registry: ✓ Precomputed embeddings for 84 agents
+2026-03-08 18:43:26,310 [INFO] __main__: 🎨 Babas Agency Swarm starting - 84 agents across 9 departments (UI/UX Enhanced)
+2026-03-08 18:43:26,310 [INFO] aiogram.dispatcher: Start polling
+2026-03-08 18:43:27,085 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-08 18:43:33,987 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-08 18:43:33,987 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-08 18:43:39,497 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-08 18:43:39,497 [WARNING] aiogram.dispatcher: Sleep for 1.222795 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-08 18:43:45,520 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-08 18:43:45,520 [WARNING] aiogram.dispatcher: Sleep for 1.615768 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-08 18:43:52,259 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-08 18:43:52,259 [WARNING] aiogram.dispatcher: Sleep for 2.110262 seconds and try again... (tryings = 3, bot id = 7773908475)
+2026-03-08 18:43:54,801 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-08 18:43:54,802 [INFO] aiogram.dispatcher: Polling stopped for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-08 18:43:54,802 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 18:13:24,338 [INFO] __main__: =======================================================
+2026-03-09 18:13:24,338 [INFO] __main__: 🤖 BabasSwarms starting
+2026-03-09 18:13:24,338 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-09 18:13:24,338 [INFO] __main__: =======================================================
+2026-03-09 18:13:24,338 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 18:13:24,596 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-09 18:13:29,159 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:13:29,159 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:13:34,927 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:13:34,927 [WARNING] aiogram.dispatcher: Sleep for 1.338584 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:13:41,388 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:13:41,388 [WARNING] aiogram.dispatcher: Sleep for 1.709202 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-09 18:13:48,656 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:13:48,656 [WARNING] aiogram.dispatcher: Sleep for 2.248372 seconds and try again... (tryings = 3, bot id = 7773908475)
+2026-03-09 18:13:55,484 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:13:55,484 [WARNING] aiogram.dispatcher: Sleep for 2.881818 seconds and try again... (tryings = 4, bot id = 7773908475)
+2026-03-09 18:14:03,053 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:03,080 [WARNING] aiogram.dispatcher: Sleep for 3.671169 seconds and try again... (tryings = 5, bot id = 7773908475)
+2026-03-09 18:14:11,059 [INFO] aiogram.dispatcher: Connection established (tryings = 6, bot id = 7773908475)
+2026-03-09 18:14:11,462 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:11,462 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:14:12,817 [INFO] aiogram.event: Update id=572430197 is handled. Duration 1748 ms by bot id=7773908475
+2026-03-09 18:14:17,300 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:17,300 [WARNING] aiogram.dispatcher: Sleep for 1.299699 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:14:21,418 [INFO] aiogram.dispatcher: Connection established (tryings = 2, bot id = 7773908475)
+2026-03-09 18:14:21,429 [INFO] aiogram.event: Update id=572430198 is handled. Duration 10 ms by bot id=7773908475
+2026-03-09 18:14:23,786 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:23,786 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:14:30,448 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:30,448 [WARNING] aiogram.dispatcher: Sleep for 1.226903 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:14:37,993 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:37,993 [WARNING] aiogram.dispatcher: Sleep for 1.448926 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-09 18:14:45,128 [INFO] aiogram.dispatcher: Connection established (tryings = 3, bot id = 7773908475)
+2026-03-09 18:14:45,920 [INFO] aiogram.event: Update id=572430199 is handled. Duration 780 ms by bot id=7773908475
+2026-03-09 18:14:46,602 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:46,602 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:14:55,755 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:14:55,755 [WARNING] aiogram.dispatcher: Sleep for 1.447078 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:15:05,652 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:05,652 [WARNING] aiogram.dispatcher: Sleep for 1.952400 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-09 18:15:12,711 [INFO] aiogram.dispatcher: Connection established (tryings = 3, bot id = 7773908475)
+2026-03-09 18:15:13,277 [INFO] llm_client: Trying model: cerebras/qwen-3-235b (agent=general)
+2026-03-09 18:15:17,057 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:17,079 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:15:17,731 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b; provider = cerebras
+2026-03-09 18:15:21,116 [WARNING] llm_client: Error with cerebras/qwen-3-235b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b does not exist or you do not have access to it. — trying next
+2026-03-09 18:15:21,116 [INFO] llm_client: Trying model: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:15:21,120 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:15:24,381 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:15:25,291 [INFO] aiogram.event: Update id=572430200 is handled. Duration 12576 ms by bot id=7773908475
+2026-03-09 18:15:26,821 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:26,821 [WARNING] aiogram.dispatcher: Sleep for 1.082075 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:15:36,476 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:36,479 [WARNING] aiogram.dispatcher: Sleep for 1.404178 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-09 18:15:46,453 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:46,454 [WARNING] aiogram.dispatcher: Sleep for 1.966163 seconds and try again... (tryings = 3, bot id = 7773908475)
+2026-03-09 18:15:56,927 [INFO] aiogram.dispatcher: Connection established (tryings = 4, bot id = 7773908475)
+2026-03-09 18:15:57,377 [INFO] llm_client: Trying model: groq/meta-llama/llama-4-scout-17b-16e-instruct (agent=vision)
+2026-03-09 18:15:57,379 [INFO] LiteLLM: 
+LiteLLM completion() model= meta-llama/llama-4-scout-17b-16e-instruct; provider = groq
+2026-03-09 18:15:57,396 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:15:57,396 [WARNING] aiogram.dispatcher: Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7773908475)
+2026-03-09 18:15:58,052 [INFO] llm_client: Success: groq/meta-llama/llama-4-scout-17b-16e-instruct
+2026-03-09 18:15:58,949 [INFO] aiogram.event: Update id=572430201 is handled. Duration 2021 ms by bot id=7773908475
+2026-03-09 18:16:02,921 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:02,921 [WARNING] aiogram.dispatcher: Sleep for 1.202995 seconds and try again... (tryings = 1, bot id = 7773908475)
+2026-03-09 18:16:08,669 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:08,669 [WARNING] aiogram.dispatcher: Sleep for 1.495104 seconds and try again... (tryings = 2, bot id = 7773908475)
+2026-03-09 18:16:14,897 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:14,897 [WARNING] aiogram.dispatcher: Sleep for 1.874959 seconds and try again... (tryings = 3, bot id = 7773908475)
+2026-03-09 18:16:21,787 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:21,787 [WARNING] aiogram.dispatcher: Sleep for 2.372674 seconds and try again... (tryings = 4, bot id = 7773908475)
+2026-03-09 18:16:29,729 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:29,729 [WARNING] aiogram.dispatcher: Sleep for 3.069659 seconds and try again... (tryings = 5, bot id = 7773908475)
+2026-03-09 18:16:38,885 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:38,885 [WARNING] aiogram.dispatcher: Sleep for 4.037664 seconds and try again... (tryings = 6, bot id = 7773908475)
+2026-03-09 18:16:46,902 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:46,903 [WARNING] aiogram.dispatcher: Sleep for 5.185825 seconds and try again... (tryings = 7, bot id = 7773908475)
+2026-03-09 18:16:57,232 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:16:57,232 [WARNING] aiogram.dispatcher: Sleep for 4.950197 seconds and try again... (tryings = 8, bot id = 7773908475)
+2026-03-09 18:17:07,716 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:17:07,716 [WARNING] aiogram.dispatcher: Sleep for 4.862233 seconds and try again... (tryings = 9, bot id = 7773908475)
+2026-03-09 18:17:18,162 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:17:18,162 [WARNING] aiogram.dispatcher: Sleep for 4.984093 seconds and try again... (tryings = 10, bot id = 7773908475)
+2026-03-09 18:17:28,592 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:17:28,592 [WARNING] aiogram.dispatcher: Sleep for 5.059498 seconds and try again... (tryings = 11, bot id = 7773908475)
+2026-03-09 18:17:39,205 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:17:39,205 [WARNING] aiogram.dispatcher: Sleep for 5.038746 seconds and try again... (tryings = 12, bot id = 7773908475)
+2026-03-09 18:17:49,609 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:17:49,609 [WARNING] aiogram.dispatcher: Sleep for 5.148923 seconds and try again... (tryings = 13, bot id = 7773908475)
+2026-03-09 18:18:00,428 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:00,428 [WARNING] aiogram.dispatcher: Sleep for 4.937175 seconds and try again... (tryings = 14, bot id = 7773908475)
+2026-03-09 18:18:10,893 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:10,893 [WARNING] aiogram.dispatcher: Sleep for 4.979136 seconds and try again... (tryings = 15, bot id = 7773908475)
+2026-03-09 18:18:21,331 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:21,331 [WARNING] aiogram.dispatcher: Sleep for 4.972117 seconds and try again... (tryings = 16, bot id = 7773908475)
+2026-03-09 18:18:31,807 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:31,807 [WARNING] aiogram.dispatcher: Sleep for 5.176052 seconds and try again... (tryings = 17, bot id = 7773908475)
+2026-03-09 18:18:42,573 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:42,573 [WARNING] aiogram.dispatcher: Sleep for 4.846255 seconds and try again... (tryings = 18, bot id = 7773908475)
+2026-03-09 18:18:52,807 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:18:52,807 [WARNING] aiogram.dispatcher: Sleep for 4.902752 seconds and try again... (tryings = 19, bot id = 7773908475)
+2026-03-09 18:19:02,960 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:02,960 [WARNING] aiogram.dispatcher: Sleep for 4.953171 seconds and try again... (tryings = 20, bot id = 7773908475)
+2026-03-09 18:19:13,218 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:13,218 [WARNING] aiogram.dispatcher: Sleep for 4.961303 seconds and try again... (tryings = 21, bot id = 7773908475)
+2026-03-09 18:19:23,822 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:23,822 [WARNING] aiogram.dispatcher: Sleep for 4.946752 seconds and try again... (tryings = 22, bot id = 7773908475)
+2026-03-09 18:19:34,309 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:34,309 [WARNING] aiogram.dispatcher: Sleep for 5.210807 seconds and try again... (tryings = 23, bot id = 7773908475)
+2026-03-09 18:19:45,175 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:45,175 [WARNING] aiogram.dispatcher: Sleep for 5.271058 seconds and try again... (tryings = 24, bot id = 7773908475)
+2026-03-09 18:19:56,019 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:19:56,019 [WARNING] aiogram.dispatcher: Sleep for 5.014759 seconds and try again... (tryings = 25, bot id = 7773908475)
+2026-03-09 18:20:06,428 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:06,428 [WARNING] aiogram.dispatcher: Sleep for 5.005567 seconds and try again... (tryings = 26, bot id = 7773908475)
+2026-03-09 18:20:17,000 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:17,000 [WARNING] aiogram.dispatcher: Sleep for 5.037817 seconds and try again... (tryings = 27, bot id = 7773908475)
+2026-03-09 18:20:27,462 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:27,462 [WARNING] aiogram.dispatcher: Sleep for 5.110801 seconds and try again... (tryings = 28, bot id = 7773908475)
+2026-03-09 18:20:38,124 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:38,124 [WARNING] aiogram.dispatcher: Sleep for 4.960850 seconds and try again... (tryings = 29, bot id = 7773908475)
+2026-03-09 18:20:48,625 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:48,625 [WARNING] aiogram.dispatcher: Sleep for 4.873462 seconds and try again... (tryings = 30, bot id = 7773908475)
+2026-03-09 18:20:59,024 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:20:59,024 [WARNING] aiogram.dispatcher: Sleep for 5.214117 seconds and try again... (tryings = 31, bot id = 7773908475)
+2026-03-09 18:21:09,729 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:21:09,730 [WARNING] aiogram.dispatcher: Sleep for 4.909155 seconds and try again... (tryings = 32, bot id = 7773908475)
+2026-03-09 18:21:20,149 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:21:20,149 [WARNING] aiogram.dispatcher: Sleep for 5.033599 seconds and try again... (tryings = 33, bot id = 7773908475)
+2026-03-09 18:21:30,795 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:21:30,795 [WARNING] aiogram.dispatcher: Sleep for 4.919405 seconds and try again... (tryings = 34, bot id = 7773908475)
+2026-03-09 18:21:41,442 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:21:41,442 [WARNING] aiogram.dispatcher: Sleep for 5.058651 seconds and try again... (tryings = 35, bot id = 7773908475)
+2026-03-09 18:21:52,184 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:21:52,184 [WARNING] aiogram.dispatcher: Sleep for 5.002610 seconds and try again... (tryings = 36, bot id = 7773908475)
+2026-03-09 18:22:02,786 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:02,786 [WARNING] aiogram.dispatcher: Sleep for 4.781219 seconds and try again... (tryings = 37, bot id = 7773908475)
+2026-03-09 18:22:12,913 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:12,913 [WARNING] aiogram.dispatcher: Sleep for 5.094745 seconds and try again... (tryings = 38, bot id = 7773908475)
+2026-03-09 18:22:23,526 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:23,526 [WARNING] aiogram.dispatcher: Sleep for 5.024447 seconds and try again... (tryings = 39, bot id = 7773908475)
+2026-03-09 18:22:34,097 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:34,097 [WARNING] aiogram.dispatcher: Sleep for 4.875924 seconds and try again... (tryings = 40, bot id = 7773908475)
+2026-03-09 18:22:44,383 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:44,383 [WARNING] aiogram.dispatcher: Sleep for 4.774102 seconds and try again... (tryings = 41, bot id = 7773908475)
+2026-03-09 18:22:54,412 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:22:54,412 [WARNING] aiogram.dispatcher: Sleep for 4.995081 seconds and try again... (tryings = 42, bot id = 7773908475)
+2026-03-09 18:23:05,078 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:05,078 [WARNING] aiogram.dispatcher: Sleep for 5.059217 seconds and try again... (tryings = 43, bot id = 7773908475)
+2026-03-09 18:23:15,621 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:15,621 [WARNING] aiogram.dispatcher: Sleep for 5.051372 seconds and try again... (tryings = 44, bot id = 7773908475)
+2026-03-09 18:23:26,193 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:26,193 [WARNING] aiogram.dispatcher: Sleep for 5.108415 seconds and try again... (tryings = 45, bot id = 7773908475)
+2026-03-09 18:23:36,729 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:36,729 [WARNING] aiogram.dispatcher: Sleep for 4.937763 seconds and try again... (tryings = 46, bot id = 7773908475)
+2026-03-09 18:23:47,251 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:47,252 [WARNING] aiogram.dispatcher: Sleep for 4.798035 seconds and try again... (tryings = 47, bot id = 7773908475)
+2026-03-09 18:23:57,700 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:23:57,700 [WARNING] aiogram.dispatcher: Sleep for 4.965396 seconds and try again... (tryings = 48, bot id = 7773908475)
+2026-03-09 18:24:08,188 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:24:08,188 [WARNING] aiogram.dispatcher: Sleep for 4.897583 seconds and try again... (tryings = 49, bot id = 7773908475)
+2026-03-09 18:24:18,491 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:24:18,491 [WARNING] aiogram.dispatcher: Sleep for 5.151881 seconds and try again... (tryings = 50, bot id = 7773908475)
+2026-03-09 18:24:29,134 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:24:29,134 [WARNING] aiogram.dispatcher: Sleep for 5.053822 seconds and try again... (tryings = 51, bot id = 7773908475)
+2026-03-09 18:24:39,815 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:24:39,815 [WARNING] aiogram.dispatcher: Sleep for 4.951099 seconds and try again... (tryings = 52, bot id = 7773908475)
+2026-03-09 18:24:50,263 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:24:50,264 [WARNING] aiogram.dispatcher: Sleep for 5.008329 seconds and try again... (tryings = 53, bot id = 7773908475)
+2026-03-09 18:25:00,788 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:00,789 [WARNING] aiogram.dispatcher: Sleep for 4.862124 seconds and try again... (tryings = 54, bot id = 7773908475)
+2026-03-09 18:25:11,124 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:11,124 [WARNING] aiogram.dispatcher: Sleep for 5.055326 seconds and try again... (tryings = 55, bot id = 7773908475)
+2026-03-09 18:25:21,676 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:21,677 [WARNING] aiogram.dispatcher: Sleep for 4.947926 seconds and try again... (tryings = 56, bot id = 7773908475)
+2026-03-09 18:25:32,172 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:32,172 [WARNING] aiogram.dispatcher: Sleep for 4.993382 seconds and try again... (tryings = 57, bot id = 7773908475)
+2026-03-09 18:25:43,063 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:43,063 [WARNING] aiogram.dispatcher: Sleep for 4.938074 seconds and try again... (tryings = 58, bot id = 7773908475)
+2026-03-09 18:25:53,363 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:25:53,363 [WARNING] aiogram.dispatcher: Sleep for 5.072474 seconds and try again... (tryings = 59, bot id = 7773908475)
+2026-03-09 18:26:03,966 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:03,966 [WARNING] aiogram.dispatcher: Sleep for 5.002556 seconds and try again... (tryings = 60, bot id = 7773908475)
+2026-03-09 18:26:14,471 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:14,471 [WARNING] aiogram.dispatcher: Sleep for 4.980854 seconds and try again... (tryings = 61, bot id = 7773908475)
+2026-03-09 18:26:25,053 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:25,053 [WARNING] aiogram.dispatcher: Sleep for 5.040234 seconds and try again... (tryings = 62, bot id = 7773908475)
+2026-03-09 18:26:35,561 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:35,561 [WARNING] aiogram.dispatcher: Sleep for 4.917427 seconds and try again... (tryings = 63, bot id = 7773908475)
+2026-03-09 18:26:46,499 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:46,499 [WARNING] aiogram.dispatcher: Sleep for 4.927912 seconds and try again... (tryings = 64, bot id = 7773908475)
+2026-03-09 18:26:57,085 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:26:57,085 [WARNING] aiogram.dispatcher: Sleep for 5.052916 seconds and try again... (tryings = 65, bot id = 7773908475)
+2026-03-09 18:27:07,570 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:27:07,570 [WARNING] aiogram.dispatcher: Sleep for 5.090147 seconds and try again... (tryings = 66, bot id = 7773908475)
+2026-03-09 18:27:18,216 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:27:18,216 [WARNING] aiogram.dispatcher: Sleep for 4.949198 seconds and try again... (tryings = 67, bot id = 7773908475)
+2026-03-09 18:27:28,787 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:27:28,787 [WARNING] aiogram.dispatcher: Sleep for 4.919345 seconds and try again... (tryings = 68, bot id = 7773908475)
+2026-03-09 18:27:39,153 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:27:39,153 [WARNING] aiogram.dispatcher: Sleep for 5.052655 seconds and try again... (tryings = 69, bot id = 7773908475)
+2026-03-09 18:27:49,853 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:27:49,853 [WARNING] aiogram.dispatcher: Sleep for 5.028653 seconds and try again... (tryings = 70, bot id = 7773908475)
+2026-03-09 18:28:00,224 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:00,225 [WARNING] aiogram.dispatcher: Sleep for 4.899485 seconds and try again... (tryings = 71, bot id = 7773908475)
+2026-03-09 18:28:10,684 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:10,685 [WARNING] aiogram.dispatcher: Sleep for 4.927579 seconds and try again... (tryings = 72, bot id = 7773908475)
+2026-03-09 18:28:21,107 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:21,107 [WARNING] aiogram.dispatcher: Sleep for 5.041867 seconds and try again... (tryings = 73, bot id = 7773908475)
+2026-03-09 18:28:31,758 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:31,758 [WARNING] aiogram.dispatcher: Sleep for 4.891848 seconds and try again... (tryings = 74, bot id = 7773908475)
+2026-03-09 18:28:42,187 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:42,187 [WARNING] aiogram.dispatcher: Sleep for 4.916226 seconds and try again... (tryings = 75, bot id = 7773908475)
+2026-03-09 18:28:52,785 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:28:52,785 [WARNING] aiogram.dispatcher: Sleep for 4.952763 seconds and try again... (tryings = 76, bot id = 7773908475)
+2026-03-09 18:29:03,278 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:03,278 [WARNING] aiogram.dispatcher: Sleep for 4.991209 seconds and try again... (tryings = 77, bot id = 7773908475)
+2026-03-09 18:29:13,967 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:13,967 [WARNING] aiogram.dispatcher: Sleep for 5.061511 seconds and try again... (tryings = 78, bot id = 7773908475)
+2026-03-09 18:29:24,414 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:24,414 [WARNING] aiogram.dispatcher: Sleep for 5.165057 seconds and try again... (tryings = 79, bot id = 7773908475)
+2026-03-09 18:29:35,069 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:35,069 [WARNING] aiogram.dispatcher: Sleep for 4.843954 seconds and try again... (tryings = 80, bot id = 7773908475)
+2026-03-09 18:29:45,381 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:45,381 [WARNING] aiogram.dispatcher: Sleep for 4.772965 seconds and try again... (tryings = 81, bot id = 7773908475)
+2026-03-09 18:29:55,559 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:29:55,559 [WARNING] aiogram.dispatcher: Sleep for 4.917385 seconds and try again... (tryings = 82, bot id = 7773908475)
+2026-03-09 18:30:05,891 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:05,891 [WARNING] aiogram.dispatcher: Sleep for 5.060608 seconds and try again... (tryings = 83, bot id = 7773908475)
+2026-03-09 18:30:16,577 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:16,577 [WARNING] aiogram.dispatcher: Sleep for 5.108922 seconds and try again... (tryings = 84, bot id = 7773908475)
+2026-03-09 18:30:27,096 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:27,096 [WARNING] aiogram.dispatcher: Sleep for 5.036394 seconds and try again... (tryings = 85, bot id = 7773908475)
+2026-03-09 18:30:37,732 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:37,733 [WARNING] aiogram.dispatcher: Sleep for 4.830865 seconds and try again... (tryings = 86, bot id = 7773908475)
+2026-03-09 18:30:48,189 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:48,189 [WARNING] aiogram.dispatcher: Sleep for 4.890037 seconds and try again... (tryings = 87, bot id = 7773908475)
+2026-03-09 18:30:58,385 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:30:58,385 [WARNING] aiogram.dispatcher: Sleep for 5.025559 seconds and try again... (tryings = 88, bot id = 7773908475)
+2026-03-09 18:31:09,032 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:31:09,032 [WARNING] aiogram.dispatcher: Sleep for 5.017302 seconds and try again... (tryings = 89, bot id = 7773908475)
+2026-03-09 18:31:19,606 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:31:19,606 [WARNING] aiogram.dispatcher: Sleep for 4.865395 seconds and try again... (tryings = 90, bot id = 7773908475)
+2026-03-09 18:31:29,998 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:31:29,998 [WARNING] aiogram.dispatcher: Sleep for 4.982369 seconds and try again... (tryings = 91, bot id = 7773908475)
+2026-03-09 18:31:40,596 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:31:40,596 [WARNING] aiogram.dispatcher: Sleep for 5.038094 seconds and try again... (tryings = 92, bot id = 7773908475)
+2026-03-09 18:31:51,600 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:31:51,601 [WARNING] aiogram.dispatcher: Sleep for 5.021742 seconds and try again... (tryings = 93, bot id = 7773908475)
+2026-03-09 18:32:02,103 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:02,103 [WARNING] aiogram.dispatcher: Sleep for 5.044272 seconds and try again... (tryings = 94, bot id = 7773908475)
+2026-03-09 18:32:12,731 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:12,731 [WARNING] aiogram.dispatcher: Sleep for 5.053215 seconds and try again... (tryings = 95, bot id = 7773908475)
+2026-03-09 18:32:23,162 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:23,162 [WARNING] aiogram.dispatcher: Sleep for 5.022610 seconds and try again... (tryings = 96, bot id = 7773908475)
+2026-03-09 18:32:33,603 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:33,603 [WARNING] aiogram.dispatcher: Sleep for 5.078658 seconds and try again... (tryings = 97, bot id = 7773908475)
+2026-03-09 18:32:44,387 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:44,388 [WARNING] aiogram.dispatcher: Sleep for 5.056266 seconds and try again... (tryings = 98, bot id = 7773908475)
+2026-03-09 18:32:54,804 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:32:54,804 [WARNING] aiogram.dispatcher: Sleep for 4.894345 seconds and try again... (tryings = 99, bot id = 7773908475)
+2026-03-09 18:33:05,154 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:05,155 [WARNING] aiogram.dispatcher: Sleep for 5.123105 seconds and try again... (tryings = 100, bot id = 7773908475)
+2026-03-09 18:33:15,707 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:15,707 [WARNING] aiogram.dispatcher: Sleep for 4.996099 seconds and try again... (tryings = 101, bot id = 7773908475)
+2026-03-09 18:33:26,360 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:26,360 [WARNING] aiogram.dispatcher: Sleep for 4.997227 seconds and try again... (tryings = 102, bot id = 7773908475)
+2026-03-09 18:33:36,952 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:36,953 [WARNING] aiogram.dispatcher: Sleep for 5.118896 seconds and try again... (tryings = 103, bot id = 7773908475)
+2026-03-09 18:33:47,663 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:47,663 [WARNING] aiogram.dispatcher: Sleep for 4.895790 seconds and try again... (tryings = 104, bot id = 7773908475)
+2026-03-09 18:33:58,123 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:33:58,123 [WARNING] aiogram.dispatcher: Sleep for 5.162138 seconds and try again... (tryings = 105, bot id = 7773908475)
+2026-03-09 18:34:08,720 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:34:08,720 [WARNING] aiogram.dispatcher: Sleep for 5.115892 seconds and try again... (tryings = 106, bot id = 7773908475)
+2026-03-09 18:34:19,426 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:34:19,426 [WARNING] aiogram.dispatcher: Sleep for 4.998436 seconds and try again... (tryings = 107, bot id = 7773908475)
+2026-03-09 18:34:30,068 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:34:30,068 [WARNING] aiogram.dispatcher: Sleep for 4.918874 seconds and try again... (tryings = 108, bot id = 7773908475)
+2026-03-09 18:34:40,642 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:34:40,642 [WARNING] aiogram.dispatcher: Sleep for 5.086419 seconds and try again... (tryings = 109, bot id = 7773908475)
+2026-03-09 18:34:51,398 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:34:51,398 [WARNING] aiogram.dispatcher: Sleep for 4.948619 seconds and try again... (tryings = 110, bot id = 7773908475)
+2026-03-09 18:35:01,824 [ERROR] aiogram.dispatcher: Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-03-09 18:35:01,824 [WARNING] aiogram.dispatcher: Sleep for 4.956055 seconds and try again... (tryings = 111, bot id = 7773908475)
+2026-03-09 18:35:11,700 [WARNING] aiogram.dispatcher: Received SIGINT signal
+2026-03-09 18:35:11,701 [INFO] aiogram.dispatcher: Polling stopped for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-09 18:35:11,702 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 18:35:36,151 [INFO] __main__: =======================================================
+2026-03-09 18:35:36,151 [INFO] __main__: Legion starting up
+2026-03-09 18:35:36,151 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-09 18:35:36,151 [INFO] __main__: =======================================================
+2026-03-09 18:35:36,152 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 18:35:36,411 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-09 18:36:27,040 [INFO] aiogram.event: Update id=572430202 is handled. Duration 969 ms by bot id=7773908475
+2026-03-09 18:36:40,645 [INFO] aiogram.event: Update id=572430203 is handled. Duration 894 ms by bot id=7773908475
+2026-03-09 18:38:39,831 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:38:39,849 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:38:42,321 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:38:43,287 [INFO] aiogram.event: Update id=572430204 is handled. Duration 3901 ms by bot id=7773908475
+2026-03-09 18:39:07,704 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:39:07,706 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:39:08,482 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:39:09,445 [INFO] aiogram.event: Update id=572430205 is handled. Duration 2180 ms by bot id=7773908475
+2026-03-09 18:39:28,561 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:39:28,562 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:39:29,341 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:39:30,256 [INFO] aiogram.event: Update id=572430206 is handled. Duration 2146 ms by bot id=7773908475
+2026-03-09 18:39:38,433 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:39:38,434 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:39:39,077 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:39:39,960 [INFO] aiogram.event: Update id=572430207 is handled. Duration 1995 ms by bot id=7773908475
+2026-03-09 18:39:50,299 [INFO] llm_client: Trying: groq/meta-llama/llama-4-scout-17b-16e-instruct (agent=vision)
+2026-03-09 18:39:50,300 [INFO] LiteLLM: 
+LiteLLM completion() model= meta-llama/llama-4-scout-17b-16e-instruct; provider = groq
+2026-03-09 18:39:51,049 [INFO] llm_client: Success: groq/meta-llama/llama-4-scout-17b-16e-instruct
+2026-03-09 18:39:51,955 [INFO] aiogram.event: Update id=572430208 is handled. Duration 2109 ms by bot id=7773908475
+2026-03-09 18:40:07,109 [INFO] aiogram.event: Update id=572430209 is handled. Duration 432 ms by bot id=7773908475
+2026-03-09 18:40:18,652 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=coding)
+2026-03-09 18:40:18,653 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:40:20,597 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:40:21,480 [INFO] aiogram.event: Update id=572430210 is handled. Duration 3286 ms by bot id=7773908475
+2026-03-09 18:40:38,112 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-09 18:40:38,113 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-09 18:40:38,744 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-09 18:40:39,676 [INFO] aiogram.event: Update id=572430211 is handled. Duration 2018 ms by bot id=7773908475
+2026-03-10 11:36:19,116 [WARNING] __main__: Scheduler init failed (non-fatal): No module named 'aiosqlite'
+2026-03-10 11:36:22,499 [INFO] computer_agent: DISPLAY from env: :1
+2026-03-10 11:36:22,499 [INFO] __main__: =======================================================
+2026-03-10 11:36:22,499 [INFO] __main__: Legion v2 starting
+2026-03-10 11:36:22,499 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-10 11:36:22,499 [INFO] __main__: 🖥 Display: :1
+2026-03-10 11:36:22,499 [INFO] __main__: =======================================================
+2026-03-10 11:36:22,499 [INFO] aiogram.dispatcher: Start polling
+2026-03-10 11:36:22,769 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 11:36:42,596 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:36:42,608 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:36:44,166 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:36:45,040 [INFO] aiogram.event: Update id=572430212 is handled. Duration 3408 ms by bot id=7773908475
+2026-03-10 11:37:00,829 [INFO] aiogram.event: Update id=572430213 is handled. Duration 450 ms by bot id=7773908475
+2026-03-10 11:37:11,485 [INFO] aiogram.event: Update id=572430214 is handled. Duration 452 ms by bot id=7773908475
+2026-03-10 11:37:46,631 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:37:48,562 [INFO] llm_client: Tool call: open_app(['app_name'])
+2026-03-10 11:37:56,081 [INFO] aiogram.event: Update id=572430215 is handled. Duration 9904 ms by bot id=7773908475
+2026-03-10 11:38:14,536 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:38:14,537 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:38:14,952 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:38:16,376 [INFO] aiogram.event: Update id=572430216 is handled. Duration 2310 ms by bot id=7773908475
+2026-03-10 11:38:18,288 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:38:18,292 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:38:18,673 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:38:20,097 [INFO] aiogram.event: Update id=572430217 is handled. Duration 2251 ms by bot id=7773908475
+2026-03-10 11:38:46,961 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:38:48,477 [INFO] llm_client: Tool call: open_app(['app_name'])
+2026-03-10 11:38:50,878 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:38:57,110 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:39:07,560 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:39:12,835 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:39:14,518 [INFO] aiogram.event: Update id=572430218 is handled. Duration 28007 ms by bot id=7773908475
+2026-03-10 11:39:30,140 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:39:32,096 [INFO] llm_client: Tool call: open_app(['app_name'])
+2026-03-10 11:39:34,438 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:39:40,097 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:39:50,547 [INFO] llm_client: Tool call: shell_execute(['command', 'timeout'])
+2026-03-10 11:39:55,828 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:39:57,693 [INFO] aiogram.event: Update id=572430219 is handled. Duration 28004 ms by bot id=7773908475
+2026-03-10 11:40:15,032 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:40:15,033 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:40:15,501 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:40:16,478 [INFO] aiogram.event: Update id=572430220 is handled. Duration 1900 ms by bot id=7773908475
+2026-03-10 11:40:37,903 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:40:39,672 [INFO] aiogram.event: Update id=572430221 is handled. Duration 2250 ms by bot id=7773908475
+2026-03-10 11:40:45,221 [INFO] computer_agent: Screenshot OK via: scrot
+2026-03-10 11:40:48,711 [INFO] aiogram.event: Update id=572430222 is handled. Duration 4092 ms by bot id=7773908475
+2026-03-10 11:41:24,021 [INFO] aiogram.event: Update id=572430223 is handled. Duration 956 ms by bot id=7773908475
+2026-03-10 11:41:27,799 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:41:29,708 [INFO] aiogram.event: Update id=572430224 is handled. Duration 2361 ms by bot id=7773908475
+2026-03-10 11:41:36,519 [INFO] aiogram.event: Update id=572430225 is handled. Duration 456 ms by bot id=7773908475
+2026-03-10 11:41:48,358 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:41:48,359 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:41:48,705 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:41:50,085 [INFO] aiogram.event: Update id=572430226 is handled. Duration 2186 ms by bot id=7773908475
+2026-03-10 11:41:59,762 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 11:41:59,763 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:42:00,184 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 11:42:01,563 [INFO] aiogram.event: Update id=572430227 is handled. Duration 2248 ms by bot id=7773908475
+2026-03-10 11:42:16,861 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 11:42:17,862 [ERROR] llm_client: agent_loop model error: litellm.BadRequestError: GroqException - {"error":{"message":"Failed to call a function. Please adjust your prompt. See 'failed_generation' for more details.","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"\u003cfunction=open_app{\"app_name\": \"mozilla\"}\u003c/function\u003e\n"}}
+
+2026-03-10 11:42:18,738 [INFO] aiogram.event: Update id=572430228 is handled. Duration 2322 ms by bot id=7773908475
+2026-03-10 11:42:40,500 [INFO] llm_client: Trying: groq/moonshotai/kimi-k2-instruct (agent=analyst)
+2026-03-10 11:42:40,501 [INFO] LiteLLM: 
+LiteLLM completion() model= moonshotai/kimi-k2-instruct; provider = groq
+2026-03-10 11:42:40,690 [INFO] llm_client: Success: groq/moonshotai/kimi-k2-instruct
+2026-03-10 11:42:42,099 [INFO] aiogram.event: Update id=572430229 is handled. Duration 2048 ms by bot id=7773908475
+2026-03-10 11:42:53,717 [INFO] aiogram.event: Update id=572430230 is handled. Duration 445 ms by bot id=7773908475
+2026-03-10 11:42:56,495 [INFO] aiogram.event: Update id=572430231 is handled. Duration 421 ms by bot id=7773908475
+2026-03-10 11:43:00,407 [INFO] aiogram.event: Update id=572430232 is handled. Duration 448 ms by bot id=7773908475
+2026-03-10 12:23:14,711 [WARNING] aiogram.dispatcher: Received SIGINT signal
+2026-03-10 12:23:14,711 [INFO] aiogram.dispatcher: Polling stopped for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 12:23:14,711 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-10 12:23:35,052 [INFO] tools.persistence: Database initialized: /home/newadmin/swarm-bot/legion.db
+2026-03-10 12:23:35,053 [INFO] __main__: Scheduler initialized
+2026-03-10 12:23:35,068 [INFO] tools.memory: Memory DB initialized
+2026-03-10 12:23:35,068 [INFO] __main__: Memory DB initialized
+2026-03-10 12:23:35,071 [INFO] __main__: Daily briefing scheduled for 07:30
+2026-03-10 12:23:35,073 [INFO] tools.briefing: Next briefing in 68785 seconds (at 07:30)
+2026-03-10 12:23:36,024 [INFO] computer_agent: DISPLAY from env: :1
+2026-03-10 12:23:36,024 [INFO] __main__: =======================================================
+2026-03-10 12:23:36,024 [INFO] __main__: Legion v4 starting
+2026-03-10 12:23:36,024 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-10 12:23:36,024 [INFO] __main__: 🖥 Display: :1
+2026-03-10 12:23:36,024 [INFO] __main__: =======================================================
+2026-03-10 12:23:36,024 [INFO] aiogram.dispatcher: Start polling
+2026-03-10 12:23:36,283 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 12:25:40,949 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 12:25:40,961 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:25:42,276 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 12:25:43,148 [INFO] aiogram.event: Update id=572430233 is handled. Duration 3154 ms by bot id=7773908475
+2026-03-10 12:25:45,360 [INFO] aiogram.event: Update id=572430234 is handled. Duration 457 ms by bot id=7773908475
+2026-03-10 12:28:29,801 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 12:28:29,802 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:28:30,529 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 12:28:31,570 [INFO] aiogram.event: Update id=572430235 is handled. Duration 2216 ms by bot id=7773908475
+2026-03-10 12:29:00,189 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=coding)
+2026-03-10 12:29:00,191 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:29:01,298 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 12:29:02,193 [INFO] aiogram.event: Update id=572430236 is handled. Duration 2457 ms by bot id=7773908475
+2026-03-10 12:29:17,413 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:29:18,349 [ERROR] llm_client: agent_loop model error: litellm.BadRequestError: GroqException - {"error":{"message":"tool call validation failed: attempted to call tool 'list_directory{}' which was not in request.tools","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"\u003cfunction=list_directory{}\u003e\u003c/function\u003e"}}
+
+2026-03-10 12:29:19,232 [INFO] aiogram.event: Update id=572430237 is handled. Duration 2267 ms by bot id=7773908475
+2026-03-10 12:29:35,215 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:29:35,944 [ERROR] llm_client: agent_loop model error: litellm.BadRequestError: GroqException - {"error":{"message":"Failed to call a function. Please adjust your prompt. See 'failed_generation' for more details.","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"\u003cfunction=open_app{\"app_name\": \"firefox\"}\u003c/function\u003e"}}
+
+2026-03-10 12:29:36,831 [INFO] aiogram.event: Update id=572430238 is handled. Duration 2100 ms by bot id=7773908475
+2026-03-10 12:29:44,627 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:29:44,774 [WARNING] llm_client: Rate limited: groq (cooling 60s)
+2026-03-10 12:29:44,780 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 12:29:47,575 [ERROR] llm_client: agent_loop model error: litellm.BadRequestError: CerebrasException - Wrong API Key
+2026-03-10 12:29:48,450 [INFO] aiogram.event: Update id=572430239 is handled. Duration 4271 ms by bot id=7773908475
+2026-03-10 12:29:58,957 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:29:59,738 [ERROR] llm_client: agent_loop model error: litellm.BadRequestError: GroqException - {"error":{"message":"tool call validation failed: attempted to call tool 'open_app{\"app_name\": \"whatsapp\"}' which was not in request.tools","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"\u003cfunction=open_app{\"app_name\": \"whatsapp\"}\u003e\u003c/function\u003e"}}
+
+2026-03-10 12:30:00,611 [INFO] aiogram.event: Update id=572430240 is handled. Duration 2099 ms by bot id=7773908475
+2026-03-10 12:30:11,987 [INFO] computer_agent: Screenshot OK via: scrot
+2026-03-10 12:30:15,237 [INFO] aiogram.event: Update id=572430241 is handled. Duration 3799 ms by bot id=7773908475
+2026-03-10 12:56:29,032 [WARNING] aiogram.dispatcher: Received SIGINT signal
+2026-03-10 12:56:29,036 [INFO] aiogram.dispatcher: Polling stopped for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 12:56:29,036 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-10 12:56:39,709 [INFO] tools.persistence: Database initialized: /home/newadmin/swarm-bot/legion.db
+2026-03-10 12:56:39,709 [INFO] __main__: Scheduler initialized
+2026-03-10 12:56:39,710 [INFO] tools.memory: Memory DB initialized
+2026-03-10 12:56:39,710 [INFO] __main__: Memory DB initialized
+2026-03-10 12:56:39,711 [INFO] __main__: Daily briefing scheduled for 07:30
+2026-03-10 12:56:39,714 [INFO] tools.briefing: Next briefing in 66800 seconds (at 07:30)
+2026-03-10 12:56:40,678 [INFO] computer_agent: DISPLAY from env: :1
+2026-03-10 12:56:40,678 [INFO] __main__: =======================================================
+2026-03-10 12:56:40,678 [INFO] __main__: Legion v4 starting
+2026-03-10 12:56:40,678 [INFO] __main__: ✅ Keys: CEREBRAS_API_KEY, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, ZAI_API_KEY, HF_TOKEN
+2026-03-10 12:56:40,678 [INFO] __main__: 🖥 Display: :1
+2026-03-10 12:56:40,678 [INFO] __main__: =======================================================
+2026-03-10 12:56:40,678 [INFO] aiogram.dispatcher: Start polling
+2026-03-10 12:56:40,941 [INFO] aiogram.dispatcher: Run polling for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 12:57:30,911 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=coding)
+2026-03-10 12:57:30,925 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:57:32,342 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 12:57:33,230 [INFO] aiogram.event: Update id=572430242 is handled. Duration 3289 ms by bot id=7773908475
+2026-03-10 12:58:06,508 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=general)
+2026-03-10 12:58:06,510 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 12:58:07,373 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 12:58:08,504 [INFO] aiogram.event: Update id=572430243 is handled. Duration 2455 ms by bot id=7773908475
+2026-03-10 12:58:20,735 [INFO] aiogram.event: Update id=572430244 is handled. Duration 514 ms by bot id=7773908475
+2026-03-10 12:58:52,355 [INFO] aiogram.event: Update id=572430245 is handled. Duration 1093 ms by bot id=7773908475
+2026-03-10 13:11:28,115 [INFO] aiogram.event: Update id=572430246 is handled. Duration 445 ms by bot id=7773908475
+2026-03-10 13:11:34,547 [INFO] llm_client: Trying: cerebras/qwen-3-235b-a22b (agent=architect)
+2026-03-10 13:11:34,549 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:11:34,997 [WARNING] llm_client: Error cerebras/qwen-3-235b-a22b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:11:34,997 [INFO] llm_client: Trying: gemini/gemini-2.0-flash (agent=architect)
+2026-03-10 13:11:35,001 [INFO] LiteLLM: 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2026-03-10 13:11:35,277 [WARNING] llm_client: Rate limited: gemini (cooling 60s)
+2026-03-10 13:11:35,277 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=architect)
+2026-03-10 13:11:35,278 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:11:37,273 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:11:38,222 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:11:38,223 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:11:38,735 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:11:38,735 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:11:38,759 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:11:38,760 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:11:41,516 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:11:42,121 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:11:43,293 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:11:43,727 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:11:43,728 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:11:43,751 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:11:43,752 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:11:46,265 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:11:49,129 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:11:49,576 [INFO] llm_client: Trying: cerebras/qwen-3-235b-a22b (agent=architect)
+2026-03-10 13:11:49,577 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:11:49,720 [WARNING] llm_client: Error cerebras/qwen-3-235b-a22b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:11:49,720 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=architect)
+2026-03-10 13:11:49,721 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:11:51,659 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:11:52,097 [INFO] llm_client: Trying: cerebras/qwen-3-235b-a22b (agent=architect)
+2026-03-10 13:11:52,098 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:11:52,276 [WARNING] llm_client: Error cerebras/qwen-3-235b-a22b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:11:52,276 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=architect)
+2026-03-10 13:11:52,277 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:11:53,658 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:11:54,105 [INFO] llm_client: Trying: groq/moonshotai/kimi-k2-instruct (agent=analyst)
+2026-03-10 13:11:54,106 [INFO] LiteLLM: 
+LiteLLM completion() model= moonshotai/kimi-k2-instruct; provider = groq
+2026-03-10 13:11:55,838 [INFO] llm_client: Success: groq/moonshotai/kimi-k2-instruct
+2026-03-10 13:11:56,276 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=coding)
+2026-03-10 13:11:56,277 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:11:57,204 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:11:57,639 [INFO] llm_client: Trying: cerebras/qwen-3-235b-a22b (agent=architect)
+2026-03-10 13:11:57,639 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:11:57,818 [WARNING] llm_client: Error cerebras/qwen-3-235b-a22b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:11:57,818 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=architect)
+2026-03-10 13:11:57,819 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:11:59,391 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:11:59,391 [INFO] llm_client: Trying: cerebras/qwen-3-235b-a22b (agent=architect)
+2026-03-10 13:11:59,392 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:11:59,552 [WARNING] llm_client: Error cerebras/qwen-3-235b-a22b: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:11:59,552 [INFO] llm_client: Trying: groq/llama-3.3-70b-versatile (agent=architect)
+2026-03-10 13:11:59,553 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:12:01,199 [INFO] llm_client: Success: groq/llama-3.3-70b-versatile
+2026-03-10 13:12:02,099 [INFO] aiogram.event: Update id=572430247 is handled. Duration 28003 ms by bot id=7773908475
+2026-03-10 13:12:18,067 [INFO] aiogram.event: Update id=572430248 is handled. Duration 445 ms by bot id=7773908475
+2026-03-10 13:12:23,521 [INFO] tools.web_browser: Playwright browser launched (headless Chromium)
+2026-03-10 13:12:30,593 [INFO] aiogram.event: Update id=572430249 is handled. Duration 8215 ms by bot id=7773908475
+2026-03-10 13:13:02,031 [INFO] aiogram.event: Update id=572430250 is handled. Duration 450 ms by bot id=7773908475
+2026-03-10 13:13:07,980 [INFO] llm_client: Trying: zai/glm-4 (agent=debug)
+2026-03-10 13:13:07,981 [INFO] LiteLLM: 
+LiteLLM completion() model= glm-4; provider = openai
+2026-03-10 13:13:27,592 [INFO] llm_client: Success: zai/glm-4
+2026-03-10 13:13:29,400 [INFO] aiogram.event: Update id=572430251 is handled. Duration 21855 ms by bot id=7773908475
+2026-03-10 13:15:06,931 [INFO] aiogram.event: Update id=572430252 is handled. Duration 452 ms by bot id=7773908475
+2026-03-10 13:15:11,695 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:15:12,736 [ERROR] llm_client: agent_loop BadRequest: litellm.BadRequestError: GroqException - {"error":{"message":"tool call validation failed: attempted to call tool 'open_app {\"app_name\": \"whatsapp\"}' which was not in request.tools","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"\u003cfunction=open_app {\"app_name\": \"whatsapp\"}\u003e\u003c/function\u003e"}}
+
+2026-03-10 13:15:12,737 [INFO] llm_client: Switched to fallback: cerebras/qwen-3-235b-a22b
+2026-03-10 13:15:12,737 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:15:12,922 [ERROR] llm_client: agent_loop error: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:15:13,787 [INFO] aiogram.event: Update id=572430253 is handled. Duration 2553 ms by bot id=7773908475
+2026-03-10 13:15:20,764 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:15:21,496 [INFO] llm_client: Recovered XML tool call: open_app(['app_name'])
+2026-03-10 13:15:24,530 [INFO] LiteLLM: 
+LiteLLM completion() model= llama-3.3-70b-versatile; provider = groq
+2026-03-10 13:15:24,700 [WARNING] llm_client: Rate limited: groq (cooling 60s)
+2026-03-10 13:15:24,700 [INFO] llm_client: Switched to fallback: cerebras/qwen-3-235b-a22b
+2026-03-10 13:15:24,701 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:15:24,856 [ERROR] llm_client: agent_loop error: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:15:25,734 [INFO] aiogram.event: Update id=572430254 is handled. Duration 5424 ms by bot id=7773908475
+2026-03-10 13:15:47,417 [INFO] LiteLLM: 
+LiteLLM completion() model= qwen-3-235b-a22b; provider = cerebras
+2026-03-10 13:15:47,577 [ERROR] llm_client: agent_loop error: litellm.NotFoundError: NotFoundError: CerebrasException - Model qwen-3-235b-a22b does not exist or you do not have access to it.
+2026-03-10 13:15:48,928 [INFO] aiogram.event: Update id=572430255 is handled. Duration 1955 ms by bot id=7773908475
+2026-03-10 14:01:12,950 [WARNING] aiogram.dispatcher: Received SIGINT signal
+2026-03-10 14:01:12,950 [INFO] aiogram.dispatcher: Polling stopped for bot @Babas_Swarms_bot id=7773908475 - 'Swarms'
+2026-03-10 14:01:12,950 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-10 14:01:13,437 [ERROR] asyncio: Future exception was never retrieved
+future: <Future finished exception=Exception('Connection closed while reading from the driver')>
+Exception: Connection closed while reading from the driver

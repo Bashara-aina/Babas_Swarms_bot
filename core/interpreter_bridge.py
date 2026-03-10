@@ -69,13 +69,24 @@ SYSTEM_PROMPTS = {
 
 # Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
 _CONTEXT_WINDOWS: dict[str, int] = {
+    # ⭐ PRIORITY 1: YOUR FASTEST APIs FIRST (60+ req/min)
+    "gemini/gemini-1.5-flash-latest":     1000000,  # ⭐ MOST GENEROUS
+    "groq/llama3-8b-8192":                 8192,    # Lightning fast  
+    "cerebras/llama-3.1-8b":               131072,  # High quality
+    
+    # PRIORITY 2: OpenRouter free tier
+    "openrouter/qwen/qwen2.5:0.5b":        32768,
+    "openrouter/meta-llama/llama-3.1-8b-instruct:free": 8192,
+    
+    # PRIORITY 3: Current models (fallback)
     "openrouter/qwen/qwen3-coder:free":    131072,
-    "cerebras/qwen3-coder:free":            131072,
+    "cerebras/qwen3-coder:free":           131072,
     "gemini/gemini-1.5-flash":            1000000,
-    "groq/moonshotai/llama3-8b-8192":    200000,
+    "groq/moonshotai/llama3-8b-8192":     200000,
     "zai/glm-4":                           128000,
-    "openrouter/openai/gpt-oss-120b:free":  32768,
+    "openrouter/openai/gpt-oss-120b:free": 32768,
 }
+
 _MAX_TOKENS = 4096
 
 # Rate limit tracking: {provider: last_rate_limit_time}
