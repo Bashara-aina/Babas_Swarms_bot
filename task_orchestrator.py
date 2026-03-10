@@ -1,9 +1,11 @@
 # /home/newadmin/swarm-bot/task_orchestrator.py
-"""Task chaining, scheduled monitoring, and confirmation queue.
+"""Task chaining, scheduled monitoring, confirmation queue, and SwarmDebateOrchestrator.
 
 Enables multi-step autonomous workflows:
     "Check terminal errors → fix code → restart service"
     "Monitor training every 5 minutes → alert on loss spike"
+
+Also implements the 4-round SwarmDebateOrchestrator for /swarm.
 
 Safety:
 - Destructive commands always paused for /confirm yes|no
@@ -29,14 +31,6 @@ MAX_CHAIN_STEPS = 10
 
 @dataclass
 class TaskStep:
-    """A single step in a task chain.
-
-    Attributes:
-        description: Human-readable description of what this step does.
-        fn: Async callable that executes the step.
-        requires_confirmation: Whether to pause and ask user before executing.
-    """
-
     description: str
     fn: Callable[..., Coroutine[Any, Any, str]]
     requires_confirmation: bool = False
@@ -44,15 +38,6 @@ class TaskStep:
 
 @dataclass
 class PendingConfirmation:
-    """Holds a paused action waiting for user approval.
-
-    Attributes:
-        action_id: Unique ID for /confirm yes <id>.
-        description: What will happen if confirmed.
-        fn: Async callable to execute on confirmation.
-        created_at: Unix timestamp of when this was queued.
-    """
-
     action_id: str
     description: str
     fn: Callable[..., Coroutine[Any, Any, str]]
@@ -61,17 +46,6 @@ class PendingConfirmation:
 
 @dataclass
 class MonitorTask:
-    """A recurring scheduled task.
-
-    Attributes:
-        task_id: Unique ID for /cancel <task_id>.
-        description: What is being monitored.
-        interval_sec: How often to run (seconds).
-        fn: Async callable that returns the status string.
-        notify_fn: Callback to send alerts to the user.
-        running: Whether this task is active.
-    """
-
     task_id: str
     description: str
     interval_sec: int
@@ -82,13 +56,8 @@ class MonitorTask:
 
 # ── Global State ───────────────────────────────────────────────────────────────
 
-# action_id → PendingConfirmation
 _pending: dict[str, PendingConfirmation] = {}
-
-# task_id → MonitorTask
 _monitors: dict[str, MonitorTask] = {}
-
-# Confirmation expiry: 5 minutes
 CONFIRMATION_TTL_SEC = 300
 
 
@@ -99,16 +68,6 @@ async def execute_chain(
     progress_fn: Callable[[str], Coroutine[Any, Any, None]],
     confirm_fn: Callable[[str, str], Coroutine[Any, Any, None]],
 ) -> str:
-    """Execute a sequence of steps, pausing on destructive ones.
-
-    Args:
-        steps: Ordered list of TaskStep objects.
-        progress_fn: Async callback to send progress messages to the user.
-        confirm_fn: Async callback(action_id, description) to request confirmation.
-
-    Returns:
-        Final summary of all step outputs.
-    """
     if len(steps) > MAX_CHAIN_STEPS:
         raise ValueError(f"Chain exceeds max steps ({MAX_CHAIN_STEPS})")
 
@@ -121,7 +80,6 @@ async def execute_chain(
             action_id = _queue_confirmation(step.description, step.fn)
             await confirm_fn(action_id, step.description)
             outputs.append(f"[Step {i} paused — waiting for /confirm yes {action_id}]")
-            # Remaining steps are abandoned until confirmed; chain ends here
             return "\n\n".join(outputs)
 
         try:
@@ -139,15 +97,6 @@ async def execute_chain(
 # ── Confirmation Queue ─────────────────────────────────────────────────────────
 
 def _queue_confirmation(description: str, fn: Callable) -> str:
-    """Add a pending confirmation and return its ID.
-
-    Args:
-        description: Human-readable description of the action.
-        fn: Async callable to execute if confirmed.
-
-    Returns:
-        Short action ID (first 8 chars of UUID).
-    """
     action_id = str(uuid.uuid4())[:8]
     _pending[action_id] = PendingConfirmation(
         action_id=action_id,
@@ -159,33 +108,14 @@ def _queue_confirmation(description: str, fn: Callable) -> str:
 
 
 def queue_confirmation(description: str, fn: Callable) -> str:
-    """Public: queue a destructive action for user confirmation.
-
-    Args:
-        description: What will happen.
-        fn: Async callable to execute on confirmation.
-
-    Returns:
-        action_id string.
-    """
     return _queue_confirmation(description, fn)
 
 
 async def confirm_action(action_id: str) -> str:
-    """Execute a pending confirmation by ID.
-
-    Args:
-        action_id: ID from /confirm yes <id>.
-
-    Returns:
-        Result string from the confirmed action, or error message.
-    """
     _expire_old_confirmations()
-
     pending = _pending.pop(action_id, None)
     if pending is None:
         return f"No pending action '{action_id}' (may have expired after 5 min)"
-
     logger.info("Executing confirmed action %s: %s", action_id, pending.description)
     try:
         result = await pending.fn()
@@ -196,14 +126,6 @@ async def confirm_action(action_id: str) -> str:
 
 
 def deny_action(action_id: str) -> str:
-    """Cancel a pending confirmation.
-
-    Args:
-        action_id: ID from /confirm no <id>.
-
-    Returns:
-        Cancellation message.
-    """
     pending = _pending.pop(action_id, None)
     if pending is None:
         return f"No pending action '{action_id}'"
@@ -212,15 +134,9 @@ def deny_action(action_id: str) -> str:
 
 
 def list_pending() -> str:
-    """Return a formatted list of all pending confirmations.
-
-    Returns:
-        HTML-formatted list, or message if none pending.
-    """
     _expire_old_confirmations()
     if not _pending:
         return "No pending confirmations."
-
     lines = ["<b>Pending Confirmations</b>\n"]
     for aid, p in _pending.items():
         age = int(time.time() - p.created_at)
@@ -232,12 +148,8 @@ def list_pending() -> str:
 
 
 def _expire_old_confirmations() -> None:
-    """Remove confirmations older than CONFIRMATION_TTL_SEC."""
     now = time.time()
-    expired = [
-        aid for aid, p in _pending.items()
-        if now - p.created_at > CONFIRMATION_TTL_SEC
-    ]
+    expired = [aid for aid, p in _pending.items() if now - p.created_at > CONFIRMATION_TTL_SEC]
     for aid in expired:
         logger.info("Expired confirmation %s", aid)
         del _pending[aid]
@@ -252,20 +164,7 @@ async def start_monitor(
     notify_fn: Callable[[str], Coroutine[Any, Any, None]],
     alert_if: Optional[Callable[[str], bool]] = None,
 ) -> str:
-    """Start a recurring monitoring task.
-
-    Args:
-        description: What is being monitored (shown in /monitors list).
-        interval_sec: How often to run (e.g. 300 = every 5 minutes).
-        fn: Async callable returning status string.
-        notify_fn: Async callback to send alerts to user.
-        alert_if: Optional predicate — only notify if True (e.g. loss spike detector).
-
-    Returns:
-        task_id string for use with /cancel.
-    """
     task_id = str(uuid.uuid4())[:8]
-
     monitor = MonitorTask(
         task_id=task_id,
         description=description,
@@ -275,7 +174,6 @@ async def start_monitor(
         running=True,
     )
     _monitors[task_id] = monitor
-
     asyncio.create_task(_monitor_loop(monitor, alert_if), name=f"monitor-{task_id}")
     logger.info("Started monitor %s: %s (every %ds)", task_id, description, interval_sec)
     return task_id
@@ -285,12 +183,6 @@ async def _monitor_loop(
     monitor: MonitorTask,
     alert_if: Optional[Callable[[str], bool]],
 ) -> None:
-    """Internal loop for a monitoring task.
-
-    Args:
-        monitor: The MonitorTask to run.
-        alert_if: Optional predicate to filter notifications.
-    """
     while monitor.running:
         try:
             result = await monitor.fn()
@@ -301,22 +193,11 @@ async def _monitor_loop(
                 )
         except Exception as exc:
             logger.exception("Monitor %s error: %s", monitor.task_id, exc)
-            await monitor.notify_fn(
-                f"Monitor <b>{monitor.description}</b> error: {exc}"
-            )
-
+            await monitor.notify_fn(f"Monitor <b>{monitor.description}</b> error: {exc}")
         await asyncio.sleep(monitor.interval_sec)
 
 
 def cancel_monitor(task_id: str) -> str:
-    """Stop a running monitor task.
-
-    Args:
-        task_id: ID returned by start_monitor.
-
-    Returns:
-        Cancellation message.
-    """
     monitor = _monitors.pop(task_id, None)
     if monitor is None:
         return f"No monitor '{task_id}' found."
@@ -326,15 +207,9 @@ def cancel_monitor(task_id: str) -> str:
 
 
 def list_monitors() -> str:
-    """Return formatted list of active monitors.
-
-    Returns:
-        HTML string for Telegram, or message if none active.
-    """
     active = {tid: m for tid, m in _monitors.items() if m.running}
     if not active:
         return "No active monitors."
-
     lines = ["<b>Active Monitors</b>\n"]
     for tid, m in active.items():
         lines.append(
@@ -344,19 +219,8 @@ def list_monitors() -> str:
     return "\n\n".join(lines)
 
 
-# ── Convenience: Common Monitors ───────────────────────────────────────────────
-
 def make_loss_spike_detector(threshold: float = 0.5) -> Callable[[str], bool]:
-    """Return a predicate that detects loss spikes in training output.
-
-    Args:
-        threshold: Alert if 'loss' value in text exceeds this (simple heuristic).
-
-    Returns:
-        Callable predicate for use with start_monitor's alert_if parameter.
-    """
     import re
-
     def _detect(text: str) -> bool:
         matches = re.findall(r"loss[:\s=]+([0-9]+\.?[0-9]*)", text, re.IGNORECASE)
         for m in matches:
@@ -366,5 +230,237 @@ def make_loss_spike_detector(threshold: float = 0.5) -> Callable[[str], bool]:
             except ValueError:
                 pass
         return "nan" in text.lower() or "inf" in text.lower()
-
     return _detect
+
+
+# ── SwarmDebateOrchestrator ────────────────────────────────────────────────────
+
+class SwarmDebateOrchestrator:
+    """4-round debate system for /swarm.
+
+    Round 1: Parallel divergence — all 6 agents give initial positions.
+    Round 2: Cross-examination — each agent attacks one other and updates.
+    Round 3: Judge synthesis — consensus, minority view, best argument, verdict.
+    Round 4: Confidence ranking — each agent rates the verdict 1-10.
+    """
+
+    AGENTS = ["strategist", "devil_advocate", "researcher", "pragmatist", "visionary", "critic"]
+
+    def __init__(
+        self,
+        llm_call: Callable[[str, str, str], Coroutine[Any, Any, str]],
+        progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    ):
+        self.llm_call = llm_call
+        self.progress_fn = progress_fn
+
+    async def _progress(self, msg: str):
+        if self.progress_fn:
+            await self.progress_fn(msg)
+        logger.info("[SwarmDebate] %s", msg)
+
+    async def _call_agent(self, agent_name: str, task: str, context: str = "") -> str:
+        from agents import DEBATE_PERSONAS, AGENT_MODELS, build_system_prompt
+        persona = DEBATE_PERSONAS.get(agent_name, "You are a brilliant expert.")
+        system = build_system_prompt(
+            f"Your debate role: {persona}\n\n"
+            "Give your position in 3-4 sharp sentences. Be opinionated. "
+            "No hedging. If you disagree with conventional thinking, say so directly."
+        )
+        user_msg = f"Topic: {task}"
+        if context:
+            user_msg += f"\n\nContext from other agents:\n{context}"
+        # Use cerebras for fast parallel calls, fall back to groq
+        model = AGENT_MODELS.get("general", "cerebras/qwen-3-235b")
+        try:
+            return await self.llm_call(model, system, user_msg)
+        except Exception as e:
+            logger.warning("Agent %s failed: %s", agent_name, e)
+            return f"[{agent_name} failed to respond: {e}]"
+
+    async def run(self, task: str) -> dict:
+        """Run full 4-round debate.
+
+        Args:
+            task: The topic/question to debate.
+
+        Returns:
+            dict with round1, round2, synthesis, confidence_scores, formatted_output
+        """
+        # ── ROUND 1: Parallel Divergence ────────────────────────────────────
+        await self._progress("⚔️ Round 1/4 — Agents forming initial positions...")
+
+        round1_tasks = [
+            self._call_agent(agent, task)
+            for agent in self.AGENTS
+        ]
+        round1_results_raw = await asyncio.gather(*round1_tasks, return_exceptions=True)
+        round1: dict[str, str] = {}
+        for agent, result in zip(self.AGENTS, round1_results_raw):
+            if isinstance(result, Exception):
+                round1[agent] = f"[Error: {result}]"
+            else:
+                round1[agent] = result
+
+        # ── ROUND 2: Cross-Examination ──────────────────────────────────────
+        await self._progress("🔥 Round 2/4 — Cross-examination and position updates...")
+
+        round1_summary = "\n\n".join(
+            f"{agent.upper()}: {pos}" for agent, pos in round1.items()
+        )
+        round2_tasks = [
+            self._call_agent(
+                agent,
+                task,
+                context=(
+                    f"Round 1 positions from all agents:\n{round1_summary}\n\n"
+                    "Your job now: (a) identify the strongest flaw in ONE other agent's argument,"
+                    " naming them explicitly. (b) Update your own position if any other agent "
+                    "convinced you of something. Be specific and sharp."
+                )
+            )
+            for agent in self.AGENTS
+        ]
+        round2_results_raw = await asyncio.gather(*round2_tasks, return_exceptions=True)
+        round2: dict[str, str] = {}
+        for agent, result in zip(self.AGENTS, round2_results_raw):
+            if isinstance(result, Exception):
+                round2[agent] = f"[Error: {result}]"
+            else:
+                round2[agent] = result
+
+        # ── ROUND 3: Judge Synthesis ────────────────────────────────────────
+        await self._progress("🏆 Round 3/4 — Judge synthesizing all positions...")
+
+        from agents import AGENT_MODELS, build_system_prompt
+
+        round2_summary = "\n\n".join(
+            f"{agent.upper()} (Round 2): {pos}" for agent, pos in round2.items()
+        )
+        judge_system = build_system_prompt(
+            "You are the debate Judge. You have read all agents' positions across 2 rounds."
+            " Produce a structured synthesis with EXACTLY these sections:\n"
+            "CONSENSUS: [what all or most agree on]\n"
+            "BEST_ARGUMENT: [the single strongest point made, with agent name]\n"
+            "MINORITY_VIEW: [the dissenting view worth preserving]\n"
+            "FINAL_RECOMMENDATION: [your verdict — direct and actionable]"
+        )
+        judge_msg = (
+            f"Topic: {task}\n\n"
+            f"Round 1 positions:\n{round1_summary}\n\n"
+            f"Round 2 cross-examination:\n{round2_summary}"
+        )
+        synthesis_raw = await self.llm_call(
+            AGENT_MODELS["architect"],  # gemini-2.0-flash for large context
+            judge_system,
+            judge_msg[:12000]  # Stay within context limits
+        )
+
+        # Parse synthesis sections
+        synthesis = {
+            "consensus": _extract_section(synthesis_raw, "CONSENSUS"),
+            "best_argument": _extract_section(synthesis_raw, "BEST_ARGUMENT"),
+            "minority_view": _extract_section(synthesis_raw, "MINORITY_VIEW"),
+            "verdict": _extract_section(synthesis_raw, "FINAL_RECOMMENDATION"),
+            "raw": synthesis_raw,
+        }
+
+        # ── ROUND 4: Confidence Ranking ─────────────────────────────────────
+        await self._progress("📊 Round 4/4 — Agents rating the verdict...")
+
+        verdict_text = synthesis.get("verdict") or synthesis_raw[:500]
+        confidence_tasks = [
+            self._call_agent(
+                agent,
+                task,
+                context=(
+                    f"The Judge's final verdict is:\n{verdict_text}\n\n"
+                    "Rate this verdict from 1-10 and give ONE sentence justification."
+                    " Format: SCORE: X/10 — [justification]"
+                )
+            )
+            for agent in self.AGENTS
+        ]
+        confidence_raw = await asyncio.gather(*confidence_tasks, return_exceptions=True)
+        confidence_scores: dict[str, str] = {}
+        for agent, result in zip(self.AGENTS, confidence_raw):
+            if isinstance(result, Exception):
+                confidence_scores[agent] = "?/10"
+            else:
+                confidence_scores[agent] = result[:150]
+
+        return {
+            "round1": round1,
+            "round2": round2,
+            "synthesis": synthesis,
+            "confidence_scores": confidence_scores,
+        }
+
+
+def _extract_section(text: str, section: str) -> str:
+    """Extract a named section from structured LLM output."""
+    import re
+    pattern = rf'{section}[:\s]+(.*?)(?=\n[A-Z_]{{3,}}:|$)'
+    m = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+    if m:
+        return m.group(1).strip()
+    # Fallback: return first 300 chars
+    return text[:300]
+
+
+def format_debate_for_telegram(result: dict, task: str) -> list[str]:
+    """Format a SwarmDebateOrchestrator result into Telegram message chunks.
+
+    Returns a list of message strings (each <= 4096 chars) to send sequentially.
+
+    Args:
+        result: Dict from SwarmDebateOrchestrator.run().
+        task: The original topic.
+
+    Returns:
+        List of Telegram message strings.
+    """
+    from agents import DEBATE_ICONS
+
+    messages = []
+
+    # Message 1: Round 1
+    r1_lines = [f"🧠 **SWARM DEBATE — Round 1**\n**Topic:** {task[:200]}\n━━━━━━━━━━━━━━━━━━━━━━\n"]
+    for agent, pos in result["round1"].items():
+        icon = DEBATE_ICONS.get(agent, "🤖")
+        r1_lines.append(f"{icon} **{agent.upper().replace('_', ' ')}**:\n{pos[:400]}\n")
+    messages.append("\n".join(r1_lines))
+
+    # Message 2: Round 2
+    r2_lines = ["🔥 **SWARM DEBATE — Round 2: Cross-Examination**\n━━━━━━━━━━━━━━━━━━━━━━\n"]
+    for agent, pos in result["round2"].items():
+        icon = DEBATE_ICONS.get(agent, "🤖")
+        r2_lines.append(f"{icon} **{agent.upper().replace('_', ' ')}** (updated):\n{pos[:400]}\n")
+    messages.append("\n".join(r2_lines))
+
+    # Message 3: Synthesis + Confidence
+    s = result["synthesis"]
+    conf = result["confidence_scores"]
+    conf_line = " · ".join(
+        f"{a.replace('_', ' ').title()} {_parse_score(v)}"
+        for a, v in conf.items()
+    )
+    synth_msg = (
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🏆 **JUDGE'S SYNTHESIS**\n\n"
+        f"**Consensus**: {s.get('consensus', 'N/A')}\n\n"
+        f"**Best argument**: {s.get('best_argument', 'N/A')}\n\n"
+        f"**Minority view**: {s.get('minority_view', 'N/A')}\n\n"
+        f"**VERDICT**: {s.get('verdict', 'N/A')}\n\n"
+        f"**Confidence scores**: {conf_line}"
+    )
+    messages.append(synth_msg)
+
+    return messages
+
+
+def _parse_score(text: str) -> str:
+    """Extract X/10 from confidence text."""
+    import re
+    m = re.search(r'(\d+)/10', text)
+    return m.group(0) if m else "?/10"
