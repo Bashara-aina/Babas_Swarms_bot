@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -220,7 +221,6 @@ def list_monitors() -> str:
 
 
 def make_loss_spike_detector(threshold: float = 0.5) -> Callable[[str], bool]:
-    import re
     def _detect(text: str) -> bool:
         matches = re.findall(r"loss[:\s=]+([0-9]+\.?[0-9]*)", text, re.IGNORECASE)
         for m in matches:
@@ -242,6 +242,9 @@ class SwarmDebateOrchestrator:
     Round 2: Cross-examination — each agent attacks one other and updates.
     Round 3: Judge synthesis — consensus, minority view, best argument, verdict.
     Round 4: Confidence ranking — each agent rates the verdict 1-10.
+
+    Each persona uses its preferred model (see DEBATE_PERSONA_MODELS in agents.py)
+    so reasoning styles are genuinely differentiated.
     """
 
     AGENTS = ["strategist", "devil_advocate", "researcher", "pragmatist", "visionary", "critic"]
@@ -260,7 +263,7 @@ class SwarmDebateOrchestrator:
         logger.info("[SwarmDebate] %s", msg)
 
     async def _call_agent(self, agent_name: str, task: str, context: str = "") -> str:
-        from agents import DEBATE_PERSONAS, AGENT_MODELS, build_system_prompt
+        from agents import DEBATE_PERSONAS, DEBATE_PERSONA_MODELS, AGENT_MODELS, build_system_prompt
         persona = DEBATE_PERSONAS.get(agent_name, "You are a brilliant expert.")
         system = build_system_prompt(
             f"Your debate role: {persona}\n\n"
@@ -270,37 +273,35 @@ class SwarmDebateOrchestrator:
         user_msg = f"Topic: {task}"
         if context:
             user_msg += f"\n\nContext from other agents:\n{context}"
-        # Use cerebras for fast parallel calls, fall back to groq
-        model = AGENT_MODELS.get("general", "cerebras/qwen-3-235b")
+        # Each persona uses its preferred model for differentiated reasoning
+        model = DEBATE_PERSONA_MODELS.get(
+            agent_name,
+            AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+        )
         try:
             return await self.llm_call(model, system, user_msg)
         except Exception as e:
-            logger.warning("Agent %s failed: %s", agent_name, e)
-            return f"[{agent_name} failed to respond: {e}]"
+            logger.warning("Agent %s (model %s) failed: %s — falling back", agent_name, model, e)
+            fallback = AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+            try:
+                return await self.llm_call(fallback, system, user_msg)
+            except Exception as e2:
+                return f"[{agent_name} failed: {e2}]"
 
     async def run(self, task: str) -> dict:
         """Run full 4-round debate.
 
-        Args:
-            task: The topic/question to debate.
-
         Returns:
-            dict with round1, round2, synthesis, confidence_scores, formatted_output
+            dict with round1, round2, synthesis, confidence_scores
         """
         # ── ROUND 1: Parallel Divergence ────────────────────────────────────
         await self._progress("⚔️ Round 1/4 — Agents forming initial positions...")
 
-        round1_tasks = [
-            self._call_agent(agent, task)
-            for agent in self.AGENTS
-        ]
+        round1_tasks = [self._call_agent(agent, task) for agent in self.AGENTS]
         round1_results_raw = await asyncio.gather(*round1_tasks, return_exceptions=True)
         round1: dict[str, str] = {}
         for agent, result in zip(self.AGENTS, round1_results_raw):
-            if isinstance(result, Exception):
-                round1[agent] = f"[Error: {result}]"
-            else:
-                round1[agent] = result
+            round1[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 2: Cross-Examination ──────────────────────────────────────
         await self._progress("🔥 Round 2/4 — Cross-examination and position updates...")
@@ -324,10 +325,7 @@ class SwarmDebateOrchestrator:
         round2_results_raw = await asyncio.gather(*round2_tasks, return_exceptions=True)
         round2: dict[str, str] = {}
         for agent, result in zip(self.AGENTS, round2_results_raw):
-            if isinstance(result, Exception):
-                round2[agent] = f"[Error: {result}]"
-            else:
-                round2[agent] = result
+            round2[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 3: Judge Synthesis ────────────────────────────────────────
         await self._progress("🏆 Round 3/4 — Judge synthesizing all positions...")
@@ -339,7 +337,7 @@ class SwarmDebateOrchestrator:
         )
         judge_system = build_system_prompt(
             "You are the debate Judge. You have read all agents' positions across 2 rounds."
-            " Produce a structured synthesis with EXACTLY these sections:\n"
+            " Produce a structured synthesis with EXACTLY these sections (use these exact labels):\n"
             "CONSENSUS: [what all or most agree on]\n"
             "BEST_ARGUMENT: [the single strongest point made, with agent name]\n"
             "MINORITY_VIEW: [the dissenting view worth preserving]\n"
@@ -350,18 +348,24 @@ class SwarmDebateOrchestrator:
             f"Round 1 positions:\n{round1_summary}\n\n"
             f"Round 2 cross-examination:\n{round2_summary}"
         )
+        # Warn if content is being truncated
+        full_len = len(judge_msg)
+        if full_len > 12000:
+            logger.warning(
+                "Judge context truncated: %d → 12000 chars (%d chars lost)",
+                full_len, full_len - 12000
+            )
         synthesis_raw = await self.llm_call(
-            AGENT_MODELS["architect"],  # gemini-2.0-flash for large context
+            AGENT_MODELS["architect"],  # cerebras for large context synthesis
             judge_system,
-            judge_msg[:12000]  # Stay within context limits
+            judge_msg[:12000],
         )
 
-        # Parse synthesis sections
         synthesis = {
-            "consensus": _extract_section(synthesis_raw, "CONSENSUS"),
+            "consensus":     _extract_section(synthesis_raw, "CONSENSUS"),
             "best_argument": _extract_section(synthesis_raw, "BEST_ARGUMENT"),
             "minority_view": _extract_section(synthesis_raw, "MINORITY_VIEW"),
-            "verdict": _extract_section(synthesis_raw, "FINAL_RECOMMENDATION"),
+            "verdict":       _extract_section(synthesis_raw, "FINAL_RECOMMENDATION"),
             "raw": synthesis_raw,
         }
 
@@ -384,10 +388,7 @@ class SwarmDebateOrchestrator:
         confidence_raw = await asyncio.gather(*confidence_tasks, return_exceptions=True)
         confidence_scores: dict[str, str] = {}
         for agent, result in zip(self.AGENTS, confidence_raw):
-            if isinstance(result, Exception):
-                confidence_scores[agent] = "?/10"
-            else:
-                confidence_scores[agent] = result[:150]
+            confidence_scores[agent] = "?/10" if isinstance(result, Exception) else result[:150]
 
         return {
             "round1": round1,
@@ -398,13 +399,33 @@ class SwarmDebateOrchestrator:
 
 
 def _extract_section(text: str, section: str) -> str:
-    """Extract a named section from structured LLM output."""
-    import re
-    pattern = rf'{section}[:\s]+(.*?)(?=\n[A-Z_]{{3,}}:|$)'
+    """Extract a named section from structured LLM output.
+
+    Handles all real-world Gemini/Cerebras output variants:
+      FINAL_RECOMMENDATION: ...
+      FINAL RECOMMENDATION: ...
+      **FINAL_RECOMMENDATION**: ...
+      Final Recommendation: ...
+    Falls back to first 300 chars with a warning log.
+    """
+    # Build pattern that matches underscored or spaced version, optional bold markers
+    section_pattern = section.replace("_", "[_ ]")  # FINAL_RECOMMENDATION → FINAL[_ ]RECOMMENDATION
+    pattern = (
+        rf'\*{{0,2}}{section_pattern}\*{{0,2}}'
+        rf'[\s:]+'
+        rf'(.*?)'
+        rf'(?=\n\*{{0,2}}[A-Z][A-Z_\s]{{2,}}\*{{0,2}}[:\s]|\Z)'
+    )
     m = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
     if m:
-        return m.group(1).strip()
-    # Fallback: return first 300 chars
+        content = m.group(1).strip()
+        logger.debug("Extracted section '%s': %d chars", section, len(content))
+        return content
+    logger.warning(
+        "_extract_section: could not find '%s' in synthesis output — "
+        "falling back to first 300 chars. Raw output snippet: %s",
+        section, text[:200].replace("\n", " ")
+    )
     return text[:300]
 
 
@@ -412,13 +433,6 @@ def format_debate_for_telegram(result: dict, task: str) -> list[str]:
     """Format a SwarmDebateOrchestrator result into Telegram message chunks.
 
     Returns a list of message strings (each <= 4096 chars) to send sequentially.
-
-    Args:
-        result: Dict from SwarmDebateOrchestrator.run().
-        task: The original topic.
-
-    Returns:
-        List of Telegram message strings.
     """
     from agents import DEBATE_ICONS
 
@@ -460,7 +474,6 @@ def format_debate_for_telegram(result: dict, task: str) -> list[str]:
 
 
 def _parse_score(text: str) -> str:
-    """Extract X/10 from confidence text."""
-    import re
-    m = re.search(r'(\d+)/10', text)
+    """Extract X/10 or X.Y/10 from confidence text."""
+    m = re.search(r'([0-9]+(?:\.[0-9]+)?)/10', text)
     return m.group(0) if m else "?/10"

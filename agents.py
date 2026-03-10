@@ -1,11 +1,20 @@
-"""Agent router: cloud-only model registry with smart keyword routing.
+"""Agent registry, debate personas, and thread memory.
 
-Priority fallback chain (all free tiers):
-  1. Cerebras  — fastest inference (~1,500 tok/s)
-  2. Groq      — fast (~241 tok/s)
-  3. Gemini    — large context (1M tokens)
-  4. OpenRouter — model variety fallback
-  NO Ollama fallback — cloud APIs only.
+Single source of truth for:
+  - AGENT_MODELS       : primary model per agent role
+  - FALLBACK_CHAIN     : ordered fallback list per agent role
+  - TASK_KEYWORDS      : keyword→agent routing (includes Indonesian)
+  - DEBATE_PERSONAS    : 6 debate roles for SwarmDebateOrchestrator
+  - ACTIVE_THREADS     : in-memory thread store
+
+Ollama is ONLY used for vision (local, private, RTX 3060).
+Never used as a text fallback.
+
+Verified working models (live logs 2026-03-09):
+  groq/llama-3.3-70b-versatile                   ✓
+  groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
+  cerebras/qwen-3-235b-a22b                       ✓
+  zai/glm-4                                       ✓
 """
 
 from __future__ import annotations
@@ -59,6 +68,16 @@ DEBATE_PERSONAS = {
     ),
 }
 
+# Persona → preferred model (different reasoning styles need different models)
+DEBATE_PERSONA_MODELS: dict[str, str] = {
+    "strategist":     "cerebras/qwen-3-235b-a22b",           # fast, large context
+    "devil_advocate": "groq/qwen-qwq-32b",                   # adversarial reasoning
+    "researcher":     "groq/moonshotai/kimi-k2-instruct",    # deep research
+    "pragmatist":     "groq/llama-3.3-70b-versatile",        # practical, fast
+    "visionary":      "cerebras/qwen-3-235b-a22b",           # creative, fast
+    "critic":         "zai/glm-4",                           # precise, analytical
+}
+
 DEBATE_ICONS = {
     "strategist": "⚔️",
     "devil_advocate": "🔥",
@@ -69,118 +88,159 @@ DEBATE_ICONS = {
 }
 
 # ── Primary model registry ──────────────────────────────────────────────────
+# SINGLE source of truth — router.py imports from here.
 AGENT_MODELS: dict[str, str] = {
-    "vision":     "groq/meta-llama/llama-4-scout-17b-16e-instruct",
-    "coding":     "cerebras/qwen-3-235b",
-    "debug":      "groq/qwen-qwq-32b",
-    "math":       "cerebras/qwen-3-235b",
-    "architect":  "gemini/gemini-2.0-flash",
-    "analyst":    "groq/moonshotai/kimi-k2-instruct",
-    "general":    "cerebras/qwen-3-235b",
-    "research":   "gemini/gemini-2.0-flash",
-    "humanizer":  "groq/llama-3.3-70b-versatile",
+    "vision":     "ollama_chat/gemma3:12b",              # local, private, RTX 3060
+    "coding":     "groq/llama-3.3-70b-versatile",        # fast + reliable
+    "debug":      "zai/glm-4",                           # GPQA Diamond 85.7%
+    "math":       "zai/glm-4",                           # AIME 2025 95.7%
+    "architect":  "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
+    "analyst":    "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
+    "computer":   "groq/llama-3.3-70b-versatile",        # agentic tool-calling loop
+    "general":    "groq/llama-3.3-70b-versatile",        # reliable default
+    "researcher": "groq/moonshotai/kimi-k2-instruct",    # academic research
+    "marketer":   "groq/llama-3.3-70b-versatile",        # content + social
+    "devops":     "groq/llama-3.3-70b-versatile",        # infra + deployment
+    "pm":         "cerebras/qwen-3-235b-a22b",           # project management
+    "humanizer":  "groq/llama-3.3-70b-versatile",        # humanising AI text
 }
 
-# ── Fallback chain per agent ────────────────────────────────────────────────
-FALLBACK_MODELS: dict[str, str] = {
-    "vision":     "gemini/gemini-2.0-flash",
-    "coding":     "openrouter/qwen/qwen3-coder:free",
-    "debug":      "groq/llama-3.3-70b-versatile",
-    "math":       "groq/qwen-qwq-32b",
-    "architect":  "cerebras/qwen-3-235b",
-    "analyst":    "gemini/gemini-2.0-flash",
-    "general":    "groq/llama-3.3-70b-versatile",
-    "research":   "cerebras/qwen-3-235b",
-    "humanizer":  "gemini/gemini-2.0-flash",
-}
-
+# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
+        "ollama_chat/gemma3:12b",
         "groq/meta-llama/llama-4-scout-17b-16e-instruct",
         "gemini/gemini-2.0-flash",
-        "openrouter/google/gemini-2.0-flash-exp:free",
     ],
     "coding": [
-        "cerebras/qwen-3-235b",
-        "groq/qwen-qwq-32b",
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
         "openrouter/qwen/qwen3-coder:free",
-        "openrouter/openai/gpt-4o-mini:free",
     ],
     "debug": [
+        "zai/glm-4",
         "groq/qwen-qwq-32b",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "math": [
-        "cerebras/qwen-3-235b",
+        "zai/glm-4",
         "groq/qwen-qwq-32b",
+        "groq/llama-3.3-70b-versatile",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
+        "cerebras/qwen-3-235b-a22b",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
-        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+        "groq/llama-3.3-70b-versatile",
     ],
     "analyst": [
         "groq/moonshotai/kimi-k2-instruct",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
+        "groq/llama-3.3-70b-versatile",
+    ],
+    "computer": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
     ],
     "general": [
-        "cerebras/qwen-3-235b",
         "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-        "openrouter/google/gemini-flash-1.5:free",
     ],
-    "research": [
-        "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
+    "researcher": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
         "groq/llama-3.3-70b-versatile",
-        "openrouter/google/gemini-flash-1.5:free",
+    ],
+    "marketer": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
+    ],
+    "devops": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
+    ],
+    "pm": [
+        "cerebras/qwen-3-235b-a22b",
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
     ],
     "humanizer": [
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b",
+        "cerebras/qwen-3-235b-a22b",
     ],
 }
 
 # ── Keyword → agent routing ─────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
-        "screenshot", "image", "photo", "ui", "visual", "ocr",
-        "screen", "what's on", "desktop", "window", "look at",
-        "describe", "read screen", "see", "what do you see",
+        "screenshot", "screen", "layar", "gambar", "image", "photo",
+        "ocr", "visual", "desktop", "window", "what do you see",
+        "lihat", "tampilan", "apa yang ada di", "capture",
     ],
     "coding": [
-        "code", "function", "script", "implement", "class", "module",
-        "refactor", "generate", "syntax", "endpoint", "sql", "query",
-        "write code", "build", "create file", "add feature", "api",
-        "python", "bash", "shell", "command",
+        "code", "kode", "function", "script", "implement", "class",
+        "refactor", "generate", "endpoint", "api", "python",
+        "bash", "write", "tulis", "buat file", "build", "create",
     ],
     "debug": [
-        "debug", "traceback", "exception", "crash", "fix", "bug",
-        "cuda", "pytorch", "torch", "nan", "oom", "out of memory",
-        "backward", "loss spike", "error", "why is", "not working",
+        "debug", "error", "crash", "fix", "bug", "traceback",
+        "exception", "cuda", "pytorch", "torch", "nan", "oom",
+        "not working", "kenapa", "why", "gagal", "failed",
     ],
     "math": [
-        "tensor", "matrix", "equation", "derivative", "integral",
-        "gradient", "backprop", "linear algebra", "eigenvalue",
-        "softmax", "norm", "convolution", "calculate", "math",
-        "formula", "proof", "solve",
+        "tensor", "matrix", "gradient", "derivative", "integral",
+        "backprop", "eigenvalue", "softmax", "calculate", "hitung",
+        "math", "formula", "prove", "buktikan", "solve",
     ],
     "architect": [
         "design", "architecture", "plan", "system", "pipeline",
-        "structure", "strategy", "high level", "document", "thesis",
-        "overview", "framework", "organize", "diagram",
+        "struktur", "rancang", "overview", "diagram", "framework",
+        "strategy", "strategi",
     ],
     "analyst": [
-        "analyze", "plot", "chart", "csv", "dataframe", "log",
-        "trend", "statistics", "distribution", "compare",
-        "metrics", "performance", "insight", "nvidia-smi",
-        "visualize", "summarize data", "gpu", "training",
+        "analyze", "analisis", "plot", "chart", "csv", "metrics",
+        "performance", "gpu", "training", "trend", "statistics",
+        "compare", "nvidia-smi", "visualize",
+    ],
+    "computer": [
+        "browse", "search for", "find online", "look up",
+        "scrape", "website", "web page", "cari di internet", "booking",
+        "google", "search the web",
+        "pdf", "excel", "spreadsheet", "word doc", "docx",
+        "extract table", "read document", "baca dokumen",
+        "email", "inbox", "send email", "kirim email", "mail",
+        "reply email", "check email", "cek email",
+        "git status", "git commit", "git push", "git pull", "git diff",
+        "git stash", "commit", "push to", "pull from",
+        "run tests", "pytest", "lint", "ruff", "format code",
+        "find in code", "grep", "codebase", "db query",
+        "monitor", "schedule", "disk space", "memory usage",
+        "maintenance", "cleanup", "services", "system check",
+        "organize files", "find files", "sort files",
+    ],
+    "researcher": [
+        "research", "paper", "study", "evidence", "cite", "source",
+        "literature", "academic", "experiment", "hypothesis", "jurnal",
+    ],
+    "marketer": [
+        "marketing", "ads", "campaign", "brand", "positioning", "messaging",
+        "customer", "acquisition", "growth", "conversion", "funnel", "iklan",
+    ],
+    "devops": [
+        "deploy", "pipeline", "ci cd", "docker", "k8s", "kubernetes",
+        "monitoring", "logs", "alerts", "infrastructure", "cloud",
+    ],
+    "pm": [
+        "project", "roadmap", "milestone", "sprint", "backlog", "priority",
+        "stakeholder", "timeline", "scope", "deliverable",
     ],
 }
 
@@ -206,12 +266,16 @@ def detect_agent(task: str) -> str:
 
 
 def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
+    """Return primary or first-fallback model for an agent key."""
     if use_fallback:
-        return FALLBACK_MODELS.get(agent_key)
+        chain = FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
+        logger.debug("Fallback model for '%s': %s", agent_key, chain[0])
+        return chain[0]
     return AGENT_MODELS.get(agent_key)
 
 
 def get_fallback_chain(agent_key: str) -> list[str]:
+    """Return full fallback chain for waterfall retry logic."""
     return FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
 
 
@@ -221,22 +285,30 @@ def build_system_prompt(role_prompt: str) -> str:
 
 
 def list_agents() -> str:
-    lines = ["<b>🤖 Active Agents — Cloud Only</b>\n"]
+    lines = ["<b>🤖 Active Agents</b>\n"]
     icons = {
         "vision": "👁️", "coding": "💻", "debug": "🐛",
         "math": "📐", "architect": "🏗️", "analyst": "📊",
-        "general": "🧠", "research": "🔍", "humanizer": "✨",
+        "computer": "🖥️", "general": "🧠", "researcher": "🔬",
+        "marketer": "📢", "devops": "🔧", "pm": "📋",
+        "humanizer": "✨",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "🤖")
-        provider = model.split("/")[0].upper()
-        model_name = "/".join(model.split("/")[1:])
+        if model.startswith("ollama_chat/"):
+            provider = "OLLAMA"
+            model_name = model.replace("ollama_chat/", "") + " (local 🔒)"
+        else:
+            parts = model.split("/")
+            provider = parts[0].upper()
+            model_name = "/".join(parts[1:])
         lines.append(f"  {icon} <b>{key}</b> → <code>{provider}</code> <i>{model_name}</i>")
+    lines.append("\n  🔒 <i>vision = local Ollama, stays on your machine</i>")
     return "\n".join(lines)
 
 
 def list_all_departments() -> list[str]:
-    """Compatibility shim for old code that calls agents.list_all_departments()."""
+    """Return all agent role names."""
     return list(AGENT_MODELS.keys())
 
 
@@ -258,11 +330,11 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     if thread_id not in ACTIVE_THREADS or not ACTIVE_THREADS[thread_id]:
         return ""
     recent = ACTIVE_THREADS[thread_id][-last_n:]
-    lines = ["Previous conversation in this thread:\n"]
+    lines = ["<i>Previous in this thread:</i>\n"]
     for turn in recent:
         t = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:100]}...")
-        lines.append(f"Response: {turn['result']}\n")
+        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}…")
+        lines.append(f"↳ {turn['result'][:120]}…\n")
     return "\n".join(lines)
 
 
