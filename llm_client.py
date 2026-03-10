@@ -50,7 +50,12 @@ _PERSONA = (
 SYSTEM_PROMPTS: dict[str, str] = {
     "computer": (
         f"{_PERSONA}\n\n"
-        "You're in COMPUTER USE mode. You have tools to control the desktop. "
+        "TOOL CALLING RULES:\n"
+        "- Always call tools using the tools parameter in the API call, never in message text\n"
+        "- Never write function calls as text in your response\n"
+        "- When you need to use a tool, output ONLY the tool call, no surrounding text\n"
+        "- Tool arguments must be valid JSON objects\n\n"
+        "You are in COMPUTER USE mode. You have tools to control the desktop.\n"
         "For ANY task involving the computer:\n"
         "1. Use shell_execute to run commands and get real output\n"
         "2. Use take_screenshot to see what's on screen\n"
@@ -309,7 +314,14 @@ async def agent_loop(
             logger.error("agent_loop model error: %s", e)
             return f"model error: {e}", model
 
+        # Guard against None/empty response
+        if response is None or not hasattr(response, 'choices') or not response.choices:
+            logger.warning("agent_loop: empty response, breaking")
+            break
         msg = response.choices[0].message
+        if msg is None:
+            logger.warning("agent_loop: None message, breaking")
+            break
 
         # No tool calls → LLM gave final answer
         if not msg.tool_calls:
@@ -352,12 +364,17 @@ async def agent_loop(
             logger.info("Tool call: %s(%s)", tool_name, list(args.keys()))
 
             # Execute the tool
-            result = await execute_tool(tool_name, args)
+            try:
+                result = await execute_tool(tool_name, args)
+            except Exception as e:
+                result = f"tool error: {e}"
+            # Coerce to string — tool executors can return None
+            result = str(result) if result is not None else "tool returned no output"
 
             # Special handling: screenshot → send image to Telegram, analyze for LLM
             if tool_name == "take_screenshot":
-                screenshot_path = result  # returns file path or None
-                if screenshot_path and Path(screenshot_path).exists():
+                screenshot_path = result  # returns file path as string
+                if screenshot_path and screenshot_path != "tool returned no output" and Path(screenshot_path).exists():
                     # Send image to Telegram user
                     if photo_cb:
                         await photo_cb(screenshot_path)
@@ -379,7 +396,7 @@ async def agent_loop(
                         "3. Check: echo $DISPLAY"
                     )
             else:
-                tool_result_text = str(result)[:4000] if result else "(no output)"
+                tool_result_text = result[:4000] if result else "(no output)"
 
             steps_taken.append(f"{tool_name} → {tool_result_text[:80]}...")
 

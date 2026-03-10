@@ -12,7 +12,15 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import aiosqlite
+try:
+    import aiosqlite
+except ImportError:
+    import subprocess, sys
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "aiosqlite", "--break-system-packages", "-q"],
+        check=False,
+    )
+    import aiosqlite
 
 logger = logging.getLogger(__name__)
 

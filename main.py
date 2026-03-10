@@ -198,27 +198,24 @@ async def cmd_start(msg: Message) -> None:
     h, m = uptime // 3600, (uptime % 3600) // 60
 
     text = (
-        f"yo Bas 👋 Legion's up — {h}h {m}m | {active}/6 keys\n\n"
+        f"yo Bas — Legion v4 up — {h}h {m}m | {active}/6 keys\n\n"
         "<b>computer control</b>\n"
-        "  <code>/do &lt;task&gt;</code>      — autonomous: sees screen, clicks, types, opens apps\n"
-        "  <code>/screen</code>          — grab desktop screenshot\n"
-        "  <code>/open &lt;app/url&gt;</code>  — open anything\n"
-        "  <code>/click &lt;x&gt; &lt;y&gt;</code>    — click at coordinates\n"
-        "  <code>/type &lt;text&gt;</code>     — type keyboard\n"
-        "  <code>/key &lt;combo&gt;</code>     — keyboard shortcut\n"
-        "  <code>/cmd &lt;shell&gt;</code>     — run shell command\n\n"
+        "  <code>/do</code> <code>/screen</code> <code>/open</code> <code>/click</code> <code>/type</code> <code>/key</code> <code>/cmd</code>\n\n"
         "<b>AI agents</b>\n"
-        "  <code>/run &lt;task&gt;</code>      — chat only (no computer use)\n"
-        "  <code>/think &lt;query&gt;</code>   — force QwQ reasoning\n"
-        "  <code>/agent &lt;key&gt; &lt;task&gt;</code>\n\n"
-        "<b>self-management</b>\n"
-        "  <code>/install &lt;packages&gt;</code> — pip install + restart\n"
-        "  <code>/upgrade</code>          — git pull + restart\n\n"
-        "<b>web &amp; research</b>\n"
-        "  <code>/scrape &lt;url&gt;</code>    — JS-rendered page scrape\n"
-        "  <code>/research &lt;topic&gt;</code> — deep multi-page research\n\n"
+        "  <code>/run</code>  <code>/think</code>  <code>/swarm</code>  <code>/agent</code>\n\n"
+        "<b>research</b>\n"
+        "  <code>/paper</code>  <code>/ask_paper</code>  <code>/workernet_papers</code>\n"
+        "  <code>/scrape</code>  <code>/research</code>\n\n"
+        "<b>second brain</b>\n"
+        "  <code>/remember</code>  <code>/recall</code>  <code>/memories</code>  <code>/briefing</code>\n\n"
+        "<b>dev tools</b>\n"
+        "  <code>/scaffold</code>  <code>/build</code>  <code>/gpu</code>  <code>/vuln_scan</code>\n\n"
+        "<b>tasks</b>\n"
+        "  <code>/task_from</code>  <code>/tasks_due</code>  <code>/task_done</code>\n\n"
+        "<b>content</b>\n"
+        "  <code>/post</code>  <code>/brand_check</code>  <code>/delegate</code>\n\n"
         "<b>system</b>\n"
-        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>\n\n"
+        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>  <code>/maintenance</code>\n\n"
         "or just type naturally — i'll figure it out."
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
@@ -807,7 +804,7 @@ async def cmd_cancel(msg: Message) -> None:
     await msg.answer(f"❌ {result}")
 
 
-# ── /swarm — multi-agent parallel execution ──────────────────────────────────
+# ── /swarm — multi-agent team execution (v4) ──────────────────────────────────
 @dp.message(Command("swarm"))
 async def cmd_swarm(msg: Message) -> None:
     if not is_allowed(msg):
@@ -816,16 +813,16 @@ async def cmd_swarm(msg: Message) -> None:
     if not task:
         await msg.answer(
             "usage: <code>/swarm &lt;complex task&gt;</code>\n\n"
-            "decomposes the task into sub-tasks and runs multiple "
-            "AI agents in parallel.\n\n"
+            "decomposes task and runs specialist agents in parallel:\n"
+            "strategist, developer, researcher, marketer, analyst, devops, pm\n\n"
             "examples:\n"
-            "<code>/swarm write a FastAPI endpoint with tests and documentation</code>\n"
-            "<code>/swarm analyze my codebase and suggest improvements</code>",
+            "<code>/swarm analyze IKEA ASM codebase and suggest 3 improvements</code>\n"
+            "<code>/swarm build a landing page with API and tests</code>",
             parse_mode="HTML",
         )
         return
 
-    status_msg = await msg.answer("🧠 decomposing task…")
+    status_msg = await msg.answer("strategist decomposing task...")
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     async def on_progress(step_text: str) -> None:
@@ -835,18 +832,20 @@ async def cmd_swarm(msg: Message) -> None:
             pass
 
     try:
-        from tools.orchestrator import smart_route
-        result, model = await smart_route(task, progress_cb=on_progress)
-        typing_task.cancel()
+        from tools.orchestrator import decompose_task, execute_parallel, synthesize_results
+        subtasks = await decompose_task(task)
+        agent_list = "\n".join(f"  [{s['agent']}] {s['task'][:60]}..." for s in subtasks)
+        await status_msg.edit_text(
+            f"running {len(subtasks)} agents:\n{agent_list}",
+            parse_mode="HTML",
+        )
 
-        if result:
-            await status_msg.delete()
-            await send_chunked(msg, result, model_used=model)
-        else:
-            # Fall back to regular agent loop
-            await status_msg.edit_text("single-agent task — routing to /do…")
-            typing_task.cancel()
-            await _run_agent_loop(msg, task)
+        results = await execute_parallel(subtasks, progress_cb=on_progress)
+        final = await synthesize_results(task, results, subtasks)
+
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, final, model_used="swarm/multi-agent")
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(f"swarm error: <code>{e}</code>", parse_mode="HTML")
@@ -1008,6 +1007,517 @@ async def cmd_maintenance(msg: Message) -> None:
         )
 
 
+# ── /paper — arXiv paper search ────────────────────────────────────────────────
+@dp.message(Command("paper"))
+async def cmd_paper(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    query = (msg.text or "").removeprefix("/paper").strip()
+    if not query:
+        await msg.answer(
+            "usage: <code>/paper &lt;query&gt;</code>\n\n"
+            "searches arXiv and returns top 3 results.\n\n"
+            "examples:\n"
+            "<code>/paper Kendall multi-task learning uncertainty</code>\n"
+            "<code>/paper FiLM visual reasoning conditioning</code>",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer(f"searching arXiv: {query[:50]}...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.arxiv import search_arxiv
+        papers = await search_arxiv(query, max_results=3)
+        typing_task.cancel()
+        await status_msg.delete()
+        if not papers:
+            await msg.answer("No papers found.")
+            return
+        for p in papers:
+            text = (
+                f"<b>{p['title'][:200]}</b>\n"
+                f"<i>{p['authors']}</i> | {p['published']}\n\n"
+                f"{p['abstract'][:400]}...\n\n"
+                f"ID: <code>{p['arxiv_id']}</code>\n"
+                f"PDF: {p['pdf_url']}"
+            )
+            try:
+                await msg.answer(text, parse_mode="HTML")
+            except Exception:
+                await msg.answer(text)
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"arXiv error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /ask-paper — question about a specific paper ──────────────────────────────
+@dp.message(Command("ask_paper"))
+async def cmd_ask_paper(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/ask_paper").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/ask_paper &lt;arxiv_id&gt; &lt;question&gt;</code>\n\n"
+            "example:\n"
+            "<code>/ask_paper 1705.07115 is clamping log_var justified?</code>",
+            parse_mode="HTML",
+        )
+        return
+    parts = text.split(maxsplit=1)
+    arxiv_id = parts[0]
+    question = parts[1] if len(parts) > 1 else "Summarize the key contributions."
+    status_msg = await msg.answer(f"downloading {arxiv_id}...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.arxiv import download_paper, extract_paper_text, analyze_paper
+        pdf_path = await download_paper(arxiv_id)
+        await status_msg.edit_text("extracting text...")
+        paper_text = extract_paper_text(pdf_path)
+        await status_msg.edit_text("analyzing...")
+        analysis = await analyze_paper(paper_text, question)
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, analysis, model_used="debug/paper-analysis")
+        # Auto-save to memory
+        try:
+            from tools.memory import auto_save_research
+            await auto_save_research(analysis, arxiv_id)
+        except Exception:
+            pass
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /workernet-papers — analyze all 6 WorkerNet papers ────────────────────────
+@dp.message(Command("workernet_papers"))
+async def cmd_workernet_papers(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("fetching 6 WorkerNet papers...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.arxiv import (
+            WORKERNET_PAPERS, download_paper, extract_paper_text, analyze_paper,
+        )
+        for name, info in WORKERNET_PAPERS.items():
+            try:
+                await status_msg.edit_text(f"processing: {name}...")
+                pdf_path = await download_paper(info["arxiv_id"])
+                paper_text = extract_paper_text(pdf_path)
+                question = f"How does this paper relate to implementing: {', '.join(info['implements'])}? Key equation: {info['key_equation']}"
+                analysis = await analyze_paper(paper_text, question)
+                header = (
+                    f"<b>{name}</b> (arXiv:{info['arxiv_id']})\n"
+                    f"Implements: <code>{', '.join(info['implements'])}</code>\n"
+                    f"Key eq: <code>{info['key_equation']}</code>\n\n"
+                )
+                await send_chunked(msg, header + analysis, model_used="debug")
+                # Auto-save
+                try:
+                    from tools.memory import auto_save_research
+                    await auto_save_research(header + analysis, info["arxiv_id"])
+                except Exception:
+                    pass
+            except Exception as e:
+                await msg.answer(f"{name}: error — {e}")
+        typing_task.cancel()
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /briefing — morning briefing ──────────────────────────────────────────────
+@dp.message(Command("briefing"))
+async def cmd_briefing(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("assembling briefing...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.briefing import generate_briefing
+        briefing = await generate_briefing()
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, briefing, model_used="briefing")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"briefing error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /remember, /recall, /memories, /brain-export — second brain ───────────────
+@dp.message(Command("remember"))
+async def cmd_remember(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    note = (msg.text or "").removeprefix("/remember").strip()
+    if not note:
+        await msg.answer("usage: <code>/remember &lt;note&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        from tools.memory import add_memory
+        note_id = await add_memory(note, source="telegram")
+        await msg.answer(f"saved (id: {note_id})")
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("recall"))
+async def cmd_recall(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    query = (msg.text or "").removeprefix("/recall").strip()
+    if not query:
+        await msg.answer("usage: <code>/recall &lt;query&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        from tools.memory import search_memory
+        results = await search_memory(query, top_k=5)
+        if not results:
+            await msg.answer("no matching memories found.")
+            return
+        lines = ["<b>Matching memories:</b>\n"]
+        for r in results:
+            import time as _time
+            ts = _time.strftime("%m/%d", _time.localtime(r["created_at"]))
+            tags = f" [{r['tags']}]" if r.get("tags") else ""
+            lines.append(f"  #{r['id']} ({ts}{tags}) rel:{r['relevance']}")
+            lines.append(f"  {r['text'][:150]}...\n")
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("memories"))
+async def cmd_memories(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.memory import get_recent_memories
+        import time as _time
+        notes = await get_recent_memories(limit=10)
+        if not notes:
+            await msg.answer("no memories saved yet. Use <code>/remember &lt;note&gt;</code>", parse_mode="HTML")
+            return
+        lines = ["<b>Recent memories:</b>\n"]
+        for n in notes:
+            ts = _time.strftime("%m/%d %H:%M", _time.localtime(n["created_at"]))
+            tags = f" [{n['tags']}]" if n.get("tags") else ""
+            lines.append(f"  #{n['id']} ({ts}{tags}) [{n['source']}]")
+            lines.append(f"  {n['text'][:120]}...\n")
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("brain_export"))
+async def cmd_brain_export(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("exporting to Obsidian vault...")
+    try:
+        from tools.memory import export_to_obsidian
+        vault_path = str(Path.home() / "brain")
+        result = await export_to_obsidian(vault_path)
+        await status_msg.edit_text(result)
+    except Exception as e:
+        await status_msg.edit_text(f"export error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /scaffold, /build — project scaffolding ───────────────────────────────────
+@dp.message(Command("scaffold"))
+async def cmd_scaffold(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/scaffold").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/scaffold &lt;framework&gt; &lt;description&gt;</code>\n\n"
+            "frameworks: nextjs, fastapi, laravel\n\n"
+            "examples:\n"
+            "<code>/scaffold nextjs personal portfolio with blog</code>\n"
+            "<code>/scaffold fastapi todo API with JWT auth</code>",
+            parse_mode="HTML",
+        )
+        return
+    parts = text.split(maxsplit=1)
+    framework = parts[0].lower()
+    desc = parts[1] if len(parts) > 1 else framework
+
+    # Extract features from description
+    features = []
+    desc_lower = desc.lower()
+    if "auth" in desc_lower:
+        features.append("auth")
+    if "supabase" in desc_lower:
+        features.append("supabase")
+    if "database" in desc_lower or "db" in desc_lower:
+        features.append("database")
+
+    # Generate project name from description
+    project_name = desc.split()[:3]
+    project_name = "-".join(w.lower() for w in project_name if w.isalnum())[:30] or framework
+
+    status_msg = await msg.answer(f"scaffolding {framework} project: {project_name}...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from tools.scaffolder import scaffold_nextjs, scaffold_fastapi, scaffold_laravel
+        if framework in ("nextjs", "next"):
+            result = await scaffold_nextjs(project_name, features)
+        elif framework in ("fastapi", "fast"):
+            result = await scaffold_fastapi(project_name, features)
+        elif framework == "laravel":
+            result = await scaffold_laravel(project_name, features)
+        else:
+            typing_task.cancel()
+            await status_msg.edit_text(f"unknown framework: {framework}\nSupported: nextjs, fastapi, laravel")
+            return
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used=f"scaffold/{framework}")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"scaffold error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("build"))
+async def cmd_build(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/build").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/build &lt;task&gt;</code>\n\n"
+            "runs frontend + backend agents in parallel.\n\n"
+            "example:\n<code>/build e-commerce product page with cart API</code>",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer("frontend + backend agents running in parallel...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.scaffolder import parallel_fullstack
+        result = await parallel_fullstack(task)
+        typing_task.cancel()
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used="build/parallel")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"build error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /task-from, /tasks-due, /task-done — project management ──────────────────
+@dp.message(Command("task_from"))
+async def cmd_task_from(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/task_from").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/task_from &lt;text or transcript&gt;</code>\n\n"
+            "extracts structured tasks from any text.\n\n"
+            "example:\n"
+            "<code>/task_from discussed: add auth by friday, deploy monday, john handles DB</code>",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer("extracting tasks...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.project_manager import transcript_to_tasks, save_tasks_local
+        tasks = await transcript_to_tasks(text)
+        await save_tasks_local(tasks, "telegram")
+        typing_task.cancel()
+        await status_msg.delete()
+        lines = [f"<b>Extracted {len(tasks)} tasks:</b>\n"]
+        priority_icons = {"high": "!!", "mid": "!", "low": ""}
+        for t in tasks:
+            icon = priority_icons.get(t.get("priority", "mid"), "")
+            lines.append(f"  {icon} {t['task'][:80]}")
+            lines.append(f"    owner: {t.get('owner', '?')} | deadline: {t.get('deadline', 'TBD')}\n")
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("tasks_due"))
+async def cmd_tasks_due(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.project_manager import check_deadlines
+        result = await check_deadlines()
+        await msg.answer(result, parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("task_done"))
+async def cmd_task_done(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task_id_str = (msg.text or "").removeprefix("/task_done").strip()
+    if not task_id_str:
+        await msg.answer("usage: <code>/task_done &lt;id&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        from tools.project_manager import complete_task
+        result = await complete_task(int(task_id_str))
+        await msg.answer(result)
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /gpu — enhanced GPU status ────────────────────────────────────────────────
+@dp.message(Command("gpu"))
+async def cmd_gpu(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.devops import check_gpu_health
+        result = await check_gpu_health()
+        await msg.answer(result, parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"GPU error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /vuln-scan — vulnerability scan ──────────────────────────────────────────
+@dp.message(Command("vuln_scan"))
+async def cmd_vuln_scan(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("scanning dependencies...")
+    try:
+        from tools.devops import check_vulnerabilities
+        result = await check_vulnerabilities()
+        await status_msg.delete()
+        await send_chunked(msg, result, model_used="devops/vuln-scan")
+    except Exception as e:
+        await status_msg.edit_text(f"scan error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /watch-training — training log monitor ────────────────────────────────────
+@dp.message(Command("watch_training"))
+async def cmd_watch_training(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    import os as _os
+    log_path = _os.getenv("WORKERNET_LOG_PATH", "")
+    if not log_path:
+        await msg.answer(
+            "WORKERNET_LOG_PATH not set in .env\n"
+            "Set it to your training log path.",
+        )
+        return
+
+    if not _scheduler:
+        await msg.answer("scheduler not initialized")
+        return
+
+    task_id = await _scheduler.add_monitor(
+        description="WorkerNet training watcher",
+        command=f"tail -5 '{log_path}'",
+        interval_sec=60,
+        alert_condition="'nan' in result.lower() or 'inf' in result.lower() or 'best' in result.lower()",
+    )
+    await msg.answer(
+        f"training watcher started: <code>{task_id}</code>\n"
+        f"monitoring: {log_path}\n"
+        f"alerts on: NaN, Inf, new best model\n\n"
+        f"cancel: <code>/cancel {task_id}</code>",
+        parse_mode="HTML",
+    )
+
+
+# ── /post — social media drafting ─────────────────────────────────────────────
+@dp.message(Command("post"))
+async def cmd_post(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/post").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/post &lt;platform&gt; &lt;topic&gt;</code>\n\n"
+            "platforms: linkedin, tweet, thread\n\n"
+            "example:\n<code>/post linkedin my WorkerNet model achieves 60% accuracy on IKEA ASM</code>",
+            parse_mode="HTML",
+        )
+        return
+    parts = text.split(maxsplit=1)
+    platform = parts[0].lower()
+    topic = parts[1] if len(parts) > 1 else text
+    status_msg = await msg.answer(f"drafting {platform} post...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.content import draft_linkedin_post, draft_tweet
+        if platform == "linkedin":
+            result = await draft_linkedin_post(topic)
+        elif platform == "tweet":
+            result = await draft_tweet(topic, thread=False)
+        elif platform == "thread":
+            result = await draft_tweet(topic, thread=True)
+        else:
+            typing_task.cancel()
+            await status_msg.edit_text("platforms: linkedin, tweet, thread")
+            return
+        typing_task.cancel()
+        await status_msg.delete()
+        await msg.answer(f"<b>{platform.upper()} draft:</b>\n\n{result}", parse_mode="HTML")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /brand-check — brand monitoring ───────────────────────────────────────────
+@dp.message(Command("brand_check"))
+async def cmd_brand_check(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    keyword = (msg.text or "").removeprefix("/brand_check").strip()
+    if not keyword:
+        await msg.answer("usage: <code>/brand_check &lt;keyword&gt;</code>", parse_mode="HTML")
+        return
+    status_msg = await msg.answer(f"searching for: {keyword}...")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+    try:
+        from tools.content import monitor_brand
+        result = await monitor_brand([keyword])
+        typing_task.cancel()
+        await status_msg.delete()
+        await msg.answer(result, parse_mode="HTML")
+    except Exception as e:
+        typing_task.cancel()
+        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+
+
+# ── /delegate — OpenClaw delegation ───────────────────────────────────────────
+@dp.message(Command("delegate"))
+async def cmd_delegate(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/delegate").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/delegate &lt;task&gt;</code>\n\n"
+            "sends task to OpenClaw (smart home, Obsidian, Spotify, etc.)",
+            parse_mode="HTML",
+        )
+        return
+    try:
+        from tools.openclaw_bridge import delegate_to_openclaw
+        result = await delegate_to_openclaw(task)
+        await send_chunked(msg, result, model_used="openclaw")
+    except Exception as e:
+        await msg.answer(f"delegate error: <code>{e}</code>", parse_mode="HTML")
+
+
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
 @dp.message(F.text == "🖥 Do task")
 async def kbd_do_hint(msg: Message) -> None:
@@ -1160,6 +1670,17 @@ async def handle_nl(msg: Message) -> None:
     task_lower = task.lower()
     is_computer_task = any(kw in task_lower for kw in computer_keywords)
 
+    # Check OpenClaw delegation
+    try:
+        from tools.openclaw_bridge import should_delegate_to_openclaw, is_openclaw_running, delegate_to_openclaw
+        if should_delegate_to_openclaw(task):
+            if await is_openclaw_running():
+                result = await delegate_to_openclaw(task)
+                await send_chunked(msg, result, model_used="openclaw")
+                return
+    except Exception:
+        pass
+
     if is_computer_task:
         await _run_agent_loop(msg, task)
     else:
@@ -1287,34 +1808,55 @@ async def on_startup() -> None:
     except Exception as e:
         logger.warning("Scheduler init failed (non-fatal): %s", e)
 
+    # Initialize memory DB
+    try:
+        from tools.memory import init_memory_db
+        await init_memory_db()
+        logger.info("Memory DB initialized")
+    except Exception as e:
+        logger.warning("Memory init failed (non-fatal): %s", e)
+
+    # Schedule daily briefing at 7:30 AM
+    try:
+        from tools.briefing import schedule_daily_briefing
+        asyncio.create_task(schedule_daily_briefing(bot, ALLOWED_USER_ID, hour=7, minute=30))
+        logger.info("Daily briefing scheduled for 07:30")
+    except Exception as e:
+        logger.warning("Briefing schedule failed (non-fatal): %s", e)
+
     await bot.set_my_commands([
-        BotCommand(command="do",      description="Autonomous computer control"),
-        BotCommand(command="screen",  description="Take desktop screenshot"),
-        BotCommand(command="open",    description="Open app or URL"),
-        BotCommand(command="click",   description="Click at x,y coordinates"),
-        BotCommand(command="type",    description="Type text on keyboard"),
-        BotCommand(command="key",     description="Press keyboard shortcut"),
-        BotCommand(command="cmd",     description="Run shell command"),
-        BotCommand(command="run",     description="LLM chat (no computer)"),
-        BotCommand(command="think",   description="QwQ deep reasoning"),
-        BotCommand(command="agent",   description="Force specific agent"),
-        BotCommand(command="install", description="pip install + restart"),
-        BotCommand(command="upgrade", description="git pull + restart"),
-        BotCommand(command="models",  description="Agent roster"),
-        BotCommand(command="keys",    description="API key status"),
-        BotCommand(command="stats",   description="CPU/GPU/RAM"),
-        BotCommand(command="git",     description="Git status"),
-        BotCommand(command="threads", description="Conversation threads"),
-        BotCommand(command="scrape",   description="Scrape a URL (JS-rendered)"),
-        BotCommand(command="research", description="Deep multi-page web research"),
-        BotCommand(command="swarm",    description="Multi-agent parallel execution"),
-        BotCommand(command="email",    description="Email inbox management"),
-        BotCommand(command="monitor",  description="Background recurring task"),
-        BotCommand(command="schedule", description="One-time scheduled task"),
-        BotCommand(command="tasks",    description="List background tasks"),
-        BotCommand(command="cancel",      description="Cancel a background task"),
-        BotCommand(command="alert",       description="Conditional recurring alert"),
-        BotCommand(command="maintenance", description="Full system health check"),
+        BotCommand(command="do",          description="Autonomous computer control"),
+        BotCommand(command="screen",      description="Take desktop screenshot"),
+        BotCommand(command="run",         description="LLM chat (no computer)"),
+        BotCommand(command="swarm",       description="Multi-agent team execution"),
+        BotCommand(command="think",       description="QwQ deep reasoning"),
+        BotCommand(command="cmd",         description="Run shell command"),
+        # Research
+        BotCommand(command="paper",       description="Search arXiv papers"),
+        BotCommand(command="ask_paper",   description="Ask about a paper"),
+        BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
+        BotCommand(command="research",    description="Deep web research"),
+        BotCommand(command="scrape",      description="Scrape a URL"),
+        # Memory
+        BotCommand(command="remember",    description="Save a note to memory"),
+        BotCommand(command="recall",      description="Search memory"),
+        BotCommand(command="memories",    description="Show recent memories"),
+        BotCommand(command="briefing",    description="Morning briefing"),
+        # Dev
+        BotCommand(command="scaffold",    description="Create project scaffold"),
+        BotCommand(command="build",       description="Parallel fullstack build"),
+        BotCommand(command="gpu",         description="GPU health status"),
+        BotCommand(command="vuln_scan",   description="Vulnerability scan"),
+        # Tasks
+        BotCommand(command="task_from",   description="Extract tasks from text"),
+        BotCommand(command="tasks_due",   description="Show pending tasks"),
+        # Content
+        BotCommand(command="post",        description="Draft social media post"),
+        BotCommand(command="brand_check", description="Monitor brand mentions"),
+        # System
+        BotCommand(command="models",      description="Agent roster"),
+        BotCommand(command="keys",        description="API key status"),
+        BotCommand(command="stats",       description="System stats"),
         BotCommand(command="start",       description="Help + status"),
     ])
 
@@ -1326,7 +1868,7 @@ async def on_startup() -> None:
     display = await computer_agent.detect_display()
 
     logger.info("=" * 55)
-    logger.info("Legion v2 starting")
+    logger.info("Legion v4 starting")
     logger.info("✅ Keys: %s", ", ".join(active) or "NONE")
     logger.info("🖥 Display: %s", display)
     if not any(key_status.get(k) for k in cloud):

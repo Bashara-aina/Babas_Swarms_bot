@@ -1,4 +1,4 @@
-# Legion v3 — full-stack AI workstation control
+# Legion v4 — full-stack AI workstation control + multi-agent platform
 
 # Telegram bot
 aiogram>=3.4.0,<4.0.0
@@ -37,7 +37,11 @@ python-docx>=1.0.0
 aioimaplib>=1.1.0
 aiosmtplib>=3.0.0
 
+# ── v4: RSS feeds ────────────────────────────────────────────────────────
+feedparser>=6.0.0
+
 # ── Host machine tools (install separately, not pip) ──────────────────────
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
 # playwright install chromium
+# pip install pip-audit  (optional, for /vuln_scan)
