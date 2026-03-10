@@ -8,6 +8,12 @@ Usage in main.py cmd_swarm():
     messages = await run_swarm_debate(task, progress_fn)
     for m in messages:
         await msg.answer(m, parse_mode="HTML")
+
+Architecture:
+    Phase 1 (parallel): 9 departments × 8 specialist agents = 72 LLM calls
+                        + 9 department leads synthesize = 9 LLM calls
+    Phase 2 (parallel): 6 debate personas × 4 rounds = 24 LLM calls
+    Total per /swarm: ~105 LLM calls, all parallelised within each phase.
 """
 
 from __future__ import annotations
@@ -15,9 +21,13 @@ from __future__ import annotations
 import asyncio
 import html
 import logging
+import os
 import re
-from typing import Callable, Coroutine, Any, Optional
+from typing import Any, Callable, Coroutine, Optional
 
+import litellm
+
+from agents import AGENT_MODELS, DEBATE_ICONS, build_system_prompt
 from task_orchestrator import SwarmDebateOrchestrator, format_debate_for_telegram
 
 logger = logging.getLogger(__name__)
@@ -25,24 +35,37 @@ logger = logging.getLogger(__name__)
 
 # ── LLM bridge (single-turn chat, no tools) ──────────────────────────────────
 
-async def _llm_call(model: str, system: str, user: str) -> str:
+_KEY_MAP: dict[str, str] = {
+    "cerebras":   "CEREBRAS_API_KEY",
+    "groq":       "GROQ_API_KEY",
+    "gemini":     "GEMINI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+    "zai":        "ZAI_API_KEY",
+    "ollama_chat": "",  # no key needed for local Ollama
+}
+
+
+async def _llm_call(
+    model: str,
+    system: str,
+    user: str,
+    max_tokens: int = 1500,
+    temperature: float = 0.75,
+) -> str:
     """Minimal single-turn LLM call used by the debate orchestrator.
 
     Uses litellm directly so it works with all providers already configured
     in llm_client.py without importing the full agentic loop.
-    """
-    import os
-    import litellm
 
+    Args:
+        model:       litellm model string, e.g. 'groq/llama-3.3-70b-versatile'
+        system:      System prompt
+        user:        User message
+        max_tokens:  Token limit (default 1500 — enough for full debate position)
+        temperature: Sampling temperature (default 0.75 — creative but structured)
+    """
     provider = model.split("/")[0].lower()
-    key_map = {
-        "cerebras":   "CEREBRAS_API_KEY",
-        "groq":       "GROQ_API_KEY",
-        "gemini":     "GEMINI_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
-        "zai":        "ZAI_API_KEY",
-    }
-    env_var = key_map.get(provider)
+    env_var = _KEY_MAP.get(provider, "")
     api_key = os.getenv(env_var) if env_var else None
 
     kwargs: dict[str, Any] = {
@@ -51,8 +74,8 @@ async def _llm_call(model: str, system: str, user: str) -> str:
             {"role": "system", "content": system},
             {"role": "user",   "content": user},
         ],
-        "max_tokens": 800,
-        "temperature": 0.85,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
     }
     if api_key:
         kwargs["api_key"] = api_key
@@ -62,7 +85,6 @@ async def _llm_call(model: str, system: str, user: str) -> str:
             "X-Title": "LegionSwarm",
         }
 
-    # Try primary model, fall back to groq general
     try:
         resp = await litellm.acompletion(**kwargs)
         return resp.choices[0].message.content or ""
@@ -75,13 +97,14 @@ async def _llm_call(model: str, system: str, user: str) -> str:
             resp = await litellm.acompletion(**kwargs)
             return resp.choices[0].message.content or ""
         except Exception as e2:
+            logger.error("Fallback also failed for model %s: %s", model, e2)
             return f"[model error: {e2}]"
 
 
 # ── Department parallel layer ─────────────────────────────────────────────────
 # Each department runs its specialist agents in parallel BEFORE the debate.
 # Department leads synthesize their team's findings into one position,
-# which then enters the 4-round debate as a unified voice.
+# which then enters the 4-round debate as enriched context.
 
 DEPARTMENTS: dict[str, dict] = {
     "engineering": {
@@ -193,14 +216,14 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "⚖️",
         "lead": "General Counsel",
         "agents": [
-            ("Contract Lawyer",      "You review terms, liabilities, and contractual risk."),
-            ("Privacy / GDPR Expert","You flag data handling risks and compliance requirements."),
-            ("IP Lawyer",            "You protect and assess intellectual property exposure."),
-            ("Regulatory Expert",    "You map applicable regulations by jurisdiction."),
-            ("Compliance Officer",   "You ensure internal policies match external obligations."),
-            ("Ethics Advisor",       "You raise uncomfortable questions about unintended consequences."),
-            ("Employment Lawyer",    "You flag workforce-related legal risks."),
-            ("Litigation Risk",      "You estimate litigation probability and cost of various paths."),
+            ("Contract Lawyer",       "You review terms, liabilities, and contractual risk."),
+            ("Privacy / GDPR Expert", "You flag data handling risks and compliance requirements."),
+            ("IP Lawyer",             "You protect and assess intellectual property exposure."),
+            ("Regulatory Expert",     "You map applicable regulations by jurisdiction."),
+            ("Compliance Officer",    "You ensure internal policies match external obligations."),
+            ("Ethics Advisor",        "You raise uncomfortable questions about unintended consequences."),
+            ("Employment Lawyer",     "You flag workforce-related legal risks."),
+            ("Litigation Risk",       "You estimate litigation probability and cost of various paths."),
         ],
         "synthesis_instruction": "Synthesize your team's legal view into ONE risk assessment: the top legal risk, its likelihood, and the minimum viable mitigation.",
     },
@@ -208,14 +231,14 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "🧭",
         "lead": "Chief Strategy Officer",
         "agents": [
-            ("Corporate Strategist", "You think in competitive moats, market positioning, and 5-year trajectories."),
-            ("Venture Capitalist",   "You evaluate ideas by market size, defensibility, and team capability."),
-            ("Management Consultant","You apply frameworks (Porter, BCG, Jobs-to-be-done) to structure the problem."),
-            ("Futurist",             "You extrapolate current signals into 10-year scenarios."),
-            ("Economist",            "You think in incentive structures, market dynamics, and second-order effects."),
-            ("Geopolitical Analyst", "You consider how macro forces — regulation, trade, politics — affect the decision."),
+            ("Corporate Strategist",     "You think in competitive moats, market positioning, and 5-year trajectories."),
+            ("Venture Capitalist",       "You evaluate ideas by market size, defensibility, and team capability."),
+            ("Management Consultant",    "You apply frameworks (Porter, BCG, Jobs-to-be-done) to structure the problem."),
+            ("Futurist",                 "You extrapolate current signals into 10-year scenarios."),
+            ("Economist",                "You think in incentive structures, market dynamics, and second-order effects."),
+            ("Geopolitical Analyst",     "You consider how macro forces — regulation, trade, politics — affect the decision."),
             ("First Principles Thinker", "You strip away assumptions and rebuild reasoning from scratch."),
-            ("Devil's Advocate",     "You attack the strategy's core assumption. Your job is to find the fatal flaw."),
+            ("Devil's Advocate",         "You attack the strategy's core assumption. Your job is to find the fatal flaw."),
         ],
         "synthesis_instruction": "Synthesize your team's strategic view into ONE strategic recommendation: the core bet, why now, and the biggest risk to the thesis.",
     },
@@ -240,8 +263,6 @@ async def _run_department(
     if progress_fn:
         await progress_fn(f"{icon} {dept_name.upper()} dept launching {len(agents)} agents...")
 
-    from agents import build_system_prompt, AGENT_MODELS
-
     # Run all specialist agents in parallel
     async def _agent_call(agent_name: str, agent_persona: str) -> str:
         system = build_system_prompt(
@@ -249,16 +270,22 @@ async def _run_department(
             f"Your specialist perspective: {agent_persona}\n\n"
             "Give your expert take in 3-4 focused sentences. Be direct, specific, opinionated."
         )
-        model = AGENT_MODELS.get("general", "cerebras/qwen-3-235b")
-        return await _llm_call(model, system, f"Analyse this from your specialist angle: {task}")
+        model = AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+        return await _llm_call(
+            model, system,
+            f"Analyse this from your specialist angle: {task}",
+            max_tokens=1000,
+            temperature=0.75,
+        )
 
     agent_tasks = [_agent_call(name, persona) for name, persona in agents]
     agent_results_raw = await asyncio.gather(*agent_tasks, return_exceptions=True)
 
-    agent_outputs = []
+    agent_outputs: list[str] = []
     for (name, _), result in zip(agents, agent_results_raw):
         if isinstance(result, Exception):
-            agent_outputs.append(f"{name}: [error: {result}]")
+            logger.warning("Agent %s in dept %s failed: %s", name, dept_name, result)
+            agent_outputs.append(f"{name}: [error — skipped]")
         else:
             agent_outputs.append(f"{name}: {result}")
 
@@ -271,11 +298,15 @@ async def _run_department(
     )
     lead_user = (
         f"Topic: {task}\n\n"
-        f"Your team's briefing:\n{team_briefing[:6000]}"
+        f"Your team's briefing:\n{team_briefing[:8000]}"
     )
-    # Use architect model (Gemini) for lead synthesis — large context
-    lead_model = AGENT_MODELS.get("architect", "gemini/gemini-2.0-flash")
-    lead_synthesis = await _llm_call(lead_model, lead_system, lead_user)
+    # Use architect model for lead synthesis — needs large context window
+    lead_model = AGENT_MODELS.get("architect", "cerebras/qwen-3-235b-a22b")
+    lead_synthesis = await _llm_call(
+        lead_model, lead_system, lead_user,
+        max_tokens=1500,
+        temperature=0.7,
+    )
 
     return dept_name, lead_synthesis
 
@@ -288,23 +319,23 @@ async def run_swarm_debate(
     departments: Optional[list[str]] = None,
     skip_departments: bool = False,
 ) -> list[str]:
-    """Full swarm pipeline:
+    """Full swarm pipeline.
 
     Phase 1 (parallel): All 9 departments run their 8 agents simultaneously.
                         Each dept lead synthesizes their team into one position.
     Phase 2 (parallel): 6 debate personas run Round 1 simultaneously,
                         enriched with department lead positions as context.
     Phase 3 (sequential): Rounds 2, 3, 4 of the debate orchestrator.
-    Phase 4: Format all output into Telegram-ready message chunks.
+    Phase 4: Format all output into Telegram-ready HTML message chunks.
 
     Args:
-        task: The question or topic to debate.
-        progress_fn: Async callback that sends progress messages to Telegram.
-        departments: Optional list of dept names to run (default: all 9).
+        task:             The question or topic to debate.
+        progress_fn:      Async callback that sends progress messages to Telegram.
+        departments:      Optional list of dept names to run (default: all 9).
         skip_departments: If True, skip Phase 1 and go straight to debate.
 
     Returns:
-        List of Telegram message strings (each <= 4000 chars).
+        List of Telegram-ready HTML message strings (each <= 4000 chars).
     """
     selected_depts = departments or list(DEPARTMENTS.keys())
 
@@ -329,15 +360,15 @@ async def run_swarm_debate(
 
         for result in dept_results:
             if isinstance(result, Exception):
-                logger.warning("Department failed: %s", result)
+                logger.warning("Department sprint failed: %s", result)
             else:
                 dname, dpos = result
                 dept_positions[dname] = dpos
-                logger.info("Department %s completed", dname)
+                logger.info("Department '%s' completed (%d chars)", dname, len(dpos))
 
         if progress_fn:
             await progress_fn(
-                f"✅ All {len(dept_positions)}/{len(selected_depts)} departments complete.\n"
+                f"✅ {len(dept_positions)}/{len(selected_depts)} departments complete.\n"
                 f"🔥 Entering 4-round debate..."
             )
 
@@ -352,17 +383,16 @@ async def run_swarm_debate(
             lines.append(f"{icon} <b>{lead}</b> ({dname}): {pos[:400]}")
         dept_context = "\n\n".join(lines)
 
-    # ── PHASE 2+3: 4-round debate with department context injected ────────────
-
-    # Monkey-patch the debate orchestrator's task to include dept context
+    # Enrich the debate task with department briefings as grounding context
     enriched_task = task
     if dept_context:
         enriched_task = (
             f"{task}\n\n"
-            f"--- Department briefings (use as evidence) ---\n"
+            f"--- Department briefings (use as evidence in your debate) ---\n"
             f"{dept_context[:8000]}"
         )
 
+    # ── PHASE 2+3: 4-round debate with department context injected ────────────
     orchestrator = SwarmDebateOrchestrator(
         llm_call=_llm_call,
         progress_fn=progress_fn,
@@ -370,9 +400,9 @@ async def run_swarm_debate(
     debate_result = await orchestrator.run(enriched_task)
 
     # ── PHASE 4: Format for Telegram ─────────────────────────────────────────
-    messages = []
+    messages: list[str] = []
 
-    # Message 0: Department summary (if depts were run)
+    # Message 0: Department summary
     if dept_positions:
         dept_lines = [
             f"🏢 <b>SWARM — {len(dept_positions)} Department Briefings</b>\n"
@@ -388,14 +418,12 @@ async def run_swarm_debate(
                 f"<i>{html.escape(pos[:350])}</i>\n"
             )
         dept_msg = "\n".join(dept_lines)
-        # Split if too long
         if len(dept_msg) > 4000:
-            dept_msg = dept_msg[:3990] + "..."
+            dept_msg = dept_msg[:3990] + "…"
         messages.append(dept_msg)
 
-    # Messages 1-3: Debate rounds from format_debate_for_telegram
+    # Messages 1-3: Debate rounds → convert markdown → HTML for aiogram
     debate_messages = format_debate_for_telegram(debate_result, task)
-    # Convert ** markdown to HTML bold for aiogram HTML parse mode
     debate_messages = [_md_to_html(m) for m in debate_messages]
     messages.extend(debate_messages)
 
@@ -403,22 +431,64 @@ async def run_swarm_debate(
 
 
 def _md_to_html(text: str) -> str:
-    """Convert **bold** markdown to <b>bold</b> HTML for Telegram HTML parse mode."""
-    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
-    text = re.sub(r'\*(.+?)\*', r'<i>\1</i>', text)
-    text = re.sub(r'`(.+?)`', r'<code>\1</code>', text)
+    """Convert **bold** / *italic* / `code` markdown to Telegram HTML.
+
+    Protects existing <code> blocks from bold/italic substitution so that
+    Python snippets like **kwargs are never corrupted.
+    """
+    # Step 1: Extract and replace <code> blocks with safe placeholders
+    code_blocks: list[str] = []
+
+    def _stash_code(m: re.Match) -> str:
+        code_blocks.append(m.group(0))
+        return f"__CODE_{len(code_blocks) - 1}__"
+
+    text = re.sub(r'<code>.*?</code>', _stash_code, text, flags=re.DOTALL)
+
+    # Step 2: Also protect backtick inline code before converting
+    backtick_blocks: list[str] = []
+
+    def _stash_backtick(m: re.Match) -> str:
+        backtick_blocks.append(m.group(1))
+        return f"__BACKTICK_{len(backtick_blocks) - 1}__"
+
+    text = re.sub(r'`([^`]+)`', _stash_backtick, text)
+
+    # Step 3: Convert markdown bold/italic
+    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text, flags=re.DOTALL)
+    text = re.sub(r'\*([^*\n]+?)\*', r'<i>\1</i>', text)
+
+    # Step 4: Restore backtick blocks as <code>
+    for i, content in enumerate(backtick_blocks):
+        text = text.replace(f"__BACKTICK_{i}__", f"<code>{html.escape(content)}</code>")
+
+    # Step 5: Restore original <code> blocks
+    for i, block in enumerate(code_blocks):
+        text = text.replace(f"__CODE_{i}__", block)
+
     return text
 
 
 def get_swarm_stats() -> str:
-    """Return a formatted string with swarm capability stats."""
+    """Return a formatted HTML string with swarm capability stats."""
     total_dept_agents = sum(len(d["agents"]) for d in DEPARTMENTS.values())
-    debate_agents = 6  # strategist, devil_advocate, researcher, pragmatist, visionary, critic
-    total = total_dept_agents + debate_agents  # 72 + 6 = 78 + 9 dept leads = 87 total
+    dept_leads = len(DEPARTMENTS)           # 9
+    debate_personas = 6
+    debate_rounds = 4
+    total_llm_calls = (
+        total_dept_agents               # 72 specialist agents
+        + dept_leads                    # 9 dept lead syntheses
+        + debate_personas * debate_rounds  # 6 × 4 = 24 debate calls
+    )  # = 105 total
+
     lines = [
         "<b>🐝 Swarm Capability</b>\n",
-        f"📊 <b>{len(DEPARTMENTS)} departments</b> · <b>{total_dept_agents} specialist agents</b> · <b>{debate_agents} debate personas</b>",
-        f"🔢 <b>Total agent calls per /swarm: ~{total_dept_agents + debate_agents * 4}</b> (dept agents × 1 + debate personas × 4 rounds)\n",
+        f"📊 <b>{len(DEPARTMENTS)} departments</b> · "
+        f"<b>{total_dept_agents} specialist agents</b> · "
+        f"<b>{dept_leads} dept leads</b> · "
+        f"<b>{debate_personas} debate personas</b>",
+        f"🔢 <b>~{total_llm_calls} LLM calls per /swarm</b> "
+        f"({total_dept_agents} agents + {dept_leads} leads + {debate_personas}×{debate_rounds} debate rounds)\n",
         "<b>Departments:</b>",
     ]
     for dname, cfg in DEPARTMENTS.items():
@@ -426,7 +496,6 @@ def get_swarm_stats() -> str:
             f"  {cfg['icon']} <b>{cfg['lead']}</b> — {len(cfg['agents'])} agents"
         )
     lines.append("\n<b>Debate Personas:</b>")
-    from agents import DEBATE_ICONS
     for persona, icon in DEBATE_ICONS.items():
         lines.append(f"  {icon} {persona.replace('_', ' ').title()}")
     return "\n".join(lines)
