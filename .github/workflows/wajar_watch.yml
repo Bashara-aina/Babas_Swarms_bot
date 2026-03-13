@@ -1,0 +1,49 @@
+name: WAJAR_WATCH Daily
+
+on:
+  schedule:
+    # 23:00 UTC = 06:00 WIB (next day)
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: "Trigger label"
+        default: "manual"
+
+permissions:
+  contents: read
+
+jobs:
+  wajar-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run WAJAR_WATCH pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ALLOWED_USER_ID: ${{ secrets.ALLOWED_USER_ID }}
+          WAJAR_WATCH_ALERT_CHAT_ID: ${{ secrets.WAJAR_WATCH_ALERT_CHAT_ID }}
+          CEKWAJAR_GITHUB_TOKEN: ${{ secrets.CEKWAJAR_GITHUB_TOKEN }}
+          CEKWAJAR_SUPABASE_URL: ${{ secrets.CEKWAJAR_SUPABASE_URL }}
+          CEKWAJAR_SUPABASE_SERVICE_KEY: ${{ secrets.CEKWAJAR_SUPABASE_SERVICE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+          WAJAR_WATCH_AUTO_MERGE_ENABLED: "false"
+        run: |
+          python scripts/wajar_watch_daily.py

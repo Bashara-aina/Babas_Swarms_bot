@@ -1523,6 +1523,144 @@ async def cmd_delegate(msg: Message) -> None:
         await msg.answer(f"delegate error: <code>{e}</code>", parse_mode="HTML")
 
 
+
+
+# ── WAJAR_WATCH — regulation monitoring commands ──────────────────────────────
+
+@dp.message(Command("wajar_check"))
+async def cmd_wajar_check(msg: Message) -> None:
+    """Manually trigger WAJAR_WATCH pipeline."""
+    if not is_allowed(msg):
+        return
+    status = await msg.answer(
+        "🔍 <b>WAJAR_WATCH</b> — Manual check triggered\n"
+        "⏳ Scraping 5 regulation sources...",
+        parse_mode="HTML",
+    )
+    try:
+        from tools.wajar_watch.orchestrator import run_wajar_watch_pipeline
+        import uuid as _uuid
+        run_id = f"telegram-{_uuid.uuid4().hex[:8]}"
+        chat_id = int(os.getenv("WAJAR_WATCH_ALERT_CHAT_ID", str(msg.chat.id)))
+        result = await run_wajar_watch_pipeline(
+            run_id=run_id, trigger="telegram",
+            bot=msg.bot, alert_chat_id=chat_id,
+        )
+        await status.edit_text(
+            f"✅ <b>WAJAR_WATCH Complete</b>\n\n"
+            f"📊 Sources: {result.sources_checked}\n"
+            f"🔄 Changes: {result.changes_detected}\n"
+            f"✅ Auto-applied: {result.auto_applied}\n"
+            f"⚠️  Needs review: {result.alerted_human}\n"
+            f"🚨 Blocked: {result.blocked}\n"
+            f"❌ Errors: {len(result.errors)}\n\n"
+            f"<code>{run_id}</code>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await status.edit_text(
+            f"❌ Error: <code>{html_mod.escape(str(e))}</code>",
+            parse_mode="HTML",
+        )
+
+
+@dp.message(Command("wajar_status"))
+async def cmd_wajar_status(msg: Message) -> None:
+    """Show all watched constants and their current values."""
+    if not is_allowed(msg):
+        return
+    from tools.wajar_watch.constants import WATCHED_CONSTANTS
+    lines = ["<b>📋 WAJAR_WATCH — Regulation Constants</b>\n"]
+    for c in WATCHED_CONSTANTS:
+        icon = "✅" if c.auto_apply_allowed else "🔒"
+        lines.append(
+            f"{icon} <code>{c.key}</code>\n"
+            f"   Value: <b>Rp{c.current_value:,}</b> | Type: {c.change_type}\n"
+            f"   Basis: {c.legal_basis}\n"
+            f"   Updates: {c.update_trigger}\n"
+        )
+    await msg.answer("\n".join(lines), parse_mode="HTML")
+
+
+@dp.message(Command("wajar_history"))
+async def cmd_wajar_history(msg: Message) -> None:
+    """Show last 10 regulation changes from Supabase."""
+    if not is_allowed(msg):
+        return
+    status = await msg.answer("⏳ Loading...", parse_mode="HTML")
+    try:
+        from tools.wajar_watch.supabase_writer import get_recent_changes
+        changes = await asyncio.wait_for(get_recent_changes(10), timeout=10.0)
+        if not changes:
+            await status.edit_text("📋 No regulation changes recorded yet.")
+            return
+        lines = ["<b>📋 WAJAR_WATCH — Recent Changes</b>\n"]
+        for c in changes:
+            status_icon = {"auto_merged": "✅", "human_approved": "✅",
+                          "rejected": "❌", "dismissed": "🚫"}.get(
+                c.get("status", ""), "⏳")
+            lines.append(
+                f"{status_icon} <code>{c.get('key', '?')}</code>\n"
+                f"   {c.get('old_value', '?'):,} → "
+                f"{float(c.get('new_value', 0)):,.0f} | "
+                f"{c.get('confidence', '?')} | {c.get('status', '?')}\n"
+                f"   {str(c.get('created_at', ''))[:10]}\n"
+            )
+        await status.edit_text("\n".join(lines), parse_mode="HTML")
+    except asyncio.TimeoutError:
+        await status.edit_text(
+            "⏱ Supabase timed out. Try again.", parse_mode="HTML")
+    except Exception as e:
+        await status.edit_text(
+            f"❌ {html_mod.escape(str(e))}", parse_mode="HTML",
+        )
+
+
+@dp.callback_query(lambda c: c.data and c.data.startswith("wajar_"))
+async def handle_wajar_callbacks(callback: CallbackQuery) -> None:
+    """Handle approve/reject/dismiss inline keyboard buttons."""
+    data = callback.data.replace("wajar_", "", 1)
+    if "_" not in data:
+        await callback.answer("Invalid callback")
+        return
+    action, log_id = data.split("_", 1)
+    try:
+        from tools.wajar_watch.supabase_writer import update_change_status
+        from tools.wajar_watch.github_pr_writer import (
+            get_pr_by_log_id, merge_pr, close_pr,
+        )
+        if action == "approve":
+            pr = await get_pr_by_log_id(log_id)
+            if pr and pr.pr_number:
+                await merge_pr(pr.pr_number)
+            await update_change_status(
+                log_id, "human_approved", str(callback.from_user.id))
+            await callback.message.edit_text(
+                callback.message.text + "\n\n✅ <b>Approved & merged</b>",
+                parse_mode="HTML",
+            )
+        elif action == "reject":
+            pr = await get_pr_by_log_id(log_id)
+            if pr and pr.pr_number:
+                await close_pr(pr.pr_number)
+            await update_change_status(
+                log_id, "rejected", str(callback.from_user.id))
+            await callback.message.edit_text(
+                callback.message.text + "\n\n❌ <b>Rejected</b>",
+                parse_mode="HTML",
+            )
+        elif action == "dismiss":
+            await update_change_status(
+                log_id, "dismissed", str(callback.from_user.id))
+            await callback.message.edit_text(
+                callback.message.text + "\n\n🚫 <b>Dismissed</b>",
+                parse_mode="HTML",
+            )
+        await callback.answer()
+    except Exception as e:
+        await callback.answer(f"Error: {str(e)[:50]}", show_alert=True)
+
+
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
 @dp.message(F.text == "🖥 Do task")
 async def kbd_do_hint(msg: Message) -> None:
@@ -1893,6 +2031,10 @@ async def on_startup() -> None:
         BotCommand(command="keys",        description="API key status"),
         BotCommand(command="stats",       description="System stats"),
         BotCommand(command="start",       description="Help + status"),
+        # WAJAR_WATCH
+        BotCommand(command="wajar_check",   description="▶️ Run regulation check"),
+        BotCommand(command="wajar_status",  description="📋 Regulation constants"),
+        BotCommand(command="wajar_history", description="🕐 Regulation changes"),
     ])
 
     key_status = verify_api_keys()

@@ -104,6 +104,7 @@ AGENT_MODELS: dict[str, str] = {
     "devops":     "groq/llama-3.3-70b-versatile",       # infra + deployment
     "pm":         "cerebras/qwen-3-235b-a22b",          # project management
     "humanizer":  "groq/llama-3.3-70b-versatile",       # humanising AI text
+    "regulation_watcher": "groq/moonshotai/kimi-k2-instruct",  # WAJAR_WATCH legal analyst
 }
 
 # ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
@@ -177,6 +178,11 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "gemini/gemini-2.0-flash",
         "cerebras/qwen-3-235b-a22b",
     ],
+    "regulation_watcher": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+        "groq/llama-3.3-70b-versatile",
+    ],
 }
 
 # ── Keyword → agent routing ─────────────────────────────────────────────────
@@ -243,6 +249,11 @@ TASK_KEYWORDS: dict[str, list[str]] = {
         "project", "roadmap", "milestone", "sprint", "backlog", "priority",
         "stakeholder", "timeline", "scope", "deliverable",
     ],
+    "regulation_watcher": [
+        "regulation", "peraturan", "batas upah", "iuran bpjs",
+        "ptkp", "pmk", "perpres", "surat edaran", "wajar watch",
+        "bpjs jp", "jaminan pensiun", "tarif efektif",
+    ],
 }
 
 DEFAULT_AGENT = "general"
@@ -293,6 +304,7 @@ def list_agents() -> str:
         "computer": "🖥️", "general": "🧠", "researcher": "🔬",
         "marketer": "📢", "devops": "🔧", "pm": "📋",
         "humanizer": "✨",
+        "regulation_watcher": "⚖️",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "🤖")

@@ -47,6 +47,12 @@ feedparser>=6.0.0
 # ── arXiv paper download ─────────────────────────────────────────────────
 arxiv>=2.1.0
 
+# ── WAJAR_WATCH: regulation monitoring pipeline ────────────────────────────
+pdfminer.six>=20221105
+PyGithub>=2.1.1
+supabase>=2.3.0,<3.0.0
+python-dateutil>=2.9.0
+
 # ── Host machine tools (install separately, not pip) ──────────────────────
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
