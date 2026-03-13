@@ -161,7 +161,7 @@ def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
             name = m.group(1)
             args_str = m.group(2).replace('\\"', '"')
             try:
-                args = json.loads(args_str)
+                args = json.loads(args_str) or {}
             except json.JSONDecodeError:
                 args = {}
             return name, args
@@ -360,7 +360,7 @@ async def agent_loop(
                 parsed = _parse_groq_xml_tool_call(error_str)
                 if parsed:
                     tool_name, args = parsed
-                    logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()))
+                    logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
                     if progress_cb:
                         await progress_cb(_tool_label(tool_name, args))
 
@@ -460,7 +460,7 @@ async def agent_loop(
         for tc in msg.tool_calls:
             tool_name = tc.function.name
             try:
-                args = json.loads(tc.function.arguments)
+                args = json.loads(tc.function.arguments) or {}
             except json.JSONDecodeError:
                 args = {}
 
@@ -469,7 +469,7 @@ async def agent_loop(
                 step_label = _tool_label(tool_name, args)
                 await progress_cb(step_label)
 
-            logger.info("Tool call: %s(%s)", tool_name, list(args.keys()))
+            logger.info("Tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
             # Execute the tool
             try:
