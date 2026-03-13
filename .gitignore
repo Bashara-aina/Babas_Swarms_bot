@@ -12,6 +12,7 @@ memory.backup/
 # Runtime artifacts — never commit these
 bot.log
 *.log
+logs/
 screenshots/
 *.db
 *.sqlite
