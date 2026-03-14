@@ -62,6 +62,11 @@ def get_active_loop(user_id: int) -> Optional[LoopState]:
     return None
 
 
+def get_loop_state(user_id: int) -> Optional[LoopState]:
+    """Get loop state regardless of status (for status queries)."""
+    return _active_loops.get(user_id)
+
+
 def stop_loop(user_id: int) -> bool:
     """Signal a running loop to stop. Returns True if there was one."""
     state = _active_loops.get(user_id)
@@ -69,6 +74,56 @@ def stop_loop(user_id: int) -> bool:
         state.stop_event.set()
         return True
     return False
+
+
+def pause_loop(user_id: int) -> bool:
+    """Pause a running loop. Returns True if there was one."""
+    state = _active_loops.get(user_id)
+    if state and state.status == "running":
+        state.status = "paused"
+        return True
+    return False
+
+
+def resume_loop(user_id: int) -> bool:
+    """Resume a paused loop. Returns True if there was one."""
+    state = _active_loops.get(user_id)
+    if state and state.status == "paused":
+        state.status = "running"
+        return True
+    return False
+
+
+def format_loop_status_html(state: LoopState) -> str:
+    """Format loop status as HTML for Telegram."""
+    elapsed_min = (time.time() - state.start_time) / 60 if state.start_time else 0
+
+    status_icon = {
+        "idle": "⚪", "running": "🔄", "paused": "⏸️",
+        "stopped": "🛑", "completed": "✅", "error": "❌",
+    }.get(state.status, "⚪")
+
+    lines = [
+        f"{status_icon} <b>Loop Status</b>\n",
+        f"Goal: <code>{state.goal[:150]}</code>",
+        f"Status: {state.status}",
+        f"Iteration: {state.iteration}",
+        f"Elapsed: {elapsed_min:.1f} min",
+        f"Est. cost: ${state.estimated_cost_usd:.4f}",
+        f"Model: {state.model_used or 'n/a'}",
+    ]
+
+    if state.history:
+        lines.append("\n<b>Recent steps:</b>")
+        for i, h in enumerate(state.history[-5:], 1):
+            lines.append(f"  {i}. <code>{h[:100]}</code>")
+
+    if state.status == "running":
+        lines.append("\nCommands: /loop_stop | /loop_pause")
+    elif state.status == "paused":
+        lines.append("\nCommands: /loop_resume | /loop_stop")
+
+    return "\n".join(lines)
 
 
 def _estimate_cost(model: str, tokens_in: int, tokens_out: int) -> float:
@@ -134,6 +189,17 @@ async def run_autonomous_loop(
                     f"Cost: ~${state.estimated_cost_usd:.4f}"
                 )
                 return state
+
+            # ── Check pause ──────────────────────────────────────
+            while state.status == "paused":
+                await asyncio.sleep(2)
+                if state.stop_event.is_set():
+                    state.status = "stopped"
+                    await notify_cb(
+                        f"<b>Loop stopped</b> while paused after {state.iteration} iterations.\n"
+                        f"Cost: ~${state.estimated_cost_usd:.4f}"
+                    )
+                    return state
 
             # ── Check timeout ────────────────────────────────────
             elapsed_min = (time.time() - state.start_time) / 60
