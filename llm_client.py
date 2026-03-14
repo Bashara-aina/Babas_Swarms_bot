@@ -614,11 +614,14 @@ async def chat(
     thread_id: Optional[str] = None,
     image_b64: Optional[str] = None,
     show_thinking: bool = False,
-    user_id: Optional[str] = None,
+    user_id: Optional[str] = None,          # fix: was missing — caused TypeError in shared.py
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
 
     Returns (response_text, model_used)
+
+    fix: added user_id param — shared._execute_chat() always passes it;
+         without this the call raised TypeError on every single message.
 
     Resource-aware: for vision agent, checks RAM+VRAM via resource_monitor
     before allowing Ollama. Skips local model automatically if constrained.
@@ -629,12 +632,9 @@ async def chat(
     chain = get_fallback_chain(agent_key)
 
     # ── Resource-aware Ollama gating ──────────────────────────────────────────
-    # For vision agent: check if local model is safe to run right now.
-    # If RAM or VRAM are under threshold, skip ollama_chat/* entirely.
     _local_skip_reason = ""
     if agent_key == "vision":
         if image_b64 is None:
-            # No image provided at all — skip local regardless
             chain = [m for m in chain if not m.startswith("ollama_chat/")]
         else:
             try:
@@ -651,12 +651,21 @@ async def chat(
 
     system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
 
-    # Annotate system prompt if local was bypassed so model knows why
     if _local_skip_reason:
         system_prompt += (
             f"\n\n[Note: local Ollama bypassed — {_local_skip_reason}. "
             "Using cloud vision instead.]"
         )
+
+    # ── Inject conversation history for continuity ─────────────────────────────
+    if user_id:
+        try:
+            from router import get_conversation_summary_prompt
+            ctx = get_conversation_summary_prompt(user_id)
+            if ctx:
+                system_prompt += "\n\n" + ctx
+        except Exception:
+            pass
 
     try:
         from tools.persistence import get_instinct_context
@@ -752,6 +761,15 @@ async def chat(
             if thread_id:
                 add_to_thread(thread_id, agent_key, task, result)
 
+            # fix: update conversation history when user_id provided
+            if user_id:
+                try:
+                    from router import add_to_conversation
+                    add_to_conversation(user_id, "user", task)
+                    add_to_conversation(user_id, "assistant", result)
+                except Exception:
+                    pass
+
             if _cache_key:
                 try:
                     from tools.persistence import cache_set
@@ -804,7 +822,6 @@ async def analyze_screenshot(
 
     Returns (analysis_text, model_used)
     """
-    # Validate file
     img_path = Path(image_path)
     if not img_path.exists() or img_path.stat().st_size < 500:
         raise RuntimeError(
@@ -826,7 +843,6 @@ async def analyze_screenshot(
     _skip_local = False
     _skip_reason = ""
 
-    # ── Resource check before trying Ollama ───────────────────────────────────
     try:
         from tools.resource_monitor import can_use_local_model
         _local_ok, _skip_reason = await can_use_local_model()
@@ -839,7 +855,6 @@ async def analyze_screenshot(
     except Exception as _rm_err:
         logger.warning("resource_monitor unavailable: %s — allowing local", _rm_err)
 
-    # ── Try local Ollama (only if resources allow) ────────────────────────────
     if not _skip_local:
         try:
             resp = await _call_model(
@@ -861,7 +876,6 @@ async def analyze_screenshot(
     else:
         logger.info("analyze_screenshot: using cloud directly (%s)", _skip_reason)
 
-    # ── Cloud fallback ────────────────────────────────────────────────────────
     groq_key = os.getenv("GROQ_API_KEY", "")
     if not groq_key:
         raise RuntimeError("No GROQ_API_KEY and Ollama vision failed/skipped")
