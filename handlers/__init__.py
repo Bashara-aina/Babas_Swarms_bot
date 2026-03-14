@@ -9,6 +9,7 @@ from handlers import (
     dev,
     enterprise,
     inline,
+    overnight_handler,
     pm,
     research,
     sessions,
@@ -17,21 +18,22 @@ from handlers import (
     voice,
 )
 
-# ai.py must be second-to-last; inline/voice registered before NL catch-all
+# ai.py must be last (NL catch-all). overnight before ai to avoid interception.
 _ROUTER_ORDER = [
-    computer.router,    # /do /screen /click /type /key /cmd /install /upgrade
-    system.router,      # /start /stats /keys /models /git /maintenance /gpu
-    research.router,    # /scrape /research /paper /ask_paper
-    brain.router,       # /remember /recall /memories /briefing
-    sessions.router,    # /save /resume /sessions /audit
-    tasks.router,       # /monitor /schedule /tasks /cancel
-    dev.router,         # /scaffold /build /vuln_scan /review
-    pm.router,          # /task_from /tasks_due /post /email
-    enterprise.router,  # /budget /routing_stats /security_stats /audit_summary
-    artifact.router,    # /preview
-    voice.router,       # F.voice + F.audio
-    inline.router,      # inline_query
-    ai.router,          # /run /think /agent /swarm /loop* + NL catch-all (LAST)
+    computer.router,          # /do /screen /click /type /key /cmd /install /upgrade
+    system.router,            # /start /stats /keys /models /git /maintenance /gpu
+    research.router,          # /scrape /research /paper /ask_paper
+    brain.router,             # /remember /recall /memories /briefing
+    sessions.router,          # /save /resume /sessions /audit
+    tasks.router,             # /monitor /schedule /tasks /cancel
+    dev.router,               # /scaffold /build /vuln_scan /review
+    pm.router,                # /task_from /tasks_due /post /email
+    enterprise.router,        # /budget /routing_stats /security_stats /audit_summary
+    artifact.router,          # /preview
+    overnight_handler.router, # /overnight /dashboard /overnight_* (NEW)
+    voice.router,             # F.voice + F.audio
+    inline.router,            # inline_query
+    ai.router,                # /run /think /agent /swarm /loop* + NL catch-all (LAST)
 ]
 
 

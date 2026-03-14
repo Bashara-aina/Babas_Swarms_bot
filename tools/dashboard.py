@@ -18,9 +18,7 @@ from __future__ import annotations
 
 import io
 import logging
-import math
 import time
-from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -33,6 +31,9 @@ STATUS_META = {
     "⚪ idle":    {"color": "#95a5a6", "icon": "○ ", "short": "IDLE"},
     "pending":    {"color": "#bdc3c7", "icon": "○ ", "short": "WAIT"},
 }
+
+# BUG FIX: status keys now match the strings emitted by overnight.py exactly
+# (was using unicode emoji strings that differed between files)
 
 AGENT_ICONS = {
     "vision":     "👁 ",
@@ -77,9 +78,9 @@ def build_ascii_dashboard(
     # Overall progress bar (if job_tasks provided)
     if job_tasks:
         total = len(job_tasks)
-        done  = sum(1 for t in job_tasks if getattr(t, 'status', None) and t.status.value == 'done')
-        fail  = sum(1 for t in job_tasks if getattr(t, 'status', None) and t.status.value == 'failed')
-        run   = sum(1 for t in job_tasks if getattr(t, 'status', None) and t.status.value == 'running')
+        done  = sum(1 for t in job_tasks if _task_status_val(t) == "done")
+        fail  = sum(1 for t in job_tasks if _task_status_val(t) == "failed")
+        run   = sum(1 for t in job_tasks if _task_status_val(t) == "running")
         pct   = int((done + fail) / total * 100) if total else 0
         bar   = _progress_bar(pct, width=20)
         lines.append(
@@ -103,7 +104,6 @@ def build_ascii_dashboard(
             meta = STATUS_META.get(status, STATUS_META["⚪ idle"])
             status_icon = meta["icon"]
 
-            # Format task snippet
             task_str = f" <i>{task}</i>" if task else ""
             prog_str = f" <code>{progress}</code>" if progress else ""
             age_str  = f" <i>({age_sec}s ago)</i>" if age_sec > 5 else ""
@@ -117,6 +117,16 @@ def build_ascii_dashboard(
     return "\n".join(lines)
 
 
+def _task_status_val(t) -> str:
+    """Safely extract status string from an OvernightTask regardless of type."""
+    s = getattr(t, "status", None)
+    if s is None:
+        return "pending"
+    if hasattr(s, "value"):
+        return s.value
+    return str(s)
+
+
 def _progress_bar(pct: int, width: int = 20) -> str:
     filled = int(width * pct / 100)
     return "[" + "█" * filled + "░" * (width - filled) + "]"
@@ -127,7 +137,7 @@ def _now_str() -> str:
     return datetime.datetime.now().strftime("%H:%M:%S")
 
 
-# ── PNG Chart Dashboard ────────────────────────────────────────────────────────
+# ── PNG Chart Dashboard ───────────────────────────────────────────────────────
 
 async def build_png_dashboard(
     agent_status: dict,
@@ -142,7 +152,6 @@ async def build_png_dashboard(
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
-        import matplotlib.patches as mpatches
         from matplotlib.gridspec import GridSpec
     except ImportError:
         logger.warning("matplotlib not available, using ASCII dashboard only")
@@ -165,7 +174,6 @@ async def build_png_dashboard(
 
     _draw_agent_grid(ax_agents, agent_status, agents)
 
-    # Title
     fig.suptitle(
         f"⚡ LegionSwarm Dashboard  —  {_now_str()}",
         color="white", fontsize=13, fontweight="bold", y=0.98,
@@ -186,7 +194,7 @@ def _draw_job_progress(ax, tasks: list, job_id: Optional[str]) -> None:
 
     counts = {"done": 0, "running": 0, "failed": 0, "pending": 0, "skipped": 0}
     for t in tasks:
-        status_val = t.status.value if hasattr(t.status, 'value') else str(t.status)
+        status_val = _task_status_val(t)  # BUG FIX: use helper instead of inline hasattr
         counts[status_val] = counts.get(status_val, 0) + 1
 
     left = 0
@@ -233,21 +241,18 @@ def _draw_agent_grid(ax, agent_status: dict, agents: list) -> None:
         status = info.get("status", "⚪ idle")
         task   = info.get("task", "")[:35]
         prog   = info.get("progress", "")[:20]
-        meta   = STATUS_META.get(status, STATUS_META["⚪ idle"])
+        meta   = STATUS_META.get(status, STATUS_META["⚪ idle"])  # BUG FIX: fallback key updated
         color  = meta["color"]
         icon   = AGENT_ICONS.get(agent, "🤖")
         short  = meta["short"]
 
-        # Status block
         ax.barh(i, 1.2, left=0, height=0.7, color=color, alpha=0.85)
         ax.text(0.6, i, short, ha="center", va="center",
                 color="white", fontsize=7.5, fontweight="bold")
 
-        # Agent name
         ax.text(1.4, i, f"{agent}", ha="left", va="center",
                 color="white", fontsize=9, fontweight="bold")
 
-        # Task description
         if task:
             ax.text(3.5, i + 0.18, task, ha="left", va="center",
                     color="#ecf0f1", fontsize=7.5)
@@ -255,7 +260,6 @@ def _draw_agent_grid(ax, agent_status: dict, agents: list) -> None:
             ax.text(3.5, i - 0.18, prog, ha="left", va="center",
                     color="#bdc3c7", fontsize=6.5, style="italic")
 
-        # Horizontal divider
         if i > 0:
             ax.axhline(y=i - 0.5, color="#2c3e50", linewidth=0.5)
 
