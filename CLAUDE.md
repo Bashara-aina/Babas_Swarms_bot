@@ -56,6 +56,7 @@ all from my iPhone.
 | devops     | groq/llama-3.3-70b-versatile      | Infrastructure, CI/CD, deployment  |
 | pm         | cerebras/qwen-3-235b-a22b         | Project management, timelines      |
 | humanizer  | groq/llama-3.3-70b-versatile      | Humanising AI-generated text       |
+| reviewer   | groq/llama-3.3-70b-versatile      | AI code review, security audit     |
 
 Plus 76 specialized agents across 9 departments (see config/departments.yaml).
 
@@ -105,6 +106,11 @@ Note: Adjust User/WorkingDirectory paths to match your deployment.
 - Test core commands: /start → /models → /keys → /run → /think → /agent
 - Test computer control: /screen → /do → /cmd
 - Test tools: /scrape → /research → /swarm → /stats → /maintenance
+- Test sessions: /save test → /sessions → /resume test
+- Test learning: /learn "use type hints" → /instincts → /forget 1
+- Test review: /review main.py → /security_review llm_client.py
+- Test orchestration: /orchestrate "build a CLI tool" → /multi_plan "design auth"
+- Test audit: /audit 1
 - Validate systemd service with: sudo journalctl -u swarm-bot -f
 - Check Ollama GPU usage with: watch -n1 nvidia-smi
 

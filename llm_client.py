@@ -634,6 +634,15 @@ async def chat(
     except Exception:
         pass  # DB not initialized yet, or first run
 
+    # Inject domain knowledge skills for relevant agents
+    try:
+        from tools.skill_loader import get_skills_for_agent
+        skills_block = get_skills_for_agent(agent_key, max_chars=2000)
+        if skills_block:
+            system_prompt += "\n\n" + skills_block
+    except Exception:
+        pass
+
     # In chat mode (no tools), prevent hallucination of computer access
     if agent_key not in ("computer", "vision"):
         system_prompt += (
