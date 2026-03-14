@@ -22,12 +22,15 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Optional
 
+import hashlib
+
 import litellm
 from litellm import acompletion
 
 import computer_agent
 from computer_agent import TOOL_DEFINITIONS, execute_tool
 from router import detect_agent, get_fallback_chain, add_to_thread
+from core.hooks import get_hooks
 
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
@@ -622,6 +625,15 @@ async def chat(
 
     system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
 
+    # Inject instincts (learned user preferences) if available
+    try:
+        from tools.persistence import get_instinct_context
+        instinct_block = await get_instinct_context(max_tokens=300)
+        if instinct_block:
+            system_prompt += "\n\n" + instinct_block
+    except Exception:
+        pass  # DB not initialized yet, or first run
+
     # In chat mode (no tools), prevent hallucination of computer access
     if agent_key not in ("computer", "vision"):
         system_prompt += (
@@ -645,7 +657,27 @@ async def chat(
         {"role": "user",   "content": user_content},
     ]
 
+    # Check response cache (skip vision, think mode, and image tasks)
+    _skip_cache = image_b64 is not None or show_thinking or agent_key == "vision"
+    if not _skip_cache:
+        try:
+            from tools.persistence import cache_get
+            _cache_key = hashlib.sha256(
+                f"{agent_key}:{task}:{chain[0]}".encode()
+            ).hexdigest()
+            cached = await cache_get(_cache_key)
+            if cached:
+                logger.info("Cache hit for agent=%s", agent_key)
+                if thread_id:
+                    add_to_thread(thread_id, agent_key, task, cached)
+                return cached, f"cache:{chain[0]}"
+        except Exception:
+            _cache_key = ""
+    else:
+        _cache_key = ""
+
     last_error: Exception = Exception("No models available")
+    hooks = get_hooks()
 
     for model in chain:
         if _is_rate_limited(model):
@@ -655,8 +687,24 @@ async def chat(
 
         try:
             logger.info("Trying: %s (agent=%s)", model, agent_key)
+            _t0 = time.time()
+            await hooks.emit("pre_llm_call", {
+                "agent": agent_key, "model": model, "task": task[:200],
+            })
             resp = await _call_model(model, messages)
             raw = (resp.choices[0].message.content or "").strip()
+            _elapsed_ms = int((time.time() - _t0) * 1000)
+
+            # Extract token usage
+            _usage = getattr(resp, "usage", None)
+            _tin = getattr(_usage, "prompt_tokens", 0) if _usage else 0
+            _tout = getattr(_usage, "completion_tokens", 0) if _usage else 0
+
+            await hooks.emit("post_llm_call", {
+                "agent": agent_key, "model": model,
+                "tokens_in": _tin, "tokens_out": _tout,
+                "duration_ms": _elapsed_ms, "success": True,
+            })
 
             thinking, answer = _strip_think_tags(raw)
             if thinking and show_thinking:
@@ -666,6 +714,14 @@ async def chat(
 
             if thread_id:
                 add_to_thread(thread_id, agent_key, task, result)
+
+            # Store in cache if eligible
+            if _cache_key:
+                try:
+                    from tools.persistence import cache_set
+                    await cache_set(_cache_key, result, agent_key, model, _tin + _tout)
+                except Exception:
+                    pass
 
             logger.info("Success: %s", model)
             return result, model
