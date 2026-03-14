@@ -97,6 +97,7 @@ async def cmd_swarm(msg: Message) -> None:
     status_msg = await msg.answer("strategist decomposing task...")
     typing_task = asyncio.create_task(_keep_typing(msg))
 
+    # on_progress is already a proper async def — no fix needed here
     async def on_progress(step_text: str) -> None:
         try:
             await status_msg.edit_text(step_text, parse_mode="HTML")
@@ -139,7 +140,7 @@ async def cmd_multi_execute(msg: Message) -> None:
         )
         return
 
-    # FIX #3: Safe --agents= parser — guard against missing space after flag value
+    # FIX #3: Safe --agents= parser — guard against ValueError when no space follows flag value
     agent_keys = ["coding", "architect", "analyst"]
     if "--agents=" in task:
         parts = task.split("--agents=", 1)
@@ -148,20 +149,20 @@ async def cmd_multi_execute(msg: Message) -> None:
             agent_str, task = remainder.split(" ", 1)
             task = task.strip()
         else:
-            # No task provided after agent list
+            # Flag present but no task after agent list
             agent_str = remainder
             task = ""
         agent_keys = [a.strip() for a in agent_str.split(",") if a.strip()]
 
     if not task:
         await msg.answer(
-            "⚠️ No task provided after <code>--agents=</code>.\n"
+            "\u26a0\ufe0f No task provided after <code>--agents=</code>.\n"
             "Usage: <code>/multi_execute --agents=coding,debug &lt;task&gt;</code>",
             parse_mode="HTML",
         )
         return
 
-    status_msg = await msg.answer(f"⚡ Running task with {len(agent_keys)} agents…")
+    status_msg = await msg.answer(f"\u26a1 Running task with {len(agent_keys)} agents\u2026")
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     try:
@@ -176,7 +177,7 @@ async def cmd_multi_execute(msg: Message) -> None:
 
             lines = ["<b>Multi-Execute Comparison</b>\n"]
             for resp in responses:
-                icon = "✅" if resp.success else "❌"
+                icon = "\u2705" if resp.success else "\u274c"
                 model = resp.metadata.get("model", "unknown")
                 lines.append(
                     f"\n{icon} <b>{resp.agent_name}</b> ({model}, {resp.execution_time_ms}ms):\n"
@@ -201,10 +202,10 @@ async def cmd_multi_execute(msg: Message) -> None:
             lines = ["<b>Multi-Execute Comparison</b>\n"]
             for agent_key, res in zip(agent_keys, results):
                 if isinstance(res, Exception):
-                    lines.append(f"\n❌ <b>{agent_key}</b>: {html_mod.escape(str(res)[:200])}\n")
+                    lines.append(f"\n\u274c <b>{agent_key}</b>: {html_mod.escape(str(res)[:200])}\n")
                 else:
                     text_r, model = res
-                    lines.append(f"\n✅ <b>{agent_key}</b> ({model}):\n{text_r[:1000]}\n")
+                    lines.append(f"\n\u2705 <b>{agent_key}</b> ({model}):\n{text_r[:1000]}\n")
             full = "\n".join(lines)
 
         await send_chunked(msg, full)
@@ -222,7 +223,7 @@ async def cmd_multi_execute(msg: Message) -> None:
         typing_task.cancel()
 
 
-# ── /multi_plan ────────────────────────────────────────────────────────────────
+# ── /multi_plan ───────────────────────────────────────────────────────────────
 @router.message(Command("multi_plan"))
 async def cmd_multi_plan(msg: Message) -> None:
     if not is_allowed(msg):
@@ -231,7 +232,7 @@ async def cmd_multi_plan(msg: Message) -> None:
     if not task:
         await msg.answer("usage: <code>/multi_plan &lt;task&gt;</code>", parse_mode="HTML")
         return
-    status_msg = await msg.answer("🧠 generating 3 approaches…")
+    status_msg = await msg.answer("\U0001f9e0 generating 3 approaches\u2026")
     try:
         from llm_client import chat, chunk_output
         agent_keys = ["architect", "coding", "analyst"]
@@ -242,13 +243,13 @@ async def cmd_multi_plan(msg: Message) -> None:
         lines = ["<b>Multi-Plan Comparison</b>\n"]
         for agent_key, res in zip(agent_keys, results):
             if isinstance(res, Exception):
-                lines.append(f"\n<b>⚠️ {agent_key}</b>: error — {html_mod.escape(str(res)[:200])}\n")
+                lines.append(f"\n<b>\u26a0\ufe0f {agent_key}</b>: error — {html_mod.escape(str(res)[:200])}\n")
             else:
                 text_r, model = res
-                lines.append(f"\n<b>📋 {agent_key}</b> ({model}):\n{text_r[:1000]}\n")
+                lines.append(f"\n<b>\U0001f4cb {agent_key}</b> ({model}):\n{text_r[:1000]}\n")
         full = "\n".join(lines)
 
-        # FIX #10: Use chunk_output to avoid cutting mid-HTML tag
+        # FIX #10: Use chunk_output() to avoid cutting mid-HTML tag (was slicing at [:4000] directly)
         chunks = chunk_output(full, max_length=4000)
         await status_msg.edit_text(chunks[0], parse_mode="HTML")
         for chunk in chunks[1:]:
@@ -269,12 +270,12 @@ async def cmd_orchestrate(msg: Message) -> None:
     if not task:
         await msg.answer("usage: <code>/orchestrate &lt;complex task&gt;</code>", parse_mode="HTML")
         return
-    status_msg = await msg.answer("🎯 decomposing task…")
+    status_msg = await msg.answer("\U0001f3af decomposing task\u2026")
 
-    # FIX #1: progress_cb must be an async def — lambda is never awaited
+    # FIX #1: progress_cb was a bare lambda (never awaited) — replaced with proper async def
     async def _progress(s: str) -> None:
         try:
-            await status_msg.edit_text(f"⏳ {s}", parse_mode="HTML")
+            await status_msg.edit_text(f"\u23f3 {s}", parse_mode="HTML")
         except Exception:
             pass
 
@@ -283,7 +284,7 @@ async def cmd_orchestrate(msg: Message) -> None:
         from tools.orchestrate_engine import orchestrate_task
         result = await orchestrate_task(task, progress_cb=_progress)
 
-        # FIX #10: Use chunk_output to avoid cutting mid-HTML tag
+        # FIX #10: Use chunk_output() to avoid cutting mid-HTML tag
         chunks = chunk_output(result, max_length=4000)
         await status_msg.edit_text(chunks[0], parse_mode="HTML")
         for chunk in chunks[1:]:
@@ -295,7 +296,7 @@ async def cmd_orchestrate(msg: Message) -> None:
         )
 
 
-# ── /loop — Autonomous plan-execute loop ──────────────────────────────────────
+# ── /loop — Autonomous plan-execute loop ─────────────────────────────────────
 @router.message(Command("loop"))
 async def cmd_loop(msg: Message) -> None:
     """Autonomous plan-execute loop with safety bounds."""
@@ -305,7 +306,7 @@ async def cmd_loop(msg: Message) -> None:
     if not goal:
         await msg.answer(
             "<b>usage:</b> <code>/loop &lt;goal&gt;</code>\n\n"
-            "Runs an autonomous plan→execute loop until the goal is done.\n"
+            "Runs an autonomous plan\u2192execute loop until the goal is done.\n"
             "Safety bounds: 25 iterations, $0.50 cost ceiling, 30min timeout.\n"
             "Stop anytime with /loop_stop",
             parse_mode="HTML",
@@ -329,7 +330,7 @@ async def cmd_loop(msg: Message) -> None:
         return
 
     await msg.answer(
-        f"<b>🔄 Loop started</b>\n"
+        f"<b>\U0001f504 Loop started</b>\n"
         f"Goal: <code>{html_mod.escape(goal[:200])}</code>\n\n"
         f"Bounds: 25 iters | $0.50 cost cap | 30min timeout\n"
         f"Progress updates every 5 iterations.\n"
@@ -389,7 +390,7 @@ async def cmd_loop_pause(msg: Message) -> None:
         return
     from tools.autonomous_loop import pause_loop
     if pause_loop(msg.from_user.id):
-        await msg.answer("⏸️ Loop paused. Resume with /loop_resume")
+        await msg.answer("\u23f8\ufe0f Loop paused. Resume with /loop_resume")
     else:
         await msg.answer("No running loop to pause.")
 
@@ -401,13 +402,13 @@ async def cmd_loop_resume(msg: Message) -> None:
         return
     from tools.autonomous_loop import resume_loop
     if resume_loop(msg.from_user.id):
-        await msg.answer("▶️ Loop resumed.")
+        await msg.answer("\u25b6\ufe0f Loop resumed.")
     else:
         await msg.answer("No paused loop to resume.")
 
 
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
-@router.message(F.text.in_({"🐛 Debug", "💻 Code"}))
+@router.message(F.text.in_({"\U0001f41b Debug", "\U0001f4bb Code"}))
 async def kbd_agent_hint(msg: Message) -> None:
     if not is_allowed(msg):
         return
@@ -440,7 +441,7 @@ async def handle_nl(msg: Message) -> None:
     except Exception:
         pass
 
-    # Detect questions (knowledge queries → chat mode, no tools)
+    # Detect questions (knowledge queries -> chat mode, no tools)
     question_starters = [
         "apa ", "berapa", "bagaimana", "kenapa", "mengapa", "siapa",
         "dimana", "kapan", "gimana", "apakah", "bisakah",
