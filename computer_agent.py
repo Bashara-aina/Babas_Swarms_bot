@@ -45,7 +45,9 @@ async def run_shell(cmd: str, timeout: int = 30, capture_stderr: bool = True) ->
         err = stderr.decode("utf-8", errors="replace").strip() if stderr else ""
         if proc.returncode == 0:
             return out or "(done, no output)"
-        return f"exit {proc.returncode}\nstdout: {out}\nstderr: {err}".strip()
+        out_trunc = out[:500] + "…" if len(out) > 500 else out
+        err_trunc = err[:500] + "…" if len(err) > 500 else err
+        return f"exit {proc.returncode}\nstdout: {out_trunc}\nstderr: {err_trunc}".strip()
     except asyncio.TimeoutError:
         return f"⏱ timed out after {timeout}s"
     except Exception as e:
@@ -79,14 +81,17 @@ async def detect_display() -> str:
 
     # 2. Probe known display numbers
     for d in [":0", ":1", ":2"]:
-        check = subprocess.run(
-            ["bash", "-c", f"DISPLAY={d} xdpyinfo 2>/dev/null | head -1"],
-            capture_output=True, timeout=3
-        )
-        if check.returncode == 0:
-            _detected_display = d
-            logger.info("DISPLAY probed: %s", d)
-            return d
+        try:
+            check = subprocess.run(
+                ["bash", "-c", f"DISPLAY={d} xdpyinfo 2>/dev/null | head -1"],
+                capture_output=True, timeout=3
+            )
+            if check.returncode == 0:
+                _detected_display = d
+                logger.info("DISPLAY probed: %s", d)
+                return d
+        except Exception:
+            pass
 
     # 3. Parse `who`
     try:
@@ -200,7 +205,7 @@ async def scroll_at(direction: str = "down", amount: int = 3, x: int = 0, y: int
     """Scroll at current mouse position (or given x,y)."""
     display = await detect_display()
     btn = "5" if direction == "down" else "4"
-    if x and y:
+    if x is not None and y is not None and not (x == 0 and y == 0):
         cmd = f"DISPLAY={display} xdotool mousemove {x} {y} click --repeat {amount} {btn}"
     else:
         cmd = f"DISPLAY={display} xdotool click --repeat {amount} {btn}"
@@ -215,24 +220,31 @@ async def get_cursor_position() -> tuple[int, int]:
     )
     x = re.search(r"X=(\d+)", out)
     y = re.search(r"Y=(\d+)", out)
+    if not x or not y:
+        logger.warning("get_cursor_position: could not parse xdotool output: %s", out[:100])
     return int(x.group(1)) if x else 0, int(y.group(1)) if y else 0
 
 
 # ── Keyboard control ──────────────────────────────────────────────────────────
 
 async def keyboard_type(text: str, delay_ms: int = 30) -> str:
-    """Type text character by character. Handles special chars."""
+    """Type text character by character. Handles special chars and newlines."""
     display = await detect_display()
-    # xdotool type handles most unicode but chokes on some special chars
-    # Use --clearmodifiers to avoid shift/ctrl interference
-    # Escape single quotes for shell
-    safe_text = text.replace("\\", "\\\\").replace("'", "'\\''")
-    cmd = (
-        f"DISPLAY={display} xdotool type --clearmodifiers "
-        f"--delay {delay_ms} -- '{safe_text}'"
-    )
-    result = await run_shell(cmd, timeout=max(30, len(text) // 5))
-    return f"typed {len(text)} chars: {result}"
+    # Split on newlines — xdotool doesn't handle \n in typed text, use key Return
+    segments = text.split("\n")
+    for i, segment in enumerate(segments):
+        if segment:
+            # Escape single quotes for shell; escape backslashes first
+            safe_segment = segment.replace("\\", "\\\\").replace("'", "'\\''")
+            cmd = (
+                f"DISPLAY={display} xdotool type --clearmodifiers "
+                f"--delay {delay_ms} -- '{safe_segment}'"
+            )
+            await run_shell(cmd, timeout=max(30, len(segment) // 5))
+        if i < len(segments) - 1:
+            # Press Return between segments (but not after the last one)
+            await run_shell(f"DISPLAY={display} xdotool key Return", timeout=3)
+    return f"typed {len(text)} chars: ok"
 
 
 async def key_press(keys: str) -> str:
@@ -332,8 +344,9 @@ APP_MAP: dict[str, str] = {
     "vscode":         "code",
     "vs code":        "code",
     "code":           "code",
-    "terminal":       "gnome-terminal",
+    "terminal":       "gnome-terminal || xterm",
     "konsole":        "konsole",
+    "xterm":          "xterm",
     "files":          "nautilus .",
     "file manager":   "nautilus .",
     "nautilus":       "nautilus .",
@@ -458,10 +471,12 @@ async def read_file(path: str, max_chars: int = 8000) -> str:
 
 
 async def write_file(path: str, content: str) -> str:
-    """Write content to a file, creating directories as needed."""
+    """Write content to a file, creating directories as needed. NOTE: overwrites without backup."""
     try:
         p = Path(path).expanduser()
         p.parent.mkdir(parents=True, exist_ok=True)
+        if p.exists():
+            logger.warning("write_file: overwriting existing file: %s", p)
         p.write_text(content, encoding="utf-8")
         return f"wrote {len(content)} chars → {p}"
     except Exception as e:
@@ -537,7 +552,8 @@ async def kill_process(process_name: str) -> str:
 
 async def install_packages(packages: list[str]) -> str:
     """Install pip packages. Returns install output."""
-    pkg_str = " ".join(f"'{p}'" for p in packages)
+    safe_packages = [re.sub(r"[^a-zA-Z0-9._\-\[\],=]", "", p) for p in packages]
+    pkg_str = " ".join(f"'{p}'" for p in safe_packages)
     logger.info("Installing packages: %s", pkg_str)
     result = await run_shell(
         f"{sys.executable} -m pip install {pkg_str} 2>&1",

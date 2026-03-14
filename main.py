@@ -28,6 +28,7 @@ import asyncio
 import html as html_mod
 import logging
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -111,6 +112,11 @@ def allowed_cb(cb: CallbackQuery) -> bool:
     return cb.from_user is not None and cb.from_user.id == ALLOWED_USER_ID
 
 
+def _strip_cmd(text: Optional[str]) -> str:
+    """Strip /command or /command@BotName prefix from message text."""
+    return re.sub(r"^/\w+(@\w+)?\s*", "", text or "").strip()
+
+
 # ── UI components ─────────────────────────────────────────────────────────────
 def main_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
@@ -173,9 +179,12 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
 
 # ── Helper: typing indicator ─────────────────────────────────────────────────
 async def _keep_typing(msg: Message) -> None:
+    """Send typing indicator repeatedly until the task is cancelled."""
     while True:
         try:
             await bot.send_chat_action(msg.chat.id, "typing")
+        except asyncio.CancelledError:
+            break
         except Exception:
             pass
         await asyncio.sleep(4)
@@ -246,7 +255,7 @@ async def cmd_start(msg: Message) -> None:
 async def cmd_do(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    task = (msg.text or "").removeprefix("/do").strip()
+    task = _strip_cmd(msg.text)
     if not task:
         await msg.answer(
             "usage: <code>/do &lt;task&gt;</code>\n\n"
@@ -345,7 +354,7 @@ async def cmd_click(msg: Message) -> None:
 async def cmd_type(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    text_to_type = (msg.text or "").removeprefix("/type").strip()
+    text_to_type = _strip_cmd(msg.text)
     if not text_to_type:
         await msg.answer("usage: <code>/type &lt;text to type&gt;</code>", parse_mode="HTML")
         return
@@ -1669,8 +1678,10 @@ async def handle_nl(msg: Message) -> None:
                 result = await delegate_to_openclaw(task)
                 await send_chunked(msg, result, model_used="openclaw")
                 return
-    except Exception:
+    except ImportError:
         pass
+    except Exception as e:
+        logger.debug("OpenClaw check error: %s", e)
 
     # ── Smart routing: question → chat, action → computer ──────────────
 

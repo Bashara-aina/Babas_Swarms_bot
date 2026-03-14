@@ -12,6 +12,8 @@ Fallback policy:
 
 from __future__ import annotations
 
+__version__ = "4.1.0"
+
 import asyncio
 import base64
 import json
@@ -220,6 +222,7 @@ async def _call_model(
 
     elif provider == "zai":
         model_name = "/".join(model.split("/")[1:])
+        model_name = model_name.removeprefix("openai/")
         kwargs["model"] = f"openai/{model_name}"
         kwargs["api_base"] = "https://open.bigmodel.cn/api/paas/v4"
         api_key = os.getenv("ZAI_API_KEY", "")
@@ -272,9 +275,14 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
                          for tc in m.get("tool_calls", [])]
             summary_parts.append(f"Called tools: {', '.join(tool_names)}")
         elif role == "tool":
+            content = m.get("content", "")
+            if not isinstance(content, str):
+                content = str(content)
             truncated = content[:150] + "\u2026" if len(content) > 150 else content
             summary_parts.append(f"Tool result: {truncated}")
         elif content:
+            if not isinstance(content, str):
+                content = str(content)
             truncated = content[:200] + "\u2026" if len(content) > 200 else content
             summary_parts.append(f"{role}: {truncated}")
 
@@ -384,11 +392,13 @@ async def _agent_loop_inner(
                             if photo_cb:
                                 await photo_cb(result)
                             try:
+                                _xml_sc_path = result
                                 desc, _ = await analyze_screenshot(
-                                    result,
+                                    _xml_sc_path,
                                     question="Describe exactly what's visible on screen."
                                 )
                                 result = f"Screenshot taken. Screen shows:\n{desc}"
+                                Path(_xml_sc_path).unlink(missing_ok=True)
                             except Exception:
                                 result = "Screenshot taken (analysis failed)"
                         else:
@@ -408,7 +418,7 @@ async def _agent_loop_inner(
                     })
                     messages.append({
                         "role": "tool",
-                        "content": result[:4000],
+                        "content": result[:3900] + "\n\u2026[truncated]" if len(result) > 3900 else result,
                         "tool_call_id": tc_id,
                     })
                     continue
@@ -501,6 +511,7 @@ async def _agent_loop_inner(
                                      "which apps, windows, text, errors. Be specific and detailed."
                         )
                         tool_result_text = f"Screenshot taken. Screen shows:\n{description}"
+                        Path(screenshot_path).unlink(missing_ok=True)
                     except Exception as e:
                         tool_result_text = f"Screenshot taken (analysis failed: {e})"
                 else:
@@ -511,7 +522,9 @@ async def _agent_loop_inner(
                         "3. Check: echo $DISPLAY"
                     )
             else:
-                tool_result_text = result[:4000] if result else "(no output)"
+                tool_result_text = (
+                    result[:3900] + "\n\u2026[truncated]" if len(result) > 3900 else result
+                ) if result else "(no output)"
 
             steps_taken.append(f"{tool_name} \u2192 {tool_result_text[:80]}...")
 
@@ -554,6 +567,11 @@ async def agent_loop(
         )
     except asyncio.TimeoutError:
         logger.error("agent_loop timed out after 300s for task: %s", task[:80])
+        if progress_cb:
+            try:
+                await progress_cb("⏱ timed out")
+            except Exception:
+                pass
         if thread_id:
             add_to_thread(thread_id, "computer", task, "timed out after 300s")
         return "\u23f1 Task timed out after 5 minutes. Use /do to retry with a narrower scope.", "timeout"
@@ -823,6 +841,8 @@ async def analyze_screenshot(
         from PIL import Image as _PILImage
         with _PILImage.open(image_path) as _img:
             _img.verify()
+    except ImportError:
+        logger.warning("Pillow not installed — skipping image validation. pip install Pillow to enable.")
     except Exception as e:
         raise RuntimeError(f"Screenshot is not a valid image: {e}")
 
@@ -896,6 +916,8 @@ def chunk_output(text: str, max_length: int = 4000) -> list[str]:
     minified JSON, or other single-line blobs. Now hard-splits any line
     that still exceeds max_length after accumulation.
     """
+    if not text:
+        return []
     if len(text) <= max_length:
         return [text]
     chunks, current = [], ""

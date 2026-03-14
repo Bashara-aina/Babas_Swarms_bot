@@ -17,28 +17,33 @@ import logging
 logger = logging.getLogger(__name__)
 
 # ── Re-export everything from agents.py (single source of truth) ────────────
-from agents import (
-    AGENT_MODELS,
-    FALLBACK_CHAIN,
-    TASK_KEYWORDS,
-    DEFAULT_AGENT,
-    ACTIVE_THREADS,
-    DEBATE_PERSONAS,
-    DEBATE_PERSONA_MODELS,
-    DEBATE_ICONS,
-    PERSONALITY_WRAPPER,
-    detect_agent,
-    get_model,
-    get_fallback_chain,
-    build_system_prompt,
-    list_agents,
-    list_all_departments,
-    add_to_thread,
-    get_thread_context,
-    list_threads,
-    list_threads_raw,
-    clear_thread,
-)
+try:
+    from agents import (
+        AGENT_MODELS,
+        FALLBACK_CHAIN,
+        TASK_KEYWORDS,
+        DEFAULT_AGENT,
+        ACTIVE_THREADS,
+        DEBATE_PERSONAS,
+        DEBATE_PERSONA_MODELS,
+        DEBATE_ICONS,
+        PERSONALITY_WRAPPER,
+        detect_agent,
+        get_model,
+        get_fallback_chain,
+        build_system_prompt,
+        list_agents,
+        list_all_departments,
+        add_to_thread,
+        get_thread_context,
+        list_threads,
+        list_threads_raw,
+        clear_thread,
+    )
+except ImportError as _e:
+    raise ImportError(
+        f"agents.py not found — did you run setup? {_e}"
+    ) from _e
 
 __all__ = [
     "AGENT_MODELS", "FALLBACK_CHAIN", "TASK_KEYWORDS", "DEFAULT_AGENT",
