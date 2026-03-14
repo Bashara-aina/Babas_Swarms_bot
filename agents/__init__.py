@@ -104,6 +104,7 @@ AGENT_MODELS: dict[str, str] = {
     "devops":     "groq/llama-3.3-70b-versatile",       # infra + deployment
     "pm":         "cerebras/qwen-3-235b-a22b",          # project management
     "humanizer":  "groq/llama-3.3-70b-versatile",       # humanising AI text
+    "reviewer":   "groq/llama-3.3-70b-versatile",       # AI code review
 }
 
 # ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
@@ -177,6 +178,11 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "gemini/gemini-2.0-flash",
         "cerebras/qwen-3-235b-a22b",
     ],
+    "reviewer": [
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen-3-235b-a22b",
+        "gemini/gemini-2.0-flash",
+    ],
 }
 
 # ── Keyword → agent routing ─────────────────────────────────────────────────
@@ -242,6 +248,10 @@ TASK_KEYWORDS: dict[str, list[str]] = {
     "pm": [
         "project", "roadmap", "milestone", "sprint", "backlog", "priority",
         "stakeholder", "timeline", "scope", "deliverable",
+    ],
+    "reviewer": [
+        "review", "audit", "check code", "inspect", "quality",
+        "code review", "periksa", "lint", "scan",
     ],
 }
 

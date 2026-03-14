@@ -1829,6 +1829,319 @@ async def _execute_chat(
         )
 
 
+# ── Session management ────────────────────────────────────────────────────────
+
+@dp.message(Command("save"))
+async def cmd_save(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    name = (msg.text or "").removeprefix("/save").strip()
+    if not name:
+        await msg.answer("usage: <code>/save &lt;session_name&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        import json as _json, uuid
+        from agents import ACTIVE_THREADS
+        from tools.persistence import save_session
+        # Find the most recent active thread
+        thread_id = f"tg_{msg.chat.id}"
+        context = ACTIVE_THREADS.get(thread_id, [])
+        session_id = uuid.uuid4().hex[:12]
+        await save_session(
+            session_id=session_id,
+            name=name,
+            thread_id=thread_id,
+            agent_key="general",
+            context_json=_json.dumps(context, default=str),
+        )
+        await msg.answer(
+            f"✅ Session <b>{html_mod.escape(name)}</b> saved ({len(context)} messages)\n"
+            f"ID: <code>{session_id}</code>\nResume with: <code>/resume {html_mod.escape(name)}</code>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("resume"))
+async def cmd_resume(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    name = (msg.text or "").removeprefix("/resume").strip()
+    if not name:
+        await msg.answer("usage: <code>/resume &lt;session_name&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        import json as _json
+        from agents import ACTIVE_THREADS
+        from tools.persistence import resume_session
+        session = await resume_session(name)
+        if not session:
+            await msg.answer(f"session <b>{html_mod.escape(name)}</b> not found.", parse_mode="HTML")
+            return
+        # Restore thread context
+        thread_id = session["thread_id"]
+        context = _json.loads(session["context_json"] or "[]")
+        ACTIVE_THREADS[thread_id] = context
+        await msg.answer(
+            f"✅ Resumed <b>{html_mod.escape(session['name'])}</b> "
+            f"({len(context)} messages restored)\n"
+            f"Thread: <code>{thread_id}</code>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("sessions"))
+async def cmd_sessions(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.persistence import list_sessions
+        sessions = await list_sessions(limit=20)
+        if not sessions:
+            await msg.answer("No saved sessions.")
+            return
+        import datetime
+        lines = ["<b>Saved Sessions</b>\n"]
+        for s in sessions:
+            dt = datetime.datetime.fromtimestamp(s["last_active"]).strftime("%m-%d %H:%M")
+            lines.append(
+                f"  <code>{s['session_id']}</code> <b>{html_mod.escape(s['name'])}</b> "
+                f"({s['status']}) — {dt}"
+            )
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+# ── Audit ─────────────────────────────────────────────────────────────────────
+
+@dp.message(Command("audit"))
+async def cmd_audit(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    arg = (msg.text or "").removeprefix("/audit").strip()
+    hours = int(arg) if arg.isdigit() else 24
+    try:
+        from tools.persistence import get_audit_summary
+        summary = await get_audit_summary(hours=hours)
+        if not summary["breakdown"]:
+            await msg.answer(f"No activity in the last {hours}h.")
+            return
+        lines = [f"<b>Audit — last {hours}h</b>\n"]
+        total_tin = total_tout = total_err = 0
+        for row in summary["breakdown"]:
+            tin = row["tin"] or 0
+            tout = row["tout"] or 0
+            total_tin += tin
+            total_tout += tout
+            total_err += row["errors"] or 0
+            lines.append(
+                f"  <code>{row['action']:12}</code> ×{row['cnt']} "
+                f"({tin + tout} tok, {row['errors'] or 0} err)"
+            )
+        lines.append(f"\nTotal: {total_tin + total_tout} tokens, {total_err} errors")
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+# ── Instincts / Learn ─────────────────────────────────────────────────────────
+
+@dp.message(Command("learn"))
+async def cmd_learn(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    text = (msg.text or "").removeprefix("/learn").strip()
+    if not text:
+        await msg.answer(
+            "usage: <code>/learn &lt;pattern or preference&gt;</code>\n"
+            "Example: /learn Always use type hints in Python",
+            parse_mode="HTML",
+        )
+        return
+    # Detect category from keywords
+    t = text.lower()
+    if any(k in t for k in ("style", "format", "naming", "convention")):
+        category = "style"
+    elif any(k in t for k in ("prefer", "always", "never", "default")):
+        category = "preference"
+    elif any(k in t for k in ("fix", "correct", "actually", "instead")):
+        category = "correction"
+    else:
+        category = "pattern"
+    try:
+        from tools.persistence import add_instinct
+        iid = await add_instinct(category, text, source="manual")
+        await msg.answer(
+            f"✅ Learned [{category}] (id: {iid})\n<i>{html_mod.escape(text[:200])}</i>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("instincts"))
+async def cmd_instincts(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.persistence import get_instincts
+        items = await get_instincts(limit=30)
+        if not items:
+            await msg.answer("No instincts yet. Use /learn to add some.")
+            return
+        lines = ["<b>Instincts</b>\n"]
+        for i in items:
+            lines.append(
+                f"  <code>#{i['id']}</code> [{i['category']}] "
+                f"{html_mod.escape(i['content'][:80])} "
+                f"(used {i['uses']}×)"
+            )
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+@dp.message(Command("forget"))
+async def cmd_forget(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    arg = (msg.text or "").removeprefix("/forget").strip()
+    if not arg.isdigit():
+        await msg.answer("usage: <code>/forget &lt;instinct_id&gt;</code>", parse_mode="HTML")
+        return
+    try:
+        from tools.persistence import delete_instinct
+        ok = await delete_instinct(int(arg))
+        if ok:
+            await msg.answer(f"✅ Instinct #{arg} deleted.")
+        else:
+            await msg.answer(f"Instinct #{arg} not found.")
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+# ── Code Review ───────────────────────────────────────────────────────────────
+
+@dp.message(Command("review"))
+async def cmd_review(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    arg = (msg.text or "").removeprefix("/review").strip()
+    if not arg:
+        await msg.answer(
+            "usage: <code>/review &lt;file_path&gt;</code>\n"
+            "or reply to a code message with /review",
+            parse_mode="HTML",
+        )
+        return
+    status_msg = await msg.answer("🔍 reviewing…")
+    try:
+        from tools.code_reviewer import review_file, review_code
+        from pathlib import Path
+        if Path(arg).exists():
+            result = await review_file(arg)
+        else:
+            # Treat as inline code
+            result = await review_code(arg, language="python")
+        await status_msg.edit_text(result[:4000], parse_mode="HTML")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+
+
+@dp.message(Command("security_review"))
+async def cmd_security_review(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    arg = (msg.text or "").removeprefix("/security_review").strip()
+    if not arg:
+        await msg.answer("usage: <code>/security_review &lt;file_path&gt;</code>", parse_mode="HTML")
+        return
+    status_msg = await msg.answer("🛡 security review…")
+    try:
+        from tools.code_reviewer import review_file
+        result = await review_file(arg, review_type="security")
+        await status_msg.edit_text(result[:4000], parse_mode="HTML")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+
+
+# ── Multi-Plan ────────────────────────────────────────────────────────────────
+
+@dp.message(Command("multi_plan"))
+async def cmd_multi_plan(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/multi_plan").strip()
+    if not task:
+        await msg.answer("usage: <code>/multi_plan &lt;task&gt;</code>", parse_mode="HTML")
+        return
+    status_msg = await msg.answer("🧠 generating 3 approaches…")
+    try:
+        from llm_client import chat
+        agents = ["architect", "coding", "analyst"]
+        results = await asyncio.gather(
+            *(chat(task, agent_key=a) for a in agents),
+            return_exceptions=True,
+        )
+        lines = ["<b>Multi-Plan Comparison</b>\n"]
+        for agent, res in zip(agents, results):
+            if isinstance(res, Exception):
+                lines.append(f"\n<b>⚠️ {agent}</b>: error — {html_mod.escape(str(res)[:200])}\n")
+            else:
+                text, model = res
+                lines.append(f"\n<b>📋 {agent}</b> ({model}):\n{text[:1000]}\n")
+        full = "\n".join(lines)
+        # Chunk if needed
+        if len(full) <= 4000:
+            await status_msg.edit_text(full, parse_mode="HTML")
+        else:
+            await status_msg.edit_text(full[:4000], parse_mode="HTML")
+            for i in range(4000, len(full), 4000):
+                await msg.answer(full[i:i + 4000], parse_mode="HTML")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+
+
+# ── Orchestrate ───────────────────────────────────────────────────────────────
+
+@dp.message(Command("orchestrate"))
+async def cmd_orchestrate(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/orchestrate").strip()
+    if not task:
+        await msg.answer("usage: <code>/orchestrate &lt;complex task&gt;</code>", parse_mode="HTML")
+        return
+    status_msg = await msg.answer("🎯 decomposing task…")
+    try:
+        from tools.orchestrate_engine import orchestrate_task
+        result = await orchestrate_task(task, progress_cb=lambda s: status_msg.edit_text(f"⏳ {s}"))
+        if len(result) <= 4000:
+            await status_msg.edit_text(result, parse_mode="HTML")
+        else:
+            await status_msg.edit_text(result[:4000], parse_mode="HTML")
+            for i in range(4000, len(result), 4000):
+                await msg.answer(result[i:i + 4000], parse_mode="HTML")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+
+
 # ── Startup ───────────────────────────────────────────────────────────────────
 async def on_startup() -> None:
     # Initialize persistence and scheduler
@@ -1842,6 +2155,14 @@ async def on_startup() -> None:
         logger.info("Scheduler initialized")
     except Exception as e:
         logger.warning("Scheduler init failed (non-fatal): %s", e)
+
+    # Register lifecycle hooks
+    try:
+        from core.builtin_hooks import register_builtin_hooks
+        register_builtin_hooks()
+        logger.info("Lifecycle hooks registered")
+    except Exception as e:
+        logger.warning("Hook init failed (non-fatal): %s", e)
 
     # Initialize memory DB
     try:
@@ -1888,6 +2209,19 @@ async def on_startup() -> None:
         # Content
         BotCommand(command="post",        description="Draft social media post"),
         BotCommand(command="brand_check", description="Monitor brand mentions"),
+        # Code Quality
+        BotCommand(command="review",      description="AI code review"),
+        BotCommand(command="security_review", description="Security audit"),
+        # Orchestration
+        BotCommand(command="orchestrate", description="Decompose + execute complex task"),
+        BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
+        # Sessions & Learning
+        BotCommand(command="save",        description="Save session state"),
+        BotCommand(command="resume",      description="Resume saved session"),
+        BotCommand(command="sessions",    description="List saved sessions"),
+        BotCommand(command="learn",       description="Teach a pattern"),
+        BotCommand(command="instincts",   description="Show learned patterns"),
+        BotCommand(command="audit",       description="Activity audit trail"),
         # System
         BotCommand(command="models",      description="Agent roster"),
         BotCommand(command="keys",        description="API key status"),
