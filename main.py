@@ -2142,6 +2142,77 @@ async def cmd_orchestrate(msg: Message) -> None:
         )
 
 
+# ── Autonomous Loop ──────────────────────────────────────────────────────
+
+@dp.message(Command("loop"))
+async def cmd_loop(msg: Message) -> None:
+    """Autonomous plan-execute loop with safety bounds."""
+    if not is_allowed(msg):
+        return
+    goal = (msg.text or "").removeprefix("/loop").strip()
+    if not goal:
+        await msg.answer(
+            "<b>usage:</b> <code>/loop &lt;goal&gt;</code>\n\n"
+            "Runs an autonomous plan→execute loop until the goal is done.\n"
+            "Safety bounds: 25 iterations, $0.50 cost ceiling, 30min timeout.\n"
+            "Stop anytime with /loop_stop",
+            parse_mode="HTML",
+        )
+        return
+
+    from tools.autonomous_loop import get_active_loop, run_autonomous_loop, LoopConfig
+
+    # Check if a loop is already running
+    if get_active_loop(msg.from_user.id):
+        await msg.answer(
+            "A loop is already running. Use /loop_stop to cancel it first.",
+        )
+        return
+
+    thread_id = _user_thread.get(msg.from_user.id)
+
+    await msg.answer(
+        f"<b>🔄 Loop started</b>\n"
+        f"Goal: <code>{html_mod.escape(goal[:200])}</code>\n\n"
+        f"Bounds: 25 iters | $0.50 cost cap | 30min timeout\n"
+        f"Progress updates every 5 iterations.\n"
+        f"Stop anytime: /loop_stop",
+        parse_mode="HTML",
+    )
+
+    async def notify(text: str) -> None:
+        try:
+            await bot.send_message(msg.chat.id, text, parse_mode="HTML")
+        except Exception:
+            try:
+                await bot.send_message(msg.chat.id, html_mod.escape(text), parse_mode="HTML")
+            except Exception:
+                await bot.send_message(msg.chat.id, text[:4000])
+
+    # Run in background — don't block the command handler
+    asyncio.create_task(
+        run_autonomous_loop(
+            user_id=msg.from_user.id,
+            goal=goal,
+            notify_cb=notify,
+            config=LoopConfig(),
+            thread_id=thread_id,
+        )
+    )
+
+
+@dp.message(Command("loop_stop"))
+async def cmd_loop_stop(msg: Message) -> None:
+    """Kill switch for the autonomous loop."""
+    if not is_allowed(msg):
+        return
+    from tools.autonomous_loop import stop_loop
+    if stop_loop(msg.from_user.id):
+        await msg.answer("Loop stop signal sent. It will halt after the current step.")
+    else:
+        await msg.answer("No active loop running.")
+
+
 # ── Startup ───────────────────────────────────────────────────────────────────
 async def on_startup() -> None:
     # Initialize persistence and scheduler
@@ -2215,6 +2286,8 @@ async def on_startup() -> None:
         # Orchestration
         BotCommand(command="orchestrate", description="Decompose + execute complex task"),
         BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
+        BotCommand(command="loop",        description="Autonomous goal execution loop"),
+        BotCommand(command="loop_stop",   description="Stop running loop"),
         # Sessions & Learning
         BotCommand(command="save",        description="Save session state"),
         BotCommand(command="resume",      description="Resume saved session"),
