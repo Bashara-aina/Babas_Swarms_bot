@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "babas-swarms-bot"
+version = "4.1.0"
+description = "Legion — AI-powered Telegram bot for full desktop control and multi-agent orchestration"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Bashara Aina", email = "71659607+Bashara-aina@users.noreply.github.com" }]
+requires-python = ">=3.11"
+keywords = ["telegram", "bot", "ai", "llm", "agent", "computer-use"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["."] 
+omit = [
+    "tests/*",
+    "*/site-packages/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+fail_under = 50
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = [".venv", "__pycache__", ".git"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501", "F401", "F811"]
