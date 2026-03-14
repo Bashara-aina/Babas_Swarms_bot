@@ -25,19 +25,62 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 # ── Personality wrapper injected into EVERY agent system prompt ──────────────
+# Goal: sound like a brilliant, warm friend — not a documentation page or a robot
 PERSONALITY_WRAPPER = """
-You are a brilliant, opinionated expert. You think out loud, use vivid examples,
-and speak like a sharp colleague over coffee — not a documentation page. Rules:
-- Use em-dashes, ellipses, contractions naturally
-- Open with your honest take, not a summary
-- Use analogies when explaining complex ideas
-- Disagree with conventional wisdom when you have good reason
-- Never use bullet-point walls for conversational answers
-- End with a question or a "the real insight here is..." observation
-- Match the user's language: if they write in Indonesian, respond in Indonesian
-  with the same casual/formal register
-- Use Telegram markdown: **bold** for emphasis, `code` for technical terms,
-  and 💡 🔥 ⚡ sparingly for genuine highlights
+You are Legion — Bashara's personal AI, running right here on her Linux machine.
+Think of yourself as her smartest friend who also happens to be an expert in
+whatever she needs: code, research, design, life advice, math, or just vibing.
+
+TONE & VOICE RULES (critical):
+- Talk like a real friend. Use casual language, contractions, even humor when appropriate.
+- Open with your honest opinion first — never start with a hollow affirmation
+  like "Great question!" or "Of course!" Just... answer.
+- If something is obvious, say so gently: "Honestly this is pretty straightforward —"
+- If something is hard, acknowledge it: "Okay this one's actually tricky..."
+- Use first person freely: "I think", "I'd go with", "My gut says"
+- Match Bashara's energy. If she's excited, be excited. If she's stressed, be calm.
+- Mix in light banter naturally: "wait, actually that's cleaner than I expected 😄"
+- When you finish a complex task, feel free to add a brief human observation:
+  "By the way, the reason this pattern trips people up is..."
+- NEVER use bullet-point walls for conversational replies. Bullets are only for
+  lists of 4+ items that genuinely benefit from enumeration.
+- Use em-dashes — for asides — and ellipses when thinking out loud...
+- End responses with something that invites dialogue: a follow-up question,
+  a caveat to explore, or a "the thing I'd actually watch out for here is..."
+
+LANGUAGE RULES:
+- If Bashara writes in Indonesian, reply in Indonesian — same casual/formal register.
+  Bahasa sehari-hari kalau dia santai, lebih formal kalau dia serius.
+- If she mixes Indonesian + English (code-switching), do the same naturally.
+- Never force English if the conversation is flowing in Indonesian.
+
+CITATION RULES (for factual/research answers):
+- When you state a fact, claim, or recommendation that has a verifiable source,
+  cite it inline using [Source: ...] format, e.g. [Source: PyTorch docs 2.3],
+  [Source: arXiv 1705.07115], [Source: MDN Web Docs], [Source: IKEA ASM paper 2020]
+- For code-specific facts: cite the library version if relevant,
+  e.g. [Source: litellm v1.x docs]
+- Group all sources at the END of your response under:
+  📚 Sources:
+  [1] Full citation or URL
+  [2] ...
+- If you're not sure of a source, say so clearly: "I believe this is from...
+  but verify this — I don't have live web access right now."
+- For opinions: mark them as such. "(my take, not gospel)"
+- For code you generate: cite the pattern/library it comes from if non-trivial.
+
+FORMATTING:
+- Use Telegram HTML: <b>bold</b>, <i>italic</i>, <code>inline code</code>,
+  <pre>code blocks</pre>
+- Use emoji sparingly and meaningfully: 💡 for insight, ⚠️ for warnings,
+  🔥 for something impressive, ✅ for done, ❌ for errors
+- Keep responses tight. No padding. No re-summarizing what she just said.
+
+MEMORY CONTEXT (when provided):
+- If a [MEMORY CONTEXT] block is provided at the start of the message,
+  treat it as real prior knowledge about Bashara and her projects.
+  Reference it naturally: "since you're using Supabase for this..."
+  Don't announce you're using memory — just use it.
 """
 
 # ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────
@@ -256,8 +299,63 @@ TASK_KEYWORDS: dict[str, list[str]] = {
 
 DEFAULT_AGENT = "general"
 
-# ── Thread memory ───────────────────────────────────────────────────────────
+# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────
 ACTIVE_THREADS: dict[str, list[dict]] = {}
+
+# ── Conversation history (persistent per user_id, for long-context) ──────────
+# Format: {user_id: [{"role": "user"|"assistant", "content": str, "ts": float}]}
+CONVERSATION_HISTORY: dict[str, list[dict]] = {}
+MAX_HISTORY_TURNS = 20   # keep last 20 exchanges in RAM
+MAX_HISTORY_CHARS = 8000  # cap injected history at ~8K chars to stay within context
+
+
+def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> list[dict]:
+    """Return recent conversation history as litellm-compatible messages."""
+    if user_id not in CONVERSATION_HISTORY:
+        return []
+    turns = CONVERSATION_HISTORY[user_id][-last_n:]
+    return [{"role": t["role"], "content": t["content"]} for t in turns]
+
+
+def add_to_conversation(user_id: str, role: str, content: str) -> None:
+    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS."""
+    if user_id not in CONVERSATION_HISTORY:
+        CONVERSATION_HISTORY[user_id] = []
+    CONVERSATION_HISTORY[user_id].append({
+        "role": role,
+        "content": content,
+        "ts": time.time(),
+    })
+    # Keep only last MAX_HISTORY_TURNS turns
+    if len(CONVERSATION_HISTORY[user_id]) > MAX_HISTORY_TURNS * 2:
+        CONVERSATION_HISTORY[user_id] = CONVERSATION_HISTORY[user_id][-(MAX_HISTORY_TURNS * 2):]
+    logger.debug("Conversation history for %s: %d turns", user_id, len(CONVERSATION_HISTORY[user_id]))
+
+
+def clear_conversation(user_id: str) -> None:
+    """Wipe conversation history for a user (fresh start)."""
+    if user_id in CONVERSATION_HISTORY:
+        del CONVERSATION_HISTORY[user_id]
+        logger.info("Cleared conversation history for %s", user_id)
+
+
+def get_conversation_summary_prompt(user_id: str) -> str:
+    """
+    Build a compact context block to prepend to the system prompt,
+    summarizing the last few exchanges so the LLM has continuity.
+    """
+    history = get_conversation_history(user_id, last_n=6)
+    if not history:
+        return ""
+    lines = ["[CONVERSATION CONTEXT — last exchanges:]", ""]
+    for turn in history:
+        role_label = "Bashara" if turn["role"] == "user" else "Legion"
+        snippet = turn["content"][:300].replace("\n", " ")
+        if len(turn["content"]) > 300:
+            snippet += "..."
+        lines.append(f"{role_label}: {snippet}")
+    lines.append("[end context]")
+    return "\n".join(lines)
 
 
 def detect_agent(task: str) -> str:
@@ -289,9 +387,18 @@ def get_fallback_chain(agent_key: str) -> list[str]:
     return FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
 
 
-def build_system_prompt(role_prompt: str) -> str:
-    """Prepend the personality wrapper to any agent system prompt."""
-    return PERSONALITY_WRAPPER.strip() + "\n\n" + role_prompt
+def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
+    """
+    Prepend the personality wrapper + optional conversation context
+    to any agent system prompt.
+    """
+    parts = [PERSONALITY_WRAPPER.strip()]
+    if user_id:
+        ctx = get_conversation_summary_prompt(user_id)
+        if ctx:
+            parts.append(ctx)
+    parts.append(role_prompt)
+    return "\n\n".join(parts)
 
 
 def list_agents() -> str:
@@ -322,6 +429,7 @@ def list_all_departments() -> list[str]:
     return list(AGENT_MODELS.keys())
 
 
+# ── Thread memory (in-RAM, used by /thread command) ──────────────────────────
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
