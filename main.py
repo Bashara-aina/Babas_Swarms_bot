@@ -91,6 +91,14 @@ _start_time = time.time()
 _last_screenshot: dict[int, str] = {}  # user_id → screenshot path for analyze button
 _scheduler = None  # initialized in on_startup
 
+# ── swarms_bot enterprise layer (initialized in on_startup) ──────────────────
+_chief_of_staff = None
+_cost_router = None
+_budget_manager = None
+_security_guard = None
+_audit_logger = None
+_evaluator = None
+
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 def is_allowed(msg: Message) -> bool:
@@ -219,6 +227,11 @@ async def cmd_start(msg: Message) -> None:
         "  <code>/task_from</code>  <code>/tasks_due</code>  <code>/task_done</code>\n\n"
         "<b>content</b>\n"
         "  <code>/post</code>  <code>/brand_check</code>  <code>/delegate</code>\n\n"
+        "<b>orchestration</b>\n"
+        "  <code>/orchestrate</code>  <code>/multi_execute</code>  <code>/multi_plan</code>\n"
+        "  <code>/loop</code>  <code>/loop_stop</code>\n\n"
+        "<b>enterprise</b>\n"
+        "  <code>/budget</code>  <code>/routing_stats</code>  <code>/audit_summary</code>  <code>/security_stats</code>\n\n"
         "<b>system</b>\n"
         "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>  <code>/maintenance</code>\n\n"
         "or just type naturally — i'll figure it out."
@@ -2213,6 +2226,191 @@ async def cmd_loop_stop(msg: Message) -> None:
         await msg.answer("No active loop running.")
 
 
+# ── /multi_execute — Same task, multiple agents ──────────────────────────────
+
+@dp.message(Command("multi_execute"))
+async def cmd_multi_execute(msg: Message) -> None:
+    """Execute same task with multiple agents and compare results."""
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/multi_execute").strip()
+    if not task:
+        await msg.answer(
+            "<b>usage:</b> <code>/multi_execute &lt;task&gt;</code>\n\n"
+            "Runs the same task with 3 agents and compares results.\n"
+            "Optionally specify agents: <code>/multi_execute --agents=coding,debug,analyst &lt;task&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    # Parse --agents flag
+    agent_keys = ["coding", "architect", "analyst"]
+    if "--agents=" in task:
+        parts = task.split("--agents=", 1)
+        agent_str, task = parts[1].split(" ", 1)
+        agent_keys = [a.strip() for a in agent_str.split(",")]
+
+    status_msg = await msg.answer(f"⚡ Running task with {len(agent_keys)} agents…")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        if _chief_of_staff:
+            from swarms_bot.orchestrator.chief_of_staff import Task as STask
+            stask = STask.create(
+                user_id=msg.from_user.id,
+                chat_id=msg.chat.id,
+                description=task,
+            )
+            responses = await _chief_of_staff.route_multi(stask, agent_keys)
+
+            lines = ["<b>Multi-Execute Comparison</b>\n"]
+            for resp in responses:
+                icon = "✅" if resp.success else "❌"
+                model = resp.metadata.get("model", "unknown")
+                lines.append(
+                    f"\n{icon} <b>{resp.agent_name}</b> ({model}, {resp.execution_time_ms}ms):\n"
+                    f"{resp.result[:1000] if resp.result else 'No result'}\n"
+                )
+            full = "\n".join(lines)
+
+            # Log audit
+            if _audit_logger:
+                await _audit_logger.log(
+                    user_id=msg.from_user.id,
+                    agent_name="multi_execute",
+                    action_type="multi_execute",
+                    success=any(r.success for r in responses),
+                    metadata={"agents": agent_keys},
+                )
+        else:
+            # Fallback to basic parallel execution
+            from llm_client import chat
+            results = await asyncio.gather(
+                *(chat(task, agent_key=a) for a in agent_keys),
+                return_exceptions=True,
+            )
+            lines = ["<b>Multi-Execute Comparison</b>\n"]
+            for agent, res in zip(agent_keys, results):
+                if isinstance(res, Exception):
+                    lines.append(f"\n❌ <b>{agent}</b>: {html_mod.escape(str(res)[:200])}\n")
+                else:
+                    text, model = res
+                    lines.append(f"\n✅ <b>{agent}</b> ({model}):\n{text[:1000]}\n")
+            full = "\n".join(lines)
+
+        await send_chunked(msg, full)
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    except Exception as e:
+        await status_msg.edit_text(
+            f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+    finally:
+        typing_task.cancel()
+
+
+# ── /budget — Cost tracking dashboard ────────────────────────────────────────
+
+@dp.message(Command("budget"))
+async def cmd_budget(msg: Message) -> None:
+    """Show cost tracking and budget status."""
+    if not is_allowed(msg):
+        return
+    if not _budget_manager:
+        await msg.answer("Budget manager not initialized.")
+        return
+
+    text = _budget_manager.format_budget_html()
+    await msg.answer(text, parse_mode="HTML")
+
+
+# ── /routing_stats — Cost router analytics ───────────────────────────────────
+
+@dp.message(Command("routing_stats"))
+async def cmd_routing_stats(msg: Message) -> None:
+    """Show cost-aware routing statistics."""
+    if not is_allowed(msg):
+        return
+
+    lines = []
+
+    if _chief_of_staff:
+        lines.append(_chief_of_staff.format_stats_html())
+        lines.append("")
+
+    if _cost_router:
+        lines.append(_cost_router.format_stats_html())
+        lines.append("")
+
+    if _evaluator:
+        lines.append(_evaluator.format_scores_html())
+
+    if not lines:
+        await msg.answer("No routing stats available yet.")
+        return
+
+    await send_chunked(msg, "\n".join(lines))
+
+
+# ── /security_stats — Security guard stats ───────────────────────────────────
+
+@dp.message(Command("security_stats"))
+async def cmd_security_stats(msg: Message) -> None:
+    """Show security guard statistics."""
+    if not is_allowed(msg):
+        return
+    if not _security_guard:
+        await msg.answer("Security guard not initialized.")
+        return
+
+    stats = _security_guard.get_stats()
+    text = (
+        "<b>Security Guard Stats</b>\n\n"
+        f"Scanned: {stats['total_scanned']}\n"
+        f"Blocked: {stats['total_blocked']}\n"
+        f"Block rate: {stats['block_rate']*100:.1f}%"
+    )
+    await msg.answer(text, parse_mode="HTML")
+
+
+# ── /audit_summary — Audit log summary ───────────────────────────────────────
+
+@dp.message(Command("audit_summary"))
+async def cmd_audit_summary(msg: Message) -> None:
+    """Show audit log summary for the last 24 hours."""
+    if not is_allowed(msg):
+        return
+    if not _audit_logger:
+        await msg.answer("Audit logger not initialized.")
+        return
+
+    summary = await _audit_logger.get_summary(hours=24)
+    lines = [
+        "<b>Audit Summary (24h)</b>\n",
+        f"Events: {summary['total_events']}",
+        f"Success: {summary['success_count']} | "
+        f"Failures: {summary['failure_count']}",
+        f"Cost: ${summary['total_cost_usd']:.4f}",
+    ]
+
+    if summary["by_agent"]:
+        lines.append("\n<b>By agent:</b>")
+        for agent, count in sorted(summary["by_agent"].items(),
+                                     key=lambda x: x[1], reverse=True):
+            lines.append(f"  <code>{agent}</code>: {count}")
+
+    if summary["by_action"]:
+        lines.append("\n<b>By action:</b>")
+        for action, count in summary["by_action"].items():
+            lines.append(f"  {action}: {count}")
+
+    await msg.answer("\n".join(lines), parse_mode="HTML")
+
+
 # ── Startup ───────────────────────────────────────────────────────────────────
 async def on_startup() -> None:
     # Initialize persistence and scheduler
@@ -2251,6 +2449,28 @@ async def on_startup() -> None:
     except Exception as e:
         logger.warning("Briefing schedule failed (non-fatal): %s", e)
 
+    # Initialize swarms_bot enterprise layer
+    global _chief_of_staff, _cost_router, _budget_manager
+    global _security_guard, _audit_logger, _evaluator
+    try:
+        from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff
+        from swarms_bot.routing.cost_router import CostAwareRouter
+        from swarms_bot.routing.budget_manager import BudgetManager
+        from swarms_bot.security.guard import SecurityGuard
+        from swarms_bot.security.rate_limiter import RateLimiter
+        from swarms_bot.audit.audit_logger import AuditLogger
+        from swarms_bot.evaluation.evaluator import AgentEvaluator
+
+        _chief_of_staff = ChiefOfStaff()
+        _cost_router = CostAwareRouter()
+        _budget_manager = BudgetManager()
+        _security_guard = SecurityGuard()
+        _audit_logger = AuditLogger()
+        _evaluator = AgentEvaluator()
+        logger.info("✅ swarms_bot enterprise layer initialized")
+    except Exception as e:
+        logger.warning("swarms_bot init failed (non-fatal): %s", e)
+
     await bot.set_my_commands([
         BotCommand(command="do",          description="Autonomous computer control"),
         BotCommand(command="screen",      description="Take desktop screenshot"),
@@ -2288,6 +2508,10 @@ async def on_startup() -> None:
         BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
         BotCommand(command="loop",        description="Autonomous goal execution loop"),
         BotCommand(command="loop_stop",   description="Stop running loop"),
+        BotCommand(command="multi_execute", description="Compare multiple agents"),
+        BotCommand(command="budget",     description="Cost tracking dashboard"),
+        BotCommand(command="routing_stats", description="Routing analytics"),
+        BotCommand(command="audit_summary", description="Audit log summary"),
         # Sessions & Learning
         BotCommand(command="save",        description="Save session state"),
         BotCommand(command="resume",      description="Resume saved session"),
