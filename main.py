@@ -98,6 +98,8 @@ _budget_manager = None
 _security_guard = None
 _audit_logger = None
 _evaluator = None
+_session_manager = None
+_cost_metrics = None
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -1853,10 +1855,31 @@ async def cmd_save(msg: Message) -> None:
         await msg.answer("usage: <code>/save &lt;session_name&gt;</code>", parse_mode="HTML")
         return
     try:
+        # Use SessionManager if available (tracks cost, routing decisions, agent states)
+        if _session_manager:
+            thread_id = _user_thread.get(msg.from_user.id, f"tg_{msg.chat.id}")
+            _session_manager.get_or_create_session(
+                user_id=msg.from_user.id,
+                chat_id=msg.chat.id,
+                thread_id=thread_id,
+            )
+            session = await _session_manager.save_session(msg.from_user.id, name)
+            if session:
+                await msg.answer(
+                    f"✅ Session <b>{html_mod.escape(name)}</b> saved\n"
+                    f"ID: <code>{session.session_id}</code>\n"
+                    f"Tasks: {session.task_count} | "
+                    f"Cost: ${session.total_cost_usd:.4f} | "
+                    f"Tokens: {session.total_tokens:,}\n"
+                    f"Resume: <code>/resume {html_mod.escape(name)}</code>",
+                    parse_mode="HTML",
+                )
+                return
+
+        # Fallback to legacy persistence
         import json as _json, uuid
         from agents import ACTIVE_THREADS
         from tools.persistence import save_session
-        # Find the most recent active thread
         thread_id = f"tg_{msg.chat.id}"
         context = ACTIVE_THREADS.get(thread_id, [])
         session_id = uuid.uuid4().hex[:12]
@@ -1869,7 +1892,7 @@ async def cmd_save(msg: Message) -> None:
         )
         await msg.answer(
             f"✅ Session <b>{html_mod.escape(name)}</b> saved ({len(context)} messages)\n"
-            f"ID: <code>{session_id}</code>\nResume with: <code>/resume {html_mod.escape(name)}</code>",
+            f"ID: <code>{session_id}</code>\nResume: <code>/resume {html_mod.escape(name)}</code>",
             parse_mode="HTML",
         )
     except Exception as e:
@@ -1885,6 +1908,29 @@ async def cmd_resume(msg: Message) -> None:
         await msg.answer("usage: <code>/resume &lt;session_name&gt;</code>", parse_mode="HTML")
         return
     try:
+        # Use SessionManager if available
+        if _session_manager:
+            session = await _session_manager.resume_session(msg.from_user.id, name)
+            if session:
+                # Restore thread association
+                if session.thread_id:
+                    _user_thread[msg.from_user.id] = session.thread_id
+                await msg.answer(
+                    f"✅ Resumed <b>{html_mod.escape(session.name)}</b>\n"
+                    f"Tasks: {session.task_count} | "
+                    f"Cost: ${session.total_cost_usd:.4f}\n"
+                    f"Thread: <code>{session.thread_id or 'new'}</code>",
+                    parse_mode="HTML",
+                )
+                return
+            else:
+                await msg.answer(
+                    f"Session <b>{html_mod.escape(name)}</b> not found.",
+                    parse_mode="HTML",
+                )
+                return
+
+        # Fallback to legacy persistence
         import json as _json
         from agents import ACTIVE_THREADS
         from tools.persistence import resume_session
@@ -1892,7 +1938,6 @@ async def cmd_resume(msg: Message) -> None:
         if not session:
             await msg.answer(f"session <b>{html_mod.escape(name)}</b> not found.", parse_mode="HTML")
             return
-        # Restore thread context
         thread_id = session["thread_id"]
         context = _json.loads(session["context_json"] or "[]")
         ACTIVE_THREADS[thread_id] = context
@@ -1911,6 +1956,14 @@ async def cmd_sessions(msg: Message) -> None:
     if not is_allowed(msg):
         return
     try:
+        # Use SessionManager if available
+        if _session_manager:
+            sessions = await _session_manager.list_sessions(msg.from_user.id, limit=20)
+            text = _session_manager.format_sessions_html(sessions)
+            await msg.answer(text, parse_mode="HTML")
+            return
+
+        # Fallback to legacy persistence
         from tools.persistence import list_sessions
         sessions = await list_sessions(limit=20)
         if not sessions:
@@ -2226,6 +2279,57 @@ async def cmd_loop_stop(msg: Message) -> None:
         await msg.answer("No active loop running.")
 
 
+@dp.message(Command("loop_status"))
+async def cmd_loop_status(msg: Message) -> None:
+    """Show status of the current autonomous loop."""
+    if not is_allowed(msg):
+        return
+    from tools.autonomous_loop import get_loop_state, format_loop_status_html
+    state = get_loop_state(msg.from_user.id)
+    if not state:
+        await msg.answer("No loop found. Start one with /loop")
+        return
+    await msg.answer(format_loop_status_html(state), parse_mode="HTML")
+
+
+@dp.message(Command("loop_pause"))
+async def cmd_loop_pause(msg: Message) -> None:
+    """Pause the running autonomous loop."""
+    if not is_allowed(msg):
+        return
+    from tools.autonomous_loop import pause_loop
+    if pause_loop(msg.from_user.id):
+        await msg.answer("⏸️ Loop paused. Resume with /loop_resume")
+    else:
+        await msg.answer("No running loop to pause.")
+
+
+@dp.message(Command("loop_resume"))
+async def cmd_loop_resume(msg: Message) -> None:
+    """Resume a paused autonomous loop."""
+    if not is_allowed(msg):
+        return
+    from tools.autonomous_loop import resume_loop
+    if resume_loop(msg.from_user.id):
+        await msg.answer("▶️ Loop resumed.")
+    else:
+        await msg.answer("No paused loop to resume.")
+
+
+# ── /metrics — Performance dashboard ─────────────────────────────────────────
+
+@dp.message(Command("metrics"))
+async def cmd_metrics(msg: Message) -> None:
+    """Show performance and cost metrics dashboard."""
+    if not is_allowed(msg):
+        return
+    if not _cost_metrics:
+        await msg.answer("Cost metrics collector not initialized.")
+        return
+    text = _cost_metrics.format_dashboard_html()
+    await msg.answer(text, parse_mode="HTML")
+
+
 # ── /multi_execute — Same task, multiple agents ──────────────────────────────
 
 @dp.message(Command("multi_execute"))
@@ -2452,6 +2556,7 @@ async def on_startup() -> None:
     # Initialize swarms_bot enterprise layer
     global _chief_of_staff, _cost_router, _budget_manager
     global _security_guard, _audit_logger, _evaluator
+    global _session_manager, _cost_metrics
     try:
         from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff
         from swarms_bot.routing.cost_router import CostAwareRouter
@@ -2460,14 +2565,32 @@ async def on_startup() -> None:
         from swarms_bot.security.rate_limiter import RateLimiter
         from swarms_bot.audit.audit_logger import AuditLogger
         from swarms_bot.evaluation.evaluator import AgentEvaluator
+        from swarms_bot.sessions.session_manager import SessionManager
+        from swarms_bot.observability.cost_metrics import CostMetricsCollector
+        from swarms_bot.observability.logging_config import configure_structured_logging
 
-        _chief_of_staff = ChiefOfStaff()
         _cost_router = CostAwareRouter()
         _budget_manager = BudgetManager()
         _security_guard = SecurityGuard()
         _audit_logger = AuditLogger()
         _evaluator = AgentEvaluator()
-        logger.info("✅ swarms_bot enterprise layer initialized")
+        _session_manager = SessionManager()
+        _cost_metrics = CostMetricsCollector()
+
+        # Initialize ChiefOfStaff with all enterprise integrations
+        _chief_of_staff = ChiefOfStaff(
+            budget_manager=_budget_manager,
+            security_guard=_security_guard,
+            audit_logger=_audit_logger,
+            cost_metrics=_cost_metrics,
+            cost_router=_cost_router,
+            session_manager=_session_manager,
+        )
+
+        # Configure structured logging for production observability
+        configure_structured_logging()
+
+        logger.info("✅ swarms_bot enterprise layer initialized (with integrations)")
     except Exception as e:
         logger.warning("swarms_bot init failed (non-fatal): %s", e)
 
@@ -2508,8 +2631,12 @@ async def on_startup() -> None:
         BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
         BotCommand(command="loop",        description="Autonomous goal execution loop"),
         BotCommand(command="loop_stop",   description="Stop running loop"),
+        BotCommand(command="loop_status", description="Loop progress status"),
+        BotCommand(command="loop_pause",  description="Pause running loop"),
+        BotCommand(command="loop_resume", description="Resume paused loop"),
         BotCommand(command="multi_execute", description="Compare multiple agents"),
         BotCommand(command="budget",     description="Cost tracking dashboard"),
+        BotCommand(command="metrics",    description="Performance metrics dashboard"),
         BotCommand(command="routing_stats", description="Routing analytics"),
         BotCommand(command="audit_summary", description="Audit log summary"),
         # Sessions & Learning
