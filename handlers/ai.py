@@ -120,7 +120,7 @@ async def cmd_swarm(msg: Message) -> None:
         await send_chunked(msg, final, model_used="swarm/multi-agent")
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(f"swarm error: <code>{e}</code>", parse_mode="HTML")
+        await status_msg.edit_text(f"swarm error: <code>{html_mod.escape(str(e)[:400])}</code>", parse_mode="HTML")
 
 
 # ── /multi_execute — Same task, multiple agents ──────────────────────────────
@@ -139,12 +139,27 @@ async def cmd_multi_execute(msg: Message) -> None:
         )
         return
 
-    # Parse --agents flag
+    # FIX #3: Safe --agents= parser — guard against missing space after flag value
     agent_keys = ["coding", "architect", "analyst"]
     if "--agents=" in task:
         parts = task.split("--agents=", 1)
-        agent_str, task = parts[1].split(" ", 1)
-        agent_keys = [a.strip() for a in agent_str.split(",")]
+        remainder = parts[1]
+        if " " in remainder:
+            agent_str, task = remainder.split(" ", 1)
+            task = task.strip()
+        else:
+            # No task provided after agent list
+            agent_str = remainder
+            task = ""
+        agent_keys = [a.strip() for a in agent_str.split(",") if a.strip()]
+
+    if not task:
+        await msg.answer(
+            "⚠️ No task provided after <code>--agents=</code>.\n"
+            "Usage: <code>/multi_execute --agents=coding,debug &lt;task&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
 
     status_msg = await msg.answer(f"⚡ Running task with {len(agent_keys)} agents…")
     typing_task = asyncio.create_task(_keep_typing(msg))
@@ -218,7 +233,7 @@ async def cmd_multi_plan(msg: Message) -> None:
         return
     status_msg = await msg.answer("🧠 generating 3 approaches…")
     try:
-        from llm_client import chat
+        from llm_client import chat, chunk_output
         agent_keys = ["architect", "coding", "analyst"]
         results = await asyncio.gather(
             *(chat(task, agent_key=a) for a in agent_keys),
@@ -232,12 +247,12 @@ async def cmd_multi_plan(msg: Message) -> None:
                 text_r, model = res
                 lines.append(f"\n<b>📋 {agent_key}</b> ({model}):\n{text_r[:1000]}\n")
         full = "\n".join(lines)
-        if len(full) <= 4000:
-            await status_msg.edit_text(full, parse_mode="HTML")
-        else:
-            await status_msg.edit_text(full[:4000], parse_mode="HTML")
-            for i in range(4000, len(full), 4000):
-                await msg.answer(full[i:i + 4000], parse_mode="HTML")
+
+        # FIX #10: Use chunk_output to avoid cutting mid-HTML tag
+        chunks = chunk_output(full, max_length=4000)
+        await status_msg.edit_text(chunks[0], parse_mode="HTML")
+        for chunk in chunks[1:]:
+            await msg.answer(chunk, parse_mode="HTML")
     except Exception as e:
         await status_msg.edit_text(
             f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
@@ -255,15 +270,24 @@ async def cmd_orchestrate(msg: Message) -> None:
         await msg.answer("usage: <code>/orchestrate &lt;complex task&gt;</code>", parse_mode="HTML")
         return
     status_msg = await msg.answer("🎯 decomposing task…")
+
+    # FIX #1: progress_cb must be an async def — lambda is never awaited
+    async def _progress(s: str) -> None:
+        try:
+            await status_msg.edit_text(f"⏳ {s}", parse_mode="HTML")
+        except Exception:
+            pass
+
     try:
+        from llm_client import chunk_output
         from tools.orchestrate_engine import orchestrate_task
-        result = await orchestrate_task(task, progress_cb=lambda s: status_msg.edit_text(f"⏳ {s}"))
-        if len(result) <= 4000:
-            await status_msg.edit_text(result, parse_mode="HTML")
-        else:
-            await status_msg.edit_text(result[:4000], parse_mode="HTML")
-            for i in range(4000, len(result), 4000):
-                await msg.answer(result[i:i + 4000], parse_mode="HTML")
+        result = await orchestrate_task(task, progress_cb=_progress)
+
+        # FIX #10: Use chunk_output to avoid cutting mid-HTML tag
+        chunks = chunk_output(result, max_length=4000)
+        await status_msg.edit_text(chunks[0], parse_mode="HTML")
+        for chunk in chunks[1:]:
+            await msg.answer(chunk, parse_mode="HTML")
     except Exception as e:
         await status_msg.edit_text(
             f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
@@ -297,7 +321,12 @@ async def cmd_loop(msg: Message) -> None:
         return
 
     thread_id = _user_thread.get(msg.from_user.id)
+
+    # FIX #8: msg.bot can be None in aiogram 3.x — guard before use
     _bot = msg.bot
+    if not _bot:
+        await msg.answer("Internal error: bot context unavailable.")
+        return
 
     await msg.answer(
         f"<b>🔄 Loop started</b>\n"
