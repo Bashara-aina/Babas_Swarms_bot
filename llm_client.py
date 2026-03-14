@@ -24,6 +24,7 @@ from typing import Any, Callable, Coroutine, Optional
 
 import hashlib
 
+import aiofiles
 import litellm
 from litellm import acompletion
 
@@ -112,7 +113,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
 
 # ── Rate limit tracking ──────────────────────────────────────────────────────
 _rate_limited: dict[str, float] = {}
-_COOLDOWN = 60
+_COOLDOWN = 90  # fix #22: Groq free tier windows can be multi-minute; 60s was too short
 
 
 def _is_rate_limited(model: str) -> bool:
@@ -140,9 +141,13 @@ def _get_api_key(model: str) -> Optional[str]:
 
 
 def _strip_think_tags(text: str) -> tuple[str, str]:
-    """Strip <think>...</think> blocks. Returns (thinking_text, clean_answer)."""
-    think_match = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
-    thinking = think_match.group(1).strip() if think_match else ""
+    """Strip ALL <think>...</think> blocks. Returns (thinking_text, clean_answer).
+
+    fix #33: original only captured the first block; models like QwQ-32b
+    emit multiple <think> blocks — all are now captured and joined.
+    """
+    think_blocks = re.findall(r"<think>(.*?)</think>", text, re.DOTALL)
+    thinking = "\n\n".join(b.strip() for b in think_blocks)
     answer = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
     return thinking, answer
 
@@ -150,25 +155,37 @@ def _strip_think_tags(text: str) -> tuple[str, str]:
 def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
     """Parse Groq's malformed XML tool calls from BadRequestError messages.
 
-    Groq Llama models sometimes emit <function=name{args}></function> instead of
-    proper tool_calls. This extracts tool name + args from the error so we can
-    execute the tool and continue the agentic loop.
+    fix #32: original regex r'{[^}]*}' breaks on nested JSON objects.
+    Replaced with a proper brace-depth counter that correctly extracts
+    the full JSON argument object regardless of nesting depth.
     """
     s = str(error_str)
-    for pat in [
-        r'function=(\w+)(\{[^}]*\})',       # <function=name{args}>
-        r"tool '(\w+)(\{[^}]*\})'",          # attempted to call tool 'name{args}'
-    ]:
-        m = re.search(pat, s)
-        if m:
-            name = m.group(1)
-            args_str = m.group(2).replace('\\"', '"')
-            try:
-                args = json.loads(args_str) or {}
-            except json.JSONDecodeError:
-                args = {}
-            return name, args
-    return None
+    # Step 1: find the function name
+    name_match = re.search(r'function=(\w+)', s)
+    if not name_match:
+        name_match = re.search(r"tool '(\w+)", s)
+    if not name_match:
+        return None
+    name = name_match.group(1)
+
+    # Step 2: find the JSON args using brace-depth counting (handles nesting)
+    start = s.find('{', name_match.end())
+    if start == -1:
+        return name, {}
+    depth = 0
+    for i, ch in enumerate(s[start:], start=start):
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                args_str = s[start:i + 1].replace('\\"', '"')
+                try:
+                    args = json.loads(args_str) or {}
+                except json.JSONDecodeError:
+                    args = {}
+                return name, args
+    return name, {}
 
 
 # ── Core model call ──────────────────────────────────────────────────────────
@@ -235,6 +252,9 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
 
     Keeps: system prompt + last `keep_recent` messages.
     Summarizes everything in between into a single context message.
+
+    fix #20: summary is now injected as 'system' role (not 'user') to avoid
+    breaking the alternating turn structure that LLMs expect.
     """
     if len(messages) <= keep_recent + 2:
         return messages
@@ -243,7 +263,6 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
     recent = messages[-keep_recent:]  # Keep last N messages
     middle = messages[1:-keep_recent]  # Summarize these
 
-    # Build a compact summary of middle messages
     summary_parts = []
     for m in middle:
         role = m.get("role", "")
@@ -253,16 +272,16 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
                          for tc in m.get("tool_calls", [])]
             summary_parts.append(f"Called tools: {', '.join(tool_names)}")
         elif role == "tool":
-            # Truncate long tool results
-            truncated = content[:150] + "…" if len(content) > 150 else content
+            truncated = content[:150] + "\u2026" if len(content) > 150 else content
             summary_parts.append(f"Tool result: {truncated}")
         elif content:
-            truncated = content[:200] + "…" if len(content) > 200 else content
+            truncated = content[:200] + "\u2026" if len(content) > 200 else content
             summary_parts.append(f"{role}: {truncated}")
 
     summary = "\n".join(summary_parts)
+    # fix #20: use 'system' role so the summary doesn't break turn alternation
     compact_msg = {
-        "role": "user",
+        "role": "system",
         "content": (
             f"[Context from {len(middle)} previous steps, compacted to save space:]\n"
             f"{summary}\n\n"
@@ -270,21 +289,14 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
         ),
     }
 
-    logger.info("Compacted %d messages → 1 summary", len(middle))
+    logger.info("Compacted %d messages \u2192 1 summary", len(middle))
     return [system, compact_msg] + recent
 
 
 # ── Agentic tool-calling loop ─────────────────────────────────────────────────
 
-# Fallback chain for the agentic loop (must support function/tool calling)
-# Synced with router.py FALLBACK_CHAIN["computer"]
-_AGENT_CHAIN = [
-    "zai/glm-4",                                          # ZAI first: GPQA 85.7%, reliable tool-calls
-    "groq/llama-3.3-70b-versatile",                       # fast + reliable
-    "cerebras/qwen-3-235b-a22b",                          # 1500 tok/s, 131K ctx
-    "gemini/gemini-2.0-flash",                            # large ctx fallback
-    "openrouter/meta-llama/llama-3.3-70b-instruct:free",  # last resort
-]
+# fix #3: removed hardcoded _AGENT_CHAIN. agent_loop now calls
+# get_fallback_chain('computer') directly — single source of truth in agents.py.
 
 # Callbacks: progress_cb(text) sends status to Telegram
 # photo_cb(path) sends screenshot to Telegram
@@ -292,32 +304,23 @@ ProgressCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
 PhotoCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
 
 
-async def agent_loop(
+async def _agent_loop_inner(
     task: str,
     progress_cb: ProgressCb = None,
     photo_cb: PhotoCb = None,
     max_iterations: int = 20,
     thread_id: Optional[str] = None,
 ) -> tuple[str, str]:
-    """Agentic loop: LLM calls computer tools until the task is complete.
-
-    The LLM gets access to all TOOL_DEFINITIONS. On each iteration:
-    1. LLM decides what to do (or gives final answer)
-    2. If tool call: execute it, feed result back
-    3. If screenshot: also send the image to Telegram via photo_cb
-    4. Repeat until LLM gives a text-only final answer
-
-    Returns (final_response, model_used)
-    """
-    # Build fallback chain — skip rate-limited models
-    chain = [m for m in _AGENT_CHAIN if not _is_rate_limited(m)]
+    """Inner agent loop body — called by agent_loop() under asyncio.wait_for()."""
+    # fix #3: use get_fallback_chain('computer') — no more _AGENT_CHAIN duplicate
+    full_chain = get_fallback_chain("computer")
+    chain = [m for m in full_chain if not _is_rate_limited(m)]
     if not chain:
-        chain = list(_AGENT_CHAIN)
+        chain = list(full_chain)
     model = chain[0]
     chain_idx = 0
 
     def _advance_model() -> bool:
-        """Switch to next available model in chain. Returns False if exhausted."""
         nonlocal model, chain_idx
         chain_idx += 1
         while chain_idx < len(chain):
@@ -338,7 +341,6 @@ async def agent_loop(
     steps_taken: list[str] = []
 
     for iteration in range(max_iterations):
-        # Context compaction: summarize old messages to stay within limits
         if len(messages) > 12:
             messages = _compact_messages(messages)
 
@@ -354,16 +356,20 @@ async def agent_loop(
             _mark_rate_limited(model)
             if _advance_model():
                 continue
+            # fix #14: save thread on early exit
+            if thread_id:
+                add_to_thread(thread_id, "computer", task,
+                              "rate limited on all providers")
             return "rate limited on all providers — try again in a minute", model
 
         except litellm.BadRequestError as e:
             error_str = str(e)
-            # Groq XML tool calls: model outputs <function=name{args}> instead of tool_calls
             if "tool_use_failed" in error_str or "failed_generation" in error_str:
                 parsed = _parse_groq_xml_tool_call(error_str)
                 if parsed:
                     tool_name, args = parsed
-                    logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
+                    logger.info("Recovered XML tool call: %s(%s)", tool_name,
+                                list(args.keys()) if args else [])
                     if progress_cb:
                         await progress_cb(_tool_label(tool_name, args))
 
@@ -373,7 +379,6 @@ async def agent_loop(
                         result = f"tool error: {te}"
                     result = str(result) if result is not None else "tool returned no output"
 
-                    # Screenshot special handling
                     if tool_name == "take_screenshot":
                         if result and result != "tool returned no output" and Path(result).exists():
                             if photo_cb:
@@ -389,9 +394,8 @@ async def agent_loop(
                         else:
                             result = "Screenshot failed"
 
-                    steps_taken.append(f"{tool_name} → {result[:80]}...")
+                    steps_taken.append(f"{tool_name} \u2192 {result[:80]}...")
 
-                    # Build synthetic tool call messages for conversation continuity
                     tc_id = f"xml_{iteration}"
                     messages.append({
                         "role": "assistant",
@@ -409,23 +413,29 @@ async def agent_loop(
                     })
                     continue
 
-            # Non-recoverable BadRequest → try next model
             logger.error("agent_loop BadRequest: %s", e)
             if _advance_model():
                 continue
+            # fix #14: save thread on early exit
+            if thread_id:
+                add_to_thread(thread_id, "computer", task, f"model error: {e}")
             return f"model error: {e}", model
 
         except litellm.AuthenticationError:
             logger.error("agent_loop auth error on %s — trying next", model)
             if _advance_model():
                 continue
+            if thread_id:
+                add_to_thread(thread_id, "computer", task,
+                              "auth error on all providers")
             return "auth error on all providers — check /keys", model
 
         except Exception as e:
             logger.error("agent_loop error: %s", e)
+            if thread_id:
+                add_to_thread(thread_id, "computer", task, f"error: {e}")
             return f"error: {e}", model
 
-        # Guard against None/empty response
         if response is None or not hasattr(response, 'choices') or not response.choices:
             logger.warning("agent_loop: empty response, breaking")
             break
@@ -434,15 +444,15 @@ async def agent_loop(
             logger.warning("agent_loop: None message, breaking")
             break
 
-        # No tool calls → LLM gave final answer
         if not msg.tool_calls:
             answer = (msg.content or "").strip()
             thinking, clean = _strip_think_tags(answer)
+            result_text = clean or answer
+            # fix #14: always save thread on successful completion
             if thread_id:
-                add_to_thread(thread_id, "computer", task, clean)
-            return clean or answer, model
+                add_to_thread(thread_id, "computer", task, result_text)
+            return result_text, model
 
-        # Append assistant message with tool calls
         messages.append({
             "role": "assistant",
             "content": msg.content or "",
@@ -459,7 +469,6 @@ async def agent_loop(
             ],
         })
 
-        # Execute each tool call
         for tc in msg.tool_calls:
             tool_name = tc.function.name
             try:
@@ -467,29 +476,24 @@ async def agent_loop(
             except json.JSONDecodeError:
                 args = {}
 
-            # Progress update to Telegram
             if progress_cb:
                 step_label = _tool_label(tool_name, args)
                 await progress_cb(step_label)
 
             logger.info("Tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
-            # Execute the tool
             try:
                 result = await execute_tool(tool_name, args)
             except Exception as e:
                 result = f"tool error: {e}"
-            # Coerce to string — tool executors can return None
             result = str(result) if result is not None else "tool returned no output"
 
-            # Special handling: screenshot → send image to Telegram, analyze for LLM
             if tool_name == "take_screenshot":
-                screenshot_path = result  # returns file path as string
-                if screenshot_path and screenshot_path != "tool returned no output" and Path(screenshot_path).exists():
-                    # Send image to Telegram user
+                screenshot_path = result
+                if (screenshot_path and screenshot_path != "tool returned no output"
+                        and Path(screenshot_path).exists()):
                     if photo_cb:
                         await photo_cb(screenshot_path)
-                    # Analyze for LLM (gives it a text description of what's on screen)
                     try:
                         description, _ = await analyze_screenshot(
                             screenshot_path,
@@ -509,98 +513,131 @@ async def agent_loop(
             else:
                 tool_result_text = result[:4000] if result else "(no output)"
 
-            steps_taken.append(f"{tool_name} → {tool_result_text[:80]}...")
+            steps_taken.append(f"{tool_name} \u2192 {tool_result_text[:80]}...")
 
-            # Feed result back to LLM
             messages.append({
                 "role": "tool",
                 "content": tool_result_text,
                 "tool_call_id": tc.id,
             })
 
-    # Exceeded max iterations
-    summary = "\n".join(f"  • {s}" for s in steps_taken[-5:])
-    return f"completed {max_iterations} steps:\n{summary}", model
+    # fix #14: max_iterations exhausted — still save to thread
+    summary = "\n".join(f"  \u2022 {s}" for s in steps_taken[-5:])
+    final_msg = f"completed {max_iterations} steps:\n{summary}"
+    if thread_id:
+        add_to_thread(thread_id, "computer", task, final_msg)
+    return final_msg, model
+
+
+async def agent_loop(
+    task: str,
+    progress_cb: ProgressCb = None,
+    photo_cb: PhotoCb = None,
+    max_iterations: int = 20,
+    thread_id: Optional[str] = None,
+) -> tuple[str, str]:
+    """Agentic loop with 300s wall-clock timeout (fix #21).
+
+    Wraps _agent_loop_inner() in asyncio.wait_for() so a stuck tool call
+    or runaway model can never freeze the bot indefinitely.
+    """
+    try:
+        return await asyncio.wait_for(
+            _agent_loop_inner(
+                task=task,
+                progress_cb=progress_cb,
+                photo_cb=photo_cb,
+                max_iterations=max_iterations,
+                thread_id=thread_id,
+            ),
+            timeout=300.0,  # 5 minutes hard cap
+        )
+    except asyncio.TimeoutError:
+        logger.error("agent_loop timed out after 300s for task: %s", task[:80])
+        if thread_id:
+            add_to_thread(thread_id, "computer", task, "timed out after 300s")
+        return "\u23f1 Task timed out after 5 minutes. Use /do to retry with a narrower scope.", "timeout"
 
 
 def _tool_label(name: str, args: dict) -> str:
-    """Human-friendly progress label for a tool call."""
+    """Human-friendly progress label for a tool call.
+
+    fix #55: removed orphan entries for 'format_code' and 'parallel_agents'
+    which are not in TOOL_DEFINITIONS and can never be called.
+    """
     labels = {
         "shell_execute":    lambda a: f"$ {a.get('command', '')[:60]}",
-        "take_screenshot":  lambda a: "📸 grabbing screen…",
-        "mouse_click":      lambda a: f"🖱 click ({a.get('x')}, {a.get('y')}) [{a.get('button','left')}]",
-        "keyboard_type":    lambda a: f"⌨️ typing: {a.get('text','')[:30]}…",
-        "key_press":        lambda a: f"⌨️ {a.get('keys','')}",
-        "open_app":         lambda a: f"📂 opening {a.get('app_name','')}",
-        "open_url":         lambda a: f"🌐 {a.get('url','')}",
-        "browser_navigate": lambda a: f"🌐 → {a.get('url','')}",
-        "new_browser_tab":  lambda a: f"🗂 new tab: {a.get('url','')}",
-        "focus_window":     lambda a: f"🪟 focus: {a.get('pattern','')}",
-        "list_windows":     lambda a: "🪟 listing windows…",
-        "scroll_at":        lambda a: f"↕ scroll {a.get('direction','down')} ×{a.get('amount',3)}",
-        "read_file":        lambda a: f"📖 reading {a.get('path','')}",
-        "write_file":       lambda a: f"✏️ writing {a.get('path','')}",
-        "list_directory":   lambda a: f"📁 ls {a.get('path','~')}",
-        "open_folder_gui":  lambda a: f"📁 open {a.get('path','~')}",
-        "get_clipboard":    lambda a: "📋 get clipboard",
-        "set_clipboard":    lambda a: "📋 set clipboard",
-        "install_packages": lambda a: f"📦 pip install {' '.join(a.get('packages',[]))}",
+        "take_screenshot":  lambda a: "\U0001f4f8 grabbing screen\u2026",
+        "mouse_click":      lambda a: f"\U0001f5b1 click ({a.get('x')}, {a.get('y')}) [{a.get('button','left')}]",
+        "keyboard_type":    lambda a: f"\u2328\ufe0f typing: {a.get('text','')[:30]}\u2026",
+        "key_press":        lambda a: f"\u2328\ufe0f {a.get('keys','')}",
+        "open_app":         lambda a: f"\U0001f4c2 opening {a.get('app_name','')}",
+        "open_url":         lambda a: f"\U0001f310 {a.get('url','')}",
+        "browser_navigate": lambda a: f"\U0001f310 \u2192 {a.get('url','')}",
+        "new_browser_tab":  lambda a: f"\U0001f5c2 new tab: {a.get('url','')}",
+        "focus_window":     lambda a: f"\U0001fa9f focus: {a.get('pattern','')}",
+        "list_windows":     lambda a: "\U0001fa9f listing windows\u2026",
+        "scroll_at":        lambda a: f"\u2195 scroll {a.get('direction','down')} \xd7{a.get('amount',3)}",
+        "read_file":        lambda a: f"\U0001f4d6 reading {a.get('path','')}",
+        "write_file":       lambda a: f"\u270f\ufe0f writing {a.get('path','')}",
+        "list_directory":   lambda a: f"\U0001f4c1 ls {a.get('path','~')}",
+        "open_folder_gui":  lambda a: f"\U0001f4c1 open {a.get('path','~')}",
+        "get_clipboard":    lambda a: "\U0001f4cb get clipboard",
+        "set_clipboard":    lambda a: "\U0001f4cb set clipboard",
+        "install_packages": lambda a: f"\U0001f4e6 pip install {' '.join(a.get('packages',[]))}",
         # Web browsing
-        "web_browse":       lambda a: f"🌐 browsing {a.get('url','')}",
-        "web_search":       lambda a: f"🔍 searching: {a.get('query','')}",
-        "web_research":     lambda a: f"🔬 researching: {a.get('topic','')[:40]}…",
-        "web_fill_form":    lambda a: f"📝 filling form at {a.get('url','')}",
-        "web_get_links":    lambda a: f"🔗 getting links from {a.get('url','')}",
-        "web_click":        lambda a: f"🖱 clicking '{a.get('click_text','')}' on {a.get('url','')}",
+        "web_browse":       lambda a: f"\U0001f310 browsing {a.get('url','')}",
+        "web_search":       lambda a: f"\U0001f50d searching: {a.get('query','')}",
+        "web_research":     lambda a: f"\U0001f52c researching: {a.get('topic','')[:40]}\u2026",
+        "web_fill_form":    lambda a: f"\U0001f4dd filling form at {a.get('url','')}",
+        "web_get_links":    lambda a: f"\U0001f517 getting links from {a.get('url','')}",
+        "web_click":        lambda a: f"\U0001f5b1 clicking '{a.get('click_text','')}' on {a.get('url','')}",
         # Document processing
-        "read_pdf":         lambda a: f"📄 reading PDF {a.get('path','')}",
-        "pdf_extract_tables": lambda a: f"📊 extracting tables from {a.get('path','')}",
-        "read_excel":       lambda a: f"📗 reading Excel {a.get('path','')}",
-        "write_excel":      lambda a: f"📗 writing Excel {a.get('path','')}",
-        "excel_update_cell": lambda a: f"📗 updating {a.get('cell','')} in {a.get('path','')}",
-        "ocr_image":        lambda a: f"🔤 OCR on {a.get('path','')}",
-        "ocr_pdf":          lambda a: f"🔤 OCR PDF {a.get('path','')}",
-        "read_docx":        lambda a: f"📝 reading Word {a.get('path','')}",
-        "organize_files":   lambda a: f"📂 organizing {a.get('directory','')}",
-        "find_files":       lambda a: f"🔎 finding {a.get('pattern','')} in {a.get('directory','')}",
-        "file_info":        lambda a: f"ℹ️ info: {a.get('path','')}",
+        "read_pdf":         lambda a: f"\U0001f4c4 reading PDF {a.get('path','')}",
+        "pdf_extract_tables": lambda a: f"\U0001f4ca extracting tables from {a.get('path','')}",
+        "read_excel":       lambda a: f"\U0001f4d7 reading Excel {a.get('path','')}",
+        "write_excel":      lambda a: f"\U0001f4d7 writing Excel {a.get('path','')}",
+        "excel_update_cell": lambda a: f"\U0001f4d7 updating {a.get('cell','')} in {a.get('path','')}",
+        "ocr_image":        lambda a: f"\U0001f524 OCR on {a.get('path','')}",
+        "ocr_pdf":          lambda a: f"\U0001f524 OCR PDF {a.get('path','')}",
+        "read_docx":        lambda a: f"\U0001f4dd reading Word {a.get('path','')}",
+        "organize_files":   lambda a: f"\U0001f4c2 organizing {a.get('directory','')}",
+        "find_files":       lambda a: f"\U0001f50e finding {a.get('pattern','')} in {a.get('directory','')}",
+        "file_info":        lambda a: f"\u2139\ufe0f info: {a.get('path','')}",
         # Email
-        "email_check_inbox": lambda a: "📧 checking inbox…",
-        "email_read":        lambda a: f"📧 reading email {a.get('uid','')}",
-        "email_send":        lambda a: f"📧 sending to {a.get('to','')}",
-        "email_reply":       lambda a: f"📧 replying to {a.get('uid','')}",
-        "email_search":      lambda a: f"🔍 searching emails: {a.get('query','')}",
-        "email_summarize":   lambda a: "📧 summarizing inbox…",
+        "email_check_inbox": lambda a: "\U0001f4e7 checking inbox\u2026",
+        "email_read":        lambda a: f"\U0001f4e7 reading email {a.get('uid','')}",
+        "email_send":        lambda a: f"\U0001f4e7 sending to {a.get('to','')}",
+        "email_reply":       lambda a: f"\U0001f4e7 replying to {a.get('uid','')}",
+        "email_search":      lambda a: f"\U0001f50d searching emails: {a.get('query','')}",
+        "email_summarize":   lambda a: "\U0001f4e7 summarizing inbox\u2026",
         # Git operations
-        "git_status":        lambda a: f"📦 git status {a.get('repo_path','')}",
-        "git_diff":          lambda a: f"📦 git diff {a.get('repo_path','')}",
-        "git_log":           lambda a: f"📦 git log {a.get('repo_path','')}",
-        "git_commit":        lambda a: f"📦 git commit: {a.get('message','')[:40]}",
-        "git_branch":        lambda a: f"📦 git branch {a.get('action','list')}",
-        "git_pull":          lambda a: f"📦 git pull {a.get('repo_path','')}",
-        "git_push":          lambda a: f"📦 git push {a.get('repo_path','')}",
-        "git_stash":         lambda a: f"📦 git stash {a.get('action','push')}",
+        "git_status":        lambda a: f"\U0001f4e6 git status {a.get('repo_path','')}",
+        "git_diff":          lambda a: f"\U0001f4e6 git diff {a.get('repo_path','')}",
+        "git_log":           lambda a: f"\U0001f4e6 git log {a.get('repo_path','')}",
+        "git_commit":        lambda a: f"\U0001f4e6 git commit: {a.get('message','')[:40]}",
+        "git_branch":        lambda a: f"\U0001f4e6 git branch {a.get('action','list')}",
+        "git_pull":          lambda a: f"\U0001f4e6 git pull {a.get('repo_path','')}",
+        "git_push":          lambda a: f"\U0001f4e6 git push {a.get('repo_path','')}",
+        "git_stash":         lambda a: f"\U0001f4e6 git stash {a.get('action','push')}",
         # Dev tools
-        "run_tests":         lambda a: f"🧪 running tests in {a.get('path','.')}",
-        "lint_code":         lambda a: f"🔍 linting {a.get('path','')}",
-        "format_code":       lambda a: f"✨ formatting {a.get('path','')}",
-        "find_in_codebase":  lambda a: f"🔎 grep '{a.get('pattern','')}'",
-        "analyze_codebase":  lambda a: f"📊 analyzing {a.get('path','.')}",
-        "db_query":          lambda a: f"🗄 SQL: {a.get('query','')[:40]}",
-        # Orchestration
-        "parallel_agents":   lambda a: f"🔄 swarm: {a.get('task','')[:40]}",
+        "run_tests":         lambda a: f"\U0001f9ea running tests in {a.get('path','.')}",
+        "lint_code":         lambda a: f"\U0001f50d linting {a.get('path','')}",
+        "find_in_codebase":  lambda a: f"\U0001f50e grep '{a.get('pattern','')}'",
+        "analyze_codebase":  lambda a: f"\U0001f4ca analyzing {a.get('path','.')}",
+        "db_query":          lambda a: f"\U0001f5c4 SQL: {a.get('query','')[:40]}",
         # System maintenance
-        "check_disk_space":      lambda a: "💾 checking disk space…",
-        "check_memory_usage":    lambda a: "🧠 checking memory…",
-        "check_gpu_health":      lambda a: "🎮 checking GPU health…",
-        "check_services":        lambda a: f"🔧 checking services: {a.get('services','swarm-bot,ollama')}",
-        "system_cleanup":        lambda a: f"🧹 {'previewing' if a.get('dry_run', True) else 'running'} cleanup…",
-        "check_updates":         lambda a: "📦 checking for updates…",
-        "driver_status":         lambda a: "🔧 checking drivers…",
-        "full_maintenance_check": lambda a: "🏥 full health check…",
+        "check_disk_space":       lambda a: "\U0001f4be checking disk space\u2026",
+        "check_memory_usage":     lambda a: "\U0001f9e0 checking memory\u2026",
+        "check_gpu_health":       lambda a: "\U0001f3ae checking GPU health\u2026",
+        "check_services":         lambda a: f"\U0001f527 checking services: {a.get('services','swarm-bot,ollama')}",
+        "system_cleanup":         lambda a: f"\U0001f9f9 {'previewing' if a.get('dry_run', True) else 'running'} cleanup\u2026",
+        "check_updates":          lambda a: "\U0001f4e6 checking for updates\u2026",
+        "driver_status":          lambda a: "\U0001f527 checking drivers\u2026",
+        "full_maintenance_check": lambda a: "\U0001f3e5 full health check\u2026",
     }
     fn = labels.get(name)
-    return fn(args) if fn else f"🔧 {name}()"
+    return fn(args) if fn else f"\U0001f527 {name}()"
 
 
 # ── Single-turn chat (existing behavior) ─────────────────────────────────────
@@ -625,16 +662,14 @@ async def chat(
 
     system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
 
-    # Inject instincts (learned user preferences) if available
     try:
         from tools.persistence import get_instinct_context
         instinct_block = await get_instinct_context(max_tokens=300)
         if instinct_block:
             system_prompt += "\n\n" + instinct_block
     except Exception:
-        pass  # DB not initialized yet, or first run
+        pass
 
-    # Inject domain knowledge skills for relevant agents
     try:
         from tools.skill_loader import get_skills_for_agent
         skills_block = get_skills_for_agent(agent_key, max_chars=2000)
@@ -643,7 +678,6 @@ async def chat(
     except Exception:
         pass
 
-    # In chat mode (no tools), prevent hallucination of computer access
     if agent_key not in ("computer", "vision"):
         system_prompt += (
             "\n\nYou are in CHAT-ONLY mode — no tools, no computer access right now. "
@@ -666,7 +700,6 @@ async def chat(
         {"role": "user",   "content": user_content},
     ]
 
-    # Check response cache (skip vision, think mode, and image tasks)
     _skip_cache = image_b64 is not None or show_thinking or agent_key == "vision"
     if not _skip_cache:
         try:
@@ -704,7 +737,6 @@ async def chat(
             raw = (resp.choices[0].message.content or "").strip()
             _elapsed_ms = int((time.time() - _t0) * 1000)
 
-            # Extract token usage
             _usage = getattr(resp, "usage", None)
             _tin = getattr(_usage, "prompt_tokens", 0) if _usage else 0
             _tout = getattr(_usage, "completion_tokens", 0) if _usage else 0
@@ -717,14 +749,13 @@ async def chat(
 
             thinking, answer = _strip_think_tags(raw)
             if thinking and show_thinking:
-                result = f"<i>💭 {thinking[:400]}{'…' if len(thinking) > 400 else ''}</i>\n\n{answer}"
+                result = f"<i>\U0001f4ad {thinking[:400]}{'\u2026' if len(thinking) > 400 else ''}</i>\n\n{answer}"
             else:
                 result = answer if thinking else raw
 
             if thread_id:
                 add_to_thread(thread_id, agent_key, task, result)
 
-            # Store in cache if eligible
             if _cache_key:
                 try:
                     from tools.persistence import cache_set
@@ -762,10 +793,10 @@ async def chat(
 
 
 # ── Screenshot utilities ──────────────────────────────────────────────────────
-
-async def take_screenshot() -> Optional[str]:
-    """Wrapper that delegates to computer_agent.take_screenshot()."""
-    return await computer_agent.take_screenshot()
+# fix #6: removed take_screenshot() wrapper that shadowed computer_agent.take_screenshot().
+# All callers should import take_screenshot directly from computer_agent.
+# Legacy alias kept for any external callers that haven't been updated yet.
+take_screenshot = computer_agent.take_screenshot
 
 
 async def analyze_screenshot(
@@ -774,15 +805,34 @@ async def analyze_screenshot(
 ) -> tuple[str, str]:
     """Analyze a screenshot image with vision model.
 
+    fix #17: switched from blocking open() to async aiofiles.open() so large
+    screenshots don't block the event loop and freeze Telegram message handling.
+    fix #35: added PIL image validation before base64 encoding to catch corrupt
+    files early with a helpful error instead of a cryptic API 400 error.
+
     Tries Ollama gemma3:12b first (local/private), falls back to Groq cloud.
     Returns (analysis_text, model_used)
     """
-    with open(image_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
+    # fix #35: validate file is a real, non-empty image before encoding
+    img_path = Path(image_path)
+    if not img_path.exists() or img_path.stat().st_size < 500:
+        raise RuntimeError(
+            f"Screenshot file is missing or too small ({img_path.stat().st_size if img_path.exists() else 0} bytes): {image_path}"
+        )
+    try:
+        from PIL import Image as _PILImage
+        with _PILImage.open(image_path) as _img:
+            _img.verify()
+    except Exception as e:
+        raise RuntimeError(f"Screenshot is not a valid image: {e}")
+
+    # fix #17: async file read — won't block event loop
+    async with aiofiles.open(image_path, "rb") as f:
+        raw_bytes = await f.read()
+    b64 = base64.b64encode(raw_bytes).decode()
 
     vision_question = question
 
-    # Try local Ollama first (image stays on machine)
     try:
         resp = await _call_model(
             "ollama_chat/gemma3:12b",
@@ -797,11 +847,10 @@ async def analyze_screenshot(
         )
         result = (resp.choices[0].message.content or "").strip()
         logger.info("Screenshot analyzed locally via Ollama")
-        return result, "ollama/gemma3:12b 🔒 local"
+        return result, "ollama/gemma3:12b \U0001f512 local"
     except Exception as e:
-        logger.warning("Ollama vision failed: %s → trying Groq", e)
+        logger.warning("Ollama vision failed: %s \u2192 trying Groq", e)
 
-    # Fall back to Groq Llama-4-Scout (cloud vision)
     groq_key = os.getenv("GROQ_API_KEY", "")
     if not groq_key:
         raise RuntimeError("No GROQ_API_KEY and Ollama vision failed")
@@ -825,8 +874,8 @@ async def analyze_screenshot(
     except Exception as e:
         raise RuntimeError(
             f"Screenshot analysis failed.\n"
-            f"• Local: run 'ollama pull gemma3:12b' to enable local vision\n"
-            f"• Cloud: {e}"
+            f"\u2022 Local: run 'ollama pull gemma3:12b' to enable local vision\n"
+            f"\u2022 Cloud: {e}"
         )
 
 
@@ -840,11 +889,25 @@ async def run_shell_command(cmd: str, timeout: int = 30) -> str:
 # ── Output utilities ──────────────────────────────────────────────────────────
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
-    """Split text into Telegram-safe chunks (4096 char limit)."""
+    """Split text into Telegram-safe chunks (4096 char limit).
+
+    fix #15: original implementation would pass through lines longer than
+    max_length unchanged, causing Telegram MessageTooLong errors on base64,
+    minified JSON, or other single-line blobs. Now hard-splits any line
+    that still exceeds max_length after accumulation.
+    """
     if len(text) <= max_length:
         return [text]
     chunks, current = [], ""
     for line in text.split("\n"):
+        # Hard-split lines that are themselves longer than max_length
+        while len(line) > max_length:
+            remaining_space = max_length - len(current)
+            if remaining_space > 0:
+                current += line[:remaining_space]
+                line = line[remaining_space:]
+            chunks.append(current.rstrip())
+            current = ""
         if len(current) + len(line) + 1 > max_length:
             chunks.append(current.rstrip())
             current = line + "\n"
