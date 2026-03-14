@@ -25,7 +25,7 @@ from .shared import (
 router = Router()
 
 
-# ── /do — Agentic computer control ─────────────────────────────────────────
+# ── /do — Agentic computer control ───────────────────────────────────────────
 @router.message(Command("do"))
 async def cmd_do(msg: Message) -> None:
     if not is_allowed(msg):
@@ -35,9 +35,9 @@ async def cmd_do(msg: Message) -> None:
         await msg.answer(
             "usage: <code>/do &lt;task&gt;</code>\n\n"
             "i'll autonomously:\n"
-            "• take screenshots to see what's on screen\n"
-            "• click, type, open apps, run commands\n"
-            "• loop until the task is done\n\n"
+            "\u2022 take screenshots to see what's on screen\n"
+            "\u2022 click, type, open apps, run commands\n"
+            "\u2022 loop until the task is done\n\n"
             "examples:\n"
             "<code>/do open whatsapp and send 'hello' to the first chat</code>\n"
             "<code>/do open vscode with swarm-bot folder</code>\n"
@@ -48,12 +48,12 @@ async def cmd_do(msg: Message) -> None:
     await _run_agent_loop(msg, task)
 
 
-# ── /screen ────────────────────────────────────────────────────────────────────────
+# ── /screen ───────────────────────────────────────────────────────────────────
 @router.message(Command("screen"))
 async def cmd_screen(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status_msg = await msg.answer("📸 grabbing screen…")
+    status_msg = await msg.answer("\U0001f4f8 grabbing screen\u2026")
     try:
         path = await computer_agent.take_screenshot()
         if not path:
@@ -71,14 +71,14 @@ async def cmd_screen(msg: Message) -> None:
 
         await msg.answer_photo(
             photo=FSInputFile(path),
-            caption="🖥 desktop — tap Analyze or give me a task to do on screen",
+            caption="\U0001f5a5 desktop \u2014 tap Analyze or give me a task to do on screen",
             reply_markup=screenshot_keyboard(),
         )
     except Exception as e:
         await status_msg.edit_text(f"screenshot error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
 
 
-# ── /open ─────────────────────────────────────────────────────────────────────────
+# ── /open ─────────────────────────────────────────────────────────────────────
 @router.message(Command("open"))
 async def cmd_open(msg: Message) -> None:
     if not is_allowed(msg):
@@ -92,9 +92,9 @@ async def cmd_open(msg: Message) -> None:
             parse_mode="HTML",
         )
         return
-    status_msg = await msg.answer(f"opening {html_mod.escape(target)}…")
+    status_msg = await msg.answer(f"opening {html_mod.escape(target)}\u2026")
 
-    # FIX #15: Prepend https:// for www. URLs so open_url receives a valid URL
+    # FIX #15: Prepend https:// for www. URLs — open_url() needs a full valid URL
     if target.startswith("www."):
         target = "https://" + target
 
@@ -107,7 +107,7 @@ async def cmd_open(msg: Message) -> None:
     await status_msg.edit_text(html_mod.escape(result))
 
 
-# ── /click ───────────────────────────────────────────────────────────────────────
+# ── /click ────────────────────────────────────────────────────────────────────
 @router.message(Command("click"))
 async def cmd_click(msg: Message) -> None:
     if not is_allowed(msg):
@@ -124,12 +124,12 @@ async def cmd_click(msg: Message) -> None:
         x, y = int(parts[1]), int(parts[2])
         button = parts[3] if len(parts) > 3 else "left"
         result = await computer_agent.mouse_click(x, y, button)
-        await msg.answer(f"🖱 {html_mod.escape(result)}")
+        await msg.answer(f"\U0001f5b1 {html_mod.escape(result)}")
     except (ValueError, IndexError):
-        await msg.answer("bad coordinates — use integers: <code>/click 500 300</code>", parse_mode="HTML")
+        await msg.answer("bad coordinates \u2014 use integers: <code>/click 500 300</code>", parse_mode="HTML")
 
 
-# ── /type ────────────────────────────────────────────────────────────────────────
+# ── /type ─────────────────────────────────────────────────────────────────────
 @router.message(Command("type"))
 async def cmd_type(msg: Message) -> None:
     if not is_allowed(msg):
@@ -139,10 +139,10 @@ async def cmd_type(msg: Message) -> None:
         await msg.answer("usage: <code>/type &lt;text to type&gt;</code>", parse_mode="HTML")
         return
     result = await computer_agent.keyboard_type(text_to_type)
-    await msg.answer(f"⌨️ {html_mod.escape(result)}")
+    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")
 
 
-# ── /key ─────────────────────────────────────────────────────────────────────────
+# ── /key ──────────────────────────────────────────────────────────────────────
 @router.message(Command("key"))
 async def cmd_key(msg: Message) -> None:
     if not is_allowed(msg):
@@ -157,10 +157,10 @@ async def cmd_key(msg: Message) -> None:
         )
         return
     result = await computer_agent.key_press(combo)
-    await msg.answer(f"⌨️ {html_mod.escape(result)}")
+    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")
 
 
-# ── /cmd ─────────────────────────────────────────────────────────────────────────
+# ── /cmd ──────────────────────────────────────────────────────────────────────
 @router.message(Command("cmd"))
 async def cmd_shell(msg: Message) -> None:
     if not is_allowed(msg):
@@ -173,21 +173,33 @@ async def cmd_shell(msg: Message) -> None:
         )
         return
 
-    # FIX #16: Expanded shell blocklist with additional dangerous patterns
+    # FIX #16: Expanded shell blocklist — original missed rm -rf ~, sudo rm, curl|bash, wget|bash
     blocked = [
-        "rm -rf /", "rm -rf ~", "rm -rf *",
-        "mkfs", ":(){:|:&};:",
-        "> /dev/sda", "dd if=/dev/zero", "dd if=/dev/urandom",
-        "chmod -R 777 /", "chmod -R 000 /",
+        "rm -rf /",
+        "rm -rf ~",
+        "rm -rf *",
+        "mkfs",
+        ":(){:|:&};:",
+        "> /dev/sda",
+        "dd if=/dev/zero",
+        "dd if=/dev/urandom",
+        "chmod -R 777 /",
+        "chmod -R 000 /",
         "sudo rm -rf",
-        "wget -O- | bash", "wget -O- | sh",
-        "curl | bash", "curl | sh",
-        "| bash", "| sh",
+        "wget -o- | bash",
+        "wget -o- | sh",
+        "curl | bash",
+        "curl | sh",
+        "| bash",
+        "| sh",
     ]
     cmd_lower = cmd.lower()
     for b in blocked:
         if b in cmd_lower:
-            await msg.answer(f"blocked dangerous pattern: <code>{html_mod.escape(b)}</code>", parse_mode="HTML")
+            await msg.answer(
+                f"blocked dangerous pattern: <code>{html_mod.escape(b)}</code>",
+                parse_mode="HTML",
+            )
             return
 
     status_msg = await msg.answer(f"<code>$ {html_mod.escape(cmd[:100])}</code>", parse_mode="HTML")
@@ -199,7 +211,7 @@ async def cmd_shell(msg: Message) -> None:
     )
 
 
-# ── /install ──────────────────────────────────────────────────────────────────────
+# ── /install ──────────────────────────────────────────────────────────────────
 @router.message(Command("install"))
 async def cmd_install(msg: Message) -> None:
     if not is_allowed(msg):
@@ -216,14 +228,14 @@ async def cmd_install(msg: Message) -> None:
 
     packages = packages_str.split()
     status_msg = await msg.answer(
-        f"📦 installing: <code>{html_mod.escape(', '.join(packages))}</code>\n(this may take a moment…)",
+        f"\U0001f4e6 installing: <code>{html_mod.escape(', '.join(packages))}</code>\n(this may take a moment\u2026)",
         parse_mode="HTML",
     )
 
     result = await computer_agent.install_packages(packages)
     result_lower = result.lower()
 
-    # FIX #7: Only restart if install actually succeeded — don't restart on pip failure
+    # FIX #7: Only restart if pip install actually succeeded — don't restart on failure
     install_ok = (
         "successfully installed" in result_lower
         or "already satisfied" in result_lower
@@ -232,7 +244,7 @@ async def cmd_install(msg: Message) -> None:
 
     if not install_ok:
         await status_msg.edit_text(
-            f"⚠️ Install may have failed — NOT restarting.\n"
+            f"\u26a0\ufe0f Install may have failed \u2014 NOT restarting.\n"
             f"<pre>{html_mod.escape(result[:2000])}</pre>\n\n"
             "Check the output and retry manually if needed.",
             parse_mode="HTML",
@@ -240,26 +252,25 @@ async def cmd_install(msg: Message) -> None:
         return
 
     await status_msg.edit_text(
-        f"📦 install output:\n<pre>{html_mod.escape(result[:2000])}</pre>\n\n🔄 restarting bot…",
+        f"\U0001f4e6 install output:\n<pre>{html_mod.escape(result[:2000])}</pre>\n\n\U0001f504 restarting bot\u2026",
         parse_mode="HTML",
     )
-
     await asyncio.sleep(2)
-    await msg.answer("back in a sec 👋")
+    await msg.answer("back in a sec \U0001f44b")
     computer_agent.restart_bot()
 
 
-# ── /upgrade ───────────────────────────────────────────────────────────────────────
+# ── /upgrade ──────────────────────────────────────────────────────────────────
 @router.message(Command("upgrade"))
 async def cmd_upgrade(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status_msg = await msg.answer("⬆️ pulling latest from GitHub…")
+    status_msg = await msg.answer("\u2b06\ufe0f pulling latest from GitHub\u2026")
 
     result = await computer_agent.upgrade_from_git()
     result_lower = result.lower()
 
-    # FIX #2: Guard against git errors — only restart on clean pull, not on errors
+    # FIX #2: Was always restarting even on git errors — now only restart on clean pull
     if "already up to date" in result_lower:
         await status_msg.edit_text(
             f"<b>git pull</b>\n<pre>{html_mod.escape(result)}</pre>\nalready up to date, no restart needed.",
@@ -269,7 +280,7 @@ async def cmd_upgrade(msg: Message) -> None:
 
     if "fatal" in result_lower or "error" in result_lower or "conflict" in result_lower:
         await status_msg.edit_text(
-            f"⚠️ <b>git pull encountered an issue — NOT restarting.</b>\n"
+            f"\u26a0\ufe0f <b>git pull encountered an issue \u2014 NOT restarting.</b>\n"
             f"<pre>{html_mod.escape(result[:2000])}</pre>\n\n"
             "Please resolve manually before upgrading.",
             parse_mode="HTML",
@@ -278,37 +289,37 @@ async def cmd_upgrade(msg: Message) -> None:
 
     # Clean pull with actual changes — safe to restart
     await status_msg.edit_text(
-        f"<b>git pull</b>\n<pre>{html_mod.escape(result)}</pre>\n\n🔄 restarting…",
+        f"<b>git pull</b>\n<pre>{html_mod.escape(result)}</pre>\n\n\U0001f504 restarting\u2026",
         parse_mode="HTML",
     )
     await asyncio.sleep(2)
-    await msg.answer("restarting with updates 🔄")
+    await msg.answer("restarting with updates \U0001f504")
     computer_agent.restart_bot()
 
 
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
-@router.message(F.text == "🖥 Do task")
+@router.message(F.text == "\U0001f5a5 Do task")
 async def kbd_do_hint(msg: Message) -> None:
     if is_allowed(msg):
         await msg.answer(
             "tell me what to do on the computer:\n\n"
             "just type your task naturally, or use <code>/do &lt;task&gt;</code>\n\n"
             "examples:\n"
-            "• open whatsapp\n"
-            "• check what's in my swarm-bot folder\n"
-            "• take a screenshot and tell me what's open\n"
-            "• open supabase dashboard",
+            "\u2022 open whatsapp\n"
+            "\u2022 check what's in my swarm-bot folder\n"
+            "\u2022 take a screenshot and tell me what's open\n"
+            "\u2022 open supabase dashboard",
             parse_mode="HTML",
         )
 
 
-@router.message(F.text == "📸 Screenshot")
+@router.message(F.text == "\U0001f4f8 Screenshot")
 async def kbd_screenshot(msg: Message) -> None:
     if is_allowed(msg):
         await cmd_screen(msg)
 
 
-@router.message(F.text == "⚡ Shell")
+@router.message(F.text == "\u26a1 Shell")
 async def kbd_shell_hint(msg: Message) -> None:
     if is_allowed(msg):
         await msg.answer(
@@ -317,12 +328,12 @@ async def kbd_shell_hint(msg: Message) -> None:
         )
 
 
-# ── Callbacks ─────────────────────────────────────────────────────────────────────
+# ── Callbacks ─────────────────────────────────────────────────────────────────
 @router.callback_query(F.data.startswith("fb:"))
 async def cb_feedback(cb: CallbackQuery) -> None:
     action = cb.data.split(":")[1]
     responses = {
-        "good":  "👍 nice",
+        "good":  "\U0001f44d nice",
         "retry": "re-send your message to retry",
         "info":  "provider shown in button label",
     }
@@ -335,14 +346,15 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
         await cb.answer("not authorized")
         return
 
-    # FIX #11: Use pop() to prevent race condition on double-tap — claim the path atomically
+    # FIX #11: Use pop() to atomically claim the screenshot path — prevents race condition
+    # on double-tap where second tap would see None and incorrectly say "screenshot expired"
     path = _last_screenshot.pop(cb.from_user.id, None)
     if not path or not Path(path).exists():
-        await cb.answer("screenshot expired — grab a new one with /screen")
+        await cb.answer("screenshot expired \u2014 grab a new one with /screen")
         return
 
-    await cb.answer("analyzing…")
-    status_msg = await cb.message.answer("🔍 analyzing screen…")
+    await cb.answer("analyzing\u2026")
+    status_msg = await cb.message.answer("\U0001f50d analyzing screen\u2026")
     typing_task = asyncio.create_task(_keep_typing(cb.message))
 
     try:
@@ -364,7 +376,10 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
             pass
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(f"analysis failed: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+        await status_msg.edit_text(
+            f"analysis failed: <code>{html_mod.escape(str(e))}</code>",
+            parse_mode="HTML",
+        )
 
 
 @router.callback_query(F.data == "screen:do")
