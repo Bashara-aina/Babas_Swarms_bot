@@ -1,6 +1,7 @@
-# /home/newadmin/swarm-bot/docker-compose.yml
-# Start: docker-compose up -d
-# Stop:  docker-compose down
+# Legion v4 — support services
+# Start:  docker-compose up -d
+# Stop:   docker-compose down
+# Logs:   docker-compose logs -f
 
 version: "3.8"
 
@@ -36,6 +37,31 @@ services:
       interval: 15s
       timeout: 10s
       retries: 3
+
+  # Uncomment to run the bot itself in Docker (needs X11/display passthrough)
+  # legion-bot:
+  #   build: .
+  #   container_name: legion-bot
+  #   env_file: .env
+  #   volumes:
+  #     - .:/app
+  #     - /tmp/.X11-unix:/tmp/.X11-unix
+  #   environment:
+  #     - DISPLAY=${DISPLAY}
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     chromadb:
+  #       condition: service_healthy
+  #   # GPU passthrough for RTX 3060 (NVIDIA Container Toolkit required)
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   restart: unless-stopped
 
 volumes:
   redis_data:
