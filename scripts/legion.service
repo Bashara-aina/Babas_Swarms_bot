@@ -1,0 +1,23 @@
+[Unit]
+Description=Legion AI Bot (Babas Swarms Bot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+EnvironmentFile=/home/newadmin/swarm-bot/.env
+ExecStart=/home/newadmin/swarm-bot/venv/bin/python main.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=legion-bot
+
+# Prevent the bot from using excessive resources
+CPUQuota=80%
+MemoryMax=4G
+
+[Install]
+WantedBy=multi-user.target
