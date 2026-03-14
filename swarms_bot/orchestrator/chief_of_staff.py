@@ -8,6 +8,14 @@ Implements the supervisor pattern with deterministic routing:
 
 Integrates with existing agents.py/llm_client.py infrastructure
 while adding structured orchestration on top.
+
+Enterprise integrations (optional, fail-open):
+- BudgetManager: enforce cost limits before execution
+- SecurityGuard: validate inputs before processing
+- AuditLogger: log all routing decisions for compliance
+- CostMetricsCollector: track real-time cost metrics
+- CostAwareRouter: select cheapest capable model
+- SessionManager: track tasks within user sessions
 """
 
 from __future__ import annotations
@@ -138,13 +146,52 @@ class ChiefOfStaff:
     - Agent selection from existing registry
     - Retry with exponential backoff
     - Cost and routing decision logging
+    - Budget enforcement (optional)
+    - Security validation (optional)
+    - Audit logging (optional)
+    - Cost metrics collection (optional)
+    - Session tracking (optional)
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        budget_manager: Optional[Any] = None,
+        security_guard: Optional[Any] = None,
+        audit_logger: Optional[Any] = None,
+        cost_metrics: Optional[Any] = None,
+        cost_router: Optional[Any] = None,
+        session_manager: Optional[Any] = None,
+    ) -> None:
         self.routing_history: List[Dict[str, Any]] = []
         self._total_cost_usd: float = 0.0
         self._total_tasks: int = 0
         self._successful_tasks: int = 0
+
+        # Enterprise integrations (all optional, fail-open)
+        self._budget = budget_manager
+        self._security = security_guard
+        self._audit = audit_logger
+        self._cost_metrics = cost_metrics
+        self._cost_router = cost_router
+        self._sessions = session_manager
+
+    def set_budget_manager(self, bm: Any) -> None:
+        self._budget = bm
+
+    def set_security_guard(self, sg: Any) -> None:
+        self._security = sg
+
+    def set_audit_logger(self, al: Any) -> None:
+        self._audit = al
+
+    def set_cost_metrics(self, cm: Any) -> None:
+        self._cost_metrics = cm
+
+    def set_cost_router(self, cr: Any) -> None:
+        self._cost_router = cr
+
+    def set_session_manager(self, sm: Any) -> None:
+        self._sessions = sm
 
     def classify_task(self, task: Task) -> TaskType:
         """Classify task type using keyword matching.
@@ -185,28 +232,68 @@ class ChiefOfStaff:
         return _TASK_AGENT_MAP.get(task_type, "general")
 
     async def route_task(self, task: Task) -> AgentResponse:
-        """Main routing: classify → select → execute → log.
+        """Main routing: validate → classify → budget check → select → execute → log.
 
         Uses existing llm_client.chat() for execution,
         maintaining full compatibility with the current system.
+
+        Pipeline:
+        1. Security validation (if SecurityGuard attached)
+        2. Task classification (keyword-based, no LLM call)
+        3. Budget check (if BudgetManager attached)
+        4. Agent + model selection (optionally cost-aware)
+        5. Execute with retry
+        6. Track cost, log audit, update session
         """
         from llm_client import chat
 
         start_time = time.monotonic()
         self._total_tasks += 1
 
-        # 1. Classify
+        # 1. Security validation
+        if self._security:
+            try:
+                result = self._security.validate(task.description)
+                if result.get("blocked"):
+                    return AgentResponse(
+                        success=False,
+                        result=f"Blocked by security: {result.get('reason', 'policy violation')}",
+                        agent_name="security_guard",
+                        metadata={"blocked": True, "reason": result.get("reason")},
+                    )
+            except Exception as e:
+                logger.warning("Security check failed (proceeding): %s", e)
+
+        # 2. Classify
         task.task_type = self.classify_task(task)
 
-        # 2. Select agent
+        # 3. Budget check
+        if self._budget:
+            try:
+                budget_status = self._budget.check_budget()
+                if not budget_status.get("allowed", True):
+                    return AgentResponse(
+                        success=False,
+                        result=(
+                            f"Budget exhausted. "
+                            f"Daily: ${budget_status.get('daily_spent', 0):.2f}"
+                            f"/${budget_status.get('daily_limit', 0):.2f}"
+                        ),
+                        agent_name="budget_manager",
+                        metadata={"budget_exceeded": True},
+                    )
+            except Exception as e:
+                logger.warning("Budget check failed (proceeding): %s", e)
+
+        # 4. Select agent
         agent_key = self.select_agent_key(task.task_type, task.context)
 
-        # 3. Execute with retry
+        # 5. Execute with retry
         response = await self._execute_with_retry(
             task, agent_key, chat, max_retries=task.max_retries,
         )
 
-        # 4. Track
+        # 6. Track
         execution_time_ms = int((time.monotonic() - start_time) * 1000)
         response.execution_time_ms = execution_time_ms
 
@@ -214,8 +301,73 @@ class ChiefOfStaff:
             self._successful_tasks += 1
         self._total_cost_usd += response.cost_usd
 
-        # 5. Log routing decision
+        # 7. Log routing decision
         self._log_routing(task, agent_key, response)
+
+        # 8. Record cost in budget manager
+        if self._budget and response.cost_usd > 0:
+            try:
+                self._budget.record_cost(
+                    agent=agent_key,
+                    model=response.metadata.get("model", ""),
+                    cost_usd=response.cost_usd,
+                    tokens_in=response.tokens_used,
+                    tokens_out=0,
+                    task_type=task.task_type.value if task.task_type else "",
+                )
+            except Exception:
+                pass
+
+        # 9. Record in cost metrics
+        if self._cost_metrics:
+            try:
+                self._cost_metrics.record(
+                    agent_name=agent_key,
+                    model=response.metadata.get("model", ""),
+                    cost_usd=response.cost_usd,
+                    tokens_used=response.tokens_used,
+                    latency_ms=execution_time_ms,
+                )
+            except Exception:
+                pass
+
+        # 10. Audit log
+        if self._audit:
+            try:
+                await self._audit.log(
+                    user_id=task.user_id,
+                    agent_name=agent_key,
+                    action_type="route_task",
+                    success=response.success,
+                    cost_usd=response.cost_usd,
+                    tokens_used=response.tokens_used,
+                    latency_ms=execution_time_ms,
+                    metadata={
+                        "task_type": task.task_type.value if task.task_type else "",
+                        "model": response.metadata.get("model", ""),
+                    },
+                )
+            except Exception:
+                pass
+
+        # 11. Track in session
+        if self._sessions:
+            try:
+                self._sessions.track_task(
+                    user_id=task.user_id,
+                    agent_name=agent_key,
+                    model=response.metadata.get("model", ""),
+                    cost_usd=response.cost_usd,
+                    tokens=response.tokens_used,
+                    routing_decision={
+                        "task_type": task.task_type.value if task.task_type else "",
+                        "agent": agent_key,
+                        "success": response.success,
+                        "latency_ms": execution_time_ms,
+                    },
+                )
+            except Exception:
+                pass
 
         return response
 
