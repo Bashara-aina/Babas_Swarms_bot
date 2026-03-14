@@ -16,8 +16,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
-from io import BytesIO
 
 from aiogram import Router
 from aiogram.types import Message, BufferedInputFile
@@ -29,13 +27,13 @@ router = Router()
 
 def _auth(msg: Message) -> bool:
     from handlers.shared import ALLOWED_USER_ID
-    return msg.from_user and msg.from_user.id == ALLOWED_USER_ID
+    return bool(msg.from_user and msg.from_user.id == ALLOWED_USER_ID)
 
 
 async def _notify(bot, user_id: int, text: str) -> None:
     """Send a message to the user, chunked if needed."""
     MAX = 4000
-    for i in range(0, len(text), MAX):
+    for i in range(0, max(len(text), 1), MAX):  # BUG FIX: max(len,1) prevents zero-range on empty string
         try:
             await bot.send_message(user_id, text[i:i+MAX], parse_mode="HTML")
         except Exception as e:
@@ -76,8 +74,15 @@ async def cmd_overnight(msg: Message) -> None:
         from tools.overnight import plan_job_with_llm, create_job, run_overnight_job, AGENT_STATUS
         from tools.dashboard import build_ascii_dashboard
 
-        # Plan the job
         task_dicts = await plan_job_with_llm(goal, simple_llm_call)
+
+        if not task_dicts:  # BUG FIX: guard against empty plan
+            await status_msg.edit_text(
+                "❌ Could not decompose goal into tasks. Try a more specific description.",
+                parse_mode="HTML"
+            )
+            return
+
         job_id, tasks = create_job(task_dicts)
 
         task_preview = "\n".join(
@@ -99,7 +104,6 @@ async def cmd_overnight(msg: Message) -> None:
             await _notify(bot, user_id, text)
 
         async def update_dashboard() -> None:
-            # Update the live dashboard message (edit in place)
             try:
                 dash_text = build_ascii_dashboard(
                     AGENT_STATUS,
@@ -111,8 +115,8 @@ async def cmd_overnight(msg: Message) -> None:
             except Exception as e:
                 logger.debug("Dashboard update error: %s", e)
 
-        # Run overnight job in background
-        asyncio.create_task(
+        # BUG FIX: store reference to background task to prevent garbage collection
+        _bg_task = asyncio.create_task(
             run_overnight_job(
                 job_id=job_id,
                 tasks=tasks,
@@ -121,6 +125,11 @@ async def cmd_overnight(msg: Message) -> None:
                 update_dashboard_fn=update_dashboard,
             ),
             name=f"overnight-{job_id}"
+        )
+        # Attach done callback so unhandled exceptions get logged
+        _bg_task.add_done_callback(
+            lambda t: logger.error("overnight job crashed: %s", t.exception())
+            if not t.cancelled() and t.exception() else None
         )
 
     except Exception as e:
@@ -152,7 +161,7 @@ async def cmd_overnight_status(msg: Message) -> None:
     await msg.answer(dash, parse_mode="HTML")
 
 
-# ── /overnight_cancel ─────────────────────────────────────────────────────────
+# ── /overnight_cancel ──────────────────────────────────────────────────────────
 
 @router.message(Command("overnight_cancel"))
 async def cmd_overnight_cancel(msg: Message) -> None:
@@ -167,7 +176,7 @@ async def cmd_overnight_cancel(msg: Message) -> None:
     await msg.answer(result)
 
 
-# ── /overnight_pause / resume ─────────────────────────────────────────────────
+# ── /overnight_pause / resume ──────────────────────────────────────────────────
 
 @router.message(Command("overnight_pause"))
 async def cmd_overnight_pause(msg: Message) -> None:
@@ -193,7 +202,7 @@ async def cmd_overnight_resume(msg: Message) -> None:
     await msg.answer(resume_job(job_id))
 
 
-# ── /overnight_jobs ───────────────────────────────────────────────────────────
+# ── /overnight_jobs ────────────────────────────────────────────────────────────
 
 @router.message(Command("overnight_jobs"))
 async def cmd_overnight_jobs(msg: Message) -> None:
@@ -237,7 +246,11 @@ async def cmd_dashboard_png(msg: Message) -> None:
     job_id = get_active_job_id()
     tasks  = get_job_tasks(job_id) if job_id else None
 
-    png_bytes = await build_png_dashboard(AGENT_STATUS, job_id=job_id, job_tasks=tasks)
+    try:
+        png_bytes = await build_png_dashboard(AGENT_STATUS, job_id=job_id, job_tasks=tasks)
+    except Exception as e:
+        logger.warning("PNG dashboard render failed: %s", e)
+        png_bytes = None
 
     if png_bytes:
         await thinking.delete()
@@ -247,6 +260,5 @@ async def cmd_dashboard_png(msg: Message) -> None:
             caption=caption,
         )
     else:
-        # Fallback to ASCII if matplotlib unavailable
         dash = build_ascii_dashboard(AGENT_STATUS, job_id=job_id, job_tasks=tasks)
         await thinking.edit_text(dash, parse_mode="HTML")

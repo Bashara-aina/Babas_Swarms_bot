@@ -55,7 +55,7 @@ class OvernightTask:
     started_at: float        = 0.0
     ended_at:   float        = 0.0
     tokens_used: int         = 0
-    depends_on: list[str]    = field(default_factory=list)  # task_ids this depends on
+    depends_on: list         = field(default_factory=list)  # task_ids this depends on
 
     @property
     def duration_sec(self) -> float:
@@ -73,17 +73,17 @@ class OvernightTask:
         return f"{secs/60:.1f}m"
 
 
-# ── Global state ───────────────────────────────────────────────────────────────
+# ── Global state ────────────────────────────────────────────────────────────────
 
 # Map: job_id → list of OvernightTask
-_jobs: dict[str, list[OvernightTask]] = {}
+_jobs: dict[str, list] = {}
 _active_job: Optional[str] = None       # currently running job id
 _job_cancelled: dict[str, bool] = {}
 _job_paused: dict[str, bool] = {}
 
 
-# ── Agent Status (used by dashboard) ──────────────────────────────────────────
-# Keyed by agent name → current status string
+# ── Agent Status (used by dashboard) ───────────────────────────────────────────
+# Keyed by agent name → current status dict
 AGENT_STATUS: dict[str, dict] = {}
 
 
@@ -103,18 +103,17 @@ def _update_agent_status(
     }
 
 
-# ── Checkpoint helpers ─────────────────────────────────────────────────────────
+# ── Checkpoint helpers ────────────────────────────────────────────────────────
 
-def _save_checkpoint(job_id: str, tasks: list[OvernightTask]) -> None:
+def _save_checkpoint(job_id: str, tasks: list) -> None:
     try:
         data = {
             "job_id": job_id,
             "saved_at": time.time(),
             "tasks": [
                 {
-                    **asdict(t),
-                    "status": t.status.value,
-                    "depends_on": t.depends_on,
+                    **{k: v for k, v in asdict(t).items() if k != "status"},
+                    "status": t.status.value,  # BUG FIX: serialize enum as string, not raw value
                 }
                 for t in tasks
             ],
@@ -124,7 +123,7 @@ def _save_checkpoint(job_id: str, tasks: list[OvernightTask]) -> None:
         logger.warning("Checkpoint save failed: %s", e)
 
 
-def load_checkpoint() -> Optional[tuple[str, list[OvernightTask]]]:
+def load_checkpoint() -> Optional[tuple]:
     if not CHECKPOINT_PATH.exists():
         return None
     try:
@@ -132,6 +131,7 @@ def load_checkpoint() -> Optional[tuple[str, list[OvernightTask]]]:
         job_id = data["job_id"]
         tasks = []
         for t in data["tasks"]:
+            t = dict(t)  # BUG FIX: copy so we can pop without mutating original
             status_val = t.pop("status", "pending")
             ot = OvernightTask(**t)
             ot.status = TaskStatus(status_val)
@@ -152,7 +152,7 @@ def clear_checkpoint() -> None:
 
 # ── Job creation helpers ───────────────────────────────────────────────────────
 
-def create_job(tasks: list[dict]) -> tuple[str, list[OvernightTask]]:
+def create_job(tasks: list) -> tuple:
     """
     Create a new overnight job.
     tasks = [{"title": str, "prompt": str, "agent": str, "depends_on": [ids]}, ...]
@@ -166,7 +166,7 @@ def create_job(tasks: list[dict]) -> tuple[str, list[OvernightTask]]:
             title      = t["title"],
             prompt     = t["prompt"],
             agent      = t.get("agent", "general"),
-            depends_on = t.get("depends_on", []),
+            depends_on = list(t.get("depends_on", [])),  # BUG FIX: always copy the list
         )
         task_objs.append(ot)
     _jobs[job_id] = task_objs
@@ -177,7 +177,7 @@ def create_job(tasks: list[dict]) -> tuple[str, list[OvernightTask]]:
 async def plan_job_with_llm(
     goal: str,
     llm_call: Callable,
-) -> list[dict]:
+) -> list:
     """
     Use the architect agent to decompose a high-level goal into a
     structured list of overnight tasks with agent assignments.
@@ -203,9 +203,13 @@ async def plan_job_with_llm(
 
     try:
         tasks = json.loads(raw)
-        # Validate structure
+        if not isinstance(tasks, list):  # BUG FIX: guard against LLM returning a dict
+            logger.warning("LLM returned non-list JSON for task planning")
+            raise ValueError("Expected JSON array")
         validated = []
         for i, t in enumerate(tasks):
+            if not isinstance(t, dict):  # BUG FIX: skip non-dict items
+                continue
             if "title" not in t or "prompt" not in t:
                 continue
             validated.append({
@@ -214,8 +218,8 @@ async def plan_job_with_llm(
                 "agent":      str(t.get("agent", "general")),
                 "depends_on": list(t.get("depends_on", [])),
             })
-        return validated
-    except json.JSONDecodeError:
+        return validated if validated else [{"title": goal[:80], "prompt": goal, "agent": "general", "depends_on": []}]
+    except (json.JSONDecodeError, ValueError):
         logger.warning("LLM returned invalid JSON for task planning, using single-task fallback")
         return [{"title": goal[:80], "prompt": goal, "agent": "general", "depends_on": []}]
 
@@ -224,9 +228,9 @@ async def plan_job_with_llm(
 
 async def run_overnight_job(
     job_id: str,
-    tasks: list[OvernightTask],
+    tasks: list,
     llm_call: Callable,
-    notify_fn: Callable[[str], Coroutine],
+    notify_fn: Callable,
     update_dashboard_fn: Optional[Callable] = None,
 ) -> dict:
     """
@@ -265,73 +269,79 @@ async def run_overnight_job(
         name=f"heartbeat-{job_id}"
     )
 
-    completed_ids: set[str] = set()
-    failed_ids: set[str] = set()
+    completed_ids: set = set()
+    failed_ids: set = set()
 
-    while True:
-        if _job_cancelled.get(job_id):
-            await notify_fn(f"⛔ Job <code>{job_id}</code> cancelled.")
-            break
-
-        if time.time() > deadline:
-            await notify_fn(f"⏰ Job <code>{job_id}</code> hit max runtime ({MAX_RUNTIME_HOURS}h). Stopping.")
-            for t in tasks:
-                if t.status == TaskStatus.PENDING:
-                    t.status = TaskStatus.SKIPPED
-            break
-
-        # Find tasks ready to run (deps met, not yet started)
-        ready = [
-            t for t in tasks
-            if t.status == TaskStatus.PENDING
-            and all(dep in completed_ids or dep in failed_ids for dep in t.depends_on)
-        ]
-
-        if not ready:
-            # Check if anything still running
-            still_running = any(t.status == TaskStatus.RUNNING for t in tasks)
-            if still_running:
-                await asyncio.sleep(2)
-                continue
-            # Nothing ready and nothing running → done
-            break
-
-        # Handle pause
-        while _job_paused.get(job_id):
-            await asyncio.sleep(5)
+    try:  # BUG FIX: wrap main loop in try/finally to always cancel heartbeat + clear active job
+        while True:
             if _job_cancelled.get(job_id):
+                await notify_fn(f"⛔ Job <code>{job_id}</code> cancelled.")
                 break
 
-        # Launch ready tasks in parallel
-        run_tasks = []
-        for t in ready:
-            t.status = TaskStatus.RUNNING
-            t.started_at = time.time()
-            _update_agent_status(t.agent, "🟡 running", t.title, "starting...", job_id)
-            if update_dashboard_fn:
-                await update_dashboard_fn()
-            run_tasks.append(
-                asyncio.create_task(
-                    _execute_single_task(t, job_id, llm_call, notify_fn, update_dashboard_fn),
-                    name=f"task-{t.task_id}"
+            if time.time() > deadline:
+                await notify_fn(f"⏰ Job <code>{job_id}</code> hit max runtime ({MAX_RUNTIME_HOURS}h). Stopping.")
+                for t in tasks:
+                    if t.status == TaskStatus.PENDING:
+                        t.status = TaskStatus.SKIPPED
+                break
+
+            # Find tasks ready to run (deps met, not yet started)
+            ready = [
+                t for t in tasks
+                if t.status == TaskStatus.PENDING
+                and all(dep in completed_ids or dep in failed_ids for dep in t.depends_on)
+            ]
+
+            if not ready:
+                # Check if anything still running
+                still_running = any(t.status == TaskStatus.RUNNING for t in tasks)
+                if still_running:
+                    await asyncio.sleep(2)
+                    continue
+                # Nothing ready and nothing running → done
+                break
+
+            # Handle pause
+            while _job_paused.get(job_id):
+                await asyncio.sleep(5)
+                if _job_cancelled.get(job_id):
+                    break
+
+            # Launch ready tasks in parallel
+            run_tasks = []
+            for t in ready:
+                t.status = TaskStatus.RUNNING
+                t.started_at = time.time()
+                _update_agent_status(t.agent, "🟡 running", t.title, "starting...", job_id)
+                if update_dashboard_fn:
+                    await update_dashboard_fn()
+                run_tasks.append(
+                    asyncio.create_task(
+                        _execute_single_task(t, job_id, llm_call, notify_fn, update_dashboard_fn),
+                        name=f"task-{t.task_id}"
+                    )
                 )
-            )
 
-        if run_tasks:
-            await asyncio.gather(*run_tasks, return_exceptions=True)
+            if run_tasks:
+                results = await asyncio.gather(*run_tasks, return_exceptions=True)
+                # BUG FIX: log any exceptions that slipped past the inner handler
+                for i, res in enumerate(results):
+                    if isinstance(res, Exception):
+                        logger.error("Unhandled task exception (task %d): %s", i, res)
 
-        # Update completion sets
-        for t in tasks:
-            if t.status == TaskStatus.DONE:
-                completed_ids.add(t.task_id)
-            elif t.status == TaskStatus.FAILED:
-                failed_ids.add(t.task_id)
+            # Update completion sets
+            for t in tasks:
+                if t.status == TaskStatus.DONE:
+                    completed_ids.add(t.task_id)
+                elif t.status == TaskStatus.FAILED:
+                    failed_ids.add(t.task_id)
 
-        _save_checkpoint(job_id, tasks)
+            _save_checkpoint(job_id, tasks)
 
-    heartbeat_task.cancel()
-    _active_job = None
-    clear_checkpoint()
+    finally:
+        heartbeat_task.cancel()
+        _active_job = None
+        clear_checkpoint()
 
     # Mark idle agents
     for t in tasks:
@@ -349,11 +359,11 @@ async def _execute_single_task(
     notify_fn: Callable,
     update_dashboard_fn: Optional[Callable],
 ) -> None:
-    from agents import AGENT_MODELS, FALLBACK_CHAIN, build_system_prompt
-    from tools.memory import add_memory
+    from agents import AGENT_MODELS, build_system_prompt
 
     agent_key = task.agent
-    model = AGENT_MODELS.get(agent_key, AGENT_MODELS["general"])
+    # BUG FIX: guard against unknown agent keys (e.g. typos from LLM planner)
+    model = AGENT_MODELS.get(agent_key) or AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
     system = build_system_prompt(
         f"You are the {agent_key} specialist in an overnight autonomous job. "
         "Work carefully and thoroughly — there's no user to ask follow-up questions. "
@@ -378,6 +388,7 @@ async def _execute_single_task(
 
         # Save to memory
         try:
+            from tools.memory import add_memory
             await add_memory(
                 f"Overnight task [{agent_key}]: {task.title}\n\nResult:\n{result[:800]}",
                 tags=["overnight", agent_key, job_id],
@@ -410,25 +421,28 @@ async def _execute_single_task(
 
 async def _heartbeat_loop(
     job_id: str,
-    tasks: list[OvernightTask],
+    tasks: list,
     notify_fn: Callable,
 ) -> None:
-    while True:
-        await asyncio.sleep(HEARTBEAT_INTERVAL)
-        if _job_cancelled.get(job_id):
-            break
-        done   = sum(1 for t in tasks if t.status == TaskStatus.DONE)
-        failed = sum(1 for t in tasks if t.status == TaskStatus.FAILED)
-        running = [t.title for t in tasks if t.status == TaskStatus.RUNNING]
-        total  = len(tasks)
-        running_str = ", ".join(running) if running else "none"
-        await notify_fn(
-            f"💓 <b>Overnight heartbeat</b> — Job <code>{job_id}</code>\n"
-            f"✅ Done: {done}/{total}  ❌ Failed: {failed}  🟡 Running: {running_str}"
-        )
+    try:  # BUG FIX: catch CancelledError so cancellation is clean and silent
+        while True:
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+            if _job_cancelled.get(job_id):
+                break
+            done   = sum(1 for t in tasks if t.status == TaskStatus.DONE)
+            failed = sum(1 for t in tasks if t.status == TaskStatus.FAILED)
+            running = [t.title for t in tasks if t.status == TaskStatus.RUNNING]
+            total  = len(tasks)
+            running_str = ", ".join(running) if running else "none"
+            await notify_fn(
+                f"💓 <b>Overnight heartbeat</b> — Job <code>{job_id}</code>\n"
+                f"✅ Done: {done}/{total}  ❌ Failed: {failed}  🟡 Running: {running_str}"
+            )
+    except asyncio.CancelledError:
+        pass  # clean shutdown
 
 
-def _build_summary(job_id: str, tasks: list[OvernightTask], total_sec: float) -> str:
+def _build_summary(job_id: str, tasks: list, total_sec: float) -> str:
     done    = [t for t in tasks if t.status == TaskStatus.DONE]
     failed  = [t for t in tasks if t.status == TaskStatus.FAILED]
     skipped = [t for t in tasks if t.status == TaskStatus.SKIPPED]
@@ -454,7 +468,7 @@ def _build_summary(job_id: str, tasks: list[OvernightTask], total_sec: float) ->
     return "\n".join(lines)
 
 
-# ── Control functions ──────────────────────────────────────────────────────────
+# ── Control functions ────────────────────────────────────────────────────────
 
 def cancel_job(job_id: str) -> str:
     if job_id not in _jobs:
@@ -467,7 +481,7 @@ def pause_job(job_id: str) -> str:
     if job_id not in _jobs:
         return f"No job '{job_id}' found."
     _job_paused[job_id] = True
-    return f"⏸ Job {job_id} paused. Use /overnight_resume {job_id} to continue."
+    return f"⏸ Job {job_id} paused. Use /overnight_resume to continue."
 
 
 def resume_job(job_id: str) -> str:
@@ -481,7 +495,7 @@ def get_active_job_id() -> Optional[str]:
     return _active_job
 
 
-def get_job_tasks(job_id: str) -> list[OvernightTask]:
+def get_job_tasks(job_id: str) -> list:
     return _jobs.get(job_id, [])
 
 
