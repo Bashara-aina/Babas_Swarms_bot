@@ -3,19 +3,17 @@
 Single source of truth for:
   - AGENT_MODELS       : primary model per agent role
   - FALLBACK_CHAIN     : ordered fallback list per agent role
-  - TASK_KEYWORDS      : keyword→agent routing (includes Indonesian)
+  - TASK_KEYWORDS      : keyword->agent routing (includes Indonesian)
   - DEBATE_PERSONAS    : 6 debate roles for SwarmDebateOrchestrator
   - ACTIVE_THREADS     : in-memory thread store
-  - CONVERSATION_HISTORY: persistent per-user conversation context
 
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
 
 Verified working models (live logs 2026-03-09):
-  groq/llama-3.3-70b-versatile                   ✓
-  groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
-  cerebras/qwen-3-235b-a22b                       ✓
-  zai/glm-4                                       ✓
+  groq/llama-3.3-70b-versatile    ✓
+  cerebras/qwen-3-235b-a22b       ✓
+  zai/glm-4                       ✓
 """
 
 from __future__ import annotations
@@ -25,8 +23,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# ── Personality wrapper injected into EVERY agent system prompt ──────────────────
-# Goal: sound like a brilliant, warm friend — not a documentation page or a robot
+# ── Personality wrapper injected into EVERY agent system prompt ──────────────
 PERSONALITY_WRAPPER = """
 You are Legion — Bashara's personal AI, running right here on her Linux machine.
 Think of yourself as her smartest friend who also happens to be an expert in
@@ -84,7 +81,7 @@ MEMORY CONTEXT (when provided):
   Don't announce you're using memory — just use it.
 """
 
-# ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────────
+# ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────
 DEBATE_PERSONAS = {
     "strategist": (
         "You think in 10-year timeframes. You prize leverage and compounding advantages. "
@@ -112,8 +109,8 @@ DEBATE_PERSONAS = {
     ),
 }
 
-# Persona → preferred model (different reasoning styles need different models)
-# FIX #17: Added fallback-aware note — if persona model fails, FALLBACK_CHAIN[role] is used
+# Persona -> preferred model (different reasoning styles need different models)
+# If a persona's preferred model is unavailable, FALLBACK_CHAIN[role] is used automatically
 DEBATE_PERSONA_MODELS: dict[str, str] = {
     "strategist":     "cerebras/qwen-3-235b-a22b",           # fast, large context
     "devil_advocate": "groq/qwen-qwq-32b",                   # adversarial reasoning
@@ -123,25 +120,16 @@ DEBATE_PERSONA_MODELS: dict[str, str] = {
     "critic":         "zai/glm-4",                           # precise, analytical
 }
 
-DEBATE_PERSONA_FALLBACKS: dict[str, list[str]] = {
-    "strategist":     ["cerebras/qwen-3-235b-a22b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
-    "devil_advocate": ["groq/qwen-qwq-32b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
-    "researcher":     ["groq/moonshotai/kimi-k2-instruct", "zai/glm-4", "groq/llama-3.3-70b-versatile"],
-    "pragmatist":     ["groq/llama-3.3-70b-versatile", "cerebras/qwen-3-235b-a22b", "gemini/gemini-2.0-flash"],
-    "visionary":      ["cerebras/qwen-3-235b-a22b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
-    "critic":         ["zai/glm-4", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
-}
-
 DEBATE_ICONS = {
-    "strategist": "⚔️",
-    "devil_advocate": "🔥",
-    "researcher": "📚",
-    "pragmatist": "🔧",
-    "visionary": "🚀",
-    "critic": "✂️",
+    "strategist": "\u2694\ufe0f",
+    "devil_advocate": "\U0001f525",
+    "researcher": "\U0001f4da",
+    "pragmatist": "\U0001f527",
+    "visionary": "\U0001f680",
+    "critic": "\u2702\ufe0f",
 }
 
-# ── Primary model registry ────────────────────────────────────────────────────────────
+# ── Primary model registry ──────────────────────────────────────────────────
 # SINGLE source of truth — router.py imports from here.
 AGENT_MODELS: dict[str, str] = {
     "vision":     "ollama_chat/gemma3:12b",              # local, private, RTX 3060
@@ -160,7 +148,7 @@ AGENT_MODELS: dict[str, str] = {
     "reviewer":   "groq/llama-3.3-70b-versatile",        # AI code review
 }
 
-# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────────
+# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
         "ollama_chat/gemma3:12b",
@@ -238,7 +226,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
 }
 
-# ── Keyword → agent routing ───────────────────────────────────────────────────────────────
+# ── Keyword -> agent routing ─────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
         "screenshot", "screen", "layar", "gambar", "image", "photo",
@@ -310,10 +298,10 @@ TASK_KEYWORDS: dict[str, list[str]] = {
 
 DEFAULT_AGENT = "general"
 
-# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────────────
+# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
-# ── Conversation history (persistent per user_id, for long-context) ────────────────
+# ── Conversation history (persistent per user_id, for long-context) ──────────
 # Format: {user_id: [{"role": "user"|"assistant", "content": str, "ts": float}]}
 CONVERSATION_HISTORY: dict[str, list[dict]] = {}
 MAX_HISTORY_TURNS = 20   # keep last 20 exchanges in RAM
@@ -329,7 +317,7 @@ def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> l
 
 
 def add_to_conversation(user_id: str, role: str, content: str) -> None:
-    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS pairs."""
+    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS."""
     if user_id not in CONVERSATION_HISTORY:
         CONVERSATION_HISTORY[user_id] = []
     CONVERSATION_HISTORY[user_id].append({
@@ -337,10 +325,11 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
         "content": content,
         "ts": time.time(),
     })
-    # FIX #12: Keep last MAX_HISTORY_TURNS * 2 entries (each "turn" = 1 user + 1 assistant message)
+    # Keep only last MAX_HISTORY_TURNS * 2 entries:
+    # each "turn" = 1 user message + 1 assistant message = 2 list entries
     if len(CONVERSATION_HISTORY[user_id]) > MAX_HISTORY_TURNS * 2:
         CONVERSATION_HISTORY[user_id] = CONVERSATION_HISTORY[user_id][-(MAX_HISTORY_TURNS * 2):]
-    logger.debug("Conversation history for %s: %d entries", user_id, len(CONVERSATION_HISTORY[user_id]))
+    logger.debug("Conversation history for %s: %d turns", user_id, len(CONVERSATION_HISTORY[user_id]))
 
 
 def clear_conversation(user_id: str) -> None:
@@ -413,26 +402,35 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
 
 
 def list_agents() -> str:
-    lines = ["<b>🤖 Active Agents</b>\n"]
-    # FIX #4: Added 'reviewer' icon so all AGENT_MODELS keys have a matching icon
+    lines = ["<b>\U0001f916 Active Agents</b>\n"]
+    # FIX #4: Added 'reviewer' icon — was missing from dict, fell back to generic robot emoji
     icons = {
-        "vision": "👁️", "coding": "💻", "debug": "🐛",
-        "math": "📐", "architect": "🏗️", "analyst": "📊",
-        "computer": "🖥️", "general": "🧠", "researcher": "🔬",
-        "marketer": "📢", "devops": "🔧", "pm": "📋",
-        "humanizer": "✨", "reviewer": "🔍",
+        "vision": "\U0001f441\ufe0f",
+        "coding": "\U0001f4bb",
+        "debug": "\U0001f41b",
+        "math": "\U0001f4d0",
+        "architect": "\U0001f3d7\ufe0f",
+        "analyst": "\U0001f4ca",
+        "computer": "\U0001f5a5\ufe0f",
+        "general": "\U0001f9e0",
+        "researcher": "\U0001f52c",
+        "marketer": "\U0001f4e2",
+        "devops": "\U0001f527",
+        "pm": "\U0001f4cb",
+        "humanizer": "\u2728",
+        "reviewer": "\U0001f50d",  # FIX #4: was missing — caused fallback to generic 🤖
     }
     for key, model in AGENT_MODELS.items():
-        icon = icons.get(key, "🤖")
+        icon = icons.get(key, "\U0001f916")
         if model.startswith("ollama_chat/"):
             provider = "OLLAMA"
-            model_name = model.replace("ollama_chat/", "") + " (local 🔒)"
+            model_name = model.replace("ollama_chat/", "") + " (local \U0001f512)"
         else:
             parts = model.split("/")
             provider = parts[0].upper()
             model_name = "/".join(parts[1:])
-        lines.append(f"  {icon} <b>{key}</b> → <code>{provider}</code> <i>{model_name}</i>")
-    lines.append("\n  🔒 <i>vision = local Ollama, stays on your machine</i>")
+        lines.append(f"  {icon} <b>{key}</b> \u2192 <code>{provider}</code> <i>{model_name}</i>")
+    lines.append("\n  \U0001f512 <i>vision = local Ollama, stays on your machine</i>")
     return "\n".join(lines)
 
 
@@ -441,7 +439,7 @@ def list_all_departments() -> list[str]:
     return list(AGENT_MODELS.keys())
 
 
-# ── Thread memory (in-RAM, used by /thread command) ────────────────────────────
+# ── Thread memory (in-RAM, used by /thread command) ──────────────────────────
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
@@ -463,19 +461,19 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     lines = ["<i>Previous in this thread:</i>\n"]
     for turn in recent:
         t = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}…")
-        lines.append(f"↳ {turn['result'][:120]}…\n")
+        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}\u2026")
+        lines.append(f"\u21b3 {turn['result'][:120]}\u2026\n")
     return "\n".join(lines)
 
 
 def list_threads() -> str:
     if not ACTIVE_THREADS:
         return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-    lines = ["<b>📌 Active Threads</b>\n"]
+    lines = ["<b>\U0001f4cc Active Threads</b>\n"]
     for tid, turns in ACTIVE_THREADS.items():
         last = turns[-1]
         t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
-        lines.append(f"  📌 <b>{tid}</b> — {len(turns)} turns (last: {t})")
+        lines.append(f"  \U0001f4cc <b>{tid}</b> \u2014 {len(turns)} turns (last: {t})")
     return "\n".join(lines)
 
 
