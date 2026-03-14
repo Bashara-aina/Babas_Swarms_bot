@@ -1,19 +1,33 @@
-"""memory.py — Second brain / searchable knowledge base for Legion.
+"""
+tools/memory.py — Persistent long-context memory for LegionSwarm.
 
-Uses SQLite + TF-IDF cosine similarity for semantic search.
-Stores notes, tags, sources with timestamps.
+Two-layer memory architecture:
+  1. RAM layer   : CONVERSATION_HISTORY in agents.py (per-session, hot)
+  2. SQLite layer: this file — persists across restarts (cold but permanent)
+
+Features:
+  - add_memory()      : save a note with tags + source
+  - search_memory()   : TF-IDF similarity search (no heavy deps)
+  - get_recent()      : last N memories
+  - build_memory_context() : returns a compact string to inject into system prompt
+  - auto_save_interaction(): called after every /run or /do to optionally save
+  - export_to_obsidian(): dump all notes as .md files
+
+No threading — all async. Uses aiosqlite.
 """
 
 from __future__ import annotations
-
+import asyncio
 import json
 import logging
 import math
+import os
 import re
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,229 +35,296 @@ try:
     import aiosqlite
 except ImportError:
     import subprocess, sys
-    subprocess.run(
-        [sys.executable, "-m", "pip", "install", "aiosqlite", "--break-system-packages", "-q"],
-        check=False,
-    )
+    subprocess.run([sys.executable, "-m", "pip", "install", "aiosqlite", "-q"])
     import aiosqlite
 
-from tools.persistence import DB_PATH
+DB_PATH = Path(os.environ.get("MEMORY_DB_PATH", Path.home() / ".legion_memory.db"))
+
+# ── Schema ────────────────────────────────────────────────────────────────────
+CREATE_SQL = """
+CREATE TABLE IF NOT EXISTS memories (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    text     TEXT    NOT NULL,
+    tags     TEXT    DEFAULT '',
+    source   TEXT    DEFAULT 'manual',
+    tfidf    TEXT    DEFAULT '{}',
+    created  REAL    NOT NULL,
+    accessed REAL    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created DESC);
+CREATE INDEX IF NOT EXISTS idx_memories_tags    ON memories(tags);
+"""
 
 
-# ── Schema ──────────────────────────────────────────────────────────────────
-
-async def init_memory_db() -> None:
-    """Create memory table if not exists."""
+async def _init_db() -> None:
     async with aiosqlite.connect(DB_PATH) as db:
-        await db.executescript("""
-            CREATE TABLE IF NOT EXISTS memory_notes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                text TEXT NOT NULL,
-                tags TEXT DEFAULT '',
-                source TEXT DEFAULT 'manual',
-                word_vector TEXT DEFAULT '{}',
-                created_at REAL NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_memory_source ON memory_notes(source);
-        """)
+        await db.executescript(CREATE_SQL)
         await db.commit()
-    logger.info("Memory DB initialized")
 
 
-# ── TF-IDF helpers ──────────────────────────────────────────────────────────
-
-_STOP_WORDS = {
-    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "shall", "can", "to", "of", "in", "for",
-    "on", "with", "at", "by", "from", "as", "into", "through", "during",
-    "before", "after", "above", "below", "between", "out", "off", "over",
-    "under", "again", "further", "then", "once", "here", "there", "when",
-    "where", "why", "how", "all", "each", "every", "both", "few", "more",
-    "most", "other", "some", "such", "no", "nor", "not", "only", "own",
-    "same", "so", "than", "too", "very", "and", "but", "or", "if", "this",
-    "that", "these", "those", "it", "its", "i", "me", "my", "we", "our",
-    "you", "your", "he", "him", "his", "she", "her", "they", "them", "their",
+# ── TF-IDF helpers ────────────────────────────────────────────────────────────
+STOPWORDS = {
+    "the", "a", "an", "is", "it", "in", "on", "at", "to", "for",
+    "of", "and", "or", "but", "not", "be", "was", "are", "with",
+    "this", "that", "from", "by", "as", "i", "you", "we", "they",
+    "yang", "di", "ke", "dari", "dan", "atau", "ini", "itu",
 }
 
 
 def _tokenize(text: str) -> list[str]:
-    """Simple word tokenizer: lowercase, alphanumeric only, remove stop words."""
-    words = re.findall(r"[a-z0-9]+", text.lower())
-    return [w for w in words if w not in _STOP_WORDS and len(w) > 1]
+    tokens = re.findall(r"[a-z0-9_]+", text.lower())
+    return [t for t in tokens if t not in STOPWORDS and len(t) > 1]
 
 
-def _word_freq(text: str) -> dict[str, int]:
-    return dict(Counter(_tokenize(text)))
+def _tfidf_vector(text: str) -> dict[str, float]:
+    tokens = _tokenize(text)
+    if not tokens:
+        return {}
+    counts = Counter(tokens)
+    total = len(tokens)
+    return {word: count / total for word, count in counts.items()}
 
 
-def _cosine_sim(vec_a: dict[str, float], vec_b: dict[str, float]) -> float:
-    """Cosine similarity between two word-frequency vectors."""
-    common = set(vec_a.keys()) & set(vec_b.keys())
+def _cosine_similarity(vec_a: dict, vec_b: dict) -> float:
+    if not vec_a or not vec_b:
+        return 0.0
+    common = set(vec_a) & set(vec_b)
     if not common:
         return 0.0
-    dot = sum(vec_a[k] * vec_b[k] for k in common)
-    mag_a = math.sqrt(sum(v * v for v in vec_a.values()))
-    mag_b = math.sqrt(sum(v * v for v in vec_b.values()))
+    dot = sum(vec_a[w] * vec_b[w] for w in common)
+    mag_a = math.sqrt(sum(v ** 2 for v in vec_a.values()))
+    mag_b = math.sqrt(sum(v ** 2 for v in vec_b.values()))
     if mag_a == 0 or mag_b == 0:
         return 0.0
     return dot / (mag_a * mag_b)
 
 
-# ── Core operations ─────────────────────────────────────────────────────────
-
+# ── CRUD ──────────────────────────────────────────────────────────────────────
 async def add_memory(
     text: str,
-    tags: Optional[list[str]] = None,
+    tags: list[str] | None = None,
     source: str = "manual",
 ) -> int:
-    """Store a note in the knowledge base. Returns note ID."""
-    await init_memory_db()
-    tags_str = ",".join(tags) if tags else ""
-    vec = json.dumps(_word_freq(text))
+    """
+    Save a note to persistent memory.
+    Returns the new row id.
+    """
+    await _init_db()
     now = time.time()
-
+    tags_str = ",".join(tags or [])
+    vec = _tfidf_vector(text)
+    tfidf_json = json.dumps(vec)
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
-            """INSERT INTO memory_notes (text, tags, source, word_vector, created_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (text, tags_str, source, vec, now),
+            "INSERT INTO memories (text, tags, source, tfidf, created, accessed) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (text, tags_str, source, tfidf_json, now, now),
         )
         await db.commit()
-        return cursor.lastrowid or 0
+        memory_id = cursor.lastrowid
+    logger.info("Memory saved: id=%d tags=%s source=%s", memory_id, tags_str, source)
+    return memory_id
 
 
-async def search_memory(query: str, top_k: int = 5) -> list[dict[str, Any]]:
-    """TF-IDF cosine similarity search across all notes."""
-    await init_memory_db()
-    query_vec = _word_freq(query)
+async def search_memory(query: str, top_k: int = 5) -> list[dict]:
+    """
+    TF-IDF cosine similarity search.
+    Returns list of dicts: {id, text, tags, source, score, created}
+    """
+    await _init_db()
+    query_vec = _tfidf_vector(query)
     if not query_vec:
-        return []
+        return await get_recent(top_k)
 
-    async with aiosqlite.connect(DB_PATH) as db:
-        db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT * FROM memory_notes ORDER BY created_at DESC") as cursor:
-            rows = await cursor.fetchall()
-
-    # Score each note
-    scored = []
-    for row in rows:
-        row_dict = dict(row)
-        try:
-            note_vec = json.loads(row_dict.get("word_vector", "{}"))
-        except (json.JSONDecodeError, TypeError):
-            note_vec = {}
-        sim = _cosine_sim(query_vec, note_vec)
-
-        # Boost if query words appear in tags
-        tags = row_dict.get("tags", "")
-        tag_boost = sum(0.1 for w in _tokenize(query) if w in tags.lower())
-        sim += tag_boost
-
-        if sim > 0:
-            scored.append((sim, row_dict))
-
-    # Sort by similarity, return top_k
-    scored.sort(key=lambda x: x[0], reverse=True)
-    results = []
-    for sim, note in scored[:top_k]:
-        results.append({
-            "id": note["id"],
-            "text": note["text"],
-            "tags": note["tags"],
-            "source": note["source"],
-            "created_at": note["created_at"],
-            "relevance": round(sim, 3),
-        })
-    return results
-
-
-async def get_recent_memories(limit: int = 10) -> list[dict[str, Any]]:
-    """Get the N most recent memories."""
-    await init_memory_db()
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute(
-            "SELECT * FROM memory_notes ORDER BY created_at DESC LIMIT ?", (limit,)
+            "SELECT id, text, tags, source, tfidf, created FROM memories ORDER BY created DESC LIMIT 200"
         ) as cursor:
-            return [dict(r) for r in await cursor.fetchall()]
+            rows = await cursor.fetchall()
+
+    scored = []
+    for row in rows:
+        try:
+            vec = json.loads(row["tfidf"])
+        except Exception:
+            vec = {}
+        score = _cosine_similarity(query_vec, vec)
+        scored.append({
+            "id": row["id"],
+            "text": row["text"],
+            "tags": row["tags"],
+            "source": row["source"],
+            "score": score,
+            "created": row["created"],
+        })
+
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    results = [r for r in scored[:top_k] if r["score"] > 0.01]
+
+    # Update accessed time for returned memories
+    if results:
+        ids = [str(r["id"]) for r in results]
+        async with aiosqlite.connect(DB_PATH) as db:
+            await db.execute(
+                f"UPDATE memories SET accessed = ? WHERE id IN ({','.join(ids)})",
+                (time.time(),),
+            )
+            await db.commit()
+
+    return results
 
 
-async def link_memories(note_id: int) -> list[dict[str, Any]]:
-    """Find notes semantically similar to the given note."""
-    await init_memory_db()
+async def get_recent(n: int = 10) -> list[dict]:
+    """Return the N most recently added memories."""
+    await _init_db()
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT * FROM memory_notes WHERE id = ?", (note_id,)) as cursor:
+        async with db.execute(
+            "SELECT id, text, tags, source, created FROM memories ORDER BY created DESC LIMIT ?",
+            (n,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+    return [
+        {"id": r["id"], "text": r["text"], "tags": r["tags"],
+         "source": r["source"], "created": r["created"]}
+        for r in rows
+    ]
+
+
+async def delete_memory(memory_id: int) -> bool:
+    """Delete a memory by ID."""
+    await _init_db()
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
+        await db.commit()
+    logger.info("Memory deleted: id=%d", memory_id)
+    return True
+
+
+async def count_memories() -> int:
+    await _init_db()
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT COUNT(*) FROM memories") as cursor:
             row = await cursor.fetchone()
-            if not row:
-                return []
-            target = dict(row)
-
-    # Search using the note's text as query
-    results = await search_memory(target["text"], top_k=6)
-    # Exclude self
-    return [r for r in results if r["id"] != note_id]
+    return row[0] if row else 0
 
 
-async def export_to_obsidian(vault_path: str) -> str:
-    """Export all memories as .md files to an Obsidian vault directory."""
-    await init_memory_db()
+# ── Context injection helper ──────────────────────────────────────────────────
+async def build_memory_context(query: str, top_k: int = 3) -> str:
+    """
+    Search memory and return a compact block to inject into a system prompt.
+    Keeps it under ~1500 chars so it doesn't bloat the context.
+    """
+    results = await search_memory(query, top_k=top_k)
+    if not results:
+        return ""
+
+    lines = ["[MEMORY CONTEXT — relevant notes from your second brain:]", ""]
+    for r in results:
+        created = datetime.fromtimestamp(r["created"]).strftime("%Y-%m-%d")
+        tags = f" [{r['tags']}]" if r["tags"] else ""
+        snippet = r["text"][:400].replace("\n", " ")
+        if len(r["text"]) > 400:
+            snippet += "..."
+        lines.append(f"• ({created}{tags}) {snippet}")
+
+    lines.append("[end memory context]")
+    return "\n".join(lines)
+
+
+async def auto_save_interaction(
+    user_message: str,
+    assistant_reply: str,
+    source: str = "conversation",
+) -> None:
+    """
+    Decide if the interaction is worth remembering, then save it.
+    Uses a simple heuristic: save if assistant reply is >200 chars
+    and contains technical terms, URLs, file paths, or code.
+    """
+    worth_saving_patterns = [
+        r"https?://",           # URLs
+        r"/[a-z_]+/[a-z_]+",   # file paths
+        r"```",                 # code blocks
+        r"arXiv",               # papers
+        r"\bfix\b|\bsolved\b|\bworkaround\b",  # solutions
+        r"\bremember\b|\bdon't forget\b|\bimportant\b",
+    ]
+    if len(assistant_reply) < 200:
+        return
+    worth_saving = any(
+        re.search(pat, assistant_reply, re.IGNORECASE)
+        for pat in worth_saving_patterns
+    )
+    if not worth_saving:
+        return
+
+    combined = f"Q: {user_message[:200]}\nA: {assistant_reply[:600]}"
+    tags = [source]
+    # Auto-tag by content
+    if "arxiv" in assistant_reply.lower() or "paper" in user_message.lower():
+        tags.append("research")
+    if any(kw in user_message.lower() for kw in ["pytorch", "cuda", "workernet", "ikea"]):
+        tags.append("ml")
+    if any(kw in user_message.lower() for kw in ["nextjs", "supabase", "typescript", "react"]):
+        tags.append("webdev")
+    if "fix" in assistant_reply.lower() or "debug" in user_message.lower():
+        tags.append("fix")
+
+    await add_memory(combined, tags=tags, source=source)
+    logger.debug("Auto-saved interaction to memory (tags=%s)", tags)
+
+
+# ── Obsidian export ───────────────────────────────────────────────────────────
+async def export_to_obsidian(vault_path: str | Path) -> int:
+    """
+    Export all memories as .md files to an Obsidian vault directory.
+    Returns count of files written.
+    """
     vault = Path(vault_path)
     vault.mkdir(parents=True, exist_ok=True)
 
+    await _init_db()
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT * FROM memory_notes ORDER BY created_at") as cursor:
+        async with db.execute(
+            "SELECT id, text, tags, source, created FROM memories ORDER BY created DESC"
+        ) as cursor:
             rows = await cursor.fetchall()
 
-    if not rows:
-        return "No memories to export."
-
-    exported = 0
+    count = 0
     for row in rows:
-        note = dict(row)
-        note_id = note["id"]
-        tags = note.get("tags", "")
-        source = note.get("source", "manual")
-        text = note.get("text", "")
-        ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(note["created_at"]))
+        created = datetime.fromtimestamp(row["created"]).strftime("%Y-%m-%d %H:%M")
+        safe_title = re.sub(r"[^\w\s-]", "", row["text"][:50]).strip().replace(" ", "-")
+        filename = vault / f"memory-{row['id']:04d}-{safe_title[:30]}.md"
+        tags_list = [t for t in row["tags"].split(",") if t]
+        tags_yaml = "\n".join(f"  - {t}" for t in tags_list)
+        content = (
+            f"---\n"
+            f"id: {row['id']}\n"
+            f"source: {row['source']}\n"
+            f"created: {created}\n"
+            f"tags:\n{tags_yaml or '  - untagged'}\n"
+            f"---\n\n"
+            f"{row['text']}\n"
+        )
+        filename.write_text(content, encoding="utf-8")
+        count += 1
 
-        # Generate filename
-        first_line = text.split("\n")[0][:60].strip()
-        safe_name = re.sub(r"[^\w\s-]", "", first_line).strip().replace(" ", "_") or f"note_{note_id}"
-        filename = f"{safe_name}.md"
-
-        # Build markdown
-        lines = [
-            f"# {first_line}",
-            "",
-            f"**Source:** {source}  ",
-            f"**Date:** {ts}  ",
-        ]
-        if tags:
-            tag_links = " ".join(f"#{t.strip()}" for t in tags.split(",") if t.strip())
-            lines.append(f"**Tags:** {tag_links}  ")
-        lines += ["", "---", "", text]
-
-        # Find linked notes
-        linked = await link_memories(note_id)
-        if linked:
-            lines += ["", "## Related Notes", ""]
-            for ln in linked[:3]:
-                ln_first = ln["text"].split("\n")[0][:50]
-                ln_safe = re.sub(r"[^\w\s-]", "", ln_first).strip().replace(" ", "_")
-                lines.append(f"- [[{ln_safe}]] (relevance: {ln['relevance']})")
-
-        (vault / filename).write_text("\n".join(lines), encoding="utf-8")
-        exported += 1
-
-    return f"Exported {exported} notes to {vault_path}"
+    logger.info("Exported %d memories to %s", count, vault)
+    return count
 
 
-async def auto_save_research(paper_analysis: str, paper_id: str = "") -> int:
-    """Auto-save a paper analysis result to memory."""
-    tags = ["arxiv", "research"]
-    if paper_id:
-        tags.append(paper_id)
-    return await add_memory(paper_analysis, tags=tags, source="arxiv")
+# ── Format helpers (for Telegram display) ────────────────────────────────────
+def format_memory_result(r: dict, show_score: bool = False) -> str:
+    created = datetime.fromtimestamp(r["created"]).strftime("%Y-%m-%d")
+    tags = f" <i>[{r['tags']}]</i>" if r.get("tags") else ""
+    score_str = f" <i>(score: {r['score']:.2f})</i>" if show_score and "score" in r else ""
+    text_preview = r["text"][:300].replace("<", "&lt;").replace(">", "&gt;")
+    if len(r["text"]) > 300:
+        text_preview += "..."
+    return (
+        f"<b>#{r['id']}</b>{tags} <code>{created}</code>{score_str}\n"
+        f"{text_preview}"
+    )
