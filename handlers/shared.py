@@ -21,7 +21,7 @@ import router as agents
 import llm_client
 from llm_client import agent_loop, chat, chunk_output, verify_api_keys
 
-# ── Shared mutable state ──────────────────────────────────────────────────────
+# ── Shared mutable state ──────────────────────────────────────────────────────────────
 ALLOWED_USER_ID: int = 0          # set by main.py at startup
 _user_thread: dict[int, str] = {}
 _last_screenshot: dict[int, str] = {}
@@ -41,7 +41,7 @@ _session_manager = None
 _cost_metrics = None
 
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# ── Auth ─────────────────────────────────────────────────────────────────────────
 def is_allowed(msg: Message) -> bool:
     return msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID
 
@@ -50,7 +50,7 @@ def allowed_cb(cb: CallbackQuery) -> bool:
     return cb.from_user is not None and cb.from_user.id == ALLOWED_USER_ID
 
 
-# ── UI components ─────────────────────────────────────────────────────────────
+# ── UI components ──────────────────────────────────────────────────────────────────
 def main_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
@@ -89,7 +89,7 @@ def screenshot_keyboard() -> InlineKeyboardMarkup:
     ]])
 
 
-# ── Helper: send chunked messages ─────────────────────────────────────────────
+# ── Helper: send chunked messages ─────────────────────────────────────────────────
 async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
     if not text:
         return
@@ -109,7 +109,7 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
             await asyncio.sleep(0.3)
 
 
-# ── Helper: typing indicator ──────────────────────────────────────────────────
+# ── Helper: typing indicator ──────────────────────────────────────────────────────
 async def _keep_typing(msg: Message) -> None:
     while True:
         try:
@@ -119,7 +119,7 @@ async def _keep_typing(msg: Message) -> None:
         await asyncio.sleep(4)
 
 
-# ── Helper: key status string ─────────────────────────────────────────────────
+# ── Helper: key status string ──────────────────────────────────────────────────────
 def _key_status() -> str:
     status = verify_api_keys()
     names = {
@@ -140,9 +140,13 @@ def _key_status() -> str:
     return "\n".join(lines)
 
 
-# ── Core: agentic loop handler ────────────────────────────────────────────────
+# ── Core: agentic loop handler ──────────────────────────────────────────────────────
 async def _run_agent_loop(msg: Message, task: str) -> None:
     """Run the agentic computer-use loop with live progress updates."""
+    # FIX #5: Guard against None from_user (e.g. channel posts or anonymous messages)
+    if not msg.from_user:
+        return
+
     thread_id = _user_thread.get(msg.from_user.id)
 
     status_msg = await msg.answer("🤖 on it…")
@@ -202,7 +206,7 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
         )
 
 
-# ── Core: single-turn chat handler ────────────────────────────────────────────
+# ── Core: single-turn chat handler ───────────────────────────────────────────────
 async def _execute_chat(
     msg: Message,
     task: str,
@@ -210,6 +214,10 @@ async def _execute_chat(
     show_thinking: bool = False,
 ) -> None:
     """Single LLM call without computer tool use."""
+    # FIX #5: Guard against None from_user
+    if not msg.from_user:
+        return
+
     agent_key = forced_agent or agents.detect_agent(task)
     thread_id = _user_thread.get(msg.from_user.id)
 
