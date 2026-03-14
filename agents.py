@@ -6,6 +6,7 @@ Single source of truth for:
   - TASK_KEYWORDS      : keyword→agent routing (includes Indonesian)
   - DEBATE_PERSONAS    : 6 debate roles for SwarmDebateOrchestrator
   - ACTIVE_THREADS     : in-memory thread store
+  - CONVERSATION_HISTORY: persistent per-user conversation context
 
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
@@ -24,7 +25,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# ── Personality wrapper injected into EVERY agent system prompt ──────────────
+# ── Personality wrapper injected into EVERY agent system prompt ──────────────────
 # Goal: sound like a brilliant, warm friend — not a documentation page or a robot
 PERSONALITY_WRAPPER = """
 You are Legion — Bashara's personal AI, running right here on her Linux machine.
@@ -83,7 +84,7 @@ MEMORY CONTEXT (when provided):
   Don't announce you're using memory — just use it.
 """
 
-# ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────
+# ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────────
 DEBATE_PERSONAS = {
     "strategist": (
         "You think in 10-year timeframes. You prize leverage and compounding advantages. "
@@ -112,6 +113,7 @@ DEBATE_PERSONAS = {
 }
 
 # Persona → preferred model (different reasoning styles need different models)
+# FIX #17: Added fallback-aware note — if persona model fails, FALLBACK_CHAIN[role] is used
 DEBATE_PERSONA_MODELS: dict[str, str] = {
     "strategist":     "cerebras/qwen-3-235b-a22b",           # fast, large context
     "devil_advocate": "groq/qwen-qwq-32b",                   # adversarial reasoning
@@ -119,6 +121,15 @@ DEBATE_PERSONA_MODELS: dict[str, str] = {
     "pragmatist":     "groq/llama-3.3-70b-versatile",        # practical, fast
     "visionary":      "cerebras/qwen-3-235b-a22b",           # creative, fast
     "critic":         "zai/glm-4",                           # precise, analytical
+}
+
+DEBATE_PERSONA_FALLBACKS: dict[str, list[str]] = {
+    "strategist":     ["cerebras/qwen-3-235b-a22b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
+    "devil_advocate": ["groq/qwen-qwq-32b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
+    "researcher":     ["groq/moonshotai/kimi-k2-instruct", "zai/glm-4", "groq/llama-3.3-70b-versatile"],
+    "pragmatist":     ["groq/llama-3.3-70b-versatile", "cerebras/qwen-3-235b-a22b", "gemini/gemini-2.0-flash"],
+    "visionary":      ["cerebras/qwen-3-235b-a22b", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
+    "critic":         ["zai/glm-4", "groq/llama-3.3-70b-versatile", "gemini/gemini-2.0-flash"],
 }
 
 DEBATE_ICONS = {
@@ -130,7 +141,7 @@ DEBATE_ICONS = {
     "critic": "✂️",
 }
 
-# ── Primary model registry ──────────────────────────────────────────────────
+# ── Primary model registry ────────────────────────────────────────────────────────────
 # SINGLE source of truth — router.py imports from here.
 AGENT_MODELS: dict[str, str] = {
     "vision":     "ollama_chat/gemma3:12b",              # local, private, RTX 3060
@@ -149,7 +160,7 @@ AGENT_MODELS: dict[str, str] = {
     "reviewer":   "groq/llama-3.3-70b-versatile",        # AI code review
 }
 
-# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
+# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
         "ollama_chat/gemma3:12b",
@@ -227,7 +238,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
 }
 
-# ── Keyword → agent routing ─────────────────────────────────────────────────
+# ── Keyword → agent routing ───────────────────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
         "screenshot", "screen", "layar", "gambar", "image", "photo",
@@ -299,10 +310,10 @@ TASK_KEYWORDS: dict[str, list[str]] = {
 
 DEFAULT_AGENT = "general"
 
-# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────
+# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────────────
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
-# ── Conversation history (persistent per user_id, for long-context) ──────────
+# ── Conversation history (persistent per user_id, for long-context) ────────────────
 # Format: {user_id: [{"role": "user"|"assistant", "content": str, "ts": float}]}
 CONVERSATION_HISTORY: dict[str, list[dict]] = {}
 MAX_HISTORY_TURNS = 20   # keep last 20 exchanges in RAM
@@ -318,7 +329,7 @@ def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> l
 
 
 def add_to_conversation(user_id: str, role: str, content: str) -> None:
-    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS."""
+    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS pairs."""
     if user_id not in CONVERSATION_HISTORY:
         CONVERSATION_HISTORY[user_id] = []
     CONVERSATION_HISTORY[user_id].append({
@@ -326,10 +337,10 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
         "content": content,
         "ts": time.time(),
     })
-    # Keep only last MAX_HISTORY_TURNS turns
+    # FIX #12: Keep last MAX_HISTORY_TURNS * 2 entries (each "turn" = 1 user + 1 assistant message)
     if len(CONVERSATION_HISTORY[user_id]) > MAX_HISTORY_TURNS * 2:
         CONVERSATION_HISTORY[user_id] = CONVERSATION_HISTORY[user_id][-(MAX_HISTORY_TURNS * 2):]
-    logger.debug("Conversation history for %s: %d turns", user_id, len(CONVERSATION_HISTORY[user_id]))
+    logger.debug("Conversation history for %s: %d entries", user_id, len(CONVERSATION_HISTORY[user_id]))
 
 
 def clear_conversation(user_id: str) -> None:
@@ -403,12 +414,13 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
 
 def list_agents() -> str:
     lines = ["<b>🤖 Active Agents</b>\n"]
+    # FIX #4: Added 'reviewer' icon so all AGENT_MODELS keys have a matching icon
     icons = {
         "vision": "👁️", "coding": "💻", "debug": "🐛",
         "math": "📐", "architect": "🏗️", "analyst": "📊",
         "computer": "🖥️", "general": "🧠", "researcher": "🔬",
         "marketer": "📢", "devops": "🔧", "pm": "📋",
-        "humanizer": "✨",
+        "humanizer": "✨", "reviewer": "🔍",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "🤖")
@@ -429,7 +441,7 @@ def list_all_departments() -> list[str]:
     return list(AGENT_MODELS.keys())
 
 
-# ── Thread memory (in-RAM, used by /thread command) ──────────────────────────
+# ── Thread memory (in-RAM, used by /thread command) ────────────────────────────
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
