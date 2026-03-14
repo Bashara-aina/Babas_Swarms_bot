@@ -2209,6 +2209,19 @@ async def on_startup() -> None:
         # Content
         BotCommand(command="post",        description="Draft social media post"),
         BotCommand(command="brand_check", description="Monitor brand mentions"),
+        # Code Quality
+        BotCommand(command="review",      description="AI code review"),
+        BotCommand(command="security_review", description="Security audit"),
+        # Orchestration
+        BotCommand(command="orchestrate", description="Decompose + execute complex task"),
+        BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
+        # Sessions & Learning
+        BotCommand(command="save",        description="Save session state"),
+        BotCommand(command="resume",      description="Resume saved session"),
+        BotCommand(command="sessions",    description="List saved sessions"),
+        BotCommand(command="learn",       description="Teach a pattern"),
+        BotCommand(command="instincts",   description="Show learned patterns"),
+        BotCommand(command="audit",       description="Activity audit trail"),
         # System
         BotCommand(command="models",      description="Agent roster"),
         BotCommand(command="keys",        description="API key status"),
