@@ -5,8 +5,9 @@ Two execution modes:
   2. agent_loop()  — Multi-turn agentic loop with real computer tool use
 
 Fallback policy:
-  vision:    Ollama gemma3:12b (local) → Groq Llama-4-Scout (cloud)
-  all other: cloud chain (ZAI → Groq → Cerebras → Gemini → OpenRouter)
+  vision:    Ollama gemma3:12b (local) only if RAM+VRAM have headroom
+             (checked via tools.resource_monitor) -> else cloud vision
+  all other: cloud chain (ZAI -> Groq -> Cerebras -> Gemini -> OpenRouter)
   NEVER fall back to Ollama for non-vision text tasks.
 """
 
@@ -160,7 +161,6 @@ def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
     the full JSON argument object regardless of nesting depth.
     """
     s = str(error_str)
-    # Step 1: find the function name
     name_match = re.search(r'function=(\w+)', s)
     if not name_match:
         name_match = re.search(r"tool '(\w+)", s)
@@ -168,7 +168,6 @@ def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
         return None
     name = name_match.group(1)
 
-    # Step 2: find the JSON args using brace-depth counting (handles nesting)
     start = s.find('{', name_match.end())
     if start == -1:
         return name, {}
@@ -211,7 +210,6 @@ async def _call_model(
         kwargs["tools"] = tools
         kwargs["tool_choice"] = tool_choice
 
-    # Provider-specific config
     if provider == "ollama_chat":
         model_name = model.replace("ollama_chat/", "")
         kwargs["model"] = f"ollama_chat/{model_name}"
@@ -248,20 +246,13 @@ async def _call_model(
 # ── Context compaction ───────────────────────────────────────────────────────
 
 def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
-    """Summarize older messages to reduce context size.
-
-    Keeps: system prompt + last `keep_recent` messages.
-    Summarizes everything in between into a single context message.
-
-    fix #20: summary is now injected as 'system' role (not 'user') to avoid
-    breaking the alternating turn structure that LLMs expect.
-    """
+    """Summarize older messages to reduce context size."""
     if len(messages) <= keep_recent + 2:
         return messages
 
-    system = messages[0]  # Always keep system prompt
-    recent = messages[-keep_recent:]  # Keep last N messages
-    middle = messages[1:-keep_recent]  # Summarize these
+    system = messages[0]
+    recent = messages[-keep_recent:]
+    middle = messages[1:-keep_recent]
 
     summary_parts = []
     for m in middle:
@@ -279,7 +270,6 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
             summary_parts.append(f"{role}: {truncated}")
 
     summary = "\n".join(summary_parts)
-    # fix #20: use 'system' role so the summary doesn't break turn alternation
     compact_msg = {
         "role": "system",
         "content": (
@@ -295,11 +285,6 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
 
 # ── Agentic tool-calling loop ─────────────────────────────────────────────────
 
-# fix #3: removed hardcoded _AGENT_CHAIN. agent_loop now calls
-# get_fallback_chain('computer') directly — single source of truth in agents.py.
-
-# Callbacks: progress_cb(text) sends status to Telegram
-# photo_cb(path) sends screenshot to Telegram
 ProgressCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
 PhotoCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
 
@@ -312,7 +297,6 @@ async def _agent_loop_inner(
     thread_id: Optional[str] = None,
 ) -> tuple[str, str]:
     """Inner agent loop body — called by agent_loop() under asyncio.wait_for()."""
-    # fix #3: use get_fallback_chain('computer') — no more _AGENT_CHAIN duplicate
     full_chain = get_fallback_chain("computer")
     chain = [m for m in full_chain if not _is_rate_limited(m)]
     if not chain:
@@ -356,7 +340,6 @@ async def _agent_loop_inner(
             _mark_rate_limited(model)
             if _advance_model():
                 continue
-            # fix #14: save thread on early exit
             if thread_id:
                 add_to_thread(thread_id, "computer", task,
                               "rate limited on all providers")
@@ -416,7 +399,6 @@ async def _agent_loop_inner(
             logger.error("agent_loop BadRequest: %s", e)
             if _advance_model():
                 continue
-            # fix #14: save thread on early exit
             if thread_id:
                 add_to_thread(thread_id, "computer", task, f"model error: {e}")
             return f"model error: {e}", model
@@ -448,7 +430,6 @@ async def _agent_loop_inner(
             answer = (msg.content or "").strip()
             thinking, clean = _strip_think_tags(answer)
             result_text = clean or answer
-            # fix #14: always save thread on successful completion
             if thread_id:
                 add_to_thread(thread_id, "computer", task, result_text)
             return result_text, model
@@ -521,7 +502,6 @@ async def _agent_loop_inner(
                 "tool_call_id": tc.id,
             })
 
-    # fix #14: max_iterations exhausted — still save to thread
     summary = "\n".join(f"  \u2022 {s}" for s in steps_taken[-5:])
     final_msg = f"completed {max_iterations} steps:\n{summary}"
     if thread_id:
@@ -536,11 +516,7 @@ async def agent_loop(
     max_iterations: int = 20,
     thread_id: Optional[str] = None,
 ) -> tuple[str, str]:
-    """Agentic loop with 300s wall-clock timeout (fix #21).
-
-    Wraps _agent_loop_inner() in asyncio.wait_for() so a stuck tool call
-    or runaway model can never freeze the bot indefinitely.
-    """
+    """Agentic loop with 300s wall-clock timeout."""
     try:
         return await asyncio.wait_for(
             _agent_loop_inner(
@@ -550,7 +526,7 @@ async def agent_loop(
                 max_iterations=max_iterations,
                 thread_id=thread_id,
             ),
-            timeout=300.0,  # 5 minutes hard cap
+            timeout=300.0,
         )
     except asyncio.TimeoutError:
         logger.error("agent_loop timed out after 300s for task: %s", task[:80])
@@ -560,11 +536,7 @@ async def agent_loop(
 
 
 def _tool_label(name: str, args: dict) -> str:
-    """Human-friendly progress label for a tool call.
-
-    fix #55: removed orphan entries for 'format_code' and 'parallel_agents'
-    which are not in TOOL_DEFINITIONS and can never be called.
-    """
+    """Human-friendly progress label for a tool call."""
     labels = {
         "shell_execute":    lambda a: f"$ {a.get('command', '')[:60]}",
         "take_screenshot":  lambda a: "\U0001f4f8 grabbing screen\u2026",
@@ -585,14 +557,12 @@ def _tool_label(name: str, args: dict) -> str:
         "get_clipboard":    lambda a: "\U0001f4cb get clipboard",
         "set_clipboard":    lambda a: "\U0001f4cb set clipboard",
         "install_packages": lambda a: f"\U0001f4e6 pip install {' '.join(a.get('packages',[]))}",
-        # Web browsing
         "web_browse":       lambda a: f"\U0001f310 browsing {a.get('url','')}",
         "web_search":       lambda a: f"\U0001f50d searching: {a.get('query','')}",
         "web_research":     lambda a: f"\U0001f52c researching: {a.get('topic','')[:40]}\u2026",
         "web_fill_form":    lambda a: f"\U0001f4dd filling form at {a.get('url','')}",
         "web_get_links":    lambda a: f"\U0001f517 getting links from {a.get('url','')}",
         "web_click":        lambda a: f"\U0001f5b1 clicking '{a.get('click_text','')}' on {a.get('url','')}",
-        # Document processing
         "read_pdf":         lambda a: f"\U0001f4c4 reading PDF {a.get('path','')}",
         "pdf_extract_tables": lambda a: f"\U0001f4ca extracting tables from {a.get('path','')}",
         "read_excel":       lambda a: f"\U0001f4d7 reading Excel {a.get('path','')}",
@@ -604,14 +574,12 @@ def _tool_label(name: str, args: dict) -> str:
         "organize_files":   lambda a: f"\U0001f4c2 organizing {a.get('directory','')}",
         "find_files":       lambda a: f"\U0001f50e finding {a.get('pattern','')} in {a.get('directory','')}",
         "file_info":        lambda a: f"\u2139\ufe0f info: {a.get('path','')}",
-        # Email
         "email_check_inbox": lambda a: "\U0001f4e7 checking inbox\u2026",
         "email_read":        lambda a: f"\U0001f4e7 reading email {a.get('uid','')}",
         "email_send":        lambda a: f"\U0001f4e7 sending to {a.get('to','')}",
         "email_reply":       lambda a: f"\U0001f4e7 replying to {a.get('uid','')}",
         "email_search":      lambda a: f"\U0001f50d searching emails: {a.get('query','')}",
         "email_summarize":   lambda a: "\U0001f4e7 summarizing inbox\u2026",
-        # Git operations
         "git_status":        lambda a: f"\U0001f4e6 git status {a.get('repo_path','')}",
         "git_diff":          lambda a: f"\U0001f4e6 git diff {a.get('repo_path','')}",
         "git_log":           lambda a: f"\U0001f4e6 git log {a.get('repo_path','')}",
@@ -620,13 +588,11 @@ def _tool_label(name: str, args: dict) -> str:
         "git_pull":          lambda a: f"\U0001f4e6 git pull {a.get('repo_path','')}",
         "git_push":          lambda a: f"\U0001f4e6 git push {a.get('repo_path','')}",
         "git_stash":         lambda a: f"\U0001f4e6 git stash {a.get('action','push')}",
-        # Dev tools
         "run_tests":         lambda a: f"\U0001f9ea running tests in {a.get('path','.')}",
         "lint_code":         lambda a: f"\U0001f50d linting {a.get('path','')}",
         "find_in_codebase":  lambda a: f"\U0001f50e grep '{a.get('pattern','')}'",
         "analyze_codebase":  lambda a: f"\U0001f4ca analyzing {a.get('path','.')}",
         "db_query":          lambda a: f"\U0001f5c4 SQL: {a.get('query','')[:40]}",
-        # System maintenance
         "check_disk_space":       lambda a: "\U0001f4be checking disk space\u2026",
         "check_memory_usage":     lambda a: "\U0001f9e0 checking memory\u2026",
         "check_gpu_health":       lambda a: "\U0001f3ae checking GPU health\u2026",
@@ -648,19 +614,49 @@ async def chat(
     thread_id: Optional[str] = None,
     image_b64: Optional[str] = None,
     show_thinking: bool = False,
+    user_id: Optional[str] = None,
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
 
     Returns (response_text, model_used)
+
+    Resource-aware: for vision agent, checks RAM+VRAM via resource_monitor
+    before allowing Ollama. Skips local model automatically if constrained.
     """
     if agent_key is None:
         agent_key = detect_agent(task)
 
     chain = get_fallback_chain(agent_key)
-    if agent_key == "vision" and image_b64 is None:
-        chain = [m for m in chain if not m.startswith("ollama_chat/")]
+
+    # ── Resource-aware Ollama gating ──────────────────────────────────────────
+    # For vision agent: check if local model is safe to run right now.
+    # If RAM or VRAM are under threshold, skip ollama_chat/* entirely.
+    _local_skip_reason = ""
+    if agent_key == "vision":
+        if image_b64 is None:
+            # No image provided at all — skip local regardless
+            chain = [m for m in chain if not m.startswith("ollama_chat/")]
+        else:
+            try:
+                from tools.resource_monitor import can_use_local_model
+                _local_ok, _local_skip_reason = await can_use_local_model()
+                if not _local_ok:
+                    logger.info(
+                        "Skipping local Ollama (resource constrained): %s",
+                        _local_skip_reason,
+                    )
+                    chain = [m for m in chain if not m.startswith("ollama_chat/")]
+            except Exception as _rm_err:
+                logger.warning("resource_monitor import failed: %s — allowing local", _rm_err)
 
     system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
+
+    # Annotate system prompt if local was bypassed so model knows why
+    if _local_skip_reason:
+        system_prompt += (
+            f"\n\n[Note: local Ollama bypassed — {_local_skip_reason}. "
+            "Using cloud vision instead.]"
+        )
 
     try:
         from tools.persistence import get_instinct_context
@@ -793,9 +789,6 @@ async def chat(
 
 
 # ── Screenshot utilities ──────────────────────────────────────────────────────
-# fix #6: removed take_screenshot() wrapper that shadowed computer_agent.take_screenshot().
-# All callers should import take_screenshot directly from computer_agent.
-# Legacy alias kept for any external callers that haven't been updated yet.
 take_screenshot = computer_agent.take_screenshot
 
 
@@ -803,21 +796,20 @@ async def analyze_screenshot(
     image_path: str,
     question: str = "Describe what you see on screen."
 ) -> tuple[str, str]:
-    """Analyze a screenshot image with vision model.
+    """Analyze a screenshot with vision model.
 
-    fix #17: switched from blocking open() to async aiofiles.open() so large
-    screenshots don't block the event loop and freeze Telegram message handling.
-    fix #35: added PIL image validation before base64 encoding to catch corrupt
-    files early with a helpful error instead of a cryptic API 400 error.
+    Resource-aware: checks RAM + VRAM via resource_monitor before trying
+    Ollama gemma3:12b. If constrained, goes straight to cloud vision.
+    Falls back to Groq cloud if Ollama fails for any reason.
 
-    Tries Ollama gemma3:12b first (local/private), falls back to Groq cloud.
     Returns (analysis_text, model_used)
     """
-    # fix #35: validate file is a real, non-empty image before encoding
+    # Validate file
     img_path = Path(image_path)
     if not img_path.exists() or img_path.stat().st_size < 500:
         raise RuntimeError(
-            f"Screenshot file is missing or too small ({img_path.stat().st_size if img_path.exists() else 0} bytes): {image_path}"
+            f"Screenshot file is missing or too small "
+            f"({img_path.stat().st_size if img_path.exists() else 0} bytes): {image_path}"
         )
     try:
         from PIL import Image as _PILImage
@@ -826,34 +818,53 @@ async def analyze_screenshot(
     except Exception as e:
         raise RuntimeError(f"Screenshot is not a valid image: {e}")
 
-    # fix #17: async file read — won't block event loop
     async with aiofiles.open(image_path, "rb") as f:
         raw_bytes = await f.read()
     b64 = base64.b64encode(raw_bytes).decode()
 
     vision_question = question
+    _skip_local = False
+    _skip_reason = ""
 
+    # ── Resource check before trying Ollama ───────────────────────────────────
     try:
-        resp = await _call_model(
-            "ollama_chat/gemma3:12b",
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": vision_question},
-                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}},
-                ],
-            }],
-            max_tokens=1024,
-        )
-        result = (resp.choices[0].message.content or "").strip()
-        logger.info("Screenshot analyzed locally via Ollama")
-        return result, "ollama/gemma3:12b \U0001f512 local"
-    except Exception as e:
-        logger.warning("Ollama vision failed: %s \u2192 trying Groq", e)
+        from tools.resource_monitor import can_use_local_model
+        _local_ok, _skip_reason = await can_use_local_model()
+        if not _local_ok:
+            _skip_local = True
+            logger.info(
+                "analyze_screenshot: skipping Ollama (resource constrained): %s",
+                _skip_reason,
+            )
+    except Exception as _rm_err:
+        logger.warning("resource_monitor unavailable: %s — allowing local", _rm_err)
 
+    # ── Try local Ollama (only if resources allow) ────────────────────────────
+    if not _skip_local:
+        try:
+            resp = await _call_model(
+                "ollama_chat/gemma3:12b",
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": vision_question},
+                        {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}},
+                    ],
+                }],
+                max_tokens=1024,
+            )
+            result = (resp.choices[0].message.content or "").strip()
+            logger.info("Screenshot analyzed locally via Ollama")
+            return result, "ollama/gemma3:12b \U0001f512 local"
+        except Exception as e:
+            logger.warning("Ollama vision failed: %s \u2192 trying Groq", e)
+    else:
+        logger.info("analyze_screenshot: using cloud directly (%s)", _skip_reason)
+
+    # ── Cloud fallback ────────────────────────────────────────────────────────
     groq_key = os.getenv("GROQ_API_KEY", "")
     if not groq_key:
-        raise RuntimeError("No GROQ_API_KEY and Ollama vision failed")
+        raise RuntimeError("No GROQ_API_KEY and Ollama vision failed/skipped")
 
     try:
         resp = await acompletion(
@@ -869,12 +880,15 @@ async def analyze_screenshot(
             max_tokens=1024,
         )
         result = (resp.choices[0].message.content or "").strip()
+        _cloud_label = "groq/llama-4-scout"
+        if _skip_local and _skip_reason:
+            _cloud_label += f" \u2601\ufe0f (local bypassed: {_skip_reason[:60]})"
         logger.info("Screenshot analyzed via Groq cloud vision")
-        return result, "groq/llama-4-scout"
+        return result, _cloud_label
     except Exception as e:
         raise RuntimeError(
             f"Screenshot analysis failed.\n"
-            f"\u2022 Local: run 'ollama pull gemma3:12b' to enable local vision\n"
+            f"\u2022 Local: {'bypassed — ' + _skip_reason if _skip_local else 'run ollama pull gemma3:12b'}\n"
             f"\u2022 Cloud: {e}"
         )
 
@@ -889,18 +903,11 @@ async def run_shell_command(cmd: str, timeout: int = 30) -> str:
 # ── Output utilities ──────────────────────────────────────────────────────────
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
-    """Split text into Telegram-safe chunks (4096 char limit).
-
-    fix #15: original implementation would pass through lines longer than
-    max_length unchanged, causing Telegram MessageTooLong errors on base64,
-    minified JSON, or other single-line blobs. Now hard-splits any line
-    that still exceeds max_length after accumulation.
-    """
+    """Split text into Telegram-safe chunks (4096 char limit)."""
     if len(text) <= max_length:
         return [text]
     chunks, current = [], ""
     for line in text.split("\n"):
-        # Hard-split lines that are themselves longer than max_length
         while len(line) > max_length:
             remaining_space = max_length - len(current)
             if remaining_space > 0:
