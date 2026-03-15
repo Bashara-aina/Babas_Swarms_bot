@@ -13,10 +13,10 @@ import os
 # Patterns that look like API keys / secrets
 _SECRET_PATTERNS = [
     re.compile(r'sk-[A-Za-z0-9]{20,}'),          # OpenAI / Groq style
-    re.compile(r'AIza[A-Za-z0-9_\-]{35}'),        # Google API key
+    re.compile(r'AIza[A-Za-z0-9_\-]{20,}'),        # Google API key variants
     re.compile(r'[A-Za-z0-9]{32,}(?=.*secret)', re.I),  # generic secret
     re.compile(r'Bearer [A-Za-z0-9\-._~+/]+=*'),  # Bearer tokens
-    re.compile(r'bot[0-9]{8,}:[A-Za-z0-9_\-]{35}'),  # Telegram bot token
+    re.compile(r'bot[0-9]{8,}:[A-Za-z0-9_\-]{20,}'),  # Telegram bot token variants
 ]
 
 

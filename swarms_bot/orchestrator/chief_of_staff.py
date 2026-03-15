@@ -428,7 +428,9 @@ class ChiefOfStaff:
             start = time.monotonic()
             try:
                 result, model = await chat(
-                    task.description, agent_key=agent_key,
+                    task.description,
+                    agent_key=agent_key,
+                    user_id=str(task.user_id),
                 )
                 return AgentResponse(
                     success=True,

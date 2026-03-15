@@ -49,7 +49,7 @@ async def _decompose(task: str) -> list[SubTask]:
     from llm_client import chat
 
     full_prompt = f"{_PLANNER_PROMPT}\nTask to decompose:\n{task}"
-    raw, _model = await chat(full_prompt, agent_key="architect")
+    raw, _model = await chat(full_prompt, agent_key="architect", user_id="0")
 
     # Extract JSON from response (handle markdown wrapping)
     text = raw.strip()
@@ -95,7 +95,7 @@ async def _execute_subtask(
 
     st.status = "running"
     try:
-        result, _model = await chat(prompt, agent_key=st.agent)
+        result, _model = await chat(prompt, agent_key=st.agent, user_id="0")
         st.result = result
         st.status = "done"
         completed[st.id] = result

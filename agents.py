@@ -13,13 +13,14 @@ Never used as a text fallback.
 
 Verified working models (live logs 2026-03-09):
   groq/llama-3.3-70b-versatile    ✓
-  cerebras/qwen-3-235b-a22b       ✓
+    cerebras/qwen-3-235b-a22b       ✓
   zai/glm-4                       ✓
 """
 
 from __future__ import annotations
 import asyncio
 import logging
+import re
 import time
 from datetime import datetime
 
@@ -183,8 +184,10 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "computer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "zai/glm-4",
         "gemini/gemini-2.0-flash",
+        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+        "cerebras/qwen-3-235b-a22b",
     ],
     "general": [
         "groq/llama-3.3-70b-versatile",
@@ -394,17 +397,48 @@ def get_conversation_summary_prompt(user_id: str) -> str:
 
 
 def detect_agent(task: str) -> str:
-    task_lower = task.lower()
+    task_lower = task.lower().strip()
+
+    # High-confidence intent overrides to reduce keyword collision noise.
+    if re.search(r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower):
+        return "math"
+    if re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
+        return "debug"
+    if re.search(r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower):
+        return "architect"
+    if re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
+        return "general"
+
     scores: dict[str, int] = {agent: 0 for agent in TASK_KEYWORDS}
     for agent, keywords in TASK_KEYWORDS.items():
         for kw in keywords:
-            if kw in task_lower:
+            kw_norm = kw.strip().lower()
+            if not kw_norm:
+                continue
+            if re.search(r"[a-z0-9]", kw_norm):
+                pattern = rf"(?<![a-z0-9]){re.escape(kw_norm)}(?![a-z0-9])"
+                if re.search(pattern, task_lower):
+                    scores[agent] += 1
+            elif kw_norm in task_lower:
                 scores[agent] += 1
+
+    # Tie-break preference keeps generic PM/ops keywords from stealing
+    # clearly technical tasks when scores are equal.
+    tie_break_order = [
+        "debug", "math", "vision", "coding", "architect",
+        "analyst", "researcher", "devops", "pm", "reviewer", "general",
+    ]
     best_agent = max(scores, key=lambda a: scores[a])
-    if scores[best_agent] == 0:
+    best_score = scores[best_agent]
+    if best_score > 0:
+        for candidate in tie_break_order:
+            if scores.get(candidate, 0) == best_score:
+                best_agent = candidate
+                break
+    if best_score == 0:
         logger.debug("No keyword match — using %s", DEFAULT_AGENT)
         return DEFAULT_AGENT
-    logger.debug("Detected agent '%s' (score=%d)", best_agent, scores[best_agent])
+    logger.debug("Detected agent '%s' (score=%d)", best_agent, best_score)
     return best_agent
 
 

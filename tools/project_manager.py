@@ -32,7 +32,7 @@ async def transcript_to_tasks(transcript_text: str) -> list[dict[str, str]]:
         f"Text:\n{transcript_text[:3000]}"
     )
 
-    result, _ = await chat(prompt, agent_key="architect")
+    result, _ = await chat(prompt, agent_key="architect", user_id="0")
 
     # Parse JSON from response
     try:

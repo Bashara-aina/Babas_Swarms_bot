@@ -31,7 +31,7 @@ async def draft_linkedin_post(topic: str, tone: str = "professional") -> str:
         "- Keep it under 1300 characters\n"
         "- Be authentic and value-driven, not salesy\n"
     )
-    result, _ = await chat(prompt, agent_key="general")
+    result, _ = await chat(prompt, agent_key="general", user_id="0")
     return result
 
 
@@ -57,11 +57,11 @@ async def draft_tweet(topic: str, thread: bool = False) -> str:
             "- Punchy, engaging\n"
             "- 1-2 relevant hashtags\n"
         )
-    result, _ = await chat(prompt, agent_key="general")
+    result, _ = await chat(prompt, agent_key="general", user_id="0")
     return result
 
 
-async def monitor_brand(keywords: list[str], platforms: list[str] | None = None) -> str:
+async def monitor_brand(keywords: list[str], platforms: Optional[list[str]] = None) -> str:
     """Search Reddit and HN for keyword mentions."""
     platforms = platforms or ["reddit", "hackernews"]
     results = []
@@ -133,5 +133,5 @@ async def rss_to_post(rss_url: str, platform: str = "linkedin") -> str:
         f"Add your professional take and commentary. "
         f"Keep it authentic and value-driven."
     )
-    result, _ = await chat(prompt, agent_key="general")
+    result, _ = await chat(prompt, agent_key="general", user_id="0")
     return f"Source: {title}\n\n{result}"

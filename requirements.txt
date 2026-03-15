@@ -1,44 +1,47 @@
 # Legion Swarms Bot — Python dependencies
-# Install: pip install -r requirements.txt
+# Install: python -m pip install -r requirements.txt
 
-# ── Core Telegram bot ─────────────────────────────────────────────────────
-aiogram>=3.4.1
+# Core bot
+aiogram>=3.4.1,<4.0.0
 python-dotenv>=1.0.0
+litellm>=1.57.0
 
-# ── LLM client ────────────────────────────────────────────────────────────
-litellm>=1.35.0
+# Async + HTTP
+aiohttp>=3.9.0
+httpx>=0.27.0
+aiofiles>=23.2.0
 
-# ── Database ──────────────────────────────────────────────────────────────
-aiosqlite>=0.19.0
+# Persistence / system
+aiosqlite>=0.20.0
+psutil>=5.9.0
 
-# ── Context database (OpenViking — L0/L1/L2 tiered memory) ───────────────
-# pip install openviking  (Python 3.9+, no server needed, local file store)
+# Context memory (optional but supported)
 openviking>=0.2.5
 
-# ── File I/O ──────────────────────────────────────────────────────────────
-aiofiles>=23.0.0
-Pillow>=10.0.0
-
-# ── Computer use / screen tools ───────────────────────────────────────────
-pyscreenshot>=0.4.2
-pyautogui>=0.9.54
-xdotool  # system package: sudo apt install xdotool
-
-# ── System monitoring (resource_monitor) ─────────────────────────────────
-psutil>=5.9.0
-# pynvml  — install if you have an NVIDIA GPU:
-# pip install pynvml
-
-# ── Research / web tools ─────────────────────────────────────────────────
-httpx>=0.27.0
-beautifulsoup4>=4.12.0
+# Web/research
 requests>=2.31.0
+beautifulsoup4>=4.12.0
+playwright>=1.40.0
+feedparser>=6.0.0
+arxiv>=2.1.0
 
-# ── Document tools ────────────────────────────────────────────────────────
-pymupdf>=1.23.0        # PDF
-openpyxl>=3.1.0        # Excel
-python-docx>=1.1.0     # Word
+# Documents / OCR
+Pillow>=10.0.0
+openpyxl>=3.1.0
+pdfplumber>=0.10.0
+pytesseract>=0.3.10
+python-docx>=1.1.0
+PyMuPDF>=1.23.0
 pdfminer.six>=20221105
 
-# ── Optional: Obsidian export, Markdown ──────────────────────────────────
-# markdown>=3.5.0
+# Email
+aioimaplib>=1.1.0
+aiosmtplib>=3.0.0
+
+# Optional desktop libs used by compatibility modules
+pyautogui>=0.9.54
+pyscreenshot>=3.1
+
+# Host machine tools (install via apt, not pip):
+# sudo apt install xdotool wmctrl scrot xclip xdg-utils
+# sudo apt install tesseract-ocr tesseract-ocr-eng

@@ -239,6 +239,7 @@ async def run_autonomous_loop(
                     planner_prompt,
                     agent_key="architect",
                     thread_id=thread_id,
+                    user_id=str(user_id),
                 )
             except Exception as e:
                 logger.error("Loop planner error: %s", e)
@@ -275,6 +276,7 @@ async def run_autonomous_loop(
                     plan_text,
                     max_iterations=10,  # sub-loop cap per step
                     thread_id=thread_id,
+                    user_id=user_id,
                 )
             except Exception as e:
                 exec_result = f"execution error: {e}"

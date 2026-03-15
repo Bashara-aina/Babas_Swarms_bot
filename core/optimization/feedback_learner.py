@@ -232,11 +232,21 @@ class FeedbackLearner:
                 pass
 
     def _all_agents(self) -> list[str]:
+        base = ["vision", "coding", "debug", "math", "architect", "mentor", "analyst", "general"]
+        discovered = set(base)
+
+        # Include agents that have already received feedback in this process.
+        discovered.update(self._scores.keys())
+        discovered.update(agent for agent, _task in self._pending.values())
+        discovered.update(entry.agent for entry in self._recent)
+
         try:
             from core.agent_registry import AGENT_REGISTRY
-            return list(AGENT_REGISTRY.keys())
+            discovered.update(list(AGENT_REGISTRY.keys()))
         except Exception:
-            return ["vision", "coding", "debug", "math", "architect", "mentor", "analyst"]
+            pass
+
+        return sorted(discovered)
 
 
 # Singleton

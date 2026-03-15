@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import html as html_mod
+import re
 from pathlib import Path
 
 from aiogram import F, Router
@@ -48,6 +49,98 @@ async def cmd_do(msg: Message) -> None:
     await _run_agent_loop(msg, task)
 
 
+@router.message(Command("do_local"))
+async def cmd_do_local(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+
+    raw = (msg.text or "").removeprefix("/do_local").strip()
+    if not raw:
+        await msg.answer(
+            "usage:\n"
+            "<code>/do_local whatsapp | contact | message</code>\n"
+            "or natural:\n"
+            "<code>/do_local buka whatsapp, chat ke nama 'isi pesan'</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    contact = ""
+    message_text = ""
+
+    if "|" in raw:
+        parts = [p.strip() for p in raw.split("|", 2)]
+        if len(parts) == 3 and parts[0].lower() == "whatsapp":
+            contact, message_text = parts[1], parts[2]
+    else:
+        pattern = re.search(
+            r"chat\s+ke\s+(.+?)\s+[\"'‘](.+?)[\"'’]\s*$",
+            raw,
+            flags=re.IGNORECASE,
+        )
+        if pattern:
+            contact = pattern.group(1).strip()
+            message_text = pattern.group(2).strip()
+        else:
+            plain = re.search(r"chat\s+ke\s+(.+)$", raw, flags=re.IGNORECASE)
+            if plain:
+                tail = plain.group(1).strip()
+                tokens = tail.split()
+                if len(tokens) >= 3:
+                    msg_starters = {
+                        "aku", "i", "hi", "hello", "sayang", "dear", "test", "tes", "tolong",
+                        "please", "maaf", "kangen", "love",
+                    }
+                    split_idx = -1
+                    for i in range(2, len(tokens)):
+                        if tokens[i].lower() in msg_starters:
+                            split_idx = i
+                            break
+                    if split_idx == -1 and len(tokens) >= 5:
+                        split_idx = len(tokens) - 3
+                    if split_idx > 0:
+                        contact = " ".join(tokens[:split_idx]).strip()
+                        message_text = " ".join(tokens[split_idx:]).strip()
+
+    if not contact or not message_text:
+        await msg.answer(
+            "couldn't parse local WhatsApp task.\n"
+            "Use: <code>/do_local whatsapp | pwiti little hani | aku sayang kamu</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer("🖥 running local WhatsApp automation…")
+
+    async def _progress_local(step_text: str) -> None:
+        try:
+            if step_text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(step_text)}</i>", parse_mode="HTML")
+            else:
+                await status_msg.edit_text(html_mod.escape(step_text))
+        except Exception:
+            pass
+
+    result = await computer_agent.whatsapp_send_local(
+        contact,
+        message_text,
+        progress_cb=_progress_local,
+    )
+    await status_msg.edit_text(html_mod.escape(result))
+
+    try:
+        shot = await computer_agent.take_screenshot()
+        if shot and msg.from_user:
+            _last_screenshot[msg.from_user.id] = shot
+            await msg.answer_photo(
+                photo=FSInputFile(shot),
+                caption="📸 after /do_local",
+                reply_markup=screenshot_keyboard(),
+            )
+    except Exception:
+        pass
+
+
 # ── /screen ───────────────────────────────────────────────────────────────────
 @router.message(Command("screen"))
 async def cmd_screen(msg: Message) -> None:
@@ -59,9 +152,10 @@ async def cmd_screen(msg: Message) -> None:
         if not path:
             await status_msg.edit_text(
                 "screenshot failed. run this to debug:\n"
-                "<code>echo $DISPLAY</code>\n"
-                "If empty: <code>export DISPLAY=:0</code> then restart the bot.\n\n"
-                "Also install: <code>sudo apt install scrot xdotool wmctrl xclip</code>",
+                "<code>echo $DISPLAY; echo $XAUTHORITY</code>\n"
+                "Then verify capture tools: <code>command -v scrot gnome-screenshot xwd</code>\n"
+                "(If service runs on :1, set DISPLAY=:1 in systemd env.)\n\n"
+                "Install deps: <code>sudo apt install scrot xdotool wmctrl xclip imagemagick</code>",
                 parse_mode="HTML",
             )
             return
@@ -261,7 +355,7 @@ async def cmd_install(msg: Message) -> None:
 
 
 # ── /upgrade ──────────────────────────────────────────────────────────────────
-@router.message(Command("upgrade"))
+@router.message(Command("upgrade_git"))
 async def cmd_upgrade(msg: Message) -> None:
     if not is_allowed(msg):
         return

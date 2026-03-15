@@ -68,6 +68,56 @@ Every agent has automatic fallback chains — no rate limit ever blocks you.
 | `/models` | Agent roster |
 | `/keys` | API key status |
 
+### Complete Command Reference
+| Command | Description |
+|---|---|
+| `/do` | Autonomous computer control |
+| `/screen` | Take desktop screenshot |
+| `/run` | LLM chat (no computer) |
+| `/swarm` | Multi-agent team execution |
+| `/think` | Deep reasoning mode |
+| `/cmd` | Run shell command |
+| `/paper` | Search arXiv papers |
+| `/ask_paper` | Ask about a paper |
+| `/workernet_papers` | Analyze WorkerNet papers |
+| `/research` | Deep web research |
+| `/scrape` | Scrape a URL |
+| `/remember` | Save a note to memory |
+| `/recall` | Search memory |
+| `/memories` | Show recent memories |
+| `/briefing` | Morning briefing |
+| `/scaffold` | Create project scaffold |
+| `/build` | Parallel fullstack build |
+| `/gpu` | GPU health status |
+| `/vuln_scan` | Vulnerability scan |
+| `/task_from` | Extract tasks from text |
+| `/tasks_due` | Show pending tasks |
+| `/post` | Draft social post |
+| `/brand_check` | Monitor brand mentions |
+| `/review` | AI code review |
+| `/security_review` | Security audit |
+| `/orchestrate` | Decompose + execute complex task |
+| `/multi_plan` | Compare 3 agent approaches |
+| `/loop` | Autonomous goal execution loop |
+| `/loop_stop` | Stop running loop |
+| `/loop_status` | Show loop progress status |
+| `/loop_pause` | Pause running loop |
+| `/loop_resume` | Resume paused loop |
+| `/multi_execute` | Compare multiple agents |
+| `/budget` | Cost tracking dashboard |
+| `/metrics` | Performance metrics dashboard |
+| `/routing_stats` | Routing analytics |
+| `/audit_summary` | Audit log summary |
+| `/save` | Save session state |
+| `/resume` | Resume saved session |
+| `/sessions` | List saved sessions |
+| `/learn` | Teach a pattern |
+| `/instincts` | Show learned patterns |
+| `/audit` | Activity audit trail |
+| `/resources` | RAM / GPU / local model policy |
+| `/stats` | System stats |
+| `/start` | Help + status |
+
 ---
 
 ## Setup

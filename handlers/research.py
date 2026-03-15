@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import html as html_mod
 from pathlib import Path
 
 from aiogram import Router
@@ -92,15 +93,81 @@ async def cmd_research(msg: Message) -> None:
             parse_mode="HTML",
         )
         return
-    status_msg = await msg.answer(f"🔬 researching: <i>{topic[:80]}</i>…", parse_mode="HTML")
+    status_msg = await msg.answer(f"🧠 [Plan] researching: <i>{topic[:80]}</i>…", parse_mode="HTML")
     typing_task = asyncio.create_task(_keep_typing(msg))
 
+    async def _phase(text: str) -> None:
+        try:
+            if text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(text)}</i>", parse_mode="HTML")
+            else:
+                await status_msg.edit_text(html_mod.escape(text), parse_mode="HTML")
+        except Exception:
+            pass
+
     try:
-        from tools.web_browser import deep_research
-        result = await deep_research(topic)
+        from llm_client import chat
+        from tools.quality_guard import (
+            build_evidence_envelope,
+            format_verifier_block,
+            gather_fused_evidence,
+            verify_and_repair,
+        )
+
+        await _phase("🌐 [Act] collecting fused evidence (web + arXiv + memory)")
+        evidence_meta = await gather_fused_evidence(
+            topic,
+            user_id=str(msg.from_user.id) if msg.from_user else "0",
+            min_sources=5,
+            start_pages=8,
+            max_pages=20,
+            max_attempts=3,
+        )
+
+        evidence = evidence_meta.get("evidence", "")
+        source_count = int(evidence_meta.get("source_count", 0))
+        min_sources = int(evidence_meta.get("min_sources", 5))
+
+        if source_count < min_sources:
+            await _phase(
+                f"💭 source gate warning: got {source_count}/{min_sources} sources; continuing with explicit low-confidence warning"
+            )
+        else:
+            await _phase(f"💭 source gate passed: {source_count} sources collected")
+
+        await _phase("🧪 [Verify] synthesizing and validating research answer")
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        synthesis_prompt = (
+            "You are a deep research analyst. Use ONLY the supplied evidence to answer. "
+            "If evidence is insufficient, say that explicitly.\n\n"
+            f"Research question:\n{topic}\n\n"
+            f"Evidence corpus:\n{evidence[:22000]}\n\n"
+            "Return this structure:\n"
+            "1) Executive Summary\n"
+            "2) Key Findings (numbered)\n"
+            "3) Source-backed Evidence\n"
+            "4) Risks / Unknowns\n"
+            "5) Actionable Next Steps"
+        )
+        draft, _ = await chat(synthesis_prompt, agent_key="analyst", user_id=user_id)
+        verified, verify_meta = await verify_and_repair(topic, draft, user_id=user_id)
+
+        source_gate_block = (
+            "\n\n### Source Gate\n"
+            f"- Required sources: {min_sources}\n"
+            f"- Collected sources: {source_count}\n"
+            f"- Status: {'PASS' if source_count >= min_sources else 'WARN'}"
+        )
+        result = (
+            verified
+            + build_evidence_envelope(evidence, verified)
+            + source_gate_block
+            + format_verifier_block(verify_meta)
+        )
+
         typing_task.cancel()
         await status_msg.delete()
-        await send_chunked(msg, result, model_used="playwright+web")
+        await send_chunked(msg, result, model_used="deep-research/verified")
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(

@@ -90,7 +90,7 @@ async def review_code(
     )
 
     try:
-        result, model = await chat(task, agent_key="coding")
+        result, model = await chat(task, agent_key="coding", user_id="0")
         return (
             f"<b>Code Review</b> ({review_type}) via <code>{html.escape(model)}</code>\n\n"
             f"{result}"

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import html as html_mod
+import time
 
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -22,20 +23,104 @@ import handlers.shared as _shared
 router = Router()
 
 
+async def _send_swarm_visualization(msg: Message) -> None:
+    """Send current swarm observability view for the calling user."""
+    if not msg.from_user:
+        return
+    from tools.swarm_observability import build_swarm_viz_html
+    report = build_swarm_viz_html(msg.from_user.id)
+    await send_chunked(msg, report, model_used="swarm-observability")
+
+
 # ── /think ────────────────────────────────────────────────────────────────────
 @router.message(Command("think"))
 async def cmd_think(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    query = (msg.text or "").removeprefix("/think").strip()
-    if not query:
+    raw = (msg.text or "").removeprefix("/think").strip()
+    if not raw:
         await msg.answer(
-            "usage: <code>/think &lt;hard question&gt;</code>\n"
-            "forces QwQ-32b with visible reasoning chain",
+            "usage: <code>/think [--depth=3] [--branches=5] &lt;hard question&gt;</code>\n"
+            "runs layered extended thinking with adversarial critique + synthesis",
             parse_mode="HTML",
         )
         return
-    await _execute_chat(msg, query, forced_agent="debug", show_thinking=True)
+
+    depth = 3
+    branches = 5
+    tokens = raw.split()
+    query_tokens: list[str] = []
+    for token in tokens:
+        if token.startswith("--depth="):
+            try:
+                depth = max(2, min(6, int(token.split("=", 1)[1])))
+            except Exception:
+                pass
+            continue
+        if token.startswith("--branches="):
+            try:
+                branches = max(3, min(8, int(token.split("=", 1)[1])))
+            except Exception:
+                pass
+            continue
+        query_tokens.append(token)
+
+    query = " ".join(query_tokens).strip()
+    if not query:
+        await msg.answer(
+            "usage: <code>/think [--depth=3] [--branches=5] &lt;hard question&gt;</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer(
+        f"🧠 starting layered deep think… (depth={depth}, branches={branches})",
+        parse_mode="HTML",
+    )
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    async def _progress(text: str) -> None:
+        safe = html_mod.escape(text)
+        try:
+            await status_msg.edit_text(safe, parse_mode="HTML")
+        except Exception:
+            try:
+                await msg.answer(f"<i>{safe}</i>", parse_mode="HTML")
+            except Exception:
+                pass
+
+    try:
+        from llm_client import _call_model
+        from tools.deep_think import format_think_result, run_deep_think
+
+        async def _llm_call(model: str, system_prompt: str, user_prompt: str) -> str:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            resp = await _call_model(model=model, messages=messages, max_tokens=2200, temperature=0.7)
+            return (resp.choices[0].message.content or "").strip()
+
+        result = await run_deep_think(
+            question=query,
+            llm_call=_llm_call,
+            progress_fn=_progress,
+            depth=depth,
+            branches=branches,
+        )
+        rendered = format_think_result(result)
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+        await send_chunked(msg, rendered, model_used=f"think/deep:d{depth}:b{branches}")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"deep think error: <code>{html_mod.escape(str(e)[:380])}</code>",
+            parse_mode="HTML",
+        )
+    finally:
+        typing_task.cancel()
 
 
 # ── /run ──────────────────────────────────────────────────────────────────────
@@ -92,33 +177,172 @@ async def cmd_swarm(msg: Message) -> None:
         )
         return
 
-    status_msg = await msg.answer("strategist decomposing task...")
+    status_msg = await msg.answer("🧠 [Plan] strategist decomposing task...")
+    started_at = time.time()
+    live_viz_msg = await msg.answer("📡 starting live swarm visualization…")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    stop_live_viz = asyncio.Event()
+
+    async def _live_refresh_loop() -> None:
+        if not msg.from_user:
+            return
+        while not stop_live_viz.is_set():
+            try:
+                from tools.swarm_observability import build_swarm_live_panel_html
+                panel = build_swarm_live_panel_html(msg.from_user.id)
+                await live_viz_msg.edit_text(panel, parse_mode="HTML")
+            except Exception:
+                pass
+
+            try:
+                await asyncio.wait_for(stop_live_viz.wait(), timeout=4.0)
+            except asyncio.TimeoutError:
+                continue
+
+    live_viz_task = asyncio.create_task(_live_refresh_loop())
 
     async def on_progress(step_text: str) -> None:
         try:
-            await status_msg.edit_text(step_text, parse_mode="HTML")
+            if msg.from_user:
+                try:
+                    from tools.swarm_observability import record_event
+                    record_event(msg.from_user.id, step_text)
+                except Exception:
+                    pass
+            if step_text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(step_text)}</i>", parse_mode="HTML")
+            else:
+                await status_msg.edit_text(html_mod.escape(step_text), parse_mode="HTML")
         except Exception:
             pass
 
     try:
+        from llm_client import chat
         from tools.orchestrator import decompose_task, execute_parallel, synthesize_results
+        from tools.quality_guard import (
+            analyze_answer_consistency,
+            build_evidence_envelope,
+            verify_and_repair,
+        )
+        from tools.capability_metrics import record_capability_run
+        await on_progress("💭 [Plan] understanding the objective and splitting into parallel subtasks")
         subtasks = await decompose_task(task)
+        if msg.from_user:
+            try:
+                from tools.swarm_observability import start_swarm_trace
+                start_swarm_trace(msg.from_user.id, task, subtasks)
+            except Exception:
+                pass
         agent_list = "\n".join(f"  [{s['agent']}] {s['task'][:60]}..." for s in subtasks)
         await status_msg.edit_text(
-            f"running {len(subtasks)} agents:\n{agent_list}",
+            f"⚙️ [Act] running {len(subtasks)} agents:\n{agent_list}",
             parse_mode="HTML",
         )
 
-        results = await execute_parallel(subtasks, progress_cb=on_progress)
+        results = await execute_parallel(subtasks, progress_cb=on_progress, root_task=task)
+        if msg.from_user:
+            try:
+                from tools.swarm_observability import record_subtask_result
+                for sid, result_text in results.items():
+                    record_subtask_result(msg.from_user.id, sid, str(result_text))
+            except Exception:
+                pass
+        await on_progress("🧪 [Verify] validating synthesized output")
         final = await synthesize_results(task, results, subtasks)
 
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        unified_prompt = (
+            "Rewrite this result using the standard final contract:\n"
+            "1) Status\n2) Key Findings\n3) Evidence\n4) Confidence\n5) Next Actions\n\n"
+            f"Original task:\n{task}\n\n"
+            f"Current result:\n{final}"
+        )
+        contracted, _ = await chat(unified_prompt, agent_key="architect", user_id=user_id)
+        verified, meta = await verify_and_repair(task, contracted, user_id=user_id)
+
+        combined_evidence = "\n\n".join(str(v) for v in results.values())
+        verifier_block = (
+            "\n\n### Verifier\n"
+            f"- Pass: {'YES' if meta.get('pass') else 'NO'}\n"
+            f"- Confidence: {int(float(meta.get('confidence', 0.0)) * 100)}%\n"
+            f"- Repairs: {int(meta.get('repairs', 0))}\n"
+            f"- Notes: {meta.get('notes', 'n/a')}"
+        )
+        from tools.quality_guard import enforce_grounded_answer
+        grounded, gate = enforce_grounded_answer(task, verified, combined_evidence, min_sources=3)
+        gate_block = (
+            "\n\n### Grounding Gate\n"
+            f"- Blocked: {'YES' if gate.get('blocked') else 'NO'}\n"
+            f"- Sources: {int(gate.get('source_count', 0))}/{int(gate.get('min_sources', 3))}"
+        )
+        consistency = analyze_answer_consistency(grounded)
+        consistency_block = (
+            "\n\n### Consistency\n"
+            f"- Contradictions: {int(consistency.get('count', 0))}\n"
+            f"- Score: {int(float(consistency.get('score', 0.0)) * 100)}%"
+        )
+        final_report = grounded + build_evidence_envelope(combined_evidence, grounded) + verifier_block + gate_block + consistency_block
+
+        record_capability_run(
+            "swarm",
+            task,
+            verifier_pass=bool(meta.get("pass")),
+            confidence=float(meta.get("confidence", 0.0)),
+            source_count=int(gate.get("source_count", 0)),
+            unique_domains=int(gate.get("unique_domains", 0)),
+            diversity_score=float(gate.get("diversity_score", 0.0)),
+            blocked=bool(gate.get("blocked")),
+            contradiction_count=int(consistency.get("count", 0)),
+            latency_ms=int((time.time() - started_at) * 1000),
+        )
+        if msg.from_user:
+            try:
+                from tools.swarm_observability import finalize_trace
+                finalize_trace(msg.from_user.id, final_report)
+            except Exception:
+                pass
+        await on_progress("✅ [Finalize] sending final answer")
+
+        stop_live_viz.set()
+        live_viz_task.cancel()
         typing_task.cancel()
         await status_msg.delete()
-        await send_chunked(msg, final, model_used="swarm/multi-agent")
+        try:
+            if msg.from_user:
+                from tools.swarm_observability import build_swarm_live_panel_html
+                await live_viz_msg.edit_text(build_swarm_live_panel_html(msg.from_user.id), parse_mode="HTML")
+        except Exception:
+            pass
+        await send_chunked(msg, final_report, model_used="swarm/multi-agent")
+        await _send_swarm_visualization(msg)
     except Exception as e:
+        if msg.from_user:
+            try:
+                from tools.swarm_observability import finalize_trace
+                finalize_trace(msg.from_user.id, f"swarm error: {str(e)}")
+            except Exception:
+                pass
+        stop_live_viz.set()
+        live_viz_task.cancel()
         typing_task.cancel()
         await status_msg.edit_text(f"swarm error: <code>{html_mod.escape(str(e)[:400])}</code>", parse_mode="HTML")
+
+
+@router.message(Command("swarm_viz"))
+@router.message(Command("agents_viz"))
+async def cmd_swarm_viz(msg: Message) -> None:
+    """Visualize departments, swarm thoughts, communication, and conclusion path."""
+    if not is_allowed(msg):
+        return
+    if not msg.from_user:
+        return
+    try:
+        await _send_swarm_visualization(msg)
+    except Exception as e:
+        await msg.answer(
+            f"swarm visualization error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
 
 
 # ── /multi_execute — Same task, multiple agents ──────────────────────────────
@@ -159,17 +383,67 @@ async def cmd_multi_execute(msg: Message) -> None:
         )
         return
 
-    status_msg = await msg.answer(f"\u26a1 Running task with {len(agent_keys)} agents\u2026")
+    status_msg = await msg.answer(f"🧠 [Plan] preparing {len(agent_keys)} agents…")
+    started_at = time.time()
     typing_task = asyncio.create_task(_keep_typing(msg))
 
+    async def _phase(text: str) -> None:
+        try:
+            if text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(text)}</i>", parse_mode="HTML")
+            else:
+                await status_msg.edit_text(html_mod.escape(text), parse_mode="HTML")
+        except Exception:
+            pass
+
     try:
+        from llm_client import chat
+        from tools.quality_guard import (
+            analyze_answer_consistency,
+            build_evidence_envelope,
+            enforce_grounded_answer,
+            is_research_like,
+            verify_and_repair,
+        )
+        from tools.capability_metrics import record_capability_run
+
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
+
+        evidence_bundle = ""
+        if is_research_like(task):
+            await _phase("🌐 [Act] collecting fused evidence (web + arXiv + memory) for all agents")
+            try:
+                from tools.quality_guard import gather_fused_evidence
+                fused = await gather_fused_evidence(
+                    task,
+                    user_id=user_id,
+                    min_sources=5,
+                    start_pages=8,
+                    max_pages=18,
+                    max_attempts=3,
+                )
+                evidence_bundle = str(fused.get("evidence", "") or "")
+                await _phase("💭 collected live sources; grounding agent outputs with evidence")
+            except Exception as evidence_error:
+                await _phase(f"💭 evidence retrieval failed, continuing with model-only pass: {evidence_error}")
+
+        augmented_task = task
+        if evidence_bundle:
+            augmented_task = (
+                f"Task:\n{task}\n\n"
+                "Use the following live evidence as grounding context. "
+                "Do not invent unsupported claims.\n\n"
+                f"Evidence:\n{evidence_bundle[:18000]}"
+            )
+
         # Use _shared module references (not local copies) so enterprise objects are live
         if _shared._chief_of_staff:
+            await _phase("⚙️ [Act] running multi-agent execution via Chief of Staff")
             from swarms_bot.orchestrator.chief_of_staff import Task as STask
             stask = STask.create(
                 user_id=msg.from_user.id,
                 chat_id=msg.chat.id,
-                description=task,
+                description=augmented_task,
             )
             responses = await _shared._chief_of_staff.route_multi(stask, agent_keys)
 
@@ -192,9 +466,9 @@ async def cmd_multi_execute(msg: Message) -> None:
                     metadata={"agents": agent_keys},
                 )
         else:
-            from llm_client import chat
+            await _phase("⚙️ [Act] running multi-agent execution in parallel")
             results = await asyncio.gather(
-                *(chat(task, agent_key=a) for a in agent_keys),
+                *(chat(augmented_task, agent_key=a, user_id=user_id) for a in agent_keys),
                 return_exceptions=True,
             )
             lines = ["<b>Multi-Execute Comparison</b>\n"]
@@ -206,7 +480,62 @@ async def cmd_multi_execute(msg: Message) -> None:
                     lines.append(f"\n\u2705 <b>{agent_key}</b> ({model}):\n{text_r[:1000]}\n")
             full = "\n".join(lines)
 
-        await send_chunked(msg, full)
+        await _phase("🧪 [Verify] synthesizing best answer and quality-checking")
+        synthesis_prompt = (
+            "You are the lead reviewer. Synthesize the multi-agent outputs below into ONE final answer.\n\n"
+            f"Original task:\n{task}\n\n"
+            f"Agent outputs:\n{full}\n\n"
+            "Return with this structure:\n"
+            "1) Status\n2) Best Answer\n3) Key Evidence\n4) Confidence (0-100%)\n5) Next Actions"
+        )
+        synthesized, _ = await chat(synthesis_prompt, agent_key="architect", user_id=user_id)
+        verified, meta = await verify_and_repair(task, synthesized, user_id=user_id)
+
+        verifier_block = (
+            "\n\n### Verifier\n"
+            f"- Pass: {'YES' if meta.get('pass') else 'NO'}\n"
+            f"- Confidence: {int(float(meta.get('confidence', 0.0)) * 100)}%\n"
+            f"- Repairs: {int(meta.get('repairs', 0))}\n"
+            f"- Notes: {meta.get('notes', 'n/a')}"
+        )
+        evidence_text = evidence_bundle or full
+        grounded, gate = enforce_grounded_answer(task, verified, evidence_text, min_sources=3)
+        gate_block = (
+            "\n\n### Grounding Gate\n"
+            f"- Blocked: {'YES' if gate.get('blocked') else 'NO'}\n"
+            f"- Sources: {int(gate.get('source_count', 0))}/{int(gate.get('min_sources', 3))}"
+        )
+        consistency = analyze_answer_consistency(grounded)
+        consistency_block = (
+            "\n\n### Consistency\n"
+            f"- Contradictions: {int(consistency.get('count', 0))}\n"
+            f"- Score: {int(float(consistency.get('score', 0.0)) * 100)}%"
+        )
+        final_report = (
+            grounded
+            + build_evidence_envelope(evidence_text, grounded)
+            + verifier_block
+            + gate_block
+            + consistency_block
+            + "\n\n---\n\n"
+            + full
+        )
+
+        record_capability_run(
+            "multi_execute",
+            task,
+            verifier_pass=bool(meta.get("pass")),
+            confidence=float(meta.get("confidence", 0.0)),
+            source_count=int(gate.get("source_count", 0)),
+            unique_domains=int(gate.get("unique_domains", 0)),
+            diversity_score=float(gate.get("diversity_score", 0.0)),
+            blocked=bool(gate.get("blocked")),
+            contradiction_count=int(consistency.get("count", 0)),
+            latency_ms=int((time.time() - started_at) * 1000),
+        )
+
+        await _phase("✅ [Finalize] sending verified result")
+        await send_chunked(msg, final_report, model_used="multi_execute/verified")
         try:
             await status_msg.delete()
         except Exception:
@@ -230,12 +559,33 @@ async def cmd_multi_plan(msg: Message) -> None:
     if not task:
         await msg.answer("usage: <code>/multi_plan &lt;task&gt;</code>", parse_mode="HTML")
         return
-    status_msg = await msg.answer("\U0001f9e0 generating 3 approaches\u2026")
+    status_msg = await msg.answer("🧠 [Plan] generating 3 approaches…")
+    started_at = time.time()
+
+    async def _phase(text: str) -> None:
+        try:
+            if text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(text)}</i>", parse_mode="HTML")
+            else:
+                await status_msg.edit_text(html_mod.escape(text), parse_mode="HTML")
+        except Exception:
+            pass
+
     try:
-        from llm_client import chat, chunk_output
+        from llm_client import chat
+        from tools.quality_guard import (
+            analyze_answer_consistency,
+            build_evidence_envelope,
+            enforce_grounded_answer,
+            verify_and_repair,
+        )
+        from tools.capability_metrics import record_capability_run
+
+        await _phase("⚙️ [Act] running 3 planning agents in parallel")
         agent_keys = ["architect", "coding", "analyst"]
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
         results = await asyncio.gather(
-            *(chat(task, agent_key=a) for a in agent_keys),
+            *(chat(task, agent_key=a, user_id=user_id) for a in agent_keys),
             return_exceptions=True,
         )
         lines = ["<b>Multi-Plan Comparison</b>\n"]
@@ -247,11 +597,65 @@ async def cmd_multi_plan(msg: Message) -> None:
                 lines.append(f"\n<b>\U0001f4cb {agent_key}</b> ({model}):\n{text_r[:1000]}\n")
         full = "\n".join(lines)
 
-        # FIX #10: Use chunk_output() to avoid cutting mid-HTML tag (was slicing at [:4000] directly)
-        chunks = chunk_output(full, max_length=4000)
-        await status_msg.edit_text(chunks[0], parse_mode="HTML")
-        for chunk in chunks[1:]:
-            await msg.answer(chunk, parse_mode="HTML")
+        await _phase("🧪 [Verify] synthesizing and quality-checking plan")
+        synthesis_prompt = (
+            "Synthesize the 3 plan candidates below into a single final strategic plan.\n\n"
+            f"Task:\n{task}\n\n"
+            f"Candidates:\n{full}\n\n"
+            "Return with structure:\n"
+            "1) Status\n2) Recommended Plan\n3) Evidence/Rationale\n4) Confidence\n5) Next Actions"
+        )
+        synthesized, _ = await chat(synthesis_prompt, agent_key="architect", user_id=user_id)
+        verified, meta = await verify_and_repair(task, synthesized, user_id=user_id)
+        verifier_block = (
+            "\n\n### Verifier\n"
+            f"- Pass: {'YES' if meta.get('pass') else 'NO'}\n"
+            f"- Confidence: {int(float(meta.get('confidence', 0.0)) * 100)}%\n"
+            f"- Repairs: {int(meta.get('repairs', 0))}\n"
+            f"- Notes: {meta.get('notes', 'n/a')}"
+        )
+        grounded, gate = enforce_grounded_answer(task, verified, full, min_sources=2)
+        gate_block = (
+            "\n\n### Grounding Gate\n"
+            f"- Blocked: {'YES' if gate.get('blocked') else 'NO'}\n"
+            f"- Sources: {int(gate.get('source_count', 0))}/{int(gate.get('min_sources', 2))}"
+        )
+        consistency = analyze_answer_consistency(grounded)
+        consistency_block = (
+            "\n\n### Consistency\n"
+            f"- Contradictions: {int(consistency.get('count', 0))}\n"
+            f"- Score: {int(float(consistency.get('score', 0.0)) * 100)}%"
+        )
+        final_report = (
+            grounded
+            + build_evidence_envelope(full, grounded)
+            + verifier_block
+            + gate_block
+            + consistency_block
+            + "\n\n---\n\n"
+            + full
+        )
+
+        record_capability_run(
+            "multi_plan",
+            task,
+            verifier_pass=bool(meta.get("pass")),
+            confidence=float(meta.get("confidence", 0.0)),
+            source_count=int(gate.get("source_count", 0)),
+            unique_domains=int(gate.get("unique_domains", 0)),
+            diversity_score=float(gate.get("diversity_score", 0.0)),
+            blocked=bool(gate.get("blocked")),
+            contradiction_count=int(consistency.get("count", 0)),
+            latency_ms=int((time.time() - started_at) * 1000),
+        )
+
+        await _phase("✅ [Finalize] sending verified plan")
+        await send_chunked(msg, final_report, model_used="multi_plan/verified")
+
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
     except Exception as e:
         await status_msg.edit_text(
             f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
@@ -260,7 +664,7 @@ async def cmd_multi_plan(msg: Message) -> None:
 
 
 # ── /orchestrate ──────────────────────────────────────────────────────────────
-@router.message(Command("orchestrate"))
+@router.message(Command("orchestrate_legacy"))
 async def cmd_orchestrate(msg: Message) -> None:
     if not is_allowed(msg):
         return

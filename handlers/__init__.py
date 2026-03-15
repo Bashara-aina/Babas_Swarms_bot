@@ -6,10 +6,12 @@ from handlers import (
     artifact,
     brain,
     computer,
+    ecc_compat,
     dev,
     e2e,
     enterprise,
     inline,
+    orchestrate,
     overnight_handler,
     pm,
     research,
@@ -37,7 +39,9 @@ _ROUTER_ORDER = [
     voice.router,             # F.voice + F.audio
     inline.router,            # inline_query
     skills.router,            # /skills /skill /skill_reload
+    ecc_compat.router,        # /harness_audit /model_route /quality_gate /verify /plan /checkpoint
     e2e.router,               # /e2etest /e2eplan /dbquery /dbhealth /dbtables
+    orchestrate.router,       # /orchestrate /orchestrate_cancel
     ai.router,                # /run /think /agent /swarm + NL catch-all (LAST)
 ]
 

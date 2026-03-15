@@ -1,18 +1,16 @@
-"""deep_think.py — 6-step extended thinking pipeline.
+"""deep_think.py — Multi-layer extended thinking pipeline.
 
-Models Claude Opus-style deep thinking:
-  Step 1: Frame the problem
-  Step 2: Generate competing hypotheses
-  Step 3: Steel-man each hypothesis
-  Step 4: Find the fatal flaw in each
-  Step 5: Bayesian update — which survives?
-  Step 6: Final answer with explicit uncertainty
+Designed for long-form reasoning tasks where we want:
+    1) framing
+    2) multiple competing hypotheses
+    3) adversarial critique
+    4) iterative refinement across several layers
+    5) final synthesis with confidence and uncertainty
 
-Designed for the /think command.
+This is intentionally slower and deeper than a regular single-turn chat call.
 """
 
 from __future__ import annotations
-import asyncio
 import logging
 from typing import Callable, Coroutine, Any
 
@@ -23,170 +21,217 @@ async def run_deep_think(
     question: str,
     llm_call: Callable[[str, str, str], Coroutine[Any, Any, str]],
     progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    depth: int = 3,
+    branches: int = 5,
 ) -> dict:
-    """Run the full 6-step deep thinking pipeline.
+    """Run a multi-layer deep thinking pipeline.
 
     Args:
         question: The user's original question.
         llm_call: async fn(model, system_prompt, user_message) -> str
         progress_fn: Optional async callback for Telegram status updates.
+        depth: Number of iterative refinement layers (2-6 recommended).
+        branches: Number of competing hypotheses per layer.
 
     Returns:
-        dict with keys: framing, hypotheses, steelmans, flaws,
-                        surviving_hypothesis, final_answer, uncertainty,
-                        what_would_change
+        dict with keys:
+          framing
+          layers
+          final_answer
+          confidence
+          uncertainty
+          what_would_change
     """
     from agents import AGENT_MODELS, build_system_prompt
+
+    depth = max(2, min(int(depth), 6))
+    branches = max(3, min(int(branches), 8))
 
     async def _progress(msg: str):
         if progress_fn:
             await progress_fn(msg)
         logger.info("[DeepThink] %s", msg)
 
-    await _progress("🧠 Step 1/6 — Framing the real question...")
+    await _progress("🧠 Layered Think 1/5 — Framing the question...")
 
-    # ── STEP 1: Frame the problem ─────────────────────────────────────────────
+    # ── Stage 1: Frame the problem ───────────────────────────────────────────
     framing_prompt = build_system_prompt(
-        "You are a philosopher-scientist. Your job is to dissect what a question"
-        " is REALLY asking. Expose hidden assumptions. Identify what would need to"
-        " be true for each possible answer. Be concise and sharp — 3-5 sentences."
+        "You are a rigorous first-principles analyst."
+        " Clarify what the question is truly asking, surface hidden assumptions,"
+        " identify constraints, and define success criteria."
+        " Keep it concise but sharp."
     )
     framing = await llm_call(
         AGENT_MODELS["debug"],
         framing_prompt,
-        f"What is this question REALLY asking, and what are its hidden assumptions?\n\nQuestion: {question}"
+        f"Question:\n{question}\n\n"
+        "Return sections:\n"
+        "- Core problem\n"
+        "- Hidden assumptions\n"
+        "- Constraints\n"
+        "- Success criteria"
     )
 
-    await _progress("🔀 Step 2/6 — Generating competing hypotheses...")
+    await _progress(f"🔀 Layered Think 2/5 — Running {depth} reasoning layers...")
 
-    # ── STEP 2: Generate competing hypotheses ─────────────────────────────────
-    hyp_prompt = build_system_prompt(
-        "You are a lateral thinker. Generate 4-5 COMPLETELY DIFFERENT ways to"
-        " answer a question — including contrarian, unconventional, and 'what if"
-        " everyone is wrong' perspectives. Number each one. Keep each to 2-3 sentences."
-    )
-    hyp_raw = await llm_call(
-        AGENT_MODELS["general"],
-        hyp_prompt,
-        f"Generate 4-5 competing hypotheses/answers for:\n\n{question}\n\nFraming context: {framing}",
-    )
-    hypotheses = hyp_raw
+    layers: list[dict[str, str]] = []
+    rolling_context = f"Question:\n{question}\n\nFraming:\n{framing}"
 
-    await _progress("🛡️ Step 3/6 — Steel-manning each hypothesis...")
+    for idx in range(1, depth + 1):
+        await _progress(f"🧩 Layer {idx}/{depth} — hypotheses")
 
-    # ── STEP 3: Steel-man each hypothesis ────────────────────────────────────
-    steel_prompt = build_system_prompt(
-        "You are a master debater. For each hypothesis provided, write the STRONGEST"
-        " possible argument in its favor — even if you personally disagree. Each"
-        " steel-man should be 2-3 sentences. Number them to match the original."
-    )
-    steelmans = await llm_call(
-        AGENT_MODELS["architect"],
-        steel_prompt,
-        f"Steel-man each of these hypotheses:\n\n{hypotheses}"
-    )
+        hyp_prompt = build_system_prompt(
+            "You are a strategic hypothesis generator."
+            " Produce mutually distinct candidate explanations/solutions,"
+            " including at least one contrarian option."
+        )
+        hypotheses = await llm_call(
+            AGENT_MODELS["architect"],
+            hyp_prompt,
+            f"{rolling_context}\n\n"
+            f"Generate {branches} competing hypotheses."
+            " For each hypothesis include:\n"
+            "- claim\n- why it may be true\n- key risk"
+        )
 
-    await _progress("⚔️ Step 4/6 — Finding fatal flaws...")
+        await _progress(f"⚔️ Layer {idx}/{depth} — adversarial critique")
+        critique_prompt = build_system_prompt(
+            "You are an adversarial reviewer."
+            " Attack each hypothesis with strongest counter-evidence,"
+            " edge-case failures, and hidden risks."
+        )
+        critique = await llm_call(
+            AGENT_MODELS["debug"],
+            critique_prompt,
+            f"Context:\n{rolling_context}\n\nHypotheses:\n{hypotheses}\n\n"
+            "For each hypothesis provide:\n"
+            "- strongest objection\n- failure mode\n- evidence needed to validate"
+        )
 
-    # ── STEP 4: Fatal flaw for each ───────────────────────────────────────────
-    flaw_prompt = build_system_prompt(
-        "You are a rigorous critic. For each hypothesis, find the single most"
-        " devastating counterargument or logical flaw. Be surgical — one killer"
-        " objection per hypothesis. Number them to match."
-    )
-    flaws = await llm_call(
-        AGENT_MODELS["debug"],
-        flaw_prompt,
-        f"Find the fatal flaw in each hypothesis:\n\nHypotheses:\n{hypotheses}\n\nSteel-mans:\n{steelmans}"
-    )
+        await _progress(f"🧠 Layer {idx}/{depth} — synthesis update")
+        synthesis_prompt = build_system_prompt(
+            "You are a Bayesian synthesizer."
+            " Merge hypotheses and critiques into the best current thesis,"
+            " assign confidence bands, and list unresolved uncertainty."
+        )
+        synthesis = await llm_call(
+            AGENT_MODELS["analyst"],
+            synthesis_prompt,
+            f"Question:\n{question}\n\n"
+            f"Hypotheses:\n{hypotheses}\n\n"
+            f"Critique:\n{critique}\n\n"
+            "Return:\n"
+            "- Current best thesis\n"
+            "- Confidence (0-100%)\n"
+            "- What remains uncertain\n"
+            "- What evidence would change the conclusion"
+        )
 
-    await _progress("⚖️ Step 5/6 — Bayesian update — which hypothesis survives?...")
+        layers.append(
+            {
+                "hypotheses": hypotheses,
+                "critique": critique,
+                "synthesis": synthesis,
+            }
+        )
+        rolling_context = (
+            f"Question:\n{question}\n\n"
+            f"Framing:\n{framing}\n\n"
+            f"Layer-{idx} synthesis:\n{synthesis}"
+        )
 
-    # ── STEP 5: Bayesian update ───────────────────────────────────────────────
-    bayes_prompt = build_system_prompt(
-        "You are a Bayesian reasoner. Given the hypotheses, their best arguments,"
-        " and their fatal flaws, assign rough probability weights (they don't need"
-        " to sum to 100%) and explain which hypothesis survives best. Be explicit"
-        " about what evidence tipped the balance."
-    )
-    surviving = await llm_call(
-        AGENT_MODELS["analyst"],
-        bayes_prompt,
-        f"Hypotheses:\n{hypotheses}\n\nSteel-mans:\n{steelmans}\n\nFatal flaws:\n{flaws}\n\nWhich hypothesis survives Bayesian scrutiny?"
-    )
+    await _progress("📝 Layered Think 3/5 — final synthesis")
 
-    await _progress("📝 Step 6/6 — Writing final answer with uncertainty...")
-
-    # ── STEP 6: Final answer with uncertainty ─────────────────────────────────
     final_prompt = build_system_prompt(
-        "You are an expert who has just completed a rigorous thinking process."
-        " Write a clear, direct final answer. Explicitly state:\n"
-        " 1. What you're confident in\n"
-        " 2. What's genuinely uncertain\n"
-        " 3. What new information would change your answer\n\n"
-        "Be honest, direct, and human. Don't summarize the process — just give the answer."
+        "You are an expert making a final call after multi-layer analysis."
+        " Be clear, decisive, and honest about uncertainty."
     )
     final_raw = await llm_call(
-        AGENT_MODELS["general"],
+        AGENT_MODELS["reviewer"],
         final_prompt,
-        f"Original question: {question}\n\nAfter deep analysis, the surviving hypothesis is:\n{surviving}\n\nWrite the final answer."
+        f"Original question:\n{question}\n\n"
+        f"Framing:\n{framing}\n\n"
+        f"Final layer synthesis:\n{layers[-1]['synthesis']}\n\n"
+        "Write final output with sections:\n"
+        "- Answer\n"
+        "- Confidence\n"
+        "- Uncertainty\n"
+        "- What would change my mind\n"
+        "- Next best action"
     )
 
-    # Extract uncertainty and what-would-change from final answer
+    await _progress("🔍 Layered Think 4/5 — extracting uncertainty")
+
     uncertainty = ""
     what_changes = ""
-    if "uncertain" in final_raw.lower():
-        # Try to extract uncertainty sentence
-        for sent in final_raw.split('.'):
-            if 'uncertain' in sent.lower() or 'not sure' in sent.lower():
-                uncertainty = sent.strip() + '.'
-                break
-    if "would change" in final_raw.lower() or "new information" in final_raw.lower():
-        for sent in final_raw.split('.'):
-            if 'change' in sent.lower() or 'new information' in sent.lower():
-                what_changes = sent.strip() + '.'
+    for sent in final_raw.replace("\n", ". ").split("."):
+        low = sent.lower()
+        if not uncertainty and (
+            "uncertain" in low
+            or "unknown" in low
+            or "not sure" in low
+            or "confidence" in low
+        ):
+            uncertainty = sent.strip() + "."
+        if not what_changes and (
+            "change" in low
+            or "would change" in low
+            or "new evidence" in low
+            or "what would change" in low
+        ):
+            what_changes = sent.strip() + "."
+        if uncertainty and what_changes:
+            break
+
+    await _progress("✅ Layered Think 5/5 — done")
+
+    confidence = ""
+    for sent in final_raw.replace("\n", ". ").split("."):
+        if "%" in sent or "confidence" in sent.lower():
+            confidence = sent.strip()
+            if confidence:
                 break
 
     return {
         "framing": framing,
-        "hypotheses": hypotheses,
-        "steelmans": steelmans,
-        "flaws": flaws,
-        "surviving_hypothesis": surviving,
+        "layers": layers,
         "final_answer": final_raw,
+        "confidence": confidence,
         "uncertainty": uncertainty,
         "what_would_change": what_changes,
+        "depth": depth,
+        "branches": branches,
     }
 
 
 def format_think_result(result: dict) -> str:
-    """Format the deep think result for Telegram display.
+    """Format deep-think result for Telegram display."""
+    layers = result.get("layers", [])
+    last_syn = ""
+    if layers:
+        last_syn = str(layers[-1].get("synthesis", ""))
 
-    Uses spoiler tags for the thinking process, shows the final answer prominently.
-
-    Args:
-        result: Dict returned by run_deep_think().
-
-    Returns:
-        Telegram-formatted string.
-    """
     thinking_summary = (
-        f"Framing: {result['framing'][:200]}...\n\n"
-        f"Hypotheses considered: {result['hypotheses'][:300]}...\n\n"
-        f"Surviving: {result['surviving_hypothesis'][:200]}..."
+        f"Framing: {str(result.get('framing', ''))[:260]}...\n\n"
+        f"Layers: {int(result.get('depth', len(layers) or 0))}\n"
+        f"Branches/layer: {int(result.get('branches', 0) or 0)}\n\n"
+        f"Last synthesis: {last_syn[:360]}..."
     )
 
     parts = [
-        f"💭 **THINKING PROCESS** ||{thinking_summary}||",
+        f"💭 <b>THINKING PROCESS</b>\n<pre>{thinking_summary}</pre>",
         "",
-        "🎯 **FINAL ANSWER**",
-        result["final_answer"],
+        "🎯 <b>FINAL ANSWER</b>",
+        str(result.get("final_answer", "")),
     ]
 
+    if result.get("confidence"):
+        parts.append(f"\n📈 <b>CONFIDENCE</b>: {result['confidence']}")
+
     if result.get("uncertainty"):
-        parts.append(f"\n⚠️ **UNCERTAINTY**: {result['uncertainty']}")
+        parts.append(f"\n⚠️ <b>UNCERTAINTY</b>: {result['uncertainty']}")
 
     if result.get("what_would_change"):
-        parts.append(f"🔄 **WHAT WOULD CHANGE THIS**: {result['what_would_change']}")
+        parts.append(f"🔄 <b>WHAT WOULD CHANGE THIS</b>: {result['what_would_change']}")
 
     return "\n".join(parts)

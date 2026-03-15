@@ -34,7 +34,11 @@ async def handle_inline_query(query: InlineQuery) -> None:
         return
 
     try:
-        response, model_used = await llm_client.chat(text, agent_key="general")
+        response, model_used = await llm_client.chat(
+            text,
+            agent_key="general",
+            user_id=str(query.from_user.id),
+        )
     except Exception as e:
         response = f"❌ Error: {str(e)[:200]}"
         model_used = "error"

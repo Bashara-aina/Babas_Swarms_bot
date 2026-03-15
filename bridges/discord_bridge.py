@@ -85,6 +85,7 @@ async def start_discord_bridge() -> None:
                     content,
                     agent_key="general",
                     thread_id=thread_id,
+                    user_id=str(message.author.id),
                 )
                 # Split response for Discord 2000-char limit
                 chunks = [response[i:i+1900] for i in range(0, len(response), 1900)]

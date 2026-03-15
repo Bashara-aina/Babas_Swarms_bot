@@ -74,6 +74,37 @@ class SupabaseClient:
         return h
 
     @staticmethod
+    def _raise_for_status_with_detail(resp: Any) -> None:
+        """Raise HTTPStatusError with Supabase JSON/body detail when available."""
+        if resp.status_code < 400:
+            return
+
+        detail = ""
+        try:
+            payload = resp.json()
+            if isinstance(payload, dict):
+                detail = (
+                    payload.get("message")
+                    or payload.get("error_description")
+                    or payload.get("error")
+                    or ""
+                )
+            else:
+                detail = str(payload)
+        except Exception:
+            try:
+                detail = (resp.text or "").strip()
+            except Exception:
+                detail = ""
+
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            if detail:
+                raise RuntimeError(f"Supabase HTTP {resp.status_code}: {detail}") from e
+            raise
+
+    @staticmethod
     def _build_filters(
         params: Dict[str, Any],
         eq: Optional[Dict[str, Any]],
@@ -117,7 +148,7 @@ class SupabaseClient:
             headers=self._headers(use_service_role),
             params=params,
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     async def insert(
@@ -139,7 +170,7 @@ class SupabaseClient:
             json=data,
             params=params,
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     async def update(
@@ -157,7 +188,7 @@ class SupabaseClient:
             json=data,
             params=params,
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     async def delete(
@@ -173,7 +204,7 @@ class SupabaseClient:
             headers=self._headers(use_service_role),
             params=params,
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     # ------------------------------------------------------------------ #
@@ -192,7 +223,7 @@ class SupabaseClient:
             headers=self._headers(use_service_role),
             json=params or {},
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()
 
     # ------------------------------------------------------------------ #
@@ -210,7 +241,7 @@ class SupabaseClient:
             headers={"apikey": self.anon_key, "Content-Type": "application/json"},
             json={"email": email, "password": password},
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     async def auth_create_user(
@@ -230,7 +261,7 @@ class SupabaseClient:
                 "email_confirm": True,
             },
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     # ------------------------------------------------------------------ #
@@ -249,7 +280,7 @@ class SupabaseClient:
             headers=self._headers(use_service_role=True),
             json={"prefix": prefix, "limit": limit, "offset": 0},
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     async def storage_upload(
@@ -270,7 +301,7 @@ class SupabaseClient:
             },
             content=content,
         )
-        resp.raise_for_status()
+        self._raise_for_status_with_detail(resp)
         return resp.json()  # type: ignore[return-value]
 
     def storage_public_url(self, bucket: str, path: str) -> str:
@@ -295,6 +326,33 @@ class SupabaseClient:
             return {"ok": False, "error": str(e), "latency_ms": None}
         latency = round((time.monotonic() - t0) * 1000)
         return {"ok": ok, "status_code": resp.status_code, "latency_ms": latency}
+
+    async def list_accessible_tables(self) -> List[str]:
+        """List table-like resources visible via PostgREST OpenAPI.
+
+        Works with anon key and does not require service_role or custom RPC.
+        """
+        resp = await self._http.get(
+            f"{self.url}/rest/v1/",
+            headers=self._headers(use_service_role=False),
+            timeout=10.0,
+        )
+        self._raise_for_status_with_detail(resp)
+
+        payload = resp.json()
+        paths = payload.get("paths", {}) if isinstance(payload, dict) else {}
+        out: List[str] = []
+        for raw in paths.keys():
+            if not isinstance(raw, str):
+                continue
+            name = raw.lstrip("/")
+            if not name or name.startswith("rpc/"):
+                continue
+            if "/" in name:
+                name = name.split("/", 1)[0]
+            if name and name not in out:
+                out.append(name)
+        return sorted(out)
 
     async def close(self) -> None:
         await self._http.aclose()

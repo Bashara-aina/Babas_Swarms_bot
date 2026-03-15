@@ -14,12 +14,13 @@ Never used as a text fallback.
 Verified working models (live logs 2026-03-09):
   groq/llama-3.3-70b-versatile                   ✓
   groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
-  cerebras/qwen-3-235b-a22b                       ✓
+    cerebras/qwen3-235b-a22b                        ✓
   zai/glm-4                                       ✓ (via openai-compat endpoint)
 """
 
 from __future__ import annotations
 import logging
+import re
 import time
 from datetime import datetime
 
@@ -71,11 +72,11 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist":     "cerebras/qwen-3-235b-a22b",         # fast, large context
+    "strategist":     "cerebras/qwen3-235b-a22b",          # fast, large context
     "devil_advocate": "groq/qwen-qwq-32b",                 # adversarial reasoning
     "researcher":     "groq/moonshotai/kimi-k2-instruct",  # deep research
     "pragmatist":     "groq/llama-3.3-70b-versatile",      # practical, fast
-    "visionary":      "cerebras/qwen-3-235b-a22b",         # creative, fast
+    "visionary":      "cerebras/qwen3-235b-a22b",          # creative, fast
     "critic":         "zai/glm-4",                         # precise, analytical
 }
 
@@ -95,14 +96,14 @@ AGENT_MODELS: dict[str, str] = {
     "coding":     "groq/llama-3.3-70b-versatile",       # fast + reliable
     "debug":      "zai/glm-4",                          # GPQA Diamond 85.7%
     "math":       "zai/glm-4",                          # AIME 2025 95.7%
-    "architect":  "cerebras/qwen-3-235b-a22b",          # 1500 tok/s, 131K ctx
+    "architect":  "cerebras/qwen3-235b-a22b",           # 1500 tok/s, 131K ctx
     "analyst":    "groq/moonshotai/kimi-k2-instruct",   # 1T MoE, deep reasoning
     "computer":   "groq/llama-3.3-70b-versatile",       # agentic tool-calling loop
     "general":    "groq/llama-3.3-70b-versatile",       # reliable default
     "researcher": "groq/moonshotai/kimi-k2-instruct",   # academic research
     "marketer":   "groq/llama-3.3-70b-versatile",       # content + social
     "devops":     "groq/llama-3.3-70b-versatile",       # infra + deployment
-    "pm":         "cerebras/qwen-3-235b-a22b",          # project management
+    "pm":         "cerebras/qwen3-235b-a22b",           # project management
     "humanizer":  "groq/llama-3.3-70b-versatile",       # humanising AI text
     "reviewer":   "groq/llama-3.3-70b-versatile",       # AI code review
 }
@@ -116,7 +117,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "coding": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/qwen/qwen3-coder:free",
     ],
@@ -133,7 +134,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "groq/llama-3.3-70b-versatile",
     ],
@@ -144,12 +145,12 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "computer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "general": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
@@ -160,27 +161,27 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "marketer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "devops": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "pm": [
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
     ],
     "humanizer": [
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
     ],
     "reviewer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
 }
@@ -262,17 +263,46 @@ ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 
 def detect_agent(task: str) -> str:
-    task_lower = task.lower()
+    task_lower = task.lower().strip()
+
+    if re.search(r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower):
+        return "math"
+    if re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
+        return "debug"
+    if re.search(r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower):
+        return "architect"
+    if re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
+        return "general"
+
     scores: dict[str, int] = {agent: 0 for agent in TASK_KEYWORDS}
     for agent, keywords in TASK_KEYWORDS.items():
         for kw in keywords:
-            if kw in task_lower:
+            kw_norm = kw.strip().lower()
+            if not kw_norm:
+                continue
+            if re.search(r"[a-z0-9]", kw_norm):
+                pattern = rf"(?<![a-z0-9]){re.escape(kw_norm)}(?![a-z0-9])"
+                if re.search(pattern, task_lower):
+                    scores[agent] += 1
+            elif kw_norm in task_lower:
                 scores[agent] += 1
+
+    tie_break_order = [
+        "debug", "math", "vision", "coding", "architect",
+        "analyst", "researcher", "devops", "pm", "reviewer", "general",
+    ]
     best_agent = max(scores, key=lambda a: scores[a])
-    if scores[best_agent] == 0:
+    best_score = scores[best_agent]
+    if best_score > 0:
+        for candidate in tie_break_order:
+            if scores.get(candidate, 0) == best_score:
+                best_agent = candidate
+                break
+
+    if best_score == 0:
         logger.debug("No keyword match — using %s", DEFAULT_AGENT)
         return DEFAULT_AGENT
-    logger.debug("Detected agent '%s' (score=%d)", best_agent, scores[best_agent])
+    logger.debug("Detected agent '%s' (score=%d)", best_agent, best_score)
     return best_agent
 
 

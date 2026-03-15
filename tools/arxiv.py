@@ -185,7 +185,7 @@ async def analyze_paper(text: str, question: str = "") -> str:
 
     prompt += f"\nPaper text:\n{text[:6000]}"
 
-    result, model = await chat(prompt, agent_key="debug")
+    result, model = await chat(prompt, agent_key="debug", user_id="0")
     return result
 
 
@@ -225,7 +225,7 @@ async def analyze_codebase_vs_paper(
         "- Missing implementations\n"
     )
 
-    result, _ = await chat(prompt, agent_key="debug")
+    result, _ = await chat(prompt, agent_key="debug", user_id="0")
     return result
 
 
@@ -259,5 +259,5 @@ async def monitor_benchmark(
         "3. What technique gives them the advantage?\n"
         "If no new SOTA found, say so."
     )
-    result, _ = await chat(prompt, agent_key="analyst")
+    result, _ = await chat(prompt, agent_key="analyst", user_id="0")
     return result
