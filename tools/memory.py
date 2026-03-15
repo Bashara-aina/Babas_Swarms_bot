@@ -3,17 +3,21 @@ tools/memory.py — Persistent long-context memory for LegionSwarm.
 
 Two-layer memory architecture:
   1. RAM layer   : CONVERSATION_HISTORY in agents.py (per-session, hot)
-  2. SQLite layer: this file — persists across restarts (cold but permanent)
+  2. Primary     : OpenViking L0/L1/L2 tiered context database (semantic,
+                   cross-restart persistent, self-evolving)
+  3. Fallback    : SQLite + TF-IDF cosine similarity (used when OpenViking
+                   is not installed or unavailable)
 
 Features:
-  - add_memory()      : save a note with tags + source
-  - search_memory()   : TF-IDF similarity search (no heavy deps)
-  - get_recent()      : last N memories
-  - build_memory_context() : returns a compact string to inject into system prompt
-  - auto_save_interaction(): called after every /run or /do to optionally save
-  - export_to_obsidian(): dump all notes as .md files
+  - add_memory()           : save a note with tags + source
+  - search_memory()        : semantic (OpenViking) or TF-IDF similarity search
+  - get_recent()           : last N memories
+  - build_memory_context() : tiered context block (OpenViking) or compact
+                             TF-IDF string — drop-in for system prompt injection
+  - auto_save_interaction(): called after every /run or /do
+  - export_to_obsidian()   : dump all notes as .md files
 
-No threading — all async. Uses aiosqlite.
+No threading — all async. Uses aiosqlite + openviking.
 """
 
 from __future__ import annotations
@@ -62,7 +66,7 @@ async def _init_db() -> None:
         await db.commit()
 
 
-# ── TF-IDF helpers ────────────────────────────────────────────────────────────
+# ── TF-IDF helpers (fallback when OpenViking unavailable) ─────────────────────
 STOPWORDS = {
     "the", "a", "an", "is", "it", "in", "on", "at", "to", "for",
     "of", "and", "or", "but", "not", "be", "was", "are", "with",
@@ -107,7 +111,9 @@ async def add_memory(
 ) -> int:
     """
     Save a note to persistent memory.
-    Returns the new row id.
+    Writes to both SQLite (for /recall, /memories commands) and
+    OpenViking L2 history (for semantic retrieval).
+    Returns the SQLite row id.
     """
     await _init_db()
     now = time.time()
@@ -123,14 +129,45 @@ async def add_memory(
         await db.commit()
         memory_id = cursor.lastrowid
     logger.info("Memory saved: id=%d tags=%s source=%s", memory_id, tags_str, source)
+
+    # Also write to OpenViking L2 for semantic retrieval
+    try:
+        from tools.viking_context import auto_extract_facts
+        # Use a synthetic user_id='manual' for manually added memories
+        await auto_extract_facts("manual", f"[{source}] {tags_str}", text)
+    except Exception:
+        pass
+
     return memory_id
 
 
-async def search_memory(query: str, top_k: int = 5) -> list[dict]:
+async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = None) -> list[dict]:
     """
-    TF-IDF cosine similarity search.
+    Semantic search via OpenViking (primary) or TF-IDF cosine (fallback).
     Returns list of dicts: {id, text, tags, source, score, created}
     """
+    # ── Try OpenViking semantic search first ──────────────────────────────
+    try:
+        from tools.viking_context import semantic_search, is_available
+        if is_available():
+            hits = await semantic_search(query, user_id=user_id, top_k=top_k)
+            if hits:
+                # Convert to same format as TF-IDF results
+                return [
+                    {
+                        "id": 0,
+                        "text": h["snippet"],
+                        "tags": h["uri"],
+                        "source": "openviking",
+                        "score": h["score"],
+                        "created": time.time(),
+                    }
+                    for h in hits
+                ]
+    except Exception as e:
+        logger.debug("OpenViking search failed, falling back to TF-IDF: %s", e)
+
+    # ── TF-IDF fallback ───────────────────────────────────────────────────
     await _init_db()
     query_vec = _tfidf_vector(query)
     if not query_vec:
@@ -162,7 +199,6 @@ async def search_memory(query: str, top_k: int = 5) -> list[dict]:
     scored.sort(key=lambda x: x["score"], reverse=True)
     results = [r for r in scored[:top_k] if r["score"] > 0.01]
 
-    # Update accessed time for returned memories
     if results:
         ids = [str(r["id"]) for r in results]
         async with aiosqlite.connect(DB_PATH) as db:
@@ -211,12 +247,31 @@ async def count_memories() -> int:
 
 
 # ── Context injection helper ──────────────────────────────────────────────────
-async def build_memory_context(query: str, top_k: int = 3) -> str:
+async def build_memory_context(query: str, top_k: int = 3, user_id: Optional[str] = None) -> str:
     """
-    Search memory and return a compact block to inject into a system prompt.
-    Keeps it under ~1500 chars so it doesn't bloat the context.
+    Build a context block to inject into a system prompt.
+
+    Primary path: OpenViking tiered context (L0 + L1 + L2 semantic hits)
+    Fallback path: TF-IDF cosine search over SQLite memories
+
+    Keeps total output under ~2000 chars.
     """
-    results = await search_memory(query, top_k=top_k)
+    # ── Primary: OpenViking tiered context ───────────────────────────────
+    try:
+        from tools.viking_context import build_viking_context, is_available
+        if is_available():
+            ctx = await build_viking_context(
+                query=query,
+                user_id=user_id,
+                max_chars=2000,
+            )
+            if ctx:
+                return ctx
+    except Exception as e:
+        logger.debug("build_viking_context failed, using TF-IDF fallback: %s", e)
+
+    # ── Fallback: TF-IDF SQLite search ───────────────────────────────────
+    results = await search_memory(query, top_k=top_k, user_id=user_id)
     if not results:
         return ""
 
@@ -237,18 +292,18 @@ async def auto_save_interaction(
     user_message: str,
     assistant_reply: str,
     source: str = "conversation",
+    user_id: Optional[str] = None,
 ) -> None:
     """
     Decide if the interaction is worth remembering, then save it.
-    Uses a simple heuristic: save if assistant reply is >200 chars
-    and contains technical terms, URLs, file paths, or code.
+    Writes to both SQLite and OpenViking L1/L2.
     """
     worth_saving_patterns = [
-        r"https?://",           # URLs
-        r"/[a-z_]+/[a-z_]+",   # file paths
-        r"```",                 # code blocks
-        r"arXiv",               # papers
-        r"\bfix\b|\bsolved\b|\bworkaround\b",  # solutions
+        r"https?://",
+        r"/[a-z_]+/[a-z_]+",
+        r"```",
+        r"arXiv",
+        r"\bfix\b|\bsolved\b|\bworkaround\b",
         r"\bremember\b|\bdon't forget\b|\bimportant\b",
     ]
     if len(assistant_reply) < 200:
@@ -262,7 +317,6 @@ async def auto_save_interaction(
 
     combined = f"Q: {user_message[:200]}\nA: {assistant_reply[:600]}"
     tags = [source]
-    # Auto-tag by content
     if "arxiv" in assistant_reply.lower() or "paper" in user_message.lower():
         tags.append("research")
     if any(kw in user_message.lower() for kw in ["pytorch", "cuda", "workernet", "ikea"]):
@@ -272,14 +326,25 @@ async def auto_save_interaction(
     if "fix" in assistant_reply.lower() or "debug" in user_message.lower():
         tags.append("fix")
 
+    # Save to SQLite (for /recall, /memories commands)
     await add_memory(combined, tags=tags, source=source)
+
+    # Also save to OpenViking L1 (session) and L2 (fact extraction)
+    if user_id:
+        try:
+            from tools.viking_context import save_interaction_to_l1, auto_extract_facts
+            await save_interaction_to_l1(user_id, user_message, assistant_reply)
+            await auto_extract_facts(user_id, user_message, assistant_reply)
+        except Exception as e:
+            logger.debug("OpenViking save skipped (non-fatal): %s", e)
+
     logger.debug("Auto-saved interaction to memory (tags=%s)", tags)
 
 
 # ── Obsidian export ───────────────────────────────────────────────────────────
 async def export_to_obsidian(vault_path: str | Path) -> int:
     """
-    Export all memories as .md files to an Obsidian vault directory.
+    Export all SQLite memories as .md files to an Obsidian vault directory.
     Returns count of files written.
     """
     vault = Path(vault_path)
@@ -328,3 +393,14 @@ def format_memory_result(r: dict, show_score: bool = False) -> str:
         f"<b>#{r['id']}</b>{tags} <code>{created}</code>{score_str}\n"
         f"{text_preview}"
     )
+
+
+# ── Init alias (called from main.py) ─────────────────────────────────────────
+async def init_memory_db() -> None:
+    """Init SQLite schema and warm up OpenViking client."""
+    await _init_db()
+    try:
+        from tools.viking_context import init_viking_db
+        await init_viking_db()
+    except Exception as e:
+        logger.debug("OpenViking warmup skipped: %s", e)

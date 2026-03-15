@@ -16,6 +16,7 @@ Core modes:
   /agent <key> <t> → force specific agent
   /models          → agent roster
   /keys            → API key status
+  /resources       → RAM / GPU VRAM / local model policy
   /stats           → CPU/GPU/RAM
   /git             → git status
   /threads         → conversation threads
@@ -35,7 +36,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 from dotenv import load_dotenv
 
-# ── Load env FIRST before any module reads os.getenv() ──────────────────────
+# ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env")
 
 import computer_agent
@@ -43,7 +44,7 @@ from llm_client import verify_api_keys
 import handlers.shared as _shared
 from handlers import register_all_routers
 
-# ── Logging ──────────────────────────────────────────────────────────────────
+# ── Logging ────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -65,7 +66,7 @@ if not ALLOWED_USER_ID:
     logger.critical("ALLOWED_USER_ID not set in .env")
     sys.exit(1)
 
-# ── Inject shared config into handlers package ───────────────────────────────
+# ── Inject shared config into handlers package ─────────────────────────────────
 _shared.ALLOWED_USER_ID = ALLOWED_USER_ID
 _shared._start_time = time.time()
 
@@ -143,68 +144,75 @@ async def on_startup(bot: Bot) -> None:
         )
 
         configure_structured_logging()
-        logger.info("✅ swarms_bot enterprise layer initialized (with integrations)")
+        logger.info("\u2705 swarms_bot enterprise layer initialized (with integrations)")
     except Exception as e:
         logger.warning("swarms_bot init failed (non-fatal): %s", e)
 
-    await bot.set_my_commands([
-        BotCommand(command="do",          description="Autonomous computer control"),
-        BotCommand(command="screen",      description="Take desktop screenshot"),
-        BotCommand(command="run",         description="LLM chat (no computer)"),
-        BotCommand(command="swarm",       description="Multi-agent team execution"),
-        BotCommand(command="think",       description="QwQ deep reasoning"),
-        BotCommand(command="cmd",         description="Run shell command"),
-        # Research
-        BotCommand(command="paper",       description="Search arXiv papers"),
-        BotCommand(command="ask_paper",   description="Ask about a paper"),
-        BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
-        BotCommand(command="research",    description="Deep web research"),
-        BotCommand(command="scrape",      description="Scrape a URL"),
-        # Memory
-        BotCommand(command="remember",    description="Save a note to memory"),
-        BotCommand(command="recall",      description="Search memory"),
-        BotCommand(command="memories",    description="Show recent memories"),
-        BotCommand(command="briefing",    description="Morning briefing"),
-        # Dev
-        BotCommand(command="scaffold",    description="Create project scaffold"),
-        BotCommand(command="build",       description="Parallel fullstack build"),
-        BotCommand(command="gpu",         description="GPU health status"),
-        BotCommand(command="vuln_scan",   description="Vulnerability scan"),
-        # Tasks
-        BotCommand(command="task_from",   description="Extract tasks from text"),
-        BotCommand(command="tasks_due",   description="Show pending tasks"),
-        # Content
-        BotCommand(command="post",        description="Draft social media post"),
-        BotCommand(command="brand_check", description="Monitor brand mentions"),
-        # Code Quality
-        BotCommand(command="review",      description="AI code review"),
-        BotCommand(command="security_review", description="Security audit"),
-        # Orchestration
-        BotCommand(command="orchestrate", description="Decompose + execute complex task"),
-        BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
-        BotCommand(command="loop",        description="Autonomous goal execution loop"),
-        BotCommand(command="loop_stop",   description="Stop running loop"),
-        BotCommand(command="loop_status", description="Loop progress status"),
-        BotCommand(command="loop_pause",  description="Pause running loop"),
-        BotCommand(command="loop_resume", description="Resume paused loop"),
-        BotCommand(command="multi_execute", description="Compare multiple agents"),
-        BotCommand(command="budget",     description="Cost tracking dashboard"),
-        BotCommand(command="metrics",    description="Performance metrics dashboard"),
-        BotCommand(command="routing_stats", description="Routing analytics"),
-        BotCommand(command="audit_summary", description="Audit log summary"),
-        # Sessions & Learning
-        BotCommand(command="save",        description="Save session state"),
-        BotCommand(command="resume",      description="Resume saved session"),
-        BotCommand(command="sessions",    description="List saved sessions"),
-        BotCommand(command="learn",       description="Teach a pattern"),
-        BotCommand(command="instincts",   description="Show learned patterns"),
-        BotCommand(command="audit",       description="Activity audit trail"),
-        # System
-        BotCommand(command="models",      description="Agent roster"),
-        BotCommand(command="keys",        description="API key status"),
-        BotCommand(command="stats",       description="System stats"),
-        BotCommand(command="start",       description="Help + status"),
-    ])
+    # fix: wrap set_my_commands in try/except — Telegram API slowness on startup
+    # must not prevent the rest of the boot sequence from completing.
+    try:
+        await bot.set_my_commands([
+            BotCommand(command="do",          description="Autonomous computer control"),
+            BotCommand(command="screen",      description="Take desktop screenshot"),
+            BotCommand(command="run",         description="LLM chat (no computer)"),
+            BotCommand(command="swarm",       description="Multi-agent team execution"),
+            BotCommand(command="think",       description="QwQ deep reasoning"),
+            BotCommand(command="cmd",         description="Run shell command"),
+            # Research
+            BotCommand(command="paper",       description="Search arXiv papers"),
+            BotCommand(command="ask_paper",   description="Ask about a paper"),
+            BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
+            BotCommand(command="research",    description="Deep web research"),
+            BotCommand(command="scrape",      description="Scrape a URL"),
+            # Memory
+            BotCommand(command="remember",    description="Save a note to memory"),
+            BotCommand(command="recall",      description="Search memory"),
+            BotCommand(command="memories",    description="Show recent memories"),
+            BotCommand(command="briefing",    description="Morning briefing"),
+            # Dev
+            BotCommand(command="scaffold",    description="Create project scaffold"),
+            BotCommand(command="build",       description="Parallel fullstack build"),
+            BotCommand(command="gpu",         description="GPU health status"),
+            BotCommand(command="vuln_scan",   description="Vulnerability scan"),
+            # Tasks
+            BotCommand(command="task_from",   description="Extract tasks from text"),
+            BotCommand(command="tasks_due",   description="Show pending tasks"),
+            # Content
+            BotCommand(command="post",        description="Draft social media post"),
+            BotCommand(command="brand_check", description="Monitor brand mentions"),
+            # Code Quality
+            BotCommand(command="review",      description="AI code review"),
+            BotCommand(command="security_review", description="Security audit"),
+            # Orchestration
+            BotCommand(command="orchestrate", description="Decompose + execute complex task"),
+            BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
+            BotCommand(command="loop",        description="Autonomous goal execution loop"),
+            BotCommand(command="loop_stop",   description="Stop running loop"),
+            BotCommand(command="loop_status", description="Loop progress status"),
+            BotCommand(command="loop_pause",  description="Pause running loop"),
+            BotCommand(command="loop_resume", description="Resume paused loop"),
+            BotCommand(command="multi_execute", description="Compare multiple agents"),
+            BotCommand(command="budget",     description="Cost tracking dashboard"),
+            BotCommand(command="metrics",    description="Performance metrics dashboard"),
+            BotCommand(command="routing_stats", description="Routing analytics"),
+            BotCommand(command="audit_summary", description="Audit log summary"),
+            # Sessions & Learning
+            BotCommand(command="save",        description="Save session state"),
+            BotCommand(command="resume",      description="Resume saved session"),
+            BotCommand(command="sessions",    description="List saved sessions"),
+            BotCommand(command="learn",       description="Teach a pattern"),
+            BotCommand(command="instincts",   description="Show learned patterns"),
+            BotCommand(command="audit",       description="Activity audit trail"),
+            # System
+            BotCommand(command="models",      description="Agent roster"),
+            BotCommand(command="keys",        description="API key status"),
+            BotCommand(command="resources",   description="RAM / GPU / local model policy"),
+            BotCommand(command="stats",       description="System stats"),
+            BotCommand(command="start",       description="Help + status"),
+        ])
+        logger.info("Bot commands registered")
+    except Exception as e:
+        logger.warning("set_my_commands failed (non-fatal): %s", e)
 
     key_status = verify_api_keys()
     active = [k for k, v in key_status.items() if v]
@@ -214,8 +222,8 @@ async def on_startup(bot: Bot) -> None:
 
     logger.info("=" * 55)
     logger.info("Legion v4 starting")
-    logger.info("✅ Keys: %s", ", ".join(active) or "NONE")
-    logger.info("🖥 Display: %s", display)
+    logger.info("\u2705 Keys: %s", ", ".join(active) or "NONE")
+    logger.info("\U0001f5a5 Display: %s", display)
     if not any(key_status.get(k) for k in cloud):
         logger.critical("NO CLOUD KEYS — all requests will fail!")
     logger.info("=" * 55)
