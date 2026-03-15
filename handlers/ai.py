@@ -16,8 +16,6 @@ from .shared import (
     _run_agent_loop,
     is_allowed,
     send_chunked,
-    _chief_of_staff,
-    _audit_logger,
 )
 import handlers.shared as _shared
 
@@ -97,7 +95,6 @@ async def cmd_swarm(msg: Message) -> None:
     status_msg = await msg.answer("strategist decomposing task...")
     typing_task = asyncio.create_task(_keep_typing(msg))
 
-    # on_progress is already a proper async def — no fix needed here
     async def on_progress(step_text: str) -> None:
         try:
             await status_msg.edit_text(step_text, parse_mode="HTML")
@@ -166,6 +163,7 @@ async def cmd_multi_execute(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     try:
+        # Use _shared module references (not local copies) so enterprise objects are live
         if _shared._chief_of_staff:
             from swarms_bot.orchestrator.chief_of_staff import Task as STask
             stask = STask.create(
