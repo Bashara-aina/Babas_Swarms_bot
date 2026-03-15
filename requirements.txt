@@ -1,54 +1,44 @@
-# Legion v4 — full-stack AI workstation control + multi-agent platform
+# Legion Swarms Bot — Python dependencies
+# Install: pip install -r requirements.txt
 
-# Telegram bot
-aiogram>=3.4.0,<4.0.0
+# ── Core Telegram bot ─────────────────────────────────────────────────────
+aiogram>=3.4.1
 python-dotenv>=1.0.0
 
-# LLM — all cloud providers + tool calling
-# 1.57+ required for Cerebras Qwen-3-235b-a22b + Groq Kimi-K2 support
-litellm>=1.57.0
+# ── LLM client ────────────────────────────────────────────────────────────
+litellm>=1.35.0
 
-# HTTP client (used by litellm + web tools)
-httpx>=0.27.0
+# ── Database ──────────────────────────────────────────────────────────────
+aiosqlite>=0.19.0
 
-# Web scraping (legacy fallback)
-requests>=2.31.0
-beautifulsoup4>=4.12.0
+# ── Context database (OpenViking — L0/L1/L2 tiered memory) ───────────────
+# pip install openviking  (Python 3.9+, no server needed, local file store)
+openviking>=0.2.5
 
-# Vision / images
-pillow>=10.0.0
+# ── File I/O ──────────────────────────────────────────────────────────────
+aiofiles>=23.0.0
+Pillow>=10.0.0
 
-# Async utilities
-aiofiles>=23.2.0
-aiohttp>=3.9.0
+# ── Computer use / screen tools ───────────────────────────────────────────
+pyscreenshot>=0.4.2
+pyautogui>=0.9.54
+xdotool  # system package: sudo apt install xdotool
 
-# System monitoring
+# ── System monitoring (resource_monitor) ─────────────────────────────────
 psutil>=5.9.0
+# pynvml  — install if you have an NVIDIA GPU:
+# pip install pynvml
 
-# ── Phase 1: Web browsing (JS-rendered) ──────────────────────────────────
-playwright>=1.40.0
+# ── Research / web tools ─────────────────────────────────────────────────
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+requests>=2.31.0
 
-# ── Phase 2: Persistence ─────────────────────────────────────────────────
-aiosqlite>=0.20.0
+# ── Document tools ────────────────────────────────────────────────────────
+pymupdf>=1.23.0        # PDF
+openpyxl>=3.1.0        # Excel
+python-docx>=1.1.0     # Word
+pdfminer.six>=20221105
 
-# ── Phase 3: Document processing ─────────────────────────────────────────
-openpyxl>=3.1.0
-pdfplumber>=0.10.0
-pytesseract>=0.3.10
-python-docx>=1.0.0
-
-# ── Phase 4: Email ───────────────────────────────────────────────────────
-aioimaplib>=1.1.0
-aiosmtplib>=3.0.0
-
-# ── v4: RSS feeds ────────────────────────────────────────────────────────
-feedparser>=6.0.0
-
-# ── arXiv paper download ─────────────────────────────────────────────────
-arxiv>=2.1.0
-
-# ── Host machine tools (install separately, not pip) ──────────────────────
-# sudo apt install xdotool wmctrl scrot xclip xdg-utils
-# sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
-# playwright install chromium
-# pip install pip-audit  (optional, for /vuln_scan)
+# ── Optional: Obsidian export, Markdown ──────────────────────────────────
+# markdown>=3.5.0

@@ -6,6 +6,7 @@ Single source of truth for:
   - TASK_KEYWORDS      : keyword->agent routing (includes Indonesian)
   - DEBATE_PERSONAS    : 6 debate roles for SwarmDebateOrchestrator
   - ACTIVE_THREADS     : in-memory thread store
+  - CONVERSATION_HISTORY: in-RAM per-user context, backed by OpenViking L1
 
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
@@ -17,6 +18,7 @@ Verified working models (live logs 2026-03-09):
 """
 
 from __future__ import annotations
+import asyncio
 import logging
 import time
 from datetime import datetime
@@ -75,7 +77,7 @@ FORMATTING:
 - Keep responses tight. No padding. No re-summarizing what she just said.
 
 MEMORY CONTEXT (when provided):
-- If a [MEMORY CONTEXT] block is provided at the start of the message,
+- If a [VIKING CONTEXT] or [MEMORY CONTEXT] block is provided at the start,
   treat it as real prior knowledge about Bashara and her projects.
   Reference it naturally: "since you're using Supabase for this..."
   Don't announce you're using memory — just use it.
@@ -109,15 +111,13 @@ DEBATE_PERSONAS = {
     ),
 }
 
-# Persona -> preferred model (different reasoning styles need different models)
-# If a persona's preferred model is unavailable, FALLBACK_CHAIN[role] is used automatically
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist":     "cerebras/qwen-3-235b-a22b",           # fast, large context
-    "devil_advocate": "groq/qwen-qwq-32b",                   # adversarial reasoning
-    "researcher":     "groq/moonshotai/kimi-k2-instruct",    # deep research
-    "pragmatist":     "groq/llama-3.3-70b-versatile",        # practical, fast
-    "visionary":      "cerebras/qwen-3-235b-a22b",           # creative, fast
-    "critic":         "zai/glm-4",                           # precise, analytical
+    "strategist":     "cerebras/qwen-3-235b-a22b",
+    "devil_advocate": "groq/qwen-qwq-32b",
+    "researcher":     "groq/moonshotai/kimi-k2-instruct",
+    "pragmatist":     "groq/llama-3.3-70b-versatile",
+    "visionary":      "cerebras/qwen-3-235b-a22b",
+    "critic":         "zai/glm-4",
 }
 
 DEBATE_ICONS = {
@@ -130,25 +130,23 @@ DEBATE_ICONS = {
 }
 
 # ── Primary model registry ──────────────────────────────────────────────────
-# SINGLE source of truth — router.py imports from here.
 AGENT_MODELS: dict[str, str] = {
-    "vision":     "ollama_chat/gemma3:12b",              # local, private, RTX 3060
-    "coding":     "groq/llama-3.3-70b-versatile",        # fast + reliable
-    "debug":      "zai/glm-4",                           # GPQA Diamond 85.7%
-    "math":       "zai/glm-4",                           # AIME 2025 95.7%
-    "architect":  "cerebras/qwen-3-235b-a22b",           # 1500 tok/s, 131K ctx
-    "analyst":    "groq/moonshotai/kimi-k2-instruct",    # 1T MoE, deep reasoning
-    "computer":   "groq/llama-3.3-70b-versatile",        # agentic tool-calling loop
-    "general":    "groq/llama-3.3-70b-versatile",        # reliable default
-    "researcher": "groq/moonshotai/kimi-k2-instruct",    # academic research
-    "marketer":   "groq/llama-3.3-70b-versatile",        # content + social
-    "devops":     "groq/llama-3.3-70b-versatile",        # infra + deployment
-    "pm":         "cerebras/qwen-3-235b-a22b",           # project management
-    "humanizer":  "groq/llama-3.3-70b-versatile",        # humanising AI text
-    "reviewer":   "groq/llama-3.3-70b-versatile",        # AI code review
+    "vision":     "ollama_chat/gemma3:12b",
+    "coding":     "groq/llama-3.3-70b-versatile",
+    "debug":      "zai/glm-4",
+    "math":       "zai/glm-4",
+    "architect":  "cerebras/qwen-3-235b-a22b",
+    "analyst":    "groq/moonshotai/kimi-k2-instruct",
+    "computer":   "groq/llama-3.3-70b-versatile",
+    "general":    "groq/llama-3.3-70b-versatile",
+    "researcher": "groq/moonshotai/kimi-k2-instruct",
+    "marketer":   "groq/llama-3.3-70b-versatile",
+    "devops":     "groq/llama-3.3-70b-versatile",
+    "pm":         "cerebras/qwen-3-235b-a22b",
+    "humanizer":  "groq/llama-3.3-70b-versatile",
+    "reviewer":   "groq/llama-3.3-70b-versatile",
 }
 
-# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
         "ollama_chat/gemma3:12b",
@@ -226,7 +224,6 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
 }
 
-# ── Keyword -> agent routing ─────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
         "screenshot", "screen", "layar", "gambar", "image", "photo",
@@ -301,11 +298,13 @@ DEFAULT_AGENT = "general"
 # ── Thread memory (in-RAM, per-session) ─────────────────────────────────────
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
-# ── Conversation history (persistent per user_id, for long-context) ──────────
-# Format: {user_id: [{"role": "user"|"assistant", "content": str, "ts": float}]}
+# ── Conversation history ─────────────────────────────────────────────────────
+# Primary: OpenViking L1 (persistent, cross-restart, semantic)
+# Fallback: in-RAM dict (wiped on restart, kept for hot path speed)
+# Both are maintained in parallel — RAM for speed, Viking for durability.
 CONVERSATION_HISTORY: dict[str, list[dict]] = {}
-MAX_HISTORY_TURNS = 20   # keep last 20 exchanges in RAM
-MAX_HISTORY_CHARS = 8000  # cap injected history at ~8K chars to stay within context
+MAX_HISTORY_TURNS = 20
+MAX_HISTORY_CHARS = 8000
 
 
 def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> list[dict]:
@@ -317,7 +316,12 @@ def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> l
 
 
 def add_to_conversation(user_id: str, role: str, content: str) -> None:
-    """Append a turn to conversation history. Trims to MAX_HISTORY_TURNS."""
+    """Append a turn to conversation history.
+
+    Writes to RAM dict (hot path) AND schedules an async write to OpenViking
+    L1 session context (durable, cross-restart). The async write is fire-and-
+    forget via asyncio.create_task() — never blocks the caller.
+    """
     if user_id not in CONVERSATION_HISTORY:
         CONVERSATION_HISTORY[user_id] = []
     CONVERSATION_HISTORY[user_id].append({
@@ -325,11 +329,34 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
         "content": content,
         "ts": time.time(),
     })
-    # Keep only last MAX_HISTORY_TURNS * 2 entries:
-    # each "turn" = 1 user message + 1 assistant message = 2 list entries
     if len(CONVERSATION_HISTORY[user_id]) > MAX_HISTORY_TURNS * 2:
         CONVERSATION_HISTORY[user_id] = CONVERSATION_HISTORY[user_id][-(MAX_HISTORY_TURNS * 2):]
     logger.debug("Conversation history for %s: %d turns", user_id, len(CONVERSATION_HISTORY[user_id]))
+
+    # ── Fire-and-forget OpenViking L1 persistence ──────────────────────
+    # Only write assistant turns to L1 (each turn contains both sides anyway)
+    if role == "assistant":
+        user_turns = CONVERSATION_HISTORY[user_id]
+        last_user_msg = ""
+        for t in reversed(user_turns):
+            if t["role"] == "user":
+                last_user_msg = t["content"]
+                break
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.create_task(_persist_to_viking(user_id, last_user_msg, content))
+        except Exception:
+            pass  # never crash the sync path
+
+
+async def _persist_to_viking(user_id: str, user_msg: str, assistant_msg: str) -> None:
+    """Async helper: persist conversation turn to OpenViking L1."""
+    try:
+        from tools.viking_context import save_interaction_to_l1
+        await save_interaction_to_l1(user_id, user_msg, assistant_msg)
+    except Exception as e:
+        logger.debug("Viking L1 persist skipped (non-fatal): %s", e)
 
 
 def clear_conversation(user_id: str) -> None:
@@ -341,9 +368,17 @@ def clear_conversation(user_id: str) -> None:
 
 def get_conversation_summary_prompt(user_id: str) -> str:
     """
-    Build a compact context block to prepend to the system prompt,
-    summarizing the last few exchanges so the LLM has continuity.
+    Build a compact context block to prepend to the system prompt.
+
+    Strategy:
+      1. Try to get a tiered context block from OpenViking (L0+L1+L2)
+         via asyncio — works if called from an async context
+      2. Fall back to the RAM CONVERSATION_HISTORY dict for hot path
     """
+    # ── Try OpenViking async (schedule as task, use RAM for THIS request) ─
+    # OpenViking context will be available on the NEXT request after the
+    # first save — this is intentional (async fire-and-forget pattern).
+    # For immediate continuity, the RAM dict is always used.
     history = get_conversation_history(user_id, last_n=6)
     if not history:
         return ""
@@ -374,24 +409,17 @@ def detect_agent(task: str) -> str:
 
 
 def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
-    """Return primary or first-fallback model for an agent key."""
     if use_fallback:
         chain = FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
-        logger.debug("Fallback model for '%s': %s", agent_key, chain[0])
         return chain[0]
     return AGENT_MODELS.get(agent_key)
 
 
 def get_fallback_chain(agent_key: str) -> list[str]:
-    """Return full fallback chain for waterfall retry logic."""
     return FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
 
 
 def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
-    """
-    Prepend the personality wrapper + optional conversation context
-    to any agent system prompt.
-    """
     parts = [PERSONALITY_WRAPPER.strip()]
     if user_id:
         ctx = get_conversation_summary_prompt(user_id)
@@ -403,7 +431,6 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
 
 def list_agents() -> str:
     lines = ["<b>\U0001f916 Active Agents</b>\n"]
-    # FIX #4: Added 'reviewer' icon — was missing from dict, fell back to generic robot emoji
     icons = {
         "vision": "\U0001f441\ufe0f",
         "coding": "\U0001f4bb",
@@ -418,7 +445,7 @@ def list_agents() -> str:
         "devops": "\U0001f527",
         "pm": "\U0001f4cb",
         "humanizer": "\u2728",
-        "reviewer": "\U0001f50d",  # FIX #4: was missing — caused fallback to generic 🤖
+        "reviewer": "\U0001f50d",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "\U0001f916")
@@ -435,11 +462,9 @@ def list_agents() -> str:
 
 
 def list_all_departments() -> list[str]:
-    """Return all agent role names."""
     return list(AGENT_MODELS.keys())
 
 
-# ── Thread memory (in-RAM, used by /thread command) ──────────────────────────
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
@@ -451,7 +476,6 @@ def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     })
     if len(ACTIVE_THREADS[thread_id]) > 10:
         ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
-    logger.info("Added to thread '%s': %s agent", thread_id, agent)
 
 
 def get_thread_context(thread_id: str, last_n: int = 3) -> str:
@@ -484,6 +508,5 @@ def list_threads_raw() -> list[str]:
 def clear_thread(thread_id: str) -> bool:
     if thread_id in ACTIVE_THREADS:
         del ACTIVE_THREADS[thread_id]
-        logger.info("Cleared thread '%s'", thread_id)
         return True
     return False

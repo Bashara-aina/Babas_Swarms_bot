@@ -1,100 +1,96 @@
-"""System handlers: /start /stats /keys /models /git /maintenance /gpu /thread /threads /metrics."""
+"""System info handlers: /status /gpu /keys /models /resources."""
 from __future__ import annotations
 
 import asyncio
+import html as html_mod
+import platform
 import time
 
 from aiogram import F, Router
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command
 from aiogram.types import Message
 
-import computer_agent
-import router as agents
-from llm_client import run_shell_command, verify_api_keys
 from .shared import (
-    _key_status,
-    _keep_typing,
     _start_time,
+    _key_status,
     is_allowed,
-    main_keyboard,
     send_chunked,
-    _user_thread,
 )
-import handlers.shared as _shared
 
 router = Router()
 
 
-# ── /start ────────────────────────────────────────────────────────────────────
-@router.message(CommandStart())
-async def cmd_start(msg: Message) -> None:
+# ── /status ───────────────────────────────────────────────────────────────────
+@router.message(Command("status"))
+@router.message(F.text == "\u2699\ufe0f Status")
+async def cmd_status(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status = verify_api_keys()
-    active = sum(1 for v in status.values() if v)
-    uptime = int(time.time() - _start_time)
-    h, m = uptime // 3600, (uptime % 3600) // 60
+    uptime_s  = int(time.time() - _start_time)
+    h, rem    = divmod(uptime_s, 3600)
+    m, s      = divmod(rem, 60)
+    uptime    = f"{h}h {m}m {s}s"
+    py_ver    = platform.python_version()
+    os_info   = f"{platform.system()} {platform.release()}"
+
+    key_block = _key_status()
+
+    try:
+        from tools.resource_monitor import get_resource_snapshot
+        snap = await get_resource_snapshot()
+        local_line = (
+            "\U0001f916 Ollama: \u2705 ready"
+            if snap.local_allowed
+            else f"\U0001f916 Ollama: \u26a0\ufe0f bypassed ({snap.block_reason[:60]})"
+        )
+        ram_line = f"\U0001f9e0 RAM free: {snap.ram_free_gb:.1f}GB"
+        gpu_line = (
+            f"\U0001f3ae VRAM free: {snap.vram_free_gb:.1f}GB"
+            if snap.vram_free_gb is not None
+            else "\U0001f3ae GPU: not detected"
+        )
+        resource_block = f"\n{ram_line}\n{gpu_line}\n{local_line}"
+    except Exception:
+        resource_block = ""
 
     text = (
-        f"yo Bas — Legion v4 up — {h}h {m}m | {active}/6 keys\n\n"
-        "<b>computer control</b>\n"
-        "  <code>/do</code> <code>/screen</code> <code>/open</code> <code>/click</code> <code>/type</code> <code>/key</code> <code>/cmd</code>\n\n"
-        "<b>AI agents</b>\n"
-        "  <code>/run</code>  <code>/think</code>  <code>/swarm</code>  <code>/agent</code>\n\n"
-        "<b>research</b>\n"
-        "  <code>/paper</code>  <code>/ask_paper</code>  <code>/workernet_papers</code>\n"
-        "  <code>/scrape</code>  <code>/research</code>\n\n"
-        "<b>second brain</b>\n"
-        "  <code>/remember</code>  <code>/recall</code>  <code>/memories</code>  <code>/briefing</code>\n\n"
-        "<b>dev tools</b>\n"
-        "  <code>/scaffold</code>  <code>/build</code>  <code>/gpu</code>  <code>/vuln_scan</code>\n\n"
-        "<b>tasks</b>\n"
-        "  <code>/task_from</code>  <code>/tasks_due</code>  <code>/task_done</code>\n\n"
-        "<b>content</b>\n"
-        "  <code>/post</code>  <code>/brand_check</code>  <code>/delegate</code>\n\n"
-        "<b>orchestration</b>\n"
-        "  <code>/orchestrate</code>  <code>/multi_execute</code>  <code>/multi_plan</code>\n"
-        "  <code>/loop</code>  <code>/loop_stop</code>\n\n"
-        "<b>enterprise</b>\n"
-        "  <code>/budget</code>  <code>/routing_stats</code>  <code>/audit_summary</code>  <code>/security_stats</code>\n\n"
-        "<b>system</b>\n"
-        "  <code>/stats</code>  <code>/git</code>  <code>/models</code>  <code>/keys</code>  <code>/maintenance</code>\n\n"
-        "or just type naturally — i'll figure it out."
+        f"<b>\U0001f916 Legion Status</b>\n\n"
+        f"\u23f1 uptime: <code>{uptime}</code>\n"
+        f"\U0001f40d Python: <code>{py_ver}</code>\n"
+        f"\U0001f4bb OS: <code>{os_info}</code>\n"
+        f"{resource_block}\n\n"
+        f"{key_block}"
     )
-    await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
+    await msg.answer(text, parse_mode="HTML")
 
 
-# ── /stats ────────────────────────────────────────────────────────────────────
-@router.message(Command("stats"))
-async def cmd_stats(msg: Message) -> None:
+# ── /gpu ──────────────────────────────────────────────────────────────────────
+@router.message(Command("gpu"))
+async def cmd_gpu(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status_msg = await msg.answer("pulling stats…")
-    cpu, mem, gpu, disk, display = await asyncio.gather(
-        run_shell_command("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'", timeout=5),
-        run_shell_command("free -h | grep Mem", timeout=5),
-        run_shell_command(
-            "nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu"
-            " --format=csv,noheader,nounits 2>/dev/null || echo 'No GPU'",
-            timeout=5,
-        ),
-        run_shell_command("df -h / | tail -1", timeout=5),
-        computer_agent.detect_display(),
-    )
-    uptime = int(time.time() - _start_time)
-    text = (
-        f"<b>📊 system</b>\n\n"
-        f"⏱ bot up: {uptime // 3600}h {(uptime % 3600) // 60}m\n"
-        f"🖥 cpu: <code>{cpu.strip()}%</code>\n"
-        f"🖥 display: <code>{display}</code>\n"
-        f"💾 mem:\n<pre>{mem.strip()}</pre>\n"
-        f"🎮 gpu:\n<pre>{gpu.strip()}</pre>\n"
-        f"💿 disk:\n<pre>{disk.strip()}</pre>"
-    )
-    await status_msg.edit_text(text, parse_mode="HTML")
+    status_msg = await msg.answer("\U0001f3ae checking GPU\u2026")
+    try:
+        from tools.resource_monitor import get_resource_snapshot, format_resource_html
+        snap = await get_resource_snapshot(force=True)
+        await status_msg.edit_text(format_resource_html(snap), parse_mode="HTML")
+    except Exception as e:
+        # Fallback to raw nvidia-smi
+        try:
+            from llm_client import run_shell_command
+            out = await run_shell_command("nvidia-smi", timeout=10)
+            await status_msg.edit_text(
+                f"<pre>{html_mod.escape(out[:3000])}</pre>",
+                parse_mode="HTML",
+            )
+        except Exception as e2:
+            await status_msg.edit_text(
+                f"GPU info unavailable: <code>{html_mod.escape(str(e2))}</code>",
+                parse_mode="HTML",
+            )
 
 
-# ── /keys ─────────────────────────────────────────────────────────────────────
+# ── /keys ──────────────────────────────────────────────────────────────────────
 @router.message(Command("keys"))
 async def cmd_keys(msg: Message) -> None:
     if not is_allowed(msg):
@@ -102,106 +98,31 @@ async def cmd_keys(msg: Message) -> None:
     await msg.answer(_key_status(), parse_mode="HTML")
 
 
-# ── /models ───────────────────────────────────────────────────────────────────
+# ── /models ────────────────────────────────────────────────────────────────────
 @router.message(Command("models"))
 async def cmd_models(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    await msg.answer(
-        f"{agents.list_agents()}\n\n{_key_status()}",
-        parse_mode="HTML",
-    )
+    import router as agents
+    await msg.answer(agents.list_agents(), parse_mode="HTML")
 
 
-# ── /git ──────────────────────────────────────────────────────────────────────
-@router.message(Command("git"))
-async def cmd_git(msg: Message) -> None:
+# ── /resources — live RAM + GPU + local model policy ──────────────────────────
+@router.message(Command("resources"))
+async def cmd_resources(msg: Message) -> None:
+    """Show live RAM, GPU VRAM, and whether local Ollama is currently allowed."""
     if not is_allowed(msg):
         return
-    output = await run_shell_command(
-        "cd ~/swarm-bot && git status --short && echo '---' && git log --oneline -5",
-        timeout=10,
-    )
-    await msg.answer(f"<b>📁 git</b>\n\n<pre>{output}</pre>", parse_mode="HTML")
-
-
-# ── /thread / /threads ────────────────────────────────────────────────────────
-@router.message(Command("thread"))
-async def cmd_thread(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    name = (msg.text or "").removeprefix("/thread").strip()
-    if not name:
-        current = _user_thread.get(msg.from_user.id, "none")
-        await msg.answer(
-            f"current thread: <b>{current}</b>\nuse: <code>/thread &lt;name&gt;</code>",
-            parse_mode="HTML",
-        )
-        return
-    _user_thread[msg.from_user.id] = name
-    await msg.answer(f"📌 thread: <b>{name}</b>", parse_mode="HTML")
-
-
-@router.message(Command("threads"))
-async def cmd_threads(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    await msg.answer(agents.list_threads(), parse_mode="HTML")
-
-
-# ── /maintenance — full system health check ───────────────────────────────────
-@router.message(Command("maintenance"))
-async def cmd_maintenance(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-
-    status_msg = await msg.answer("🏥 running full system health check…")
-    typing_task = asyncio.create_task(_keep_typing(msg))
-
+    status_msg = await msg.answer("\U0001f4ca reading system resources\u2026")
     try:
-        from tools.system_maintenance import full_maintenance_check
-        result = await full_maintenance_check()
-        typing_task.cancel()
-        await status_msg.delete()
-        await send_chunked(msg, result, model_used="maintenance")
+        from tools.resource_monitor import get_resource_snapshot, format_resource_html
+        # force=True to bypass cache and get a fresh reading
+        snap = await get_resource_snapshot(force=True)
+        await status_msg.edit_text(format_resource_html(snap), parse_mode="HTML")
     except Exception as e:
-        typing_task.cancel()
         await status_msg.edit_text(
-            f"maintenance check failed: <code>{e}</code>",
+            f"\u274c resource monitor error:\n<code>{html_mod.escape(str(e)[:400])}</code>\n\n"
+            "Make sure <code>psutil</code> is installed: "
+            "<code>pip install psutil pynvml</code>",
             parse_mode="HTML",
         )
-
-
-# ── /gpu — enhanced GPU status ────────────────────────────────────────────────
-@router.message(Command("gpu"))
-async def cmd_gpu(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    try:
-        from tools.devops import check_gpu_health
-        result = await check_gpu_health()
-        await msg.answer(result, parse_mode="HTML")
-    except Exception as e:
-        await msg.answer(f"GPU error: <code>{e}</code>", parse_mode="HTML")
-
-
-# ── /metrics — Performance dashboard ─────────────────────────────────────────
-@router.message(Command("metrics"))
-async def cmd_metrics(msg: Message) -> None:
-    """Show performance and cost metrics dashboard."""
-    if not is_allowed(msg):
-        return
-    if not _shared._cost_metrics:
-        await msg.answer("Cost metrics collector not initialized.")
-        return
-    text = _shared._cost_metrics.format_dashboard_html()
-    await msg.answer(text, parse_mode="HTML")
-
-
-# ── Keyboard button shortcuts ─────────────────────────────────────────────────
-@router.message(F.text == "⚙️ Status")
-async def kbd_status(msg: Message) -> None:
-    if is_allowed(msg):
-        await cmd_stats(msg)
-
-
