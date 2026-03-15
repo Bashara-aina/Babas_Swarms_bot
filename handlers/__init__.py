@@ -13,6 +13,7 @@ from handlers import (
     pm,
     research,
     sessions,
+    skills,
     system,
     tasks,
     voice,
@@ -33,6 +34,7 @@ _ROUTER_ORDER = [
     overnight_handler.router, # /overnight /dashboard /overnight_* (NEW)
     voice.router,             # F.voice + F.audio
     inline.router,            # inline_query
+    skills.router,            # /skills /skill /skill_reload  (NEW)
     ai.router,                # /run /think /agent /swarm /loop* + NL catch-all (LAST)
 ]
 

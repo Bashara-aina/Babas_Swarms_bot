@@ -29,15 +29,28 @@ import aiofiles
 import litellm
 from litellm import acompletion
 
-import computer_agent
-from computer_agent import TOOL_DEFINITIONS, execute_tool
+# FIX: guard computer_agent import so bot starts even without pyautogui/cv2
+try:
+    import computer_agent
+    from computer_agent import TOOL_DEFINITIONS, execute_tool
+    _COMPUTER_AVAILABLE = True
+except ImportError as _ca_err:
+    import logging as _log
+    _log.getLogger(__name__).warning(
+        "computer_agent unavailable (%s) — /do and computer tools disabled", _ca_err
+    )
+    computer_agent = None  # type: ignore
+    TOOL_DEFINITIONS = []
+    execute_tool = None  # type: ignore
+    _COMPUTER_AVAILABLE = False
+
 from router import detect_agent, get_fallback_chain, add_to_thread
 from core.hooks import get_hooks
 
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
 
-# ── Coworker persona ─────────────────────────────────────────────────────────
+# ── Coworker persona ─────────────────────────────────────────────────
 
 _PERSONA = (
     "You're Legion — Bas's AI coworker on his Linux workstation "
@@ -112,7 +125,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
     ),
 }
 
-# ── Rate limit tracking ──────────────────────────────────────────────────────
+# ── Rate limit tracking ─────────────────────────────────────────────
 _rate_limited: dict[str, float] = {}
 _COOLDOWN = 90  # fix #22: Groq free tier windows can be multi-minute; 60s was too short
 
@@ -187,7 +200,7 @@ def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
     return name, {}
 
 
-# ── Core model call ──────────────────────────────────────────────────────────
+# ── Core model call ───────────────────────────────────────────────
 
 async def _call_model(
     model: str,
@@ -243,7 +256,7 @@ async def _call_model(
     return await acompletion(**kwargs)
 
 
-# ── Context compaction ───────────────────────────────────────────────────────
+# ── Context compaction ───────────────────────────────────────────────
 
 def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
     """Summarize older messages to reduce context size."""
@@ -283,7 +296,7 @@ def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
     return [system, compact_msg] + recent
 
 
-# ── Agentic tool-calling loop ─────────────────────────────────────────────────
+# ── Agentic tool-calling loop ─────────────────────────────────────────────
 
 ProgressCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
 PhotoCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
@@ -295,8 +308,16 @@ async def _agent_loop_inner(
     photo_cb: PhotoCb = None,
     max_iterations: int = 20,
     thread_id: Optional[str] = None,
+    user_id: Optional[int] = None,
 ) -> tuple[str, str]:
     """Inner agent loop body — called by agent_loop() under asyncio.wait_for()."""
+    if not _COMPUTER_AVAILABLE:
+        return (
+            "\u26a0\ufe0f Computer tools are unavailable (pyautogui/cv2 not installed). "
+            "Install dependencies or use /run for LLM-only tasks.",
+            "unavailable",
+        )
+
     full_chain = get_fallback_chain("computer")
     chain = [m for m in full_chain if not _is_rate_limited(m)]
     if not chain:
@@ -317,6 +338,17 @@ async def _agent_loop_inner(
         return False
 
     system = SYSTEM_PROMPTS["computer"]
+
+    # FIX: inject conversation history into agent_loop (was missing, context lost between /do calls)
+    if user_id:
+        try:
+            from router import get_conversation_summary_prompt
+            ctx = get_conversation_summary_prompt(str(user_id))
+            if ctx:
+                system += "\n\n" + ctx
+        except Exception:
+            pass
+
     messages: list[dict] = [
         {"role": "system", "content": system},
         {"role": "user", "content": task},
@@ -432,6 +464,14 @@ async def _agent_loop_inner(
             result_text = clean or answer
             if thread_id:
                 add_to_thread(thread_id, "computer", task, result_text)
+            # FIX: persist agent_loop result to conversation history
+            if user_id:
+                try:
+                    from router import add_to_conversation
+                    add_to_conversation(str(user_id), "user", task)
+                    add_to_conversation(str(user_id), "assistant", result_text)
+                except Exception:
+                    pass
             return result_text, model
 
         messages.append({
@@ -515,6 +555,7 @@ async def agent_loop(
     photo_cb: PhotoCb = None,
     max_iterations: int = 20,
     thread_id: Optional[str] = None,
+    user_id: Optional[int] = None,
 ) -> tuple[str, str]:
     """Agentic loop with 300s wall-clock timeout."""
     try:
@@ -525,6 +566,7 @@ async def agent_loop(
                 photo_cb=photo_cb,
                 max_iterations=max_iterations,
                 thread_id=thread_id,
+                user_id=user_id,
             ),
             timeout=300.0,
         )
@@ -606,7 +648,7 @@ def _tool_label(name: str, args: dict) -> str:
     return fn(args) if fn else f"\U0001f527 {name}()"
 
 
-# ── Single-turn chat (existing behavior) ─────────────────────────────────────
+# ── Single-turn chat (existing behavior) ───────────────────────────────────
 
 async def chat(
     task: str,
@@ -614,24 +656,18 @@ async def chat(
     thread_id: Optional[str] = None,
     image_b64: Optional[str] = None,
     show_thinking: bool = False,
-    user_id: Optional[str] = None,          # fix: was missing — caused TypeError in shared.py
+    user_id: Optional[str] = None,
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
 
     Returns (response_text, model_used)
-
-    fix: added user_id param — shared._execute_chat() always passes it;
-         without this the call raised TypeError on every single message.
-
-    Resource-aware: for vision agent, checks RAM+VRAM via resource_monitor
-    before allowing Ollama. Skips local model automatically if constrained.
     """
     if agent_key is None:
         agent_key = detect_agent(task)
 
     chain = get_fallback_chain(agent_key)
 
-    # ── Resource-aware Ollama gating ──────────────────────────────────────────
+    # ── Resource-aware Ollama gating ──────────────────────────────────────
     _local_skip_reason = ""
     if agent_key == "vision":
         if image_b64 is None:
@@ -657,7 +693,7 @@ async def chat(
             "Using cloud vision instead.]"
         )
 
-    # ── Inject conversation history for continuity ─────────────────────────────
+    # ── Inject conversation history ──────────────────────────────────────────────
     if user_id:
         try:
             from router import get_conversation_summary_prompt
@@ -667,6 +703,18 @@ async def chat(
         except Exception:
             pass
 
+    # ── RecallMax: inject relevant memories ──────────────────────────────────────
+    if user_id:
+        try:
+            from tools.memory import search_memories
+            from tools.recallmax import build_memory_context
+            memories = await search_memories(user_id=int(user_id), query=task, limit=6)
+            mem_ctx = build_memory_context(memories, query=task)
+            if mem_ctx:
+                system_prompt = mem_ctx + "\n" + system_prompt
+        except Exception as _mem_err:
+            logger.debug("recallmax memory injection failed: %s", _mem_err)
+
     try:
         from tools.persistence import get_instinct_context
         instinct_block = await get_instinct_context(max_tokens=300)
@@ -675,9 +723,10 @@ async def chat(
     except Exception:
         pass
 
+    # ── Skill injection (budget raised to 6000 chars) ──────────────────────────
     try:
         from tools.skill_loader import get_skills_for_agent
-        skills_block = get_skills_for_agent(agent_key, max_chars=2000)
+        skills_block = get_skills_for_agent(agent_key, max_chars=6000)
         if skills_block:
             system_prompt += "\n\n" + skills_block
     except Exception:
@@ -761,12 +810,24 @@ async def chat(
             if thread_id:
                 add_to_thread(thread_id, agent_key, task, result)
 
-            # fix: update conversation history when user_id provided
             if user_id:
                 try:
                     from router import add_to_conversation
                     add_to_conversation(user_id, "user", task)
                     add_to_conversation(user_id, "assistant", result)
+                except Exception:
+                    pass
+
+                # RecallMax: store turn if worth persisting
+                try:
+                    from tools.recallmax import should_store
+                    from tools.memory import store_memory
+                    if should_store(task):
+                        await store_memory(
+                            user_id=int(user_id),
+                            content=task,
+                            source="chat",
+                        )
                 except Exception:
                     pass
 
@@ -806,8 +867,12 @@ async def chat(
     )
 
 
-# ── Screenshot utilities ──────────────────────────────────────────────────────
-take_screenshot = computer_agent.take_screenshot
+# ── Screenshot utilities ──────────────────────────────────────────────────
+if _COMPUTER_AVAILABLE:
+    take_screenshot = computer_agent.take_screenshot
+else:
+    async def take_screenshot() -> str:  # type: ignore
+        return ""
 
 
 async def analyze_screenshot(
@@ -907,14 +972,16 @@ async def analyze_screenshot(
         )
 
 
-# ── Shell execution ───────────────────────────────────────────────────────────
+# ── Shell execution ──────────────────────────────────────────────────────
 
 async def run_shell_command(cmd: str, timeout: int = 30) -> str:
     """Alias for computer_agent.run_shell used by main.py."""
+    if not _COMPUTER_AVAILABLE:
+        return "computer_agent not available"
     return await computer_agent.run_shell(cmd, timeout=timeout)
 
 
-# ── Output utilities ──────────────────────────────────────────────────────────
+# ── Output utilities ──────────────────────────────────────────────────────
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
     """Split text into Telegram-safe chunks (4096 char limit)."""
