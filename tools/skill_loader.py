@@ -1,16 +1,15 @@
 """tools/skill_loader.py — Load and inject domain knowledge into agent prompts.
 
 Skills are markdown files in the skills/ directory. Each skill teaches the agent
-a specific behaviour (security review, debugging, cost optimisation, etc.).
+a specific behaviour (security review, debugging, cost optimisation, E2E testing, etc.).
 
 Agent → skill mappings are defined in _AGENT_SKILLS. Skills are loaded once
-and cached in memory. The budget (max_chars) prevents context bloat.
+and cached in memory with mtime-based live-reload support.
 """
 
 from __future__ import annotations
 
 import logging
-import time
 from pathlib import Path
 from typing import List
 
@@ -28,24 +27,28 @@ _AGENT_SKILLS: dict[str, list[str]] = {
         "debugging-strategies",
         "tool-use-guardian",
         "api-cost-optimizer",
+        "supabase-engineer",
     ],
     "debug":      [
         "debugging-strategies",
         "python-patterns",
         "security-auditor",
         "tool-use-guardian",
+        "supabase-engineer",
     ],
     "architect":  [
         "brainstorming",
         "python-patterns",
         "security-auditor",
         "rag-engineer",
+        "supabase-engineer",
     ],
     "analyst":    [
         "brainstorming",
         "rag-engineer",
         "prompt-engineer",
         "python-patterns",
+        "supabase-engineer",
     ],
     "researcher": [
         "rag-engineer",
@@ -57,17 +60,21 @@ _AGENT_SKILLS: dict[str, list[str]] = {
         "python-patterns",
         "testing-patterns",
         "debugging-strategies",
+        "e2e-tester",
     ],
     "devops":     [
         "security-auditor",
         "tool-use-guardian",
         "api-cost-optimizer",
+        "supabase-engineer",
+        "e2e-tester",
     ],
     "general":    [
         "brainstorming",
         "prompt-engineer",
         "api-cost-optimizer",
         "recallmax",
+        "supabase-engineer",
     ],
     "pm":         [
         "brainstorming",
@@ -76,6 +83,17 @@ _AGENT_SKILLS: dict[str, list[str]] = {
     "marketer":   [
         "brainstorming",
         "prompt-engineer",
+    ],
+    "e2e":        [
+        "e2e-tester",
+        "supabase-engineer",
+        "debugging-strategies",
+        "security-auditor",
+    ],
+    "database":   [
+        "supabase-engineer",
+        "security-auditor",
+        "debugging-strategies",
     ],
 }
 
@@ -86,9 +104,12 @@ _cache: dict[str, tuple[str, float]] = {}
 def _load_skill(name: str) -> str:
     """Load a skill file, using mtime-based cache invalidation for live-reload."""
     # Support both flat (skills/name.md) and nested (skills/name/SKILL.md)
+    # Also support underscore variants (python_patterns vs python-patterns)
     candidates = [
         SKILLS_DIR / f"{name}.md",
         SKILLS_DIR / name / "SKILL.md",
+        SKILLS_DIR / f"{name.replace('-', '_')}.md",
+        SKILLS_DIR / f"{name.replace('_', '-')}.md",
     ]
     path: Path | None = None
     for c in candidates:
@@ -96,7 +117,7 @@ def _load_skill(name: str) -> str:
             path = c
             break
     if path is None:
-        logger.debug("Skill not found: %s (tried %s)", name, candidates)
+        logger.debug("Skill not found: %s (tried %s)", name, [str(c) for c in candidates])
         return ""
 
     try:
@@ -116,7 +137,6 @@ def _load_skill(name: str) -> str:
 def get_skills_for_agent(agent_key: str, max_chars: int = 6000) -> str:
     """Return concatenated skill text for an agent, capped at max_chars.
 
-    Budget raised to 6000 chars (was 2000) to accommodate richer skill content.
     Returns empty string if no skills mapped or files missing.
     """
     skill_names = _AGENT_SKILLS.get(agent_key, [])
@@ -132,7 +152,7 @@ def get_skills_for_agent(agent_key: str, max_chars: int = 6000) -> str:
         if used + len(content) > max_chars:
             remaining = max_chars - used
             if remaining > 300:
-                parts.append(content[:remaining] + "\n…(truncated)")
+                parts.append(content[:remaining] + "\n\u2026(truncated)")
             break
         parts.append(content)
         used += len(content)

@@ -7,6 +7,7 @@ from handlers import (
     brain,
     computer,
     dev,
+    e2e,
     enterprise,
     inline,
     overnight_handler,
@@ -34,7 +35,8 @@ _ROUTER_ORDER = [
     overnight_handler.router, # /overnight /dashboard /overnight_* (NEW)
     voice.router,             # F.voice + F.audio
     inline.router,            # inline_query
-    skills.router,            # /skills /skill /skill_reload  (NEW)
+    skills.router,            # /skills /skill /skill_reload
+    e2e.router,               # /e2etest /e2eplan /dbquery /dbhealth /dbtables  (NEW)
     ai.router,                # /run /think /agent /swarm /loop* + NL catch-all (LAST)
 ]
 
