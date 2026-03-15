@@ -1,19 +1,22 @@
 """handlers/e2e.py — End-to-end testing and Supabase query commands.
 
 Commands:
-  /e2etest <url>        — AI-guided Playwright E2E test run against a URL
-  /e2eplan <url>        — Generate a test plan without running (dry-run)
-  /dbquery <query>      — Natural-language or raw SQL query against Supabase
-  /dbhealth             — Check Supabase project connectivity + latency
-  /dbtables             — List all public tables in the Supabase project
+  /e2etest <url>   — AI-guided Playwright E2E test runner (generates + runs + reports)
+  /e2eplan <url>   — Generate a test plan without running (dry-run)
+  /dbquery <query> — Natural-language Supabase query via LLM
+  /dbhealth        — Check Supabase project connectivity + latency
+  /dbtables        — List all public tables in the Supabase project
 """
 from __future__ import annotations
 
+import asyncio
 import html as html_mod
 import json
 import os
+import re
 import textwrap
 from pathlib import Path
+from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -24,6 +27,37 @@ from handlers.shared import is_allowed, send_chunked
 router = Router()
 
 _E2E_WORK_DIR = Path("/tmp/legion_e2e")
+
+
+# =========================================================================== #
+# Helpers (defined at top so all functions can use them)
+# =========================================================================== #
+
+def _extract_code_block(text: str) -> str:
+    """Extract content from first ```...``` block."""
+    m = re.search(r"```(?:typescript|ts|javascript|js|python)?\n([\s\S]*?)```", text)
+    if m:
+        return m.group(1).strip()
+    return ""
+
+
+async def _run_shell(cmd: str, timeout: int = 60) -> str:
+    """Run a shell command asynchronously, return stdout+stderr combined."""
+    try:
+        proc = await asyncio.wait_for(
+            asyncio.create_subprocess_shell(
+                cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
+            ),
+            timeout=5,  # process creation timeout
+        )
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+        return (stdout or b"").decode(errors="replace")
+    except asyncio.TimeoutError:
+        return f"[TIMEOUT after {timeout}s]"
+    except Exception as e:
+        return f"[shell error: {e}]"
 
 
 # =========================================================================== #
@@ -54,10 +88,12 @@ async def cmd_e2etest(msg: Message) -> None:
         parse_mode="HTML",
     )
 
+    user_id = str(msg.from_user.id) if msg.from_user else "0"
+
     try:
         from llm_client import chat
 
-        # Step 1: Generate test plan
+        # Step 1: Generate test code
         plan_prompt = textwrap.dedent(f"""\
             You are a senior QA engineer. Analyse the website at: {url}
 
@@ -77,12 +113,13 @@ async def cmd_e2etest(msg: Message) -> None:
             No explanation before or after the code block.
         """)
 
-        plan_response, plan_model = await chat(plan_prompt, agent_key="reviewer")
+        plan_response, plan_model = await chat(
+            plan_prompt,
+            agent_key="reviewer",
+            user_id=user_id,
+        )
 
-        # Extract code block
-        test_code = _extract_code_block(plan_response)
-        if not test_code:
-            test_code = plan_response  # fallback: use raw response
+        test_code = _extract_code_block(plan_response) or plan_response
 
         await status_msg.edit_text(
             f"\U0001f9ea E2E test for <code>{html_mod.escape(url)}</code>\n"
@@ -125,36 +162,31 @@ async def cmd_e2etest(msg: Message) -> None:
             parse_mode="HTML",
         )
 
-        # Step 3: Run tests via computer_agent shell
-        try:
-            from llm_client import run_shell_command
-            # Check/install playwright
-            check = await run_shell_command(
-                "which npx && npx playwright --version 2>&1 || echo 'NOT_INSTALLED'"
-            )
-            if "NOT_INSTALLED" in check or "not found" in check:
-                install_out = await run_shell_command(
-                    "npm install -g playwright @playwright/test 2>&1 | tail -5"
-                )
-                await status_msg.edit_text(
-                    f"\U0001f9ea E2E test — installed Playwright:\n<pre>{html_mod.escape(install_out[:400])}</pre>\n"
-                    "Running tests\u2026",
-                    parse_mode="HTML",
-                )
-                await run_shell_command(
-                    "npx playwright install --with-deps chromium 2>&1 | tail -3"
-                )
-
-            run_out = await run_shell_command(
-                f"cd {_E2E_WORK_DIR} && npx playwright test generated.spec.ts "
-                f"--config playwright.config.ts 2>&1 | tail -40",
+        # Step 3: Check/install Playwright, then run
+        check_out = await _run_shell("which npx 2>&1 && npx playwright --version 2>&1", timeout=10)
+        if "not found" in check_out.lower() or "error" in check_out.lower():
+            install_out = await _run_shell(
+                "npm install -g @playwright/test 2>&1 | tail -5",
                 timeout=120,
             )
+            await status_msg.edit_text(
+                f"\U0001f9ea Installing Playwright:\n"
+                f"<pre>{html_mod.escape(install_out[:300])}</pre>\n"
+                "Running tests\u2026",
+                parse_mode="HTML",
+            )
+            await _run_shell(
+                "npx playwright install --with-deps chromium 2>&1 | tail -5",
+                timeout=180,
+            )
 
-        except Exception as shell_err:
-            run_out = f"Shell execution failed: {shell_err}\n(Is computer_agent available?)"
+        run_out = await _run_shell(
+            f"cd {_E2E_WORK_DIR} && npx playwright test generated.spec.ts "
+            f"--config playwright.config.ts 2>&1 | tail -40",
+            timeout=120,
+        )
 
-        # Step 4: Parse results and summarise
+        # Step 4: Summarise results
         await status_msg.edit_text(
             f"\U0001f9ea E2E test for <code>{html_mod.escape(url)}</code>\n"
             "Step 4/4: Analysing results\u2026",
@@ -180,25 +212,39 @@ async def cmd_e2etest(msg: Message) -> None:
             (PASS / FAIL / PARTIAL + one-line recommendation)
         """)
 
-        summary, _ = await chat(summary_prompt, agent_key="analyst")
+        summary, _ = await chat(summary_prompt, agent_key="analyst", user_id=user_id)
 
-        # Send test code + summary
-        code_snippet = test_code[:1500] + ("\n...(truncated)" if len(test_code) > 1500 else "")
+        code_snippet = test_code[:1500] + ("\n\u2026(truncated)" if len(test_code) > 1500 else "")
         final = (
             f"<b>\U0001f9ea E2E Test Complete — {html_mod.escape(url)}</b>\n\n"
             f"{html_mod.escape(summary)}\n\n"
             f"<b>Generated Test File:</b>\n"
             f"<pre>{html_mod.escape(code_snippet)}</pre>"
         )
-        await status_msg.delete()
+
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
         await send_chunked(msg, final)
 
     except Exception as e:
-        await status_msg.edit_text(
-            f"\u274c E2E test failed: <code>{html_mod.escape(str(e)[:300])}</code>",
-            parse_mode="HTML",
-        )
+        try:
+            await status_msg.edit_text(
+                f"\u274c E2E test failed: <code>{html_mod.escape(str(e)[:300])}</code>",
+                parse_mode="HTML",
+            )
+        except Exception:
+            await msg.answer(
+                f"\u274c E2E test failed: <code>{html_mod.escape(str(e)[:300])}</code>",
+                parse_mode="HTML",
+            )
 
+
+# =========================================================================== #
+# /e2eplan
+# =========================================================================== #
 
 @router.message(Command("e2eplan"))
 async def cmd_e2eplan(msg: Message) -> None:
@@ -217,6 +263,7 @@ async def cmd_e2eplan(msg: Message) -> None:
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
+    user_id = str(msg.from_user.id) if msg.from_user else "0"
     wait = await msg.answer("\U0001f4cb Generating test plan\u2026", parse_mode="HTML")
     try:
         from llm_client import chat
@@ -226,11 +273,23 @@ async def cmd_e2eplan(msg: Message) -> None:
             "data requirements, and a skeleton test file. "
             "Format with clear markdown headers."
         )
-        result, model = await chat(prompt, agent_key="reviewer")
-        await wait.delete()
-        await send_chunked(msg, f"<b>\U0001f4cb E2E Plan — {html_mod.escape(url)}</b>\n\n{html_mod.escape(result)}")
+        result, model = await chat(prompt, agent_key="reviewer", user_id=user_id)
+        try:
+            await wait.delete()
+        except Exception:
+            pass
+        await send_chunked(
+            msg,
+            f"<b>\U0001f4cb E2E Plan — {html_mod.escape(url)}</b>\n\n{html_mod.escape(result)}",
+        )
     except Exception as e:
-        await wait.edit_text(f"\u274c {html_mod.escape(str(e)[:200])}")
+        try:
+            await wait.edit_text(
+                f"\u274c {html_mod.escape(str(e)[:200])}",
+                parse_mode="HTML",
+            )
+        except Exception:
+            pass
 
 
 # =========================================================================== #
@@ -255,30 +314,30 @@ async def cmd_dbquery(msg: Message) -> None:
         )
         return
 
-    try:
-        from tools.supabase_client import get_client, is_configured
-        if not is_configured():
-            await msg.answer(
-                "\u26a0\ufe0f Supabase is not configured.\n"
-                "Add these to your <code>.env</code>:\n"
-                "<pre>SUPABASE_URL=https://&lt;project&gt;.supabase.co\n"
-                "SUPABASE_ANON_KEY=&lt;your-anon-key&gt;\n"
-                "SUPABASE_SERVICE_ROLE_KEY=&lt;your-service-role-key&gt;</pre>",
-                parse_mode="HTML",
-            )
-            return
-    except Exception:
-        pass
+    from tools.supabase_client import is_configured
+    if not is_configured():
+        await msg.answer(
+            "\u26a0\ufe0f Supabase is not configured.\n"
+            "Add these to your <code>.env</code>:\n"
+            "<pre>SUPABASE_URL=https://&lt;project&gt;.supabase.co\n"
+            "SUPABASE_ANON_KEY=&lt;your-anon-key&gt;\n"
+            "SUPABASE_SERVICE_ROLE_KEY=&lt;your-service-role-key&gt;</pre>",
+            parse_mode="HTML",
+        )
+        return
 
     wait = await msg.answer("\U0001f5c4 Querying Supabase\u2026", parse_mode="HTML")
 
-    # Check if it's a raw structured query: table=X select=Y eq=Z
     if query_text.startswith("table="):
         result = await _raw_db_query(query_text)
     else:
-        result = await _nl_db_query(query_text)
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        result = await _nl_db_query(query_text, user_id)
 
-    await wait.delete()
+    try:
+        await wait.delete()
+    except Exception:
+        pass
     await send_chunked(msg, result)
 
 
@@ -291,7 +350,7 @@ async def _raw_db_query(query_text: str) -> str:
         parts = dict(p.split("=", 1) for p in query_text.split() if "=" in p)
         table = parts.get("table", "")
         if not table:
-            return "\u274c Missing table= parameter."
+            return "\u274c Missing <code>table=</code> parameter."
 
         select = parts.get("select", "*")
         limit = int(parts.get("limit", "20"))
@@ -314,25 +373,18 @@ async def _raw_db_query(query_text: str) -> str:
         return f"\u274c DB query error: <code>{html_mod.escape(str(e)[:300])}</code>"
 
 
-async def _nl_db_query(query_text: str) -> str:
+async def _nl_db_query(query_text: str, user_id: str = "0") -> str:
     """Use LLM to translate natural language to a Supabase query, then execute."""
     try:
         from llm_client import chat
         from tools.supabase_client import get_client
 
-        # Ask LLM to produce a structured query spec
         prompt = textwrap.dedent(f"""\
             Convert this natural language database request into a JSON Supabase query spec:
             Request: "{query_text}"
 
-            Output ONLY valid JSON in this exact format:
-            {{
-              "table": "table_name",
-              "select": "col1,col2,col3",
-              "eq": {{"col": "value"}},
-              "order": "created_at.desc",
-              "limit": 20
-            }}
+            Output ONLY valid JSON in this exact format (no markdown fences, no explanation):
+            {{"table": "table_name", "select": "col1,col2", "eq": {{}}, "order": "created_at.desc", "limit": 20}}
 
             Rules:
             - Use common Supabase table names (users, bookings, orders, profiles, etc.)
@@ -340,21 +392,26 @@ async def _nl_db_query(query_text: str) -> str:
             - eq={{}} if no filter needed
             - order="created_at.desc" for "latest/recent"
             - limit=10 for "few", limit=100 for "all"
-            - Output ONLY the JSON object, no explanation.
+            - Output ONLY the JSON object on a single line. No code blocks.
         """)
 
-        spec_str, _ = await chat(prompt, agent_key="analyst")
-        spec_str = _extract_code_block(spec_str) or spec_str.strip()
+        spec_str, _ = await chat(prompt, agent_key="analyst", user_id=user_id)
 
-        # Strip markdown json fences if present
-        spec_str = spec_str.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        # Strip any markdown fences the model adds despite instructions
+        spec_str = re.sub(r"^```[a-z]*\n?", "", spec_str.strip())
+        spec_str = re.sub(r"```$", "", spec_str.strip()).strip()
+
+        # Extract first JSON object if surrounded by prose
+        json_match = re.search(r"\{[\s\S]+\}", spec_str)
+        if json_match:
+            spec_str = json_match.group(0)
 
         try:
             spec = json.loads(spec_str)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as je:
             return (
-                f"\u26a0\ufe0f Could not parse query spec from LLM response.\n"
-                f"<pre>{html_mod.escape(spec_str[:500])}</pre>\n"
+                f"\u26a0\ufe0f Could not parse query spec (JSONDecodeError: {je})\n"
+                f"<pre>{html_mod.escape(spec_str[:400])}</pre>\n"
                 "Try: <code>/dbquery table=&lt;name&gt; select=* limit=10</code>"
             )
 
@@ -390,31 +447,32 @@ async def cmd_dbhealth(msg: Message) -> None:
     if not is_allowed(msg):
         return
 
-    try:
-        from tools.supabase_client import get_client, is_configured
-        if not is_configured():
-            await msg.answer(
-                "\u26a0\ufe0f Supabase not configured. Set SUPABASE_URL + SUPABASE_ANON_KEY in .env",
-                parse_mode="HTML",
-            )
-            return
+    from tools.supabase_client import is_configured
+    if not is_configured():
+        await msg.answer(
+            "\u26a0\ufe0f Supabase not configured. Set SUPABASE_URL + SUPABASE_ANON_KEY in .env",
+            parse_mode="HTML",
+        )
+        return
 
+    try:
+        from tools.supabase_client import get_client
         db = get_client()
         health = await db.health_check()
-        url = os.getenv("SUPABASE_URL", "?")
+        url_str = os.getenv("SUPABASE_URL", "?")
         svc_set = bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
 
         if health["ok"]:
             icon = "\u2705"
-            status = f"Online ({health['latency_ms']}ms)"
+            status_str = f"Online ({health['latency_ms']}ms)"
         else:
             icon = "\u274c"
-            status = health.get("error") or f"HTTP {health.get('status_code')}"
+            status_str = health.get("error") or f"HTTP {health.get('status_code')}"
 
         await msg.answer(
             f"{icon} <b>Supabase Health</b>\n"
-            f"URL: <code>{html_mod.escape(url)}</code>\n"
-            f"Status: <b>{status}</b>\n"
+            f"URL: <code>{html_mod.escape(url_str)}</code>\n"
+            f"Status: <b>{html_mod.escape(str(status_str))}</b>\n"
             f"Service Role Key: {'\u2705 set' if svc_set else '\u26a0\ufe0f not set (RLS bypass disabled)'}",
             parse_mode="HTML",
         )
@@ -431,35 +489,60 @@ async def cmd_dbhealth(msg: Message) -> None:
 
 @router.message(Command("dbtables"))
 async def cmd_dbtables(msg: Message) -> None:
-    """List public tables in the Supabase project."""
+    """List public tables in the Supabase project via pg_catalog."""
     if not is_allowed(msg):
         return
 
-    try:
-        from tools.supabase_client import get_client, is_configured
-        if not is_configured():
-            await msg.answer("\u26a0\ufe0f Supabase not configured.", parse_mode="HTML")
-            return
+    from tools.supabase_client import is_configured
+    if not is_configured():
+        await msg.answer("\u26a0\ufe0f Supabase not configured.", parse_mode="HTML")
+        return
 
+    try:
+        from tools.supabase_client import get_client
         db = get_client()
-        # Query information_schema via RPC or direct REST
-        rows = await db.query(
-            "information_schema.tables",
-            select="table_name,table_type",
-            eq={"table_schema": "public"},
-            order="table_name.asc",
-            limit=100,
-        )
+
+        # Use RPC to query pg_tables — information_schema.tables is not a PostgREST endpoint
+        try:
+            rows = await db.rpc("list_public_tables", {})
+        except Exception:
+            # Fallback: query pg_catalog.pg_tables via direct PostgREST
+            # This works if service role is set (bypasses RLS on system tables)
+            try:
+                rows = await db.query(
+                    "pg_catalog.pg_tables",
+                    select="tablename",
+                    eq={"schemaname": "public"},
+                    order="tablename.asc",
+                    limit=100,
+                )
+                rows = [{"table_name": r["tablename"], "table_type": "BASE TABLE"} for r in rows]
+            except Exception:
+                rows = []
+
         if not rows:
-            await msg.answer("No public tables found.", parse_mode="HTML")
+            await msg.answer(
+                "\U0001f5c4 No public tables found, or the <code>list_public_tables</code> "
+                "RPC function is not installed.\n\n"
+                "<b>To enable /dbtables, run in Supabase SQL editor:</b>\n"
+                "<pre>CREATE OR REPLACE FUNCTION list_public_tables()\n"
+                "RETURNS TABLE(table_name text, table_type text)\n"
+                "LANGUAGE sql SECURITY DEFINER AS $$\n"
+                "  SELECT table_name::text, table_type::text\n"
+                "  FROM information_schema.tables\n"
+                "  WHERE table_schema = 'public'\n"
+                "  ORDER BY table_name;\n"
+                "$$;</pre>",
+                parse_mode="HTML",
+            )
             return
 
         lines = ["<b>\U0001f5c4 Supabase Tables (public schema)</b>\n"]
         for r in rows:
             t = r.get("table_name", "?")
-            tt = r.get("table_type", "")
+            tt = r.get("table_type", "BASE TABLE")
             icon = "\U0001f4c4" if tt == "BASE TABLE" else "\U0001f441"
-            lines.append(f"  {icon} <code>{html_mod.escape(t)}</code>")
+            lines.append(f"  {icon} <code>{html_mod.escape(str(t))}</code>")
 
         await msg.answer("\n".join(lines), parse_mode="HTML")
 
@@ -468,16 +551,3 @@ async def cmd_dbtables(msg: Message) -> None:
             f"\u274c Could not list tables: <code>{html_mod.escape(str(e)[:200])}</code>",
             parse_mode="HTML",
         )
-
-
-# =========================================================================== #
-# Helpers
-# =========================================================================== #
-
-def _extract_code_block(text: str) -> str:
-    """Extract content from first ```...``` block."""
-    import re
-    m = re.search(r"```(?:typescript|ts|javascript|js|python)?\n([\s\S]*?)```", text)
-    if m:
-        return m.group(1).strip()
-    return ""

@@ -20,9 +20,10 @@ from handlers import (
     voice,
 )
 
-# ai.py must be last (NL catch-all). overnight before ai to avoid interception.
+# ai.router must be last (NL catch-all).
+# overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
-    computer.router,          # /do /screen /click /type /key /cmd /install /upgrade
+    computer.router,          # /do /screen /click /type /key /cmd /install
     system.router,            # /start /stats /keys /models /git /maintenance /gpu
     research.router,          # /scrape /research /paper /ask_paper
     brain.router,             # /remember /recall /memories /briefing
@@ -32,16 +33,16 @@ _ROUTER_ORDER = [
     pm.router,                # /task_from /tasks_due /post /email
     enterprise.router,        # /budget /routing_stats /security_stats /audit_summary
     artifact.router,          # /preview
-    overnight_handler.router, # /overnight /dashboard /overnight_* (NEW)
+    overnight_handler.router, # /overnight /dashboard /overnight_*
     voice.router,             # F.voice + F.audio
     inline.router,            # inline_query
     skills.router,            # /skills /skill /skill_reload
-    e2e.router,               # /e2etest /e2eplan /dbquery /dbhealth /dbtables  (NEW)
-    ai.router,                # /run /think /agent /swarm /loop* + NL catch-all (LAST)
+    e2e.router,               # /e2etest /e2eplan /dbquery /dbhealth /dbtables
+    ai.router,                # /run /think /agent /swarm + NL catch-all (LAST)
 ]
 
 
 def register_all_routers(dp: Dispatcher) -> None:
-    """Include all routers. Order matters — NL catch-all must be last."""
+    """Include all routers in order. NL catch-all (ai.router) must be last."""
     for r in _ROUTER_ORDER:
         dp.include_router(r)

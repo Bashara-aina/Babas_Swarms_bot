@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Optional
+import time
+from typing import Any, Dict, List, Optional
 
 try:
     import httpx
@@ -55,9 +56,13 @@ class SupabaseClient:
     def _rest_url(self, table: str) -> str:
         return f"{self.url}/rest/v1/{table}"
 
-    def _headers(self, use_service_role: bool = False, extra: dict | None = None) -> dict:
+    def _headers(
+        self,
+        use_service_role: bool = False,
+        extra: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, str]:
         key = self.service_role_key if use_service_role else self.anon_key
-        h = {
+        h: Dict[str, str] = {
             "apikey": key,
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
@@ -69,13 +74,17 @@ class SupabaseClient:
         return h
 
     @staticmethod
-    def _build_filters(params: dict, eq: dict | None, filters: dict | None) -> dict:
+    def _build_filters(
+        params: Dict[str, Any],
+        eq: Optional[Dict[str, Any]],
+        filters: Optional[Dict[str, str]],
+    ) -> Dict[str, Any]:
         """Merge eq shortcuts and raw filter params into query params."""
         p = dict(params)
         for col, val in (eq or {}).items():
             p[col] = f"eq.{val}"
         for col, expr in (filters or {}).items():
-            p[col] = expr  # e.g. {"age": "gte.18"}
+            p[col] = expr
         return p
 
     # ------------------------------------------------------------------ #
@@ -86,15 +95,15 @@ class SupabaseClient:
         self,
         table: str,
         select: str = "*",
-        eq: dict | None = None,
-        filters: dict | None = None,
-        order: str | None = None,
+        eq: Optional[Dict[str, Any]] = None,
+        filters: Optional[Dict[str, str]] = None,
+        order: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
         use_service_role: bool = True,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """SELECT rows from a table."""
-        params: dict[str, Any] = {
+        params: Dict[str, Any] = {
             "select": select,
             "limit": limit,
             "offset": offset,
@@ -109,22 +118,21 @@ class SupabaseClient:
             params=params,
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     async def insert(
         self,
         table: str,
-        data: dict | list[dict],
+        data: Any,
         upsert: bool = False,
         on_conflict: str = "",
         use_service_role: bool = True,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """INSERT (or UPSERT) rows."""
         prefer = "resolution=merge-duplicates,return=representation" if upsert else "return=representation"
+        params: Dict[str, str] = {}
         if upsert and on_conflict:
-            params = {"on_conflict": on_conflict}
-        else:
-            params = {}
+            params["on_conflict"] = on_conflict
         resp = await self._http.post(
             self._rest_url(table),
             headers=self._headers(use_service_role, {"Prefer": prefer}),
@@ -132,15 +140,15 @@ class SupabaseClient:
             params=params,
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     async def update(
         self,
         table: str,
-        data: dict,
-        eq: dict,
+        data: Dict[str, Any],
+        eq: Dict[str, Any],
         use_service_role: bool = True,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """UPDATE rows matching eq filter."""
         params = {col: f"eq.{val}" for col, val in eq.items()}
         resp = await self._http.patch(
@@ -150,14 +158,14 @@ class SupabaseClient:
             params=params,
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     async def delete(
         self,
         table: str,
-        eq: dict,
+        eq: Dict[str, Any],
         use_service_role: bool = True,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """DELETE rows matching eq filter."""
         params = {col: f"eq.{val}" for col, val in eq.items()}
         resp = await self._http.delete(
@@ -166,16 +174,16 @@ class SupabaseClient:
             params=params,
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     # ------------------------------------------------------------------ #
-    # RPC (Postgres functions / Edge Functions)
+    # RPC
     # ------------------------------------------------------------------ #
 
     async def rpc(
         self,
         function_name: str,
-        params: dict | None = None,
+        params: Optional[Dict[str, Any]] = None,
         use_service_role: bool = True,
     ) -> Any:
         """Call a Postgres function via PostgREST /rpc/<name>."""
@@ -195,7 +203,7 @@ class SupabaseClient:
         self,
         email: str,
         password: str,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """Sign in a user with email+password. Returns session dict."""
         resp = await self._http.post(
             f"{self.url}/auth/v1/token?grant_type=password",
@@ -203,24 +211,27 @@ class SupabaseClient:
             json={"email": email, "password": password},
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     async def auth_create_user(
         self,
         email: str,
         password: str,
-        user_metadata: dict | None = None,
-    ) -> dict:
+        user_metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Create a user via the admin API (service_role only)."""
         resp = await self._http.post(
             f"{self.url}/auth/v1/admin/users",
             headers=self._headers(use_service_role=True),
-            json={"email": email, "password": password,
-                  "user_metadata": user_metadata or {},
-                  "email_confirm": True},
+            json={
+                "email": email,
+                "password": password,
+                "user_metadata": user_metadata or {},
+                "email_confirm": True,
+            },
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     # ------------------------------------------------------------------ #
     # Storage
@@ -231,7 +242,7 @@ class SupabaseClient:
         bucket: str,
         prefix: str = "",
         limit: int = 100,
-    ) -> list[dict]:
+    ) -> List[Dict[str, Any]]:
         """List objects in a storage bucket."""
         resp = await self._http.post(
             f"{self.url}/storage/v1/object/list/{bucket}",
@@ -239,7 +250,7 @@ class SupabaseClient:
             json={"prefix": prefix, "limit": limit, "offset": 0},
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     async def storage_upload(
         self,
@@ -248,7 +259,7 @@ class SupabaseClient:
         content: bytes,
         content_type: str = "application/octet-stream",
         upsert: bool = True,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """Upload a file to Supabase Storage."""
         resp = await self._http.post(
             f"{self.url}/storage/v1/object/{bucket}/{path}",
@@ -260,7 +271,7 @@ class SupabaseClient:
             content=content,
         )
         resp.raise_for_status()
-        return resp.json()
+        return resp.json()  # type: ignore[return-value]
 
     def storage_public_url(self, bucket: str, path: str) -> str:
         """Return the public URL for a storage object."""
@@ -270,9 +281,8 @@ class SupabaseClient:
     # Health
     # ------------------------------------------------------------------ #
 
-    async def health_check(self) -> dict:
+    async def health_check(self) -> Dict[str, Any]:
         """Check Supabase project health. Returns dict with ok/latency_ms."""
-        import time
         t0 = time.monotonic()
         try:
             resp = await self._http.get(
@@ -295,10 +305,10 @@ class SupabaseClient:
 # ------------------------------------------------------------------ #
 
 def get_client(
-    url: str | None = None,
-    anon_key: str | None = None,
-    service_role_key: str | None = None,
-) -> SupabaseClient:
+    url: Optional[str] = None,
+    anon_key: Optional[str] = None,
+    service_role_key: Optional[str] = None,
+) -> "SupabaseClient":
     """Return a shared SupabaseClient instance, reading from env if not provided.
 
     Raises ValueError if SUPABASE_URL or SUPABASE_ANON_KEY are not set.
