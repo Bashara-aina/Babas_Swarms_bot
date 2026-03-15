@@ -9,6 +9,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Coroutine, Optional
 
@@ -18,6 +20,20 @@ MAX_PARALLEL = 3
 _parallel_sem = asyncio.Semaphore(MAX_PARALLEL)
 
 ProgressCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
+
+RESEARCH_HINTS = (
+    "research",
+    "scrape",
+    "find",
+    "top",
+    "market",
+    "competitor",
+    "holding",
+    "benchmark",
+    "compare",
+    "sources",
+    "evidence",
+)
 
 # ── Agent Team Registry ─────────────────────────────────────────────────────
 
@@ -113,7 +129,7 @@ async def decompose_task(task: str) -> list[dict[str, Any]]:
         f"Task: {task}"
     )
 
-    result, _ = await chat(prompt, agent_key="architect")
+    result, _ = await chat(prompt, agent_key="architect", user_id="0")
 
     try:
         text = result.strip()
@@ -128,11 +144,90 @@ async def decompose_task(task: str) -> list[dict[str, Any]]:
     return [{"id": "1", "agent": "general", "task": task, "depends_on": []}]
 
 
+def _is_research_like(text: str) -> bool:
+    lowered = (text or "").lower()
+    return any(h in lowered for h in RESEARCH_HINTS)
+
+
+def _extract_urls(text: str) -> list[str]:
+    found = re.findall(r"https?://[^\s)\]>\"']+", text or "")
+    unique: list[str] = []
+    seen: set[str] = set()
+    for url in found:
+        if url not in seen:
+            seen.add(url)
+            unique.append(url)
+    return unique
+
+
+def _estimate_confidence(text: str, url_count: int) -> float:
+    lowered = (text or "").lower()
+    if "no results" in lowered or "couldn't extract" in lowered:
+        return 0.30
+    if url_count >= 8:
+        return 0.92
+    if url_count >= 5:
+        return 0.85
+    if url_count >= 2:
+        return 0.72
+    return 0.55
+
+
+def _evidence_envelope(raw_evidence: str, generated_answer: str = "") -> str:
+    urls = _extract_urls(raw_evidence)
+    conf = _estimate_confidence(raw_evidence + "\n" + generated_answer, len(urls))
+    ts = time.strftime("%Y-%m-%d %H:%M:%S")
+    lines = [
+        "",
+        "### Evidence Envelope",
+        f"- Retrieved at: {ts}",
+        f"- Source count: {len(urls)}",
+        f"- Confidence: {int(conf * 100)}%",
+        "- Sources:",
+    ]
+    if urls:
+        lines.extend(f"  - {u}" for u in urls[:10])
+    else:
+        lines.append("  - (no explicit URLs found in retrieved evidence)")
+    return "\n".join(lines)
+
+
+async def _verify_final_output(task: str, candidate: str) -> tuple[bool, float, str]:
+    """Verifier pass over synthesized output. Returns (pass, confidence, notes)."""
+    from llm_client import chat
+
+    verifier_prompt = (
+        "You are a strict output verifier. Validate whether the assistant answer below "
+        "is grounded, complete, and directly answers the user task.\n\n"
+        f"User task:\n{task}\n\n"
+        f"Assistant answer:\n{candidate}\n\n"
+        "Return ONLY JSON with this schema:\n"
+        '{"pass": true|false, "confidence": 0.0-1.0, "notes": "short reason", "fix": "if fail, concise repair instruction"}'
+    )
+    try:
+        raw, _ = await chat(verifier_prompt, agent_key="debug", user_id="0")
+        txt = raw.strip()
+        if "{" in txt and "}" in txt:
+            txt = txt[txt.index("{"): txt.rindex("}") + 1]
+        parsed = json.loads(txt)
+        passed = bool(parsed.get("pass", False))
+        confidence = float(parsed.get("confidence", 0.5))
+        notes = str(parsed.get("notes") or parsed.get("fix") or "no verifier notes")
+        return passed, max(0.0, min(confidence, 1.0)), notes[:600]
+    except Exception as e:
+        logger.warning("Verifier parse failed: %s", e)
+        # Heuristic fallback if verifier output is malformed
+        has_sources = "source" in candidate.lower() or "http" in candidate.lower()
+        base_conf = 0.70 if has_sources else 0.50
+        return has_sources, base_conf, "fallback verifier (heuristic): malformed verifier JSON"
+
+
 # ── Parallel Execution ──────────────────────────────────────────────────────
 
 async def execute_parallel(
     subtasks: list[dict[str, Any]],
     progress_cb: ProgressCb = None,
+    root_task: str = "",
 ) -> dict[str, str]:
     """Execute subtasks respecting dependencies. Returns {id: result}."""
     from llm_client import chat
@@ -171,7 +266,7 @@ async def execute_parallel(
 
                 if progress_cb:
                     await progress_cb(
-                        f"[{len(completed)+1}/{total}] {agent}: {task_desc[:50]}..."
+                        f"💭 [Act {len(completed)+1}/{total}] {agent}: {task_desc[:80]}"
                     )
 
                 context_parts = []
@@ -201,7 +296,32 @@ async def execute_parallel(
                 chat_agent = agent_map.get(agent, agent)
 
                 try:
-                    result, _ = await chat(full_task, agent_key=chat_agent)
+                    # Auto-ground research-like subtasks with real web evidence
+                    if _is_research_like(full_task) or _is_research_like(root_task):
+                        if progress_cb:
+                            await progress_cb(f"🌐 [Act] {agent}: collecting web evidence from live sources")
+                        from tools.quality_guard import gather_fused_evidence
+                        evidence_meta = await gather_fused_evidence(
+                            full_task,
+                            user_id="0",
+                            min_sources=5,
+                            start_pages=8,
+                            max_pages=20,
+                            max_attempts=3,
+                        )
+                        evidence_text = str(evidence_meta.get("evidence", "") or "")
+                        grounded_prompt = (
+                            "You are synthesizing findings from REAL retrieved web evidence. "
+                            "Answer the task directly using only supported claims. "
+                            "If data is missing, state it clearly.\n\n"
+                            f"Task:\n{full_task}\n\n"
+                            f"Evidence:\n{evidence_text[:22000]}\n\n"
+                            "Output concise analysis + key findings + recommended next steps."
+                        )
+                        result, _ = await chat(grounded_prompt, agent_key="analyst", user_id="0")
+                        result = result + "\n" + _evidence_envelope(evidence_text, result)
+                    else:
+                        result, _ = await chat(full_task, agent_key=chat_agent, user_id="0")
                     return sid, result
                 except Exception as e:
                     return sid, f"Failed: {e}"
@@ -231,21 +351,55 @@ async def synthesize_results(
         agent = s.get("agent", "?")
         desc = s.get("task", "?")
         result = subtask_results.get(sid, "(no result)")
-        parts.append(f"[{agent}] {desc}\nResult: {result[:500]}")
+        parts.append(f"[{agent}] {desc}\nResult: {result[:900]}")
 
     context = "\n\n".join(parts)
 
     prompt = (
-        f"You are synthesizing results from multiple specialist agents.\n\n"
-        f"Original task: {task}\n\n"
+        "You are producing the FINAL response for a multi-agent run.\n\n"
+        f"Original task:\n{task}\n\n"
         f"Agent results:\n{context}\n\n"
-        "Synthesize these into a single coherent response. "
-        "Highlight key findings, recommendations, and action items. "
-        "Be concise but comprehensive."
+        "Return in this exact structure:\n"
+        "1) Status (done/partial/blocked)\n"
+        "2) Key Findings (numbered)\n"
+        "3) Evidence (what sources/artifacts support findings)\n"
+        "4) Confidence (0-100% with one-line reason)\n"
+        "5) Next Actions (concrete commands/steps)\n"
+        "Be direct, specific, and grounded."
     )
 
-    result, _ = await chat(prompt, agent_key="architect")
-    return result
+    draft, _ = await chat(prompt, agent_key="architect", user_id="0")
+
+    # Verifier gate with one repair pass
+    passed, verify_conf, verify_notes = await _verify_final_output(task, draft)
+    if not passed:
+        repair_prompt = (
+            "Repair this draft based on verifier feedback while preserving factual grounding.\n\n"
+            f"Verifier notes: {verify_notes}\n\n"
+            f"Original task:\n{task}\n\n"
+            f"Current draft:\n{draft}\n\n"
+            "Return improved final answer in the same 5-section structure."
+        )
+        repaired, _ = await chat(repair_prompt, agent_key="architect", user_id="0")
+        draft = repaired
+        passed, verify_conf, verify_notes = await _verify_final_output(task, draft)
+
+    # Aggregate source URLs seen in subtask outputs for final envelope
+    aggregated_urls: list[str] = []
+    for result_text in subtask_results.values():
+        for url in _extract_urls(result_text):
+            if url not in aggregated_urls:
+                aggregated_urls.append(url)
+    source_stub = "\n".join(aggregated_urls[:12]) if aggregated_urls else ""
+    envelope = _evidence_envelope(source_stub, draft)
+    verifier_line = (
+        f"\n\n### Verifier\n"
+        f"- Pass: {'YES' if passed else 'NO'}\n"
+        f"- Confidence: {int(verify_conf * 100)}%\n"
+        f"- Notes: {verify_notes}"
+    )
+
+    return draft + "\n" + envelope + verifier_line
 
 
 # ── Legacy-compatible functions ─────────────────────────────────────────────
@@ -302,7 +456,7 @@ async def parallel_agents(
                     full_task += "\n\nContext from previous steps:\n" + "\n".join(context_parts)
 
                 try:
-                    result, _ = await chat(full_task, agent_key=step.agent_key)
+                    result, _ = await chat(full_task, agent_key=step.agent_key, user_id="0")
                     step.status = "completed"
                     return idx, result
                 except Exception as e:
@@ -353,7 +507,7 @@ async def auto_decompose(task: str) -> list[SubTask] | None:
     )
 
     try:
-        result, _ = await chat(prompt, agent_key="architect")
+        result, _ = await chat(prompt, agent_key="architect", user_id="0")
         result = result.strip()
 
         if "SIMPLE" in result.upper():

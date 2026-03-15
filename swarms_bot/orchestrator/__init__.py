@@ -1,6 +1,6 @@
 """Legion Orchestrator package — exports all key classes."""
-from swarms_bot.orchestrator.agent_base import Agent, AgentResponse, Task
-from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff, TaskType
+from swarms_bot.orchestrator.agent_base import Agent, AgentResponse
+from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff, Task, TaskType
 from swarms_bot.orchestrator.dag_planner import DAGNode, DAGPlanner, TaskDAG
 from swarms_bot.orchestrator.dag_executor import DAGExecutor
 from swarms_bot.orchestrator.agent_messaging import AgentMessage, AgentMessageBus, MessageType

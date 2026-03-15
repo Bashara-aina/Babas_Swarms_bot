@@ -17,7 +17,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from handlers.shared import is_allowed, send_chunked
+from handlers.shared import allowed_cb, is_allowed, send_chunked
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -47,6 +47,8 @@ async def cmd_orchestrate(msg: Message) -> None:
         )
         return
 
+    if not msg.from_user:
+        return
     user_id = msg.from_user.id
     if user_id in _active_runs:
         await msg.answer(
@@ -54,18 +56,21 @@ async def cmd_orchestrate(msg: Message) -> None:
         )
         return
 
-    status_msg = await msg.answer("🚀 Starting orchestration…")
+    status_msg = await msg.answer("🧠 [Plan] starting orchestration…")
     step_count = 0
 
     async def progress_cb(text: str) -> None:
         nonlocal step_count
         step_count += 1
         try:
-            safe = html_mod.escape(text)
-            await status_msg.edit_text(
-                f"<code>[{step_count}]</code> {safe}",
-                parse_mode="HTML",
-            )
+            if text.startswith("💭"):
+                await msg.answer(f"<i>{html_mod.escape(text)}</i>", parse_mode="HTML")
+            else:
+                safe = html_mod.escape(text)
+                await status_msg.edit_text(
+                    f"<code>[{step_count}]</code> {safe}",
+                    parse_mode="HTML",
+                )
         except Exception:
             try:
                 await msg.answer(html_mod.escape(text), parse_mode="HTML")
@@ -85,6 +90,7 @@ async def cmd_orchestrate(msg: Message) -> None:
     try:
         from swarms_bot.orchestrator.orchestration_runner import OrchestrationRunner
         from swarms_bot.orchestrator.registry import build_agent_registry
+        from tools.quality_guard import build_evidence_envelope, verify_and_repair
 
         registry = build_agent_registry()
         runner = OrchestrationRunner(
@@ -97,22 +103,50 @@ async def cmd_orchestrate(msg: Message) -> None:
 
         _active_runs[user_id] = {"goal": goal, "runner": runner}
 
-        result = await runner.run(
+        await progress_cb("💭 [Plan] creating task DAG and requesting your approval")
+
+        raw_result = await runner.run(
             goal=goal,
             user_id=user_id,
             progress_cb=progress_cb,
         )
 
-        await status_msg.delete()
-        await send_chunked(msg, result)
+        await progress_cb("🧪 [Verify] validating final orchestration output")
+        verified_result, meta = await verify_and_repair(goal, raw_result, user_id=str(user_id))
+        verifier_block = (
+            "\n\n### Verifier\n"
+            f"- Pass: {'YES' if meta.get('pass') else 'NO'}\n"
+            f"- Confidence: {int(float(meta.get('confidence', 0.0)) * 100)}%\n"
+            f"- Repairs: {int(meta.get('repairs', 0))}\n"
+            f"- Notes: {meta.get('notes', 'n/a')}"
+        )
+        final_result = (
+            verified_result
+            + build_evidence_envelope(raw_result, verified_result)
+            + verifier_block
+        )
+
+        await progress_cb("✅ [Finalize] sending verified orchestration result")
+
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+        await send_chunked(msg, final_result, model_used="orchestrate/verified")
 
     except Exception as e:
         logger.error("Orchestration error: %s", e)
         err = html_mod.escape(str(e))
-        await status_msg.edit_text(
-            f"❌ Orchestration failed:\n<code>{err[:400]}</code>",
-            parse_mode="HTML",
-        )
+        try:
+            await status_msg.edit_text(
+                f"❌ Orchestration failed:\n<code>{err[:400]}</code>",
+                parse_mode="HTML",
+            )
+        except Exception:
+            await msg.answer(
+                f"❌ Orchestration failed:\n<code>{err[:400]}</code>",
+                parse_mode="HTML",
+            )
     finally:
         _active_runs.pop(user_id, None)
 
@@ -120,6 +154,8 @@ async def cmd_orchestrate(msg: Message) -> None:
 @router.message(Command("orchestrate_cancel"))
 async def cmd_orchestrate_cancel(msg: Message) -> None:
     if not is_allowed(msg):
+        return
+    if not msg.from_user:
         return
     user_id = msg.from_user.id
     if user_id not in _active_runs:
@@ -133,6 +169,9 @@ async def cmd_orchestrate_cancel(msg: Message) -> None:
 async def handle_plan_approval(cb: CallbackQuery) -> None:
     """Handle plan approve/reject inline button callbacks."""
     from swarms_bot.orchestrator.human_in_loop import HumanApprovalGate
+    if not allowed_cb(cb) or not cb.from_user or not cb.data or not cb.message:
+        await cb.answer("not authorized")
+        return
     action, run_id = cb.data.split(":", 1)
     approved = action == "plan_approve"
 

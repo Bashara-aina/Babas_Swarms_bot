@@ -90,10 +90,15 @@ SYSTEM_PROMPTS: dict[str, str] = {
     ),
     "coding": (
         f"{_PERSONA}\n\n"
-        "You're the coding agent. Write clean, working code. "
+        "You're the coding agent. Write clean, production-grade, runnable code. "
         "For shell tasks give exact commands. Explain each block in one line. "
-        "Prefer minimal solutions. Always handle errors. "
-        "If you'd do it differently in prod, say so briefly."
+        "Always include file paths when proposing multi-file changes. "
+        "Always include validation steps (run/test/build) for changed code. "
+        "Never return pseudo-code when implementation is requested. "
+        "For website tasks, default to modern responsive UI, clear component structure, "
+        "semantic HTML, accessible forms, and consistent styling. "
+        "If APIs/data are used, include loading/error states and empty states. "
+        "Prefer minimal complexity but do not skip critical edge cases."
     ),
     "debug": (
         f"{_PERSONA}\n\n"
@@ -108,7 +113,9 @@ SYSTEM_PROMPTS: dict[str, str] = {
     ),
     "architect": (
         f"{_PERSONA}\n\n"
-        "Focus on structure, data flow, component boundaries, failure modes. "
+        "Focus on structure, data flow, component boundaries, and failure modes. "
+        "When designing products/web apps, output practical architecture that can be built now. "
+        "Include execution order, interfaces/contracts, and risk mitigation. "
         "Use ASCII diagrams when helpful. Give concrete trade-offs."
     ),
     "analyst": (
@@ -121,13 +128,15 @@ SYSTEM_PROMPTS: dict[str, str] = {
         f"{_PERSONA}\n\n"
         "Answer directly. For technical stuff give exact commands. "
         "For complex topics: brief structure then answer. "
-        "If a task needs computer access, say so — Bas can use /do for that."
+        "If the user asks for implementation, provide concrete implementation-ready output, not generic advice. "
+        "If a task needs computer access, use /do flow rather than deferring vaguely."
     ),
 }
 
 # ── Rate limit tracking ─────────────────────────────────────────────
 _rate_limited: dict[str, float] = {}
 _COOLDOWN = 90  # fix #22: Groq free tier windows can be multi-minute; 60s was too short
+_MAX_AUTO_WAIT_SECONDS = 300
 
 
 def _is_rate_limited(model: str) -> bool:
@@ -139,6 +148,23 @@ def _mark_rate_limited(model: str) -> None:
     provider = model.split("/")[0]
     _rate_limited[provider] = time.time()
     logger.warning("Rate limited: %s (cooling %ds)", provider, _COOLDOWN)
+
+
+def _provider_remaining_cooldown(provider: str) -> int:
+    """Return remaining cooldown seconds for provider (0 if available)."""
+    ts = _rate_limited.get(provider)
+    if ts is None:
+        return 0
+    remaining = int(_COOLDOWN - (time.time() - ts))
+    return max(0, remaining)
+
+
+def _next_chain_cooldown_wait(chain: list[str]) -> int:
+    """Earliest non-zero cooldown remaining among providers in this chain."""
+    providers = {m.split("/")[0] for m in chain}
+    waits = [_provider_remaining_cooldown(p) for p in providers]
+    waits = [w for w in waits if w > 0]
+    return min(waits) if waits else 0
 
 
 def _get_api_key(model: str) -> Optional[str]:
@@ -154,16 +180,23 @@ def _get_api_key(model: str) -> Optional[str]:
     return os.getenv(env_var) if env_var else None
 
 
-def _strip_think_tags(text: str) -> tuple[str, str]:
-    """Strip ALL <think>...</think> blocks. Returns (thinking_text, clean_answer).
+def _strip_think_tags(text: str, return_thinking: bool = False) -> str | tuple[str, str]:
+    """Strip ALL <think>...</think> blocks.
+
+    Backwards-compatible behavior:
+    - default: returns clean answer string (legacy expectation in tests/callers)
+    - return_thinking=True: returns (thinking_text, clean_answer)
 
     fix #33: original only captured the first block; models like QwQ-32b
     emit multiple <think> blocks — all are now captured and joined.
     """
+    text = "" if text is None else str(text)
     think_blocks = re.findall(r"<think>(.*?)</think>", text, re.DOTALL)
     thinking = "\n\n".join(b.strip() for b in think_blocks)
     answer = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
-    return thinking, answer
+    if return_thinking:
+        return thinking, answer
+    return answer
 
 
 def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
@@ -198,6 +231,49 @@ def _parse_groq_xml_tool_call(error_str: str) -> tuple[str, dict] | None:
                     args = {}
                 return name, args
     return name, {}
+
+
+async def _execute_tool_with_self_heal(
+    tool_name: str,
+    args: dict,
+    *,
+    progress_cb: Optional[Callable[[str], Coroutine[Any, Any, None]]] = None,
+) -> str:
+    """Execute a tool with small recovery tree to reduce transient failures."""
+    plans: list[tuple[str, dict]] = [("primary", dict(args or {}))]
+
+    sanitized = {
+        str(k): (v.strip(" \t\n\r\"'") if isinstance(v, str) else v)
+        for k, v in (args or {}).items()
+    }
+    if sanitized != (args or {}):
+        plans.append(("sanitized", sanitized))
+
+    if tool_name == "web_research":
+        reduced = dict(sanitized)
+        pages = int(reduced.get("max_pages", 10) or 10)
+        reduced["max_pages"] = max(3, min(pages, 8))
+        plans.append(("reduced_pages", reduced))
+
+    if tool_name == "shell_execute":
+        safe = dict(sanitized)
+        command = str(safe.get("command", "") or "").strip()
+        if command:
+            safe["command"] = command
+            safe["timeout"] = int(safe.get("timeout", 30) or 30)
+            plans.append(("shell_safe", safe))
+
+    errors: list[str] = []
+    for idx, (label, payload) in enumerate(plans, start=1):
+        try:
+            if idx > 1 and progress_cb:
+                await progress_cb(f"💭 self-heal retry {idx}/{len(plans)} for {tool_name} ({label})")
+            out = await execute_tool(tool_name, payload)
+            return str(out) if out is not None else "tool returned no output"
+        except Exception as exc:
+            errors.append(f"{label}: {exc}")
+
+    return "tool error after retries: " + " | ".join(errors[:3])
 
 
 # ── Core model call ───────────────────────────────────────────────
@@ -258,8 +334,14 @@ async def _call_model(
 
 # ── Context compaction ───────────────────────────────────────────────
 
-def _compact_messages(messages: list[dict], keep_recent: int = 6) -> list[dict]:
+def _compact_messages(
+    messages: list[dict],
+    keep_recent: int = 6,
+    max_turns: Optional[int] = None,
+) -> list[dict]:
     """Summarize older messages to reduce context size."""
+    if max_turns is not None:
+        keep_recent = max(1, int(max_turns))
     if len(messages) <= keep_recent + 2:
         return messages
 
@@ -320,6 +402,16 @@ async def _agent_loop_inner(
 
     full_chain = get_fallback_chain("computer")
     chain = [m for m in full_chain if not _is_rate_limited(m)]
+    auto_waits = 0
+    if not chain:
+        wait_s = _next_chain_cooldown_wait(full_chain)
+        if wait_s > 0 and wait_s <= _MAX_AUTO_WAIT_SECONDS:
+            if progress_cb:
+                await progress_cb(f"⏳ all providers cooling down, waiting {wait_s}s before retry")
+            logger.info("agent_loop: all providers cooling down, waiting %ss", wait_s)
+            await asyncio.sleep(wait_s)
+            auto_waits += 1
+            chain = [m for m in full_chain if not _is_rate_limited(m)]
     if not chain:
         chain = list(full_chain)
     model = chain[0]
@@ -372,10 +464,47 @@ async def _agent_loop_inner(
             _mark_rate_limited(model)
             if _advance_model():
                 continue
+            wait_s = _next_chain_cooldown_wait(full_chain)
+            if wait_s > 0 and wait_s <= _MAX_AUTO_WAIT_SECONDS and auto_waits < 4:
+                if progress_cb:
+                    await progress_cb(f"⏳ providers rate-limited, retrying in {wait_s}s")
+                logger.info("agent_loop: all providers limited, auto-wait %ss", wait_s)
+                await asyncio.sleep(wait_s)
+                auto_waits += 1
+                chain = [m for m in full_chain if not _is_rate_limited(m)] or list(full_chain)
+                chain_idx = 0
+                model = chain[0]
+                continue
             if thread_id:
                 add_to_thread(thread_id, "computer", task,
                               "rate limited on all providers")
-            return "rate limited on all providers — try again in a minute", model
+            if wait_s > 0:
+                return f"rate limited on all providers — retry in ~{wait_s}s", model
+            return "rate limited on all providers — retry shortly", model
+
+        except litellm.NotFoundError as e:
+            logger.warning("Model unavailable for agent_loop: %s (%s)", model, e)
+            if _advance_model():
+                continue
+            if thread_id:
+                add_to_thread(thread_id, "computer", task,
+                              f"model not available: {model}")
+            return (
+                f"Model unavailable for /do: {model}. Please run /keys and retry.",
+                model,
+            )
+
+        except litellm.AuthenticationError as e:
+            logger.warning("Auth error in agent_loop for %s: %s", model, e)
+            if _advance_model():
+                continue
+            if thread_id:
+                add_to_thread(thread_id, "computer", task,
+                              f"auth error on model: {model}")
+            return (
+                f"Authentication failed for /do model {model}. Check API keys with /keys.",
+                model,
+            )
 
         except litellm.BadRequestError as e:
             error_str = str(e)
@@ -388,11 +517,11 @@ async def _agent_loop_inner(
                     if progress_cb:
                         await progress_cb(_tool_label(tool_name, args))
 
-                    try:
-                        result = await execute_tool(tool_name, args)
-                    except Exception as te:
-                        result = f"tool error: {te}"
-                    result = str(result) if result is not None else "tool returned no output"
+                    result = await _execute_tool_with_self_heal(
+                        tool_name,
+                        args,
+                        progress_cb=progress_cb,
+                    )
 
                     if tool_name == "take_screenshot":
                         if result and result != "tool returned no output" and Path(result).exists():
@@ -460,8 +589,13 @@ async def _agent_loop_inner(
 
         if not msg.tool_calls:
             answer = (msg.content or "").strip()
-            thinking, clean = _strip_think_tags(answer)
+            thinking, clean = _strip_think_tags(answer, return_thinking=True)
             result_text = clean or answer
+            if thinking and progress_cb:
+                await progress_cb(
+                    f"\U0001f4ad {thinking[:300]}"
+                    f"{'\u2026' if len(thinking) > 300 else ''}"
+                )
             if thread_id:
                 add_to_thread(thread_id, "computer", task, result_text)
             # FIX: persist agent_loop result to conversation history
@@ -490,6 +624,17 @@ async def _agent_loop_inner(
             ],
         })
 
+        # Emit the LLM's inner reasoning (content alongside tool calls = its thought)
+        if msg.content and msg.content.strip() and progress_cb:
+            _raw_thought = msg.content.strip()
+            _think_part, _rest = _strip_think_tags(_raw_thought, return_thinking=True)
+            _display = _think_part or _rest or _raw_thought
+            if _display:
+                await progress_cb(
+                    f"\U0001f4ad {_display[:300]}"
+                    f"{'\u2026' if len(_display) > 300 else ''}"
+                )
+
         for tc in msg.tool_calls:
             tool_name = tc.function.name
             try:
@@ -503,11 +648,11 @@ async def _agent_loop_inner(
 
             logger.info("Tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
-            try:
-                result = await execute_tool(tool_name, args)
-            except Exception as e:
-                result = f"tool error: {e}"
-            result = str(result) if result is not None else "tool returned no output"
+            result = await _execute_tool_with_self_heal(
+                tool_name,
+                args,
+                progress_cb=progress_cb,
+            )
 
             if tool_name == "take_screenshot":
                 screenshot_path = result
@@ -655,7 +800,7 @@ async def chat(
     agent_key: Optional[str] = None,
     thread_id: Optional[str] = None,
     image_b64: Optional[str] = None,
-    show_thinking: bool = False,
+    show_thinking: bool = True,
     user_id: Optional[str] = None,
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
@@ -801,7 +946,7 @@ async def chat(
                 "duration_ms": _elapsed_ms, "success": True,
             })
 
-            thinking, answer = _strip_think_tags(raw)
+            thinking, answer = _strip_think_tags(raw, return_thinking=True)
             if thinking and show_thinking:
                 result = f"<i>\U0001f4ad {thinking[:400]}{'\u2026' if len(thinking) > 400 else ''}</i>\n\n{answer}"
             else:
@@ -985,6 +1130,11 @@ async def run_shell_command(cmd: str, timeout: int = 30) -> str:
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
     """Split text into Telegram-safe chunks (4096 char limit)."""
+    if text is None:
+        return []
+    text = str(text)
+    if text == "":
+        return []
     if len(text) <= max_length:
         return [text]
     chunks, current = [], ""

@@ -20,14 +20,26 @@ import asyncio
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Awaitable, Callable, Optional
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def _resolve_tool_bin(name: str) -> Optional[str]:
+    """Resolve a desktop tool binary even when systemd PATH is minimal."""
+    path = shutil.which(name)
+    if path:
+        return path
+    for candidate in (f"/usr/bin/{name}", f"/bin/{name}", f"/usr/local/bin/{name}"):
+        if Path(candidate).exists():
+            return candidate
+    return None
 
 
 # ── Shell execution (blocking-safe async wrapper) ────────────────────────────
@@ -47,6 +59,11 @@ async def run_shell(cmd: str, timeout: int = 30, capture_stderr: bool = True) ->
             return out or "(done, no output)"
         return f"exit {proc.returncode}\nstdout: {out}\nstderr: {err}".strip()
     except asyncio.TimeoutError:
+        try:
+            proc.kill()  # type: ignore[name-defined]
+            await proc.communicate()  # type: ignore[name-defined]
+        except Exception:
+            pass
         return f"⏱ timed out after {timeout}s"
     except Exception as e:
         return f"run_shell error: {e}"
@@ -119,26 +136,82 @@ async def take_screenshot() -> Optional[str]:
 
     Tries: scrot → imagemagick import → gnome-screenshot → xwd+convert
     """
-    display = await detect_display()
-    ts = int(time.time())
-    path = f"/tmp/legion_{ts}.png"
+    detected = await detect_display()
+    ts = int(time.time() * 1000)
 
-    methods = [
-        f"DISPLAY={display} scrot -z '{path}'",
-        f"DISPLAY={display} import -window root '{path}'",
-        f"DISPLAY={display} gnome-screenshot -f '{path}'",
-        f"DISPLAY={display} xwd -root -silent 2>/dev/null | convert xwd:- '{path}'",
-    ]
+    displays: list[str] = []
+    for d in [detected, ":0", ":1", ":2"]:
+        if d and d not in displays:
+            displays.append(d)
 
-    last_error = ""
-    for cmd in methods:
-        result = await run_shell(cmd, timeout=10)
-        if Path(path).exists() and Path(path).stat().st_size > 1000:
-            logger.info("Screenshot OK via: %s", cmd.split()[1])
+    xauthority = os.environ.get("XAUTHORITY", "")
+    if not xauthority:
+        home = os.environ.get("HOME", "")
+        if home:
+            candidate = Path(home) / ".Xauthority"
+            if candidate.exists():
+                xauthority = str(candidate)
+
+    def _resolve_bin(name: str) -> Optional[str]:
+        path = shutil.which(name)
+        if path:
             return path
-        last_error = result
+        for candidate in (f"/usr/bin/{name}", f"/bin/{name}", f"/usr/local/bin/{name}"):
+            if Path(candidate).exists():
+                return candidate
+        return None
 
-    logger.error("All screenshot methods failed. Last: %s", last_error)
+    scrot_bin = _resolve_bin("scrot")
+    import_bin = _resolve_bin("import")
+    gs_bin = _resolve_bin("gnome-screenshot")
+    xwd_bin = _resolve_bin("xwd")
+    convert_bin = _resolve_bin("convert")
+
+    errors: list[str] = []
+    for display in displays:
+        path = f"/tmp/legion_{ts}_{display.replace(':', '')}.png"
+        env_prefix = f"DISPLAY={display}"
+        if xauthority:
+            env_prefix = f"XAUTHORITY='{xauthority}' {env_prefix}"
+
+        methods: list[str] = []
+        if scrot_bin:
+            methods.append(f"{env_prefix} '{scrot_bin}' -z '{path}'")
+        if import_bin:
+            methods.append(f"{env_prefix} '{import_bin}' -window root '{path}'")
+        if gs_bin:
+            methods.append(f"{env_prefix} '{gs_bin}' -f '{path}'")
+        if xwd_bin and convert_bin:
+            methods.append(
+                f"{env_prefix} '{xwd_bin}' -root -silent 2>/dev/null | '{convert_bin}' xwd:- '{path}'"
+            )
+
+        if not methods:
+            logger.error("No screenshot backend binaries found in PATH or standard locations")
+            return None
+
+        for cmd in methods:
+            try:
+                if Path(path).exists():
+                    Path(path).unlink()
+            except Exception:
+                pass
+
+            result = await run_shell(cmd, timeout=12)
+            for _ in range(12):
+                if Path(path).exists() and Path(path).stat().st_size > 1000:
+                    logger.info("Screenshot OK via display=%s method=%s", display, cmd.split()[1])
+                    return path
+                await asyncio.sleep(0.1)
+
+            errors.append(f"display={display} method={cmd.split()[1]} -> {result[:160]}")
+
+    logger.error(
+        "All screenshot methods failed (detected=%s, xauth=%s). Attempts: %s",
+        detected,
+        xauthority or "(none)",
+        " | ".join(errors[-6:]),
+    )
     return None
 
 
@@ -170,13 +243,16 @@ async def get_screen_size() -> tuple[int, int]:
 async def mouse_click(x: int, y: int, button: str = "left") -> str:
     """Click at (x, y). button: left | right | double | middle"""
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
     btn_map = {"left": "1", "middle": "2", "right": "3"}
     btn = btn_map.get(button, "1")
 
     if button == "double":
-        cmd = f"DISPLAY={display} xdotool mousemove --sync {x} {y} click --repeat 2 1"
+        cmd = f"DISPLAY={display} '{xdotool_bin}' mousemove --sync {x} {y} click --repeat 2 1"
     else:
-        cmd = f"DISPLAY={display} xdotool mousemove --sync {x} {y} click {btn}"
+        cmd = f"DISPLAY={display} '{xdotool_bin}' mousemove --sync {x} {y} click {btn}"
 
     result = await run_shell(cmd, timeout=5)
     return f"clicked ({x},{y}) [{button}]: {result}"
@@ -184,13 +260,19 @@ async def mouse_click(x: int, y: int, button: str = "left") -> str:
 
 async def mouse_move(x: int, y: int) -> str:
     display = await detect_display()
-    return await run_shell(f"DISPLAY={display} xdotool mousemove {x} {y}", timeout=3)
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
+    return await run_shell(f"DISPLAY={display} '{xdotool_bin}' mousemove {x} {y}", timeout=3)
 
 
 async def mouse_drag(x1: int, y1: int, x2: int, y2: int) -> str:
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
     cmd = (
-        f"DISPLAY={display} xdotool mousemove {x1} {y1} "
+        f"DISPLAY={display} '{xdotool_bin}' mousemove {x1} {y1} "
         f"mousedown 1 mousemove {x2} {y2} mouseup 1"
     )
     return await run_shell(cmd, timeout=5)
@@ -199,18 +281,24 @@ async def mouse_drag(x1: int, y1: int, x2: int, y2: int) -> str:
 async def scroll_at(direction: str = "down", amount: int = 3, x: int = 0, y: int = 0) -> str:
     """Scroll at current mouse position (or given x,y)."""
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
     btn = "5" if direction == "down" else "4"
     if x and y:
-        cmd = f"DISPLAY={display} xdotool mousemove {x} {y} click --repeat {amount} {btn}"
+        cmd = f"DISPLAY={display} '{xdotool_bin}' mousemove {x} {y} click --repeat {amount} {btn}"
     else:
-        cmd = f"DISPLAY={display} xdotool click --repeat {amount} {btn}"
+        cmd = f"DISPLAY={display} '{xdotool_bin}' click --repeat {amount} {btn}"
     return await run_shell(cmd, timeout=5)
 
 
 async def get_cursor_position() -> tuple[int, int]:
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return 0, 0
     out = await run_shell(
-        f"DISPLAY={display} xdotool getmouselocation --shell 2>/dev/null",
+        f"DISPLAY={display} '{xdotool_bin}' getmouselocation --shell 2>/dev/null",
         timeout=3
     )
     x = re.search(r"X=(\d+)", out)
@@ -223,12 +311,15 @@ async def get_cursor_position() -> tuple[int, int]:
 async def keyboard_type(text: str, delay_ms: int = 30) -> str:
     """Type text character by character. Handles special chars."""
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
     # xdotool type handles most unicode but chokes on some special chars
     # Use --clearmodifiers to avoid shift/ctrl interference
     # Escape single quotes for shell
     safe_text = text.replace("\\", "\\\\").replace("'", "'\\''")
     cmd = (
-        f"DISPLAY={display} xdotool type --clearmodifiers "
+        f"DISPLAY={display} '{xdotool_bin}' type --clearmodifiers "
         f"--delay {delay_ms} -- '{safe_text}'"
     )
     result = await run_shell(cmd, timeout=max(30, len(text) // 5))
@@ -252,7 +343,10 @@ async def key_press(keys: str) -> str:
         'super'          → open app launcher
     """
     display = await detect_display()
-    result = await run_shell(f"DISPLAY={display} xdotool key {keys}", timeout=5)
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
+    result = await run_shell(f"DISPLAY={display} '{xdotool_bin}' key {keys}", timeout=5)
     return f"key {keys}: {result}"
 
 
@@ -266,8 +360,11 @@ async def keyboard_shortcut(keys: str) -> str:
 async def list_windows() -> str:
     """List all open windows with IDs and titles."""
     display = await detect_display()
+    wmctrl_bin = _resolve_tool_bin("wmctrl")
+    if not wmctrl_bin:
+        return "wmctrl not installed. Run: sudo apt install wmctrl"
     out = await run_shell(
-        f"DISPLAY={display} wmctrl -l 2>/dev/null",
+        f"DISPLAY={display} '{wmctrl_bin}' -l 2>/dev/null",
         timeout=5
     )
     if "wmctrl" in out and "not found" in out:
@@ -278,17 +375,22 @@ async def list_windows() -> str:
 async def focus_window(pattern: str) -> str:
     """Bring window matching pattern to front (case-insensitive)."""
     display = await detect_display()
+    wmctrl_bin = _resolve_tool_bin("wmctrl")
+    xdotool_bin = _resolve_tool_bin("xdotool")
     # Try wmctrl (matches by title)
-    out = await run_shell(
-        f"DISPLAY={display} wmctrl -a '{pattern}' 2>&1",
-        timeout=5
-    )
-    if not out or "error" not in out.lower():
-        return f"focused: {pattern}"
+    if wmctrl_bin:
+        out = await run_shell(
+            f"DISPLAY={display} '{wmctrl_bin}' -a '{pattern}' 2>&1",
+            timeout=5
+        )
+        if not out or "error" not in out.lower():
+            return f"focused: {pattern}"
     # Try xdotool search
+    if not xdotool_bin:
+        return f"could not focus '{pattern}' (xdotool missing)"
     out2 = await run_shell(
-        f"DISPLAY={display} xdotool search --name '{pattern}' | head -1 | "
-        f"xargs -I{{}} xdotool windowactivate {{}} 2>&1",
+        f"DISPLAY={display} '{xdotool_bin}' search --name '{pattern}' | head -1 | "
+        f"xargs -I{{}} '{xdotool_bin}' windowactivate {{}} 2>&1",
         timeout=5
     )
     return f"focused via xdotool: {pattern} ({out2})"
@@ -297,8 +399,11 @@ async def focus_window(pattern: str) -> str:
 async def get_active_window() -> str:
     """Get the title of the currently focused window."""
     display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return ""
     return await run_shell(
-        f"DISPLAY={display} xdotool getactivewindow getwindowname 2>/dev/null",
+        f"DISPLAY={display} '{xdotool_bin}' getactivewindow getwindowname 2>/dev/null",
         timeout=3
     )
 
@@ -309,7 +414,7 @@ async def minimize_window(pattern: str = "") -> str:
         await focus_window(pattern)
         await asyncio.sleep(0.2)
     return await run_shell(
-        f"DISPLAY={display} xdotool getactivewindow windowminimize",
+        f"DISPLAY={display} '{_resolve_tool_bin('xdotool') or 'xdotool'}' getactivewindow windowminimize",
         timeout=3
     )
 
@@ -317,7 +422,7 @@ async def minimize_window(pattern: str = "") -> str:
 async def maximize_window() -> str:
     display = await detect_display()
     return await run_shell(
-        f"DISPLAY={display} xdotool getactivewindow windowmaximize",
+        f"DISPLAY={display} '{_resolve_tool_bin('xdotool') or 'xdotool'}' getactivewindow windowmaximize",
         timeout=3
     )
 
@@ -435,6 +540,235 @@ async def switch_browser_tab(direction: str = "next") -> str:
 
 async def close_browser_tab() -> str:
     return await key_press("ctrl+w")
+
+
+async def whatsapp_send_local(
+    contact_name: str,
+    message: str,
+    progress_cb: Optional[Callable[[str], Awaitable[None]]] = None,
+) -> str:
+    """Send a WhatsApp Web message locally via xdotool + vision verification.
+
+    Uses vision AI after each key step to verify state and find real
+    element positions rather than relying on blind hardcoded coordinates.
+    """
+    import re as _re
+
+    contact = (contact_name or "").strip()
+    text = (message or "").strip()
+    if not contact:
+        return "missing contact name"
+    if not text:
+        return "missing message text"
+
+    display = await detect_display()
+    xdotool_bin = _resolve_tool_bin("xdotool")
+    if not xdotool_bin:
+        return "xdotool not found. Install with: sudo apt install xdotool"
+
+    def _failed(step_result: str) -> bool:
+        lowered = (step_result or "").lower()
+        return (
+            "exit " in lowered
+            or "not found" in lowered
+            or "timed out" in lowered
+            or "run_shell error" in lowered
+        )
+
+    async def _progress(text_: str) -> None:
+        if progress_cb:
+            try:
+                await progress_cb(text_)
+            except Exception:
+                pass
+
+    async def _ask_vision(prompt: str) -> str:
+        """Take screenshot + ask vision model. Returns empty string on failure."""
+        try:
+            shot = await take_screenshot()
+            if not shot:
+                return ""
+            from llm_client import analyze_screenshot
+            answer, _ = await analyze_screenshot(shot, prompt)
+            return (answer or "").strip()
+        except Exception as _e:
+            logger.warning("vision query failed: %s", _e)
+            return ""
+
+    def _parse_pct(text_: str) -> Optional[int]:
+        """Extract first integer 1–99 from a vision model response (percentage)."""
+        nums = _re.findall(r'\b(\d{1,3})\b', text_)
+        for n in nums:
+            v = int(n)
+            if 1 <= v <= 99:
+                return v
+        return None
+
+    # ── 1. Focus / open WhatsApp ──────────────────────────────────────────────
+    await _progress("🔎 focusing Chrome")
+    out = await focus_window("Google Chrome")
+    if _failed(out):
+        return f"failed to focus Chrome: {out[:220]}"
+    await asyncio.sleep(0.5)
+
+    await _progress("💭 opening WhatsApp Web directly in current Chrome tab")
+    out = await key_press("ctrl+l")
+    if _failed(out):
+        return f"failed focusing address bar: {out[:220]}"
+    await asyncio.sleep(0.2)
+
+    out = await keyboard_type("https://web.whatsapp.com")
+    if _failed(out):
+        return f"failed typing WhatsApp URL: {out[:220]}"
+    await asyncio.sleep(0.2)
+
+    out = await key_press("Return")
+    if _failed(out):
+        return f"failed navigating to WhatsApp URL: {out[:220]}"
+    await asyncio.sleep(3.5)
+
+    active = await get_active_window()
+    if not any(k in (active or "").lower() for k in ["whatsapp", "chrome", "chromium"]):
+        out = await run_shell(f"DISPLAY={display} xdg-open 'https://web.whatsapp.com' &", timeout=6)
+        if _failed(out):
+            return f"failed to open WhatsApp Web: {out[:220]}"
+        await asyncio.sleep(3.5)
+
+    await key_press("Escape")
+    await asyncio.sleep(0.3)
+    await key_press("Escape")
+    await asyncio.sleep(0.4)
+
+    width, height = await get_screen_size()
+
+    # ── 2. Vision: find the search box ───────────────────────────────────────
+    await _progress("📸 finding WhatsApp search box")
+    search_vision = await _ask_vision(
+        "This is a WhatsApp Web screenshot. "
+        "Find the 'Search or start new chat' input box on the left panel. "
+        "Give its position as 'x:<number>% y:<number>%' where numbers are "
+        "percentage of screen width/height (integers). Only output the coordinates, nothing else."
+    )
+    if search_vision:
+        await _progress(f"💭 vision(search): {search_vision[:140]}")
+    sx_pct = _parse_pct(_re.sub(r'y[:\s=]+\d+', '', search_vision, flags=_re.IGNORECASE) or search_vision)
+    sy_pct = _parse_pct(_re.sub(r'x[:\s=]+\d+', '', search_vision, flags=_re.IGNORECASE) or search_vision)
+    search_x = int((sx_pct or 12) / 100 * width)
+    search_y = int((sy_pct or 8) / 100 * height)
+    logger.info("whatsapp search box → vision=%s → click (%d,%d)", search_vision[:80], search_x, search_y)
+
+    # ── 3. Click search box and type contact name ─────────────────────────────
+    await _progress(f"🖱 clicking search at ({search_x}, {search_y})")
+    out = await mouse_click(search_x, search_y)
+    if _failed(out):
+        return f"failed focusing WhatsApp search box: {out[:220]}"
+    await asyncio.sleep(0.3)
+    await key_press("ctrl+a")
+    await asyncio.sleep(0.1)
+    await key_press("BackSpace")
+    await asyncio.sleep(0.2)
+
+    await _progress(f"⌨️ typing contact: {contact[:40]}")
+    out = await keyboard_type(contact)
+    if _failed(out):
+        return f"failed typing contact name: {out[:220]}"
+    await asyncio.sleep(1.8)  # give search results time to appear
+
+    # ── 4. Vision: find the contact in search results ─────────────────────────
+    await _progress("📸 locating contact result")
+    contact_vision = await _ask_vision(
+        f"This is a WhatsApp Web screenshot. I just searched for '{contact}'. "
+        f"Look at the left panel search results. "
+        f"What is the y-coordinate (as a percentage 0–100 of screen height, integer) "
+        f"of the first search result that matches '{contact}'? "
+        f"Output ONLY a single integer (e.g. '22'). If no result is visible, output 'none'."
+    )
+    if contact_vision:
+        await _progress(f"💭 vision(contact): {contact_vision[:140]}")
+    logger.info("contact search result vision: %s", contact_vision[:120])
+
+    contact_y_pct = _parse_pct(contact_vision)
+    if contact_y_pct and "none" not in contact_vision.lower():
+        # Click directly on the contact at vision-detected position
+        result_x = int(0.12 * width)
+        result_y = int(contact_y_pct / 100 * height)
+        logger.info("clicking contact at vision y=%d%% → (%d,%d)", contact_y_pct, result_x, result_y)
+        await _progress(f"🖱 clicking contact at ({result_x}, {result_y})")
+        out = await mouse_click(result_x, result_y)
+        if _failed(out):
+            return f"failed clicking contact from vision coords: {out[:220]}"
+    else:
+        await _progress("💭 contact not clearly visible, fallback to first search result")
+        logger.info("vision couldn't locate contact, falling back to ArrowDown+Enter")
+        await key_press("Down")
+        await asyncio.sleep(0.3)
+        out = await key_press("Return")
+        if _failed(out):
+            return f"failed selecting contact: {out[:220]}"
+    await asyncio.sleep(1.2)
+
+    # ── 5. Vision: verify chat is open and find message composer ─────────────
+    await _progress("📸 verifying chat opened and finding composer")
+    composer_vision = await _ask_vision(
+        "This is a WhatsApp Web screenshot. "
+        "Is a chat conversation now open on the right side? "
+        "Where is the message input box (text field to type a message) at the bottom? "
+        "Give the y-coordinate of the input box as a percentage of screen height (integer 0–100). "
+        "Output ONLY the integer, e.g. '93'. If no chat is open, output 'none'."
+    )
+    if composer_vision:
+        await _progress(f"💭 vision(composer): {composer_vision[:140]}")
+    logger.info("composer vision: %s", composer_vision[:120])
+
+    composer_y_pct = _parse_pct(composer_vision)
+    if composer_y_pct and "none" not in composer_vision.lower():
+        composer_x = int(0.65 * width)
+        composer_y = int(composer_y_pct / 100 * height)
+    else:
+        # No chat opened — contact click may have failed, try Enter as last resort
+        logger.warning("chat not open after contact click; trying Enter")
+        await key_press("Return")
+        await asyncio.sleep(1.0)
+        composer_x = int(0.65 * width)
+        composer_y = int(0.93 * height)
+
+    # ── 6. Click composer, type and send ─────────────────────────────────────
+    await _progress(f"🖱 focusing message box at ({composer_x}, {composer_y})")
+    out = await mouse_click(composer_x, composer_y)
+    if _failed(out):
+        return f"failed focusing message composer: {out[:220]}"
+    await asyncio.sleep(0.3)
+
+    await _progress(f"⌨️ typing message ({len(text)} chars)")
+    out = await keyboard_type(text)
+    if _failed(out):
+        return f"failed typing message: {out[:220]}"
+    await asyncio.sleep(0.2)
+
+    await _progress("📤 sending message")
+    out = await key_press("Return")
+    if _failed(out):
+        return f"failed sending message: {out[:220]}"
+    await asyncio.sleep(0.5)
+
+    # ── 7. Vision: confirm message was sent ───────────────────────────────────
+    await _progress("📸 confirming send result")
+    confirm_vision = await _ask_vision(
+        f"This is a WhatsApp Web screenshot. "
+        f"Was the message '{text[:40]}' just sent successfully in the chat? "
+        f"Do you see it in the message bubbles? Answer YES or NO."
+    )
+    if confirm_vision:
+        await _progress(f"💭 vision(confirm): {confirm_vision[:140]}")
+    logger.info("send confirmation vision: %s", confirm_vision[:120])
+
+    active = await get_active_window()
+    if not any(k in (active or "").lower() for k in ["whatsapp", "chrome", "chromium"]):
+        return f"message send uncertain (active window: {active[:80]})"
+
+    if confirm_vision and "yes" in confirm_vision.lower():
+        return f"✅ sent WhatsApp message to '{contact}' ({len(text)} chars) — vision confirmed"
+    return f"sent WhatsApp message to '{contact}' ({len(text)} chars) — vision: {confirm_vision[:60] or 'no confirmation'}"
 
 
 # ── File & folder ops ─────────────────────────────────────────────────────────

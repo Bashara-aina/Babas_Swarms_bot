@@ -36,6 +36,16 @@ class ValidationResult:
             self.warnings = []
 
 
+@dataclass
+class ScanResult:
+    """Compatibility result used by tests and higher-level callers."""
+
+    blocked: bool
+    risk_score: float
+    sanitized_text: str
+    reasons: List[str]
+
+
 # Prompt injection patterns
 _INJECTION_PATTERNS = [
     r"ignore\s+(?:all\s+)?(?:previous|above)\s+(?:instructions?|prompts?|rules?)",
@@ -64,12 +74,19 @@ _PII_PATTERNS = {
 # Credential patterns
 _CREDENTIAL_PATTERNS = [
     r"(?:api[_-]?key|token|secret|password|pwd)\s*[=:]\s*['\"][A-Za-z0-9/+=]{20,}['\"]",
+    r"(?:api[_-]?key|token|secret|password|pwd|secretkey)\s*[=:]\s*[A-Za-z0-9_\-]{6,}",
+    r"sk-[A-Za-z0-9\-_]{8,}",
     r"sk-[A-Za-z0-9]{32,}",  # OpenAI API key
     r"sk-ant-[A-Za-z0-9-]{40,}",  # Anthropic API key
     r"gsk_[A-Za-z0-9]{40,}",  # Groq API key
     r"AIzaSy[A-Za-z0-9_-]{33}",  # Google API key
     r"ghp_[A-Za-z0-9]{36}",  # GitHub PAT
     r"-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----",
+]
+
+_DANGEROUS_EXEC_PATTERNS = [
+    re.compile(r":\(\)\s*\{\s*:\|:\s*&\s*\};:"),  # fork bomb
+    re.compile(r"\b(drop\s+table|delete\s+from|truncate\s+table)\b", re.IGNORECASE),
 ]
 
 
@@ -141,6 +158,48 @@ class SecurityGuard:
             warnings=warnings,
         )
 
+    def scan(self, text: str) -> ScanResult:
+        """Scan text and return a risk-scored security decision.
+
+        This wrapper preserves compatibility with older call-sites/tests expecting
+        `.scan()` with fields: blocked, risk_score, sanitized_text.
+        """
+        validation = self.validate_input(text)
+        sanitized = validation.sanitized_input if validation.valid else text
+        reasons: list[str] = list(validation.warnings)
+        risk = 0.0
+
+        if not validation.valid:
+            reasons.append(validation.blocked_reason)
+            risk += 0.9
+
+        if self._contains_credentials(text):
+            sanitized = self._redact_credentials(sanitized)
+            reasons.append("credential_detected")
+            risk += 0.8
+
+        for pattern in _DANGEROUS_EXEC_PATTERNS:
+            if pattern.search(text):
+                reasons.append("dangerous_payload")
+                risk += 0.7
+                break
+
+        # If any PII survived initial validation path (e.g., validation blocked), redact here.
+        if self.enable_pii:
+            sanitized, pii_warnings = self._redact_pii(sanitized)
+            reasons.extend(pii_warnings)
+            if pii_warnings:
+                risk += 0.2
+
+        blocked = (not validation.valid) or risk >= 0.7
+        risk = min(1.0, risk)
+        return ScanResult(
+            blocked=blocked,
+            risk_score=round(risk, 3),
+            sanitized_text=sanitized,
+            reasons=reasons,
+        )
+
     def filter_output(self, output: str) -> str:
         """Filter agent output before sending to user.
 
@@ -195,6 +254,12 @@ class SecurityGuard:
             if pattern.search(text):
                 return True
         return False
+
+    def _redact_credentials(self, text: str) -> str:
+        redacted = text
+        for pattern in self._credential_compiled:
+            redacted = pattern.sub("[REDACTED]", redacted)
+        return redacted
 
     def get_stats(self) -> Dict[str, Any]:
         """Return security guard statistics."""

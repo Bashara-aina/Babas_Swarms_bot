@@ -69,7 +69,12 @@ class SpawnableAgent:
             logger.warning(
                 "Max spawn depth %d reached for agent %s", MAX_DEPTH, self.agent_key
             )
-            result, _ = await chat(task_description, agent_key=self.agent_key, thread_id=thread_id)
+            result, _ = await chat(
+                task_description,
+                agent_key=self.agent_key,
+                thread_id=thread_id,
+                user_id="0",
+            )
             return result, 0.0
 
         # First pass: run the agent
@@ -77,6 +82,7 @@ class SpawnableAgent:
             task_description,
             agent_key=self.agent_key,
             thread_id=thread_id,
+            user_id="0",
         )
 
         # Check for spawn directives in result

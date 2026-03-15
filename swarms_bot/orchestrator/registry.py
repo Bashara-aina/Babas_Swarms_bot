@@ -33,6 +33,7 @@ class LLMAgent(Agent):
                 task.description,
                 agent_key=self.agent_key,
                 thread_id=thread_id,
+                user_id=str(task.user_id),
             )
             elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -71,6 +72,7 @@ class AgenticLoopAgent(Agent):
                 task.description,
                 max_iterations=task.context.get("max_iterations", 15),
                 thread_id=thread_id,
+                user_id=task.user_id,
             )
             elapsed_ms = int((time.monotonic() - start) * 1000)
             return AgentResponse(

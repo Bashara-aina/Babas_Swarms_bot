@@ -24,14 +24,17 @@ _AGENT_SKILLS: dict[str, list[str]] = {
     "coding":     [
         "python-patterns",
         "testing-patterns",
-        "debugging-strategies",
+        "debugging",
+        "nextjs-engineer",
+        "aiogram-patterns",
         "tool-use-guardian",
         "api-cost-optimizer",
         "supabase-engineer",
     ],
     "debug":      [
-        "debugging-strategies",
+        "debugging",
         "python-patterns",
+        "aiogram-patterns",
         "security-auditor",
         "tool-use-guardian",
         "supabase-engineer",
@@ -39,6 +42,7 @@ _AGENT_SKILLS: dict[str, list[str]] = {
     "architect":  [
         "brainstorming",
         "python-patterns",
+        "nextjs-engineer",
         "security-auditor",
         "rag-engineer",
         "supabase-engineer",
@@ -59,7 +63,9 @@ _AGENT_SKILLS: dict[str, list[str]] = {
         "security-auditor",
         "python-patterns",
         "testing-patterns",
-        "debugging-strategies",
+        "debugging",
+        "security-checklist",
+        "aiogram-patterns",
         "e2e-tester",
     ],
     "devops":     [
@@ -74,26 +80,26 @@ _AGENT_SKILLS: dict[str, list[str]] = {
         "prompt-engineer",
         "api-cost-optimizer",
         "recallmax",
+        "aiogram-patterns",
         "supabase-engineer",
     ],
     "pm":         [
         "brainstorming",
         "prompt-engineer",
+        "payroll-indonesia",
     ],
     "marketer":   [
         "brainstorming",
         "prompt-engineer",
     ],
-    "e2e":        [
-        "e2e-tester",
-        "supabase-engineer",
-        "debugging-strategies",
-        "security-auditor",
+    "computer":   [
+        "aiogram-patterns",
+        "debugging",
+        "tool-use-guardian",
     ],
-    "database":   [
-        "supabase-engineer",
-        "security-auditor",
-        "debugging-strategies",
+    "humanizer":  [
+        "prompt-engineer",
+        "brainstorming",
     ],
 }
 

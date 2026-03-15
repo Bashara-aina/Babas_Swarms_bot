@@ -502,21 +502,15 @@ async def cmd_dbtables(msg: Message) -> None:
         from tools.supabase_client import get_client
         db = get_client()
 
-        # Use RPC to query pg_tables — information_schema.tables is not a PostgREST endpoint
+        # First: preferred RPC if installed
         try:
             rows = await db.rpc("list_public_tables", {})
         except Exception:
-            # Fallback: query pg_catalog.pg_tables via direct PostgREST
-            # This works if service role is set (bypasses RLS on system tables)
+            # Fallback 1: derive accessible table-like resources from PostgREST OpenAPI.
+            # Works with anon key (no service role required).
             try:
-                rows = await db.query(
-                    "pg_catalog.pg_tables",
-                    select="tablename",
-                    eq={"schemaname": "public"},
-                    order="tablename.asc",
-                    limit=100,
-                )
-                rows = [{"table_name": r["tablename"], "table_type": "BASE TABLE"} for r in rows]
+                table_names = await db.list_accessible_tables()
+                rows = [{"table_name": t, "table_type": "ACCESSIBLE"} for t in table_names]
             except Exception:
                 rows = []
 

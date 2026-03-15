@@ -116,7 +116,7 @@ class DAGExecutor:
             start = time.monotonic()
             for attempt in range(3):
                 try:
-                    from swarms_bot.orchestrator.agent_base import Task
+                    from swarms_bot.orchestrator.chief_of_staff import Task
                     task = Task.create(
                         user_id=0,
                         chat_id=0,

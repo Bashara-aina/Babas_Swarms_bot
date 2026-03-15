@@ -285,7 +285,7 @@ async def run_tests_and_fix(project_path: str, max_attempts: int = 3) -> str:
                 "Identify the root cause and provide the exact fix. "
                 "Show the file path and the corrected code."
             )
-            fix, _ = await chat(fix_prompt, agent_key="coding")
+            fix, _ = await chat(fix_prompt, agent_key="coding", user_id="0")
             results.append(f"Fix suggestion: {fix[:300]}")
 
     return f"Tests still failing after {max_attempts} attempts.\n" + "\n".join(results)
@@ -328,7 +328,7 @@ async def parallel_fullstack(task: str) -> str:
             f"Use React + TypeScript + Tailwind CSS. "
             f"Return complete file contents with file paths.\n\nTask: {task}"
         )
-        result, _ = await chat(prompt, agent_key="coding")
+        result, _ = await chat(prompt, agent_key="coding", user_id="0")
         return result
 
     async def backend():
@@ -337,7 +337,7 @@ async def parallel_fullstack(task: str) -> str:
             f"Use Python FastAPI. "
             f"Return complete file contents with file paths.\n\nTask: {task}"
         )
-        result, _ = await chat(prompt, agent_key="coding")
+        result, _ = await chat(prompt, agent_key="coding", user_id="0")
         return result
 
     async def tests():
@@ -345,7 +345,7 @@ async def parallel_fullstack(task: str) -> str:
             f"Write tests for this task covering both frontend and backend. "
             f"Use pytest for backend and describe frontend test scenarios.\n\nTask: {task}"
         )
-        result, _ = await chat(prompt, agent_key="coding")
+        result, _ = await chat(prompt, agent_key="coding", user_id="0")
         return result
 
     fe, be, te = await asyncio.gather(frontend(), backend(), tests())

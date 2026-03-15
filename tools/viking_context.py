@@ -61,7 +61,7 @@ def _get_client_sync():
         return c
     except ImportError:
         _available = False
-        logger.warning(
+        logger.info(
             "openviking not installed — falling back to SQLite/TF-IDF memory. "
             "Run: pip install openviking"
         )
