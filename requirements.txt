@@ -54,6 +54,22 @@ knowledge-graph>=0.0.33
 swarms==9.0.4
 pytest-asyncio>=0.23.0
 
+# === v6 Humanization Layer ===
+mem0ai>=0.1.0
+chromadb>=0.5.0
+faster-whisper>=1.0.0
+kokoro-onnx>=0.3.0
+soundfile>=0.12.0
+scipy>=1.11.0
+letta-client>=0.6.0
+graphiti-core>=0.3.0
+memobase>=0.0.27
+sentence-transformers>=2.7.0
+open-interpreter>=0.3.0
+
+# Optional automation / observability
+agentops>=0.3.0
+
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng

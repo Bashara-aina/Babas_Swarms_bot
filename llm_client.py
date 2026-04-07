@@ -28,6 +28,19 @@ import hashlib
 import aiofiles
 import litellm
 from litellm import acompletion
+from core.character import build_base_persona, build_mode_instructions
+from core.emotion_modulator import (
+    build_emotion_modifier,
+    detect_emotion_from_context,
+    postprocess_response,
+)
+from core.autonomous_router import AutonomousRouter
+from core.memory.memory_manager import MemoryManager
+from core.memory.temporal_graph import TemporalKnowledgeGraph
+from core.personality.emotion_engine import EmotionEngine
+from core.reflection.reflection_engine import ReflectionEngine
+from core.system_prompt_builder import SystemPromptBuilder
+from tools.letta_personality import build_persona_block, get_persona_state, update_emotion
 
 # FIX: guard computer_agent import so bot starts even without pyautogui/cv2
 try:
@@ -194,6 +207,42 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Always verify before reporting done."
     ),
 }
+
+
+# ── Humanization layer singletons (v6) ─────────────────────────────────────
+memory: MemoryManager | None = None
+graph: TemporalKnowledgeGraph | None = None
+emotion: EmotionEngine | None = None
+reflection: ReflectionEngine | None = None
+prompt_builder: SystemPromptBuilder | None = None
+auto_router: AutonomousRouter | None = None
+
+
+def init_humanization_layer() -> dict[str, object]:
+    """Initialize shared humanization singletons exactly once."""
+    global memory, graph, emotion, reflection, prompt_builder, auto_router
+
+    if memory is None:
+        memory = MemoryManager()
+    if graph is None:
+        graph = TemporalKnowledgeGraph()
+    if emotion is None:
+        emotion = EmotionEngine()
+    if reflection is None:
+        reflection = ReflectionEngine(memory_manager=memory, llm_client=llm_client)  # type: ignore[arg-type]
+    if prompt_builder is None:
+        prompt_builder = SystemPromptBuilder(memory, emotion, graph, reflection)
+    if auto_router is None:
+        auto_router = AutonomousRouter(memory, reflection)
+
+    return {
+        "memory": memory,
+        "graph": graph,
+        "emotion": emotion,
+        "reflection": reflection,
+        "prompt_builder": prompt_builder,
+        "auto_router": auto_router,
+    }
 
 # ── Rate limit tracking ─────────────────────────────────────────────
 _rate_limited: dict[str, float] = {}
@@ -509,6 +558,7 @@ async def _agent_loop_inner(
     ]
 
     steps_taken: list[str] = []
+    consecutive_failures = 0
 
     for iteration in range(max_iterations):
         if len(messages) > 12:
@@ -523,6 +573,7 @@ async def _agent_loop_inner(
                 temperature=0.3,
             )
         except litellm.RateLimitError:
+            consecutive_failures += 1
             _mark_rate_limited(model)
             if _advance_model():
                 continue
@@ -545,6 +596,7 @@ async def _agent_loop_inner(
             return "rate limited on all providers — retry shortly", model
 
         except litellm.NotFoundError as e:
+            consecutive_failures += 1
             logger.warning("Model unavailable for agent_loop: %s (%s)", model, e)
             if _advance_model():
                 continue
@@ -557,6 +609,7 @@ async def _agent_loop_inner(
             )
 
         except litellm.AuthenticationError as e:
+            consecutive_failures += 1
             logger.warning("Auth error in agent_loop for %s: %s", model, e)
             if _advance_model():
                 continue
@@ -569,6 +622,7 @@ async def _agent_loop_inner(
             )
 
         except litellm.BadRequestError as e:
+            consecutive_failures += 1
             error_str = str(e)
             if "tool_use_failed" in error_str or "failed_generation" in error_str:
                 parsed = _parse_groq_xml_tool_call(error_str)
@@ -627,6 +681,7 @@ async def _agent_loop_inner(
             return f"model error: {e}", model
 
         except litellm.AuthenticationError:
+            consecutive_failures += 1
             logger.error("agent_loop auth error on %s — trying next", model)
             if _advance_model():
                 continue
@@ -636,7 +691,21 @@ async def _agent_loop_inner(
             return "auth error on all providers — check /keys", model
 
         except Exception as e:
+            consecutive_failures += 1
             logger.error("agent_loop error: %s", e)
+            if consecutive_failures >= 2:
+                try:
+                    from tools.oi_bridge import oi_execute, oi_is_available
+
+                    if await oi_is_available():
+                        if progress_cb:
+                            await progress_cb("🔄 switching to Open Interpreter fallback...")
+                        oi_result = await oi_execute(task)
+                        if thread_id:
+                            add_to_thread(thread_id, "computer", task, oi_result)
+                        return oi_result, "open-interpreter/fallback"
+                except Exception as oi_err:
+                    logger.warning("Open Interpreter fallback also failed: %s", oi_err)
             if thread_id:
                 add_to_thread(thread_id, "computer", task, f"error: {e}")
             return f"error: {e}", model
@@ -748,6 +817,7 @@ async def _agent_loop_inner(
                 "content": tool_result_text,
                 "tool_call_id": tc.id,
             })
+            consecutive_failures = 0
 
     summary = "\n".join(f"  \u2022 {s}" for s in steps_taken[-5:])
     final_msg = f"completed {max_iterations} steps:\n{summary}"
@@ -864,6 +934,9 @@ async def chat(
     image_b64: Optional[str] = None,
     show_thinking: bool = True,
     user_id: Optional[str] = None,
+    task_context: str = "",
+    model_override: Optional[str] = None,
+    run_post_hooks: bool = True,
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
 
@@ -872,7 +945,7 @@ async def chat(
     if agent_key is None:
         agent_key = detect_agent(task)
 
-    chain = get_fallback_chain(agent_key)
+    chain = [model_override] if model_override else get_fallback_chain(agent_key)
 
     # ── Resource-aware Ollama gating ──────────────────────────────────────
     _local_skip_reason = ""
@@ -900,6 +973,45 @@ async def chat(
             "Using cloud vision instead.]"
         )
 
+    # ── Prompt stack: character, personality, emotion, memory, skills ──────────
+    prompt_sections: list[str] = [build_base_persona()]
+
+    try:
+        init_humanization_layer()
+        if memory is not None and prompt_builder is not None:
+            relevant_memories: list[dict[str, Any]] = []
+            if task and len(task) > 10:
+                relevant_memories = await memory.search(task, limit=5)
+            humanized_prompt = prompt_builder.build(
+                task_context=task_context or f"Agent: {agent_key}",
+                relevant_memories=relevant_memories,
+                include_opinions=True,
+            )
+            if humanized_prompt:
+                prompt_sections.append(humanized_prompt)
+    except Exception as _humanization_error:
+        logger.debug("humanization prompt injection failed: %s", _humanization_error)
+
+    try:
+        persona_state = get_persona_state()
+        if persona_state:
+            prompt_sections.append(build_persona_block())
+    except Exception as _persona_err:
+        logger.debug("persona state injection failed: %s", _persona_err)
+
+    _current_emotion = "neutral"
+    try:
+        from tools.letta_personality import get_persona_state as _gps
+
+        _current_emotion = str(_gps().get("dominant_emotion", "neutral"))
+        detected = detect_emotion_from_context(task, _current_emotion)
+        if detected != _current_emotion:
+            update_emotion(detected, event=f"Context shift from message: {task[:50]}")
+            _current_emotion = detected
+        prompt_sections.append(build_emotion_modifier(_current_emotion))
+    except Exception as _em_err:
+        logger.debug("Emotion modulation skipped: %s", _em_err)
+
     # ── Inject conversation history ──────────────────────────────────────────────
     if user_id:
         try:
@@ -910,23 +1022,50 @@ async def chat(
         except Exception:
             pass
 
-    # ── RecallMax: inject relevant memories ──────────────────────────────────────
+    # ── Mem0 / MemoryOS / OpenMemory / legacy memory ─────────────────────────────
     if user_id:
         try:
-            from tools.memory import search_memories
-            from tools.recallmax import build_memory_context
-            memories = await search_memories(user_id=int(user_id), query=task, limit=6)
-            mem_ctx = build_memory_context(memories, query=task)
+            from tools.mem0_client import mem0_search, build_mem0_context
+            memories = await mem0_search(user_id=str(user_id), query=task, limit=12)
+            mem_ctx = build_mem0_context(memories, query=task)
             if mem_ctx:
-                system_prompt = mem_ctx + "\n" + system_prompt
+                prompt_sections.append(mem_ctx)
         except Exception as _mem_err:
-            logger.debug("recallmax memory injection failed: %s", _mem_err)
+            logger.debug("mem0 memory injection failed: %s", _mem_err)
+
+        try:
+            from tools.memoryos_client import mos_retrieve_context
+            mos_ctx = await mos_retrieve_context(query=task, user_id=str(user_id))
+            if mos_ctx:
+                prompt_sections.append(f"[Long-term conversation context from MemoryOS:]\n{mos_ctx}")
+        except Exception as _mos_err:
+            logger.debug("MemoryOS injection failed: %s", _mos_err)
+
+        try:
+            from tools.open_memory import om_search, build_om_context
+            om_results = await om_search(user_id=str(user_id), query=task, limit=8)
+            om_ctx = build_om_context(om_results)
+            if om_ctx:
+                prompt_sections.append(om_ctx)
+        except Exception as _om_err:
+            logger.debug("OpenMemory search failed: %s", _om_err)
+
+        try:
+            from tools.memory import search_memory, build_memory_context
+            legacy_memories = await search_memory(task, top_k=3, user_id=str(user_id))
+            legacy_ctx = await build_memory_context(task, top_k=3, user_id=str(user_id))
+            if legacy_ctx:
+                prompt_sections.append(legacy_ctx)
+            elif legacy_memories:
+                prompt_sections.append("[Legacy memory found relevant context]")
+        except Exception as _legacy_mem_err:
+            logger.debug("legacy memory injection failed: %s", _legacy_mem_err)
 
     try:
         from tools.persistence import get_instinct_context
         instinct_block = await get_instinct_context(max_tokens=300)
         if instinct_block:
-            system_prompt += "\n\n" + instinct_block
+            prompt_sections.append(instinct_block)
     except Exception:
         pass
 
@@ -935,9 +1074,16 @@ async def chat(
         from tools.skill_loader import get_skills_for_agent
         skills_block = get_skills_for_agent(agent_key, max_chars=6000)
         if skills_block:
-            system_prompt += "\n\n" + skills_block
+            prompt_sections.append(skills_block)
     except Exception:
         pass
+
+    try:
+        prompt_sections.append(build_mode_instructions(agent_key))
+    except Exception:
+        pass
+
+    system_prompt = "\n\n".join(section for section in prompt_sections if section)
 
     if agent_key not in ("computer", "vision"):
         system_prompt += (
@@ -1025,16 +1171,20 @@ async def chat(
                 except Exception:
                     pass
 
-                # RecallMax: store turn if worth persisting
+                # Store to the memory stack
                 try:
                     from tools.recallmax import should_store
-                    from tools.memory import store_memory
+                    from tools.mem0_client import mem0_add
+                    from tools.memoryos_client import mos_add_conversation
+                    from tools.open_memory import om_store, SECTOR_EPISODIC, SECTOR_SEMANTIC
+
+                    await mem0_add(user_id=str(user_id), content=task, metadata={"source": "chat", "role": "user"})
                     if should_store(task):
-                        await store_memory(
-                            user_id=int(user_id),
-                            content=task,
-                            source="chat",
-                        )
+                        await mem0_add(user_id=str(user_id), content=result, metadata={"source": "chat", "role": "assistant"})
+                    await mos_add_conversation(user_msg=task, assistant_msg=result, user_id=str(user_id))
+                    await om_store(user_id=str(user_id), content=task, sector=SECTOR_EPISODIC)
+                    if should_store(task):
+                        await om_store(user_id=str(user_id), content=task, sector=SECTOR_SEMANTIC, importance=1.5)
                 except Exception:
                     pass
 
@@ -1042,6 +1192,19 @@ async def chat(
                 try:
                     from tools.persistence import cache_set
                     await cache_set(_cache_key, result, agent_key, model, _tin + _tout)
+                except Exception:
+                    pass
+
+            if run_post_hooks:
+                try:
+                    asyncio.create_task(
+                        _post_call_hooks(
+                            user_msg=task,
+                            response=result,
+                            agent_used=agent_key,
+                            session_id=thread_id,
+                        )
+                    )
                 except Exception:
                     pass
 
@@ -1072,6 +1235,86 @@ async def chat(
         f"Last error: {last_error}\n"
         "Run /keys to check API keys."
     )
+
+
+async def _post_call_hooks(
+    user_msg: str,
+    response: str,
+    agent_used: str | None = None,
+    session_id: str | None = None,
+) -> None:
+    """Runs asynchronously after every LLM call."""
+    try:
+        init_humanization_layer()
+        try:
+            from tools.letta_personality import update_emotion
+            from core.emotion_modulator import detect_emotion_from_context
+
+            update_emotion(detect_emotion_from_context(user_msg), event=f"assistant response: {response[:80]}")
+        except Exception:
+            pass
+        if emotion is not None:
+            emotion.update_from_interaction(user_msg, response)
+        if memory is not None:
+            await memory.auto_extract_and_save(user_msg, response)
+            emotion_state = emotion.state.to_dict() if emotion is not None else None
+            memory.add_conversation_turn(
+                "user",
+                user_msg,
+                agent_used=agent_used,
+                emotion_state=emotion_state,
+                session_id=session_id,
+            )
+            memory.add_conversation_turn(
+                "assistant",
+                response,
+                agent_used=agent_used,
+                emotion_state=emotion_state,
+                session_id=session_id,
+            )
+        if reflection is not None:
+            await reflection.post_turn_hook(user_msg, response)
+    except Exception as exc:
+        logger.warning("[PostCall hooks] %s", exc)
+
+
+class _LLMClientFacade:
+    """Compatibility facade exposing complete() for handler integrations."""
+
+    async def complete(
+        self,
+        messages: list[dict[str, Any]],
+        model: str | None = None,
+        task_context: str = "",
+        skip_post_hooks: bool = False,
+        **kwargs: Any,
+    ) -> str:
+        user_msg = ""
+        for message in messages:
+            if message.get("role") == "user":
+                content = message.get("content", "")
+                user_msg = content if isinstance(content, str) else str(content)
+                break
+        if not user_msg and messages:
+            content = messages[-1].get("content", "")
+            user_msg = content if isinstance(content, str) else str(content)
+
+        response, _used_model = await chat(
+            task=user_msg,
+            agent_key=None,
+            thread_id=None,
+            image_b64=None,
+            show_thinking=kwargs.get("show_thinking", False),
+            user_id=kwargs.get("user_id"),
+            task_context=task_context,
+            model_override=model,
+            run_post_hooks=not skip_post_hooks,
+        )
+
+        return response
+
+
+llm_client = _LLMClientFacade()
 
 
 # ── Screenshot utilities ──────────────────────────────────────────────────

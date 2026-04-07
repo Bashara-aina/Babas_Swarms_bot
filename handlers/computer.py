@@ -411,6 +411,33 @@ async def cmd_upgrade(msg: Message) -> None:
     computer_agent.restart_bot()
 
 
+# ── /oi — Open Interpreter direct fallback ───────────────────────────────────
+@router.message(Command("oi"))
+async def cmd_oi_direct(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/oi").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/oi &lt;task&gt;</code>\nexample: <code>/oi open firefox and go to github.com</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status = await msg.answer("🔄 Open Interpreter running...")
+    try:
+        from tools.oi_bridge import oi_execute
+
+        result = await oi_execute(task)
+        await status.edit_text(html_mod.escape(result[:3500]))
+        chunks = llm_client.chunk_output(result)
+        if len(chunks) > 1:
+            for chunk in chunks[1:]:
+                await msg.answer(chunk)
+    except Exception as e:
+        await status.edit_text(f"❌ OI error: {html_mod.escape(str(e))}")
+
+
 # ── Keyboard button shortcuts ─────────────────────────────────────────────────
 @router.message(F.text == "\U0001f5a5 Do task")
 async def kbd_do_hint(msg: Message) -> None:

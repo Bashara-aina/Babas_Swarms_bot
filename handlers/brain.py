@@ -49,6 +49,12 @@ async def cmd_remember(msg: Message) -> None:
     try:
         from tools.memory import add_memory
         note_id = await add_memory(note, source="telegram")
+        try:
+            from tools.mem0_client import mem0_add
+
+            await mem0_add(user_id=str(msg.from_user.id), content=note, metadata={"source": "telegram", "note_id": note_id})
+        except Exception:
+            pass
         await msg.answer(f"saved (id: {note_id})")
     except Exception as e:
         await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
@@ -66,7 +72,17 @@ async def cmd_recall(msg: Message) -> None:
     try:
         from tools.memory import search_memory
         results = await search_memory(query, top_k=5)
+        try:
+            from tools.mem0_client import mem0_search, build_mem0_context
+
+            mem0_results = await mem0_search(user_id=str(msg.from_user.id), query=query, limit=8)
+            mem0_ctx = build_mem0_context(mem0_results, query=query)
+        except Exception:
+            mem0_ctx = ""
         if not results:
+            if mem0_ctx:
+                await msg.answer(mem0_ctx, parse_mode="HTML")
+                return
             await msg.answer("no matching memories found.")
             return
         lines = ["<b>Matching memories:</b>\n"]
@@ -75,6 +91,8 @@ async def cmd_recall(msg: Message) -> None:
             tags = f" [{r['tags']}]" if r.get("tags") else ""
             lines.append(f"  #{r['id']} ({ts}{tags}) rel:{r['relevance']}")
             lines.append(f"  {r['text'][:150]}...\n")
+        if mem0_ctx:
+            lines.extend(["<b>Mem0 context:</b>", mem0_ctx])
         await msg.answer("\n".join(lines), parse_mode="HTML")
     except Exception as e:
         await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
@@ -148,6 +166,27 @@ async def cmd_learn(msg: Message) -> None:
         )
     except Exception as e:
         await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+@router.message(Command("om_stats"))
+async def cmd_om_stats(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.open_memory import om_stats
+
+        stats = await om_stats(str(msg.from_user.id))
+        if not stats:
+            await msg.answer("No OpenMemory entries yet.")
+            return
+        lines = ["<b>📊 OpenMemory Stats</b>", ""]
+        for sector, data in stats.items():
+            lines.append(
+                f"<b>{sector}</b>: {data['count']} memories | avg importance {data['avg_importance']} | avg accesses {data['avg_accesses']}"
+            )
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
 
 
 # ── /instincts ────────────────────────────────────────────────────────────────

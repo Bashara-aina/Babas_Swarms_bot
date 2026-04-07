@@ -806,6 +806,18 @@ async def handle_nl(msg: Message) -> None:
     if not task or task.startswith("/"):
         return
 
+    try:
+        from llm_client import auto_router, init_humanization_layer
+        from handlers.message_handler import handle_plain_message
+
+        if auto_router is None:
+            init_humanization_layer()
+        if auto_router is not None:
+            await handle_plain_message(msg, auto_router)
+            return
+    except Exception:
+        pass
+
     task_lower = task.lower()
 
     # Check OpenClaw delegation first

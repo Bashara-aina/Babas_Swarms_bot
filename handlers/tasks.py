@@ -243,3 +243,30 @@ async def cmd_watch_training(msg: Message) -> None:
         f"cancel: <code>/cancel {task_id}</code>",
         parse_mode="HTML",
     )
+
+
+# ── /n8n — automation status ─────────────────────────────────────────────────
+@router.message(Command("n8n"))
+async def cmd_n8n(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from tools.n8n_bridge import n8n_status, ensure_n8n_running
+
+        status = await n8n_status()
+        if not status.get("healthy"):
+            startup = await ensure_n8n_running()
+            await msg.answer(
+                "<b>n8n status</b>\n"
+                f"healthy: <code>{status.get('healthy')}</code>\n"
+                f"details: <code>{status.get('error', status.get('status', 'unknown'))}</code>\n"
+                f"auto-start: <code>{startup.get('started')}</code>",
+                parse_mode="HTML",
+            )
+            return
+        await msg.answer(
+            f"<b>n8n status</b>\nhealthy: <code>{status.get('healthy')}</code>\nbase: <code>{status.get('base_url')}</code>",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(f"n8n error: <code>{e}</code>", parse_mode="HTML")
