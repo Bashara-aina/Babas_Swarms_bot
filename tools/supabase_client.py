@@ -312,6 +312,171 @@ class SupabaseClient:
     # Health
     # ------------------------------------------------------------------ #
 
+    # ------------------------------------------------------------------ #
+    # Schema introspection (one-time bootstrap for rumahlabuh skill)
+    # ------------------------------------------------------------------ #
+
+    async def introspect_schema(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Read table/column definitions from PostgREST OpenAPI spec.
+
+        Returns: {table_name: [{column, type, nullable}]}
+        Requires service_role key for full visibility.
+        """
+        resp = await self._http.get(
+            f"{self.url}/rest/v1/",
+            headers=self._headers(use_service_role=True),
+            timeout=15.0,
+        )
+        self._raise_for_status_with_detail(resp)
+        spec = resp.json()
+
+        definitions = spec.get("definitions", {}) if isinstance(spec, dict) else {}
+        schema: Dict[str, List[Dict[str, Any]]] = {}
+
+        for table_name, defn in definitions.items():
+            if not isinstance(defn, dict):
+                continue
+            props = defn.get("properties", {})
+            required = defn.get("required", [])
+            columns: List[Dict[str, Any]] = []
+            for col, col_def in props.items():
+                columns.append({
+                    "column": col,
+                    "type": col_def.get("type", col_def.get("format", "unknown")),
+                    "nullable": col not in required,
+                    "description": col_def.get("description", ""),
+                })
+            schema[table_name] = columns
+
+        return schema
+
+    async def generate_skill_file(self, output_path: str = "skills/rumahlabuh-manager.md") -> str:
+        """Introspect schema, pass to LLM, generate a skill markdown file.
+
+        Returns the generated file path.
+        """
+        import json as _json
+        from pathlib import Path
+        import litellm
+
+        schema = await self.introspect_schema()
+        if not schema:
+            raise RuntimeError("introspect_schema() returned empty — check service_role key and project URL")
+
+        schema_json = _json.dumps(schema, indent=2)[:8000]  # cap for LLM context
+
+        prompt = (
+            "You are documenting a Supabase database for an AI assistant called Legion. "
+            "The AI needs to understand the database schema of rumahlabuh.com "
+            "(a villa/accommodation rental business in Indonesia) to answer queries about it. "
+            "Based on the schema below, write a markdown skill file that:\n"
+            "1. Lists all tables with column names, types, and what they represent\n"
+            "2. Describes common operations: check bookings, get revenue, find guests, update status\n"
+            "3. Gives example PostgREST API queries for each common operation\n"
+            "4. Notes any important relationships between tables\n\n"
+            f"Database schema:\n```json\n{schema_json}\n```\n\n"
+            "Format as clean markdown. Start with `# Skill: rumahlabuh.com Business Manager`"
+        )
+
+        resp = await litellm.acompletion(
+            model="cerebras/qwen-3-235b-a22b",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=3000,
+        )
+        content = resp.choices[0].message.content.strip()
+
+        path = Path(output_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+        logger.info("[Supabase] Generated skill file: %s", output_path)
+        return output_path
+
+    # ------------------------------------------------------------------ #
+    # Natural language query interface
+    # ------------------------------------------------------------------ #
+
+    async def query_natural(self, nl_query: str) -> str:
+        """Convert natural language → PostgREST query → execute → return formatted result.
+
+        Requires the skills/rumahlabuh-manager.md skill to be populated first
+        (run /site_health to trigger schema bootstrap if missing).
+        """
+        import json as _json
+        import litellm
+        from pathlib import Path
+
+        # Inject schema context from skill file if available
+        skill_path = Path("skills/rumahlabuh-manager.md")
+        schema_context = ""
+        if skill_path.exists():
+            schema_context = skill_path.read_text(encoding="utf-8")[:3000]
+        else:
+            # Fallback: introspect on demand
+            try:
+                schema = await self.introspect_schema()
+                schema_context = _json.dumps(schema, indent=2)[:2000]
+            except Exception:
+                schema_context = "(schema not available)"
+
+        prompt = (
+            "You are a PostgREST query translator. Convert the user's natural language "
+            "query into a PostgREST API call.\n\n"
+            f"Database schema:\n{schema_context}\n\n"
+            f"User query: {nl_query}\n\n"
+            "Output ONLY valid JSON with these fields:\n"
+            '{"table": "table_name", "select": "col1,col2", "filters": {"col": "eq.value"}, '
+            '"order": "col.desc", "limit": 20}\n'
+            "Use PostgREST filter syntax: eq.value, gt.value, lt.value, ilike.*search*\n"
+            "If you cannot determine the query, output: {\"error\": \"cannot determine query\"}"
+        )
+
+        try:
+            resp = await litellm.acompletion(
+                model="groq/llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=300,
+            )
+            raw = resp.choices[0].message.content.strip()
+            import re
+            json_match = re.search(r"\{.*\}", raw, re.DOTALL)
+            if not json_match:
+                return f"Could not parse query: {raw[:200]}"
+            query_params = _json.loads(json_match.group(0))
+        except Exception as exc:
+            return f"LLM query generation failed: {exc}"
+
+        if "error" in query_params:
+            return f"Query unclear: {query_params['error']}"
+
+        table = query_params.get("table", "")
+        if not table:
+            return "Could not determine which table to query."
+
+        try:
+            rows = await self.query(
+                table=table,
+                select=query_params.get("select", "*"),
+                filters=query_params.get("filters"),
+                order=query_params.get("order"),
+                limit=int(query_params.get("limit", 20)),
+            )
+        except Exception as exc:
+            return f"Query failed: {exc}"
+
+        if not rows:
+            return f"No results found in `{table}` for that query."
+
+        # Format as readable summary
+        lines = [f"<b>{table}</b> — {len(rows)} result(s):"]
+        for row in rows[:10]:
+            row_str = "  " + ", ".join(f"{k}: {v}" for k, v in list(row.items())[:6])
+            lines.append(row_str[:200])
+        if len(rows) > 10:
+            lines.append(f"  ... and {len(rows) - 10} more")
+        return "\n".join(lines)
+
     async def health_check(self) -> Dict[str, Any]:
         """Check Supabase project health. Returns dict with ok/latency_ms."""
         t0 = time.monotonic()

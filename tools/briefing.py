@@ -171,10 +171,37 @@ async def _get_weather() -> str:
         return f"(weather unavailable for {city})"
 
 
+async def _conversational_wrap(raw_data: str, now: datetime) -> str:
+    """Pass raw briefing data through LLM to generate a friend-like conversational message."""
+    try:
+        import litellm
+
+        hour = now.hour
+        time_of_day = "morning" if hour < 12 else "afternoon" if hour < 17 else "evening"
+        prompt = (
+            f"You are Legion — Bashara's AI companion. It's {time_of_day} ({now.strftime('%H:%M')}, "
+            f"{now.strftime('%A %B %d')}). Write a short, friendly briefing message to Bashara "
+            f"based on the following raw data. Talk like a smart friend catching them up — "
+            f"casual, direct, a bit witty. Use Telegram HTML (<b>, <i>, <code>). "
+            f"Point out anything that needs attention, mention anything interesting, "
+            f"and keep it under 400 words. Don't just list everything — prioritise what matters.\n\n"
+            f"RAW DATA:\n{raw_data}"
+        )
+        resp = await litellm.acompletion(
+            model="groq/llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=600,
+        )
+        return resp.choices[0].message.content.strip()
+    except Exception as exc:
+        logger.warning("conversational briefing LLM wrap failed: %s", exc)
+        return raw_data  # Fallback to raw data if LLM fails
+
+
 async def generate_briefing() -> str:
-    """Assemble the full morning briefing."""
+    """Assemble the morning briefing and format it conversationally via LLM."""
     now = datetime.now()
-    greeting = "Good morning" if now.hour < 12 else "Good afternoon" if now.hour < 17 else "Good evening"
 
     # Fetch everything in parallel
     (
@@ -195,38 +222,21 @@ async def generate_briefing() -> str:
         _fetch_rss("https://arxiv.org/rss/cs.CV", max_items=3),
     )
 
-    # Format news
-    hn_lines = []
-    for item in hn_news:
-        hn_lines.append(f"  - {item['title'][:80]}")
-    hn_text = "\n".join(hn_lines) if hn_lines else "  (unavailable)"
+    hn_text = "\n".join(f"- {i['title'][:80]}" for i in hn_news) or "(unavailable)"
+    arxiv_text = "\n".join(f"- {i['title'][:80]}" for i in arxiv_news) or "(unavailable)"
 
-    arxiv_lines = []
-    for item in arxiv_news:
-        arxiv_lines.append(f"  - {item['title'][:80]}")
-    arxiv_text = "\n".join(arxiv_lines) if arxiv_lines else "  (unavailable)"
-
-    briefing = (
-        f"<b>{'☀️' if now.hour < 17 else '🌙'} {greeting}, Bas!</b>\n"
-        f"📅 {now.strftime('%A, %B %d %Y')} — {now.strftime('%H:%M')}\n\n"
-
-        f"<b>🌤 Weather</b>\n  {weather}\n\n"
-
-        f"<b>💻 System</b>\n{system}\n\n"
-
-        f"<b>📦 Your PRs</b>\n{github_prs}\n\n"
-        f"<b>📝 Reviews Requested</b>\n{review_prs}\n\n"
-
-        f"<b>🧠 Training Status</b>\n<pre>{training}</pre>\n\n"
-
-        f"<b>📰 Hacker News</b>\n{hn_text}\n\n"
-
-        f"<b>📚 arXiv CS.CV</b>\n{arxiv_text}\n\n"
-
-        "<i>Use /paper to dive into any paper, /stats for full system info</i>"
+    # Build raw data block for LLM
+    raw = (
+        f"Weather: {weather}\n"
+        f"System stats:\n{system}\n"
+        f"Your open PRs:\n{github_prs}\n"
+        f"PRs waiting for your review:\n{review_prs}\n"
+        f"ML training status (last lines):\n{training}\n"
+        f"Hacker News top stories:\n{hn_text}\n"
+        f"arXiv CS.CV latest:\n{arxiv_text}"
     )
 
-    return briefing
+    return await _conversational_wrap(raw, now)
 
 
 async def schedule_daily_briefing(bot, user_id: int, hour: int = 7, minute: int = 30) -> None:

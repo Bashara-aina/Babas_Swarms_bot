@@ -1094,6 +1094,20 @@ async def chat(
             "For Legion status/config questions, suggest: /models, /keys, /stats, /gpu."
         )
 
+    # ── Devil's advocate injection (for substantive messages, non-agentic agents) ──
+    # Adds internal intellectual honesty — Legion challenges its own answers before
+    # committing, making responses more honest and less "yes-man".
+    _word_count = len(task.split()) if task else 0
+    if agent_key not in ("computer", "vision", "think") and _word_count > 12:
+        system_prompt += (
+            "\n\n[INTERNAL REASONING DISCIPLINE]\n"
+            "Before finalising your response, briefly stress-test it: "
+            "ask yourself 'Is this actually correct? What would a smart skeptic push back on?' "
+            "If the self-check reveals a real weakness or blind spot, lead with it honestly. "
+            "If your first take holds up, answer with confidence — no need to hedge. "
+            "This is about intellectual honesty, not performative uncertainty."
+        )
+
     if image_b64:
         user_content: Any = [
             {"type": "text", "text": task},
@@ -1274,6 +1288,17 @@ async def _post_call_hooks(
             )
         if reflection is not None:
             await reflection.post_turn_hook(user_msg, response)
+
+        # Promote important facts from this conversation to CoreMemory (async, non-blocking)
+        try:
+            from core.memory.consolidator import promote_important
+            recent = [
+                {"role": "user", "content": user_msg},
+                {"role": "assistant", "content": response},
+            ]
+            asyncio.create_task(promote_important(recent))
+        except Exception:
+            pass
     except Exception as exc:
         logger.warning("[PostCall hooks] %s", exc)
 
