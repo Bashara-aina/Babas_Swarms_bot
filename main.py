@@ -47,7 +47,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 import computer_agent
 import agents as agents_registry
-from llm_client import verify_api_keys
+from llm_client import init_humanization_layer, verify_api_keys
 import handlers.shared as _shared
 from handlers import register_all_routers
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
@@ -190,6 +190,20 @@ async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) 
 
 async def on_startup(bot: Bot) -> None:
     init_observability()
+
+    try:
+        layer = init_humanization_layer()
+        mem = layer.get("memory")
+        emo = layer.get("emotion")
+        logger.info("[Legion v6] Memory: %s", mem.get_memory_stats() if mem else {})
+        logger.info(
+            "[Legion v6] Emotion: %s",
+            getattr(getattr(emo, "state", None), "dominant_emotion", "loaded"),
+        )
+        logger.info("[Legion v6] Humanization layer active.")
+    except Exception as e:
+        logger.warning("Humanization init failed (non-fatal): %s", e)
+
     try:
         agents_registry.ensure_gemma4_local_available()
     except Exception as e:
@@ -313,8 +327,14 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="research",    description="Deep web research"),
             BotCommand(command="scrape",      description="Scrape a URL"),
             # Memory
+            BotCommand(command="memory",      description="Humanized memory stats"),
             BotCommand(command="remember",    description="Save a note to memory"),
             BotCommand(command="recall",      description="Search memory"),
+            BotCommand(command="forget",      description="Remove core memory key"),
+            BotCommand(command="emotion",     description="Legion emotional state"),
+            BotCommand(command="opinions",    description="Legion current opinions"),
+            BotCommand(command="profile",     description="Persistent user profile"),
+            BotCommand(command="teach",       description="Teach/correct Legion profile"),
             BotCommand(command="memories",    description="Show recent memories"),
             BotCommand(command="briefing",    description="Morning briefing"),
             # Dev
@@ -359,7 +379,6 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="evolve",      description="Create evolution roadmap"),
             BotCommand(command="aside",       description="Create concise side note"),
             BotCommand(command="loop",        description="Autonomous goal execution loop"),
-            BotCommand(command="loop_start",  description="ECC-style alias for /loop"),
             BotCommand(command="loop_stop",   description="Stop running loop"),
             BotCommand(command="loop_status", description="Loop progress status"),
             BotCommand(command="loop_pause",  description="Pause running loop"),
@@ -371,17 +390,13 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="audit_summary", description="Audit log summary"),
             # Sessions & Learning
             BotCommand(command="save",        description="Save session state"),
-            BotCommand(command="save_session", description="ECC-style save session alias"),
             BotCommand(command="resume",      description="Resume saved session"),
-            BotCommand(command="resume_session", description="ECC-style resume session alias"),
             BotCommand(command="checkpoint",  description="Save named checkpoint"),
             BotCommand(command="sessions",    description="List saved sessions"),
             BotCommand(command="learn",       description="Teach a pattern"),
             BotCommand(command="learn_eval",  description="Evaluate learned instincts"),
             BotCommand(command="instincts",   description="Show learned patterns"),
             BotCommand(command="instinct_status", description="Instincts by category"),
-            BotCommand(command="instinct_export", description="Export instincts as JSON"),
-            BotCommand(command="instinct_import", description="Import instincts from JSON"),
             BotCommand(command="skill_create", description="Create a new skill file"),
             BotCommand(command="update_docs", description="Generate docs update draft"),
             BotCommand(command="update_codemaps", description="Regenerate codemap doc"),
