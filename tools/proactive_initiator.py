@@ -134,8 +134,8 @@ async def _build_message(trigger: str) -> str:
 
     if trigger == "memory_surface":
         try:
-            from tools.mem0_client import search_memories
-            mems = await asyncio.to_thread(search_memories, "recent important", limit=1)
+            from tools.mem0_client import mem0_search
+            mems = await mem0_search("bashara", "recent important", limit=1)
             if mems:
                 content = mems[0].get("memory") or mems[0].get("content", "")
                 if content:
