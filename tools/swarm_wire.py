@@ -301,7 +301,7 @@ async def _run_department(
         f"Your team's briefing:\n{team_briefing[:8000]}"
     )
     # Use architect model for lead synthesis — needs large context window
-    lead_model = AGENT_MODELS.get("architect", "cerebras/qwen-3-235b-a22b")
+    lead_model = AGENT_MODELS.get("architect", "cerebras/qwen3-235b-a22b")
     lead_synthesis = await _llm_call(
         lead_model, lead_system, lead_user,
         max_tokens=1500,

@@ -92,7 +92,7 @@ DEBATE_ICONS = {
 # ── Primary model registry ──────────────────────────────────────────────────
 # SINGLE source of truth — router.py and swarm_wire.py import from here.
 AGENT_MODELS: dict[str, str] = {
-    "vision":     "ollama_chat/gemma3:12b",             # local, private, RTX 3060
+    "vision":     "ollama_chat/gemma4:e4b",             # local, private, RTX 3060
     "coding":     "groq/llama-3.3-70b-versatile",       # fast + reliable
     "debug":      "zai/glm-4",                          # GPQA Diamond 85.7%
     "math":       "zai/glm-4",                          # AIME 2025 95.7%
@@ -106,12 +106,19 @@ AGENT_MODELS: dict[str, str] = {
     "pm":         "cerebras/qwen3-235b-a22b",           # project management
     "humanizer":  "groq/llama-3.3-70b-versatile",       # humanising AI text
     "reviewer":   "groq/llama-3.3-70b-versatile",       # AI code review
+    "owl":        "groq/moonshotai/kimi-k2-instruct",
+    "ag2_researcher": "groq/moonshotai/kimi-k2-instruct",
+    "ag2_critic": "zai/glm-4",
+    "ag2_synthesizer": "cerebras/qwen3-235b-a22b",
+    "code_exec":  "openrouter/qwen/qwen3-coder:free",
+    "predictor":  "cerebras/qwen3-235b-a22b",
+    "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
 }
 
 # ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
-        "ollama_chat/gemma3:12b",
+        "ollama_chat/gemma4:e4b",
         "groq/meta-llama/llama-4-scout-17b-16e-instruct",
         "gemini/gemini-2.0-flash",
     ],
@@ -177,6 +184,41 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     "humanizer": [
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "owl": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "gemini/gemini-2.0-flash",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_researcher": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_critic": [
+        "zai/glm-4",
+        "groq/qwen-qwq-32b",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_synthesizer": [
+        "cerebras/qwen3-235b-a22b",
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
+    ],
+    "code_exec": [
+        "openrouter/qwen/qwen3-coder:free",
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "predictor": [
+        "cerebras/qwen3-235b-a22b",
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+    ],
+    "claude_orchestrator": [
+        "openrouter/anthropic/claude-opus-4",
+        "openrouter/anthropic/claude-3.5-sonnet",
         "cerebras/qwen3-235b-a22b",
     ],
     "reviewer": [

@@ -107,6 +107,7 @@ async def cmd_research(msg: Message) -> None:
 
     try:
         from llm_client import chat
+        from agents.ag2_pipeline import ResearchSwarm
         from tools.quality_guard import (
             build_evidence_envelope,
             format_verifier_block,
@@ -135,7 +136,7 @@ async def cmd_research(msg: Message) -> None:
         else:
             await _phase(f"💭 source gate passed: {source_count} sources collected")
 
-        await _phase("🧪 [Verify] synthesizing and validating research answer")
+        await _phase("🧪 [Verify] synthesizing with AG2 research swarm")
         user_id = str(msg.from_user.id) if msg.from_user else "0"
         synthesis_prompt = (
             "You are a deep research analyst. Use ONLY the supplied evidence to answer. "
@@ -149,7 +150,12 @@ async def cmd_research(msg: Message) -> None:
             "4) Risks / Unknowns\n"
             "5) Actionable Next Steps"
         )
-        draft, _ = await chat(synthesis_prompt, agent_key="analyst", user_id=user_id)
+        draft = ""
+        try:
+            convo = await ResearchSwarm().run(synthesis_prompt, max_turns=6)
+            draft = convo.output
+        except Exception:
+            draft, _ = await chat(synthesis_prompt, agent_key="analyst", user_id=user_id)
         verified, verify_meta = await verify_and_repair(topic, draft, user_id=user_id)
 
         source_gate_block = (

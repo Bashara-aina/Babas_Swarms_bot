@@ -39,6 +39,8 @@ models:
     context_window: 131072
     strengths: [coding, multi-file, swe-bench]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
   qwen3-235b:
     provider: cerebras
@@ -46,6 +48,8 @@ models:
     context_window: 131072
     strengths: [reasoning, speed, general]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
   glm-4:
     provider: zai
@@ -53,6 +57,8 @@ models:
     context_window: 128000
     strengths: [debug, math, reasoning]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
   kimi-k2:
     provider: groq
@@ -60,6 +66,8 @@ models:
     context_window: 200000
     strengths: [deep-reasoning, analysis, long-context]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
   gemini-3.1-pro:
     provider: gemini
@@ -67,13 +75,20 @@ models:
     context_window: 1000000
     strengths: [teaching, general, long-context]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
-  gemma3-12b:
+  gemma4-local:
     provider: ollama
-    model_id: "ollama_chat/gemma3:12b"
-    context_window: 8192
-    strengths: [vision, local, privacy]
+    model_id: "ollama_chat/gemma4:e4b"
+    context_window: 131072
+    strengths: [vision, local, privacy, agentic, function-calling, audio]
     cost_per_1m_tokens: 0.0
+    daily_limit: null
+    vram_required_gb: 6
+    notes: "RTX 3060 12GB safe. Gemma4 E4B MoE activates ~4B params/token."
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
   llama3-70b:
     provider: ollama
@@ -81,6 +96,8 @@ models:
     context_window: 32768
     strengths: [general, local, fallback]
     cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
 
 # Complexity tier → preferred provider order (first available wins)
 complexity_tiers:

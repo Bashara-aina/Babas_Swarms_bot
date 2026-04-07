@@ -6,13 +6,14 @@ for any legacy callers that import from router directly.
 
 Verified working models (from live logs 2026-03-09):
   groq/llama-3.3-70b-versatile  ✓
-  cerebras/qwen-3-235b-a22b     ✓
+  cerebras/qwen3-235b-a22b      ✓
   zai/glm-4                     ✓ (via openai-compat endpoint)
 """
 
 from __future__ import annotations
 import logging
 import importlib.util
+import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -24,9 +25,11 @@ if _spec is None or _spec.loader is None:
   raise ImportError(f"Unable to load agents module from {_agents_file}")
 
 _agents_module = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = _agents_module
 _spec.loader.exec_module(_agents_module)
 
 AGENT_MODELS = _agents_module.AGENT_MODELS
+AGENT_REGISTRY = _agents_module.AGENT_REGISTRY
 FALLBACK_CHAIN = _agents_module.FALLBACK_CHAIN
 TASK_KEYWORDS = _agents_module.TASK_KEYWORDS
 DEFAULT_AGENT = _agents_module.DEFAULT_AGENT
@@ -54,7 +57,7 @@ clear_conversation = _agents_module.clear_conversation
 get_conversation_summary_prompt = _agents_module.get_conversation_summary_prompt
 
 __all__ = [
-    "AGENT_MODELS", "FALLBACK_CHAIN", "TASK_KEYWORDS", "DEFAULT_AGENT",
+  "AGENT_MODELS", "AGENT_REGISTRY", "FALLBACK_CHAIN", "TASK_KEYWORDS", "DEFAULT_AGENT",
     "ACTIVE_THREADS", "CONVERSATION_HISTORY",
     "DEBATE_PERSONAS", "DEBATE_PERSONA_MODELS",
     "DEBATE_ICONS", "PERSONALITY_WRAPPER",

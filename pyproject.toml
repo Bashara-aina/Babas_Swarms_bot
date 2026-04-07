@@ -16,6 +16,27 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
 ]
+dependencies = [
+    "aiogram>=3.4.1,<4.0.0",
+    "python-dotenv>=1.0.0",
+    "litellm>=1.57.0",
+    "aiohttp>=3.9.0",
+    "httpx>=0.27.0",
+    "aiofiles>=23.2.0",
+    "aiosqlite>=0.20.0",
+    "psutil>=5.9.0",
+    "playwright>=1.40.0",
+    "openai-agents==0.4.2",
+    "camel-ai==0.2.89",
+    "ag2==0.11.4",
+    "smolagents==1.23.0",
+    "pydantic-ai-slim==1.61.0",
+    "agentops==0.3.26",
+    "networkx>=3.0",
+    "knowledge-graph>=0.0.33",
+    "swarms==9.0.4",
+    "pytest-asyncio>=0.23.0",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

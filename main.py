@@ -28,8 +28,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import subprocess
 import sys
 import time
+from urllib import error as urlerror
+from urllib import request as urlrequest
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
@@ -43,9 +46,12 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / ".env")
 
 import computer_agent
+import agents as agents_registry
 from llm_client import verify_api_keys
 import handlers.shared as _shared
 from handlers import register_all_routers
+from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
+from core.observability import init_observability
 
 # ── Logging ────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -163,7 +169,51 @@ register_all_routers(dp)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
+def _ruflo_health_probe_sync(url: str = "http://127.0.0.1:7834/health") -> bool:
+    req = urlrequest.Request(url=url, method="GET")
+    with urlrequest.urlopen(req, timeout=2) as response:
+        body = response.read().decode("utf-8", errors="ignore")
+        return response.status == 200 and '"ok":true' in body.replace(" ", "")
+
+
+async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) -> bool:
+    for _ in range(attempts):
+        try:
+            healthy = await asyncio.to_thread(_ruflo_health_probe_sync)
+            if healthy:
+                return True
+        except (urlerror.URLError, TimeoutError, ValueError, OSError):
+            pass
+        await asyncio.sleep(delay_seconds)
+    return False
+
+
 async def on_startup(bot: Bot) -> None:
+    init_observability()
+    try:
+        agents_registry.ensure_gemma4_local_available()
+    except Exception as e:
+        logger.warning("gemma4 local prep failed (non-fatal): %s", e)
+
+    if os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            subprocess.Popen(
+                ["node", "tools/ruflo/server.js"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            logger.info("ruflo sidecar launched")
+        except Exception as e:
+            logger.warning("ruflo sidecar launch failed (non-fatal): %s", e)
+
+        try:
+            if await _wait_for_ruflo_health():
+                logger.info("ruflo sidecar healthy on startup")
+            else:
+                logger.warning("ruflo sidecar health probe failed on startup (non-fatal)")
+        except Exception as e:
+            logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
+
     # Initialize persistence and scheduler
     try:
         from tools.persistence import init_db
@@ -249,6 +299,10 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="screen",      description="Take desktop screenshot"),
             BotCommand(command="run",         description="LLM chat (no computer)"),
             BotCommand(command="swarm",       description="Multi-agent team execution"),
+            BotCommand(command="owl",         description="OWL specialist complex-task agent"),
+            BotCommand(command="predict",     description="Swarm consensus prediction"),
+            BotCommand(command="code_exec",   description="Write + execute code safely"),
+            BotCommand(command="ag2",         description="AG2 multi-agent research conversation"),
             BotCommand(command="swarm_viz",   description="Visualize agents/thoughts/communications"),
             BotCommand(command="think",       description="QwQ deep reasoning"),
             BotCommand(command="cmd",         description="Run shell command"),
@@ -366,6 +420,9 @@ async def on_startup(bot: Bot) -> None:
 
 
 async def main() -> None:
+    health = run_health_check()
+    print_health_report(health)
+    _shared.FEATURE_FLAGS = FEATURE_FLAGS
     dp.startup.register(on_startup)
     await dp.start_polling(bot, skip_updates=True)
 

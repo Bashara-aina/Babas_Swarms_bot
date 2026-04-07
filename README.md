@@ -8,7 +8,7 @@
 
 | Agent | Model | Provider | Best For |
 |-------|-------|----------|----------|
-| **vision** | gemma3:12b | Local Ollama 🔒 | Screenshot analysis (stays on your machine) |
+| **vision** | gemma4:e4b | Local Ollama 🔒 | Screenshot analysis (stays on your machine) |
 | **coding** | llama-3.3-70b | Groq free | Code generation, fast |
 | **debug** | GLM-4 | Z.AI free | PyTorch/CUDA errors (GPQA 85.7%) |
 | **math** | GLM-4 | Z.AI free | Tensors, gradients, math (AIME 95.7%) |
@@ -16,6 +16,13 @@
 | **analyst** | Kimi K2 (1T MoE) | Groq free | Data analysis, deep reasoning |
 | **computer** | llama-3.3-70b | Groq free | Agentic tool-calling loop |
 | **general** | llama-3.3-70b | Groq free | Default fallback |
+| **owl** ⭐NEW | Kimi K2 | Groq | Complex tasks, GAIA-style workflows |
+| **ag2_researcher** ⭐ | Kimi K2 | Groq | Deep research pipelines |
+| **ag2_critic** ⭐ | GLM-4 | Z.AI | Critique and adversarial analysis |
+| **ag2_synthesizer** ⭐ | Qwen3-235B | Cerebras | Multi-perspective synthesis |
+| **code_exec** ⭐ | qwen3-coder:free | OpenRouter | Write + execute Python/bash loops |
+| **predictor** ⭐ | Qwen3-235B | Cerebras | Swarm consensus complexity/prediction |
+| **claude_orch** ⭐ | claude-opus-4 | OpenRouter | Claude-native orchestration via ruflo |
 
 Every agent has automatic fallback chains — no rate limit ever blocks you.
 
@@ -41,6 +48,15 @@ Every agent has automatic fallback chains — no rate limit ever blocks you.
 | `/think <query>` | QwQ deep reasoning mode |
 | `/agent <key> <task>` | Force a specific agent |
 | `/swarm <task>` | Multi-agent parallel execution |
+
+### v5 New Commands
+| Command | Description |
+|---------|-------------|
+| `/owl <task>` | OWL agent for complex real-world tasks |
+| `/predict <question>` | MiroFish swarm consensus + confidence |
+| `/code_exec <task>` | Generate + run code with stdout/stderr |
+| `/ag2 <task>` | AG2 multi-agent research conversation |
+| `/swarm --topology <name> <task>` | Select topology (`spreadsheet`, `mixture`, `graph`, `sequential`, `concurrent`, `debate`, `auto`) |
 
 ### Web & Research
 | Command | Description |

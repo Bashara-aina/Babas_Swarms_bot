@@ -7,7 +7,7 @@ Usage:
     from tools.resource_monitor import can_use_local_model, get_resource_snapshot
 
     if await can_use_local_model():
-        # use ollama_chat/gemma3:12b
+        # use ollama_chat/gemma4:e4b
     else:
         # use cloud fallback
 
@@ -264,7 +264,7 @@ def format_resource_html(snap: ResourceSnapshot) -> str:
     lines.append("")
     if snap.local_allowed:
         lines.append("\U0001f916 <b>Local Ollama</b>: \u2705 <b>ENABLED</b>")
-        lines.append("   gemma3:12b will be used for vision tasks")
+        lines.append("   gemma4:e4b will be used for vision tasks")
     else:
         lines.append("\U0001f916 <b>Local Ollama</b>: \u274c <b>BYPASSED \u2192 cloud fallback</b>")
         lines.append(f"   reason: <i>{snap.block_reason}</i>")
