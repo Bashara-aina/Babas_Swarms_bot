@@ -1,4 +1,15 @@
-"""Voice message handler — transcribes audio and optionally replies with TTS."""
+"""Voice message handler — transcribes audio and optionally replies with TTS.
+
+Commands (merged from voice_handler.py):
+  /voice_on      — enable voice reply mode
+  /voice_off     — disable voice reply mode
+  /voice_status  — show current voice mode state
+  /voice_toggle  — toggle voice reply (legacy alias)
+
+Handles:
+  F.voice  — voice note messages (transcribe → LLM → optional TTS reply)
+  F.audio  — audio file uploads (same pipeline)
+"""
 from __future__ import annotations
 
 import logging
@@ -91,6 +102,49 @@ async def _reply_with_optional_tts(msg: Message, response: str) -> None:
         logger.debug("TTS skipped: %s", exc)
 
 
+# ── Voice mode commands ────────────────────────────────────────────────────────────────────────────────
+
+@router.message(Command("voice_on"))
+async def cmd_voice_on(msg: Message) -> None:
+    """Enable voice reply mode."""
+    if not is_allowed(msg):
+        return
+    await _set_voice_reply_enabled(True)
+    await msg.answer("🎤 Voice mode ON — send voice notes and I'll reply with audio.")
+
+
+@router.message(Command("voice_off"))
+async def cmd_voice_off(msg: Message) -> None:
+    """Disable voice reply mode."""
+    if not is_allowed(msg):
+        return
+    await _set_voice_reply_enabled(False)
+    await msg.answer("🔇 Voice mode OFF — text only.")
+
+
+@router.message(Command("voice_status"))
+async def cmd_voice_status(msg: Message) -> None:
+    """Show current voice mode state."""
+    if not is_allowed(msg):
+        return
+    enabled = await _voice_reply_enabled()
+    status = "ON 🎤" if enabled else "OFF 🔇"
+    await msg.answer(f"Voice reply mode: <b>{status}</b>", parse_mode="HTML")
+
+
+@router.message(Command("voice_toggle"))
+async def cmd_voice_toggle(msg: Message) -> None:
+    """Toggle voice reply on/off (alias for /voice_on / /voice_off)."""
+    if not is_allowed(msg):
+        return
+    enabled = await _voice_reply_enabled()
+    new_state = not enabled
+    await _set_voice_reply_enabled(new_state)
+    await msg.answer(f"Voice replies are now {'enabled 🎤' if new_state else 'disabled 🔇'}.")
+
+
+# ── Voice/audio message handlers ──────────────────────────────────────────────────────────────────
+
 @router.message(F.voice)
 async def handle_voice(msg: Message) -> None:
     """Download voice message, transcribe, then route to chat with optional TTS."""
@@ -169,13 +223,3 @@ async def handle_audio(msg: Message) -> None:
                 os.unlink(tmp_path)
             except Exception:
                 pass
-
-
-@router.message(Command("voice_toggle"))
-async def cmd_voice_toggle(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    enabled = await _voice_reply_enabled()
-    new_state = not enabled
-    await _set_voice_reply_enabled(new_state)
-    await msg.answer(f"Voice replies are now {'enabled' if new_state else 'disabled'}.")
