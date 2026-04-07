@@ -1223,6 +1223,17 @@ async def chat(
                     pass
 
             logger.info("Success: %s", model)
+            # Apply emotion-driven tone cleanup (strip corporate phrases, add TLDR)
+            try:
+                result = postprocess_response(result, _current_emotion, task)
+            except Exception as _pp_err:
+                logger.debug("postprocess_response skipped: %s", _pp_err)
+            # Enforce character: strip forbidden phrases, apply mode voice
+            try:
+                from core.character_enforcer import enforce_character
+                result = enforce_character(result, agent_key)
+            except Exception as _ce_err:
+                logger.debug("character_enforcer skipped: %s", _ce_err)
             return result, model
 
         except litellm.RateLimitError:

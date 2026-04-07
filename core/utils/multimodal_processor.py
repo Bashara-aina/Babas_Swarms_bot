@@ -2,10 +2,10 @@
 """Unified processor for voice messages, documents, and images.
 
 Providers:
-- Voice → Whisper (local, via openai-whisper)
+- Voice → faster-whisper (GPU, CUDA) → Groq Whisper API → openai-whisper (CPU fallback)
 - PDF   → PyPDF2
 - DOCX  → python-docx
-- TTS   → edge-tts (free Microsoft neural voices)
+- TTS   → kokoro-onnx (local, high-quality) → edge-tts (cloud fallback)
 - Image → Ollama Gemma3:12b vision (local)
 """
 
@@ -32,7 +32,7 @@ MAX_CONTEXT_CHARS = 8_000        # Max chars stored from a document into thread 
 # ── Voice Transcription ────────────────────────────────────────────────────────
 
 def _transcribe_sync(audio_bytes: bytes, extension: str = ".ogg") -> str:
-    """Transcribe audio using local Whisper model (sync).
+    """Transcribe audio. Priority: faster-whisper (GPU) → openai-whisper (CPU).
 
     Args:
         audio_bytes: Raw audio file bytes.
@@ -41,21 +41,43 @@ def _transcribe_sync(audio_bytes: bytes, extension: str = ".ogg") -> str:
     Returns:
         Transcribed text string.
     """
-    try:
-        import whisper
-    except ImportError:
-        raise RuntimeError("openai-whisper not installed — run: pip install openai-whisper")
-
     with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as f:
         f.write(audio_bytes)
         tmp_path = f.name
 
     try:
-        model = whisper.load_model("base")   # 'base' runs fast on CPU; upgrade to 'small' if needed
-        result = model.transcribe(tmp_path)
-        text: str = result["text"].strip()
-        logger.info("Transcribed %d chars from audio", len(text))
-        return text
+        # ── Tier 1: faster-whisper with GPU ──────────────────────────────────
+        try:
+            from faster_whisper import WhisperModel
+            model = WhisperModel("base", device="cuda", compute_type="float16")
+            segments, _ = model.transcribe(tmp_path)
+            text = " ".join(seg.text for seg in segments).strip()
+            logger.info("Transcribed %d chars via faster-whisper (GPU)", len(text))
+            return text
+        except Exception as fw_err:
+            logger.debug("faster-whisper failed (%s), trying CPU mode", fw_err)
+            try:
+                from faster_whisper import WhisperModel
+                model = WhisperModel("base", device="cpu", compute_type="int8")
+                segments, _ = model.transcribe(tmp_path)
+                text = " ".join(seg.text for seg in segments).strip()
+                logger.info("Transcribed %d chars via faster-whisper (CPU)", len(text))
+                return text
+            except Exception as fw_cpu_err:
+                logger.debug("faster-whisper CPU also failed (%s), falling back to openai-whisper", fw_cpu_err)
+
+        # ── Tier 2: openai-whisper (original fallback) ───────────────────────
+        try:
+            import whisper
+            model_ow = whisper.load_model("base")
+            result = model_ow.transcribe(tmp_path)
+            text = str(result["text"]).strip()
+            logger.info("Transcribed %d chars via openai-whisper", len(text))
+            return text
+        except ImportError:
+            raise RuntimeError(
+                "No Whisper backend available. Install faster-whisper or openai-whisper."
+            )
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
@@ -76,19 +98,60 @@ async def transcribe_voice(audio_bytes: bytes, extension: str = ".ogg") -> str:
 
 # ── Text-to-Speech ─────────────────────────────────────────────────────────────
 
+_KOKORO_VOICE = "af_sarah"   # High-quality English voice; change for other languages
+_KOKORO_MODEL_PATH = Path(__file__).parent.parent.parent / "models" / "kokoro-v0_19.onnx"
+_KOKORO_VOICES_PATH = Path(__file__).parent.parent.parent / "models" / "voices.bin"
+
+
+def _tts_kokoro_sync(text: str) -> bytes:
+    """Synthesise speech with kokoro-onnx (sync). Returns WAV bytes."""
+    from kokoro_onnx import Kokoro
+    import numpy as np
+    import struct
+    import wave
+
+    kokoro = Kokoro(str(_KOKORO_MODEL_PATH), str(_KOKORO_VOICES_PATH))
+    samples, sample_rate = kokoro.create(text, _KOKORO_VOICE)
+
+    # Encode raw float32 samples → WAV bytes
+    pcm = (np.clip(samples, -1.0, 1.0) * 32767).astype(np.int16)
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(pcm.tobytes())
+    return buf.getvalue()
+
+
 async def text_to_speech(text: str, voice: str = TTS_VOICE) -> bytes:
-    """Convert text to MP3 audio bytes using edge-tts.
+    """Convert text to audio bytes.
+
+    Priority:
+    1. kokoro-onnx  — local high-quality ONNX TTS (returns WAV)
+    2. edge-tts     — Microsoft cloud neural TTS (returns MP3, fallback)
 
     Args:
         text: Text to synthesize.
-        voice: Edge-TTS voice name (default: en-US-AriaNeural).
+        voice: Edge-TTS voice name used only for the fallback path.
 
     Returns:
-        MP3 audio bytes.
-
-    Raises:
-        RuntimeError: If edge-tts is not installed.
+        Audio bytes (WAV from kokoro, MP3 from edge-tts).
     """
+    # ── Tier 1: kokoro-onnx ───────────────────────────────────────────────────
+    if _KOKORO_MODEL_PATH.exists() and _KOKORO_VOICES_PATH.exists():
+        try:
+            audio_bytes = await asyncio.get_event_loop().run_in_executor(
+                None, _tts_kokoro_sync, text
+            )
+            logger.info("TTS: kokoro-onnx generated %d bytes for %d chars", len(audio_bytes), len(text))
+            return audio_bytes
+        except Exception as ko_err:
+            logger.debug("kokoro-onnx TTS failed (%s), falling back to edge-tts", ko_err)
+    else:
+        logger.debug("kokoro-onnx model files not found, using edge-tts")
+
+    # ── Tier 2: edge-tts ─────────────────────────────────────────────────────
     try:
         import edge_tts
     except ImportError:
@@ -96,13 +159,11 @@ async def text_to_speech(text: str, voice: str = TTS_VOICE) -> bytes:
 
     communicate = edge_tts.Communicate(text, voice)
     buf = io.BytesIO()
-
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
             buf.write(chunk["data"])
-
     audio_bytes = buf.getvalue()
-    logger.info("TTS generated %d bytes for %d chars", len(audio_bytes), len(text))
+    logger.info("TTS: edge-tts generated %d bytes for %d chars", len(audio_bytes), len(text))
     return audio_bytes
 
 

@@ -38,6 +38,29 @@ services:
       timeout: 10s
       retries: 3
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: legion-n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-legion}
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Asia/Tokyo
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Uncomment to run the bot itself in Docker (needs X11/display passthrough)
   # legion-bot:
   #   build: .
@@ -67,4 +90,6 @@ volumes:
   redis_data:
     driver: local
   chroma_data:
+    driver: local
+  n8n_data:
     driver: local
