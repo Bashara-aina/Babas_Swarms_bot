@@ -268,7 +268,7 @@ async def on_startup(bot: Bot) -> None:
         interval = int(os.getenv("PROACTIVE_MIN_INTERVAL_SEC", "1800"))
         logger.info("Proactive monitors scheduled (min_interval=%ds, env: PROACTIVE_MIN_INTERVAL_SEC)", interval)
     except Exception as e:
-        logger.warning("Proactive monitors init failed (non-fatal): %s", e)
+        logger.warning("Proactive monitors init failed (non-fatal): %s", e)   try:     from tools.proactive_initiator import start_proactive_initiator     asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))     logger.info("Proactive initiator started (Legion talks first)")   except Exception as e:     logger.warning("Proactive initiator init failed (non-fatal): %s", e)
 
     try:
         from tools.voice_engine import run_prewarm
