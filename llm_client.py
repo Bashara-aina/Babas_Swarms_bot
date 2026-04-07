@@ -984,8 +984,8 @@ async def chat(
                 relevant_memories = await memory.search(task, limit=5)
             humanized_prompt = prompt_builder.build(
                 task_context=task_context or f"Agent: {agent_key}",
-                relevant_memories=relevant_memories,
-                include_opinions=True,
+                mem0_memories=relevant_memories,
+                emotion=_current_emotion,
             )
             if humanized_prompt:
                 prompt_sections.append(humanized_prompt)
@@ -1154,7 +1154,7 @@ async def chat(
             await hooks.emit("pre_llm_call", {
                 "agent": agent_key, "model": model, "task": task[:200],
             })
-            resp = await _call_model(model, messages)
+            resp = await _call_model(model, messages, temperature={"excited": 0.85, "curious": 0.82, "frustrated": 0.6, "focused": 0.2, "debug": 0.2, "happy": 0.88, "banter": 0.92}.get(_current_emotion, 0.7))
             raw = (resp.choices[0].message.content or "").strip()
             _elapsed_ms = int((time.time() - _t0) * 1000)
 
