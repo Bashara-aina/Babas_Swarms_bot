@@ -164,168 +164,144 @@ async def cmd_agent(msg: Message) -> None:
 async def cmd_swarm(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    task = (msg.text or "").removeprefix("/swarm").strip()
-    if not task:
+    raw = (msg.text or "").removeprefix("/swarm").strip()
+    if not raw:
         await msg.answer(
-            "usage: <code>/swarm &lt;complex task&gt;</code>\n\n"
-            "decomposes task and runs specialist agents in parallel:\n"
-            "strategist, developer, researcher, marketer, analyst, devops, pm\n\n"
-            "examples:\n"
-            "<code>/swarm analyze IKEA ASM codebase and suggest 3 improvements</code>\n"
-            "<code>/swarm build a landing page with API and tests</code>",
+            "usage: <code>/swarm [--sdk] [--topology auto|spreadsheet|mixture|graph|sequential|concurrent|debate] &lt;task&gt;</code>",
             parse_mode="HTML",
         )
         return
 
-    status_msg = await msg.answer("🧠 [Plan] strategist decomposing task...")
-    started_at = time.time()
-    live_viz_msg = await msg.answer("📡 starting live swarm visualization…")
+    from handlers.swarm_handler import parse_swarm_args
+
+    args = parse_swarm_args(raw)
+    use_sdk = args.use_sdk
+    topology = args.topology
+    task = args.task
+    if not task:
+        await msg.answer("missing task after flags", parse_mode="HTML")
+        return
+
+    status = await msg.answer("🧠 running swarm…")
     typing_task = asyncio.create_task(_keep_typing(msg))
-    stop_live_viz = asyncio.Event()
-
-    async def _live_refresh_loop() -> None:
-        if not msg.from_user:
-            return
-        while not stop_live_viz.is_set():
-            try:
-                from tools.swarm_observability import build_swarm_live_panel_html
-                panel = build_swarm_live_panel_html(msg.from_user.id)
-                await live_viz_msg.edit_text(panel, parse_mode="HTML")
-            except Exception:
-                pass
-
-            try:
-                await asyncio.wait_for(stop_live_viz.wait(), timeout=4.0)
-            except asyncio.TimeoutError:
-                continue
-
-    live_viz_task = asyncio.create_task(_live_refresh_loop())
-
-    async def on_progress(step_text: str) -> None:
-        try:
-            if msg.from_user:
-                try:
-                    from tools.swarm_observability import record_event
-                    record_event(msg.from_user.id, step_text)
-                except Exception:
-                    pass
-            if step_text.startswith("💭"):
-                await msg.answer(f"<i>{html_mod.escape(step_text)}</i>", parse_mode="HTML")
-            else:
-                await status_msg.edit_text(html_mod.escape(step_text), parse_mode="HTML")
-        except Exception:
-            pass
-
     try:
-        from llm_client import chat
-        from tools.orchestrator import decompose_task, execute_parallel, synthesize_results
-        from tools.quality_guard import (
-            analyze_answer_consistency,
-            build_evidence_envelope,
-            verify_and_repair,
-        )
-        from tools.capability_metrics import record_capability_run
-        await on_progress("💭 [Plan] understanding the objective and splitting into parallel subtasks")
-        subtasks = await decompose_task(task)
-        if msg.from_user:
+        if use_sdk:
+            from core.openai_agents_bridge import run_with_handoffs
+
+            result = await run_with_handoffs(task=task, start_agent="general")
+            await status.delete()
+            await send_chunked(msg, result.final_output or "(empty output)", model_used="swarm/openai-agents")
+            return
+
+        if topology == "auto":
             try:
-                from tools.swarm_observability import start_swarm_trace
-                start_swarm_trace(msg.from_user.id, task, subtasks)
+                from agents.mirofish_agent import MiroFishAgent
+
+                score = await MiroFishAgent().score_task_complexity(task)
+                if score >= 7:
+                    topology = "mixture"
+                elif score <= 3:
+                    topology = "sequential"
+                else:
+                    topology = "concurrent"
             except Exception:
-                pass
-        agent_list = "\n".join(f"  [{s['agent']}] {s['task'][:60]}..." for s in subtasks)
-        await status_msg.edit_text(
-            f"⚙️ [Act] running {len(subtasks)} agents:\n{agent_list}",
-            parse_mode="HTML",
-        )
+                topology = "sequential"
 
-        results = await execute_parallel(subtasks, progress_cb=on_progress, root_task=task)
-        if msg.from_user:
-            try:
-                from tools.swarm_observability import record_subtask_result
-                for sid, result_text in results.items():
-                    record_subtask_result(msg.from_user.id, sid, str(result_text))
-            except Exception:
-                pass
-        await on_progress("🧪 [Verify] validating synthesized output")
-        final = await synthesize_results(task, results, subtasks)
+        from core.swarm_topologies import run_topology
 
-        user_id = str(msg.from_user.id) if msg.from_user else "0"
-        unified_prompt = (
-            "Rewrite this result using the standard final contract:\n"
-            "1) Status\n2) Key Findings\n3) Evidence\n4) Confidence\n5) Next Actions\n\n"
-            f"Original task:\n{task}\n\n"
-            f"Current result:\n{final}"
-        )
-        contracted, _ = await chat(unified_prompt, agent_key="architect", user_id=user_id)
-        verified, meta = await verify_and_repair(task, contracted, user_id=user_id)
-
-        combined_evidence = "\n\n".join(str(v) for v in results.values())
-        verifier_block = (
-            "\n\n### Verifier\n"
-            f"- Pass: {'YES' if meta.get('pass') else 'NO'}\n"
-            f"- Confidence: {int(float(meta.get('confidence', 0.0)) * 100)}%\n"
-            f"- Repairs: {int(meta.get('repairs', 0))}\n"
-            f"- Notes: {meta.get('notes', 'n/a')}"
-        )
-        from tools.quality_guard import enforce_grounded_answer
-        grounded, gate = enforce_grounded_answer(task, verified, combined_evidence, min_sources=3)
-        gate_block = (
-            "\n\n### Grounding Gate\n"
-            f"- Blocked: {'YES' if gate.get('blocked') else 'NO'}\n"
-            f"- Sources: {int(gate.get('source_count', 0))}/{int(gate.get('min_sources', 3))}"
-        )
-        consistency = analyze_answer_consistency(grounded)
-        consistency_block = (
-            "\n\n### Consistency\n"
-            f"- Contradictions: {int(consistency.get('count', 0))}\n"
-            f"- Score: {int(float(consistency.get('score', 0.0)) * 100)}%"
-        )
-        final_report = grounded + build_evidence_envelope(combined_evidence, grounded) + verifier_block + gate_block + consistency_block
-
-        record_capability_run(
-            "swarm",
-            task,
-            verifier_pass=bool(meta.get("pass")),
-            confidence=float(meta.get("confidence", 0.0)),
-            source_count=int(gate.get("source_count", 0)),
-            unique_domains=int(gate.get("unique_domains", 0)),
-            diversity_score=float(gate.get("diversity_score", 0.0)),
-            blocked=bool(gate.get("blocked")),
-            contradiction_count=int(consistency.get("count", 0)),
-            latency_ms=int((time.time() - started_at) * 1000),
-        )
-        if msg.from_user:
-            try:
-                from tools.swarm_observability import finalize_trace
-                finalize_trace(msg.from_user.id, final_report)
-            except Exception:
-                pass
-        await on_progress("✅ [Finalize] sending final answer")
-
-        stop_live_viz.set()
-        live_viz_task.cancel()
-        typing_task.cancel()
-        await status_msg.delete()
-        try:
-            if msg.from_user:
-                from tools.swarm_observability import build_swarm_live_panel_html
-                await live_viz_msg.edit_text(build_swarm_live_panel_html(msg.from_user.id), parse_mode="HTML")
-        except Exception:
-            pass
-        await send_chunked(msg, final_report, model_used="swarm/multi-agent")
-        await _send_swarm_visualization(msg)
+        team = ["general", "coding", "debug", "architect"]
+        result = await run_topology(task=task, topology=topology, agent_names=team)
+        await status.delete()
+        await send_chunked(msg, result.final_output or "(empty output)", model_used=f"swarm/{result.topology_used}")
     except Exception as e:
-        if msg.from_user:
-            try:
-                from tools.swarm_observability import finalize_trace
-                finalize_trace(msg.from_user.id, f"swarm error: {str(e)}")
-            except Exception:
-                pass
-        stop_live_viz.set()
-        live_viz_task.cancel()
+        await status.edit_text(f"swarm error: <code>{html_mod.escape(str(e)[:400])}</code>", parse_mode="HTML")
+    finally:
         typing_task.cancel()
-        await status_msg.edit_text(f"swarm error: <code>{html_mod.escape(str(e)[:400])}</code>", parse_mode="HTML")
+
+
+@router.message(Command("owl"))
+async def cmd_owl(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/owl").strip()
+    if not task:
+        await msg.answer("usage: <code>/owl &lt;task&gt;</code>", parse_mode="HTML")
+        return
+    status = await msg.answer("🦉 OWL Agent activated (GAIA-style specialist)…")
+    try:
+        from agents.owl_agent import run_owl_task
+        result = await run_owl_task(task)
+        await status.delete()
+        await send_chunked(msg, result, model_used="owl")
+    except Exception as e:
+        await status.edit_text(f"owl error: <code>{html_mod.escape(str(e)[:300])}</code>", parse_mode="HTML")
+
+
+@router.message(Command("predict"))
+async def cmd_predict(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    question = (msg.text or "").removeprefix("/predict").strip()
+    if not question:
+        await msg.answer("usage: <code>/predict &lt;question&gt;</code>", parse_mode="HTML")
+        return
+    from agents.mirofish_agent import MiroFishAgent
+    result = await MiroFishAgent().predict(question)
+    text = (
+        "<b>🔮 Swarm Consensus</b>\n"
+        f"Confidence: <code>{result.confidence_score:.2f}</code>\n\n"
+        f"{html_mod.escape(result.prediction)}\n\n"
+        f"Dissenting view: {html_mod.escape(' | '.join(result.dissenting_views[:3]))}"
+    )
+    await send_chunked(msg, text, model_used="mirofish")
+
+
+@router.message(Command("code_exec"))
+async def cmd_code_exec(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/code_exec").strip()
+    if not task:
+        await msg.answer("usage: <code>/code_exec &lt;task&gt;</code>", parse_mode="HTML")
+        return
+    status = await msg.answer("⚙️ running code execution agent…")
+    try:
+        from agents.code_agent import run_code_agent
+        result = await run_code_agent(task)
+        await status.delete()
+        payload = (
+            "<b>Code</b>\n<pre>" + html_mod.escape(result.code[:3500]) + "</pre>\n"
+            "<b>Stdout</b>\n<pre>" + html_mod.escape(result.stdout[:3000]) + "</pre>\n"
+            "<b>Stderr</b>\n<pre>" + html_mod.escape(result.stderr[:1200]) + "</pre>\n"
+            f"Exit: <code>{result.exit_code}</code> | Time: <code>{result.execution_time_ms:.1f} ms</code>"
+        )
+        await send_chunked(msg, payload, model_used="code_exec")
+    except Exception as e:
+        await status.edit_text(f"code_exec error: <code>{html_mod.escape(str(e)[:300])}</code>", parse_mode="HTML")
+
+
+@router.message(Command("ag2"))
+async def cmd_ag2(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/ag2").strip()
+    if not task:
+        await msg.answer("usage: <code>/ag2 &lt;task&gt;</code>", parse_mode="HTML")
+        return
+    status = await msg.answer("🧪 AG2 research swarm running…")
+    try:
+        from agents.ag2_pipeline import run_ag2_conversation
+        result = await run_ag2_conversation(task, max_turns=6)
+        await status.delete()
+        transcript = "\n\n".join(f"[{t.speaker}] {t.content}" for t in result.turns)
+        text = (
+            "<b>AG2 Output</b>\n"
+            f"{html_mod.escape(result.output)}\n\n"
+            "<tg-spoiler>" + html_mod.escape(transcript[:8000]) + "</tg-spoiler>"
+        )
+        await send_chunked(msg, text, model_used="ag2")
+    except Exception as e:
+        await status.edit_text(f"ag2 error: <code>{html_mod.escape(str(e)[:300])}</code>", parse_mode="HTML")
 
 
 @router.message(Command("swarm_viz"))

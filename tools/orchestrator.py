@@ -39,7 +39,7 @@ RESEARCH_HINTS = (
 
 AGENT_TEAM = {
     "strategist": {
-        "model": "cerebras/qwen-3-235b-a22b",
+        "model": "cerebras/qwen3-235b-a22b",
         "role": "High-level planning, architecture decisions, business strategy",
         "system": (
             "You are a senior technical strategist. Break complex goals into clear sub-tasks. "
@@ -88,7 +88,7 @@ AGENT_TEAM = {
         ),
     },
     "pm": {
-        "model": "cerebras/qwen-3-235b-a22b",
+        "model": "cerebras/qwen3-235b-a22b",
         "role": "Project management, task decomposition, deadline tracking",
         "system": (
             "You are a senior PM. Break work into clear tasks with owners and deadlines. "

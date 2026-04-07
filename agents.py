@@ -13,15 +13,18 @@ Never used as a text fallback.
 
 Verified working models (live logs 2026-03-09):
   groq/llama-3.3-70b-versatile    ✓
-    cerebras/qwen-3-235b-a22b       ✓
+    cerebras/qwen3-235b-a22b        ✓
   zai/glm-4                       ✓
 """
 
 from __future__ import annotations
 import asyncio
 import logging
+import os
 import re
+import subprocess
 import time
+from dataclasses import dataclass, field
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -140,11 +143,11 @@ DEBATE_PERSONAS = {
 }
 
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist":     "cerebras/qwen-3-235b-a22b",
+    "strategist":     "cerebras/qwen3-235b-a22b",
     "devil_advocate": "groq/qwen-qwq-32b",
     "researcher":     "groq/moonshotai/kimi-k2-instruct",
     "pragmatist":     "groq/llama-3.3-70b-versatile",
-    "visionary":      "cerebras/qwen-3-235b-a22b",
+    "visionary":      "cerebras/qwen3-235b-a22b",
     "critic":         "zai/glm-4",
 }
 
@@ -159,32 +162,39 @@ DEBATE_ICONS = {
 
 # ── Primary model registry ──────────────────────────────────────────────────
 AGENT_MODELS: dict[str, str] = {
-    "vision":     "ollama_chat/gemma3:12b",
+    "vision":     "ollama_chat/gemma4:e4b",
     "coding":     "groq/llama-3.3-70b-versatile",
     "debug":      "zai/glm-4",
     "math":       "zai/glm-4",
-    "architect":  "cerebras/qwen-3-235b-a22b",
+    "architect":  "cerebras/qwen3-235b-a22b",
     "analyst":    "groq/moonshotai/kimi-k2-instruct",
     "computer":   "groq/llama-3.3-70b-versatile",
     "general":    "groq/llama-3.3-70b-versatile",
     "researcher": "groq/moonshotai/kimi-k2-instruct",
     "marketer":   "groq/llama-3.3-70b-versatile",
     "devops":     "groq/llama-3.3-70b-versatile",
-    "pm":         "cerebras/qwen-3-235b-a22b",
+    "pm":         "cerebras/qwen3-235b-a22b",
     "humanizer":  "groq/llama-3.3-70b-versatile",
     "reviewer":   "groq/llama-3.3-70b-versatile",
     "think":      "cerebras/qwen-3-32b",           # QwQ-32B deep reasoning
+    "owl":        "groq/moonshotai/kimi-k2-instruct",
+    "ag2_researcher": "groq/moonshotai/kimi-k2-instruct",
+    "ag2_critic": "zai/glm-4",
+    "ag2_synthesizer": "cerebras/qwen3-235b-a22b",
+    "code_exec":  "openrouter/qwen/qwen3-coder:free",
+    "predictor":  "cerebras/qwen3-235b-a22b",
+    "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
 }
 
 FALLBACK_CHAIN: dict[str, list[str]] = {
     "vision": [
-        "ollama_chat/gemma3:12b",
+        "ollama_chat/gemma4:e4b",
         "groq/meta-llama/llama-4-scout-17b-16e-instruct",
         "gemini/gemini-2.0-flash",
     ],
     "coding": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/qwen/qwen3-coder:free",
     ],
@@ -201,7 +211,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "groq/llama-3.3-70b-versatile",
     ],
@@ -215,11 +225,11 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "zai/glm-4",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
     ],
     "general": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
@@ -230,27 +240,27 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     ],
     "marketer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "devops": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "pm": [
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
     ],
     "humanizer": [
         "groq/llama-3.3-70b-versatile",
         "gemini/gemini-2.0-flash",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
     ],
     "reviewer": [
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen-3-235b-a22b",
+        "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",
     ],
     "think": [
@@ -259,7 +269,88 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "openrouter/deepseek/deepseek-r1:free",
         "zai/glm-4",
     ],
+    "owl": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "gemini/gemini-2.0-flash",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_researcher": [
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_critic": [
+        "zai/glm-4",
+        "groq/qwen-qwq-32b",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "ag2_synthesizer": [
+        "cerebras/qwen3-235b-a22b",
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
+    ],
+    "code_exec": [
+        "openrouter/qwen/qwen3-coder:free",
+        "groq/llama-3.3-70b-versatile",
+        "cerebras/qwen3-235b-a22b",
+    ],
+    "predictor": [
+        "cerebras/qwen3-235b-a22b",
+        "groq/moonshotai/kimi-k2-instruct",
+        "zai/glm-4",
+    ],
+    "claude_orchestrator": [
+        "openrouter/anthropic/claude-opus-4",
+        "openrouter/anthropic/claude-3.5-sonnet",
+        "cerebras/qwen3-235b-a22b",
+    ],
 }
+
+
+@dataclass
+class AgentDef:
+    model: str
+    provider: str
+    sdk: str = "litellm"
+    strengths: list[str] = field(default_factory=list)
+    fallback: list[str] = field(default_factory=list)
+    requires_env: str | None = None
+
+
+AGENT_REGISTRY: dict[str, AgentDef] = {
+    key: AgentDef(
+        model=value,
+        provider=value.split("/")[0] if "/" in value else "unknown",
+        sdk="litellm",
+        fallback=FALLBACK_CHAIN.get(key, []).copy(),
+    )
+    for key, value in AGENT_MODELS.items()
+}
+
+AGENT_REGISTRY["owl"].sdk = "camel-owl"
+AGENT_REGISTRY["owl"].strengths = ["complex-tasks", "research", "gaia-benchmark"]
+AGENT_REGISTRY["ag2_researcher"].sdk = "ag2"
+AGENT_REGISTRY["ag2_critic"].sdk = "ag2"
+AGENT_REGISTRY["ag2_synthesizer"].sdk = "ag2"
+AGENT_REGISTRY["code_exec"].sdk = "smolagents"
+AGENT_REGISTRY["code_exec"].strengths = ["code-execution", "python", "bash"]
+AGENT_REGISTRY["predictor"].sdk = "mirofish"
+AGENT_REGISTRY["predictor"].strengths = ["consensus", "prediction", "complexity-scoring"]
+AGENT_REGISTRY["claude_orchestrator"].sdk = "ruflo"
+AGENT_REGISTRY["claude_orchestrator"].requires_env = "ANTHROPIC_API_KEY"
+
+
+def ensure_gemma4_local_available() -> bool:
+    try:
+        result = subprocess.run(["ollama", "list"], capture_output=True, text=True, timeout=5)
+        if "gemma4:e4b" in result.stdout:
+            return True
+        subprocess.run(["ollama", "pull", "gemma4:e4b"], check=False, timeout=1800)
+        result = subprocess.run(["ollama", "list"], capture_output=True, text=True, timeout=5)
+        return "gemma4:e4b" in result.stdout
+    except Exception as exc:
+        logger.warning("gemma4 local availability check failed: %s", exc)
+        return False
 
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
@@ -515,6 +606,13 @@ def list_agents() -> str:
         "humanizer": "\u2728",
         "reviewer": "\U0001f50d",
         "think": "\U0001f9e0",   # 🧠 deep reasoning mode
+        "owl": "🦉",
+        "ag2_researcher": "🧪",
+        "ag2_critic": "🛡️",
+        "ag2_synthesizer": "🧩",
+        "code_exec": "⚙️",
+        "predictor": "🔮",
+        "claude_orchestrator": "🧭",
     }
     for key, model in AGENT_MODELS.items():
         icon = icons.get(key, "\U0001f916")

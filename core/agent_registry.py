@@ -295,7 +295,7 @@ ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 # Legacy model mappings for backwards compat (/agent coding, /agent debug, etc.)
 _LEGACY_AGENT_MODELS: dict[str, str] = {
-    "vision":    "ollama_chat/gemma3:12b",
+    "vision":    "ollama_chat/gemma4:e4b",
     "coding":    "cerebras/qwen3-235b-a22b",       # 14,400 req/day, fast, reliable
     "debug":     "zai/glm-4",
     "math":      "zai/glm-4",

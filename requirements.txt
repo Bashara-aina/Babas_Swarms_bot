@@ -42,6 +42,18 @@ aiosmtplib>=3.0.0
 pyautogui>=0.9.54
 pyscreenshot>=3.1
 
+# v5 integrations
+openai-agents==0.4.2
+camel-ai==0.2.89
+ag2==0.11.4
+smolagents==1.23.0
+pydantic-ai-slim==1.61.0
+agentops==0.3.26
+networkx>=3.0
+knowledge-graph>=0.0.33
+swarms==9.0.4
+pytest-asyncio>=0.23.0
+
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng

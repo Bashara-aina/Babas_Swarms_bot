@@ -1,0 +1,3 @@
+[submodule "tools/mirofish"]
+	path = tools/mirofish
+	url = https://github.com/666ghj/MiroFish

@@ -48,7 +48,7 @@ class ModelTier:
 # Model pricing as of March 2026 — uses existing litellm model strings
 MODEL_TIERS: List[ModelTier] = [
     # Free tier (Cerebras, Groq free models)
-    ModelTier("Cerebras Qwen", "cerebras/qwen-3-235b-a22b", "cerebras",
+    ModelTier("Cerebras Qwen", "cerebras/qwen3-235b-a22b", "cerebras",
              0.0, 0.0, "free", 131072),
     ModelTier("Groq Llama 3.3", "groq/llama-3.3-70b-versatile", "groq",
              0.0, 0.0, "free", 32768),
@@ -162,7 +162,7 @@ class CostAwareRouter:
 
         # Vision always uses local (privacy requirement)
         if agent_key == "vision":
-            return "ollama_chat/gemma3:12b", complexity, "local"
+            return "ollama_chat/gemma4:e4b", complexity, "local"
 
         # Get eligible tiers for this complexity
         eligible_tiers = _COMPLEXITY_TIERS.get(

@@ -51,3 +51,32 @@ jobs:
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
+
+  test-integrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-v5-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-v5-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-mock
+
+      - name: Run v5 integration tests
+        env:
+          TELEGRAM_BOT_TOKEN: "0:test"
+          ALLOWED_USER_ID: "12345"
+        run: pytest tests/test_v5_integrations.py -v --tb=short

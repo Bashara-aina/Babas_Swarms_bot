@@ -5,7 +5,7 @@ Two execution modes:
   2. agent_loop()  — Multi-turn agentic loop with real computer tool use
 
 Fallback policy:
-  vision:    Ollama gemma3:12b (local) only if RAM+VRAM have headroom
+    vision:    Ollama gemma4:e4b (local) only if RAM+VRAM have headroom
              (checked via tools.resource_monitor) -> else cloud vision
   all other: cloud chain (ZAI -> Groq -> Cerebras -> Gemini -> OpenRouter)
   NEVER fall back to Ollama for non-vision text tasks.
@@ -1089,7 +1089,7 @@ async def analyze_screenshot(
     """Analyze a screenshot with vision model.
 
     Resource-aware: checks RAM + VRAM via resource_monitor before trying
-    Ollama gemma3:12b. If constrained, goes straight to cloud vision.
+    Ollama gemma4:e4b. If constrained, goes straight to cloud vision.
     Falls back to Groq cloud if Ollama fails for any reason.
 
     Returns (analysis_text, model_used)
@@ -1130,7 +1130,7 @@ async def analyze_screenshot(
     if not _skip_local:
         try:
             resp = await _call_model(
-                "ollama_chat/gemma3:12b",
+                "ollama_chat/gemma4:e4b",
                 messages=[{
                     "role": "user",
                     "content": [
@@ -1142,7 +1142,7 @@ async def analyze_screenshot(
             )
             result = (resp.choices[0].message.content or "").strip()
             logger.info("Screenshot analyzed locally via Ollama")
-            return result, "ollama/gemma3:12b \U0001f512 local"
+            return result, "ollama/gemma4:e4b \U0001f512 local"
         except Exception as e:
             logger.warning("Ollama vision failed: %s \u2192 trying Groq", e)
     else:
@@ -1174,7 +1174,7 @@ async def analyze_screenshot(
     except Exception as e:
         raise RuntimeError(
             f"Screenshot analysis failed.\n"
-            f"\u2022 Local: {'bypassed — ' + _skip_reason if _skip_local else 'run ollama pull gemma3:12b'}\n"
+            f"\u2022 Local: {'bypassed — ' + _skip_reason if _skip_local else 'run ollama pull gemma4:e4b'}\n"
             f"\u2022 Cloud: {e}"
         )
 

@@ -46,6 +46,26 @@ async def cmd_do(msg: Message) -> None:
             parse_mode="HTML",
         )
         return
+
+    exec_keywords = ["run", "execute", "plot", "train", "test"]
+    if any(k in task.lower() for k in exec_keywords) and any(k in task.lower() for k in ["code", "python", "script", "bash"]):
+        try:
+            from agents.code_agent import run_code_agent
+
+            status = await msg.answer("⚙️ Detected code execution intent — routing to code_exec agent…")
+            result = await run_code_agent(task)
+            await status.delete()
+            payload = (
+                "<b>Code</b>\n<pre>" + html_mod.escape(result.code[:3500]) + "</pre>\n"
+                "<b>Stdout</b>\n<pre>" + html_mod.escape(result.stdout[:2500]) + "</pre>\n"
+                "<b>Stderr</b>\n<pre>" + html_mod.escape(result.stderr[:1000]) + "</pre>\n"
+                f"Exit: <code>{result.exit_code}</code>"
+            )
+            await send_chunked(msg, payload, model_used="code_exec")
+            return
+        except Exception:
+            pass
+
     await _run_agent_loop(msg, task)
 
 

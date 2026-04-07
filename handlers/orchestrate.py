@@ -88,6 +88,26 @@ async def cmd_orchestrate(msg: Message) -> None:
             pass
 
     try:
+        complexity_score = 5
+        try:
+            from agents.mirofish_agent import MiroFishAgent
+
+            complexity_score = await MiroFishAgent().score_task_complexity(goal)
+            await progress_cb(f"💭 [Plan] complexity score: {complexity_score}/10")
+        except Exception:
+            pass
+
+        if complexity_score > 8:
+            try:
+                from agents.owl_agent import run_owl_task
+
+                owl_hint = await run_owl_task(
+                    f"Create a concise decomposition strategy for this orchestration goal:\n{goal}"
+                )
+                await progress_cb(f"💭 [OWL] high-complexity strategy seed ready ({len(owl_hint)} chars)")
+            except Exception:
+                pass
+
         from swarms_bot.orchestrator.orchestration_runner import OrchestrationRunner
         from swarms_bot.orchestrator.registry import build_agent_registry
         from tools.quality_guard import build_evidence_envelope, verify_and_repair

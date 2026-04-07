@@ -413,8 +413,37 @@ async def cmd_keys(msg: Message) -> None:
 async def cmd_models(msg: Message) -> None:
     if not is_allowed(msg):
         return
+    import os
     import router as agents
-    await msg.answer(agents.list_agents(), parse_mode="HTML")
+
+    registry = getattr(agents, "AGENT_REGISTRY", {}) or {}
+    if not registry:
+        await msg.answer(agents.list_agents(), parse_mode="HTML")
+        return
+
+    lines = ["<b>🤖 Agent Registry (v5)</b>"]
+    for key, meta in registry.items():
+        required = getattr(meta, "requires_env", None)
+        status = "active"
+        if required and not os.getenv(required):
+            status = "unavailable"
+        lines.append(
+            f"• <code>{html_mod.escape(key)}</code> — {html_mod.escape(meta.model)} "
+            f"(<i>{html_mod.escape(meta.sdk)}</i>) [{status}]"
+        )
+    await msg.answer("\n".join(lines), parse_mode="HTML")
+
+
+@router.message(Command("metrics"))
+async def cmd_metrics(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    try:
+        from core.observability import render_metrics_html
+
+        await msg.answer(render_metrics_html(), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(f"metrics unavailable: <code>{html_mod.escape(str(e)[:250])}</code>", parse_mode="HTML")
 
 
 # ── /resources — live RAM + GPU + local model policy ──────────────────────────

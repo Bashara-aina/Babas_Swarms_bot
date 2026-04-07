@@ -28,6 +28,18 @@ logger = logging.getLogger(__name__)
 MAX_CHAIN_STEPS = 10
 
 
+async def score_task_complexity(task: str) -> int:
+    """Score task complexity (1-10), preferring MiroFish voting when available."""
+    try:
+        from agents.mirofish_agent import MiroFishAgent
+
+        return await MiroFishAgent().score_task_complexity(task)
+    except Exception:
+        size = len(task.split())
+        score = 1 + min(9, size // 12)
+        return max(1, min(10, score))
+
+
 # ── Data Models ────────────────────────────────────────────────────────────────
 
 @dataclass
