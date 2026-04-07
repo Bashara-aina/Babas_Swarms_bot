@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import html as html_mod
 import logging
+import re
+from typing import Optional
 
 from aiogram.types import Message
 
@@ -15,6 +17,112 @@ from core.autonomous_router import SKILL_PATTERNS, AutonomousRouter
 from .shared import _execute_chat, _run_agent_loop, is_allowed
 
 logger = logging.getLogger(__name__)
+
+_WA_PENDING: dict[int, dict[str, str]] = {}
+_WA_LAST_CONTACT: dict[int, str] = {}
+
+
+def _wa_is_intent_message(text: str, user_id: int) -> bool:
+    t = _wa_normalize(text).lower()
+    if user_id in _WA_PENDING:
+        return True
+    keywords = [
+        "whatsapp",
+        "wa ",
+        "chat ke",
+        "chat to",
+        "send to",
+        "send ke",
+        "kirim ke",
+        "kirim ke",
+        "wa_reply",
+        "reply wa",
+        "to her",
+        "to him",
+    ]
+    return any(k in t for k in keywords)
+
+
+def _wa_normalize(text: str) -> str:
+    return " ".join((text or "").strip().split())
+
+
+def _wa_is_confirm(text: str) -> bool:
+    t = _wa_normalize(text).lower()
+    phrases = {
+        "send it now",
+        "send now",
+        "send",
+        "yes send",
+        "confirm send",
+        "kirim sekarang",
+        "kirim sekarang ya",
+        "send to her now",
+        "send to him now",
+    }
+    return t in phrases
+
+
+def _wa_extract_contact_message(text: str, fallback_contact: Optional[str] = None) -> tuple[Optional[str], Optional[str]]:
+    raw = _wa_normalize(text)
+    lower = raw.lower()
+
+    patterns = [
+        r"(?:send|chat|message|tell|kirim|pesan)\s+(?:to|ke)\s+(?P<contact>.+?)\s+(?:that|saying|say|kalau|bahwa)\s+(?P<body>.+)$",
+        r"(?:send|message|kirim|pesan)\s+(?P<contact>.+?)\s*:\s*(?P<body>.+)$",
+        r"(?P<body>.+?)\s+(?:send|kirim|chat|pesan)\s+(?:to|ke)\s+(?P<contact>.+)$",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, raw, flags=re.IGNORECASE)
+        if match:
+            contact = _wa_normalize(match.group("contact"))
+            body = _wa_normalize(match.group("body"))
+            body = re.sub(r"^(cuma|just|only)\s+", "", body, flags=re.IGNORECASE)
+            body = re.sub(r"\s+(aja|doang)$", "", body, flags=re.IGNORECASE)
+            return contact or None, body or None
+
+    love_phrases = ["i love you", "love you", "aku sayang kamu", "sayang kamu"]
+    verb_match = re.search(r"\b(send|chat|kirim|pesan|message|tell)\b", lower)
+    prep_match = re.search(r"\b(to|ke)\b", lower)
+    if verb_match and prep_match and prep_match.start() > verb_match.start():
+        tail = raw[prep_match.end():].strip()
+        for phrase in love_phrases:
+            idx = tail.lower().rfind(phrase)
+            if idx > 0:
+                contact = _wa_normalize(tail[:idx])
+                body = _wa_normalize(tail[idx:])
+                if contact and body:
+                    return contact, body
+
+    pronoun_targets = ["to her", "to him", "her", "him"]
+    if fallback_contact and any(p in lower for p in pronoun_targets):
+        body = raw
+        for token in [
+            "send it now",
+            "send now",
+            "send to her",
+            "send to him",
+            "chat to her",
+            "chat to him",
+            "tell her",
+            "tell him",
+            "that",
+        ]:
+            body = re.sub(rf"\b{re.escape(token)}\b", "", body, flags=re.IGNORECASE)
+        body = _wa_normalize(body)
+        return fallback_contact, (body or None)
+
+    if fallback_contact and lower.startswith("just "):
+        return fallback_contact, _wa_normalize(raw[5:]) or None
+
+    return None, None
+
+
+async def _wa_send_local(contact_name: str, body: str) -> str:
+    from computer_agent import whatsapp_send_local
+
+    return await whatsapp_send_local(contact_name=contact_name, message=body)
 
 
 async def handle_plain_message(
@@ -29,8 +137,13 @@ async def handle_plain_message(
     if not user_msg or user_msg.startswith("/"):
         return
 
-    # analyze() is async (may call LLM for low-confidence messages)
-    skill_match = await auto_router.analyze(user_msg)
+    user_id = msg.from_user.id if msg.from_user else 0
+    if _wa_is_intent_message(user_msg, user_id):
+        await _handle_whatsapp(msg, user_msg, auto_router)
+        return
+
+    # analyze_async() keeps the live bot LLM-backed while tests use analyze().
+    skill_match = await auto_router.analyze_async(user_msg)
     logger.info(
         "[AutoRouter] '%s...' -> %s (%s%%)",
         user_msg[:50],
@@ -255,14 +368,88 @@ async def _handle_whatsapp(msg: Message, user_msg: str, router: AutonomousRouter
 
         bridge = WhatsAppBridge()
         msg_lower = user_msg.lower()
+        user_id = msg.from_user.id if msg.from_user else 0
+
+        pending = _WA_PENDING.get(user_id)
+
+        if pending and _wa_is_confirm(user_msg):
+            result = await _wa_send_local(pending["contact"], pending["body"])
+            if "sent" in result.lower() and "failed" not in result.lower():
+                await msg.answer(
+                    f"✅ Sent to <b>{html_mod.escape(pending['contact'])}</b>: "
+                    f"<i>{html_mod.escape(pending['body'])}</i>",
+                    parse_mode="HTML",
+                )
+                _WA_LAST_CONTACT[user_id] = pending["contact"]
+                _WA_PENDING.pop(user_id, None)
+                router.record_performance("whatsapp_action", True)
+                return
+            await msg.answer(
+                f"❌ Send failed: <code>{html_mod.escape(result[:320])}</code>",
+                parse_mode="HTML",
+            )
+            router.record_performance("whatsapp_action", False)
+            return
+
+        fallback_contact = (pending or {}).get("contact") or _WA_LAST_CONTACT.get(user_id)
+        contact, body = _wa_extract_contact_message(user_msg, fallback_contact=fallback_contact)
+        if contact and body:
+            _WA_LAST_CONTACT[user_id] = contact
+            if re.match(r"^(send|kirim|pesan|message)\b", msg_lower):
+                result = await _wa_send_local(contact, body)
+                if "sent" in result.lower() and "failed" not in result.lower():
+                    await msg.answer(
+                        f"✅ Sent to <b>{html_mod.escape(contact)}</b>: <i>{html_mod.escape(body)}</i>",
+                        parse_mode="HTML",
+                    )
+                    _WA_PENDING.pop(user_id, None)
+                    router.record_performance("whatsapp_action", True)
+                    return
+                await msg.answer(
+                    f"❌ Send failed: <code>{html_mod.escape(result[:320])}</code>",
+                    parse_mode="HTML",
+                )
+                router.record_performance("whatsapp_action", False)
+                return
+
+            _WA_PENDING[user_id] = {"contact": contact, "body": body}
+            await msg.answer(
+                "Draft ready:\n"
+                f"To: <b>{html_mod.escape(contact)}</b>\n"
+                f"Message: <i>{html_mod.escape(body)}</i>\n\n"
+                "Reply <b>send it now</b> to send.",
+                parse_mode="HTML",
+            )
+            router.record_performance("whatsapp_action", True)
+            return
+
+        if pending and body and not _wa_is_confirm(user_msg):
+            pending["body"] = body
+            _WA_PENDING[user_id] = pending
+            await msg.answer(
+                "Updated draft:\n"
+                f"To: <b>{html_mod.escape(pending['contact'])}</b>\n"
+                f"Message: <i>{html_mod.escape(pending['body'])}</i>\n\n"
+                "Reply <b>send it now</b> to send.",
+                parse_mode="HTML",
+            )
+            router.record_performance("whatsapp_action", True)
+            return
 
         if any(kw in msg_lower for kw in ["send", "kirim", "balas", "reply"]):
-            enriched = (
-                f"{user_msg}\n\n"
-                "[You can send WhatsApp messages via WhatsAppBridge.send_message(). "
-                "Draft the message and confirm with the user before sending.]"
-            )
-            await _execute_chat(msg, enriched, forced_agent="general")
+            if pending:
+                await msg.answer(
+                    "Pending draft found. Reply <b>send it now</b> to send it, "
+                    "or provide a new message in format: "
+                    "<code>send to &lt;contact&gt; that &lt;message&gt;</code>",
+                    parse_mode="HTML",
+                )
+            else:
+                await msg.answer(
+                    "Send format: <code>send to &lt;contact&gt; that &lt;message&gt;</code>\n"
+                    "Example: <code>send to pwiti little hani that i love you</code>",
+                    parse_mode="HTML",
+                )
         else:
             unread = await bridge.get_unread()
             if not unread:

@@ -36,7 +36,7 @@ async def stream_chat(
         await _execute_chat(msg, task, forced_agent=agent_key)
         return
 
-    key = agent_key or agents.detect_agent(task)
+    key = agent_key or "general"
     status_msg = await msg.answer("⚡ thinking…")
 
     accumulated = ""

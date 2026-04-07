@@ -1145,7 +1145,7 @@ async def chat(
     for model in chain:
         if _is_rate_limited(model):
             continue
-        if model.startswith("ollama_chat/") and agent_key != "vision":
+        if model.startswith("ollama_chat/") and agent_key not in ("vision", "general"):
             continue
 
         try:

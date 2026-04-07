@@ -330,12 +330,14 @@ async def _execute_chat(
     if not msg.from_user:
         return
 
+    selected_agent = forced_agent or "general"
+
     try:
         logger.info(
             "[USER_CHAT][mode=chat][chat=%s][user=%s][agent=%s] %s",
             msg.chat.id,
             msg.from_user.id,
-            forced_agent or "auto",
+            selected_agent,
             (task[:1200] + ("…" if len(task) > 1200 else "")).replace("\n", "\\n"),
         )
     except Exception:
@@ -345,7 +347,7 @@ async def _execute_chat(
     try:
         response, model_used = await chat(
             task,
-            agent_key=forced_agent,
+            agent_key=selected_agent,
             show_thinking=show_thinking,
             user_id=str(msg.from_user.id),
         )

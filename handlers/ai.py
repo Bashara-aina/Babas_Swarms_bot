@@ -136,7 +136,7 @@ async def cmd_run(msg: Message) -> None:
             parse_mode="HTML",
         )
         return
-    await _execute_chat(msg, task)
+    await _execute_chat(msg, task, forced_agent="general")
 
 
 # ── /agent ────────────────────────────────────────────────────────────────────
