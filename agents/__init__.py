@@ -99,7 +99,7 @@ AGENT_MODELS: dict[str, str] = {
     "architect":  "cerebras/qwen3-235b-a22b",           # 1500 tok/s, 131K ctx
     "analyst":    "groq/moonshotai/kimi-k2-instruct",   # 1T MoE, deep reasoning
     "computer":   "groq/llama-3.3-70b-versatile",       # agentic tool-calling loop
-    "general":    "groq/llama-3.3-70b-versatile",       # reliable default
+    "general":    "ollama_chat/gemma4:e4b",             # local chat default
     "researcher": "groq/moonshotai/kimi-k2-instruct",   # academic research
     "marketer":   "groq/llama-3.3-70b-versatile",       # content + social
     "devops":     "groq/llama-3.3-70b-versatile",       # infra + deployment
@@ -156,6 +156,7 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "gemini/gemini-2.0-flash",
     ],
     "general": [
+        "ollama_chat/gemma4:e4b",
         "groq/llama-3.3-70b-versatile",
         "cerebras/qwen3-235b-a22b",
         "gemini/gemini-2.0-flash",

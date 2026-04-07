@@ -288,13 +288,13 @@ class SwarmDebateOrchestrator:
         # Each persona uses its preferred model for differentiated reasoning
         model = DEBATE_PERSONA_MODELS.get(
             agent_name,
-            AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+            AGENT_MODELS.get("general", "ollama_chat/gemma4:e4b")
         )
         try:
             return await self.llm_call(model, system, user_msg)
         except Exception as e:
             logger.warning("Agent %s (model %s) failed: %s — falling back", agent_name, model, e)
-            fallback = AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+            fallback = AGENT_MODELS.get("general", "ollama_chat/gemma4:e4b")
             try:
                 return await self.llm_call(fallback, system, user_msg)
             except Exception as e2:

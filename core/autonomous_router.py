@@ -174,10 +174,13 @@ class AutonomousRouter:
         self.reflection = reflection_engine
         self._skill_performance: dict[str, list[float]] = {}
 
-    async def analyze(self, message: str) -> SkillMatch:
-        """Route message to the best skill using keyword-match + LLM fallback."""
+    def analyze(self, message: str) -> SkillMatch:
+        """Route message to the best skill using keyword-match only.
+
+        This synchronous fast path keeps test helpers and simple callers stable.
+        Use `analyze_async()` when LLM fallback classification is desired.
+        """
         msg_lower = message.lower().strip()
-        word_count = len(message.split())
         scores: dict[str, float] = {}
 
         # ── Tier 1: keyword scoring ──────────────────────────────────────────
@@ -214,24 +217,33 @@ class AutonomousRouter:
         best_skill = max(scores, key=scores.get)
         confidence = min(0.95, scores[best_skill] / 2.0)
 
+        return SkillMatch(
+            skill_name=best_skill,
+            confidence=confidence,
+            reasoning=f"Keyword match '{best_skill}' score={scores[best_skill]:.2f}",
+        )
+
+    async def analyze_async(self, message: str) -> SkillMatch:
+        """Route message with keyword scoring and optional LLM fallback."""
+        keyword_match = self.analyze(message)
+        if keyword_match.skill_name == "conversation":
+            return keyword_match
+
+        word_count = len(message.split())
         # ── Tier 2: LLM fallback when confidence is low or message is long ───
-        if confidence < 0.55 or word_count > 30:
+        if keyword_match.confidence < 0.55 or word_count > 30:
             llm_match = await self._llm_classify(message)
             if llm_match is not None:
                 logger.debug(
                     "[AutoRouter] LLM override: '%s...' -> %s (keyword had %s @ %.0f%%)",
                     message[:40],
                     llm_match.skill_name,
-                    best_skill,
-                    confidence * 100,
+                    keyword_match.skill_name,
+                    keyword_match.confidence * 100,
                 )
                 return llm_match
 
-        return SkillMatch(
-            skill_name=best_skill,
-            confidence=confidence,
-            reasoning=f"Keyword match '{best_skill}' score={scores[best_skill]:.2f}",
-        )
+        return keyword_match
 
     async def _llm_classify(self, message: str) -> SkillMatch | None:
         """Call Groq Llama to classify the message into a skill category."""
