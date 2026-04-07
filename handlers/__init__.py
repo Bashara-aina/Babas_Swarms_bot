@@ -5,11 +5,13 @@ from handlers import (
     ai,
     artifact,
     brain,
+    business_handler,
     computer,
     ecc_compat,
     dev,
     e2e,
     enterprise,
+    github_intel_handler,
     inline,
     memory_commands,
     orchestrate,
@@ -21,12 +23,16 @@ from handlers import (
     system,
     tasks,
     voice,
+    whatsapp_handler,
 )
 
 # ai.router must be last (NL catch-all).
 # overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
     computer.router,          # /do /screen /click /type /key /cmd /install
+    business_handler.router,  # /db /site_health /bookings /db_schema
+    github_intel_handler.router,  # /github_intel /eval_repo /upgrade_from
+    whatsapp_handler.router,  # /wa /wa_reply /wa_qr /wa_status
     system.router,            # /start /stats /keys /models /git /maintenance /gpu
     research.router,          # /scrape /research /paper /ask_paper
     memory_commands.router,   # /memory /remember /recall /emotion /opinions /forget /profile /teach
