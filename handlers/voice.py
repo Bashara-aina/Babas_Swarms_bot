@@ -1,4 +1,4 @@
-"""Voice message handler — transcribes .ogg via Whisper then routes to agent."""
+"""Voice message handler — transcribes audio and optionally replies with TTS."""
 from __future__ import annotations
 
 import logging
@@ -6,37 +6,52 @@ import os
 import tempfile
 
 from aiogram import F, Router
-from aiogram.types import Message
+from aiogram.filters import Command
+from aiogram.types import BufferedInputFile, Message
 
 from handlers.shared import _execute_chat, is_allowed
+from tools.persistence import kv_get, kv_set
 
 logger = logging.getLogger(__name__)
 router = Router()
 
+VOICE_REPLY_KEY = "voice_reply_enabled"
+
+
+async def _voice_reply_enabled() -> bool:
+    value = await kv_get(VOICE_REPLY_KEY)
+    if value is None:
+        return True
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+async def _set_voice_reply_enabled(enabled: bool) -> None:
+    await kv_set(VOICE_REPLY_KEY, "true" if enabled else "false")
+
 
 async def _transcribe(ogg_path: str) -> str:
     """Transcribe audio file using OpenAI Whisper API or local whisper."""
-    # Try OpenAI Whisper API first
     openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
     if openai_key and os.getenv("OPENAI_API_KEY"):
         try:
             import openai
+
             client = openai.AsyncOpenAI(api_key=openai_key)
             with open(ogg_path, "rb") as f:
                 result = await client.audio.transcriptions.create(
                     model="whisper-1",
                     file=f,
-                    language="id",  # Indonesian + English auto-detect
+                    language="id",
                 )
             return result.text
-        except Exception as e:
-            logger.warning("OpenAI Whisper failed: %s", e)
+        except Exception as exc:
+            logger.warning("OpenAI Whisper failed: %s", exc)
 
-    # Fallback: Groq Whisper (free, fast)
     groq_key = os.getenv("GROQ_API_KEY")
     if groq_key:
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=30) as client:
                 with open(ogg_path, "rb") as f:
                     resp = await client.post(
@@ -47,38 +62,51 @@ async def _transcribe(ogg_path: str) -> str:
                     )
                 resp.raise_for_status()
                 return resp.text.strip()
-        except Exception as e:
-            logger.warning("Groq Whisper failed: %s", e)
+        except Exception as exc:
+            logger.warning("Groq Whisper failed: %s", exc)
 
-    # Fallback: local whisper
     try:
         import whisper  # pip install openai-whisper
+
         model = whisper.load_model("base")
         result = model.transcribe(ogg_path)
         return result["text"]
-    except ImportError:
-        raise RuntimeError("No Whisper available. Set OPENAI_API_KEY or GROQ_API_KEY, or: pip install openai-whisper")
+    except ImportError as exc:
+        raise RuntimeError("No Whisper available. Set OPENAI_API_KEY or GROQ_API_KEY, or install openai-whisper") from exc
+
+
+async def _reply_with_optional_tts(msg: Message, response: str) -> None:
+    from llm_client import chunk_output
+
+    chunks = chunk_output(response, max_length=4000)
+    for chunk in chunks:
+        await msg.answer(chunk)
+    try:
+        from core.utils.multimodal_processor import text_to_speech
+
+        audio = await text_to_speech(response)
+        if audio:
+            await msg.answer_voice(BufferedInputFile(audio, filename="legion_reply.mp3"))
+    except Exception as exc:
+        logger.debug("TTS skipped: %s", exc)
 
 
 @router.message(F.voice)
 async def handle_voice(msg: Message) -> None:
-    """Download voice message, transcribe, then route to agent."""
+    """Download voice message, transcribe, then route to chat with optional TTS."""
     if not is_allowed(msg):
         return
 
     status = await msg.answer("🎙 transcribing…")
+    tmp_path = ""
 
     try:
-        # Download .ogg from Telegram
         with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
             tmp_path = tmp.name
 
         file = await msg.bot.get_file(msg.voice.file_id)
         await msg.bot.download_file(file.file_path, destination=tmp_path)
-
-        # Transcribe
         text = await _transcribe(tmp_path)
-        os.unlink(tmp_path)
 
         if not text or not text.strip():
             await status.edit_text("❌ Could not transcribe audio — please try again")
@@ -87,17 +115,23 @@ async def handle_voice(msg: Message) -> None:
         await status.edit_text(f"🎙 <i>{text}</i>", parse_mode="HTML")
         logger.info("Voice transcribed: %s", text[:80])
 
-        # Route to agent exactly like a text message
-        await _execute_chat(msg, text)
+        if await _voice_reply_enabled():
+            from llm_client import chat
 
-    except Exception as e:
-        logger.error("Voice handler error: %s", e)
-        await status.edit_text(f"❌ Voice error: {str(e)[:200]}")
+            response, _model = await chat(task=text, user_id=str(msg.from_user.id), show_thinking=False)
+            await _reply_with_optional_tts(msg, response)
+        else:
+            await _execute_chat(msg, text)
+
+    except Exception as exc:
+        logger.error("Voice handler error: %s", exc)
+        await status.edit_text(f"❌ Voice error: {str(exc)[:200]}")
     finally:
-        try:
-            os.unlink(tmp_path)
-        except Exception:
-            pass
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
 
 
 @router.message(F.audio)
@@ -105,18 +139,43 @@ async def handle_audio(msg: Message) -> None:
     """Handle audio file uploads (mp3, wav, m4a) — same pipeline."""
     if not is_allowed(msg):
         return
+
     status = await msg.answer("🎵 transcribing audio file…")
+    tmp_path = ""
+
     try:
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             tmp_path = tmp.name
         file = await msg.bot.get_file(msg.audio.file_id)
         await msg.bot.download_file(file.file_path, destination=tmp_path)
         text = await _transcribe(tmp_path)
-        os.unlink(tmp_path)
         if not text.strip():
             await status.edit_text("❌ Empty transcription")
             return
         await status.edit_text(f"🎵 <i>{text}</i>", parse_mode="HTML")
-        await _execute_chat(msg, text)
-    except Exception as e:
-        await status.edit_text(f"❌ Audio error: {str(e)[:200]}")
+
+        if await _voice_reply_enabled():
+            from llm_client import chat
+
+            response, _model = await chat(task=text, user_id=str(msg.from_user.id), show_thinking=False)
+            await _reply_with_optional_tts(msg, response)
+        else:
+            await _execute_chat(msg, text)
+    except Exception as exc:
+        await status.edit_text(f"❌ Audio error: {str(exc)[:200]}")
+    finally:
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+
+@router.message(Command("voice_toggle"))
+async def cmd_voice_toggle(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    enabled = await _voice_reply_enabled()
+    new_state = not enabled
+    await _set_voice_reply_enabled(new_state)
+    await msg.answer(f"Voice replies are now {'enabled' if new_state else 'disabled'}.")

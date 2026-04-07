@@ -31,7 +31,7 @@ import time
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,32 @@ except ImportError:
     import aiosqlite
 
 DB_PATH = Path(os.environ.get("MEMORY_DB_PATH", Path.home() / ".legion_memory.db"))
+
+
+async def store_memory(
+    user_id: int | str,
+    content: str,
+    source: str = "manual",
+    tags: list[str] | None = None,
+) -> int:
+    """Compatibility wrapper for older callers."""
+    _ = user_id
+    return await add_memory(content, tags=tags, source=source)
+
+
+async def search_memories(
+    user_id: int | str,
+    query: str,
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    """Compatibility wrapper for older callers."""
+    _ = user_id
+    return await search_memory(query, top_k=limit)
+
+
+async def get_recent_memories(limit: int = 10) -> list[dict[str, Any]]:
+    """Compatibility wrapper used by legacy handlers."""
+    return await get_recent(limit)
 
 # ── Schema ────────────────────────────────────────────────────────────────────
 CREATE_SQL = """
@@ -130,6 +156,13 @@ async def add_memory(
         memory_id = cursor.lastrowid
     logger.info("Memory saved: id=%d tags=%s source=%s", memory_id, tags_str, source)
 
+    try:
+        from tools.mem0_client import mem0_add
+
+        await mem0_add(user_id=source or "manual", content=text, metadata={"tags": tags or [], "source": source})
+    except Exception as exc:
+        logger.debug("mem0 add skipped: %s", exc)
+
     # Also write to OpenViking L2 for semantic retrieval
     try:
         from tools.viking_context import auto_extract_facts
@@ -146,6 +179,27 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
     Semantic search via OpenViking (primary) or TF-IDF cosine (fallback).
     Returns list of dicts: {id, text, tags, source, score, created}
     """
+    # ── Try Mem0 semantic search first ────────────────────────────────────
+    try:
+        from tools.mem0_client import mem0_search
+
+        if user_id is not None:
+            mem0_hits = await mem0_search(user_id=str(user_id), query=query, limit=top_k)
+            if mem0_hits:
+                return [
+                    {
+                        "id": 0,
+                        "text": str(hit.get("memory", hit.get("content", ""))),
+                        "tags": str(hit.get("metadata", {}).get("tags", "mem0")),
+                        "source": "mem0",
+                        "score": float(hit.get("score", 0.0) or 0.0),
+                        "created": time.time(),
+                    }
+                    for hit in mem0_hits
+                ]
+    except Exception as e:
+        logger.debug("Mem0 search failed, falling back to OpenViking/TF-IDF: %s", e)
+
     # ── Try OpenViking semantic search first ──────────────────────────────
     try:
         from tools.viking_context import semantic_search, is_available
@@ -160,6 +214,7 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
                         "tags": h["uri"],
                         "source": "openviking",
                         "score": h["score"],
+                        "relevance": h["score"],
                         "created": time.time(),
                     }
                     for h in hits
@@ -193,6 +248,7 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
             "tags": row["tags"],
             "source": row["source"],
             "score": score,
+            "relevance": score,
             "created": row["created"],
         })
 
@@ -256,6 +312,17 @@ async def build_memory_context(query: str, top_k: int = 3, user_id: Optional[str
 
     Keeps total output under ~2000 chars.
     """
+    # ── Primary: Mem0 context ────────────────────────────────────────────
+    try:
+        from tools.mem0_client import build_mem0_context, mem0_search
+        if user_id is not None:
+            mem0_hits = await mem0_search(user_id=str(user_id), query=query, limit=top_k)
+            ctx = build_mem0_context(mem0_hits, query=query)
+            if ctx:
+                return ctx
+    except Exception as e:
+        logger.debug("build_mem0_context failed, using other fallbacks: %s", e)
+
     # ── Primary: OpenViking tiered context ───────────────────────────────
     try:
         from tools.viking_context import build_viking_context, is_available
@@ -404,3 +471,19 @@ async def init_memory_db() -> None:
         await init_viking_db()
     except Exception as e:
         logger.debug("OpenViking warmup skipped: %s", e)
+
+
+__all__ = [
+    "add_memory",
+    "search_memory",
+    "get_recent",
+    "delete_memory",
+    "count_memories",
+    "build_memory_context",
+    "auto_save_interaction",
+    "export_to_obsidian",
+    "format_memory_result",
+    "init_memory_db",
+    "store_memory",
+    "search_memories",
+]

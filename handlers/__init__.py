@@ -11,6 +11,7 @@ from handlers import (
     e2e,
     enterprise,
     inline,
+    memory_commands,
     orchestrate,
     overnight_handler,
     pm,
@@ -28,7 +29,8 @@ _ROUTER_ORDER = [
     computer.router,          # /do /screen /click /type /key /cmd /install
     system.router,            # /start /stats /keys /models /git /maintenance /gpu
     research.router,          # /scrape /research /paper /ask_paper
-    brain.router,             # /remember /recall /memories /briefing
+    memory_commands.router,   # /memory /remember /recall /emotion /opinions /forget /profile /teach
+    brain.router,             # /memories /briefing /learn /instincts
     sessions.router,          # /save /resume /sessions /audit
     tasks.router,             # /monitor /schedule /tasks /cancel
     dev.router,               # /scaffold /build /vuln_scan /review

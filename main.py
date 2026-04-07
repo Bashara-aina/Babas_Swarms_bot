@@ -205,6 +205,48 @@ async def on_startup(bot: Bot) -> None:
         logger.warning("Humanization init failed (non-fatal): %s", e)
 
     try:
+        from tools.letta_personality import init_personality_state
+
+        state = init_personality_state()
+        logger.info("Personality state loaded: %s", state.get("dominant_emotion", "neutral"))
+    except Exception as e:
+        logger.warning("Personality init failed (non-fatal): %s", e)
+
+    try:
+        from tools.memoryos_client import get_memoryos
+
+        mos = get_memoryos("bashara")
+        if mos:
+            logger.info("✅ MemoryOS initialized (hierarchical memory tiers)")
+    except Exception as e:
+        logger.warning("MemoryOS init failed (non-fatal): %s", e)
+
+    try:
+        from tools.n8n_bridge import start_n8n_webhook_listener
+
+        start_n8n_webhook_listener()
+        logger.info("n8n webhook listener scheduled")
+    except Exception as e:
+        logger.warning("n8n init failed (non-fatal): %s", e)
+
+    try:
+        from tools.proactive_monitors import start_monitors
+
+        for task in await start_monitors(bot, ALLOWED_USER_ID):
+            _ = task
+        logger.info("Proactive monitors scheduled")
+    except Exception as e:
+        logger.warning("Proactive monitors init failed (non-fatal): %s", e)
+
+    try:
+        from tools.voice_engine import run_prewarm
+
+        await run_prewarm()
+        logger.info("Voice engine pre-warmed")
+    except Exception as e:
+        logger.warning("Voice prewarm failed (non-fatal): %s", e)
+
+    try:
         agents_registry.ensure_gemma4_local_available()
     except Exception as e:
         logger.warning("gemma4 local prep failed (non-fatal): %s", e)
@@ -332,11 +374,16 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="recall",      description="Search memory"),
             BotCommand(command="forget",      description="Remove core memory key"),
             BotCommand(command="emotion",     description="Legion emotional state"),
+            BotCommand(command="voice_toggle", description="Toggle voice replies"),
+            BotCommand(command="oi",          description="Force Open Interpreter computer control"),
+            BotCommand(command="om_stats",    description="OpenMemory sector statistics"),
+            BotCommand(command="n8n",         description="n8n automation status"),
             BotCommand(command="opinions",    description="Legion current opinions"),
             BotCommand(command="profile",     description="Persistent user profile"),
             BotCommand(command="teach",       description="Teach/correct Legion profile"),
             BotCommand(command="memories",    description="Show recent memories"),
             BotCommand(command="briefing",    description="Morning briefing"),
+            BotCommand(command="monitor",     description="System health + alert thresholds"),
             # Dev
             BotCommand(command="scaffold",    description="Create project scaffold"),
             BotCommand(command="build",       description="Parallel fullstack build"),

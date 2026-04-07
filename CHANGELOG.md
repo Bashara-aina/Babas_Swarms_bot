@@ -6,6 +6,61 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [6.0.0] — 2026-04-07 — THE HUMANIZATION UPDATE
+
+### The Problem This Solves
+Legion was technically capable but felt robotic:
+- Forgot everything between sessions
+- Only worked when explicitly commanded
+- Spoke in flat transactional text
+- Was a yes-man with no opinions
+- Had no inner life or emotional state
+
+### What's New
+
+**Persistent 3-Tier Memory (letta + mem0 architecture)**
+- CoreMemory: high-priority facts always in every prompt
+- ArchivalMemory: unlimited SQLite FTS5 store
+- RecallMemory: full permanent conversation history
+- Auto-extracts important facts from conversations
+
+**Temporal Knowledge Graph (graphiti architecture)**
+- Tracks facts over time with validity windows
+- Seeded with known facts about Bashara from day one
+
+**User Profile (memobase architecture)**
+- Permanent profile of who Bashara is, not just what was said
+- Grows automatically from interactions and explicit `/teach`
+
+**Emotion Engine (openfeelz-inspired)**
+- OCEAN-backed personality framing and PAD emotional state
+- Tracks curiosity, frustration, energy, connection
+- Persists across sessions and decays toward baseline
+
+**Reflection Engine (generative_agents + Reflexion-inspired)**
+- Micro-reflection after each turn
+- Deep reflection every 10 turns
+- Stores observations, technical opinions, lessons, concerns
+
+**Autonomous Skill Selection (ReAct-style routing)**
+- Plain text now routes automatically to chat/research/code/system/computer/memory
+- Legacy slash commands remain supported
+
+**New Commands**
+- `/memory` — memory stats + core facts
+- `/remember <fact>` — explicit permanent memory
+- `/recall <query>` — archival memory search
+- `/emotion` — current emotional state snapshot
+- `/opinions` — current reflection/opinion block
+- `/forget <key>` — remove core-memory key
+- `/profile` — persistent user profile block
+- `/teach <correction>` — correct/profile-teach Legion
+
+### Breaking Changes
+None. Existing slash-command flows are preserved.
+
+---
+
 ## [v4.1.0] — 2026-03-14
 
 ### Added
