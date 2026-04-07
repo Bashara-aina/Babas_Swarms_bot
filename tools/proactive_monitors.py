@@ -53,21 +53,21 @@ async def get_snapshot() -> MonitorSnapshot:
 
 
 async def monitor_loop(bot: Any, user_id: int, interval_seconds: int = 300) -> None:
-    """Background alert loop."""
+    """Background alert loop — routes through ProactiveInitiator for friend-like messages."""
     if os.getenv("ENABLE_PROACTIVE_MONITORS", "true").lower() not in {"1", "true", "yes", "on"}:
         return
+
+    from core.proactive.proactive_initiator import ProactiveInitiator
+
+    async def _notify(text: str) -> None:
+        await bot.send_message(user_id, text, parse_mode="HTML")
+
+    initiator = ProactiveInitiator(notify_fn=_notify)
+
     while True:
         try:
             snap = await get_snapshot()
-            alerts: list[str] = []
-            if snap.gpu_temp_c is not None and snap.gpu_temp_c >= float(os.getenv("GPU_TEMP_ALERT_C", "80")):
-                alerts.append(f"GPU temp high: {snap.gpu_temp_c:.0f}°C")
-            if snap.ram_used_gb >= float(os.getenv("RAM_ALERT_GB", "55")):
-                alerts.append(f"RAM high: {snap.ram_used_gb:.1f}/{snap.ram_total_gb:.1f}GB")
-            if snap.disk_used_pct >= float(os.getenv("DISK_ALERT_PCT", "90")):
-                alerts.append(f"Disk high: {snap.disk_used_pct:.0f}% used")
-            if alerts:
-                await bot.send_message(user_id, "⚠️ Proactive monitor alert:\n" + "\n".join(f"• {a}" for a in alerts))
+            await initiator.check_triggers(snap=snap)
         except Exception as exc:
             logger.debug("monitor loop error: %s", exc)
         await asyncio.sleep(interval_seconds)

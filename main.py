@@ -31,6 +31,7 @@ import os
 import subprocess
 import sys
 import time
+from datetime import datetime
 from urllib import error as urlerror
 from urllib import request as urlrequest
 from pathlib import Path
@@ -312,6 +313,78 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Nightly capability regression scheduled for 03:40")
     except Exception as e:
         logger.warning("Nightly capability schedule failed (non-fatal): %s", e)
+
+    # Schedule nightly memory consolidation at 02:00 AM
+    try:
+        async def _run_memory_consolidation_nightly() -> None:
+            import calendar
+            while True:
+                now = datetime.now()
+                target = now.replace(hour=2, minute=0, second=0, microsecond=0)
+                if now >= target:
+                    target = target.replace(day=target.day + 1)
+                try:
+                    days_in_month = calendar.monthrange(target.year, target.month)[1]
+                    if target.day > days_in_month:
+                        target = target.replace(
+                            month=target.month + 1 if target.month < 12 else 1,
+                            day=1,
+                            year=target.year + (1 if target.month == 12 else 0),
+                        )
+                except Exception:
+                    pass
+                await asyncio.sleep((target - now).total_seconds())
+                try:
+                    from core.memory.consolidator import run_nightly
+                    result = await run_nightly()
+                    logger.info("Memory consolidation done: %s", result)
+                except Exception as _ce:
+                    logger.warning("Memory consolidation failed: %s", _ce)
+                await asyncio.sleep(60)
+
+        asyncio.create_task(_run_memory_consolidation_nightly())
+        logger.info("Nightly memory consolidation scheduled for 02:00")
+    except Exception as e:
+        logger.warning("Memory consolidation schedule failed (non-fatal): %s", e)
+
+    # Schedule daily GitHub trending intelligence at 09:00 AM
+    try:
+        async def _run_github_intel_daily() -> None:
+            import calendar
+            while True:
+                now = datetime.now()
+                target = now.replace(hour=9, minute=0, second=0, microsecond=0)
+                if now >= target:
+                    target = target.replace(day=target.day + 1)
+                try:
+                    days_in_month = calendar.monthrange(target.year, target.month)[1]
+                    if target.day > days_in_month:
+                        target = target.replace(
+                            month=target.month + 1 if target.month < 12 else 1,
+                            day=1,
+                            year=target.year + (1 if target.month == 12 else 0),
+                        )
+                except Exception:
+                    pass
+                await asyncio.sleep((target - now).total_seconds())
+                try:
+                    from tools.github_intel import GitHubIntelEngine
+                    engine = GitHubIntelEngine()
+
+                    async def _notify(text: str) -> None:
+                        await bot.send_message(ALLOWED_USER_ID, text[:4000], parse_mode="HTML")
+
+                    repos = await engine.fetch_trending(language="python")
+                    evals = await engine.evaluate_all(repos)
+                    await engine.run_daily_scan(_notify)
+                except Exception as _ge:
+                    logger.warning("GitHub intel daily scan failed: %s", _ge)
+                await asyncio.sleep(60)
+
+        asyncio.create_task(_run_github_intel_daily())
+        logger.info("Daily GitHub intel scheduled for 09:00")
+    except Exception as e:
+        logger.warning("GitHub intel schedule failed (non-fatal): %s", e)
 
     # Initialize swarms_bot enterprise layer
     try:
