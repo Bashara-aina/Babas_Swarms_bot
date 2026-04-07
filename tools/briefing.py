@@ -280,3 +280,18 @@ async def schedule_daily_briefing(bot, user_id: int, hour: int = 7, minute: int 
 
         # Sleep until next day (with buffer)
         await asyncio.sleep(60)  # Prevent double-send
+
+
+
+async def get_quick_brief() -> str:
+    """Quick brief for proactive messages — lighter version of generate_briefing."""
+    try:
+        weather, hn_news = await asyncio.gather(
+            _get_weather(),
+            _fetch_rss("https://hnrss.org/frontpage", max_items=2),
+        )
+        hn_text = ", ".join(i["title"][:60] for i in hn_news) or "(no news)"
+        return f"Weather: {weather} | HN: {hn_text}"
+    except Exception as e:
+        logger.warning("get_quick_brief failed: %s", e)
+        return ""
