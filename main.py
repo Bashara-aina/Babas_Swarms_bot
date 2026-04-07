@@ -189,6 +189,36 @@ async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) 
     return False
 
 
+async def _bootstrap_supabase_skill() -> None:
+    """Generate skills/rumahlabuh-manager.md from live Supabase schema.
+
+    Runs on startup if the skill file is missing or older than 7 days.
+    Wrapped in try/except — never blocks bot boot.
+    """
+    skill_path = Path("skills/rumahlabuh-manager.md")
+    max_age_seconds = 7 * 24 * 3600  # regenerate weekly
+
+    if skill_path.exists():
+        age = time.time() - skill_path.stat().st_mtime
+        if age < max_age_seconds:
+            logger.info("Supabase skill file is fresh (age=%.0fh) — skipping bootstrap", age / 3600)
+            return
+        logger.info("Supabase skill file is stale (age=%.0fh) — regenerating", age / 3600)
+    else:
+        logger.info("Supabase skill file missing — bootstrapping from live schema")
+
+    try:
+        from tools.supabase_client import get_client, is_configured
+        if not is_configured():
+            logger.info("Supabase not configured — skipping skill bootstrap")
+            return
+        db = get_client()
+        path = await db.generate_skill_file(str(skill_path))
+        logger.info("✅ Supabase skill file generated: %s", path)
+    except Exception as exc:
+        logger.warning("Supabase skill bootstrap failed (non-fatal): %s", exc)
+
+
 async def on_startup(bot: Bot) -> None:
     init_observability()
 
@@ -235,7 +265,8 @@ async def on_startup(bot: Bot) -> None:
 
         for task in await start_monitors(bot, ALLOWED_USER_ID):
             _ = task
-        logger.info("Proactive monitors scheduled")
+        interval = int(os.getenv("PROACTIVE_MIN_INTERVAL_SEC", "1800"))
+        logger.info("Proactive monitors scheduled (min_interval=%ds, env: PROACTIVE_MIN_INTERVAL_SEC)", interval)
     except Exception as e:
         logger.warning("Proactive monitors init failed (non-fatal): %s", e)
 
@@ -297,6 +328,9 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Memory DB initialized")
     except Exception as e:
         logger.warning("Memory init failed (non-fatal): %s", e)
+
+    # Bootstrap Supabase skill file from live schema (non-blocking)
+    asyncio.create_task(_bootstrap_supabase_skill())
 
     # Schedule daily briefing at 7:30 AM
     try:
@@ -503,7 +537,7 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="loop_status", description="Loop progress status"),
             BotCommand(command="loop_pause",  description="Pause running loop"),
             BotCommand(command="loop_resume", description="Resume paused loop"),
-            BotCommand(command="multi_execute", description="Compare multiple agents"),
+            BotCommand(command="multi_execute", description="Alias multi-agent compare"),
             BotCommand(command="budget",     description="Cost tracking dashboard"),
             BotCommand(command="metrics",    description="Performance metrics dashboard"),
             BotCommand(command="routing_stats", description="Routing analytics"),
