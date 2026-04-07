@@ -1,6 +1,9 @@
 """
 Session continuity handler — mneme task tracking.
-Commands: /task, /task_done, /sessions, /semantic_set, /semantic_get
+Commands: /task, /task_done, /task_sessions, /semantic_set, /semantic_get
+
+NOTE: /sessions (save/resume) lives in handlers/sessions.py.
+      This file handles the mneme task-tracking sessions (/task_sessions).
 """
 from __future__ import annotations
 
@@ -10,7 +13,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 logger = logging.getLogger(__name__)
-router = Router(name="session")
+router = Router(name="session_handler")
 
 
 @router.message(Command("task"))
@@ -48,15 +51,15 @@ async def cmd_task_done(message: Message) -> None:
     await message.answer(f"✅ Task completed: {task['task']}\nResult: {summary}")
 
 
-@router.message(Command("sessions"))
-async def cmd_sessions(message: Message) -> None:
-    """Show recent session episodes."""
+@router.message(Command("task_sessions"))
+async def cmd_task_sessions(message: Message) -> None:
+    """Show recent mneme session episodes. (Use /sessions for save/resume sessions.)"""
     from tools.mneme_session import get_recent_episodes
     episodes = get_recent_episodes(10)
     if not episodes:
-        await message.answer("No session history yet.")
+        await message.answer("No task history yet.")
         return
-    lines = ["<b>📚 Recent Session History</b>\n"]
+    lines = ["<b>📚 Recent Task History</b>\n"]
     for ep in reversed(episodes):
         lines.append(f"• {ep.get('task','?')[:60]} → {ep.get('result_summary','?')[:60]}")
     await message.answer("\n".join(lines), parse_mode="HTML")
