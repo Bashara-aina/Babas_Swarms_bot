@@ -19,6 +19,13 @@ _DEFAULT_STATE: dict[str, Any] = {
     "recent_emotional_events": [],
     "personality_traits": ["direct", "casual", "practical", "truthful"],
     "updated_at": "",
+    # Structured key-value blocks the LLM can read and update (Letta-style memory_blocks)
+    "memory_blocks": {
+        "human": "Bashara — developer, running Ubuntu on RTX 3060, based in Tokyo (Koto City).",
+        "persona": "Legion — direct, casual AI coworker. No corporate filler. Always honest.",
+        "goals": "",
+        "context": "",
+    },
 }
 
 
@@ -52,20 +59,45 @@ def get_persona_state() -> dict[str, Any]:
     return dict(_STATE)
 
 
+def get_memory_blocks_prompt() -> str:
+    """Return a formatted prompt block for the memory_blocks dict."""
+    blocks: dict = _STATE.get("memory_blocks") or {}
+    if not blocks:
+        return ""
+    lines = ["[Memory Blocks]"]
+    for key, value in blocks.items():
+        if value:
+            lines.append(f"<{key}>{value}</{key}>")
+    lines.append("[End Memory Blocks]")
+    return "\n".join(lines)
+
+
+def update_memory_block(key: str, value: str) -> None:
+    """Update a named memory block and persist to disk."""
+    blocks: dict = _STATE.setdefault("memory_blocks", {})
+    blocks[key] = value[:1000]  # cap at 1000 chars per block
+    _save_state()
+    logger.debug("memory_block[%s] updated (%d chars)", key, len(value))
+
+
 def build_persona_block() -> str:
     """Build the prompt block describing the current personality state."""
     events = _STATE.get("recent_emotional_events", []) or []
     event_lines = [f"- {item.get('emotion', 'neutral')}: {item.get('event', '')}" for item in events[:3] if isinstance(item, dict)]
     events_text = "\n".join(event_lines) if event_lines else "- none"
-    return (
-        "[Legion Personality State]\n"
-        f"Dominant emotion: {_STATE.get('dominant_emotion', 'neutral')}\n"
-        f"Energy level: {_STATE.get('energy_level', 'high')}\n"
-        f"Mood notes: {_STATE.get('mood_notes', 'steady')}\n"
-        f"Traits: {', '.join(_STATE.get('personality_traits', []))}\n"
-        f"Recent emotional events:\n{events_text}\n"
-        "[End personality state]"
-    )
+    memory_block_section = get_memory_blocks_prompt()
+    parts = [
+        "[Legion Personality State]",
+        f"Dominant emotion: {_STATE.get('dominant_emotion', 'neutral')}",
+        f"Energy level: {_STATE.get('energy_level', 'high')}",
+        f"Mood notes: {_STATE.get('mood_notes', 'steady')}",
+        f"Traits: {', '.join(_STATE.get('personality_traits', []))}",
+        f"Recent emotional events:\n{events_text}",
+        "[End personality state]",
+    ]
+    if memory_block_section:
+        parts.insert(-1, memory_block_section)
+    return "\n".join(parts)
 
 
 def update_emotion(emotion: str, event: str = "") -> None:
