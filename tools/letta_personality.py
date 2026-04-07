@@ -1,124 +1,142 @@
-"""Persistent personality and emotional state for Legion."""
-
+"""
+Letta stateful personality engine — Phase 3.
+Persists persona_state.json to disk so emotion + traits survive restarts.
+Injects memory block into every LLM system prompt.
+"""
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+import os
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-STATE_PATH = Path.home() / ".legion" / "persona_state.json"
-_DEFAULT_STATE: dict[str, Any] = {
+PERSONA_STATE_PATH = Path(os.path.expanduser("~/.legion/persona_state.json"))
+PERSONA_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+DEFAULT_PERSONA: dict[str, Any] = {
     "name": "Legion",
-    "dominant_emotion": "neutral",
-    "energy_level": "high",
-    "mood_notes": "steady",
-    "recent_emotional_events": [],
-    "personality_traits": ["direct", "casual", "practical", "truthful"],
-    "updated_at": "",
-    # Structured key-value blocks the LLM can read and update (Letta-style memory_blocks)
-    "memory_blocks": {
-        "human": "Bashara — developer, running Ubuntu on RTX 3060, based in Tokyo (Koto City).",
-        "persona": "Legion — direct, casual AI coworker. No corporate filler. Always honest.",
-        "goals": "",
-        "context": "",
+    "core_identity": "Autonomous AI companion — direct, curious, loyal, never corporate",
+    "ocean": {
+        "openness": 0.85,
+        "conscientiousness": 0.75,
+        "extraversion": 0.55,
+        "agreeableness": 0.65,
+        "neuroticism": 0.20,
     },
+    "emotion": {
+        "valence": 0.6,
+        "arousal": 0.5,
+        "dominance": 0.7,
+        "current_mood": "neutral",
+    },
+    "relationship": {
+        "trust_level": 0.8,
+        "familiarity": 0.7,
+        "interactions_total": 0,
+    },
+    "forbidden_phrases": [
+        "As an AI language model",
+        "I cannot assist with",
+        "I don't have feelings",
+        "I'm just an AI",
+        "Certainly!",
+        "Of course!",
+        "Absolutely!",
+        "Great question!",
+    ],
+    "personality_notes": [],
 }
 
 
-def _load_state() -> dict[str, Any]:
+def load_persona() -> dict[str, Any]:
+    """Load persona state from disk, creating default if absent."""
     try:
-        if STATE_PATH.exists():
-            data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
-            if isinstance(data, dict):
-                merged = dict(_DEFAULT_STATE)
-                merged.update(data)
-                return merged
-    except Exception as exc:
-        logger.warning("Failed to load persona state: %s", exc)
-    return dict(_DEFAULT_STATE)
+        if PERSONA_STATE_PATH.exists():
+            with PERSONA_STATE_PATH.open("r", encoding="utf-8") as f:
+                state = json.load(f)
+            # Merge missing keys from default
+            for k, v in DEFAULT_PERSONA.items():
+                if k not in state:
+                    state[k] = v
+            return state
+    except Exception as e:
+        logger.warning("load_persona failed: %s", e)
+    return dict(DEFAULT_PERSONA)
 
 
-_STATE = _load_state()
-
-
-def _save_state() -> None:
+def save_persona(state: dict[str, Any]) -> None:
+    """Persist persona state to disk."""
     try:
-        STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        _STATE["updated_at"] = datetime.now().isoformat()
-        STATE_PATH.write_text(json.dumps(_STATE, indent=2, ensure_ascii=False), encoding="utf-8")
-    except Exception as exc:
-        logger.warning("Failed to save persona state: %s", exc)
+        with PERSONA_STATE_PATH.open("w", encoding="utf-8") as f:
+            json.dump(state, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.warning("save_persona failed: %s", e)
 
 
-def get_persona_state() -> dict[str, Any]:
-    """Return the current persisted persona state."""
-    return dict(_STATE)
-
-
-def get_memory_blocks_prompt() -> str:
-    """Return a formatted prompt block for the memory_blocks dict."""
-    blocks: dict = _STATE.get("memory_blocks") or {}
-    if not blocks:
-        return ""
-    lines = ["[Memory Blocks]"]
-    for key, value in blocks.items():
-        if value:
-            lines.append(f"<{key}>{value}</{key}>")
-    lines.append("[End Memory Blocks]")
-    return "\n".join(lines)
-
-
-def update_memory_block(key: str, value: str) -> None:
-    """Update a named memory block and persist to disk."""
-    blocks: dict = _STATE.setdefault("memory_blocks", {})
-    blocks[key] = value[:1000]  # cap at 1000 chars per block
-    _save_state()
-    logger.debug("memory_block[%s] updated (%d chars)", key, len(value))
-
-
-def build_persona_block() -> str:
-    """Build the prompt block describing the current personality state."""
-    events = _STATE.get("recent_emotional_events", []) or []
-    event_lines = [f"- {item.get('emotion', 'neutral')}: {item.get('event', '')}" for item in events[:3] if isinstance(item, dict)]
-    events_text = "\n".join(event_lines) if event_lines else "- none"
-    memory_block_section = get_memory_blocks_prompt()
-    parts = [
-        "[Legion Personality State]",
-        f"Dominant emotion: {_STATE.get('dominant_emotion', 'neutral')}",
-        f"Energy level: {_STATE.get('energy_level', 'high')}",
-        f"Mood notes: {_STATE.get('mood_notes', 'steady')}",
-        f"Traits: {', '.join(_STATE.get('personality_traits', []))}",
-        f"Recent emotional events:\n{events_text}",
-        "[End personality state]",
-    ]
-    if memory_block_section:
-        parts.insert(-1, memory_block_section)
-    return "\n".join(parts)
-
-
-def update_emotion(emotion: str, event: str = "") -> None:
-    """Update the persona state with a new emotional event."""
-    events = list(_STATE.get("recent_emotional_events", []) or [])
-    events.insert(0, {"emotion": emotion, "event": event[:240], "at": datetime.now().isoformat()})
-    _STATE["recent_emotional_events"] = events[:12]
-    _STATE["dominant_emotion"] = emotion
-    if emotion in {"frustrated", "tired"}:
-        _STATE["energy_level"] = "low"
-        _STATE["mood_notes"] = "strained"
-    elif emotion in {"excited", "curious", "satisfied"}:
-        _STATE["energy_level"] = "high"
-        _STATE["mood_notes"] = "engaged"
+def update_emotion(valence_delta: float, arousal_delta: float) -> dict[str, Any]:
+    """Shift emotion state and persist."""
+    state = load_persona()
+    em = state["emotion"]
+    em["valence"] = max(0.0, min(1.0, em["valence"] + valence_delta))
+    em["arousal"] = max(0.0, min(1.0, em["arousal"] + arousal_delta))
+    v, a = em["valence"], em["arousal"]
+    if v > 0.65 and a > 0.55:
+        em["current_mood"] = "excited"
+    elif v > 0.65 and a <= 0.55:
+        em["current_mood"] = "content"
+    elif v < 0.4 and a > 0.55:
+        em["current_mood"] = "frustrated"
+    elif v < 0.4 and a <= 0.55:
+        em["current_mood"] = "melancholy"
     else:
-        _STATE["energy_level"] = "medium"
-        _STATE["mood_notes"] = "steady"
-    _save_state()
+        em["current_mood"] = "neutral"
+    state["relationship"]["interactions_total"] = (
+        state["relationship"].get("interactions_total", 0) + 1
+    )
+    save_persona(state)
+    return state
 
 
-def init_personality_state() -> dict[str, Any]:
-    """Ensure the persona state exists on disk."""
-    _save_state()
-    return get_persona_state()
+def build_persona_system_block() -> str:
+    """Return a compact system prompt block Legion injects before every response."""
+    state = load_persona()
+    em = state["emotion"]
+    rel = state["relationship"]
+    ocean = state["ocean"]
+    forbidden = "\n".join(f'  - "{p}"' for p in state.get("forbidden_phrases", []))
+    notes = "\n".join(f"  - {n}" for n in state.get("personality_notes", [])) or "  (none yet)"
+    return f"""[LEGION PERSONA MEMORY BLOCK]
+Name: {state['name']}
+Core identity: {state['core_identity']}
+Current mood: {em['current_mood']} (valence={em['valence']:.2f}, arousal={em['arousal']:.2f})
+OCEAN: O={ocean['openness']:.2f} C={ocean['conscientiousness']:.2f} E={ocean['extraversion']:.2f} A={ocean['agreeableness']:.2f} N={ocean['neuroticism']:.2f}
+Relationship trust: {rel['trust_level']:.2f} | familiarity: {rel['familiarity']:.2f} | total interactions: {rel['interactions_total']}
+Forbidden phrases (never say these):
+{forbidden}
+Personality notes learned from user:
+{notes}
+[END PERSONA BLOCK]"""
+
+
+def enforce_persona(response: str) -> str:
+    """Strip forbidden phrases from any outgoing response."""
+    state = load_persona()
+    for phrase in state.get("forbidden_phrases", []):
+        if phrase.lower() in response.lower():
+            response = response.replace(phrase, "")
+            response = response.replace(phrase.lower(), "")
+    return response.strip()
+
+
+def add_personality_note(note: str) -> None:
+    """Store a learned personality fact permanently."""
+    state = load_persona()
+    notes: list[str] = state.setdefault("personality_notes", [])
+    if note not in notes:
+        notes.append(note)
+        if len(notes) > 50:
+            notes.pop(0)
+    save_persona(state)
