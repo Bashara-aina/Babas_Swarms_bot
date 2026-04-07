@@ -1,4 +1,10 @@
-"""Local MemoryOS-style hierarchical memory sidecar."""
+"""MemoryOS hierarchical memory — external package with local SQLite fallback.
+
+Priority:
+1. External ``memoryos`` package (pip install memoryos) — full hierarchical memory
+   with hot / warm / cold tiers managed by the upstream library.
+2. Local SQLite implementation — same interface, no external dependencies.
+"""
 
 from __future__ import annotations
 
@@ -102,11 +108,37 @@ class LocalMemoryOS:
 
 
 _mos_instance: LocalMemoryOS | None = None
+_external_mos: Any = None  # external memoryos.MemoryOS instance if available
+
+
+def _try_init_external(user_id: str) -> Any:
+    """Try to initialise the external memoryos package. Returns instance or None."""
+    try:
+        import memoryos  # type: ignore[import]
+        import os
+        openai_key = os.getenv("OPENAI_API_KEY", "")
+        if not openai_key:
+            raise RuntimeError("OPENAI_API_KEY required for external memoryos")
+        instance = memoryos.MemoryOS(
+            user_id=user_id,
+            openai_api_key=openai_key,
+            storage_path=str(MEMORYOS_STORAGE / "external"),
+        )
+        logger.info("MemoryOS initialized (external package)")
+        return instance
+    except Exception as ext_err:
+        logger.debug("External memoryos unavailable (%s), using local SQLite", ext_err)
+        return None
 
 
 def get_memoryos(user_id: str = "bashara") -> LocalMemoryOS:
-    """Return a local MemoryOS-compatible instance."""
-    global _mos_instance
+    """Return a MemoryOS-compatible instance (external or local SQLite fallback)."""
+    global _mos_instance, _external_mos
+    # Try external package once per user_id change
+    if _external_mos is None:
+        _external_mos = _try_init_external(user_id)
+    if _external_mos is not None:
+        return _external_mos  # type: ignore[return-value]
     if _mos_instance is None or _mos_instance.user_id != user_id:
         _mos_instance = LocalMemoryOS(user_id=user_id)
         logger.info("MemoryOS initialized (local fallback)")
