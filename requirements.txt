@@ -68,6 +68,7 @@ sentence-transformers==5.2.3
 open-interpreter==0.4.3
 
 # === v7 Tier 1 — Soul Transplant + Capability Expansion ===
+
 # Composio — 850+ tool connectors (Gmail, Calendar, WhatsApp, GitHub, Notion...)
 composio-core>=0.7.0
 composio-langchain>=0.7.0
@@ -87,16 +88,17 @@ supabase>=2.4.0
 # LangChain core (for autonomous router ReAct loop + Composio integration)
 langchain-core>=0.3.0
 langchain>=0.3.0
+langchain-community>=0.3.0
 
 # === v8 Tier-3 — Screenpipe, MCP, LiveKit token helpers, search ===
 mcp>=1.2.0
 livekit-api>=0.8.0
 
 # === v9 Soul Transplant ===
-browser-use>=0.1.40        # autonomous LLM-driven browsing (browse_task)
-pytz>=2024.1               # timezone support (fallback to stdlib where possible)
+browser-use==0.1.40  # autonomous LLM-driven browsing (browse_task)
+pytz>=2024.1  # timezone support (fallback to stdlib where possible)
 
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng
-# sudo apt install ollama  (for local LLM inference on RTX 3060)
+# sudo apt install ollama (for local LLM inference on RTX 3060)
