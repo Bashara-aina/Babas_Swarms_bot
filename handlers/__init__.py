@@ -13,6 +13,7 @@ from handlers import (
     ai,
     artifact,
     brain,
+    communications,
     legion_extras,
     business_handler,
     wiki_handler,
@@ -44,6 +45,7 @@ from handlers import (
 # overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
     computer.router,              # /do /screen /click /type /key /cmd /install
+    communications.router,        # /emails /inbox /calendar
     runbook_handler.router,       # /runbook
     business_handler.router,      # /db /site_health /bookings /db_schema
     github_intel_handler.router,  # /github_intel /eval_repo /upgrade_from

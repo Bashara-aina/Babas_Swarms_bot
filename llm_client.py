@@ -1039,6 +1039,16 @@ async def chat(
         except Exception as _cog_err:
             logger.debug("cognition_pipeline skipped: %s", _cog_err)
 
+        # Intent hint injection — tells LLM what mode to use without forcing it
+        try:
+            from core.intent_router import classify_intent_fast, build_intent_hint
+            _intent_result = classify_intent_fast(task)
+            _intent_hint = build_intent_hint(_intent_result)
+            if _intent_hint:
+                prompt_sections.append(_intent_hint)
+        except Exception as _ir_err:
+            logger.debug("intent_router skipped: %s", _ir_err)
+
     try:
         init_humanization_layer()
         if memory is not None and prompt_builder is not None:

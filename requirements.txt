@@ -92,6 +92,10 @@ langchain>=0.3.0
 mcp>=1.2.0
 livekit-api>=0.8.0
 
+# === v9 Soul Transplant ===
+browser-use>=0.1.40        # autonomous LLM-driven browsing (browse_task)
+pytz>=2024.1               # timezone support (fallback to stdlib where possible)
+
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng
