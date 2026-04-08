@@ -1,5 +1,4 @@
-"""Proactive initiator — Legion notices things and speaks up."""
+"""Legion proactive intelligence subsystem."""
+from core.proactive.scheduler import ProactiveScheduler, get_scheduler
 
-from core.proactive.proactive_initiator import ProactiveInitiator
-
-__all__ = ["ProactiveInitiator"]
+__all__ = ["ProactiveScheduler", "get_scheduler"]
