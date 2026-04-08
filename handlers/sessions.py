@@ -1,4 +1,4 @@
-"""Session handlers: /save /resume /sessions /audit."""
+"""Session handlers: /save /resume /legion_sessions /audit."""
 from __future__ import annotations
 
 import html as html_mod
@@ -122,7 +122,7 @@ async def cmd_resume(msg: Message) -> None:
 
 
 # ── /sessions ─────────────────────────────────────────────────────────────────
-@router.message(Command("sessions"))
+@router.message(Command("legion_sessions"))
 async def cmd_sessions(msg: Message) -> None:
     if not is_allowed(msg):
         return
