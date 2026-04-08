@@ -2,20 +2,16 @@
 
 Full pipeline:
  1. Parse upgrade request (natural language or structured)
- 2. Generate Python file(s) via LLM (coding agent)
- 3. Validate syntax (ast.parse)
- 4. Safety scan (no rm -rf, no os.system with untrusted input, etc.)
- 5. Write files to disk
- 6. Extract + install new pip dependencies
- 7. Hot-reload the handler module (importlib.reload)
- 8. If hot-reload fails → zero-downtime restart via watchdog wrapper
- 9. Notify user when the new feature is live
-10. Rollback on any failure — restore previous file, reload old version
-
-The Telegram bot connection is NEVER dropped:
-- During hot-reload: aiogram dispatcher keeps polling
-- During full restart: a watchdog parent process (watcher.py) relaunches
-  main.py automatically, and Telegram long-polling reconnects in <3 seconds
+ 2. LLM-powered GitHub trend scanner with pros/cons evaluator (NEW)
+ 3. Generate Python file(s) via LLM (coding agent)
+ 4. Validate syntax (ast.parse)
+ 5. Safety scan
+ 6. Write files to disk
+ 7. Extract + install new pip dependencies
+ 8. Hot-reload the handler module
+ 9. If hot-reload fails → zero-downtime restart via watchdog
+10. Notify user when the new feature is live
+11. Rollback on any failure
 """
 from __future__ import annotations
 
@@ -23,6 +19,7 @@ import ast
 import asyncio
 import importlib
 import importlib.util
+import json
 import logging
 import os
 import re
@@ -36,21 +33,33 @@ from typing import Callable, Coroutine, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
-# ── Safety: patterns that are NEVER allowed in generated code ───────────────
 _BLOCKED_PATTERNS = [
     r"os\.system\s*\(",
     r"subprocess\.call\s*\(",
     r"__import__\s*\(['\"]os['\"]",
     r"rm\s+-rf",
     r"shutil\.rmtree\s*\(",
-    r"open\s*\(.*['\"]w['\"].*\).*\\.\.\.",  # writing to ../ paths
+    r"open\s*\(.*['\"]w['\"].*\).*\\.\.\.",
     r"eval\s*\(",
     r"exec\s*\(",
 ]
 
-_ALLOWED_INSTALL_PREFIX = (
-    sys.executable,  # always use the current Python executable
-)
+_ALLOWED_INSTALL_PREFIX = (sys.executable,)
+
+
+@dataclass
+class RepoEvaluation:
+    """LLM-powered evaluation of a trending GitHub repository."""
+    repo_name: str
+    description: str
+    stars: int
+    pros: List[str]
+    cons: List[str]
+    effort_estimate: str       # low | medium | high
+    risk_level: str            # low | medium | high
+    relevance_score: float     # 0.0 - 1.0
+    recommendation: str        # integrate | monitor | skip
+    integration_summary: str   # what would actually change in Legion
 
 
 @dataclass
@@ -59,9 +68,9 @@ class UpgradeResult:
     feature_name: str
     files_written: List[str] = field(default_factory=list)
     deps_installed: List[str] = field(default_factory=list)
-    reload_method: str = ""      # hot_reload | restart | none
+    reload_method: str = ""
     error: str = ""
-    rollback_files: Dict[str, str] = field(default_factory=dict)  # path -> original content
+    rollback_files: Dict[str, str] = field(default_factory=dict)
 
 
 class SelfUpgradeEngine:
@@ -81,18 +90,14 @@ class SelfUpgradeEngine:
 
     async def upgrade(self, request: str, user_id: int = 0) -> UpgradeResult:
         """Full upgrade pipeline from natural-language request."""
-        await self._notify(f"🧠 Analyzing upgrade request\u2026")
-
-        # 1. Generate code via LLM
+        await self._notify("🧠 Analyzing upgrade request…")
         plan = await self._plan_upgrade(request)
         await self._notify(
             f"📝 Plan ready: {len(plan['files'])} file(s), "
             f"deps: {plan.get('deps', []) or 'none'}"
         )
-
         result = UpgradeResult(success=False, feature_name=plan.get("feature", "unknown"))
 
-        # 2. Validate all files before writing any
         for file_plan in plan["files"]:
             ok, err = self._validate_code(file_plan["content"], file_plan["path"])
             if not ok:
@@ -102,13 +107,11 @@ class SelfUpgradeEngine:
 
         await self._notify("✅ Code validation passed")
 
-        # 3. Backup existing files
         for file_plan in plan["files"]:
             path = self.root / file_plan["path"]
             if path.exists():
                 result.rollback_files[file_plan["path"]] = path.read_text(encoding="utf-8")
 
-        # 4. Write files
         for file_plan in plan["files"]:
             path = self.root / file_plan["path"]
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -116,7 +119,6 @@ class SelfUpgradeEngine:
             result.files_written.append(file_plan["path"])
             await self._notify(f"💾 Written: {file_plan['path']}")
 
-        # 5. Install dependencies
         deps = plan.get("deps", [])
         if deps:
             await self._notify(f"📦 Installing: {', '.join(deps)}")
@@ -129,7 +131,6 @@ class SelfUpgradeEngine:
             result.deps_installed = deps
             await self._notify(f"✅ Installed: {', '.join(deps)}")
 
-        # 6. Hot-reload or restart
         reload_ok, method = await self._reload_or_restart(plan["files"])
         result.reload_method = method
 
@@ -150,16 +151,169 @@ class SelfUpgradeEngine:
         )
         return result
 
+    # ── GitHub Trending Intelligence (NEW) ───────────────────────────
+
+    async def scan_github_trending(
+        self,
+        topic: str = "ai-agent",
+        limit: int = 10,
+    ) -> List[RepoEvaluation]:
+        """Fetch trending GitHub repos and evaluate each with LLM pros/cons analysis.
+
+        Returns a list of RepoEvaluation sorted by relevance_score DESC.
+        """
+        await self._notify(f"🔍 Scanning GitHub trending repos for topic: <code>{topic}</code>")
+
+        repos = await self._fetch_trending_repos(topic, limit)
+        if not repos:
+            await self._notify("⚠️ No trending repos found (check GITHUB_TOKEN)")
+            return []
+
+        await self._notify(f"📦 Found {len(repos)} repos — running LLM evaluation...")
+        evaluations: List[RepoEvaluation] = []
+
+        for repo in repos:
+            try:
+                eval_result = await self._llm_evaluate_repo(repo)
+                evaluations.append(eval_result)
+            except Exception as e:
+                logger.warning("[SelfUpgrade] Repo eval failed for %s: %s", repo.get("name"), e)
+
+        evaluations.sort(key=lambda x: x.relevance_score, reverse=True)
+        return evaluations
+
+    async def _fetch_trending_repos(self, topic: str, limit: int) -> List[dict]:
+        """Fetch trending repos from GitHub API."""
+        try:
+            import aiohttp
+            token = os.getenv("GITHUB_TOKEN", "")
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            if token:
+                headers["Authorization"] = f"token {token}"
+
+            query = f"topic:{topic} stars:>100"
+            url = f"https://api.github.com/search/repositories?q={query}&sort=stars&order=desc&per_page={limit}"
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    if resp.status != 200:
+                        logger.warning("[SelfUpgrade] GitHub API returned %d", resp.status)
+                        return []
+                    data = await resp.json()
+                    items = data.get("items", [])
+                    return [
+                        {
+                            "name": r["full_name"],
+                            "description": r.get("description") or "",
+                            "stars": r.get("stargazers_count", 0),
+                            "url": r.get("html_url", ""),
+                            "language": r.get("language") or "unknown",
+                            "topics": r.get("topics", []),
+                        }
+                        for r in items
+                    ]
+        except Exception as e:
+            logger.warning("[SelfUpgrade] GitHub trending fetch failed: %s", e)
+            return []
+
+    async def _llm_evaluate_repo(self, repo: dict) -> RepoEvaluation:
+        """Use LLM to evaluate a repo with structured pros/cons/risk/effort."""
+        import litellm
+
+        structure = self._get_project_structure()
+        prompt = f"""
+You are evaluating whether a GitHub repository is worth integrating into Legion,
+a personal AI assistant Telegram bot for a data scientist (Bashara) running on
+Linux with RTX 3060, Python 3.13, aiogram 3.x, litellm.
+
+Current Legion project structure (compact):
+{structure[:1500]}
+
+Repository to evaluate:
+  Name: {repo['name']}
+  Description: {repo['description']}
+  Stars: {repo['stars']:,}
+  Language: {repo['language']}
+  Topics: {', '.join(repo.get('topics', []))}
+  URL: {repo['url']}
+
+Task: Evaluate this repo for integration into Legion. Output ONLY valid JSON:
+{{
+  "pros": ["specific benefit 1", "specific benefit 2"],
+  "cons": ["specific drawback 1"],
+  "effort_estimate": "low|medium|high",
+  "risk_level": "low|medium|high",
+  "relevance_score": 0.0,
+  "recommendation": "integrate|monitor|skip",
+  "integration_summary": "one sentence: what would actually change in Legion if integrated"
+}}
+
+Scoring guide:
+  relevance_score 0.8-1.0: directly improves Legion's core capabilities
+  relevance_score 0.5-0.8: useful addition, moderate effort
+  relevance_score 0.0-0.5: not relevant or too risky
+
+Output ONLY the JSON.
+"""
+        resp = await litellm.acompletion(
+            model="groq/llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=512,
+        )
+        raw = resp.choices[0].message.content or "{}"
+        raw = re.sub(r"```(?:json)?\n?", "", raw).strip()
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        parsed = json.loads(match.group(0) if match else raw)
+
+        return RepoEvaluation(
+            repo_name=repo["name"],
+            description=repo["description"],
+            stars=repo["stars"],
+            pros=parsed.get("pros", []),
+            cons=parsed.get("cons", []),
+            effort_estimate=parsed.get("effort_estimate", "medium"),
+            risk_level=parsed.get("risk_level", "medium"),
+            relevance_score=float(parsed.get("relevance_score", 0.0)),
+            recommendation=parsed.get("recommendation", "skip"),
+            integration_summary=parsed.get("integration_summary", ""),
+        )
+
+    def format_evaluations_for_telegram(self, evals: List[RepoEvaluation]) -> str:
+        """Format repo evaluations as a Telegram HTML message."""
+        if not evals:
+            return "No evaluations available."
+
+        lines = ["🔬 <b>GitHub Trending — Legion Self-Upgrade Analysis</b>\n"]
+        for ev in evals[:8]:
+            rec_icon = {"integrate": "✅", "monitor": "👀", "skip": "❌"}.get(ev.recommendation, "❓")
+            score_bar = "█" * round(ev.relevance_score * 10) + "░" * (10 - round(ev.relevance_score * 10))
+            lines.append(
+                f"{rec_icon} <b>{ev.repo_name}</b> ⭐{ev.stars:,}\n"
+                f"  <i>{ev.description[:80]}</i>\n"
+                f"  Relevance: <code>{score_bar}</code> {ev.relevance_score:.1f}\n"
+                f"  Effort: {ev.effort_estimate} | Risk: {ev.risk_level}\n"
+            )
+            if ev.pros:
+                lines.append("  ✅ " + " | ".join(ev.pros[:2]))
+            if ev.cons:
+                lines.append("  ⚠️ " + " | ".join(ev.cons[:2]))
+            lines.append(f"  → {ev.integration_summary}")
+            lines.append("")
+
+        integrate_count = sum(1 for e in evals if e.recommendation == "integrate")
+        lines.append(
+            f"<b>Summary:</b> {integrate_count} repo(s) recommended for integration. "
+            "Reply with the repo name to proceed."
+        )
+        return "\n".join(lines)
+
     # ── LLM Code Generation ───────────────────────────────────────────
 
     async def _plan_upgrade(self, request: str) -> dict:
-        """Call LLM to generate implementation plan + code."""
         try:
             import litellm
-
-            # Read current project structure for context
             structure = self._get_project_structure()
-
             prompt = f"""
 You are upgrading a Telegram AI bot (Legion). The bot uses:
 - aiogram 3.x for Telegram
@@ -214,16 +368,12 @@ Rules:
         raw = re.sub(r"```(?:json)?\n?", "", raw).strip()
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         if match:
-            import json
             return json.loads(match.group(0))
-        import json
         return json.loads(raw)
 
     def _get_project_structure(self) -> str:
-        """Return a compact project tree (dirs + .py files, max 80 lines)."""
         lines = []
         for root, dirs, files in os.walk(self.root):
-            # Skip hidden, __pycache__, node_modules, data
             dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("__pycache__", "node_modules", "data", ".venv", "venv")]
             rel = Path(root).relative_to(self.root)
             indent = "  " * len(rel.parts)
@@ -239,48 +389,34 @@ Rules:
     # ── Validation ──────────────────────────────────────────────────
 
     def _validate_code(self, code: str, path: str) -> Tuple[bool, str]:
-        """Syntax check + safety scan."""
-        # 1. Syntax check
         try:
             ast.parse(code)
         except SyntaxError as e:
             return False, f"SyntaxError in {path}: {e}"
-
-        # 2. Safety patterns
         for pattern in _BLOCKED_PATTERNS:
             if re.search(pattern, code):
                 return False, f"Blocked pattern found in {path}: {pattern}"
-
-        # 3. Path traversal check
         if "../" in path or path.startswith("/"):
             return False, f"Unsafe path: {path}"
-
         return True, ""
 
     # ── Dependency Installation ───────────────────────────────────────
 
     async def _install_deps(self, deps: List[str]) -> Tuple[bool, str]:
-        """Install pip packages. Returns (success, error_message)."""
-        # Sanitize: only allow alphanumeric, -, _, ., [, ], >=, <=, ==, ~=
         safe_deps = []
         for dep in deps:
             if re.match(r'^[a-zA-Z0-9_\-\.\[\]>=<~!]+$', dep):
                 safe_deps.append(dep)
             else:
                 return False, f"Unsafe dependency name: {dep}"
-
         cmd = [sys.executable, "-m", "pip", "install", "--quiet"] + safe_deps
         try:
             proc = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
             if proc.returncode != 0:
                 return False, stderr.decode()[:500]
-
-            # Append to requirements.txt
             req_path = self.root / "requirements.txt"
             if req_path.exists():
                 existing = req_path.read_text()
@@ -288,7 +424,6 @@ Rules:
                 if new_deps:
                     with open(req_path, "a") as f:
                         f.write("\n" + "\n".join(new_deps) + "\n")
-
             return True, ""
         except asyncio.TimeoutError:
             return False, "pip install timed out (120s)"
@@ -298,62 +433,40 @@ Rules:
     # ── Hot-reload / Restart ───────────────────────────────────────────
 
     async def _reload_or_restart(self, files: List[dict]) -> Tuple[bool, str]:
-        """Try hot-reload first. Fall back to zero-downtime restart."""
         reload_errors = []
-
         for file_plan in files:
             path = file_plan["path"]
             if not path.endswith(".py"):
                 continue
-            # Convert path to module name
             module_name = path.replace("/", ".").replace("\\", ".").removesuffix(".py")
             try:
                 if module_name in sys.modules:
                     mod = sys.modules[module_name]
                     importlib.reload(mod)
-                    logger.info("Hot-reloaded: %s", module_name)
                 else:
-                    # New module — import it fresh
-                    spec = importlib.util.spec_from_file_location(
-                        module_name, self.root / path
-                    )
+                    spec = importlib.util.spec_from_file_location(module_name, self.root / path)
                     mod = importlib.util.module_from_spec(spec)
                     sys.modules[module_name] = mod
                     spec.loader.exec_module(mod)
-                    logger.info("Fresh-loaded: %s", module_name)
             except Exception as e:
                 reload_errors.append(f"{module_name}: {e}")
-
         if reload_errors:
-            logger.warning("Hot-reload errors (will restart): %s", reload_errors)
-            # Signal watchdog to restart
             self._request_restart()
-            return True, "restart"   # watchdog will handle it
-
+            return True, "restart"
         return True, "hot_reload"
 
     def _request_restart(self) -> None:
-        """Write restart flag. Watchdog process detects this and relaunches."""
         self._restart_flag.write_text(str(time.time()))
-        logger.info("Restart flag written: %s", self._restart_flag)
-
-    # ── Rollback ───────────────────────────────────────────────────────────
 
     async def _rollback(self, result: UpgradeResult) -> None:
-        """Restore all backed-up files."""
         for rel_path, original_content in result.rollback_files.items():
             path = self.root / rel_path
             path.write_text(original_content, encoding="utf-8")
-            logger.info("Rolled back: %s", rel_path)
-        # Also delete newly created files that had no backup
         for written in result.files_written:
             if written not in result.rollback_files:
                 path = self.root / written
                 if path.exists():
                     path.unlink()
-                    logger.info("Deleted new file on rollback: %s", written)
-
-    # ── Notify ────────────────────────────────────────────────────────────
 
     async def _notify(self, text: str) -> None:
         if self.notify:
