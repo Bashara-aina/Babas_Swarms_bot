@@ -208,45 +208,102 @@ class EpisodicStore:
         return "\n".join(lines)
 
     def auto_extract_and_store(self, user_id: str, user_msg: str) -> None:
-        """Heuristically extract storable facts from user messages."""
+        """Heuristically extract storable facts from user messages.
+
+        Stores facts into episodic memory so Legion can recall them in future turns.
+        Multiple categories can match — the first high-confidence hit wins.
+        Any substantive message (>20 words) is stored as a loose conversation entry.
+        """
         msg = user_msg.strip()
         if not msg or len(msg) < 10:
             return
 
         msg_lower = msg.lower()
 
-        # Schedule detection
+        # ── Schedule / time-bounded events ──────────────────────────────────
         schedule_triggers = [
             "holiday", "libur", "cuti", "meeting", "appointment",
             "flight", "penerbangan", "trip", "travel", "perjalanan",
             "deadline", "besok", "tomorrow", "next week", "minggu depan",
+            "next month", "bulan depan", "next year", "conference", "event",
+            "vacation", "liburan", "going to", "akan pergi", "plan to",
+            "berencana", "seminar", "workshop",
         ]
         if any(t in msg_lower for t in schedule_triggers):
             self.store(user_id, "schedule", summary=msg[:200], detail=msg,
                        tags=["schedule", "auto"], source="auto_extract")
             return
 
-        # Preference / personal fact detection
+        # ── Personal preferences & facts ────────────────────────────────────
         pref_triggers = [
             "i like", "i love", "i hate", "i prefer", "i always", "i never",
             "aku suka", "aku tidak suka", "aku selalu", "aku biasanya",
             "my home", "my office", "rumahku", "kantorku",
-            "i live in", "aku tinggal di",
+            "i live in", "aku tinggal di", "i work at", "i study",
+            "i'm studying", "i'm working on", "i use", "i'm using",
+            "my favorite", "favorit saya", "my setup", "i switched to",
+            "my name is", "nama saya", "i usually", "biasanya aku",
+            "i feel", "aku merasa", "i think", "menurut aku",
+            "my goal", "target saya", "i want to", "aku mau",
         ]
         if any(t in msg_lower for t in pref_triggers):
             self.store(user_id, "preference", summary=msg[:200], detail=msg,
                        tags=["preference", "auto"], source="auto_extract")
             return
 
-        # Project milestone
+        # ── People / relationships ───────────────────────────────────────────
+        people_triggers = [
+            "my friend", "my partner", "my boss", "my team", "my professor",
+            "temanku", "pacarku", "bossku", "timku", "dosenku",
+            "she is", "he is", "they are", "her name is", "his name is",
+            "my supervisor", "my colleague",
+        ]
+        if any(t in msg_lower for t in people_triggers):
+            self.store(user_id, "people", summary=msg[:200], detail=msg,
+                       tags=["people", "relationship", "auto"], source="auto_extract")
+            return
+
+        # ── Location awareness ───────────────────────────────────────────────
+        location_triggers = [
+            "i'm in", "aku di", "i'm at", "aku lagi di", "i'm visiting",
+            "i moved to", "aku pindah ke", "my city", "my country",
+            "near me", "around here", "di sini", "di sana", "i'm near",
+        ]
+        if any(t in msg_lower for t in location_triggers):
+            self.store(user_id, "location", summary=msg[:200], detail=msg,
+                       tags=["location", "auto"], source="auto_extract")
+            return
+
+        # ── Project milestones & technical work ─────────────────────────────
         project_triggers = [
             "deployed", "launched", "finished", "completed", "broke",
             "rumahlabuh", "supabase", "github", "server", "dataset",
-            "selesai", "deploy", "rilis",
+            "selesai", "deploy", "rilis", "merged", "pushed", "released",
+            "training", "model", "pytorch", "cuda", "vram", "epoch",
+            "error", "bug", "fixed", "bug fix", "refactor", "migrated",
+            "implemented", "built", "created", "wrote",
         ]
         if any(t in msg_lower for t in project_triggers) and len(msg) > 30:
             self.store(user_id, "project", summary=msg[:200], detail=msg,
                        tags=["project", "auto"], source="auto_extract")
+            return
+
+        # ── Remember-me directives ───────────────────────────────────────────
+        remember_triggers = [
+            "remember that", "note that", "keep in mind", "don't forget",
+            "ingat bahwa", "catat", "ingat ya", "fyi", "just so you know",
+            "btw", "by the way",
+        ]
+        if any(t in msg_lower for t in remember_triggers):
+            self.store(user_id, "fact", summary=msg[:200], detail=msg,
+                       tags=["fact", "explicit", "auto"], source="auto_extract")
+            return
+
+        # ── Catch-all: store any substantive message as a conversation episode ─
+        # Low importance — keeps a natural episodic trail even for casual chat.
+        if len(msg.split()) >= 20:
+            self.store(user_id, "conversation", summary=msg[:200], detail=msg,
+                       tags=["conversation", "auto"], source="auto_extract")
 
 
 def _fmt_ts(ts: float) -> str:
