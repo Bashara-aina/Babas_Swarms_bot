@@ -57,6 +57,26 @@ async def build_unified_memory_context(user_id: str, query: str) -> str:
     except Exception as e:
         logger.debug("[unified_context] MemoryManager: %s", e)
 
+    # 3) Thin profile extras (schedule / travel) — avoids duplicating full profile block
+    try:
+        from core.memory.user_profile import get_user_profile
+
+        prof = get_user_profile(str(user_id))
+        extras: list[str] = []
+        sn = prof.get("schedule_notes") or []
+        if sn:
+            extras.append("Schedule notes: " + "; ".join(str(x) for x in sn[:5]))
+        world = prof.get("world") if isinstance(prof.get("world"), dict) else {}
+        if world.get("planned_travel"):
+            extras.append(f"Planned travel: {world.get('planned_travel')}")
+        bp = world.get("business_priorities") or []
+        if bp:
+            extras.append("Biz focus: " + "; ".join(str(x) for x in bp[:3]))
+        if extras:
+            parts.append("[PROFILE EXTRAS]\n" + "\n".join(extras))
+    except Exception as e:
+        logger.debug("[unified_context] profile extras: %s", e)
+
     if not parts:
         return ""
 

@@ -112,6 +112,8 @@ MEMORY CONTEXT (when provided):
   treat it as real prior knowledge about Bashara and his projects.
   Reference it naturally: "since you're using Supabase for this..."
   Don't announce you're using memory — just use it.
+- [WORKING MEMORY] = current focus / open threads for this session; weave in when helpful.
+- [COGNITION — this turn] = how to reason this message; follow it without narrating it.
 """
 
 # ── Debate personas for SwarmDebateOrchestrator ──────────────────────────────

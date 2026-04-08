@@ -955,6 +955,7 @@ async def chat(
     task_context: str = "",
     model_override: Optional[str] = None,
     run_post_hooks: bool = True,
+    routing_hint: Optional[str] = None,
 ) -> tuple[str, str]:
     """Single-turn chat without computer tool use.
 
@@ -1016,6 +1017,27 @@ async def chat(
             prompt_sections.append(rel_ctx)
     except Exception as _rel_err:
         logger.warning("relationship_memory injection failed: %s", _rel_err)
+
+    # ── Working memory + cognition (Jarvis continuity, every turn) ───────────
+    if user_id:
+        try:
+            from core.working_memory import build_prompt_block as _wm_block
+
+            _wm = _wm_block(str(user_id))
+            if _wm:
+                prompt_sections.append(_wm)
+        except Exception as _wm_err:
+            logger.debug("working_memory injection skipped: %s", _wm_err)
+        try:
+            from core.cognition_pipeline import build_cognition_system_fragment
+
+            _cog = build_cognition_system_fragment(
+                str(user_id), task, routing_hint=routing_hint
+            )
+            if _cog:
+                prompt_sections.append(_cog)
+        except Exception as _cog_err:
+            logger.debug("cognition_pipeline skipped: %s", _cog_err)
 
     try:
         init_humanization_layer()
@@ -1138,9 +1160,9 @@ async def chat(
                 "off",
             ):
                 try:
-                    from core.skill_registry import skills_prompt_block
+                    from core.skill_registry import skills_prompt_block_for_query
 
-                    _sk = skills_prompt_block()
+                    _sk = skills_prompt_block_for_query(task)
                     if _sk:
                         prompt_sections.append(_sk)
                 except Exception as _sk_err:
@@ -1441,6 +1463,20 @@ async def chat(
                     )
                 except Exception as _wiki_ing_err:
                     logger.debug("wiki ingest schedule skipped: %s", _wiki_ing_err)
+
+            if user_id:
+                try:
+                    from core.working_memory import record_turn
+
+                    record_turn(
+                        str(user_id),
+                        user_message=task,
+                        assistant_snippet=result,
+                        agent_key=agent_key or "",
+                        routing_hint=routing_hint or "",
+                    )
+                except Exception:
+                    pass
 
             return result, model
 

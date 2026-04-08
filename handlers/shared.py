@@ -324,6 +324,7 @@ async def _execute_chat(
     task: str,
     forced_agent: Optional[str] = None,
     show_thinking: bool = True,
+    routing_hint: Optional[str] = None,
 ) -> None:
     """Single-turn LLM chat with typing indicator and chunked output."""
     # FIX #5: Guard against msg.from_user being None
@@ -350,6 +351,7 @@ async def _execute_chat(
             agent_key=selected_agent,
             show_thinking=show_thinking,
             user_id=str(msg.from_user.id),
+            routing_hint=routing_hint,
         )
         await _cancel_task(typing_task)
         await send_chunked(msg, response, model_used=model_used)

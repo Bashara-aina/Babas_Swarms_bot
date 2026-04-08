@@ -66,6 +66,16 @@ _DEFAULT_PROFILE: dict = {
     ],
     "known_facts": [],
     "interaction_patterns": [],
+    "schedule_notes": [],
+    "contacts_highlight": [],
+    "world": {
+        "planned_travel": "",
+        "business_priorities": [
+            "rumahlabuh.com — bookings, site health, Supabase",
+            "Legion bot — reliability, memory, routing",
+        ],
+        "quiet_hours_local": "00:00–07:00 (avoid non-urgent pings)",
+    },
 }
 
 
@@ -158,18 +168,38 @@ class UserProfileStore:
         interests = p.get("interests", [])
         ws = p.get("workstation", {})
 
-        return (
-            "[BASHARA'S PROFILE — know this, don't repeat it back]\n"
+        lines = [
+            "[BASHARA'S PROFILE — know this, don't repeat it back]",
             f"Name: {p.get('name', 'Bashara')} | "
             f"Location: {p.get('location', 'Tokyo')} | "
-            f"Timezone: {p.get('timezone', 'Asia/Tokyo')}\n"
-            f"Active projects: {proj_str}\n"
+            f"Timezone: {p.get('timezone', 'Asia/Tokyo')}",
+            f"Home / base: {p.get('home', '')}",
+            f"Active projects: {proj_str}",
             f"Workstation: {ws.get('os', 'Linux')}, "
-            f"{ws.get('gpu', 'RTX 3060')}, Python {ws.get('python', '3.x')}\n"
-            f"Interests: {', '.join(interests[:4])}\n"
-            f"Preferences: {p.get('preferences', {}).get('response_style', 'casual')}\n"
-            "[END PROFILE]"
-        )
+            f"{ws.get('gpu', 'RTX 3060')}, Python {ws.get('python', '3.x')}",
+            f"Interests: {', '.join(interests[:6])}",
+            f"Preferences: {p.get('preferences', {}).get('response_style', 'casual')}",
+        ]
+        sched = p.get("schedule_notes") or []
+        if sched:
+            lines.append("Schedule notes: " + "; ".join(str(s) for s in sched[:5]))
+        ch = p.get("contacts_highlight") or []
+        if ch:
+            lines.append("Key people: " + "; ".join(str(c) for c in ch[:5]))
+        facts = p.get("known_facts") or []
+        if facts:
+            lines.append("Known facts: " + "; ".join(str(f) for f in facts[:6]))
+        world = p.get("world") if isinstance(p.get("world"), dict) else {}
+        if world:
+            if world.get("planned_travel"):
+                lines.append(f"Planned travel: {world.get('planned_travel')}")
+            bp = world.get("business_priorities") or []
+            if bp:
+                lines.append("Business priorities: " + "; ".join(str(x) for x in bp[:4]))
+            if world.get("quiet_hours_local"):
+                lines.append(f"Quiet hours: {world.get('quiet_hours_local')}")
+        lines.append("[END PROFILE]")
+        return "\n".join(lines)
 
 
 # Singleton
