@@ -1060,6 +1060,7 @@ async def chat(
                 mem0_memories=relevant_memories,
                 emotion=_current_emotion,
                 semantic_memory_lines=semantic_memory_lines,
+                include_personality=False,  # build_base_persona() already added it above
             )
             if humanized_prompt:
                 prompt_sections.append(humanized_prompt)
@@ -1073,17 +1074,16 @@ async def chat(
     except Exception as _persona_err:
         logger.warning("persona state injection failed: %s", _persona_err)
 
-    # ── Inject conversation history ──────────────────────────────────────────────
-    # IMPORTANT: append to prompt_sections (not system_prompt) so it survives
-    # the join at line 1086 that overwrites system_prompt.
+    # ── Conversation history: collected as proper message objects, not text dump ──
+    # Proper message history means the LLM can track the actual dialogue
+    # rather than reading a flattened text block in the system prompt.
+    _conversation_history: list[dict] = []
     if user_id:
         try:
-            from router import get_conversation_summary_prompt
-            ctx = get_conversation_summary_prompt(user_id)
-            if ctx:
-                prompt_sections.append(ctx)
+            from router import get_conversation_history as _get_ch
+            _conversation_history = _get_ch(str(user_id), last_n=6)
         except Exception as _ctx_err:
-            logger.warning("conversation history injection failed: %s", _ctx_err)
+            logger.warning("conversation history fetch failed: %s", _ctx_err)
 
         # Unified local + episodic + archival memory every turn
         try:
@@ -1310,10 +1310,11 @@ async def chat(
     else:
         user_content = task
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": user_content},
-    ]
+    # Build messages: system → prior turns as proper objects → current user turn.
+    # This gives the LLM actual conversational context instead of a text dump.
+    messages: list[dict] = [{"role": "system", "content": system_prompt}]
+    messages.extend(_conversation_history)
+    messages.append({"role": "user", "content": user_content})
 
     _skip_cache = (
         image_b64 is not None

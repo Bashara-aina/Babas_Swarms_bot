@@ -191,11 +191,17 @@ class SystemPromptBuilder:
         emotion: str = "neutral",
         include_opinions: bool = True,
         semantic_memory_lines: list[str] | None = None,
+        include_personality: bool = True,
     ) -> str:
-        """Assemble humanization stack for one LLM request (sync)."""
+        """Assemble humanization stack for one LLM request (sync).
+
+        Set include_personality=False when build_base_persona() has already
+        been prepended (e.g. inside llm_client.chat()) to avoid duplication.
+        """
         sections: list[str] = []
 
-        sections.append(LEGION_PERSONALITY.to_description())
+        if include_personality:
+            sections.append(LEGION_PERSONALITY.to_description())
 
         try:
             profile_block = self.memory.profile.to_prompt_block()
