@@ -8,13 +8,14 @@ from __future__ import annotations
 
 import html as html_mod
 import logging
+import os
 import re
 from typing import Optional
 
 from aiogram.types import Message
 
 from core.autonomous_router import SKILL_PATTERNS, AutonomousRouter
-from .shared import _execute_chat, _run_agent_loop, is_allowed
+from .shared import _execute_chat, _run_agent_loop, is_allowed, send_chunked
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +143,38 @@ async def handle_plain_message(
         await _handle_whatsapp(msg, user_msg, auto_router)
         return
 
+    # Optional Manus-killer task router (parallel specialists) — runs before AutonomousRouter
+    if os.getenv("LEGION_TASK_ROUTER_ENABLED", "0").strip().lower() in (
+        "1", "true", "yes", "on",
+    ):
+        try:
+            from core.task_router import get_task_router
+
+            stream_cb = None
+            if os.getenv("LEGION_TASK_ROUTER_STREAM", "0").strip().lower() in (
+                "1", "true", "yes", "on",
+            ):
+
+                async def _tr_stream(t: str) -> None:
+                    try:
+                        await msg.answer(t[:3800], parse_mode="HTML")
+                    except Exception:
+                        pass
+
+                stream_cb = _tr_stream
+
+            routed = await get_task_router().route(
+                user_msg,
+                context="",
+                user_id=str(user_id),
+                stream_callback=stream_cb,
+            )
+            if routed is not None:
+                await send_chunked(msg, routed)
+                return
+        except Exception:
+            logger.exception("task router failed; falling back to autonomous routing")
+
     # analyze_async() keeps the live bot LLM-backed while tests use analyze().
     skill_match = await auto_router.analyze_async(user_msg)
     logger.info(
@@ -154,8 +187,10 @@ async def handle_plain_message(
     handler_key = SKILL_PATTERNS.get(skill_match.skill_name, {}).get("handler", "chat")
 
     try:
+        # Jarvis: 3-word keyword hits score ~0.375 confidence — allow slightly lower floor
+        _min_route_conf = 0.35 if handler_key == "jarvis" else 0.4
         # ── conversation / low-confidence fallback ───────────────────────────
-        if handler_key == "chat" or skill_match.confidence < 0.4:
+        if handler_key == "chat" or skill_match.confidence < _min_route_conf:
             await _execute_chat(msg, user_msg)
             auto_router.record_performance(skill_match.skill_name, True)
             return
@@ -212,6 +247,47 @@ async def handle_plain_message(
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
+        # ── strategic simulation (plain-text "simulate / what if …") ─────────
+        if handler_key == "simulation":
+            await msg.answer("Running simulation…", parse_mode="HTML")
+            try:
+                from agents.simulation_agent import run_simulation_agent
+
+                out = await run_simulation_agent(user_msg)
+                await send_chunked(msg, out)
+            except Exception as exc:
+                logger.exception("simulation route failed")
+                await msg.answer(f"Simulation error: {exc}", parse_mode="HTML")
+            auto_router.record_performance(skill_match.skill_name, True)
+            return
+
+        # ── Jarvis full-context bundle (plain-text, same as /jarvis) ───────────
+        if handler_key == "jarvis":
+            autoroute = os.getenv("LEGION_JARVIS_AUTOROUTE_ENABLED", "1").strip().lower()
+            if autoroute not in ("1", "true", "yes", "on"):
+                await _execute_chat(msg, user_msg)
+                auto_router.record_performance(skill_match.skill_name, True)
+                return
+            await msg.answer("Running full context bundle (Jarvis)…", parse_mode="HTML")
+            try:
+                from core.jarvis_orchestrator import (
+                    compose_jarvis_response,
+                    gather_jarvis_bundle,
+                )
+
+                uid = str(msg.from_user.id) if msg.from_user else "0"
+                bundle = await gather_jarvis_bundle(user_msg, uid)
+                out = await compose_jarvis_response(bundle)
+                await send_chunked(msg, out)
+            except Exception as exc:
+                logger.exception("jarvis autoroute failed")
+                await msg.answer(
+                    f"Jarvis error: <code>{html_mod.escape(str(exc)[:350])}</code>",
+                    parse_mode="HTML",
+                )
+            auto_router.record_performance(skill_match.skill_name, True)
+            return
+
         # ── shell command ────────────────────────────────────────────────────
         if handler_key == "/cmd":
             from llm_client import run_shell_command
@@ -227,6 +303,11 @@ async def handle_plain_message(
         # ── email management ─────────────────────────────────────────────────
         if handler_key == "email":
             await _handle_email(msg, user_msg, auto_router)
+            return
+
+        # ── maintenance runbooks ─────────────────────────────────────────────
+        if handler_key == "runbook":
+            await _handle_runbook(msg, user_msg, auto_router)
             return
 
         # ── business / Supabase ──────────────────────────────────────────────
@@ -302,6 +383,26 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
         # Graceful fallback — chat agent handles it
         await _execute_chat(msg, user_msg)
         router.record_performance("email_management", False)
+
+
+async def _handle_runbook(msg: Message, user_msg: str, router: AutonomousRouter) -> None:
+    """Run config/runbooks.json maintenance flows from natural language or explicit id."""
+    try:
+        from tools.runbook_engine import execute_runbook, list_runbook_summaries, match_runbook_from_text
+
+        rid = match_runbook_from_text(user_msg)
+        if not rid:
+            rid = os.getenv("LEGION_DEFAULT_RUNBOOK", "rumahlabuh_stack_health")
+        report = await execute_runbook(rid)
+        await msg.answer(report[:4000], parse_mode="HTML")
+        router.record_performance("runbook_maintenance", True)
+    except Exception as exc:
+        logger.warning("[runbook handler] %s", exc)
+        try:
+            await msg.answer(list_runbook_summaries(), parse_mode="HTML")
+        except Exception:
+            await msg.answer(f"Runbook error: <code>{html_mod.escape(str(exc)[:300])}</code>", parse_mode="HTML")
+        router.record_performance("runbook_maintenance", False)
 
 
 async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter) -> None:

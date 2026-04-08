@@ -1,0 +1,19 @@
+{
+  "servers": [
+    {
+      "name": "example-filesystem",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "env": {},
+      "enabled": false
+    },
+    {
+      "name": "example-fetch",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "env": {},
+      "enabled": false
+    }
+  ],
+  "notes": "Set enabled true and install Node/npx for stdio servers. Bot uses core/mcp_client.py for status listing; full tool proxy is future work."
+}

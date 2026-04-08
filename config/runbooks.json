@@ -1,0 +1,55 @@
+{
+  "runbooks": {
+    "rumahlabuh_stack_health": {
+      "title": "Rumah Labuh + Supabase connectivity",
+      "description": "HTTP check public site + optional Supabase table probe",
+      "triggers": [
+        "runbook rumahlabuh",
+        "health check rumahlabuh",
+        "cek rumahlabuh",
+        "maintenance rumahlabuh",
+        "run health stack",
+        "bisnis health check"
+      ],
+      "steps": [
+        {
+          "type": "http_get",
+          "name": "rumahlabuh.com",
+          "url": "https://rumahlabuh.com",
+          "timeout_sec": 12
+        },
+        {
+          "type": "note",
+          "text": "If homepage fails, check DNS/SSL/hosting and Supabase env on the app."
+        },
+        {
+          "type": "supabase_probe",
+          "table_env": "RUNBOOK_SUPABASE_TABLE",
+          "fallback_table": "bookings",
+          "limit": 1
+        }
+      ]
+    },
+    "swarm_bot_smoke": {
+      "title": "LegionSwarm repo sanity",
+      "description": "Light checks you can run from the bot host",
+      "triggers": [
+        "runbook swarm",
+        "cek bot swarm",
+        "legion health"
+      ],
+      "steps": [
+        {
+          "type": "note",
+          "text": "Ensure systemd service or process is running; check journal if replies stop."
+        },
+        {
+          "type": "http_get",
+          "name": "API keys probe (local)",
+          "url": "https://httpbin.org/status/200",
+          "timeout_sec": 8
+        }
+      ]
+    }
+  }
+}

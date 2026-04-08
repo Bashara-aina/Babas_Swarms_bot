@@ -1,0 +1,58 @@
+{
+  "name": "Bashara",
+  "location": "Koto City, Tokyo, Japan",
+  "timezone": "Asia/Tokyo",
+  "home": "Koto City, Tokyo",
+  "languages": [
+    "Indonesian",
+    "English",
+    "Japanese (basic)"
+  ],
+  "projects": [
+    {
+      "name": "rumahlabuh.com",
+      "description": "Rental/hospitality business website",
+      "stack": [
+        "Next.js",
+        "TypeScript",
+        "Supabase"
+      ],
+      "status": "active"
+    },
+    {
+      "name": "Babas_Swarms_bot",
+      "description": "Personal AI assistant Telegram bot",
+      "stack": [
+        "Python",
+        "aiogram",
+        "litellm",
+        "Supabase"
+      ],
+      "status": "active"
+    }
+  ],
+  "workstation": {
+    "os": "Linux (Ubuntu)",
+    "gpu": "RTX 3060 12GB",
+    "python": "3.13",
+    "ml_frameworks": [
+      "PyTorch",
+      "CUDA"
+    ]
+  },
+  "preferences": {
+    "response_style": "casual, direct, no fluff",
+    "language_mix": "Indonesian + English code-switching",
+    "humor": true,
+    "debate": true
+  },
+  "education": "Master's in Data Science / AI/ML",
+  "interests": [
+    "human pose estimation",
+    "activity recognition",
+    "multi-agent AI systems",
+    "VPS/cloud infrastructure"
+  ],
+  "known_facts": [],
+  "interaction_patterns": []
+}

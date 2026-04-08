@@ -88,6 +88,10 @@ supabase>=2.4.0
 langchain-core>=0.3.0
 langchain>=0.3.0
 
+# === v8 Tier-3 — Screenpipe, MCP, LiveKit token helpers, search ===
+mcp>=1.2.0
+livekit-api>=0.8.0
+
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng

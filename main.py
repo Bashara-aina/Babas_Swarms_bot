@@ -146,13 +146,14 @@ def _install_outbound_logging(bot: Bot) -> None:
 
 # ── Config ────────────────────────────────────────────────────────────────────
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
+_uid_raw = (os.getenv("ALLOWED_USER_ID") or os.getenv("BASHARA_TELEGRAM_ID") or "0").strip()
+ALLOWED_USER_ID = int(_uid_raw.split(",")[0] if _uid_raw else "0")
 
 if not BOT_TOKEN:
     logger.critical("TELEGRAM_BOT_TOKEN not set in .env")
     sys.exit(1)
 if not ALLOWED_USER_ID:
-    logger.critical("ALLOWED_USER_ID not set in .env")
+    logger.critical("ALLOWED_USER_ID or BASHARA_TELEGRAM_ID must be set in .env")
     sys.exit(1)
 
 # ── Inject shared config into handlers package ─────────────────────────────────
@@ -268,7 +269,42 @@ async def on_startup(bot: Bot) -> None:
         interval = int(os.getenv("PROACTIVE_MIN_INTERVAL_SEC", "1800"))
         logger.info("Proactive monitors scheduled (min_interval=%ds, env: PROACTIVE_MIN_INTERVAL_SEC)", interval)
     except Exception as e:
-        logger.warning("Proactive monitors init failed (non-fatal): %s", e)   try:     from tools.proactive_initiator import start_proactive_initiator     asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))     logger.info("Proactive initiator started (Legion talks first)")   except Exception as e:     logger.warning("Proactive initiator init failed (non-fatal): %s", e)
+        logger.warning("Proactive monitors init failed (non-fatal): %s", e)
+
+    try:
+        from tools.proactive_initiator import start_proactive_initiator
+
+        asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))
+        logger.info("Proactive initiator started (Legion talks first)")
+    except Exception as e:
+        logger.warning("Proactive initiator init failed (non-fatal): %s", e)
+
+    try:
+        if os.getenv("SCREENPIPE_ENABLED", "").strip().lower() in ("1", "true", "yes", "on"):
+            if os.getenv("SCREENPIPE_PROACTIVE_ENABLED", "1").strip().lower() not in (
+                "0",
+                "false",
+                "no",
+                "off",
+            ):
+                from bridges.screenpipe_bridge import ScreenpipeBridge
+
+                _sp_bridge = ScreenpipeBridge(bot, ALLOWED_USER_ID)
+                asyncio.create_task(_sp_bridge.monitor_loop())
+                logger.info("Screenpipe proactive monitor started")
+    except Exception as e:
+        logger.warning("Screenpipe bridge init failed (non-fatal): %s", e)
+
+    try:
+        from core.proactive.scheduler import get_scheduler
+
+        async def _proactive_notify(text: str) -> None:
+            await bot.send_message(ALLOWED_USER_ID, text[:4000], parse_mode="HTML")
+
+        get_scheduler(str(ALLOWED_USER_ID), _proactive_notify, ALLOWED_USER_ID).start()
+        logger.info("ProactiveScheduler started (schedule + business + GitHub checks)")
+    except Exception as e:
+        logger.warning("ProactiveScheduler init failed (non-fatal): %s", e)
 
     try:
         from tools.voice_engine import run_prewarm
@@ -474,6 +510,7 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="ask_paper",   description="Ask about a paper"),
             BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
             BotCommand(command="research",    description="Deep web research"),
+            BotCommand(command="jarvis",      description="Context bundle + plan (no auto-send)"),
             BotCommand(command="scrape",      description="Scrape a URL"),
             # Memory
             BotCommand(command="memory",      description="Humanized memory stats"),
