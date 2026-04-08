@@ -1,12 +1,11 @@
-from .memory_manager import MemoryManager, get_memory
-from .tiers import CoreMemory, ArchivalMemory, RecallMemory
-from .user_profile import UserProfile
+"""Legion memory subsystem."""
+from core.memory.episodic_store import EpisodicStore, Episode, get_episodic_store
+from core.memory.user_profile import UserProfileStore, get_user_profile
 
 __all__ = [
-	"MemoryManager",
-	"get_memory",
-	"CoreMemory",
-	"ArchivalMemory",
-	"RecallMemory",
-	"UserProfile",
+    "EpisodicStore",
+    "Episode",
+    "get_episodic_store",
+    "UserProfileStore",
+    "get_user_profile",
 ]
