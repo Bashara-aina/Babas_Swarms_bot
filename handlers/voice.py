@@ -5,6 +5,7 @@ Commands (merged from voice_handler.py):
   /voice_off     — disable voice reply mode
   /voice_status  — show current voice mode state
   /voice_toggle  — toggle voice reply (legacy alias)
+      /vcsearch      — search voice message transcripts
 
 Handles:
   F.voice  — voice note messages (transcribe → LLM → optional TTS reply)
@@ -141,6 +142,29 @@ async def cmd_voice_toggle(msg: Message) -> None:
     new_state = not enabled
     await _set_voice_reply_enabled(new_state)
     await msg.answer(f"Voice replies are now {'enabled 🎤' if new_state else 'disabled 🔇'}.")
+
+
+@router.message(Command("vcsearch"))
+async def cmd_vcsearch(msg: Message) -> None:
+    """Search voice message transcripts.
+    Usage: /vcsearch <query>
+    """
+    if not is_allowed(msg):
+        return
+    
+    query = msg.text.replace("/vcsearch", "").strip()
+    if not query:
+        await msg.answer("❌ Usage: /vcsearch <query>")
+        return
+    
+    # Search voice transcripts (implementation depends on storage)
+    # For now, return placeholder
+    await msg.answer(
+        f"🔍 Searching voice transcripts for: <b>{query}</b>\n\n"
+        "⚠️ Voice transcript search not yet implemented.\n"
+        "This feature requires a transcript storage backend.",
+        parse_mode="HTML"
+    )
 
 
 # ── Voice/audio message handlers ──────────────────────────────────────────────────────────────────
