@@ -11,6 +11,7 @@ from aiogram import Dispatcher
 
 from handlers import (
     ai,
+    admin_handlers,
     artifact,
     brain,
     communications,
@@ -62,6 +63,7 @@ _ROUTER_ORDER = [
     dev.router,                   # /scaffold /build /vuln_scan /review
     pm.router,                    # /task_from /tasks_due /post /email
     enterprise.router,            # /budget /routing_stats /security_stats /audit_summary
+      admin_handlers.router,  # /budget /soul
     artifact.router,              # /preview
     upgrade.router,               # /upgrade /upgrade_status /upgrade_history
     debate_handlers.router,       # /debate /opinion
