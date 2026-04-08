@@ -806,18 +806,35 @@ async def handle_nl(msg: Message) -> None:
     if not task or task.startswith("/"):
         return
 
+    # ── PRIMARY PATH: Autonomous router (guaranteed attempt, not optional) ───
+    # The autonomous router handles NL intelligently — it's the default, not a fallback.
+    # Only drop to keyword matching below if the router module itself can't be imported.
+    _router_handled = False
     try:
         from llm_client import auto_router, init_humanization_layer
         from handlers.message_handler import handle_plain_message
 
+        # Ensure router is initialized — try once if not ready
         if auto_router is None:
             init_humanization_layer()
-        if auto_router is not None:
-            await handle_plain_message(msg, auto_router)
-            return
-    except Exception:
-        pass
 
+        # Re-import after potential init
+        from llm_client import auto_router as _ar
+        if _ar is not None:
+            await handle_plain_message(msg, _ar)
+            _router_handled = True
+    except Exception as _router_err:
+        import logging as _log
+        _log.getLogger(__name__).warning(
+            "autonomous router failed for NL message — falling back to keyword dispatch: %s",
+            _router_err,
+        )
+
+    if _router_handled:
+        return
+
+    # ── FALLBACK: Keyword-based dispatch (only if autonomous router failed) ───
+    # This should be rare — if it triggers, check autonomous_router init logs.
     task_lower = task.lower()
 
     # Check OpenClaw delegation first

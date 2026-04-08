@@ -249,6 +249,11 @@ async def handle_plain_message(
             await _handle_github_intel(msg, user_msg, auto_router)
             return
 
+        # ── codebase understanding (Copilot-like) ────────────────────────────
+        if handler_key == "codebase_reader":
+            await _handle_codebase_understanding(msg, user_msg, auto_router)
+            return
+
         # ── generic fallback ─────────────────────────────────────────────────
         await _execute_chat(msg, user_msg)
         auto_router.record_performance(skill_match.skill_name, True)
@@ -502,3 +507,33 @@ async def _handle_github_intel(msg: Message, user_msg: str, router: AutonomousRo
         logger.warning("[github_intel handler] %s", exc)
         await _execute_chat(msg, user_msg, forced_agent="researcher")
         router.record_performance("github_intel", False)
+
+
+async def _handle_codebase_understanding(msg: Message, user_msg: str, router: AutonomousRouter) -> None:
+    """Understand project codebase structure — Copilot/Cursor-like code exploration."""
+    try:
+        from tools.codebase_reader import explain_codebase, find_in_code
+
+        # Detect if it's a "find/locate" query or an "explain" query
+        find_triggers = ["where is", "find ", "locate ", "where does", "dimana ada", "cari fungsi"]
+        is_find = any(t in user_msg.lower() for t in find_triggers)
+
+        if is_find:
+            result = await find_in_code(user_msg)
+        else:
+            result = await explain_codebase(user_msg)
+
+        # Enrich result with LLM explanation
+        enriched = (
+            f"{user_msg}\n\n"
+            f"[Codebase search results from the Legion project]:\n{result[:3000]}\n\n"
+            "Use these results to answer the question. Reference file paths and line numbers. "
+            "If the results are incomplete, say so and suggest a more specific search."
+        )
+        await _execute_chat(msg, enriched, forced_agent="coding")
+        router.record_performance("codebase_understanding", True)
+    except Exception as exc:
+        logger.warning("[codebase_reader handler] %s", exc)
+        # Fallback: just ask the coding agent
+        await _execute_chat(msg, user_msg, forced_agent="coding")
+        router.record_performance("codebase_understanding", False)
