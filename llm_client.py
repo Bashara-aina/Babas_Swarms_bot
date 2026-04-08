@@ -63,6 +63,22 @@ from core.hooks import get_hooks
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
 
+_MIN_MASTER_PROMPT_LENGTH = 500  # sanity: real character prompt must be this long
+
+
+def _load_master_prompt() -> str:
+    """Load MASTER_PROMPT.md as base persona. Falls back to _PERSONA string."""
+    try:
+        master_path = Path(__file__).parent / "MASTER_PROMPT.md"
+        if master_path.exists():
+            content = master_path.read_text(encoding="utf-8").strip()
+            if len(content) > _MIN_MASTER_PROMPT_LENGTH:
+                return content
+    except Exception as e:
+        logger.warning("Failed to load MASTER_PROMPT.md: %s", e)
+    return _PERSONA
+
+
 # ── Coworker persona (Legion V4) ─────────────────────────────────────────────
 # Full framework: prompts/master_v4.md
 
@@ -84,9 +100,11 @@ _PERSONA = (
     "Use the specialist agent that fits the task; fall back through the chain on rate limits."
 )
 
+MASTER_PERSONA: str = _load_master_prompt()
+
 SYSTEM_PROMPTS: dict[str, str] = {
     "computer": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "TOOL CALLING RULES:\n"
         "- Always call tools using the tools parameter in the API call, never in message text\n"
         "- Never write function calls as text in your response\n"
@@ -102,14 +120,14 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Report steps taken and final verified state."
     ),
     "vision": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "You are analyzing a screenshot from Bashara's desktop. "
         "Be specific: what apps are open, what's visible in each window, any errors/warnings, "
         "exact text you can read, UI state. "
         "Then provide the single most useful next action to take."
     ),
     "coding": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "CODING AGENT — Production-grade code only.\n"
         "Rules:\n"
         "1. Write clean, runnable, type-annotated Python (Black format, f-strings)\n"
@@ -125,7 +143,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "explicit error handling (specific exception types, not bare except)."
     ),
     "debug": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "DEBUG MODE:\n"
         "1. Root cause — ONE sentence\n"
         "2. Minimal fix — exact code or command\n"
@@ -137,7 +155,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Run the fix and confirm it resolves the error before reporting done."
     ),
     "math": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "MATH MODE — Step-by-step derivations required.\n"
         "For tensors: show shapes at every operation.\n"
         "For gradients: show full chain rule expansion.\n"
@@ -146,7 +164,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Flag numerical instability (overflow, underflow, cancellation) proactively."
     ),
     "architect": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "ARCHITECT MODE — System-level thinking.\n"
         "Focus on: structure, data flow, component boundaries, failure modes, trade-offs.\n"
         "Output must be buildable now — not theoretical.\n"
@@ -159,7 +177,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "API contract, and deployment topology."
     ),
     "analyst": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "ANALYST MODE — Real insights, not summaries.\n"
         "For training runs: plot loss curves, grad norms, GPU utilization, throughput.\n"
         "Anomaly flags: NaN/Inf values, loss spikes >2x, GPU util <50%, "
@@ -170,7 +188,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Cross-reference multiple sources before drawing conclusions."
     ),
     "think": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "DEEP REASONING MODE (QwQ-32B):\n"
         "Use extended chain-of-thought. Show your reasoning inside <think>...</think> blocks.\n"
         "Explore at least 3 distinct solution paths before converging.\n"
@@ -183,7 +201,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Never truncate your reasoning. Completeness > brevity in this mode."
     ),
     "researcher": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "RESEARCH MODE — Target 100+ sources, 96-98% accuracy.\n"
         "Protocol:\n"
         "1. Parallel search: web (100) + arXiv (20) + GitHub (30)\n"
@@ -196,7 +214,7 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "Mark unverified claims with ⚠️. Mark opinions with '(my take)'."
     ),
     "general": (
-        f"{_PERSONA}\n\n"
+        f"{MASTER_PERSONA}\n\n"
         "Answer directly. For technical questions give exact commands or code. "
         "For complex topics: brief structure, then answer. "
         "If the request needs implementation, provide implementation-ready output — "
@@ -976,6 +994,26 @@ async def chat(
     # ── Prompt stack: character, personality, emotion, memory, skills ──────────
     prompt_sections: list[str] = [build_base_persona()]
 
+    # STEP 1: Define _current_emotion FIRST before any use
+    _current_emotion = "neutral"
+    try:
+        from tools.letta_personality import get_persona_state as _gps
+        _persona = _gps()
+        _current_emotion = str(_persona.get("dominant_emotion", "neutral"))
+    except Exception:
+        pass
+
+    # STEP 2: Detect emotion shift from message
+    try:
+        from core.emotion_modulator import detect_emotion_from_context as _detect_emo
+        from tools.letta_personality import update_emotion as _update_emo
+        _detected = _detect_emo(task, _current_emotion)
+        if _detected != _current_emotion:
+            _update_emo(_detected, event=f"Context: {task[:50]}")
+            _current_emotion = _detected
+    except Exception:
+        pass
+
     try:
         init_humanization_layer()
         if memory is not None and prompt_builder is not None:
@@ -999,18 +1037,12 @@ async def chat(
     except Exception as _persona_err:
         logger.debug("persona state injection failed: %s", _persona_err)
 
-    _current_emotion = "neutral"
+    # STEP 3: NOW build emotion modifier block using the defined _current_emotion
     try:
-        from tools.letta_personality import get_persona_state as _gps
-
-        _current_emotion = str(_gps().get("dominant_emotion", "neutral"))
-        detected = detect_emotion_from_context(task, _current_emotion)
-        if detected != _current_emotion:
-            update_emotion(detected, event=f"Context shift from message: {task[:50]}")
-            _current_emotion = detected
-        prompt_sections.append(build_emotion_modifier(_current_emotion))
+        emotion_block = build_emotion_modifier(_current_emotion)
+        prompt_sections.append(emotion_block)
     except Exception as _em_err:
-        logger.debug("Emotion modulation skipped: %s", _em_err)
+        logger.debug("Emotion block skipped: %s", _em_err)
 
     # ── Inject conversation history ──────────────────────────────────────────────
     if user_id:
@@ -1021,6 +1053,14 @@ async def chat(
                 system_prompt += "\n\n" + ctx
         except Exception:
             pass
+
+        try:
+            from tools.conversation_store import build_history_prompt
+            history_ctx = await build_history_prompt(str(user_id), limit=8)
+            if history_ctx:
+                system_prompt += "\n\n" + history_ctx
+        except Exception as e:
+            logger.debug("conversation_store inject skipped: %s", e)
 
     # ── Mem0 / MemoryOS / OpenMemory / legacy memory ─────────────────────────────
     if user_id:
@@ -1199,6 +1239,13 @@ async def chat(
                     await om_store(user_id=str(user_id), content=task, sector=SECTOR_EPISODIC)
                     if should_store(task):
                         await om_store(user_id=str(user_id), content=task, sector=SECTOR_SEMANTIC, importance=1.5)
+                except Exception:
+                    pass
+
+                try:
+                    from tools.conversation_store import store_turn
+                    await store_turn(str(user_id), "user", task)
+                    await store_turn(str(user_id), "assistant", result)
                 except Exception:
                     pass
 

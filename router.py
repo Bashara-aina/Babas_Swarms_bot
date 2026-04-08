@@ -1,15 +1,3 @@
-"""Agent router — thin shim that delegates to agents.py.
-
-agents.py is the single source of truth for model registry, keywords,
-fallback chains, and thread memory. This file re-exports everything
-for any legacy callers that import from router directly.
-
-Verified working models (from live logs 2026-03-09):
-  groq/llama-3.3-70b-versatile  ✓
-  cerebras/qwen3-235b-a22b      ✓
-  zai/glm-4                     ✓ (via openai-compat endpoint)
-"""
-
 from __future__ import annotations
 import logging
 import importlib.util
@@ -40,7 +28,6 @@ DEBATE_PERSONA_MODELS = _agents_module.DEBATE_PERSONA_MODELS
 DEBATE_ICONS = _agents_module.DEBATE_ICONS
 PERSONALITY_WRAPPER = _agents_module.PERSONALITY_WRAPPER
 
-detect_agent = _agents_module.detect_agent
 get_model = _agents_module.get_model
 get_fallback_chain = _agents_module.get_fallback_chain
 build_system_prompt = _agents_module.build_system_prompt
@@ -56,6 +43,15 @@ get_conversation_history = _agents_module.get_conversation_history
 clear_conversation = _agents_module.clear_conversation
 get_conversation_summary_prompt = _agents_module.get_conversation_summary_prompt
 
+from core.intent_classifier import classify_intent
+
+
+def detect_agent(message: str) -> str:
+    """Detect the best agent for a message. Uses semantic classifier."""
+    result = classify_intent(message)
+    return result.agent_key
+
+
 __all__ = [
   "AGENT_MODELS", "AGENT_REGISTRY", "FALLBACK_CHAIN", "TASK_KEYWORDS", "DEFAULT_AGENT",
     "ACTIVE_THREADS", "CONVERSATION_HISTORY",
@@ -68,3 +64,4 @@ __all__ = [
     "add_to_conversation", "get_conversation_history",
     "clear_conversation", "get_conversation_summary_prompt",
 ]
+
