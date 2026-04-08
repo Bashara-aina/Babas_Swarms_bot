@@ -14,6 +14,7 @@ from handlers import (
     artifact,
     brain,
     communications,
+    debate_handlers,
     legion_extras,
     business_handler,
     wiki_handler,
@@ -63,6 +64,7 @@ _ROUTER_ORDER = [
     enterprise.router,            # /budget /routing_stats /security_stats /audit_summary
     artifact.router,              # /preview
     upgrade.router,               # /upgrade /upgrade_status /upgrade_history
+    debate_handlers.router,       # /debate /opinion
     overnight_handler.router,     # /overnight /dashboard /overnight_*
     voice.router,                 # F.voice + F.audio + /voice_on /voice_off /voice_status /voice_toggle
     inline.router,                # inline_query
