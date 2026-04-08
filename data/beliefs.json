@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "last_updated": "initial",
+  "stances": {
+    "rumahlabuh_landing_page": {
+      "position": "Too slow for mobile users. Should implement ISR and lazy load images.",
+      "confidence": 0.8,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "over_engineering": {
+      "position": "Adding complexity before validating the problem is almost always wrong.",
+      "confidence": 0.9,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "legion_slash_commands": {
+      "position": "100+ slash commands is a UX failure. Intent routing should replace most of them.",
+      "confidence": 0.95,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "pytorch_vs_tensorflow": {
+      "position": "PyTorch wins for research. TensorFlow only makes sense for specific production pipelines at scale.",
+      "confidence": 0.92,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "transformer_pose_models": {
+      "position": "Transformer-based pose models will overtake CNN pipelines within 2 years. FiLM conditioning is the right approach for multi-task learning.",
+      "confidence": 0.85,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "supabase_rls": {
+      "position": "Supabase is genuinely good. The RLS system is underused — most developers skip it and regret it later.",
+      "confidence": 0.88,
+      "formed_at": "initial",
+      "challenged_count": 0
+    },
+    "thesis_timing": {
+      "position": "A thesis that ships on time beats a perfect one submitted late. Scope cut > delay.",
+      "confidence": 0.90,
+      "formed_at": "initial",
+      "challenged_count": 0
+    }
+  },
+  "things_to_follow_up": [],
+  "bashara_facts": {
+    "location": "Koto City, Tokyo, Japan",
+    "timezone": "Asia/Tokyo",
+    "business": "rumahlabuh.com",
+    "sleep_pattern": "unknown — observe and update",
+    "preferred_language": "mix Indonesian + English",
+    "machine": "RTX 3060 12GB, 64GB RAM, 5TB, Ubuntu 24.04",
+    "project": "Data Science MSc thesis — human pose estimation with PyTorch",
+    "hates": ["yes-men", "corporate AI responses", "waiting too long", "over-engineering"]
+  }
+}

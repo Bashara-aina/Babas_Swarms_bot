@@ -25,6 +25,9 @@ from llm_client import agent_loop, chat, chunk_output, verify_api_keys
 
 logger = logging.getLogger(__name__)
 
+# Tracks the last time the user sent any message — used by the curiosity engine
+_last_user_message_ts: float = 0.0
+
 
 def _format_for_telegram_html(text: str) -> str:
     """Lightweight formatter to improve readability in Telegram HTML mode.
