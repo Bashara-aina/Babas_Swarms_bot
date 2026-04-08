@@ -22,6 +22,7 @@ _TRIGGERS = (
     "review", "rating", "berapa", "how much", "stock", "crypto", "election",
     "who won", "current", "2025", "2026", "2027", "undang-undang", "policy",
     "supabase pricing", "breaking", "ipo", "schedule for", "jadwal",
+    "trending", "best practices", "self improve", "upgrade legion", "adopt",
 )
 
 _NEGATORS = (

@@ -185,13 +185,14 @@ async def handle_plain_message(
     )
 
     handler_key = SKILL_PATTERNS.get(skill_match.skill_name, {}).get("handler", "chat")
+    _route_hint = skill_match.skill_name if skill_match.confidence >= 0.3 else None
 
     try:
         # Jarvis: 3-word keyword hits score ~0.375 confidence — allow slightly lower floor
         _min_route_conf = 0.35 if handler_key == "jarvis" else 0.4
         # ── conversation / low-confidence fallback ───────────────────────────
         if handler_key == "chat" or skill_match.confidence < _min_route_conf:
-            await _execute_chat(msg, user_msg)
+            await _execute_chat(msg, user_msg, routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
@@ -210,10 +211,10 @@ async def handle_plain_message(
                         f"{user_msg}\n\n"
                         f"[Memory search results — use these to answer]:\n{mem_context}"
                     )
-                    await _execute_chat(msg, enriched)
+                    await _execute_chat(msg, enriched, routing_hint=_route_hint)
                     auto_router.record_performance(skill_match.skill_name, True)
                     return
-            await _execute_chat(msg, user_msg)
+            await _execute_chat(msg, user_msg, routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
@@ -225,25 +226,33 @@ async def handle_plain_message(
 
         # ── code generation ──────────────────────────────────────────────────
         if handler_key == "/run":
-            await _execute_chat(msg, user_msg, forced_agent="coding")
+            await _execute_chat(
+                msg, user_msg, forced_agent="coding", routing_hint=_route_hint
+            )
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── deep reasoning ───────────────────────────────────────────────────
         if handler_key == "/think":
-            await _execute_chat(msg, user_msg, forced_agent="think")
+            await _execute_chat(
+                msg, user_msg, forced_agent="think", routing_hint=_route_hint
+            )
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── multi-agent swarm ────────────────────────────────────────────────
         if handler_key == "/swarm":
-            await _execute_chat(msg, user_msg, forced_agent="architect")
+            await _execute_chat(
+                msg, user_msg, forced_agent="architect", routing_hint=_route_hint
+            )
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── multi-source research ────────────────────────────────────────────
         if handler_key == "/research":
-            await _execute_chat(msg, user_msg, forced_agent="researcher")
+            await _execute_chat(
+                msg, user_msg, forced_agent="researcher", routing_hint=_route_hint
+            )
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
@@ -265,7 +274,7 @@ async def handle_plain_message(
         if handler_key == "jarvis":
             autoroute = os.getenv("LEGION_JARVIS_AUTOROUTE_ENABLED", "1").strip().lower()
             if autoroute not in ("1", "true", "yes", "on"):
-                await _execute_chat(msg, user_msg)
+                await _execute_chat(msg, user_msg, routing_hint=_route_hint)
                 auto_router.record_performance(skill_match.skill_name, True)
                 return
             await msg.answer("Running full context bundle (Jarvis)…", parse_mode="HTML")
@@ -336,7 +345,7 @@ async def handle_plain_message(
             return
 
         # ── generic fallback ─────────────────────────────────────────────────
-        await _execute_chat(msg, user_msg)
+        await _execute_chat(msg, user_msg, routing_hint=_route_hint)
         auto_router.record_performance(skill_match.skill_name, True)
 
     except Exception as exc:
@@ -366,7 +375,9 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
                 "Draft a reply or new email as requested. "
                 "Use send_email() or reply_email() when ready.]"
             )
-            await _execute_chat(msg, enriched, forced_agent="general")
+            await _execute_chat(
+                msg, enriched, forced_agent="general", routing_hint="email_management"
+            )
         else:
             # Default: show inbox summary
             summary = await client.summarize_inbox()
@@ -375,13 +386,15 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
                 f"[Current inbox summary]:\n{summary[:2000]}\n\n"
                 "Summarise what's important and ask if the user wants to act on anything."
             )
-            await _execute_chat(msg, enriched, forced_agent="general")
+            await _execute_chat(
+                msg, enriched, forced_agent="general", routing_hint="email_management"
+            )
 
         router.record_performance("email_management", True)
     except Exception as exc:
         logger.warning("[email handler] %s", exc)
         # Graceful fallback — chat agent handles it
-        await _execute_chat(msg, user_msg)
+        await _execute_chat(msg, user_msg, routing_hint="email_management")
         router.record_performance("email_management", False)
 
 
@@ -419,7 +432,9 @@ async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter
                 f"[Supabase query result]:\n{str(result)[:2000]}\n\n"
                 "Present this data clearly and suggest what the user might want to do next."
             )
-            await _execute_chat(msg, enriched, forced_agent="analyst")
+            await _execute_chat(
+                msg, enriched, forced_agent="analyst", routing_hint="business_query"
+            )
         else:
             # Fallback: researcher with Supabase/business context injected
             enriched = (
@@ -428,12 +443,14 @@ async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter
                 "business in Indonesia. The database is on Supabase. "
                 "Answer using your knowledge of the business, or ask for more detail.]"
             )
-            await _execute_chat(msg, enriched, forced_agent="analyst")
+            await _execute_chat(
+                msg, enriched, forced_agent="analyst", routing_hint="business_query"
+            )
 
         router.record_performance("business_query", True)
     except Exception as exc:
         logger.warning("[business handler] %s", exc)
-        await _execute_chat(msg, user_msg)
+        await _execute_chat(msg, user_msg, routing_hint="business_query")
         router.record_performance("business_query", False)
 
 
@@ -463,7 +480,9 @@ async def _handle_location(msg: Message, user_msg: str, router: AutonomousRouter
             "Use this location to give specific, personalised recommendations. "
             "Search online for up-to-date options.]"
         )
-        await _execute_chat(msg, enriched, forced_agent="researcher")
+        await _execute_chat(
+            msg, enriched, forced_agent="researcher", routing_hint="location_advice"
+        )
         router.record_performance("location_advice", False)
 
 
@@ -571,7 +590,9 @@ async def _handle_whatsapp(msg: Message, user_msg: str, router: AutonomousRouter
                 f"[Unread WhatsApp messages]:\n{summary}\n\n"
                 "Summarise and ask if the user wants to reply to any."
             )
-            await _execute_chat(msg, enriched, forced_agent="general")
+            await _execute_chat(
+                msg, enriched, forced_agent="general", routing_hint="whatsapp_action"
+            )
 
         router.record_performance("whatsapp_action", True)
     except ImportError:
@@ -582,7 +603,7 @@ async def _handle_whatsapp(msg: Message, user_msg: str, router: AutonomousRouter
         router.record_performance("whatsapp_action", False)
     except Exception as exc:
         logger.warning("[whatsapp handler] %s", exc)
-        await _execute_chat(msg, user_msg)
+        await _execute_chat(msg, user_msg, routing_hint="whatsapp_action")
         router.record_performance("whatsapp_action", False)
 
 
@@ -606,7 +627,9 @@ async def _handle_github_intel(msg: Message, user_msg: str, router: AutonomousRo
         router.record_performance("github_intel", False)
     except Exception as exc:
         logger.warning("[github_intel handler] %s", exc)
-        await _execute_chat(msg, user_msg, forced_agent="researcher")
+        await _execute_chat(
+            msg, user_msg, forced_agent="researcher", routing_hint="github_intel"
+        )
         router.record_performance("github_intel", False)
 
 
@@ -631,10 +654,14 @@ async def _handle_codebase_understanding(msg: Message, user_msg: str, router: Au
             "Use these results to answer the question. Reference file paths and line numbers. "
             "If the results are incomplete, say so and suggest a more specific search."
         )
-        await _execute_chat(msg, enriched, forced_agent="coding")
+        await _execute_chat(
+            msg, enriched, forced_agent="coding", routing_hint="codebase_reader"
+        )
         router.record_performance("codebase_understanding", True)
     except Exception as exc:
         logger.warning("[codebase_reader handler] %s", exc)
         # Fallback: just ask the coding agent
-        await _execute_chat(msg, user_msg, forced_agent="coding")
+        await _execute_chat(
+            msg, user_msg, forced_agent="coding", routing_hint="codebase_reader"
+        )
         router.record_performance("codebase_understanding", False)

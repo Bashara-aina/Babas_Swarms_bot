@@ -43,6 +43,7 @@ class ProactiveScheduler:
         self._task: asyncio.Task | None = None
         self._last_briefing_date: str = ""
         self._last_check_ts: float = 0.0
+        self._last_github_intel_week: tuple[int, int] = (0, 0)
 
     def start(self) -> None:
         if self._running:
@@ -93,6 +94,35 @@ class ProactiveScheduler:
         if alerts:
             msg = "🔔 <b>Legion check-in</b>\n\n" + "\n\n".join(alerts)
             await self.notify(msg)
+
+        await self._maybe_weekly_github_intel_digest()
+
+    async def _maybe_weekly_github_intel_digest(self) -> None:
+        """Optional Sunday (configurable) nudge to run OSS / self-evolution scan."""
+        if os.getenv("LEGION_WEEKLY_GITHUB_INTEL", "0").strip().lower() not in (
+            "1",
+            "true",
+            "yes",
+            "on",
+        ):
+            return
+        try:
+            now = datetime.now()
+            target_wd = int(os.getenv("LEGION_GITHUB_INTEL_WEEKDAY", "6"))
+            if now.weekday() != target_wd:
+                return
+            iso = now.isocalendar()
+            key = (int(iso[0]), int(iso[1]))
+            if key == self._last_github_intel_week:
+                return
+            self._last_github_intel_week = key
+            await self.notify(
+                "📚 <b>Weekly GitHub digest</b>\n"
+                "Ask naturally for <i>trending repos</i>, <i>what to adopt for Legion</i>, "
+                "or say <code>github trending</code> — I’ll run intel + pros/cons."
+            )
+        except Exception as e:
+            logger.debug("[Proactive] weekly github intel nudge skipped: %s", e)
 
     def _check_schedule(self) -> list[str]:
         try:

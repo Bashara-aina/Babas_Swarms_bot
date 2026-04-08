@@ -110,13 +110,13 @@ def _emotion_pad_layer() -> str:
         return ""
 
 
-def _skills_layer() -> str:
+def _skills_layer(query: str) -> str:
     if os.getenv("LEGION_SKILLS_PROMPT_ENABLED", "1").strip().lower() in ("0", "false", "no", "off"):
         return ""
     try:
-        from core.skill_registry import skills_prompt_block
+        from core.skill_registry import skills_prompt_block_for_query
 
-        return skills_prompt_block() or ""
+        return skills_prompt_block_for_query(query) or ""
     except Exception as exc:
         logger.debug("unified skills layer failed: %s", exc)
         return ""
@@ -184,7 +184,7 @@ async def gather_parallel_prompt_layers(
         if isinstance(res, str) and res.strip():
             blocks.append(res.strip())
 
-    sk = _skills_layer()
+    sk = _skills_layer(q)
     if sk:
         blocks.append(sk)
     kg = _knowledge_graph_layer(q)

@@ -14,6 +14,10 @@ Async cross-cutting layers (wiki, Screenpipe, JST, MCP calendar, RAG, skills, KG
 gathered in parallel by :mod:`core.unified_prompt_context` and appended in
 :func:`llm_client.chat` (see ``LEGION_UNIFIED_CONTEXT_ENABLED``).
 
+Per-turn session continuity uses :mod:`core.working_memory` and
+:mod:`core.cognition_pipeline` inside :func:`llm_client.chat` (see env vars
+``LEGION_WORKING_MEMORY_ENABLED``, ``LEGION_COGNITION_PIPELINE``).
+
 This replaces the old build_system_prompt() in agents.py.
 """
 from __future__ import annotations
