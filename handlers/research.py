@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import html as html_mod
+import os
 from pathlib import Path
 
 from aiogram import Router
@@ -95,6 +96,23 @@ async def cmd_research(msg: Message) -> None:
         return
     status_msg = await msg.answer(f"🧠 [Plan] researching: <i>{topic[:80]}</i>…", parse_mode="HTML")
     typing_task = asyncio.create_task(_keep_typing(msg))
+
+    if os.getenv("LEGION_RESEARCH_USE_PIPELINE", "0").strip().lower() in ("1", "true", "yes", "on"):
+        try:
+            from agents.research_agent import run_research_pipeline
+
+            out = await run_research_pipeline(
+                topic,
+                user_id=str(msg.from_user.id) if msg.from_user else None,
+            )
+        finally:
+            typing_task.cancel()
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+        await send_chunked(msg, out or "(empty)")
+        return
 
     async def _phase(text: str) -> None:
         try:

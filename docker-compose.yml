@@ -86,6 +86,29 @@ services:
   #             capabilities: [gpu]
   #   restart: unless-stopped
 
+  # --- Optional profiles (do not start by default) ---
+  # docker compose --profile livekit up -d livekit
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: legion-livekit
+    profiles: ["livekit"]
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    command: --dev --bind 0.0.0.0
+    restart: unless-stopped
+
+  # docker compose --profile screenpipe up -d screenpipe
+  # Verify current image/tag in Screenpipe docs; may need extra devices/volumes on Linux.
+  screenpipe:
+    image: ghcr.io/mediar-ai/screenpipe:latest
+    container_name: legion-screenpipe
+    profiles: ["screenpipe"]
+    ports:
+      - "3030:3030"
+    restart: "no"
+
 volumes:
   redis_data:
     driver: local

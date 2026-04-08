@@ -113,6 +113,24 @@ SKILL_PATTERNS = {
         "description": "Read, reply, and manage email via IMAP/SMTP",
         "handler": "email",
     },
+    "runbook_maintenance": {
+        "keywords": [
+            "runbook",
+            "health check rumahlabuh",
+            "maintenance run",
+            "stack health",
+            "cek stack bisnis",
+            "run health check",
+            "maintenance check all",
+            "cek kesehatan situs",
+            "rumahlabuh health",
+            # Indonesian
+            "cek semua situs",
+            "audit situs",
+        ],
+        "description": "Execute predefined maintenance runbooks (HTTP, Supabase, notes)",
+        "handler": "runbook",
+    },
     "business_query": {
         "keywords": [
             "rumahlabuh", "booking", "reservasi", "supabase",
@@ -156,6 +174,49 @@ SKILL_PATTERNS = {
         ],
         "description": "GitHub trending intelligence and self-evolution",
         "handler": "github_intel",
+    },
+    "strategic_simulation": {
+        "keywords": [
+            "simulate how",
+            "simulate if",
+            "simulate what",
+            "what if we",
+            "what if i",
+            "market reaction",
+            "predict how",
+            "scenario simulation",
+            "run a simulation",
+            "how would tourists",
+            "how would users react",
+            "mirofish",
+        ],
+        "description": "Multi-agent outcome simulation (strategic / market-style)",
+        "handler": "simulation",
+    },
+    "jarvis_orchestrate": {
+        "keywords": [
+            "check what's on my screen",
+            "what's on my screen",
+            "what is on my screen",
+            "on my screen and",
+            "on my screen,",
+            "staring at this error",
+            "stuck on this error",
+            "reply to the guest",
+            "guest on whatsapp",
+            "guest who messaged",
+            "rumahlabuh guest",
+            "help me reply to the",
+            "legion jarvis",
+            "full context bundle",
+            "jarvis flow",
+            "multi-source context",
+        ],
+        "description": (
+            "Gather screen, memory, WhatsApp/calendar slices and produce one synthesized "
+            "plan — same as /jarvis; does not auto-send messages"
+        ),
+        "handler": "jarvis",
     },
     "codebase_understanding": {
         "keywords": [

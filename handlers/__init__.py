@@ -13,7 +13,10 @@ from handlers import (
     ai,
     artifact,
     brain,
+    legion_extras,
     business_handler,
+    wiki_handler,
+    runbook_handler,
     computer,
     ecc_compat,
     dev,
@@ -41,12 +44,14 @@ from handlers import (
 # overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
     computer.router,              # /do /screen /click /type /key /cmd /install
+    runbook_handler.router,       # /runbook
     business_handler.router,      # /db /site_health /bookings /db_schema
     github_intel_handler.router,  # /github_intel /eval_repo /upgrade_from
     whatsapp_handler.router,      # /wa /wa_reply /wa_qr /wa_status
     system.router,                # /start /stats /keys /models /git /maintenance /gpu
     research.router,              # /scrape /research /paper /ask_paper
     memory_commands.router,       # /memory /remember /recall /emotion /opinions /forget /profile /teach
+    wiki_handler.router,          # /wiki /wiki_ingest /wiki_lint
     brain.router,                 # /memories /briefing /learn /instincts
     session_handler.router,       # /task /task_done /task_sessions /semantic_set /semantic_get
     sessions.router,              # /save /resume /sessions /audit
@@ -64,6 +69,7 @@ _ROUTER_ORDER = [
     ecc_compat.router,            # /harness_audit /model_route /quality_gate /verify /plan /checkpoint
     e2e.router,                   # /e2etest /e2eplan /dbquery /dbhealth /dbtables
     orchestrate.router,           # /orchestrate /orchestrate_cancel
+    legion_extras.router,         # /simulate /screenpipe_status /mcp_status /voice_room /websearch /quickscrape
     ai.router,                    # /run /think /agent /swarm + NL catch-all (LAST)
 ]
 

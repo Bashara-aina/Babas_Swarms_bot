@@ -64,6 +64,8 @@ _DEFAULT_PROFILE: dict = {
         "multi-agent AI systems",
         "VPS/cloud infrastructure",
     ],
+    "known_facts": [],
+    "interaction_patterns": [],
 }
 
 
@@ -179,3 +181,24 @@ def get_user_profile(user_id: str = "bashara") -> UserProfileStore:
     if _profile_store is None:
         _profile_store = UserProfileStore(user_id)
     return _profile_store
+
+
+class UserProfile(UserProfileStore):
+    """:class:`core.memory.memory_manager.MemoryManager` expects ``to_prompt_block``,
+    ``add_known_fact``, and ``add_pattern`` — this subclass maps them onto the store.
+    """
+
+    def to_prompt_block(self) -> str:
+        return self.build_context_block()
+
+    def add_known_fact(self, fact: str) -> None:
+        facts = list(self.get("known_facts") or [])
+        if fact not in facts:
+            facts.append(fact)
+            self.set("known_facts", facts)
+
+    def add_pattern(self, pattern: str) -> None:
+        patterns = list(self.get("interaction_patterns") or [])
+        if pattern not in patterns:
+            patterns.append(pattern)
+            self.set("interaction_patterns", patterns)

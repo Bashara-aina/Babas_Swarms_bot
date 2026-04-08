@@ -40,7 +40,7 @@ def _is_quiet_hours() -> bool:
     return 1 <= jst_hour < 7
 
 
-def _pick_trigger() -> str | None:
+def _pick_trigger(user_id: int) -> str | None:
     """Return a proactive message topic, or None if Legion should stay quiet."""
     import time
     global _last_sent
@@ -51,6 +51,17 @@ def _pick_trigger() -> str | None:
     elapsed = time.time() - _last_sent
     if elapsed < _MIN_INTERVAL:
         return None
+
+    # Upcoming schedule in episodic memory → higher priority nudge
+    try:
+        from core.memory.episodic_store import get_episodic_store
+
+        upcoming = get_episodic_store().get_upcoming_schedule(str(user_id), horizon_days=2)
+        if upcoming and elapsed >= _MIN_INTERVAL:
+            if elapsed >= _MAX_INTERVAL * 0.5 or random.random() < 0.4:
+                return "schedule_nudge"
+    except Exception:
+        pass
 
     # Hard check-in after max interval
     if elapsed >= _MAX_INTERVAL:
@@ -73,7 +84,7 @@ def _pick_trigger() -> str | None:
     ])
 
 
-async def _build_message(trigger: str) -> str:
+async def _build_message(trigger: str, user_id: int | None = None) -> str:
     """Generate a context-appropriate proactive message."""
     jst_hour = (datetime.utcnow().hour + 9) % 24
 
@@ -118,9 +129,9 @@ async def _build_message(trigger: str) -> str:
             if alerts:
                 return f"\u26a0\ufe0f Resource alert: {', '.join(alerts)} — lo mau gw cek apa yang makan resource?"
             # No alert — fallback to check-in
-            return await _build_message("check_in")
+            return await _build_message("check_in", user_id)
         except Exception:
-            return await _build_message("check_in")
+            return await _build_message("check_in", user_id)
 
     if trigger == "news_brief":
         try:
@@ -130,7 +141,7 @@ async def _build_message(trigger: str) -> str:
                 return f"\U0001f4f0 Quick brief:\n{brief[:800]}"
         except Exception:
             pass
-        return await _build_message("check_in")
+        return await _build_message("check_in", user_id)
 
     if trigger == "memory_surface":
         try:
@@ -142,7 +153,25 @@ async def _build_message(trigger: str) -> str:
                     return f"Eh, gw inget lo pernah bilang: \"{content[:200]}\" — masih relevan nggak?"
         except Exception:
             pass
-        return await _build_message("check_in")
+        return await _build_message("check_in", user_id)
+
+    if trigger == "schedule_nudge":
+        try:
+            from core.memory.episodic_store import get_episodic_store
+
+            uid = str(user_id) if user_id is not None else os.getenv("ALLOWED_USER_ID", "0")
+            upcoming = get_episodic_store().get_upcoming_schedule(uid, horizon_days=2)
+            if upcoming:
+                lines = [
+                    "\U0001f4c5 Heads-up — lo punya ini di kalender (dari memory gw):",
+                ]
+                for ep in upcoming[:4]:
+                    lines.append(f"  • {ep.get('summary', '')[:120]}")
+                lines.append("Perlu gw bantu prep atau reminder tambahan?")
+                return "\n".join(lines)
+        except Exception:
+            pass
+        return await _build_message("check_in", user_id)
 
     return "Gw masih di sini kalau lo butuh sesuatu."
 
@@ -160,9 +189,9 @@ async def start_proactive_initiator(bot: "Bot", user_id: int) -> None:
 
     while True:
         try:
-            trigger = _pick_trigger()
+            trigger = _pick_trigger(user_id)
             if trigger:
-                message = await _build_message(trigger)
+                message = await _build_message(trigger, user_id)
                 await bot.send_message(user_id, message)
                 _last_sent = time.time()
                 logger.info("[Proactive] Sent (%s): %s", trigger, message[:80])

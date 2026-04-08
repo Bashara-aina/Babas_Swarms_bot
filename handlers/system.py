@@ -57,6 +57,8 @@ async def _build_home_panel(msg: Message) -> str:
         "<b>Quick Actions</b>",
         "• <code>/swarm &lt;task&gt;</code> — multi-agent execution",
         "• <code>/research &lt;topic&gt;</code> — deep web research",
+        "• <code>/jarvis &lt;goal&gt;</code> — context bundle + plan (no auto-send)",
+        "• <code>/runbook</code> — maintenance playbooks (sites, Supabase)",
         "• <code>/do &lt;task&gt;</code> — autonomous computer control",
         "• <code>/visualize</code> — system visual dashboard",
         "• <code>/swarm_viz</code> — agent communication visualization",
@@ -137,6 +139,8 @@ def _build_help_panel() -> str:
         "• <code>/do &lt;task&gt;</code> computer agent\n"
         "• <code>/swarm &lt;task&gt;</code> multi-agent team\n"
         "• <code>/research &lt;topic&gt;</code> deep search\n"
+        "• <code>/jarvis &lt;goal&gt;</code> memory + screen + WA context → plan\n"
+        "• <code>/runbook [id]</code> business/site maintenance checks\n"
         "\n"
         "<b>Visualization</b>\n"
         "• <code>/visualize</code> system dashboard\n"

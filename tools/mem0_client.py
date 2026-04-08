@@ -6,6 +6,7 @@ import logging
 import os
 from typing import Any
 
+from config.memory_config import mem0_vector_store_config
 from tools import memory as legacy_memory
 
 logger = logging.getLogger(__name__)
@@ -18,16 +19,16 @@ except Exception:
 _mem0_instance: Any | None = None
 
 
+def reset_mem0_instance() -> None:
+    """Clear cached Mem0 client (tests / config reload)."""
+    global _mem0_instance
+    _mem0_instance = None
+
+
 def _build_mem0_config() -> dict[str, Any]:
     ollama_base = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     return {
-        "vector_store": {
-            "provider": "chroma",
-            "config": {
-                "collection_name": "legion_memory",
-                "path": str(os.path.expanduser("~/.legion/mem0_chroma")),
-            },
-        },
+        "vector_store": mem0_vector_store_config(),
         "llm": {
             "provider": "litellm",
             "config": {

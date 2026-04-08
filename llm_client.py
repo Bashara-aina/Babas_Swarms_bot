@@ -443,6 +443,28 @@ async def _call_model(
     return await acompletion(**kwargs)
 
 
+async def wiki_raw_completion(
+    user_prompt: str,
+    *,
+    system_prompt: str = "You follow instructions precisely. Output only what is asked — no preamble.",
+    model: str | None = None,
+    max_tokens: int = 2048,
+    temperature: float = 0.25,
+) -> str:
+    """Single-turn LLM call for wiki maintenance (no mem0 / wiki / humanization stack)."""
+    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "groq/llama-3.3-70b-versatile")
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    try:
+        resp = await _call_model(m, messages, max_tokens=max_tokens, temperature=temperature)
+        return (resp.choices[0].message.content or "").strip()
+    except Exception as exc:
+        logger.warning("wiki_raw_completion failed (%s): %s", m, exc)
+        return ""
+
+
 # ── Context compaction ───────────────────────────────────────────────
 
 def _compact_messages(
@@ -723,10 +745,8 @@ async def _agent_loop_inner(
             thinking, clean = _strip_think_tags(answer, return_thinking=True)
             result_text = clean or answer
             if thinking and progress_cb:
-                await progress_cb(
-                    f"\U0001f4ad {thinking[:300]}"
-                    f"{'\u2026' if len(thinking) > 300 else ''}"
-                )
+                _think_suffix = "\u2026" if len(thinking) > 300 else ""
+                await progress_cb(f"\U0001f4ad {thinking[:300]}{_think_suffix}")
             if thread_id:
                 add_to_thread(thread_id, "computer", task, result_text)
             # FIX: persist agent_loop result to conversation history
@@ -761,10 +781,8 @@ async def _agent_loop_inner(
             _think_part, _rest = _strip_think_tags(_raw_thought, return_thinking=True)
             _display = _think_part or _rest or _raw_thought
             if _display:
-                await progress_cb(
-                    f"\U0001f4ad {_display[:300]}"
-                    f"{'\u2026' if len(_display) > 300 else ''}"
-                )
+                _disp_suffix = "\u2026" if len(_display) > 300 else ""
+                await progress_cb(f"\U0001f4ad {_display[:300]}{_disp_suffix}")
 
         for tc in msg.tool_calls:
             tool_name = tc.function.name
@@ -975,38 +993,7 @@ async def chat(
 
     # ── Prompt stack: character, personality, emotion, memory, skills ──────────
     prompt_sections: list[str] = [build_base_persona()]
-
-    # ── Relationship context (always inject — guaranteed local, no API needed) ──
-    try:
-        from core.relationship_memory import get_relationship_context
-        rel_ctx = get_relationship_context()
-        if rel_ctx:
-            prompt_sections.append(rel_ctx)
-    except Exception as _rel_err:
-        logger.warning("relationship_memory injection failed: %s", _rel_err)
-
-    try:
-        init_humanization_layer()
-        if memory is not None and prompt_builder is not None:
-            relevant_memories: list[dict[str, Any]] = []
-            if task and len(task) > 10:
-                relevant_memories = await memory.search(task, limit=5)
-            humanized_prompt = prompt_builder.build(
-                task_context=task_context or f"Agent: {agent_key}",
-                mem0_memories=relevant_memories,
-                emotion=_current_emotion,
-            )
-            if humanized_prompt:
-                prompt_sections.append(humanized_prompt)
-    except Exception as _humanization_error:
-        logger.warning("humanization prompt injection failed: %s", _humanization_error)
-
-    try:
-        persona_state = get_persona_state()
-        if persona_state:
-            prompt_sections.append(build_persona_block())
-    except Exception as _persona_err:
-        logger.warning("persona state injection failed: %s", _persona_err)
+    _research_cache_bypass = False
 
     _current_emotion = "neutral"
     try:
@@ -1021,6 +1008,49 @@ async def chat(
     except Exception as _em_err:
         logger.warning("Emotion modulation skipped: %s", _em_err)
 
+    # ── Relationship context (always inject — guaranteed local, no API needed) ──
+    try:
+        from core.relationship_memory import get_relationship_context
+        rel_ctx = get_relationship_context()
+        if rel_ctx:
+            prompt_sections.append(rel_ctx)
+    except Exception as _rel_err:
+        logger.warning("relationship_memory injection failed: %s", _rel_err)
+
+    try:
+        init_humanization_layer()
+        if memory is not None and prompt_builder is not None:
+            relevant_memories: list[dict[str, Any]] = []
+            if task and len(task.strip()) > 1:
+                relevant_memories = await memory.search(task, limit=8)
+            semantic_memory_lines: list[str] = []
+            if user_id and task and len(task.strip()) > 1:
+                try:
+                    from core.memory_manager import LegionSemanticMemory
+
+                    semantic_memory_lines = await LegionSemanticMemory().search_memories(
+                        task, str(user_id), limit=5
+                    )
+                except Exception as _sem_err:
+                    logger.debug("semantic memory search skipped: %s", _sem_err)
+            humanized_prompt = prompt_builder.build(
+                task_context=task_context or f"Agent: {agent_key}",
+                mem0_memories=relevant_memories,
+                emotion=_current_emotion,
+                semantic_memory_lines=semantic_memory_lines,
+            )
+            if humanized_prompt:
+                prompt_sections.append(humanized_prompt)
+    except Exception as _humanization_error:
+        logger.warning("humanization prompt injection failed: %s", _humanization_error)
+
+    try:
+        persona_state = get_persona_state()
+        if persona_state:
+            prompt_sections.append(build_persona_block())
+    except Exception as _persona_err:
+        logger.warning("persona state injection failed: %s", _persona_err)
+
     # ── Inject conversation history ──────────────────────────────────────────────
     # IMPORTANT: append to prompt_sections (not system_prompt) so it survives
     # the join at line 1086 that overwrites system_prompt.
@@ -1033,17 +1063,106 @@ async def chat(
         except Exception as _ctx_err:
             logger.warning("conversation history injection failed: %s", _ctx_err)
 
-    # ── Mem0 / MemoryOS / OpenMemory / legacy memory ─────────────────────────────
-    if user_id:
+        # Unified local + episodic + archival memory every turn
         try:
-            from tools.mem0_client import mem0_search, build_mem0_context
-            memories = await mem0_search(user_id=str(user_id), query=task, limit=12)
-            mem_ctx = build_mem0_context(memories, query=task)
-            if mem_ctx:
-                prompt_sections.append(mem_ctx)
-        except Exception as _mem_err:
-            logger.warning("mem0 memory injection failed: %s", _mem_err)
+            from core.memory.unified_context import build_unified_memory_context
 
+            umc = await build_unified_memory_context(str(user_id), task)
+            if umc:
+                prompt_sections.append(umc)
+        except Exception as _umc_err:
+            logger.warning("unified memory context failed: %s", _umc_err)
+
+        # ── Unified parallel context (JST, wiki, Screenpipe, RAG, MCP calendar, PAD, skills, KG) ──
+        _unified_off = os.getenv("LEGION_UNIFIED_CONTEXT_ENABLED", "1").strip().lower() in (
+            "0",
+            "false",
+            "no",
+            "off",
+        )
+        if not _unified_off:
+            try:
+                from core.unified_prompt_context import gather_parallel_prompt_layers
+
+                _chat_mode = os.getenv("LEGION_CHAT_MODE", "text")
+                for _layer in await gather_parallel_prompt_layers(task, str(user_id), mode=_chat_mode):
+                    if _layer:
+                        prompt_sections.append(_layer)
+            except Exception as _uni_err:
+                logger.warning("unified prompt context failed: %s", _uni_err)
+        else:
+            if os.getenv("LEGION_EMOTION_PROMPT_ENABLED", "1").strip().lower() not in (
+                "0",
+                "false",
+                "no",
+                "off",
+            ):
+                try:
+                    from core.emotion_tracker import emotion_prompt_block
+
+                    _emo = emotion_prompt_block()
+                    if _emo:
+                        prompt_sections.append(_emo)
+                except Exception as _emo_err:
+                    logger.debug("emotion prompt injection failed: %s", _emo_err)
+
+            if os.getenv("LEGION_WIKI_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+                try:
+                    from core.wiki_manager import get_wiki_manager
+
+                    _wiki_ctx = await get_wiki_manager().query(task, top_k=3)
+                    if _wiki_ctx:
+                        prompt_sections.append(_wiki_ctx)
+                except Exception as _wiki_err:
+                    logger.debug("wiki context injection failed: %s", _wiki_err)
+
+            if os.getenv("SCREENPIPE_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on"):
+                try:
+                    from tools.screenpipe_tool import get_screenpipe_tool
+
+                    _sp = get_screenpipe_tool()
+                    _sp_ctx = await _sp.search(
+                        task,
+                        limit=int(os.getenv("SCREENPIPE_CONTEXT_LIMIT", "3")),
+                        hours_back=int(os.getenv("SCREENPIPE_CONTEXT_HOURS", "24")),
+                    )
+                    if _sp_ctx:
+                        prompt_sections.append(_sp_ctx)
+                except Exception as _sp_err:
+                    logger.debug("screenpipe context injection failed: %s", _sp_err)
+
+            if os.getenv("LEGION_SKILLS_PROMPT_ENABLED", "1").strip().lower() not in (
+                "0",
+                "false",
+                "no",
+                "off",
+            ):
+                try:
+                    from core.skill_registry import skills_prompt_block
+
+                    _sk = skills_prompt_block()
+                    if _sk:
+                        prompt_sections.append(_sk)
+                except Exception as _sk_err:
+                    logger.debug("skills prompt injection failed: %s", _sk_err)
+
+            if os.getenv("LEGION_KNOWLEDGE_GRAPH_ENABLED", "0").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            ):
+                try:
+                    from core.knowledge_manager import get_knowledge_manager
+
+                    _kg = get_knowledge_manager().prompt_snippet(task[:120])
+                    if _kg:
+                        prompt_sections.append(_kg)
+                except Exception as _kg_err:
+                    logger.debug("knowledge graph prompt failed: %s", _kg_err)
+
+    # ── MemoryOS / OpenMemory / legacy memory (mem0 semantic block is in SystemPromptBuilder) ──
+    if user_id:
         try:
             from tools.memoryos_client import mos_retrieve_context
             mos_ctx = await mos_retrieve_context(query=task, user_id=str(user_id))
@@ -1093,6 +1212,20 @@ async def chat(
         prompt_sections.append(build_mode_instructions(agent_key))
     except Exception:
         pass
+
+    # ── Research-first: attach live evidence for factual / local / news-like queries ─
+    if user_id:
+        try:
+            from core.research_policy import maybe_attach_research_context
+
+            r_block, _ran = await maybe_attach_research_context(
+                task, str(user_id), agent_key or "general"
+            )
+            if r_block:
+                prompt_sections.append(r_block)
+                _research_cache_bypass = True
+        except Exception as _rp_err:
+            logger.warning("research_policy injection failed: %s", _rp_err)
 
     # ── Character voice: opinions, debate triggers, humor, proactive checks ──────
     # These fire based on message content to inject Legion's personality actively,
@@ -1160,7 +1293,12 @@ async def chat(
         {"role": "user",   "content": user_content},
     ]
 
-    _skip_cache = image_b64 is not None or show_thinking or agent_key == "vision"
+    _skip_cache = (
+        image_b64 is not None
+        or show_thinking
+        or agent_key == "vision"
+        or _research_cache_bypass
+    )
     if not _skip_cache:
         try:
             from tools.persistence import cache_get
@@ -1209,7 +1347,8 @@ async def chat(
 
             thinking, answer = _strip_think_tags(raw, return_thinking=True)
             if thinking and show_thinking:
-                result = f"<i>\U0001f4ad {thinking[:400]}{'\u2026' if len(thinking) > 400 else ''}</i>\n\n{answer}"
+                _th_suffix = "\u2026" if len(thinking) > 400 else ""
+                result = f"<i>\U0001f4ad {thinking[:400]}{_th_suffix}</i>\n\n{answer}"
             else:
                 result = answer if thinking else raw
 
@@ -1227,13 +1366,14 @@ async def chat(
                 # Store to the memory stack
                 try:
                     from tools.recallmax import should_store
-                    from tools.mem0_client import mem0_add
+                    from core.memory_manager import LegionSemanticMemory
                     from tools.memoryos_client import mos_add_conversation
                     from tools.open_memory import om_store, SECTOR_EPISODIC, SECTOR_SEMANTIC
 
-                    await mem0_add(user_id=str(user_id), content=task, metadata={"source": "chat", "role": "user"})
+                    _mem_msgs: list[dict[str, str]] = [{"role": "user", "content": task}]
                     if should_store(task):
-                        await mem0_add(user_id=str(user_id), content=result, metadata={"source": "chat", "role": "assistant"})
+                        _mem_msgs.append({"role": "assistant", "content": result})
+                    await LegionSemanticMemory().save_memory(_mem_msgs, str(user_id))
                     await mos_add_conversation(user_msg=task, assistant_msg=result, user_id=str(user_id))
                     await om_store(user_id=str(user_id), content=task, sector=SECTOR_EPISODIC)
                     if should_store(task):
@@ -1273,6 +1413,35 @@ async def chat(
                 result = enforce_character(result, agent_key)
             except Exception as _ce_err:
                 logger.debug("character_enforcer skipped: %s", _ce_err)
+
+            if os.getenv("LEGION_RESPONSE_FILTER_ENABLED", "0").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            ):
+                try:
+                    from core.response_filter import maybe_tighten_response
+
+                    result = await maybe_tighten_response(result, task, agent_key)
+                except Exception as _rf_err:
+                    logger.debug("response_filter skipped: %s", _rf_err)
+
+            if user_id and os.getenv("LEGION_WIKI_ENABLED", "1").strip().lower() not in (
+                "0",
+                "false",
+                "no",
+                "off",
+            ):
+                try:
+                    from core.wiki_manager import schedule_wiki_ingest_exchange
+
+                    asyncio.create_task(
+                        schedule_wiki_ingest_exchange(str(user_id), task, result)
+                    )
+                except Exception as _wiki_ing_err:
+                    logger.debug("wiki ingest schedule skipped: %s", _wiki_ing_err)
+
             return result, model
 
         except litellm.RateLimitError:
