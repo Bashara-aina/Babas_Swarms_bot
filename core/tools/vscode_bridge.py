@@ -125,7 +125,13 @@ def _run_command_sync(cmd: str, cwd: Optional[str] = None, timeout: int = 30) ->
     Returns:
         Combined stdout + stderr output string.
     """
-    work_dir = Path(cwd) if cwd else WORKSPACE_ROOT
+    if cwd:
+        work_dir = Path(cwd)
+    elif WORKSPACE_ROOT.is_dir():
+        work_dir = WORKSPACE_ROOT
+    else:
+        # CI / dev machines without the Linux workstation path
+        work_dir = Path.cwd()
     logger.info("Running command in %s: %s", work_dir, cmd)
 
     try:
