@@ -76,12 +76,48 @@ def save_persona(state: dict[str, Any]) -> None:
         logger.warning("save_persona failed: %s", e)
 
 
-def update_emotion(valence_delta: float, arousal_delta: float) -> dict[str, Any]:
-    """Shift emotion state and persist."""
+def _emotion_label_to_deltas(label: str) -> tuple[float, float]:
+    """Map coarse mood labels from detect_emotion_from_context to PAD nudges."""
+    m = label.lower().strip()
+    if m in ("excited", "happy", "joyful"):
+        return 0.06, 0.05
+    if m in ("content", "calm"):
+        return 0.02, 0.0
+    if m in ("frustrated", "angry", "annoyed"):
+        return -0.07, 0.08
+    if m in ("melancholy", "sad"):
+        return -0.08, -0.03
+    if m == "neutral":
+        return 0.0, 0.0
+    if m == "curious":
+        return 0.03, 0.04
+    if m == "satisfied":
+        return 0.04, -0.02
+    if m == "tired":
+        return -0.02, -0.05
+    return 0.01, 0.01
+
+
+def update_emotion(
+    valence_delta: float | str,
+    arousal_delta: float = 0.0,
+    *,
+    event: str | None = None,
+) -> dict[str, Any]:
+    """Shift emotion state and persist.
+
+    Call either with numeric ``(valence_delta, arousal_delta)`` or a mood string
+    from ``detect_emotion_from_context`` (``event`` is accepted for llm_client).
+    """
+    _ = event
+    if isinstance(valence_delta, str):
+        vd, ad = _emotion_label_to_deltas(valence_delta)
+    else:
+        vd, ad = float(valence_delta), float(arousal_delta)
     state = load_persona()
     em = state["emotion"]
-    em["valence"] = max(0.0, min(1.0, em["valence"] + valence_delta))
-    em["arousal"] = max(0.0, min(1.0, em["arousal"] + arousal_delta))
+    em["valence"] = max(0.0, min(1.0, em["valence"] + vd))
+    em["arousal"] = max(0.0, min(1.0, em["arousal"] + ad))
     v, a = em["valence"], em["arousal"]
     if v > 0.65 and a > 0.55:
         em["current_mood"] = "excited"
@@ -140,3 +176,16 @@ def add_personality_note(note: str) -> None:
         if len(notes) > 50:
             notes.pop(0)
     save_persona(state)
+
+
+def get_persona_state() -> dict[str, Any]:
+    """Return persisted persona; includes dominant_emotion for llm_client / emotion hooks."""
+    state = load_persona()
+    mood = state.get("emotion", {}).get("current_mood", "neutral")
+    out: dict[str, Any] = dict(state)
+    out["dominant_emotion"] = mood
+    return out
+
+
+# Alias expected by llm_client (canonical name is build_persona_system_block)
+build_persona_block = build_persona_system_block
