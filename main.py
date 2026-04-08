@@ -95,6 +95,13 @@ class ActivityLogMiddleware(BaseMiddleware):
             )
         except Exception as e:
             logger.warning("Inbound activity logging failed: %s", e)
+        # Track last user message for curiosity engine
+        try:
+            if event.from_user and event.from_user.id == ALLOWED_USER_ID:
+                import handlers.shared as _sh
+                _sh._last_user_message_ts = time.time()
+        except Exception:
+            pass
         return await handler(event, data)
 
 
@@ -305,6 +312,24 @@ async def on_startup(bot: Bot) -> None:
         logger.info("ProactiveScheduler started (schedule + business + GitHub checks)")
     except Exception as e:
         logger.warning("ProactiveScheduler init failed (non-fatal): %s", e)
+
+    try:
+        from core.proactive.curiosity_engine import run_curiosity_loop
+
+        async def _curiosity_notify(text: str) -> None:
+            await bot.send_message(ALLOWED_USER_ID, text[:4000])
+
+        def _get_last_user_ts() -> float:
+            try:
+                import handlers.shared as _sh
+                return _sh._last_user_message_ts
+            except Exception:
+                return 0.0
+
+        asyncio.create_task(run_curiosity_loop(_curiosity_notify, _get_last_user_ts))
+        logger.info("Curiosity engine started")
+    except Exception as e:
+        logger.warning("Curiosity engine init failed (non-fatal): %s", e)
 
     try:
         from tools.voice_engine import run_prewarm

@@ -1,7 +1,14 @@
-"""Emotion modulation engine for response style control."""
+"""Emotion modulation engine for response style control.
+
+Emotion detection has two tiers:
+1. Fast heuristic (detect_emotion_from_context) — keyword-based, synchronous, <1ms
+2. ML sentiment (detect_emotion_from_context_async) — cardiffnlp roberta model, ~50ms
+   Falls back to heuristic if model unavailable or fails.
+"""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 import re
@@ -193,3 +200,79 @@ def postprocess_response(response: str, emotion: str, user_msg: str) -> str:
         response = f"**TLDR:** {first_substantive}\n\n{response}"
 
     return response.strip()
+
+
+# ── ML-based sentiment detection ─────────────────────────────────────────────
+
+_sentiment_pipeline = None
+_sentiment_model_load_attempted = False
+
+
+def _get_sentiment_pipeline():
+    """Lazy-load the sentiment model (downloads ~500MB on first use, cached)."""
+    global _sentiment_pipeline, _sentiment_model_load_attempted
+    if _sentiment_model_load_attempted:
+        return _sentiment_pipeline
+    _sentiment_model_load_attempted = True
+    try:
+        from transformers import pipeline as hf_pipeline
+        _sentiment_pipeline = hf_pipeline(
+            "sentiment-analysis",
+            model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+            device=-1,  # CPU only — GPU is reserved for Ollama/PyTorch workloads
+        )
+        logger.info("[EmotionModulator] Sentiment model loaded (cardiffnlp roberta)")
+    except Exception as exc:
+        logger.warning("[EmotionModulator] Sentiment model unavailable: %s", exc)
+        _sentiment_pipeline = None
+    return _sentiment_pipeline
+
+
+def _run_sentiment_model(text: str) -> str | None:
+    """
+    Run sentiment inference synchronously (called via asyncio.to_thread).
+    Returns a Legion emotion string, or None if the model is unavailable.
+    """
+    pipe = _get_sentiment_pipeline()
+    if pipe is None:
+        return None
+    try:
+        result = pipe(text[:512], truncation=True)
+        label = result[0]["label"].lower() if isinstance(result, list) else result["label"].lower()
+        score = result[0]["score"] if isinstance(result, list) else result["score"]
+
+        # Map 3-class sentiment → 8 Legion emotion states
+        if label == "negative" and score > 0.85:
+            return "frustrated"
+        if label == "negative" and score > 0.65:
+            return "calm"       # mild negative — stay grounded
+        if label == "positive" and score > 0.85:
+            return "excited"
+        if label == "positive" and score > 0.65:
+            return "satisfied"
+        return "neutral"
+    except Exception as exc:
+        logger.debug("[EmotionModulator] Sentiment inference failed: %s", exc)
+        return None
+
+
+async def detect_emotion_from_context_async(
+    user_msg: str,
+    prior_emotion: str = "neutral",
+) -> str:
+    """
+    Async emotion detection — tries ML model first, falls back to keyword heuristic.
+
+    Use this in async contexts (e.g., llm_client.chat()) for higher accuracy.
+    The keyword heuristic runs synchronously in llm_client today; this is
+    the drop-in async upgrade.
+    """
+    try:
+        ml_emotion = await asyncio.to_thread(_run_sentiment_model, user_msg)
+        if ml_emotion:
+            return ml_emotion
+    except Exception as exc:
+        logger.debug("[EmotionModulator] Async sentiment failed: %s", exc)
+
+    # Fallback to existing keyword heuristic
+    return detect_emotion_from_context(user_msg, prior_emotion)

@@ -75,6 +75,15 @@ def build_full_system_prompt(
     """
     parts: list[str] = []
 
+    # 0. Soul context — Legion's living identity document (FIRST, before everything)
+    try:
+        from core.soul_engine import build_soul_context
+        soul = build_soul_context()
+        if soul:
+            parts.append(soul)
+    except Exception as e:
+        logger.debug("[PromptBuilder] soul_engine not available: %s", e)
+
     # 1. Core personality (from agents.py PERSONALITY_WRAPPER)
     try:
         from agents import PERSONALITY_WRAPPER
@@ -129,6 +138,17 @@ def build_full_system_prompt(
                 parts.append(modifier)
         except Exception as e:
             logger.debug("[PromptBuilder] emotion_modulator not available: %s", e)
+
+    # 5b. Debate instruction — only injected when user makes an assertive claim on a known topic
+    if user_msg:
+        try:
+            from core.debate_engine import build_debate_instruction
+            from core.soul_engine import read_beliefs
+            debate_block = build_debate_instruction(user_msg, read_beliefs())
+            if debate_block:
+                parts.append(debate_block)
+        except Exception as e:
+            logger.debug("[PromptBuilder] debate_engine skipped: %s", e)
 
     # 6. Role-specific agent instructions
     if role_prompt:
@@ -200,6 +220,15 @@ class SystemPromptBuilder:
         """
         sections: list[str] = []
 
+        # Soul context is ALWAYS first — it is Legion's living identity
+        try:
+            from core.soul_engine import build_soul_context
+            soul = build_soul_context()
+            if soul:
+                sections.append(soul)
+        except Exception as e:
+            logger.debug("[SystemPromptBuilder] soul_engine skipped: %s", e)
+
         if include_personality:
             sections.append(LEGION_PERSONALITY.to_description())
 
@@ -264,6 +293,16 @@ class SystemPromptBuilder:
                     sections.append(opinions)
             except Exception as e:
                 logger.debug("[SystemPromptBuilder] opinions skipped: %s", e)
+
+        # Passive opinion injection from debate engine (no debate framing, just stances)
+        try:
+            from core.debate_engine import build_opinion_injection
+            from core.soul_engine import read_beliefs
+            opinion_block = build_opinion_injection(read_beliefs(), limit=3)
+            if opinion_block:
+                sections.append(opinion_block)
+        except Exception as e:
+            logger.debug("[SystemPromptBuilder] opinion injection skipped: %s", e)
 
         if task_context.strip():
             sections.append(f"[CURRENT TASK]\n{task_context.strip()}")
