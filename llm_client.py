@@ -976,6 +976,15 @@ async def chat(
     # ── Prompt stack: character, personality, emotion, memory, skills ──────────
     prompt_sections: list[str] = [build_base_persona()]
 
+    # ── Relationship context (always inject — guaranteed local, no API needed) ──
+    try:
+        from core.relationship_memory import get_relationship_context
+        rel_ctx = get_relationship_context()
+        if rel_ctx:
+            prompt_sections.append(rel_ctx)
+    except Exception as _rel_err:
+        logger.warning("relationship_memory injection failed: %s", _rel_err)
+
     try:
         init_humanization_layer()
         if memory is not None and prompt_builder is not None:
@@ -990,14 +999,14 @@ async def chat(
             if humanized_prompt:
                 prompt_sections.append(humanized_prompt)
     except Exception as _humanization_error:
-        logger.debug("humanization prompt injection failed: %s", _humanization_error)
+        logger.warning("humanization prompt injection failed: %s", _humanization_error)
 
     try:
         persona_state = get_persona_state()
         if persona_state:
             prompt_sections.append(build_persona_block())
     except Exception as _persona_err:
-        logger.debug("persona state injection failed: %s", _persona_err)
+        logger.warning("persona state injection failed: %s", _persona_err)
 
     _current_emotion = "neutral"
     try:
@@ -1010,17 +1019,19 @@ async def chat(
             _current_emotion = detected
         prompt_sections.append(build_emotion_modifier(_current_emotion))
     except Exception as _em_err:
-        logger.debug("Emotion modulation skipped: %s", _em_err)
+        logger.warning("Emotion modulation skipped: %s", _em_err)
 
     # ── Inject conversation history ──────────────────────────────────────────────
+    # IMPORTANT: append to prompt_sections (not system_prompt) so it survives
+    # the join at line 1086 that overwrites system_prompt.
     if user_id:
         try:
             from router import get_conversation_summary_prompt
             ctx = get_conversation_summary_prompt(user_id)
             if ctx:
-                system_prompt += "\n\n" + ctx
-        except Exception:
-            pass
+                prompt_sections.append(ctx)
+        except Exception as _ctx_err:
+            logger.warning("conversation history injection failed: %s", _ctx_err)
 
     # ── Mem0 / MemoryOS / OpenMemory / legacy memory ─────────────────────────────
     if user_id:
@@ -1031,7 +1042,7 @@ async def chat(
             if mem_ctx:
                 prompt_sections.append(mem_ctx)
         except Exception as _mem_err:
-            logger.debug("mem0 memory injection failed: %s", _mem_err)
+            logger.warning("mem0 memory injection failed: %s", _mem_err)
 
         try:
             from tools.memoryos_client import mos_retrieve_context
@@ -1039,7 +1050,7 @@ async def chat(
             if mos_ctx:
                 prompt_sections.append(f"[Long-term conversation context from MemoryOS:]\n{mos_ctx}")
         except Exception as _mos_err:
-            logger.debug("MemoryOS injection failed: %s", _mos_err)
+            logger.warning("MemoryOS injection failed: %s", _mos_err)
 
         try:
             from tools.open_memory import om_search, build_om_context
@@ -1083,16 +1094,44 @@ async def chat(
     except Exception:
         pass
 
+    # ── Character voice: opinions, debate triggers, humor, proactive checks ──────
+    # These fire based on message content to inject Legion's personality actively,
+    # not just strip corporate phrases after the fact.
+    if agent_key not in ("computer", "vision"):
+        try:
+            from core.character_voice import (
+                get_opinion_on,
+                get_debate_trigger,
+                get_humor_nudge,
+                get_proactive_check,
+            )
+            # 1. Check if user seems frustrated/stressed → proactive check
+            proactive_nudge = get_proactive_check(task)
+            if proactive_nudge:
+                prompt_sections.append(proactive_nudge)
+
+            # 2. Check if user is asserting something Legion disagrees with → debate
+            debate_block = get_debate_trigger(task)
+            if debate_block:
+                prompt_sections.append(debate_block)
+            else:
+                # 3. No debate needed → check if Legion has a relevant opinion on topic
+                opinion_block = get_opinion_on(task)
+                if opinion_block:
+                    prompt_sections.append(opinion_block)
+
+            # 4. Casual short message → gentle humor nudge
+            humor_block = get_humor_nudge(task)
+            if humor_block:
+                prompt_sections.append(humor_block)
+
+        except Exception as _cv_err:
+            logger.warning("character_voice injection failed: %s", _cv_err)
+
     system_prompt = "\n\n".join(section for section in prompt_sections if section)
 
-    if agent_key not in ("computer", "vision"):
-        system_prompt += (
-            "\n\nYou are in CHAT-ONLY mode — no tools, no computer access right now. "
-            "Answer from your knowledge. Do NOT pretend to run commands, check files, "
-            "or access the desktop. Do NOT fabricate file contents or command output. "
-            "If the task requires computer access, tell Bas to use /do <task>. "
-            "For Legion status/config questions, suggest: /models, /keys, /stats, /gpu."
-        )
+    # NOTE: Chat-only mode lobotomy removed — it was telling the LLM it had no
+    # capabilities, destroying the Jarvis feeling. Agent definitions handle scope.
 
     # ── Devil's advocate injection (for substantive messages, non-agentic agents) ──
     # Adds internal intellectual honesty — Legion challenges its own answers before
@@ -1310,6 +1349,14 @@ async def _post_call_hooks(
             asyncio.create_task(promote_important(recent))
         except Exception:
             pass
+
+        # Update relationship memory — track topic frequency, language, response length
+        try:
+            from core.relationship_memory import record_interaction
+            record_interaction(user_msg, response_length=len(response))
+        except Exception as _rel_hook_err:
+            logger.debug("relationship_memory record failed: %s", _rel_hook_err)
+
     except Exception as exc:
         logger.warning("[PostCall hooks] %s", exc)
 
