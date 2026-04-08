@@ -11,7 +11,8 @@ import core.nexus_orchestrator as task_orchestrator
 
 
 def run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    """Run async coroutine (Python 3.11+: no implicit main-thread loop)."""
+    return asyncio.run(coro)
 
 
 def test_queue_and_confirm():
