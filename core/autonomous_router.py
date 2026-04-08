@@ -157,6 +157,23 @@ SKILL_PATTERNS = {
         "description": "GitHub trending intelligence and self-evolution",
         "handler": "github_intel",
     },
+    "codebase_understanding": {
+        "keywords": [
+            # English — project/code understanding queries
+            "how does", "how do", "explain this code", "explain the code",
+            "understand the", "how is", "what does this", "where is",
+            "find where", "which file", "trace the", "architecture of",
+            "codebase", "explain this project", "walk me through",
+            "how is this structured", "what handles", "how does it work",
+            "find the function", "find the class", "find where it",
+            # Indonesian
+            "bagaimana cara kerja", "jelaskan kode", "di mana ada",
+            "file mana yang", "cari fungsi", "cari kelas", "struktur kode",
+            "cara kerja", "gimana ini bekerja", "temukan di kode",
+        ],
+        "description": "Understand project codebase structure — like Copilot/Cursor",
+        "handler": "codebase_reader",
+    },
     "conversation": {
         "keywords": [],
         "description": "Natural conversation, jokes, opinions, check-ins",
