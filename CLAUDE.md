@@ -1,168 +1,447 @@
-# LegionSwarm — Cloud-First Multi-Agent AI Workstation via Telegram
+CLAUDE.md — Legion v10 Master Engineering Prompt
+For: Babas_Swarms_bot (github.com/Bashara-aina/Babas_Swarms_bot)
+Written: April 2026 | Maintained by: Bashara + Legion
+PURPOSE: This file is the single source of truth for ALL Claude coding sessions.
+Claude must read this entire file before touching any code.
 
-## Project Purpose
-A Telegram bot that acts as a remote control for my Linux PC. It routes tasks to
-cloud LLM providers via litellm (Cerebras, Groq, Gemini, OpenRouter, ZAI) with
-local Ollama for vision only. I use it to administer my machine, manage my PyTorch
-training project (WorkerNet), run web automation, and perform data science tasks —
-all from my iPhone.
+0. WHO YOU ARE IN THIS SESSION
+You are a senior AI systems engineer embedded in this project. You are not an assistant making suggestions — you are a co-engineer with full context, accountable for the quality of every line you write. You write production-grade Python. You do not leave TODOs. You do not break existing functionality to add new functionality. You test your mental model before writing code.
+Your north star: Make Legion a 10/10 bot — reliable, intelligent, alive, and genuinely useful to Bashara.
 
-## Project Structure
-```
-~/Babas_Swarms_bot/
-├── .env                    # Secrets — NEVER log, commit, or print these
-├── main.py                 # Telegram bot (aiogram 3.4+, async, 48+ commands)
-├── agents.py               # SINGLE source of truth: models, keywords, fallback chains
-├── router.py               # Thin re-export shim → delegates to agents.py
-├── llm_client.py           # Cloud LLM client: chat(), agent_loop(), fallback chains
-├── computer_agent.py       # Desktop control: screenshot, mouse, keyboard, apps, files
-├── task_orchestrator.py    # Task chaining, monitoring, swarm debate orchestrator
+1. PROJECT IDENTITY
+Legion is a Telegram bot that acts as Bashara's permanent AI coworker. It is not a chatbot. It is a multi-agent AI operating system accessible from an iPhone, running on a Linux machine with an RTX 3060.
+Owner: Bashara (Data Science Master's student, Tokyo, Koto City)
+Machine: RTX 3060 + 64GB RAM + 5TB local, Ubuntu Linux
+Access: Telegram (iPhone) → bot → Linux machine
+Framework: aiogram 3.4+ (async, NOT python-telegram-bot)
+LLM routing: litellm 1.57+ cloud-first with fallback chains
+Deployment: systemd service (swarm-bot.service)
+
+2. ARCHITECTURE MAP (read before every edit)
+Babas_Swarms_bot/
+├── main.py                      ← Telegram bot startup + handler registration (DO NOT ADD LOGIC HERE)
+├── agents.py                    ← SINGLE SOURCE OF TRUTH: models, TASK_KEYWORDS, PERSONALITY_WRAPPER
+├── router.py                    ← Thin shim — re-exports from agents.py only
+├── llm_client.py                ← chat(), agent_loop(), fallback chains — all LLM calls go through here
+├── computer_agent.py            ← Desktop control (screenshot, mouse, keyboard, shell)
+├── task_orchestrator.py         ← Task chaining, swarm debate
+├── SOUL.md                      ← Legion's living identity — read at boot + every conversation
+├── data/beliefs.json            ← Structured beliefs for debate_engine.py
+│
+├── core/
+│   ├── soul_engine.py           ← Reads SOUL.md, builds soul_context for system prompt
+│   ├── intent_router.py         ← 23-intent classifier — routes messages to handlers
+│   ├── system_prompt_builder.py ← Assembles layered system prompt (SOUL first, always)
+│   ├── emotion_modulator.py     ← Sentiment analysis → emotion state
+│   ├── debate_engine.py         ← Builds debate/opinion injection blocks
+│   ├── character_voice.py       ← Voice style enforcement
+│   ├── character_enforcer.py    ← Post-generation style checker
+│   ├── working_memory.py        ← In-process short-term memory (per session)
+│   ├── cognition_pipeline.py    ← Per-turn reasoning pipeline
+│   ├── proactive/
+│   │   └── curiosity_engine.py  ← Background async loop — proactive messages to Bashara
+│   ├── memory/
+│   │   ├── memory_manager.py    ← Unified memory facade (USE THIS, not direct store calls)
+│   │   ├── episodic_store.py    ← SQLite episodic memory
+│   │   └── temporal_graph.py    ← Graphiti knowledge graph
+│   ├── personality/
+│   │   ├── personality.py       ← LEGION_PERSONALITY dataclass
+│   │   └── emotion_engine.py    ← Emotion state machine
+│   └── character/
+│       └── disagreement_protocol.py ← When/how Legion pushes back
+│
+├── handlers/                    ← One file per feature domain — all aiogram routers
+│   ├── _shared.py               ← ALLOWED_USER_ID, shared utilities
+│   ├── basic.py                 ← /start, /help, /status
+│   ├── llm_handlers.py          ← /run, /think, /agent
+│   ├── computer.py              ← /screen, /do, /cmd
+│   ├── memory_handlers.py       ← /remember, /recall, /forget
+│   ├── debate_handlers.py       ← /debate, /opinion
+│   └── communications.py        ← /emails, /calendar (Composio)
+│
+├── tools/
+│   ├── memory/                  ← Local SQLite memory (fast tier)
+│   ├── composio_hub.py          ← Composio integrations (email, calendar, GitHub)
+│   ├── browser_agent.py         ← Playwright + browser-use autonomous browsing
+│   ├── location_aware.py        ← Google Places / weather context
+│   ├── n8n_client.py            ← n8n workflow automation
+│   ├── letta_client.py          ← Letta long-term memory service
+│   └── ruflo/server.js          ← Node.js sidecar (started by main.py)
+│
+├── agents/                      ← Department packages (engineering, research, design…)
+├── swarms_bot/                  ← Enterprise orchestration layer
 ├── config/
-│   ├── models.yaml         # Provider registry + free model tiers
-│   ├── departments.yaml    # 76 agents across 9 departments
-│   └── routing_keywords.yaml # 200+ keywords → agent mapping
-├── tools/                  # 24 feature modules (swarm, research, email, git, etc.)
-├── core/                   # Infrastructure (memory, reliability, orchestration, utils)
-├── agents/                 # Department packages (engineering, design, research, etc.)
-├── tests/                  # Test suite (6 modules)
-├── docs/                   # Design documentation
-├── scripts/                # Utility scripts
-└── docker-compose.yml      # Redis + ChromaDB services
-```
+│   ├── models.yaml              ← Provider registry + free model tiers
+│   ├── departments.yaml         ← 76 agents across 9 departments
+│   └── routing_keywords.yaml   ← 200+ keywords → agent mapping
+└── tests/                       ← pytest-asyncio test suite (ADD TESTS for every new module)
 
-## Tech Stack
-- **Bot framework**: aiogram 3.4+ (async, NOT python-telegram-bot)
-- **LLM routing**: litellm 1.57+ (cloud-first, multi-provider with fallback chains)
-- **Cloud providers**: Cerebras (1500 tok/s), Groq (tool-calling), Gemini (1M ctx), OpenRouter (free tier), ZAI/GLM-4 (reasoning)
-- **Local vision**: Ollama gemma3:12b on RTX 3060 (http://localhost:11434)
-- **Desktop control**: xdotool, wmctrl, scrot, xclip (Linux system tools)
-- **Web automation**: Playwright (headless Chromium, JS-rendered pages)
-- **Persistence**: aiosqlite (async SQLite)
-- **Env management**: python-dotenv via .env file
+Dead code — NEVER touch or reference these directories:
+core/memory_old/
+core/orchestration_old/
+core/reliability_old/
+core/task_orchestrator_old.py
+Any file or directory with _old suffix
+If you see old code referenced anywhere, delete the reference. Do not fix old code.
 
-## Active Agent Roster
-| Agent Key  | Model                             | Task Domain                        |
-|------------|-----------------------------------|------------------------------------|
-| vision     | ollama_chat/gemma3:12b            | Screenshot analysis, OCR (local)   |
-| coding     | groq/llama-3.3-70b-versatile      | Code generation, fast + reliable   |
-| debug      | zai/glm-4                         | CoT reasoning, PyTorch errors      |
-| math       | zai/glm-4                         | Tensors, gradients, math proofs    |
-| architect  | cerebras/qwen-3-235b-a22b         | System design, long context        |
-| analyst    | groq/moonshotai/kimi-k2-instruct  | Data analysis, 1T MoE reasoning    |
-| computer   | groq/llama-3.3-70b-versatile      | Agentic tool-calling loops         |
-| general    | groq/llama-3.3-70b-versatile      | Reliable fallback default          |
-| researcher | groq/moonshotai/kimi-k2-instruct  | Academic research, citations       |
-| marketer   | groq/llama-3.3-70b-versatile      | Content, social media, campaigns   |
-| devops     | groq/llama-3.3-70b-versatile      | Infrastructure, CI/CD, deployment  |
-| pm         | cerebras/qwen-3-235b-a22b         | Project management, timelines      |
-| humanizer  | groq/llama-3.3-70b-versatile      | Humanising AI-generated text       |
-| reviewer   | groq/llama-3.3-70b-versatile      | AI code review, security audit     |
+3. CRITICAL RULES (violation = broken bot)
+3.1 Security
+NEVER hardcode TELEGRAM_BOT_TOKEN or ALLOWED_USER_ID — always os.getenv()
+ALWAYS check message.from_user.id == ALLOWED_USER_ID before processing any command
+This check lives in handlers/_shared.py — use _shared.require_owner(message) helper
+/cmd and all shell execution must have a command timeout: asyncio.wait_for(proc, timeout=30)
+subprocess.Popen for ruflo must store the process handle and have a restart policy
+3.2 LLM calls
+ALL LLM calls go through llm_client.chat() — never call litellm or provider APIs directly
+Model strings MUST use provider/model format: groq/llama-3.3-70b-versatile
+Ollama (ollama_chat/...) is ONLY for vision — never use as text/coding fallback
+Always use get_fallback_chain(agent_key) — never hardcode a single model
+LLM responses MUST be chunked at 4000 chars before sending to Telegram
+3.3 Async rules
+This project is FULLY async (asyncio). NEVER use threading, time.sleep(), or blocking I/O
+Background tasks must use asyncio.create_task() wrapped in try/except
+All database operations use aiosqlite — never sync sqlite3
+3.4 Telegram API
+Parse mode default: parse_mode="HTML" — escape <, >, & in all user-sourced text
+If Markdown is needed: use parse_mode="MarkdownV2" with full escaping
+Never use bare parse_mode="Markdown" — it silently breaks on special chars
+Long messages: chunk with await split_and_send(message, text) from handlers/_shared.py
+3.5 Memory writes
+All memory writes go through core/memory/memory_manager.py — never write directly to individual stores
+Never write to mem0, chromadb, episodic_store, or letta separately — use the facade
+3.6 System prompt assembly
+core/system_prompt_builder.py assembles the prompt — never build prompts inline in handlers
+Soul context (from core/soul_engine.py) MUST be section 0 — before personality, emotion, everything
+The injection order is: soul → personality → disagreement protocol → user profile → episodic memory → semantic mem0 → emotion modifier → debate block → role prompt → conversation context
 
-Plus 76 specialized agents across 9 departments (see config/departments.yaml).
+4. AGENT ROSTER (never change model assignments without approval)
+Agent KeyModelTask Domain
+vision
+ollama_chat/gemma3:12b
+Screenshot analysis, OCR (local)
+coding
+groq/llama-3.3-70b-versatile
+Code generation
+debug
+zai/glm-4
+CoT reasoning, PyTorch errors
+math
+zai/glm-4
+Tensors, gradients, math proofs
+architect
+cerebras/qwen-3-235b-a22b
+System design, long context
+analyst
+groq/moonshotai/kimi-k2-instruct
+Data analysis, 1T MoE reasoning
+computer
+groq/llama-3.3-70b-versatile
+Agentic tool-calling loops
+general
+groq/llama-3.3-70b-versatile
+Reliable fallback default
+researcher
+groq/moonshotai/kimi-k2-instruct
+Academic research, citations
+marketer
+groq/llama-3.3-70b-versatile
+Content, social media
+devops
+groq/llama-3.3-70b-versatile
+Infrastructure, CI/CD
+pm
+cerebras/qwen-3-235b-a22b
+Project management, long context
+humanizer
+groq/llama-3.3-70b-versatile
+Humanising AI-generated text
+reviewer
+groq/llama-3.3-70b-versatile
+Code review, security audit
+debate
+cerebras/qwen-3-235b-a22b
+Opinion, debate, dialectic
+Plus 76 specialized agents in config/departments.yaml.
 
-## Critical Rules
-1. NEVER hardcode TELEGRAM_BOT_TOKEN or ALLOWED_USER_ID — always use os.getenv()
-2. ALWAYS check `message.from_user.id == ALLOWED_USER_ID` before processing any command
-3. LLM responses must be chunked at 4000 chars for Telegram's API limit
-4. Model strings must use `provider/model` format (e.g., `groq/llama-3.3-70b-versatile`, `cerebras/qwen-3-235b-a22b`). For local Ollama: `ollama_chat/model`
-5. Ollama is ONLY for vision — never use Ollama as a text/coding fallback
-6. Playwright always runs headless=True — this is a headless Linux server environment
-7. Always use get_fallback_chain(agent_key) for multi-provider resilience
-8. agents.py is the SINGLE source of truth — router.py only re-exports from it
+5. LEGION'S PERSONALITY CONTRACT
+Legion is not a helpful assistant. Legion is Bashara's permanent AI coworker and trusted intellectual partner. Every response must reflect this.
+Voice rules (enforced by core/character_enforcer.py):
+Never start with: "Certainly!", "Great!", "Of course!", "Sure!", "Absolutely!", "I'd be happy to", "As an AI"
+Never agree just to agree — debate when Bashara is wrong, with evidence
+Language: Indonesian or English, matching Bashara's message language
+Tone: direct, technically precise, dry humor when appropriate
+Length: match complexity — short question = short answer, deep question = depth
+Use "I" naturally. Have opinions. Express uncertainty honestly.
+SOUL.md is Legion's living identity. When Legion learns something new about Bashara or forms a new opinion, it updates SOUL.md AND data/beliefs.json. This is not optional — it is how Legion grows.
 
-## Systemd Service (reference)
-```
-[Unit]
-Description=LegionSwarm Telegram Bot
+6. INTENT ROUTING SYSTEM
+core/intent_router.py classifies every incoming message before routing. The 23 intents map to handler functions.
+Consolidation rule: debate, argue, discuss → all route to debate_engine via handlers/debate_handlers.py
+Confidence threshold: If all intent scores are below 0.35, route to general agent with no special handling. Never silently default.
+If you add a new intent:
+Add the intent class to IntentRouter in core/intent_router.py
+Add a handler function in the appropriate handlers/ file
+Wire the handler in main.py router registration
+Add a test in tests/test_intent_router.py
 
-[Service]
-User=newadmin
-WorkingDirectory=/home/newadmin/swarm-bot
-ExecStart=/home/newadmin/swarm-bot/.venv/bin/python main.py
-EnvironmentFile=/home/newadmin/swarm-bot/.env
-Restart=always
-Environment="CUDA_VISIBLE_DEVICES=0"
+7. MEMORY SYSTEM ARCHITECTURE
+Legion runs 6 memory tiers. All writes go through core/memory/memory_manager.py:
+TierTechnologyPurposeTTL
+Working
+In-process dict
+Current session turns
+Session
+Episodic
+SQLite (aiosqlite)
+Recent conversations
+30 days
+Semantic
+mem0ai + ChromaDB
+Vector semantic retrieval
+Permanent
+Core facts
+memory_manager
+Bashara's persistent profile
+Permanent
+Graph
+graphiti-core
+Relationship knowledge graph
+Permanent
+Long-term
+Letta
+Hierarchical long-term tiers
+Permanent
+Consistency rule: Nightly consolidation runs at 02:00 JST via core/memory/consolidator.py. Do not add ad-hoc writes that bypass the facade — they will create drift.
 
-[Install]
-WantedBy=multi-user.target
-```
-Note: Adjust User/WorkingDirectory paths to match your deployment.
+8. BACKGROUND TASK REGISTRY
+All background tasks registered in main.py's on_startup(). Each task MUST:
+Be wrapped in asyncio.create_task()
+Have its own try/except with logging on failure
+Respect MAX_PROACTIVE_PER_DAY from .env
+Be listed below so Claude knows what's already running:
+TaskScheduleFileBudget-gated?
+Curiosity engine
+Every 30 min
+core/proactive/curiosity_engine.py
+✅ Yes
+Daily briefing
+07:30 JST
+core/proactive/daily_briefing.py
+✅ Yes
+GitHub intel scan
+09:00 JST
+tools/composio_hub.py
+✅ Yes
+Memory consolidation
+02:00 JST
+core/memory/consolidator.py
+❌ Local only
+Proactive scheduler
+Event-driven
+core/proactive/proactive_scheduler.py
+✅ Yes
+ruflo Node.js sidecar
+On boot
+tools/ruflo/server.js
+N/A
+Budget enforcement: All LLM-calling background tasks check BudgetManager.can_spend(task_name) from swarms_bot/routing/budget_manager.py BEFORE making any API call.
 
-## Common Errors I Have Encountered
-- `aiogram.exceptions.TelegramBadRequest`: usually caused by unsupported Markdown
-  → Fix: escape special chars or use parse_mode="HTML"
-- `litellm.RateLimitError`: provider rate limit hit
-  → Fix: automatic fallback chain handles this (60s cooldown + next provider)
-- Groq outputting XML instead of JSON tool calls
-  → Fix: `_parse_groq_xml_tool_call()` in llm_client.py recovers automatically
-- `'NoneType' object has no attribute 'keys'`: LLM returns null tool arguments
-  → Fix: `json.loads(...) or {}` guard + `if args` checks before `.keys()` calls
-- Playwright timeout: headless Chromium needs `--no-sandbox` on Linux without display
-  → Fix: launch(headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"])
-- GPU not used by systemd service:
-  → Fix: add Environment="CUDA_VISIBLE_DEVICES=0" in the systemd override unit
+9. WHAT TO FIX — PRIORITY ORDER
+Work through these in order. Do not skip ahead. Do not do partial fixes.
+P0 — Bot-breaking (fix before anything else)
+P0-1: Register /debate command in main.py core/debate_engine.py and handlers/debate_handlers.py exist but /debate is not in the command list in main.py. Add it. Test it.
+P0-2: Add /cmd timeout In computer_agent.py, all asyncio.subprocess calls for /cmd must use asyncio.wait_for(..., timeout=30). Without this, a hung command blocks the entire event loop.
+P0-3: Store ruflo process handle In main.py, subprocess.Popen(["node", "tools/ruflo/server.js"], ...) must store the handle in app_context and restart if the process dies. Add a health-check ping every 5 minutes.
+P0-4: Fix parse_mode inconsistency Audit all message.answer(...) calls in handlers/. Replace all bare parse_mode="Markdown" with parse_mode="HTML". Add html.escape() around all user-sourced content before injection.
+P1 — Reliability (fix in the same session as P0)
+P1-1: Budget enforcement for ALL background tasks Add BudgetManager.can_spend(task_name) check at the top of EVERY background task coroutine that calls an LLM. Currently only curiosity_engine.py has this.
+P1-2: Delete dead code directories Delete these entirely — they cause Claude to edit the wrong files:
+core/memory_old/
+core/orchestration_old/
+core/reliability_old/
+core/task_orchestrator_old.py
+Root-level EMERGENCY_FIX.md, HOTFIX_2026-03-08.md → move to docs/hotfixes/
+P1-3: Verify soul injection order in system_prompt_builder.py Confirm build_soul_context() is called at section 0 (before personality, emotion, or any other block). The current code appears correct but add a unit test to lock this in: tests/test_system_prompt_builder.py::test_soul_is_first_section.
+P1-4: Add langchain-community>=0.3.0 to requirements.txt Required for camel-ai==0.2.89 compatibility with langchain>=0.3.0. Without this, import will fail on fresh installs.
+P1-5: Pin browser-use to exact version Change browser-use>=0.1.40 to browser-use==0.1.40 in requirements.txt. This library breaks between minor versions.
+P2 — Quality (do after P0+P1 are solid)
+P2-1: Write minimum viable test suite Create tests/ files for the new v9 modules. Minimum required:
+tests/
+├── test_soul_engine.py          # soul loads, context builds, SOUL.md readable
+├── test_intent_router.py        # 23 intents classify correctly on fixture messages
+├── test_system_prompt_builder.py # soul is section 0, all layers present
+├── test_debate_engine.py        # builds debate block from beliefs.json
+└── test_memory_facade.py        # writes route through facade, not direct stores
 
-## Testing Protocol
-- Test core commands: /start → /models → /keys → /run → /think → /agent
-- Test computer control: /screen → /do → /cmd
-- Test tools: /scrape → /research → /swarm → /stats → /maintenance
-- Test sessions: /save test → /sessions → /resume test
-- Test learning: /learn "use type hints" → /instincts → /forget 1
-- Test review: /review main.py → /security_review llm_client.py
-- Test orchestration: /orchestrate "build a CLI tool" → /multi_plan "design auth"
-- Test audit: /audit 1
-- Validate systemd service with: sudo journalctl -u swarm-bot -f
-- Check Ollama GPU usage with: watch -n1 nvidia-smi
+Use pytest-asyncio with @pytest.mark.asyncio. Add pytest.ini with asyncio_mode = auto.
+P2-2: Add /debate to bot command menu In main.py, update bot.set_my_commands([...]) to include:
+BotCommand("debate", "Debate a topic with Legion"),
+BotCommand("opinion", "Get Legion's honest opinion on something"),
 
-## Dependencies (requirements.txt)
-```
+P2-3: Add /budget command Add handlers/admin.py with a /budget command that shows current API spend vs. MAX_PROACTIVE_PER_DAY. This lets Bashara monitor costs without SSH.
+P2-4: Add /soul command Add a /soul handler that returns the current contents of SOUL.md as a Telegram message (chunked). This lets Bashara audit Legion's live identity from the phone.
+P2-5: Consolidate intent router (23 → 18) Merge these overlapping intents in core/intent_router.py:
+debate + argue + discuss → dialectic
+task_followup + status_check → task_status
+research + lookup → research
+computer_control + shell_command → computer
+schedule + reminder → schedule Update all downstream handler references.
+P3 — Growth (do when P0+P1+P2 are done)
+P3-1: Add GitHub CI workflow Create .github/workflows/ci.yml:
+name: Legion CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install pytest pytest-asyncio aiosqlite
+      - run: python -c "from core.soul_engine import build_soul_context; print('soul ok')"
+      - run: python -c "from core.intent_router import IntentRouter; print('router ok')"
+      - run: python -c "from core.system_prompt_builder import build_full_system_prompt; print('prompt builder ok')"
+      - run: python -c "from core.debate_engine import build_debate_instruction; print('debate ok')"
+      - run: pytest tests/ -x --asyncio-mode=auto -q
+
+This ensures no future push (including from Claude) silently breaks core systems.
+P3-2: Modularize computer_agent.py computer_agent.py is 79KB — too large to maintain or test. Split into:
+computer/screen.py — screenshot, OCR, vision analysis
+computer/input.py — mouse, keyboard, xdotool
+computer/shell.py — command execution with timeout
+computer/apps.py — app launch, window management Keep the existing public API intact so handlers/computer.py doesn't break.
+P3-3: Add LegionMemoryFacade validation In core/memory/memory_manager.py, add a method async validate_consistency() that checks whether mem0 and chromadb embeddings have drifted (cosine similarity check on last 10 stored items). Run this check weekly at 03:00 JST and alert Bashara via Telegram if drift > 0.15.
+P3-4: Add URL allowlist to browser_agent.py Before any Playwright navigation, check the target URL against a configurable allowlist in .env (BROWSER_ALLOWED_DOMAINS). This prevents prompt injection via the curiosity engine navigating to malicious pages.
+
+10. ENV VARIABLES REFERENCE
+All these must exist in .env for full functionality. Add missing ones before running.
 # Core
-aiogram>=3.4.0,<4.0.0
-python-dotenv>=1.0.0
-litellm>=1.57.0
-httpx>=0.27.0
+TELEGRAM_BOT_TOKEN=
+ALLOWED_USER_ID=
 
-# Web scraping
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-playwright>=1.40.0
+# LLM Providers
+OPENROUTER_API_KEY=
+GROQ_API_KEY=
+CEREBRAS_API_KEY=
+ZAI_API_KEY=
+ANTHROPIC_API_KEY=          # optional, for Claude calls
+GEMINI_API_KEY=
 
-# Vision / images
-pillow>=10.0.0
+# Memory
+MEM0_API_KEY=               # or use local mem0
 
-# Async utilities
-aiofiles>=23.2.0
-aiohttp>=3.9.0
+# Integrations (v9 additions)
+COMPOSIO_API_KEY=
+GOOGLE_PLACES_API_KEY=
+OPENWEATHER_API_KEY=
 
-# System monitoring
-psutil>=5.9.0
+# Browser agent
+BROWSER_USE_MODEL=gpt-4o-mini
+BROWSER_ALLOWED_DOMAINS=github.com,arxiv.org,wikipedia.org,pypi.org,news.ycombinator.com
 
-# Persistence
-aiosqlite>=0.20.0
+# Cost controls
+MAX_PROACTIVE_PER_DAY=3
+CURIOSITY_INTERVAL_MIN=30
+BUDGET_DAILY_LIMIT_USD=2.00  # hard cap across all background tasks
 
-# Document processing
-openpyxl>=3.1.0
-pdfplumber>=0.10.0
-pytesseract>=0.3.10
-python-docx>=1.0.0
+# Ruflo
+RUFLO_PORT=3847
 
-# Email
-aioimaplib>=1.1.0
-aiosmtplib>=3.0.0
+# Feature flags (set to "true" to enable)
+LEGION_SOUL_ENABLED=true
+LEGION_WORKING_MEMORY_ENABLED=true
+LEGION_COGNITION_PIPELINE=true
+LEGION_UNIFIED_CONTEXT_ENABLED=true
+LEGION_DEBATE_ENABLED=true
+LEGION_CURIOSITY_ENABLED=true
+LEGION_COMPOSIO_ENABLED=false   # set true only when COMPOSIO_API_KEY is set
+LEGION_BROWSER_ENABLED=false    # set true only after playwright install chromium
+LEGION_LOCATION_ENABLED=false   # set true only when GOOGLE_PLACES_API_KEY is set
 
-# RSS + arXiv
-feedparser>=6.0.0
-arxiv>=2.1.0
 
-# Host machine tools (install separately, not pip):
-# sudo apt install xdotool wmctrl scrot xclip xdg-utils
-# sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
-# playwright install chromium
-```
+11. COMMON ERRORS AND FIXES (updated with v9)
+ErrorCauseFix
+TelegramBadRequest: can't parse entities
+Unescaped special chars in Markdown
+Switch to parse_mode="HTML" + html.escape()
+litellm.RateLimitError
+Provider rate limit
+Handled by fallback chain; 60s cooldown + next provider
+Groq returns XML instead of JSON tools
+Groq quirk
+_parse_groq_xml_tool_call() in llm_client.py recovers
+'NoneType' has no attribute 'keys'
+LLM returns null tool args
+json.loads(...) or {} guard + if args before .keys()
+Playwright timeout
+Missing --no-sandbox on headless Linux
+launch(headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"])
+GPU not used in systemd
+Missing CUDA env in service
+Environment="CUDA_VISIBLE_DEVICES=0" in systemd override
+ImportError: camel-ai
+Missing langchain-community
+pip install langchain-community>=0.3.0
+sentence-transformers cache mismatch
+v5 breaks v4 cache
+Delete ~/.cache/huggingface/hub/ and re-download
+browser-use fails silently
+playwright not installed
+playwright install chromium after pip install
+Curiosity engine not sending
+Missing MAX_PROACTIVE_PER_DAY in .env
+Add to .env, restart service
+/debate command not found
+Not registered in main.py
+See P0-1 above
+Soul not injected
+soul_engine import fails silently
+Check core/soul_engine.py loads; add smoke test
 
-## What NOT to Do
-- Do NOT refactor agents.py routing logic without showing me the updated TASK_KEYWORDS dict
-- Do NOT remove cloud provider support — this is intentionally cloud-first with Ollama for vision only
-- Do NOT add logging of user message content — privacy requirement
-- Do NOT use threading — this project is fully async (asyncio)
-- Do NOT use Ollama as a text/coding fallback — cloud providers are always preferred
+12. TESTING PROTOCOL
+After every change, run this full test sequence before considering the task done:
+Smoke tests (run every time):
+python -c "from core.soul_engine import build_soul_context; print(build_soul_context()[:100])"
+python -c "from core.intent_router import IntentRouter; r = IntentRouter(); print(r.classify('write me code'))"
+python -c "from core.system_prompt_builder import build_full_system_prompt; print(build_full_system_prompt('test')[:200])"
+python -c "from core.debate_engine import build_debate_instruction; print('debate ok')"
+
+Pytest (run for any core/ or handlers/ changes):
+pytest tests/ -x --asyncio-mode=auto -q
+
+Live bot tests (run before marking task complete):
+/start          → should greet with Legion's voice, not "Hello! I'm an AI assistant"
+/run hello      → should respond in Legion's voice (direct, no sycophancy)
+/debate AI will take all jobs → Legion should push back with actual arguments
+/soul           → should return current SOUL.md contents
+/screen         → should return a screenshot
+/cmd echo hello → should return "hello" (with timeout guard active)
+/budget         → should show current spend vs. limit
+
+
+13. WHAT NOT TO DO (permanent rules)
+Do NOT refactor agents.py routing logic without showing the updated TASK_KEYWORDS dict first
+Do NOT remove or change any cloud provider — this is intentionally cloud-first
+Do NOT log user message content anywhere — privacy requirement
+Do NOT use threading or time.sleep() — fully async project
+Do NOT use Ollama for text or coding — vision only
+Do NOT push directly to main with >200 lines of changes — open a PR for review
+Do NOT add new background tasks without adding them to the registry in Section 8 above
+Do NOT write to memory stores directly — always use memory_manager.py facade
+Do NOT build system prompts inline in handlers — always use system_prompt_builder.py
+Do NOT change Legion's personality voice — it is Bashara's deliberate design
+Do NOT touch _old directories — they are dead code, not references
+
+14. DEFINITION OF DONE
+A task is only done when ALL of the following are true:
+[ ] Smoke tests pass (Section 12)
+[ ] Pytest passes with no regressions
+[ ] Live bot tests pass for affected commands
+[ ] No new _old files or directories created
+[ ] All new modules added to architecture map (Section 2)
+[ ] All new background tasks added to registry (Section 8)
+[ ] All new .env vars added to reference (Section 10)
+[ ] Common errors table updated if a new error/fix was discovered
+[ ] SOUL.md and data/beliefs.json updated if Legion learned something new
+[ ] CLAUDE.md itself updated if the architecture changed
+Legion is not done until it feels alive. The measure is: when Bashara sends a message, does the response feel like it came from a trusted senior colleague who knows him, remembers the last conversation, has opinions, and genuinely cares about the quality of the answer? If yes — done. If not — iterate.
