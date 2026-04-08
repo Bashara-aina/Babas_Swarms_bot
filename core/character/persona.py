@@ -19,7 +19,8 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "legion_character.json"
+# persona.py lives at core/character/persona.py → repo root is three levels up
+_CONFIG_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "legion_character.json"
 
 
 @lru_cache(maxsize=1)
@@ -46,6 +47,7 @@ def build_base_persona() -> str:
     # Layer 1: Import the full PERSONALITY_WRAPPER from agents.py (no circular import risk)
     try:
         from agents import PERSONALITY_WRAPPER
+
         base = PERSONALITY_WRAPPER.strip()
     except Exception as _e:
         logger.warning("character: could not import PERSONALITY_WRAPPER: %s — using fallback", _e)

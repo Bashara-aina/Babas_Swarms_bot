@@ -443,3 +443,18 @@ def clear_thread(thread_id: str) -> bool:
         logger.info("Cleared thread '%s'", thread_id)
         return True
     return False
+
+
+_LAZY_AGENT_SUBMODULES = frozenset({"owl_agent", "ag2_pipeline"})
+
+
+def __getattr__(name: str):
+    if name in _LAZY_AGENT_SUBMODULES:
+        import importlib
+
+        return importlib.import_module(f"agents.{name}")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(_LAZY_AGENT_SUBMODULES))
