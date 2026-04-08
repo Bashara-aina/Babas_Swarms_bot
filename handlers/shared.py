@@ -344,6 +344,9 @@ async def _execute_chat(
     except Exception:
         pass
 
+    # Use chat.id as thread_id so conversation history is tracked per-chat
+    thread_id = str(msg.chat.id) if msg.chat else str(msg.from_user.id)
+
     typing_task = asyncio.create_task(_keep_typing(msg))
     try:
         response, model_used = await chat(
@@ -351,6 +354,7 @@ async def _execute_chat(
             agent_key=selected_agent,
             show_thinking=show_thinking,
             user_id=str(msg.from_user.id),
+            thread_id=thread_id,
             routing_hint=routing_hint,
         )
         await _cancel_task(typing_task)
