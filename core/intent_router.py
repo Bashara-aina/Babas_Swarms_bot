@@ -180,12 +180,40 @@ _PATTERNS: dict[Intent, list[str]] = {
 }
 
 
+_INTENT_TO_AGENT: dict[Intent, str] = {
+    Intent.CODE_GENERATION: "coding",
+    Intent.CODE_REVIEW: "reviewer",
+    Intent.MATH_REASONING: "math",
+    Intent.DEEP_REASONING: "think",
+    Intent.DATA_ANALYSIS: "analyst",
+    Intent.CREATIVE_WRITE: "general",
+    Intent.WEB_RESEARCH: "researcher",
+    Intent.COMPUTER_CONTROL: "computer",
+    Intent.TRANSLATION: "general",
+}
+
+_INTENT_NEEDS_TOOLS: set[Intent] = {
+    Intent.COMPUTER_CONTROL, Intent.FILE_OPERATION,
+    Intent.EMAIL_READ, Intent.EMAIL_WRITE,
+    Intent.WEB_SCRAPE, Intent.DATABASE_AUDIT,
+    Intent.SCHEDULE_TASK, Intent.SELF_UPGRADE,
+}
+
+_INTENT_NEEDS_RESEARCH: set[Intent] = {
+    Intent.WEB_RESEARCH, Intent.WEATHER_QUERY,
+    Intent.LOCATION_QUERY, Intent.SITE_ANALYSIS,
+}
+
+
 @dataclass
 class IntentResult:
     intent: Intent
     confidence: float
-    method: str          # "pattern" or "llm"
+    method: str          # "pattern"
     raw_message: str
+    suggested_agent: str = ""
+    needs_tools: bool = False
+    needs_research: bool = False
 
 
 def classify_intent_fast(message: str) -> IntentResult:
@@ -202,56 +230,36 @@ def classify_intent_fast(message: str) -> IntentResult:
             scores[intent] = score
 
     if not scores:
-        return IntentResult(Intent.CASUAL_CHAT, 0.5, "pattern", message)
+        return IntentResult(
+            Intent.CASUAL_CHAT, 0.5, "pattern", message,
+            suggested_agent="general", needs_tools=False, needs_research=False,
+        )
 
     best = max(scores, key=lambda k: scores[k])
     total_matches = scores[best]
     confidence = min(0.95, 0.5 + (total_matches * 0.15))
 
-    return IntentResult(best, confidence, "pattern", message)
-
-
-async def classify_intent_llm(message: str, fast_result: IntentResult) -> IntentResult:
-    """
-    LLM-based intent classification for ambiguous messages.
-    Only called when fast classification confidence < 0.65.
-    Async — uses the fast groq model for speed.
-    """
-    if fast_result.confidence >= 0.65:
-        return fast_result
-
-    try:
-        from llm_client import chat as llm_chat
-        intents_list = "\n".join(
-            f"- {i.value}: {i.name.replace('_', ' ').lower()}"
-            for i in Intent
-        )
-        prompt = (
-            "Classify this message into exactly ONE intent category. "
-            "Return ONLY the intent value (e.g. 'web_research'), nothing else.\n\n"
-            f"Message: {message}\n\n"
-            f"Categories:\n{intents_list}"
-        )
-        response, _ = await llm_chat(
-            task=prompt,
-            agent_key="general",
-            show_thinking=False,
-        )
-        result_clean = (response or "").strip().lower().replace("-", "_").split()[0]
-        for intent in Intent:
-            if intent.value == result_clean:
-                return IntentResult(intent, 0.8, "llm", message)
-    except Exception as exc:
-        logger.debug("[IntentRouter] LLM classification failed: %s", exc)
-
-    return fast_result
+    return IntentResult(
+        intent=best,
+        confidence=confidence,
+        method="pattern",
+        raw_message=message,
+        suggested_agent=_INTENT_TO_AGENT.get(best, "general"),
+        needs_tools=best in _INTENT_NEEDS_TOOLS,
+        needs_research=best in _INTENT_NEEDS_RESEARCH,
+    )
 
 
 def build_intent_hint(result: IntentResult) -> str:
     """Build a system prompt fragment hinting at the detected intent."""
     if result.intent == Intent.CASUAL_CHAT or result.confidence < 0.65:
         return ""
-    return (
-        f"[Detected intent: {result.intent.value} — confidence {result.confidence:.0%}. "
-        f"Lean towards this mode in your response without announcing it.]"
-    )
+    parts = [
+        f"[Detected intent: {result.intent.value} — confidence {result.confidence:.0%}."
+    ]
+    if result.needs_research:
+        parts.append("This may need web research or live data — seek evidence before answering.")
+    if result.needs_tools:
+        parts.append("This likely requires tool use — suggest /do if direct action is needed.")
+    parts.append("Lean towards this mode without announcing it.]")
+    return " ".join(parts)

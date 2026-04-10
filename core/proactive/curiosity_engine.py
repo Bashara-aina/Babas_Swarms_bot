@@ -81,9 +81,9 @@ async def _check_pending_followups() -> str | None:
         from core.soul_engine import get_pending_followups
         followups = get_pending_followups()
         if followups:
-            task = followups[0]
+            task_text = followups[0].get("task", str(followups[0])) if isinstance(followups[0], dict) else str(followups[0])
             return (
-                f"Hey — I've been meaning to ask: {task}\n"
+                f"Hey — I've been meaning to ask: {task_text}\n"
                 f"(I'll keep bugging you about this until it's done or dismissed)"
             )
     except Exception as exc:

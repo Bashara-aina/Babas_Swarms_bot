@@ -69,7 +69,6 @@ async def cmd_debate(message: Message) -> None:
         from core.debate_engine import build_debate_instruction  # type: ignore[attr-defined]
         from llm_client import chat  # type: ignore[attr-defined]
 
-        # Load beliefs for context
         beliefs: dict = {}
         try:
             import json
@@ -81,19 +80,18 @@ async def cmd_debate(message: Message) -> None:
             logger.warning("Failed to load beliefs.json: %s", _e)
 
         debate_block = build_debate_instruction(topic, beliefs)
-
-        system_prompt = (
-            "You are Legion, Bashara's permanent AI coworker. "
-            "You debate with evidence and genuine intellectual conviction. "
-            "You do NOT just validate the user — you push back when you have a strong position. "
-            "Be direct, precise, and use concrete examples or data where possible. "
-            f"\n\n{debate_block}"
+        task_text = (
+            f"[DEBATE CONTEXT]\n{debate_block}\n\n"
+            f"Debate this topic with genuine intellectual conviction. "
+            f"Push back if you have a strong position. Use evidence and concrete examples.\n\n"
+            f"Topic: {topic}"
         )
 
-        response = await chat(
-            messages=[{"role": "user", "content": f"Debate this: {topic}"}],
-            system=system_prompt,
+        user_id = str(message.from_user.id) if message.from_user else None
+        response, _model = await chat(
+            task=task_text,
             agent_key="debate",
+            user_id=user_id,
         )
 
         await thinking.delete()
@@ -134,18 +132,18 @@ async def cmd_opinion(message: Message) -> None:
     try:
         from llm_client import chat  # type: ignore[attr-defined]
 
-        system_prompt = (
-            "You are Legion, Bashara's permanent AI coworker and trusted intellectual partner. "
-            "Give your genuine, direct opinion. Do not hedge excessively. "
-            "If you have a strong view, state it clearly and explain why. "
-            "Use data, analogies, or personal reasoning. Never start with agreement or flattery. "
-            "Match Bashara's language (Indonesian or English)."
+        task_text = (
+            f"Give your genuine, direct opinion on this. Do not hedge excessively. "
+            f"If you have a strong view, state it clearly and explain why. "
+            f"Use data, analogies, or personal reasoning. Never start with agreement or flattery.\n\n"
+            f"What is your honest opinion on: {subject}"
         )
 
-        response = await chat(
-            messages=[{"role": "user", "content": f"What is your honest opinion on: {subject}"}],
-            system=system_prompt,
+        user_id = str(message.from_user.id) if message.from_user else None
+        response, _model = await chat(
+            task=task_text,
             agent_key="debate",
+            user_id=user_id,
         )
 
         await thinking.delete()

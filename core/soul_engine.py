@@ -13,11 +13,16 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+_SOUL_ENABLED = os.getenv("LEGION_SOUL_ENABLED", "true").strip().lower() not in (
+    "0", "false", "no", "off",
+)
 
 SOUL_PATH = Path(__file__).resolve().parent.parent / "SOUL.md"
 BELIEFS_PATH = Path(__file__).resolve().parent.parent / "data" / "beliefs.json"
@@ -172,7 +177,12 @@ def build_soul_context() -> str:
 
     This is what gives Legion a genuine identity — a living document it maintains
     itself, not static config baked into code.
+
+    Gated by LEGION_SOUL_ENABLED env var (default: true).
     """
+    if not _SOUL_ENABLED:
+        return ""
+
     soul = read_soul()
     beliefs = read_beliefs()
     stances = beliefs.get("stances", {})

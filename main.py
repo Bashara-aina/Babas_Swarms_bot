@@ -244,6 +244,13 @@ async def on_startup(bot: Bot) -> None:
         logger.warning("Humanization init failed (non-fatal): %s", e)
 
     try:
+        from core.agent_registry import load_registry
+        load_registry()
+        logger.info("Agent registry loaded from YAML (76 agents)")
+    except Exception as e:
+        logger.warning("Agent registry YAML load failed (non-fatal): %s", e)
+
+    try:
         from tools.letta_personality import init_personality_state
 
         state = init_personality_state()
@@ -389,6 +396,15 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Memory DB initialized")
     except Exception as e:
         logger.warning("Memory init failed (non-fatal): %s", e)
+
+    # Initialize persistent conversation history DB + cleanup old turns
+    try:
+        from agents import _init_conv_db, _cleanup_old_turns
+        await _init_conv_db()
+        asyncio.create_task(_cleanup_old_turns())
+        logger.info("Conversation history DB initialized (SQLite-backed)")
+    except Exception as e:
+        logger.warning("Conversation history DB init failed (non-fatal): %s", e)
 
     # Bootstrap Supabase skill file from live schema (non-blocking)
     asyncio.create_task(_bootstrap_supabase_skill())
@@ -547,6 +563,8 @@ async def on_startup(bot: Bot) -> None:
             BotCommand(command="oi",          description="Force Open Interpreter computer control"),
             BotCommand(command="om_stats",    description="OpenMemory sector statistics"),
             BotCommand(command="n8n",         description="n8n automation status"),
+            BotCommand(command="debate",      description="Debate a topic with Legion"),
+            BotCommand(command="opinion",     description="Get Legion's honest opinion"),
             BotCommand(command="opinions",    description="Legion current opinions"),
             BotCommand(command="profile",     description="Persistent user profile"),
             BotCommand(command="teach",       description="Teach/correct Legion profile"),

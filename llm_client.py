@@ -28,7 +28,8 @@ import hashlib
 import aiofiles
 import litellm
 from litellm import acompletion
-from core.character import build_base_persona, build_mode_instructions
+from core.character import build_base_persona, build_mode_instructions, get_disagreement_prompt
+from core.soul_engine import build_soul_context
 from core.emotion_modulator import (
     build_emotion_modifier,
     detect_emotion_from_context,
@@ -205,6 +206,17 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "quick scan → deep think → verify → synthesize. "
         "If computer access is needed, use the /do flow. "
         "Always verify before reporting done."
+    ),
+    "debate": (
+        f"{_PERSONA}\n\n"
+        "DEBATE MODE — Intellectual conviction required.\n"
+        "1. Take a genuine position on the topic — don't hedge or equivocate.\n"
+        "2. If you disagree with the user, lead with your disagreement and explain WHY.\n"
+        "3. Use concrete evidence: data, examples, precedents, analogies.\n"
+        "4. Acknowledge strong counterarguments but defend your position.\n"
+        "5. If the user is right, say so directly — don't manufacture fake disagreement.\n"
+        "6. End with the most important insight or takeaway.\n"
+        "Never start with hollow agreement. Opinions are mandatory."
     ),
 }
 
@@ -963,6 +975,13 @@ async def chat(
     """
     if agent_key is None:
         agent_key = detect_agent(task)
+        try:
+            from core.intent_router import classify_intent_fast as _cif
+            _intent = _cif(task)
+            if _intent.confidence >= 0.65 and _intent.suggested_agent:
+                agent_key = _intent.suggested_agent
+        except Exception:
+            pass
 
     chain = [model_override] if model_override else get_fallback_chain(agent_key)
 
@@ -984,16 +1003,46 @@ async def chat(
             except Exception as _rm_err:
                 logger.warning("resource_monitor import failed: %s — allowing local", _rm_err)
 
-    system_prompt = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["general"])
+    # ── Prompt stack: soul → persona → disagreement → agent role → emotion → memory ──
+    prompt_sections: list[str] = []
+
+    # Section 0: Soul context — Legion's living identity (MUST be first)
+    try:
+        _soul = build_soul_context()
+        if _soul:
+            prompt_sections.append(_soul)
+    except Exception as _soul_err:
+        logger.warning("Soul context injection failed: %s", _soul_err)
+
+    # Section 1: Base persona (PERSONALITY_WRAPPER + character card)
+    prompt_sections.append(build_base_persona())
+
+    # Section 2: Disagreement protocol — Legion's spine (pushback, humor, debate rules)
+    try:
+        _disagree = get_disagreement_prompt()
+        if _disagree:
+            prompt_sections.append(_disagree)
+    except Exception as _dp_err:
+        logger.warning("Disagreement protocol injection failed: %s", _dp_err)
+
+    # Section 3: Per-agent specialization from SYSTEM_PROMPTS (strip shared _PERSONA prefix)
+    _agent_role_full = SYSTEM_PROMPTS.get(agent_key, "")
+    if _agent_role_full:
+        _persona_prefix = _PERSONA + "\n\n"
+        if _agent_role_full.startswith(_persona_prefix):
+            _agent_specialization = _agent_role_full[len(_persona_prefix):]
+        elif _agent_role_full.startswith(_PERSONA):
+            _agent_specialization = _agent_role_full[len(_PERSONA):].strip()
+        else:
+            _agent_specialization = _agent_role_full
+        if _agent_specialization.strip():
+            prompt_sections.append(f"[AGENT MODE: {agent_key.upper()}]\n{_agent_specialization.strip()}")
 
     if _local_skip_reason:
-        system_prompt += (
-            f"\n\n[Note: local Ollama bypassed — {_local_skip_reason}. "
+        prompt_sections.append(
+            f"[Note: local Ollama bypassed — {_local_skip_reason}. "
             "Using cloud vision instead.]"
         )
-
-    # ── Prompt stack: character, personality, emotion, memory, skills ──────────
-    prompt_sections: list[str] = [build_base_persona()]
     _research_cache_bypass = False
 
     _current_emotion = "neutral"
@@ -1396,24 +1445,6 @@ async def chat(
                 except Exception:
                     pass
 
-                # Store to the memory stack
-                try:
-                    from tools.recallmax import should_store
-                    from core.memory_manager import LegionSemanticMemory
-                    from tools.memoryos_client import mos_add_conversation
-                    from tools.open_memory import om_store, SECTOR_EPISODIC, SECTOR_SEMANTIC
-
-                    _mem_msgs: list[dict[str, str]] = [{"role": "user", "content": task}]
-                    if should_store(task):
-                        _mem_msgs.append({"role": "assistant", "content": result})
-                    await LegionSemanticMemory().save_memory(_mem_msgs, str(user_id))
-                    await mos_add_conversation(user_msg=task, assistant_msg=result, user_id=str(user_id))
-                    await om_store(user_id=str(user_id), content=task, sector=SECTOR_EPISODIC)
-                    if should_store(task):
-                        await om_store(user_id=str(user_id), content=task, sector=SECTOR_SEMANTIC, importance=1.5)
-                except Exception:
-                    pass
-
             if _cache_key:
                 try:
                     from tools.persistence import cache_set
@@ -1429,6 +1460,7 @@ async def chat(
                             response=result,
                             agent_used=agent_key,
                             session_id=thread_id,
+                            user_id=user_id,
                         )
                     )
                 except Exception:
@@ -1522,8 +1554,13 @@ async def _post_call_hooks(
     response: str,
     agent_used: str | None = None,
     session_id: str | None = None,
+    user_id: str | None = None,
 ) -> None:
-    """Runs asynchronously after every LLM call."""
+    """Runs asynchronously after every LLM call.
+
+    All memory writes are centralized here — never write to stores directly
+    from chat(). This prevents drift between memory tiers.
+    """
     try:
         init_humanization_layer()
         try:
@@ -1555,7 +1592,26 @@ async def _post_call_hooks(
         if reflection is not None:
             await reflection.post_turn_hook(user_msg, response)
 
-        # Promote important facts from this conversation to CoreMemory (async, non-blocking)
+        # Semantic + MemoryOS + OpenMemory writes (consolidated from chat())
+        if user_id:
+            try:
+                from tools.recallmax import should_store
+                from core.memory_manager import LegionSemanticMemory
+                from tools.memoryos_client import mos_add_conversation
+                from tools.open_memory import om_store, SECTOR_EPISODIC, SECTOR_SEMANTIC
+
+                _mem_msgs: list[dict[str, str]] = [{"role": "user", "content": user_msg}]
+                if should_store(user_msg):
+                    _mem_msgs.append({"role": "assistant", "content": response})
+                await LegionSemanticMemory().save_memory(_mem_msgs, str(user_id))
+                await mos_add_conversation(user_msg=user_msg, assistant_msg=response, user_id=str(user_id))
+                await om_store(user_id=str(user_id), content=user_msg, sector=SECTOR_EPISODIC)
+                if should_store(user_msg):
+                    await om_store(user_id=str(user_id), content=user_msg, sector=SECTOR_SEMANTIC, importance=1.5)
+            except Exception:
+                pass
+
+        # Promote important facts from this conversation to CoreMemory
         try:
             from core.memory.consolidator import promote_important
             recent = [
