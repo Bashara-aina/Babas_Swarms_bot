@@ -19,3 +19,7 @@ screenshots/
 
 # Accidental pip artifacts
 =*
+
+# Cloned reference repos (not part of the bot)
+everything-claude-code-main/
+ungate/

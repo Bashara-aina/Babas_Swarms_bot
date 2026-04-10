@@ -297,6 +297,14 @@ async def handle_plain_message(
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
+        # ── debate / opinion (auto-triggered without /debate) ────────────────
+        if handler_key == "debate":
+            await _execute_chat(
+                msg, user_msg, forced_agent="debate", routing_hint=_route_hint
+            )
+            auto_router.record_performance(skill_match.skill_name, True)
+            return
+
         # ── shell command ────────────────────────────────────────────────────
         if handler_key == "/cmd":
             from llm_client import run_shell_command

@@ -186,6 +186,7 @@ AGENT_MODELS: dict[str, str] = {
     "code_exec":  "openrouter/qwen/qwen3-coder:free",
     "predictor":  "cerebras/qwen3-235b-a22b",
     "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
+    "debate":  "cerebras/qwen3-235b-a22b",
 }
 
 FALLBACK_CHAIN: dict[str, list[str]] = {
@@ -306,6 +307,11 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
         "openrouter/anthropic/claude-opus-4",
         "openrouter/anthropic/claude-3.5-sonnet",
         "cerebras/qwen3-235b-a22b",
+    ],
+    "debate": [
+        "cerebras/qwen3-235b-a22b",
+        "groq/llama-3.3-70b-versatile",
+        "gemini/gemini-2.0-flash",
     ],
 }
 
@@ -430,16 +436,127 @@ DEFAULT_AGENT = "general"
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 # ── Conversation history ─────────────────────────────────────────────────────
-# Primary: OpenViking L1 (persistent, cross-restart, semantic)
-# Fallback: in-RAM dict (wiped on restart, kept for hot path speed)
-# Both are maintained in parallel — RAM for speed, Viking for durability.
+# Three persistence layers:
+#   1. RAM dict (hot path, sub-ms reads)
+#   2. SQLite (durable, survives restarts, 30-day TTL)
+#   3. OpenViking L1 (semantic, cross-session — fire-and-forget)
 CONVERSATION_HISTORY: dict[str, list[dict]] = {}
 MAX_HISTORY_TURNS = 20
 MAX_HISTORY_CHARS = 8000
+_HISTORY_TTL_DAYS = 30
+
+_CONV_DB_PATH = os.path.join(
+    os.path.expanduser("~"), ".legionswarm", "memory", "conversation_history.db"
+)
+_conv_db_ready = False
+_conv_db_loaded_users: set[str] = set()
+
+
+def _ensure_conv_db_dir() -> None:
+    os.makedirs(os.path.dirname(_CONV_DB_PATH), exist_ok=True)
+
+
+async def _init_conv_db() -> None:
+    """Create the conversation_history table if it doesn't exist."""
+    global _conv_db_ready
+    if _conv_db_ready:
+        return
+    try:
+        import aiosqlite
+        _ensure_conv_db_dir()
+        async with aiosqlite.connect(_CONV_DB_PATH) as db:
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS conversation_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT NOT NULL,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    ts REAL NOT NULL,
+                    created_at TEXT DEFAULT (datetime('now'))
+                )
+            """)
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_conv_user ON conversation_turns(user_id, ts)"
+            )
+            await db.commit()
+        _conv_db_ready = True
+    except Exception as exc:
+        logger.warning("Conversation DB init failed (non-fatal): %s", exc)
+
+
+async def _load_history_from_db(user_id: str) -> None:
+    """Load last N turns from SQLite into RAM cache (once per user per session)."""
+    if user_id in _conv_db_loaded_users:
+        return
+    _conv_db_loaded_users.add(user_id)
+    try:
+        import aiosqlite
+        await _init_conv_db()
+        async with aiosqlite.connect(_CONV_DB_PATH) as db:
+            async with db.execute(
+                "SELECT role, content, ts FROM conversation_turns "
+                "WHERE user_id = ? ORDER BY ts DESC LIMIT ?",
+                (user_id, MAX_HISTORY_TURNS * 2),
+            ) as cursor:
+                rows = await cursor.fetchall()
+        if rows:
+            turns = [{"role": r[0], "content": r[1], "ts": r[2]} for r in reversed(rows)]
+            if user_id not in CONVERSATION_HISTORY:
+                CONVERSATION_HISTORY[user_id] = turns
+            else:
+                existing_ts = {t["ts"] for t in CONVERSATION_HISTORY[user_id]}
+                for t in turns:
+                    if t["ts"] not in existing_ts:
+                        CONVERSATION_HISTORY[user_id].append(t)
+                CONVERSATION_HISTORY[user_id].sort(key=lambda x: x["ts"])
+            logger.info("Loaded %d conversation turns from DB for user %s", len(turns), user_id)
+    except Exception as exc:
+        logger.debug("Conversation DB load failed (non-fatal): %s", exc)
+
+
+async def _persist_turn_to_db(user_id: str, role: str, content: str, ts: float) -> None:
+    """Fire-and-forget SQLite write for a single conversation turn."""
+    try:
+        import aiosqlite
+        await _init_conv_db()
+        async with aiosqlite.connect(_CONV_DB_PATH) as db:
+            await db.execute(
+                "INSERT INTO conversation_turns (user_id, role, content, ts) VALUES (?, ?, ?, ?)",
+                (user_id, role, content[:MAX_HISTORY_CHARS], ts),
+            )
+            await db.commit()
+    except Exception as exc:
+        logger.debug("Conversation DB persist failed (non-fatal): %s", exc)
+
+
+async def _cleanup_old_turns() -> None:
+    """Delete turns older than TTL."""
+    try:
+        import aiosqlite
+        await _init_conv_db()
+        cutoff = time.time() - (_HISTORY_TTL_DAYS * 86400)
+        async with aiosqlite.connect(_CONV_DB_PATH) as db:
+            result = await db.execute(
+                "DELETE FROM conversation_turns WHERE ts < ?", (cutoff,)
+            )
+            await db.commit()
+            logger.info("Cleaned up old conversation turns (cutoff: %d days)", _HISTORY_TTL_DAYS)
+    except Exception as exc:
+        logger.debug("Conversation DB cleanup failed: %s", exc)
 
 
 def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> list[dict]:
-    """Return recent conversation history as litellm-compatible messages."""
+    """Return recent conversation history as litellm-compatible messages.
+
+    On first access per user, schedules an async load from SQLite to warm the cache.
+    """
+    if user_id not in _conv_db_loaded_users:
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.create_task(_load_history_from_db(user_id))
+        except Exception:
+            pass
     if user_id not in CONVERSATION_HISTORY:
         return []
     turns = CONVERSATION_HISTORY[user_id][-last_n:]
@@ -449,23 +566,32 @@ def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> l
 def add_to_conversation(user_id: str, role: str, content: str) -> None:
     """Append a turn to conversation history.
 
-    Writes to RAM dict (hot path) AND schedules an async write to OpenViking
-    L1 session context (durable, cross-restart). The async write is fire-and-
-    forget via asyncio.create_task() — never blocks the caller.
+    Writes to:
+    1. RAM dict (hot path, immediate)
+    2. SQLite DB (durable, fire-and-forget async)
+    3. OpenViking L1 (semantic, fire-and-forget async)
     """
+    ts = time.time()
     if user_id not in CONVERSATION_HISTORY:
         CONVERSATION_HISTORY[user_id] = []
     CONVERSATION_HISTORY[user_id].append({
         "role": role,
         "content": content,
-        "ts": time.time(),
+        "ts": ts,
     })
     if len(CONVERSATION_HISTORY[user_id]) > MAX_HISTORY_TURNS * 2:
         CONVERSATION_HISTORY[user_id] = CONVERSATION_HISTORY[user_id][-(MAX_HISTORY_TURNS * 2):]
     logger.debug("Conversation history for %s: %d turns", user_id, len(CONVERSATION_HISTORY[user_id]))
 
-    # ── Fire-and-forget OpenViking L1 persistence ──────────────────────
-    # Only write assistant turns to L1 (each turn contains both sides anyway)
+    # Fire-and-forget SQLite persistence
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.create_task(_persist_turn_to_db(user_id, role, content, ts))
+    except Exception:
+        pass
+
+    # Fire-and-forget OpenViking L1 persistence
     if role == "assistant":
         user_turns = CONVERSATION_HISTORY[user_id]
         last_user_msg = ""
@@ -478,7 +604,7 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
             if loop.is_running():
                 asyncio.create_task(_persist_to_viking(user_id, last_user_msg, content))
         except Exception:
-            pass  # never crash the sync path
+            pass
 
 
 async def _persist_to_viking(user_id: str, user_msg: str, assistant_msg: str) -> None:
@@ -495,6 +621,7 @@ def clear_conversation(user_id: str) -> None:
     if user_id in CONVERSATION_HISTORY:
         del CONVERSATION_HISTORY[user_id]
         logger.info("Cleared conversation history for %s", user_id)
+    _conv_db_loaded_users.discard(user_id)
 
 
 def get_conversation_summary_prompt(user_id: str) -> str:

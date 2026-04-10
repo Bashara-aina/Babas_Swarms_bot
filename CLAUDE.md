@@ -51,22 +51,23 @@ Babas_Swarms_bot/
 │       └── disagreement_protocol.py ← When/how Legion pushes back
 │
 ├── handlers/                    ← One file per feature domain — all aiogram routers
-│   ├── _shared.py               ← ALLOWED_USER_ID, shared utilities
-│   ├── basic.py                 ← /start, /help, /status
-│   ├── llm_handlers.py          ← /run, /think, /agent
+│   ├── shared.py                ← ALLOWED_USER_ID, shared utilities
+│   ├── system.py                ← /start, /help, /status
+│   ├── ai.py                    ← /run, /think, /agent + NL catch-all
 │   ├── computer.py              ← /screen, /do, /cmd
-│   ├── memory_handlers.py       ← /remember, /recall, /forget
+│   ├── memory_commands.py       ← /remember, /recall, /forget
+│   ├── brain.py                 ← /memories, /briefing, /learn, /instincts
 │   ├── debate_handlers.py       ← /debate, /opinion
 │   └── communications.py        ← /emails, /calendar (Composio)
 │
 ├── tools/
-│   ├── memory/                  ← Local SQLite memory (fast tier)
 │   ├── composio_hub.py          ← Composio integrations (email, calendar, GitHub)
 │   ├── browser_agent.py         ← Playwright + browser-use autonomous browsing
 │   ├── location_aware.py        ← Google Places / weather context
-│   ├── n8n_client.py            ← n8n workflow automation
-│   ├── letta_client.py          ← Letta long-term memory service
-│   └── ruflo/server.js          ← Node.js sidecar (started by main.py)
+│   ├── n8n_bridge.py            ← n8n workflow automation
+│   ├── letta_personality.py     ← Local JSON persona state (personality/emotion persistence)
+│   ├── briefing.py              ← Daily morning briefing (weather, calendar, tasks)
+│   └── ruflo/server.js          ← Node.js sidecar (started by main.py, port 7834)
 │
 ├── agents/                      ← Department packages (engineering, research, design…)
 ├── swarms_bot/                  ← Enterprise orchestration layer
@@ -76,19 +77,16 @@ Babas_Swarms_bot/
 │   └── routing_keywords.yaml   ← 200+ keywords → agent mapping
 └── tests/                       ← pytest-asyncio test suite (ADD TESTS for every new module)
 
-Dead code — NEVER touch or reference these directories:
-core/memory_old/
-core/orchestration_old/
-core/reliability_old/
-core/task_orchestrator_old.py
-Any file or directory with _old suffix
+Dead code — NEVER touch or reference files/directories with _old suffix.
+The following were deleted in the April 2026 cleanup:
+core/memory_old/, core/orchestration_old/, core/reliability_old/, core/task_orchestrator_old.py
 If you see old code referenced anywhere, delete the reference. Do not fix old code.
 
 3. CRITICAL RULES (violation = broken bot)
 3.1 Security
 NEVER hardcode TELEGRAM_BOT_TOKEN or ALLOWED_USER_ID — always os.getenv()
 ALWAYS check message.from_user.id == ALLOWED_USER_ID before processing any command
-This check lives in handlers/_shared.py — use _shared.require_owner(message) helper
+This check lives in handlers/shared.py — use _shared.require_owner(message) helper
 /cmd and all shell execution must have a command timeout: asyncio.wait_for(proc, timeout=30)
 subprocess.Popen for ruflo must store the process handle and have a restart policy
 3.2 LLM calls
@@ -105,7 +103,7 @@ All database operations use aiosqlite — never sync sqlite3
 Parse mode default: parse_mode="HTML" — escape <, >, & in all user-sourced text
 If Markdown is needed: use parse_mode="MarkdownV2" with full escaping
 Never use bare parse_mode="Markdown" — it silently breaks on special chars
-Long messages: chunk with await split_and_send(message, text) from handlers/_shared.py
+Long messages: chunk with await split_and_send(message, text) from handlers/shared.py
 3.5 Memory writes
 All memory writes go through core/memory/memory_manager.py — never write directly to individual stores
 Never write to mem0, chromadb, episodic_store, or letta separately — use the facade
@@ -117,7 +115,7 @@ The injection order is: soul → personality → disagreement protocol → user 
 4. AGENT ROSTER (never change model assignments without approval)
 Agent KeyModelTask Domain
 vision
-ollama_chat/gemma3:12b
+ollama_chat/gemma4:e4b
 Screenshot analysis, OCR (local)
 coding
 groq/llama-3.3-70b-versatile
@@ -345,7 +343,7 @@ CURIOSITY_INTERVAL_MIN=30
 BUDGET_DAILY_LIMIT_USD=2.00  # hard cap across all background tasks
 
 # Ruflo
-RUFLO_PORT=3847
+RUFLO_PORT=7834
 
 # Feature flags (set to "true" to enable)
 LEGION_SOUL_ENABLED=true

@@ -235,6 +235,19 @@ SKILL_PATTERNS = {
         "description": "Understand project codebase structure — like Copilot/Cursor",
         "handler": "codebase_reader",
     },
+    "debate_opinion": {
+        "keywords": [
+            "what do you think", "your opinion", "is this good", "should i",
+            "is it better", "do you agree", "am i right", "debate",
+            "i think that", "i believe", "ai will", "ai is",
+            "is overrated", "is underrated", "is dead", "is the future",
+            "hot take", "unpopular opinion", "change my mind",
+            "menurut kamu", "pendapatmu", "lebih baik mana", "setuju gak",
+            "apakah ini bagus", "ide bagus gak", "menurutmu gimana",
+        ],
+        "description": "Debate topics and give honest opinions with pushback",
+        "handler": "debate",
+    },
     "conversation": {
         "keywords": [],
         "description": "Natural conversation, jokes, opinions, check-ins",

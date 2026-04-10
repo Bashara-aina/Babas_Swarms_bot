@@ -37,65 +37,7 @@ async def cmd_briefing(msg: Message) -> None:
         await status_msg.edit_text(f"briefing error: <code>{e}</code>", parse_mode="HTML")
 
 
-# ── /remember ─────────────────────────────────────────────────────────────────
-@router.message(Command("remember"))
-async def cmd_remember(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    note = (msg.text or "").removeprefix("/remember").strip()
-    if not note:
-        await msg.answer("usage: <code>/remember &lt;note&gt;</code>", parse_mode="HTML")
-        return
-    try:
-        from tools.memory import add_memory
-        note_id = await add_memory(note, source="telegram")
-        try:
-            from tools.mem0_client import mem0_add
-
-            await mem0_add(user_id=str(msg.from_user.id), content=note, metadata={"source": "telegram", "note_id": note_id})
-        except Exception:
-            pass
-        await msg.answer(f"saved (id: {note_id})")
-    except Exception as e:
-        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
-
-
-# ── /recall ───────────────────────────────────────────────────────────────────
-@router.message(Command("recall"))
-async def cmd_recall(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    query = (msg.text or "").removeprefix("/recall").strip()
-    if not query:
-        await msg.answer("usage: <code>/recall &lt;query&gt;</code>", parse_mode="HTML")
-        return
-    try:
-        from tools.memory import search_memory
-        results = await search_memory(query, top_k=5)
-        try:
-            from tools.mem0_client import mem0_search, build_mem0_context
-
-            mem0_results = await mem0_search(user_id=str(msg.from_user.id), query=query, limit=8)
-            mem0_ctx = build_mem0_context(mem0_results, query=query)
-        except Exception:
-            mem0_ctx = ""
-        if not results:
-            if mem0_ctx:
-                await msg.answer(mem0_ctx, parse_mode="HTML")
-                return
-            await msg.answer("no matching memories found.")
-            return
-        lines = ["<b>Matching memories:</b>\n"]
-        for r in results:
-            ts = time.strftime("%m/%d", time.localtime(r["created_at"]))
-            tags = f" [{r['tags']}]" if r.get("tags") else ""
-            lines.append(f"  #{r['id']} ({ts}{tags}) rel:{r['relevance']}")
-            lines.append(f"  {r['text'][:150]}...\n")
-        if mem0_ctx:
-            lines.extend(["<b>Mem0 context:</b>", mem0_ctx])
-        await msg.answer("\n".join(lines), parse_mode="HTML")
-    except Exception as e:
-        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+# /remember and /recall are handled by memory_commands.py (registered first)
 
 
 # ── /memories ─────────────────────────────────────────────────────────────────
