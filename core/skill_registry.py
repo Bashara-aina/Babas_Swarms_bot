@@ -1,4 +1,7 @@
-"""Load optional skill manifests from config/legion_skills.json (additive)."""
+"""Load optional skill manifests from config/legion_skills.json and skills/manifest.json.
+
+Priority: skills/manifest.json > config/legion_skills.json (additive merge)
+"""
 
 from __future__ import annotations
 
@@ -11,6 +14,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 _CONFIG = Path(__file__).resolve().parent.parent / "config" / "legion_skills.json"
+_MANIFEST = Path(__file__).resolve().parent.parent / "skills" / "manifest.json"
 
 # When the user message matches no keywords, surface these first (stable, high-utility).
 _FALLBACK_ROUTE_ORDER = [
@@ -34,15 +38,33 @@ _FALLBACK_ROUTE_ORDER = [
 
 
 def load_skills() -> list[dict[str, Any]]:
-    if not _CONFIG.exists():
-        return []
-    try:
-        data = json.loads(_CONFIG.read_text(encoding="utf-8"))
-        skills = data.get("skills")
-        return skills if isinstance(skills, list) else []
-    except Exception as exc:
-        logger.debug("legion_skills.json load failed: %s", exc)
-        return []
+    """Load and merge skills from manifest.json + config/legion_skills.json."""
+    skills: list[dict[str, Any]] = []
+
+    # Primary: skills/manifest.json
+    if _MANIFEST.exists():
+        try:
+            data = json.loads(_MANIFEST.read_text(encoding="utf-8"))
+            s = data.get("skills")
+            if isinstance(s, list):
+                skills.extend(s)
+        except Exception as exc:
+            logger.debug("skills/manifest.json load failed: %s", exc)
+
+    # Additive: config/legion_skills.json (legacy)
+    if _CONFIG.exists():
+        try:
+            data = json.loads(_CONFIG.read_text(encoding="utf-8"))
+            s = data.get("skills")
+            if isinstance(s, list):
+                existing_ids = {sk.get("id") or sk.get("name") for sk in skills}
+                for item in s:
+                    if (item.get("id") or item.get("name")) not in existing_ids:
+                        skills.append(item)
+        except Exception as exc:
+            logger.debug("legion_skills.json load failed: %s", exc)
+
+    return skills
 
 
 def _score_routes_for_query(query: str) -> list[tuple[str, float]]:

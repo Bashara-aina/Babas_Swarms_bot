@@ -31,10 +31,12 @@ logger = logging.getLogger(__name__)
 try:
     from crewai import Agent, Task, Crew, Process
     from crewai.tools import BaseTool
+
     _CREWAI_AVAILABLE = True
 except ImportError:
     try:
         from crewai import Agent, Task, Crew, Process  # type: ignore
+
         _CREWAI_AVAILABLE = True
     except ImportError:
         _CREWAI_AVAILABLE = False
@@ -45,10 +47,12 @@ _crew_instance: Any | None = None
 
 # ── Supabase query helper (uses existing tools/supabase_client.py) ────────────
 
+
 async def _query_supabase(query_description: str) -> str:
     """Delegate Supabase queries to the existing supabase_client tool."""
     try:
         from tools.supabase_client import query_table, get_client
+
         client = get_client()
         if not client:
             return "Supabase client not available — check SUPABASE_URL and SUPABASE_KEY"
@@ -56,6 +60,7 @@ async def _query_supabase(query_description: str) -> str:
         desc_lower = query_description.lower()
         if "booking" in desc_lower and "today" in desc_lower:
             import datetime
+
             today = datetime.date.today().isoformat()
             result = client.table("bookings").select("*").gte("created_at", today).execute()
             return str(result.data[:20]) if result.data else "No bookings today"
@@ -65,8 +70,7 @@ async def _query_supabase(query_description: str) -> str:
         elif "revenue" in desc_lower or "pendapatan" in desc_lower:
             result = client.table("bookings").select("total_price, status, created_at").limit(50).execute()
             if result.data:
-                total = sum(float(r.get("total_price", 0) or 0) for r in result.data
-                            if r.get("status") == "confirmed")
+                total = sum(float(r.get("total_price", 0) or 0) for r in result.data if r.get("status") == "confirmed")
                 return f"Confirmed revenue (last 50 bookings): Rp {total:,.0f}"
             return "No revenue data found"
         elif "guest" in desc_lower or "tamu" in desc_lower:
@@ -84,6 +88,7 @@ async def check_website_uptime(url: str = "https://rumahlabuh.com") -> dict[str,
     """Check if rumahlabuh.com is up and responding."""
     import aiohttp
     import time
+
     try:
         start = time.time()
         async with aiohttp.ClientSession() as session:
@@ -94,8 +99,9 @@ async def check_website_uptime(url: str = "https://rumahlabuh.com") -> dict[str,
                     "status": resp.status,
                     "ok": resp.status < 400,
                     "latency_ms": elapsed,
-                    "message": f"✅ Up ({resp.status}) in {elapsed}ms" if resp.status < 400
-                               else f"⚠️ Status {resp.status} in {elapsed}ms",
+                    "message": f"✅ Up ({resp.status}) in {elapsed}ms"
+                    if resp.status < 400
+                    else f"⚠️ Status {resp.status} in {elapsed}ms",
                 }
     except asyncio.TimeoutError:
         return {"url": url, "ok": False, "message": "⛔ Timeout (>10s) — site may be down"}
@@ -110,8 +116,11 @@ async def draft_guest_reply(guest_message: str, guest_name: str = "Guest") -> st
     """
     try:
         from tools.mem0_client import mem0_search
+
         # Search for any past context about this guest or similar inquiries
-        memories = await mem0_search(user_id="bashara", query=f"rumahlabuh guest {guest_name} {guest_message[:50]}", limit=3)
+        memories = await mem0_search(
+            user_id="bashara", query=f"rumahlabuh guest {guest_name} {guest_message[:50]}", limit=3
+        )
         memory_context = ""
         if memories:
             memory_context = "\n".join(m.get("memory", "") for m in memories[:2])
@@ -125,7 +134,7 @@ Draft a warm, helpful reply to this guest message:
 Guest name: {guest_name}
 Guest message: {guest_message}
 
-{f'Relevant context: {memory_context}' if memory_context else ''}
+{f"Relevant context: {memory_context}" if memory_context else ""}
 
 Requirements:
 - Reply in Indonesian (primary language for Indonesian market)
@@ -139,7 +148,10 @@ Draft:"""
 
     try:
         import litellm
-        response = litellm.completion(
+        import asyncio
+
+        response = await asyncio.to_thread(
+            litellm.completion,
             model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
@@ -152,6 +164,97 @@ Draft:"""
             f"Halo {guest_name},\n\nTerima kasih sudah menghubungi Rumahlabuh! "
             f"Kami akan segera membalas pertanyaan Anda.\n\nSalam, Tim Rumahlabuh"
         )
+
+
+async def check_booking_alerts() -> list[str]:
+    """
+    Check Supabase for new bookings since last check, failed payments,
+    and overbooking anomalies. Returns a list of alert strings.
+    """
+    alerts: list[str] = []
+    try:
+        from tools.supabase_client import get_client
+        import datetime
+
+        client = get_client()
+        if not client:
+            return ["⚠️ Supabase client not available"]
+
+        now = datetime.datetime.utcnow()
+        thirty_min_ago = (now - datetime.timedelta(minutes=30)).isoformat()
+
+        # New bookings since last check (last 30 min)
+        try:
+            new_bookings = client.table("bookings").select("*").gte("created_at", thirty_min_ago).execute()
+            if new_bookings.data:
+                count = len(new_bookings.data)
+                alerts.append(
+                    f"🏠 <b>New Booking(s)</b>: {count} new booking(s) in the last 30 min — check inbox for details."
+                )
+                # First booking details
+                first = new_bookings.data[0]
+                guest = first.get("guest_name", "Unknown guest")
+                checkin = first.get("check_in_date", "?")
+                alerts.append(f"   Latest: {guest} | Check-in: {checkin}")
+        except Exception as e:
+            logger.debug("[Rumahlabuh] new booking check failed: %s", e)
+
+        # Failed payments
+        try:
+            failed = (
+                client.table("bookings")
+                .select("id, guest_name, total_price")
+                .eq("payment_status", "failed")
+                .gte("created_at", thirty_min_ago)
+                .execute()
+            )
+            if failed.data:
+                alerts.append(
+                    f"⚠️ <b>Failed Payment(s)</b>: {len(failed.data)} booking(s) with failed payment — review immediately."
+                )
+        except Exception:
+            pass  # payment_status column may not exist
+
+        # Overbookings — same room double-booked for overlapping dates
+        try:
+            confirmed = (
+                client.table("bookings")
+                .select("id, room_id, check_in_date, check_out_date, guest_name")
+                .eq("status", "confirmed")
+                .execute()
+            )
+            if confirmed.data and len(confirmed.data) > 1:
+                by_room: dict[str, list[dict]] = {}
+                for b in confirmed.data:
+                    rid = b.get("room_id") or "unknown"
+                    by_room.setdefault(rid, []).append(b)
+                for room_id, bookings in by_room.items():
+                    if len(bookings) < 2:
+                        continue
+                    # Simple overlap check
+                    for i in range(len(bookings)):
+                        for j in range(i + 1, len(bookings)):
+                            ci_i = bookings[i].get("check_in_date", "")
+                            co_i = bookings[i].get("check_out_date", "")
+                            ci_j = bookings[j].get("check_in_date", "")
+                            co_j = bookings[j].get("check_out_date", "")
+                            if ci_i and co_i and ci_j and co_j:
+                                # rough overlap: one starts before the other ends
+                                if ci_i <= co_j and ci_j <= co_i:
+                                    alerts.append(
+                                        f"🚨 <b>Overbooking Detected</b> — Room {room_id} "
+                                        f"has overlapping confirmed bookings: "
+                                        f"{bookings[i].get('guest_name')} ({ci_i}–{co_i}) and "
+                                        f"{bookings[j].get('guest_name')} ({ci_j}–{co_j})"
+                                    )
+        except Exception as e:
+            logger.debug("[Rumahlabuh] overbooking check failed: %s", e)
+
+    except Exception as e:
+        logger.warning("[Rumahlabuh] check_booking_alerts failed: %s", e)
+        alerts.append(f"⚠️ Booking alert check failed: {e}")
+
+    return alerts
 
 
 async def get_business_summary() -> str:
@@ -174,6 +277,7 @@ async def get_business_summary() -> str:
 
 
 # ── CrewAI Crew (optional — requires crewai installed) ────────────────────────
+
 
 def build_rumahlabuh_crew() -> Any | None:
     """Build the CrewAI crew for Rumahlabuh business management."""
@@ -271,6 +375,7 @@ async def run_crew_task(task_description: str) -> str:
     if crew and _CREWAI_AVAILABLE:
         try:
             from crewai import Task
+
             task = Task(
                 description=task_description,
                 expected_output="A clear, actionable response to the business request",

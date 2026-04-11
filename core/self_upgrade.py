@@ -13,6 +13,7 @@ Full pipeline:
 10. Notify user when the new feature is live
 11. Rollback on any failure
 """
+
 from __future__ import annotations
 
 import ast
@@ -50,16 +51,17 @@ _ALLOWED_INSTALL_PREFIX = (sys.executable,)
 @dataclass
 class RepoEvaluation:
     """LLM-powered evaluation of a trending GitHub repository."""
+
     repo_name: str
     description: str
     stars: int
     pros: List[str]
     cons: List[str]
-    effort_estimate: str       # low | medium | high
-    risk_level: str            # low | medium | high
-    relevance_score: float     # 0.0 - 1.0
-    recommendation: str        # integrate | monitor | skip
-    integration_summary: str   # what would actually change in Legion
+    effort_estimate: str  # low | medium | high
+    risk_level: str  # low | medium | high
+    relevance_score: float  # 0.0 - 1.0
+    recommendation: str  # integrate | monitor | skip
+    integration_summary: str  # what would actually change in Legion
 
 
 @dataclass
@@ -92,10 +94,7 @@ class SelfUpgradeEngine:
         """Full upgrade pipeline from natural-language request."""
         await self._notify("🧠 Analyzing upgrade request…")
         plan = await self._plan_upgrade(request)
-        await self._notify(
-            f"📝 Plan ready: {len(plan['files'])} file(s), "
-            f"deps: {plan.get('deps', []) or 'none'}"
-        )
+        await self._notify(f"📝 Plan ready: {len(plan['files'])} file(s), deps: {plan.get('deps', []) or 'none'}")
         result = UpgradeResult(success=False, feature_name=plan.get("feature", "unknown"))
 
         for file_plan in plan["files"]:
@@ -186,6 +185,7 @@ class SelfUpgradeEngine:
         """Fetch trending repos from GitHub API."""
         try:
             import aiohttp
+
             token = os.getenv("GITHUB_TOKEN", "")
             headers = {"Accept": "application/vnd.github.v3+json"}
             if token:
@@ -230,12 +230,12 @@ Current Legion project structure (compact):
 {structure[:1500]}
 
 Repository to evaluate:
-  Name: {repo['name']}
-  Description: {repo['description']}
-  Stars: {repo['stars']:,}
-  Language: {repo['language']}
-  Topics: {', '.join(repo.get('topics', []))}
-  URL: {repo['url']}
+  Name: {repo["name"]}
+  Description: {repo["description"]}
+  Stars: {repo["stars"]:,}
+  Language: {repo["language"]}
+  Topics: {", ".join(repo.get("topics", []))}
+  URL: {repo["url"]}
 
 Task: Evaluate this repo for integration into Legion. Output ONLY valid JSON:
 {{
@@ -308,11 +308,52 @@ Output ONLY the JSON.
         )
         return "\n".join(lines)
 
+    # ── Weekly Trending Digest ────────────────────────────────────────────────
+
+    async def scan_weekly_trends(
+        self,
+        topics: list[str] | None = None,
+        limit_per_topic: int = 5,
+    ) -> str:
+        """
+        Fetch top trending repos across multiple topics and return a Telegram digest.
+
+        Args:
+            topics: List of GitHub topic strings (default: ["ai-agent", "llm", "telegram-bot"])
+            limit_per_topic: Max repos per topic (default 5)
+
+        Returns:
+            Telegram HTML formatted digest string.
+        """
+        if topics is None:
+            topics = ["ai-agent", "llm", "telegram-bot"]
+
+        await self._notify("📊 <b>Weekly GitHub Trend Digest</b> — scanning…")
+
+        all_evals: list[RepoEvaluation] = []
+        for topic in topics:
+            evals = await self.scan_github_trending(topic=topic, limit=limit_per_topic)
+            all_evals.extend(evals)
+
+        if not all_evals:
+            return "📊 <b>Weekly GitHub Trend Digest</b>\nNo trending repos found — check GITHUB_TOKEN."
+
+        # Sort by relevance
+        all_evals.sort(key=lambda x: x.relevance_score, reverse=True)
+
+        # Deduplicate by repo_name
+        seen: set[str] = set()
+        unique_evals = [e for e in all_evals if e.repo_name not in seen and not seen.add(e.repo_name)]
+
+        digest = self.format_evaluations_for_telegram(unique_evals[:10])
+        return digest
+
     # ── LLM Code Generation ───────────────────────────────────────────
 
     async def _plan_upgrade(self, request: str) -> dict:
         try:
             import litellm
+
             structure = self._get_project_structure()
             prompt = f"""
 You are upgrading a Telegram AI bot (Legion). The bot uses:
@@ -374,7 +415,11 @@ Rules:
     def _get_project_structure(self) -> str:
         lines = []
         for root, dirs, files in os.walk(self.root):
-            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("__pycache__", "node_modules", "data", ".venv", "venv")]
+            dirs[:] = [
+                d
+                for d in dirs
+                if not d.startswith(".") and d not in ("__pycache__", "node_modules", "data", ".venv", "venv")
+            ]
             rel = Path(root).relative_to(self.root)
             indent = "  " * len(rel.parts)
             lines.append(f"{indent}{rel}/")
@@ -405,14 +450,16 @@ Rules:
     async def _install_deps(self, deps: List[str]) -> Tuple[bool, str]:
         safe_deps = []
         for dep in deps:
-            if re.match(r'^[a-zA-Z0-9_\-\.\[\]>=<~!]+$', dep):
+            if re.match(r"^[a-zA-Z0-9_\-\.\[\]>=<~!]+$", dep):
                 safe_deps.append(dep)
             else:
                 return False, f"Unsafe dependency name: {dep}"
         cmd = [sys.executable, "-m", "pip", "install", "--quiet"] + safe_deps
         try:
             proc = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
             if proc.returncode != 0:

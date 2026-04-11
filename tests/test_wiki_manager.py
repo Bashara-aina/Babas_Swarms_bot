@@ -47,12 +47,13 @@ async def test_read_write_page_roundtrip(tmp_path: Path) -> None:
     mgr = WikiManager(wiki_root=root)
     await mgr.write_page(
         "legion/test_note.md",
-        "# Test\n\nhello",
+        "# Test Note\n\nThis is a test note about Legion's personal knowledge management system.\n\nIt verifies that wiki write and read operations work correctly.\n",
         update_index=False,
+        skip_quality_gate=True,
     )
     body = await mgr.read_page("legion/test_note.md")
-    assert "hello" in body
-    assert "Test" in body
+    assert "Test Note" in body
+    assert "Legion" in body
 
 
 @pytest.mark.asyncio

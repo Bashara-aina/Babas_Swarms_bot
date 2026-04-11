@@ -7,7 +7,7 @@ engineering:
   agents:
     senior_python_dev:
       description: "Expert Python developer for backend systems, APIs, and async workflows"
-      primary_model: devstral
+      primary_model: minimax-m2-7
       fallbacks: [qwen3-235b, llama3-70b]
       capabilities: [python, backend, async, typing, fastapi, django, implement, function, class, script, code, write]
       tools: [interpreter, vscode]
@@ -708,3 +708,193 @@ vision_multimodal:
       capabilities: [video, frame, clip, scene, temporal, detection, local]
       tools: []
       complexity_tier: lightweight
+
+# ── Legacy agents (mirrors agents.py AGENT_MODELS, used for backwards compat) ──
+legacy:
+  default_agent: general
+  description: "Legacy 22-agent registry — mirrors agents.py AGENT_MODELS for backwards compat"
+  agents:
+    vision:
+      description: "Vision analysis via Ollama (local, private, RTX 3060)"
+      primary_model: gemma4:e4b
+      fallbacks: [llama3-70b, gemini-2.0-flash]
+      capabilities: [screenshot, screen, layar, gambar, image, photo, ocr, visual, desktop, window, capture]
+      tools: [ollama]
+      complexity_tier: lightweight
+
+    coding:
+      description: "Code generation, implementation, refactoring, debugging"
+      primary_model: llama3-70b
+      fallbacks: [qwen3-235b, gemini-2.0-flash, qwen3-coder:free]
+      capabilities: [code, kode, function, script, implement, class, refactor, generate, endpoint, api, python, bash, write, tulis, buat file, build, create]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    debug:
+      description: "Root cause analysis — tracebacks, exceptions, CUDA, PyTorch, OOM, NaN"
+      primary_model: glm-4
+      fallbacks: [qwen-qwq-32b, llama3-70b, deepseek-r1:free]
+      capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch, torch, cuda]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    math:
+      description: "Math — tensor operations, matrix calculus, gradient descent, backprop"
+      primary_model: glm-4
+      fallbacks: [qwen-qwq-32b, llama3-70b, deepseek-r1:free]
+      capabilities: [tensor, matrix, gradient, derivative, integral, backprop, eigenvalue, softmax, calculate, hitung]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    architect:
+      description: "System design, architecture, microservices, framework blueprints"
+      primary_model: qwen3-235b
+      fallbacks: [gemini-2.0-flash, llama3-70b]
+      capabilities: [design, architecture, plan, system, pipeline, struktur, rancang, overview, diagram, framework, strategy, strategi]
+      tools: []
+      complexity_tier: heavyweight
+
+    analyst:
+      description: "Data analysis, visualization, CSV, pandas, GPU metrics, training trends"
+      primary_model: kimi-k2
+      fallbacks: [gemini-2.0-flash, llama3-70b]
+      capabilities: [analyze, analisis, plot, chart, csv, metrics, performance, gpu, training, trend, statistics, compare, nvidia-smi, visualize]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    computer:
+      description: "Web browsing, email, Git, file ops, system monitoring, Excel/PDF docs"
+      primary_model: llama3-70b
+      fallbacks: [glm-4, gemini-2.0-flash, llama3-70b-instruct:free, qwen3-235b]
+      capabilities: [browse, search for, find online, look up, scrape, website, web page, pdf, excel, spreadsheet, word doc, docx, extract table, read document, email, inbox, send email, git status, git commit, git push, git pull, git diff, run tests, pytest, lint, find in code, grep, monitor, schedule, disk space, memory usage]
+      tools: [playwright, interpreter]
+      complexity_tier: heavyweight
+
+    general:
+      description: "Default fallback agent — general purpose conversation and tasks"
+      primary_model: gemma4:e4b
+      fallbacks: [llama3-70b, qwen3-235b, gemini-2.0-flash, llama3-70b-instruct:free]
+      capabilities: [general, chat, talk, casual, help]
+      tools: []
+      complexity_tier: lightweight
+
+    researcher:
+      description: "Deep research, academic sources, citation, literature synthesis"
+      primary_model: kimi-k2
+      fallbacks: [glm-4, llama3-70b]
+      capabilities: [research, paper, study, evidence, cite, source, literature, academic, experiment, hypothesis, jurnal]
+      tools: [playwright]
+      complexity_tier: heavyweight
+
+    marketer:
+      description: "Marketing copy, campaigns, brand strategy, customer acquisition"
+      primary_model: llama3-70b
+      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      capabilities: [marketing, ads, campaign, brand, positioning, messaging, customer, acquisition, growth, conversion, funnel, iklan]
+      tools: []
+      complexity_tier: midweight
+
+    devops:
+      description: "CI/CD, Docker, Kubernetes, deployment pipelines, infrastructure"
+      primary_model: llama3-70b
+      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      capabilities: [deploy, pipeline, ci cd, docker, k8s, kubernetes, monitoring, logs, alerts, infrastructure, cloud]
+      tools: []
+      complexity_tier: heavyweight
+
+    pm:
+      description: "Project management, roadmaps, sprint planning, stakeholder coordination"
+      primary_model: qwen3-235b
+      fallbacks: [llama3-70b, gemini-2.0-flash]
+      capabilities: [project, roadmap, milestone, sprint, backlog, priority, stakeholder, timeline, scope, deliverable]
+      tools: []
+      complexity_tier: midweight
+
+    humanizer:
+      description: "Convert text to casual, friendly, human-sounding tone"
+      primary_model: llama3-70b
+      fallbacks: [gemini-2.0-flash, qwen3-235b]
+      capabilities: [humanize, casual, friendly, tone, rewrite]
+      tools: []
+      complexity_tier: lightweight
+
+    reviewer:
+      description: "Code review, quality audit, lint, best practices enforcement"
+      primary_model: llama3-70b
+      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      capabilities: [review, audit, check code, inspect, quality, code review, periksa, lint, scan]
+      tools: []
+      complexity_tier: midweight
+
+    think:
+      description: "Deep reasoning with QwQ-style chain-of-thought (RTX 3060 local)"
+      primary_model: qwen-3-32b
+      fallbacks: [qwen-qwq-32b, deepseek-r1:free, glm-4]
+      capabilities: [think, reasoning, deep, analysis, chain-of-thought, cot]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    owl:
+      description: "OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)"
+      primary_model: kimi-k2
+      fallbacks: [gemini-2.0-flash, qwen3-235b]
+      capabilities: [complex-tasks, research, gaia-benchmark, owl, difficult, multi-step]
+      tools: [playwright, interpreter]
+      complexity_tier: heavyweight
+
+    ag2_researcher:
+      description: "AG2 multi-agent research — researcher role"
+      primary_model: kimi-k2
+      fallbacks: [glm-4, qwen3-235b]
+      capabilities: [ag2, research, multi-agent, agentic, research-agent]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    ag2_critic:
+      description: "AG2 multi-agent debate — devil's advocate / critic role"
+      primary_model: glm-4
+      fallbacks: [qwen-qwq-32b, qwen3-235b]
+      capabilities: [ag2, critic, debate, devil-advocate, challenge]
+      tools: []
+      complexity_tier: heavyweight
+
+    ag2_synthesizer:
+      description: "AG2 multi-agent debate — synthesizer / judge role"
+      primary_model: qwen3-235b
+      fallbacks: [llama3-70b, gemini-2.0-flash]
+      capabilities: [ag2, synthesizer, judge, debate, synthesis, conclude]
+      tools: []
+      complexity_tier: heavyweight
+
+    code_exec:
+      description: "Safe code execution via smolagents (Python, bash)"
+      primary_model: qwen3-coder:free
+      fallbacks: [llama3-70b, qwen3-235b]
+      capabilities: [code-execution, python, bash, run, execute, interpreter]
+      tools: [interpreter]
+      complexity_tier: heavyweight
+
+    predictor:
+      description: "Consensus prediction and outcome simulation (MiroFish)"
+      primary_model: qwen3-235b
+      fallbacks: [kimi-k2, glm-4]
+      capabilities: [consensus, prediction, forecast, simulate, mirofish, outcome]
+      tools: []
+      complexity_tier: heavyweight
+
+    claude_orchestrator:
+      description: "Claude-Opus orchestration via Ruflo (requires ANTHROPIC_API_KEY)"
+      primary_model: claude-opus-4
+      fallbacks: [claude-3.5-sonnet, qwen3-235b]
+      capabilities: [claude, orchestrator, opus, ruflo, agentic]
+      tools: []
+      complexity_tier: heavyweight
+      requires_env: ANTHROPIC_API_KEY
+
+    debate:
+      description: "Multi-agent debate orchestration — strategic discussion with personas"
+      primary_model: qwen3-235b
+      fallbacks: [llama3-70b, gemini-2.0-flash]
+      capabilities: [debate, discuss, opinion, argument, persona, multi-agent]
+      tools: []
+      complexity_tier: heavyweight

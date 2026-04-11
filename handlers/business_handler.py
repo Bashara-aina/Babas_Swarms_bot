@@ -31,6 +31,7 @@ def _get_db():
     """Return Supabase client or None."""
     try:
         from tools.supabase_client import get_client, is_configured
+
         if not is_configured():
             return None
         return get_client()
@@ -82,6 +83,7 @@ async def cmd_site_health(msg: Message) -> None:
     # Check website
     try:
         import aiohttp
+
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 "https://rumahlabuh.com",
@@ -92,6 +94,7 @@ async def cmd_site_health(msg: Message) -> None:
 
                 # Trigger schema bootstrap if skill file is missing
                 from pathlib import Path
+
                 if not Path("skills/rumahlabuh-manager.md").exists():
                     db = _get_db()
                     if db is not None:
@@ -182,3 +185,18 @@ async def cmd_db_schema(msg: Message) -> None:
             f"Schema generation failed: <code>{html.escape(str(exc)[:300])}</code>",
             parse_mode="HTML",
         )
+
+
+@router.message(Command("biz"))
+async def cmd_biz_summary(msg: Message) -> None:
+    """Business metrics dashboard — rumahlabuh + cekwajar + Vercel."""
+    if not _is_allowed(msg):
+        return
+
+    status = await msg.answer("📊 Fetching business metrics...")
+    from tools.business_ops import get_business_summary, check_vercel_deployments
+
+    summary = await get_business_summary()
+    deployments = await check_vercel_deployments()
+    full = summary + "\n\n" + deployments
+    await status.edit_text(full, parse_mode="Markdown")

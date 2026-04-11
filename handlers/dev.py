@@ -1,4 +1,5 @@
 """Dev handlers: /scaffold /build /vuln_scan /review /security_review."""
+
 from __future__ import annotations
 
 import asyncio
@@ -8,6 +9,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from .shared import (
+    _cancel_task,
     _keep_typing,
     is_allowed,
     send_chunked,
@@ -52,7 +54,8 @@ async def cmd_scaffold(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     try:
-        from tools.scaffolder import scaffold_nextjs, scaffold_fastapi, scaffold_laravel
+        from tools.scaffolder import scaffold_fastapi, scaffold_laravel, scaffold_nextjs
+
         if framework in ("nextjs", "next"):
             result = await scaffold_nextjs(project_name, features)
         elif framework in ("fastapi", "fast"):
@@ -89,6 +92,7 @@ async def cmd_build(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
     try:
         from tools.scaffolder import parallel_fullstack
+
         result = await parallel_fullstack(task)
         typing_task.cancel()
         await status_msg.delete()
@@ -106,6 +110,7 @@ async def cmd_vuln_scan(msg: Message) -> None:
     status_msg = await msg.answer("scanning dependencies...")
     try:
         from tools.devops import check_vulnerabilities
+
         result = await check_vulnerabilities()
         await status_msg.delete()
         await send_chunked(msg, result, model_used="devops/vuln-scan")
@@ -121,23 +126,26 @@ async def cmd_review(msg: Message) -> None:
     arg = (msg.text or "").removeprefix("/review").strip()
     if not arg:
         await msg.answer(
-            "usage: <code>/review &lt;file_path&gt;</code>\n"
-            "or reply to a code message with /review",
+            "usage: <code>/review &lt;file_path&gt;</code>\nor reply to a code message with /review",
             parse_mode="HTML",
         )
         return
     status_msg = await msg.answer("🔍 reviewing…")
     try:
-        from tools.code_reviewer import review_file, review_code
         from pathlib import Path
+
+        from tools.code_reviewer import review_code, review_file
+
         if Path(arg).exists():
             result = await review_file(arg)
         else:
             result = await review_code(arg, language="python")
         import html as html_mod
+
         await status_msg.edit_text(result[:4000], parse_mode="HTML")
     except Exception as e:
         import html as html_mod
+
         await status_msg.edit_text(
             f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",
@@ -156,12 +164,56 @@ async def cmd_security_review(msg: Message) -> None:
     status_msg = await msg.answer("🛡 security review…")
     try:
         from tools.code_reviewer import review_file
+
         result = await review_file(arg, review_type="security")
         import html as html_mod
+
         await status_msg.edit_text(result[:4000], parse_mode="HTML")
     except Exception as e:
         import html as html_mod
-        await status_msg.edit_text(
+
+        await msg.answer(
             f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
+
+
+# ── /opencode ─────────────────────────────────────────────────────────────────
+@router.message(Command("opencode"))
+async def cmd_opencode(msg: Message) -> None:
+    """Route a task to opencode CLI via the Legion bridge."""
+    if not is_allowed(msg):
+        return
+    task_text = (msg.text or "").removeprefix("/opencode").strip()
+    if not task_text:
+        await msg.answer(
+            "usage: <code>/opencode &lt;task description&gt;</code>\n\n"
+            "Routes task through opencode with Legion's full pipeline:\n"
+            "PLAN → IMPLEMENT → REVIEW → TEST → COMMIT → REPORT\n\n"
+            "Example:\n<code>/opencode add user authentication to the API</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer("🤖 Legion dispatching to opencode…")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from core.opencode_bridge import build_opencode_prompt, extract_report, run_opencode_task
+
+        username = msg.from_user.username if msg.from_user else "unknown"
+        prompt = build_opencode_prompt(task_text, project="/home/newadmin/swarm-bot", user=username)
+        result = await run_opencode_task(prompt, project_dir="/home/newadmin/swarm-bot")
+        report = extract_report(result)
+
+        await _cancel_task(typing_task)
+        await status_msg.delete()
+        await send_chunked(msg, report)
+    except Exception as e:
+        await _cancel_task(typing_task)
+        import html as html_mod
+
+        await status_msg.edit_text(
+            f"opencode error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",
         )

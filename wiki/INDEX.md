@@ -11,5 +11,7 @@ Legion maintains this file as pages are added. See [SCHEMA.md](SCHEMA.md) for wr
 - **tools/** — Supabase, PyTorch, Next.js, Telegram, GitHub
 - **tokyo/** — local life notes
 - **conversations/** — significant summaries (not raw logs)
-
-_No pages yet beyond SCHEMA and this index. Legion adds entries from conversation and ingest._
+  - [[conversations/2026-04-10.md]]
+  - [[legion/conversations_log.md]]
+- **legion/** 
+  - [[legion/conversations_log.md]]

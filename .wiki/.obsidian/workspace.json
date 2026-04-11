@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "c919c572334427c9",
+    "type": "split",
+    "children": [
+      {
+        "id": "20c31ede7fe33de1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "13a279f88b200140",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "126a18d0e16f78fe",
+    "type": "split",
+    "children": [
+      {
+        "id": "b82d5c0ad93db99a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "704e2c6ee64db204",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "ab98cd42e8a590d8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "671f04f4c97abf3e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ba5bcabe74272914",
+    "type": "split",
+    "children": [
+      {
+        "id": "79f302c0ae3f0a82",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4705d022c2b22c77",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Untitled.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Untitled"
+            }
+          },
+          {
+            "id": "6c5608dd03d649d2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Untitled.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Untitled"
+            }
+          },
+          {
+            "id": "1e6347b7c1ef6d18",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "a70307574306fe2e",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "bea7f6b6fec66f6a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Untitled.canvas",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Untitled"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "13a279f88b200140",
+  "lastOpenFiles": [
+    "logs/git-log.md",
+    "prompts.md",
+    "wisdom/02-taleb-antifragile.md",
+    "logs/2026-04-11-opencode-integration.md",
+    "decisions/ADR-001-opencode-integration.md",
+    "wisdom/domains/TOP10-SOURCES.md",
+    "wisdom/domains/index.md",
+    "logs/worker-2-tier2-complete.md",
+    "research/022-cones-2024.md",
+    "wisdom/domains/20-ai-agent-wisdom.md",
+    "logs/worker-1-tier1-complete.md",
+    "research/009-hrnet-wang-2020.md",
+    "research/021-video-seg-modulation-yang-2018.md",
+    "research/012-imagenet-russakovsky-2015.md",
+    "research/011-poseconv3d-duan-2022.md",
+    "research/010-giou-rezatofighi-2019.md",
+    "wisdom/domains/19-resilience-anti-fragility.md",
+    "research/020-flexloc-2024.md",
+    "research/019-dit-peebles-2023.md",
+    "wisdom/domains/18-creativity-innovation.md",
+    "logs/worker-8-tier8-complete.md",
+    "logs/worker-10-tier10-complete.md",
+    "research/018-adain-huang-2017.md",
+    "research/INDEX.md",
+    "research/popw-protocol/TIER3-INDEX.md",
+    "research/008-simple-baseline-xiao-2018.md",
+    "research/popw-protocol",
+    "_quarantine",
+    "wisdom/domains",
+    "_archive/research/thesis",
+    "_archive/research",
+    "_archive/tools/openaugi/docs/plans",
+    "_archive/tools/openaugi/docs",
+    "_archive/tools/openaugi",
+    "_archive/tools",
+    "_archive/decisions",
+    "tools/karpathy-wiki/docs/assets/second-brain-overview.png",
+    "Untitled 3.canvas",
+    "Untitled 2.canvas",
+    "research/ai-dev-patterns/logo.png",
+    "research/ai-agents/assets/banner.svg",
+    "research/context-engineering/docs/claudecode/image.png",
+    "research/context-engineering/docs/claudecode/image-1.png",
+    "Untitled 1.canvas",
+    "Untitled.canvas"
+  ]
+}

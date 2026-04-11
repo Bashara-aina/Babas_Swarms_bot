@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # Data model
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AgentDef:
     """Complete definition of a single agent."""
@@ -31,20 +32,18 @@ class AgentDef:
     name: str
     department: str
     description: str
-    primary_model: str          # key in models.yaml → resolved to litellm model_id
-    fallbacks: list[str]        # keys in models.yaml
-    capabilities: list[str]     # keyword tags used for routing
+    primary_model: str  # key in models.yaml → resolved to litellm model_id
+    fallbacks: list[str]  # keys in models.yaml
+    capabilities: list[str]  # keyword tags used for routing
     tools: list[str]
-    complexity_tier: str        # lightweight / midweight / heavyweight
-    prompt_template: str = ""   # path to Jinja2 .j2 file (auto-set)
+    complexity_tier: str  # lightweight / midweight / heavyweight
+    prompt_template: str = ""  # path to Jinja2 .j2 file (auto-set)
     primary_model_id: str = ""  # resolved litellm model_id (set by load_registry)
     fallback_model_ids: list[str] = field(default_factory=list)  # resolved
 
     def __post_init__(self) -> None:
         if not self.prompt_template:
-            self.prompt_template = (
-                f"prompts/role/{self.department}/{self.name}.j2"
-            )
+            self.prompt_template = f"prompts/role/{self.department}/{self.name}.j2"
 
 
 # ---------------------------------------------------------------------------
@@ -63,6 +62,7 @@ _embedding_model = None  # sentence-transformers instance (lazy)
 # ---------------------------------------------------------------------------
 # Registry loading
 # ---------------------------------------------------------------------------
+
 
 def load_registry(
     departments_path: str = "config/departments.yaml",
@@ -87,10 +87,7 @@ def load_registry(
     else:
         with models_file.open() as f:
             models_cfg = yaml.safe_load(f)
-        MODEL_LOOKUP = {
-            key: cfg["model_id"]
-            for key, cfg in models_cfg.get("models", {}).items()
-        }
+        MODEL_LOOKUP = {key: cfg["model_id"] for key, cfg in models_cfg.get("models", {}).items()}
 
     # ── Load department/agent definitions ───────────────────────────────────
     dept_file = Path(departments_path)
@@ -119,9 +116,7 @@ def load_registry(
                 tools=acfg.get("tools", []),
                 complexity_tier=acfg.get("complexity_tier", "midweight"),
                 primary_model_id=MODEL_LOOKUP.get(primary_key, primary_key),
-                fallback_model_ids=[
-                    MODEL_LOOKUP.get(k, k) for k in fallback_keys
-                ],
+                fallback_model_ids=[MODEL_LOOKUP.get(k, k) for k in fallback_keys],
             )
 
             AGENT_REGISTRY[agent_name] = agent
@@ -153,17 +148,11 @@ def _precompute_embeddings() -> None:
 
         for name, agent in AGENT_REGISTRY.items():
             text = agent.description + " " + " ".join(agent.capabilities)
-            CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(
-                text, normalize_embeddings=True
-            )
+            CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)
 
-        logger.info(
-            f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents"
-        )
+        logger.info(f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents")
     except ImportError:
-        logger.warning(
-            "sentence-transformers not installed — semantic routing (Layer 2) disabled"
-        )
+        logger.warning("sentence-transformers not installed — semantic routing (Layer 2) disabled")
     except Exception as exc:
         logger.warning(f"Embedding precomputation failed: {exc}")
 
@@ -171,6 +160,7 @@ def _precompute_embeddings() -> None:
 # ---------------------------------------------------------------------------
 # Hot-reload
 # ---------------------------------------------------------------------------
+
 
 def reload_from_yaml() -> None:
     """Reload all agents from YAML without restarting the bot."""
@@ -190,6 +180,7 @@ signal.signal(signal.SIGHUP, _sighup_handler)
 # ---------------------------------------------------------------------------
 # Lookup helpers
 # ---------------------------------------------------------------------------
+
 
 @lru_cache(maxsize=512)
 def get_agent(name: str) -> Optional[AgentDef]:
@@ -234,6 +225,7 @@ def get_agent_count() -> dict[str, int]:
 # Routing helpers
 # ---------------------------------------------------------------------------
 
+
 def search_by_capability(keywords: list[str]) -> list[tuple[str, int]]:
     """Keyword-based capability search (Layer 1).
 
@@ -259,9 +251,7 @@ def search_by_capability(keywords: list[str]) -> list[tuple[str, int]]:
     return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
 
-def semantic_search(
-    query: str, top_k: int = 3
-) -> list[tuple[str, float]]:
+def semantic_search(query: str, top_k: int = 3) -> list[tuple[str, float]]:
     """Embedding-based semantic search (Layer 2).
 
     Returns list of (agent_name, cosine_similarity) sorted descending.
@@ -273,8 +263,7 @@ def semantic_search(
     try:
         qvec = _embedding_model.encode(query, normalize_embeddings=True)
         sims: list[tuple[str, float]] = [
-            (name, float(np.dot(qvec, evec)))
-            for name, evec in CAPABILITY_EMBEDDINGS.items()
+            (name, float(np.dot(qvec, evec))) for name, evec in CAPABILITY_EMBEDDINGS.items()
         ]
         sims.sort(key=lambda x: x[1], reverse=True)
         return sims[:top_k]
@@ -284,89 +273,499 @@ def semantic_search(
 
 
 # ---------------------------------------------------------------------------
+# Legacy agent data (extracted from agents.py AGENT_MODELS + FALLBACK_CHAIN)
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+# Primary model per legacy agent (22 agents from old agents.py AGENT_MODELS)
+_LEGACY_AGENT_MODELS: dict[str, str] = {
+    "vision": "ollama_chat/gemma4:e4b",
+    "coding": "groq/llama-3.3-70b-versatile",
+    "debug": "zai/glm-4",
+    "math": "zai/glm-4",
+    "architect": "cerebras/qwen3-235b-a22b",
+    "analyst": "groq/moonshotai/kimi-k2-instruct",
+    "computer": "groq/llama-3.3-70b-versatile",
+    "general": "ollama_chat/gemma4:e4b",
+    "researcher": "groq/moonshotai/kimi-k2-instruct",
+    "marketer": "groq/llama-3.3-70b-versatile",
+    "devops": "groq/llama-3.3-70b-versatile",
+    "pm": "cerebras/qwen3-235b-a22b",
+    "humanizer": "groq/llama-3.3-70b-versatile",
+    "reviewer": "groq/llama-3.3-70b-versatile",
+    "think": "cerebras/qwen-3-32b",
+    "owl": "groq/moonshotai/kimi-k2-instruct",
+    "ag2_researcher": "groq/moonshotai/kimi-k2-instruct",
+    "ag2_critic": "zai/glm-4",
+    "ag2_synthesizer": "cerebras/qwen3-235b-a22b",
+    "code_exec": "openrouter/qwen/qwen3-coder:free",
+    "predictor": "cerebras/qwen3-235b-a22b",
+    "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
+    "debate": "cerebras/qwen3-235b-a22b",
+}
+
+# Fallback chain per legacy agent (from old agents.py FALLBACK_CHAIN)
+# Strategy: MiniMax-M2.7 primary for everything. Free cloud fallbacks when MiniMax fails.
+# Local Ollama gemma4:e4b (9.6GB VRAM) ONLY for vision/computer screen reading.
+# RTX 3060: NO llama3.3:70b, NO qwen3.5:35b — these need too much VRAM.
+# NO paid fallbacks (cerebras is pay-per-token) — free tier only.
+LEGACY_FALLBACK_CHAIN: dict[str, list[str]] = {
+    # Vision/computer: local gemma4:e4b for screen reading (MiniMax can't do vision)
+    "vision": ["minimax/MiniMax-M2.7", "ollama_chat/gemma4:e4b"],
+    "computer": ["minimax/MiniMax-M2.7", "ollama_chat/gemma4:e4b"],
+    # All other agents: MiniMax primary → free cloud fallbacks
+    "coding": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/qwen/qwen3-coder:free",
+    ],
+    "debug": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/deepseek/deepseek-r1:free",
+    ],
+    "math": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/deepseek/deepseek-r1:free",
+    ],
+    "architect": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "analyst": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "general": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+    ],
+    "researcher": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "marketer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "devops": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "pm": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "humanizer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "reviewer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "think": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "owl": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "ag2_researcher": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "ag2_critic": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/deepseek/deepseek-r1:free",
+    ],
+    "ag2_synthesizer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "code_exec": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "openrouter/qwen/qwen3-coder:free",
+        "groq/llama-3.3-70b-versatile",
+    ],
+    "predictor": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+    "claude_orchestrator": [
+        "minimax/MiniMax-M2.7",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/qwen/qwen3-coder:free",
+    ],
+    "debate": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "groq/llama-3.3-70b-versatile"],
+}
+
+# Task keywords for legacy agent detection (from old agents.py TASK_KEYWORDS)
+LEGACY_TASK_KEYWORDS: dict[str, list[str]] = {
+    "vision": [
+        "screenshot",
+        "screen",
+        "layar",
+        "gambar",
+        "image",
+        "photo",
+        "ocr",
+        "visual",
+        "desktop",
+        "window",
+        "what do you see",
+        "lihat",
+        "tampilan",
+        "apa yang ada di",
+        "capture",
+    ],
+    "coding": [
+        "code",
+        "kode",
+        "function",
+        "script",
+        "implement",
+        "class",
+        "refactor",
+        "generate",
+        "endpoint",
+        "api",
+        "python",
+        "bash",
+        "write",
+        "tulis",
+        "buat file",
+        "build",
+        "create",
+    ],
+    "debug": [
+        "debug",
+        "error",
+        "crash",
+        "fix",
+        "bug",
+        "traceback",
+        "exception",
+        "cuda",
+        "pytorch",
+        "torch",
+        "nan",
+        "oom",
+        "not working",
+        "kenapa",
+        "why",
+        "gagal",
+        "failed",
+    ],
+    "math": [
+        "tensor",
+        "matrix",
+        "gradient",
+        "derivative",
+        "integral",
+        "backprop",
+        "eigenvalue",
+        "softmax",
+        "calculate",
+        "hitung",
+        "math",
+        "formula",
+        "prove",
+        "buktikan",
+        "solve",
+    ],
+    "architect": [
+        "design",
+        "architecture",
+        "plan",
+        "system",
+        "pipeline",
+        "struktur",
+        "rancang",
+        "overview",
+        "diagram",
+        "framework",
+        "strategy",
+        "strategi",
+    ],
+    "analyst": [
+        "analyze",
+        "analisis",
+        "plot",
+        "chart",
+        "csv",
+        "metrics",
+        "performance",
+        "gpu",
+        "training",
+        "trend",
+        "statistics",
+        "compare",
+        "nvidia-smi",
+        "visualize",
+    ],
+    "computer": [
+        "browse",
+        "search for",
+        "find online",
+        "look up",
+        "scrape",
+        "website",
+        "web page",
+        "cari di internet",
+        "booking",
+        "google",
+        "search the web",
+        "pdf",
+        "excel",
+        "spreadsheet",
+        "word doc",
+        "docx",
+        "extract table",
+        "read document",
+        "baca dokumen",
+        "email",
+        "inbox",
+        "send email",
+        "kirim email",
+        "mail",
+        "reply email",
+        "check email",
+        "cek email",
+        "git status",
+        "git commit",
+        "git push",
+        "git pull",
+        "git diff",
+        "git stash",
+        "commit",
+        "push to",
+        "pull from",
+        "run tests",
+        "pytest",
+        "lint",
+        "ruff",
+        "format code",
+        "find in code",
+        "grep",
+        "codebase",
+        "db query",
+        "monitor",
+        "schedule",
+        "disk space",
+        "memory usage",
+        "maintenance",
+        "cleanup",
+        "services",
+        "system check",
+        "organize files",
+        "find files",
+        "sort files",
+    ],
+    "researcher": [
+        "research",
+        "paper",
+        "study",
+        "evidence",
+        "cite",
+        "source",
+        "literature",
+        "academic",
+        "experiment",
+        "hypothesis",
+        "jurnal",
+    ],
+    "marketer": [
+        "marketing",
+        "ads",
+        "campaign",
+        "brand",
+        "positioning",
+        "messaging",
+        "customer",
+        "acquisition",
+        "growth",
+        "conversion",
+        "funnel",
+        "iklan",
+    ],
+    "devops": [
+        "deploy",
+        "pipeline",
+        "ci cd",
+        "docker",
+        "k8s",
+        "kubernetes",
+        "monitoring",
+        "logs",
+        "alerts",
+        "infrastructure",
+        "cloud",
+    ],
+    "pm": [
+        "project",
+        "roadmap",
+        "milestone",
+        "sprint",
+        "backlog",
+        "priority",
+        "stakeholder",
+        "timeline",
+        "scope",
+        "deliverable",
+    ],
+    "reviewer": [
+        "review",
+        "audit",
+        "check code",
+        "inspect",
+        "quality",
+        "code review",
+        "periksa",
+        "lint",
+        "scan",
+    ],
+}
+
+# Load PERSONA_WRAPPER from personality.yaml (at module load time)
+_PERSONA_WRAPPER: str = ""
+try:
+    _personality_path = Path(__file__).parent.parent / "config" / "personality.yaml"
+    if _personality_path.exists():
+        import yaml as _yaml
+
+        with _personality_path.open() as _f:
+            _personality_cfg = _yaml.safe_load(_f)
+        _PERSONA_WRAPPER = _personality_cfg.get("personality_wrapper", "") or ""
+except Exception:
+    pass
+
+PERSONA_WRAPPER = _PERSONA_WRAPPER
+
+# Aliases for backwards compat
+FALLBACK_CHAIN = LEGACY_FALLBACK_CHAIN
+TASK_KEYWORDS = LEGACY_TASK_KEYWORDS
+DEFAULT_AGENT = "general"
+
+
+# ── Debate personas (loaded from config/personality.yaml) ─────────────────────
+_DEBATE_PERSONAS: dict[str, str] = {}
+_DEBATE_PERSONA_MODELS: dict[str, str] = {}
+_DEBATE_ICONS: dict[str, str] = {}
+
+try:
+    import yaml as _yaml
+
+    _personality_path = Path(__file__).parent.parent / "config" / "personality.yaml"
+    if _personality_path.exists():
+        with _personality_path.open() as _f:
+            _cfg = _yaml.safe_load(_f)
+        _debate = _cfg.get("debate_personas", {})
+        _DEBATE_PERSONAS = {k: v["description"] for k, v in _debate.items()}
+        _DEBATE_PERSONA_MODELS = {k: v["model"] for k, v in _debate.items()}
+        _DEBATE_ICONS = {k: v["icon"] for k, v in _debate.items()}
+except Exception:
+    pass
+
+DEBATE_PERSONAS = _DEBATE_PERSONAS
+DEBATE_PERSONA_MODELS = _DEBATE_PERSONA_MODELS
+DEBATE_ICONS = _DEBATE_ICONS
+
+
+# ---------------------------------------------------------------------------
 # Compatibility shims — keep existing main.py call-sites working
 # ---------------------------------------------------------------------------
 
-# In-memory thread storage (mirrors old agents.ACTIVE_THREADS)
 import time as _time
 from datetime import datetime as _datetime
 
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
-# Legacy model mappings for backwards compat (/agent coding, /agent debug, etc.)
-_LEGACY_AGENT_MODELS: dict[str, str] = {
-    "vision":    "ollama_chat/gemma4:e4b",
-    "coding":    "cerebras/qwen3-235b-a22b",       # 14,400 req/day, fast, reliable
-    "debug":     "zai/glm-4",
-    "math":      "zai/glm-4",
-    "architect": "cerebras/qwen3-235b-a22b",
-    "mentor":    "gemini/gemini-2.0-flash",
-    "analyst":   "groq/moonshotai/kimi-k2-instruct",
-}
-_LEGACY_FALLBACK_MODELS: dict[str, str] = {
-    "coding":    "openrouter/qwen/qwen3-coder:free",  # fallback when cerebras unavailable
-    "debug":     "cerebras/qwen3-235b-a22b",
-    "math":      "cerebras/qwen3-235b-a22b",
-    "architect": "openrouter/openai/gpt-oss-120b:free",
-    "mentor":    "gemini/gemma-3-27b-it",
-    "analyst":   "openrouter/openai/gpt-oss-120b:free",
-}
-
 
 def get_model(agent_key: str, use_fallback: bool = False) -> Optional[str]:
     """Return litellm model_id for an agent key.
 
-    Supports both legacy 7-agent keys and new 76-agent slug names.
+    Supports both legacy 22-agent keys and new 76-agent slug names.
     """
     # Check legacy map first
-    registry = _LEGACY_FALLBACK_MODELS if use_fallback else _LEGACY_AGENT_MODELS
-    if agent_key in registry:
-        return registry[agent_key]
+    if use_fallback:
+        chain = LEGACY_FALLBACK_CHAIN.get(agent_key, LEGACY_FALLBACK_CHAIN["general"])
+        return chain[0]
+    if agent_key in _LEGACY_AGENT_MODELS:
+        return _LEGACY_AGENT_MODELS[agent_key]
     # Check new registry
     agent = AGENT_REGISTRY.get(agent_key)
     if agent:
         return (
-            agent.fallback_model_ids[0]
-            if use_fallback and agent.fallback_model_ids
-            else agent.primary_model_id
+            agent.fallback_model_ids[0] if use_fallback and agent.fallback_model_ids else agent.primary_model_id
         ) or agent.primary_model_id
     return None
 
 
-def detect_agent(task: str) -> str:
-    """Legacy keyword detection — returns agent key string.
+def get_fallback_chain(agent_key: str) -> list[str]:
+    """Return the full fallback chain for an agent key."""
+    if agent_key in LEGACY_FALLBACK_CHAIN:
+        return LEGACY_FALLBACK_CHAIN[agent_key]
+    # Fall back to new registry
+    agent = AGENT_REGISTRY.get(agent_key)
+    if agent and agent.fallback_model_ids:
+        return agent.fallback_model_ids
+    return LEGACY_FALLBACK_CHAIN["general"]
 
-    Used by existing _execute_task(); bridges to new search_by_capability().
+
+def detect_agent(task: str) -> str:
+    """Detect which legacy agent best matches the given task.
+
+    This is the SINGLE implementation — called by all code paths.
+    Uses keyword matching with regex for fine-grained control.
+
+    Returns an agent key from the legacy 22-agent set
+    (vision, coding, debug, math, architect, analyst, computer, general,
+     researcher, marketer, devops, pm, humanizer, reviewer, think, owl,
+     ag2_researcher, ag2_critic, ag2_synthesizer, code_exec, predictor,
+     claude_orchestrator, debate).
     """
-    results = search_by_capability(task.lower().split())
-    if results:
-        return results[0][0]
-    # Fallback to legacy keyword scan
-    task_lower = task.lower()
-    _LEGACY_KEYWORDS: dict[str, list[str]] = {
-        "vision": ["screenshot", "image", "photo", "ui", "visual", "ocr", "screen"],
-        "debug": ["debug", "traceback", "exception", "crash", "fix", "bug", "cuda", "nan", "oom"],
-        "math": ["tensor", "matrix", "derivative", "gradient", "backprop", "calculate"],
-        "architect": ["design", "architecture", "plan", "system", "strategy"],
-        "mentor": ["explain", "teach", "what is", "how does", "eli5", "beginner"],
-        "analyst": ["analyze", "plot", "csv", "dataframe", "statistics", "trend"],
-        "coding": ["code", "function", "implement", "class", "endpoint", "api"],
-    }
-    scores = {a: sum(kw in task_lower for kw in kws) for a, kws in _LEGACY_KEYWORDS.items()}
-    best = max(scores, key=lambda a: scores[a])
-    return best if scores[best] > 0 else "senior_python_dev"
+    task_lower = task.lower().strip()
+
+    # High-confidence intent overrides to reduce keyword collision noise.
+    if _re.search(
+        r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower
+    ):
+        return "math"
+    if _re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
+        return "debug"
+    if _re.search(
+        r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower
+    ):
+        return "architect"
+    if _re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
+        return "general"
+
+    scores: dict[str, int] = {agent: 0 for agent in LEGACY_TASK_KEYWORDS}
+    for agent, keywords in LEGACY_TASK_KEYWORDS.items():
+        for kw in keywords:
+            kw_norm = kw.strip().lower()
+            if not kw_norm:
+                continue
+            if _re.search(r"[a-z0-9]", kw_norm):
+                pattern = rf"(?<![a-z0-9]){_re.escape(kw_norm)}(?![a-z0-9])"
+                if _re.search(pattern, task_lower):
+                    scores[agent] += 1
+            elif kw_norm in task_lower:
+                scores[agent] += 1
+
+    # Tie-break preference keeps generic PM/ops keywords from stealing
+    # clearly technical tasks when scores are equal.
+    tie_break_order = [
+        "debug",
+        "math",
+        "vision",
+        "coding",
+        "architect",
+        "analyst",
+        "researcher",
+        "devops",
+        "pm",
+        "reviewer",
+        "general",
+    ]
+    best_agent = max(scores, key=lambda a: scores[a])
+    best_score = scores[best_agent]
+    if best_score > 0:
+        for candidate in tie_break_order:
+            if scores.get(candidate, 0) == best_score:
+                best_agent = candidate
+                break
+    if best_score == 0:
+        logger.debug("No keyword match — using %s", DEFAULT_AGENT)
+        return DEFAULT_AGENT
+    logger.debug("Detected agent '%s' (score=%d)", best_agent, best_score)
+    return best_agent
 
 
 def list_agents() -> str:
     """Return HTML table of all agents grouped by department."""
     if not AGENT_REGISTRY:
         # Fallback to legacy display if registry not loaded yet
-        lines = ["<b>Babas Agency Swarm — Agents</b>\n"]
+        lines = ["<b>Babas Agency Swarm — Legacy Agents</b>\n"]
         for key, model in _LEGACY_AGENT_MODELS.items():
             lines.append(f"  <b>{key}</b> → <code>{model}</code>")
         return "\n".join(lines)
 
-    lines = ["<b>🤖 Babas Agency Swarm — 76 Agents</b>\n"]
+    lines = ["<b>🤖 Babas Agency Swarm — 76+ Agents</b>\n"]
     for dept, agent_names in DEPARTMENT_INDEX.items():
         dept_display = dept.replace("_", " ").title()
         lines.append(f"\n<b>{dept_display}</b> ({len(agent_names)} agents)")
@@ -382,12 +781,14 @@ def list_agents() -> str:
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     """Store a conversation turn in thread history."""
     ACTIVE_THREADS.setdefault(thread_id, [])
-    ACTIVE_THREADS[thread_id].append({
-        "agent": agent,
-        "task": task,
-        "result": result[:500],
-        "timestamp": _time.time(),
-    })
+    ACTIVE_THREADS[thread_id].append(
+        {
+            "agent": agent,
+            "task": task,
+            "result": result[:500],
+            "timestamp": _time.time(),
+        }
+    )
     if len(ACTIVE_THREADS[thread_id]) > 10:
         ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
 

@@ -1,0 +1,1 @@
+Research the topic below thoroughly using web search MCP if available, or your knowledge. Write a structured research note to ~/swarm-bot/.wiki/research/[topic]-[date].md with: Overview, Key Findings, Code Examples, Pros/Cons, Recommendation for this project. Topic to research:

@@ -20,11 +20,11 @@ logger = logging.getLogger(__name__)
 
 
 class TaskComplexity(Enum):
-    TRIVIAL = 1     # Simple classification, yes/no
-    SIMPLE = 2      # Basic Q&A, short snippets
-    MODERATE = 3    # Code generation, analysis
-    COMPLEX = 4     # Multi-step reasoning
-    EXPERT = 5      # Architecture, long-form planning
+    TRIVIAL = 1  # Simple classification, yes/no
+    SIMPLE = 2  # Basic Q&A, short snippets
+    MODERATE = 3  # Code generation, analysis
+    COMPLEX = 4  # Multi-step reasoning
+    EXPERT = 5  # Architecture, long-form planning
 
 
 @dataclass
@@ -48,36 +48,54 @@ class ModelTier:
 # Model pricing as of March 2026 — uses existing litellm model strings
 MODEL_TIERS: List[ModelTier] = [
     # Free tier (Cerebras, Groq free models)
-    ModelTier("Cerebras Qwen", "cerebras/qwen3-235b-a22b", "cerebras",
-             0.0, 0.0, "free", 131072),
-    ModelTier("Groq Llama 3.3", "groq/llama-3.3-70b-versatile", "groq",
-             0.0, 0.0, "free", 32768),
-    ModelTier("Groq Kimi K2", "groq/moonshotai/kimi-k2-instruct", "groq",
-             0.0, 0.0, "free", 131072),
+    ModelTier("Cerebras Qwen", "cerebras/qwen3-235b-a22b", "cerebras", 0.0, 0.0, "free", 131072),
+    ModelTier("Groq Llama 3.3", "groq/llama-3.3-70b-versatile", "groq", 0.0, 0.0, "free", 32768),
+    ModelTier("Groq Kimi K2", "groq/moonshotai/kimi-k2-instruct", "groq", 0.0, 0.0, "free", 131072),
     # Budget tier
-    ModelTier("ZAI GLM-4", "zai/glm-4", "zai",
-             0.0, 0.0, "budget", 128000),
-    ModelTier("Gemini Flash", "gemini/gemini-2.0-flash-exp:free", "gemini",
-             0.0, 0.0, "budget", 1048576),
+    ModelTier("ZAI GLM-4", "zai/glm-4", "zai", 0.0, 0.0, "budget", 128000),
+    ModelTier("Gemini Flash", "gemini/gemini-2.0-flash-exp:free", "gemini", 0.0, 0.0, "budget", 1048576),
     # Standard tier
-    ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free",
-             "openrouter", 0.0, 0.0, "standard", 65536),
+    ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free", "openrouter", 0.0, 0.0, "standard", 65536),
     # Premium tier (paid models — fallback only)
-    ModelTier("Gemini Pro", "gemini/gemini-1.5-pro", "gemini",
-             3.50, 10.50, "premium", 1048576),
+    ModelTier("Gemini Pro", "gemini/gemini-1.5-pro", "gemini", 3.50, 10.50, "premium", 1048576),
 ]
 
 # Complexity signals
 _TECHNICAL_TERMS = {
-    "pytorch", "cuda", "gradient", "backprop", "transformer", "attention",
-    "eigenvalue", "tensor", "convolution", "dockerfile", "kubernetes",
-    "async", "decorator", "metaclass", "coroutine", "distributed",
-    "architecture", "algorithm", "optimization", "regularization",
+    "pytorch",
+    "cuda",
+    "gradient",
+    "backprop",
+    "transformer",
+    "attention",
+    "eigenvalue",
+    "tensor",
+    "convolution",
+    "dockerfile",
+    "kubernetes",
+    "async",
+    "decorator",
+    "metaclass",
+    "coroutine",
+    "distributed",
+    "architecture",
+    "algorithm",
+    "optimization",
+    "regularization",
 }
 
 _MULTI_STEP_KWS = {
-    "first", "then", "after that", "finally", "step by step",
-    "and then", "also", "additionally", "commit", "restart", "deploy",
+    "first",
+    "then",
+    "after that",
+    "finally",
+    "step by step",
+    "and then",
+    "also",
+    "additionally",
+    "commit",
+    "restart",
+    "deploy",
 }
 
 
@@ -165,9 +183,7 @@ class CostAwareRouter:
             return "ollama_chat/gemma4:e4b", complexity, "local"
 
         # Get eligible tiers for this complexity
-        eligible_tiers = _COMPLEXITY_TIERS.get(
-            complexity, ["free", "standard"]
-        )
+        eligible_tiers = _COMPLEXITY_TIERS.get(complexity, ["free", "standard"])
 
         # Find cheapest eligible model
         for tier_name in eligible_tiers:
@@ -176,15 +192,23 @@ class CostAwareRouter:
                 selected = matching[0]
                 logger.info(
                     "Cost router: agent=%s complexity=%s tier=%s model=%s",
-                    agent_key, complexity.name, tier_name, selected.model_id,
+                    agent_key,
+                    complexity.name,
+                    tier_name,
+                    selected.model_id,
                 )
                 self._log_routing(
-                    agent_key, task, complexity, selected, tier_name,
+                    agent_key,
+                    task,
+                    complexity,
+                    selected,
+                    tier_name,
                 )
                 return selected.model_id, complexity, tier_name
 
         # Fallback to existing agent model
-        from router import get_fallback_chain
+        from core.agent_registry import get_fallback_chain
+
         chain = get_fallback_chain(agent_key)
         default_model = chain[0] if chain else "groq/llama-3.3-70b-versatile"
         return default_model, complexity, "fallback"
@@ -204,9 +228,7 @@ class CostAwareRouter:
         output_tokens = input_tokens * 2  # assume 2x response
 
         # Find model tier
-        tier = next(
-            (m for m in MODEL_TIERS if m.model_id == model_id), None
-        )
+        tier = next((m for m in MODEL_TIERS if m.model_id == model_id), None)
 
         if tier is None or tier.cost_per_token == 0:
             return 0.0  # Free tier
@@ -222,14 +244,16 @@ class CostAwareRouter:
         tier: str,
     ) -> None:
         """Log routing decision."""
-        self.routing_log.append({
-            "agent": agent_key,
-            "complexity": complexity.name,
-            "model": model.model_id,
-            "tier": tier,
-            "cost_per_token": model.cost_per_token,
-            "timestamp": time.time(),
-        })
+        self.routing_log.append(
+            {
+                "agent": agent_key,
+                "complexity": complexity.name,
+                "model": model.model_id,
+                "tier": tier,
+                "cost_per_token": model.cost_per_token,
+                "timestamp": time.time(),
+            }
+        )
         if len(self.routing_log) > 200:
             self.routing_log = self.routing_log[-200:]
 
@@ -243,9 +267,7 @@ class CostAwareRouter:
 
         for entry in self.routing_log:
             tier_counts[entry["tier"]] = tier_counts.get(entry["tier"], 0) + 1
-            complexity_counts[entry["complexity"]] = (
-                complexity_counts.get(entry["complexity"], 0) + 1
-            )
+            complexity_counts[entry["complexity"]] = complexity_counts.get(entry["complexity"], 0) + 1
 
         total = len(self.routing_log)
         free_pct = tier_counts.get("free", 0) / total * 100

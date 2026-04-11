@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "description": "Legion skills manifest — all registered capabilities",
+  "skills": [
+    {
+      "id": "web_search",
+      "name": "Web Search",
+      "description": "Search the web using DuckDuckGo with SerpAPI fallback",
+      "module": "skills.web_search",
+      "handler": "WebSearch",
+      "keywords": ["search", "google", "lookup", "look up", "research"]
+    },
+    {
+      "id": "geo_intelligence",
+      "name": "Geo Intelligence",
+      "description": "Restaurant, hotel, and location recommendations",
+      "module": "skills.geo_intelligence",
+      "handler": "GeoIntelligence",
+      "keywords": ["restaurant", "hotel", "nearby", "where to eat", "place to stay"]
+    },
+    {
+      "id": "screenpipe_recall",
+      "name": "Screenpipe Recall",
+      "description": "Recent screen/OCR/audio context from local Screenpipe when SCREENPIPE_ENABLED=1",
+      "module": null,
+      "handler": "screenpipe_tool",
+      "keywords": ["screen", "what's on screen", "what did i see"]
+    },
+    {
+      "id": "mirofish_simulation",
+      "name": "MiroFish Simulation",
+      "description": "Consensus-style forecast via /simulate (MiroFishAgent + analyst routing)",
+      "module": null,
+      "handler": "mirofish",
+      "keywords": ["simulate", "forecast", "consensus"]
+    },
+    {
+      "id": "open_interpreter",
+      "name": "Open Interpreter",
+      "description": "Shell/code execution via Open Interpreter",
+      "module": null,
+      "handler": "interpreter_tool",
+      "keywords": ["run code", "execute", "write and run"]
+    },
+    {
+      "id": "database_agent",
+      "name": "Database Agent",
+      "description": "Supabase/SQL database operations, schema audits, and data queries",
+      "module": "skills.database_agent",
+      "handler": "DatabaseAgent",
+      "keywords": ["database", "supabase", "sql", "table", "schema", "query"]
+    }
+  ]
+}

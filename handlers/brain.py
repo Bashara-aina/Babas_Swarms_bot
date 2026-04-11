@@ -1,4 +1,5 @@
 """Brain handlers: /remember /recall /memories /brain_export /briefing /learn /instincts /forget."""
+
 from __future__ import annotations
 
 import asyncio
@@ -28,6 +29,7 @@ async def cmd_briefing(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
     try:
         from tools.briefing import generate_briefing
+
         briefing = await generate_briefing()
         typing_task.cancel()
         await status_msg.delete()
@@ -47,6 +49,7 @@ async def cmd_memories(msg: Message) -> None:
         return
     try:
         from tools.memory import get_recent_memories
+
         notes = await get_recent_memories(limit=10)
         if not notes:
             await msg.answer("no memories saved yet. Use <code>/remember &lt;note&gt;</code>", parse_mode="HTML")
@@ -70,6 +73,7 @@ async def cmd_brain_export(msg: Message) -> None:
     status_msg = await msg.answer("exporting to Obsidian vault...")
     try:
         from tools.memory import export_to_obsidian
+
         vault_path = str(Path.home() / "brain")
         result = await export_to_obsidian(vault_path)
         await status_msg.edit_text(result)
@@ -85,8 +89,7 @@ async def cmd_learn(msg: Message) -> None:
     text = (msg.text or "").removeprefix("/learn").strip()
     if not text:
         await msg.answer(
-            "usage: <code>/learn &lt;pattern or preference&gt;</code>\n"
-            "Example: /learn Always use type hints in Python",
+            "usage: <code>/learn &lt;pattern or preference&gt;</code>\nExample: /learn Always use type hints in Python",
             parse_mode="HTML",
         )
         return
@@ -101,6 +104,7 @@ async def cmd_learn(msg: Message) -> None:
         category = "pattern"
     try:
         from tools.persistence import add_instinct
+
         iid = await add_instinct(category, text, source="manual")
         await msg.answer(
             f"✅ Learned [{category}] (id: {iid})\n<i>{html_mod.escape(text[:200])}</i>",
@@ -138,6 +142,7 @@ async def cmd_instincts(msg: Message) -> None:
         return
     try:
         from tools.persistence import get_instincts
+
         items = await get_instincts(limit=30)
         if not items:
             await msg.answer("No instincts yet. Use /learn to add some.")
@@ -145,9 +150,7 @@ async def cmd_instincts(msg: Message) -> None:
         lines = ["<b>Instincts</b>\n"]
         for i in items:
             lines.append(
-                f"  <code>#{i['id']}</code> [{i['category']}] "
-                f"{html_mod.escape(i['content'][:80])} "
-                f"(used {i['uses']}×)"
+                f"  <code>#{i['id']}</code> [{i['category']}] {html_mod.escape(i['content'][:80])} (used {i['uses']}×)"
             )
         await msg.answer("\n".join(lines), parse_mode="HTML")
     except Exception as e:
@@ -165,10 +168,29 @@ async def cmd_forget(msg: Message) -> None:
         return
     try:
         from tools.persistence import delete_instinct
+
         ok = await delete_instinct(int(arg))
         if ok:
             await msg.answer(f"✅ Instinct #{arg} deleted.")
         else:
             await msg.answer(f"Instinct #{arg} not found.")
+    except Exception as e:
+        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+
+
+# ── /self_review ───────────────────────────────────────────────────────────────
+@router.message(Command("self_review"))
+async def cmd_self_review(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    await msg.answer("🧠 Running self-review now...")
+    try:
+        from core.self_improvement import _run_self_review, _conversation_buffer
+
+        if not _conversation_buffer:
+            await msg.answer("No conversations buffered yet for review.")
+            return
+        await _run_self_review()
+        await msg.answer("✅ Self-review complete. SOUL.md updated if changes found.")
     except Exception as e:
         await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")

@@ -95,9 +95,7 @@ class WikiManager:
         self,
         user_prompt: str,
         *,
-        system_prompt: str = (
-            "You follow instructions precisely. Output only what is asked — no preamble."
-        ),
+        system_prompt: str = ("You follow instructions precisely. Output only what is asked — no preamble."),
         model: str | None = None,
         max_tokens: int = 2048,
     ) -> str:
@@ -112,10 +110,7 @@ class WikiManager:
 
     async def read_index(self) -> str:
         if not self.index_path.exists():
-            return (
-                "# Legion Wiki Index\n\n"
-                "No pages yet. Legion adds entries as it learns. See SCHEMA.md for rules.\n"
-            )
+            return "# Legion Wiki Index\n\nNo pages yet. Legion adds entries as it learns. See SCHEMA.md for rules.\n"
         async with aiofiles.open(self.index_path, encoding="utf-8", mode="r") as f:
             return await f.read()
 
@@ -132,11 +127,26 @@ class WikiManager:
         content: str,
         *,
         update_index: bool = True,
+        skip_quality_gate: bool = False,
     ) -> None:
+        from core.wiki_quality_gate import evaluate_before_write, quarantine_content
+
         resolved = self._resolve(page_path)
         if resolved is None:
             logger.warning("wiki write rejected (unsafe path): %s", page_path)
             return
+
+        # Quality gate — evaluate BEFORE writing (skip for internal/index writes)
+        if not skip_quality_gate:
+            result = await evaluate_before_write(page_path, content)
+            if result.verdict == "REJECT":
+                logger.warning("Wiki write rejected: %s (score=%.2f)", page_path, result.score)
+                await quarantine_content(page_path, content, result.reason, result.score)
+                return
+            if result.verdict == "NEEDS_IMPROVEMENT":
+                logger.info("Wiki needs improvement: %s (score=%.2f)", page_path, result.score)
+                content = f"⚠️ QUALITY NOTE: {result.reason}\n\n{content}"
+
         resolved.parent.mkdir(parents=True, exist_ok=True)
         stamp = _now_jst()
         if "_Last updated:" not in content and "_last updated:" not in content.lower():
@@ -225,7 +235,7 @@ Paths are relative to wiki/ (e.g. bashara/preferences.md), never use ... or abso
             existing = await self.read_page(page_path)
             is_update = action == "update" and "does not exist" not in existing
 
-            write_prompt = f"""Write the {'full' if not is_update else 'updated'} markdown for wiki page: {page_path}
+            write_prompt = f"""Write the {"full" if not is_update else "updated"} markdown for wiki page: {page_path}
 
 Schema rules (follow strictly):
 {schema[:800]}
@@ -251,9 +261,7 @@ Return ONLY complete markdown for the page. Use [[wiki/other/path.md]] for cross
 
     async def query(self, question: str, top_k: int = 3) -> str:
         index = await self.read_index()
-        router_model = os.getenv(
-            "LEGION_WIKI_ROUTER_MODEL", "groq/llama-3.1-8b-instant"
-        )
+        router_model = os.getenv("LEGION_WIKI_ROUTER_MODEL", "groq/llama-3.1-8b-instant")
         routing_prompt = f"""Wiki Index:
 {index[:4000]}
 
@@ -324,17 +332,125 @@ Be specific; name files."""
             "LINT_REPORT.md",
             report_full,
             update_index=False,
+            skip_quality_gate=True,
         )
         return report_full
+
+    async def sync_agents_md(self) -> str:
+        """Regenerate AGENTS.md in the repo root from wiki knowledge.
+
+        Scopes:
+          - Recent ADRs → Architecture section
+          - Recent session summaries → Agent system updates
+          - Architecture pages → Directory guide updates
+          - Recent decisions → Decisions log
+        """
+        import aiofiles
+
+        repo_root = REPO_ROOT
+        agents_md = repo_root / "AGENTS.md"
+
+        adr_dir = WIKI_DIR / "decisions"
+        session_dir = WIKI_DIR / "opencode" / "sessions"
+
+        adr_files: list[Path] = []
+        if adr_dir.exists():
+            try:
+                adr_files = sorted(adr_dir.glob("ADR-*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+            except OSError:
+                adr_files = []
+
+        session_files: list[Path] = []
+        if session_dir.exists():
+            try:
+                session_files = sorted(session_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+            except OSError:
+                session_files = []
+
+        adr_block = ""
+        for adrf in adr_files[:10]:
+            try:
+                async with aiofiles.open(adrf, encoding="utf-8", mode="r") as f:
+                    content = await f.read()
+                lines = content.splitlines()
+                title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), adrf.stem)
+                date = next((ln.split("created: ")[-1].strip() for ln in lines if ln.startswith("created: ")), "")
+                adr_block += f"- `{adrf.stem}` — {title} ({date})\n"
+            except OSError:
+                continue
+
+        session_block = ""
+        for sf in session_files[:5]:
+            try:
+                async with aiofiles.open(sf, encoding="utf-8", mode="r") as f:
+                    content = await f.read()
+                lines = content.splitlines()
+                task = next((ln.replace("## Task", "").strip() for ln in lines if ln.startswith("## Task")), sf.stem)
+                date = next((ln.split("created: ")[-1].strip() for ln in lines if ln.startswith("created: ")), "")
+                session_block += f"- `{sf.stem}` — {task[:60]} ({date})\n"
+            except OSError:
+                continue
+
+        wiki_pages: list[str] = []
+        try:
+            for md_file in sorted(self.wiki_dir.rglob("*.md")):
+                rel = md_file.relative_to(self.wiki_dir)
+                if rel.name.startswith("_") or rel.parts[0] in ("_archive", "_quarantine", ".obsidian"):
+                    continue
+                wiki_pages.append(str(rel))
+        except OSError:
+            wiki_pages = []
+
+        schema = ""
+        if self.schema_path.exists():
+            async with aiofiles.open(self.schema_path, encoding="utf-8", mode="r") as f:
+                schema = await f.read()
+
+        sync_prompt = f"""You are regenerating AGENTS.md for the SwarmBot project.
+Read the existing AGENTS.md below and update it with fresh knowledge from the wiki.
+
+EXISTING AGENTS.md:
+(do not include this in output)
+
+WIKI KNOWLEDGE:
+## Recent Decisions (from wiki/decisions/):
+{adr_block or "- No decisions recorded yet"}
+
+## Recent OpenCode Sessions (from wiki/opencode/sessions/):
+{session_block or "- No sessions recorded yet"}
+
+## Wiki Pages (from wiki/):
+{chr(10).join(f"- {p}" for p in wiki_pages[:40])}
+
+## Schema excerpt:
+{schema[:800]}
+
+Update the AGENTS.md file. Keep the coding standards, critical rules, commands, and directory guide intact.
+Update the Architecture, Agent System, Wiki Auto-Ingest, and Directory Guide sections with new wiki knowledge.
+Add a "## 🧠 Shared Brain (OpenCode ↔ Legion)" section summarizing how the two agents share the .wiki/ vault.
+Return the COMPLETE updated AGENTS.md markdown. Start with the front-matter line."""
+
+        updated = await self._wiki_llm(sync_prompt, max_tokens=3000)
+        if not updated.strip():
+            logger.warning("sync_agents_md: LLM returned empty")
+            return ""
+
+        try:
+            async with aiofiles.open(agents_md, encoding="utf-8", mode="w") as f:
+                await f.write(updated.strip() + "\n")
+            logger.info("AGENTS.md synced from wiki")
+        except OSError as exc:
+            logger.warning("sync_agents_md: failed to write AGENTS.md: %s", exc)
+            return ""
+
+        return updated.strip()
 
     async def ingest_codebase(self, repo_path: str = ".") -> None:
         repo = Path(repo_path).resolve()
         key_files: list[Path] = []
         for py_file in repo.rglob("*.py"):
             s = str(py_file)
-            if any(
-                x in s for x in ("__pycache__", "test_", ".venv", "migrations")
-            ):
+            if any(x in s for x in ("__pycache__", "test_", ".venv", "migrations")):
                 continue
             if "tests" in py_file.parts:
                 continue

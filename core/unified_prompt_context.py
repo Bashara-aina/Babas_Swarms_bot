@@ -10,6 +10,7 @@ import asyncio
 import logging
 import os
 from datetime import datetime
+
 logger = logging.getLogger(__name__)
 
 _VOICE_RULES = """
@@ -44,6 +45,18 @@ async def _wiki_layer(query: str) -> str:
         return await get_wiki_manager().query(query, top_k=3) or ""
     except Exception as exc:
         logger.debug("unified wiki layer failed: %s", exc)
+        return ""
+
+
+async def _opencode_brain_layer(query: str) -> str:
+    if not _env_on("LEGION_WIKI_ENABLED", "1"):
+        return ""
+    try:
+        from core.wiki_bridge import opencode_query_wiki
+
+        return await opencode_query_wiki(query, top_k=2) or ""
+    except Exception as exc:
+        logger.debug("unified opencode brain layer failed: %s", exc)
         return ""
 
 
@@ -157,12 +170,14 @@ async def gather_parallel_prompt_layers(
     sp_fut = _screenpipe_layer(q)
     rag_fut = _rag_layer(q)
     cal_fut = _calendar_layer()
+    opencode_fut = _opencode_brain_layer(q)
 
-    wiki_r, sp_r, rag_r, cal_r, emo_r = await asyncio.gather(
+    wiki_r, sp_r, rag_r, cal_r, oc_r, emo_r = await asyncio.gather(
         wiki_fut,
         sp_fut,
         rag_fut,
         cal_fut,
+        opencode_fut,
         emo_fut,
         return_exceptions=True,
     )
@@ -176,6 +191,7 @@ async def gather_parallel_prompt_layers(
         ("screenpipe", sp_r),
         ("rag", rag_r),
         ("calendar", cal_r),
+        ("opencode_brain", oc_r),
         ("emotion_pad", emo_r),
     ):
         if isinstance(res, BaseException):

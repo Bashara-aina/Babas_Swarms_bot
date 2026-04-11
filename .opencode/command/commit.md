@@ -1,0 +1,1 @@
+Review all uncommitted changes in git, write a clear conventional commit message, run all tests, and if tests pass commit with the message. Format: type(scope): description. Types: feat, fix, refactor, docs, test, chore. Also update .wiki/logs/ with what was committed.
