@@ -17,8 +17,8 @@ psutil>=5.9.0
 
 # Context memory (optional but supported)
 openviking>=0.2.5
-
-# Web/research
+chromadb==1.5.6
+aiofiles>=23.2.0
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 playwright>=1.40.0
@@ -93,6 +93,8 @@ langchain-community>=0.3.0
 # === v8 Tier-3 — Screenpipe, MCP, LiveKit token helpers, search ===
 mcp>=1.2.0
 livekit-api>=0.8.0
+duckduckgo-search>=4.0.0
+apscheduler>=3.10.0
 
 # === v9 Soul Transplant ===
 browser-use==0.1.40  # autonomous LLM-driven browsing (browse_task)

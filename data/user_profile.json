@@ -53,6 +53,18 @@
     "multi-agent AI systems",
     "VPS/cloud infrastructure"
   ],
-  "known_facts": [],
-  "interaction_patterns": []
+  "known_facts": [
+    "test_fact_xyz_123"
+  ],
+  "interaction_patterns": [],
+  "schedule_notes": [],
+  "contacts_highlight": [],
+  "world": {
+    "planned_travel": "",
+    "business_priorities": [
+      "rumahlabuh.com — bookings, site health, Supabase",
+      "Legion bot — reliability, memory, routing"
+    ],
+    "quiet_hours_local": "00:00–07:00 (avoid non-urgent pings)"
+  }
 }

@@ -36,37 +36,89 @@ class TaskType(str, Enum):
 
 # Order matters: first match wins (put more specific routes first).
 KEYWORD_ROUTES: list[tuple[TaskType, tuple[str, ...]]] = [
-    (TaskType.SIMULATION, (
-        "what if ", "simulate ", "how would ", "market reaction",
-        "pros and cons", "should i launch", "scenario ",
-    )),
-    (TaskType.DEBATE, (
-        "devil's advocate", "argue for and against", "debate whether",
-        "is this a good idea", "challenge my assumption",
-    )),
-    (TaskType.DOCUMENT, (
-        "business plan", "technical spec", "investment analysis",
-        "research report on", "prd for", "architecture design for",
-        "competitive analysis", "market analysis of", "write a formal report",
-    )),
-    (TaskType.BROWSER, (
-        "open https://", "go to https://", "go to http://",
-        "fetch the page", "scrape https://", "check the site ",
-        "look up on the website",
-    )),
-    (TaskType.COMPUTER_CONTROL, (
-        "take a screenshot", "on my screen", "open terminal",
-        "run on my machine", "click at ", "xdotool",
-    )),
-    (TaskType.CODE, (
-        "traceback", "syntaxerror", "attributeerror", "pull request",
-        "refactor this", "implement ", "write tests for",
-        "github issue", "stack trace",
-    )),
-    (TaskType.RESEARCH, (
-        "find papers on", "literature review", "compare vendors",
-        "survey of ", "deep research on",
-    )),
+    (
+        TaskType.SIMULATION,
+        (
+            "what if ",
+            "simulate ",
+            "how would ",
+            "market reaction",
+            "pros and cons",
+            "should i launch",
+            "scenario ",
+        ),
+    ),
+    (
+        TaskType.DEBATE,
+        (
+            "devil's advocate",
+            "argue for and against",
+            "debate whether",
+            "is this a good idea",
+            "challenge my assumption",
+        ),
+    ),
+    (
+        TaskType.DOCUMENT,
+        (
+            "business plan",
+            "technical spec",
+            "investment analysis",
+            "research report on",
+            "prd for",
+            "architecture design for",
+            "competitive analysis",
+            "market analysis of",
+            "write a formal report",
+        ),
+    ),
+    (
+        TaskType.BROWSER,
+        (
+            "open https://",
+            "go to https://",
+            "go to http://",
+            "fetch the page",
+            "scrape https://",
+            "check the site ",
+            "look up on the website",
+        ),
+    ),
+    (
+        TaskType.COMPUTER_CONTROL,
+        (
+            "take a screenshot",
+            "on my screen",
+            "open terminal",
+            "run on my machine",
+            "click at ",
+            "xdotool",
+        ),
+    ),
+    (
+        TaskType.CODE,
+        (
+            "traceback",
+            "syntaxerror",
+            "attributeerror",
+            "pull request",
+            "refactor this",
+            "implement ",
+            "write tests for",
+            "github issue",
+            "stack trace",
+        ),
+    ),
+    (
+        TaskType.RESEARCH,
+        (
+            "find papers on",
+            "literature review",
+            "compare vendors",
+            "survey of ",
+            "deep research on",
+        ),
+    ),
 ]
 
 
@@ -85,7 +137,7 @@ class TaskRouter:
     def __init__(self) -> None:
         self._classify_model = os.getenv(
             "LEGION_TASK_ROUTER_CLASSIFY_MODEL",
-            "groq/llama-3.1-8b-instant",
+            "minimax/MiniMax-M2.7",
         )
 
     async def route(
@@ -177,7 +229,10 @@ class TaskRouter:
 
     async def _run_research(self, message: str, user_id: str, context: str) -> str:
         if os.getenv("LEGION_RESEARCH_USE_PIPELINE", "").strip().lower() in (
-            "1", "true", "yes", "on",
+            "1",
+            "true",
+            "yes",
+            "on",
         ):
             try:
                 from agents.research_agent import run_research_pipeline
@@ -210,8 +265,7 @@ class TaskRouter:
         if not parts:
             q = (message + ("\n\n" + context if context else ""))[:2000]
             text, _ = await chat(
-                "User wants browser-like info but gave no URL. "
-                "Explain you need a link, or use /scrape <url>.\n\n" + q,
+                "User wants browser-like info but gave no URL. Explain you need a link, or use /scrape <url>.\n\n" + q,
                 agent_key="general",
                 user_id=user_id,
             )
@@ -356,10 +410,7 @@ class TaskRouter:
         return final
 
     async def _decompose_json(self, message: str, context: str) -> dict:
-        schema = (
-            '{"subtasks":[{"agent":"research","task":"..."},'
-            '{"agent":"code","task":"..."}]}'
-        )
+        schema = '{"subtasks":[{"agent":"research","task":"..."},{"agent":"code","task":"..."}]}'
         prompt = (
             "Decompose into parallel subtasks. Max 4. Reply with JSON only, no markdown.\n"
             f"Schema example: {schema}\n"

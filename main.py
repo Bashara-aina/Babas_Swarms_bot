@@ -46,6 +46,11 @@ from dotenv import load_dotenv
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env")
 
+_REQUIRED_KEYS = ["TELEGRAM_BOT_TOKEN", "ALLOWED_USER_ID"]
+_missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]
+if _missing:
+    raise RuntimeError(f"Missing required env vars: {_missing}")
+
 import computer_agent
 import agents as agents_registry
 from llm_client import init_humanization_layer, verify_api_keys
@@ -53,6 +58,10 @@ import handlers.shared as _shared
 from handlers import register_all_routers
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
 from core.observability import init_observability
+from core.wiki_scheduler import WikiQualityScheduler
+
+# ── Wiki Quality Scheduler global handle ─────────────────────────────────────
+_wiki_scheduler: WikiQualityScheduler | None = None
 
 # ── Logging ────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -99,6 +108,7 @@ class ActivityLogMiddleware(BaseMiddleware):
         try:
             if event.from_user and event.from_user.id == ALLOWED_USER_ID:
                 import handlers.shared as _sh
+
                 _sh._last_user_message_ts = time.time()
         except Exception:
             pass
@@ -150,6 +160,7 @@ def _install_outbound_logging(bot: Bot) -> None:
     bot.edit_message_text = edit_message_text_logged  # type: ignore[assignment]
     bot.send_photo = send_photo_logged  # type: ignore[assignment]
     logger.info("Activity outbound logging hooks installed (send/edit/photo)")
+
 
 # ── Config ────────────────────────────────────────────────────────────────────
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -217,6 +228,7 @@ async def _bootstrap_supabase_skill() -> None:
 
     try:
         from tools.supabase_client import get_client, is_configured
+
         if not is_configured():
             logger.info("Supabase not configured — skipping skill bootstrap")
             return
@@ -227,153 +239,178 @@ async def _bootstrap_supabase_skill() -> None:
         logger.warning("Supabase skill bootstrap failed (non-fatal): %s", exc)
 
 
-async def on_startup(bot: Bot) -> None:
-    init_observability()
+async def _run_group_a_startup(bot: Bot) -> None:
+    """Run all independent startup tasks in parallel via asyncio.gather."""
 
-    try:
-        layer = init_humanization_layer()
-        mem = layer.get("memory")
-        emo = layer.get("emotion")
-        logger.info("[Legion v6] Memory: %s", mem.get_memory_stats() if mem else {})
-        logger.info(
-            "[Legion v6] Emotion: %s",
-            getattr(getattr(emo, "state", None), "dominant_emotion", "loaded"),
-        )
-        logger.info("[Legion v6] Humanization layer active.")
-    except Exception as e:
-        logger.warning("Humanization init failed (non-fatal): %s", e)
-
-    try:
-        from core.agent_registry import load_registry
-        load_registry()
-        logger.info("Agent registry loaded from YAML (76 agents)")
-    except Exception as e:
-        logger.warning("Agent registry YAML load failed (non-fatal): %s", e)
-
-    try:
-        from tools.letta_personality import init_personality_state
-
-        state = init_personality_state()
-        logger.info("Personality state loaded: %s", state.get("dominant_emotion", "neutral"))
-    except Exception as e:
-        logger.warning("Personality init failed (non-fatal): %s", e)
-
-    try:
-        from tools.memoryos_client import get_memoryos
-
-        mos = get_memoryos("bashara")
-        if mos:
-            logger.info("✅ MemoryOS initialized (hierarchical memory tiers)")
-    except Exception as e:
-        logger.warning("MemoryOS init failed (non-fatal): %s", e)
-
-    try:
-        from tools.n8n_bridge import start_n8n_webhook_listener
-
-        start_n8n_webhook_listener()
-        logger.info("n8n webhook listener scheduled")
-    except Exception as e:
-        logger.warning("n8n init failed (non-fatal): %s", e)
-
-    try:
-        from tools.proactive_monitors import start_monitors
-
-        for task in await start_monitors(bot, ALLOWED_USER_ID):
-            _ = task
-        interval = int(os.getenv("PROACTIVE_MIN_INTERVAL_SEC", "1800"))
-        logger.info("Proactive monitors scheduled (min_interval=%ds, env: PROACTIVE_MIN_INTERVAL_SEC)", interval)
-    except Exception as e:
-        logger.warning("Proactive monitors init failed (non-fatal): %s", e)
-
-    try:
-        from tools.proactive_initiator import start_proactive_initiator
-
-        asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))
-        logger.info("Proactive initiator started (Legion talks first)")
-    except Exception as e:
-        logger.warning("Proactive initiator init failed (non-fatal): %s", e)
-
-    try:
-        if os.getenv("SCREENPIPE_ENABLED", "").strip().lower() in ("1", "true", "yes", "on"):
-            if os.getenv("SCREENPIPE_PROACTIVE_ENABLED", "1").strip().lower() not in (
-                "0",
-                "false",
-                "no",
-                "off",
-            ):
-                from bridges.screenpipe_bridge import ScreenpipeBridge
-
-                _sp_bridge = ScreenpipeBridge(bot, ALLOWED_USER_ID)
-                asyncio.create_task(_sp_bridge.monitor_loop())
-                logger.info("Screenpipe proactive monitor started")
-    except Exception as e:
-        logger.warning("Screenpipe bridge init failed (non-fatal): %s", e)
-
-    try:
-        from core.proactive.scheduler import get_scheduler
-
-        async def _proactive_notify(text: str) -> None:
-            await bot.send_message(ALLOWED_USER_ID, text[:4000], parse_mode="HTML")
-
-        get_scheduler(str(ALLOWED_USER_ID), _proactive_notify, ALLOWED_USER_ID).start()
-        logger.info("ProactiveScheduler started (schedule + business + GitHub checks)")
-    except Exception as e:
-        logger.warning("ProactiveScheduler init failed (non-fatal): %s", e)
-
-    try:
-        from core.proactive.curiosity_engine import run_curiosity_loop
-
-        async def _curiosity_notify(text: str) -> None:
-            await bot.send_message(ALLOWED_USER_ID, text[:4000])
-
-        def _get_last_user_ts() -> float:
-            try:
-                import handlers.shared as _sh
-                return _sh._last_user_message_ts
-            except Exception:
-                return 0.0
-
-        asyncio.create_task(run_curiosity_loop(_curiosity_notify, _get_last_user_ts))
-        logger.info("Curiosity engine started")
-    except Exception as e:
-        logger.warning("Curiosity engine init failed (non-fatal): %s", e)
-
-    try:
-        from tools.voice_engine import run_prewarm
-
-        await run_prewarm()
-        logger.info("Voice engine pre-warmed")
-    except Exception as e:
-        logger.warning("Voice prewarm failed (non-fatal): %s", e)
-
-    try:
-        agents_registry.ensure_gemma4_local_available()
-    except Exception as e:
-        logger.warning("gemma4 local prep failed (non-fatal): %s", e)
-
-    if os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+    async def _start_observability() -> None:
         try:
-            subprocess.Popen(
-                ["node", "tools/ruflo/server.js"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+            init_observability()
+        except Exception as e:
+            logger.warning("Observability init failed (non-fatal): %s", e)
+
+    async def _start_humanization() -> None:
+        try:
+            layer = init_humanization_layer()
+            mem = layer.get("memory")
+            emo = layer.get("emotion")
+            logger.info("[Legion v6] Memory: %s", mem.get_memory_stats() if mem else {})
+            logger.info(
+                "[Legion v6] Emotion: %s",
+                getattr(getattr(emo, "state", None), "dominant_emotion", "loaded"),
             )
-            logger.info("ruflo sidecar launched")
+            logger.info("[Legion v6] Humanization layer active.")
         except Exception as e:
-            logger.warning("ruflo sidecar launch failed (non-fatal): %s", e)
+            logger.warning("Humanization init failed (non-fatal): %s", e)
 
+    async def _start_registry() -> None:
         try:
-            if await _wait_for_ruflo_health():
-                logger.info("ruflo sidecar healthy on startup")
-            else:
-                logger.warning("ruflo sidecar health probe failed on startup (non-fatal)")
-        except Exception as e:
-            logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
+            from core.agent_registry import load_registry
 
+            load_registry()
+            logger.info("Agent registry loaded from YAML (76 agents)")
+        except Exception as e:
+            logger.warning("Agent registry YAML load failed (non-fatal): %s", e)
+
+    async def _start_personality() -> None:
+        try:
+            from tools.letta_personality import init_personality_state
+
+            state = init_personality_state()
+            logger.info("Personality state loaded: %s", state.get("dominant_emotion", "neutral"))
+        except Exception as e:
+            logger.warning("Personality init failed (non-fatal): %s", e)
+
+    async def _start_memoryos() -> None:
+        try:
+            from tools.memoryos_client import get_memoryos
+
+            mos = get_memoryos("bashara")
+            if mos:
+                logger.info("✅ MemoryOS initialized (hierarchical memory tiers)")
+        except Exception as e:
+            logger.warning("MemoryOS init failed (non-fatal): %s", e)
+
+    async def _start_n8n() -> None:
+        try:
+            from tools.n8n_bridge import start_n8n_webhook_listener
+
+            start_n8n_webhook_listener()
+            logger.info("n8n webhook listener scheduled")
+        except Exception as e:
+            logger.warning("n8n init failed (non-fatal): %s", e)
+
+    async def _start_monitors() -> None:
+        try:
+            from tools.proactive_monitors import start_monitors
+
+            for task in await start_monitors(bot, ALLOWED_USER_ID):
+                _ = task
+            interval = int(os.getenv("PROACTIVE_MIN_INTERVAL_SEC", "1800"))
+            logger.info("Proactive monitors scheduled (min_interval=%ds, env: PROACTIVE_MIN_INTERVAL_SEC)", interval)
+        except Exception as e:
+            logger.warning("Proactive monitors init failed (non-fatal): %s", e)
+
+    async def _start_proactive_scheduler() -> None:
+        try:
+            from core.proactive.scheduler import get_scheduler
+
+            async def _proactive_notify(text: str) -> None:
+                await bot.send_message(ALLOWED_USER_ID, text[:4000], parse_mode="HTML")
+
+            get_scheduler(str(ALLOWED_USER_ID), _proactive_notify, ALLOWED_USER_ID).start()
+            logger.info("ProactiveScheduler started (schedule + business + GitHub checks)")
+        except Exception as e:
+            logger.warning("ProactiveScheduler init failed (non-fatal): %s", e)
+
+    async def _start_curiosity_engine() -> None:
+        try:
+            from core.proactive.curiosity_engine import run_curiosity_loop
+
+            async def _curiosity_notify(text: str) -> None:
+                await bot.send_message(ALLOWED_USER_ID, text[:4000])
+
+            def _get_last_user_ts() -> float:
+                try:
+                    import handlers.shared as _sh
+
+                    return _sh._last_user_message_ts
+                except Exception:
+                    return 0.0
+
+            asyncio.create_task(run_curiosity_loop(_curiosity_notify, _get_last_user_ts))
+            logger.info("Curiosity engine started")
+        except Exception as e:
+            logger.warning("Curiosity engine init failed (non-fatal): %s", e)
+
+    async def _start_voice_prewarm() -> None:
+        try:
+            from tools.voice_engine import run_prewarm
+
+            await run_prewarm()
+            logger.info("Voice engine pre-warmed")
+        except Exception as e:
+            logger.warning("Voice prewarm failed (non-fatal): %s", e)
+
+    async def _start_gemma4_prep() -> None:
+        try:
+            agents_registry.ensure_gemma4_local_available()
+        except Exception as e:
+            logger.warning("gemma4 local prep failed (non-fatal): %s", e)
+
+    async def _start_wiki_quality_scheduler() -> None:
+        global _wiki_scheduler
+        try:
+
+            async def _wiki_notify(text: str) -> None:
+                await bot.send_message(ALLOWED_USER_ID, text[:4000])
+
+            _wiki_scheduler = WikiQualityScheduler(_wiki_notify, ALLOWED_USER_ID)
+            _wiki_scheduler.start()
+            logger.info("WikiQualityScheduler started")
+        except Exception as e:
+            logger.warning("WikiQualityScheduler init failed (non-fatal): %s", e)
+
+    async def _register_lifecycle_hooks() -> None:
+        try:
+            from core.builtin_hooks import register_builtin_hooks
+
+            register_builtin_hooks()
+            logger.info("Lifecycle hooks registered")
+        except Exception as e:
+            logger.warning("Hook init failed (non-fatal): %s", e)
+
+    # Run all Group A tasks in parallel with a 30s timeout
+    await asyncio.wait_for(
+        asyncio.gather(
+            _start_observability(),
+            _start_humanization(),
+            _start_registry(),
+            _start_personality(),
+            _start_memoryos(),
+            _start_n8n(),
+            _start_monitors(),
+            _start_proactive_scheduler(),
+            _start_curiosity_engine(),
+            _start_voice_prewarm(),
+            _start_gemma4_prep(),
+            _start_wiki_quality_scheduler(),
+            _register_lifecycle_hooks(),
+            return_exceptions=True,
+        ),
+        timeout=30.0,
+    )
+
+
+async def on_startup(bot: Bot) -> None:
+    # Group A: Run all independent tasks in parallel
+    await _run_group_a_startup(bot)
+
+    # Group B: Run sequentially after parallel tasks complete
     # Initialize persistence and scheduler
     try:
         from tools.persistence import init_db
         from tools.scheduler import TaskScheduler
+
         await init_db()
         _shared._scheduler = TaskScheduler(bot, ALLOWED_USER_ID)
         await _shared._scheduler.start()
@@ -381,17 +418,10 @@ async def on_startup(bot: Bot) -> None:
     except Exception as e:
         logger.warning("Scheduler init failed (non-fatal): %s", e)
 
-    # Register lifecycle hooks
-    try:
-        from core.builtin_hooks import register_builtin_hooks
-        register_builtin_hooks()
-        logger.info("Lifecycle hooks registered")
-    except Exception as e:
-        logger.warning("Hook init failed (non-fatal): %s", e)
-
     # Initialize memory DB
     try:
         from tools.memory import init_memory_db
+
         await init_memory_db()
         logger.info("Memory DB initialized")
     except Exception as e:
@@ -400,18 +430,21 @@ async def on_startup(bot: Bot) -> None:
     # Initialize persistent conversation history DB + cleanup old turns
     try:
         from agents import _init_conv_db, _cleanup_old_turns
+
         await _init_conv_db()
         asyncio.create_task(_cleanup_old_turns())
         logger.info("Conversation history DB initialized (SQLite-backed)")
     except Exception as e:
         logger.warning("Conversation history DB init failed (non-fatal): %s", e)
 
+    # Group C: Fire-and-forget tasks (already using create_task — no changes needed)
     # Bootstrap Supabase skill file from live schema (non-blocking)
     asyncio.create_task(_bootstrap_supabase_skill())
 
     # Schedule daily briefing at 7:30 AM
     try:
         from tools.briefing import schedule_daily_briefing
+
         asyncio.create_task(schedule_daily_briefing(bot, ALLOWED_USER_ID, hour=7, minute=30))
         logger.info("Daily briefing scheduled for 07:30")
     except Exception as e:
@@ -420,6 +453,7 @@ async def on_startup(bot: Bot) -> None:
     # Schedule nightly capability regression at 03:40 AM
     try:
         from tools.capability_nightly import schedule_nightly_capability_report
+
         asyncio.create_task(schedule_nightly_capability_report(bot, ALLOWED_USER_ID, hour=3, minute=40))
         logger.info("Nightly capability regression scheduled for 03:40")
     except Exception as e:
@@ -427,8 +461,10 @@ async def on_startup(bot: Bot) -> None:
 
     # Schedule nightly memory consolidation at 02:00 AM
     try:
+
         async def _run_memory_consolidation_nightly() -> None:
             import calendar
+
             while True:
                 now = datetime.now()
                 target = now.replace(hour=2, minute=0, second=0, microsecond=0)
@@ -447,6 +483,7 @@ async def on_startup(bot: Bot) -> None:
                 await asyncio.sleep((target - now).total_seconds())
                 try:
                     from core.memory.consolidator import run_nightly
+
                     result = await run_nightly()
                     logger.info("Memory consolidation done: %s", result)
                 except Exception as _ce:
@@ -460,8 +497,10 @@ async def on_startup(bot: Bot) -> None:
 
     # Schedule daily GitHub trending intelligence at 09:00 AM
     try:
+
         async def _run_github_intel_daily() -> None:
             import calendar
+
             while True:
                 now = datetime.now()
                 target = now.replace(hour=9, minute=0, second=0, microsecond=0)
@@ -480,6 +519,7 @@ async def on_startup(bot: Bot) -> None:
                 await asyncio.sleep((target - now).total_seconds())
                 try:
                     from tools.github_intel import GitHubIntelEngine
+
                     engine = GitHubIntelEngine()
 
                     async def _notify(text: str) -> None:
@@ -496,6 +536,65 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Daily GitHub intel scheduled for 09:00")
     except Exception as e:
         logger.warning("GitHub intel schedule failed (non-fatal): %s", e)
+
+    # Proactive initiator (fire-and-forget)
+    try:
+        from tools.proactive_initiator import start_proactive_initiator
+
+        asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))
+        logger.info("Proactive initiator started (Legion talks first)")
+    except Exception as e:
+        logger.warning("Proactive initiator init failed (non-fatal): %s", e)
+
+    # Proactive engine (monitoring loop)
+    try:
+        from core.proactive_engine import run_proactive_loop, register_sender
+
+        async def _legion_proactive_send(text: str) -> None:
+            await bot.send_message(chat_id=int(os.getenv("ALLOWED_USER_ID")), text=text, parse_mode="Markdown")
+
+        register_sender(_legion_proactive_send)
+        asyncio.create_task(run_proactive_loop())
+        logger.info("Proactive engine started (site/GPU/thesis monitoring)")
+    except Exception as e:
+        logger.warning("Proactive engine init failed (non-fatal): %s", e)
+
+    # Screenpipe (fire-and-forget, conditional)
+    try:
+        if os.getenv("SCREENPIPE_ENABLED", "").strip().lower() in ("1", "true", "yes", "on"):
+            if os.getenv("SCREENPIPE_PROACTIVE_ENABLED", "1").strip().lower() not in (
+                "0",
+                "false",
+                "no",
+                "off",
+            ):
+                from bridges.screenpipe_bridge import ScreenpipeBridge
+
+                _sp_bridge = ScreenpipeBridge(bot, ALLOWED_USER_ID)
+                asyncio.create_task(_sp_bridge.monitor_loop())
+                logger.info("Screenpipe proactive monitor started")
+    except Exception as e:
+        logger.warning("Screenpipe bridge init failed (non-fatal): %s", e)
+
+    # ruflo sidecar (synchronous launch + async health check)
+    if os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            subprocess.Popen(
+                ["node", "tools/ruflo/server.js"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            logger.info("ruflo sidecar launched")
+        except Exception as e:
+            logger.warning("ruflo sidecar launch failed (non-fatal): %s", e)
+
+        try:
+            if await _wait_for_ruflo_health():
+                logger.info("ruflo sidecar healthy on startup")
+            else:
+                logger.warning("ruflo sidecar health probe failed on startup (non-fatal)")
+        except Exception as e:
+            logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
 
     # Initialize swarms_bot enterprise layer
     try:
@@ -534,121 +633,133 @@ async def on_startup(bot: Bot) -> None:
     # fix: wrap set_my_commands in try/except — Telegram API slowness on startup
     # must not prevent the rest of the boot sequence from completing.
     try:
-        await bot.set_my_commands([
-            BotCommand(command="do",          description="Autonomous computer control"),
-            BotCommand(command="screen",      description="Take desktop screenshot"),
-            BotCommand(command="run",         description="LLM chat (no computer)"),
-            BotCommand(command="swarm",       description="Multi-agent team execution"),
-            BotCommand(command="owl",         description="OWL specialist complex-task agent"),
-            BotCommand(command="predict",     description="Swarm consensus prediction"),
-            BotCommand(command="code_exec",   description="Write + execute code safely"),
-            BotCommand(command="ag2",         description="AG2 multi-agent research conversation"),
-            BotCommand(command="swarm_viz",   description="Visualize agents/thoughts/communications"),
-            BotCommand(command="think",       description="QwQ deep reasoning"),
-            BotCommand(command="cmd",         description="Run shell command"),
-            # Research
-            BotCommand(command="paper",       description="Search arXiv papers"),
-            BotCommand(command="ask_paper",   description="Ask about a paper"),
-            BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
-            BotCommand(command="research",    description="Deep web research"),
-            BotCommand(command="jarvis",      description="Context bundle + plan (no auto-send)"),
-            BotCommand(command="scrape",      description="Scrape a URL"),
-            # Memory
-            BotCommand(command="memory",      description="Humanized memory stats"),
-            BotCommand(command="remember",    description="Save a note to memory"),
-            BotCommand(command="recall",      description="Search memory"),
-            BotCommand(command="forget",      description="Remove core memory key"),
-            BotCommand(command="emotion",     description="Legion emotional state"),
-            BotCommand(command="voice_toggle", description="Toggle voice replies"),
-            BotCommand(command="oi",          description="Force Open Interpreter computer control"),
-            BotCommand(command="om_stats",    description="OpenMemory sector statistics"),
-            BotCommand(command="n8n",         description="n8n automation status"),
-            BotCommand(command="debate",      description="Debate a topic with Legion"),
-            BotCommand(command="opinion",     description="Get Legion's honest opinion"),
-            BotCommand(command="opinions",    description="Legion current opinions"),
-            BotCommand(command="profile",     description="Persistent user profile"),
-            BotCommand(command="teach",       description="Teach/correct Legion profile"),
-            BotCommand(command="memories",    description="Show recent memories"),
-            BotCommand(command="briefing",    description="Morning briefing"),
-            BotCommand(command="monitor",     description="System health + alert thresholds"),
-            # Dev
-            BotCommand(command="scaffold",    description="Create project scaffold"),
-            BotCommand(command="build",       description="Parallel fullstack build"),
-            BotCommand(command="gpu",         description="GPU health status"),
-            BotCommand(command="vuln_scan",   description="Vulnerability scan"),
-            # Tasks
-            BotCommand(command="task_from",   description="Extract tasks from text"),
-            BotCommand(command="tasks_due",   description="Show pending tasks"),
-            # Content
-            BotCommand(command="post",        description="Draft social media post"),
-            BotCommand(command="brand_check", description="Monitor brand mentions"),
-            # Code Quality
-            BotCommand(command="review",      description="AI code review"),
-            BotCommand(command="security_review", description="Security audit"),
-            # Orchestration
-            BotCommand(command="orchestrate", description="Decompose + execute complex task"),
-            BotCommand(command="multi_plan",  description="Compare 3 agent approaches"),
-            BotCommand(command="plan",        description="ECC-style implementation planning"),
-            BotCommand(command="quality_gate", description="Generate + verify grounded answer"),
-            BotCommand(command="verify",      description="Alias for quality gate"),
-            BotCommand(command="eval",        description="Evaluate/verify an answer or plan"),
-            BotCommand(command="model_route", description="Show routed agent/model chain"),
-            BotCommand(command="harness_audit", description="Harness readiness audit"),
-            BotCommand(command="code_review", description="ECC-style code review"),
-            BotCommand(command="python_review", description="Python-focused code review"),
-            BotCommand(command="refactor_clean", description="Format + cleanup review"),
-            BotCommand(command="test_coverage", description="Run pytest coverage"),
-            BotCommand(command="tdd",         description="Generate TDD plan"),
-            BotCommand(command="prompt_optimize", description="Optimize a prompt"),
-            BotCommand(command="build_fix",   description="Analyze build failures"),
-            BotCommand(command="go_build",    description="Run go build ./..."),
-            BotCommand(command="go_test",     description="Run go test ./..."),
-            BotCommand(command="go_review",   description="Review Go code"),
-            BotCommand(command="kotlin_build", description="Run Kotlin/Gradle build"),
-            BotCommand(command="kotlin_test", description="Run Kotlin/Gradle tests"),
-            BotCommand(command="kotlin_review", description="Review Kotlin code"),
-            BotCommand(command="gradle_build", description="Run Gradle build"),
-            BotCommand(command="pm2",         description="Check PM2 status"),
-            BotCommand(command="promote",     description="Generate promotion notes"),
-            BotCommand(command="evolve",      description="Create evolution roadmap"),
-            BotCommand(command="aside",       description="Create concise side note"),
-            BotCommand(command="loop",        description="Autonomous goal execution loop"),
-            BotCommand(command="loop_stop",   description="Stop running loop"),
-            BotCommand(command="loop_status", description="Loop progress status"),
-            BotCommand(command="loop_pause",  description="Pause running loop"),
-            BotCommand(command="loop_resume", description="Resume paused loop"),
-            BotCommand(command="multi_execute", description="Alias multi-agent compare"),
-            BotCommand(command="budget",     description="Cost tracking dashboard"),
-            BotCommand(command="metrics",    description="Performance metrics dashboard"),
-            BotCommand(command="routing_stats", description="Routing analytics"),
-            BotCommand(command="audit_summary", description="Audit log summary"),
-            # Sessions & Learning
-            BotCommand(command="save",        description="Save session state"),
-            BotCommand(command="resume",      description="Resume saved session"),
-            BotCommand(command="checkpoint",  description="Save named checkpoint"),
-            BotCommand(command="sessions",    description="List saved sessions"),
-            BotCommand(command="learn",       description="Teach a pattern"),
-            BotCommand(command="learn_eval",  description="Evaluate learned instincts"),
-            BotCommand(command="instincts",   description="Show learned patterns"),
-            BotCommand(command="instinct_status", description="Instincts by category"),
-            BotCommand(command="skill_create", description="Create a new skill file"),
-            BotCommand(command="update_docs", description="Generate docs update draft"),
-            BotCommand(command="update_codemaps", description="Regenerate codemap doc"),
-            BotCommand(command="projects",    description="List workspace projects/files"),
-            BotCommand(command="setup_pm",    description="Package manager/setup guide"),
-            BotCommand(command="claw",        description="Delegate to OpenClaw"),
-            BotCommand(command="audit",       description="Activity audit trail"),
-            # System
-            BotCommand(command="models",      description="Agent roster"),
-            BotCommand(command="keys",        description="API key status"),
-            BotCommand(command="resources",   description="RAM / GPU / local model policy"),
-            BotCommand(command="stats",       description="System stats"),
-            BotCommand(command="visualize",   description="Visual dashboard + architecture"),
-            BotCommand(command="capability_stats", description="Capability quality leaderboard"),
-            BotCommand(command="benchmark",   description="Run capability benchmark suite"),
-            BotCommand(command="redteam",     description="Run red-team capability suite"),
-            BotCommand(command="start",       description="Help + status"),
-        ])
+        await bot.set_my_commands(
+            [
+                BotCommand(command="do", description="Autonomous computer control"),
+                BotCommand(command="screen", description="Take desktop screenshot"),
+                BotCommand(command="run", description="LLM chat (no computer)"),
+                BotCommand(command="swarm", description="Multi-agent team execution"),
+                BotCommand(command="owl", description="OWL specialist complex-task agent"),
+                BotCommand(command="predict", description="Swarm consensus prediction"),
+                BotCommand(command="code_exec", description="Write + execute code safely"),
+                BotCommand(command="ag2", description="AG2 multi-agent research conversation"),
+                BotCommand(command="swarm_viz", description="Visualize agents/thoughts/communications"),
+                BotCommand(command="think", description="QwQ deep reasoning"),
+                BotCommand(command="cmd", description="Run shell command"),
+                # Research
+                BotCommand(command="paper", description="Search arXiv papers"),
+                BotCommand(command="ask_paper", description="Ask about a paper"),
+                BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
+                BotCommand(command="research", description="Deep web research"),
+                BotCommand(command="jarvis", description="Context bundle + plan (no auto-send)"),
+                BotCommand(command="scrape", description="Scrape a URL"),
+                # Memory
+                BotCommand(command="memory", description="Humanized memory stats"),
+                BotCommand(command="remember", description="Save a note to memory"),
+                BotCommand(command="recall", description="Search memory"),
+                BotCommand(command="forget", description="Remove core memory key"),
+                BotCommand(command="emotion", description="Legion emotional state"),
+                BotCommand(command="voice_toggle", description="Toggle voice replies"),
+                BotCommand(command="oi", description="Force Open Interpreter computer control"),
+                BotCommand(command="om_stats", description="OpenMemory sector statistics"),
+                BotCommand(command="n8n", description="n8n automation status"),
+                BotCommand(command="debate", description="Debate a topic with Legion"),
+                BotCommand(command="opinion", description="Get Legion's honest opinion"),
+                BotCommand(command="opinions", description="Legion current opinions"),
+                BotCommand(command="profile", description="Persistent user profile"),
+                BotCommand(command="teach", description="Teach/correct Legion profile"),
+                BotCommand(command="memories", description="Show recent memories"),
+                BotCommand(command="briefing", description="Morning briefing"),
+                BotCommand(command="monitor", description="System health + alert thresholds"),
+                # Business
+                BotCommand(command="biz", description="Business metrics dashboard"),
+                BotCommand(command="self_review", description="Legion self-improvement review"),
+                # Dev
+                BotCommand(command="scaffold", description="Create project scaffold"),
+                BotCommand(command="build", description="Parallel fullstack build"),
+                BotCommand(command="gpu", description="GPU health status"),
+                BotCommand(command="vuln_scan", description="Vulnerability scan"),
+                BotCommand(command="opencode", description="Route task to opencode CLI"),
+                # Tasks
+                BotCommand(command="task_from", description="Extract tasks from text"),
+                BotCommand(command="tasks_due", description="Show pending tasks"),
+                # Content
+                BotCommand(command="post", description="Draft social media post"),
+                BotCommand(command="brand_check", description="Monitor brand mentions"),
+                # Code Quality
+                BotCommand(command="review", description="AI code review"),
+                BotCommand(command="security_review", description="Security audit"),
+                # Orchestration
+                BotCommand(command="orchestrate", description="Decompose + execute complex task"),
+                BotCommand(command="multi_plan", description="Compare 3 agent approaches"),
+                BotCommand(command="plan", description="ECC-style implementation planning"),
+                BotCommand(command="quality_gate", description="Generate + verify grounded answer"),
+                BotCommand(command="verify", description="Alias for quality gate"),
+                BotCommand(command="eval", description="Evaluate/verify an answer or plan"),
+                BotCommand(command="model_route", description="Show routed agent/model chain"),
+                BotCommand(command="harness_audit", description="Harness readiness audit"),
+                BotCommand(command="code_review", description="ECC-style code review"),
+                BotCommand(command="python_review", description="Python-focused code review"),
+                BotCommand(command="refactor_clean", description="Format + cleanup review"),
+                BotCommand(command="test_coverage", description="Run pytest coverage"),
+                BotCommand(command="tdd", description="Generate TDD plan"),
+                BotCommand(command="prompt_optimize", description="Optimize a prompt"),
+                BotCommand(command="build_fix", description="Analyze build failures"),
+                BotCommand(command="go_build", description="Run go build ./..."),
+                BotCommand(command="go_test", description="Run go test ./..."),
+                BotCommand(command="go_review", description="Review Go code"),
+                BotCommand(command="kotlin_build", description="Run Kotlin/Gradle build"),
+                BotCommand(command="kotlin_test", description="Run Kotlin/Gradle tests"),
+                BotCommand(command="kotlin_review", description="Review Kotlin code"),
+                BotCommand(command="gradle_build", description="Run Gradle build"),
+                BotCommand(command="pm2", description="Check PM2 status"),
+                BotCommand(command="promote", description="Generate promotion notes"),
+                BotCommand(command="evolve", description="Create evolution roadmap"),
+                BotCommand(command="aside", description="Create concise side note"),
+                BotCommand(command="loop", description="Autonomous goal execution loop"),
+                BotCommand(command="loop_stop", description="Stop running loop"),
+                BotCommand(command="loop_status", description="Loop progress status"),
+                BotCommand(command="loop_pause", description="Pause running loop"),
+                BotCommand(command="loop_resume", description="Resume paused loop"),
+                BotCommand(command="multi_execute", description="Alias multi-agent compare"),
+                BotCommand(command="budget", description="Cost tracking dashboard"),
+                BotCommand(command="metrics", description="Performance metrics dashboard"),
+                BotCommand(command="routing_stats", description="Routing analytics"),
+                BotCommand(command="audit_summary", description="Audit log summary"),
+                # Sessions & Learning
+                BotCommand(command="save", description="Save session state"),
+                BotCommand(command="resume", description="Resume saved session"),
+                BotCommand(command="checkpoint", description="Save named checkpoint"),
+                BotCommand(command="sessions", description="List saved sessions"),
+                BotCommand(command="learn", description="Teach a pattern"),
+                BotCommand(command="learn_eval", description="Evaluate learned instincts"),
+                BotCommand(command="instincts", description="Show learned patterns"),
+                BotCommand(command="instinct_status", description="Instincts by category"),
+                BotCommand(command="skill_create", description="Create a new skill file"),
+                BotCommand(command="update_docs", description="Generate docs update draft"),
+                BotCommand(command="update_codemaps", description="Regenerate codemap doc"),
+                BotCommand(command="projects", description="List workspace projects/files"),
+                BotCommand(command="setup_pm", description="Package manager/setup guide"),
+                BotCommand(command="claw", description="Delegate to OpenClaw"),
+                BotCommand(command="audit", description="Activity audit trail"),
+                # Wiki
+                BotCommand(command="wiki_audit", description="Wiki quality status + quarantine"),
+                BotCommand(command="wiki_scan", description="Run full wiki deep evaluation"),
+                BotCommand(command="wiki_stats", description="Wiki quality by directory"),
+                BotCommand(command="wiki_flush", description="Delete quarantined wiki files"),
+                BotCommand(command="wiki_restore", description="Restore quarantined files"),
+                # System
+                BotCommand(command="models", description="Agent roster"),
+                BotCommand(command="keys", description="API key status"),
+                BotCommand(command="resources", description="RAM / GPU / local model policy"),
+                BotCommand(command="stats", description="System stats"),
+                BotCommand(command="visualize", description="Visual dashboard + architecture"),
+                BotCommand(command="capability_stats", description="Capability quality leaderboard"),
+                BotCommand(command="benchmark", description="Run capability benchmark suite"),
+                BotCommand(command="redteam", description="Run red-team capability suite"),
+                BotCommand(command="start", description="Help + status"),
+            ]
+        )
         logger.info("Bot commands registered")
     except Exception as e:
         logger.warning("set_my_commands failed (non-fatal): %s", e)
@@ -668,11 +779,22 @@ async def on_startup(bot: Bot) -> None:
     logger.info("=" * 55)
 
 
+async def on_shutdown(dispatcher: Dispatcher) -> None:
+    logger.info("Legion shutting down — cancelling %d tasks", len(asyncio.all_tasks()))
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    for task in tasks:
+        task.cancel()
+    if tasks:
+        await asyncio.wait(tasks, timeout=10.0)
+    logger.info("Legion shutdown complete")
+
+
 async def main() -> None:
     health = run_health_check()
     print_health_report(health)
     _shared.FEATURE_FLAGS = FEATURE_FLAGS
     dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
     await dp.start_polling(bot, skip_updates=True)
 
 

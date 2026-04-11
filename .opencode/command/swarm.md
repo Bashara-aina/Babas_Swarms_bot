@@ -1,0 +1,1 @@
+Activate the full three-agent pipeline. Use @planner to decompose the task, @worker agents to execute each subtask in sequence, and @reviewer to review all changes. Write decisions to .wiki/decisions/ and logs to .wiki/logs/. Task to execute:

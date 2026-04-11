@@ -68,32 +68,32 @@ def test_memory_context_block_not_empty() -> None:
     assert "Bashara" in block
 
 
-def test_temporal_graph_add_and_retrieve() -> None:
+async def test_temporal_graph_add_and_retrieve() -> None:
     from core.memory.temporal_graph import TemporalKnowledgeGraph
 
     graph = TemporalKnowledgeGraph()
-    graph.add_fact("Bashara", "uses_model", "gemma4:e4b", confidence=1.0)
-    facts = graph.get_current_facts("Bashara")
+    await graph.add_fact("Bashara", "uses_model", "gemma4:e4b", confidence=1.0)
+    facts = await graph.get_current_facts("Bashara")
     assert any(f["predicate"] == "uses_model" for f in facts)
 
 
-def test_temporal_graph_fact_update_closes_old() -> None:
+async def test_temporal_graph_fact_update_closes_old() -> None:
     from core.memory.temporal_graph import TemporalKnowledgeGraph
 
     graph = TemporalKnowledgeGraph()
-    graph.add_fact("Bashara", "test_pred_xyz", "old_value")
-    graph.add_fact("Bashara", "test_pred_xyz", "new_value")
-    facts = graph.get_current_facts("Bashara")
+    await graph.add_fact("Bashara", "test_pred_xyz", "old_value")
+    await graph.add_fact("Bashara", "test_pred_xyz", "new_value")
+    facts = await graph.get_current_facts("Bashara")
     current = [f for f in facts if f["predicate"] == "test_pred_xyz"]
     assert len(current) == 1
     assert current[0]["object"] == "new_value"
 
 
-def test_temporal_graph_history() -> None:
+async def test_temporal_graph_history() -> None:
     from core.memory.temporal_graph import TemporalKnowledgeGraph
 
     graph = TemporalKnowledgeGraph()
-    history = graph.get_history("Bashara", "uses_local_model")
+    history = await graph.get_history("Bashara", "uses_local_model")
     assert isinstance(history, list)
 
 

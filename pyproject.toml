@@ -56,7 +56,7 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 10
+fail_under = 15
 exclude_lines = [
     "pragma: no cover",
     "if __name__ == .__main__.:",
@@ -71,3 +71,9 @@ exclude = [".venv", "__pycache__", ".git"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = ["E501", "F401", "F811"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_configs = true
+strict = false

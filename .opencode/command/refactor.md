@@ -1,0 +1,1 @@
+Perform a careful refactor of the specified code. Use @planner to design the refactor approach first. Then @worker implements changes incrementally. @reviewer checks each increment. Ensure zero breaking changes. Write ADR if architecture changes. Target to refactor:

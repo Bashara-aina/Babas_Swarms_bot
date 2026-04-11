@@ -61,8 +61,7 @@ DEBATE_PERSONAS = {
         "You've seen 100 brilliant plans die in execution."
     ),
     "visionary": (
-        "You think 3 steps ahead. You see connections others miss. "
-        "You're willing to sound crazy if the logic holds."
+        "You think 3 steps ahead. You see connections others miss. You're willing to sound crazy if the logic holds."
     ),
     "critic": (
         "You are a world-class editor. You find redundancy, weak framing, missing context. "
@@ -72,230 +71,380 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist":     "cerebras/qwen3-235b-a22b",          # fast, large context
-    "devil_advocate": "groq/qwen-qwq-32b",                 # adversarial reasoning
-    "researcher":     "groq/moonshotai/kimi-k2-instruct",  # deep research
-    "pragmatist":     "groq/llama-3.3-70b-versatile",      # practical, fast
-    "visionary":      "cerebras/qwen3-235b-a22b",          # creative, fast
-    "critic":         "zai/glm-4",                         # precise, analytical
+    "strategist": "cerebras/qwen3-235b-a22b",  # fast, large context
+    "devil_advocate": "groq/qwen-qwq-32b",  # adversarial reasoning
+    "researcher": "groq/moonshotai/kimi-k2-instruct",  # deep research
+    "pragmatist": "groq/llama-3.3-70b-versatile",  # practical, fast
+    "visionary": "cerebras/qwen3-235b-a22b",  # creative, fast
+    "critic": "zai/glm-4",  # precise, analytical
 }
 
 DEBATE_ICONS = {
-    "strategist":     "⚔️",
+    "strategist": "⚔️",
     "devil_advocate": "🔥",
-    "researcher":     "📚",
-    "pragmatist":     "🔧",
-    "visionary":      "🚀",
-    "critic":         "✂️",
+    "researcher": "📚",
+    "pragmatist": "🔧",
+    "visionary": "🚀",
+    "critic": "✂️",
 }
 
 # ── Primary model registry ──────────────────────────────────────────────────
 # SINGLE source of truth — router.py and swarm_wire.py import from here.
+# STRATEGY: MiniMax M2.7 is the ONLY paid API — use it for everything.
+# Local Ollama gemma4:e4b (9.6GB VRAM) ONLY for vision (screen reading).
+# All other free cloud fallbacks (Groq, Gemini, OpenRouter free tier) when MiniMax fails.
+# RTX 3060: NO llama3.3:70b, NO qwen3.5:35b — these are too heavy.
 AGENT_MODELS: dict[str, str] = {
-    "vision":     "ollama_chat/gemma4:e4b",             # local, private, RTX 3060
-    "coding":     "groq/llama-3.3-70b-versatile",       # fast + reliable
-    "debug":      "zai/glm-4",                          # GPQA Diamond 85.7%
-    "math":       "zai/glm-4",                          # AIME 2025 95.7%
-    "architect":  "cerebras/qwen3-235b-a22b",           # 1500 tok/s, 131K ctx
-    "analyst":    "groq/moonshotai/kimi-k2-instruct",   # 1T MoE, deep reasoning
-    "computer":   "groq/llama-3.3-70b-versatile",       # agentic tool-calling loop
-    "general":    "ollama_chat/gemma4:e4b",             # local chat default
-    "researcher": "groq/moonshotai/kimi-k2-instruct",   # academic research
-    "marketer":   "groq/llama-3.3-70b-versatile",       # content + social
-    "devops":     "groq/llama-3.3-70b-versatile",       # infra + deployment
-    "pm":         "cerebras/qwen3-235b-a22b",           # project management
-    "humanizer":  "groq/llama-3.3-70b-versatile",       # humanising AI text
-    "reviewer":   "groq/llama-3.3-70b-versatile",       # AI code review
-    "owl":        "groq/moonshotai/kimi-k2-instruct",
-    "ag2_researcher": "groq/moonshotai/kimi-k2-instruct",
-    "ag2_critic": "zai/glm-4",
-    "ag2_synthesizer": "cerebras/qwen3-235b-a22b",
-    "code_exec":  "openrouter/qwen/qwen3-coder:free",
-    "predictor":  "cerebras/qwen3-235b-a22b",
-    "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
+    # Vision: local Ollama — MiniMax can't read screenshots
+    "vision": "ollama_chat/gemma4:e4b",
+    # All other agents: MiniMax M2.7 only (your ONLY paid model)
+    "coding": "minimax/MiniMax-M2.7",
+    "debug": "minimax/MiniMax-M2.7",
+    "math": "minimax/MiniMax-M2.7",
+    "architect": "minimax/MiniMax-M2.7",
+    "analyst": "minimax/MiniMax-M2.7",
+    "computer": "minimax/MiniMax-M2.7",
+    "general": "minimax/MiniMax-M2.7",
+    "researcher": "minimax/MiniMax-M2.7",
+    "marketer": "minimax/MiniMax-M2.7",
+    "devops": "minimax/MiniMax-M2.7",
+    "pm": "minimax/MiniMax-M2.7",
+    "humanizer": "minimax/MiniMax-M2.7",
+    "reviewer": "minimax/MiniMax-M2.7",
+    "owl": "minimax/MiniMax-M2.7",
+    "ag2_researcher": "minimax/MiniMax-M2.7",
+    "ag2_critic": "minimax/MiniMax-M2.7",
+    "ag2_synthesizer": "minimax/MiniMax-M2.7",
+    "code_exec": "minimax/MiniMax-M2.7",
+    "predictor": "minimax/MiniMax-M2.7",
+    "claude_orchestrator": "minimax/MiniMax-M2.7",
 }
 
-# ── Fallback chains (NO Ollama outside vision) ──────────────────────────────
+# ── Fallback chains ────────────────────────────────────────────────────────────
+# Free cloud only when MiniMax fails/rate-limited. No local models except vision.
+# NO cerebras/llama3.1-70b (paid) — only free tier models as fallback.
 FALLBACK_CHAIN: dict[str, list[str]] = {
+    # Vision/computer: gemma4:e4b local for screen analysis when cloud fails
     "vision": [
         "ollama_chat/gemma4:e4b",
         "groq/meta-llama/llama-4-scout-17b-16e-instruct",
         "gemini/gemini-2.0-flash",
     ],
+    "computer": [
+        "ollama_chat/gemma4:e4b",  # local only — MiniMax can't do screen reading
+        "gemini/gemini-2.0-flash-exp:free",
+        "openrouter/qwen/qwen3-coder:free",
+    ],
+    # All other agents: free cloud only when MiniMax fails
     "coding": [
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "debug": [
-        "zai/glm-4",
-        "groq/qwen-qwq-32b",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "math": [
-        "zai/glm-4",
-        "groq/qwen-qwq-32b",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
     ],
     "analyst": [
-        "groq/moonshotai/kimi-k2-instruct",
-        "gemini/gemini-2.0-flash",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-    ],
-    "computer": [
-        "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
     ],
     "general": [
-        "ollama_chat/gemma4:e4b",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
     "researcher": [
-        "groq/moonshotai/kimi-k2-instruct",
-        "zai/glm-4",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
     ],
     "marketer": [
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
     ],
     "devops": [
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
     ],
     "pm": [
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "gemini/gemini-2.0-flash",
     ],
     "humanizer": [
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "gemini/gemini-2.0-flash",
-        "cerebras/qwen3-235b-a22b",
     ],
     "owl": [
-        "groq/moonshotai/kimi-k2-instruct",
-        "gemini/gemini-2.0-flash",
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
     ],
     "ag2_researcher": [
-        "groq/moonshotai/kimi-k2-instruct",
-        "zai/glm-4",
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
     ],
     "ag2_critic": [
-        "zai/glm-4",
-        "groq/qwen-qwq-32b",
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/deepseek/deepseek-r1:free",
     ],
     "ag2_synthesizer": [
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "gemini/gemini-2.0-flash",
     ],
     "code_exec": [
+        "gemini/gemini-2.0-flash-exp:free",
         "openrouter/qwen/qwen3-coder:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
     ],
     "predictor": [
-        "cerebras/qwen3-235b-a22b",
-        "groq/moonshotai/kimi-k2-instruct",
-        "zai/glm-4",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
     ],
     "claude_orchestrator": [
-        "openrouter/anthropic/claude-opus-4",
-        "openrouter/anthropic/claude-3.5-sonnet",
-        "cerebras/qwen3-235b-a22b",
+        "gemini/gemini-2.0-flash-exp:free",
+        "groq/llama-3.3-70b-versatile",
+        "openrouter/qwen/qwen3-coder:free",
     ],
     "reviewer": [
+        "gemini/gemini-2.0-flash-exp:free",
         "groq/llama-3.3-70b-versatile",
-        "cerebras/qwen3-235b-a22b",
-        "gemini/gemini-2.0-flash",
     ],
 }
 
 # ── Keyword → agent routing ─────────────────────────────────────────────────
 TASK_KEYWORDS: dict[str, list[str]] = {
     "vision": [
-        "screenshot", "screen", "layar", "gambar", "image", "photo",
-        "ocr", "visual", "desktop", "window", "what do you see",
-        "lihat", "tampilan", "apa yang ada di", "capture",
+        "screenshot",
+        "screen",
+        "layar",
+        "gambar",
+        "image",
+        "photo",
+        "ocr",
+        "visual",
+        "desktop",
+        "window",
+        "what do you see",
+        "lihat",
+        "tampilan",
+        "apa yang ada di",
+        "capture",
     ],
     "coding": [
-        "code", "kode", "function", "script", "implement", "class",
-        "refactor", "generate", "endpoint", "api", "python",
-        "bash", "write", "tulis", "buat file", "build", "create",
+        "code",
+        "kode",
+        "function",
+        "script",
+        "implement",
+        "class",
+        "refactor",
+        "generate",
+        "endpoint",
+        "api",
+        "python",
+        "bash",
+        "write",
+        "tulis",
+        "buat file",
+        "build",
+        "create",
     ],
     "debug": [
-        "debug", "error", "crash", "fix", "bug", "traceback",
-        "exception", "cuda", "pytorch", "torch", "nan", "oom",
-        "not working", "kenapa", "why", "gagal", "failed",
+        "debug",
+        "error",
+        "crash",
+        "fix",
+        "bug",
+        "traceback",
+        "exception",
+        "cuda",
+        "pytorch",
+        "torch",
+        "nan",
+        "oom",
+        "not working",
+        "kenapa",
+        "why",
+        "gagal",
+        "failed",
     ],
     "math": [
-        "tensor", "matrix", "gradient", "derivative", "integral",
-        "backprop", "eigenvalue", "softmax", "calculate", "hitung",
-        "math", "formula", "prove", "buktikan", "solve",
+        "tensor",
+        "matrix",
+        "gradient",
+        "derivative",
+        "integral",
+        "backprop",
+        "eigenvalue",
+        "softmax",
+        "calculate",
+        "hitung",
+        "math",
+        "formula",
+        "prove",
+        "buktikan",
+        "solve",
     ],
     "architect": [
-        "design", "architecture", "plan", "system", "pipeline",
-        "struktur", "rancang", "overview", "diagram", "framework",
-        "strategy", "strategi",
+        "design",
+        "architecture",
+        "plan",
+        "system",
+        "pipeline",
+        "struktur",
+        "rancang",
+        "overview",
+        "diagram",
+        "framework",
+        "strategy",
+        "strategi",
     ],
     "analyst": [
-        "analyze", "analisis", "plot", "chart", "csv", "metrics",
-        "performance", "gpu", "training", "trend", "statistics",
-        "compare", "nvidia-smi", "visualize",
+        "analyze",
+        "analisis",
+        "plot",
+        "chart",
+        "csv",
+        "metrics",
+        "performance",
+        "gpu",
+        "training",
+        "trend",
+        "statistics",
+        "compare",
+        "nvidia-smi",
+        "visualize",
     ],
     "computer": [
-        "browse", "search for", "find online", "look up",
-        "scrape", "website", "web page", "cari di internet", "booking",
-        "google", "search the web",
-        "pdf", "excel", "spreadsheet", "word doc", "docx",
-        "extract table", "read document", "baca dokumen",
-        "email", "inbox", "send email", "kirim email", "mail",
-        "reply email", "check email", "cek email",
-        "git status", "git commit", "git push", "git pull", "git diff",
-        "git stash", "commit", "push to", "pull from",
-        "run tests", "pytest", "lint", "ruff", "format code",
-        "find in code", "grep", "codebase", "db query",
-        "monitor", "schedule", "disk space", "memory usage",
-        "maintenance", "cleanup", "services", "system check",
-        "organize files", "find files", "sort files",
+        "browse",
+        "search for",
+        "find online",
+        "look up",
+        "scrape",
+        "website",
+        "web page",
+        "cari di internet",
+        "booking",
+        "google",
+        "search the web",
+        "pdf",
+        "excel",
+        "spreadsheet",
+        "word doc",
+        "docx",
+        "extract table",
+        "read document",
+        "baca dokumen",
+        "email",
+        "inbox",
+        "send email",
+        "kirim email",
+        "mail",
+        "reply email",
+        "check email",
+        "cek email",
+        "git status",
+        "git commit",
+        "git push",
+        "git pull",
+        "git diff",
+        "git stash",
+        "commit",
+        "push to",
+        "pull from",
+        "run tests",
+        "pytest",
+        "lint",
+        "ruff",
+        "format code",
+        "find in code",
+        "grep",
+        "codebase",
+        "db query",
+        "monitor",
+        "schedule",
+        "disk space",
+        "memory usage",
+        "maintenance",
+        "cleanup",
+        "services",
+        "system check",
+        "organize files",
+        "find files",
+        "sort files",
     ],
     "researcher": [
-        "research", "paper", "study", "evidence", "cite", "source",
-        "literature", "academic", "experiment", "hypothesis", "jurnal",
+        "research",
+        "paper",
+        "study",
+        "evidence",
+        "cite",
+        "source",
+        "literature",
+        "academic",
+        "experiment",
+        "hypothesis",
+        "jurnal",
     ],
     "marketer": [
-        "marketing", "ads", "campaign", "brand", "positioning", "messaging",
-        "customer", "acquisition", "growth", "conversion", "funnel", "iklan",
+        "marketing",
+        "ads",
+        "campaign",
+        "brand",
+        "positioning",
+        "messaging",
+        "customer",
+        "acquisition",
+        "growth",
+        "conversion",
+        "funnel",
+        "iklan",
     ],
     "devops": [
-        "deploy", "pipeline", "ci cd", "docker", "k8s", "kubernetes",
-        "monitoring", "logs", "alerts", "infrastructure", "cloud",
+        "deploy",
+        "pipeline",
+        "ci cd",
+        "docker",
+        "k8s",
+        "kubernetes",
+        "monitoring",
+        "logs",
+        "alerts",
+        "infrastructure",
+        "cloud",
     ],
     "pm": [
-        "project", "roadmap", "milestone", "sprint", "backlog", "priority",
-        "stakeholder", "timeline", "scope", "deliverable",
+        "project",
+        "roadmap",
+        "milestone",
+        "sprint",
+        "backlog",
+        "priority",
+        "stakeholder",
+        "timeline",
+        "scope",
+        "deliverable",
     ],
     "reviewer": [
-        "review", "audit", "check code", "inspect", "quality",
-        "code review", "periksa", "lint", "scan",
+        "review",
+        "audit",
+        "check code",
+        "inspect",
+        "quality",
+        "code review",
+        "periksa",
+        "lint",
+        "scan",
     ],
 }
 
@@ -308,11 +457,15 @@ ACTIVE_THREADS: dict[str, list[dict]] = {}
 def detect_agent(task: str) -> str:
     task_lower = task.lower().strip()
 
-    if re.search(r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower):
+    if re.search(
+        r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower
+    ):
         return "math"
     if re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
         return "debug"
-    if re.search(r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower):
+    if re.search(
+        r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower
+    ):
         return "architect"
     if re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
         return "general"
@@ -331,8 +484,17 @@ def detect_agent(task: str) -> str:
                 scores[agent] += 1
 
     tie_break_order = [
-        "debug", "math", "vision", "coding", "architect",
-        "analyst", "researcher", "devops", "pm", "reviewer", "general",
+        "debug",
+        "math",
+        "vision",
+        "coding",
+        "architect",
+        "analyst",
+        "researcher",
+        "devops",
+        "pm",
+        "reviewer",
+        "general",
     ]
     best_agent = max(scores, key=lambda a: scores[a])
     best_score = scores[best_agent]
@@ -371,10 +533,18 @@ def build_system_prompt(role_prompt: str) -> str:
 def list_agents() -> str:
     lines = ["<b>🤖 Active Agents</b>\n"]
     icons = {
-        "vision": "👁️", "coding": "💻", "debug": "🐛",
-        "math": "📐", "architect": "🏗️", "analyst": "📊",
-        "computer": "🖥️", "general": "🧠", "researcher": "🔬",
-        "marketer": "📢", "devops": "🔧", "pm": "📋",
+        "vision": "👁️",
+        "coding": "💻",
+        "debug": "🐛",
+        "math": "📐",
+        "architect": "🏗️",
+        "analyst": "📊",
+        "computer": "🖥️",
+        "general": "🧠",
+        "researcher": "🔬",
+        "marketer": "📢",
+        "devops": "🔧",
+        "pm": "📋",
         "humanizer": "✨",
     }
     for key, model in AGENT_MODELS.items():
@@ -399,12 +569,14 @@ def list_all_departments() -> list[str]:
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
     if thread_id not in ACTIVE_THREADS:
         ACTIVE_THREADS[thread_id] = []
-    ACTIVE_THREADS[thread_id].append({
-        "agent": agent,
-        "task": task,
-        "result": result[:500],
-        "timestamp": time.time(),
-    })
+    ACTIVE_THREADS[thread_id].append(
+        {
+            "agent": agent,
+            "task": task,
+            "result": result[:500],
+            "timestamp": time.time(),
+        }
+    )
     if len(ACTIVE_THREADS[thread_id]) > 10:
         ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
     logger.info("Added to thread '%s': %s agent", thread_id, agent)

@@ -17,6 +17,7 @@ except Exception:
     Memory = None  # type: ignore[assignment]
 
 _mem0_instance: Any | None = None
+_mem0_init_attempted: bool = False
 
 
 def reset_mem0_instance() -> None:
@@ -51,7 +52,10 @@ def _build_mem0_config() -> dict[str, Any]:
 
 def get_mem0() -> Any | None:
     """Return the Mem0 client when available, else None."""
-    global _mem0_instance
+    global _mem0_instance, _mem0_init_attempted
+    if _mem0_init_attempted:
+        return _mem0_instance
+    _mem0_init_attempted = True
     if _mem0_instance is not None:
         return _mem0_instance
     if Memory is None:
@@ -96,11 +100,13 @@ async def mem0_search(user_id: str, query: str, limit: int = 10) -> list[dict[st
         legacy = await legacy_memory.search_memory(query, top_k=limit, user_id=user_id)
         out: list[dict[str, Any]] = []
         for item in legacy:
-            out.append({
-                "memory": item.get("text", ""),
-                "score": float(item.get("score", 0.0) or 0.0),
-                "metadata": {"source": item.get("source", "legacy")},
-            })
+            out.append(
+                {
+                    "memory": item.get("text", ""),
+                    "score": float(item.get("score", 0.0) or 0.0),
+                    "metadata": {"source": item.get("source", "legacy")},
+                }
+            )
         return out
     except Exception as exc:
         logger.warning("legacy memory search fallback failed: %s", exc)

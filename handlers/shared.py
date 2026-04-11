@@ -1,4 +1,5 @@
 """Shared state, helpers, and core runner functions for all handler modules."""
+
 from __future__ import annotations
 
 import asyncio
@@ -19,8 +20,8 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-import router as agents
 import llm_client
+import router as agents
 from llm_client import agent_loop, chat, chunk_output, verify_api_keys
 
 logger = logging.getLogger(__name__)
@@ -63,8 +64,9 @@ def _format_for_telegram_html(text: str) -> str:
 
     return out.strip()
 
+
 # ── Shared mutable state ──────────────────────────────────────────────────────
-ALLOWED_USER_ID: int = 0          # set by main.py at startup
+ALLOWED_USER_ID: int = 0  # set by main.py at startup
 _user_thread: dict[int, str] = {}
 _last_screenshot: dict[int, str] = {}
 _start_time: float = time.time()
@@ -74,6 +76,9 @@ _scheduler = None
 
 # swarms_bot enterprise layer (initialised in on_startup)
 _chief_of_staff = None
+
+# opencode bridge (initialised in on_startup)
+_opencode_bridge = None
 _cost_router = None
 _budget_manager = None
 _security_guard = None
@@ -122,18 +127,26 @@ def result_keyboard(model_used: str) -> InlineKeyboardMarkup:
     provider = parts[0].upper()
     if provider == "OLLAMA_CHAT":
         provider = "LOCAL\U0001f512"
-    return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="\U0001f44d", callback_data="fb:good"),
-        InlineKeyboardButton(text="\U0001f504", callback_data="fb:retry"),
-        InlineKeyboardButton(text=f"\u2191{provider}", callback_data="fb:info"),
-    ]])
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="\U0001f44d", callback_data="fb:good"),
+                InlineKeyboardButton(text="\U0001f504", callback_data="fb:retry"),
+                InlineKeyboardButton(text=f"\u2191{provider}", callback_data="fb:info"),
+            ]
+        ]
+    )
 
 
 def screenshot_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="\U0001f50d Analyze screen", callback_data="screen:analyze"),
-        InlineKeyboardButton(text="\U0001f5b1 Do task on screen", callback_data="screen:do"),
-    ]])
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="\U0001f50d Analyze screen", callback_data="screen:analyze"),
+                InlineKeyboardButton(text="\U0001f5b1 Do task on screen", callback_data="screen:do"),
+            ]
+        ]
+    )
 
 
 # ── Helper: send chunked messages ─────────────────────────────────────────────
@@ -152,7 +165,7 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
         pass
     chunks = chunk_output(text, max_length=4000)
     for i, chunk in enumerate(chunks):
-        is_last = (i == len(chunks) - 1)
+        is_last = i == len(chunks) - 1
         markup = result_keyboard(model_used) if (is_last and model_used) else None
         try:
             await msg.answer(chunk, parse_mode="HTML", reply_markup=markup)
@@ -193,12 +206,12 @@ async def _cancel_task(task: Optional[asyncio.Task]) -> None:
 def _key_status() -> str:
     status = verify_api_keys()
     names = {
-        "CEREBRAS_API_KEY":   "Cerebras   \u26a1 1,500 tok/s",
-        "GROQ_API_KEY":       "Groq       \U0001f680 function calling",
-        "GEMINI_API_KEY":     "Gemini     \U0001f4da 1M context",
+        "CEREBRAS_API_KEY": "Cerebras   \u26a1 1,500 tok/s",
+        "GROQ_API_KEY": "Groq       \U0001f680 function calling",
+        "GEMINI_API_KEY": "Gemini     \U0001f4da 1M context",
         "OPENROUTER_API_KEY": "OpenRouter  \U0001f500 free models",
-        "ZAI_API_KEY":        "ZAI/GLM-4  \U0001f9e0 debug+math",
-        "HF_TOKEN":           "HuggingFace \U0001f917",
+        "ZAI_API_KEY": "ZAI/GLM-4  \U0001f9e0 debug+math",
+        "HF_TOKEN": "HuggingFace \U0001f917",
     }
     lines = ["<b>\U0001f511 API Keys</b>\n"]
     for k, label in names.items():
@@ -279,6 +292,7 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
             _last_screenshot[msg.from_user.id] = path
         except Exception as e:
             import logging
+
             logging.getLogger(__name__).error("Failed to send screenshot photo: %s", e)
 
     typing_task = asyncio.create_task(_keep_typing(msg))

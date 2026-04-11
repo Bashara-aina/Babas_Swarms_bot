@@ -27,6 +27,16 @@ providers:
     api_key_env: "GEMINI_API_KEY"
     daily_limit: 1000
 
+  minimax:
+    base_url: "https://api.minimax.io/v1"
+    api_key_env: "MINIMAX_API_KEY"
+    daily_limit: null
+
+  anthropic:
+    base_url: "https://api.minimax.io/anthropic"
+    api_key_env: "ANTHROPIC_API_KEY"
+    daily_limit: null
+
   ollama:
     base_url: "http://localhost:11434"
     api_key_env: null
@@ -99,20 +109,44 @@ models:
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
+  minimax-m2-7:
+    provider: minimax
+    model_id: "minimax-coding-plan/MiniMax-M2.7"
+    context_window: 16384
+    max_tokens: 16384
+    temperature_conversation: 0.7
+    temperature_code: 0.1
+    strengths: [coding, reasoning, conversation, general]
+    cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
+
+  anthropic-claude:
+    provider: anthropic
+    model_id: "anthropic/claude-sonnet-4-20250514"
+    context_window: 200000
+    strengths: [reasoning, coding, analysis]
+    cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
+
 # Complexity tier → preferred provider order (first available wins)
 complexity_tiers:
   lightweight:
+    - minimax
     - cerebras
     - groq
     - ollama
 
   midweight:
+    - minimax
     - zai
     - gemini
     - cerebras
     - groq
 
   heavyweight:
+    - minimax
     - openrouter
     - gemini
     - zai

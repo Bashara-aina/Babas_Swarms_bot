@@ -1,0 +1,22 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "sk-cp-bTQ0ccDmDD4CZ4nr861d22ExdqfY4R139FX97l0JxHO3OfKek_baD_XJocvDu9KPVo040RmDRnsojZL1_XpgWPNU2a97coskM9lFKeACsEYYBhBgic3CD6g",
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "ANTHROPIC_MODEL": "MiniMax-M2.7",
+    "ANTHROPIC_SMALL_FAST_MODEL": "MiniMax-M2.7",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.py$\")"
+    ]
+  },
+  "terminal.integrated.commandsToSkipShell": [
+    "-workbench.action.quickOpen"
+  ]
+  
+}

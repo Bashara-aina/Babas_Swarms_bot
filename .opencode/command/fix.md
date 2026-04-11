@@ -1,0 +1,1 @@
+Analyze the error or bug described below. Use @planner to create a fix plan, @worker to implement the fix with minimal code changes, and @reviewer to verify the fix doesn't introduce new issues. Document the bug and fix in .wiki/issues/. Bug to fix:

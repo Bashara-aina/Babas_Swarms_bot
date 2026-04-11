@@ -1,0 +1,1 @@
+Give me a complete status report of the SwarmBot project. Read all files in ~/swarm-bot/.wiki/logs/ from the last 7 days, check git log for recent commits, scan for any TODO/FIXME/HACK comments in the codebase, and check if all dependencies are up to date. Present as a structured dashboard with: Recent Activity, Open Issues, Technical Debt, Next Priorities.

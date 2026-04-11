@@ -1,0 +1,81 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/research/069-tsm-lin-2019.md",
+  "reason": "daily_fast_scan: score=0.000 < 0.3",
+  "score": 0.0,
+  "quarantined_at": "2026-04-11T18:14:42.370612"
+}
+---
+
+---
+tags: [video-understanding, temporal-modeling, efficient, temporal-shift, 2d-cnn-cost]
+sources: [arxiv:1811.08383]
+created: 2026-04-11
+updated: 2026-04-11
+---
+
+# TSM: Temporal Shift Module for Efficient Video Understanding
+
+**Lin et al.** | ICCV 2019 | [arXiv:1811.08383](https://arxiv.org/abs/1811.08383)
+
+## Overview
+
+The **Temporal Shift Module (TSM)** enables temporal modeling in video networks at **2D CNN computational cost**. Unlike I3D which requires 3D convolutions, TSM achieves temporal reasoning by shifting channel activations along the temporal dimension — a zero-FLOP operation that mimics temporal communication between frames.
+
+TSM can be plugged into any 2D CNN (e.g., ResNet) to create a "pseudo-3D" network that retains the efficiency of 2D convolutions while gaining temporal modeling capability.
+
+## Architecture
+
+### Core Innovation: Temporal Shift
+
+The key insight is that temporal modeling can be achieved without 3D convolutions:
+
+1. **Shift operation**: Move a portion of channel activations from neighboring frames to the current frame
+2. **No parameters**: The shift is a simple tensor permutation, adding zero new weights
+3. **No FLOPs**: Shift is computationally free compared to 3D convolutions
+
+### Shift Directions
+
+```
+Frame t-1 ──shift──► Frame t (receives temporal info from past)
+Frame t   ──shift──► Frame t+1 (provides temporal info to future)
+```
+
+The shift is partial (e.g., 1/8 of channels) to balance temporal mixing vs. information retention.
+
+### Integration Modes
+
+1. **Residual TSM**: Replaces the 2D residual branch in ResNet blocks
+2. **Parallel TSM**: Additional branch alongside standard 2D convolutions
+
+## Performance
+
+| Metric | TSM (2D cost) | I3D (3D cost) | Non-local |
+|--------|---------------|---------------|-----------|
+| Kinetics-400 | 72.2% | 74.2% | 74.9% |
+| UCF-101 | 95.6% | 93.4% | — |
+| FLOPs | 2D CNN level | 10x higher | 10x higher |
+
+TSM matches or exceeds I3D on smaller datasets while using only 2D CNN compute.
+
+## Significance for POPW
+
+- **RTX 3060 Efficiency**: TSM's zero-overhead temporal modeling is ideal for constrained hardware
+- **IKEA ASM**: Assembly sequences require temporal ordering; TSM captures this efficiently
+- **vs I3D**: I3D achieves 57.57% on IKEA ASM but is computationally expensive
+- **FiLM comparison**: TSM's temporal shift could complement FiLM conditioning in WorkerNet
+
+## POPW Relevance
+
+> [!NOTE]
+> TSM is interesting for POPW's **RTX 3060 efficiency constraint**. The temporal shift operation adds zero parameters and zero FLOPs, making it computationally free. For assembly action recognition where we need to distinguish "screw clockwise" vs "screw counter-clockwise," temporal ordering matters — TSM captures this without the computational overhead of 3D convolutions.
+
+## Code Availability
+
+- Official: https://github.com/mit-han-lab/temporal-shift-module
+- PyTorch implementation, pretrained models available
+
+## See Also
+
+- [[068-i3d-carreira-2017]] — I3D (3D baseline, expensive)
+- [[071-slowfast-feichtenhofer-2019]] — SlowFast dual-path architecture
