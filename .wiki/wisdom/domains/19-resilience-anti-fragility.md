@@ -315,15 +315,6 @@
 **Conflicts**: None
 
 ---
-## [Cal Newport] — So Good They Can't Ignore You
-**Type**: Book
-**Year**: 2012
-**Core Insight**: Craftsman mindset; deliberate practice; rare valuable skills; career capital; mission.
-**LEGION RULE**: When building career, do Y because Z (craftsman mindset; deliberate practice; rare valuable; mission)
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Follow passion mindset
-
----
 ## [James Clear] — Atomic Habits
 **Type**: Book
 **Year**: 2018
@@ -403,3 +394,33 @@
 **LEGION RULE**: When overwhelmed, do Y because Z (courage to step back; mental health priority; boundaries)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Never quit culture
+
+---
+## [Nassim Taleb] — Fooled by Randomness
+**Type**: Book
+**Year**: 2001
+**Core Insight**: Role of chance; survivorship bias; narrative fallacy; skill vs luck; markets random; hidden; role.
+**LEGION RULE**: When attributing success, do Y because Z (chance; survivorship bias; skill vs luck)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Over-attribution to skill
+
+---
+## [Gary Klein] — Sources of Power: How People Make Decisions
+**Type**: Book
+**Year**: 1998
+**Core Insight**: Naturalistic decision; sources; power; recognition; mental; simulation; satisficing;adows; expertise; commanders.
+**LEGION RULE**: When experts decide, do Y because Z (recognition-primed; simulation; satisficing; expertise)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Analysis-only
+
+---
+## [Philip Tetlock] — Expert Political Judgment
+**Type**: Book
+**Year**: 2005
+**Core Insight**: Expert; judgment; Tetlock; calibration; foxes; hedgehogs; accuracy; forecasting; decomposition; track record.
+**LEGION RULE**: When experts judge, do Y because Z (foxes; decomposition; calibration; Tetlock; track record)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Expert-worship
+
+---
+

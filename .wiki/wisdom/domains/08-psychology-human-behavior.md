@@ -150,16 +150,6 @@
 
 ---
 
-## Charlie Munger — "Psychology of Human Misjudgment"
-**Type**: Speech
-**Year**: 1995
-**Core Insight**: 25 psychological tendencies cause misjudgment: reciprocity, liking, consistency, authority, social proof, scarcity, etc.; most human errors traceable to these.
-**LEGION RULE**: When analyzing mistakes, map to psychological tendencies because most failures trace to predictable cognitive biases.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
 ## George Lakoff — "Don't Think of an Elephant"
 **Type**: Book
 **Year**: 2004
@@ -415,16 +405,6 @@
 **Year**: 2005
 **Core Insight**: Experts' political predictions barely better than random; accuracy correlates with cognitive style (focused on specific predictions vs abstract principles).
 **LEGION RULE**: When evaluating experts, measure prediction accuracy because expertise doesn't guarantee foresight.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
-## Gary Klein — "Sources of Power"
-**Type**: Book
-**Year**: 1998
-**Core Insight**: Naturalistic decision-making: experts use mental simulation, not analysis; recognition-primed decisions; backwards reasoning from goals.
-**LEGION RULE**: When making time-pressured decisions, use recognition-primed approach because experts decide through pattern matching, not analysis.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 

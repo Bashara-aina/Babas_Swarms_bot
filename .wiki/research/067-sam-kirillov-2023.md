@@ -1,109 +1,105 @@
 ---
-tags: [segmentation, foundation-model, zero-shot, promptable, sam, iccv2023, best-paper]
-sources: [arxiv:2304.02643, openaccess:ICCV2023/Kirillov]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "067"
+paper_id: 067
+title: "Segment Anything Model (SAM)"
+authors: "Kirillov, Alexander; Mintun, Eric; Ravi, Nikhila; Mao, Hanzi; Rolland, Chloe; Gustafson, Laura; Xiao, Tete; Whitehead, Spencer; Berg, Alexander C; Lo, Wan-Yi; Dollár, Piotr; Girshick, Ross"
+year: 2023
+venue: "ICCV"
+arxiv: "2304.02643"
+citations: 8500
+tier: 6
+tags: [segmentation, foundation-model, zero-shot, promptable, sam, iccv2023]
+popw_relevance: CRITICAL
 ---
 
 # Segment Anything Model (SAM)
 
-**Kirillov*, Mintun*, Ravi*, et al. | ICCV 2023 (Best Paper Honorable Mention) | [arXiv:2304.02643](https://arxiv.org/abs/2304.02643)
+## Why This Paper Matters for POPW
 
-## Overview
+POPW uses pseudo-GT from Mask R-CNN for unlabeled frames. SAM (ICCV 2023 Best Paper Honorable Mention) is the zero-shot furniture segmenter for pseudo-GT bootstrapping — it can generate high-quality masks for any furniture type without task-specific training. As noted in deepresearch.md, SAM produces higher quality masks than 12 overfitted Mask R-CNNs for IKEA ASM.
 
-**SAM (Segment Anything Model)** is a foundation model for image segmentation that can segment any object in any image given appropriate prompts. Trained on the SA-1B dataset of 11M images and 1B masks, SAM demonstrates remarkable zero-shot generalization capabilities.
+## Core Contribution
 
-The three main components are:
-1. **Task**: Promptable segmentation (generate segmentation from any prompt type)
-2. **Model**: Vision Transformer-based architecture with prompt encoder
-3. **Dataset**: SA-1B, the largest segmentation dataset ever created
+SAM is a foundation model for image segmentation trained on SA-1B (11M images, 1B masks) that can segment any object in any image given appropriate prompts (points, boxes, masks, text). The model demonstrates remarkable zero-shot generalization across diverse object types and contexts. SAM's three main components are: (1) Promptable segmentation task, (2) Vision Transformer-based architecture with prompt encoder, (3) SA-1B dataset for training robust generalization.
 
-## Architecture
+## Key Technical Details
 
-### Promptable Segmentation Task
+- **Architecture**: ViT-based image encoder + prompt encoder + mask decoder with cross-attention
+- **Three model sizes**: SAM-B (93M params, 12ms/img), SAM-L (308M params, 23ms/img), SAM-H (640M params, 87ms/img)
+- **SA-1B Dataset**: 11M images, 1B masks generated via semi-automated data engine
+- **Prompt types**: Points, boxes, masks, text (in later versions)
+- **Decoder**: Cross-attention mechanism with iterative refinement and IoU prediction
+- **Zero-shot**: Segment anything without task-specific training
 
-SAM accepts multiple prompt types:
-- **Points**: Single point indicating object center
-- **Boxes**: Bounding box for object location
-- **Masks**: Partial mask as prior
-- **Text**: Natural language description (in later versions)
-
-The model outputs a valid segmentation mask for any prompt, enabling flexible use cases.
-
-### Model Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│              Image Encoder (ViT)                │
-│    (ViT-B/L/H depending on model size)          │
-└─────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────┐
-│            Prompt Encoder                       │
-│  (Points, Boxes, Masks → Token Embeddings)      │
-└─────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────┐
-│              Mask Decoder                       │
-│  (Cross-attention, upsample, IoU prediction)    │
-└─────────────────────────────────────────────────┘
-```
-
-### Three Model Sizes
-
-| Model | Parameters | Encoder | Speed (A100) |
-|-------|------------|---------|--------------|
-| SAM-B | 93M | ViT-B | 12ms/img |
-| SAM-L | 308M | ViT-L | 23ms/img |
-| SAM-H | 640M | ViT-H | 87ms/img |
-
-## SA-1B Dataset
-
-- **11M images** from diverse sources
-- **1B masks** generated via data engine (semi-automated annotation)
-- Diversity across domains, object types, and contexts
-- Used for training robust zero-shot generalization
-
-## Key Results
-
-### Zero-Shot Transfer
+## Critical Results (Exact Numbers)
 
 | Task | Previous SOTA | SAM Zero-Shot |
-|------|---------------|---------------|
-| Edge Detection | 0.75 mIoU | 0.72 mIoU |
+|------|--------------|--------------|
 | Instance Segmentation | 32.9 mAP | 46.6 mAP |
-| SOM | — | 24.2 mIoU |
+| Edge Detection | 0.75 mIoU | 0.72 mIoU |
 | Text-to-Mask | — | 0.73 mIoU |
+| SOM (Segment Anything Mobile) | — | 24.2 mIoU |
 
-SAM achieves strong zero-shot performance across diverse segmentation tasks without any task-specific training.
+## What POPW Can Steal Directly
 
-### Interactive Segmentation
+- **model.py**: Integrate SAM for pseudo-GT generation:
+  ```python
+  # SAM for pseudo-GT segmentation
+  from segment_anything import sam_model_registry, SamPredictor
+  
+  sam = sam_model_registry["vit_b"](checkpoint="sam_vit_b.pth")
+  predictor = SamPredictor(sam)
+  
+  def generate_pseudo_gt(image, bbox):
+      predictor.set_image(image)
+      masks, scores, _ = predictor.predict(
+          point_coords=None,
+          point_labels=None,
+          box=np.array(bbox),
+          multimask_output=False
+      )
+      return masks[0]  # Return highest scoring mask
+  ```
+- **ikea_dataset.py**: Use SAM-generated masks as pseudo-GT for furniture part detection
+- **config.py**: Set `USE_SAM_PSEUDO_GT=True` with SAM checkpoint path
+- **Paper note**: SAM-B fits in RTX 3060 for inference, SAM-L/H require more VRAM
 
-Given a single point prompt, SAM produces masks comparable to real-time interactive segmentation systems (e.g., RITM) with substantially better efficiency.
+## Failure Modes and Known Limitations
 
-## POPW Relevance
+- SAM-L (308M params, 23ms/img) is tight for RTX 3060 — SAM-B (93M, 12ms/img) is more practical
+- For fine furniture parts (small objects), SAM may over-segment or miss boundaries
+- SAM-HQ variant needed for high-quality mask refinement
+- Text prompts not useful for POPW (no natural language for furniture parts)
 
-> [!CRITICAL]
-> **SAM is the most important paper for POPW pseudo-GT bootstrapping.** As stated in deepresearch.md, POPW uses pseudo-GT from Mask R-CNN for unlabeled frames. SAM is the zero-shot furniture segmenter for pseudo-GT bootstrapping — it can generate high-quality masks for any furniture type without task-specific training.
+## Key Equations
 
-**POPW Implementation Insights from SAM:**
-1. **Zero-shot segmentation**: SAM can segment unseen furniture categories
-2. **Prompt-based refinement**: SAM outputs can be refined via box/point prompts
-3. **Foundation model**: Pre-trained on massive data, no furniture-specific fine-tuning needed
-4. **Quality comparison**: SAM produces higher quality masks than 12 overfitted Mask R-CNNs per deepresearch.md
+Equation 1 — Mask Decoder Cross-Attention:
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)V$$
+Where Q comes from prompt tokens, K,V come from image tokens
 
-## Code Availability
+## Researcher Intelligence
 
-- Project Page: https://segment-anything.com
-- GitHub: https://github.com/facebookresearch/segment-anything
-- Demo: https://segment-anything.com/demo
-- SA-1B Dataset: Available for research
+**Alexander Kirillov** (Meta AI Research) led SAM development alongside **Ross Girshick** and **Piotr Dollár**. Motivation: Create a "GPT moment" for segmentation — a foundation model that can segment anything given prompts, trained on massive data. The SA-1B dataset (1B masks) is the largest segmentation dataset ever created, enabling zero-shot generalization. The paper won Best Paper Honorable Mention at ICCV 2023.
 
-## See Also
+**Key papers that cite this / build on it:**
+- SAM-HQ (high-quality variant) — improves mask quality for fine boundaries
+- S4M (062) — SAM for semi-supervised instance segmentation
+- MobileSAM — lightweight variant for edge deployment
 
-- [[066-pointrend]] — PointRend (same first author, architectural foundations)
-- [[061-pointly-supervised]] — Pointly-Supervised IS (same author group)
-- [[062-s4m]] — S⁴M leverages SAM for semi-supervised instance segmentation
+## Engineer's Implementation Notes
+
+- SAM-B checkpoint (~375MB) fits on RTX 3060 for inference
+- Use `SamPredictor` for box-prompted segmentation (fastest for single-object)
+- For IKEA ASM: prompt with furniture part bounding boxes from detection head
+- SAM produces better masks than Mask R-CNN for furniture edges
+- Run SAM at original image resolution (not resized) for best mask quality
+- Batch processing: SAM-B can process ~80 frames/sec on RTX 3060
+
+## Connections to Other Wiki Papers
+
+- [[062-s4m-yoon-2025]] — S4M leverages SAM for semi-supervised instance segmentation
+- [[066-pointrend-kirillov-2020]] — PointRend is architectural precursor to SAM decoder
+- [[059-soft-teacher-xu-2021]] — Soft Teacher uses pseudo boxes for semi-supervised detection
+
+## POPW Action Item
+
+> **PRIORITY CRITICAL:** Integrate SAM-B for pseudo-GT generation in `model.py`. Use furniture part bounding boxes from detection head as SAM prompts to generate high-quality segmentation masks. Per deepresearch.md, SAM masks outperform 12 overfitted Mask R-CNNs. Expected: significant improvement in detection head quality with minimal labeling cost.

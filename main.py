@@ -32,15 +32,13 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-from urllib import error as urlerror
-from urllib import request as urlrequest
 from pathlib import Path
 from typing import Any, Awaitable, Callable
+from urllib import error as urlerror
+from urllib import request as urlrequest
 
-from aiogram import Bot, Dispatcher
-from aiogram import BaseMiddleware
-from aiogram.types import Message
-from aiogram.types import BotCommand
+from aiogram import BaseMiddleware, Bot, Dispatcher
+from aiogram.types import BotCommand, Message
 from dotenv import load_dotenv
 
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
@@ -51,16 +49,16 @@ _missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]
 if _missing:
     raise RuntimeError(f"Missing required env vars: {_missing}")
 
-import computer_agent
 import agents as agents_registry
-from llm_client import init_humanization_layer, verify_api_keys
+import computer_agent
 import handlers.shared as _shared
-from handlers import register_all_routers
+from core.daily_harvester.scheduler import DailyHarvesterScheduler
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
 from core.observability import init_observability
 from core.wiki_scheduler import WikiQualityScheduler
 
-# ── Wiki Quality Scheduler global handle ─────────────────────────────────────
+# ── Global scheduler handles ─────────────────────────────────────────────────
+_harvester_scheduler: DailyHarvesterScheduler | None = None
 _wiki_scheduler: WikiQualityScheduler | None = None
 
 # ── Logging ────────────────────────────────────────────────────────────
@@ -200,6 +198,25 @@ async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) 
     for _ in range(attempts):
         try:
             healthy = await asyncio.to_thread(_ruflo_health_probe_sync)
+            if healthy:
+                return True
+        except (urlerror.URLError, TimeoutError, ValueError, OSError):
+            pass
+        await asyncio.sleep(delay_seconds)
+    return False
+
+
+def _opencode_health_probe_sync(url: str = "http://127.0.0.1:4096/health") -> bool:
+    req = urlrequest.Request(url=url, method="GET")
+    with urlrequest.urlopen(req, timeout=2) as response:
+        body = response.read().decode("utf-8", errors="ignore")
+        return response.status == 200 and '"ok":true' in body.replace(" ", "")
+
+
+async def _wait_for_opencode_health(attempts: int = 8, delay_seconds: float = 0.5) -> bool:
+    for _ in range(attempts):
+        try:
+            healthy = await asyncio.to_thread(_opencode_health_probe_sync)
             if healthy:
                 return True
         except (urlerror.URLError, TimeoutError, ValueError, OSError):
@@ -357,6 +374,19 @@ async def _run_group_a_startup(bot: Bot) -> None:
         except Exception as e:
             logger.warning("gemma4 local prep failed (non-fatal): %s", e)
 
+    async def _start_daily_harvester() -> None:
+        global _harvester_scheduler
+        try:
+
+            async def _harvest_notify(text: str) -> None:
+                await bot.send_message(ALLOWED_USER_ID, text[:4000])
+
+            _harvester_scheduler = DailyHarvesterScheduler(_harvest_notify, ALLOWED_USER_ID)
+            _harvester_scheduler.start()
+            logger.info("DailyHarvesterScheduler started")
+        except Exception as e:
+            logger.warning("DailyHarvesterScheduler init failed (non-fatal): %s", e)
+
     async def _start_wiki_quality_scheduler() -> None:
         global _wiki_scheduler
         try:
@@ -393,6 +423,7 @@ async def _run_group_a_startup(bot: Bot) -> None:
             _start_curiosity_engine(),
             _start_voice_prewarm(),
             _start_gemma4_prep(),
+            _start_daily_harvester(),
             _start_wiki_quality_scheduler(),
             _register_lifecycle_hooks(),
             return_exceptions=True,
@@ -429,7 +460,7 @@ async def on_startup(bot: Bot) -> None:
 
     # Initialize persistent conversation history DB + cleanup old turns
     try:
-        from agents import _init_conv_db, _cleanup_old_turns
+        from agents import _cleanup_old_turns, _init_conv_db
 
         await _init_conv_db()
         asyncio.create_task(_cleanup_old_turns())
@@ -548,7 +579,7 @@ async def on_startup(bot: Bot) -> None:
 
     # Proactive engine (monitoring loop)
     try:
-        from core.proactive_engine import run_proactive_loop, register_sender
+        from core.proactive_engine import register_sender, run_proactive_loop
 
         async def _legion_proactive_send(text: str) -> None:
             await bot.send_message(chat_id=int(os.getenv("ALLOWED_USER_ID")), text=text, parse_mode="Markdown")
@@ -596,17 +627,36 @@ async def on_startup(bot: Bot) -> None:
         except Exception as e:
             logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
 
+    # opencode sidecar (synchronous launch + async health check)
+    try:
+        subprocess.Popen(
+            ["opencode", "serve", "--port", "4096"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        logger.info("opencode sidecar launched")
+    except Exception as e:
+        logger.warning("opencode sidecar launch failed (non-fatal): %s", e)
+
+    try:
+        if await _wait_for_opencode_health():
+            logger.info("opencode sidecar healthy on startup")
+        else:
+            logger.warning("opencode sidecar health probe failed on startup (non-fatal)")
+    except Exception as e:
+        logger.warning("opencode sidecar health probe errored (non-fatal): %s", e)
+
     # Initialize swarms_bot enterprise layer
     try:
-        from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff
-        from swarms_bot.routing.cost_router import CostAwareRouter
-        from swarms_bot.routing.budget_manager import BudgetManager
-        from swarms_bot.security.guard import SecurityGuard
         from swarms_bot.audit.audit_logger import AuditLogger
         from swarms_bot.evaluation.evaluator import AgentEvaluator
-        from swarms_bot.sessions.session_manager import SessionManager
         from swarms_bot.observability.cost_metrics import CostMetricsCollector
         from swarms_bot.observability.logging_config import configure_structured_logging
+        from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff
+        from swarms_bot.routing.budget_manager import BudgetManager
+        from swarms_bot.routing.cost_router import CostAwareRouter
+        from swarms_bot.security.guard import SecurityGuard
+        from swarms_bot.sessions.session_manager import SessionManager
 
         _shared._cost_router = CostAwareRouter()
         _shared._budget_manager = BudgetManager()
@@ -781,6 +831,8 @@ async def on_startup(bot: Bot) -> None:
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     logger.info("Legion shutting down — cancelling %d tasks", len(asyncio.all_tasks()))
+    if _harvester_scheduler:
+        await _harvester_scheduler.stop()
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
     for task in tasks:
         task.cancel()
