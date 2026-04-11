@@ -421,3 +421,30 @@
 **LEGION RULE**: When building AI systems, do Y because Z (agentic AI; tool use; reasoning; workflows; 2024 turning point)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Static inference only
+
+---
+## [Anthropic] — Claude on Model Distillation
+**Type**: Essay
+**Year**: 2024
+**Core Insight**: Model distillation; knowledge transfer; smaller models; capabilities; efficiency; compressed knowledge; generalization.
+**LEGION RULE**: When distilling models, do Y because Z (distillation; knowledge transfer; efficiency; compression)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Full-size only
+
+---
+## [DeepMind] — Gemini Technical Report
+**Type**: Report
+**Year**: 2023
+**Core Insight**: Multimodal; native multimodality; efficiency; safety; Google; Gemini; reasoning; image; text; video; native.
+**LEGION RULE**: When building multimodal, do Y because Z (native multimodality; efficiency; safety; integration)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Single-modality only
+
+---
+## [Eliezer Yudkowsky] — Artificial General Intelligence and the Bayesian Stance
+**Type**: Essay
+**Year**: 2006
+**Core Insight**: AGI; Bayesian; logic; probability; utility; decision; coherent; extrapolated; volition;control; existential.
+**LEGION RULE**: When building AGI, do Y because Z (Bayesian; coherent; decision theory; control; existential)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Non-Bayesian AGI

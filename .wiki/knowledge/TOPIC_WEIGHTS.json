@@ -1,0 +1,65 @@
+{
+  "last_updated": "2026-04-11T00:00:00+07:00",
+  "topics": {
+    "cekwajar_labor_law": {
+      "weight": 38,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-10"
+    },
+    "cekwajar_market": {
+      "weight": 32,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-10"
+    },
+    "cekwajar_engineering": {
+      "weight": 28,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-09"
+    },
+    "popw_ml_research": {
+      "weight": 35,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-08"
+    },
+    "babas_bot_ai": {
+      "weight": 22,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-10"
+    },
+    "rumahlabuh_property": {
+      "weight": 18,
+      "decay_days": 21,
+      "status": "active",
+      "last_mentioned": "2026-04-05"
+    },
+    "indonesia_economy": {
+      "weight": 18,
+      "decay_days": 21,
+      "status": "active",
+      "last_mentioned": "2026-04-06"
+    },
+    "ai_tools_llm": {
+      "weight": 25,
+      "decay_days": 14,
+      "status": "active",
+      "last_mentioned": "2026-04-09"
+    },
+    "personal_life": {
+      "weight": 20,
+      "decay_days": 30,
+      "status": "active",
+      "last_mentioned": "2026-04-10"
+    },
+    "surprise_discoveries": {
+      "weight": 15,
+      "decay_days": 7,
+      "status": "active",
+      "last_mentioned": "2026-04-10"
+    }
+  }
+}

@@ -90,16 +90,6 @@
 
 ---
 
-## Peter Thiel — "Zero to One"
-**Type**: Book
-**Year**: 2014
-**Core Insight**: Create new value, don't compete; monopolies are good; secrets exist everywhere; vertical progress vs horizontal progress; contrarian thinking.
-**LEGION RULE**: When building companies, create monopolies through unique value because competition destroys profits.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
 ## Michael Bloomberg — Leadership Principles
 **Type**: Framework
 **Year**: 2001
@@ -140,31 +130,11 @@
 
 ---
 
-## Jeff Bezos — "Day One" Philosophy
-**Type**: Framework
-**Year**: 1997
-**Core Insight**: Day 1 mentality: customer obsession, resistance to proxies, eager external trends; Day 2 is stasis followed by irrelevance and death.
-**LEGION RULE**: When scaling companies, maintain Day 1 mentality because complacency leads to irrelevance.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
 ## Satya Nadella — "Hit Refresh"
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Growth mindset organization; empathy as competitive advantage; cloud first, mobile first; transformation through culture change.
 **LEGION RULE**: When transforming organizations, prioritize growth mindset because cultural change enables strategic transformation.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
-## Elon Musk — First Principles Management
-**Type**: Framework
-**Year**: 2008
-**Core Insight**: Question assumptions; reason from physics; 120 hour work weeks; deploy capital aggressively; engineering first; fail fast and iterate.
-**LEGION RULE**: When solving problems, apply first principles reasoning because conventional wisdom blocks breakthrough thinking.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -215,16 +185,6 @@
 **Year**: 2004
 **Core Insight**: 70/20/10 allocation: 70 resources core business, 20 adjacent, 10 new bets; moonshot thinking; don't accept status quo.
 **LEGION RULE**: When allocating resources, allocate to bets at various risk levels because innovation requires deliberate resource commitment.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
-## Eric Ries — "The Lean Startup"
-**Type**: Book
-**Year**: 2011
-**Core Insight**: Build-Measure-Learn feedback loop; minimum viable product; validated learning; innovation accounting; pivot or persevere.
-**LEGION RULE**: When building products, use Build-Measure-Learn loops because rapid iteration beats extensive upfront planning.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -495,16 +455,6 @@
 **Year**: 2017
 **Core Insight**: Radical transparency; idea meritocracy; believability-weighted decision making;痛苦+反思=进步; algorithmic decision making.
 **LEGION RULE**: When making decisions, use radical truth and transparency because idea meritocracies produce better outcomes than political decision-making.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
----
-
-## Jeff Bezos — Annual Shareholder Letters
-**Type**: Framework
-**Year**: 1997
-**Core Insight**: Obsess over customers; resist proxies; implement ideas from everywhere; high bar for talent; big decisions take time; "It's not an experiment if you know it's going to work."
-**LEGION RULE**: When building companies, obsess over customers not competitors because customer focus creates sustainable advantage.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 

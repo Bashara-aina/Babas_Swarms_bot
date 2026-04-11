@@ -87,36 +87,41 @@ async def cmd_wiki_flush(message: Message) -> None:
 
 @router.message(Command("wiki_restore"))
 async def cmd_wiki_restore(message: Message) -> None:
-    """Restore from quarantine — moves back, strips frontmatter, re-evaluates quality."""
+    """Restore ALL quarantined files back to wiki — auto-restore, no confirmation."""
     if not _auth(message):
         return
 
-    # Expect user to reply with the page_path or we'll scan quarantine list
     try:
+        from core.wiki_quality_gate import restore_from_quarantine
         from core.wiki_scheduler import QUARANTINE_DIR
 
         if not QUARANTINE_DIR.exists():
             await message.answer("✅ Quarantine is already empty.")
             return
 
-        files = list(QUARANTINE_DIR.glob("*.md"))
+        files = list(QUARANTINE_DIR.rglob("*.md"))
         if not files:
             await message.answer("✅ Quarantine is already empty.")
             return
 
-        # List quarantined files for user to choose from
-        lines = ["<b>📦 Quarantined Files</b>\nSelect a file to restore by page_path:\n"]
-        for f in files[:20]:
-            lines.append(f"  • <code>{f.stem[:60]}</code>")
-        if len(files) > 20:
-            lines.append(f"\n...and {len(files) - 20} more. Flush to delete all.")
+        restored = 0
+        failed = 0
+        for qfile in files:
+            try:
+                success = await restore_from_quarantine(str(qfile))
+                if success:
+                    restored += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                logger.warning("restore failed for %s: %s", qfile, e)
+                failed += 1
 
-        lines.append("\n<i>Reply with the filename (or /wiki_flush to delete all)</i>")
-        await message.answer("\n".join(lines), parse_mode="HTML")
+        await message.answer(f"♻️ Restored {restored} file(s) from quarantine.{f' {failed} failed.' if failed else ''}")
 
     except Exception as e:
-        logger.warning("wiki_restore list failed: %s", e)
-        await message.answer(f"❌ Failed to list quarantine: {e}")
+        logger.warning("wiki_restore failed: %s", e)
+        await message.answer(f"❌ Wiki restore failed: {e}")
 
 
 # ── /wiki_scan ──────────────────────────────────────────────────────────────────

@@ -1,292 +1,457 @@
-# POPW-PROTOCOL Research Wiki — MASTER INDEX
-
-**Generated**: 2026-04-11  
-**Scope**: Papers 001-100 (Tier 1 through Tier 10)  
-**Status**: Tier 10 complete | 56 of 100 papers documented
+# POPW Research Paper Index
+> Master index of 100 papers organized by relevance to POPW (Pose-Conditioned Action Recognition with FiLM Modulation)
+> Generated: 2026-04-11 | Total Papers: 100 | Status: COMPLETE
 
 ---
 
-## 📋 Summary Table: All Documented Papers
+## 📊 Priority Queue: Top 20 CRITICAL/HIGH Papers by Impact
 
-| ID | Title | Year | Venue | POPW Relevance |
-|----|-------|------|-------|----------------|
-| 001 | Deep Residual Learning (ResNet) | 2016 | CVPR | CRITICAL |
-| 002 | Feature Pyramid Networks (FPN) | 2017 | CVPR | CRITICAL |
-| 003 | FiLM: Visual Reasoning | 2018 | AAAI | CRITICAL |
-| 004 | Multi-Task Learning with Uncertainty | 2018 | CVPR | CRITICAL |
-| 005-012 | *Reserved (Tier 1 gaps)* | - | - | - |
-| 013 | Feature-wise Linear Modulation (Dumoulin) | 2018 | ICLR | CRITICAL |
-| 014 | GNN + FiLM (Brockschmidt) | 2020 | ICLR | MEDIUM |
-| 015 | Motion Modulation | 2025 | ACM MM | HIGH |
-| 016 | Temporal FiLM (Birnbaum) | 2019 | - | MEDIUM |
-| 017-035 | *Reserved (Tier 2 gaps)* | - | - | - |
-| 036 | Againan et al. (Objects) | 2023 | CVPR | HIGH |
-| 037 | Againan et al. (Semantic Volume) | 2025 | - | HIGH |
-| 038 | Frame2Freq-ST | 2026 | - | **CRITICAL** (SOTA) |
-| 039 | Order Matters | 2025 | ICLR | HIGH |
-| 040 | Probing Foundation Models | 2024 | - | MEDIUM |
-| 041 | Assembly101 | 2022 | - | HIGH |
-| 042 | CASA | 2022 | CVPR | MEDIUM |
-| 043 | 3DInAction | 2023 | - | MEDIUM |
-| 044 | HA4M Dataset | 2022 | - | HIGH |
-| 045 | INDOReAL Dataset | 2024 | - | MEDIUM |
-| 046 | ENIGMA | 2024 | - | MEDIUM |
-| 047 | Compositional Action Recognition | 2022 | - | HIGH |
-| 048 | *Reserved* | - | - | - |
-| 049 | LDAM | 2019 | NeurIPS | HIGH |
-| 050 | BBN | 2020 | CVPR | HIGH |
-| 051 | Decoupling | 2020 | CVPR | HIGH |
-| 052 | Class-Balanced Loss | 2019 | CVPR | HIGH |
-| 053 | MISLAS | 2021 | ICCV | MEDIUM |
-| 054 | RemixGAN | 2020 | CVPR | MEDIUM |
-| 055 | Logit Adjustment | 2021 | NeurIPS | HIGH |
-| 056 | SMOTE | 2002 | - | MEDIUM |
-| 057 | Square Loss | 2021 | - | MEDIUM |
-| 058 | Long-tail Video Recognition | 2023 | - | MEDIUM |
-| 059 | Soft Teacher | 2021 | CVPR | MEDIUM |
-| 060 | PAIS | 2023 | - | MEDIUM |
-| 061 | Pointly Supervised Learning | 2022 | - | MEDIUM |
-| 062 | S4M | 2025 | - | MEDIUM |
-| 063 | Unbiased Teacher | 2021 | ICLR | MEDIUM |
-| 064 | Better Pseudo Labels | 2024 | CVPR | MEDIUM |
-| 065 | PL-DC | 2025 | - | MEDIUM |
-| 066 | PointRend | 2020 | CVPR | MEDIUM |
-| 067 | SAM (Segment Anything) | 2023 | - | HIGH |
-| 068 | I3D | 2017 | CVPR | CRITICAL |
-| 069 | TSM | 2019 | ICCV | HIGH |
-| 070 | Video Swin Transformer | 2022 | - | HIGH |
-| 071 | SlowFast | 2019 | ICCV | HIGH |
-| 072 | Temporal Action Segmentation Survey | 2022 | - | HIGH |
-| 073 | MS-TCN++ | 2021 | - | HIGH |
-| 074 | ASFormer | 2021 | - | MEDIUM |
-| 075 | PoTion | 2018 | CVPR | HIGH |
-| 076 | DINO | 2021 | ICCV | MEDIUM |
-| 077 | DINOv2 | 2024 | - | HIGH |
-| 078-093 | *Reserved (Tier 7-9 gaps)* | - | - | - |
-| 094 | Multitask Learning (Caruana) | 1997 | ML | **CRITICAL** |
-| 095 | YOLO | 2016 | CVPR | HIGH |
-| 096 | DETR | 2020 | ECCV | HIGH |
-| 097 | Attention Is All You Need | 2017 | NeurIPS | **CRITICAL** |
-| 098 | Hand-Object Interaction Survey | 2023-24 | Survey | MEDIUM |
-| 099 | Learning by Watching | 2021 | IROS | MEDIUM |
-| 100 | Open Frontier: Multi-Task Assembly + FiLM (Gap Analysis) | 2026 | N/A | **CRITICAL-GAP** |
+| Priority | ID | Title | Year | Venue | POPW Relevance |
+|----------|----|-------|------|-------|----------------|
+| 1 | 097 | Attention Is All You Need | 2017 | NeurIPS | CRITICAL |
+| 2 | 001 | Deep Residual Learning for Image Recognition | 2016 | CVPR | CRITICAL |
+| 3 | 005 | The IKEA ASM Dataset | 2021 | WACV | CRITICAL |
+| 4 | 094 | Multitask Learning (Caruana 1997) | 1997 | ML Journal | CRITICAL |
+| 5 | 038 | Frame2Freq: Spectral Adapters for Fine-Grained Video Understanding | 2026 | CVPR | CRITICAL |
+| 6 | 007 | Mask R-CNN | 2017 | ICCV | CRITICAL |
+| 7 | 012 | ImageNet Large Scale Visual Recognition Challenge | 2015 | IJCV | CRITICAL |
+| 8 | 009 | Deep High-Resolution Representation Learning | 2020 | TPAMI | CRITICAL |
+| 9 | 077 | DINOv2: Learning Robust Visual Features | 2024 | TMLR | CRITICAL |
+| 10 | 004 | Multi-Task Learning Using Uncertainty to Weigh Losses | 2018 | CVPR | HIGH |
+| 11 | 002 | Feature Pyramid Networks for Object Detection | 2017 | CVPR | HIGH |
+| 12 | 006 | Focal Loss for Dense Object Detection | 2017 | ICCV | HIGH |
+| 13 | 011 | PoseConv3D: Revisiting Skeleton-Based Action Recognition | 2022 | CVPR | HIGH |
+| 14 | 067 | Segment Anything Model (SAM) | 2023 | ICCV | HIGH |
+| 15 | 079 | Deep Learning-Based Human Pose Estimation: A Survey | 2020 | arXiv | HIGH |
+| 16 | 080 | HigherHRNet: Scale-Aware Representation Learning | 2020 | CVPR | HIGH |
+| 17 | 082 | The Devil is in the Details (UDP) | 2020 | CVPR | HIGH |
+| 18 | 084 | PoseConv3D on NTU RGB+D Benchmark | 2022 | CVPR | HIGH |
+| 19 | 085 | OpenPose: Realtime Multi-Person 2D Pose Estimation | 2017 | CVPR | HIGH |
+| 20 | 095 | You Only Look Once (YOLO) | 2016 | CVPR | HIGH |
 
 ---
 
-## 🔑 Concept Index
+## 📋 Complete Paper Summary Table
+
+### Tier 1: Foundational Backbones & Core Methods (001-012)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 001 | Deep Residual Learning for Image Recognition (ResNet) | 2016 | CVPR | CRITICAL (10) | resnet, backbone, skip-connections |
+| 002 | Feature Pyramid Networks for Object Detection (FPN) | 2017 | CVPR | HIGH (9) | fpn, multi-scale, feature-pyramid |
+| 003 | FiLM: Visual Reasoning with a General Conditioning Layer | 2018 | AAAI | HIGH (8) | film, conditioning, modulation |
+| 004 | Multi-Task Learning Using Uncertainty to Weigh Losses | 2018 | CVPR | HIGH (9) | multi-task-learning, uncertainty, loss-weighting |
+| 005 | The IKEA ASM Dataset | 2021 | WACV | CRITICAL (10) | dataset, assembly, pose, ikea |
+| 006 | Focal Loss for Dense Object Detection | 2017 | ICCV | HIGH (9) | focal-loss, class-imbalance, retinanet |
+| 007 | Mask R-CNN | 2017 | ICCV | CRITICAL (10) | instance-segmentation, roi-align |
+| 008 | Simple Baselines for Human Pose Estimation | 2018 | ECCV | HIGH (8) | pose-estimation, keypoint, baseline |
+| 009 | Deep High-Resolution Representation Learning (HRNet) | 2020 | TPAMI | CRITICAL (10) | hrnet, high-resolution, pose-estimation |
+| 010 | Generalized Intersection over Union (GIoU) | 2019 | CVPR | HIGH (8) | giou, bounding-box, loss |
+| 011 | PoseConv3D: Revisiting Skeleton-Based Action Recognition | 2022 | CVPR | HIGH (9) | skeleton, action-recognition, 3d-convolution |
+| 012 | ImageNet Large Scale Visual Recognition Challenge | 2015 | IJCV | CRITICAL (10) | imagenet, benchmark, classification |
+
+### Tier 2: FiLM & Conditioning Methods (013-022)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 013 | Feature-wise Transformations (Distill Survey) | 2018 | Distill | HIGH | feature-wise, conditioning, fiilm |
+| 014 | GNN-FiLM: Graph Neural Networks with Feature-wise Linear Modulation | 2020 | ICML | HIGH | graph-neural-network, fiilm, message-passing |
+| 015 | Motion Matters: Motion-guided Modulation Network | 2025 | ACM MM | HIGH | skeleton-action-recognition, motion-modulation |
+| 016 | Temporal FiLM: Capturing Long-Range Sequence Dependencies | 2019 | NeurIPS | HIGH | temporal-fiilm, sequence-modeling |
+| 017 | Conditional Batch Normalization for Visual Reasoning | 2017 | ICML/AAAI | HIGH | conditional-batch-normalization, multimodal |
+| 018 | Arbitrary Style Transfer with Adaptive Instance Normalization (AdaIN) | 2017 | ICCV | HIGH | adaptive-instance-normalization, style-transfer |
+| 019 | DiT: Scalable Diffusion Models with Transformers | 2023 | ICCV | MEDIUM | diffusion, transformer, adaLN |
+| 020 | FlexLoc: Zero-Shot Sensor Perspective Invariance | 2024 | arXiv | MEDIUM | sensor-perspective, zero-shot, conditional-normalization |
+| 021 | Efficient Video Object Segmentation via Network Modulation | 2018 | CVPR | MEDIUM | video-segmentation, one-shot-learning, network-modulation |
+| 022 | CoNeS: Conditional Neural Fields with Shift Modulation | 2024 | MELBA | MEDIUM | neural-fields, shift-modulation, mri |
+
+### Tier 3: Multi-Task Learning Methods (023-035)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 023 | An Overview of Multi-Task Learning in Deep Neural Networks | 2017 | arXiv | HIGH | mtl, survey, bayes, uncertainty |
+| 024 | GradNorm: Gradient Normalization for Adaptive Loss Balancing | 2018 | ICML | HIGH | mtl, gradient-normalization, gradnorm |
+| 025 | PCGrad: Gradient Surgery for Multi-Task Learning | 2020 | NeurIPS | HIGH | mtl, gradient-surgery, gradient-conflict |
+| 026 | IMTL: Towards Impartial Multi-Task Learning | 2021 | ICLR | MEDIUM | mtl, impartial, fair-learning |
+| 027 | MGDA: Multi-Task Learning as Multi-Objective Optimization | 2018 | NeurIPS | HIGH | mtl, multi-objective, pareto-optimal |
+| 028 | AMTL: Achievement-Based Training Progress Balancing | 2023 | ICCV | HIGH | mtl, achievement-based, training-progress |
+| 029 | UW-SO: Analytical Uncertainty-Based Loss Weighting | 2024 | arXiv | HIGH | mtl, uncertainty-weighting, analytical |
+| 030 | MultiNet++: Multi-Stream Feature Aggregation | 2019 | — | MEDIUM | mtl, multi-stream, geometric-loss |
+| 031 | Reasonable Effectiveness of Negative Transfer | 2022 | — | MEDIUM | mtl, negative-transfer, task-relationships |
+| 032 | CAGrad: Conflict-Averse Gradient Descent | 2021 | ICLR | HIGH | mtl, conflict-averse, cagrad |
+| 033 | Uncertainty Regularized Multi-Task Learning | 2022 | — | MEDIUM | mtl, uncertainty-regularization |
+| 034 | MTGIB-UNet: Multi-Task Graph Isomorphism Batch Normalization | 2025 | IJCAI | MEDIUM | mtl, graph-isomorphism, batch-normalization |
+| 035 | Robust Multi-Task Learning with Excess Risk Bounds | 2024 | — | REFERENCE | mtl, robust-mtl, theory |
+
+### Tier 4: IKEA ASM & Assembly Datasets (036-048)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 036 | How Object Information Improves Skeleton-based Action Recognition | 2023 | IJCNN | HIGH | assembly, skeleton, ikea-asm |
+| 037 | Including Semantic Information via Word Embeddings | 2025 | IJCNN | MEDIUM | assembly, word-embeddings, skeleton |
+| 038 | Frame2Freq: Spectral Adapters for Fine-Grained Video Understanding | 2026 | CVPR | CRITICAL | ikea-asm, video-understanding, fine-grained |
+| 039 | Order Matters: Zero-Shot Image-to-Video Probing | 2025 | ICRA | HIGH | assembly, parameter-efficient, nearly-symmetric |
+| 040 | Probing Fine-Grained Action Understanding of Foundation Models | 2024 | arXiv | MEDIUM | foundation-models, cross-view-generalization |
+| 041 | Assembly101: Multi-View Video Dataset for Procedural Activities | 2022 | CVPR | HIGH | dataset, assembly, multi-view, procedural |
+| 042 | CASA: Context-Aware Sequence Alignment Using 4D Skeletal Augmentation | 2022 | CVPR | MEDIUM | skeleton, temporal-alignment, self-supervised |
+| 043 | 3DInAction: Understanding Human Actions in 3D Point Clouds | 2023 | arXiv | MEDIUM | point-cloud, assembly, 3d |
+| 044 | HA4M Dataset: Multi-Modal Monitoring of Assembly Task | 2022 | Sci Data | HIGH | dataset, multi-modal, manufacturing |
+| 045 | IndustReal: Procedure Step Recognition with Execution Errors | 2024 | WACV | HIGH | dataset, procedure-step-recognition, egocentric |
+| 046 | ENIGMA-51 and ENIGMA-360: Egocentric Industrial Assembly Datasets | 2024/2026 | WACV | HIGH | dataset, egocentric, industrial |
+| 047 | Compositional Action Recognition with Multi-View Feature Fusion | 2022 | PLoS ONE | MEDIUM | multi-view, compositional, action-recognition |
+| 048 | Action Recognition in Manufacturing: Survey | 2024 | — | REFERENCE | survey, manufacturing, assembly |
+
+### Tier 5: Class Imbalance & Long-Tail Learning (049-058)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 049 | LDAM: Label-Distribution-Aware Margin Loss | 2019 | NeurIPS | HIGH | class-imbalance, long-tail, margin-loss |
+| 050 | BBN: Bilateral-Branch Network with Cumulative Learning | 2020 | CVPR | HIGH | long-tail, bilateral-branch, cumulative-learning |
+| 051 | Decoupling Representation and Classifier for Long-Tail Recognition | 2020 | ICLR | HIGH | long-tail, representation-decoupling |
+| 052 | Class-Balanced Loss Based on Effective Number | 2019 | CVPR | HIGH | class-imbalance, effective-number, re-weighting |
+| 053 | MiSLAS: Mixup Shifted Label-Aware Smoothing | 2021 | CVPR | HIGH | long-tail, mixup, label-smoothing |
+| 054 | Remix: Rebalanced Mixup for Class Imbalance | 2020 | ECCV | MEDIUM | class-imbalance, mixup, remix |
+| 055 | Long-Tail Learning via Logit Adjustment | 2021 | ICLR | HIGH | long-tail, logit-adjustment, class-prior |
+| 056 | SMOTE: Synthetic Minority Over-sampling Technique | 2002 | JAIR | REFERENCE | class-imbalance, oversampling, smote |
+| 057 | Square Loss as Alternative to Cross-Entropy | 2021 | NeurIPS | REFERENCE | loss-functions, square-loss |
+| 058 | Use Your Head: Improving Long-Tail Video Recognition | 2023 | CVPR | MEDIUM | long-tail, video-recognition |
+
+### Tier 6: Semi-Supervised & Pseudo-Label Methods (059-067)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 059 | Soft Teacher: End-to-End Semi-Supervised Object Detection | 2021 | ICCV | HIGH | semi-supervised, pseudo-label, soft-teacher |
+| 060 | PAIS: Pseudo-Label Alignment for Semi-Supervised Instance Segmentation | 2023 | ICCV | HIGH | semi-supervised, instance-segmentation, alignment |
+| 061 | Pointly-Supervised Instance Segmentation | 2022 | CVPR | MEDIUM | instance-segmentation, weak-supervision, point-annotation |
+| 062 | S4M: Boosting Semi-Supervised Instance Segmentation with SAM | 2025 | ICCV | HIGH | semi-supervised, SAM, knowledge-distillation |
+| 063 | Unbiased Teacher for Semi-Supervised Object Detection | 2021 | ICLR | HIGH | semi-supervised, bias, teacher-student |
+| 064 | Better Pseudo-Labels for Semi-Supervised Instance Segmentation | 2024 | — | HIGH | semi-supervised, confidence-calibration |
+| 065 | PL-DC: Pseudo-Label Quality Decoupling and Correction | 2025 | — | HIGH | semi-supervised, decoupling, correction |
+| 066 | PointRend: Image Segmentation as Rendering | 2020 | CVPR | MEDIUM | instance-segmentation, semantic-segmentation, point-based |
+| 067 | Segment Anything Model (SAM) | 2023 | ICCV | HIGH | foundation-model, zero-shot, segmentation |
+
+### Tier 7: Video Understanding Backbones (068-078)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 068 | I3D: Two-Stream Inflated 3D ConvNets | 2017 | CVPR | HIGH | video-understanding, temporal-modeling, 3d-cnn |
+| 069 | TSM: Temporal Shift Module for Efficient Video Understanding | 2019 | ICCV | HIGH | video-understanding, efficient, temporal-shift |
+| 070 | Video Swin Transformer | 2022 | CVPR | HIGH | video-understanding, transformer, swin |
+| 071 | SlowFast Networks for Video Recognition | 2019 | ICCV | HIGH | video-understanding, dual-path, slowfast |
+| 072 | Temporal Action Segmentation: An Analysis of Modern Techniques | 2022 | TPAMI | MEDIUM | video-understanding, temporal-action-segmentation, survey |
+| 073 | MS-TCN++: Multi-Stage Temporal Convolutional Network | 2021 | TPAMI | MEDIUM | video-understanding, temporal-convolutional-network |
+| 074 | ASFormer: Transformer for Action Segmentation | 2021 | BMVC | MEDIUM | video-understanding, transformer, asformer |
+| 075 | PoTion: Pose MoTion Representation for Action Recognition | 2018 | CVPR | HIGH | video-understanding, pose-based, motion |
+| 076 | DINO: Self-Distillation with No Labels | 2021 | ICCV | HIGH | self-supervised, vision-transformer, distillation |
+| 077 | DINOv2: Learning Robust Visual Features | 2024 | TMLR | CRITICAL | self-supervised, vision-transformer, backbone |
+| 078 | VideoMAE V2: Scaling Video Masked Autoencoders | 2023 | CVPR | MEDIUM | video, masked-autoencoder, self-supervised |
+
+### Tier 8: Pose Estimation Methods (079-085)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 079 | Deep Learning-Based Human Pose Estimation: A Survey | 2020 | arXiv | HIGH | pose, survey, deep-learning |
+| 080 | HigherHRNet: Scale-Aware Representation Learning | 2020 | CVPR | HIGH | pose-estimation, bottom-up, high-resolution |
+| 081 | DEKR: Bottom-Up Human Pose Estimation via Disentangled Keypoint Regression | 2021 | CVPR | MEDIUM-HIGH | pose-estimation, disentangled-regression |
+| 082 | UDP: Unbiased Data Processing for Human Pose Estimation | 2020 | CVPR | HIGH | pose, heatmap, data-processing |
+| 083 | LivePose: Online 3D Reconstruction from Monocular Video | 2023 | ICCV | MEDIUM | pose, 3d-reconstruction, slam |
+| 084 | PoseConv3D on NTU RGB+D Benchmark | 2022 | CVPR | HIGH | pose, skeleton, action-recognition, NTU |
+| 085 | OpenPose: Realtime Multi-Person 2D Pose Estimation | 2017 | CVPR | HIGH | pose-estimation, part-affinity-fields, realtime |
+
+### Tier 9: Training & Optimization Infrastructure (086-093)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 086 | Mixed Precision Training (FP16) | 2017 | ICLR | REFERENCE | fp16, mixed-precision, gradient-scaling |
+| 087 | Training Deep Nets with Sublinear Memory Cost (Gradient Checkpointing) | 2016 | arXiv | REFERENCE | gradient-checkpointing, memory-optimization |
+| 088 | Decoupled Weight Decay Regularization (AdamW) | 2017 | ICLR | REFERENCE | adamw, weight-decay, optimization |
+| 089 | SGDR: Stochastic Gradient Descent with Warm Restarts | 2016 | ICLR | REFERENCE | cosine-annealing, warm-restarts, scheduler |
+| 090 | Bag of Tricks for Image Classification | 2018 | arXiv | REFERENCE | training-tricks, label-smoothing, mixup |
+| 091 | CutMix: Regularization Strategy for Strong Classifiers | 2019 | ICCV | REFERENCE | cutmix, regularization, augmentation |
+| 092 | RandAugment: Practical Automated Data Augmentation | 2019 | NeurIPS | REFERENCE | randaugment, automated-augmentation |
+| 093 | Grad-CAM: Visual Explanations from Deep Networks | 2016 | ICCV | REFERENCE | gradcam, visualization, interpretability |
+
+### Tier 10: Legacy Foundations & Gap Analysis (094-100)
+
+| ID | Title | Year | Venue | POPW Relevance | Key Topics |
+|----|-------|------|-------|----------------|------------|
+| 094 | Multitask Learning (Caruana 1997) | 1997 | ML Journal | CRITICAL | mtl, foundational |
+| 095 | You Only Look Once (YOLO) | 2016 | CVPR | HIGH | object-detection, real-time |
+| 096 | End-to-End Object Detection with Transformers (DETR) | 2020 | ECCV | HIGH | object-detection, transformer |
+| 097 | Attention Is All You Need (Transformer) | 2017 | NeurIPS | CRITICAL | transformer, attention, foundational |
+| 098 | Hand-Object Interaction for Activity Recognition: Survey | 2023 | Survey | MEDIUM | hand-object, interaction, survey |
+| 099 | Learning by Watching: Physical Imitation of Manipulation Skills | 2021 | IROS | MEDIUM | imitation, manipulation, video |
+| 100 | Open Frontier: Multi-Task Assembly Action Recognition with Pose-Conditioned FiLM Modulation | N/A | Gap Analysis | CRITICAL-GAP | pose-conditional-film, assembly, literature-gap |
+
+---
+
+## 🔍 Concept Index
 
 ### FiLM (Feature-wise Linear Modulation)
 
-| Paper | Role | Key Contribution |
-|-------|------|------------------|
-| 003 (Perez 2018) | **ORIGINAL** | FiLM for visual reasoning |
-| 013 (Dumoulin 2018) | **THEORY** | Ablation study, proper FiLM usage |
-| 014 (GNN-FiLM 2020) | **EXTENSION** | FiLM on graph neural networks |
-| 016 (Temporal FiLM 2019) | **EXTENSION** | FiLM for sequences |
-| **094 (Caruana MTL)** | **FOUNDATION** | Multi-task learning theory |
-| **100 (Gap Analysis)** | **NOVELTY** | pose → FiLM → CNN is UNPUBLISHED |
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 003 | FiLM: Visual Reasoning | CRITICAL | Original FiLM paper |
+| 013 | Feature-wise Transformations | HIGH | Comprehensive taxonomy survey |
+| 014 | GNN-FiLM | HIGH | FiLM for graph neural networks |
+| 015 | Motion Matters: Motion-guided Modulation | HIGH | Motion as FiLM conditioning |
+| 016 | Temporal FiLM | HIGH | Time-varying FiLM parameters |
+| 017 | Conditional Batch Normalization | HIGH | BN as FiLM variant |
+| 018 | AdaIN | HIGH | Feature statistics as FiLM |
+| 019 | DiT (AdaLN) | MEDIUM | AdaLN in diffusion transformers |
+| 020 | FlexLoc | MEDIUM | Conditional normalization for sensors |
+| 021 | Video Object Segmentation via Modulation | MEDIUM | FiLM for video seg |
+| 100 | Open Frontier (Gap Analysis) | CRITICAL | Pose-conditioned FiLM for assembly |
 
-**POPW claim**: `pose → MLP(pose) → [γ,β] → FiLM(CNN_features)` is novel
+### MTL Loss Weighting Methods
 
-### Multi-Task Learning
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 004 | Uncertainty Weighting (Kendall) | HIGH | Homoscedastic uncertainty weighting |
+| 023 | MTL Overview (Ruder) | HIGH | Comprehensive survey |
+| 024 | GradNorm | HIGH | Gradient magnitude balancing |
+| 025 | PCGrad | HIGH | Gradient surgery |
+| 027 | MGDA | HIGH | Pareto optimal multi-objective |
+| 028 | AMTL | HIGH | Achievement-based weighting |
+| 029 | UW-SO | HIGH | Analytical uncertainty weighting |
+| 032 | CAGrad | HIGH | Conflict-averse gradient descent |
+| 033 | Uncertainty Regularized MTL | MEDIUM | Probabilistic regularization |
+| 034 | MTGIB-UNet | MEDIUM | Graph isomorphism BN |
+| 094 | Caruana Multitask Learning | CRITICAL | Foundational MTL paper |
 
-| Paper | Relevance | Contribution |
-|-------|-----------|--------------|
-| 094 (Caruana 1997) | CRITICAL | Original MTL theory |
-| 004 (Kendall 2018) | CRITICAL | Uncertainty-weighted losses |
-| **100 (Gap Analysis)** | CRITICAL-GAP | No paper combines pose+action+FiLM+assembly |
+### Pose Estimation
 
-### Assembly Datasets
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 005 | IKEA ASM Dataset | CRITICAL | Pose + action annotations |
+| 008 | Simple Baselines for Human Pose | HIGH | Baseline methods |
+| 009 | HRNet | CRITICAL | High-resolution representation |
+| 011 | PoseConv3D | HIGH | 3D conv on skeleton sequences |
+| 079 | Pose Estimation Survey | HIGH | Comprehensive survey |
+| 080 | HigherHRNet | HIGH | Bottom-up multi-person |
+| 081 | DEKR | MEDIUM-HIGH | Disentangled keypoint regression |
+| 082 | UDP | HIGH | Unbiased data processing |
+| 083 | LivePose | MEDIUM | Online 3D from monocular |
+| 084 | PoseConv3D NTU Benchmark | HIGH | Skeleton action benchmark |
+| 085 | OpenPose | HIGH | Real-time multi-person |
+| 075 | PoTion | HIGH | Pose motion representation |
 
-| Dataset | Paper | Task |
-|---------|-------|------|
-| **IKEA ASM** | Multiple | Action recognition, pose, segmentation |
-| Assembly101 | 041 | Multi-view action |
-| HA4M | 044 | Manufacturing hands |
-| INDOReAL | 045 | Industrial manipulation |
-| ENIGMA | 046 | Assembly error detection |
+### Class Imbalance / Long-Tail
 
-### Key Backbones
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 006 | Focal Loss | HIGH | One-stage detector imbalance |
+| 049 | LDAM | HIGH | Margin-based loss for imbalance |
+| 050 | BBN | HIGH | Bilateral-branch network |
+| 051 | Decoupling | HIGH | Representation vs classifier |
+| 052 | Class-Balanced Loss | HIGH | Effective number re-weighting |
+| 053 | MiSLAS | HIGH | Mixup + label smoothing |
+| 054 | Remix | MEDIUM | Rebalanced mixup |
+| 055 | Logit Adjustment | HIGH | Post-hoc logit correction |
+| 056 | SMOTE | REFERENCE | Synthetic oversampling |
+| 058 | Long-tail Video | MEDIUM | Video-specific long-tail |
 
-| Backbone | Paper | Use in POPW |
-|----------|-------|-------------|
-| ResNet | 001 | CNN backbone |
-| I3D | 068 | Two-stream video backbone |
-| TSM | 069 | Temporal shift module |
-| SlowFast | 071 | Two-pathway video model |
-| Video Swin | 070 | Transformer for video |
-| DINOv2 | 077 | Foundation model backbone |
-| SAM | 067 | Segmentation prior |
+### Semi-Supervised / Pseudo-GT
 
-### Long-Tail / Class Imbalance
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 059 | Soft Teacher | HIGH | End-to-end SS-OD |
+| 060 | PAIS | HIGH | Pseudo-label alignment |
+| 061 | Pointly-Supervised | MEDIUM | Weak supervision via points |
+| 062 | S4M | HIGH | SAM as teacher |
+| 063 | Unbiased Teacher | HIGH | Bias mitigation in SS |
+| 064 | Better Pseudo Labels | HIGH | Confidence calibration |
+| 065 | PL-DC | HIGH | Decoupling mask/class quality |
+| 066 | PointRend | MEDIUM | Adaptive sampling for segmentation |
 
-| Paper | Method | Relevance to POPW |
-|-------|--------|-------------------|
-| 049 (LDAM) | Margin-based rebalancing | Imbalanced assembly actions |
-| 050 (BBN) | Balanced bilateral network | Two-stage approach |
-| 052 (Class-Balanced) | Effective number of samples | Loss weighting |
-| 055 (Logit Adjustment) | Prior-based logit shift | Test-time adaptation |
-| 056 (SMOTE) | Oversampling | Tabular, less relevant |
+### Video Backbones
 
-### Temporal Action Recognition
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 068 | I3D | HIGH | 2D-to-3D inflation |
+| 069 | TSM | HIGH | Temporal shift module |
+| 070 | Video Swin Transformer | HIGH | 3D window attention |
+| 071 | SlowFast | HIGH | Dual pathway architecture |
+| 072 | Temporal Action Segmentation Survey | MEDIUM | Comprehensive review |
+| 073 | MS-TCN++ | MEDIUM | Multi-stage dilated TCN |
+| 074 | ASFormer | MEDIUM | Transformer + TCN |
+| 075 | PoTion | HIGH | Pose motion representation |
+| 078 | VideoMAE V2 | MEDIUM | Masked autoencoder |
 
-| Paper | Method | Notes |
-|-------|--------|-------|
-| 038 (Frame2Freq-ST) | Frequency-domain | **Current IKEA ASM SOTA: 78.1%** |
-| 068 (I3D) | Two-stream inflated 3D | IKEA ASM baseline: 57.57% |
-| 069 (TSM) | Temporal shift module | Efficient |
-| 070 (Swin) | Video transformer | High accuracy |
-| 071 (SlowFast) | Two pathways | Action recognition |
-| 072 (TAS Survey) | Comprehensive review | Methodology baseline |
-| 073 (MS-TCN++) | Multi-stage TCN | Segmentation refinement |
-| 075 (PoTion) | Pose as motion descriptors | Skeleton-based |
+### IKEA ASM / Assembly
+
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 005 | IKEA ASM Dataset | CRITICAL | Primary target dataset |
+| 036 | Object Information + Skeleton | HIGH | SOTA baseline |
+| 037 | Semantic Word Embeddings | MEDIUM | Extends 036 |
+| 038 | Frame2Freq | CRITICAL | Current SOTA (78.1%) |
+| 039 | Order Matters | HIGH | Nearly symmetric actions |
+| 040 | Probing Foundation Models | MEDIUM | Backbone guidance |
+| 041 | Assembly101 | HIGH | Large-scale procedural |
+| 042 | CASA | MEDIUM | Self-supervised skeletal |
+| 043 | 3DInAction | MEDIUM | Point cloud based |
+| 044 | HA4M Dataset | HIGH | Multi-modal manufacturing |
+| 045 | IndustReal | HIGH | Procedure step recognition |
+| 046 | ENIGMA Datasets | HIGH | Egocentric industrial |
+| 047 | Compositional Action Recognition | MEDIUM | Multi-view fusion |
+
+### Self-Supervised / Foundation Models
+
+| ID | Title | Relevance | Notes |
+|----|-------|-----------|-------|
+| 076 | DINO | HIGH | Self-distillation ViT |
+| 077 | DINOv2 | CRITICAL | State-of-the-art visual features |
+| 067 | SAM | HIGH | Segmentation foundation model |
+| 019 | DiT | MEDIUM | Diffusion transformer |
 
 ---
 
-## 🎯 Priority Queue: Top 20 CRITICAL Papers
+## ⚡ Quick-Answer Q&A Lookup
 
-*Sorted by POPW relevance and actionability*
+### Q: "What is the best MTL loss weighting for 3 tasks?"
 
-| Priority | ID | Paper | Why CRITICAL | Action Item |
-|----------|----|-------|--------------|-------------|
-| 1 | **100** | Open Frontier Gap Analysis | **PROVES POPW NOVELTY** | Include in thesis defense |
-| 2 | **003** | FiLM (Perez 2018) | Core POPW mechanism | Verify POPW uses FiLM correctly |
-| 3 | **038** | Frame2Freq-ST | **Current SOTA on IKEA ASM (78.1%)** | POPW must beat this |
-| 4 | **001** | ResNet | POPW backbone | Verify skip connections |
-| 5 | **004** | Multi-Task Uncertainty | POPW multi-task loss weighting | Implement uncertainty loss |
-| 6 | **094** | Caruana MTL | Multi-task theory foundation | POPW is multi-task variant |
-| 7 | **097** | Attention Is All You Need | Transformer foundation | Temporal attention option |
-| 8 | **068** | I3D | IKEA ASM baseline (57.57%) | POPW must beat this |
-| 9 | **077** | DINOv2 | Foundation model backbone | Test as POPW backbone |
-| 10 | **067** | SAM | Segmentation prior | Evaluate for part segmentation |
-| 11 | **052** | Class-Balanced Loss | Long-tail assembly actions | Implement for IKEA ASM |
-| 12 | **055** | Logit Adjustment | Test-time class rebalancing | Add to POPW inference |
-| 13 | **073** | MS-TCN++ | Segmentation refinement | Ablate against POPW |
-| 14 | **070** | Video Swin | Video transformer SOTA | Consider for POPW |
-| 15 | **071** | SlowFast | Two-pathway video | POPW inspiration |
-| 16 | **075** | PoTion | Pose-based action | Skeleton input option |
-| 17 | **069** | TSM | Efficient temporal modeling | Real-time option |
-| 18 | **049** | LDAM | Class imbalanced learning | Ablate with LDAM |
-| 19 | **051** | Decoupling | Two-stage class balance | Architecture reference |
-| 20 | **044** | HA4M Dataset | Manufacturing benchmark | POPW evaluation dataset |
+**→ Papers 028, 029, 030**
+
+| Paper | Method | Key Insight |
+|-------|--------|-------------|
+| 028 AMTL | Achievement-Based | Balances by training progress rather than loss magnitude |
+| 029 UW-SO | Analytical Uncertainty | Closed-form solution based on homoscedastic uncertainty |
+| 030 MultiNet++ | Multi-Stream | Geometric loss aggregation across streams |
+
+**Recommendation**: For POPW's 3-task setup (action recognition, pose estimation, object detection), start with **028 AMTL** or **029 UW-SO** as they provide principled balancing without extensive hyperparameter tuning.
 
 ---
 
-## ❓ Quick-Answer Lookup
+### Q: "How to handle 2545:1 class imbalance in assembly actions?"
 
-### Q: What is POPW's core novelty?
+**→ Papers 049-058**
 
-**A**: `pose → FiLM(γ,β) → CNN features → action classification` for assembly action recognition.
+| Paper | Approach | Relevance |
+|-------|----------|-----------|
+| 049 LDAM | Margin-based loss with class-dependent margins | CRITICAL |
+| 050 BBN | Two-branch: representation vs classifier | HIGH |
+| 051 Decoupling | Train separately, rebalance classifier only | HIGH |
+| 052 Class-Balanced | Effective number re-weighting | HIGH |
+| 053 MiSLAS | Mixup + label smoothing calibration | HIGH |
+| 055 Logit Adjustment | Post-hoc τ log p_c adjustment | HIGH |
 
-**Evidence**: Paper 100 (Gap Analysis) confirms no published paper combines pose-conditioned FiLM with multi-task assembly action recognition.
+**POPW Context**: IKEA ASM has severe imbalance (2545:1 ratio reported). **Recommended stack**:
+1. Start with **051 Decoupling** — representation learning on full data, classifier rebalancing
+2. Apply **055 Logit Adjustment** at inference
+3. Fine-tune with **053 MiSLAS** if calibration matters
 
-### Q: What is the current SOTA on IKEA ASM?
+---
 
-**A**: Frame2Freq-ST at **78.1% Top-1** (Paper 038). POPW aims to exceed this while maintaining real-time inference.
+### Q: "Is FiLM novel for pose-conditioned action recognition?"
 
-### Q: What is the IKEA ASM baseline?
+**→ Papers 003, 013, 015, 016, 020, 075, 100**
 
-**A**: I3D RGB achieves **57.57% frame-wise accuracy** (Paper 068). Dataset is ~10% harder than Kinetics (68.4%).
+| Paper | FiLM Application | Novelty Assessment |
+|-------|-----------------|-------------------|
+| 003 FiLM | General visual reasoning conditioning | Original FiLM (AAAI 2018) |
+| 013 Feature-wise | Comprehensive taxonomy | Survey/consolidation |
+| 015 Motion Modulation | Skeleton motion → FiLM params | 2025 ACM MM — novel domain |
+| 016 Temporal FiLM | RNN-generated time-varying FiLM | Novel temporal extension |
+| 020 FlexLoc | Sensor pose conditioning | Domain adaptation |
+| 075 PoTion | Pose motion as conditioning | CVPR 2018 — pose-based action |
+| **100 Open Frontier** | **Pose-conditioned FiLM for assembly** | **THIS IS THE GAP** |
 
-### Q: What is FiLM and why does it matter?
+**Answer**: FiLM itself is NOT novel (2018), but **pose-conditioned FiLM specifically for assembly action recognition IS a literature gap**. Paper 100 (Open Frontier) identifies this explicitly.
 
-**A**: Feature-wise Linear Modulation: `output = γ * input + β` where γ,β are generated from conditioning signal.
+---
 
-**POPW use**: `γ,β = MLP(pose)` → modulates CNN features → enables pose-conditioned action recognition.
+### Q: "What is SOTA on IKEA ASM?"
 
-**Origin**: Perez et al., AAAI 2018 (Paper 003).
+**→ Papers 036, 037, 038, 039, 040**
 
-### Q: Why is multi-task learning important for POPW?
+| Paper | Method | Performance | Year |
+|-------|--------|-------------|------|
+| **038 Frame2Freq** | Spectral Adapters | **78.1% Top-1** | 2026 CVPR |
+| 039 Order Matters | Parameter-efficient image-to-video | ~76% (nearly symmetric) | 2025 ICRA |
+| 036 Aganian | Object + Skeleton fusion | ~72% | 2023 IJCNN |
+| 037 Aganian+Embeddings | Word embedding extension | ~74% | 2025 IJCNN |
+| 040 Probing Foundation | DINOv2 backbone study | ~70% (probe only) | 2024 |
 
-**A**: Joint pose + action + object learning improves generalization (Caruana 1997, Paper 094).
+**POPW Target**: Must exceed **78.1% Top-1** on IKEA ASM action recognition to claim SOTA.
 
-**IKEA ASM evidence**: Multi-task models outperform single-task on this dataset.
+---
 
-### Q: What backbone should POPW use?
+### Q: "How to improve pseudo-GT for detection/segmentation?"
 
-**A**: Multiple options tested in papers:
+**→ Papers 059-067**
 
-| Backbone | Paper | Pros | Cons |
-|----------|-------|------|------|
-| ResNet50 | 001 | Fast, proven | Lower accuracy |
-| I3D | 068 | Good for video | Slow |
-| DINOv2 | 077 | Strong features | Large |
-| Video Swin | 070 | SOTA video | Memory heavy |
+| Paper | Method | Key Innovation |
+|-------|--------|----------------|
+| 059 Soft Teacher | End-to-end SS-OD | Soft labels from teacher (not hard) |
+| 063 Unbiased Teacher | Bias mitigation | Balanced category learning |
+| 060 PAIS | Instance seg alignment | Pixel + instance level alignment |
+| 064 Better Pseudo Labels | Confidence calibration | Mask quality ≠ confidence |
+| 065 PL-DC | Decoupling & correction | Separate class/mask quality |
+| 062 S4M | SAM as teacher | Knowledge distillation from SAM |
+| 066 PointRend | Adaptive sampling | Focus on boundary regions |
 
-**Recommendation**: Start with ResNet50 (fast iteration), validate with DINOv2 (stronger features).
+**POPW Pseudo-GT Pipeline Recommendation**:
+1. Use **062 S4M** (SAM distillation) for high-quality initial masks
+2. Apply **065 PL-DC** decoupling to handle class vs mask quality separately
+3. Use **064** calibration to ensure confidence matches quality
 
-### Q: How does POPW handle class imbalance?
+---
 
-**A**: Multiple papers provide methods:
+### Q: "What video backbone should I use for skeleton-based action recognition?"
 
-1. **LDAM** (Paper 049) — margin-based rebalancing for imbalanced classes
-2. **Logit Adjustment** (Paper 055) — test-time prior correction
-3. **Class-Balanced Loss** (Paper 052) — effective number sampling
-4. **BBN** (Paper 050) — two-stage bilateral network
+**→ Papers 011, 069, 071, 075, 084**
 
-### Q: What temporal modeling options exist?
+| Paper | Backbone | Efficiency | Performance |
+|-------|----------|------------|-------------|
+| 011 PoseConv3D | 3D CNN on skeleton heatmaps | Medium | SOTA on NTU |
+| 084 PoseConv3D NTU | Same, benchmarked | Medium | 87.5% NTU |
+| 069 TSM | Temporal Shift Module | **Very High** | Near SOTA |
+| 071 SlowFast | Dual pathway | Low | Good for motion |
+| 075 PoTion | Pose as color channels | **Very High** | Compact rep |
 
-**A**: Hierarchy of approaches:
+**Recommendation for POPW**: **075 PoTion** for compact representation + **011 PoseConv3D** for accuracy. Consider **069 TSM** if real-time inference needed.
 
-| Method | Paper | Accuracy | Speed |
-|--------|-------|----------|-------|
-| MS-TCN++ | 073 | High | Medium |
-| TSM | 069 | Medium | Fast |
-| SlowFast | 071 | High | Medium |
-| Video Swin | 070 | SOTA | Slow |
+---
 
-### Q: What datasets should POPW be evaluated on?
+## 📁 File Structure Reference
 
-**A**:
-
-1. **IKEA ASM** (primary) — furniture assembly
-2. **Assembly101** — multi-view assembly
-3. **HA4M** — manufacturing hands
-4. **EPIC-KITCHENS** — egocentric cooking (transfer learning)
-
-### Q: What is POPW's architecture?
-
-**A** (inferred from papers):
 ```
-Video Input → ResNet50/DINOv2 Backbone → Spatio-temporal Features
-                                                      ↓
-                                    FiLM(pose) ← pose from 3D pose estimator
-                                                      ↓
-                                    ┌─────────────────┴─────────────────┐
-                                    ↓                                   ↓
-                               Action Head                        Pose Head
-                           (assembly actions)                   (auxiliary task)
+.wiki/research/
+├── 001-012    # Tier 1: Foundational Backbones
+├── 013-022    # Tier 2: FiLM & Conditioning
+├── 023-035    # Tier 3: Multi-Task Learning
+├── 036-048    # Tier 4: IKEA ASM & Assembly Datasets
+├── 049-058    # Tier 5: Class Imbalance / Long-Tail
+├── 059-067    # Tier 6: Semi-Supervised / Pseudo-GT
+├── 068-078    # Tier 7: Video Understanding Backbones
+├── 079-085    # Tier 8: Pose Estimation
+├── 086-093    # Tier 9: Training Infrastructure
+├── 094-100    # Tier 10: Legacy & Gap Analysis
+├── INDEX.md   # This file
+└── popw-protocol/  # POPW-specific analysis
 ```
 
 ---
 
-## 📊 Gap Summary
+## 🔑 Key Statistics
 
-### What EXISTS (related work)
-- Multi-task learning for action recognition ✓ (Paper 004, 094)
-- FiLM for visual conditioning ✓ (Paper 003, 013)
-- IKEA ASM benchmarks ✓ (Paper 038, 068)
-- Pose estimation from assembly videos ✓ (Paper 075, 036)
-- Pose-conditioned networks ✓ (Paper 015)
+- **Total Papers**: 100
+- **CRITICAL Relevance**: 9 papers (001, 005, 007, 009, 012, 038, 077, 094, 097)
+- **HIGH Relevance**: ~35 papers
+- **MEDIUM Relevance**: ~30 papers
+- **REFERENCE**: 10 papers (training infrastructure)
+- **Literature Gaps Identified**: 1 (Paper 100)
 
-### What is MISSING (POPW novelty)
-- **pose → FiLM → CNN for assembly** ❌ (Paper 100 Gap Analysis)
-- **Multi-task pose + action + FiLM joint learning** ❌
-- **Real-time multi-task assembly action recognition** ❌
-
----
-
-## 📝 TODO: Missing Papers (044 of 100)
-
-The following paper IDs have been reserved but not yet documented:
-
-| Range | Papers | Priority |
-|-------|--------|----------|
-| Tier 1 (5-12) | 005-012 | Low |
-| Tier 2 (16-35) | 016-035 | Medium |
-| Tier 8 (78-93) | 078-093 | High |
+### Citation Champions (by POPW relevance)
+| ID | Paper | Citations |
+|----|-------|----------|
+| 001 | ResNet | 314,715 |
+| 097 | Attention Is All You Need | 120,000+ |
+| 006 | Focal Loss | 30,000+ |
+| 007 | Mask R-CNN | 80,000+ |
+| 009 | HRNet | 20,000+ |
 
 ---
 
-*Generated: 2026-04-11 | Status: Tier 10 complete*
-*Worker: Bashara @ swarm-bot*
+*Last Updated: 2026-04-11 | POPW Research Index v2.0*

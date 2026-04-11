@@ -15,3 +15,8 @@ Legion maintains this file as pages are added. See [SCHEMA.md](SCHEMA.md) for wr
   - [[legion/conversations_log.md]]
 - **legion/** 
   - [[legion/conversations_log.md]]
+  - [[wiki/legion/opencode-integration-2026-04-11.md]]
+
+- **.wiki/decisions/**
+  - [[.wiki/decisions/ADR-001-opencode-integration.md]]
+  - [[.wiki/decisions/ADR-002-opencode-agents-autostart.md]]

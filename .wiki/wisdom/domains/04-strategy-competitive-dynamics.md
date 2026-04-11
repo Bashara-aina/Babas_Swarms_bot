@@ -4,7 +4,7 @@
 **Type**: Book
 **Year**: 1980
 **Core Insight**: Competitive strategy is about differentiation and cost leadership; five forces determine industry attractiveness.
-**LEGION RULE**: When analyzing industry, do Y because Z (use Five Forces; generic strategies; structure determines strategy)
+**LEGION RULE**: Use Five Forces when analyzing industry because competitive strategy is about differentiation and cost leadership and industry structure determines profitability.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Shareholder value maximization
 
@@ -13,7 +13,7 @@
 **Type**: Book
 **Year**: 1985
 **Core Insight**: Competitive advantage stems from value chain activities; firms win by performing activities better or differently.
-**LEGION RULE**: When building advantage, do Y because Z (analyze value chain; activities create advantage; cost or differentiation)
+**LEGION RULE**: Analyze the value chain when building advantage because competitive advantage stems from performing activities better or differently.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -22,7 +22,7 @@
 **Type**: Framework
 **Year**: 1979
 **Core Insight**: Industry structure shaped by: supplier power, buyer power, substitutes, new entrants, rivalry; profitability determined by structure.
-**LEGION RULE**: When assessing industry, do Y because Z (analyze five forces; structure drives profitability; barriers matter)
+**LEGION RULE**: Analyze five forces when assessing industry because industry structure is shaped by supplier power, buyer power, substitutes, new entrants, and rivalry.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Competitor-focused strategy
 
@@ -31,7 +31,7 @@
 **Type**: Book
 **Year**: 2016
 **Core Insight**: Seven sources of durable competitive advantage: economies of scale, network effects, switching costs, counterCapture, branding, trusted relationships, process power.
-**LEGION RULE**: When seeking durable advantage, do Y because Z (build 7 Powers; scale, network, switching costs; durability matters)
+**LEGION RULE**: Build the 7 Powers when seeking durable advantage because scale, network effects, switching costs, counterCapture, branding, trusted relationships, and process power create lasting moats.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Transient advantage only
 
@@ -40,7 +40,7 @@
 **Type**: Book
 **Year**: 2013
 **Core Insight**: Strategy is integrated set of choices: where to play, how to win, capabilities required, management systems.
-**LEGION RULE**: When formulating strategy, do Y because Z (make integrated choices; where to play + how to win; unique)
+**LEGION RULE**: Make integrated choices when formulating strategy because strategy is an integrated set of choices about where to play and how to win that must be unique.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Generic strategy
 
@@ -49,7 +49,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: Good strategy has kernel: diagnosis, guiding policy, coherent action; bad strategy is fluffy or lacks these elements.
-**LEGION RULE**: When evaluating strategy, do Y because Z (look for diagnosis + guiding policy + coherent action; bad strategy avoids these)
+**LEGION RULE**: Look for diagnosis, guiding policy, and coherent action when evaluating strategy because good strategy has a kernel that bad strategy lacks.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Strategy as vision only
 
@@ -58,7 +58,7 @@
 **Type**: Book
 **Year**: 1997
 **Core Insight**: Disruptive technologies initially inferior but simpler/cheaper; incumbants fail by listening to customers; new entrants win.
-**LEGION RULE**: When evaluating disruption risk, do Y because Z (disruptive vs sustaining; incumbants fail; new entrants advantage)
+**LEGION RULE**: Distinguish disruptive from sustaining innovation when evaluating disruption risk because disruptive technologies initially inferior but simpler and cheaper and incumbents fail by listening to customers.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Incumbent advantage
 
@@ -67,7 +67,7 @@
 **Type**: Book
 **Year**: 1991
 **Core Insight**: Technology adoption lifecycle: chasm between early adopters and early majority causes failure; focus on bowling alley.
-**LEGION RULE**: When launching tech products, do Y because Z (cross the chasm; bowling alley strategy; focus whole market segment)
+**LEGION RULE**: Cross the chasm when launching tech products because the gap between early adopters and early majority causes failure and the bowling alley strategy focuses on a whole market segment.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Mass market immediately
 
@@ -76,7 +76,7 @@
 **Type**: Book
 **Year**: 1994
 **Core Insight**: Positive feedback creates multiple equilibria, lock-in, and path dependence; small events redirect entire systems.
-**LEGION RULE**: When in early stages, do Y because Z (expect increasing returns; lock-in possible; history matters)
+**LEGION RULE**: Expect increasing returns in early stages because positive feedback creates multiple equilibria, lock-in, and path dependence where small events redirect entire systems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Diminishing returns
 
@@ -85,7 +85,7 @@
 **Type**: Financial Theory
 **Year**: 2004
 **Core Insight**: Markets are evolutionary ecosystems; participants adapt through competition, mutation, reproduction, natural selection.
-**LEGION RULE**: When analyzing markets, do Y because Z (evolutionary lens; adaptivity; ecological dynamics)
+**LEGION RULE**: Use an evolutionary lens when analyzing markets because markets are ecosystems where participants adapt through competition, mutation, reproduction, and natural selection.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Efficient Markets Hypothesis
 
@@ -94,7 +94,7 @@
 **Type**: Research
 **Year**: 2000s
 **Core Insight**: Contrarian investing requires examining crowd's views; mispricing occurs when consensus is most confident.
-**LEGION RULE**: When investing, do Y because Z (examine crowd views; mispricing at consensus extremes; process matters)
+**LEGION RULE**: Examine crowd views when investing because mispricing occurs when consensus is most confident and contrarian investing requires understanding when the crowd is wrong.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Momentum investing
 
@@ -103,7 +103,7 @@
 **Type**: Book
 **Year**: 1991
 **Core Insight**: Value investing requires margin of safety; risk is permanent loss, not volatility; uncertainty creates opportunity.
-**LEGION RULE**: When investing, do Y because Z (margin of safety required; risk = permanent loss; uncertainty is opportunity)
+**LEGION RULE**: Require margin of safety when investing because value investing requires accounting for risk as permanent loss not volatility and uncertainty creates opportunity.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Efficient markets
 
@@ -112,7 +112,7 @@
 **Type**: Book
 **Year**: 2024
 **Core Insight**: Complex problems solved through simple strategies; pattern recognition, analogical reasoning, system dynamics.
-**LEGION RULE**: When solving complex problems, do Y because Z (simple strategies; pattern recognition; system dynamics)
+**LEGION RULE**: Use simple strategies when solving complex problems because pattern recognition, analogical reasoning, and system dynamics often outperform complex approaches.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Complex-only solutions
 
@@ -121,7 +121,7 @@
 **Type**: Book
 **Year**: 2001
 **Core Insight**: Historical military strategies adapted for business and life; psychological warfare, strategic thinking.
-**LEGION RULE**: When competing, do Y because Z (study war strategies; psychological dimension; asymmetric advantage)
+**LEGION RULE**: Study war strategies when competing because historical military strategies adapted for business provide psychological and asymmetric advantages.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Pure analytical approach
 
@@ -130,7 +130,7 @@
 **Type**: Textbook
 **Year**: 2011
 **Core Insight**: Game theory provides framework for strategic interaction; Nash equilibrium, commitment, credible threats.
-**LEGION RULE**: When in strategic situations, do Y because Z (apply game theory; Nash equilibrium; commitment matters)
+**LEGION RULE**: Apply game theory in strategic situations because Nash equilibrium, commitment, and credible threats determine outcomes in competitive interactions.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Non-strategic thinking
 
@@ -139,7 +139,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Integrative thinking (holding both/and) produces better strategy than either/or; mental models can be combined.
-**LEGION RULE**: When formulating strategy, do Y because Z (integrative thinking; both/and; combine mental models)
+**LEGION RULE**: Use integrative thinking when formulating strategy because holding both/and and combining mental models produces better strategy than false tradeoffs.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: False tradeoffs
 
@@ -148,7 +148,7 @@
 **Type**: Book
 **Year**: 2000
 **Core Insight**: Core innovation (business model) beats product innovation; revolutionizing business models is ultimate competitive weapon.
-**LEGION RULE**: When seeking competitive advantage, do Y because Z (core innovation; business model; revolution beats evolution)
+**LEGION RULE**: Pursue core innovation when seeking competitive advantage because business model innovation beats product innovation and revolutionizing business models is the ultimate competitive weapon.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Incremental innovation only
 
@@ -157,7 +157,7 @@
 **Type**: Book
 **Year**: 2003
 **Core Insight**: Disruption predictable; new market vs low-end disruption; create business unit separate from core.
-**LEGION RULE**: When facing disruption, do Y because Z (create separate unit; new market or low-end; organizational separation)
+**LEGION RULE**: Create a separate unit when facing disruption because disruption is predictable and new market or low-end disruption requires organizational separation from core business.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Integration of disruption
 
@@ -166,7 +166,7 @@
 **Type**: Book
 **Year**: 1995
 **Core Insight**: Technology markets follow tornado (hypergrowth) then balance sheet patterns; exploit market bifurcation.
-**LEGION RULE**: When in tech markets, do Y because Z (tornado dynamics; hypergrowth; ecosystem dynamics)
+**LEGION RULE**: Understand tornado dynamics when in tech markets because technology markets follow hypergrowth then balance sheet patterns and market bifurcation exploits ecosystem dynamics.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear market models
 
@@ -175,7 +175,7 @@
 **Type**: Book
 **Year**: 1998
 **Core Insight**: Strategy requires tradeoffs; activities must fit and reinforce; configuration determines competitive advantage.
-**LEGION RULE**: When building strategy, do Y because Z (make tradeoffs; activities must fit; configuration matters)
+**LEGION RULE**: Make tradeoffs when building strategy because strategy requires tradeoffs and activities must fit and reinforce each other for configuration to determine competitive advantage.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: No-tradeoff strategy
 
@@ -184,7 +184,7 @@
 **Type**: Framework
 **Year**: 2019
 **Core Insight**: Strategy is about power; identify sources of durable power and deploy to create advantage.
-**LEGION RULE**: When developing strategy, do Y because Z (power perspective; sources of power; durability matters)
+**LEGION RULE**: Use a power perspective when developing strategy because strategy is about identifying sources of durable power and deploying them to create advantage.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Shareholder value
 
@@ -193,7 +193,7 @@
 **Type**: Framework
 **Year**: 2020
 **Core Insight**: Good strategy has three elements: diagnosis, guiding policy, coherent action; coherence is key.
-**LEGION RULE**: When evaluating strategy, do Y because Z (coherence essential; diagnosis + guiding policy + action)
+**LEGION RULE**: Prioritize coherence when evaluating strategy because good strategy has three elements and coherence is what distinguishes strategy from goals.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Vision-only strategy
 
@@ -202,7 +202,7 @@
 **Type**: Book
 **Year**: 2009
 **Core Insight**: Business model innovation uses reliable methods (Discovery-driven planning) to manage uncertainty.
-**LEGION RULE**: When designing new ventures, do Y because Z (discovery-driven planning; reliable methods; manage uncertainty)
+**LEGION RULE**: Use discovery-driven planning when designing new ventures because business model innovation requires reliable methods to manage uncertainty.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Business plan only
 
@@ -211,7 +211,7 @@
 **Type**: Book
 **Year**: 2003
 **Core Insight**: Signals of disruption detectable; theory allows pattern recognition across industries.
-**LEGION RULE**: When scanning for disruption, do Y because Z (theory enables detection; signals; pattern recognition)
+**LEGION RULE**: Use theory when scanning for disruption because signals of disruption are detectable and theory allows pattern recognition across industries.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -220,7 +220,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Enterprise tech companies face velocity wall; cross-chasm strategies insufficient; must achieve escape velocity.
-**LEGION RULE**: When scaling enterprise tech, do Y because Z (escape velocity required; post-chasm strategies; enterprise ecosystem)
+**LEGION RULE**: Achieve escape velocity when scaling enterprise tech because cross-chasm strategies are insufficient and enterprise tech companies face a velocity wall.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Chasm-only strategy
 
@@ -229,7 +229,7 @@
 **Type**: Book
 **Year**: 2009
 **Core Insight**: Technologies are combinations of phenomena orchestrated by humans; evolution-like dynamics.
-**LEGION RULE**: When understanding technology, do Y because Z (phenomena + orchestration; combination; evolutionary)
+**LEGION RULE**: View technology as combinations of phenomena when understanding it because technologies are orchestrated by humans and follow evolution-like dynamics.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Technology as machine
 
@@ -238,7 +238,7 @@
 **Type**: Paper
 **Year**: 2012
 **Core Insight**: Moat assessment requires analyzing barriers to competition; changing conditions erode advantages.
-**LEGION RULE**: When assessing competitive advantage, do Y because Z (moat durability; barriers; continuous reassessment)
+**LEGION RULE**: Assess moat durability when assessing competitive advantage because barriers to competition must be continuously reassessed as conditions change.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Static advantage
 
@@ -247,7 +247,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: Expert intuition often misplaced in competitive contexts; incentives, framing, competition distort judgment.
-**LEGION RULE**: When relying on experts, do Y because Z (question intuition; incentives distort; competitive context)
+**LEGION RULE**: Question intuition when relying on experts because expert intuition is often misplaced in competitive contexts where incentives and framing distort judgment.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Intuition worship
 
@@ -256,7 +256,7 @@
 **Type**: HBR Article
 **Year**: 2001
 **Core Insight**: Internet technology alone provides no advantage; strategy (positioning, activities, fit) still essential.
-**LEGION RULE**: When using internet, do Y because Z (strategy still matters; positioning; fit with activities)
+**LEGION RULE**: Remember strategy still matters when using the internet because internet technology alone provides no advantage and positioning and fit with activities are essential.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Internet as strategy
 
@@ -265,7 +265,7 @@
 **Type**: Framework
 **Year**: 2019
 **Core Insight**: Strategic power derives from dependencies; control of critical resources creates leverage.
-**LEGION RULE**: When negotiating, do Y because Z (power from dependencies; critical resources; leverage)
+**LEGION RULE**: Understand power from dependencies when negotiating because strategic power derives from control of critical resources that create leverage.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Power-from-position only
 
@@ -274,7 +274,7 @@
 **Type**: Book
 **Year**: 2019
 **Core Insight**: Strategy addresses fundamental choices about where to play; ambition determines scope.
-**LEGION RULE**: When setting strategy, do Y because Z (fundamental choices; ambition determines scope; clarity)
+**LEGION RULE**: Make fundamental choices when setting strategy because strategy addresses where to play and ambition determines scope.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Incremental ambition
 
@@ -283,7 +283,7 @@
 **Type**: Framework
 **Year**: 2020
 **Core Insight**: Strategy = challenge (diagnosis) + guiding policy + coherent action plan.
-**LEGION RULE**: When creating strategy, do Y because Z (three elements; challenge + policy + action; coherence)
+**LEGION RULE**: Include challenge, policy, and action when creating strategy because strategy equals the challenge plus guiding policy plus coherent action plan.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Vision-only
 
@@ -292,7 +292,7 @@
 **Type**: Theory
 **Year**: 1990s
 **Core Insight**: Disruption predictable pattern; incumbants systematically fail to respond; theory enables prediction.
-**LEGION RULE**: When assessing disruption risk, do Y because Z (disruption pattern; incumbants fail; theory enables prediction)
+**LEGION RULE**: Apply disruption theory when assessing disruption risk because the pattern is predictable and incumbents systematically fail to respond.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -301,7 +301,7 @@
 **Type**: Framework
 **Year**: 1991
 **Core Insight**: Five segments: innovators, early adopters, early majority, late majority, laggards; gaps between segments.
-**LEGION RULE**: When launching, do Y because Z (segments; chasm between early adopters/early majority; transitions)
+**LEGION RULE**: Understand technology adoption segments when launching because five segments exist and gaps between early adopters and early majority cause failure.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -310,7 +310,7 @@
 **Type**: HBR Article
 **Year**: 1996
 **Core Insight**: Operational effectiveness not strategy; strategy requires tradeoffs and fit.
-**LEGION RULE**: When developing strategy, do Y because Z (operational effectiveness ≠ strategy; tradeoffs; fit)
+**LEGION RULE**: Remember operational effectiveness is not strategy when developing strategy because strategy requires tradeoffs and fit between activities.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: OE as strategy
 
@@ -319,7 +319,7 @@
 **Type**: Concept
 **Year**: 2019
 **Core Insight**: Managers overweight current position (endowment); strategic courage requires questioning current position.
-**LEGION RULE**: When evaluating position, do Y because Z (recognize endowment effect; strategic courage; questioning)
+**LEGION RULE**: Recognize the endowment effect when evaluating position because managers overweight their current position and strategic courage requires questioning that position.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Endowment-free analysis
 
@@ -328,7 +328,7 @@
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Reflective choice process improves decisions; ladder of inference; testing assumptions.
-**LEGION RULE**: When making choices, do Y because Z (reflective process; test assumptions; ladder of inference)
+**LEGION RULE**: Use a reflective choice process when making choices because ladder of inference and testing assumptions improves decisions.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Fast choice only
 
@@ -337,7 +337,7 @@
 **Type**: Concept
 **Year**: 2020
 **Core Insight**: Strategy creates surplus (value) for customers; capturing surplus creates competitive advantage.
-**LEGION RULE**: When evaluating strategy, do Y because Z (create customer surplus; capture mechanisms; value creation)
+**LEGION RULE**: Create customer surplus when evaluating strategy because strategy creates value for customers and capturing surplus creates competitive advantage.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Value extraction only
 
@@ -346,7 +346,7 @@
 **Type**: HBR Article
 **Year**: 2014
 **Core Insight**: Capital allocation favors disruptive innovation insufficiently; financial metrics miss strategic value.
-**LEGION RULE**: When allocating capital, do Y because Z (recognize bias; disruptive underfunded; strategic value vs financial)
+**LEGION RULE**: Recognize bias toward incremental when allocating capital because capital allocation favors disruptive innovation insufficiently and financial metrics miss strategic value.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Financial metrics only
 
@@ -355,7 +355,7 @@
 **Type**: Framework
 **Year**: 2014
 **Core Insight**: Different strategies for different market zones: tornado, bowling alley, graveyard; no one-size-fits-all.
-**LEGION RULE**: When in different markets, do Y because Z (zone-specific strategies; tornado vs bowling alley; context)
+**LEGION RULE**: Apply zone-specific strategies when in different markets because no one-size-fits-all approach works and tornado versus bowling alley requires different tactics.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Universal strategy
 
@@ -364,7 +364,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Expectations drive stock prices; competitive advantage assessed by expectations gap.
-**LEGION RULE**: When investing, do Y because Z (expectations framework; gap analysis; competitive advantage vs expectations)
+**LEGION RULE**: Use the expectations framework when investing because competitive advantage is assessed by the gap between performance and market expectations.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -373,7 +373,7 @@
 **Type**: Paper
 **Year**: 1989
 **Core Insight**: Technologies compete for dominance; increasing returns lead to lock-in; history matters.
-**LEGION RULE**: When evaluating tech, do Y because Z (competing technologies; lock-in; path dependence)
+**LEGION RULE**: Consider competing technologies when evaluating tech because increasing returns lead to lock-in and history matters in technology competition.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -382,7 +382,7 @@
 **Type**: Theory
 **Year**: 2004
 **Core Insight**: AMH reconciles EMH with behavioral finance; markets cycle between efficiency/inefficiency.
-**LEGION RULE**: When analyzing markets, do Y because Z (adaptive markets; cycles; neither perfectly efficient nor inefficient)
+**LEGION RULE**: Use adaptive markets when analyzing markets because AMH reconciles efficient markets with behavioral finance and markets cycle between efficiency and inefficiency.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Efficient Markets Hypothesis
 
@@ -391,7 +391,7 @@
 **Type**: Book/Approach
 **Year**: 1991
 **Core Insight**: Long-term value investing requires patience; concentrate when conviction high; margin of safety.
-**LEGION RULE**: When value investing, do Y because Z (patience; concentrate when conviction; margin of safety)
+**LEGION RULE**: Be patient when value investing because long-term value investing requires patience and concentration when conviction is high with margin of safety.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Efficient markets
 
@@ -400,7 +400,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Skill vs luck analysis; régression to mean; process quality; counterfactual thinking.
-**LEGION RULE**: When evaluating performance, do Y because Z (skill vs luck; regression; process quality; counterfactuals)
+**LEGION RULE**: Analyze skill versus luck when evaluating performance because skill versus luck analysis requires regression to mean, process quality, and counterfactual thinking.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Outcome-based evaluation
 
@@ -409,7 +409,7 @@
 **Type**: HBR Article
 **Year**: 2017
 **Core Insight**: Strategy is integrated set of choices positioned to create advantage; choices must be coordinated.
-**LEGION RULE**: When defining strategy, do Y because Z (integrated choices; coordination; creating advantage)
+**LEGION RULE**: Make integrated coordinated choices when defining strategy because strategy is positioned to create advantage and choices must be coordinated.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Strategy as goals
 
@@ -418,6 +418,6 @@
 **Type**: Essay
 **Year**: 2020
 **Core Insight**: Leaders must articulate challenge and create coherence; non-linear change requires strategic clarity.
-**LEGION RULE**: When leading, do Y because Z (create coherence; articulate challenge; strategic clarity)
+**LEGION RULE**: Create coherence and articulate the challenge when leading because non-linear change requires strategic clarity and leaders must make the challenge understandable.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Leader as manager

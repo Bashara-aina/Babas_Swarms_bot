@@ -4,7 +4,7 @@
 **Type**: Paper
 **Year**: 1948
 **Core Insight**: Information can be quantified as entropy; communication consists of source, transmitter, channel, noise, receiver; optimal coding achieves channel capacity.
-**LEGION RULE**: When quantifying information, do Y because Z (measure entropy; use optimal coding; account for noise in channels)
+**LEGION RULE**: Measure entropy and use optimal coding when quantifying information because Shannon showed information can be quantified and optimal codes achieve channel capacity while accounting for noise.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -13,7 +13,7 @@
 **Type**: Paper
 **Year**: 1949
 **Core Insight**: Noise limits channel capacity; error-correcting codes can achieve reliable communication near channel capacity through redundancy.
-**LEGION RULE**: When designing communication systems, do Y because Z (add redundancy; use error-correcting codes; approach capacity)
+**LEGION RULE**: Add redundancy through error-correcting codes when designing communication systems because noise limits channel capacity but redundant coding enables reliable communication approaching Shannon's limit.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -22,7 +22,7 @@
 **Type**: Paper
 **Year**: 1963
 **Core Insight**: Randomness can be measured by algorithmic complexity; incompressibility defines randomness; shortest description determines information content.
-**LEGION RULE**: When measuring randomness, do Y because Z (use algorithmic complexity; test incompressibility; shortest description rules)
+**LEGION RULE**: Apply algorithmic complexity through incompressibility tests when measuring randomness because Kolmogorov showed randomness equals incompressibility and the shortest description determines information content.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Statistical randomness tests
 
@@ -31,7 +31,7 @@
 **Type**: Paper
 **Year**: 1965
 **Core Insight**: Information defined via combinatorial, probabilistic, and algorithmic approaches; all three converge on same fundamental concepts.
-**LEGION RULE**: When defining information, do Y because Z (use multiple approaches; verify convergence; algorithmic definition most fundamental)
+**LEGION RULE**: Use combinatorial, probabilistic, and algorithmic approaches when defining information because all three converge on fundamental concepts though the algorithmic definition is most mathematically precise.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -40,7 +40,7 @@
 **Type**: Book
 **Year**: 1987
 **Core Insight**: Algorithmic randomness defined via incompressibility; Gödel's incompleteness linked to information theory; randomness is a precise mathematical property.
-**LEGION RULE**: When studying randomness, do Y because Z (use algorithmic complexity; recognize incompleteness; measure via compression)
+**LEGION RULE**: Use algorithmic complexity recognizing incompleteness when studying randomness because Chaitin linked Gödel's incompleteness to information theory and randomness is a precise mathematical property not mere probability.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Probabilistic definitions of randomness
 
@@ -49,7 +49,7 @@
 **Type**: Book
 **Year**: 1991
 **Core Insight**: Mutual information, KL divergence, channel capacity form the foundation of information theory; Fano's inequality bounds learning.
-**LEGION RULE**: When analyzing information systems, do Y because Z (use mutual information; KL divergence; capacity bounds)
+**LEGION RULE**: Apply mutual information, KL divergence, and capacity bounds when analyzing information systems because Cover established these as the mathematical foundation and Fano's inequality sets fundamental learning limits.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -58,7 +58,7 @@
 **Type**: Book
 **Year**: 2003
 **Core Insight**: Bayesian inference and information theory unified; sparse coding; message-passing algorithms for inference.
-**LEGION RULE**: When doing inference, do Y because Z (use Bayesian methods; sparse coding; message passing)
+**LEGION RULE**: Use Bayesian inference with message-passing algorithms when doing inference because MacKay showed Bayesian methods unify inference with information theory and sparse coding enables efficient representation learning.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Frequentist statistics
 
@@ -67,7 +67,7 @@
 **Type**: Paper
 **Year**: 1931
 **Core Insight**: Any sufficiently powerful formal system contains true statements that cannot be proven within the system; incompleteness is fundamental.
-**LEGION RULE**: When building axiomatic systems, do Y because Z (expect incompleteness; prove consistency externally; acknowledge limits)
+**LEGION RULE**: Expect incompleteness and prove consistency externally when building axiomatic systems because Gödel established that any sufficiently powerful formal system contains true statements that cannot be proven within the system.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Hilbert's program
 
@@ -76,7 +76,7 @@
 **Type**: Paper
 **Year**: 1936
 **Core Insight**: Turing machines formalize computation; halting problem undecidable; computability has precise limits.
-**LEGION RULE**: When determining computability, do Y because Z (use Turing machine model; halting problem limits; formal proofs)
+**LEGION RULE**: Use Turing machine formalization when determining computability because the halting problem is undecidable and computability has precise mathematical limits that formal proofs establish.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Church-Turing thesis variants
 
@@ -85,7 +85,7 @@
 **Type**: Paper
 **Year**: 1950
 **Core Insight**: Machine intelligence testable via imitation game; thinking requires specific processes; learning machines possible.
-**LEGION RULE**: When evaluating AI, do Y because Z (use imitation test; focus on processes; design learning machines)
+**LEGION RULE**: Use the imitation game and focus on specific processes when evaluating AI because Turing showed machine intelligence is testable and learning machines are possible even if the test has limitations.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -94,7 +94,7 @@
 **Type**: Report
 **Year**: 1945
 **Core Insight**: Stored-program computer architecture; binary representation; sequential operation; self-reproducing machines possible.
-**LEGION RULE**: When designing computers, do Y because Z (use stored program; binary representation; sequential processing)
+**LEGION RULE**: Use stored-program architecture with binary representation when designing computers because von Neumann established that self-reproducing machines are theoretically possible with this architecture.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Harvard architecture
 
@@ -103,7 +103,7 @@
 **Type**: Book
 **Year**: 1941
 **Core Insight**: Lambda calculus formalizes computation; functions are first-class; equivalence with Turing machines established Church-Turing thesis.
-**LEGION RULE**: When formalizing computation, do Y because Z (use lambda calculus; functions as first-class; Church-Turing thesis)
+**LEGION RULE**: Apply lambda calculus where functions are first-class when formalizing computation because Church established equivalence with Turing machines and the Church-Turing thesis defines the boundaries of computability.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -112,7 +112,7 @@
 **Type**: Book
 **Year**: 1952
 **Core Insight**: Recursion theory; Gödel numbering; primitive recursive functions; general recursive functions; metamathematics foundations.
-**LEGION RULE**: When studying computation foundations, do Y because Z (use recursion theory; Gödel numbering; primitive recursive)
+**LEGION RULE**: Use recursion theory and Gödel numbering when studying computation foundations because Kleene established primitive recursive functions and metamathematical foundations that connect logic to computation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -121,7 +121,7 @@
 **Type**: Book
 **Year**: 1992
 **Core Insight**: Self-reference enables incompleteness; undecidability emerges from formal systems; truth exceeds provability.
-**LEGION RULE**: When proving incompleteness, do Y because Z (use self-reference; formal systems have limits; truth transcends proof)
+**LEGION RULE**: Exploit self-reference when proving incompleteness because Smullyan showed truth transcends provability and undecidability emerges from the capacity of formal systems to represent their own predicates.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -130,7 +130,7 @@
 **Type**: Book
 **Year**: 1997
 **Core Insight**: Quantum computation; universal quantum computer; parallel universes; information as physical.
-**LEGION RULE**: When understanding computation, do Y because Z (consider quantum effects; parallel universes; information is physical)
+**LEGION RULE**: Consider quantum effects and parallel universes when understanding computation because Deutsch argued information is physical and quantum computation harnesses superposition for exponential speedup on certain problems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical computation models
 
@@ -139,7 +139,7 @@
 **Type**: Book
 **Year**: 2013
 **Core Insight**: Computational complexity hierarchy; quantum supremacy; complexity classes relate to physics; quantum speedup limits.
-**LEGION RULE**: When evaluating quantum computing, do Y because Z (understand complexity classes; quantum supremacy requires proof; speedup limits exist)
+**LEGION RULE**: Understand computational complexity classes and require proofs of quantum supremacy when evaluating quantum computing because Aaronson established that complexity theory constrains what quantum computers can achieve and speedup limits exist.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Overoptimistic quantum claims
 
@@ -148,7 +148,7 @@
 **Type**: Book
 **Year**: 2013
 **Core Insight**: Learning as evolution of approximate solutions; evolutionary computation; PAC learning framework.
-**LEGION RULE**: When designing learning systems, do Y because Z (seek approximate solutions; use evolutionary methods; PAC bounds)
+**LEGION RULE**: Seek approximate solutions using evolutionary methods with PAC bounds when designing learning systems because Valiant proved learning is possible through evolutionary computation of approximately correct hypotheses.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Exact learning models
 
@@ -157,7 +157,7 @@
 **Type**: Essay
 **Year**: 2014
 **Core Insight**: Good explanation requires causal reasoning; visualization; progressive detail; engagement with audience.
-**LEGION RULE**: When explaining complex concepts, do Y because Z (use causal chains; progressive detail; audience engagement)
+**LEGION RULE**: Use causal chains with progressive detail and audience engagement when explaining complex concepts because Nielsen showed good explanation requires understanding what the audience can assimilate at each step.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -166,7 +166,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: Computational complexity; NP-completeness; quantum computation; algorithmic information theory integrated.
-**LEGION RULE**: When analyzing algorithms, do Y because Z (understand complexity classes; NP-complete problems; quantum speedup)
+**LEGION RULE**: Understand complexity classes and NP-completeness when analyzing algorithms because Moore showed NP-complete problems have phase transitions and efficient algorithms may not exist for many practical problems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -175,7 +175,7 @@
 **Type**: Book
 **Year**: 2000
 **Core Insight**: Causal diagrams; do-calculus; counterfactuals; causal inference as algebraic operations on graphs.
-**LEGION RULE**: When reasoning about causation, do Y because Z (use causal diagrams; do-calculus; counterfactual thinking)
+**LEGION RULE**: Use causal diagrams and do-calculus for counterfactual reasoning when analyzing causation because Pearl showed causal inference reduces to algebraic operations on graphs that encode causal structure.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Correlation-based methods
 
@@ -184,7 +184,7 @@
 **Type**: Paper
 **Year**: 1931
 **Core Insight**: Game theory applied to chess; combinatorial game theory; minimax principle; perfect play analysis.
-**LEGION RULE**: When analyzing games, do Y because Z (use minimax; perfect play; combinatorial analysis)
+**LEGION RULE**: Apply minimax with perfect play analysis when analyzing games because Lasker established combinatorial game theory where optimal strategies emerge from analyzing all possible futures.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Heuristic approaches
 
@@ -193,7 +193,7 @@
 **Type**: Book
 **Year**: 1976
 **Core Insight**: Surreal numbers; combinatorial game theory; numbers as games; infinite and infinitesimal quantities.
-**LEGION RULE**: When modeling games mathematically, do Y because Z (use surreal numbers; combinatorial game theory; recursive definitions)
+**LEGION RULE**: Use surreal numbers and recursive definitions when modeling games mathematically because Conway showed numbers are games and this framework handles infinite and infinitesimal quantities elegantly.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -202,7 +202,7 @@
 **Type**: Book
 **Year**: 1968
 **Core Insight**: Algorithmic analysis; sorting and searching; combinatorial algorithms; mathematical foundations of computation.
-**LEGION RULE**: When analyzing algorithms, do Y because Z (use asymptotic analysis; fundamental techniques; rigorous proofs)
+**LEGION RULE**: Use asymptotic analysis with rigorous proofs when analyzing algorithms because Knuth established that fundamental techniques like sorting and searching have precise mathematical foundations that determine practical performance.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Ad hoc optimization
 
@@ -211,7 +211,7 @@
 **Type**: Book
 **Year**: 1997
 **Core Insight**: Digital filters; error-correcting codes; information theory applications; Hamming distance for reliability.
-**LEGION RULE**: When designing reliable systems, do Y because Z (use error-correcting codes; Hamming distance; redundancy)
+**LEGION RULE**: Use error-correcting codes and Hamming distance when designing reliable systems because Hamming showed redundancy enables detection and correction of errors in digital information transmission.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -220,7 +220,7 @@
 **Type**: Book
 **Year**: 1999
 **Core Insight**: Stationary processes; ergodicity; information theory for random processes; entropy rates.
-**LEGION RULE**: When analyzing random processes, do Y because Z (check stationarity; ergodicity; entropy rates)
+**LEGION RULE**: Check stationarity and ergodicity when analyzing random processes because Gray showed entropy rates and information theory apply properly only when these structural properties hold over time.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -229,7 +229,7 @@
 **Type**: Paper
 **Year**: 1998
 **Core Insight**: Comprehensive review of Shannon's contributions; channel coding theorem; rate distortion theory; multiuser information theory.
-**LEGION RULE**: When studying information theory, do Y because Z (review Shannon's foundations; channel coding; rate distortion)
+**LEGION RULE**: Review Shannon's foundational contributions when studying information theory because Verdú showed channel coding theorems and rate distortion theory remain central to all modern communication systems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -238,7 +238,7 @@
 **Type**: Paper
 **Year**: 1967
 **Core Insight**: Viterbi algorithm for maximum likelihood decoding; convolutional codes; trellis structure.
-**LEGION RULE**: When decoding convolutional codes, do Y because Z (use Viterbi algorithm; maximum likelihood; trellis representation)
+**LEGION RULE**: Use the Viterbi algorithm for maximum likelihood decoding when decoding convolutional codes because Viterbi established trellis representations that make decoding computationally tractable.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -247,7 +247,7 @@
 **Type**: Paper
 **Year**: 1963
 **Core Insight**: LDPC codes near Shannon capacity; sparse graph codes; iterative decoding; belief propagation.
-**LEGION RULE**: When designing error-correcting codes, do Y because Z (use LDPC; sparse graphs; iterative decoding)
+**LEGION RULE**: Use LDPC codes with sparse graph representations when designing error-correcting codes because Gallager showed sparse graph codes approach Shannon capacity with iterative belief propagation decoding.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical block codes
 
@@ -256,7 +256,7 @@
 **Type**: Paper
 **Year**: 1952
 **Core Insight**: Huffman coding achieves optimal prefix-free codes; probability-sorted binary tree; minimum expected code length.
-**LEGION RULE**: When compressing data, do Y because Z (use Huffman coding; prefix-free codes; probability-based tree)
+**LEGION RULE**: Use Huffman coding with prefix-free codes when compressing data because Huffman proved probability-sorted binary trees achieve minimum expected code length for lossless compression.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -265,7 +265,7 @@
 **Type**: Paper
 **Year**: 1977
 **Core Insight**: LZ77/LZ78 algorithms; dictionary-based compression; universal compression; sliding window.
-**LEGION RULE**: When compressing sequential data, do Y because Z (use dictionary methods; LZ algorithms; sliding window)
+**LEGION RULE**: Use dictionary-based LZ algorithms with sliding windows when compressing sequential data because Lempel and Ziv showed universal compression is possible without knowing source statistics in advance.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Static dictionary methods
 
@@ -274,7 +274,7 @@
 **Type**: Paper
 **Year**: 1978
 **Core Insight**: LZW algorithm; universal lossless compression; adaptive dictionary; variable-rate coding.
-**LEGION RULE**: When doing universal compression, do Y because Z (use LZW; adaptive dictionary; variable rate)
+**LEGION RULE**: Use LZW with adaptive dictionaries and variable-rate coding when doing universal compression because Ziv proved adaptive dictionary methods achieve universality without requiring prior knowledge of source statistics.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -283,7 +283,7 @@
 **Type**: Book
 **Year**: 1968
 **Core Insight**: BCH codes; Reed-Solomon codes; finite field arithmetic; algebraic decoding algorithms.
-**LEGION RULE**: When designing algebraic codes, do Y because Z (use BCH; Reed-Solomon; finite field methods)
+**LEGION RULE**: Use BCH and Reed-Solomon codes with finite field arithmetic when designing algebraic codes because Berlekamp established algebraic decoding algorithms that correct multiple errors efficiently.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -292,7 +292,7 @@
 **Type**: Paper
 **Year**: 1965
 **Core Insight**: Concatenated codes achieve near Shannon capacity; inner and outer codes; iterative decoding.
-**LEGION RULE**: When designing high-performance codes, do Y because Z (concatenate codes; outer and inner; iterative decoding)
+**LEGION RULE**: Concatenate inner and outer codes with iterative decoding when designing high-performance codes because Forney showed concatenated codes approach Shannon capacity with practical complexity.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Single-stage coding
 
@@ -301,7 +301,7 @@
 **Type**: Paper
 **Year**: 1994
 **Core Insight**: DNA computation; massive parallelism; NP-complete problems solvable in polynomial time theoretically.
-**LEGION RULE**: When solving combinatorial problems, do Y because Z (consider DNA computation; parallelism; biological computers)
+**LEGION RULE**: Consider DNA computation and biological parallelism when solving combinatorial problems because Adleman showed massive parallelism can theoretically solve NP-complete problems in polynomial time.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical computation limits
 
@@ -310,7 +310,7 @@
 **Type**: Paper
 **Year**: 1994
 **Core Insight**: Shor's algorithm; quantum factorization in polynomial time; RSA insecurity; quantum supremacy.
-**LEGION RULE**: When factoring large numbers, do Y because Z (use quantum algorithms; polynomial time; RSA vulnerable)
+**LEGION RULE**: Use quantum algorithms like Shor's algorithm when factoring large numbers because quantum computation factors in polynomial time while classical methods are exponential, threatening RSA encryption.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical factorization complexity
 
@@ -319,7 +319,7 @@
 **Type**: Paper
 **Year**: 1996
 **Core Insight**: Grover's algorithm; quadratic quantum speedup; unstructured search; amplitude amplification.
-**LEGION RULE**: When searching unsorted data, do Y because Z (use Grover's algorithm; quadratic speedup; amplitude amplification)
+**LEGION RULE**: Use Grover's algorithm with amplitude amplification when searching unsorted data because quantum search provides quadratic speedup over classical search for unstructured problems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical search complexity
 
@@ -328,7 +328,7 @@
 **Type**: Paper
 **Year**: 1973
 **Core Insight**: Reversible computing;Landauerer's principle; energy dissipation limits; quantum computing foundations.
-**LEGION RULE**: When designing computing systems, do Y because Z (use reversible operations; minimize energy; Landauerer's principle)
+**LEGION RULE**: Use reversible operations and minimize energy dissipation when designing computing systems because Bennett proved reversible computation can eliminate thermodynamic costs and Landauer's principle sets fundamental limits.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Irreversible computing models
 
@@ -337,7 +337,7 @@
 **Type**: Paper
 **Year**: 1961
 **Core Insight**: Erasing information dissipates heat; reversible computation possible; thermodynamic costs of computation.
-**LEGION RULE**: When designing low-energy computation, do Y because Z (erase less information; use reversible gates; thermodynamic limits)
+**LEGION RULE**: Minimize information erasure and use reversible gates when designing low-energy computation because Landauer's principle shows erasing information dissipates heat and sets thermodynamic costs of computation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -346,7 +346,7 @@
 **Type**: Book
 **Year**: 2002
 **Core Insight**: Cellular automata; computational universe; simple programs produce complex behavior; rule 110 is Turing complete.
-**LEGION RULE**: When studying complex systems, do Y because Z (use cellular automata; explore simple programs; computational thinking)
+**LEGION RULE**: Explore cellular automata and simple programs when studying complex systems because Wolfram showed simple deterministic rules produce chaotic and complex behavior with Rule 110 achieving Turing completeness.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Traditional mathematical modeling
 
@@ -355,7 +355,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Algorithmic information theory applied to evolution; creativity in nature; irreducible complexity; information-theoretic biology.
-**LEGION RULE**: When studying evolution, do Y because Z (use algorithmic information; recognize creativity; irreducible complexity)
+**LEGION RULE**: Apply algorithmic information theory to evolution when studying it because Chaitin showed biological creativity is mathematical and irreducible complexity emerges from algorithmic processes in nature.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -364,7 +364,7 @@
 **Type**: Paper
 **Year**: 1957
 **Core Insight**: Maximum entropy principle; statistical mechanics connections; Jaynes' formulation; thermodynamic analogs.
-**LEGION RULE**: When doing statistical inference, do Y because Z (maximize entropy; use Bayesian statistics; thermodynamic analogs)
+**LEGION RULE**: Maximize entropy and use Bayesian statistics when doing statistical inference because Jaynes connected statistical mechanics to inference through maximum entropy principles and thermodynamic analogs.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -373,7 +373,7 @@
 **Type**: Paper
 **Year**: 1957
 **Core Insight**: Maximum entropy as inference principle; statistical mechanics as application; Bayesian interpretation of probability.
-**LEGION RULE**: When making inferences with incomplete data, do Y because Z (maximize entropy; use Bayesian inference; statistical mechanics)
+**LEGION RULE**: Maximize entropy as an inference principle when making inferences with incomplete data because Jaynes established statistical mechanics as applied probability theory using Bayesian interpretation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Frequentist statistics
 
@@ -382,7 +382,7 @@
 **Type**: Paper
 **Year**: 1948
 **Core Insight**: Problems categorized as simple, organized complexity, disorganized complexity; statistical methods for disorganized complexity.
-**LEGION RULE**: When analyzing complex systems, do Y because Z (classify problem type; use appropriate methods; statistical for disorganized)
+**LEGION RULE**: Classify problem types and use appropriate methods when analyzing complex systems because Weaver distinguished simple, organized complexity, and disorganized complexity requiring different statistical approaches.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Oversimplification
 
@@ -391,7 +391,7 @@
 **Type**: Book
 **Year**: 1948
 **Core Insight**: Feedback systems; homeostasis; information as control; circular causality; self-regulating systems.
-**LEGION RULE**: When designing control systems, do Y because Z (use feedback; maintain homeostasis; information as control signal)
+**LEGION RULE**: Apply feedback for homeostasis when designing control systems because Wiener established cybernetics where information serves as the control signal enabling self-regulating behavior in animals and machines.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Open-loop control
 
@@ -400,7 +400,7 @@
 **Type**: Paper
 **Year**: 1989
 **Core Insight**: It from bit; information as fundamental; quantum information; participatory universe.
-**LEGION RULE**: When understanding physics, do Y because Z (consider information; quantum bits; participatory universe)
+**LEGION RULE**: Consider information as fundamental when understanding physics because Wheeler proposed "it from bit" and quantum information reveals links between physics, information, and a participatory universe.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Materialist ontologies
 
@@ -409,7 +409,7 @@
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Algorithmic probability; causal inference from data; next step prediction; Solomonoff induction.
-**LEGION RULE**: When doing causal discovery, do Y because Z (use algorithmic probability; Solomonoff induction; next step prediction)
+**LEGION RULE**: Apply algorithmic probability and Solomonoff induction when doing causal discovery because Chaitin showed next-step prediction using algorithmic information reveals causal structure from data.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Correlation-based methods
 
@@ -418,7 +418,7 @@
 **Type**: Book
 **Year**: 1994
 **Core Insight**: Complexity science; effective complexity; algorithmic information; evolution and complexity connection.
-**LEGION RULE**: When studying complexity, do Y because Z (measure effective complexity; algorithmic information; jaguar-quark connections)
+**LEGION RULE**: Measure effective complexity using algorithmic information when studying complexity because Gell-Mann connected the quark and jaguar through complexity science showing how simple rules produce intricate patterns.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Oversimplified complexity measures
 
@@ -427,7 +427,7 @@
 **Type**: Paper
 **Year**: 2011
 **Core Insight**: Computational complexity limits philosophy; P vs NP; knowledge and creativity; quantum computing implications.
-**LEGION RULE**: When doing philosophy, do Y because Z (consider computational complexity; P vs NP; limits of knowledge)
+**LEGION RULE**: Consider computational complexity and P vs NP when doing philosophy because Aaronson showed complexity theory places fundamental limits on knowledge, creativity, and what philosophers can legitimately claim.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Intractable problems treated as tractable
 
@@ -436,7 +436,7 @@
 **Type**: Book
 **Year**: 2018
 **Core Insight**: Nature-inspired computation; swarm intelligence; ant colony; particle swarm; evolutionary algorithms.
-**LEGION RULE**: When solving optimization, do Y because Z (nature-inspired; swarm; evolutionary algorithms)
+**LEGION RULE**: Apply nature-inspired swarm intelligence and evolutionary algorithms when solving optimization because Ida showed ant colony, particle swarm, and evolutionary methods find solutions where traditional optimization fails.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -445,6 +445,6 @@
 **Type**: Paper
 **Year**: 2010
 **Core Insight**: Phase transitions in SAT; computational complexity of sampling; phase transition phenomena.
-**LEGION RULE**: When analyzing algorithms, do Y because Z (phase transitions; complexity of sampling; SAT)
+**LEGION RULE**: Analyze phase transitions in SAT and sampling complexity when analyzing algorithms because Moore showed computational hardness exhibits phase transitions between tractable and intractable regimes.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None

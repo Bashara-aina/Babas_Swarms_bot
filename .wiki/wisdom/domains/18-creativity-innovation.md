@@ -189,15 +189,6 @@
 **Conflicts**: Desktop-first thinking
 
 ---
-## [Eric Ries] — The Lean Startup
-**Type**: Book
-**Year**: 2011
-**Core Insight**: Build-Measure-Learn; MVP; validated learning; pivot or persevere; innovation accounting; continuous innovation.
-**LEGION RULE**: When starting ventures, do Y because Z (MVP; build-measure-learn; validated learning; pivot)
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Waterfall development
-
----
 ## [Clayton Christensen] — The Innovator's Dilemma
 **Type**: Book
 **Year**: 1997
@@ -297,15 +288,6 @@
 **Conflicts**: Programming as mechanical
 
 ---
-## [Peter Thiel] — Zero to One
-**Type**: Book
-**Year**: 2014
-**Core Insight**: Zero to one; vertical progress; creative monopoly; secrets; indefinite optimism; contrarian.
-**LEGION RULE**: When building, do Y because Z (zero to one; vertical; creative monopoly; secrets)
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Horizontal progress only
-
----
 ## [Reid Hoffman] — The Startup of You
 **Type**: Book
 **Year**: 2012
@@ -340,15 +322,6 @@
 **LEGION RULE**: When thinking future, do Y because Z (exponential; combinatorial; innovation; digital)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear thinking
-
----
-## [Cal Newport] — Deep Work
-**Type**: Book
-**Year**: 2016
-**Core Insight**: Deep work vs shallow; concentration; cognitively demanding; network tools distract; quit social media.
-**LEGION RULE**: When working, do Y because Z (deep work; concentration; quit distractions; shallow out)
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Always-on culture
 
 ---
 ## [Austin Kleon] — Steal Like an Artist

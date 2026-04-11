@@ -4,7 +4,7 @@
 **Type**: Book/Essay Compilation
 **Year**: 2015
 **Core Insight**: Rationality is a cognitive skill set involving accurate representation of reality and optimal belief updating through Bayesian inference.
-**LEGION RULE**: When forming beliefs, do Y because Z (update probabilities by Bayes' rule; avoiding systematic biases preserves predictive accuracy)
+**LEGION RULE**: Update beliefs using Bayes' rule because intuition alone systematically underestimates base rates and leads to predictable errors.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -13,7 +13,7 @@
 **Type**: Paper
 **Year**: 1996
 **Core Insight**: The "hard problem" of consciousness requires explaining how physical processes give rise to subjective phenomenal experience (qualia).
-**LEGION RULE**: When encountering phenomenal experience, do Y because Z (any purely physical explanation must account for subjective qualia; consciousness is not reducible to information processing alone)
+**LEGION RULE**: Require physical explanations to account for subjective qualia because consciousness cannot be reduced to information processing alone.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Daniel Dennett (consciousness as illusion)
 
@@ -22,7 +22,7 @@
 **Type**: Mathematical Framework
 **Year**: 1763
 **Core Insight**: Degrees of belief should be updated according to Bayes' theorem: P(H|E) = P(E|H)P(H)/P(E), enabling rational belief revision.
-**LEGION RULE**: When encountering new evidence, do Y because Z (update prior probabilities to posterior; failing to update leads to predictably wrong beliefs)
+**LEGION RULE**: Update prior probabilities to posterior using Bayes' theorem because failing to update beliefs leads to predictably wrong conclusions.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -31,7 +31,7 @@
 **Type**: Book
 **Year**: 1934
 **Core Insight**: Scientific knowledge grows through conjecture and refutation; theories are falsifiable and should be tested until they break.
-**LEGION RULE**: When testing a theory, do Y because Z (seek falsification, not confirmation; only through rigorous testing does knowledge become reliable)
+**LEGION RULE**: Seek falsification rather than confirmation because only through rigorous testing that attempts to disprove theories does knowledge become reliable.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Thomas Kuhn (paradigm shifts)
 
@@ -40,7 +40,7 @@
 **Type**: Book
 **Year**: 1962
 **Core Insight**: Science progresses through paradigm shifts where normal science accumulates anomalies until crisis triggers revolutionary change.
-**LEGION RULE**: When anomalies accumulate, do Y because Z (prepare for paradigm shift; ignoring anomalies leads to eventual revolutionary disruption)
+**LEGION RULE**: Prepare for paradigm shifts when anomalies accumulate because ignoring anomalies leads to eventual revolutionary disruption of normal science.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Popper (falsificationism)
 
@@ -49,7 +49,7 @@
 **Type**: Philosophical Framework
 **Year**: 1907
 **Core Insight**: Truth is what works in practice; meaning of concepts lies in their practical consequences and experiential outcomes.
-**LEGION RULE**: When truth is contested, do Y because Z (test by practical outcomes; ideas are true insofar as they produce beneficial results)
+**LEGION RULE**: Test truth by practical outcomes because ideas are true insofar as they produce beneficial experiential results.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -58,7 +58,7 @@
 **Type**: Book
 **Year**: 1979
 **Core Insight**: Perception is direct apprehension of environmental affordances; organisms perceive what they can DO, not merely what IS.
-**LEGION RULE**: When perceiving environment, do Y because Z (attend to affordances (action possibilities); perception is for guiding action, not abstract representation)
+**LEGION RULE**: Attend to affordances (action possibilities) when perceiving because perception is for guiding action, not abstract representation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Computational theories of perception
 
@@ -67,7 +67,7 @@
 **Type**: Book
 **Year**: 1991
 **Core Insight**: Consciousness is not a magical inner theater but a multiple drafts model where various brain processes compete for "fame in the brain."
-**LEGION RULE**: When explaining consciousness, do Y because Z (reject Cartesian theater; subjective experience emerges from parallel unconscious processes)
+**LEGION RULE**: Reject the Cartesian theater model because subjective experience emerges from parallel unconscious processes competing for attention.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: David Chalmers (hard problem)
 
@@ -76,7 +76,7 @@
 **Type**: Book
 **Year**: 1987
 **Core Insight**: Treating systems as intentional agents (beliefs, desires) is pragmatically useful regardless of their actual composition.
-**LEGION RULE**: When predicting complex systems, do Y because Z (adopt intentional stance; interpreting behavior through beliefs/desires yields reliable predictions)
+**LEGION RULE**: Adopt the intentional stance when predicting complex systems because interpreting behavior through beliefs and desires yields reliable predictions.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -85,7 +85,7 @@
 **Type**: Book
 **Year**: 1689
 **Core Insight**: The mind is a blank slate (tabula rasa); all knowledge derives from experience through sensation and reflection.
-**LEGION RULE**: When acquiring knowledge, do Y because Z (trust sensory experience; innate ideas are minimal; all understanding builds from empirical input)
+**LEGION RULE**: Trust sensory experience for acquiring knowledge because all understanding builds from empirical input and innate ideas are minimal.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Rationalists (Descartes, Plato)
 
@@ -94,7 +94,7 @@
 **Type**: Book/Essays
 **Year**: 1992
 **Core Insight**: Metaphysical realism is neither necessary nor desirable; truth is a kind of ideal rational acceptability within epistemic constraints.
-**LEGION RULE**: When evaluating truth claims, do Y because Z (pragmatic test: would ideal conditions of inquiry converge on this truth?; anti-realism undermines justification)
+**LEGION RULE**: Apply the pragmatic test to truth claims because under ideal epistemic conditions, reasonable inquirers should converge on the same truth.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Metaphysical realism
 
@@ -103,7 +103,7 @@
 **Type**: Book
 **Year**: 1958
 **Core Insight**: All knowledge involves personal tacit commitments; objectivity is achieved through passionate engagement, not detachment.
-**LEGION RULE**: When seeking knowledge, do Y because Z (embrace tacit dimension; pure objectivity ignores the personal participation essential to discovery)
+**LEGION RULE**: Embrace the tacit dimension when seeking knowledge because pure objectivity ignores the personal passionate engagement essential to discovery.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Positivism
 
@@ -112,7 +112,7 @@
 **Type**: Book
 **Year**: 1966
 **Core Insight**: We know more than we can tell; tacit knowledge (skills, intuitions) precedes and grounds all explicit knowledge.
-**LEGION RULE**: When learning skills, do Y because Z (practice to build tacit knowledge; what cannot be articulated still governs performance)
+**LEGION RULE**: Practice to build tacit knowledge when learning skills because what cannot be articulated still governs expert performance.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Explicit knowledge theories
 
@@ -121,7 +121,7 @@
 **Type**: Book
 **Year**: 1970
 **Core Insight**: Rapid technological change causes psychological stress (too much change in too short a time), leading to disorientation and adaptive failure.
-**LEGION RULE**: When change accelerates, do Y because Z (build adaptive capacity; too much novelty overwhelms coping mechanisms and causes future shock)
+**LEGION RULE**: Build adaptive capacity when change accelerates because too much novelty in too short a time overwhelms coping mechanisms and causes disorientation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -130,7 +130,7 @@
 **Type**: Book
 **Year**: 1980
 **Core Insight**: Post-industrial (information) society transforms all social institutions; knowledge becomes the primary resource.
-**LEGION RULE**: When navigating societal shifts, do Y because Z (develop information literacy; power shifts to those who control knowledge infrastructure)
+**LEGION RULE**: Develop information literacy when navigating societal shifts because power shifts to those who control knowledge infrastructure in information societies.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -139,7 +139,7 @@
 **Type**: Academic Framework
 **Year**: 2010
 **Core Insight**: Knowledge is inherently social; collective epistemic actions produce knowledge that exceeds individual cognitive capacity.
-**LEGION RULE**: When facing complex knowledge problems, do Y because Z (leverage collective cognition; joint epistemic actions outperform individual reasoning)
+**LEGION RULE**: Leverage collective cognition when facing complex knowledge problems because joint epistemic actions outperform individual reasoning.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Individualist epistemology
 
@@ -148,7 +148,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: All progress—scientific, economic, cultural—stems from the reach of good explanations; creativity enables infinite improvement.
-**LEGION RULE**: When seeking progress, do Y because Z (value creativity and good explanations; knowledge grows without limit through conjectures)
+**LEGION RULE**: Value creativity and good explanations when seeking progress because all improvement stems from reach of good explanations and knowledge grows without limit through conjectures.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -157,7 +157,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Some systems improve from volatility, uncertainty, stress; fragility is the inability to withstand stressors; robustness merely survives.
-**LEGION RULE**: When building systems, do Y because Z (prefer antifragile designs; avoid fragility at all costs; stressors should improve, not harm)
+**LEGION RULE**: Prefer antifragile designs when building systems because fragility is the inability to withstand stressors and some systems improve from volatility.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -166,7 +166,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Rare, high-impact events (Black Swans) dominate outcomes; human cognition is wired to ignore their significance until too late.
-**LEGION RULE**: When planning under uncertainty, do Y because Z (protect against Black Swans; normal distribution assumptions fail; fat tails matter)
+**LEGION RULE**: Protect against Black Swans when planning under uncertainty because rare, high-impact events dominate outcomes and Gaussian assumptions systematically fail.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Gaussian statistics advocates
 
@@ -175,7 +175,7 @@
 **Type**: Book
 **Year**: 2001
 **Core Insight**: Success is often mistaken for skill when luck plays a dominant role; survivorship bias distorts our view of outcomes.
-**LEGION RULE**: When evaluating performance, do Y because Z (distinguish luck from skill; examine failure cases; survivorship bias skews perception)
+**LEGION RULE**: Distinguish luck from skill when evaluating performance because success is often mistaken for skill when luck plays a dominant role and survivorship bias distorts perception.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -184,7 +184,7 @@
 **Type**: Book
 **Year**: 1945
 **Core Insight**: Problem-solving follows heuristic patterns: understand the problem, devise plan, execute, review; analogy and decomposition are key.
-**LEGION RULE**: When stuck on problems, do Y because Z (apply Polya's heuristics; decompose, find analogies, work backward; systematic approach beats intuition)
+**LEGION RULE**: Apply Polya's heuristics when stuck on problems because decomposition, finding analogies, and working backward beats intuition alone.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -193,7 +193,7 @@
 **Type**: Book
 **Year**: 1954
 **Core Insight**: Mathematical discovery relies on plausible (inductive) reasoning, not just deductive proof; patterns and analogies guide conjectures.
-**LEGION RULE**: When doing mathematics, do Y because Z (use inductive reasoning; plausible arguments precede proofs; intuition guides discovery)
+**LEGION RULE**: Use inductive reasoning when doing mathematics because plausible arguments precede proofs and intuition guides discovery.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -202,7 +202,7 @@
 **Type**: Book
 **Year**: 2014
 **Core Insight**: Mathematical thinking reveals hidden structures in everyday life; linearity, infinity, and probability transform ordinary reasoning.
-**LEGION RULE**: When reasoning about real world, do Y because Z (apply mathematical insight; linearity of local vs nonlinearity of global; infinity matters)
+**LEGION RULE**: Apply mathematical insight when reasoning about the real world because linearity at local scales often masks nonlinearity at global scales and infinity matters.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -211,7 +211,7 @@
 **Type**: Book
 **Year**: 1947
 **Core Insight**: Humans have bounded rationality; they satisfice (find satisfactory solutions) rather than optimize due to cognitive limits.
-**LEGION RULE**: When making decisions, do Y because Z (accept satisficing; optimization is impossible; good enough now beats perfect later)
+**LEGION RULE**: Accept satisficing when making decisions because optimization is impossible given bounded rationality and good enough now beats perfect later.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Perfect rationality models
 
@@ -220,7 +220,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Intuition (gut feelings) is not irrational but unconscious intelligence shaped by evolution and experience; heuristics can be adaptive.
-**LEGION RULE**: When quick decisions needed, do Y because Z (trust trained intuition; heuristics are adaptive; over-analysis leads to worse outcomes)
+**LEGION RULE**: Trust trained intuition when quick decisions are needed because heuristics shaped by evolution and experience are adaptive and over-analysis leads to worse outcomes.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Analytical rationality advocates
 
@@ -229,7 +229,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: The unconscious mind shapes behavior through subliminal influences; free will is more limited than we believe.
-**LEGION RULE**: When making choices, do Y because Z (account for subliminal influence; self-awareness reduces bias; conscious mind is not sole driver)
+**LEGION RULE**: Account for subliminal influence when making choices because the unconscious mind shapes behavior and free will is more limited than believed.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Free will optimists
 
@@ -238,7 +238,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: Two cognitive systems: System 1 (fast, intuitive) and System 2 (slow, deliberate); System 1 dominates but is prone to biases.
-**LEGION RULE**: When important decisions, do Y because Z (engage System 2; recognize System 1 biases; cognitive effort reduces errors)
+**LEGION RULE**: Engage System 2 when making important decisions because System 1 dominates but is prone to biases and cognitive effort reduces errors.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -247,7 +247,7 @@
 **Type**: Paper
 **Year**: 1974
 **Core Insight**: Humans rely on heuristics (representativeness, availability, anchoring) that cause systematic biases in probabilistic reasoning.
-**LEGION RULE**: When estimating probabilities, do Y because Z (beware heuristics; representativeness/availability/anchoring cause predictable errors)
+**LEGION RULE**: Beware heuristics when estimating probabilities because representativeness, availability, and anchoring cause systematic predictable errors in probabilistic reasoning.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -256,7 +256,7 @@
 **Type**: Book
 **Year**: 2005
 **Core Insight**: Expert predictions are barely better than chance; hedgehogs (one big idea) do worse than foxes (multiple small ideas).
-**LEGION RULE**: When relying on experts, do Y because Z (demand accountability; aggregate forecasts; fox-like thinking outperforms hedgehog overconfidence)
+**LEGION RULE**: Demand accountability when relying on experts because expert predictions are barely better than chance and fox-like thinking outperforms hedgehog overconfidence.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Expert authority
 
@@ -265,7 +265,7 @@
 **Type**: Book
 **Year**: 2015
 **Core Insight**: Some individuals (superforecasters) achieve exceptional prediction accuracy through probabilistic thinking, update frequency, and growth mindset.
-**LEGION RULE**: When predicting future, do Y because Z (think probabilistically, update frequently, cultivate doubt; forecasting is learnable skill)
+**LEGION RULE**: Think probabilistically and update frequently when predicting because forecasting is a learnable skill that improves with iterative refinement.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -274,7 +274,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Predictions fail because we confuse signal (truth) with noise (randomness); Bayesian updating and humility improve accuracy.
-**LEGION RULE**: When predicting, do Y because Z (separate signal from noise; Bayesian thinking; predictions always uncertain but testable)
+**LEGION RULE**: Separate signal from noise when predicting because predictions fail by confusing truth with randomness and Bayesian updating improves accuracy.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -283,7 +283,7 @@
 **Type**: Book
 **Year**: 2008
 **Core Insight**: Choice architecture (how options are presented) strongly influences decisions; libertarian paternalism can improve outcomes.
-**LEGION RULE**: When designing choices, do Y because Z (optimize choice architecture; defaults matter; nudge without restricting freedom)
+**LEGION RULE**: Optimize choice architecture when designing choices because how options are presented strongly influences decisions and defaults matter enormously.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Pure libertarianism
 
@@ -292,7 +292,7 @@
 **Type**: Book
 **Year**: 1984
 **Core Insight**: Six principles of persuasion: reciprocity, commitment, social proof, authority, liking, scarcity; compliance professionals exploit these.
-**LEGION RULE**: When persuading, do Y because Z (leverage reciprocity/commitment/social proof; recognize when being manipulated by these principles)
+**LEGION RULE**: Leverage reciprocity, commitment, and social proof when persuading because six principles of persuasion cause compliance and recognizing manipulation prevents exploitation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -301,7 +301,7 @@
 **Type**: Book
 **Year**: 1976
 **Core Insight**: All human behavior can be analyzed as rational maximization constrained by preferences, prices, incomes; economics applies everywhere.
-**LEGION RULE**: When analyzing behavior, do Y because Z (apply rational choice framework; preferences revealed by choices; incentives matter)
+**LEGION RULE**: Apply the rational choice framework when analyzing behavior because all human behavior can be seen as rational maximization constrained by preferences, prices, and incomes.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Behavioral economists
 
@@ -310,7 +310,7 @@
 **Type**: Economic Theory
 **Year**: 1965
 **Core Insight**: Asset prices fully reflect all available information; consistent alpha is impossible; markets are informationally efficient.
-**LEGION RULE**: When investing, do Y because Z (trust prices; beating market consistently is near impossible; index when uncertain)
+**LEGION RULE**: Trust prices when investing because asset prices fully reflect all available information and consistent alpha is nearly impossible.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Behavioral finance, active management
 
@@ -319,7 +319,7 @@
 **Type**: Financial Model
 **Year**: 1964
 **Core Insight**: Expected returns equal risk-free rate plus beta-weighted market risk premium; systematic risk (beta) determines expected return.
-**LEGION RULE**: When pricing assets, do Y because Z (use CAPM; beta measures systematic risk; diversifiable risk is not rewarded)
+**LEGION RULE**: Use CAPM when pricing assets because expected returns equal risk-free rate plus beta-weighted market risk premium and systematic risk determines expected return.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Multi-factor models
 
@@ -328,7 +328,7 @@
 **Type**: Book
 **Year**: 2006
 **Core Insight**: Economics should be studied as complex adaptive system; wealth creation = differentiate, select, amplify cycle.
-**LEGION RULE**: When understanding economics, do Y because Z (use complexity lens; evolutionary dynamics; non-equilibrium economics)
+**LEGION RULE**: Use a complexity lens when understanding economics because wealth creation follows a differentiate, select, amplify cycle and markets are non-equilibrium systems.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Neoclassical economics
 
@@ -337,7 +337,7 @@
 **Type**: Book/Collection
 **Year**: 1994
 **Core Insight**: Positive feedback causes multiple equilibria, lock-in, and path dependence; small events can have large consequences.
-**LEGION RULE**: When in early stages of network technologies, do Y because Z (expect increasing returns; lock-in possible; first mover advantage amplified)
+**LEGION RULE**: Expect increasing returns in early stages of network technologies because positive feedback creates multiple equilibria and small events can have large consequences.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Diminishing returns models
 
@@ -346,7 +346,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Deterministic systems can exhibit sensitive dependence on initial conditions (chaos); long-term prediction impossible even without randomness.
-**LEGION RULE**: When modeling complex systems, do Y because Z (account for chaos; small uncertainty grows; long-term prediction limited)
+**LEGION RULE**: Account for chaos when modeling complex systems because deterministic systems can exhibit sensitive dependence on initial conditions and long-term prediction is impossible.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Determinism without chaos
 
@@ -355,7 +355,7 @@
 **Type**: Book
 **Year**: 1954
 **Core Insight**: Statistics can be manipulated to mislead; samples, averages, graphs, correlations are common deception tools.
-**LEGION RULE**: When presented statistics, do Y because Z (interrogate methodology; sample size, axes, base rates; question what is hidden)
+**LEGION RULE**: Interrogate statistics when presented because samples, averages, graphs, and correlations are common deception tools and methodology matters.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -364,7 +364,7 @@
 **Type**: Financial Theory
 **Year**: 2004
 **Core Insight**: Markets are evolutionary ecosystems where participants adapt; neither perfectly efficient nor completely inefficient.
-**LEGION RULE**: When analyzing markets, do Y because Z (evolutionary perspective; adaptivity matters; institutions survive if fit)
+**LEGION RULE**: Use an evolutionary perspective when analyzing markets because participants adapt through competition, mutation, and natural selection and markets are neither perfectly efficient nor inefficient.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Efficient Markets Hypothesis
 
@@ -373,7 +373,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Untangling skill vs luck requires analyzing base rates, regression to mean, and process vs outcome; luck persists in many domains.
-**LEGION RULE**: When evaluating success, do Y because Z (separate skill from luck; look at base rates; process quality predicts durability)
+**LEGION RULE**: Separate skill from luck when evaluating success because luck persists in many domains and untangling requires analyzing base rates and regression to mean.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Narrative fallacy
 
@@ -382,7 +382,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: We attribute success to all positive qualities (halo) and failure to all negative ones; cause-effect is misunderstood.
-**LEGION RULE**: When evaluating success, do Y because Z (debias by looking at failure cases; avoid halo effect; correlation confused with causation)
+**LEGION RULE**: Debias by looking at failure cases when evaluating success because we attribute all positive qualities to success and correlation is confused with causation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -391,7 +391,7 @@
 **Type**: Book
 **Year**: 1990
 **Core Insight**: Power derives from knowledge, wealth, and violence (in decreasing order of sophistication); knowledge is ultimate power.
-**LEGION RULE**: When seeking power, do Y because Z (prioritize knowledge; wealth follows knowledge; violence is least sophisticated power)
+**LEGION RULE**: Prioritize knowledge when seeking power because power derives from knowledge, wealth, and violence in decreasing order of sophistication.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -400,7 +400,7 @@
 **Type**: Concept
 **Year**: 1955
 **Core Insight**: Rational agents cannot optimize due to cognitive limits and information scarcity; satisficing is the realistic alternative.
-**LEGION RULE**: When making decisions under uncertainty, do Y because Z (accept bounded rationality; satisfice; don't assume perfect optimization)
+**LEGION RULE**: Accept bounded rationality when making decisions under uncertainty because cognitive limits and information scarcity prevent optimization and satisficing is the realistic alternative.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical rationality
 
@@ -409,7 +409,7 @@
 **Type**: Research Program
 **Year**: 2000s
 **Core Insight**: Fast and frugal heuristics (take-the-best, recognition, 1/N) often outperform complex statistical models in real-world decisions.
-**LEGION RULE**: When under time pressure, do Y because Z (use simple heuristics; cognitive efficiency; ecological rationality)
+**LEGION RULE**: Use simple heuristics when under time pressure because fast-and-frugal heuristics often match or beat complex statistical models ecologically.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Bayesian rationality advocates
 
@@ -418,7 +418,7 @@
 **Type**: Management Approach
 **Year**: 1980s
 **Core Insight**: Organizations should plan interactively with all stakeholders; ideal planning anticipates future but shapes present through participation.
-**LEGION RULE**: When planning organizations, do Y because Z (engage stakeholders; interactive process; commitment through participation)
+**LEGION RULE**: Engage stakeholders when planning organizations because ideal planning anticipates future but shapes present through interactive participation.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Top-down planning
 
@@ -427,7 +427,7 @@
 **Type**: Book
 **Year**: 1961
 **Core Insight**: Organizations are feedback systems with delays; policies cause unintended consequences over time; system structure produces behavior.
-**LEGION RULE**: When diagnosing organizational problems, do Y because Z (look for feedback loops and delays; policy resistance; structure drives behavior)
+**LEGION RULE**: Look for feedback loops and delays when diagnosing organizational problems because policies cause unintended consequences over time and structure drives behavior.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear causal models
 
@@ -436,7 +436,7 @@
 **Type**: Book
 **Year**: 2008
 **Core Insight**: Systems produce emergent behaviors from feedback loops, stocks, and flows; understanding leverage points enables effective intervention.
-**LEGION RULE**: When understanding complex systems, do Y because Z (identify feedback loops, stocks, flows; look for leverage points; delays cause oscillations)
+**LEGION RULE**: Identify feedback loops, stocks, and flows when understanding complex systems because systems produce emergent behaviors and leverage points enable effective intervention.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -445,7 +445,7 @@
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Those who do not bear consequences of decisions should not make them; skin in the game aligns incentives and filters competence.
-**LEGION RULE**: When delegating decisions, do Y because Z (require skin in the game; accountability matters; without stakes, expertise is unreliable)
+**LEGION RULE**: Require skin in the game when delegating decisions because those who do not bear consequences should not make them and accountability filters competence.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Agency theory without skin
 
@@ -454,6 +454,6 @@
 **Type**: Book
 **Year**: 1971
 **Core Insight**: Global systems (population, resources, pollution, food, capital) interact through feedback loops causing unintended exponential growth and collapse.
-**LEGION RULE**: When analyzing global issues, do Y because Z (model feedback dynamics; exponential growth masks limits; counterintuitive behavior common)
+**LEGION RULE**: Model feedback dynamics when analyzing global issues because population, resources, pollution, food, and capital interact through feedback loops causing unintended exponential growth and collapse.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear extrapolation
