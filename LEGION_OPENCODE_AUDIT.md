@@ -1,6 +1,6 @@
-# LEGION BOT — MASTER AUDIT & FIX DOCUMENT FOR OPENCODE
-# Generated: 2026-04-12 | Repo: Bashara-aina/Babas_Swarms_bot
-# Purpose: Deep professional audit → full fix plan to make Legion feel human, native, zero robot
+# LEGION BOT — MASTER AUDIT & FIX DOCUMENT
+# Updated: 2026-04-12 | Repo: Bashara-aina/Babas_Swarms_bot
+# Status: P0 DONE • P1 MOSTLY DONE • P2 PARTIAL • REMAINING ITEMS BELOW
 
 ---
 
@@ -13,352 +13,278 @@ memory, opinions, and initiative.
 
 ---
 
-## AUDIT FINDINGS — 10 CRITICAL FAILURE AREAS
+## ✅ COMPLETED FIXES
 
-### AREA 1: `progress_cb` vs `progress_fn` — API Breakage [CRITICAL]
-**File affected:** `core/interpreter_bridge.py` (and anywhere agent_loop() is called)
-**Symptom:** Every `/do` and `/cmd` command fails with:
-  `agent_loop() got an unexpected keyword argument 'progress_cb'. Did you mean 'progress_fn'?`
-**Root cause:** The Open Interpreter library changed its API. `progress_cb` was renamed to
-  `progress_fn` in a newer version. The codebase was NOT updated.
-**Fix:**
-  1. Run: `grep -rn "progress_cb" . --include="*.py"`
-  2. In every hit, replace `progress_cb=` → `progress_fn=`
-  3. Also check if `agent_loop()` signature itself needs updating for the installed interpreter version.
-  4. Pin the Open Interpreter version in requirements.txt to avoid future drift:
-     `open-interpreter==X.Y.Z  # pinned — check installed version`
+### [P0-1] progress_cb → progress_fn
+Status: **NOT A BUG** — verified clean. `llm_client/__init__.py` already uses `progress_fn`
+correctly. `handlers/shared.py` calls it with `progress_fn=on_progress`. Smoke tests pass.
 
----
+### [P0-2] Proactive timestamp overflow — `core/proactive/curiosity_engine.py`
+Status: **FIXED**
+- `_today_str()`: Replaced broken manual JST calc with proper `pytz`/`ZoneInfo`
+- `_jst_hour()`: Same fix — now timezone-aware
+- `_check_sleep_pattern()`: Guards for invalid timestamps (0 or future), display clamped at 72h,
+  silent hours capped at 504. No more "493309 hours" bug.
 
-### AREA 2: SLASH COMMAND DEPENDENCY — NOT NATIVE [CRITICAL]
-**Files affected:** `telegram_bot.py` (or equivalent entrypoint), `core/intent_router.py`,
-  `core/task_router.py`
-**Symptom:** Users must type `/do`, `/cmd`, `/screen`, `/keys` to trigger capabilities.
-  This is not natural. Bashara should just say "cek rumahlabuh.com SEO-nya" and Legion does it.
-**Root cause:** Intent detection only triggers capabilities when prefixed with slash commands.
-  The `intent_router.py` and `task_router.py` likely check for `/` prefix BEFORE doing NLU.
-**Fix:**
-  1. In `core/intent_router.py` — add a natural language pass BEFORE slash-command routing.
-     Every message should run through NLU intent classifier first.
-  2. In `core/intent_classifier.py` — expand intent map:
-     - "cek [url]", "check [url]", "buka [url]" → trigger `web_check` skill
-     - "jalanin", "execute", "run", "ketik di terminal" → trigger shell execution
-     - "restart", "restart bot" → trigger service management
-     - "screen", "lihat layar" → trigger screen capture
-  3. Create `core/natural_command_parser.py` — a thin NLP layer that maps casual Indonesian/English
-     phrases to internal command names WITHOUT requiring slash prefix.
-  4. Slash commands should still work as aliases, but never be required.
-  5. Example mapping table to implement:
-     ```python
-     NATURAL_TRIGGERS = {
-         r"cek.*(seo|website|speed|loading)": "web_audit",
-         r"(run|jalanin|execute|ketik)\s+(.+)": "shell_exec",
-         r"(restart|reboot)\s*(legion|bot)?": "service_restart",
-         r"(screenshot|screen|lihat layar|tangkap layar)": "screen_capture",
-         r"(cek|check)\s+key": "api_key_check",
-         r"(buka|open|launch)\s+(.+)": "app_launch",
-     }
-     ```
+### [P0-3] Error humanizer — `core/error_humanizer.py` (new file)
+Status: **IMPLEMENTED**
+- `humanize_error()` and `humanize_error_for_display()` convert raw exceptions to friendly Indonesian/English
+- Suppresses internal errors silently (progress_cb/fn mismatches → retry)
+- Routes API key errors → provider-specific message + fallback chain retry
+- Wired into `handlers/shared.py` `_run_agent_loop()` and `_execute_chat()`
 
----
+### [P1-1] Natural command parser — `core/natural_command_parser.py` (new file)
+Status: **IMPLEMENTED**
+- Maps casual Indonesian/English phrases → internal intents without slash prefix
+- Patterns: `cek [url] SEO`, `jalanin|execute|run [cmd]`, `restart`, `screenshot`, `buka [app]`
+- `get_action()` and `is_actionable()` helpers
+- Smoke test: `"cek rumahlabuh.com SEO-nya"` → `intent=web_audit, confidence=0.85` ✅
 
-### AREA 3: PROACTIVE ENGINE — FEELS ROBOTIC [HIGH]
-**File affected:** `core/proactive_engine.py`
-**Symptom from chat:**
-  - "You've been quiet for about 493309 hours. Everything good?" (hours not clamped — overflow bug)
-  - Repeating the same check-in message every hour when user is clearly offline
-  - Scheduled messages sent in rapid succession (5 in 2 hours on same topic)
-**Root Causes:**
-  a. Duration calculation overflow — `493309 hours` means the timestamp math is wrong.
-     Likely using epoch seconds vs milliseconds, or wrong timezone offset.
-  b. No deduplication / cooldown on proactive messages. Same message fires repeatedly.
-  c. No awareness of user's sleep schedule or timezone.
-**Fixes:**
-  1. Fix duration calc: use `pendulum` or always normalize to `datetime.utcnow()` with proper
-     timezone handling. Cap displayed duration at "a few days" if > 72 hours.
-  2. Add proactive cooldown: after sending a check-in, don't send another for 4+ hours.
-     Store last_proactive_sent timestamp in Redis or SQLite.
-  3. Add sleep zone awareness: if JST time is 00:00–07:00, suppress non-urgent proactive.
-  4. Add dedup: if the last proactive message body is identical, skip it.
-  5. Vary the language — have a pool of 10+ phrased check-ins, pick randomly.
-  6. Fix for duration overflow bug:
-     ```python
-     # BAD:
-     hours_silent = (now_ts - last_seen_ts)  # if timestamps differ in units, breaks
-     # GOOD:
-     from datetime import datetime, timezone
-     delta = datetime.now(timezone.utc) - last_seen_dt
-     hours_silent = delta.total_seconds() / 3600
-     if hours_silent > 72: display = "a few days"
-     elif hours_silent > 24: display = f"{int(hours_silent/24)} days"
-     else: display = f"{int(hours_silent)} hours"
-     ```
+### [P1-2] Wiki quality gate scoring bug — `core/wiki_quality_gate.py` + `core/wiki_scheduler.py`
+Status: **FIXED**
+- Added essential file whitelist (readme, changelog, license, master-intelligence) → always PASS
+- Structure bonuses: headers, bullets, wiki links, markdown links
+- Quarantine threshold lowered from <0.3 to <0.15 with NEEDS_IMPROVEMENT routing
+- Double-gate: score 0.0-0.1 pages get `deep_gate()` before quarantine (only quarantine if REJECT)
+- Content bonuses for 50+ and 100+ word pages
+
+### [P1-3] SOUL.md injection — Already working
+Status: **VERIFIED CLEAN** — `system_prompt_builder.py` has soul as section 0 at line 79-86.
+Smoke test confirms 3890 chars loaded correctly.
+
+### [P1-4] Intent classifier for casual Indonesian — Already working
+Status: **VERIFIED CLEAN** — `core/intent_router.py` and `handlers/ai.py` already handle
+casual Indonesian phrases via fallback keyword dispatch.
+
+### [P1-5] Character enforcer — Already working
+Status: **VERIFIED CLEAN** — `core/character_enforcer.py` strips banned phrases correctly.
+Smoke test: `"help you with that."` → filtered properly.
 
 ---
 
-### AREA 4: API KEY ERROR LEAKING TO USER [HIGH]
-**Files affected:** `core/interpreter_bridge.py`, telegram message handler
-**Symptom:** Raw error messages shown to user:
-  `🔑 api key issue — run /keys to check`
-  This is system-internal info that should never surface as a user-facing message.
-**Fix:**
-  1. Wrap all capability invocations in try/except at the Telegram handler level.
-  2. On API key error: silently attempt key rotation (fallback chain in `agents.py` already exists),
-     THEN retry the action. Only tell Bashara if ALL fallbacks exhausted.
-  3. Create `core/error_humanizer.py`:
-     ```python
-     def humanize_error(exc: Exception, context: str) -> str:
-         if "api key" in str(exc).lower() or "authentication" in str(exc).lower():
-             return "Eh, ada masalah sama API key-nya. Lagi coba fallback..."
-         if "timeout" in str(exc).lower():
-             return "Koneksi timeout. Lagi retry..."
-         if "progress_cb" in str(exc) or "progress_fn" in str(exc):
-             return None  # internal error, retry silently after fix
-         return f"Ada error nih: {str(exc)[:100]}"
-     ```
-  4. Never show raw Python tracebacks or exception strings to Bashara.
+## ⏳ REMAINING OPEN ITEMS
+
+> These were NOT completed by OpenCode. Need manual implementation or further session.
 
 ---
 
-### AREA 5: SOUL ENGINE NOT INJECTED INTO EVERY RESPONSE [HIGH]
-**Files affected:** `core/soul_engine.py`, `core/system_prompt_builder.py`
-**Symptom:** Legion sometimes sounds robotic ("Certainly!", uses corporate tone, breaks SOUL.md rules).
-  The SOUL.md file exists and is well-written, but it's not being reliably injected.
-**Root cause:** `system_prompt_builder.py` likely has a conditional path where soul content is
-  not always included (e.g., when using sub-agents or debate mode).
-**Fix:**
-  1. In `core/system_prompt_builder.py` — make SOUL.md injection MANDATORY. Zero exceptions.
-     It should be the first block of every system prompt, before any agent-specific instructions.
-  2. Add a character enforcement post-processor: after every LLM response, run
-     `core/character_enforcer.py` checks:
-     - Contains "Certainly!" → rewrite opener
-     - Contains "As an AI" → strip and rephrase
-     - Starts with generic filler → trim it
-  3. Add voice consistency check: if response is >3 sentences but has no Indonesian slang when
-     Bashara wrote in Indonesian → flag for rewrite.
-  4. Ensure `build_system_prompt()` in `agents.py` always calls `soul_engine.load_soul()` first.
+### [P1-OPEN] Persistent Conversation Context
+**Status: NOT IMPLEMENTED**
+**Files:** `core/memory_engine.py`, `router.py` CONVERSATION_HISTORY
 
----
+The `CONVERSATION_HISTORY` dict in `agents.py` is still in-memory only — resets on every
+Legion restart. This is the core reason Legion "forgets" things from earlier in a session.
+Mem0 is integrated but not guaranteed to be called on every exchange.
 
-### AREA 6: CONVERSATION PERSISTENCE BROKEN [HIGH]
-**Files affected:** `core/memory_engine.py`, `router.py` → `CONVERSATION_HISTORY`
-**Symptom:** Legion doesn't remember things said earlier in the same conversation.
-  Each message starts almost fresh. The chat log shows Legion asking the same
-  clarifying questions repeatedly.
-**Root cause:** `CONVERSATION_HISTORY` in `agents.py` is an in-memory dict — it resets on restart.
-  The mem0 integration may not be properly called on every exchange.
-**Fix:**
-  1. Implement persistent conversation buffer in SQLite or Redis:
-     - Key: `user_id:session_date`
-     - Value: list of `{role, content, timestamp}` dicts
-     - Load on bot startup, flush every N messages
-  2. On every incoming message: load last 20 exchanges from persistent store into context window.
-  3. On every outgoing message: immediately write to persistent store.
-  4. Create `core/session/persistent_context.py` if not exists:
-     ```python
-     class PersistentContext:
-         def push(self, user_id, role, content): ...
-         def get_recent(self, user_id, n=20) -> list[dict]: ...
-         def summarize_old(self, user_id) -> str: ...  # compress old msgs
-     ```
-  5. Wire it into `conversation_interface.py` so every response pipeline uses it.
-
----
-
-### AREA 7: INTENT ROUTING MISSES CASUAL MESSAGES [HIGH]
-**Files affected:** `core/intent_router.py`, `core/intent_classifier.py`
-**Symptom:** When Bashara says "Pusing nih" Legion correctly responds empathetically.
-  But when Bashara says "Coba dong cek langsung" — Legion falls back to explaining
-  it can't do it, even though the capability exists.
-**Root cause:** Intent classifier has keyword-based routing that misses conversational phrases.
-  "coba cek langsung" doesn't match any action trigger because it lacks the `/` prefix.
-**Fix:**
-  1. Move intent classification to an LLM-based classifier as primary:
-     - Send last 3 messages + current message to a fast model (Groq llama-3.3-70b)
-     - Ask: "What does the user want? Options: [web_check, shell_exec, chitchat, question,
-       task_request, emotional_support, memory_store]"
-     - Use the keyword matcher only as fallback
-  2. Add context-aware resolution: if previous message was about SEO and user says
-     "coba cek langsung" — resolve "it" to the SEO check automatically.
-  3. Expand `TASK_KEYWORDS` in `agents.py` with Indonesian casual phrases.
-
----
-
-### AREA 8: SUDO / SHELL EXECUTION ARCHITECTURE [MEDIUM]
-**Files affected:** `core/interpreter_bridge.py`, `core/opencode_bridge.py`
-**Symptom:** `sudo systemctl restart legion` fails because shell is non-interactive.
-  Password cannot be passed through the current execution path.
-**Fix:**
-  1. Configure passwordless sudo for specific commands in `/etc/sudoers.d/legion`:
-     ```
-     bashara ALL=(ALL) NOPASSWD: /bin/systemctl restart legion
-     bashara ALL=(ALL) NOPASSWD: /bin/systemctl status legion
-     ```
-  2. In `interpreter_bridge.py` — when detecting `sudo` commands, warn Bashara proactively:
-     "Perintah ini butuh sudo. Mau aku kasih instruksi buat setup NOPASSWD?"
-  3. For `opencode_bridge.py` — implement proper PTY (pseudoterminal) execution using
-     `pexpect` library to handle interactive prompts:
-     ```python
-     import pexpect
-     child = pexpect.spawn(f"sudo {command}")
-     child.expect("password")
-     child.sendline(password)
-     child.expect(pexpect.EOF)
-     ```
-  4. Store sudo password in `.env` as `SUDO_PASS` (already encrypted at rest via systemd).
-
----
-
-### AREA 9: WIKI SCAN QUALITY — 485/502 PAGES QUARANTINED [MEDIUM]
-**Files affected:** `core/wiki_quality_gate.py`, `core/wiki_auto_ingest.py`
-**Symptom:** Daily scan quarantines 96% of wiki pages with score=0.000.
-  Pages like `README.md` and `MASTER-INTELLIGENCE.md` score near zero.
-  This means the quality scoring algorithm is broken, not the content.
-**Root cause:** `wiki_quality_gate.py` scoring function likely has a bug where
-  it returns 0 for pages that don't match its exact expected format.
-**Fix:**
-  1. Audit `score_page()` in `wiki_quality_gate.py` — add debug logging to see
-     what criteria are failing on a known-good page like README.md.
-  2. Likely fix: the scoring function divides by zero or returns 0.0 default
-     when a section header regex doesn't match. Add graceful fallback scoring.
-  3. Update quarantine threshold: score=0.0 should trigger investigation, not auto-quarantine.
-  4. Pages with score=0.000 that are clearly valid (README, CHANGELOG) → whitelist them.
-
----
-
-### AREA 10: PERSONA LOADING RACE CONDITION [MEDIUM]
-**Files affected:** `core/soul_engine.py`, bot startup sequence
-**Symptom:** On cold start, Legion sometimes responds before SOUL.md is loaded.
-  Results in generic/robotic first response.
-**Root cause:** Async initialization — the bot starts accepting Telegram messages
-  before `soul_engine.load_soul()` completes.
-**Fix:**
-  1. In main bot startup: make soul loading synchronous and blocking.
-     ```python
-     # startup sequence
-     soul = SoulEngine()
-     await soul.load()  # MUST complete before accepting messages
-     await bot.start_polling()  # only after soul is ready
-     ```
-  2. Add health check: `GET /health` endpoint returns 503 until soul is loaded.
-  3. Add startup message to Bashara: "Legion online. Soul loaded. Ready." (once, on each restart)
-
----
-
-## MASTER IMPLEMENTATION ORDER
-
-Priority order for OpenCode to implement (highest impact first):
-
-1. **[P0] Fix `progress_cb` -> `progress_fn`** everywhere — unblocks ALL tool use
-2. **[P0] Fix proactive timestamp bug** — 493309 hours is embarrassing, fix immediately
-3. **[P0] Humanize all errors** — never show raw exceptions to Bashara
-4. **[P1] Natural language command parsing** — eliminate slash command dependency
-5. **[P1] Persistent conversation context** — fix memory between turns
-6. **[P1] SOUL.md mandatory injection** — every response must have Legion's voice
-7. **[P2] LLM-based intent classifier** — replace keyword matcher as primary
-8. **[P2] Fix wiki quality gate scoring** — 96% quarantine rate is a bug
-9. **[P2] Sudo/PTY execution via pexpect** — enable native shell control
-10. **[P3] Async startup sequencing** — fix cold start persona race condition
-
----
-
-## BONUS: LEGION PERSONALITY UPGRADES
-
-Beyond bug fixes — these make Legion feel truly human:
-
-### Response Style Enforcements (add to system_prompt_builder.py)
-```
-LEGION VOICE RULES (non-negotiable):
-- Max 3 questions per response. Pick the most important one.
-- Never bullet-list casual chat. Only use lists for technical output.
-- When Bashara says something vague like "pusing" — ask ONE question, don't list options.
-- Use ellipsis (...) sparingly — only when trailing off genuinely.
-- React to Bashara's emotion FIRST, then offer help. Not the other way around.
-- If Bashara hasn't replied in 2+ hours during daytime, ONE check-in max. Then go silent.
-- Never start a response with "Oke!", "Siap!", "Tentu!" — start with the actual content.
-- Match energy: if Bashara is brief, be brief. If Bashara writes a paragraph, write a paragraph.
-- Swear occasionally in Indonesian context if Bashara does — it's authentic, not unprofessional.
-```
-
-### Memory Proactivity (add to soul_engine.py)
+**What to implement:**
 ```python
-PROACTIVE_MEMORY_TRIGGERS = [
-    # If Bashara mentioned this and never followed up, bring it up naturally
-    ("thesis deadline", "Btw lo thesis deadline-nya kapan tuh? Udah progress?"),
-    ("rumahlabuh deploy", "Rumahlabuh gimana? Ada update dari kemarin?"),
-    ("tired/pusing/stress", None),  # None = don't bring it up, be sensitive
+# core/session/persistent_context.py
+import sqlite3, json
+from pathlib import Path
+
+class PersistentContext:
+    def __init__(self, db_path="data/conversation.db"):
+        self.db = sqlite3.connect(db_path, check_same_thread=False)
+        self._init_table()
+
+    def _init_table(self):
+        self.db.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY,
+                user_id TEXT,
+                role TEXT,
+                content TEXT,
+                ts REAL DEFAULT (strftime('%s','now'))
+            )
+        """)
+        self.db.commit()
+
+    def push(self, user_id: str, role: str, content: str):
+        self.db.execute(
+            "INSERT INTO messages (user_id, role, content) VALUES (?,?,?)",
+            (user_id, role, content)
+        )
+        self.db.commit()
+
+    def get_recent(self, user_id: str, n: int = 20) -> list[dict]:
+        rows = self.db.execute(
+            "SELECT role, content FROM messages WHERE user_id=? ORDER BY ts DESC LIMIT ?",
+            (user_id, n)
+        ).fetchall()
+        return [{"role": r, "content": c} for r, c in reversed(rows)]
+
+    def summarize_old(self, user_id: str, keep_recent: int = 20) -> None:
+        """Compress messages older than keep_recent into a summary entry."""
+        # Use LLM to summarize old messages, store as role="summary"
+        pass
+```
+
+**Wire it in** `conversation_interface.py`:
+- On EVERY incoming message: `ctx.push(user_id, "user", content)`
+- On EVERY outgoing message: `ctx.push(user_id, "assistant", response)`
+- Load via `ctx.get_recent(user_id, 20)` and inject into system prompt context
+
+---
+
+### [P2-OPEN] sudo/PTY Execution via pexpect
+**Status: NOT IMPLEMENTED** — requires system-level config
+**Files:** `core/interpreter_bridge.py`, `core/opencode_bridge.py`
+
+**Step 1: One-time system setup (run manually):**
+```bash
+# Create passwordless sudo for Legion-specific commands only
+echo "bashara ALL=(ALL) NOPASSWD: /bin/systemctl restart legion" | sudo tee /etc/sudoers.d/legion_restart
+echo "bashara ALL=(ALL) NOPASSWD: /bin/systemctl status legion" | sudo tee -a /etc/sudoers.d/legion_restart
+chmod 440 /etc/sudoers.d/legion_restart
+```
+
+**Step 2: Add `SUDO_PASS` to `.env`:**
+```
+SUDO_PASS=your_password_here
+```
+
+**Step 3: pexpect-based execution in `core/interpreter_bridge.py`:**
+```python
+import pexpect
+import os
+
+def run_sudo_command(command: str) -> tuple[str, int]:
+    sudo_pass = os.environ.get("SUDO_PASS", "")
+    child = pexpect.spawn(f"sudo {command}", timeout=30)
+    idx = child.expect(["password", pexpect.EOF, pexpect.TIMEOUT])
+    if idx == 0:
+        child.sendline(sudo_pass)
+        child.expect(pexpect.EOF)
+    output = child.before.decode("utf-8", errors="ignore")
+    return output, child.exitstatus or 0
+```
+
+---
+
+### [P2-OPEN] Persona Loading Race Condition
+**Status: NOT VERIFIED**
+**Files:** main bot startup sequence, `core/soul_engine.py`
+
+On cold start, if Legion starts accepting Telegram messages before `soul_engine.load_soul()`
+completes, the first response can be robotic/generic.
+
+**Fix:**
+```python
+# In main.py / bot startup
+async def startup():
+    soul = SoulEngine()
+    await soul.load()   # BLOCKING — must complete before polling starts
+    logger.info(f"Soul loaded: {len(soul.content)} chars")
+    await bot.send_message(BASHARA_CHAT_ID, "Legion online. Soul loaded. 👁️")
+    await application.start_polling()  # only now
+```
+
+---
+
+### [P3-OPEN] Proactive Check-in Deduplication
+**Status: PARTIALLY FIXED** (timestamp overflow fixed, but dedup not implemented)
+**File:** `core/proactive/curiosity_engine.py` or `core/proactive_engine.py`
+
+Legion still sends the SAME check-in phrase repeatedly. The chat log shows:
+- "You've been quiet for about 9 hours..." at 10:20
+- "You've been quiet for about 10 hours..." at 11:20
+- "Pagi! Ada agenda hari ini..." at 11:02
+- All within the same hour window.
+
+**Fix needed:**
+```python
+# Add to proactive engine state
+PROACTIVE_COOLDOWN_HOURS = 4  # don't check in more than once per 4 hours
+LAST_CHECKIN_KEY = "last_proactive_checkin"
+
+def should_send_checkin(user_id: str) -> bool:
+    last = load_state(LAST_CHECKIN_KEY, user_id)
+    if last is None:
+        return True
+    hours_since = (time.time() - last) / 3600
+    return hours_since >= PROACTIVE_COOLDOWN_HOURS
+
+# Also add message variety pool:
+CHECKIN_POOL = [
+    "Lo baik-baik aja?",
+    "Masih hidup?",
+    "Halo, lo ghosting aku nih.",
+    "Eh, ada yang lagi lo pikirin?",
+    "Sunyi banget dari lo tadi.",
+    None,  # sometimes don't send at all (50% chance)
 ]
 ```
 
-### Capability Auto-Detection (wire into intent_router.py)
+---
+
+### [BONUS-OPEN] Conversation Memory Proactivity
+**Status: NOT IMPLEMENTED**
+**File:** `core/soul_engine.py` or `core/proactive_engine.py`
+
+Legion should naturally bring up unresolved topics from memory:
 ```python
-# If user's message contains a URL → auto-run web check without asking
-# If user's message mentions a file path → auto-check if file exists
-# If user mentions an error message → auto-search for fix
-# If user says "tadi error" → auto-check recent logs
+PROACTIVE_MEMORY_TRIGGERS = [
+    ("thesis deadline", "Btw lo thesis deadline-nya kapan? Udah ada progress?"),
+    ("rumahlabuh deploy", "Rumahlabuh gimana? Ada update dari kemarin?"),
+    ("pusing", None),   # sensitive topic — never bring it up proactively
+    ("tired", None),
+]
+
+# Check: if Bashara mentioned X and it was > 24h ago without resolution → ask once
 ```
 
 ---
 
-## FILES TO CREATE (NEW)
+### [BONUS-OPEN] Response Style Enforcements
+**Status: NOT IMPLEMENTED**
+**File:** `core/system_prompt_builder.py` or `core/character_enforcer.py`
 
-1. `core/natural_command_parser.py` — NLP to internal command mapping
-2. `core/error_humanizer.py` — exception to friendly Indonesian/English message
-3. `core/session/persistent_context.py` — SQLite-backed conversation buffer
-4. `core/persona_guard.py` — post-response filter enforcing SOUL.md voice
-
-## FILES TO HEAVILY MODIFY
-
-1. `core/interpreter_bridge.py` — fix progress_cb, add PTY support
-2. `core/proactive_engine.py` — fix timestamp, add cooldown, vary messages
-3. `core/intent_router.py` — add NLU pass before slash routing
-4. `core/system_prompt_builder.py` — mandatory SOUL injection
-5. `core/wiki_quality_gate.py` — fix scoring bug
-6. `core/soul_engine.py` — blocking startup, proactive memory
-
----
-
-## HOW TO USE THIS DOCUMENT WITH OPENCODE
-
-1. Open OpenCode in your VSCode terminal
-2. Reference this file: `LEGION_OPENCODE_AUDIT.md`
-3. Prompt to paste into OpenCode:
-
+Add this block to the system prompt (after SOUL.md, before task context):
 ```
-Read LEGION_OPENCODE_AUDIT.md and implement all P0 items first, then P1, then P2.
-Start with the progress_cb fix, then the proactive timestamp bug, then error humanizer.
-After each fix, run the test suite and confirm no regressions.
-Work through the file top to bottom. Surgical fixes only — do NOT refactor what isn't broken.
+LEGION VOICE RULES (applied on every response, no exceptions):
+- Max 1 clarifying question per casual message. Not a list of questions.
+- Never bullet-list during casual chitchat. Lists only for code/data output.
+- Emotion first, solution second. If Bashara vents, acknowledge before fixing.
+- Match energy: Bashara sends 3 words? Respond in 1-2 lines.
+- If Bashara hasn’t replied in 2+ daytime hours: ONE check-in, then silence for 4h.
+- Never open with "Oke!", "Siap!", "Tentu!", "Sure!", "Of course!" — just start talking.
+- When Bashara says something vague like "pusing" — ask what’s wrong. ONE question.
+- Use sarcasm and dry humor where appropriate — it’s authentic.
 ```
 
 ---
 
-## CLAUDE CODE INSTRUCTIONS (for VSCode Claude Code extension)
+## REMAINING TODO PRIORITY ORDER
 
-Paste this into Claude Code's context window to start the session:
+| Priority | Item | Effort | Impact |
+|---|---|---|---|
+| P1 | Persistent conversation context (SQLite) | 2h | 🔥 High — fixes memory loss |
+| P2 | Proactive check-in dedup + variety | 30min | High — stops spam |
+| P2 | Response style enforcement in system prompt | 15min | High — instant personality upgrade |
+| P2 | sudo/PTY via pexpect | 1h | Medium — enables native shell |
+| P3 | Startup race condition (soul blocking) | 30min | Medium — cold start quality |
+| BONUS | Proactive memory triggers | 1h | Medium — real friend feel |
+
+---
+
+## OPENCODE PROMPT FOR NEXT SESSION
+
+Paste this to continue where OpenCode left off:
 
 ```
-You are a senior software engineer auditing and fixing the Legion Telegram bot.
-Repo: ~/path/to/Babas_Swarms_bot
+Read LEGION_OPENCODE_AUDIT.md. The P0 and most P1 items are already done.
 
-Your mission: Make Legion feel like a real human friend, not a bot.
-Zero slash commands required. Zero raw errors shown. Full natural language understanding.
-Perfect memory. Consistent personality from SOUL.md on every single response.
+Your next tasks in order:
+1. Implement core/session/persistent_context.py (SQLite conversation buffer)
+   Wire it into conversation_interface.py — push on every message, load on every response.
+2. Add proactive check-in cooldown (4h) and message variety pool to core/proactive_engine.py
+3. Add LEGION VOICE RULES block to core/system_prompt_builder.py after SOUL injection
+4. Verify soul loading is blocking before bot.start_polling() in main startup
 
-Work through LEGION_OPENCODE_AUDIT.md top to bottom.
-For each fix:
-1. Read the affected file(s)
-2. Apply the minimal correct fix
-3. Confirm the fix with a brief explanation
-4. Move to next item
-
-Priority: P0 -> P1 -> P2 -> P3 -> Bonus upgrades.
-
-Start with: grep -rn "progress_cb" . --include="*.py" to find and fix Area 1.
+Surgical fixes only. Run smoke tests after each change.
 ```
 
 ---
 
-*End of LEGION_OPENCODE_AUDIT.md*
+*Last updated: 2026-04-12*
 *Repo: https://github.com/Bashara-aina/Babas_Swarms_bot*
-*Generated: 2026-04-12*
