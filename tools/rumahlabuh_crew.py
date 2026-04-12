@@ -180,7 +180,7 @@ async def check_booking_alerts() -> list[str]:
         if not client:
             return ["⚠️ Supabase client not available"]
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         thirty_min_ago = (now - datetime.timedelta(minutes=30)).isoformat()
 
         # New bookings since last check (last 30 min)

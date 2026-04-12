@@ -16,6 +16,7 @@ try:
     import aiosqlite
 except ImportError:
     import subprocess, sys
+
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "aiosqlite", "--break-system-packages", "-q"],
         check=False,
@@ -120,6 +121,7 @@ async def init_db() -> None:
 
 # ── Scheduled tasks ──────────────────────────────────────────────────────────
 
+
 async def add_scheduled_task(
     task_id: str,
     description: str,
@@ -139,8 +141,7 @@ async def add_scheduled_task(
                (id, description, command, task_type, interval_sec,
                 next_run, status, alert_condition, created_at)
                VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)""",
-            (task_id, description, command, task_type,
-             interval_sec, next_run, alert_condition, now),
+            (task_id, description, command, task_type, interval_sec, next_run, alert_condition, now),
         )
         await db.commit()
 
@@ -149,9 +150,7 @@ async def get_active_tasks() -> list[dict[str, Any]]:
     """Get all active scheduled tasks."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute(
-            "SELECT * FROM scheduled_tasks WHERE status = 'active'"
-        ) as cursor:
+        async with db.execute("SELECT * FROM scheduled_tasks WHERE status = 'active'") as cursor:
             rows = await cursor.fetchall()
             return [dict(r) for r in rows]
 
@@ -177,9 +176,7 @@ async def update_task_last_run(task_id: str) -> None:
         await db.commit()
 
 
-async def record_task_execution(
-    task_id: str, result: str, success: bool = True
-) -> None:
+async def record_task_execution(task_id: str, result: str, success: bool = True) -> None:
     """Record a task execution in history."""
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
@@ -206,17 +203,14 @@ async def get_all_tasks() -> list[dict[str, Any]]:
     """Get all tasks regardless of status."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute(
-            "SELECT * FROM scheduled_tasks ORDER BY created_at DESC"
-        ) as cursor:
+        async with db.execute("SELECT * FROM scheduled_tasks ORDER BY created_at DESC") as cursor:
             return [dict(r) for r in await cursor.fetchall()]
 
 
 # ── Conversation memory ──────────────────────────────────────────────────────
 
-async def store_conversation(
-    thread_id: str, agent: str, task: str, result: str
-) -> None:
+
+async def store_conversation(thread_id: str, agent: str, task: str, result: str) -> None:
     """Store a conversation turn."""
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
@@ -228,9 +222,7 @@ async def store_conversation(
         await db.commit()
 
 
-async def get_conversation_history(
-    thread_id: str, limit: int = 10
-) -> list[dict]:
+async def get_conversation_history(thread_id: str, limit: int = 10) -> list[dict]:
     """Get recent conversation history for a thread."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -259,6 +251,7 @@ async def get_all_threads() -> list[dict]:
 
 # ── Key-value store ──────────────────────────────────────────────────────────
 
+
 async def kv_set(key: str, value: str) -> None:
     """Set a key-value pair."""
     async with aiosqlite.connect(DB_PATH) as db:
@@ -274,9 +267,7 @@ async def kv_set(key: str, value: str) -> None:
 async def kv_get(key: str) -> Optional[str]:
     """Get a value by key."""
     async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT value FROM key_value_store WHERE key = ?", (key,)
-        ) as cursor:
+        async with db.execute("SELECT value FROM key_value_store WHERE key = ?", (key,)) as cursor:
             row = await cursor.fetchone()
             return row[0] if row else None
 
@@ -284,13 +275,12 @@ async def kv_get(key: str) -> Optional[str]:
 async def kv_delete(key: str) -> None:
     """Delete a key-value pair."""
     async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "DELETE FROM key_value_store WHERE key = ?", (key,)
-        )
+        await db.execute("DELETE FROM key_value_store WHERE key = ?", (key,))
         await db.commit()
 
 
 # ── Audit log ──────────────────────────────────────────────────────────────────
+
 
 async def log_audit(
     action: str,
@@ -308,8 +298,7 @@ async def log_audit(
                (timestamp, action, detail, model, tokens_in, tokens_out,
                 duration_ms, success)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (time.time(), action, detail, model or None,
-             tokens_in, tokens_out, duration_ms, int(success)),
+            (time.time(), action, detail, model or None, tokens_in, tokens_out, duration_ms, int(success)),
         )
         await db.commit()
 
@@ -344,6 +333,7 @@ async def get_audit_log(limit: int = 50) -> list[dict[str, Any]]:
 
 
 # ── Sessions ───────────────────────────────────────────────────────────────────
+
 
 async def save_session(
     session_id: str,
@@ -410,9 +400,8 @@ async def delete_session(name_or_id: str) -> bool:
 
 # ── Instincts ──────────────────────────────────────────────────────────────────
 
-async def add_instinct(
-    category: str, content: str, source: str = "manual"
-) -> int:
+
+async def add_instinct(category: str, content: str, source: str = "manual") -> int:
     """Insert a new instinct. Returns its ID."""
     async with aiosqlite.connect(DB_PATH) as db:
         cur = await db.execute(
@@ -424,9 +413,7 @@ async def add_instinct(
         return cur.lastrowid  # type: ignore[return-value]
 
 
-async def get_instincts(
-    category: Optional[str] = None, limit: int = 30
-) -> list[dict[str, Any]]:
+async def get_instincts(category: Optional[str] = None, limit: int = 30) -> list[dict[str, Any]]:
     """Fetch instincts, optionally filtered by category."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -454,9 +441,7 @@ async def bump_instinct_use(instinct_id: int) -> None:
 async def delete_instinct(instinct_id: int) -> bool:
     """Delete an instinct by ID. Returns True if removed."""
     async with aiosqlite.connect(DB_PATH) as db:
-        cur = await db.execute(
-            "DELETE FROM instincts WHERE id = ?", (instinct_id,)
-        )
+        cur = await db.execute("DELETE FROM instincts WHERE id = ?", (instinct_id,))
         await db.commit()
         return cur.rowcount > 0
 
@@ -484,6 +469,7 @@ async def get_instinct_context(max_tokens: int = 300) -> str:
 
 
 # ── Response cache ─────────────────────────────────────────────────────────────
+
 
 async def cache_get(cache_key: str) -> Optional[str]:
     """Return cached response if it exists and hasn't expired."""
@@ -545,3 +531,177 @@ async def cache_cleanup() -> int:
         )
         await db.commit()
         return cur.rowcount
+
+
+class Persistence:
+    """Unified persistence wrapper for all SQLite-backed storage.
+
+    Provides an async class-based interface to:
+    - Scheduled tasks and task history
+    - Conversation memory
+    - Key-value store
+    - Audit logging
+    - Session management
+    - Response caching
+
+    Example:
+        p = Persistence()
+        await p.init()
+        await p.kv_set("user_name", "Alice")
+        val = await p.kv_get("user_name")
+    """
+
+    async def init(self) -> None:
+        """Initialize the database schema."""
+        await init_db()
+
+    # ── Scheduled Tasks ────────────────────────────────────────────────────────
+
+    async def add_scheduled_task(
+        self,
+        task_id: str,
+        description: str,
+        command: str,
+        task_type: str,
+        interval_sec: int = 0,
+        next_run: float = 0,
+        alert_condition: str = "",
+    ) -> None:
+        await add_scheduled_task(task_id, description, command, task_type, interval_sec, next_run, alert_condition)
+
+    async def get_active_tasks(self) -> list[dict[str, Any]]:
+        return await get_active_tasks()
+
+    async def update_task_status(self, task_id: str, status: str) -> None:
+        await update_task_status(task_id, status)
+
+    async def update_task_last_run(self, task_id: str) -> None:
+        await update_task_last_run(task_id)
+
+    async def record_task_execution(self, task_id: str, result: str, success: bool = True) -> None:
+        await record_task_execution(task_id, result, success)
+
+    async def get_task_history(self, task_id: str, limit: int = 10) -> list[dict]:
+        return await get_task_history(task_id, limit)
+
+    async def get_all_tasks(self) -> list[dict[str, Any]]:
+        return await get_all_tasks()
+
+    # ── Conversation Memory ─────────────────────────────────────────────────────
+
+    async def store_conversation(self, thread_id: str, agent: str, task: str, result: str) -> None:
+        await store_conversation(thread_id, agent, task, result)
+
+    async def get_conversation_history(self, thread_id: str, limit: int = 10) -> list[dict]:
+        return await get_conversation_history(thread_id, limit)
+
+    async def get_all_threads(self) -> list[dict]:
+        return await get_all_threads()
+
+    # ── Key-Value Store ───────────────────────────────────────────────────────
+
+    async def kv_set(self, key: str, value: str) -> None:
+        await kv_set(key, value)
+
+    async def kv_get(self, key: str) -> str | None:
+        return await kv_get(key)
+
+    async def kv_delete(self, key: str) -> None:
+        await kv_delete(key)
+
+    # ── Audit Log ────────────────────────────────────────────────────────────
+
+    async def log_audit(
+        self,
+        action: str,
+        detail: str,
+        model: str = "",
+        tokens_in: int = 0,
+        tokens_out: int = 0,
+        duration_ms: int = 0,
+        success: bool = True,
+    ) -> None:
+        await log_audit(action, detail, model, tokens_in, tokens_out, duration_ms, success)
+
+    async def get_audit_summary(self, hours: int = 24) -> dict[str, Any]:
+        return await get_audit_summary(hours)
+
+    async def get_audit_log(self, limit: int = 50) -> list[dict[str, Any]]:
+        return await get_audit_log(limit)
+
+    # ── Sessions ───────────────────────────────────────────────────────────────
+
+    async def save_session(
+        self,
+        session_id: str,
+        name: str,
+        thread_id: str,
+        agent_key: str,
+        context_json: str,
+    ) -> None:
+        await save_session(session_id, name, thread_id, agent_key, context_json)
+
+    async def resume_session(self, name_or_id: str) -> dict[str, Any] | None:
+        return await resume_session(name_or_id)
+
+    async def list_sessions(self, limit: int = 20) -> list[dict[str, Any]]:
+        return await list_sessions(limit)
+
+    async def delete_session(self, name_or_id: str) -> bool:
+        return await delete_session(name_or_id)
+
+    # ── Response Cache ─────────────────────────────────────────────────────────
+
+    async def cache_get(self, cache_key: str) -> str | None:
+        return await cache_get(cache_key)
+
+    async def cache_set(
+        self,
+        cache_key: str,
+        response: str,
+        agent: str,
+        model: str,
+        tokens_used: int = 0,
+        ttl: int = 86400,
+    ) -> None:
+        await cache_set(cache_key, response, agent, model, tokens_used, ttl)
+
+    async def cache_stats(self) -> dict[str, Any]:
+        return await cache_stats()
+
+    async def cache_cleanup(self) -> int:
+        return await cache_cleanup()
+
+
+__all__ = [
+    "init_db",
+    "add_scheduled_task",
+    "get_active_tasks",
+    "update_task_status",
+    "record_task_execution",
+    "get_task_history",
+    "get_all_tasks",
+    "store_conversation",
+    "get_conversation_history",
+    "get_all_threads",
+    "kv_set",
+    "kv_get",
+    "kv_delete",
+    "log_audit",
+    "get_audit_summary",
+    "get_audit_log",
+    "save_session",
+    "resume_session",
+    "list_sessions",
+    "delete_session",
+    "add_instinct",
+    "get_instincts",
+    "bump_instinct_use",
+    "delete_instinct",
+    "get_instinct_context",
+    "cache_get",
+    "cache_set",
+    "cache_stats",
+    "cache_cleanup",
+    "Persistence",
+]

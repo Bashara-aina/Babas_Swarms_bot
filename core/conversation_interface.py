@@ -185,6 +185,17 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
         except Exception:
             pass
 
+    # Fire-and-forget session transcript persistence (U1)
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            from core.session.transcript import get_transcript_store
+
+            store = get_transcript_store()
+            asyncio.create_task(store.save_turn(None, user_id, role, content))
+    except Exception:
+        pass
+
 
 async def _persist_to_viking(user_id: str, user_msg: str, assistant_msg: str) -> None:
     """Async helper: persist conversation turn to OpenViking L1."""

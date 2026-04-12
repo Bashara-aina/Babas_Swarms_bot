@@ -9,13 +9,14 @@ Usage (already wired in main.py on_startup):
     from tools.proactive_initiator import start_proactive_initiator
     asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import os
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -36,13 +37,14 @@ _last_sent: float = 0.0  # epoch seconds of last proactive message
 
 def _is_quiet_hours() -> bool:
     """Return True if it's 01:00–07:00 JST (Bashara is likely asleep)."""
-    jst_hour = (datetime.utcnow().hour + 9) % 24
+    jst_hour = (datetime.now(timezone.utc).hour + 9) % 24
     return 1 <= jst_hour < 7
 
 
 def _pick_trigger(user_id: int) -> str | None:
     """Return a proactive message topic, or None if Legion should stay quiet."""
     import time
+
     global _last_sent
 
     if _is_quiet_hours():
@@ -65,23 +67,27 @@ def _pick_trigger(user_id: int) -> str | None:
 
     # Hard check-in after max interval
     if elapsed >= _MAX_INTERVAL:
-        return random.choice([
-            "check_in",
-            "resource_alert",
-            "news_brief",
-        ])
+        return random.choice(
+            [
+                "check_in",
+                "resource_alert",
+                "news_brief",
+            ]
+        )
 
     # Probabilistic trigger
     if random.random() > _SEND_PROBABILITY:
         return None
 
-    return random.choice([
-        "check_in",
-        "tip",
-        "resource_alert",
-        "news_brief",
-        "memory_surface",
-    ])
+    return random.choice(
+        [
+            "check_in",
+            "tip",
+            "resource_alert",
+            "news_brief",
+            "memory_surface",
+        ]
+    )
 
 
 async def _build_message(trigger: str, user_id: int | None = None) -> str:
@@ -115,6 +121,7 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
     if trigger == "resource_alert":
         try:
             import psutil
+
             cpu = psutil.cpu_percent(interval=0.2)
             mem = psutil.virtual_memory()
             ram_pct = mem.percent
@@ -136,6 +143,7 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
     if trigger == "news_brief":
         try:
             from tools.briefing import get_quick_brief
+
             brief = await get_quick_brief()
             if brief:
                 return f"\U0001f4f0 Quick brief:\n{brief[:800]}"
@@ -146,11 +154,12 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
     if trigger == "memory_surface":
         try:
             from tools.mem0_client import mem0_search
+
             mems = await mem0_search("bashara", "recent important", limit=1)
             if mems:
                 content = mems[0].get("memory") or mems[0].get("content", "")
                 if content:
-                    return f"Eh, gw inget lo pernah bilang: \"{content[:200]}\" — masih relevan nggak?"
+                    return f'Eh, gw inget lo pernah bilang: "{content[:200]}" — masih relevan nggak?'
         except Exception:
             pass
         return await _build_message("check_in", user_id)
@@ -179,10 +188,10 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
 async def start_proactive_initiator(bot: "Bot", user_id: int) -> None:
     """Main loop — runs forever as a background task."""
     import time
+
     global _last_sent
 
-    logger.info("Proactive initiator started (min_interval=%ds, prob=%.0f%%)",
-                _MIN_INTERVAL, _SEND_PROBABILITY * 100)
+    logger.info("Proactive initiator started (min_interval=%ds, prob=%.0f%%)", _MIN_INTERVAL, _SEND_PROBABILITY * 100)
 
     # Initial jitter: don't fire immediately on startup
     await asyncio.sleep(random.uniform(300, 900))

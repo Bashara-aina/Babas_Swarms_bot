@@ -1,6 +1,6 @@
-# LEGION BOT — MASTER AUDIT & FIX DOCUMENT
-# Updated: 2026-04-12 | Repo: Bashara-aina/Babas_Swarms_bot
-# Status: P0 DONE • P1 MOSTLY DONE • P2 PARTIAL • REMAINING ITEMS BELOW
+# LEGION BOT — MASTER AUDIT & FIX DOCUMENT FOR OPENCODE
+# Generated: 2026-04-12 | Repo: swarm-bot
+# Purpose: Deep professional audit → full fix plan to make Legion feel human, native, zero robot
 
 ---
 
@@ -272,7 +272,8 @@ LEGION VOICE RULES (applied on every response, no exceptions):
 Paste this to continue where OpenCode left off:
 
 ```
-Read LEGION_OPENCODE_AUDIT.md. The P0 and most P1 items are already done.
+You are a senior software engineer auditing and fixing the Legion Telegram bot.
+Repo: ~/path/to/swarm-bot
 
 Your next tasks in order:
 1. Implement core/session/persistent_context.py (SQLite conversation buffer)
@@ -286,5 +287,6 @@ Surgical fixes only. Run smoke tests after each change.
 
 ---
 
-*Last updated: 2026-04-12*
-*Repo: https://github.com/Bashara-aina/Babas_Swarms_bot*
+*End of LEGION_OPENCODE_AUDIT.md*
+*Repo: swarm-bot
+*Generated: 2026-04-12*

@@ -1,0 +1,64 @@
+# NeMo Guardrails Configuration for Legion Anti-Slop
+# Note: This config is for documentation/reference only.
+# Actual Guard 4 uses direct llm_client.chat() integration.
+# See ADR-001 for why we chose custom implementation over NeMo standalone.
+
+version: "1.0"
+application_name: "legion_anti_slop"
+
+# Input checks (pre-LLM)
+input_checks:
+  filler_detection:
+    enabled: true
+    phrases:
+      - "it goes without saying"
+      - "as you know"
+      - "as we all know"
+      - "it is important to note"
+      - "needless to say"
+      - "at the end of the day"
+      - "the fact of the matter is"
+      - "it should be noted"
+      - "with that being said"
+      - "that being said"
+      - "all things considered"
+      - "in conclusion"
+      - "to sum up"
+      - "overall"
+      - "generally speaking"
+      - "in general"
+      - "for the most part"
+      - "as previously mentioned"
+      - "as mentioned earlier"
+
+  caps_limit:
+    enabled: true
+    max_ratio: 0.50  # Reject if >50% uppercase
+
+  repetition:
+    enabled: true
+    max_consecutive_same_char: 10
+    max_same_word_count: 5
+
+# Output checks (post-LLM)
+output_checks:
+  groundedness:
+    enabled: true
+    model: "minimax/MiniMax-M2.7"
+    threshold: 0.7
+
+  relevance:
+    enabled: true
+    model: "minimax/MiniMax-M2.7"
+    threshold: 0.6
+
+# Model configuration
+models:
+  - model_type: "chat"
+    model_name: "minimax/MiniMax-M2.7"
+    enabled: true
+
+# Rails configuration
+rails:
+  output:
+    - defined in rails.co

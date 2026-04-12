@@ -151,15 +151,28 @@ class WikiQualityScheduler:
                     result = fast_gate(content_str, page_path)
                     scanned += 1
 
-                    if result.score < LOW_QUALITY_THRESHOLD:
+                    if result.verdict == "REJECT" and result.score < LOW_QUALITY_THRESHOLD:
                         dest = await quarantine_content(
                             page_path=page_path,
                             content=content_str,
-                            reason=f"daily_fast_scan: score={result.score:.3f} < {LOW_QUALITY_THRESHOLD}",
+                            reason=f"daily_fast_scan: verdict=REJECT, score={result.score:.3f} < {LOW_QUALITY_THRESHOLD}",
                             score=result.score,
                         )
                         quarantined.append((page_path, str(dest), result.score))
                         logger.info("[WikiQualityScheduler] quarantined %s (score=%.3f)", page_path, result.score)
+                    elif result.verdict == "NEEDS_IMPROVEMENT" and result.score < 0.1:
+                        # Score of 0.0-0.1 is likely a scoring bug (not genuinely bad content)
+                        # Route to deep_gate before quarantining — only quarantine if deep_gate agrees
+                        deep_result = await deep_gate(content_str, page_path)
+                        if deep_result.verdict == "REJECT":
+                            dest = await quarantine_content(
+                                page_path=page_path,
+                                content=content_str,
+                                reason=f"daily_fast_scan: deep_gate REJECT, score={deep_result.score:.3f}",
+                                score=deep_result.score,
+                            )
+                            quarantined.append((page_path, str(dest), deep_result.score))
+                            logger.info("[WikiQualityScheduler] quarantined after deep_gate %s (score=%.3f)", page_path, deep_result.score)
 
                 except Exception as e:
                     logger.warning("[WikiQualityScheduler] failed to scan %s: %s", page_path, e)

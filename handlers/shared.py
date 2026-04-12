@@ -300,7 +300,7 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
     try:
         response, model_used = await agent_loop(
             task,
-            progress_cb=on_progress,
+            progress_fn=on_progress,
             photo_cb=on_photo,
             thread_id=thread_id,
             user_id=msg.from_user.id,
@@ -314,23 +314,18 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
 
     except Exception as e:
         await _cancel_task(typing_task)
-        err = html_mod.escape(str(e))
-        if "rate" in err.lower():
-            hint = "\u23f3 rate limited \u2014 try again in a minute"
-        elif "key" in err.lower() or "auth" in err.lower():
-            hint = "\U0001f511 api key issue \u2014 run /keys to check"
-        elif "all providers" in err.lower():
-            hint = "\U0001f480 all models failed \u2014 run /keys to check"
-        else:
-            hint = "\u274c something went wrong"
+        from core.error_humanizer import humanize_error_for_display
+        friendly = humanize_error_for_display(e, context="/do agent loop")
+        err_short = str(e)[:300]
+        hint = friendly
         try:
             await status_msg.edit_text(
-                f"{hint}\n\n<code>{err[:400]}</code>",
+                f"{hint}\n\n<code>{err_short}</code>",
                 parse_mode="HTML",
             )
         except Exception:
             await msg.answer(
-                f"{hint}\n\n<code>{err[:400]}</code>",
+                f"{hint}\n\n<code>{err_short}</code>",
                 parse_mode="HTML",
             )
 
@@ -378,14 +373,11 @@ async def _execute_chat(
         await send_chunked(msg, response, model_used=model_used)
     except Exception as e:
         await _cancel_task(typing_task)
-        err = html_mod.escape(str(e))
-        if "rate" in err.lower():
-            hint = "\u23f3 rate limited"
-        elif "key" in err.lower() or "auth" in err.lower():
-            hint = "\U0001f511 api key issue"
-        else:
-            hint = "\u274c error"
+        from core.error_humanizer import humanize_error_for_display
+        friendly = humanize_error_for_display(e, context="chat")
+        err_short = str(e)[:300]
+        hint = friendly
         await msg.answer(
-            f"{hint}: <code>{err[:400]}</code>",
+            f"{hint}: <code>{err_short}</code>",
             parse_mode="HTML",
         )

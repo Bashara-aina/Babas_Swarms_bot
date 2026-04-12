@@ -140,6 +140,23 @@ class FallbackChain:
         return stats
 
 
+def get_fallback_chain(agent_key: str = "coding") -> list[str]:
+    """Convenience function: Get the full fallback chain model strings for an agent.
+
+    Args:
+        agent_key: Agent type (coding, chat, analysis)
+
+    Returns:
+        List of model strings in priority order
+
+    Example:
+        >>> chain = get_fallback_chain("coding")
+        >>> # Returns ["openrouter/qwen/qwen3-coder:free", "groq/llama-3.3-70b-versatile", ...]
+    """
+    chain = FallbackChain.get_provider_chain(agent_key)
+    return [model for model, _ in chain]
+
+
 def get_best_provider(agent_key: str = "coding") -> str:
     """Convenience function: Get the best available provider model string.
 
