@@ -355,7 +355,11 @@ class TestIntegration:
 
         with (
             patch("llm_client.acompletion", mock_llm),
-            patch("core.memory_manager.MemoryManager.save_memory", new_callable=AsyncMock, side_effect=capture_store),
+            patch(
+                "core.memory.memory_manager.MemoryManager.save",
+                new_callable=AsyncMock,
+                side_effect=capture_store,
+            ),
         ):
             from handlers.shared import _execute_chat
 
