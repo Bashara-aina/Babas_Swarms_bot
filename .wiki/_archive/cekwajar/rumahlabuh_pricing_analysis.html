@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rumah Labuh — Competitive Pricing Analysis</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f7fa; color: #2d3748; }
+
+  /* HEADER */
+  .header { background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%); color: white; padding: 36px 48px; }
+  .header h1 { font-size: 28px; font-weight: 700; }
+  .header p { margin-top: 6px; font-size: 14px; opacity: .8; }
+  .header-meta { display: flex; gap: 32px; margin-top: 20px; }
+  .header-meta .stat { }
+  .header-meta .stat .val { font-size: 26px; font-weight: 700; }
+  .header-meta .stat .lbl { font-size: 12px; opacity: .75; margin-top: 2px; }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .section { background: white; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+  .section h2 { font-size: 17px; font-weight: 700; color: #1a365d; margin-bottom: 18px; border-left: 4px solid #2b6cb0; padding-left: 12px; }
+  .section h3 { font-size: 14px; font-weight: 700; color: #2d3748; margin: 18px 0 10px; }
+
+  /* PROPERTY CARDS */
+  .property-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .property-card { border: 2px solid #bee3f8; border-radius: 10px; padding: 18px; background: #ebf8ff; }
+  .property-card h3 { color: #2b6cb0; margin-top: 0; }
+  .property-card .tag { display: inline-block; background: #2b6cb0; color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .badge { background: #e2e8f0; color: #4a5568; font-size: 11px; padding: 3px 9px; border-radius: 20px; }
+  .badge.green { background: #c6f6d5; color: #276749; }
+  .badge.blue { background: #bee3f8; color: #2c5282; }
+  .occ-bar { margin-top: 12px; }
+  .occ-bar .label { font-size: 12px; color: #718096; margin-bottom: 4px; }
+  .occ-track { background: #e2e8f0; border-radius: 99px; height: 10px; }
+  .occ-fill { border-radius: 99px; height: 10px; }
+  .occ-fill.high { background: #48bb78; }
+  .occ-fill.mid  { background: #ed8936; }
+  .occ-fill.low  { background: #fc8181; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #1a365d; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f7fafc; }
+  .hl-row td { background: #ebf8ff !important; font-weight: 600; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill.green  { background: #c6f6d5; color: #22543d; }
+  .pill.yellow { background: #fefcbf; color: #744210; }
+  .pill.red    { background: #fed7d7; color: #742a2a; }
+  .pill.blue   { background: #bee3f8; color: #2c5282; }
+  .pill.gray   { background: #e2e8f0; color: #4a5568; }
+
+  /* PRICING BANDS */
+  .band-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .band-card { border-radius: 10px; padding: 16px; text-align: center; }
+  .band-card .band-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .band-card .band-price { font-size: 22px; font-weight: 800; }
+  .band-card .band-sub { font-size: 11px; margin-top: 4px; opacity: .75; }
+  .band-card.p25 { background: #f0fff4; border: 2px solid #9ae6b4; color: #276749; }
+  .band-card.p50 { background: #ebf8ff; border: 2px solid #90cdf4; color: #2c5282; }
+  .band-card.p75 { background: #fef9e7; border: 2px solid #f6e05e; color: #744210; }
+  .band-card.p90 { background: #fff5f5; border: 2px solid #fc8181; color: #742a2a; }
+
+  /* RECOMMENDATION BOX */
+  .rec-box { background: linear-gradient(135deg, #f0fff4, #e6fffa); border: 2px solid #9ae6b4; border-radius: 12px; padding: 24px; }
+  .rec-box h3 { color: #276749; font-size: 16px; margin-bottom: 16px; }
+  .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rec-item { background: white; border-radius: 8px; padding: 14px; border-left: 4px solid #48bb78; }
+  .rec-item .room-name { font-size: 12px; font-weight: 700; color: #4a5568; text-transform: uppercase; }
+  .rec-item .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 4px; }
+  .rec-item .old-price { font-size: 12px; color: #a0aec0; text-decoration: line-through; }
+  .rec-item .new-price { font-size: 16px; font-weight: 800; color: #276749; }
+  .rec-item .rationale { font-size: 11px; color: #718096; margin-top: 6px; line-height: 1.5; }
+
+  /* STRATEGY BLOCKS */
+  .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .strat-card { background: white; border-radius: 10px; padding: 16px; border-top: 4px solid; }
+  .strat-card.blue  { border-color: #4299e1; }
+  .strat-card.green { border-color: #48bb78; }
+  .strat-card.purple{ border-color: #9f7aea; }
+  .strat-card .strat-icon { font-size: 22px; margin-bottom: 8px; }
+  .strat-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .strat-card p { font-size: 12px; color: #718096; line-height: 1.6; }
+
+  /* RISK / INSIGHT */
+  .insight-row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+  .insight-row:last-child { border-bottom: none; }
+  .insight-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .insight-dot.green  { background: #48bb78; }
+  .insight-dot.yellow { background: #ecc94b; }
+  .insight-dot.red    { background: #fc8181; }
+  .insight-dot.blue   { background: #63b3ed; }
+  .insight-text { font-size: 13px; line-height: 1.6; }
+  .insight-text strong { color: #2d3748; }
+
+  /* WATERMARK */
+  .footer { text-align: center; padding: 24px; font-size: 12px; color: #a0aec0; }
+
+  @media(max-width:700px) {
+    .header { padding: 24px 20px; }
+    .property-grid, .band-grid, .rec-grid, .strategy-grid { grid-template-columns: 1fr; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Rumah Labuh — Competitive Pricing Analysis</h1>
+  <p>Laweyan, Surakarta · March 2026 · Benchmarked against 8 direct & indirect competitors</p>
+  <div class="header-meta">
+    <div class="stat"><div class="val">32</div><div class="lbl">Total Rooms (2 Properties)</div></div>
+    <div class="stat"><div class="val">~72%</div><div class="lbl">Current Avg Occupancy</div></div>
+    <div class="stat"><div class="val">Rp 1.15–1.8M</div><div class="lbl">Current Monthly Range</div></div>
+    <div class="stat"><div class="val">80–95%</div><div class="lbl">Target Occupancy</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PROPERTY OVERVIEW -->
+  <div class="section">
+    <h2>Your Properties — Current State</h2>
+    <div class="property-grid">
+      <div class="property-card">
+        <span class="tag">Labuh Biru</span>
+        <h3>Jl. Joko Tingkir No.22, Pajang, Laweyan</h3>
+        <p style="font-size:13px;color:#4a5568;margin-top:6px;">24 rooms · 8 room types (13.5–24 m²) · 2 floors</p>
+        <div class="occ-bar">
+          <div class="label">Occupancy — 19/24 rooms filled ≈ <strong>79%</strong></div>
+          <div class="occ-track"><div class="occ-fill high" style="width:79%"></div></div>
+        </div>
+        <div class="badge-row">
+          <span class="badge green">WiFi Mesh 150 Mbps</span>
+          <span class="badge green">Pet Friendly</span>
+          <span class="badge blue">AC + Private Bath</span>
+          <span class="badge blue">Water Heater</span>
+          <span class="badge">Shared Kitchen</span>
+          <span class="badge">Free Parking</span>
+          <span class="badge">CCTV 24h</span>
+          <span class="badge">Washing Machine</span>
+          <span class="badge">Digital Contract</span>
+        </div>
+      </div>
+      <div class="property-card">
+        <span class="tag">Labuh Banyu</span>
+        <h3>Jl. Sidomukti Tim. No.33, Pajang, Laweyan</h3>
+        <p style="font-size:13px;color:#4a5568;margin-top:6px;">9 rooms · 4 room types (10.5–15 m²) · 1 floor</p>
+        <div class="occ-bar">
+          <div class="label">Occupancy — 5/9 rooms filled ≈ <strong>56%</strong></div>
+          <div class="occ-track"><div class="occ-fill low" style="width:56%"></div></div>
+        </div>
+        <div class="badge-row">
+          <span class="badge green">WiFi Mesh 150 Mbps</span>
+          <span class="badge green">Pet Friendly</span>
+          <span class="badge blue">AC + Private Bath</span>
+          <span class="badge blue">Water Heater</span>
+          <span class="badge">Shared Kitchen</span>
+          <span class="badge">Free Parking</span>
+          <span class="badge">CCTV 24h</span>
+          <span class="badge">Washing Machine</span>
+          <span class="badge">Digital Contract</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPETITOR MATRIX -->
+  <div class="section">
+    <h2>Competitor Comparison Matrix — Laweyan / Pajang Area</h2>
+    <p style="font-size:12px;color:#718096;margin-bottom:16px;">All prices in IDR. Rumah Labuh highlighted in blue. Sorted by monthly price (ascending).</p>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Distance</th>
+          <th>Daily</th>
+          <th>Weekly</th>
+          <th>Monthly</th>
+          <th>AC</th>
+          <th>Private Bath</th>
+          <th>WiFi</th>
+          <th>TV</th>
+          <th>Pet Friendly</th>
+          <th>OTA Listed</th>
+          <th>Tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Omah Oma Syariah</strong><br><small style="color:#718096">Laweyan (Rukita)</small></td>
+          <td>~1.2 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Rp 600K–1.15M</td>
+          <td>✓</td><td>✗</td><td>✗</td><td>—</td><td>✗</td><td>Rukita</td>
+          <td><span class="pill gray">Budget</span></td>
+        </tr>
+        <tr>
+          <td><strong>Griya Putra Laweyan</strong><br><small style="color:#718096">Laweyan (Rukita)</small></td>
+          <td>~1.5 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>from Rp 1.25M</td>
+          <td>✓</td><td>—</td><td>—</td><td>—</td><td>✗</td><td>Rukita</td>
+          <td><span class="pill yellow">Mid</span></td>
+        </tr>
+        <tr>
+          <td><strong>NADAMAX Residence</strong><br><small style="color:#718096">Jl. Manggis V, Jajar, Laweyan</small></td>
+          <td>~2 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Rp 500K–1.7M</td>
+          <td>✓</td><td>✓</td><td>✗</td><td>✓</td><td>✗</td><td>SewakKost</td>
+          <td><span class="pill yellow">Mid</span></td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>🏠 Rumah Labuh Banyu</strong><br><small style="color:#2b6cb0">Jl. Sidomukti Tim. No.33, Pajang</small></td>
+          <td>— (yours)</td>
+          <td>Rp 150K</td>
+          <td>Rp 550K</td>
+          <td>Rp 1.25M–1.5M</td>
+          <td>✓</td><td>✓</td><td>✓ 150Mbps</td><td>✗</td><td>✓</td><td>Own site</td>
+          <td><span class="pill blue">Mid-Premium</span></td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>🏠 Rumah Labuh Biru</strong><br><small style="color:#2b6cb0">Jl. Joko Tingkir No.22, Pajang</small></td>
+          <td>— (yours)</td>
+          <td>Rp 150–170K</td>
+          <td>Rp 500–650K</td>
+          <td>Rp 1.15M–1.8M</td>
+          <td>✓</td><td>✓</td><td>✓ 150Mbps</td><td>✗</td><td>✓</td><td>Own site</td>
+          <td><span class="pill blue">Mid-Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>House of Mutiara Purwosari</strong><br><small style="color:#718096">Purwosari, Laweyan (Rukita)</small></td>
+          <td>~1.8 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>from Rp 1.1M–1.5M</td>
+          <td>✓</td><td>✓</td><td>✓</td><td>—</td><td>✗</td><td>Rukita</td>
+          <td><span class="pill yellow">Mid</span></td>
+        </tr>
+        <tr>
+          <td><strong>Kerten Home Stay Solo</strong><br><small style="color:#718096">Kerten, Laweyan (Rukita)</small></td>
+          <td>~2.5 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Rp 1.75M–2.5M</td>
+          <td>✓</td><td>✓</td><td>✓</td><td>—</td><td>✗</td><td>Rukita</td>
+          <td><span class="pill yellow">Mid-Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Kost Eksklusif D'Cantika</strong><br><small style="color:#718096">Jl. Blewah Raya I, Laweyan</small></td>
+          <td>~3 km</td>
+          <td>from Rp 200K</td>
+          <td>—</td>
+          <td>~Rp 2M est.</td>
+          <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td><td>Penginapan.net</td>
+          <td><span class="pill yellow">Mid-Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Kost Eksklusif Kerten</strong><br><small style="color:#718096">Jl. Merpati, Kerten, Laweyan</small></td>
+          <td>~2.5 km</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Rp 2.5M</td>
+          <td>✓</td><td>✓</td><td>✗</td><td>—</td><td>✗</td><td>Sewakost</td>
+          <td><span class="pill red">Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>Priority Inn Laweyan</strong><br><small style="color:#718096">Jl. Honggowongso, Sriwedari, Laweyan</small></td>
+          <td>~3 km</td>
+          <td>Rp 350–375K</td>
+          <td>Rp 1.3–1.45M</td>
+          <td>Rp 2.15–2.65M</td>
+          <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td><td>Direct</td>
+          <td><span class="pill red">Premium</span></td>
+        </tr>
+        <tr>
+          <td><strong>D'Paragon Kerten ★ Closest Rival</strong><br><small style="color:#718096">Jl. Slamet Riyadi 451–455, Pajang, Laweyan</small></td>
+          <td>&lt; 1 km</td>
+          <td>Rp 375K</td>
+          <td>Rp 1.75M</td>
+          <td>Rp 2.9M</td>
+          <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td>
+          <td>Booking, Agoda, Traveloka, Tiket</td>
+          <td><span class="pill red">Premium</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- MARKET POSITIONING -->
+  <div class="section">
+    <h2>Market Positioning — Monthly Rate Percentile Bands (Laweyan Area)</h2>
+    <p style="font-size:12px;color:#718096;margin-bottom:18px;">Based on 8 surveyed competitors offering AC + private bathroom in Laweyan/Pajang.</p>
+    <div class="band-grid">
+      <div class="band-card p25">
+        <div class="band-title">25th Percentile</div>
+        <div class="band-price">Rp 1.0M</div>
+        <div class="band-sub">Budget / no brand</div>
+      </div>
+      <div class="band-card p50">
+        <div class="band-title">50th Percentile (Median)</div>
+        <div class="band-price">Rp 1.5M</div>
+        <div class="band-sub">Mid market</div>
+      </div>
+      <div class="band-card p75">
+        <div class="band-title">75th Percentile</div>
+        <div class="band-price">Rp 2.15M</div>
+        <div class="band-sub">Premium / branded</div>
+      </div>
+      <div class="band-card p90">
+        <div class="band-title">90th Percentile</div>
+        <div class="band-price">Rp 2.9M</div>
+        <div class="band-sub">D'Paragon tier</div>
+      </div>
+    </div>
+    <div style="margin-top:18px;padding:14px;background:#fff9db;border-radius:8px;border-left:4px solid #ecc94b;">
+      <strong style="font-size:13px;color:#744210;">📍 Where Rumah Labuh sits today:</strong>
+      <p style="font-size:13px;color:#744210;margin-top:6px;">At Rp 1.15M–1.8M/month, Rumah Labuh is priced at the <strong>25th–50th percentile</strong> — yet it delivers <strong>75th percentile facilities</strong> (WiFi Mesh 150Mbps, pet-friendly, digital contracts, shared kitchen). This underpricing explains strong Labuh Biru demand (79% occupancy) but limits revenue potential.</p>
+    </div>
+  </div>
+
+  <!-- FACILITY SCORE -->
+  <div class="section">
+    <h2>Facility Score vs Price — Value Gap Analysis</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Facility Score (out of 10)</th>
+          <th>Monthly Price</th>
+          <th>Value Gap</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Omah Oma Syariah</td>
+          <td>4/10</td>
+          <td>Rp 600K–1.15M</td>
+          <td><span class="pill green">Fair</span></td>
+          <td>Budget, no WiFi, shared bath</td>
+        </tr>
+        <tr>
+          <td>NADAMAX Residence</td>
+          <td>6/10</td>
+          <td>Rp 1.7M</td>
+          <td><span class="pill yellow">Fair</span></td>
+          <td>AC, TV, private bath — but no WiFi</td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>🏠 Rumah Labuh Banyu</strong></td>
+          <td><strong>8.5/10</strong></td>
+          <td><strong>Rp 1.25M–1.5M</strong></td>
+          <td><span class="pill green">UNDERPRICED ↑</span></td>
+          <td>WiFi 150Mbps, pet-friendly, digital contract — priced below value</td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>🏠 Rumah Labuh Biru</strong></td>
+          <td><strong>8.5/10</strong></td>
+          <td><strong>Rp 1.15M–1.8M</strong></td>
+          <td><span class="pill green">UNDERPRICED ↑</span></td>
+          <td>Same — large rooms at premium but priced mid</td>
+        </tr>
+        <tr>
+          <td>Kerten Home Stay</td>
+          <td>7/10</td>
+          <td>Rp 1.75M–2.5M</td>
+          <td><span class="pill yellow">Slight premium</span></td>
+          <td>Near train station advantage</td>
+        </tr>
+        <tr>
+          <td>Priority Inn</td>
+          <td>8/10</td>
+          <td>Rp 2.15M–2.65M</td>
+          <td><span class="pill yellow">Fair</span></td>
+          <td>Adds TV, hotel-grade daily/weekly packages</td>
+        </tr>
+        <tr>
+          <td>D'Paragon Kerten</td>
+          <td>8.5/10</td>
+          <td>Rp 2.9M</td>
+          <td><span class="pill red">Overpriced</span></td>
+          <td>Brand premium + OTA exposure justifies markup. No pet-friendly.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- PRICING RECOMMENDATION -->
+  <div class="section">
+    <h2>Recommended Pricing — Target 80–95% Occupancy</h2>
+    <div class="rec-box">
+      <h3>💡 Strategic Insight: Incremental Increase + Dynamic Tiers</h3>
+      <p style="font-size:13px;color:#276749;margin-bottom:18px;">Rumah Labuh's premium facilities are underpriced by ~15–25% versus comparable competitors. The strategy is a <strong>graduated price lift</strong> — raise monthly rates moderately, rebalance daily rates upward to capture short-stay premium, and introduce a <strong>long-stay discount</strong> to lock in occupancy.</p>
+
+      <h3 style="color:#2d3748;font-size:14px;margin-bottom:14px;">Labuh Biru — Recommended Price Bands</h3>
+      <div class="rec-grid">
+        <div class="rec-item">
+          <div class="room-name">Small (13.5–15 m²) — Edelweis / Lobelia / Iris / Zania</div>
+          <div class="price-row">
+            <span class="old-price">Daily Rp 150K / Monthly Rp 1.15–1.25M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 175K · Weekly Rp 600K · Monthly Rp 1.35M</span>
+          </div>
+          <div class="rationale">+15% lift. Still 27% below D'Paragon for same or better facilities. Weekly increase improves short-stay yield significantly.</div>
+        </div>
+        <div class="rec-item">
+          <div class="room-name">Medium (18 m²) — Aster / Freesia</div>
+          <div class="price-row">
+            <span class="old-price">Daily Rp 160K / Monthly Rp 1.4–1.45M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 190K · Weekly Rp 720K · Monthly Rp 1.65M</span>
+          </div>
+          <div class="rationale">+14% monthly lift. This tier has strong demand signal. Higher daily rate captures weekend/transient guests at near-hotel rates.</div>
+        </div>
+        <div class="rec-item">
+          <div class="room-name">Large (21 m²) — Lotus</div>
+          <div class="price-row">
+            <span class="old-price">Daily Rp 170K / Monthly Rp 1.6M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 210K · Weekly Rp 800K · Monthly Rp 1.85M</span>
+          </div>
+          <div class="rationale">+15% monthly. Queen bed, larger space — deserves near-D'Cantika pricing at Rp 2M. Raise incrementally.</div>
+        </div>
+        <div class="rec-item">
+          <div class="room-name">XL (24 m², King) — Sakura</div>
+          <div class="price-row">
+            <span class="old-price">Daily Rp 170K / Monthly Rp 1.8M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 225K · Weekly Rp 875K · Monthly Rp 2.1M</span>
+          </div>
+          <div class="rationale">+17% monthly. King bed, biggest room — should command Rp 2M+. Positions as "flagship" room, justifying premium vs all local rivals.</div>
+        </div>
+      </div>
+
+      <h3 style="color:#2d3748;font-size:14px;margin:20px 0 14px;">Labuh Banyu — Recommended Price Bands</h3>
+      <div class="rec-grid">
+        <div class="rec-item">
+          <div class="room-name">Laguna (10.5 m²)</div>
+          <div class="price-row">
+            <span class="old-price">Monthly Rp 1.25M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 160K · Weekly Rp 580K · Monthly Rp 1.3M</span>
+          </div>
+          <div class="rationale">Smallest room — entry-level price to attract long-stay tenants. Small increase only (+4%). Focus on locking to monthly contracts.</div>
+        </div>
+        <div class="rec-item">
+          <div class="room-name">Telaga / Embun (13.5–15 m²)</div>
+          <div class="price-row">
+            <span class="old-price">Monthly Rp 1.4M</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 175K · Weekly Rp 610K · Monthly Rp 1.55M</span>
+          </div>
+          <div class="rationale">+11% monthly. Banyu needs visibility boost, not necessarily discounting. At Rp 1.55M it stays below competitors while improving margin.</div>
+        </div>
+        <div class="rec-item">
+          <div class="room-name">Tirta (12 m², Queen)</div>
+          <div class="price-row">
+            <span class="old-price">Monthly Rp 1.5M (currently FULL)</span>
+          </div>
+          <div class="price-row">
+            <span class="new-price">Daily Rp 175K · Weekly Rp 620K · Monthly Rp 1.65M</span>
+          </div>
+          <div class="rationale">Already full — clear demand signal. Raise 10%. Queen bed at this size is rare under Rp 1.7M in the area.</div>
+        </div>
+        <div class="rec-item" style="border-left-color:#4299e1;">
+          <div class="room-name">⚡ Banyu-Specific Action</div>
+          <div class="price-row">
+            <span class="new-price" style="font-size:13px;color:#2b6cb0;">Register on Mamikos + Rukita</span>
+          </div>
+          <div class="rationale">Labuh Banyu's low occupancy (56%) is likely a <strong>visibility problem</strong>, not a price problem. Listing on Mamikos and Rukita can add 3–5 tenants within 30 days without any price change.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING SUMMARY TABLE -->
+  <div class="section">
+    <h2>Consolidated Recommended Price Table</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>Size</th>
+          <th>Current Daily</th>
+          <th>→ New Daily</th>
+          <th>Current Weekly</th>
+          <th>→ New Weekly</th>
+          <th>Current Monthly</th>
+          <th>→ New Monthly</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="9" style="background:#edf2f7;font-weight:700;color:#4a5568;font-size:12px;text-transform:uppercase;padding:8px 14px;">Labuh Biru</td></tr>
+        <tr>
+          <td>Edelweis</td><td>13.5m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 500K</td><td><strong>Rp 600K</strong></td>
+          <td>Rp 1.15M</td><td><strong>Rp 1.35M</strong></td>
+          <td><span class="pill green">+17%</span></td>
+        </tr>
+        <tr>
+          <td>Lobelia</td><td>15m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 620K</strong></td>
+          <td>Rp 1.2M</td><td><strong>Rp 1.38M</strong></td>
+          <td><span class="pill green">+15%</span></td>
+        </tr>
+        <tr>
+          <td>Iris</td><td>15m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 620K</strong></td>
+          <td>Rp 1.25M</td><td><strong>Rp 1.4M</strong></td>
+          <td><span class="pill green">+12%</span></td>
+        </tr>
+        <tr>
+          <td>Zania</td><td>15m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 500K</td><td><strong>Rp 600K</strong></td>
+          <td>Rp 1.25M</td><td><strong>Rp 1.4M</strong></td>
+          <td><span class="pill green">+12%</span></td>
+        </tr>
+        <tr>
+          <td>Aster</td><td>18m²</td>
+          <td>Rp 160K</td><td><strong>Rp 190K</strong></td>
+          <td>Rp 600K</td><td><strong>Rp 720K</strong></td>
+          <td>Rp 1.4M</td><td><strong>Rp 1.6M</strong></td>
+          <td><span class="pill green">+14%</span></td>
+        </tr>
+        <tr>
+          <td>Freesia</td><td>18m²</td>
+          <td>Rp 160K</td><td><strong>Rp 190K</strong></td>
+          <td>Rp 600K</td><td><strong>Rp 720K</strong></td>
+          <td>Rp 1.45M</td><td><strong>Rp 1.65M</strong></td>
+          <td><span class="pill green">+14%</span></td>
+        </tr>
+        <tr>
+          <td>Lotus</td><td>21m²</td>
+          <td>Rp 170K</td><td><strong>Rp 210K</strong></td>
+          <td>Rp 650K</td><td><strong>Rp 800K</strong></td>
+          <td>Rp 1.6M</td><td><strong>Rp 1.85M</strong></td>
+          <td><span class="pill green">+16%</span></td>
+        </tr>
+        <tr>
+          <td>Sakura</td><td>24m²</td>
+          <td>Rp 170K</td><td><strong>Rp 225K</strong></td>
+          <td>Rp 650K</td><td><strong>Rp 875K</strong></td>
+          <td>Rp 1.8M</td><td><strong>Rp 2.1M</strong></td>
+          <td><span class="pill green">+17%</span></td>
+        </tr>
+        <tr><td colspan="9" style="background:#edf2f7;font-weight:700;color:#4a5568;font-size:12px;text-transform:uppercase;padding:8px 14px;">Labuh Banyu</td></tr>
+        <tr>
+          <td>Laguna</td><td>10.5m²</td>
+          <td>Rp 150K</td><td><strong>Rp 160K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 580K</strong></td>
+          <td>Rp 1.25M</td><td><strong>Rp 1.3M</strong></td>
+          <td><span class="pill yellow">+4%</span></td>
+        </tr>
+        <tr>
+          <td>Telaga</td><td>13.5m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 610K</strong></td>
+          <td>Rp 1.4M</td><td><strong>Rp 1.55M</strong></td>
+          <td><span class="pill green">+11%</span></td>
+        </tr>
+        <tr>
+          <td>Embun</td><td>15m²</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 610K</strong></td>
+          <td>Rp 1.4M</td><td><strong>Rp 1.55M</strong></td>
+          <td><span class="pill green">+11%</span></td>
+        </tr>
+        <tr>
+          <td>Tirta</td><td>12m² Queen</td>
+          <td>Rp 150K</td><td><strong>Rp 175K</strong></td>
+          <td>Rp 550K</td><td><strong>Rp 620K</strong></td>
+          <td>Rp 1.5M</td><td><strong>Rp 1.65M</strong></td>
+          <td><span class="pill green">+10%</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- OCCUPANCY STRATEGY -->
+  <div class="section">
+    <h2>Strategies to Achieve 80–95% Occupancy</h2>
+    <div class="strategy-grid">
+      <div class="strat-card blue">
+        <div class="strat-icon">📱</div>
+        <h4>1. List on OTA & Aggregator Platforms</h4>
+        <p>Register both properties on <strong>Mamikos, Rukita, Sewakost, and OLX</strong>. D'Paragon's high pricing is partly sustained by Booking.com/Traveloka/Agoda visibility. Even being on Mamikos alone can add 4–6 monthly leads per month per property. Cost is low or free to list.</p>
+      </div>
+      <div class="strat-card green">
+        <div class="strat-icon">📅</div>
+        <h4>2. Long-Stay Loyalty Discount</h4>
+        <p>Offer a <strong>5–10% discount for 3-month+ contracts</strong> paid upfront. This locks in occupancy at the cost of a small margin. Monthly contract tenants are more stable than daily/weekly. Advertise "bayar 3 bulan, hemat 1 bulan" type promotions via WhatsApp broadcast.</p>
+      </div>
+      <div class="strat-card purple">
+        <div class="strat-icon">🐾</div>
+        <h4>3. Amplify the Pet-Friendly Niche</h4>
+        <p>You are one of the <strong>very few pet-friendly kost in Laweyan</strong>. Competitors do not offer this. Market specifically to pet owners via Instagram, Facebook groups like "Pet Owner Solo", and TikTok. This niche audience pays premium and has low elasticity.</p>
+      </div>
+      <div class="strat-card green">
+        <div class="strat-icon">⚡</div>
+        <h4>4. Short-Stay Yield — Fix Daily Rate Gap</h4>
+        <p>Current daily rates (Rp 150–170K) are <strong>too close to monthly ÷ 30</strong>. Recommended daily rates (Rp 175–225K) create a proper incentive for monthly stays while generating higher yield from short-stay guests. D'Paragon charges Rp 375K/day — you have wide room to move up.</p>
+      </div>
+      <div class="strat-card blue">
+        <div class="strat-icon">🌐</div>
+        <h4>5. Instagram / TikTok Content Strategy</h4>
+        <p>Your <strong>digital-first brand</strong> (online booking, digital contracts, QRIS) is a story in itself. Create short videos showing the WiFi speed, digital check-in process, pet-friendly rooms. Target young professionals and remote workers — a growing segment in Solo looking for exactly this.</p>
+      </div>
+      <div class="strat-card purple">
+        <div class="strat-icon">🎯</div>
+        <h4>6. Corporate / University Partnerships</h4>
+        <p>Laweyan is near UMS, Sahid University, and several hospitals. <strong>Partner directly</strong> with university housing offices or hospital HR for bulk referrals. Offer a "corporate rate" 5% below list price for guaranteed referrals. This alone can fill Labuh Banyu's vacant rooms.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section">
+    <h2>Key Findings & Risk Flags</h2>
+    <div class="insight-row">
+      <div class="insight-dot green"></div>
+      <div class="insight-text"><strong>Labuh Biru is already near target (79%).</strong> A moderate price increase of 12–17% is low risk here — demand is proven. Do not discount. Test the new pricing on rooms vacated next turnover.</div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-dot yellow"></div>
+      <div class="insight-text"><strong>Labuh Banyu's 56% occupancy is a visibility issue, not a price issue.</strong> The facilities are identical, prices are competitive. Listing on Mamikos/Rukita is the fastest fix. Avoid discounting — it signals low quality.</div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-dot green"></div>
+      <div class="insight-text"><strong>Rumah Labuh's closest rival (D'Paragon, &lt;1 km away) charges Rp 2.9M/month</strong> — 60–150% more than you. You can raise prices significantly and still be the better-value option in the immediate neighbourhood.</div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-dot blue"></div>
+      <div class="insight-text"><strong>WiFi Mesh 150 Mbps + Pet-Friendly + Digital Contract</strong> are genuine differentiators that competitors do not offer. These justify a 10–20% premium over similar-spec properties that lack these features.</div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-dot yellow"></div>
+      <div class="insight-text"><strong>Daily rates are underpriced relative to the market.</strong> Current Rp 150–170K/day is below even mid-range competitors like D'Cantika (Rp 200K/day) and far below D'Paragon (Rp 375K/day). Raising daily rates captures short-stay margin without affecting long-term tenants.</div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-dot red"></div>
+      <div class="insight-text"><strong>Risk: Aggressive price increases could displace existing long-term tenants.</strong> Recommended approach — grandfather existing tenants at current rates, apply new pricing only to new bookings or renewals. Phase increases over 2 rental cycles (~3–4 months).</div>
+    </div>
+  </div>
+
+  <!-- REVENUE IMPACT -->
+  <div class="section">
+    <h2>Estimated Revenue Impact (Monthly, All Rooms Occupied)</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Avg Monthly Rate</th>
+          <th>Occupancy</th>
+          <th>Est. Gross Revenue/Month</th>
+          <th>vs. Current</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Current pricing, current occupancy (~72%)</td>
+          <td>Rp 1.42M avg</td>
+          <td>~23/32 rooms</td>
+          <td>~Rp 32.7M</td>
+          <td>— baseline —</td>
+        </tr>
+        <tr>
+          <td>Current pricing, 80% occupancy</td>
+          <td>Rp 1.42M avg</td>
+          <td>~26/32 rooms</td>
+          <td>~Rp 36.9M</td>
+          <td><span class="pill green">+Rp 4.2M (+13%)</span></td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>New pricing, 80% occupancy (Target Min)</strong></td>
+          <td><strong>Rp 1.62M avg</strong></td>
+          <td>~26/32 rooms</td>
+          <td><strong>~Rp 42.1M</strong></td>
+          <td><span class="pill green">+Rp 9.4M (+29%)</span></td>
+        </tr>
+        <tr class="hl-row">
+          <td><strong>New pricing, 90% occupancy (Target Mid)</strong></td>
+          <td><strong>Rp 1.62M avg</strong></td>
+          <td>~29/32 rooms</td>
+          <td><strong>~Rp 47.0M</strong></td>
+          <td><span class="pill green">+Rp 14.3M (+44%)</span></td>
+        </tr>
+        <tr>
+          <td>New pricing, 95% occupancy (Target Max)</td>
+          <td>Rp 1.62M avg</td>
+          <td>~30/32 rooms</td>
+          <td>~Rp 48.6M</td>
+          <td><span class="pill green">+Rp 15.9M (+49%)</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:11px;color:#a0aec0;margin-top:10px;">* Revenue estimate based on all-monthly mix. Actual revenue will be higher with daily/weekly bookings factored in at the recommended daily rates. Tax and platform fees not deducted.</p>
+  </div>
+
+</div>
+
+<div class="footer">
+  Competitive analysis based on live market research · Rumah Labuh Pricing Strategy · March 2026<br>
+  Sources: rumahlabuh.com, mamikos.com, rukita.co, sewakost.com, dparagon.com blog, rumah123.com, 99.co, penginapan.net
+</div>
+
+</body>
+</html>

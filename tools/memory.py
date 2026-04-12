@@ -39,6 +39,7 @@ try:
     import aiosqlite
 except ImportError:
     import subprocess, sys
+
     subprocess.run([sys.executable, "-m", "pip", "install", "aiosqlite", "-q"])
     import aiosqlite
 
@@ -70,6 +71,7 @@ async def get_recent_memories(limit: int = 10) -> list[dict[str, Any]]:
     """Compatibility wrapper used by legacy handlers."""
     return await get_recent(limit)
 
+
 # ── Schema ────────────────────────────────────────────────────────────────────
 CREATE_SQL = """
 CREATE TABLE IF NOT EXISTS memories (
@@ -94,10 +96,42 @@ async def _init_db() -> None:
 
 # ── TF-IDF helpers (fallback when OpenViking unavailable) ─────────────────────
 STOPWORDS = {
-    "the", "a", "an", "is", "it", "in", "on", "at", "to", "for",
-    "of", "and", "or", "but", "not", "be", "was", "are", "with",
-    "this", "that", "from", "by", "as", "i", "you", "we", "they",
-    "yang", "di", "ke", "dari", "dan", "atau", "ini", "itu",
+    "the",
+    "a",
+    "an",
+    "is",
+    "it",
+    "in",
+    "on",
+    "at",
+    "to",
+    "for",
+    "of",
+    "and",
+    "or",
+    "but",
+    "not",
+    "be",
+    "was",
+    "are",
+    "with",
+    "this",
+    "that",
+    "from",
+    "by",
+    "as",
+    "i",
+    "you",
+    "we",
+    "they",
+    "yang",
+    "di",
+    "ke",
+    "dari",
+    "dan",
+    "atau",
+    "ini",
+    "itu",
 }
 
 
@@ -122,8 +156,8 @@ def _cosine_similarity(vec_a: dict, vec_b: dict) -> float:
     if not common:
         return 0.0
     dot = sum(vec_a[w] * vec_b[w] for w in common)
-    mag_a = math.sqrt(sum(v ** 2 for v in vec_a.values()))
-    mag_b = math.sqrt(sum(v ** 2 for v in vec_b.values()))
+    mag_a = math.sqrt(sum(v**2 for v in vec_a.values()))
+    mag_b = math.sqrt(sum(v**2 for v in vec_b.values()))
     if mag_a == 0 or mag_b == 0:
         return 0.0
     return dot / (mag_a * mag_b)
@@ -148,8 +182,7 @@ async def add_memory(
     tfidf_json = json.dumps(vec)
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
-            "INSERT INTO memories (text, tags, source, tfidf, created, accessed) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO memories (text, tags, source, tfidf, created, accessed) VALUES (?, ?, ?, ?, ?, ?)",
             (text, tags_str, source, tfidf_json, now, now),
         )
         await db.commit()
@@ -166,6 +199,7 @@ async def add_memory(
     # Also write to OpenViking L2 for semantic retrieval
     try:
         from tools.viking_context import auto_extract_facts
+
         # Use a synthetic user_id='manual' for manually added memories
         await auto_extract_facts("manual", f"[{source}] {tags_str}", text)
     except Exception:
@@ -203,6 +237,7 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
     # ── Try OpenViking semantic search first ──────────────────────────────
     try:
         from tools.viking_context import semantic_search, is_available
+
         if is_available():
             hits = await semantic_search(query, user_id=user_id, top_k=top_k)
             if hits:
@@ -242,15 +277,17 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
         except Exception:
             vec = {}
         score = _cosine_similarity(query_vec, vec)
-        scored.append({
-            "id": row["id"],
-            "text": row["text"],
-            "tags": row["tags"],
-            "source": row["source"],
-            "score": score,
-            "relevance": score,
-            "created": row["created"],
-        })
+        scored.append(
+            {
+                "id": row["id"],
+                "text": row["text"],
+                "tags": row["tags"],
+                "source": row["source"],
+                "score": score,
+                "relevance": score,
+                "created": row["created"],
+            }
+        )
 
     scored.sort(key=lambda x: x["score"], reverse=True)
     results = [r for r in scored[:top_k] if r["score"] > 0.01]
@@ -278,8 +315,7 @@ async def get_recent(n: int = 10) -> list[dict]:
         ) as cursor:
             rows = await cursor.fetchall()
     return [
-        {"id": r["id"], "text": r["text"], "tags": r["tags"],
-         "source": r["source"], "created": r["created"]}
+        {"id": r["id"], "text": r["text"], "tags": r["tags"], "source": r["source"], "created": r["created"]}
         for r in rows
     ]
 
@@ -315,6 +351,7 @@ async def build_memory_context(query: str, top_k: int = 3, user_id: Optional[str
     # ── Primary: Mem0 context ────────────────────────────────────────────
     try:
         from tools.mem0_client import build_mem0_context, mem0_search
+
         if user_id is not None:
             mem0_hits = await mem0_search(user_id=str(user_id), query=query, limit=top_k)
             ctx = build_mem0_context(mem0_hits, query=query)
@@ -326,6 +363,7 @@ async def build_memory_context(query: str, top_k: int = 3, user_id: Optional[str
     # ── Primary: OpenViking tiered context ───────────────────────────────
     try:
         from tools.viking_context import build_viking_context, is_available
+
         if is_available():
             ctx = await build_viking_context(
                 query=query,
@@ -375,10 +413,7 @@ async def auto_save_interaction(
     ]
     if len(assistant_reply) < 200:
         return
-    worth_saving = any(
-        re.search(pat, assistant_reply, re.IGNORECASE)
-        for pat in worth_saving_patterns
-    )
+    worth_saving = any(re.search(pat, assistant_reply, re.IGNORECASE) for pat in worth_saving_patterns)
     if not worth_saving:
         return
 
@@ -400,6 +435,7 @@ async def auto_save_interaction(
     if user_id:
         try:
             from tools.viking_context import save_interaction_to_l1, auto_extract_facts
+
             await save_interaction_to_l1(user_id, user_message, assistant_reply)
             await auto_extract_facts(user_id, user_message, assistant_reply)
         except Exception as e:
@@ -420,9 +456,7 @@ async def export_to_obsidian(vault_path: str | Path) -> int:
     await _init_db()
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute(
-            "SELECT id, text, tags, source, created FROM memories ORDER BY created DESC"
-        ) as cursor:
+        async with db.execute("SELECT id, text, tags, source, created FROM memories ORDER BY created DESC") as cursor:
             rows = await cursor.fetchall()
 
     count = 0
@@ -456,10 +490,7 @@ def format_memory_result(r: dict, show_score: bool = False) -> str:
     text_preview = r["text"][:300].replace("<", "&lt;").replace(">", "&gt;")
     if len(r["text"]) > 300:
         text_preview += "..."
-    return (
-        f"<b>#{r['id']}</b>{tags} <code>{created}</code>{score_str}\n"
-        f"{text_preview}"
-    )
+    return f"<b>#{r['id']}</b>{tags} <code>{created}</code>{score_str}\n{text_preview}"
 
 
 # ── Init alias (called from main.py) ─────────────────────────────────────────
@@ -468,9 +499,103 @@ async def init_memory_db() -> None:
     await _init_db()
     try:
         from tools.viking_context import init_viking_db
+
         await init_viking_db()
     except Exception as e:
         logger.debug("OpenViking warmup skipped: %s", e)
+
+
+class Memory:
+    """Unified long-context memory wrapper.
+
+    Provides a class-based interface to the two-layer memory architecture:
+    - SQLite + TF-IDF cosine similarity (always available)
+    - OpenViking semantic retrieval (optional, for richer context)
+    - Mem0 semantic search (optional)
+
+    Example:
+        m = Memory()
+        await m.init()
+        await m.add("Remember that user prefers dark mode", tags=["preference"])
+        results = await m.search("dark mode preference")
+        ctx = await m.build_context("dark mode")
+    """
+
+    async def init(self) -> None:
+        """Initialize the memory database and warm up OpenViking."""
+        await init_memory_db()
+
+    async def add(
+        self,
+        text: str,
+        tags: list[str] | None = None,
+        source: str = "manual",
+    ) -> int:
+        """Save a note to persistent memory.
+
+        Returns:
+            The SQLite row ID of the inserted memory.
+        """
+        return await add_memory(text, tags=tags, source=source)
+
+    async def search(
+        self,
+        query: str,
+        top_k: int = 5,
+        user_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Search memories by semantic similarity.
+
+        Uses Mem0 → OpenViking → TF-IDF fallback in order of availability.
+        """
+        return await search_memory(query, top_k=top_k, user_id=user_id)
+
+    async def get_recent(self, n: int = 10) -> list[dict[str, Any]]:
+        """Get the N most recently added memories."""
+        return await get_recent(n)
+
+    async def delete(self, memory_id: int) -> bool:
+        """Delete a memory by ID."""
+        return await delete_memory(memory_id)
+
+    async def count(self) -> int:
+        """Return total number of stored memories."""
+        return await count_memories()
+
+    async def build_context(
+        self,
+        query: str,
+        top_k: int = 3,
+        user_id: str | None = None,
+    ) -> str:
+        """Build a context block for system prompt injection.
+
+        Returns:
+            Formatted string with relevant memories, capped at ~2000 chars.
+        """
+        return await build_memory_context(query, top_k=top_k, user_id=user_id)
+
+    async def auto_save(
+        self,
+        user_message: str,
+        assistant_reply: str,
+        source: str = "conversation",
+        user_id: str | None = None,
+    ) -> None:
+        """Auto-save an interaction if it meets worth-saving criteria."""
+        await auto_save_interaction(user_message, assistant_reply, source, user_id)
+
+    async def export_to_obsidian(self, vault_path: str | Path) -> int:
+        """Export all memories as Obsidian-flavored Markdown files.
+
+        Returns:
+            Count of files written.
+        """
+        return await export_to_obsidian(vault_path)
+
+    def format(self, result: dict, show_score: bool = False) -> str:
+        """Format a memory result for Telegram display."""
+        return format_memory_result(result, show_score=show_score)
 
 
 __all__ = [
@@ -486,4 +611,5 @@ __all__ = [
     "init_memory_db",
     "store_memory",
     "search_memories",
+    "Memory",
 ]

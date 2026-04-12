@@ -1,0 +1,70 @@
+# Colang rails configuration for Legion Anti-Slop Content Barriers
+# Reference: core/character/ for voice/style enforcement patterns
+# Note: This is for documentation. Actual guard implementation uses core.py
+
+# Define content barrier flows
+
+define flow filler phrase detected
+  """
+  When a filler phrase is detected in the response,
+  reject immediately with no LLM call needed.
+  """
+  user message contains filler phrase
+  if filler phrase detected
+    bot refuse "I won't use that filler language."
+    stop
+
+define flow excessive caps detected
+  """
+  When >50% of characters are uppercase, reject as spam.
+  """
+  when caps ratio > 0.50
+  bot refuse "I'm not going to shout at you."
+  stop
+
+define flow repetition detected
+  """
+  When the same character appears >10 times consecutively,
+  or the same word appears >5 times, reject as spam.
+  """
+  when repetition pattern found
+  bot refuse "I'm not going to repeat myself."
+  stop
+
+define flow groundedness check
+  """
+  LLM-powered check that response is grounded to user query.
+  Only fires for borderline quality scores.
+  """
+  when quality score between 0.4 and 0.7
+  check groundedness with LLM
+  if groundedness score < 0.7
+    bot refine "Let me give you a more specific answer."
+  else
+    bot proceed
+
+# Define subflows
+
+define subflow filler phrase detection
+  match input contains "it goes without saying"
+  match input contains "as you know"
+  match input contains "needless to say"
+  match input contains "at the end of the day"
+  match input contains "the fact of the matter is"
+  match input contains "it should be noted"
+  match input contains "with that being said"
+  match input contains "all things considered"
+  match input contains "in conclusion"
+  match input contains "to sum up"
+  match input contains "generally speaking"
+  match input contains "as previously mentioned"
+  return filler_detected = true
+
+define subflow groundedness check
+  """
+  Check if response is grounded to user query using LLM.
+  """
+  $query = user query
+  $response = bot response
+  $groundedness = await LLM grade($query, $response)
+  return groundedness_score = $groundedness

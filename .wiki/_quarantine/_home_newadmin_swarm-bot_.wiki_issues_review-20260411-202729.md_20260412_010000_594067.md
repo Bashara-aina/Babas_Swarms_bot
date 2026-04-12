@@ -1,0 +1,78 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/issues/review-20260411-202729.md",
+  "reason": "daily_fast_scan: score=0.150 < 0.3",
+  "score": 0.15000000000000002,
+  "quarantined_at": "2026-04-12T01:00:00.594118"
+}
+---
+
+# Review: scheduler agent model + gemini fallback removal
+**Date**: 2026-04-11  
+**Reviewer**: @reviewer  
+**Files reviewed**: `agents/__init__.py`
+
+---
+
+## Checklist Results
+
+### 1. ✅ Scheduler agent properly routes
+- `AGENT_MODELS` now includes `"scheduler": "minimax/MiniMax-M2.7"` (line 121)  
+- `FALLBACK_CHAIN` includes `"scheduler"` key with Groq + OpenRouter fallbacks (lines 204-207)  
+- Routing is consistent — no issues found
+
+### 2. ✅ No `gemini/gemini-2.0-flash-exp:free` in `FALLBACK_CHAIN`
+- `agents/__init__.py` `FALLBACK_CHAIN` uses `gemini/gemini-2.0-flash` (line 132) for vision fallback only — not the banned `:free` variant  
+- All other agent types use Groq/OpenRouter free models — no `gemini-2.0-flash-exp:free` found
+
+### 3. ⚠️ `core/agent_registry.py` still has `gemini/gemini-2.0-flash-exp:free` in `LEGACY_FALLBACK_CHAIN`
+- `LEGACY_FALLBACK_CHAIN` (lines 313-374) contains `gemini/gemini-2.0-flash-exp:free` across 20+ agents  
+- This is separate from the `agents/__init__.py` registry, but both are actively imported  
+- `agent_registry.py` line 619: `FALLBACK_CHAIN = LEGACY_FALLBACK_CHAIN` — meaning the legacy chain IS the active one  
+- This means the gemini banned model is still live in production routing  
+- **Severity**: Medium — the fix was incomplete; `core/agent_registry.py` must also be updated
+
+### 4. ✅ Vision chain properly configured
+- Vision uses `ollama_chat/gemma4:e4b` local only — correct  
+- Fallback: `groq/meta-llama/llama-4-scout-17b-16e-instruct` → `gemini/gemini-2.0-flash` (free tier, no `:free` suffix)  
+- No issues
+
+### 5. ❌ Tests failing (1 failure)
+- `tests/test_legion_quality.py::test_repetition_word_rejection` — **unrelated to this change**  
+- `tests/test_agent_registry.py::test_get_fallback_chain_coding` — asserts `gemini/gemini-2.0-flash-exp:free` in chain — **directly conflicts with the intent of this change**  
+- These tests were not updated to match the ADR-001 intent (removing gemini free fallbacks)  
+- **Severity**: Medium — test expectations are stale
+
+---
+
+## Issues Found
+
+| # | File | Issue | Severity |
+|---|------|--------|----------|
+| 1 | `core/agent_registry.py` | `LEGACY_FALLBACK_CHAIN` still contains `gemini/gemini-2.0-flash-exp:free` for 20+ agents (lines 318-373) | Medium |
+| 2 | `tests/test_agent_registry.py:74` | Test asserts `gemini/gemini-2.0-flash-exp:free` exists in fallback chain — conflicts with ADR-001 | Medium |
+| 3 | `tests/test_legion_quality.py:99` | `guard_critique` failing on repetition word test — unrelated, pre-existing issue | Low |
+
+---
+
+## What Was Done Well
+- `scheduler` agent properly added to `AGENT_MODELS` and `FALLBACK_CHAIN`  
+- `agents/__init__.py` fully cleaned of `gemini-2.0-flash-exp:free`  
+- Consistent use of `gemini/gemini-2.0-flash` (non-free) for vision fallback only  
+- Documentation in file header accurately reflects current strategy  
+
+---
+
+## Required Fixes
+
+1. **`core/agent_registry.py`**: Update `LEGACY_FALLBACK_CHAIN` to remove `gemini/gemini-2.0-flash-exp:free` from all agent fallbacks, replace with `gemini/gemini-2.0-flash` (free tier, no `:free` suffix) or add additional Groq/OpenRouter models  
+2. **`tests/test_agent_registry.py`**: Update assertion at line 74 to reflect the new fallback model (either `gemini/gemini-2.0-flash` or remove the gemini assertion entirely since it's no longer a fallback for coding)  
+3. **Optionally investigate `test_legion_quality.py::test_repetition_word_rejection`** — pre-existing failure unrelated to this change
+
+---
+
+## Verdict: NEEDS_FIXES
+
+The change to `agents/__init__.py` is correct and properly scoped, but it only addressed half the problem. `core/agent_registry.py` still uses the banned `gemini/gemini-2.0-flash-exp:free` model in `LEGACY_FALLBACK_CHAIN` which is actively imported as `FALLBACK_CHAIN = LEGACY_FALLBACK_CHAIN`. The ADR-001 fix is incomplete.
+
+**Action required**: Update `core/agent_registry.py` `LEGACY_FALLBACK_CHAIN` and fix the conflicting test assertion.

@@ -14,6 +14,7 @@ Env vars:
   CURIOSITY_INTERVAL_MIN    — int, minutes between checks, default 60
   CURIOSITY_QUIET_MIN       — int, min silence before interrupting, default 30
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -33,26 +34,54 @@ _QUIET_SEC = int(os.getenv("CURIOSITY_QUIET_MIN", "30")) * 60
 # Japan timezone offset (UTC+9) — no pytz needed
 _JST_OFFSET_HOURS = 9
 
+# Sleep check-in dedup: minimum 4 hours between sleep check-ins (U4)
+_SLEEP_CHECKIN_COOLDOWN_SEC = 4 * 3600
+_last_sleep_checkin_ts: float = 0.0
+
+# CHECKIN_POOL: 8 varied check-in messages for variety (U4)
+CHECKIN_POOL: list[str] = [
+    "Hey — it's been a while. Anything you want me to work on while you're away?",
+    "You've been quiet for a bit. Want me to run any checks or prep anything?",
+    "Slow day on your end — should I be doing anything proactive?",
+    "No rush, but I've got some things queued up if you want me to proceed.",
+    "Still there? Let me know if there's anything I should be handling.",
+    "Quiet on your end. I've been idling — just say the word if you need something.",
+    "Heads up: I've got a few things pending your sign-off. Just a heads-up.",
+    "Just checking in — anything you want me to tackle while it's quiet?",
+]
+
+
+def can_send_sleep_checkin() -> bool:
+    """Return True if enough time has passed since the last sleep check-in."""
+    global _last_sleep_checkin_ts
+    if _last_sleep_checkin_ts <= 0:
+        return True
+    return (time.monotonic() - _last_sleep_checkin_ts) >= _SLEEP_CHECKIN_COOLDOWN_SEC
+
+
+def record_sleep_checkin() -> None:
+    """Record that a sleep check-in was sent."""
+    global _last_sleep_checkin_ts
+    _last_sleep_checkin_ts = time.monotonic()
+
 
 def _jst_hour() -> int:
-    """Return current hour in JST (UTC+9)."""
-    utc_hour = datetime.utcnow().hour
-    return (utc_hour + _JST_OFFSET_HOURS) % 24
+    """Return current hour in JST (UTC+9) using pytz."""
+    import pytz
+
+    return datetime.now(pytz.timezone("Asia/Tokyo")).hour
 
 
 def _today_str() -> str:
     """Return current date in JST as YYYY-MM-DD."""
-    utc_now = datetime.utcnow()
-    # Approximate JST date
-    jst_hour = (utc_now.hour + _JST_OFFSET_HOURS) % 24
-    jst_day_bump = (utc_now.hour + _JST_OFFSET_HOURS) // 24
-    from datetime import timedelta
-    jst_date = (utc_now + timedelta(days=jst_day_bump)).date()
-    return str(jst_date)
+    import pytz
+
+    return datetime.now(pytz.timezone("Asia/Tokyo")).strftime("%Y-%m-%d")
 
 
 class _CuriosityState:
     """Tracks daily send count and last fire time."""
+
     sent_today: int = 0
     last_date: str = ""
     last_fire_ts: float = 0.0
@@ -79,9 +108,12 @@ async def _check_pending_followups() -> str | None:
     """Return a follow-up message if there are pending items in beliefs.json."""
     try:
         from core.soul_engine import get_pending_followups
+
         followups = get_pending_followups()
         if followups:
-            task_text = followups[0].get("task", str(followups[0])) if isinstance(followups[0], dict) else str(followups[0])
+            task_text = (
+                followups[0].get("task", str(followups[0])) if isinstance(followups[0], dict) else str(followups[0])
+            )
             return (
                 f"Hey — I've been meaning to ask: {task_text}\n"
                 f"(I'll keep bugging you about this until it's done or dismissed)"
@@ -95,6 +127,7 @@ async def _check_site_health() -> str | None:
     """Check rumahlabuh.com and alert if degraded."""
     try:
         from tools.browser_agent import check_site_health, format_health_for_prompt
+
         health = await check_site_health()
         if health.get("status") in ("degraded", "unreachable"):
             return (
@@ -109,14 +142,31 @@ async def _check_site_health() -> str | None:
 
 async def _check_sleep_pattern(get_last_user_ts: Callable[[], float]) -> str | None:
     """If no message in >8h during typical waking hours, send a check-in."""
-    silence_sec = time.time() - get_last_user_ts()
+    now_ts = time.time()
+    last_ts = get_last_user_ts()
+
+    # Guard: if timestamp is 0 or in the future, don't attempt calculation
+    if last_ts <= 0 or last_ts > now_ts + 60:
+        return None
+
+    silence_sec = now_ts - last_ts
     jst_hour = _jst_hour()
 
     # Only check in during Tokyo daytime (9am–11pm JST), after 8h of silence
     if 9 <= jst_hour <= 23 and silence_sec > 8 * 3600:
+        # Clamp display to avoid overflow (e.g., if timestamps are in wrong units)
         silence_h = int(silence_sec // 3600)
+        if silence_h > 504:  # > 3 weeks — something is wrong with timestamps
+            silence_h = 0
+            return None
+        if silence_h > 72:
+            display = f"a few days ({silence_h // 24} days)"
+        elif silence_h > 24:
+            display = f"{silence_h // 24} days"
+        else:
+            display = f"{silence_h} hours"
         return (
-            f"You've been quiet for about {silence_h} hours. Everything good? "
+            f"You've been quiet for about {display}. Everything good? "
             f"Anything you want me to prep or check while I'm idle?"
         )
     return None
@@ -157,9 +207,7 @@ async def _tick(
     # Don't interrupt an active session
     silence_sec = time.time() - get_last_user_ts()
     if silence_sec < _QUIET_SEC:
-        logger.debug(
-            "[CuriosityEngine] user active %.0f min ago — skipping", silence_sec / 60
-        )
+        logger.debug("[CuriosityEngine] user active %.0f min ago — skipping", silence_sec / 60)
         return
 
     # Don't fire too often even within daily budget
@@ -169,9 +217,7 @@ async def _tick(
 
     # Check signals in priority order
     message = (
-        await _check_pending_followups()
-        or await _check_site_health()
-        or await _check_sleep_pattern(get_last_user_ts)
+        await _check_pending_followups() or await _check_site_health() or await _check_sleep_pattern(get_last_user_ts)
     )
 
     if message:

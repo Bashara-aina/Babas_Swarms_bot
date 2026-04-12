@@ -47,3 +47,44 @@ def should_add_casual_opener(response: str, emotion: str, message_length: int) -
     if emotion in ("tired", "frustrated"):
         return False
     return random.random() < 0.25
+
+
+class Humanizer:
+    """Wrapper class for humanization functions.
+
+    Provides an object-oriented interface for post-processing
+    LLM responses to remove stiff/formal phrasing.
+    """
+
+    def humanize(self, response: str, emotion: str = "neutral") -> str:
+        """Humanize a response string.
+
+        Args:
+            response: The raw LLM response to humanize.
+            emotion: Emotional context (currently unused but available for future expansion).
+
+        Returns:
+            The response with stiff phrases removed.
+        """
+        return humanize(response, emotion)
+
+    def should_add_casual_opener(
+        self,
+        text: str,
+        emotion: str = "neutral",
+        message_length: int | None = None,
+    ) -> bool:
+        """Decide whether to prepend a casual opener.
+
+        Args:
+            text: The response text.
+            emotion: Emotional state of the user/conversation.
+            message_length: Length of the original message.
+                          Defaults to len(text) if not provided.
+
+        Returns:
+            True if a casual opener should be added.
+        """
+        if message_length is None:
+            message_length = len(text)
+        return should_add_casual_opener(text, emotion, message_length)

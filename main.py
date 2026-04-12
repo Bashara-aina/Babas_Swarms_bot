@@ -51,7 +51,10 @@ if _missing:
 
 import agents as agents_registry
 import computer_agent
+import handlers
 import handlers.shared as _shared
+from handlers import register_all_routers
+from llm_client import verify_api_keys
 from core.daily_harvester.scheduler import DailyHarvesterScheduler
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
 from core.observability import init_observability
@@ -465,6 +468,16 @@ async def on_startup(bot: Bot) -> None:
         await _init_conv_db()
         asyncio.create_task(_cleanup_old_turns())
         logger.info("Conversation history DB initialized (SQLite-backed)")
+
+    # Initialize session transcript store (U1 — SQLite-backed, separate from conversation history)
+    try:
+        from core.session.transcript import get_transcript_store
+
+        store = get_transcript_store()
+        await store.init()
+        logger.info("Session transcript store initialized")
+    except Exception as e:
+        logger.warning("Session transcript store init failed (non-fatal): %s", e)
     except Exception as e:
         logger.warning("Conversation history DB init failed (non-fatal): %s", e)
 

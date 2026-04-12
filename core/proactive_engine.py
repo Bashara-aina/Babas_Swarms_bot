@@ -76,7 +76,7 @@ async def check_site_health() -> None:
 
     sites = {
         "rumahlabuh.com": "https://rumahlabuh.com",
-        "cekwajar.id": "https://cekwajar.id",
+        # "cekwajar.id": "https://cekwajar.id",  # Not deployed yet
     }
     try:
         import aiohttp

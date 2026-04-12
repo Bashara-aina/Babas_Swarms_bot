@@ -1317,6 +1317,17 @@ async def chat(
             last_error = e
             continue
 
+    # Budget hard-stop: if all fallbacks exhausted AND budget exceeded, fail instead of retrying
+    try:
+        from swarms_bot.routing.budget_guard import get_budget_guard, BudgetExceededError
+
+        if not get_budget_guard().can_spend("chat"):
+            raise BudgetExceededError(f"Budget exceeded for 'chat' — all models exhausted for '{agent_key}'.")
+    except BudgetExceededError:
+        raise
+    except Exception:
+        pass  # Budget guard unavailable, fall through to generic error
+
     raise RuntimeError(
         f"All models exhausted for '{agent_key}'.\nLast error: {last_error}\nRun /keys to check API keys."
     )

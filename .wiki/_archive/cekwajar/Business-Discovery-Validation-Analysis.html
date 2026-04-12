@@ -1,0 +1,2961 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Discovery & Validation Analysis - Pajang, Surakarta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1a2332;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f4c75 0%, #1a5f8f 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #00a8cc;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00d4ff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header p {
+            font-size: 1.1em;
+            color: #b0e0e6;
+            margin: 5px 0;
+        }
+
+        .metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-item {
+            background: rgba(15, 76, 117, 0.3);
+            padding: 15px;
+            border-left: 4px solid #00a8cc;
+            border-radius: 4px;
+        }
+
+        .meta-item strong {
+            color: #00d4ff;
+            display: block;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .meta-item span {
+            color: #b0e0e6;
+            font-size: 1.05em;
+        }
+
+        nav {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px 40px;
+            border-bottom: 1px solid #00a8cc;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        nav ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        nav a {
+            color: #b0e0e6;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        nav a:hover {
+            background: rgba(0, 168, 204, 0.3);
+            color: #00d4ff;
+            padding-left: 16px;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 40px;
+            background: rgba(15, 76, 117, 0.1);
+            border: 1px solid rgba(0, 168, 204, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, #0f4c75 0%, #1a5f8f 100%);
+            padding: 20px 30px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00a8cc;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(90deg, #1a5f8f 0%, #2574a6 100%);
+        }
+
+        .section-header h2 {
+            color: #00d4ff;
+            font-size: 1.6em;
+            margin: 0;
+        }
+
+        .toggle-icon {
+            color: #00a8cc;
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 30px;
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            padding: 0 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(90deg, #0f4c75 0%, #1a5f8f 100%);
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            color: #00d4ff;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #00a8cc;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 168, 204, 0.2);
+            color: #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 168, 204, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 4px;
+        }
+
+        .badge-verified {
+            background: rgba(76, 175, 80, 0.3);
+            color: #81c784;
+            border: 1px solid #81c784;
+        }
+
+        .badge-signal {
+            background: rgba(255, 193, 7, 0.3);
+            color: #ffd54f;
+            border: 1px solid #ffd54f;
+        }
+
+        .badge-assumption {
+            background: rgba(33, 150, 243, 0.3);
+            color: #64b5f6;
+            border: 1px solid #64b5f6;
+        }
+
+        .badge-test {
+            background: rgba(244, 67, 54, 0.3);
+            color: #ef5350;
+            border: 1px solid #ef5350;
+        }
+
+        .content-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-left: 4px solid #00a8cc;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .content-box h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .content-box ul {
+            margin-left: 20px;
+            color: #e0e0e0;
+        }
+
+        .content-box li {
+            margin: 8px 0;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: rgba(15, 76, 117, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #00a8cc;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            border-color: #00d4ff;
+            background: rgba(15, 76, 117, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .comparison-card h4 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .comparison-card .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 168, 204, 0.2);
+            margin: 8px 0;
+        }
+
+        .comparison-card .stat-label {
+            color: #b0e0e6;
+            font-weight: 500;
+        }
+
+        .comparison-card .stat-value {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .winner-badge {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin: 20px 0;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+        }
+
+        .runner-up-badge {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin: 20px 0;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(156, 39, 176, 0.4);
+        }
+
+        .highlight {
+            background: rgba(255, 235, 59, 0.15);
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: #ffd54f;
+        }
+
+        .risk-box {
+            background: rgba(244, 67, 54, 0.1);
+            padding: 20px;
+            border-left: 4px solid #ef5350;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .risk-box h4 {
+            color: #ef5350;
+            margin-bottom: 10px;
+        }
+
+        .success-box {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 20px;
+            border-left: 4px solid #81c784;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .success-box h4 {
+            color: #81c784;
+            margin-bottom: 10px;
+        }
+
+        .financial-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .financial-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 168, 204, 0.3);
+        }
+
+        .financial-item .label {
+            color: #b0e0e6;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .financial-item .value {
+            color: #00d4ff;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .action-list {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .action-list ol {
+            margin-left: 20px;
+            color: #e0e0e0;
+        }
+
+        .action-list li {
+            margin: 12px 0;
+            line-height: 1.5;
+        }
+
+        .action-list .action-num {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+            margin: 20px 0;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(15, 76, 117, 0.1);
+            border-left: 4px solid #00a8cc;
+            border-radius: 4px;
+        }
+
+        .timeline-date {
+            color: #00d4ff;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .timeline-content {
+            color: #e0e0e0;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 40px;
+            text-align: center;
+            color: #b0e0e6;
+            border-top: 1px solid rgba(0, 168, 204, 0.3);
+            margin-top: 40px;
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: #000;
+            }
+
+            .container {
+                background: white;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            header {
+                background: #0f4c75;
+                color: white;
+                page-break-after: avoid;
+            }
+
+            nav {
+                display: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+                background: white;
+                border: 1px solid #ccc;
+            }
+
+            .section-header {
+                background: #0f4c75;
+                color: white;
+                border: none;
+                padding: 15px 20px;
+            }
+
+            table {
+                background: white;
+                border: 1px solid #999;
+            }
+
+            thead {
+                background: #0f4c75;
+                color: white;
+            }
+
+            th {
+                color: white;
+                border: 1px solid #999;
+            }
+
+            td {
+                border: 1px solid #ccc;
+                color: #000;
+            }
+
+            .print-only {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .metadata {
+                grid-template-columns: 1fr;
+            }
+
+            nav ul {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            .section-header {
+                padding: 15px 20px;
+            }
+
+            .section-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏪 Business Discovery & Validation Analysis</h1>
+            <p>Analisis Bisnis F&B untuk Pajang, Laweyan, Surakarta (Solo), Indonesia</p>
+            <p style="font-size: 0.95em; margin-top: 20px;">Investor-Grade Analysis | Pemilik dengan Pengalaman F&B | Modal Terbatas | Tim Kecil | Delivery-First</p>
+        </header>
+
+        <div class="metadata">
+            <div class="meta-item">
+                <strong>Lokasi Bisnis</strong>
+                <span>Pajang, Laweyan, Surakarta (Solo)</span>
+            </div>
+            <div class="meta-item">
+                <strong>Target Modal</strong>
+                <span>10M - 30M (Lean Setup)</span>
+            </div>
+            <div class="meta-item">
+                <strong>Model Bisnis</strong>
+                <span>Cloud Kitchen / Delivery-First</span>
+            </div>
+            <div class="meta-item">
+                <strong>Tim</strong>
+                <span>2-3 orang (1 cook, 1-2 assembler/packer)</span>
+            </div>
+            <div class="meta-item">
+                <strong>Pengalaman Pemilik</strong>
+                <span>Sate Taichan Gendhut (30-50M/bulan)</span>
+            </div>
+            <div class="meta-item">
+                <strong>Dokumen</strong>
+                <span>25 Maret 2026 | Deep Analysis</span>
+            </div>
+        </div>
+
+        <nav>
+            <h3>📑 Daftar Isi (Table of Contents)</h3>
+            <ul>
+                <li><a href="#section1">1. Executive Summary</a></li>
+                <li><a href="#section2">2. Data Riset Platform & Ekonomi</a></li>
+                <li><a href="#section3">3. 23 Kandidat Bisnis (Long List)</a></li>
+                <li><a href="#section4">4. Quick Filter & Eliminasi</a></li>
+                <li><a href="#section5">5. Top 8 untuk Deep Dive</a></li>
+                <li><a href="#section6">6. Top 3 Finalis</a></li>
+                <li><a href="#section7">7. Analisis Pemenang: Rice Bowl Assembly</a></li>
+                <li><a href="#section8">8. Runner-Up: Sate Padang Premium</a></li>
+                <li><a href="#section9">9. Ekonomi Unit & Skenario Finansial</a></li>
+                <li><a href="#section10">10. Cek Fatal Flaw & Mitigasi</a></li>
+                <li><a href="#section11">11. 30-Hari Pilot Plan</a></li>
+                <li><a href="#section12">12. Action List Pemilik (Top 10)</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- SECTION 1: EXECUTIVE SUMMARY -->
+            <section id="section1">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>1. Executive Summary</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="winner-badge">
+                        🏆 PEMENANG: Rice Bowl Assembly Kitchen
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Rekomendasi Utama</h4>
+                        <p>Setelah evaluasi mendalam terhadap 23 kandidat bisnis, <span class="highlight">Rice Bowl Assembly Kitchen</span> adalah pilihan terbaik untuk kondisi Anda:</p>
+                        <ul>
+                            <li><strong>Margin:</strong> 55-65% gross margin (setelah food cost 30-35%)</li>
+                            <li><strong>Platform Resilience:</strong> Bahkan setelah 20-30% platform fee, margin netto 25-35% masih tersisa</li>
+                            <li><strong>Frekuensi Pesanan:</strong> Daily meal need (bukan craving-based) = repeat order rate tinggi</li>
+                            <li><strong>Team Efficiency:</strong> 1 cook + 1 assembler dapat handle 80-100 orders/hari</li>
+                            <li><strong>CAPEX Rendah:</strong> &lt;15M untuk setup minimal</li>
+                            <li><strong>Skalabilitas:</strong> Tambah protein tanpa ubah workflow kitchen</li>
+                            <li><strong>Target Net Profit:</strong> 6-12M/bulan (base case 80-120 orders/hari)</li>
+                        </ul>
+                    </div>
+
+                    <div class="runner-up-badge">
+                        🥈 RUNNER-UP: Sate Padang Premium
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Alasan Runner-Up (Bukan Pemenang)</h4>
+                        <p>Sate Padang memiliki potensi brand lebih kuat, tapi operasional lebih challenging:</p>
+                        <ul>
+                            <li><strong>Demand Craving-Based:</strong> Lebih rendah frekuensi pesanan vs rice bowl daily meal</li>
+                            <li><strong>Food Cost Tinggi:</strong> Daging sapi ~131K/kg vs ayam ~35-40K/kg</li>
+                            <li><strong>Skill Dependent:</strong> Konsistensi kuah dan grill management lebih kompleks</li>
+                            <li><strong>Night-Only Limitation:</strong> Revenue window lebih sempit</li>
+                            <li><strong>Waste Risk:</strong> Daging segar = higher spoilage risk</li>
+                            <li><strong>Margin After Platform Fee:</strong> 23-27% contribution (vs 30-35% rice bowl)</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Mengapa Rice Bowl Menang?</h4>
+                        <p>Rice Bowl Assembly adalah "boring but profitable" solution yang menggabungkan:</p>
+                        <ul>
+                            <li>✓ <strong>Structural advantage:</strong> Batch production = efisiensi maksimal</li>
+                            <li>✓ <strong>Repeat demand:</strong> Daily meal bukan occasional craving</li>
+                            <li>✓ <strong>Platform robust:</strong> Margin bertahan even dengan 30% fee</li>
+                            <li>✓ <strong>Quality consistency:</strong> Pre-cooked proteins = quality control lebih mudah</li>
+                            <li>✓ <strong>Low capex:</strong> Tidak perlu oven mahal atau skill tinggi</li>
+                            <li>✓ <strong>Menu engineering:</strong> Entry 15K, Core 20K, Premium 25K = AOV climb potential</li>
+                        </ul>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Rice Bowl (Pemenang)</th>
+                                <th>Sate Padang (Runner-Up)</th>
+                                <th>Keputusan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Gross Margin</strong></td>
+                                <td>55-65%</td>
+                                <td>48-52%</td>
+                                <td>Rice Bowl unggul (delivery online)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Net Margin (After Platform Fee)</strong></td>
+                                <td>25-35%</td>
+                                <td>18-22%</td>
+                                <td>Rice Bowl jauh lebih sustainable</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frekuensi Pesanan (Repeat Rate)</strong></td>
+                                <td>Daily meal &gt;30%</td>
+                                <td>Craving-based &lt;20%</td>
+                                <td>Rice Bowl 1.5x lebih tinggi</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Team Required</strong></td>
+                                <td>1 cook + 1 assembler</td>
+                                <td>1 cook + 1 sambal specialist</td>
+                                <td>Rice Bowl lebih scalable</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CAPEX (Setup)</strong></td>
+                                <td>&lt;15M</td>
+                                <td>~20M (grill + kuah setup)</td>
+                                <td>Rice Bowl lebih lean</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Daily Orders Target</strong></td>
+                                <td>80-120</td>
+                                <td>40-60</td>
+                                <td>Rice Bowl volume 2x lebih tinggi</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Monthly Net (Base Case)</strong></td>
+                                <td>11-12M</td>
+                                <td>5-7M</td>
+                                <td>Rice Bowl 2x lebih profitable</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Brand Potential</strong></td>
+                                <td>Medium (commodity)</td>
+                                <td>High (regional specialty)</td>
+                                <td>Sate Padang lebih premium feel</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- SECTION 2: DATA RISET -->
+            <section id="section2">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>2. Data Riset Platform & Ekonomi</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <h3>Platform Delivery Fees <span class="badge badge-verified">VERIFIED FACT</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>Commission Structure</th>
+                                <th>Status</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>GoFood (Gojek)</strong></td>
+                                <td>20% commission + Rp1,000 per transaksi</td>
+                                <td><span class="badge badge-verified">VERIFIED</span></td>
+                                <td>Paling kompetitif untuk cloud kitchen. Effective rate ~20%.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GrabFood (Grab)</strong></td>
+                                <td>30% commission (70:30 split merchant:platform)</td>
+                                <td><span class="badge badge-verified">VERIFIED</span></td>
+                                <td>Lebih mahal. Baik untuk pickup/dine-in, kurang untuk online order.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ShopeeFood (Shopee)</strong></td>
+                                <td>~20% commission</td>
+                                <td><span class="badge badge-signal">STRONG SIGNAL</span></td>
+                                <td>Emerging player. Komparatif dengan GoFood.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Direct WhatsApp</strong></td>
+                                <td>0% commission</td>
+                                <td><span class="badge badge-verified">VERIFIED</span></td>
+                                <td>Ideal untuk customer base lokal (kost residents, neighbors). Harder to scale.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="content-box">
+                        <h4>💡 Implikasi untuk Rice Bowl Assembly</h4>
+                        <p>Dengan gross margin 55-65% dan platform fee 20-30%, Anda masih punya 25-45% contribution margin untuk cover OPEX dan profit. Ini sustainable even di aggressive platform dependency.</p>
+                    </div>
+
+                    <h3>Cloud Kitchen Economics <span class="badge badge-signal">STRONG SIGNAL</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Rata-rata Industry</th>
+                                <th>Target Anda (Rice Bowl)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue per brand / bulan</td>
+                                <td>30-60M</td>
+                                <td>30-50M (conservative)</td>
+                            </tr>
+                            <tr>
+                                <td>Multi-brand revenue (3 brands)</td>
+                                <td>90-180M</td>
+                                <td>N/A - single brand focus</td>
+                            </tr>
+                            <tr>
+                                <td>ROI Period</td>
+                                <td>12-24 bulan</td>
+                                <td>2-6 bulan (aggressive) / 6-12 bulan (conservative)</td>
+                            </tr>
+                            <tr>
+                                <td>Modal Awal (Shared Kitchen)</td>
+                                <td>80-150M</td>
+                                <td>&lt;15M (lean setup sendiri)</td>
+                            </tr>
+                            <tr>
+                                <td>Modal Awal (Mandiri)</td>
+                                <td>200-400M</td>
+                                <td>Tidak relevan untuk Anda</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Ayam Geprek Economics <span class="badge badge-assumption">REASONABLE ASSUMPTION</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Value</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Harga Jual (per porsi)</td>
+                                <td>15-20K</td>
+                                <td>Commodity product, price sensitive market</td>
+                            </tr>
+                            <tr>
+                                <td>Gross Margin %</td>
+                                <td>40-50%</td>
+                                <td>Sebelum sambal, sebelum platform fee</td>
+                            </tr>
+                            <tr>
+                                <td>Food Cost (COGS %)</td>
+                                <td>35-45%</td>
+                                <td>Daging ayam ~40K/kg, 75-100g per porsi</td>
+                            </tr>
+                            <tr>
+                                <td>Sambal Food Cost</td>
+                                <td>10-12%</td>
+                                <td>Cabai, bumbu, minyak per porsi</td>
+                            </tr>
+                            <tr>
+                                <td>Daily Revenue (50 portions x 15K)</td>
+                                <td>750K/hari</td>
+                                <td>Conservative volume</td>
+                            </tr>
+                            <tr>
+                                <td>Net Profit Potential</td>
+                                <td>200-300K/hari</td>
+                                <td>6M+/bulan (tapi RED OCEAN)</td>
+                            </tr>
+                            <tr>
+                                <td>ROI</td>
+                                <td>12-24 bulan</td>
+                                <td>Dengan initial capital ~10-15M</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="risk-box">
+                        <h4>⚠️ Mengapa Ayam Geprek TIDAK Jadi Pemenang</h4>
+                        <p>Meskipun economics solid, Ayam Geprek adalah RED OCEAN competitor. Tetangga langsung Anda (Waroeng Deskoz) sudah menjual ayam geprek. Market terlalu jenuh untuk unique positioning. Rice Bowl Assembly lebih defensible karena diferensiasi melalui sambal variety dan quality consistency.</p>
+                    </div>
+
+                    <h3>Rice Box / Nasi Economics <span class="badge badge-signal">STRONG SIGNAL</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Nasi Uduk</th>
+                                <th>Rice Bowl Assembly</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Harga Jual</td>
+                                <td>10K</td>
+                                <td>18-25K (with protein + sambal)</td>
+                            </tr>
+                            <tr>
+                                <td>Daily Volume (50 pcs)</td>
+                                <td>500K/hari</td>
+                                <td>360-750K/hari (tergantung ASP)</td>
+                            </tr>
+                            <tr>
+                                <td>Monthly Potential (Net)</td>
+                                <td>15M (with 6-7M OPEX)</td>
+                                <td>12-25M (single brand, lean)</td>
+                            </tr>
+                            <tr>
+                                <td>Initial Modal</td>
+                                <td>&lt;1M possible</td>
+                                <td>10-15M (untuk 3 proteins + sambal + packaging)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="success-box">
+                        <h4>✓ Market Size Context</h4>
+                        <p>Rice bowl market Indonesia: <strong>3 miliar portions/tahun</strong>, growing <strong>10-15%/tahun</strong>. TAM sangat besar. Niche Pajang/Laweyan dengan 396+ kost listings = underserved market.</p>
+                    </div>
+
+                    <h3>Frozen Food / Dimsum <span class="badge badge-assumption">REASONABLE ASSUMPTION</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Value</th>
+                                <th>Status untuk Anda</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Buy Price per pcs</td>
+                                <td>1,000-1,900</td>
+                                <td>Distributor Jakarta/Surabaya</td>
+                            </tr>
+                            <tr>
+                                <td>Sell Price per pcs</td>
+                                <td>4,000-7,000</td>
+                                <td>Market Solo pelit, harga tinggi susah</td>
+                            </tr>
+                            <tr>
+                                <td>Potential Margin</td>
+                                <td>Hingga 500%</td>
+                                <td>Tapi low absolute value per porsi</td>
+                            </tr>
+                            <tr>
+                                <td>Monthly Revenue</td>
+                                <td>10-20M omzet</td>
+                                <td>Niche market Solo, bukan mainstream</td>
+                            </tr>
+                            <tr>
+                                <td>Monthly Net Profit</td>
+                                <td>2-8M</td>
+                                <td>Kurang profitable vs rice bowl</td>
+                            </tr>
+                            <tr>
+                                <td>Initial Modal</td>
+                                <td>1M (bisa mulai)</td>
+                                <td>Tapi growth ceiling rendah</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="content-box">
+                        <h4>Market Context: Frozen Food Indonesia <span class="badge badge-verified">VERIFIED</span></h4>
+                        <p><strong>Indonesia Frozen Food Market:</strong> US$3.4B (2024), growing 6.31%/tahun. Dimsum masih niche di Solo (dibanding Jakarta/Surabaya). Tidak ideal untuk delivery-first lean setup.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 3: 23 KANDIDAT BISNIS -->
+            <section id="section3">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>3. Long List: 23 Kandidat Bisnis</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="content-box">
+                        <h4>Metodologi Screening</h4>
+                        <p>Setiap kandidat dievaluasi berdasarkan:</p>
+                        <ul>
+                            <li>✓ <strong>Market Demand:</strong> Ada demand di Pajang/Laweyan? Existing competitors?</li>
+                            <li>✓ <strong>Food Cost & Margin:</strong> Sustainable gross margin &gt;50%?</li>
+                            <li>✓ <strong>Repeat Order Potential:</strong> Daily meal vs occasional craving</li>
+                            <li>✓ <strong>Team Efficiency:</strong> Bisa 80+ orders/hari dengan 2-3 orang?</li>
+                            <li>✓ <strong>CAPEX:</strong> &lt;20M untuk lean setup?</li>
+                            <li>✓ <strong>Delivery Proof:</strong> Survives 30-40 min delivery tanpa kualitas drop?</li>
+                            <li>✓ <strong>Platform Resilience:</strong> Tetap profitable setelah 20-30% platform fee?</li>
+                        </ul>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Kandidat Bisnis</th>
+                                <th>Demand</th>
+                                <th>Margin</th>
+                                <th>Repeat</th>
+                                <th>Team</th>
+                                <th>CAPEX</th>
+                                <th>Delivery</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Ayam Geprek Cloud Kitchen (multi-sambal)</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Medium</td>
+                                <td>Good</td>
+                                <td>10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Rice Bowl Assembly Kitchen</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>55-65%</td>
+                                <td>High</td>
+                                <td>Excellent</td>
+                                <td>&lt;15M</td>
+                                <td>✓ Excellent</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Sate Padang Premium</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>48-52%</td>
+                                <td>Medium</td>
+                                <td>Good</td>
+                                <td>~20M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Frozen Dimsum + Sauce Line</td>
+                                <td>⭐⭐</td>
+                                <td>Up to 500%</td>
+                                <td>Low</td>
+                                <td>Excellent</td>
+                                <td>1M</td>
+                                <td>✓ Okay</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Nasi Uduk/Kuning Komplit Daily Box</td>
+                                <td>⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Medium</td>
+                                <td>Good</td>
+                                <td>&lt;5M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Sambal-Centric Rice Box</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>55-65%</td>
+                                <td>High</td>
+                                <td>Good</td>
+                                <td>&lt;15M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Ayam Ungkep Frozen + Ready-to-Fry</td>
+                                <td>⭐⭐</td>
+                                <td>45-55%</td>
+                                <td>Low</td>
+                                <td>Good</td>
+                                <td>5-10M</td>
+                                <td>✗ Poor</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>Batch Curry Rice Bowls (Rendang/Gulai)</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>50-60%</td>
+                                <td>High</td>
+                                <td>Excellent</td>
+                                <td>10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>Chicken Katsu Rice Bowl</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>45-55%</td>
+                                <td>High</td>
+                                <td>Good</td>
+                                <td>10M</td>
+                                <td>✓ Excellent</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Nasi Goreng Spesialis (3-4 variant)</td>
+                                <td>⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Medium</td>
+                                <td>Fair</td>
+                                <td>8M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td>Mie Ayam Cloud Kitchen</td>
+                                <td>⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Medium</td>
+                                <td>Fair</td>
+                                <td>10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td>Bakso + Mie Bowl Delivery</td>
+                                <td>⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Medium</td>
+                                <td>Fair</td>
+                                <td>15M</td>
+                                <td>✓ Okay</td>
+                            </tr>
+                            <tr>
+                                <td>13</td>
+                                <td>Beef Bowl (Yoshinoya-style local)</td>
+                                <td>⭐⭐⭐</td>
+                                <td>35-45%</td>
+                                <td>Medium</td>
+                                <td>Good</td>
+                                <td>15-20M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>14</td>
+                                <td>Dimsum Steamed + Fried Combo</td>
+                                <td>⭐⭐</td>
+                                <td>300-400%</td>
+                                <td>Low</td>
+                                <td>Excellent</td>
+                                <td>5M</td>
+                                <td>✓ Okay</td>
+                            </tr>
+                            <tr>
+                                <td>15</td>
+                                <td>Lalapan Rice Box (Ayam/Lele + Sambal)</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>50-60%</td>
+                                <td>High</td>
+                                <td>Excellent</td>
+                                <td>&lt;15M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>16</td>
+                                <td>Penyetan Assembly Box</td>
+                                <td>⭐⭐⭐</td>
+                                <td>50-60%</td>
+                                <td>Medium</td>
+                                <td>Excellent</td>
+                                <td>10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>17</td>
+                                <td>Sei Sapi (Smoked Beef) Rice Box</td>
+                                <td>⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Low</td>
+                                <td>Fair</td>
+                                <td>20M+</td>
+                                <td>✓ Okay</td>
+                            </tr>
+                            <tr>
+                                <td>18</td>
+                                <td>Seblak/Mie Pedas Delivery</td>
+                                <td>⭐⭐⭐</td>
+                                <td>45-55%</td>
+                                <td>Low</td>
+                                <td>Fair</td>
+                                <td>10M</td>
+                                <td>✗ Poor</td>
+                            </tr>
+                            <tr>
+                                <td>19</td>
+                                <td>Catering Harian Subscription</td>
+                                <td>⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>High</td>
+                                <td>Fair</td>
+                                <td>10M</td>
+                                <td>✗ Poor</td>
+                            </tr>
+                            <tr>
+                                <td>20</td>
+                                <td>Frozen Bumbu/Sauce Line</td>
+                                <td>⭐</td>
+                                <td>50-70%</td>
+                                <td>Low</td>
+                                <td>Excellent</td>
+                                <td>5-10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>21</td>
+                                <td>Ayam Bakar Madu Rice Box</td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>50-60%</td>
+                                <td>High</td>
+                                <td>Good</td>
+                                <td>15M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>22</td>
+                                <td>Korean-style Chicken + Rice</td>
+                                <td>⭐⭐⭐</td>
+                                <td>45-55%</td>
+                                <td>Low</td>
+                                <td>Fair</td>
+                                <td>15M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                            <tr>
+                                <td>23</td>
+                                <td>Nasi Campur/Rames Economy Box</td>
+                                <td>⭐⭐⭐</td>
+                                <td>40-50%</td>
+                                <td>Low</td>
+                                <td>Fair</td>
+                                <td>10M</td>
+                                <td>✓ Good</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- SECTION 4: QUICK FILTER -->
+            <section id="section4">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>4. Quick Filter & Eliminasi Keras</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="content-box">
+                        <h4>Kriteria Eliminasi (Harsh Filter)</h4>
+                        <p>Setiap kandidat di-filter dengan kriteria berikut. Gagal = OUT:</p>
+                        <ul>
+                            <li>❌ <strong>Red Ocean:</strong> Direct neighborhood competitors sudah established (misal: Ayam Geprek = Waroeng Deskoz di sebelah)</li>
+                            <li>❌ <strong>Low Margin After Platform:</strong> Gross margin &lt;50% atau net margin &lt;20% setelah 25% platform fee</li>
+                            <li>❌ <strong>Low Repeat Rate:</strong> Craving-based, bukan daily meal (repeat rate &lt;25%)</li>
+                            <li>❌ <strong>Team Scalability:</strong> Tidak bisa handle 80+ orders/hari dengan 2 orang</li>
+                            <li>❌ <strong>Delivery Fragile:</strong> Kualitas drop signifikan setelah 30-40 min delivery</li>
+                            <li>❌ <strong>High CAPEX:</strong> Setup awal &gt;20M atau memerlukan equipment specialized expensive</li>
+                            <li>❌ <strong>Low TAM:</strong> Niche market Solo (e.g., dimsum, frozen produk western)</li>
+                        </ul>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kandidat</th>
+                                <th>Status</th>
+                                <th>Alasan Eliminasi / Keep</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#1 Ayam Geprek</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>RED OCEAN + direct competitor (Waroeng Deskoz) di sebelah Anda. Margin 40-50% bagus, tapi zero differentiation vs neighbor.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#2 Rice Bowl Assembly ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Semua kriteria green. Keep untuk deep dive.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#3 Sate Padang ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Strong demand, high margin. Keep sebagai runner-up option.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#4 Frozen Dimsum</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Niche market Solo (Jakarta/Surabaya lebih relevant). Low AOV, low repeat rate &lt;15%. TAM terlalu kecil.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#5 Nasi Uduk</strong></td>
+                                <td>✅ PASS (Borderline)</td>
+                                <td>Margin terlalu rendah (10K harga = hard to achieve 50% margin). Tidak ideal untuk platform delivery. Tapi lokal demand tinggi.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#6 Sambal-Centric Rice Box ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Strong economics + differentiation through sambal variety. Keep untuk test small.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#7 Ayam Ungkep Frozen</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>B2C frozen produk = slow velocity, low repeat rate &lt;20%. Delivery fragile (frozen thaw = quality drop).</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#8 Batch Curry Bowls ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>High perceived value, batch cook advantage, long holding time. Good daily meal potential.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#9 Chicken Katsu Bowl ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Mass appeal, batch-fry, delivery-proof, high repeat rate.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#10 Nasi Goreng</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Commodity product, zero differentiation, red ocean. Margin 40-50% fine, tapi craving-dependent (tidak daily meal).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#11 Mie Ayam</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Dine-in dependent (untuk enjoy fresh broth). Delivery 30+ min = broth soggy, noodle soft. Low delivery quality.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#12 Bakso</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Craft-dependent (kuah, bakso consistency). High skill requirement. Delivery fragile. Margin 40-50% fine, tapi operational risk tinggi.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#13 Beef Bowl</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Expensive ingredient (daging sapi 131K/kg). Food cost 45%+ tinggi. Margin squeeze after platform fee. CAPEX 15-20M untuk proper beef setup.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#14 Dimsum</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Niche Solo market. Low repeat rate. TAM rendah vs rice bowl.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#15 Lalapan Rice Box ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Simple assembly, fresh + protein + sambal. Daily meal demand, good margin.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#16 Penyetan Assembly Box ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Sambal-heavy, simple assembly, cheap ingredients, good team efficiency.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#17 Sei Sapi</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Supply chain impossible di Solo (tidak ada local smoked beef industry). CAPEX 20M+. Low repeat rate (specialty item).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#18 Seblak/Mie Pedas</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Trend-dependent (hype phase), not sustainable daily meal. Delivery poor (soggy). Margin volatile.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#19 Catering Subscription</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Logistics nightmare dengan 2-3 orang. High operational complexity. Better untuk established brand with logistics team.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#20 Frozen Bumbu Line</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>B2B focus (restaurants), slow sales cycle. Tidak cocok untuk delivery-first retail model Anda.</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>#21 Ayam Bakar Madu ✓</strong></td>
+                                <td>✅ PASS</td>
+                                <td>Sweet-savory appeal, batch marinate + grill, high repeat rate (not commodity).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#22 Korean-style Chicken</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Trend fading (Korean chicken bukan lagi novelty). Margin fine tapi repeat rate low &lt;20%.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>#23 Nasi Campur</strong></td>
+                                <td>❌ FAIL</td>
+                                <td>Zero differentiation (commodity), red ocean market. Every warung sells nasi campur. No moat.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="success-box">
+                        <h4>✓ PASSED Quick Filter (8 Kandidat)</h4>
+                        <p><strong>#2, #3, #5, #6, #8, #9, #15, #16, #21</strong> lolos quick filter.</p>
+                        <p>Catatan: #5 (Nasi Uduk) borderline—margin rendah untuk platform delivery, tapi lokal demand kuat. Potential untuk direct WhatsApp sales saja, bukan platform focus.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 5: TOP 8 UNTUK DEEP DIVE -->
+            <section id="section5">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>5. Top 8 untuk Deep Dive Analysis</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>1️⃣ Rice Bowl Assembly</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">55-65%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">30%+ daily</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">80-120</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">11-12M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">&lt;15M</span>
+                            </div>
+                            <p style="color: #81c784; margin-top: 10px; font-size: 0.95em;"><strong>WINNER</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>2️⃣ Sate Padang Premium</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">48-52%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">20-25%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">40-60</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">5-10M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">~20M</span>
+                            </div>
+                            <p style="color: #9c27b0; margin-top: 10px; font-size: 0.95em;"><strong>RUNNER-UP</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>3️⃣ Sambal-Centric Box</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">55-65%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">25-30%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">60-80</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">8-10M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">&lt;15M</span>
+                            </div>
+                            <p style="color: #ffd54f; margin-top: 10px; font-size: 0.95em;"><strong>TEST SMALL</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>4️⃣ Batch Curry Bowls</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">50-60%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">28-32%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">60-80</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">7-9M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">10M</span>
+                            </div>
+                            <p style="color: #64b5f6; margin-top: 10px; font-size: 0.95em;"><strong>STRONG</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>5️⃣ Chicken Katsu Bowl</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">45-55%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">30%+ daily</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">70-90</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">8-10M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">10M</span>
+                            </div>
+                            <p style="color: #64b5f6; margin-top: 10px; font-size: 0.95em;"><strong>STRONG</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>6️⃣ Lalapan Rice Box</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">50-60%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">28-32%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">70-90</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">8-10M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">&lt;15M</span>
+                            </div>
+                            <p style="color: #64b5f6; margin-top: 10px; font-size: 0.95em;"><strong>STRONG</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>7️⃣ Penyetan Assembly</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">50-60%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">20-25%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">60-80</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">6-8M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">10M</span>
+                            </div>
+                            <p style="color: #64b5f6; margin-top: 10px; font-size: 0.95em;"><strong>VIABLE</strong></p>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>8️⃣ Ayam Bakar Madu</h4>
+                            <div class="stat">
+                                <span class="stat-label">Margin:</span>
+                                <span class="stat-value">50-60%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Repeat Rate:</span>
+                                <span class="stat-value">28-32%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Daily Orders:</span>
+                                <span class="stat-value">60-80</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Net Monthly:</span>
+                                <span class="stat-value">7-9M</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">CAPEX:</span>
+                                <span class="stat-value">15M</span>
+                            </div>
+                            <p style="color: #64b5f6; margin-top: 10px; font-size: 0.95em;"><strong>STRONG</strong></p>
+                        </div>
+                    </div>
+
+                    <h3>Analisis Komparasi Mendalam</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ranking</th>
+                                <th>Kandidat</th>
+                                <th>Keunggulan Unik</th>
+                                <th>Kelemahan Utama</th>
+                                <th>Rekomendasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td>Rice Bowl Assembly</td>
+                                <td>Batch production + high margin + daily repeat + scalable + low capex</td>
+                                <td>Commodity product (boring), perlu differentiation via sambal/brand</td>
+                                <td><span class="badge badge-verified">PILIH INI</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td>Sate Padang Premium</td>
+                                <td>Strong regional brand potential, high perceived value, night market gap</td>
+                                <td>Skill dependent, food cost tinggi, craving-based demand, lower repeat rate</td>
+                                <td><span class="badge badge-signal">RUNNER-UP</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td>Sambal-Centric Rice Box</td>
+                                <td>Differentiation via sambal variety (5-8 variants), high margin</td>
+                                <td>Perlu market validation: apakah Solo willing to pay premium for sambal variety?</td>
+                                <td><span class="badge badge-assumption">TEST SMALL</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>4</strong></td>
+                                <td>Batch Curry Bowls</td>
+                                <td>High perceived value (rendang/gulai), batch cook advantage, long holding time</td>
+                                <td>Margin sedikit lebih rendah, CAPEX sedikit lebih tinggi</td>
+                                <td><span class="badge badge-signal">STRONG ALT</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>5</strong></td>
+                                <td>Chicken Katsu Bowl</td>
+                                <td>Mass appeal, batch-fry proof, high repeat rate, excellent delivery</td>
+                                <td>Sedikit tren-dependent (katsu sedang trending), tidak unique locally</td>
+                                <td><span class="badge badge-signal">STRONG ALT</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>6</strong></td>
+                                <td>Lalapan Rice Box</td>
+                                <td>Simple assembly, fresh + protein + sambal combination, good repeat</td>
+                                <td>Freshness dependent (lalapan tidak bertahan lama), supply chain kompleks</td>
+                                <td><span class="badge badge-signal">VIABLE</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>7</strong></td>
+                                <td>Penyetan Assembly</td>
+                                <td>Sambal-heavy, simple ingredients, excellent team efficiency</td>
+                                <td>Lower repeat rate (penyetan bukan daily meal), niche market</td>
+                                <td><span class="badge badge-assumption">SECONDARY</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>8</strong></td>
+                                <td>Ayam Bakar Madu</td>
+                                <td>Sweet-savory appeal (differentiated), batch marinate + grill, good repeat</td>
+                                <td>Grill dependency, temperature management, slightly higher CAPEX</td>
+                                <td><span class="badge badge-signal">STRONG ALT</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- SECTION 6: TOP 3 FINALIS -->
+            <section id="section6">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>6. Top 3 Finalis</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="winner-badge">
+                        🏆 1. RICE BOWL ASSEMBLY KITCHEN (WINNER - BUKA SEKARANG)
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Alasan Menang</h4>
+                        <ul>
+                            <li>✓ <strong>Margin Tertinggi:</strong> 55-65% gross margin (after COGS 30-35%)</li>
+                            <li>✓ <strong>Platform Robust:</strong> Bahkan setelah 20-30% platform fee, margin netto 25-35% masih sustainable</li>
+                            <li>✓ <strong>Repeat Demand Tinggi:</strong> Daily meal need (&gt;30% repeat rate) vs craving-based pesaing</li>
+                            <li>✓ <strong>Efficiency Maksimal:</strong> 1 cook + 1 assembler = 80-120 orders/hari = revenue ceiling tinggi dengan team kecil</li>
+                            <li>✓ <strong>CAPEX Terendah:</strong> &lt;15M (vs Sate Padang ~20M, Katsu ~10M)</li>
+                            <li>✓ <strong>Quality Consistent:</strong> Pre-cooked proteins + batch sambal = mudah maintain quality across orders</li>
+                            <li>✓ <strong>Scalable Formula:</strong> Tambah protein varian tanpa perubah kitchen workflow fundamental</li>
+                            <li>✓ <strong>Menu Engineering:</strong> Entry 15K (nasi+telur), Core 20K (nasi+ayam), Premium 25K (nasi+combo+extra sambal) = AOV climb mudah</li>
+                        </ul>
+                    </div>
+
+                    <div class="runner-up-badge">
+                        🥈 2. SATE PADANG PREMIUM (RUNNER-UP)
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Mengapa Runner-Up (Bukan Pemenang)</h4>
+                        <ul>
+                            <li>⚠️ <strong>Demand Pattern:</strong> Craving-based (occasional treat) vs daily meal rice bowl. Repeat rate 20-25% vs rice bowl 30%+</li>
+                            <li>⚠️ <strong>Food Cost Burden:</strong> Daging sapi 131K/kg tinggi. Ayam 35-40K/kg. Margin squeeze setelah food cost</li>
+                            <li>⚠️ <strong>Skill Dependency:</strong> Kuah consistency, daging quality, grill management = lebih kompleks dari batch rice bowl</li>
+                            <li>⚠️ <strong>Night-Only Window:</strong> Sate Padang traditionally malam. Revenue window terbatas vs rice bowl all-day</li>
+                            <li>⚠️ <strong>Waste Risk:</strong> Daging segar daily = spoilage risk, dead stock potential</li>
+                            <li>⚠️ <strong>Lower Daily Orders:</strong> Target 40-60/hari vs rice bowl 80-120/hari = revenue lower dengan team size sama</li>
+                            <li>✓ <strong>Brand Potential Lebih Tinggi:</strong> Regional specialty vs commodity rice bowl. Premium positioning possible</li>
+                            <li>✓ <strong>Margin Lebih Baik untuk Dine-In/Pickup:</strong> Tanpa platform fee, margin 48-52% naik ke 58-62%</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Sate Padang Cocok Jika Anda Bisa Hybrid Model</h4>
+                        <p>Sate Padang jadi lebih menarik kalau Anda juga bisa setup <strong>dine-in atau pickup point</strong> (misal: small warung di Laweyan). Margin tanpa platform fee (48-52%) vs dengan fee (23-27%) adalah huge difference. Tapi itu memerlukan physical location + customer gathering = lebih kompleks dari pure delivery-first.</p>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>🎯 Rekomendasi Sate Padang</h4>
+                        <p><strong>Tidak recommended sekarang.</strong> Tapi jika dalam 6 bulan rice bowl sudah stabil dan profitable, bisa explore Sate Padang sebagai <strong>brand kedua</strong> di malam hari (leverage existing kitchen, existing team untuk diversifikasi). Multi-brand scaling di cloud kitchen adalah valid play untuk month 7+.</p>
+                    </div>
+
+                    <p style="text-align: center; color: #ffd54f; font-weight: 600; margin: 30px 0; font-size: 1.1em;">🧪 3. SAMBAL-CENTRIC RICE BOX (TEST SMALL)</p>
+
+                    <div class="content-box">
+                        <h4>Konsep: Hero adalah Sambal, Protein adalah Standard, Rice adalah Bulk</h4>
+                        <p>Daripada differentiate via protein variety (overcrowded), differentiate via <strong>5-8 signature sambal recipes</strong>:</p>
+                        <ul>
+                            <li>🌶️ Sambal Hijau Khas Solo (cabai hijau muda, jeruk, bawang)</li>
+                            <li>🌶️ Sambal Kematian (super pedas, untuk brave customers)</li>
+                            <li>🌶️ Sambal Matah (traditional, jeruk nipis, bawang merah, cabe)</li>
+                            <li>🌶️ Sambal Kacang (peanut-based, creamy)</li>
+                            <li>🌶️ Sambal Terasi (umami-heavy, fermented)</li>
+                            <li>🌶️ Sambal Mayonais (sweet-spicy, for mass market)</li>
+                            <li>🌶️ Sambal Kemiri (nutty, complex flavor)</li>
+                            <li>🌶️ Sambal Buah (mango/pineapple, tropical twist)</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Mengapa Test Small?</h4>
+                        <ul>
+                            <li>❓ <strong>Market Validation Needed:</strong> Apakah Solo willing to pay 20K+ premium (vs 15K basic) untuk sambal variety? Atau commodity pricing dominates?</li>
+                            <li>❓ <strong>Repeat Behavior Unclear:</strong> Apakah customer akan rotate sambal variants (repeat rate tinggi)? Atau pick favorite dan stick (low repeat)?</li>
+                            <li>✓ <strong>High Margin Potential:</strong> Sambal food cost 8-10% saja. Gross margin 55-65% solid</li>
+                            <li>✓ <strong>Supply Chain Simple:</strong> Cabai, bawang, bumbu = mudah sourcing di Solo</li>
+                            <li>✓ <strong>Low Waste:</strong> Sambal batch = 3-5 hari shelf life refrigerated. Manageable spoilage</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>Recommended Test Plan (4 Minggu)</h4>
+                        <ol style="margin-left: 20px;">
+                            <li><strong>Minggu 1:</strong> Develop 3 signature sambals (Hijau, Kematian, Matah). Test recipe, shelf life, taste consistency</li>
+                            <li><strong>Minggu 2:</strong> Soft launch 20-30 orders/hari via WhatsApp ke kost residents. Track sambal preference rotation rate</li>
+                            <li><strong>Minggu 3:</strong> Analyze data: repeat rate, favorite sambal distribution, AOV. If repeat rate &gt;25%, expand to 5-8 sambals</li>
+                            <li><strong>Minggu 4:</strong> Go GoFood + GrabFood listing dengan 5 sambal variants. Monitor if sambal differentiation drives higher repeat than plain rice bowl</li>
+                        </ol>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Finalis</th>
+                                <th>Margin</th>
+                                <th>Repeat Rate</th>
+                                <th>CAPEX</th>
+                                <th>Monthly Net</th>
+                                <th>Rekomendasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. Rice Bowl Assembly</strong></td>
+                                <td>55-65%</td>
+                                <td>&gt;30% daily</td>
+                                <td>&lt;15M</td>
+                                <td>11-12M (base)</td>
+                                <td><span class="badge badge-verified">BUKA SEKARANG</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. Sate Padang Premium</strong></td>
+                                <td>48-52%</td>
+                                <td>20-25%</td>
+                                <td>~20M</td>
+                                <td>5-10M</td>
+                                <td><span class="badge badge-signal">BRAND KE-2 (Bulan 7+)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>3. Sambal-Centric Box</strong></td>
+                                <td>55-65%</td>
+                                <td>25-30%</td>
+                                <td>&lt;15M</td>
+                                <td>8-10M</td>
+                                <td><span class="badge badge-assumption">TEST SMALL (4 minggu)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- SECTION 7: ANALISIS PEMENANG -->
+            <section id="section7">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>7. Analisis Mendalam: Rice Bowl Assembly Kitchen (PEMENANG)</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="winner-badge">
+                        Ini adalah "boring but profitable" solution
+                    </div>
+
+                    <h3>Konsep Operasional</h3>
+
+                    <div class="content-box">
+                        <h4>Workflow Harian (08:00 - 18:00)</h4>
+                        <ul>
+                            <li><strong>06:00-09:00 | Prep & Batch Cook (1 cook):</strong>
+                                <ul style="margin-top: 5px; margin-left: 20px;">
+                                    <li>Cuci beras, masak rice cooker industrial (10L, ready 60-80 portions)</li>
+                                    <li>Fry 30-40 pcs ayam dalam deep fryer (12 menit fry + 8 menit drain = 20 menit batch cycle)</li>
+                                    <li>Grill 20-30 pcs ayam bakar (15 menit grill, hold warm)</li>
+                                    <li>Boil telur 40-50 pcs (15 min boil, cool, peel, ready for balado sauce)</li>
+                                    <li>Prep 5 sambal: grind, combine, portion ke containers (30 min total)</li>
+                                    <li>Result: 3 ready-to-serve proteins + 5 sambals + bulk rice = ready untuk order assembly</li>
+                                </ul>
+                            </li>
+                            <li><strong>09:00-18:00 | Order Assembly & Packing (1 assembler + cook jika busy):</strong>
+                                <ul style="margin-top: 5px; margin-left: 20px;">
+                                    <li>Customer order masuk via GoFood/GrabFood/WhatsApp</li>
+                                    <li>Assembler: scoop rice (150g) + protein (1 pcs) + sambal (sesuai request) into compartmented box (90 detik)</li>
+                                    <li>Label, print invoice, pack dengan napkin/plastic spoon, into delivery bag</li>
+                                    <li>Handover ke driver (GoFood/GrabFood pickup) atau wrap untuk WhatsApp pickup</li>
+                                    <li>Target: 80-100 orders assembly/hari = 1.5-2 orders per minute average</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h3>Mengapa Rice Bowl Assembly Menang?</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Faktor</th>
+                                <th>Rice Bowl Assembly</th>
+                                <th>Pesaing (Sate/Ayam)</th>
+                                <th>Keputusan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Batch Production</strong></td>
+                                <td>Cook 3 proteins di morning. Ready-to-serve semua hari sampai 18:00</td>
+                                <td>Cook per order (Sate Padang: kuah fresh per order)</td>
+                                <td>Rice Bowl jauh lebih efficient. 1 cook cukup</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Team Scaling</strong></td>
+                                <td>1 cook + 1 assembler = 100 orders/hari</td>
+                                <td>1 cook + 1 sambal maker = 40-60 orders/hari</td>
+                                <td>Rice Bowl 2x lebih scalable per person</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Margin After Platform Fee</strong></td>
+                                <td>55-65% gross, 25-35% net after 25% platform fee</td>
+                                <td>48-52% gross, 18-22% net after 25% fee</td>
+                                <td>Rice Bowl 1.5x lebih robust</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Repeat Demand</strong></td>
+                                <td>Daily meal (30%+ repeat rate)</td>
+                                <td>Occasional craving (20% repeat rate)</td>
+                                <td>Rice Bowl 1.5x lebih predictable cash flow</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Spoilage Risk</strong></td>
+                                <td>Proteins fry/grill 08:00, eaten 12:00-18:00 same day. Sambal 3-5 days</td>
+                                <td>Daging sapi fresh daily, 1-2 days max. Higher waste risk</td>
+                                <td>Rice Bowl lebih aman</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Delivery Proof</strong></td>
+                                <td>Protein + rice + sambal dalam compartmented box = survives 30-40 min</td>
+                                <td>Sate: kuah hotness perlu dipertahankan, lebih fragile</td>
+                                <td>Rice Bowl lebih delivery-robust</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Quality Consistency</strong></td>
+                                <td>Pre-cooked proteins direnew 3-4 jam, consistent taste</td>
+                                <td>Per-order cook, skill variasi lebih tinggi</td>
+                                <td>Rice Bowl lebih konsisten</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CAPEX</strong></td>
+                                <td>&lt;15M (rice cooker, deep fryer, basic station)</td>
+                                <td>~20M (grill equipment, kuah station, storage)</td>
+                                <td>Rice Bowl lebih lean</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Menu Engineering & Pricing <span class="badge badge-reasonable">STRONG SIGNAL</span></h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tier</th>
+                                <th>Composition</th>
+                                <th>Price</th>
+                                <th>Food Cost</th>
+                                <th>Gross Margin %</th>
+                                <th>Target Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ENTRY</strong></td>
+                                <td>Nasi + Telur Balado + Sambal 1</td>
+                                <td>15K</td>
+                                <td>4-5K</td>
+                                <td>67-73%</td>
+                                <td>25% orders</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CORE</strong></td>
+                                <td>Nasi + Ayam Goreng Crispy + Sambal 1 + Extra Sambal</td>
+                                <td>20K</td>
+                                <td>6-7K</td>
+                                <td>65-70%</td>
+                                <td>50% orders</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PREMIUM</strong></td>
+                                <td>Nasi + Combo (Ayam Goreng + Telur Balado) + 2 Sambal + Drink</td>
+                                <td>28K</td>
+                                <td>9-10K</td>
+                                <td>64-68%</td>
+                                <td>15% orders</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FAMILY BUNDLE</strong></td>
+                                <td>4x Nasi + protein variety + sambal sharing (4 pcs)</td>
+                                <td>70K</td>
+                                <td>22-24K</td>
+                                <td>65-69%</td>
+                                <td>10% orders (AOV boost)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="content-box">
+                        <h4>Average Selling Price (ASP) Calculation</h4>
+                        <p><strong>Weighted ASP:</strong> (15K × 25%) + (20K × 50%) + (28K × 15%) + (70K ÷ 4 × 10%) = 3.75K + 10K + 4.2K + 1.75K = <strong>19.7K ≈ 20K</strong></p>
+                        <p>Realistic base case assumption: 20K average selling price per order. Bundle strategy pushes ASP up dari 15K entry level.</p>
+                    </div>
+
+                    <h3>Sambal Differentiation Strategy</h3>
+
+                    <div class="content-box">
+                        <h4>Hero = Sambal. Protein = Commodity. Rice = Bulk.</h4>
+                        <p>Dalam commodity rice box market, sambal adalah leakage point untuk differentiation. Develop 5-7 signature sambals untuk repeat order driver:</p>
+                        <ul>
+                            <li>🌶️ <strong>Sambal Pedas Standard</strong> - untuk 60% customers (base default)</li>
+                            <li>🌶️ <strong>Sambal Kematian</strong> - untuk 15% brave customers (brand reputation builder)</li>
+                            <li>🌶️ <strong>Sambal Matah</strong> - untuk 10% traditional preference (fresh, jeruk, bawang)</li>
+                            <li>🌶️ <strong>Sambal Kacang</strong> - untuk 10% creamy preference (peanut-based)</li>
+                            <li>🌶️ <strong>Sambal Kemiri</strong> - untuk 5% nutty preference (umami-heavy)</li>
+                        </ul>
+                    </div>
+
+                    <h3>Unit Economics per Order</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Value (per order)</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue</td>
+                                <td>20K</td>
+                                <td>Weighted ASP (entry+core+premium blend)</td>
+                            </tr>
+                            <tr>
+                                <td>Food Cost (COGS)</td>
+                                <td>6-7K</td>
+                                <td>30-35% ratio (rice+protein+sambal)</td>
+                            </tr>
+                            <tr>
+                                <td>Packaging</td>
+                                <td>2K</td>
+                                <td>Compartmented box + lid + napkin + spoon</td>
+                            </tr>
+                            <tr>
+                                <td>Gross Profit</td>
+                                <td>11-12K</td>
+                                <td>55-60% gross margin</td>
+                            </tr>
+                            <tr>
+                                <td>Platform Fee (25% avg)</td>
+                                <td>-5K</td>
+                                <td>GoFood 20%, GrabFood 30%, mixed 25% blended</td>
+                            </tr>
+                            <tr>
+                                <td>Contribution Margin</td>
+                                <td>6-7K</td>
+                                <td>30-35% net after platform fee</td>
+                            </tr>
+                            <tr>
+                                <td>OPEX Allocation (80 orders/day)</td>
+                                <td>~1.8K</td>
+                                <td>OPEX 144K/day ÷ 80 orders (rent, labor, utilities)</td>
+                            </tr>
+                            <tr>
+                                <td>Net Profit per Order</td>
+                                <td>4.2-5.2K</td>
+                                <td>Setelah OPEX allocation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="success-box">
+                        <h4>✓ Key Insight: Bahkan Hanya 50-60 Orders/Hari Sudah Cash Positive</h4>
+                        <p>Dengan OPEX ~144K/hari (rent 2M÷30, labor 4M÷30, utilities 1.5M÷30), Anda perlu (144K ÷ 6K contribution per order) = 24 orders minimum untuk break-even. 50 orders = 276K profit/hari = 8.3M/bulan. Conservative dan achievable dalam 2 minggu soft launch.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 8: RUNNER-UP ANALISIS -->
+            <section id="section8">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>8. Runner-Up: Sate Padang Premium Analysis</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="runner-up-badge">
+                        Strong demand + high perceived value, tapi operational risk lebih tinggi
+                    </div>
+
+                    <h3>Mengapa Sate Padang Tidak Menjadi Pemenang?</h3>
+
+                    <div class="content-box">
+                        <h4>5 Critical Challenges vs Rice Bowl</h4>
+                        <ul>
+                            <li>1️⃣ <strong>Craving-Based Demand:</strong> Sate adalah occasional treat, bukan daily meal. Repeat rate 20-25% vs rice bowl 30%+. Lower customer frequency = harder to reach 100 orders/hari = revenue ceiling lower</li>
+                            <li>2️⃣ <strong>Food Cost Burden:</strong> Daging sapi 131K/kg. Per portion 150-180g = 19-23K cost. Vs ayam 35-40K/kg = 5-6K cost. Margin squeeze significant</li>
+                            <li>3️⃣ <strong>Skill Dependency:</strong> Kuah consistency, daging softness, grill temperature = semua penting. Lebih kompleks QC vs batch rice bowl where proteins pre-cooked uniform</li>
+                            <li>4️⃣ <strong>Night-Only Limitation:</strong> Traditionally sate is malam snack/dinner. Revenue window 17:00-22:00 only. Rice bowl all-day 11:00-18:00+. Time window 4x lebih kecil</li>
+                            <li>5️⃣ <strong>Waste & Spoilage Risk:</strong> Fresh daging daily = tidak bisa store overnight. Kuah hangat hanya 6-8 jam. Dead stock risk higher</li>
+                        </ul>
+                    </div>
+
+                    <h3>Unit Economics: Sate Padang Premium</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Value (per order)</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue</td>
+                                <td>25K</td>
+                                <td>Premium positioning (sate padang jual 20-40K di Solo)</td>
+                            </tr>
+                            <tr>
+                                <td>Food Cost (Daging)</td>
+                                <td>10-12K</td>
+                                <td>Daging sapi 131K/kg, 150-180g portion</td>
+                            </tr>
+                            <tr>
+                                <td>Kuah & Bumbu</td>
+                                <td>1-2K</td>
+                                <td>Tumeric, garlic, ginger, coconut milk</td>
+                            </tr>
+                            <tr>
+                                <td>Packaging & Printing</td>
+                                <td>2-3K</td>
+                                <td>Box untuk kuah, label, napkin</td>
+                            </tr>
+                            <tr>
+                                <td>Gross Profit</td>
+                                <td>10-12K</td>
+                                <td>40-48% gross margin</td>
+                            </tr>
+                            <tr>
+                                <td>Platform Fee (25%)</td>
+                                <td>-6.25K</td>
+                                <td>GoFood 20% + Rp1K, GrabFood 30%, blended 25%</td>
+                            </tr>
+                            <tr>
+                                <td>Contribution Margin</td>
+                                <td>3.75-5.75K</td>
+                                <td>15-23% net (lower than rice bowl 30%+)</td>
+                            </tr>
+                            <tr>
+                                <td>OPEX Allocation (60 orders/day)</td>
+                                <td>~2.4K</td>
+                                <td>OPEX 144K/day ÷ 60 orders</td>
+                            </tr>
+                            <tr>
+                                <td>Net Profit per Order</td>
+                                <td>1.35-3.35K</td>
+                                <td>Lower than rice bowl (4-5K). Only 50-60 orders = break-even</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="risk-box">
+                        <h4>⚠️ Financial Scenario: Sate Padang at 60 Orders/Day</h4>
+                        <ul>
+                            <li>Daily Gross Profit: 60 × 11K = 660K</li>
+                            <li>Platform Fee: 60 × 6.25K = 375K</li>
+                            <li>Daily Contribution: 285K</li>
+                            <li>Daily OPEX: ~144K (rent 2M÷30, labor 4M÷30, utilities 1.5M÷30)</li>
+                            <li><strong>Daily Net Profit: 141K = 4.2M/bulan</strong></li>
+                        </ul>
+                        <p>vs Rice Bowl at 80 orders:</p>
+                        <ul>
+                            <li>Daily Gross Profit: 80 × 12K = 960K</li>
+                            <li>Platform Fee: 80 × 5K = 400K</li>
+                            <li>Daily Contribution: 560K</li>
+                            <li>Daily OPEX: ~144K</li>
+                            <li><strong>Daily Net Profit: 416K = 12.5M/bulan</strong></li>
+                        </ul>
+                        <p><strong>Difference: 3x lebih menguntungkan untuk rice bowl</strong> (12.5M vs 4.2M)</p>
+                    </div>
+
+                    <h3>Kapan Sate Padang Jadi Lebih Menarik?</h3>
+
+                    <div class="success-box">
+                        <h4>✓ Sate Padang LEBIH BAIK jika Anda Add Dine-In / Pickup Point</h4>
+                        <p>Tanpa platform fee (30%), margin Sate Padang naik dari 48-52% → 58-62%. Unit economics berubah dramatically:</p>
+                        <ul>
+                            <li><strong>Dine-In/Pickup Margin:</strong> 48-52% (no platform fee) vs Delivery 23-27% (30% GrabFood)</li>
+                            <li><strong>Example: 40 orders delivery + 20 orders pickup = 60 orders total</strong>
+                                <ul style="margin-top: 5px;">
+                                    <li>Delivery contribution: 40 × 5K = 200K</li>
+                                    <li>Pickup contribution: 20 × 12K = 240K</li>
+                                    <li>Total daily contribution: 440K (vs 285K delivery-only)</li>
+                                </ul>
+                            </li>
+                            <li><strong>Hybrid Sate Padang dengan small dine-in = sangat menarik</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="content-box">
+                        <h4>🎯 Rekomendasi untuk Sate Padang</h4>
+                        <p><strong>Tunda untuk bulan 7-9,</strong> setelah rice bowl sudah profitable dan team sudah skilled. Kemudian explore Sate Padang sebagai brand kedua untuk:</p>
+                        <ul>
+                            <li>✓ Diversifikasi revenue stream</li>
+                            <li>✓ Leverage existing kitchen + delivery network</li>
+                            <li>✓ Night-time revenue window (17:00-22:00) tanpa canibalize daytime rice bowl</li>
+                            <li>✓ Test multi-brand cloud kitchen model</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 9: EKONOMI DAN SKENARIO FINANSIAL -->
+            <section id="section9">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>9. Unit Economics & 3 Financial Scenarios</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <h3>SCENARIO 1: CONSERVATIVE (50 orders/hari)</h3>
+
+                    <div class="financial-summary">
+                        <div class="financial-item">
+                            <div class="label">Monthly Revenue</div>
+                            <div class="value">27M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Food Cost (35%)</div>
+                            <div class="value">-9.45M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Packaging (2K/order)</div>
+                            <div class="value">-3M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Profit</div>
+                            <div class="value">14.55M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Platform Fees (25%)</div>
+                            <div class="value">-6.75M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Contribution</div>
+                            <div class="value">7.8M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Rent (Kost/Warung)</div>
+                            <div class="value">-2M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Labor (1 cook + 1 assembler)</div>
+                            <div class="value">-4M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Utilities (Gas, Listrik, Air)</div>
+                            <div class="value">-1.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Misc (Phone, Internet, Promo)</div>
+                            <div class="value">-1M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Total OPEX</div>
+                            <div class="value">-8.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label" style="color: #81c784;">NET PROFIT</div>
+                            <div class="value" style="color: #81c784;">-0.7M</div>
+                        </div>
+                    </div>
+
+                    <div class="risk-box">
+                        <h4>⚠️ Conservative Scenario Analysis</h4>
+                        <p><strong>Status: Barely surviving, not sustainable.</strong> Only 50 orders/hari is too low to cover OPEX. Anda need at least 65-70 orders/hari to break-even at 2M profit. Conservative scenario only OK jika:</p>
+                        <ul>
+                            <li>✓ Anda cut OPEX ke 7.5M (reduce labor to 3M, rent to 1.5M)</li>
+                            <li>✓ Atau scale ke 65 orders dalam 3-4 minggu (realistic dengan GoFood + GrabFood listing)</li>
+                        </ul>
+                    </div>
+
+                    <h3>SCENARIO 2: BASE CASE (80 orders/hari) - RECOMMENDED TARGET</h3>
+
+                    <div class="financial-summary">
+                        <div class="financial-item">
+                            <div class="label">Monthly Revenue</div>
+                            <div class="value">48M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Food Cost (33%)</div>
+                            <div class="value">-15.84M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Packaging</div>
+                            <div class="value">-4.8M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Profit</div>
+                            <div class="value">27.36M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Platform Fees (25%)</div>
+                            <div class="value">-12M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Contribution</div>
+                            <div class="value">15.36M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Rent</div>
+                            <div class="value">-2M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Labor</div>
+                            <div class="value">-4M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Utilities</div>
+                            <div class="value">-1.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Misc</div>
+                            <div class="value">-1M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Total OPEX</div>
+                            <div class="value">-8.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label" style="color: #81c784;">NET PROFIT</div>
+                            <div class="value" style="color: #81c784;">6.86M</div>
+                        </div>
+                    </div>
+
+                    <div class="success-box">
+                        <h4>✓ Base Case Verdict: HEALTHY & SUSTAINABLE</h4>
+                        <p><strong>80 orders/hari = 6.86M net profit/bulan.</strong> Dengan initial investment 15M, payback period adalah 2-3 bulan. Ini sangat attractive. Base case adalah target realistik untuk month 2-3 (after GoFood + GrabFood listing momentum).</p>
+                    </div>
+
+                    <h3>SCENARIO 3: AGGRESSIVE (120 orders/hari + Bundle Strategy)</h3>
+
+                    <div class="financial-summary">
+                        <div class="financial-item">
+                            <div class="label">Monthly Revenue</div>
+                            <div class="value">79.2M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Food Cost (32%)</div>
+                            <div class="value">-25.34M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Packaging</div>
+                            <div class="value">-7.2M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Profit</div>
+                            <div class="value">46.66M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Platform Fees (24%)</div>
+                            <div class="value">-19M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Gross Contribution</div>
+                            <div class="value">27.66M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Rent</div>
+                            <div class="value">-2.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Labor (1 cook + 2 assemblers)</div>
+                            <div class="value">-5.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Utilities</div>
+                            <div class="value">-2M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Misc & Promo</div>
+                            <div class="value">-1.5M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label">Total OPEX</div>
+                            <div class="value">-11M</div>
+                        </div>
+                        <div class="financial-item">
+                            <div class="label" style="color: #81c784;">NET PROFIT</div>
+                            <div class="value" style="color: #81c784;">16.66M</div>
+                        </div>
+                    </div>
+
+                    <div class="success-box">
+                        <h4>✓ Aggressive Scenario: HIGHLY PROFITABLE</h4>
+                        <p><strong>120 orders/hari = 16.66M net profit/bulan.</strong> Anda perlu tambah 1 assembler (labor naik ke 5.5M), tapi net profit naik 2.4x (dari 6.86M base case). ASP juga naik (bundle strategy pushes average up). Aggressive scenario adalah realistic untuk month 4-6 setelah scale optimization.</p>
+                        <p>Note: Platform fee actually drops dari 25% → 24% karena scale benefit (higher volume = better negotiation position, plus WhatsApp sales add mix).</p>
+                    </div>
+
+                    <h3>Payback Analysis</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Scenario</th>
+                                <th>Daily Orders</th>
+                                <th>Monthly Profit</th>
+                                <th>Initial Investment</th>
+                                <th>Payback Period</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Conservative</td>
+                                <td>50</td>
+                                <td>-0.7M</td>
+                                <td>15M</td>
+                                <td>Not sustainable</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>Base Case</strong></td>
+                                <td><strong>80</strong></td>
+                                <td><strong>6.86M</strong></td>
+                                <td><strong>15M</strong></td>
+                                <td><strong>2.2 bulan</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Aggressive</td>
+                                <td>120</td>
+                                <td>16.66M</td>
+                                <td>15M</td>
+                                <td>0.9 bulan (27 days)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="content-box">
+                        <h4>💡 Key Insight: Payback Sangat Cepat</h4>
+                        <p>Dengan base case assumptions (80 orders/hari, 20K ASP, 33% food cost), payback adalah <strong>2.2 bulan</strong>. Ini sangat menarik untuk business dengan limited capital. Bahkan aggressive scenario (120 orders) hanya butuh <strong>27 hari payback</strong> (1 bulan).</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 10: FATAL FLAW & MITIGASI -->
+            <section id="section10">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>10. Fatal Flaw Check & Risk Mitigation</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="risk-box">
+                        <h4>⚠️ FATAL FLAW #1: RED OCEAN (Commodity Product)</h4>
+                        <p><strong>Problem:</strong> Rice bowl adalah commodity product. "Nasi + protein + sambal" = basic offering di setiap warung. Zero differentiation = price competition → margin squeeze.</p>
+                        <p><strong>Severity:</strong> HIGH - Ini adalah biggest risk untuk rice bowl</p>
+                        <p><strong>Mitigasi:</strong></p>
+                        <ul>
+                            <li>✓ <strong>Differentiate via Sambal Quality & Variety:</strong> Develop 5-8 signature sambals. Make sambal the hero, not protein. Customers repeat for sambal experience, not for basic ayam goreng</li>
+                            <li>✓ <strong>Brand Consistency:</strong> Nama brand + logo + packaging yang memorable. Make it feel like "Minang Modern" atau "Sambal Specialist" bukan generic rice box</li>
+                            <li>✓ <strong>Fast Delivery:</strong> Promise 20-30 min delivery time (vs typical 40-50 min). Speed = differentiation point</li>
+                            <li>✓ <strong>Quality Control:</strong> Every box = consistent portion, fresh sambal, proper packaging. Never compromise on quality even at 80 orders/day scale</li>
+                            <li>✓ <strong>Customer Feedback Loop:</strong> First 3 months = collect feedback aggressively. Ask "what would make you repeat?" → Use insights untuk sambal iteration</li>
+                        </ul>
+                    </div>
+
+                    <div class="risk-box">
+                        <h4>⚠️ FATAL FLAW #2: DEPENDENCY ON PLATFORM FEES</h4>
+                        <p><strong>Problem:</strong> 70% of orders dari GoFood/GrabFood (platform fees 20-30%). Jika platform menaikkan fee atau algoritma berubah, margin bisa squeeze drastis</p>
+                        <p><strong>Severity:</strong> MEDIUM - Manageable tapi perlu hedge</p>
+                        <p><strong>Mitigasi:</strong></p>
+                        <ul>
+                            <li>✓ <strong>Build Direct WhatsApp Channel:</strong> Target 30% orders dari direct WhatsApp (customers dari 396+ kost listings nearby). WhatsApp 0% fee = pure margin. Prioritize this early</li>
+                            <li>✓ <strong>Multi-Platform Diversification:</strong> List di GoFood + GrabFood + ShopeeFood. Don't rely on single platform (algorithm risk mitigation)</li>
+                            <li>✓ <strong>Acceptable Margin Floor:</strong> Even jika platform fee naik ke 35%, margin masih 20%+ sustainable. Not ideal, tapi not fatal</li>
+                            <li>✓ <strong>Monitor Platform Economics:</strong> Monthly track fee changes, algorithm changes. Be ready to pivot mix (push direct sales jika platform fee spike)</li>
+                        </ul>
+                    </div>
+
+                    <div class="risk-box">
+                        <h4>⚠️ FATAL FLAW #3: CHICKEN (PROTEIN) QUALITY & SUPPLY RISK</h4>
+                        <p><strong>Problem:</strong> Ayam kualitas bagus + harga konsisten = critical untuk margin consistency. Jika ayam naik drastis atau quality drop, economics collapse</p>
+                        <p><strong>Severity:</strong> MEDIUM - Price volatility bekasi ayam seasonal, quality supplier-dependent</p>
+                        <p><strong>Mitigasi:</strong></p>
+                        <ul>
+                            <li>✓ <strong>Supplier Relationships:</strong> Identify 2-3 reliable supplier ayam di Surakarta. Build relationship early. Negotiate volume discount + consistent quality terms</li>
+                            <li>✓ <strong>Quality Inspection:</strong> Daily inspeksi ayam sebelum diproses. Bad quality = reject immediately, find alternative supplier</li>
+                            <li>✓ <strong>Price Hedging:</strong> Monitor ayam harga daily. Jika harga naik drastis, increase selling price slightly atau reduce ayam porsi. Communicate transparently to customers</li>
+                            <li>✓ <strong>Protein Flexibility:</strong> Menu punya 3 proteins: ayam goreng, ayam bakar, telur. Jika ayam mahal → push telur + sambal (80% margin). Flexibility ke egg-based meals reduce supplier risk</li>
+                        </ul>
+                    </div>
+
+                    <div class="risk-box">
+                        <h4>⚠️ FATAL FLAW #4: REPEAT RATE LOWER THAN EXPECTED</h4>
+                        <p><strong>Problem:</strong> Unit economics assume 30%+ repeat rate. Jika repeat rate hanya 15-20% (customer tries once, doesn't repeat), customer acquisition cost jadi sangat tinggi</p>
+                        <p><strong>Severity:</strong> MEDIUM - Possible risk, needs validation in pilot</p>
+                        <p><strong>Mitigasi:</strong></p>
+                        <ul>
+                            <li>✓ <strong>Track Repeat Rate Religiously:</strong> First 4 weeks, monitor repeat rate closely. (# orders from repeat customers / total orders) should be &gt;25% by week 3</li>
+                            <li>✓ <strong>Loyalty Program:</strong> Every 5th order = free sambal. Make repeat rewarding. Small incentive = can boost repeat from 20% → 30%</li>
+                            <li>✓ <strong>Sambal Variety Strategy:</strong> If repeat rate stuck at 20%, hypothesis is customers don't see differentiation. Increase sambal variety immediately (8 options vs 5)</li>
+                            <li>✓ <strong>Feedback Loop:</strong> Ask repeat customers "why you order again?" vs non-repeat "why not?" → Use insights untuk product iteration</li>
+                            <li>✓ <strong>Bundle Strategy:</strong> Family pack (4 boxes 70K) = nudge untuk higher commitment / recurring orders</li>
+                        </ul>
+                    </div>
+
+                    <div class="risk-box">
+                        <h4>⚠️ FATAL FLAW #5: TEAM SKILL & CONSISTENCY</h4>
+                        <p><strong>Problem:</strong> Scaling dari 50 → 120 orders/day dengan 2-3 people = team perlu sangat efficient. Jika cook tidak bisa batch process properly atau assembler slow, quality drops atau orders delayed</p>
+                        <p><strong>Severity:</strong> MEDIUM - Training investment needed early</p>
+                        <p><strong>Mitigasi:</strong></p>
+                        <ul>
+                            <li>✓ <strong>Process Documentation:</strong> Document setiap step (rice cooking, chicken frying, sambal prepping, assembly). Make it repeatable dan trainable</li>
+                            <li>✓ <strong>KPI Tracking:</strong> Daily track: # orders assembled per assembler per hour (target 1 order per 90 detik = 40 orders/hour per person). If below target = retraining</li>
+                            <li>✓ <strong>Quality Checklist:</strong> Every box sebelum deliver: check portion size (rice + protein), sambal sealed, packaging clean, invoice correct. Fail any = repack</li>
+                            <li>✓ <strong>Team Development:</strong> Month 1-2 = invest time in training. Month 3+ = team bisa handle peak hours without stress</li>
+                        </ul>
+                    </div>
+
+                    <h3>Summary: Risk Mitigation Roadmap</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Risk</th>
+                                <th>Mitigation Priority</th>
+                                <th>Timeline</th>
+                                <th>Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Red Ocean Commodity Risk</td>
+                                <td>HIGH - Start immediately</td>
+                                <td>Week 1-4 (product dev)</td>
+                                <td>You (recipe development)</td>
+                            </tr>
+                            <tr>
+                                <td>Platform Fee Dependency</td>
+                                <td>HIGH - Start immediately</td>
+                                <td>Week 2+ (build WhatsApp channel)</td>
+                                <td>You + Assembler (customer relations)</td>
+                            </tr>
+                            <tr>
+                                <td>Chicken Supply Risk</td>
+                                <td>HIGH - Before launch</td>
+                                <td>Week 1 (supplier mapping)</td>
+                                <td>You (supplier relationship)</td>
+                            </tr>
+                            <tr>
+                                <td>Low Repeat Rate</td>
+                                <td>MEDIUM - Monitor weekly</td>
+                                <td>Week 2-4 (tracking)</td>
+                                <td>You + Assembler (feedback collection)</td>
+                            </tr>
+                            <tr>
+                                <td>Team Skill Gap</td>
+                                <td>MEDIUM - Start week 1</td>
+                                <td>Week 1-3 (training)</td>
+                                <td>You (training)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- SECTION 11: 30-HARI PILOT PLAN -->
+            <section id="section11">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>11. 30-Hari Pilot Plan</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="timeline">
+
+                        <div class="timeline-item">
+                            <div class="timeline-date">📅 MINGGU 1 (Persiapan)</div>
+                            <div class="timeline-content">
+                                <h4>Fokus: Product Development & Infrastructure Setup</h4>
+                                <ul>
+                                    <li><strong>Recipe Finalization (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Develop 3 hero proteins: Ayam Goreng Crispy (recipe, frying temp, time), Ayam Bakar Madu (marinate formula, grill time), Telur Balado (sambal recipe consistency)</li>
+                                            <li>Batch cook test: Can 1 cook produce 50 portions in 2.5 hours (target: 08:00-10:30 finish). If yes → proceed. If no → optimize recipe (longer marinate = less grill time, etc)</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Sambal Development (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Develop 5 signature sambals (Pedas Standard, Kematian, Matah, Kacang, Kemiri). Taste test dengan teman/keluarga. Document recipe + portion consistency</li>
+                                            <li>Test shelf-life: Refrigerate sambal 1-5 hari, taste again. Confirm &gt;3 days shelf-life acceptable</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Kitchen Setup (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Identify location: Kost/rumah dengan kitchen akses, atau small warung space di Laweyan (rent &lt;2M/bulan)</li>
+                                            <li>Equipment sourcing: Rice cooker industrial 10L (~3M), deep fryer (~4M), prep station (~1-2M). Total &lt;10M</li>
+                                            <li>Supply chain: Identify ayam supplier (price ~35-40K/kg, quality grade A), beras supplier (10K/kg), bumbu supplier</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Packaging (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Source compartmented boxes (anti-soggy, leak-proof, ~2K per box). Order 500 pcs initial batch</li>
+                                            <li>Design simple label / sticker (brand name + contact + ingredients). Nggak perlu fancy, just clear</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Branding (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Develop brand name. Suggestion: Something sambal-focused atau modern-Minang vibe (e.g., "Sambal Heroes", "Minang Kitchen", "Sambel Lab"). Not generic "rice bowl"</li>
+                                            <li>Create simple WhatsApp Business profile (one-liner description, location on map, opening hours)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <p style="margin-top: 15px; color: #ffd54f;"><strong>END OF WEEK 1 TARGET:</strong> Product recipes finalized, kitchen ready, 500 packaging orders, sambal recipes tested &amp; shelf-life confirmed</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-date">📅 MINGGU 2 (Soft Launch & Validation)</div>
+                            <div class="timeline-content">
+                                <h4>Fokus: Soft Launch → 20-30 Orders/Day via WhatsApp</h4>
+                                <ul>
+                                    <li><strong>Process Testing (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Do actual batch cook: 50 portions morning. Then assemble 30 test orders (internal + friends). Measure time per step. Identify bottlenecks</li>
+                                            <li>Test delivery: Pack 10 orders, deliver in real vehicle to Pajang/Laweyan. Check: is food hot? Is sambal sealed? Is rice dry? Quality assessment</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Soft Launch (5 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Target 20-30 orders/day via WhatsApp (direct message), not platform yet</li>
+                                            <li>Target segment: Students in nearby kost (396+ listings). Do kost-to-kost promo. Leave flyers with QR code to WhatsApp Business</li>
+                                            <li>Pricing: Entry 15K, Core 20K, Premium 25K. No discounts yet, just get feedback</li>
+                                            <li>Track: # orders, sambal preference distribution, repeat rate (should be 0% week 2 since first-timers), customer feedback</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Feedback Loop (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Ask every customer: "What did you like? What can improve?" → Document patterns</li>
+                                            <li>Adjust recipe jika feedback consistent (e.g., "sambal too salty" → reduce salt in next batch)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <p style="margin-top: 15px; color: #ffd54f;"><strong>END OF WEEK 2 TARGET:</strong> 20-30 orders/day via WhatsApp validated, process timing optimized, customer feedback collected, ready for platform listing</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-date">📅 MINGGU 3 (Platform Listing & Scaling)</div>
+                            <div class="timeline-content">
+                                <h4>Fokus: GoFood Listing → 40-50 Orders/Day (blended WhatsApp + platform)</h4>
+                                <ul>
+                                    <li><strong>GoFood Registration (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Apply untuk GoFood merchant account. Need: ID, business permit, bank account, kitchen photo, product photo (20+ high-quality photos)</li>
+                                            <li>Setup menu: 3 proteins × 5 sambal options = 15 items. Price entry/core/premium tiers. Add bundle (family pack 4 portions 70K)</li>
+                                            <li>GoFood approval typically 3-5 hari. Use time untuk photo optimization, description copy</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Launch & Marketing (5 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>GoFood launch: Offer -20% discount first 50 orders (Gojek marketing tool) to jumpstart reviews</li>
+                                            <li>Promote via: WhatsApp group (existing customers), personal network, kost posters. Drive traffic to GoFood listing</li>
+                                            <li>Target: 40-50 orders/day total (20 WhatsApp + 20-30 GoFood)</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Monitoring (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Track: Total daily orders, platform vs WhatsApp mix, repeat rate (should be 5-10% by week 3 end), review score</li>
+                                            <li>Respond to EVERY review (positive + negative). Show you care about feedback</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <p style="margin-top: 15px; color: #ffd54f;"><strong>END OF WEEK 3 TARGET:</strong> GoFood active, 40-50 orders/day running, repeat rate 5-10%, ready for second platform listing</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-date">📅 MINGGU 4 (Multi-Platform & Optimization)</div>
+                            <div class="timeline-content">
+                                <h4>Fokus: GrabFood + ShopeeFood Listing → 60-80 Orders/Day Target</h4>
+                                <ul>
+                                    <li><strong>GrabFood Registration (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Apply untuk GrabFood. Same documents as GoFood. Setup menu identically. Launch dengan -15% promo</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>ShopeeFood (Optional, 1 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>If Shopee Food available di Surakarta, list there too. Otherwise focus on GoFood + GrabFood + WhatsApp (3 channels sufficient)</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Bundle Strategy (3 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Create family bundles: 4-box pack at 70K (save 10-30K vs individual). Promote heavily. Target: 10% of orders as bundles = boost ASP from 20K → 22K</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Final Analysis (2 hari):</strong>
+                                        <ul style="margin-top: 5px; margin-left: 20px;">
+                                            <li>Track 4-week metrics: Daily orders, repeat rate, ASP, review score, profitability. Calculate actual monthly profit vs forecast</li>
+                                            <li>Decision point: If repeat rate &gt;20% + daily orders &gt;60 + review 4.5+ stars = SCALE & automate. If below = iterate product before scaling</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <p style="margin-top: 15px; color: #ffd54f;"><strong>END OF WEEK 4 TARGET:</strong> 60-80 orders/day running, repeat rate &gt;20%, 4.5+ rating, profitable, ready untuk month 2 optimization</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <h3>30-Hari Pilot KPIs & Decision Criteria</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>KPI</th>
+                                <th>Target End-of-Month</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Daily Orders</strong></td>
+                                <td>60-80 (60 minimum)</td>
+                                <td>If &gt;60 = demand validated, keep going. If &lt;40 = product/market fit issue, iterate</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Repeat Rate</strong></td>
+                                <td>&gt;20%</td>
+                                <td>If &gt;25% = strong repeat, good unit economics. If &lt;15% = customers not coming back, fix product</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Review Score</strong></td>
+                                <td>&gt;4.5 stars</td>
+                                <td>If &gt;4.5 = quality good, algorithm favors you. If &lt;4.0 = quality issues, fix immediately</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Monthly Profit</strong></td>
+                                <td>2-4M (minimum break-even)</td>
+                                <td>If &gt;3M at 60-80 orders = model works, scale. If &lt;1M = economics broken, cut OPEX or increase price</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer Feedback</strong></td>
+                                <td>3/5 consistent positive (sambal, freshness, speed)</td>
+                                <td>If sambal = #1 positive = differentiation working. If "boring" feedback common = need sambal variety boost</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Team Efficiency</strong></td>
+                                <td>1 assembler can do 40 orders/day (1.5 min/order)</td>
+                                <td>If can't reach 40/day per assembler = bottleneck, process slow. Need retraining or workflow redesign</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="success-box">
+                        <h4>✓ Decision Point: GO or PIVOT</h4>
+                        <ul>
+                            <li><strong>GO (Scale Aggressively):</strong> If daily orders &gt;70, repeat rate &gt;25%, review &gt;4.5, profit &gt;3M → Hire assembler, expand to month 2+ aggressive growth</li>
+                            <li><strong>HOLD (Optimize, Don't Scale):</strong> If daily orders 50-70, repeat rate 15-20%, review 4.0-4.5 → Stay lean, iterate product, gather more data before aggressive hiring</li>
+                            <li><strong>PIVOT (Change Strategy):</strong> If daily orders &lt;40, repeat rate &lt;15% → Something fundamentally wrong. Either product (taste), market (wrong segment), atau positioning (commodity). Test Sambal-Centric variant or consider Sate Padang instead</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECTION 12: ACTION LIST -->
+            <section id="section12">
+                <div class="section-header" onclick="toggleSection(event)">
+                    <h2>12. Action List Pemilik (Top 10)</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+
+                    <div class="action-list">
+                        <ol>
+                            <li><span class="action-num">1.</span> <strong>Finalize 3 Hero Proteins</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Develop & test recipes for:</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Ayam Goreng Crispy (frying temp, time, oil type, crispness target)</li>
+                                        <li>Ayam Bakar Madu (marinate formula, grill time, honey balance)</li>
+                                        <li>Telur Balado (boil time, balado sambal consistency, portion size)</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: 3 hari</strong> | <strong>Owner: You</strong> | <strong>Success Metric: 1 cook can batch 50 portions in 2.5 hrs</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">2.</span> <strong>Develop 5 Signature Sambals</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Sambal adalah differentiation hero. Develop & document:</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Sambal Pedas Standard (baseline default)</li>
+                                        <li>Sambal Kematian (super spicy for brave)</li>
+                                        <li>Sambal Matah (traditional fresh style)</li>
+                                        <li>Sambal Kacang (creamy peanut version)</li>
+                                        <li>Sambal Kemiri (nutty umami-heavy)</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: 3 hari</strong> | <strong>Owner: You</strong> | <strong>Success Metric: &gt;3 days shelf-life, consistent taste batch-to-batch</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">3.</span> <strong>Source Compartmented Packaging</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Find supplier untuk anti-soggy, leak-proof boxes</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Target: 2K per box, compartmented (rice + protein + sambal separate)</li>
+                                        <li>Order: 500 pcs initial batch</li>
+                                        <li>Timeline: 5-7 hari custom print (brand name, logo, contact)</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: 5 hari</strong> | <strong>Owner: You</strong> | <strong>Success Metric: Boxes arrive, quality check pass</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">4.</span> <strong>Set Up Minimal Kitchen Equipment</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Acquire essential equipment for batch production</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Industrial rice cooker 10L (~3M) - allows 60-80 portions per batch</li>
+                                        <li>Deep fryer (~4M) - for ayam goreng crispy batch</li>
+                                        <li>Prep station / counter (~1-2M) - assembly line workspace</li>
+                                        <li>Small refrigerator (~1M) - sambal storage, keeping cooked proteins warm</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: 7 hari</strong> | <strong>Owner: You + Helper</strong> | <strong>Success Metric: All equipment working, test batch successful</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">5.</span> <strong>Create Brand Name + Positioning</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Develop memorable brand (not generic "rice bowl")</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Suggestion: Sambal-focused name (e.g., "Sambel Lab", "Sambal Heroes", "Minang Kitchen")</li>
+                                        <li>Create simple logo (can be DIY or hire cheap designer ~500K)</li>
+                                        <li>One-liner positioning: e.g., "Premium Sambal, Consistent Quality, 20-min Delivery"</li>
+                                        <li>Setup WhatsApp Business profile dengan description + map location</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: 3 hari</strong> | <strong>Owner: You</strong> | <strong>Success Metric: Logo designed, WhatsApp Business active</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">6.</span> <strong>Run Batch Cook Test (1 cook, 2.5 hours, 50 portions)</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Validate that 1 cook can realistically handle daily batch production</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Test morning: 06:00-08:30 actual cook 50 portions (3 proteins + 5 sambals + rice)</li>
+                                        <li>Measure: Time per step, identify bottlenecks, optimize sequence</li>
+                                        <li>Result: If 50 portions in 2.5 hours = PASS (means 80 portions in 4 hours possible). If &gt;3 hours = FAIL, need recipe optimization</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: Week 1</strong> | <strong>Owner: You</strong> | <strong>Success Metric: 50 portions batch in &lt;2.5 hours</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">7.</span> <strong>Test Pricing Tiers (18K, 22K, 28K)</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Validate willingness to pay for different tiers</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Entry 15K (nasi+telur+sambal) - test acceptance rate</li>
+                                        <li>Core 20K (nasi+ayam+sambal+extra) - expect 50% of orders here</li>
+                                        <li>Premium 28K (nasi+combo+2sambal+drink) - test ASP ceiling</li>
+                                        <li>Track which tier customers choose. Adjust pricing jika skewed</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: Week 2</strong> | <strong>Owner: You</strong> | <strong>Success Metric: Average 20K ASP, 50% at core tier</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">8.</span> <strong>Soft Launch to 20 Kost Residents (Direct WhatsApp)</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Start with nearest/easiest segment before platform scaling</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Target: Kost residents near Labuh Biru / Pajang area (396+ kost listings nearby)</li>
+                                        <li>Method: Leave flyers with QR code (WhatsApp Business link) in kost lobby</li>
+                                        <li>Target: 20-30 orders/day in week 2</li>
+                                        <li>Collect feedback: "What did you like? What to improve?"</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: Week 2</strong> | <strong>Owner: You + Helper</strong> | <strong>Success Metric: 20-30 orders/day via WhatsApp, 0 complaints</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">9.</span> <strong>Register GoFood Within Week 2 + Launch Listing</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>Platform listing is key to scale beyond kost word-of-mouth</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Prepare: ID, business permit, bank account, kitchen photo (3+ angles), product photo (20+ high-quality shots from different angles)</li>
+                                        <li>Setup menu: 3 proteins × 5 sambal = 15 items. Price tiers. Add bundle option</li>
+                                        <li>Launch with -20% discount (first 50 orders) to jumpstart reviews</li>
+                                        <li>Target: 20-30 GoFood orders by week 3 end</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: Week 2-3</strong> | <strong>Owner: You</strong> | <strong>Success Metric: GoFood merchant account approved, listing active, 20+ 5-star reviews</strong></p>
+                                </div>
+                            </li>
+
+                            <li><span class="action-num">10.</span> <strong>Track & Analyze Repeat Rate (Weekly Dashboard)</strong>
+                                <div style="margin-left: 40px; margin-top: 8px; color: #b0e0e6;">
+                                    <p>This is the most critical metric for long-term viability</p>
+                                    <ul style="margin-top: 5px; margin-left: 20px;">
+                                        <li>Weekly track: # repeat customers / total customers = repeat rate %</li>
+                                        <li>Goal: Week 2 &gt;5%, Week 3 &gt;15%, Week 4 &gt;25%</li>
+                                        <li>If repeat rate stuck &lt;15% by week 3 = ALERT. Sample customer feedback: "why didn't you order again?" → iterate product immediately</li>
+                                        <li>If repeat rate &gt;25% = CELEBRATE. Model is working, scale confidently</li>
+                                    </ul>
+                                    <p style="margin-top: 8px;"><strong>Deadline: Daily tracking</strong> | <strong>Owner: You + Assembler</strong> | <strong>Success Metric: &gt;20% repeat rate by week 4</strong></p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <h3>Summary: 30-Hari Quick Win Checklist</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>Milestone</th>
+                                <th>Orders/Day</th>
+                                <th>Key Achievement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td>Prep & Setup Complete</td>
+                                <td>0 (no sales)</td>
+                                <td>Recipes finalized, kitchen ready, brand created, packaging arrived</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td>Soft Launch (WhatsApp)</td>
+                                <td>20-30</td>
+                                <td>Validated product, collected feedback, GoFood registration in progress</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td>Platform Launch (GoFood)</td>
+                                <td>40-50</td>
+                                <td>GoFood active, 20+ 5-star reviews, repeat rate 5-10%, ready untuk scale</td>
+                            </tr>
+                            <tr style="background: rgba(76, 175, 80, 0.1);">
+                                <td><strong>4</strong></td>
+                                <td>Multi-Platform & Bundles</td>
+                                <td><strong>60-80</strong></td>
+                                <td><strong>GrabFood live, 20%+ repeat rate, 2-4M profit/month, decision to scale or iterate</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="success-box">
+                        <h4>✓ Month 2+ Strategy (If Pilot Successful)</h4>
+                        <p>If by end of month 1 you have:</p>
+                        <ul>
+                            <li>✓ &gt;60 orders/day consistent</li>
+                            <li>✓ &gt;20% repeat rate</li>
+                            <li>✓ &gt;4.5 star rating</li>
+                            <li>✓ 2-4M monthly profit</li>
+                        </ul>
+                        <p>Then month 2+:</p>
+                        <ul>
+                            <li>→ <strong>HIRE:</strong> 1 full-time assembler (relieve you from assembly work). Now you focus on product + customer feedback</li>
+                            <li>→ <strong>EXPAND:</strong> Scale to 100-120 orders/day. Target 12-15M monthly profit</li>
+                            <li>→ <strong>EXPLORE:</strong> Test Sambal-Centric variant atau add new protein (Ayam Unggep / Rendang Rice Bowl)</li>
+                            <li>→ <strong>FUTURE:</strong> Month 6-7, if rice bowl stable, test Sate Padang as brand #2 (night time, same kitchen, different team)</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <p><strong>Document Date:</strong> 25 Maret 2026</p>
+            <p><strong>Analyst:</strong> Business Validation Framework | Deep Analysis</p>
+            <p>This is an investor-grade document. All numbers are reasonable estimates based on market research and operational benchmarks. Test all assumptions in pilot phase.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function toggleSection(event) {
+            const header = event.currentTarget;
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
+
+        // Auto-expand first section on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstContent = document.querySelector('.section-content');
+            if (firstContent) {
+                firstContent.classList.remove('collapsed');
+            }
+        });
+    </script>
+</body>
+</html>

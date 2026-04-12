@@ -1,4 +1,5 @@
 """Computer control handlers: /do /screen /open /click /type /key /cmd /install /upgrade."""
+
 from __future__ import annotations
 
 import asyncio
@@ -48,7 +49,9 @@ async def cmd_do(msg: Message) -> None:
         return
 
     exec_keywords = ["run", "execute", "plot", "train", "test"]
-    if any(k in task.lower() for k in exec_keywords) and any(k in task.lower() for k in ["code", "python", "script", "bash"]):
+    if any(k in task.lower() for k in exec_keywords) and any(
+        k in task.lower() for k in ["code", "python", "script", "bash"]
+    ):
         try:
             from agents.code_agent import run_code_agent
 
@@ -108,8 +111,19 @@ async def cmd_do_local(msg: Message) -> None:
                 tokens = tail.split()
                 if len(tokens) >= 3:
                     msg_starters = {
-                        "aku", "i", "hi", "hello", "sayang", "dear", "test", "tes", "tolong",
-                        "please", "maaf", "kangen", "love",
+                        "aku",
+                        "i",
+                        "hi",
+                        "hello",
+                        "sayang",
+                        "dear",
+                        "test",
+                        "tes",
+                        "tolong",
+                        "please",
+                        "maaf",
+                        "kangen",
+                        "love",
                     }
                     split_idx = -1
                     for i in range(2, len(tokens)):
@@ -144,7 +158,7 @@ async def cmd_do_local(msg: Message) -> None:
     result = await computer_agent.whatsapp_send_local(
         contact,
         message_text,
-        progress_cb=_progress_local,
+        _progress=_progress_local,
     )
     await status_msg.edit_text(html_mod.escape(result))
 
@@ -229,8 +243,7 @@ async def cmd_click(msg: Message) -> None:
     parts = (msg.text or "").split()
     if len(parts) < 3:
         await msg.answer(
-            "usage: <code>/click &lt;x&gt; &lt;y&gt; [left|right|double]</code>\n"
-            "use /screen first to find coordinates",
+            "usage: <code>/click &lt;x&gt; &lt;y&gt; [left|right|double]</code>\nuse /screen first to find coordinates",
             parse_mode="HTML",
         )
         return
@@ -474,9 +487,9 @@ async def kbd_shell_hint(msg: Message) -> None:
 async def cb_feedback(cb: CallbackQuery) -> None:
     action = cb.data.split(":")[1]
     responses = {
-        "good":  "\U0001f44d nice",
+        "good": "\U0001f44d nice",
         "retry": "re-send your message to retry",
-        "info":  "provider shown in button label",
+        "info": "provider shown in button label",
     }
     await cb.answer(responses.get(action, "ok"))
 
@@ -505,7 +518,7 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
                 "Describe everything you see on this screen in detail: "
                 "which applications are open, what content is visible, "
                 "any errors/warnings, what the user appears to be working on."
-            )
+            ),
         )
         typing_task.cancel()
         await status_msg.delete()
@@ -530,7 +543,6 @@ async def cb_screen_do(cb: CallbackQuery) -> None:
         return
     await cb.answer()
     await cb.message.answer(
-        "what do you want me to do on screen?\n\n"
-        "just reply with your task, or use <code>/do &lt;task&gt;</code>",
+        "what do you want me to do on screen?\n\njust reply with your task, or use <code>/do &lt;task&gt;</code>",
         parse_mode="HTML",
     )

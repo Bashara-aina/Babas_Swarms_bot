@@ -5,6 +5,9 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
+from core.reliability.model_router import classify_complexity, select_model
+from core.reliability.fallback_chain import FallbackChain, get_fallback_chain
+
 _LAZY_CORE_SUBMODULES = frozenset({"openai_agents_bridge", "swarm_topologies"})
 
 

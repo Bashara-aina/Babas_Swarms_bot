@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Dive: Dried Ready Meal — Home Manufacturing Business</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --card: #161b24;
+    --card2: #1e2535;
+    --border: #2a3347;
+    --accent: #f97316;
+    --accent2: #3b82f6;
+    --accent3: #10b981;
+    --accent4: #8b5cf6;
+    --warn: #ef4444;
+    --yellow: #eab308;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --dim: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* NAV */
+  .nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .nav-sub { color: var(--muted); font-size: 12px; }
+  .nav-badge { margin-left: auto; background: rgba(16,185,129,0.15); color: var(--accent3); border: 1px solid var(--accent3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #0d1520 0%, #1a0a2e 50%, #0d1520 100%); border-bottom: 1px solid var(--border); padding: 48px 32px 40px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(249,115,22,0.12) 0%, transparent 70%); }
+  .hero h1 { font-size: 32px; font-weight: 800; color: #fff; position: relative; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); margin-top: 12px; max-width: 640px; margin-left: auto; margin-right: auto; position: relative; }
+  .verdict-box { display: inline-flex; gap: 32px; margin-top: 28px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 16px; padding: 20px 32px; position: relative; }
+  .verdict-item { text-align: center; }
+  .verdict-score { font-size: 36px; font-weight: 900; }
+  .verdict-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+  .score-green { color: var(--accent3); }
+  .score-orange { color: var(--accent); }
+  .score-blue { color: var(--accent2); }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+  .section-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-icon { font-size: 20px; }
+
+  /* CARDS */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .card-value { font-size: 26px; font-weight: 800; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mb-32 { margin-bottom: 32px; }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .kpi-card .kpi-icon { font-size: 24px; margin-bottom: 8px; }
+  .kpi-card .kpi-value { font-size: 24px; font-weight: 800; }
+  .kpi-card .kpi-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .kpi-card .kpi-change { font-size: 11px; margin-top: 6px; }
+  .up { color: var(--accent3); }
+  .down { color: var(--warn); }
+  .neutral { color: var(--yellow); }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 14px; background: var(--card2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid rgba(42,51,71,0.5); font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* TAGS */
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .tag-green { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .tag-orange { background: rgba(249,115,22,0.15); color: var(--accent); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .tag-purple { background: rgba(139,92,246,0.15); color: var(--accent4); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--warn); }
+  .tag-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+
+  /* PROGRESS BAR */
+  .bar-wrap { background: var(--card2); border-radius: 4px; height: 8px; margin-top: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-orange { background: linear-gradient(90deg, var(--accent), #fb923c); }
+  .bar-green { background: linear-gradient(90deg, var(--accent3), #34d399); }
+  .bar-blue { background: linear-gradient(90deg, var(--accent2), #60a5fa); }
+  .bar-purple { background: linear-gradient(90deg, var(--accent4), #a78bfa); }
+  .bar-yellow { background: linear-gradient(90deg, var(--yellow), #fbbf24); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-item::before { content: ''; position: absolute; left: -24px; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid; }
+  .tl-orange::before { background: var(--accent); border-color: var(--accent); }
+  .tl-green::before { background: var(--accent3); border-color: var(--accent3); }
+  .tl-blue::before { background: var(--accent2); border-color: var(--accent2); }
+  .tl-purple::before { background: var(--accent4); border-color: var(--accent4); }
+  .tl-month { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .tl-title { font-weight: 700; color: var(--text); }
+  .tl-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+  /* COMPETITOR CARD */
+  .comp-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .comp-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .comp-type { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .comp-price { font-size: 20px; font-weight: 800; color: var(--accent); }
+  .comp-price-sub { font-size: 11px; color: var(--muted); }
+  .comp-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; }
+  .comp-row span:first-child { color: var(--muted); }
+
+  /* PRODUCT CARD */
+  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .product-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+  .product-name { font-weight: 700; font-size: 16px; }
+  .product-tier { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .product-body { padding: 16px 20px; }
+  .product-price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .product-sell { font-size: 22px; font-weight: 800; color: var(--accent3); }
+  .product-cogs { font-size: 13px; color: var(--muted); }
+  .margin-badge { background: rgba(16,185,129,0.15); color: var(--accent3); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 700; }
+  .product-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(42,51,71,0.3); }
+  .product-stat:last-child { border-bottom: none; }
+  .product-stat .label { color: var(--muted); }
+
+  /* RISK TABLE */
+  .risk-row { display: grid; grid-template-columns: 2fr 1fr 1fr 3fr; gap: 12px; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(42,51,71,0.4); font-size: 13px; }
+  .risk-row:last-child { border-bottom: none; }
+  .risk-header { background: var(--card2); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+
+  /* CALLOUT */
+  .callout { border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .callout-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+  .callout-orange { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); }
+  .callout-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); }
+  .callout-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-content strong { display: block; font-weight: 700; margin-bottom: 4px; }
+  .callout-content p { color: var(--muted); font-size: 13px; }
+
+  /* FINANCIAL MODEL */
+  .fin-table { width: 100%; }
+  .fin-table .fin-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 0; background: var(--card2); border-radius: 8px 8px 0 0; }
+  .fin-table .fin-header div { padding: 10px 14px; font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .fin-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 0; border-bottom: 1px solid rgba(42,51,71,0.4); }
+  .fin-row div { padding: 10px 14px; font-size: 13px; }
+  .fin-row.total { font-weight: 700; background: rgba(255,255,255,0.03); }
+  .fin-row.profit { background: rgba(16,185,129,0.07); color: var(--accent3); font-weight: 800; }
+
+  /* SECTION */
+  .section { margin-bottom: 48px; }
+
+  /* HORIZONTAL RULE */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* LIST */
+  ul.styled { list-style: none; padding: 0; }
+  ul.styled li { padding: 6px 0; border-bottom: 1px solid rgba(42,51,71,0.3); display: flex; gap: 8px; font-size: 13px; }
+  ul.styled li::before { content: '▸'; color: var(--accent); flex-shrink: 0; }
+  ul.styled li:last-child { border-bottom: none; }
+
+  /* FOOTER */
+  .footer { border-top: 1px solid var(--border); padding: 24px 32px; text-align: center; color: var(--dim); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">🍚 DRIED READY MEAL</div>
+  <div class="nav-sub">Deep Dive — Home Manufacturing | Pajang, Solo</div>
+  <div class="nav-badge">✅ FEASIBLE — HIGH POTENTIAL</div>
+</div>
+
+<div class="hero">
+  <h1>Bisnis <span>Dried Ready Meal</span><br>Makanan Indonesia Dehidrasi</h1>
+  <p>Fully cooked, just add water. Targetkan traveler, pendaki, mahasiswa kos, dan pekerja sibuk Indonesia. Produksi dari rumah di Pajang, Solo.</p>
+  <div class="verdict-box">
+    <div class="verdict-item">
+      <div class="verdict-score score-green">87/100</div>
+      <div class="verdict-label">Feasibility Score</div>
+    </div>
+    <div class="verdict-item">
+      <div class="verdict-score score-orange">Rp 22M</div>
+      <div class="verdict-label">Modal Awal Min.</div>
+    </div>
+    <div class="verdict-item">
+      <div class="verdict-score score-blue">60–70%</div>
+      <div class="verdict-label">Target Gross Margin</div>
+    </div>
+    <div class="verdict-item">
+      <div class="verdict-score score-green">4–6 bln</div>
+      <div class="verdict-label">BEP Estimate</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== EXECUTIVE SUMMARY ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚡</span>Executive Summary</div>
+
+    <div class="callout callout-green">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-content">
+        <strong>Kesimpulan: INI BISNIS YANG LAYAK DAN PUNYA MOAT KUAT</strong>
+        <p>Dried ready meal makanan Indonesia adalah gap yang belum ada yang mengisi dengan benar. Kompetitor existing (Lanana, Mercon, Medoeek) membuktikan demand ada — tapi semua produk mereka mahal (Rp 25-90K untuk satu lauk/nasi saja), tidak combo, dan tidak menyasar segmen mass market. Dengan produksi dari rumah di Solo, labor murah, dan distribusi via sister di Jakarta, ini adalah bisnis dengan structural cost advantage yang susah ditandingi pemain Jakarta.</p>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">🇮🇩</div>
+        <div class="kpi-value" style="color: var(--accent3);">USD 8.67B</div>
+        <div class="kpi-label">Market RTE Indonesia 2024</div>
+        <div class="kpi-change up">▲ CAGR 4.8% s/d 2030</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⛺</div>
+        <div class="kpi-value" style="color: var(--accent);">USD 170M</div>
+        <div class="kpi-label">Global Dehydrated Outdoor Meal</div>
+        <div class="kpi-change up">▲ CAGR 8.6%, tumbuh ke USD 410M 2035</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-value" style="color: var(--accent2);">30%</div>
+        <div class="kpi-label">GoFood: Growth Online Frozen/RTE 2024</div>
+        <div class="kpi-change neutral">▲ YoY, data Q4 2024</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🏔️</div>
+        <div class="kpi-value" style="color: var(--accent4);">7M+</div>
+        <div class="kpi-label">Pendaki Gunung per tahun (Indonesia)</div>
+        <div class="kpi-change up">▲ Pasar outdoor terus tumbuh</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== COMPETITOR ANALYSIS ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🔍</span>Competitor Landscape</div>
+
+    <div class="callout callout-blue">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Blue Ocean Insight</strong>
+        <p>Tidak ada kompetitor yang mengisi segmen "FULL MEAL combo (nasi + lauk) dehydrated, harga Rp 30-50K, rasa Indonesia autentik, untuk daily traveler/mahasiswa." Semua kompetitor either: terlalu mahal (outdoor premium), terlalu partial (lauk only / nasi only), atau bukan dehydrated (frozen/kaleng).</p>
+      </div>
+    </div>
+
+    <div class="grid-3 mb-24">
+      <div class="comp-card">
+        <div class="comp-name">🟢 Lanana</div>
+        <div class="comp-type">Nasi Instan Dehydrated • Indonesia</div>
+        <div class="comp-price">Rp 25-29K</div>
+        <div class="comp-price-sub">per pack nasi instan (30pcs = Rp 744-872K)</div>
+        <div class="comp-row"><span>Format</span><span>Nasi only, belum ada combo lauk</span></div>
+        <div class="comp-row"><span>Target</span><span>Outdoor/hiking</span></div>
+        <div class="comp-row"><span>Channel</span><span>Tokopedia, Lazada, Ralali</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-orange">PREMIUM</span></span></div>
+        <div class="comp-row"><span>Kelemahan</span><span>Nasi saja, no protein included</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">🔴 Mercon Merah Putih</div>
+        <div class="comp-type">Lauk Siap Makan (Retort Pouch) • Indonesia</div>
+        <div class="comp-price">Rp 40-55K</div>
+        <div class="comp-price-sub">per 150g (rendang sapi, oseng)</div>
+        <div class="comp-row"><span>Format</span><span>Lauk only, retort/kaleng — bukan dehydrated</span></div>
+        <div class="comp-row"><span>Target</span><span>Diaspora, travelers</span></div>
+        <div class="comp-row"><span>Channel</span><span>Supermarket, online</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-yellow">MID</span></span></div>
+        <div class="comp-row"><span>Kelemahan</span><span>Berat (ada liquid), no nasi</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">🟤 Medoeek</div>
+        <div class="comp-type">Rendang Kemasan Vacuum • Indonesia</div>
+        <div class="comp-price">Rp 85-100K</div>
+        <div class="comp-price-sub">per pack rendang vacuum (not dehydrated)</div>
+        <div class="comp-row"><span>Format</span><span>Rendang vacuum, semi-basah</span></div>
+        <div class="comp-row"><span>Target</span><span>Oleh-oleh, diaspora</span></div>
+        <div class="comp-row"><span>Channel</span><span>Shopee, toko oleh-oleh</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-orange">PREMIUM</span></span></div>
+        <div class="comp-row"><span>Kelemahan</span><span>Mahal, bukan "just add water"</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">🌱 Green Rebel</div>
+        <div class="comp-type">Plant-Based RTE • Indonesia (VC-funded)</div>
+        <div class="comp-price">Rp 75-185K</div>
+        <div class="comp-price-sub">per pack (plant-based steak, dll)</div>
+        <div class="comp-row"><span>Format</span><span>Plant-based, frozen/chilled</span></div>
+        <div class="comp-row"><span>Target</span><span>Urban millennial, vegan</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-red">LUXURY</span></span></div>
+        <div class="comp-row"><span>Relevance</span><span>Beda segment, bukan competitor langsung</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">🏔️ ReadyWise / Alpine Aire</div>
+        <div class="comp-type">Freeze-Dried Outdoor Meal • USA</div>
+        <div class="comp-price">Rp 130-200K</div>
+        <div class="comp-price-sub">per serving (freeze-dried, impor)</div>
+        <div class="comp-row"><span>Format</span><span>Full meal freeze-dried, outdoor</span></div>
+        <div class="comp-row"><span>Target</span><span>Pendaki hardcore</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-red">ULTRA PREMIUM</span></span></div>
+        <div class="comp-row"><span>Kelemahan</span><span>Impor, mahal, no Indonesian flavor</span></div>
+      </div>
+      <div class="comp-card" style="border-color: var(--accent3); background: rgba(16,185,129,0.05);">
+        <div class="comp-name" style="color: var(--accent3);">⭐ Kamu (Target Position)</div>
+        <div class="comp-type">Full Meal Dehydrated • Solo, Indonesia</div>
+        <div class="comp-price" style="color: var(--accent3);">Rp 30-50K</div>
+        <div class="comp-price-sub">combo pack nasi + lauk — FULL MEAL</div>
+        <div class="comp-row"><span>Format</span><span><strong>Nasi + lauk combo, just add water</strong></span></div>
+        <div class="comp-row"><span>Target</span><span>Semua segment (traveler, kos, hiking)</span></div>
+        <div class="comp-row"><span>Positioning</span><span><span class="tag tag-green">MASS PREMIUM</span></span></div>
+        <div class="comp-row"><span>Keunggulan</span><span>Harga terjangkau, rasa Indo autentik</span></div>
+      </div>
+    </div>
+
+    <div class="card mb-24">
+      <div class="card-title">Competitive Price Gap Analysis</div>
+      <table>
+        <thead><tr>
+          <th>Produk</th><th>Isi</th><th>Harga</th><th>Harga/100g protein</th><th>Format</th><th>Gap Kamu Masuki</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Lanana Nasi Instan</td><td>Nasi only</td><td>Rp 25-29K</td><td>N/A (no protein)</td><td>Dehydrated</td><td><span class="tag tag-orange">Tambah lauk, harga mirip</span></td></tr>
+          <tr><td>Mercon Rendang 150g</td><td>Lauk only</td><td>Rp 40-55K</td><td>~Rp 300/g</td><td>Retort pouch</td><td><span class="tag tag-orange">Full meal + lebih ringan</span></td></tr>
+          <tr><td>Medoeek Rendang</td><td>Lauk premium</td><td>Rp 85-100K</td><td>~Rp 500/g</td><td>Vacuum semi-basah</td><td><span class="tag tag-green">50% lebih murah</span></td></tr>
+          <tr><td>ReadyWise USA</td><td>Full meal</td><td>Rp 130-200K</td><td>~Rp 800/g</td><td>Freeze-dried</td><td><span class="tag tag-green">Indonesian flavors, 75% lebih murah</span></td></tr>
+          <tr style="background: rgba(16,185,129,0.05);"><td><strong>Target Produkmu</strong></td><td><strong>Nasi + Lauk combo</strong></td><td><strong>Rp 30-50K</strong></td><td><strong>~Rp 200/g</strong></td><td><strong>Dehydrated</strong></td><td><span class="tag tag-green">SWEET SPOT ✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== PRODUK & MENU ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🍱</span>Top Menu Recommendations + Unit Economics</div>
+
+    <div class="callout callout-orange">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <strong>Strategi 3-Tier: Mulai Lean, Scale Smart</strong>
+        <p>Mulai dengan 3-4 SKU saja dulu. Fokus pada ayam dan tempe (COGS paling rendah, demand paling tinggi). Tambah beef rendang setelah cash flow stabil. Target harga jual kompetitif vs GoFood/warung, BUKAN vs outdoor premium brands.</p>
+      </div>
+    </div>
+
+    <div class="grid-3 mb-24">
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🍚 Nasi Liwet Pack</div>
+            <div class="product-tier">TIER 1 — Launch SKU Priority</div>
+          </div>
+          <span class="tag tag-green">MULAI INI</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 18.000</div>
+              <div class="product-cogs">COGS: Rp 5.500</div>
+            </div>
+            <div class="margin-badge">69% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Bahan utama</span><span>Beras 100g + bumbu nasi liwet</span></div>
+          <div class="product-stat"><span class="label">Beras (100g)</span><span>Rp 1.500</span></div>
+          <div class="product-stat"><span class="label">Bumbu, minyak</span><span>Rp 800</span></div>
+          <div class="product-stat"><span class="label">Kemasan alu foil</span><span>Rp 1.800</span></div>
+          <div class="product-stat"><span class="label">Labor per unit</span><span>Rp 700</span></div>
+          <div class="product-stat"><span class="label">Energi (dehydrator)</span><span>Rp 300</span></div>
+          <div class="product-stat"><span class="label">Shelf life</span><span>6–12 bulan suhu ruang</span></div>
+          <div class="product-stat"><span class="label">Serving</span><span>Rehydrate jadi 1 porsi nasi</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-green" style="width: 69%;"></div></div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🍗 Ayam Suwir Balado</div>
+            <div class="product-tier">TIER 1 — Launch SKU Priority</div>
+          </div>
+          <span class="tag tag-green">MULAI INI</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 30.000</div>
+              <div class="product-cogs">COGS: Rp 13.500</div>
+            </div>
+            <div class="margin-badge">55% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Bahan utama</span><span>Ayam 80g dehydrated (dari ~220g raw)</span></div>
+          <div class="product-stat"><span class="label">Ayam broiler (raw 220g)</span><span>Rp 7.700</span></div>
+          <div class="product-stat"><span class="label">Bumbu balado/rempah</span><span>Rp 2.500</span></div>
+          <div class="product-stat"><span class="label">Kemasan alu foil zipper</span><span>Rp 2.000</span></div>
+          <div class="product-stat"><span class="label">Labor per unit</span><span>Rp 900</span></div>
+          <div class="product-stat"><span class="label">Energi</span><span>Rp 400</span></div>
+          <div class="product-stat"><span class="label">Shelf life</span><span>4–8 bulan (ada minyak)</span></div>
+          <div class="product-stat"><span class="label">Serving</span><span>Rehydrate jadi 1 porsi ayam suwir</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-orange" style="width: 55%;"></div></div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🥜 Tempe Orek Kering</div>
+            <div class="product-tier">TIER 1 — Best Margin SKU</div>
+          </div>
+          <span class="tag tag-green">MULAI INI</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 22.000</div>
+              <div class="product-cogs">COGS: Rp 5.800</div>
+            </div>
+            <div class="margin-badge">74% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Bahan utama</span><span>Tempe 100g + bumbu kering manis</span></div>
+          <div class="product-stat"><span class="label">Tempe (250g = 2.5 serving)</span><span>Rp 1.200/serving</span></div>
+          <div class="product-stat"><span class="label">Kecap, gula merah, bawang</span><span>Rp 1.800</span></div>
+          <div class="product-stat"><span class="label">Kemasan alu foil</span><span>Rp 1.800</span></div>
+          <div class="product-stat"><span class="label">Labor per unit</span><span>Rp 700</span></div>
+          <div class="product-stat"><span class="label">Energi</span><span>Rp 300</span></div>
+          <div class="product-stat"><span class="label">Shelf life</span><span>8–12 bulan (kering)</span></div>
+          <div class="product-stat"><span class="label">Note</span><span>Vegan, COGS paling murah</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-green" style="width: 74%;"></div></div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🍚🍗 COMBO: Nasi + Ayam</div>
+            <div class="product-tier">TIER 2 — Hero Product (Best Seller Target)</div>
+          </div>
+          <span class="tag tag-blue">PHASE 2</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 45.000</div>
+              <div class="product-cogs">COGS: Rp 19.500</div>
+            </div>
+            <div class="margin-badge">57% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Isi</span><span>Nasi liwet + ayam suwir balado</span></div>
+          <div class="product-stat"><span class="label">COGS nasi pack</span><span>Rp 5.500</span></div>
+          <div class="product-stat"><span class="label">COGS lauk pack</span><span>Rp 13.500</span></div>
+          <div class="product-stat"><span class="label">Kemasan combo outer box</span><span>Rp 500</span></div>
+          <div class="product-stat"><span class="label">Sambal sachet (bonus)</span><span>Rp 1.000 (COGS)</span></div>
+          <div class="product-stat"><span class="label">Serving</span><span>1 full meal lengkap</span></div>
+          <div class="product-stat"><span class="label">Positioning</span><span>vs GoFood Rp 30-40K (lebih tahan lama)</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-blue" style="width: 57%;"></div></div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🥩 Rendang Sapi Premium</div>
+            <div class="product-tier">TIER 3 — Premium SKU</div>
+          </div>
+          <span class="tag tag-purple">PHASE 3</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 65.000</div>
+              <div class="product-cogs">COGS: Rp 37.000</div>
+            </div>
+            <div class="margin-badge">43% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Bahan utama</span><span>Daging sapi 80g dehydrated</span></div>
+          <div class="product-stat"><span class="label">Daging sapi (raw ~190g → 80g dry)</span><span>Rp 26.600</span></div>
+          <div class="product-stat"><span class="label">Santan, rempah rendang</span><span>Rp 5.000</span></div>
+          <div class="product-stat"><span class="label">Kemasan premium</span><span>Rp 3.000</span></div>
+          <div class="product-stat"><span class="label">Labor + energi</span><span>Rp 2.400</span></div>
+          <div class="product-stat"><span class="label">Shelf life</span><span>6–10 bulan</span></div>
+          <div class="product-stat"><span class="label">Note</span><span>Margin lebih kecil, tapi harga jual lebih tinggi</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-purple" style="width: 43%;"></div></div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-header">
+          <div>
+            <div class="product-name">🌶️ Sambal Matah Kering Sachet</div>
+            <div class="product-tier">TIER 1 — Add-on / Upsell</div>
+          </div>
+          <span class="tag tag-orange">ADD-ON</span>
+        </div>
+        <div class="product-body">
+          <div class="product-price-row">
+            <div>
+              <div class="product-sell">Rp 10.000</div>
+              <div class="product-cogs">COGS: Rp 2.800</div>
+            </div>
+            <div class="margin-badge">72% margin</div>
+          </div>
+          <div class="product-stat"><span class="label">Isi</span><span>10g sambal matah/bajak kering</span></div>
+          <div class="product-stat"><span class="label">Cabe + bawang + rempah</span><span>Rp 1.200</span></div>
+          <div class="product-stat"><span class="label">Kemasan sachet alu foil</span><span>Rp 800</span></div>
+          <div class="product-stat"><span class="label">Labor</span><span>Rp 400</span></div>
+          <div class="product-stat"><span class="label">Shelf life</span><span>12+ bulan (kering)</span></div>
+          <div class="product-stat"><span class="label">Strategy</span><span>Bundle wajib di setiap combo pack</span></div>
+          <div class="bar-wrap" style="margin-top: 12px;"><div class="bar-fill bar-orange" style="width: 72%;"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== OPERASIONAL ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚙️</span>Operasional: Workflow & Proses Produksi</div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-title">Alur Produksi Harian (per shift 8 jam)</div>
+        <div class="timeline" style="margin-top: 12px;">
+          <div class="tl-item tl-orange">
+            <div class="tl-month">07:00 — Prep</div>
+            <div class="tl-title">Persiapan Bahan Baku</div>
+            <div class="tl-desc">Timbang beras, potong/suwir ayam, siapkan bumbu. 1 worker dapat prep untuk 200 unit/hari.</div>
+          </div>
+          <div class="tl-item tl-orange">
+            <div class="tl-month">07:30 — Cooking</div>
+            <div class="tl-title">Memasak Batch</div>
+            <div class="tl-desc">Masak nasi di rice cooker komersial (2 batch x 2kg). Masak ayam/tempe di wajan besar. Bumbu kering yang dimasak kering = lebih cepat dehidrasi.</div>
+          </div>
+          <div class="tl-item tl-green">
+            <div class="tl-month">09:00 — Dehydrate</div>
+            <div class="tl-title">Load ke Food Dehydrator</div>
+            <div class="tl-desc">Susun makanan matang di rak dehydrator. Suhu 65-75°C. Nasi: 6-8 jam. Ayam suwir: 8-10 jam. Tempe orek: 4-6 jam. Gunakan 2 unit dehydrator sekaligus.</div>
+          </div>
+          <div class="tl-item tl-blue">
+            <div class="tl-month">15:00 — QC + Pack</div>
+            <div class="tl-title">Quality Check & Packaging</div>
+            <div class="tl-desc">Cek moisture level (feel test / moisture meter). Timbang per serving. Seal dengan vacuum sealer. Label produk. Target: 150-200 packs/hari dengan 2 workers.</div>
+          </div>
+          <div class="tl-item tl-purple">
+            <div class="tl-month">16:30 — Fulfill</div>
+            <div class="tl-title">Packing & Logistik</div>
+            <div class="tl-desc">Packing untuk order online (Shopee/Tokopedia). Sortir stok. Update inventory. Siapkan pengiriman J&T/Sicepat.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-16">
+          <div class="card-title">Output per Hari (2 unit Dehydrator 16 Rak)</div>
+          <table>
+            <thead><tr><th>Produk</th><th>Batch/hari</th><th>Output (packs)</th></tr></thead>
+            <tbody>
+              <tr><td>Nasi Liwet</td><td>2 batch</td><td>60-80 packs</td></tr>
+              <tr><td>Ayam Suwir</td><td>2 batch</td><td>50-70 packs</td></tr>
+              <tr><td>Tempe Orek</td><td>3 batch</td><td>80-100 packs</td></tr>
+              <tr><td>Sambal Sachet</td><td>5 batch</td><td>100-150 packs</td></tr>
+              <tr style="font-weight: 700;"><td>TOTAL</td><td></td><td>290–400 packs</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Key Teknis: Proses Dehidrasi</div>
+          <ul class="styled">
+            <li><strong>Suhu optimal:</strong> 65-75°C untuk daging/nasi. Di atas 80°C bisa rusak nutrisi.</li>
+            <li><strong>Target moisture content:</strong> &lt;10% untuk shelf life 6+ bulan. Gunakan oven thermometer sebagai QC awal.</li>
+            <li><strong>Rendang sudah natural dry:</strong> Proses masak rendang tradisional sudah mengeringkan — hanya perlu 4-6 jam di dehydrator, bukan 10 jam.</li>
+            <li><strong>Nasi:</strong> Masak nasi biasa → haluskan di rak tipis → dehydrate. Rehydrate dengan air panas 5 menit.</li>
+            <li><strong>Packaging kritis:</strong> Harus vakum + alu foil zipper untuk blok oksigen & kelembaban. Tanpa ini shelf life cuma 1-2 minggu.</li>
+            <li><strong>Oksigen absorber:</strong> Tambahkan sachet oxygen absorber (Rp 200-400/pcs) di setiap kemasan untuk shelf life 12 bulan+.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== EQUIPMENT & CAPEX ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🔧</span>Equipment List & Capex</div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-title">Phase 1 — Starter Setup (100-200 packs/hari)</div>
+        <table>
+          <thead><tr><th>Equipment</th><th>Spec</th><th>Harga Est.</th></tr></thead>
+          <tbody>
+            <tr><td>Food Dehydrator Maksindo 16 Rak</td><td>MKS-FDH16, komersial</td><td><strong>Rp 6.990.000</strong></td></tr>
+            <tr><td>Food Dehydrator Maksindo 10 Rak (backup)</td><td>MKS-FDH10</td><td><strong>Rp 5.295.000</strong></td></tr>
+            <tr><td>Vacuum Sealer Semi-Auto</td><td>External suction + seal</td><td><strong>Rp 1.200.000</strong></td></tr>
+            <tr><td>Rice Cooker Komersial 5L</td><td>Miyako/Cosmos large</td><td><strong>Rp 500.000</strong></td></tr>
+            <tr><td>Wajan Stainless 40cm x2</td><td>Untuk masak bumbu</td><td><strong>Rp 400.000</strong></td></tr>
+            <tr><td>Kompor Gas + Regulator</td><td>2 tungku</td><td><strong>Rp 800.000</strong></td></tr>
+            <tr><td>Timbangan Digital 0.1g</td><td>QC per unit pack</td><td><strong>Rp 250.000</strong></td></tr>
+            <tr><td>Moisture Meter (opsional)</td><td>QC moisture content</td><td><strong>Rp 350.000</strong></td></tr>
+            <tr><td>Meja stainless (work surface)</td><td>Packing area</td><td><strong>Rp 800.000</strong></td></tr>
+            <tr><td>Kulkas bahan baku (1 pintu)</td><td>Stok ayam dll</td><td><strong>Rp 1.500.000</strong></td></tr>
+            <tr><td><strong>TOTAL EQUIPMENT</strong></td><td></td><td><strong style="color: var(--accent);">Rp 18.085.000</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="card mb-16">
+          <div class="card-title">Modal Kerja Awal (Bulan 1-2)</div>
+          <table>
+            <thead><tr><th>Item</th><th>Estimasi</th></tr></thead>
+            <tbody>
+              <tr><td>Stok bahan baku 2 minggu</td><td>Rp 4.000.000</td></tr>
+              <tr><td>Kemasan (2.000 pcs berbagai size)</td><td>Rp 4.000.000</td></tr>
+              <tr><td>Gas LPG (tabung 12kg x 3)</td><td>Rp 600.000</td></tr>
+              <tr><td>Oxygen absorber 500pcs</td><td>Rp 200.000</td></tr>
+              <tr><td>Label/stiker produk 1000 pcs</td><td>Rp 500.000</td></tr>
+              <tr><td>PIRT registration (Dinkes)</td><td>Rp 500.000</td></tr>
+              <tr><td>Biaya setup online store + foto produk</td><td>Rp 500.000</td></tr>
+              <tr><td>Buffer kas operasional 2 bulan</td><td>Rp 4.000.000</td></tr>
+              <tr><td><strong>TOTAL MODAL KERJA</strong></td><td><strong>Rp 14.300.000</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="border-color: var(--accent3);">
+          <div class="card-title" style="color: var(--accent3);">💰 Total Investment Phase 1</div>
+          <div style="font-size: 28px; font-weight: 900; color: var(--accent3); margin: 8px 0;">Rp 22-25 Juta</div>
+          <div style="color: var(--muted); font-size: 13px;">Equipment: Rp 18M + Modal Kerja: Rp 4-7M</div>
+          <div style="margin-top: 12px; font-size: 13px; color: var(--text);">Phase 2 (scale up 500 packs/hari): tambah Rp 40-50 juta untuk dehydrator tambahan, semi-auto packer, dan working capital.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Tip: Beli Dehydrator 16 Rak dulu, bukan 30 Rak</strong>
+        <p>Dehydrator 16 rak (Rp 7M) cukup untuk proof of concept dan 150-200 packs/hari. Jangan langsung beli 30-60 rak sebelum validasi pasar. Kalau demand terbukti dalam 3 bulan, beli unit tambahan. Approach ini hemat Rp 13-22M di awal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FINANCIAL MODEL ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📊</span>Financial Model — 3 Scenario</div>
+
+    <div class="card mb-24">
+      <div class="card-title">Monthly P&L — Year 1 (3 Scenario)</div>
+      <div class="fin-table">
+        <div class="fin-header">
+          <div>Item</div>
+          <div>Conservative (50 packs/hari)</div>
+          <div>Base Case (150 packs/hari)</div>
+          <div>Optimistic (300 packs/hari)</div>
+          <div>Note</div>
+        </div>
+        <div class="fin-row"><div>Working days/bulan</div><div>25 hari</div><div>25 hari</div><div>25 hari</div><div></div></div>
+        <div class="fin-row"><div>Total packs/bulan</div><div>1.250 packs</div><div>3.750 packs</div><div>7.500 packs</div><div></div></div>
+        <div class="fin-row"><div>Avg Selling Price</div><div>Rp 28.000</div><div>Rp 30.000</div><div>Rp 32.000</div><div>Mix semua SKU</div></div>
+        <div class="fin-row total"><div>🟦 GROSS REVENUE</div><div>Rp 35.000.000</div><div>Rp 112.500.000</div><div>Rp 240.000.000</div><div></div></div>
+        <div class="fin-row"><div>COGS (avg 42%)</div><div>-Rp 14.700.000</div><div>-Rp 47.250.000</div><div>-Rp 100.800.000</div><div>Bahan + kemasan</div></div>
+        <div class="fin-row total"><div>🟩 GROSS PROFIT</div><div>Rp 20.300.000</div><div>Rp 65.250.000</div><div>Rp 139.200.000</div><div>Margin 58%</div></div>
+        <div class="fin-row"><div>Labor (2-3 workers)</div><div>-Rp 4.500.000</div><div>-Rp 6.000.000</div><div>-Rp 9.000.000</div><div>Rp 1.5-2M/orang</div></div>
+        <div class="fin-row"><div>Gas + Listrik</div><div>-Rp 800.000</div><div>-Rp 1.500.000</div><div>-Rp 2.500.000</div><div></div></div>
+        <div class="fin-row"><div>Marketing (Shopee ads, content)</div><div>-Rp 500.000</div><div>-Rp 2.000.000</div><div>-Rp 5.000.000</div><div></div></div>
+        <div class="fin-row"><div>Packaging supplies/overhead misc</div><div>-Rp 300.000</div><div>-Rp 800.000</div><div>-Rp 1.500.000</div><div></div></div>
+        <div class="fin-row"><div>Shopee/Tokopedia fee (~5%)</div><div>-Rp 1.750.000</div><div>-Rp 5.625.000</div><div>-Rp 12.000.000</div><div></div></div>
+        <div class="fin-row profit"><div>💰 NET PROFIT/BULAN</div><div>Rp 12.450.000</div><div>Rp 49.325.000</div><div>Rp 109.200.000</div><div></div></div>
+        <div class="fin-row"><div>Net Margin</div><div>35.6%</div><div>43.8%</div><div>45.5%</div><div></div></div>
+        <div class="fin-row"><div>BEP (modal Rp 22M)</div><div>~22 bulan ❌</div><div>~5 bulan ✅</div><div>~2.5 bulan ✅</div><div></div></div>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>Target Realistis: 150 packs/hari = Net Profit Rp 49 Juta/bulan</strong>
+        <p>Dengan 2 dehydrators 16-rak, 2 pekerja, dan produksi 6 hari/minggu — 150 packs/hari sangat achievable di bulan ke-3. Bahkan di 50 packs/hari (bulan ke-1), sudah positif cash flow Rp 12 juta. Ini jauh lebih baik dari bisnis sambal atau sabun yang margin lebih tipis karena kompetisi.</p>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Revenue Milestones</div>
+        <ul class="styled">
+          <li>Bulan 1-2: 50-80 packs/hari, validasi produk</li>
+          <li>Bulan 3-4: 100-150 packs/hari, traction online</li>
+          <li>Bulan 6: 200+ packs/hari, first B2B deal</li>
+          <li>Bulan 12: 400-500 packs/hari, 2nd dehydrator</li>
+          <li>Tahun 2: 1.000+ packs/hari, BPOM MD upgrade</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Unit Economics Kunci</div>
+        <ul class="styled">
+          <li>Avg COGS per pack: Rp 10.000-14.000</li>
+          <li>Avg selling price: Rp 28.000-35.000</li>
+          <li>Gross margin target: 58-65%</li>
+          <li>Net margin (scale): 40-45%</li>
+          <li>LTV pelanggan kos/online: 6-12 bulan repeat</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Asumsi Kritis</div>
+        <ul class="styled">
+          <li>Harga ayam Rp 35.000/kg (Jateng)</li>
+          <li>Harga beras Rp 14.000-16.000/kg</li>
+          <li>Kemasan alu foil zipper: Rp 1.500-2.500/pcs</li>
+          <li>Labor: Rp 1.5-2M/bulan/orang</li>
+          <li>Dehydration ratio: 1kg raw → ~300-400g dry</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TEAM ROLES ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">👥</span>Team Structure & Roles</div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-title">Internal Team — Asset Kamu</div>
+        <table>
+          <thead><tr><th>Orang</th><th>Role</th><th>Fungsi Utama</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Bashara (Kamu)</strong></td>
+              <td><span class="tag tag-orange">Founder + Tech</span></td>
+              <td>Product dev, brand, Shopee/TikTok shop setup, vibe coding untuk sistem order/inventory</td>
+            </tr>
+            <tr>
+              <td><strong>Ayah (Ex-VP HR)</strong></td>
+              <td><span class="tag tag-blue">Ops Manager</span></td>
+              <td>Supervisi produksi harian, hiring & training pekerja, SOP quality control, logistik supplier</td>
+            </tr>
+            <tr>
+              <td><strong>Kakak (VP Jakarta)</strong></td>
+              <td><span class="tag tag-purple">B2B Sales Head</span></td>
+              <td>Prospek hotel, hostel, outdoor store, minimarket Jakarta. Commission-based.</td>
+            </tr>
+            <tr>
+              <td><strong>Production Worker 1</strong></td>
+              <td><span class="tag tag-green">Cook + Prep</span></td>
+              <td>Masak, bumbu, prep bahan baku. Gaji Rp 1.5-2M/bulan.</td>
+            </tr>
+            <tr>
+              <td><strong>Production Worker 2</strong></td>
+              <td><span class="tag tag-green">Pack + QC</span></td>
+              <td>Dehydrator monitoring, packaging, labeling, stok. Gaji Rp 1.5-2M/bulan.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="card mb-16">
+          <div class="card-title">Total Payroll (Phase 1)</div>
+          <div style="font-size: 28px; font-weight: 900; color: var(--accent); margin: 8px 0;">Rp 4-6 Juta/bulan</div>
+          <div style="color: var(--muted); font-size: 13px;">2 production workers @ Rp 1.5-2M + overhead tunjangan</div>
+          <div style="margin-top: 8px; font-size: 13px;">Tidak perlu full-time chef — siapa saja bisa dilatih proses memasak standar dengan SOP 1 minggu. Ini keunggulan operational vs bisnis F&B normal.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Leverage dari Aset Keluarga</div>
+          <ul class="styled">
+            <li><strong>Rumah Pajang</strong> = zero rent untuk produksi. Hemat Rp 3-8M/bulan vs sewa dapur komersial Solo.</li>
+            <li><strong>Ayah (ops)</strong> = tidak perlu hire manajer ops. Hemat Rp 5-10M/bulan salary manajer.</li>
+            <li><strong>Kakak (B2B Jakarta)</strong> = akses ke decision-maker korporat tanpa biaya sales. Zero sales overhead awal.</li>
+            <li><strong>Vibe coding kamu</strong> = bisa build sistem order tracking, inventory, label printing sendiri — hemat jutaan dari beli software.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DISTRIBUSI & SALES ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🚀</span>Strategi Distribusi & Sales Channels</div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-title">Channel B2C — Online (Prioritas Utama)</div>
+        <table>
+          <thead><tr><th>Platform</th><th>Strategi</th><th>Target/bulan</th></tr></thead>
+          <tbody>
+            <tr><td><strong>TikTok Shop</strong></td><td>Video content masak + rehydrate live. Algoritma bagus untuk produk baru unique.</td><td>500-1000 packs</td></tr>
+            <tr><td><strong>Shopee</strong></td><td>Main channel. Flash sale, Shopee Food section. Optimasi keyword "bekal travelling", "makanan pendaki".</td><td>800-2000 packs</td></tr>
+            <tr><td><strong>Tokopedia</strong></td><td>Secondary. Buyer lebih mature/willing to pay more.</td><td>300-500 packs</td></tr>
+            <tr><td><strong>Instagram</strong></td><td>Brand building. Real review konten. Target hiker/traveler komunitas.</td><td>Awareness</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Channel B2B — High Margin, Low CAC</div>
+        <table>
+          <thead><tr><th>Target</th><th>Produk</th><th>Potensi/bulan</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Kost Mahasiswa Solo</strong></td><td>Paket hemat harian. Kerjasama dengan pemilik kost.</td><td>200-500 packs</td></tr>
+            <tr><td><strong>Outdoor/Hiking Store</strong></td><td>Consignment di toko perlengkapan gunung Solo, Semarang, Jakarta.</td><td>300-800 packs</td></tr>
+            <tr><td><strong>Hotel / Hostel Budget</strong></td><td>Mini pack untuk amenity kamar atau minimarket lobby.</td><td>500-2000 packs</td></tr>
+            <tr><td><strong>Corporate Snack Pack</strong></td><td>Custom pack untuk perusahaan (via kakak di Jakarta).</td><td>1000-3000 packs</td></tr>
+            <tr><td><strong>Minimarket Indie</strong></td><td>Alfamart/Indomaret titip jual lokal — needs BPOM MD.</td><td>Future goal</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout callout-orange">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-content">
+        <strong>Go-to-Market: TikTok Shop + Pendaki Community FIRST</strong>
+        <p>Strategi paling efektif: buat konten TikTok "memasak dan re-hidrasi" yang satisfying, target komunitas pendaki (Mapala, hiking FB groups, trail running). Testimoni real dari pendaki = social proof yang convert. Cost per acquisition hampir nol di awal. Baru setelah viral, masuk Shopee ads dan B2B.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PERIZINAN ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📋</span>Regulasi & Perizinan</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Roadmap Izin: Start Small, Upgrade Later</div>
+        <div class="timeline" style="margin-top: 12px;">
+          <div class="tl-item tl-green">
+            <div class="tl-month">Bulan 1-2 — MULAI DULU</div>
+            <div class="tl-title">PIRT (Produk Industri Rumah Tangga)</div>
+            <div class="tl-desc">Diajukan ke Dinas Kesehatan Surakarta. GRATIS / biaya admin sangat kecil. Berlaku 5 tahun. Cocok untuk makanan kering seperti produk ini. Proses 1-4 minggu. Wajib sebelum jual ke publik.</div>
+          </div>
+          <div class="tl-item tl-orange">
+            <div class="tl-month">Bulan 3-6 — Branding</div>
+            <div class="tl-title">Merek Dagang + NIB (OSS)</div>
+            <div class="tl-desc">Daftarkan merek via DJKI online (Rp 1.8-2M). NIB via OSS.go.id (gratis, online). Ini penting untuk keliatan legit di Shopee dan untuk B2B.</div>
+          </div>
+          <div class="tl-item tl-blue">
+            <div class="tl-month">Bulan 12+ — Scale Up</div>
+            <div class="tl-title">BPOM MD (Makanan Dalam)</div>
+            <div class="tl-desc">Diperlukan untuk masuk Alfamart/Indomaret atau distribusi nasional besar. Biaya lebih mahal (Rp 5-10M), proses 3-6 bulan. Lakukan ini setelah sales stabil.</div>
+          </div>
+          <div class="tl-item tl-purple">
+            <div class="tl-month">Tahun 2 — Export</div>
+            <div class="tl-title">Sertifikasi Halal MUI + SNI</div>
+            <div class="tl-desc">Untuk akses pasar diaspora (Malaysia, Timur Tengah) dan retail premium. MUI Halal butuh beberapa bulan dan biaya sertifikasi.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb-16">
+          <div class="card-title">Makanan Kering = PIRT Eligible ✅</div>
+          <ul class="styled">
+            <li>Produk kering (kadar air &lt;14%) = memenuhi syarat PIRT berdasarkan Peraturan BPOM No. 22 Tahun 2018.</li>
+            <li>Produksi di rumah (Pajang) = sesuai ketentuan "industri rumah tangga".</li>
+            <li>Bukan kategori excluded: bukan daging basah, susu, kaleng, atau alkohol.</li>
+            <li>Wajib ikut penyuluhan keamanan pangan dari Dinkes (1 hari, gratis).</li>
+            <li>Label wajib: nama produk, berat bersih, komposisi, tanggal kadaluarsa, kode produksi, logo PIRT.</li>
+          </ul>
+        </div>
+        <div class="callout callout-green" style="margin-bottom: 0;">
+          <div class="callout-icon">✅</div>
+          <div class="callout-content">
+            <strong>Keunggulan vs Sambal / Sabun</strong>
+            <p>Produk kering dehidrasi jauh lebih mudah dapat PIRT vs sambal (ada komponen protein hewani yang tricky) dan vs sabun (perlu izin BPOM kosmetik yang berbeda jalur). Ini mengurangi regulatory risk secara signifikan.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RISK REGISTER ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚠️</span>Risk Register & Mitigasi</div>
+
+    <div class="card">
+      <div class="risk-row risk-header">
+        <div>Risiko</div><div>Likelihood</div><div>Impact</div><div>Mitigasi</div>
+      </div>
+      <div class="risk-row">
+        <div>Harga ayam/sapi naik drastis (volatilitas bahan baku)</div>
+        <div><span class="tag tag-yellow">MEDIUM</span></div>
+        <div><span class="tag tag-orange">HIGH</span></div>
+        <div>Punya 2+ SKU berbasis tempe/tahu (COGS stabil). Beli bahan baku bulk saat harga rendah. Sesuaikan harga jual quarterly.</div>
+      </div>
+      <div class="risk-row">
+        <div>Produk tidak laku — market belum ready</div>
+        <div><span class="tag tag-green">LOW</span></div>
+        <div><span class="tag tag-red">HIGH</span></div>
+        <div>Validasi dulu dengan 50-100 packs di komunitas hiking/kos sebelum full scale. MVP dulu dalam 2-4 minggu dengan modal minimal.</div>
+      </div>
+      <div class="risk-row">
+        <div>Shelf life lebih pendek dari ekspektasi (moisture QC gagal)</div>
+        <div><span class="tag tag-yellow">MEDIUM</span></div>
+        <div><span class="tag tag-orange">HIGH</span></div>
+        <div>Invest di moisture meter (Rp 350K). Gunakan oxygen absorber + alu foil zipper. Uji shelf life sendiri di rumah sebelum launch.</div>
+      </div>
+      <div class="risk-row">
+        <div>Kompetitor besar masuk segment ini (Indofood, Wings)</div>
+        <div><span class="tag tag-green">LOW</span></div>
+        <div><span class="tag tag-yellow">MEDIUM</span></div>
+        <div>Build brand identity kuat (rasa autentik Solo, story UMKM). UMKM lebih agile dalam rasa lokal vs konglomerat. Fokus niche dulu.</div>
+      </div>
+      <div class="risk-row">
+        <div>Kapasitas produksi tidak cukup saat demand spike</div>
+        <div><span class="tag tag-yellow">MEDIUM</span></div>
+        <div><span class="tag tag-green">LOW</span></div>
+        <div>Dehydrator tambahan bisa dibeli bertahap (Rp 7-20M). Proses produksi bisa di-parallelize dengan shift. Ini "good problem to have".</div>
+      </div>
+      <div class="risk-row">
+        <div>Masalah konsistensi rasa antar batch</div>
+        <div><span class="tag tag-yellow">MEDIUM</span></div>
+        <div><span class="tag tag-orange">HIGH</span></div>
+        <div>Buat SOP bumbu terstandarisasi dengan timbangan. Gunakan bumbu jadi (Bamboe/Indofood) sebagai base untuk konsistensi, tambahkan bumbu segar minimal.</div>
+      </div>
+      <div class="risk-row">
+        <div>Sertifikasi PIRT lambat / ditolak</div>
+        <div><span class="tag tag-green">LOW</span></div>
+        <div><span class="tag tag-orange">HIGH</span></div>
+        <div>Bisa jual ke circle personal/komunitas tanpa PIRT dulu sambil proses izin. PIRT untuk makanan kering umumnya approved dalam 2-4 minggu di Solo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 30-60-90 DAY PLAN ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📅</span>30-60-90 Day Action Plan</div>
+
+    <div class="grid-3">
+      <div class="card" style="border-color: var(--accent);">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 12px;">📅 BULAN 1: VALIDASI</div>
+        <ul class="styled">
+          <li>Beli 1 dehydrator 16 rak Maksindo (Rp 7M)</li>
+          <li>Beli vacuum sealer + timbangan + kemasan 500 pcs awal</li>
+          <li>Eksperimen 3 resep: nasi liwet, ayam suwir, tempe orek</li>
+          <li>Uji shelf life 4 minggu di suhu ruang — catat hasil</li>
+          <li>Foto produk + bikin Shopee Store + TikTok</li>
+          <li>Jual 100-200 packs pertama ke circle: teman, kost sekitar, pendaki</li>
+          <li>Daftar PIRT ke Dinkes Surakarta</li>
+          <li>Target: validasi rasa & demand, profit pertama</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color: var(--accent2);">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 12px;">📅 BULAN 2: BUILD</div>
+        <ul class="styled">
+          <li>Scale ke 50-100 packs/hari production</li>
+          <li>Hire 1 pekerja produksi (ayah mulai supervise)</li>
+          <li>Launch TikTok konten: "memasak nasi dehidrasi untuk pendakian"</li>
+          <li>Masuk komunitas hiking Shopee + grup Facebook pendaki Jateng</li>
+          <li>Mulai PIRT-branded packaging dengan label proper</li>
+          <li>Uji coba B2B: 3 kost mahasiswa Solo</li>
+          <li>Rekam feedback pelanggan untuk perbaikan</li>
+          <li>Target: Rp 15-25 juta revenue/bulan</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color: var(--accent3);">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent3); margin-bottom: 12px;">📅 BULAN 3: SCALE</div>
+        <ul class="styled">
+          <li>Beli dehydrator ke-2 (Rp 7-20M dari cashflow)</li>
+          <li>Hire pekerja ke-2, naik ke 150-200 packs/hari</li>
+          <li>Launch combo pack (nasi + lauk) sebagai hero product</li>
+          <li>Kakak mulai prospek B2B Jakarta (hostel, outdoor store)</li>
+          <li>Daftar NIB via OSS + merek dagang</li>
+          <li>Mulai Shopee ads Rp 1-2 juta/bulan</li>
+          <li>Target: Rp 40-60 juta revenue/bulan, profit Rp 20M+</li>
+          <li>BEP modal awal Rp 22M sudah tercapai</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FINAL VERDICT ==================== -->
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🏆</span>Final Verdict & Keunggulan vs Bisnis Lain</div>
+
+    <div class="callout callout-green">
+      <div class="callout-icon">🥇</div>
+      <div class="callout-content">
+        <strong>Kenapa Dried Ready Meal LEBIH BAIK dari Sambal, Sabun, Jamu, atau Bawang Goreng?</strong>
+        <p>1/ <strong>Blue Ocean:</strong> Tidak ada pemain yang isi gap "full meal Indonesian, affordable, just-add-water." Perplexity's suggestions (jamu, bawang goreng) sudah ramai kompetitor. 2/ <strong>Margin lebih tinggi:</strong> 55-70% gross margin vs sambal 40-50% atau sabun 30-40%. 3/ <strong>Moat dari rasa:</strong> Resep autentik Jawa Tengah susah di-replicate massal oleh Indofood. 4/ <strong>B2B potential:</strong> Kakak bisa langsung prospek hotel/hostel Jakarta — ini channel yang jamu dan bawang goreng sulit tembus. 5/ <strong>Premium narrative:</strong> "Dibuat dari dapur Solo, rempah asli, untuk pendaki dan traveler Indonesia" — story yang kuat untuk branding dan harga premium.</p>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 32px; font-weight: 900; color: var(--accent3);">87/100</div>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Feasibility Score</div>
+        <div style="font-size: 12px; margin-top: 8px; color: var(--text);">Sangat feasible dengan asset yang kamu punya</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 32px; font-weight: 900; color: var(--accent);">4-5 bln</div>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Break Even Point</div>
+        <div style="font-size: 12px; margin-top: 8px; color: var(--text);">Di skenario base case 150 packs/hari</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 32px; font-weight: 900; color: var(--accent2);">Rp 49M</div>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Net Profit/Bulan (Base)</div>
+        <div style="font-size: 12px; margin-top: 8px; color: var(--text);">Setelah stable di 150 packs/hari</div>
+      </div>
+      <div class="card" style="text-align: center;">
+        <div style="font-size: 32px; font-weight: 900; color: var(--accent4);">HIGH</div>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 4px;">Competitive Moat</div>
+        <div style="font-size: 12px; margin-top: 8px; color: var(--text);">Rasa lokal + harga Solo + B2B jalur keluarga</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Deep Dive Analysis — Dried Ready Meal Home Manufacturing | Pajang, Laweyan, Surakarta | Maret 2026<br>
+  Data berdasarkan: Maksindo.com (equipment), Tokopedia/Ralali (competitor pricing), Bank Indonesia PIHPS (commodity prices), Market research reports (global/Indonesia RTE market)
+</div>
+
+</body>
+</html>

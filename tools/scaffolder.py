@@ -37,6 +37,7 @@ async def _run(cmd: str, cwd: Optional[str] = None, timeout: int = 120) -> str:
 
 # ── Next.js ─────────────────────────────────────────────────────────────────
 
+
 async def scaffold_nextjs(project_name: str, features: list[str] | None = None) -> str:
     """Create a Next.js project with TypeScript + Tailwind + App Router."""
     features = features or []
@@ -78,11 +79,11 @@ async def scaffold_nextjs(project_name: str, features: list[str] | None = None) 
     if "auth" in features:
         auth_file = project_path / "src" / "lib" / "auth.ts"
         auth_file.write_text(
-            '// Auth configuration — install: npm install next-auth\n'
-            'export const authConfig = {\n'
-            '  providers: [],\n'
-            '  // Configure your auth providers here\n'
-            '};\n'
+            "// Auth configuration — install: npm install next-auth\n"
+            "export const authConfig = {\n"
+            "  providers: [],\n"
+            "  // Configure your auth providers here\n"
+            "};\n"
         )
         result_lines.append("Auth stub: created src/lib/auth.ts")
 
@@ -90,7 +91,7 @@ async def scaffold_nextjs(project_name: str, features: list[str] | None = None) 
     if "supabase" in features:
         supabase_file = project_path / "src" / "lib" / "supabase.ts"
         supabase_file.write_text(
-            '// Supabase client — install: npm install @supabase/supabase-js\n'
+            "// Supabase client — install: npm install @supabase/supabase-js\n"
             "import { createClient } from '@supabase/supabase-js';\n\n"
             "const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;\n"
             "const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;\n\n"
@@ -109,6 +110,7 @@ async def scaffold_nextjs(project_name: str, features: list[str] | None = None) 
 
 # ── FastAPI ─────────────────────────────────────────────────────────────────
 
+
 async def scaffold_fastapi(project_name: str, features: list[str] | None = None) -> str:
     """Create a FastAPI project with standard structure."""
     features = features or []
@@ -119,26 +121,30 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
 
     # Create directories
     dirs = [
-        "app", "app/routes", "app/models", "app/services",
-        "app/schemas", "tests",
+        "app",
+        "app/routes",
+        "app/models",
+        "app/services",
+        "app/schemas",
+        "tests",
     ]
     for d in dirs:
         (project_path / d).mkdir(parents=True, exist_ok=True)
 
     # main.py
     (project_path / "app" / "main.py").write_text(
-        'from fastapi import FastAPI\n'
-        'from fastapi.middleware.cors import CORSMiddleware\n\n'
+        "from fastapi import FastAPI\n"
+        "from fastapi.middleware.cors import CORSMiddleware\n\n"
         'app = FastAPI(title="' + project_name + '")\n\n'
-        'app.add_middleware(\n'
-        '    CORSMiddleware,\n'
+        "app.add_middleware(\n"
+        "    CORSMiddleware,\n"
         '    allow_origins=["*"],\n'
-        '    allow_credentials=True,\n'
+        "    allow_credentials=True,\n"
         '    allow_methods=["*"],\n'
         '    allow_headers=["*"],\n'
-        ')\n\n\n'
+        ")\n\n\n"
         '@app.get("/health")\n'
-        'async def health():\n'
+        "async def health():\n"
         '    return {"status": "ok"}\n'
     )
 
@@ -157,55 +163,55 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
 
     # Dockerfile
     (project_path / "Dockerfile").write_text(
-        'FROM python:3.12-slim\n'
-        'WORKDIR /app\n'
-        'COPY requirements.txt .\n'
-        'RUN pip install --no-cache-dir -r requirements.txt\n'
-        'COPY . .\n'
+        "FROM python:3.12-slim\n"
+        "WORKDIR /app\n"
+        "COPY requirements.txt .\n"
+        "RUN pip install --no-cache-dir -r requirements.txt\n"
+        "COPY . .\n"
         f'CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]\n'
     )
 
     # Test stub
     (project_path / "tests" / "test_health.py").write_text(
-        'from fastapi.testclient import TestClient\n'
-        'from app.main import app\n\n'
-        'client = TestClient(app)\n\n\n'
-        'def test_health():\n'
+        "from fastapi.testclient import TestClient\n"
+        "from app.main import app\n\n"
+        "client = TestClient(app)\n\n\n"
+        "def test_health():\n"
         '    response = client.get("/health")\n'
-        '    assert response.status_code == 200\n'
+        "    assert response.status_code == 200\n"
         '    assert response.json() == {"status": "ok"}\n'
     )
 
     # Database setup
     if "database" in features:
         (project_path / "app" / "database.py").write_text(
-            'from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession\n'
-            'from sqlalchemy.orm import sessionmaker, DeclarativeBase\n'
-            'import os\n\n'
+            "from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession\n"
+            "from sqlalchemy.orm import sessionmaker, DeclarativeBase\n"
+            "import os\n\n"
             'DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./app.db")\n\n'
-            'engine = create_async_engine(DATABASE_URL)\n'
-            'async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)\n\n\n'
-            'class Base(DeclarativeBase):\n'
-            '    pass\n\n\n'
-            'async def get_db():\n'
-            '    async with async_session() as session:\n'
-            '        yield session\n'
+            "engine = create_async_engine(DATABASE_URL)\n"
+            "async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)\n\n\n"
+            "class Base(DeclarativeBase):\n"
+            "    pass\n\n\n"
+            "async def get_db():\n"
+            "    async with async_session() as session:\n"
+            "        yield session\n"
         )
 
     # Auth setup
     if "auth" in features:
         (project_path / "app" / "auth.py").write_text(
-            'from datetime import datetime, timedelta\n'
-            'from jose import jwt\n'
-            'import os\n\n'
+            "from datetime import datetime, timedelta, timezone\n"
+            "from jose import jwt\n"
+            "import os\n\n"
             'SECRET_KEY = os.getenv("SECRET_KEY", "changeme")\n'
             'ALGORITHM = "HS256"\n'
-            'ACCESS_TOKEN_EXPIRE_MINUTES = 30\n\n\n'
-            'def create_access_token(data: dict) -> str:\n'
-            '    to_encode = data.copy()\n'
-            '    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)\n'
+            "ACCESS_TOKEN_EXPIRE_MINUTES = 30\n\n\n"
+            "def create_access_token(data: dict) -> str:\n"
+            "    to_encode = data.copy()\n"
+            "    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)\n"
             '    to_encode.update({"exp": expire})\n'
-            '    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n'
+            "    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n"
         )
 
     file_count = len(list(project_path.rglob("*")))
@@ -219,6 +225,7 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
 
 
 # ── Laravel ─────────────────────────────────────────────────────────────────
+
 
 async def scaffold_laravel(project_name: str, features: list[str] | None = None) -> str:
     """Create a Laravel project."""
@@ -251,6 +258,7 @@ async def scaffold_laravel(project_name: str, features: list[str] | None = None)
 
 
 # ── Test runner + auto-fixer ────────────────────────────────────────────────
+
 
 async def run_tests_and_fix(project_path: str, max_attempts: int = 3) -> str:
     """Run tests, auto-fix failures using coding agent, retry."""
@@ -293,6 +301,7 @@ async def run_tests_and_fix(project_path: str, max_attempts: int = 3) -> str:
 
 # ── GitHub push ─────────────────────────────────────────────────────────────
 
+
 async def push_to_github(project_path: str, repo_name: str, private: bool = True) -> str:
     """Create GitHub repo, init git, push."""
     path = Path(project_path)
@@ -317,6 +326,7 @@ async def push_to_github(project_path: str, repo_name: str, private: bool = True
 
 
 # ── Parallel full-stack builder ─────────────────────────────────────────────
+
 
 async def parallel_fullstack(task: str) -> str:
     """Decompose task into frontend + backend, run agents in parallel."""

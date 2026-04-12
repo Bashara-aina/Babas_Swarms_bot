@@ -1,0 +1,223 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/issues/review-2026-04-11.md",
+  "reason": "daily_fast_scan: score=0.250 < 0.3",
+  "score": 0.25,
+  "quarantined_at": "2026-04-12T01:00:00.636753"
+}
+---
+
+# Review: Wisdom Domain Files (2026-04-11)
+
+## Summary
+Reviewed all 20 domain files for quality, compliance, and completeness against the validation checklist.
+
+---
+
+## ❌ BLOCKERS (Must Fix Before Merge)
+
+### 1. Skip List Names Appearing as Primary Entries
+**Affected Files**: 03, 08, 10, 12, 14, 15, 18, 19
+
+The following skip list names appear as PRIMARY ENTRIES, violating the explicit instruction:
+
+| Name | Files | Lines |
+|------|-------|-------|
+| Charlie Munger | 08 | 153 |
+| Gary Klein | 03, 08 | 273, 282, 423 |
+| Howard Marks | 03, 19 | 309, 435 |
+| Howard Raiffa | 03 | 363 |
+| Annie Duke | 03, 19 | 291, 444 |
+| Peter Thiel | 10, 18 | 93, 300 |
+| Eric Ries | 10, 12, 18 | 223, 111, 192 |
+| Viktor Frankl | 08 | 53, 63 |
+| Jeff Bezos | 10 | 143, 503 |
+| Elon Musk | 10 | 163 |
+| Cal Newport | 18, 19 | 345, 318 |
+| Marcus Aurelius | 19 | 21 |
+
+**Note**: Aristotle, Feynman appear legitimately in Philosophy/Physics domains as foundational thinkers. These are appropriately placed in domains 06 (Physics), 09 (Communication - as rhetorical example), 14 (Ethics), 15 (History).
+
+**Action Required**: Remove or relegate skip list names to references/conflicts section.
+
+---
+
+### 2. LEGION RULE Uses Literal Placeholder "Y" and "Z"
+**Occurrences**: 753 instances across files 01, 03, 04, 05, 11, 12, 14, 15
+
+**Problem**: Format "When X, do Y because Z" uses literal "Y" and "Z" as placeholders instead of specific content.
+
+**Example (file 14)**:
+```
+LEGION RULE: When giving, do Y because Z (effective altruism; maximize suffering reduction; impact)
+```
+Should be:
+```
+LEGION RULE: When considering charitable giving, prioritize evidence-based charities because effective altruism maximizes suffering reduction per dollar.
+```
+
+**Files with Proper Format** (no action needed): 06, 07, 08, 09, 10, 13, 16, 17, 18, 19, 20
+
+---
+
+## ⚠️ WARNINGS
+
+### 3. Inconsistent Entry Format
+- Files 01-05, 11, 12, 14, 15: Use `[Author] — Title` format
+- Files 06-10, 13, 16-20: Use `## Author — Title` format
+
+**Recommendation**: Standardize to single format across all files.
+
+### 4. Missing/Unverified Source Titles
+Some entries have abbreviated or potentially incorrect titles:
+- File 09, line 496: "Sin-Itiro Tomonaga" (spelling variant of Sin-Itiro Tomonaga)
+- File 09, line 493: "Shin-ichiro Tomonaga" - should verify correct romanization
+
+### 5. Potential Encoding Issues
+Some entries contain what appear to be encoding artifacts:
+- File 14: "运会;运" (line 295)
+- File 12, 15: Chinese characters appearing in conflict sections
+
+### 6. Source Count Discrepancies
+Claimed counts don't match actual entries:
+- Domain 04 claims 47 sources (actual ~50+)
+- Domain 19 claims 50 sources (actual ~50+)
+
+---
+
+## ✅ PASSED
+
+### Source Field Completeness
+- [x] All entries have Author
+- [x] All entries have Type
+- [x] All entries have Year
+- [x] All entries have Core Insight
+- [x] All entries have Conflicts field
+- [x] "Applied to Bashara" properly filled with cekwajar.id | rumahlabuh.com | thesis
+
+### Timelessness / Cutting-Edge Content
+- [x] Mix of timeless sources (>5 years)
+- [x] Cutting-edge AI sources (2023-2026) in Domain 20
+- [x] Recent sources: Ray Kurzweil 2024, Manus AI 2024, Andrew Ng 2024
+
+### No Fabricated Authors Detected
+- [x] All authors appear to be real and verifiable
+- [x] Manus AI confirmed real (Monica.im, China, launched 2025)
+
+### Content Quality
+- [x] Most entries have mechanistic insights, not just motivational fluff
+- [x] Sources are appropriately diverse across domains
+- [x] No obvious propaganda or highly partisan sources without balancing conflicts
+
+---
+
+## DOMAIN-SPECIFIC OBSERVATIONS
+
+### Domain 01 (Philosophy-Mind): 51 sources claimed
+- Quality: Good
+- Issue: LEGION RULE placeholder format (Y/Z)
+
+### Domain 02 (Systems Thinking): 49 sources claimed
+- Quality: Excellent
+- Note: Properly formatted LEGION RULES
+
+### Domain 03 (Decision Science): 47 sources claimed
+- **BLOCKER**: Gary Klein, Howard Marks, Annie Duke, Howard Raiffa on skip list
+- **BLOCKER**: LEGION RULE placeholder format
+
+### Domain 04 (Strategy): 47 sources claimed
+- **BLOCKER**: Peter Thiel, Eric Ries on skip list
+- **BLOCKER**: LEGION RULE placeholder format
+
+### Domain 05 (Mathematics): 55 sources claimed
+- **BLOCKER**: LEGION RULE placeholder format
+
+### Domain 06 (Physics): 51 sources claimed
+- Quality: Excellent
+- Note: Properly formatted LEGION RULES, Feynman appropriate here
+
+### Domain 07 (Biology): 50 sources claimed
+- Quality: Good
+- Note: Properly formatted LEGION RULES
+
+### Domain 08 (Psychology): 50 sources claimed
+- **BLOCKER**: Charlie Munger, Gary Klein, Viktor Frankl on skip list
+- Note: Properly formatted LEGION RULES
+
+### Domain 09 (Communication): 50 sources claimed
+- Quality: Good
+- Note: Properly formatted LEGION RULES
+
+### Domain 10 (Leadership): 52 sources claimed
+- **BLOCKER**: Peter Thiel, Eric Ries, Jeff Bezos, Elon Musk on skip list
+- Note: Properly formatted LEGION RULES
+
+### Domain 11 (Product-UX): 50 sources claimed
+- Quality: Good
+- **BLOCKER**: LEGION RULE placeholder format
+
+### Domain 12 (Economics): 50 sources claimed
+- **BLOCKER**: Eric Ries on skip list
+- **BLOCKER**: LEGION RULE placeholder format
+
+### Domain 13 (Neuroscience): 51 sources claimed
+- Quality: Good
+- Note: Properly formatted LEGION RULES
+
+### Domain 14 (Ethics): 50 sources claimed
+- **BLOCKER**: LEGION RULE placeholder format
+- Note: Aristotle appropriately cited (foundational philosopher)
+
+### Domain 15 (History): 52 sources claimed
+- **BLOCKER**: LEGION RULE placeholder format
+- Note: Aristotle appropriately cited (Politics)
+
+### Domain 16 (Math-Info-Comp): 50 sources claimed
+- Quality: Excellent
+- Note: Properly formatted LEGION RULES
+
+### Domain 17 (Eastern Philosophy): 51 sources claimed
+- Quality: Good
+- Note: Properly formatted LEGION RULES
+
+### Domain 18 (Creativity): 50 sources claimed
+- **BLOCKER**: Peter Thiel, Eric Ries, Cal Newport, Feynman on skip list
+- Note: Properly formatted LEGION RULES
+
+### Domain 19 (Resilience): 50 sources claimed
+- **BLOCKER**: Marcus Aurelius, Viktor Frankl, Cal Newport, Howard Marks, Annie Duke, Gary Klein on skip list
+- Note: Properly formatted LEGION RULES
+
+### Domain 20 (AI-Agent): 50 sources claimed
+- Quality: Excellent (cutting-edge 2023-2026 sources)
+- Note: Properly formatted LEGION RULES
+- Note: Manus AI verified real
+
+---
+
+## RECOMMENDED ACTIONS
+
+1. **URGENT**: Remove skip list names from primary entries (files 03, 08, 10, 12, 18, 19)
+2. **URGENT**: Replace all "do Y because Z" placeholders with specific content (files 01, 03, 04, 05, 11, 12, 14, 15)
+3. Standardize entry format across all files
+4. Verify Tomonaga spelling variants
+5. Fix encoding artifacts in conflict sections
+
+---
+
+## OVERALL QUALITY ASSESSMENT
+
+**Rating**: 6/10
+
+**Strengths**:
+- Comprehensive source coverage across 20 domains
+- Good balance of timeless and cutting-edge AI content
+- Proper "Applied to Bashara" field populated
+- Most entries have mechanistic insights
+
+**Critical Weaknesses**:
+- Skip list violation (BLOCKER)
+- LEGION RULE placeholder text (BLOCKER)
+- Inconsistent formatting
+
+**Verdict**: NOT READY FOR MERGE - Fix blockers first.

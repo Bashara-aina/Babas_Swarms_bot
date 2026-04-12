@@ -1,0 +1,125 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/research/098-hoi-survey-2023-2024.md",
+  "reason": "daily_fast_scan: score=0.000 < 0.3",
+  "score": 0.0,
+  "quarantined_at": "2026-04-12T01:00:00.977616"
+}
+---
+
+---
+paper_id: 098
+title: "Hand-Object Interaction for Activity Recognition: Survey"
+authors: "Multiple authors (survey compilation)"
+year: 2023-2024
+venue: "Survey paper (various journals/conferences)"
+doi: ""
+arxiv: ""
+citation_count: "Varies by specific survey"
+popw_relevance: MEDIUM
+tags:
+  - hand-object-interaction
+  - activity-recognition
+  - egocentric-vision
+  - survey
+  - pose-estimation
+  -hoi-detection
+---
+
+# Paper 098 — Hand-Object Interaction for Activity Recognition: Survey (2023/2024)
+
+## 📋 Paper Summary
+
+**Survey on hand-object interaction (HOI) for activity recognition** covering deep learning methods from 2018-2024. These surveys synthesize the state-of-the-art in perceiving hands performing actions, including 2D & 3D hand detection, segmentation, pose/shape estimation, and HOI detection. The field has grown significantly with the rise of egocentric vision datasets (Ego4D, EPIC-KITCHENS, etc.).
+
+## 🎯 Problem Statement
+
+Hand-object interaction recognition is challenging because:
+1. **Occlusions** — hands frequently occlude objects and vice versa
+2. **Viewpoint variability** — ego-centric vs. exo-centric views
+3. **Fine-grained actions** — subtle differences between grasp types
+4. **Temporal modeling** — action duration varies widely
+5. **Class imbalance** — some actions are rare in datasets
+
+## 🔑 Key Themes in HOI Surveys
+
+### 1. Hand Pose Estimation
+- **Model-based** (MANO, MeshNet) — parametric hand models
+- **Model-free** (heatmap regression) — direct keypoint detection
+- **RGB-to-3D** — depth estimation from single RGB image
+
+### 2. HOI Detection
+- **Two-stage** — detect hands + objects, then classify interaction
+- **One-stage** — joint detection + classification
+- **Transformer-based** — attention mechanisms for HOI
+
+### 3. Activity Recognition Datasets
+
+| Dataset | Year | Videos | Actions | Hands | Ego/Exo |
+|---------|------|--------|---------|-------|---------|
+| Ego4D | 2022 | 3,665h | 100+ | Yes | Ego |
+| EPIC-KITCHENS | 2018 | 432h | 58 | Yes | Ego |
+| AssemblyHands | 2023 | 10K+ | 33 | Yes | Ego |
+| IKEA ASM | 2020 | 3M frames | 30 | Yes | Multi |
+| H2O | 2021 | 500K | 2-4 | Yes | Ego |
+
+### 4. Key Methods
+- **Action recognition** from hand pose sequences
+- **Object affordances** — what can be done with an object
+- **Gaze guidance** — where humans look during interaction
+- **Multi-modal fusion** — RGB + depth + pose
+
+## 📊 Common Benchmarks
+
+| Benchmark | Task | Key Metric |
+|-----------|------|-----------|
+| AssemblyHands | 3D hand pose | MPJPE |
+| Ego4D | HOI recognition | mAP |
+| EPIC-KITCHENS | Action recognition | Top-1 acc |
+| IKEA ASM | Action recognition | Frame accuracy |
+
+## 🏛️ Architectural Implications for POPW
+
+POPW's design is informed by HOI survey findings:
+
+```
+Video Input → Hand Detection → Pose Estimation → FiLM(pose) → Action Recognition
+                                      ↓
+                              Object Detection (optional)
+```
+
+**Key insight**: Multi-task learning (pose + action) outperforms single-task on IKEA ASM:
+- Joint learning provides implicit supervision
+- Pose features help disambiguate similar actions
+- Object detection provides complementary signal
+
+**POPW differs from typical HOI approaches**:
+1. **FiLM modulation** — pose conditions feature extraction directly
+2. **Assembly-specific** — not general HOI, focused on furniture assembly
+3. **Real-time target** — most surveys focus on accuracy, not speed
+
+## 📈 Why MEDIUM Relevance for POPW
+
+1. **Provides context** for POPW's multi-task architecture
+2. **IKEA ASM** appears in several surveys as challenging benchmark
+3. **Hand pose → action** connection validates POPW's core insight
+4. **Gap**: Most surveys focus on detection, not real-time recognition
+
+## 🔗 Connection to Other Papers
+
+| Paper | Connection |
+|-------|------------|
+| 094 (Caruana MTL) | Multi-task learning for joint pose + action |
+| 097 (Attention) | Transformer-based HOI methods |
+| 001-050 (Earlier tiers) | Various action recognition papers referenced |
+
+## ⚠️ Limitations
+
+- Surveys quickly become outdated (rapid progress in 2023-2024)
+- Many surveys focus on exo-centric views
+- Limited real-time considerations
+- Assembly-specific HOI is underrepresented
+
+---
+
+*Recorded: 2026-04-11 | Source: Various surveys (ACM Computing Surveys, IEEE TPAMI, etc.) 2023-2024*

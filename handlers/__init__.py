@@ -28,6 +28,7 @@ from handlers import (
     enterprise,
     github_intel_handler,
     inline,
+    media_tools,
     memory_commands,
     orchestrate,
     overnight_handler,
@@ -70,6 +71,7 @@ _ROUTER_ORDER = [
     debate_handlers.router,  # /debate /opinion
     overnight_handler.router,  # /overnight /dashboard /overnight_*
     voice.router,  # F.voice + F.audio + /voice_on /voice_off /voice_status /voice_toggle
+    media_tools.router,  # /imagine /search /speak + F.photo (MiniMax media tools)
     inline.router,  # inline_query
     skills.router,  # /skills /skill /skill_reload
     persona_handler.router,  # /persona /mood /persona_reset /persona_note

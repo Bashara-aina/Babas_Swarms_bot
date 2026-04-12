@@ -1,0 +1,38 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/self-knowledge/cekwajar/005-constants.md",
+  "reason": "daily_fast_scan: score=0.050 < 0.3",
+  "score": 0.05,
+  "quarantined_at": "2026-04-12T01:00:01.424734"
+}
+---
+
+---
+title: "cekwajar Constants - NOT FOUND"
+source_type: CODE_EXTRACTION
+extracted_from: cekwajar
+date: 2026-04-11
+tags: [cekwajar, constants, magic-numbers, NOT-FOUND]
+---
+
+# cekwajar Constants Extraction
+
+## Status: SOURCE NOT FOUND
+
+### Expected Source
+- **Path**: `/home/newadmin/swarm-bot/.wiki/knowledge/cekwajar/`
+- **Expected Content**: Hardcoded values like 54000000 PTKP, 4500000, 0.04, 0.01
+- **Actual Content**: No source files found
+
+### Expected Constants (Not Documented)
+- PTKP tiers: 54000000, 58500000, 63000000, 67500000
+- PPh 21 rates: 0.05, 0.15, 0.25, 0.30, 0.35
+- BPJS rates: 0.01 (employee), 0.04 (employer), etc.
+- Overtime divisor: 173 (monthly hours)
+- Standard deduction: / 12 (monthly)
+
+### Conclusion
+The cekwajar hardcoded constants are not present in this repository.
+
+---
+*Extracted: 2026-04-11 by @worker*

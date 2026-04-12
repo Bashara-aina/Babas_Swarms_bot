@@ -28,7 +28,23 @@ def _resolve_tool_bin(name: str) -> Optional[str]:
 
 
 async def run_shell(cmd: str, timeout: int = 30, capture_stderr: bool = True) -> str:
-    """Run a shell command asynchronously. Returns stdout+stderr as string."""
+    """Run a shell command asynchronously with sandbox protection. Returns stdout+stderr as string."""
+    # Sandbox pre-flight check (U2)
+    try:
+        from core.shell.sandbox import SandboxExecutor, DEFAULT_SANDBOX
+
+        sandbox = SandboxExecutor(DEFAULT_SANDBOX)
+        result = await sandbox.execute(cmd)
+        if not result.ok:
+            return f"⛔ {result.stderr}"
+        out = result.stdout
+        err = result.stderr
+        if result.exit_code == 0:
+            return out or "(done, no output)"
+        return f"exit {result.exit_code}\nstdout: {out}\nstderr: {err}".strip()
+    except ImportError:
+        pass  # Fall through to direct subprocess if sandbox unavailable
+
     try:
         proc = await asyncio.create_subprocess_shell(
             cmd,

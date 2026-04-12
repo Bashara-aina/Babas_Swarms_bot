@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dapur Solo — Business Strategy Deep Dive</title>
+<style>
+  :root {
+    --bg: #0d0d0f; --surface: #16161a; --card: #1e1e24; --border: #2a2a35;
+    --accent: #f59e0b; --accent2: #10b981; --accent3: #06b6d4; --accent4: #a855f7; --accent5: #ef4444;
+    --text: #e8e8f0; --muted: #888899; --tag-bg: #2a2a35;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  .hero { background: linear-gradient(135deg, #1a1200 0%, #0d0d0f 50%, #001a0a 100%); border-bottom: 1px solid var(--border); padding: 48px 32px 36px; text-align: center; }
+  .hero-badge { display: inline-block; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #000; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 20px; margin-bottom: 16px; }
+  .hero h1 { font-size: 36px; font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 8px; }
+  .hero h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero-sub { color: var(--muted); font-size: 15px; max-width: 640px; margin: 0 auto 24px; }
+  .hero-meta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .hero-meta span { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 12px; color: var(--muted); }
+  .hero-meta span b { color: var(--text); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+  h2.st { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  h2.st .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .sdesc { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .sb { margin-bottom: 52px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .csm { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  @media(max-width:900px){.g4,.g3{grid-template-columns:1fr 1fr;}}
+  @media(max-width:600px){.g2,.g4,.g3{grid-template-columns:1fr;}.hero h1{font-size:24px;}}
+  .kpi { text-align: center; }
+  .kpi-v { font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+  .kpi-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .kpi-s { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pa { background: rgba(245,158,11,0.15); color: var(--accent); border: 1px solid rgba(245,158,11,0.3); }
+  .pb { background: rgba(16,185,129,0.15); color: var(--accent2); border: 1px solid rgba(16,185,129,0.3); }
+  .pc { background: rgba(6,182,212,0.15); color: var(--accent3); border: 1px solid rgba(6,182,212,0.3); }
+  .pd { background: rgba(168,85,247,0.15); color: var(--accent4); border: 1px solid rgba(168,85,247,0.3); }
+  .pe { background: rgba(239,68,68,0.15); color: var(--accent5); border: 1px solid rgba(239,68,68,0.3); }
+  .lbl { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .la { color: var(--accent); } .lb { color: var(--accent2); } .lc { color: var(--accent3); }
+  .ld { color: var(--accent4); } .le { color: var(--accent5); } .lm { color: var(--muted); }
+  hr.dv { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  ul.ck { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  ul.ck li { padding-left: 22px; position: relative; font-size: 13px; color: var(--text); }
+  ul.ck li::before { content: "✓"; position: absolute; left: 0; color: var(--accent2); font-weight: 700; }
+  ul.bl { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  ul.bl li { padding-left: 16px; position: relative; font-size: 13px; color: var(--muted); }
+  ul.bl li::before { content: "•"; position: absolute; left: 0; color: var(--accent); }
+  .fwh { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .fwi { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .fwt { font-size: 20px; font-weight: 700; color: #fff; }
+  .fws { font-size: 12px; color: var(--muted); }
+  .sif-b { border-left: 3px solid var(--accent); padding-left: 16px; margin-bottom: 20px; }
+  .sif-b h4 { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .sif-b.b2 { border-left-color: var(--accent2); } .sif-b.b2 h4 { color: var(--accent2); }
+  .sif-b.b3 { border-left-color: var(--accent3); } .sif-b.b3 h4 { color: var(--accent3); }
+  .sif-b.b4 { border-left-color: var(--accent4); } .sif-b.b4 h4 { color: var(--accent4); }
+  .bmc-grid { display: grid; grid-template-areas: "kp ka vp cr cs" "kp ka vp cr cs" "kr ka vp ch cs" "cost cost vp rev rev" "cost cost impact rev rev"; grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr; gap: 2px; background: var(--border); border-radius: 12px; overflow: hidden; }
+  .bmc-cell { background: var(--card); padding: 16px; min-height: 110px; }
+  .bmc-cell .cl { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .bmc-cell ul { list-style: none; }
+  .bmc-cell ul li { font-size: 12px; color: var(--muted); padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .bmc-cell ul li:last-child { border: none; }
+  .bmc-cell ul li::before { content: "› "; color: var(--accent); font-weight: 700; }
+  .bkp{grid-area:kp;} .bka{grid-area:ka;} .bvp{grid-area:vp;background:linear-gradient(135deg,rgba(245,158,11,0.07),rgba(16,185,129,0.07));border-left:2px solid var(--accent);border-right:2px solid var(--accent2);} .bcr{grid-area:cr;} .bcs{grid-area:cs;} .bkr{grid-area:kr;} .bch{grid-area:ch;} .bco{grid-area:cost;background:rgba(239,68,68,0.04);} .brv{grid-area:rev;background:rgba(16,185,129,0.04);} .bim{grid-area:impact;background:rgba(168,85,247,0.06);}
+  @media(max-width:900px){.bmc-grid{grid-template-areas:"kp""ka""vp""cr""cs""kr""ch""cost""rev""impact";grid-template-columns:1fr;}}
+  .vpc-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--border); border-radius: 14px; overflow: hidden; }
+  .vpc-l { background: var(--card); padding: 20px; border-right: 1px solid var(--border); }
+  .vpc-r { background: var(--surface); padding: 20px; }
+  .vpc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+  .vpc-item b { color: var(--text); display: block; margin-bottom: 2px; }
+  .vpc-stmt { background: linear-gradient(135deg,rgba(245,158,11,0.08),rgba(16,185,129,0.08)); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; padding: 16px; margin-top: 16px; font-size: 13px; color: var(--text); line-height: 1.7; font-style: italic; }
+  .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); border-radius: 12px; overflow: hidden; }
+  .sw-s { background: rgba(16,185,129,0.06); padding: 20px; }
+  .sw-w { background: rgba(239,68,68,0.06); padding: 20px; }
+  .sw-item { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+  .sw-n { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .sw-item p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .sw-item p b { color: var(--text); display: block; }
+  .fg { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; position: relative; overflow: hidden; }
+  .fg::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .fg.g1::before{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  .fg.g2::before{background:linear-gradient(90deg,var(--accent3),var(--accent4));}
+  .fg.g3::before{background:linear-gradient(90deg,var(--accent2),var(--accent3));}
+  .fg h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .fg .tf { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .fg p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .mission-box { background: linear-gradient(135deg,rgba(245,158,11,0.08),rgba(16,185,129,0.08)); border: 1px solid rgba(245,158,11,0.25); border-radius: 16px; padding: 28px; text-align: center; }
+  .mission-box h3 { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.6; margin-bottom: 12px; }
+  .mission-box p { font-size: 13px; color: var(--muted); max-width: 640px; margin: 0 auto; }
+  .ib { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 10px; }
+  .ib .il { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+  .ib p { font-size: 12px; color: var(--muted); }
+  .logic-step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .logic-n { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #000; flex-shrink: 0; }
+  .logic-c h5 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .logic-c p { font-size: 12px; color: var(--muted); }
+  .logic-arr { text-align: center; color: var(--accent2); font-size: 18px; margin: -6px 0 6px 16px; }
+  .rec-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .rec-card h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .rec-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .comp-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .comp-row:last-child{border:none;}
+  .comp-nm { font-size: 12px; font-weight: 600; color: var(--text); width: 130px; flex-shrink: 0; }
+  .comp-bw { flex: 1; background: var(--border); border-radius: 4px; height: 8px; overflow: hidden; }
+  .comp-b { height: 100%; border-radius: 4px; }
+  .comp-sc { font-size: 11px; color: var(--muted); width: 36px; text-align: right; flex-shrink: 0; }
+  .sku-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media(max-width:700px){.sku-grid{grid-template-columns:1fr 1fr;}}
+  .sku-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .sku-card .sku-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .sku-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .sku-row:last-child{border:none;}
+  .sku-row .k { color: var(--muted); }
+  .sku-row .v { font-weight: 600; }
+  footer { text-align: center; padding: 32px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Business Strategy Deep Dive</div>
+  <h1><span>Dapur Solo</span> — Dried Ready Meal</h1>
+  <p class="hero-sub">Analisis bisnis komprehensif: SIF · BMC · VPC · Post T-Studio Workbook<br>Home manufacturing dried Indonesian ready meal — Bashara &amp; Bapak, Pajang, Laweyan, Solo</p>
+  <div class="hero-meta">
+    <span>📍 <b>Pajang, Laweyan, Surakarta</b></span>
+    <span>👨‍👩‍👧 <b>Bashara + Bapak</b></span>
+    <span>💰 <b>Modal Rp 35–45 Juta</b></span>
+    <span>📦 <b>6 SKU Hero</b></span>
+    <span>⏱️ <b>BEP 4–6 Bulan</b></span>
+    <span>📊 <b>4 Framework Diterapkan</b></span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- EXEC SUMMARY -->
+<div class="sb">
+  <h2 class="st"><span class="dot" style="background:var(--accent)"></span> Executive Summary</h2>
+  <p class="sdesc">Snapshot strategis bisnis dried ready meal rumahan berbasis Solo</p>
+  <div class="g4" style="margin-bottom:16px;">
+    <div class="card kpi"><div class="kpi-v" style="color:var(--accent)">38%</div><div class="kpi-l">Net Margin</div><div class="kpi-s">@ 100 pak/hari</div></div>
+    <div class="card kpi"><div class="kpi-v" style="color:var(--accent2)">Rp 45M</div><div class="kpi-l">Modal Awal</div><div class="kpi-s">Termasuk cash cycle buffer</div></div>
+    <div class="card kpi"><div class="kpi-v" style="color:var(--accent3)">4–6 bln</div><div class="kpi-l">Break Even Point</div><div class="kpi-s">Skenario base case</div></div>
+    <div class="card kpi"><div class="kpi-v" style="color:var(--accent4)">PIRT</div><div class="kpi-l">Regulatory Path</div><div class="kpi-s">SPP-IRT eligible ✅</div></div>
+  </div>
+  <div class="card">
+    <div class="lbl la">Konteks Strategis</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.8;">Bisnis ini adalah <b style="color:var(--text)">home manufacturing dried ready meal</b> berbasis autentisitas masakan Jawa/Solo — dijalankan berdua oleh <b style="color:var(--text)">Bashara (bisnis &amp; marketing) dan Bapak (produksi &amp; resep)</b> dari rumah di Pajang, Laweyan, Surakarta. Produk berupa makanan siap makan yang sudah dimasak lalu didehydrasi — konsumen hanya perlu menambahkan air panas. Keunggulan utama: <b style="color:var(--text)">cita rasa autentik masakan Solo</b> (Nasi Liwet, Tempe Orek, Rendang) yang tidak dimiliki kompetitor besar, harga terjangkau Rp 25–35K/pak, shelf life 6–12 bulan, dan jalur regulasi PIRT yang clear dan murah. Distribusi utama melalui Shopee (target Solo/Jawa), dengan potensi diaspora Indonesia di luar negeri sebagai segmen premium.</p>
+  </div>
+</div>
+
+<!-- PRODUCT SKUs -->
+<div class="sb">
+  <h2 class="st"><span class="dot" style="background:var(--accent2)"></span> Portofolio Produk (6 SKU Hero)</h2>
+  <p class="sdesc">Unit economics per SKU pada skala 100 pak/hari</p>
+  <div class="sku-grid">
+    <div class="sku-card"><div class="sku-name">🍚 Nasi Liwet Solo</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 30,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 9,300</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">69%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Hero SKU</span></div>
+    </div>
+    <div class="sku-card"><div class="sku-name">🫘 Tempe Orek</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 25,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 6,500</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">74%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Margin tertinggi</span></div>
+    </div>
+    <div class="sku-card"><div class="sku-name">🍗 Ayam Suwir Sambal</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 32,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 14,400</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">55%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Bestseller protein</span></div>
+    </div>
+    <div class="sku-card"><div class="sku-name">🎁 Combo Nasi + Lauk</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 55,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 23,700</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">57%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Upsell / kado</span></div>
+    </div>
+    <div class="sku-card"><div class="sku-name">🥩 Rendang Sapi</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 35,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 20,000</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">43%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Premium / diaspora</span></div>
+    </div>
+    <div class="sku-card"><div class="sku-name">🌶️ Sambal Sachet</div>
+      <div class="sku-row"><span class="k">Harga jual</span><span class="v" style="color:var(--accent)">Rp 15,000</span></div>
+      <div class="sku-row"><span class="k">COGS</span><span class="v">Rp 4,200</span></div>
+      <div class="sku-row"><span class="k">Gross margin</span><span class="v" style="color:var(--accent2)">72%</span></div>
+      <div class="sku-row"><span class="k">Posisi</span><span class="v">Add-on / aksesoris</span></div>
+    </div>
+  </div>
+  <div class="ib" style="margin-top:12px;"><div class="il">💡 Net Profit per pak (blended avg @ 100 pak/hari)</div><p>Setelah dikurangi semua biaya operasional + Shopee fee ~10% + biaya listrik + packaging: <b style="color:var(--text)">net ~Rp 11,470/pak = margin bersih 38.2%.</b> Pada 100 pak/hari → Rp 34.4 juta/bulan gross revenue → net ~Rp 13.2 juta/bulan.</p></div>
+</div>
+
+<!-- ===== SIF ===== -->
+<div class="sb">
+  <div class="fwh">
+    <div class="fwi" style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(16,185,129,0.2))">🧭</div>
+    <div><div class="fwt">Strategy Identification Framework (SIF)</div><div class="fws">Goals → Scope → Competitive Advantage (5 bagian) → Logic of Success</div></div>
+  </div>
+
+  <!-- 1.1 Goals -->
+  <div class="sif-b">
+    <h4>1.1 — Goals (Tujuan Bisnis)</h4>
+    <div class="g2" style="gap:12px;">
+      <div class="csm">
+        <div class="lbl la">Goal 1 — Revenue &amp; Profitability</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Mencapai <b style="color:var(--text)">net profit Rp 10–15 juta/bulan</b> secara konsisten dalam 12 bulan pertama, dimulai dari 50 pak/hari menuju 150 pak/hari, dengan BEP tercapai paling lambat bulan ke-6.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pa">0–12 Bulan</span><span class="pill pb">Cash Flow</span></div>
+      </div>
+      <div class="csm">
+        <div class="lbl lb">Goal 2 — Brand Recognition</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Menjadi <b style="color:var(--text)">toko dried ready meal #1 di Shopee dengan keyword "nasi liwet instan" dan "masakan Solo kering"</b> — raih minimal 500 ulasan bintang 5 dan badge "Terpercaya" dalam 12 bulan.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pb">6–12 Bulan</span><span class="pill pc">Shopee</span></div>
+      </div>
+      <div class="csm">
+        <div class="lbl lc">Goal 3 — Produk &amp; Regulasi</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><b style="color:var(--text)">Mendapatkan sertifikat PIRT (SPP-IRT)</b> untuk minimal 4 SKU dalam 3 bulan pertama, dan mengembangkan 2 SKU baru setiap 6 bulan berdasarkan feedback pelanggan.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pc">0–3 Bulan</span><span class="pill pd">Regulasi</span></div>
+      </div>
+      <div class="csm">
+        <div class="lbl ld">Goal 4 — Ekspansi Skala</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><b style="color:var(--text)">Mencapai 500 pak/hari</b> dalam 24–30 bulan dengan menambah kapasitas dehydrator dan mempertimbangkan produksi semi-profesional (BPOM MD) jika revenue sudah stabil di atas Rp 50 juta/bulan.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pd">18–30 Bulan</span><span class="pill pa">Scale Up</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.2 Scope -->
+  <div class="sif-b b2">
+    <h4>1.2 — Scope (Ruang Lingkup)</h4>
+    <div class="g3" style="gap:12px;">
+      <div class="csm">
+        <div class="lbl lb">Target Segmen</div>
+        <ul class="bl">
+          <li><b style="color:var(--text)">Primer:</b> Anak kos/mahasiswa Jawa yang kangen masakan rumah (18–26 th)</li>
+          <li><b style="color:var(--text)">Primer:</b> Pekerja kantoran sibuk yang butuh makan praktis tapi enak</li>
+          <li><b style="color:var(--text)">Sekunder:</b> Pendaki/camper &amp; outdoor enthusiast</li>
+          <li><b style="color:var(--text)">Premium:</b> Diaspora Indonesia di Singapore, Malaysia, Belanda</li>
+          <li><b style="color:var(--text)">Seasonal:</b> Ibu rumah tangga yang stok lauk untuk bekal/mudik</li>
+        </ul>
+      </div>
+      <div class="csm">
+        <div class="lbl lc">Produk &amp; Layanan</div>
+        <ul class="bl">
+          <li>6 SKU hero (Nasi Liwet, Tempe Orek, Ayam Suwir, Combo, Rendang, Sambal)</li>
+          <li>Bundle paket (Paket Kos, Paket Pendaki, Paket Lebaran)</li>
+          <li>Custom order (arisan, hampers, event kantor)</li>
+          <li><i>Pipeline: Opor Ayam, Lodeh, Soto Solo, Gudeg</i></li>
+        </ul>
+      </div>
+      <div class="csm">
+        <div class="lbl la">Geografi &amp; Channel</div>
+        <ul class="bl">
+          <li><b style="color:var(--text)">Fase 1:</b> Shopee Indonesia (Solo → Jawa → Nasional)</li>
+          <li><b style="color:var(--text)">Fase 2:</b> Tokopedia + Instagram/TikTok store</li>
+          <li><b style="color:var(--text)">Fase 3:</b> Diaspora via Shopee SG / Tokopedia ekspor</li>
+          <li><b style="color:var(--text)">Lokal:</b> Oleh-oleh Solo, warung, minimarket kota</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.3 Competitive Advantage -->
+  <div class="sif-b b3">
+    <h4>1.3 — Competitive Advantage (5 Bagian)</h4>
+    <div class="g2" style="gap:12px;margin-bottom:12px;">
+      <div class="csm">
+        <div class="lbl lc">① Menciptakan Nilai — Cara Kami Menang</div>
+        <ul class="ck">
+          <li><b>Autentisitas resep Solo</b> — Nasi Liwet Solo adalah ikon kuliner nasional; bukan produk generic tapi ada cerita geografis yang kuat</li>
+          <li><b>Produksi keluarga</b> — Bapak masak, Bashara manage: "made with love, not by factory" adalah positioning yang tidak bisa disamai FMCG besar</li>
+          <li><b>Teknologi dehydrasi + just-add-water</b> — bukan freeze-dry mahal, tapi hasil dehydrasi home scale yang tetap enak dan aman</li>
+          <li><b>PIRT certified</b> — regulatory legitimacy yang dikit kompetitor home-scale punya</li>
+          <li><b>Harga terjangkau</b> — Rp 25–35K/pak vs nasi warteg Rp 20–30K, tapi bisa dimakan kapan saja dan shelf life 6–12 bulan</li>
+        </ul>
+      </div>
+      <div class="csm">
+        <div class="lbl la">② Intended Advantage — Tipe CA</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;"><b style="color:var(--text)">Hybrid: Diferensiasi + Biaya Rendah</b></p>
+        <ul class="bl">
+          <li><b style="color:var(--text)">Diferensiasi:</b> Autentisitas Solo/Jawa — tidak ada brand lain yang punya cerita geografis + resep keluarga ini</li>
+          <li><b style="color:var(--text)">Biaya Rendah:</b> Produksi rumahan = no rent, no factory overhead — COGS ~30–57% dari harga jual</li>
+          <li><b style="color:var(--text)">Focus Strategy:</b> Mulai dari niche yang sangat spesifik (masakan Solo kering) sebelum memperluas ke masakan daerah lain</li>
+        </ul>
+        <div class="ib" style="margin-top:8px;"><div class="il">⚠ Risiko</div><p>Kompetitor besar (Lanana, Mercon) bisa copy positioning jika terlalu generic. Harus lock-in "Solo" sebagai geographic moat.</p></div>
+      </div>
+    </div>
+    <div class="g3" style="gap:12px;">
+      <div class="csm">
+        <div class="lbl ld">③ Actual Competitive Advantage</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px;">CA yang sudah ada hari ini:</p>
+        <ul class="bl">
+          <li>Akses ke resep keluarga autentik Solo (tidak bisa dibeli/ditiru)</li>
+          <li>Bapak sebagai "Chef" dengan skill memasak masakan Jawa yang terukur dan konsisten</li>
+          <li>Lokasi di Laweyan — salah satu kampung bersejarah Solo dengan brand positioning yang kuat</li>
+          <li>Zero overhead (rumah sendiri = no rent = lower BEP)</li>
+          <li>Bashara sebagai business brain: riset, analisis, marketing digital</li>
+        </ul>
+      </div>
+      <div class="csm">
+        <div class="lbl la">④ Sumber CA — Kapabilitas &amp; Sumber Daya</div>
+        <p style="font-size:12px;color:var(--accent);margin-bottom:5px;font-weight:700;">KAPABILITAS:</p>
+        <ul class="bl" style="margin-bottom:10px;">
+          <li>Keahlian masak masakan Jawa/Solo (Bapak)</li>
+          <li>Proses dehydrasi yang presisi (suhu/waktu per menu)</li>
+          <li>Digital marketing &amp; Shopee store management (Bashara)</li>
+          <li>Manajemen keuangan &amp; riset bisnis (Bashara)</li>
+        </ul>
+        <p style="font-size:12px;color:var(--accent);margin-bottom:5px;font-weight:700;">SUMBER DAYA:</p>
+        <ul class="bl">
+          <li>Dapur rumah (zero cost, PIRT-ready)</li>
+          <li>Dehydrator + vacuum sealer + food scale</li>
+          <li>Resep keluarga (IP tidak terdaftar tapi sangat sticky)</li>
+          <li>Modal awal Rp 35–45 juta</li>
+        </ul>
+      </div>
+      <div class="csm">
+        <div class="lbl lb">⑤ Menangkap Nilai — Bargaining Power</div>
+        <p style="font-size:12px;color:var(--accent2);margin-bottom:5px;font-weight:700;">Customer Bargaining:</p>
+        <ul class="bl" style="margin-bottom:8px;">
+          <li>Ulasan Shopee yang baik → social proof → reduces price sensitivity</li>
+          <li>Repeat buyer discount (Shopee voucher) → reduce churn</li>
+          <li>Bundling paket → higher basket size</li>
+        </ul>
+        <p style="font-size:12px;color:var(--accent2);margin-bottom:5px;font-weight:700;">Supplier Bargaining:</p>
+        <ul class="bl" style="margin-bottom:8px;">
+          <li>Beli bahan baku di Pasar Legi Solo → harga pasar tradisional</li>
+          <li>Volume purchasing seiring scale → negosiasi lebih baik</li>
+        </ul>
+        <p style="font-size:12px;color:var(--accent2);margin-bottom:5px;font-weight:700;">Competitive Bargaining:</p>
+        <ul class="bl">
+          <li>Positioning "Solo authenticity" sulit direbut kompetitor FMCG</li>
+          <li>Direct to consumer via Shopee = no distributor fee</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.4 Logic of Success -->
+  <div class="sif-b b4">
+    <h4>1.4 — Logic of Success (Rantai Kausal)</h4>
+    <div class="csm">
+      <div class="logic-step"><div class="logic-n">1</div><div class="logic-c"><h5>Resep Autentik → Produk Berbeda dari Kompetitor</h5><p>Bapak masak pakai resep turun-temurun Solo → rasa yang tidak bisa direplikasi pabrik → diferensiasi nyata, bukan klaim marketing semata.</p></div></div>
+      <div class="logic-arr">↓</div>
+      <div class="logic-step"><div class="logic-n">2</div><div class="logic-c"><h5>PIRT + Packaging Baik → Kepercayaan Pembeli</h5><p>Sertifikasi PIRT + label informatif + foto produk profesional → pembeli online merasa aman beli dari home manufacturer → review positif pertama kali.</p></div></div>
+      <div class="logic-arr">↓</div>
+      <div class="logic-step"><div class="logic-n">3</div><div class="logic-c"><h5>Review Shopee + Konten TikTok/IG → Organic Growth</h5><p>Customer pertama puas → tinggalkan ulasan bintang 5 → Shopee algorithm boost → konten "cara masak nasi liwet instan" di TikTok viral di niche anak kos → CAC mendekati nol.</p></div></div>
+      <div class="logic-arr">↓</div>
+      <div class="logic-step"><div class="logic-n">4</div><div class="logic-c"><h5>Repeat Purchase → Cash Flow Stabil</h5><p>Anak kos beli tiap bulan → pekerja kantoran restock → Shopee repeat buyer rate naik → revenue lebih predictable → cash flow buffer terbentuk (meskipun payment cycle 25–35 hari).</p></div></div>
+      <div class="logic-arr">↓</div>
+      <div class="logic-step"><div class="logic-n">5</div><div class="logic-c"><h5>Skala Produksi → Margin Meningkat</h5><p>Dari 50 → 100 → 200 pak/hari → beli bahan baku bulk → COGS turun 10–15% → margin naik → reinvest ke dehydrator tambahan &amp; packaging premium.</p></div></div>
+      <div class="logic-arr">↓</div>
+      <div class="logic-step"><div class="logic-n">6</div><div class="logic-c"><h5>Brand "Dapur Solo" → Ekspansi Diaspora &amp; Nasional</h5><p>Solo authenticity story + traction nasional Shopee → masuk segmen diaspora (Shopee SG) dan oleh-oleh premium → buka jalan ke BPOM MD + retail nasional di fase 3.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BMC ===== -->
+<div class="sb">
+  <div class="fwh">
+    <div class="fwi" style="background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(168,85,247,0.2))">📋</div>
+    <div><div class="fwt">Business Model Canvas (BMC)</div><div class="fws">Problem Statement + Mission + 9 Blok + Competitive Landscape + Impact</div></div>
+  </div>
+
+  <div class="g2" style="gap:16px;margin-bottom:20px;">
+    <div class="card">
+      <div class="lbl la">Problem Statement</div>
+      <p style="font-size:14px;color:var(--text);line-height:1.8;margin-bottom:10px;"><b>Jutaan anak kos, pekerja kantoran, dan pecinta kuliner Jawa tidak bisa mengakses masakan rumahan Solo yang autentik setiap hari</b> — karena memasak sendiri butuh waktu dan skill, warung tidak selalu ada, dan makanan instan konvensional terasa generik dan tidak memuaskan.</p>
+      <p style="font-size:12px;color:var(--muted);">Produk alternatif yang ada (mie instan, nasi instan, ready meal impor) tidak menjawab kerinduan terhadap <b style="color:var(--text)">cita rasa masakan Jawa/Solo yang spesifik</b>. Gap yang ada: autentik + praktis + tahan lama + harga terjangkau dalam satu produk.</p>
+    </div>
+    <div class="mission-box" style="padding:22px;text-align:left;">
+      <div class="lbl lb">Mission</div>
+      <h3 style="font-size:15px;margin-bottom:10px;">"Menghadirkan cita rasa dapur Solo ke meja makan siapapun, di mana saja — hanya dengan air panas."</h3>
+      <p style="font-size:12px;">Kami percaya bahwa masakan rumahan yang autentik, buatan tangan, dan penuh rasa seharusnya bisa dinikmati semua orang — bukan hanya mereka yang tinggal dekat Solo atau punya waktu memasak setiap hari.</p>
+    </div>
+  </div>
+
+  <div class="bmc-grid">
+    <div class="bmc-cell bkp"><div class="cl lm">Key Partners</div><ul>
+      <li>Dinas Kesehatan Kota Solo (PIRT / SPP-IRT)</li>
+      <li>Shopee &amp; Tokopedia (platform D2C utama)</li>
+      <li>Supplier bahan baku: Pasar Legi + Pasar Gede Solo</li>
+      <li>Supplier packaging: standing pouch vacuum, oxygen absorber</li>
+      <li>JNE / SiCepat / J&amp;T (logistik)</li>
+      <li>TikTok creator / food blogger Solo (konten)</li>
+    </ul></div>
+    <div class="bmc-cell bka"><div class="cl lm">Key Activities</div><ul>
+      <li>Memasak &amp; dehydrasi bahan (Bapak)</li>
+      <li>Quality control: Aw proxy test, snap test</li>
+      <li>Vacuum sealing + labeling PIRT</li>
+      <li>Shopee store management + iklan (Bashara)</li>
+      <li>Konten TikTok/IG "cara masak" &amp; demo produk</li>
+      <li>Riset resep baru &amp; pengembangan SKU</li>
+      <li>Pengajuan &amp; maintenance PIRT</li>
+    </ul></div>
+    <div class="bmc-cell bvp"><div class="cl" style="color:var(--accent);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Value Propositions</div><ul>
+      <li><b style="color:var(--text)">Autentik resep Solo</b> — bukan flavor generic, tapi Nasi Liwet Solo yang asli</li>
+      <li><b style="color:var(--text)">Just-add-hot-water</b> — siap makan dalam 5 menit</li>
+      <li><b style="color:var(--text)">Shelf life 6–12 bulan</b> — stok tanpa khawatir expired</li>
+      <li><b style="color:var(--text)">PIRT certified</b> — aman, legal, dan bisa dipercaya</li>
+      <li><b style="color:var(--text)">Harga terjangkau</b> — Rp 25–35K/pak</li>
+      <li><b style="color:var(--text)">Buatan keluarga</b> — ada cerita manusia di balik produk</li>
+      <li><b style="color:var(--text)">Zero preservative kimia berbahaya</b> — dehydrasi alami</li>
+    </ul></div>
+    <div class="bmc-cell bcr"><div class="cl lm">Customer Relationships</div><ul>
+      <li>Review &amp; rating Shopee sebagai social proof utama</li>
+      <li>Balas chat cepat &lt; 1 jam (Shopee response rate)</li>
+      <li>Voucher diskon repeat buyer</li>
+      <li>Konten "di balik dapur" TikTok — transparansi produksi</li>
+      <li>Group WhatsApp pelanggan setia (newsletter resep)</li>
+    </ul></div>
+    <div class="bmc-cell bcs"><div class="cl lm">Customer Segments</div><ul>
+      <li><b style="color:var(--text)">Primer:</b> Anak kos/mahasiswa Jawa (18–26)</li>
+      <li><b style="color:var(--text)">Primer:</b> Pekerja kantoran yang tidak sempat masak</li>
+      <li><b style="color:var(--text)">Sekunder:</b> Pendaki &amp; outdoor enthusiast</li>
+      <li><b style="color:var(--text)">Premium:</b> Diaspora Indonesia di luar negeri</li>
+      <li><b style="color:var(--text)">Seasonal:</b> Ibu RT stok lauk / hampers Lebaran</li>
+    </ul></div>
+    <div class="bmc-cell bkr"><div class="cl lm">Key Resources</div><ul>
+      <li>Dapur rumah Pajang, Laweyan (PIRT-ready)</li>
+      <li>Bapak: keahlian masak resep Solo (IP tidak ternilai)</li>
+      <li>Bashara: business, marketing, riset</li>
+      <li>Dehydrator 10 tray × 2 unit (~Rp 4–6M)</li>
+      <li>Vacuum sealer + food scale + termometer</li>
+      <li>Modal awal Rp 35–45 juta</li>
+      <li>PIRT certificate (4 SKU awal)</li>
+    </ul></div>
+    <div class="bmc-cell bch"><div class="cl lm">Channels</div><ul>
+      <li>Shopee Indonesia — 80% revenue (fase 1)</li>
+      <li>Tokopedia — 10% revenue (fase 1)</li>
+      <li>TikTok Shop + IG Shopping — 5%</li>
+      <li>WhatsApp personal selling — 5%</li>
+      <li>Fase 2: Oleh-oleh Solo, warung makan kota</li>
+      <li>Fase 3: Shopee SG / diaspora internasional</li>
+    </ul></div>
+    <div class="bmc-cell bco"><div class="cl" style="color:#ef4444;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Cost Structure</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div><p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">COGS (40–57%)</p><ul style="list-style:none;"><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Bahan baku (beras, ayam, rempah)</li><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Packaging (pouch, label, O2 absorber)</li><li style="font-size:11px;color:var(--muted);padding:2px 0;">› Listrik dehydrator (Rp 2.07M/bln)</li></ul></div>
+        <div><p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">Platform (10%)</p><ul style="list-style:none;"><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Shopee admin fee 2–3%</li><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Payment gateway 2%</li><li style="font-size:11px;color:var(--muted);padding:2px 0;">› Gratis ongkir subsidi ~5%</li></ul></div>
+        <div><p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">Fixed</p><ul style="list-style:none;"><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› "Gaji" Bapak + Bashara</li><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› PIRT renewal tahunan (~Rp 300K)</li><li style="font-size:11px;color:var(--muted);padding:2px 0;">› Shopee Ads (opsional fase 2)</li></ul></div>
+      </div>
+    </div>
+    <div class="bmc-cell bim"><div class="cl" style="color:var(--accent4);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Impact</div><ul style="list-style:none;">
+      <li style="font-size:12px;color:var(--muted);padding:3px 0;">› Melestarikan resep masakan Solo dan warisan kuliner Jawa</li>
+      <li style="font-size:12px;color:var(--muted);padding:3px 0;">› Menciptakan lapangan kerja keluarga yang bermartabat &amp; fleksibel</li>
+      <li style="font-size:12px;color:var(--muted);padding:3px 0;">› Memberdayakan perempuan (Bashara) sebagai entrepreneur kuliner</li>
+      <li style="font-size:12px;color:var(--muted);padding:3px 0;">› Membantu diaspora Indonesia tetap terhubung dengan budaya kuliner asal</li>
+    </ul></div>
+    <div class="bmc-cell brv"><div class="cl" style="color:var(--accent2);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Revenue Streams</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">Sekarang</p><ul style="list-style:none;"><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Penjualan per pak (Rp 25–55K)</li><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Bundle paket (Paket Kos, Pendaki)</li><li style="font-size:11px;color:var(--muted);padding:2px 0;">› COD local Solo</li></ul></div>
+        <div><p style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">Pipeline</p><ul style="list-style:none;"><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› Hampers Lebaran / Natal premium</li><li style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border);">› B2B: kantor, catering, outdoor tour</li><li style="font-size:11px;color:var(--muted);padding:2px 0;">› Diaspora (Shopee SG) markup premium</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competitive Landscape -->
+  <div class="card" style="margin-top:20px;">
+    <div class="lbl lc">Competitive Landscape</div>
+    <div class="g2" style="gap:16px;">
+      <div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Posisi relatif vs. kompetitor — Autentisitas Solo × Harga Terjangkau</p>
+        <div class="comp-row"><span class="comp-nm" style="color:var(--accent)">★ Dapur Solo (kita)</span><div class="comp-bw"><div class="comp-b" style="width:93%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div><span class="comp-sc" style="color:var(--accent)">93</span></div>
+        <div class="comp-row"><span class="comp-nm">Lanana</span><div class="comp-bw"><div class="comp-b" style="width:50%;background:var(--accent3)"></div></div><span class="comp-sc">50</span></div>
+        <div class="comp-row"><span class="comp-nm">Mercon</span><div class="comp-bw"><div class="comp-b" style="width:45%;background:var(--accent3)"></div></div><span class="comp-sc">45</span></div>
+        <div class="comp-row"><span class="comp-nm">Medoeek</span><div class="comp-bw"><div class="comp-b" style="width:55%;background:var(--accent3)"></div></div><span class="comp-sc">55</span></div>
+        <div class="comp-row"><span class="comp-nm">Green Rebel</span><div class="comp-bw"><div class="comp-b" style="width:30%;background:var(--muted)"></div></div><span class="comp-sc">30</span></div>
+        <div class="comp-row"><span class="comp-nm">ReadyWise (impor)</span><div class="comp-bw"><div class="comp-b" style="width:20%;background:var(--muted)"></div></div><span class="comp-sc">20</span></div>
+      </div>
+      <div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:7px 4px;color:var(--muted);font-weight:600;">Brand</th>
+            <th style="padding:7px 4px;color:var(--muted);">Autentik</th>
+            <th style="padding:7px 4px;color:var(--muted);">Harga</th>
+            <th style="padding:7px 4px;color:var(--muted);">Shelf Life</th>
+            <th style="padding:7px 4px;color:var(--muted);">PIRT/BPOM</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);background:rgba(245,158,11,0.05)">
+              <td style="padding:7px 4px;font-weight:700;color:var(--accent)">Dapur Solo</td>
+              <td style="text-align:center;padding:7px 4px;color:var(--accent2)">★★★</td>
+              <td style="text-align:center;padding:7px 4px">Rp 25–55K</td>
+              <td style="text-align:center;padding:7px 4px">6–12 bln</td>
+              <td style="text-align:center;padding:7px 4px;color:var(--accent2)">PIRT ✓</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 4px;color:var(--muted)">Lanana</td><td style="text-align:center;padding:7px 4px;color:var(--muted)">★★</td><td style="text-align:center;padding:7px 4px">Rp 25–40K</td><td style="text-align:center;padding:7px 4px">6 bln</td><td style="text-align:center;padding:7px 4px;color:var(--accent2)">BPOM ✓</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 4px;color:var(--muted)">Mercon</td><td style="text-align:center;padding:7px 4px;color:var(--muted)">★★</td><td style="text-align:center;padding:7px 4px">Rp 20–35K</td><td style="text-align:center;padding:7px 4px">6 bln</td><td style="text-align:center;padding:7px 4px;color:var(--accent2)">BPOM ✓</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 4px;color:var(--muted)">Medoeek</td><td style="text-align:center;padding:7px 4px;color:var(--accent4)">★★★</td><td style="text-align:center;padding:7px 4px">Rp 35–60K</td><td style="text-align:center;padding:7px 4px">12 bln</td><td style="text-align:center;padding:7px 4px;color:var(--accent2)">BPOM ✓</td></tr>
+            <tr><td style="padding:7px 4px;color:var(--muted)">ReadyWise</td><td style="text-align:center;padding:7px 4px;color:var(--muted)">★</td><td style="text-align:center;padding:7px 4px">Rp 80–200K</td><td style="text-align:center;padding:7px 4px">25 thn</td><td style="text-align:center;padding:7px 4px;color:var(--accent2)">FDA ✓</td></tr>
+          </tbody>
+        </table>
+        <div class="ib" style="margin-top:10px;"><div class="il">💡 White Space Kami</div><p>Tidak ada kompetitor yang mengkombinasikan <b style="color:var(--text)">autentisitas geografis Solo + buatan keluarga + harga Rp 25–35K + PIRT</b>. Ini white space yang genuine dan bisa dipertahankan.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VPC ===== -->
+<div class="sb">
+  <div class="fwh">
+    <div class="fwi" style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(16,185,129,0.2))">🎯</div>
+    <div><div class="fwt">Value Proposition Canvas (VPC)</div><div class="fws">3 Customer Segments — Customer Profile (Jobs / Pains / Gains) + Value Map</div></div>
+  </div>
+
+  <!-- VPC 1 -->
+  <div style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span class="pill pa" style="font-size:12px;padding:4px 14px;">Segmen 1</span>
+      <span style="font-size:15px;font-weight:700;color:#fff;">Anak Kos / Mahasiswa Jawa (18–26 th, perantau urban)</span>
+    </div>
+    <div class="vpc-wrap">
+      <div class="vpc-l">
+        <div class="lbl la" style="margin-bottom:14px;">Customer Profile</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">🎓 Customer Jobs</p>
+          <div class="vpc-item"><b>Fungsional:</b> Makan kenyang, enak, dan terjangkau di kos tanpa harus masak sendiri</div>
+          <div class="vpc-item"><b>Emosional:</b> Merasakan makanan seperti di rumah — obat rindu masakan ibu/kampung halaman</div>
+          <div class="vpc-item"><b>Sosial:</b> Tidak malu kalau teman main ke kos, ada "makanan layak" yang bisa dihangatkan</div>
+          <div class="vpc-item"><b>Praktis:</b> Makan malam setelah kuliah/kerja tanpa keluar kos saat malam</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">😣 Customer Pains</p>
+          <div class="vpc-item"><b>Paling Sakit:</b> Mie instan setiap hari membosankan dan tidak bergizi — tapi tidak ada pilihan lain yang praktis</div>
+          <div class="vpc-item"><b>Sangat Sakit:</b> Masakan rumah (Nasi Liwet, Tempe Orek) tidak ada yang jual dalam format tahan lama di kota perantauan</div>
+          <div class="vpc-item"><b>Sakit:</b> Delivery online mahal dan lambat saat malam hari; warung sudah tutup</div>
+          <div class="vpc-item"><b>Moderat:</b> Budget sangat terbatas — tidak bisa beli ready meal premium Rp 50K+ per porsi</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">😊 Customer Gains</p>
+          <div class="vpc-item"><b>Expected:</b> Makanan jadi dalam 5 menit, tidak perlu kompor besar, cukup air panas</div>
+          <div class="vpc-item"><b>Desired:</b> Rasa seperti masakan rumah yang asli — tidak terasa "produk pabrik"</div>
+          <div class="vpc-item"><b>Unexpected:</b> Bisa stok 1 bulan ke depan tanpa khawatir expired</div>
+          <div class="vpc-item"><b>Sosial:</b> Cerita ke teman "ini masakan Solo asli" — ada kebanggaan tersendiri</div>
+        </div>
+      </div>
+      <div class="vpc-r">
+        <div class="lbl lb" style="margin-bottom:14px;">Value Map</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">🍱 Products &amp; Services</p>
+          <div class="vpc-item"><b>Hero:</b> Nasi Liwet Solo (Rp 30K) — comfort food #1 anak kos Jawa</div>
+          <div class="vpc-item"><b>Value:</b> Tempe Orek (Rp 25K) — lauk paling familiar, harga paling terjangkau</div>
+          <div class="vpc-item"><b>Bundle:</b> Paket Kos 7 hari (7 pak mix, diskon 10%) — solusi makan 1 minggu</div>
+          <div class="vpc-item"><b>Add-on:</b> Sambal Sachet (Rp 15K) — pelengkap semua menu</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">🛡️ Pain Relievers</p>
+          <div class="vpc-item"><b>Just-add-hot-water</b> dari dispenser kos → tidak perlu kompor, tidak perlu masak → selesaikan "tidak bisa masak" pain langsung</div>
+          <div class="vpc-item"><b>Resep autentik Solo</b> → bukan rasa generic mie instan → selesaikan "bosan mie" dan "kangen rumah" pain sekaligus</div>
+          <div class="vpc-item"><b>Harga Rp 25–30K/pak</b> → sebanding dengan beli di warteg tapi bisa dimakan jam 11 malam di kos</div>
+          <div class="vpc-item"><b>Shelf life 6 bulan</b> → beli stok sekali, habis dalam sebulan, tidak buang-buang</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">✨ Gain Creators</p>
+          <div class="vpc-item"><b>Paket Kos</b> bundle mingguan → solusi makan sudah beres, tidak perlu mikir tiap hari</div>
+          <div class="vpc-item"><b>Cerita "buatan keluarga Solo"</b> → ada nilai emosional yang mie instan tidak punya</div>
+          <div class="vpc-item"><b>Variasi rasa</b> (6 SKU) → tidak bosan meskipun makan tiap hari berbeda menu</div>
+        </div>
+      </div>
+    </div>
+    <div class="vpc-stmt"><b style="color:var(--accent)">VP Statement (Segmen 1):</b> "Saat ini, kami menyelesaikan masalah <b>anak kos dan mahasiswa perantau asal Jawa</b> terkait <b>tidak bisa mengakses masakan rumahan Solo yang autentik dan terjangkau di kota perantauan tanpa perlu memasak</b> dengan menyediakan <b>dried ready meal masakan Solo buatan keluarga — Nasi Liwet, Tempe Orek, Ayam Suwir — yang tinggal ditambah air panas, tahan 6 bulan, seharga Rp 25–30K/pak, bersertifikat PIRT.</b>"</div>
+  </div>
+
+  <!-- VPC 2 -->
+  <div style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span class="pill pb" style="font-size:12px;padding:4px 14px;">Segmen 2</span>
+      <span style="font-size:15px;font-weight:700;color:#fff;">Pendaki &amp; Outdoor Enthusiast (22–35 th, aktif secara fisik)</span>
+    </div>
+    <div class="vpc-wrap">
+      <div class="vpc-l">
+        <div class="lbl lb" style="margin-bottom:14px;">Customer Profile</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">🏕️ Customer Jobs</p>
+          <div class="vpc-item"><b>Fungsional:</b> Makan bergizi dan cukup kalori selama pendakian/camping dengan bekal seminimal mungkin</div>
+          <div class="vpc-item"><b>Logistik:</b> Bawa perbekalan makanan ringan (berat dan volume minimal) untuk perjalanan 2–5 hari</div>
+          <div class="vpc-item"><b>Rasa:</b> Tidak mau makan seadanya di gunung — ingin makanan yang enak sebagai reward setelah hiking</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">😣 Customer Pains</p>
+          <div class="vpc-item"><b>Terbesar:</b> Pilihan makanan pendakian Indonesia sangat terbatas — mie instan atau nasi kemasan plain yang tidak enak</div>
+          <div class="vpc-item"><b>Besar:</b> Ready meal impor (Mountain House, ReadyWise) mahal Rp 100–200K/porsi dan rasa tidak familiar</div>
+          <div class="vpc-item"><b>Signifikan:</b> Bawa makanan berat dan voluminous menambah beban carrier</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">😊 Customer Gains</p>
+          <div class="vpc-item"><b>Expected:</b> Makanan siap saji, ringan, mudah dimasak dengan kompor camping</div>
+          <div class="vpc-item"><b>Desired:</b> Rasa makanan Indonesia asli — nasi liwet/rendang di puncak gunung = pengalaman tak terlupakan</div>
+          <div class="vpc-item"><b>Unexpected:</b> Harga jauh lebih murah dari ready meal impor tapi rasa lebih familiar</div>
+        </div>
+      </div>
+      <div class="vpc-r">
+        <div class="lbl lc" style="margin-bottom:14px;">Value Map</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">🎒 Products &amp; Services</p>
+          <div class="vpc-item"><b>Hero:</b> Rendang Sapi (Rp 35K) — protein tinggi, rasa kuat, jadi "reward" di puncak</div>
+          <div class="vpc-item"><b>Praktis:</b> Nasi Liwet Solo (Rp 30K) — nasi + lauk dalam satu pack</div>
+          <div class="vpc-item"><b>Bundle:</b> Paket Pendaki 3D2N — 6 pak (3 nasi + 2 lauk + 1 sambal) = Rp 155K</div>
+          <div class="vpc-item"><b>Add-on:</b> Sambal Extra Pedas sebagai pelengkap semua menu</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">🛡️ Pain Relievers</p>
+          <div class="vpc-item"><b>Dehydrated = ringan</b> → berat ~150–200g/pak vs. makanan kalengan 400g → hemat beban carrier signifikan</div>
+          <div class="vpc-item"><b>Rasa Indonesia</b> → tidak makan rasa asing seperti ready meal impor → comfort dalam kondisi fisik berat</div>
+          <div class="vpc-item"><b>Harga Rp 35K</b> vs. Rp 100–200K ready meal impor → budget pendakian lebih efisien</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">✨ Gain Creators</p>
+          <div class="vpc-item"><b>Paket Pendaki bundle</b> → semua kebutuhan makan sudah dipaketkan, tidak perlu mikir planning</div>
+          <div class="vpc-item"><b>"Nasi Liwet Solo di puncak Lawu"</b> → konten TikTok/IG yang viral → produk jadi lifestyle statement</div>
+          <div class="vpc-item"><b>PIRT certified</b> → aman dibawa lintas provinsi, tidak masalah di checkpoint pos pendakian</div>
+        </div>
+      </div>
+    </div>
+    <div class="vpc-stmt"><b style="color:var(--accent2)">VP Statement (Segmen 2):</b> "Saat ini, kami menyelesaikan masalah <b>pendaki dan outdoor enthusiast Indonesia</b> terkait <b>tidak ada pilihan ready meal Indonesia yang ringan, enak, dan terjangkau untuk dibawa mendaki</b> dengan menyediakan <b>dried masakan Solo autentik dalam kemasan 150–200g — Rendang, Nasi Liwet, Ayam Suwir — yang tinggal ditambah air panas dari kompor camping, seharga Rp 25–35K, jauh lebih murah dari alternatif impor.</b>"</div>
+  </div>
+
+  <!-- VPC 3 -->
+  <div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span class="pill pc" style="font-size:12px;padding:4px 14px;">Segmen 3</span>
+      <span style="font-size:15px;font-weight:700;color:#fff;">Diaspora Indonesia di Luar Negeri (25–45 th, Singapore/Malaysia/Belanda)</span>
+    </div>
+    <div class="vpc-wrap">
+      <div class="vpc-l">
+        <div class="lbl lc" style="margin-bottom:14px;">Customer Profile</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">✈️ Customer Jobs</p>
+          <div class="vpc-item"><b>Emosional:</b> Terhubung dengan makanan dan budaya Indonesia meskipun tinggal di luar negeri</div>
+          <div class="vpc-item"><b>Fungsional:</b> Mendapatkan cita rasa masakan Indonesia yang spesifik (Nasi Liwet Solo, Rendang) yang tidak ada di restoran lokal</div>
+          <div class="vpc-item"><b>Sosial:</b> Berbagi makanan Indonesia kepada teman/kolega asing sebagai bentuk kebanggaan budaya</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">😣 Customer Pains</p>
+          <div class="vpc-item"><b>Terbesar:</b> Restoran Indonesia di luar negeri sedikit, mahal, dan sering tidak autentik (apalagi masakan Solo spesifik)</div>
+          <div class="vpc-item"><b>Besar:</b> Produk makanan Indonesia di supermarket luar negeri terbatas — kebanyakan mie instan generic</div>
+          <div class="vpc-item"><b>Signifikan:</b> Tidak bisa bawa banyak makanan dari Indonesia saat pulang karena regulasi bea cukai</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">😊 Customer Gains</p>
+          <div class="vpc-item"><b>Expected:</b> Mendapat rasa masakan Indonesia autentik yang bisa dinikmati kapan saja</div>
+          <div class="vpc-item"><b>Desired:</b> Ada cerita di balik produk (buatan keluarga Solo) — bukan produk pabrik generic</div>
+          <div class="vpc-item"><b>Premium WTP:</b> Mau bayar markup 2–3x harga Indonesia untuk kenyamanan dan autentisitas ini</div>
+        </div>
+      </div>
+      <div class="vpc-r">
+        <div class="lbl la" style="margin-bottom:14px;">Value Map</div>
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:8px;">🌏 Products &amp; Services</p>
+          <div class="vpc-item"><b>Premium:</b> Rendang Sapi + Nasi Liwet Solo — masakan yang paling dikenal dan dirindukan diaspora</div>
+          <div class="vpc-item"><b>Gift Set:</b> Kotak hampers "Rasa Solo" — 6 pak mix + kartu cerita keluarga — ideal untuk kado</div>
+          <div class="vpc-item"><b>Channel:</b> Shopee Singapore / pengiriman via SEVA / komunitas WA diaspora</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px;">🛡️ Pain Relievers</p>
+          <div class="vpc-item"><b>Shelf life 6–12 bulan</b> → bisa dikirim dari Indonesia ke Singapore/Malaysia → regulasi custom terlewati (produk kering bukan segar)</div>
+          <div class="vpc-item"><b>Autentisitas Solo yang spesifik</b> → bukan "nasi goreng generic" tapi Nasi Liwet Solo dengan story geografis jelas</div>
+          <div class="vpc-item"><b>Kemasan premium + kartu cerita</b> → layak dijadikan kado ke teman asing, bangga dipresentasikan</div>
+        </div>
+        <hr class="dv">
+        <div><p style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px;">✨ Gain Creators</p>
+          <div class="vpc-item"><b>Story "Keluarga Laweyan, Solo"</b> → koneksi emosional yang sangat kuat → willing to pay premium signifikan</div>
+          <div class="vpc-item"><b>Hampers / gift box</b> → bisa berbagi budaya Indonesia ke kolega asing → pride factor tinggi</div>
+          <div class="vpc-item"><b>Harga premium Rp 60–100K/pak</b> (2–3x harga lokal) masih jauh lebih murah dari restoran Indonesia di luar negeri</div>
+        </div>
+      </div>
+    </div>
+    <div class="vpc-stmt"><b style="color:var(--accent3)">VP Statement (Segmen 3):</b> "Saat ini, kami menyelesaikan masalah <b>diaspora Indonesia di luar negeri</b> terkait <b>tidak bisa mengakses masakan Solo yang autentik dan spesifik — Nasi Liwet, Rendang, Tempe Orek — meskipun rindu dan mau membayar lebih</b> dengan menyediakan <b>dried ready meal buatan keluarga dari Laweyan, Solo, dikemas premium dan bisa dikirim internasional karena shelf life 6–12 bulan — sebagai jembatan rasa antara mereka dan kampung halaman.</b>"</div>
+  </div>
+</div>
+
+<!-- ===== POST T-STUDIO WORKBOOK ===== -->
+<div class="sb">
+  <div class="fwh">
+    <div class="fwi" style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(6,182,212,0.2))">📓</div>
+    <div><div class="fwt">Post T-Studio Workbook</div><div class="fws">Mission · Strategy Summary · Strengths &amp; Weaknesses · Future Goals · Parking Lot</div></div>
+  </div>
+
+  <div class="mission-box" style="margin-bottom:20px;">
+    <div class="lbl lb">Section 1 — Mission Statement</div>
+    <h3>"Menghadirkan cita rasa dapur keluarga Solo ke meja makan siapapun, di mana saja, kapan saja — karena masakan rumah bukan kemewahan, tapi hak semua orang."</h3>
+    <p>Kami percaya bahwa Nasi Liwet yang autentik, Rendang yang kaya rempah, dan Tempe Orek yang gurih buatan tangan adalah warisan yang layak dinikmati oleh anak kos di Jakarta, pendaki di puncak Lawu, dan diaspora di Amsterdam — bukan hanya oleh mereka yang tinggal di Solo.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="lbl lc">Section 2 — Strategy Summary</div>
+    <div class="g2" style="gap:16px;margin-top:12px;">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:6px;">2.1 Goals</p>
+        <ul class="ck">
+          <li>Net profit Rp 10–15 juta/bulan dalam 12 bulan</li>
+          <li>Top seller Shopee keyword "nasi liwet instan" dalam 6 bulan</li>
+          <li>PIRT 4 SKU dalam 3 bulan pertama</li>
+          <li>500 pak/hari dalam 24–30 bulan</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:var(--accent3);margin-bottom:6px;">2.2 Scope</p>
+        <ul class="ck">
+          <li>Segmen: anak kos, pekerja kantoran, pendaki, diaspora</li>
+          <li>Produk: 6 SKU hero → expand masakan Jawa lain</li>
+          <li>Channel: Shopee → Tokopedia → diaspora internasional</li>
+          <li>Operasi: home-based di Pajang, Laweyan, Solo</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px;">2.3 Value Proposition</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">Dried ready meal masakan Solo autentik, buatan keluarga, bersertifikat PIRT, just-add-water, shelf life 6–12 bulan, harga Rp 25–55K — satu-satunya produk yang mengkombinasikan autentisitas geografis + kemudahan + keterjangkauan ini di Indonesia.</p>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:var(--accent4);margin-bottom:6px;">2.4 Competitive Advantage</p>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">Kombinasi dari: <b style="color:var(--text)">(1)</b> Resep keluarga autentik Solo (IP tidak bisa dibeli), <b style="color:var(--text)">(2)</b> Bapak sebagai "Master Chef" dengan skill masak Jawa yang tidak bisa direplikasi pabrik, <b style="color:var(--text)">(3)</b> zero overhead produksi (rumah sendiri), dan <b style="color:var(--text)">(4)</b> Bashara sebagai "Business Brain" yang mengelola marketing, analitik, dan pengembangan bisnis.</p>
+      </div>
+    </div>
+    <hr class="dv">
+    <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">2.5 Logic of Success</p>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;">Resep autentik Bapak → produk yang genuinely berbeda → PIRT + packaging profesional membangun kepercayaan → ulasan Shopee positif + konten TikTok "di balik dapur" → organic growth biaya rendah → repeat purchase anak kos → skala produksi naik → COGS turun → margin naik → reinvest ke kapasitas → masuk segmen diaspora premium → jalan ke BPOM MD + ekspansi nasional.</p>
+  </div>
+
+  <div class="sw-grid" style="margin-bottom:20px;">
+    <div class="sw-s">
+      <h4 style="color:var(--accent2);margin-bottom:14px;">💪 4 Kekuatan Utama</h4>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(16,185,129,0.2);color:var(--accent2)">S1</div><p><b>Resep Keluarga Autentik Solo yang Tidak Bisa Ditiru</b><br>Bapak membawa IP yang paling berharga: resep masakan Solo turun-temurun yang konsisten, autentik, dan kaya rempah — tidak bisa dibeli, tidak bisa direplikasi pabrik besar. Ini competitive advantage permanen.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(16,185,129,0.2);color:var(--accent2)">S2</div><p><b>Zero Overhead — Dapur Rumah Sendiri</b><br>Tidak ada biaya sewa tempat produksi. Ini langsung menurunkan BEP secara drastis. Kompetitor FMCG punya fixed cost factory yang harus ditanggung; kita tidak.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(16,185,129,0.2);color:var(--accent2)">S3</div><p><b>Tim Komplementer Bashara + Bapak</b><br>Bapak = produksi &amp; kualitas rasa; Bashara = bisnis, riset, marketing digital. Tidak perlu hire karyawan di fase awal — dua orang dengan skill yang saling melengkapi sempurna.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(16,185,129,0.2);color:var(--accent2)">S4</div><p><b>Jalur Regulasi PIRT yang Clear dan Murah</b><br>Berdasarkan BPOM No. 4/2024, seluruh produk (rendang kering, abon, tempe orek kering) eligible PIRT. Biaya PIRT hanya ~Rp 300K/izin — barrier to entry yang sangat rendah vs. BPOM MD.</p></div>
+    </div>
+    <div class="sw-w">
+      <h4 style="color:#ef4444;margin-bottom:14px;">⚠️ 4 Kelemahan yang Harus Dikelola</h4>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(239,68,68,0.15);color:#ef4444">W1</div><p><b>Kapasitas Produksi Terbatas di Fase Awal</b><br>2 dehydrator 10-tray → max ~100 pak/hari di fase awal. Jika demand tiba-tiba spike (viral TikTok), kapasitas tidak bisa langsung mengikuti → risiko kehabisan stok = kehilangan momentum.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(239,68,68,0.15);color:#ef4444">W2</div><p><b>Cash Flow Gap 25–35 Hari (Shopee Payment Cycle)</b><br>Shopee membayar 25–35 hari setelah penjualan. Butuh buffer modal kerja Rp 15–20 juta hanya untuk menanggung gap ini — risiko kalau modal tidak cukup adalah tidak bisa beli bahan baku untuk produksi berikutnya.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(239,68,68,0.15);color:#ef4444">W3</div><p><b>Konsistensi Kualitas Saat Skala Naik</b><br>Masakan buatan tangan memiliki variasi alami. Saat produksi naik dari 50 ke 200 pak/hari, menjaga konsistensi rasa, Aw level, dan tampilan akan menjadi tantangan nyata tanpa SOP yang ketat.</p></div>
+      <div class="sw-item"><div class="sw-n" style="background:rgba(239,68,68,0.15);color:#ef4444">W4</div><p><b>Zero Brand Recognition di Awal</b><br>Mulai dari nol — tidak ada nama, tidak ada ulasan, tidak ada social proof. Bulan 1–3 adalah periode paling sulit dimana conversion rate Shopee rendah dan butuh investasi waktu besar untuk membangun kepercayaan pertama.</p></div>
+    </div>
+  </div>
+
+  <div class="lbl la" style="margin-bottom:16px;">Section 4 — Future Goals (3 Big Ideas)</div>
+  <div class="g3" style="gap:16px;margin-bottom:20px;">
+    <div class="fg g1">
+      <div class="tf" style="color:var(--accent)">Big Idea #1 · 6–12 Bulan</div>
+      <h4>Jadi Top Seller Shopee "Nasi Liwet Solo" + Launch Paket Lebaran</h4>
+      <p>Fokus penuh pada satu keyword: "nasi liwet instan Solo". Raih 200+ ulasan bintang 5 dalam 6 bulan pertama melalui harga promo + layanan responsif. Luncurkan "Paket Lebaran Dapur Solo" (hampers 10–20 pak, packaging premium Batik Laweyan) untuk memanfaatkan musim belanja Ramadan — potensi revenue Rp 20–40 juta dalam 1 bulan.</p>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pa">High Impact</span><span class="pill pb">Quick Win</span></div>
+    </div>
+    <div class="fg g2">
+      <div class="tf" style="color:var(--accent3)">Big Idea #2 · 12–24 Bulan</div>
+      <h4>Masuk Segmen Diaspora via Shopee Singapore + Komunitas WA</h4>
+      <p>Diaspora Indonesia adalah segmen premium dengan WTP 2–3x harga lokal. Target: bergabung dengan komunitas WA diaspora Indonesia di Singapore/Malaysia/Belanda. Kirim sample gratis ke 10 food influencer diaspora. Daftar di Shopee SG dengan markup premium (Rp 60–100K/pak). Satu konten viral di komunitas diaspora bisa menghasilkan puluhan order langsung. Target: Rp 5 juta/bulan dari channel ini di bulan ke-18.</p>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pc">Premium</span><span class="pill pd">Diaspora</span></div>
+    </div>
+    <div class="fg g3">
+      <div class="tf" style="color:var(--accent2)">Big Idea #3 · 24–36 Bulan</div>
+      <h4>Upgrade ke BPOM MD + Masuk Retail Oleh-Oleh Solo &amp; Minimarket</h4>
+      <p>Setelah revenue stabil Rp 50 juta+/bulan, upgrade izin ke BPOM MD untuk membuka akses ke retail nasional. Target masuk: toko oleh-oleh Solo (Omah Sinten, Batik Keris), supermarket lokal (Luwes, Transmart Solo), dan akhirnya Indomaret/Alfamart. Brand "Dapur Solo dari Laweyan" menjadi produk oleh-oleh ikonik kota Solo — seperti Serabi Notosuman tapi dalam format modern yang bisa dikirim seluruh Indonesia.</p>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;"><span class="pill pb">Retail</span><span class="pill pa">Scale Up</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--accent)">
+    <div class="lbl la">Parking Lot — Pertanyaan Terbuka &amp; Ide yang Belum Saatnya</div>
+    <div class="g2" style="gap:12px;margin-top:8px;">
+      <div class="csm">
+        <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">🤔 Open Questions</p>
+        <ul class="bl">
+          <li>Berapa exact Aw level produk kita setelah dehydrasi? Perlu proxy test sistematis sebelum produksi massal</li>
+          <li>Apakah perlu sewa cold storage untuk bahan baku ayam/daging saat beli dalam jumlah besar?</li>
+          <li>Kapan timing yang tepat untuk hire karyawan pertama (packaging/labeling) agar tidak membebani cost?</li>
+          <li>Packaging apa yang paling optimal: vacuum pouch vs. standing pouch + O2 absorber untuk setiap SKU?</li>
+          <li>Apakah Bapak sanggup produksi 100 pak/hari secara fisik dalam jangka panjang? Perlu plan jika tidak.</li>
+        </ul>
+      </div>
+      <div class="csm">
+        <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">🚀 Ide yang Diparkir Dulu</p>
+        <ul class="bl">
+          <li><b>Franchise model</b> — licensing resep ke keluarga lain di Solo untuk produksi paralel (harus selesai PIRT dulu)</li>
+          <li>Kolaborasi dengan warung Nasi Liwet terkenal di Solo untuk co-branding</li>
+          <li>Subscription box bulanan "Rasa Solo" — 8 pak mix dikirim otomatis setiap bulan</li>
+          <li>Menu seasonal: Opor Lebaran, Gudeg Natal, Soto Tahun Baru</li>
+          <li>Kelas online "Memasak &amp; Mendehydrasi Masakan Jawa" sebagai revenue tambahan</li>
+          <li>Kolaborasi dengan tour operator pendakian untuk pre-packed outdoor meal</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRATEGIC RECOMMENDATIONS -->
+<div class="sb">
+  <h2 class="st"><span class="dot" style="background:var(--accent2)"></span> Rekomendasi Strategis</h2>
+  <p class="sdesc">6 langkah paling penting yang harus dilakukan — urutan prioritas</p>
+  <div class="g2" style="gap:14px;">
+    <div class="rec-card" style="border-left:3px solid var(--accent)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>① Urus PIRT Dulu — Sebelum Jualan</h4><span class="pill pa">Urgensi Tinggi</span></div>
+      <p>Daftar ke Dinas Kesehatan Kota Solo untuk SPP-IRT. Proses: ajukan 4 SKU awal (Nasi Liwet, Tempe Orek, Ayam Suwir, Rendang). Biaya ~Rp 300K/izin. Tanpa PIRT, Shopee bisa takedown listing, dan kepercayaan pembeli sangat rendah. <b style="color:var(--accent)">Tanpa PIRT tidak boleh mulai listing di Shopee.</b></p>
+    </div>
+    <div class="rec-card" style="border-left:3px solid var(--accent2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>② Proxy Aw Test Sebelum Produksi Massal</h4><span class="pill pb">Safety Critical</span></div>
+      <p>Lakukan snap test, squeeze test, dan timbang berat sebelum vs. sesudah dehydrasi untuk setiap SKU. Target kadar air final &lt; 12% berat basah (proxy untuk Aw &lt; 0.70). Dokumentasikan parameter suhu + waktu per menu. Ini fondasi food safety dan konsistensi produksi. <b style="color:var(--accent2)">Jangan skip step ini.</b></p>
+    </div>
+    <div class="rec-card" style="border-left:3px solid var(--accent3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>③ Build Shopee Store dengan Foto &amp; Konten Profesional</h4><span class="pill pc">Revenue Driver</span></div>
+      <p>Investasikan Rp 500K–1 juta untuk foto produk + video "cara masak" yang bagus. Judul listing harus mengandung: "Nasi Liwet Solo Instan Kering Tinggal Seduh Halal PIRT". Aktifkan Shopee Garansi Toko. Target 10 transaksi pertama dari circle sendiri untuk seed ulasan — minta teman/keluarga beli dan tinggalkan ulasan jujur.</p>
+    </div>
+    <div class="rec-card" style="border-left:3px solid var(--accent4)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>④ Konten TikTok "Di Balik Dapur" — Gratis Marketing</h4><span class="pill pd">CAC = 0</span></div>
+      <p>Buat 3 video TikTok per minggu: (1) Bapak masak masakan Solo, (2) proses dehydrasi "magic" sebelum-sesudah, (3) cara menyeduh produk kita. Story "keluarga Laweyan, Solo" adalah konten yang organically viral di niche kuliner. Satu video viral bisa bring in 50–200 order sekaligus tanpa biaya iklan. <b style="color:var(--accent4)">Ini channel marketing utama di fase awal.</b></p>
+    </div>
+    <div class="rec-card" style="border-left:3px solid var(--accent2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>⑤ Siapkan Buffer Modal Kerja Rp 15–20 Juta</h4><span class="pill pb">Cash Flow</span></div>
+      <p>Shopee cycle 25–35 hari berarti butuh modal untuk produksi terus berjalan sebelum pembayaran masuk. Dari total modal Rp 35–45 juta, alokasikan minimum Rp 15 juta sebagai working capital buffer yang tidak boleh disentuh untuk keperluan lain. Ini yang mencegah bisnis macet di bulan ke-2 meskipun penjualan bagus.</p>
+    </div>
+    <div class="rec-card" style="border-left:3px solid var(--accent)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><h4>⑥ Target Paket Lebaran sebagai Big Revenue Event Pertama</h4><span class="pill pa">Quick Win Besar</span></div>
+      <p>Lebaran adalah momen terbesar untuk produk makanan di Indonesia. Siapkan "Hampers Dapur Solo" — box berisi 6–10 pak pilihan + packaging batik Laweyan premium. Harga Rp 200–350K/box. Mulai promosi H-45 Ramadan. Potensi 100–300 box = Rp 20–90 juta revenue dalam 1 bulan. Ini bisa jadi bukti traction yang dibutuhkan untuk meyakinkan diri sendiri bahwa bisnis ini viable.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer>
+  <p>Dapur Solo — Dried Ready Meal Business Strategy Deep Dive | Bashara &amp; Bapak | Pajang, Laweyan, Surakarta | April 2026</p>
+  <p style="margin-top:4px;">Framework: Strategy Identification Framework (SIF) · Business Model Canvas (BMC) · Value Proposition Canvas (VPC) · Post T-Studio Workbook</p>
+</footer>
+</body>
+</html>

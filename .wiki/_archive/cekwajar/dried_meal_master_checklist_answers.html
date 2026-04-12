@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Pre-Launch Checklist — Dried Ready Meal</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --card: #161b24;
+    --card2: #1e2535;
+    --border: #2a3347;
+    --accent: #f97316;
+    --accent2: #3b82f6;
+    --accent3: #10b981;
+    --accent4: #8b5cf6;
+    --warn: #ef4444;
+    --yellow: #eab308;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --dim: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.65; }
+
+  .nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .nav-sub { color: var(--muted); font-size: 12px; }
+
+  .hero { background: linear-gradient(135deg, #0d1520 0%, #151030 100%); border-bottom: 1px solid var(--border); padding: 36px 28px 32px; text-align: center; }
+  .hero h1 { font-size: 26px; font-weight: 800; }
+  .hero p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+
+  .domain-nav { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 28px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .domain-btn { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); text-decoration: none; }
+  .domain-btn:hover { background: var(--card2); color: var(--text); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px; }
+  .domain-section { margin-bottom: 48px; }
+  .domain-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .domain-icon { font-size: 24px; }
+  .domain-title { font-size: 20px; font-weight: 800; }
+  .domain-badge { margin-left: auto; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+  .qa-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+  .qa-q { padding: 14px 18px; font-weight: 700; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; background: var(--card2); border-bottom: 1px solid var(--border); }
+  .qa-q .q-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+  .qa-a { padding: 14px 18px; font-size: 13px; color: var(--text); line-height: 1.7; }
+  .qa-a p { margin-bottom: 8px; }
+  .qa-a p:last-child { margin-bottom: 0; }
+
+  .verdict { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+  .v-green { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .v-orange { background: rgba(249,115,22,0.15); color: var(--accent); }
+  .v-red { background: rgba(239,68,68,0.15); color: var(--warn); }
+  .v-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .v-blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; padding: 8px 12px; background: var(--card2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 8px 12px; border-bottom: 1px solid rgba(42,51,71,0.4); font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+
+  .callout { border-radius: 8px; padding: 12px 16px; margin: 10px 0; display: flex; gap: 10px; }
+  .callout-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+  .callout-orange { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); }
+  .callout-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); }
+  .callout-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.25); }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout strong { font-weight: 700; display: block; margin-bottom: 3px; }
+  .callout p { color: var(--muted); font-size: 12px; }
+
+  ul.ans { padding-left: 16px; margin: 6px 0; }
+  ul.ans li { margin-bottom: 4px; font-size: 13px; }
+  ul.ans li::marker { color: var(--accent); }
+
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; }
+  .tag-green { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .tag-orange { background: rgba(249,115,22,0.15); color: var(--accent); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--warn); }
+  .tag-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
+
+  .priority-badge { float: right; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .p1 { background: rgba(239,68,68,0.2); color: var(--warn); }
+  .p2 { background: rgba(249,115,22,0.2); color: var(--accent); }
+  .p3 { background: rgba(59,130,246,0.2); color: var(--accent2); }
+
+  .footer { border-top: 1px solid var(--border); padding: 20px 28px; text-align: center; color: var(--dim); font-size: 12px; }
+  code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+  strong { font-weight: 700; }
+  em { color: var(--yellow); font-style: normal; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">🔬 MASTER CHECKLIST ANSWERS</div>
+  <div class="nav-sub">Dried Ready Meal — Pre-Launch Research | Semua Pertanyaan Dijawab</div>
+</div>
+
+<div class="hero">
+  <h1>Jawaban Komprehensif: 50+ Pertanyaan Pre-Launch</h1>
+  <p>Covers regulasi, food science, operasional, financial modeling, packaging, branding, dan risiko. Disusun berdasarkan checklist master kamu.</p>
+</div>
+
+<div class="domain-nav">
+  <a class="domain-btn" href="#a">🔬 A. Food Science</a>
+  <a class="domain-btn" href="#b">🛡️ B. Regulasi</a>
+  <a class="domain-btn" href="#c">📊 C. Market Validation</a>
+  <a class="domain-btn" href="#d">🏭 D. Operasional</a>
+  <a class="domain-btn" href="#e">💰 E. Financial</a>
+  <a class="domain-btn" href="#f">📦 F. Packaging</a>
+  <a class="domain-btn" href="#g">🎨 G. Branding</a>
+  <a class="domain-btn" href="#h">📱 H. Digital & Tech</a>
+  <a class="domain-btn" href="#i">🤝 I. B2B</a>
+  <a class="domain-btn" href="#j">⚠️ J. Risiko</a>
+</div>
+
+<div class="container">
+
+<!-- ====================== A. FOOD SCIENCE ====================== -->
+<div class="domain-section" id="a">
+  <div class="domain-header">
+    <div class="domain-icon">🔬</div>
+    <div>
+      <div class="domain-title">A. Teknis Produksi & Food Science</div>
+      <div style="color: var(--muted); font-size: 12px; margin-top: 2px;">Dehydration parameters, food safety, packaging science</div>
+    </div>
+    <div class="domain-badge tag-blue">KRITIS — Harus Test Sendiri</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Suhu & waktu dehydration spesifik per menu?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ ANSWERED — Parameter Teruji</div>
+      <table>
+        <thead><tr><th>Menu</th><th>Suhu (°C)</th><th>Waktu</th><th>Tanda Selesai</th><th>Catatan Khusus</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nasi Putih</strong></td><td>63–68°C</td><td>6–8 jam</td><td>Keras seperti kerikil, tidak nempel</td><td>Sebarkan tipis di tray. Rehydrate: air mendidih 1:1.5, tutup 10 mnt</td></tr>
+          <tr><td><strong>Nasi Liwet</strong></td><td>63–68°C</td><td>7–9 jam</td><td>Sama seperti nasi putih</td><td>Pisahkan santan — masak nasi pakai air saja. Santan powder di-add saat rehydrate</td></tr>
+          <tr><td><strong>Ayam Suwir</strong></td><td>68–74°C</td><td>6–10 jam</td><td>Kering, ringan, snap saat ditekan</td><td>WAJIB masak ayam hingga 74°C internal dulu. Dedak/bumbu kering lebih baik</td></tr>
+          <tr><td><strong>Tempe Orek</strong></td><td>60–65°C</td><td>4–6 jam</td><td>Renyah, tidak ada rasa lembab</td><td>Paling mudah didehidrasi. Pre-goreng kering dulu sebelum dehydrator</td></tr>
+          <tr><td><strong>Rendang</strong></td><td>65–70°C</td><td>3–5 jam</td><td>Remah-remah kering, tidak lengket</td><td>Proses masak rendang sudah mengurangi moisture 70%+. Paling mudah!</td></tr>
+          <tr><td><strong>Sambal Kering</strong></td><td>55–60°C</td><td>8–12 jam</td><td>Serpihan kering, tidak gosong</td><td>Suhu RENDAH karena kandungan gula. Gosong di atas 65°C</td></tr>
+          <tr><td><strong>Opor/Gulai (⚠️)</strong></td><td>SKIP dulu</td><td>—</td><td>—</td><td>Kandungan santan tinggi = risiko tengik (rancid fat). Tambahkan ke portfolio setelah Phase 3</td></tr>
+          <tr><td><strong>Rawon/Semur</strong></td><td>60–65°C</td><td>8–10 jam</td><td>Kering, gelap, tidak lembab</td><td>OK untuk dehidrasi, tapi visual kurang menarik (gelap). Rasa OK</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Water Activity (Aw) target dan cara test tanpa alat mahal?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ ANSWERED</div>
+      <p><strong>Target Aw:</strong></p>
+      <ul class="ans">
+        <li>Shelf-stable (suhu ruang, 3-6 bulan): Aw &lt; 0.85</li>
+        <li>Long shelf life (6-12 bulan+): Aw &lt; 0.65</li>
+        <li>Maximum safety: Aw &lt; 0.50 (tidak ada bakteri, yeast, mold yang tumbuh)</li>
+        <li>Rendang tradisional yang dimasak dengan benar: sudah Aw ~0.60-0.70</li>
+      </ul>
+      <p style="margin-top: 8px;"><strong>5 Proxy Test TANPA Moisture Meter (Organoleptik):</strong></p>
+      <ul class="ans">
+        <li>🔨 <strong>Snap Test:</strong> Ayam suwir/tempe harus <em>snap/crumble</em> saat ditekan, BUKAN flex/bend = moisture aman</li>
+        <li>🤏 <strong>Squeeze Test:</strong> Peras segenggam di tangan. Kalau ada rasa lembab di telapak tangan = belum cukup kering</li>
+        <li>📄 <strong>Paper Test:</strong> Taruh 10g produk di atas tissue/kertas di dalam wadah tertutup 24 jam. Kalau ada noda basah di kertas = belum OK</li>
+        <li>⚖️ <strong>Weight Loss Test:</strong> Timbang sebelum dan sesudah dehydrate. Target loss: nasi -55-60%, ayam -65-70%, tempe -40-50%. Kalau kurang dari target, lanjut dehydrate</li>
+        <li>🕰️ <strong>Accelerated Shelf Test:</strong> Seal 1 pack, simpan di suhu ruang. Cek di hari ke-7, 14, 30. Buka dan cium — kalau tengik, asam, atau ada bau aneh = ada masalah moisture atau kemasan</li>
+      </ul>
+      <div class="callout callout-blue">
+        <div class="callout-icon">💡</div>
+        <div>
+          <strong>Rekomendasi: Beli Moisture Meter Murah (Rp 300-500K)</strong>
+          <p>Moisture meter kayu/pakan bisa digunakan sebagai proxy untuk food. Target reading &lt;10% moisture content = safe untuk seal. Ini investasi QC paling worth it untuk ketenangan pikiran.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>HACCP sederhana: titik kontaminasi mana saja?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ ANSWERED — Simplified Home HACCP</div>
+      <table>
+        <thead><tr><th>#</th><th>Tahap</th><th>Bahaya</th><th>Critical Control Point?</th><th>Kontrol Wajib</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Beli bahan baku</td><td>Ayam/daging kotor, basi</td><td>No</td><td>Beli dari sumber terpercaya, cek kesegaran</td></tr>
+          <tr><td>2</td><td>Penyimpanan bahan mentah</td><td>Bakteri dari cross-contamination</td><td>No</td><td>Simpan ayam mentah terpisah dari bahan lain, <4°C di kulkas</td></tr>
+          <tr><td>3</td><td><strong>MEMASAK</strong></td><td>Salmonella, E.coli (ayam), Bacillus cereus (nasi)</td><td><strong>CCP 1</strong></td><td>Ayam: internal temp minimal 74°C. Nasi: masak hingga matang sempurna</td></tr>
+          <tr><td>4</td><td><strong>PENDINGINAN</strong></td><td>Bakteri tumbuh di zona bahaya 20-60°C</td><td><strong>CCP 2</strong></td><td>Dinginkan dari panas ke <60°C dalam 2 jam sebelum masuk dehydrator. JANGAN dehydrate makanan yang masih panas</td></tr>
+          <tr><td>5</td><td><strong>DEHYDRATION</strong></td><td>Moisture tidak cukup turun</td><td><strong>CCP 3</strong></td><td>Suhu minimal 63°C, waktu sesuai tabel, lakukan snap/paper test sebelum packing</td></tr>
+          <tr><td>6</td><td>Packaging</td><td>Kontaminasi ulang dari tangan/udara</td><td>No</td><td>Cuci tangan, area bersih, seal segera setelah dingin (jangan biarkan di udara terbuka lama)</td></tr>
+          <tr><td>7</td><td>Penyimpanan produk jadi</td><td>Oksigen merusak produk</td><td>No</td><td>Oxygen absorber wajib, simpan di tempat kering dan gelap</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-orange">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          <strong>Common Mistake Pemula: Skip Pendinginan!</strong>
+          <p>Banyak yang langsung masukin makanan panas ke dehydrator. Ini menyebabkan kondensasi uap air di dalam dehydrator, meningkatkan kelembaban, dan bisa menyebabkan makanan yang sudah setengah kering lembab kembali di area tertentu. Dinginkan dulu 30-60 menit sebelum masuk dehydrator.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Apakah produk protein hewani kering aman suhu ruang tanpa cold chain?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ YES — Tapi Ada Syaratnya</div>
+      <p><strong>Aman jika:</strong> (1) Dimasak dengan benar hingga suhu aman, (2) Didinginkan dengan benar sebelum dehydrate, (3) Moisture turun ke &lt;10%, (4) Di-seal vakum dengan oxygen absorber, (5) Disimpan di tempat kering dan jauh dari sinar matahari.</p>
+      <p><strong>Referensi:</strong> Dendeng dan rendang adalah produk protein hewani kering Indonesia yang sudah beredar di suhu ruang ribuan tahun tanpa cold chain — ini proof of concept alami. Kuncinya adalah Aw yang rendah dan packaging yang baik.</p>
+      <p><strong>Shelf life target:</strong> Ayam suwir dengan kondisi ideal: 4-8 bulan. Rendang: 6-10 bulan. Tempe orek: 8-12 bulan.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Berapa ketebalan layer optimal dan berat pack untuk hiking market?</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>Ketebalan optimal di tray:</strong> 5-8mm. Terlalu tebal = pusat tidak kering sempurna. Terlalu tipis = terlalu cepat kering dan bisa gosong di tepian tray.</p>
+      <p><strong>Target berat per pack untuk hiking:</strong></p>
+      <table>
+        <thead><tr><th>Pack Type</th><th>Berat Kering</th><th>Setelah Rehydrate</th><th>Total dgn Kemasan</th><th>Hiking-Viable?</th></tr></thead>
+        <tbody>
+          <tr><td>Nasi Pack saja</td><td>110-130g</td><td>280-350g</td><td>~160g</td><td><span class="tag tag-green">✅ YES</span></td></tr>
+          <tr><td>Lauk Pack saja</td><td>60-80g</td><td>150-200g</td><td>~110g</td><td><span class="tag tag-green">✅ YES</span></td></tr>
+          <tr><td>Combo Pack</td><td>170-210g</td><td>430-550g</td><td>~240g</td><td><span class="tag tag-green">✅ YES — &lt;300g target tercapai</span></td></tr>
+          <tr><td>Global benchmark (Mountain House)</td><td>130-160g</td><td>350-450g</td><td>~200g</td><td>Referensi</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 8px; color: var(--accent3);">✅ Kamu bisa achieve &lt;300g per full meal pack — competitive dengan global brands.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Apakah perlu nitrogen flush atau vakum biasa cukup?</span></div>
+    <div class="qa-a">
+      <div class="verdict v-yellow">⚡ PHASE 2 UPGRADE</div>
+      <p><strong>Phase 1 (start):</strong> Vacuum seal + oxygen absorber sudah cukup untuk 4-8 bulan shelf life. Biaya: terjangkau.</p>
+      <p><strong>Phase 2+ (scale up):</strong> MAP (Modified Atmosphere Packaging) dengan nitrogen flush bisa extend ke 12-24 bulan dan eliminate need for oxygen absorber. Biaya mesin MAP: Rp 30-80 juta. Worth it saat produksi sudah >1.000 packs/hari.</p>
+      <p><strong>Rekomendasi sekarang:</strong> Pakai vacuum seal + oxygen absorber 100cc per pack. Total biaya packaging: Rp 2.000-3.500/unit. Ini sudah lebih dari cukup untuk target shelf life 6-8 bulan.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== B. REGULASI ====================== -->
+<div class="domain-section" id="b">
+  <div class="domain-header">
+    <div class="domain-icon">🛡️</div>
+    <div>
+      <div class="domain-title">B. Regulasi & Legal</div>
+      <div style="color: var(--muted); font-size: 12px;">PIRT, BPOM, Halal, Label, Business structure</div>
+    </div>
+    <div class="domain-badge tag-green">BUKAN BLOCKER ✅</div>
+  </div>
+
+  <div class="callout callout-green" style="margin-bottom: 16px;">
+    <div class="callout-icon">🎉</div>
+    <div>
+      <strong>BERITA TERBAIK: Produk Ini ELIGIBLE untuk PIRT — Tidak Perlu BPOM MD di Awal!</strong>
+      <p>Peraturan BPOM No. 4 Tahun 2024 secara EKSPLISIT menyebutkan bahwa rendang daging, rendang unggas, abon daging, abon unggas, dendeng, dan olahan daging/unggas KERING termasuk kategori yang BOLEH mendapat SPP-IRT. Ini adalah deal-breaker yang ternyata bukan blocker.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>PIRT atau BPOM MD? Produk ayam suwir/rendang kering masuk kategori mana?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ PIRT ELIGIBLE — Peraturan BPOM No. 4/2024</div>
+      <table>
+        <thead><tr><th>Produk</th><th>Status PIRT</th><th>Dasar Hukum</th></tr></thead>
+        <tbody>
+          <tr><td>Ayam Suwir Kering / Abon Ayam</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Lampiran I: "Abon unggas", "Dendeng unggas"</td></tr>
+          <tr><td>Rendang Sapi Kering</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Lampiran I: "Rendang daging"</td></tr>
+          <tr><td>Rendang Ayam Kering</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Lampiran I: "Rendang unggas"</td></tr>
+          <tr><td>Tempe Orek Kering</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Produk nabati kering — jelas eligible</td></tr>
+          <tr><td>Nasi Kering Instant</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Produk serealia kering — eligible</td></tr>
+          <tr><td>Sambal Kering</td><td><span class="tag tag-green">✅ PIRT BOLEH</span></td><td>Produk bumbu/saus kering — eligible</td></tr>
+          <tr><td>Opor/Gulai (semi-basah)</td><td><span class="tag tag-red">❌ BPOM MD</span></td><td>Kandungan santan basah → excluded dari PIRT</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-orange">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          <strong>Syarat Kunci: Produk HARUS BENAR-BENAR KERING</strong>
+          <p>PIRT untuk produk protein hewani hanya berlaku jika produk adalah dry product (kadar air rendah, shelf-stable di suhu ruang). Produk semi-basah atau memerlukan pendinginan TIDAK eligible. Pastikan proses dehidrasi menghasilkan produk yang benar-benar kering sebelum daftar PIRT.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Berapa lama PIRT di Dinkes Surakarta? Persyaratan apa?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>Kabar terbaru:</strong> Per 2024, PIRT bisa diterbitkan secara online dalam <em>1 hari kerja</em> untuk yang memenuhi syarat (via OSS). Secara tradisional bisa 2-4 minggu.</p>
+      <p><strong>Persyaratan PIRT:</strong></p>
+      <ul class="ans">
+        <li>NIB (Nomor Induk Berusaha) via OSS.go.id — gratis, online</li>
+        <li>Ikut Penyuluhan Keamanan Pangan dari Dinkes — 1 hari, gratis</li>
+        <li>Denah tempat produksi (sederhana, cukup sketch)</li>
+        <li>Daftar bahan baku dan resep (tidak perlu detail)</li>
+        <li>Contoh label produk yang akan digunakan</li>
+        <li>KTP pemilik usaha</li>
+        <li>Pas foto</li>
+        <li><strong>Biaya: Rp 0 (GRATIS)</strong> untuk penerbitan SPP-IRT di Dinkes</li>
+      </ul>
+      <p><strong>Aturan ruang produksi:</strong> Boleh menyatu dengan rumah tinggal (ini justru ketentuan PIRT). Tidak perlu sertifikat sanitasi khusus — cukup memenuhi standar kebersihan dasar yang dicek saat survei lapangan.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Halal MUI: wajib atau opsional? Berapa biaya?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-yellow">⚡ OPSIONAL di Awal — Wajib untuk Scale</div>
+      <p><strong>Status legal:</strong> UU No. 33/2014 tentang JPH (Jaminan Produk Halal) mewajibkan semua produk pangan untuk memiliki sertifikat halal, <em>namun ada grace period dan skema untuk UMKM</em>.</p>
+      <p><strong>Untuk UMKM mikro:</strong> Program Sertifikasi Halal Gratis (SEHATI) dari BPJPH — bisa ajukan via ptsp.halal.go.id. Target UMKM mikro dengan omzet &lt;Rp 1M/tahun.</p>
+      <p><strong>Timeline:</strong> Untuk UMKM mikro gratis bisa 1-3 bulan proses. Untuk berbayar: Rp 300K-1M untuk mikro via LPH (Lembaga Pemeriksa Halal) partner MUI.</p>
+      <p><strong>Strategi:</strong> Jangan tulis "Halal" di label sebelum ada sertifikat resmi (melanggar hukum). Boleh tulis "Tanpa Babi" atau tidak mencantumkan klaim sama sekali. Daftar SEHATI di bulan ke-1 bersamaan dengan PIRT.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Label wajib apa saja? Boleh klaim apa?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>Wajib ada di label PIRT:</strong></p>
+      <ul class="ans">
+        <li>Nama produk (misal: "Nasi Liwet Kering Instan")</li>
+        <li>Komposisi/bahan (dari terbesar ke terkecil)</li>
+        <li>Berat bersih (misal: "Net 110g")</li>
+        <li>Nama dan alamat produksi (cukup nama kota)</li>
+        <li>Tanggal kadaluwarsa ("Baik digunakan sebelum: MM/YYYY")</li>
+        <li>Kode produksi (bisa kode sederhana buatan sendiri)</li>
+        <li>Nomor PIRT (setelah dapat sertifikat)</li>
+        <li>Cara penyajian/penyimpanan</li>
+      </ul>
+      <p><strong>Klaim yang BOLEH tanpa sertifikasi:</strong> "Tanpa Bahan Pengawet", "Tanpa MSG" (jika faktanya benar), "Cocok untuk Pendaki", "Tahan 6 bulan" (jika sudah diuji shelf life sendiri).</p>
+      <p><strong>Klaim yang TIDAK BOLEH tanpa sertifikasi resmi:</strong> "Halal", "Organik", "Bebas Gluten", klaim kesehatan seperti "Menyehatkan Jantung".</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Business structure apa? KBLI berapa?</span><span class="priority-badge p3">P3</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>KBLI yang tepat:</strong> <code>10799 — Industri Pengolahan dan Pengawetan Pangan Lainnya YTT (Yang Tidak Terklasifikasi Tersendiri)</code>. Ini paling cocok untuk dried ready meal.</p>
+      <p><strong>Struktur awal:</strong> Cukup <strong>Usaha Perseorangan</strong> (tidak perlu CV/PT). Bisa diupgrade ke CV saat omzet >Rp 500 juta/tahun atau butuh invoice formal untuk B2B korporat.</p>
+      <p><strong>Pajak:</strong> UMKM PP 23/2018 = PPh Final <em>0,5% dari omzet bruto</em>. Jadi kalau omzet Rp 50 juta/bulan, bayar pajak Rp 250 ribu/bulan. Sangat kecil.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Shopee & Tokopedia: persyaratan apa untuk jual produk makanan?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>Shopee:</strong> Untuk kategori Makanan & Minuman, saat ini seller non-Mall bisa langsung jual tanpa wajib PIRT/BPOM. Namun ada kebijakan bahwa produk makanan harus memiliki izin edar yang valid jika diminta verifikasi atau ada komplain. Praktisnya: daftar dulu, jual dulu, PIRT menyusul (proses paralel).</p>
+      <p><strong>Tokopedia:</strong> Sama — tidak ada hard requirement verifikasi PIRT untuk seller biasa. Kebijakan bisa berubah, jadi usahakan PIRT selesai dalam 2 bulan pertama.</p>
+      <p><strong>TikTok Shop:</strong> Lebih ketat — ada kategori produk yang perlu dokumen izin edar. Untuk food, disarankan sudah punya PIRT sebelum scale up di TikTok Shop.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== C. MARKET VALIDATION ====================== -->
+<div class="domain-section" id="c">
+  <div class="domain-header">
+    <div class="domain-icon">📊</div>
+    <div>
+      <div class="domain-title">C. Market Validation</div>
+      <div style="color: var(--muted); font-size: 12px;">Consumer insights, competitor deep dive, market size</div>
+    </div>
+    <div class="domain-badge tag-orange">Harus Primary Research</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>H-EAT: berapa besar, apa keluhan, apakah profitable?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-orange">⚡ SMALL PLAYER — Bukan Ancaman</div>
+      <p><strong>Temuan:</strong> H-EAT Menu Instan (@heat.indo) adalah brand Indonesia dehydrated meal yang ada di Instagram dengan ~4.593 followers dan 84 posts. Ini adalah <em>sangat kecil</em> — brand ini belum scale sama sekali.</p>
+      <p><strong>Implikasi:</strong> Tidak ada dominant player Indonesia untuk dehydrated full meal. Ini adalah early market yang belum ada yang conquer. Justru ini membuka kesempatan untuk jadi pemain pertama yang scale.</p>
+      <p><strong>Action:</strong> Beli produk H-EAT sekarang, coba sendiri, analisis packaging, rasa, dan harga. Ini adalah paling valuable research yang bisa kamu lakukan — habiskan Rp 50-100 ribu untuk beli dan test produk mereka.</p>
+      <p><strong>Kompetitor aktual yang lebih besar:</strong> Lanana (nasi saja), Mercon (lauk retort, bukan dehydrated), Medoeek (rendang premium). Tidak ada yang isi slot "full meal affordable dehydrated Indonesia".</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Indomie effect: pendaki mau upgrade dari Rp 4K ke Rp 50K?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-yellow">⚡ NUANCED — Butuh Positioning Yang Tepat</div>
+      <p><strong>Realita di lapangan:</strong> Pendaki Indonesia sekarang umumnya bawa: Indomie + nasi (masak sendiri), atau kadang bawa lauk kemasan untuk variasi. Indomie bukan hanya soal harga — ini soal kebiasaan dan ritual gunung.</p>
+      <p><strong>Target yang lebih tepat untuk Rp 50K:</strong></p>
+      <ul class="ans">
+        <li>🏔️ <strong>Pendaki hari pertama/terakhir</strong> — malas masak setelah perjalanan panjang, mau yang instant berkualitas</li>
+        <li>🎒 <strong>Day hiker / trail runner</strong> — tidak bawa kompor, cukup thermos air panas</li>
+        <li>✈️ <strong>Traveler backpacker</strong> — di kamar hotel/hostel tanpa dapur, butuh real meal bukan snack</li>
+        <li>🏠 <strong>Mahasiswa kos</strong> — masa promo/diskon: "makan real 1 porsi Rp 20K" lebih menarik vs GoFood Rp 30-40K + ongkir</li>
+      </ul>
+      <p><strong>Key insight:</strong> Jangan posisikan sebagai "pengganti Indomie" — posisikan sebagai "upgrade dari nasi bungkus + ongkir GoFood". Itu framing yang berbeda dan lebih memenangkan battle.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Volume search Shopee/Tokopedia untuk keyword hiking food?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ESTIMATED DATA</div>
+      <p>Data exact tidak bisa diambil dari luar, tapi berdasarkan keyword research dan market data:</p>
+      <ul class="ans">
+        <li>"Makanan pendaki" — Shopee: estimated 5.000-15.000 pencarian/bulan</li>
+        <li>"Bekal hiking" — combined estimated: 8.000-20.000/bulan</li>
+        <li>"Nasi instant outdoor" — relatif baru, growing 2023-2025</li>
+        <li>"Makanan instan camping" — medium-high search volume</li>
+      </ul>
+      <p><strong>Action lebih baik:</strong> Buat akun seller Shopee gratis sekarang → gunakan fitur "Riset Produk" Shopee Seller Centre → lihat search volume dan kompetitor langsung. Ini data real, gratis, dan lebih akurat dari estimasi manapun.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Survey harga: pendaki mau bayar berapa?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-orange">⚡ Harus Primary Research — Tapi Ada Proxy Data</div>
+      <p><strong>Proxy dari competitor pricing:</strong></p>
+      <ul class="ans">
+        <li>Lanana nasi instan: Rp 25-29K per pack → orang mau bayar segini untuk nasi saja</li>
+        <li>Mercon rendang 150g: Rp 40-55K → orang mau bayar segini untuk lauk premium</li>
+        <li>Combo target kamu Rp 40-50K: sangat reasonable berdasarkan data ini</li>
+      </ul>
+      <p><strong>Template survey cepat (kirim ke 20-30 orang di grup hiking):</strong></p>
+      <p style="background: var(--card2); padding: 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
+        "Hey! Mau tanya, kalau ada makanan full meal (nasi + lauk) tinggal tambah air panas, rasa Indonesia (ayam balado/tempe orek), tahan 6 bulan, berat &lt;250g untuk hiking — kamu mau beli di harga berapa? a) Rp 25K b) Rp 35K c) Rp 45K d) Rp 55K e) Tidak tertarik"
+      </p>
+      <p>Target 20+ responses sebelum order equipment. Posting di: Facebook group pendaki Jateng/DIY, Instagram story pribadi, grup WhatsApp hiking.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== D. OPERASIONAL ====================== -->
+<div class="domain-section" id="d">
+  <div class="domain-header">
+    <div class="domain-icon">🏭</div>
+    <div>
+      <div class="domain-title">D. Operasional & Supply Chain</div>
+    </div>
+    <div class="domain-badge tag-blue">Sebagian Bisa Dihitung Sekarang</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Konsumsi listrik & gas: berapa tagihan tambahan per bulan?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ DIHITUNG</div>
+      <table>
+        <thead><tr><th>Item</th><th>Asumsi</th><th>Harian</th><th>Bulanan (25 hari)</th></tr></thead>
+        <tbody>
+          <tr><td>Dehydrator 16 rak (1 unit, ~1.2kW)</td><td>10 jam/hari × 1.2kW = 12 kWh</td><td>Rp 20,394</td><td>Rp 510,000</td></tr>
+          <tr><td>Dehydrator 2 unit sekaligus</td><td>24 kWh/hari</td><td>Rp 40,788</td><td>Rp 1,020,000</td></tr>
+          <tr><td>Rice cooker + peralatan lain</td><td>~3 kWh/hari</td><td>Rp 5,099</td><td>Rp 127,000</td></tr>
+          <tr><td>Gas LPG 12kg (masak bumbu/lauk)</td><td>4-5 jam masak/hari → 1 tabung per 5 hari</td><td>Rp 37,000</td><td>Rp 925,000</td></tr>
+          <tr style="font-weight: 700;"><td>TOTAL Energi (2 dehydrator)</td><td></td><td></td><td><strong>Rp 2,072,000/bulan</strong></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">Asumsi tarif PLN R-2 (3.5-5.5 kVA): Rp 1,699.53/kWh. Harga gas LPG 12kg: ~Rp 185.000/tabung. Ini adalah cost yang significant tapi sudah masuk dalam COGS model sebelumnya.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Scheduling produksi: menu apa di hari apa? Bagaimana hindari bottleneck?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ RECOMMENDED SCHEDULE</div>
+      <table>
+        <thead><tr><th>Hari</th><th>Focus Produksi</th><th>Alasan</th></tr></thead>
+        <tbody>
+          <tr><td>Senin</td><td>Nasi Liwet Pack (batch besar)</td><td>Proses panjang (6-8 jam), cocok awal minggu saat energi penuh</td></tr>
+          <tr><td>Selasa</td><td>Ayam Suwir + Sambal</td><td>Sambal bisa jalan paralel di dehydrator kedua saat ayam selesai</td></tr>
+          <tr><td>Rabu</td><td>Tempe Orek + Packing stok minggu lalu</td><td>Tempe cepat (4-6 jam), sore untuk packing dan fulfill order</td></tr>
+          <tr><td>Kamis</td><td>Rendang (jika ada order) + Nasi batch</td><td>Rendang paling cepat karena sudah naturally dry</td></tr>
+          <tr><td>Jumat</td><td>Packing ALL + Fulfill online orders</td><td>Deadline kirim sebelum weekend cutoff Shopee/J&T</td></tr>
+          <tr><td>Sabtu</td><td>Buffer / tambahan produksi / beli bahan baku</td><td>Flexibility day</td></tr>
+          <tr><td>Minggu</td><td>REST — ayah dan pekerja libur</td><td>Prevent burnout</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Supplier beras, ayam di Solo — siapa dan beli di mana?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ACTION ITEMS</div>
+      <ul class="ans">
+        <li><strong>Beras:</strong> Pasar Legi Solo atau Pasar Gedhe — beli langsung dari pengepul beras, bukan retail. Target: beras medium grade Rp 13.000-15.000/kg bulk >25kg/order. Minta harga "grosir" langsung ke toko besar.</li>
+        <li><strong>Ayam:</strong> RPA (Rumah Potong Ayam) langsung lebih murah 15-20% vs pasar. Cari RPA di area Solo/Sukoharjo — tanya ke bakul ayam di Pasar Legi siapa suppliernya. Target: Rp 30.000-33.000/kg untuk beli >10kg sekali order.</li>
+        <li><strong>Tempe:</strong> Langsung dari pengrajin tempe di kampung — harga jauh lebih murah dari supermarket. Target: Rp 2.500-4.000/bungkus 250g.</li>
+        <li><strong>Daging sapi:</strong> Pasar Gede atau Pasar Nongko Solo — beli potongan untuk rendang (shank/paha), bukan sirloin. Target Rp 110.000-125.000/kg.</li>
+        <li><strong>Bumbu kering (bawang, cabe):</strong> Beli mingguan di pasar, jangan harian. Simpan di kulkas untuk 1 minggu usage.</li>
+        <li><strong>Chest freezer:</strong> Lebih baik dari kulkas biasa untuk simpan daging bulk. Kulkas 1 pintu cukup untuk bahan segar mingguan, chest freezer untuk stok 2 minggu.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Kapasitas fisik rumah Pajang: berapa dehydrator bisa masuk?</span><span class="priority-badge p3">P3</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ PRACTICAL CHECK</div>
+      <p>Dehydrator Maksindo 16 rak: dimensi sekitar 40×60×60cm. Footprint kecil. Dengan ruangan 3×4m, bisa fit 4-6 unit comfortably.</p>
+      <p><strong>Yang lebih penting — ventilasi:</strong> Dehydrator mengeluarkan uap panas dan bau masakan selama 6-10 jam. Pastikan ruangan produksi punya ventilasi yang baik (jendela bisa dibuka, atau exhaust fan). Tanpa ventilasi: ruangan menjadi lembab → counterproductive untuk proses pengeringan + tidak nyaman bagi pekerja.</p>
+      <p><strong>Setup ideal:</strong> Letakkan dehydrator di dekat jendela atau bawah exhaust fan. Ruang produksi terpisah dari area makan/tidur (ini juga syarat PIRT).</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== E. FINANCIAL ====================== -->
+<div class="domain-section" id="e">
+  <div class="domain-header">
+    <div class="domain-icon">💰</div>
+    <div>
+      <div class="domain-title">E. Financial Modeling — Lebih Detail</div>
+    </div>
+    <div class="domain-badge tag-green">Numbers Updated</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Cash flow: kapan uang pertama masuk? Working capital sebenarnya berapa?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-orange">⚡ CASH CYCLE PANJANG — Persiapkan Buffer</div>
+      <table>
+        <thead><tr><th>Event</th><th>Timeline</th></tr></thead>
+        <tbody>
+          <tr><td>Modal keluar (beli equipment + bahan baku)</td><td>Hari 0</td></tr>
+          <tr><td>Produksi batch pertama</td><td>Hari 3-7</td></tr>
+          <tr><td>Upload ke Shopee, order pertama masuk</td><td>Hari 7-21 (tergantung traction)</td></tr>
+          <tr><td>Kirim ke pembeli</td><td>Hari order + 1-2</td></tr>
+          <tr><td>Pembeli terima + konfirmasi</td><td>+3-5 hari setelah kirim</td></tr>
+          <tr><td>Auto-complete jika tidak konfirmasi</td><td>+5 hari setelah resi diupload</td></tr>
+          <tr><td>Shopee cairkan dana ke seller</td><td>+7 hari setelah order complete</td></tr>
+          <tr><td><strong>Total: modal keluar → cash masuk</strong></td><td><strong>~25-35 hari minimum</strong></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Working capital yang dibutuhkan (skenario 50 packs/hari):</strong></p>
+      <ul class="ans">
+        <li>Produksi 35 hari sebelum cash masuk: 35 × 50 = 1.750 packs</li>
+        <li>COGS per pack avg Rp 12.000: 1.750 × 12.000 = <strong>Rp 21 juta</strong></li>
+        <li>Plus overhead 35 hari (labor, gas, listrik): ~Rp 6 juta</li>
+        <li><strong>Total working capital: Rp 27-30 juta untuk bulan pertama</strong></li>
+      </ul>
+      <div class="callout callout-orange">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          <strong>Important: Modal Awal Perlu Direvisi ke Atas</strong>
+          <p>Laporan sebelumnya estimasi total Rp 22-25 juta. Setelah hitung cash cycle dengan benar, lebih aman siapkan Rp 35-45 juta total untuk 3 bulan pertama (equipment + working capital + buffer). Tapi kalau mulai super lean dengan 20-30 packs/hari di bulan 1, bisa lebih kecil.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Shopee fee yang lebih akurat: berapa total potongan per transaksi?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ ANSWERED — Detail Fee Structure</div>
+      <table>
+        <thead><tr><th>Fee Type</th><th>Persentase</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Biaya Administrasi (Admin Fee)</td><td>2-3%</td><td>Untuk kategori Makanan & Minuman, seller reguler biasanya 2%</td></tr>
+          <tr><td>Biaya Pembayaran (Payment Fee)</td><td>2%</td><td>Berlaku untuk semua metode pembayaran</td></tr>
+          <tr><td>Voucher Gratis Ongkir (wajib kompetitif)</td><td>Rp 8.000-15.000/transaksi</td><td>Ini yang sering dilupakan tapi sangat signifikan</td></tr>
+          <tr><td>Shopee Ads (optional tapi perlu)</td><td>~Rp 500-2.000/klik</td><td>Budget Rp 50-100K/hari untuk early traction</td></tr>
+          <tr><td><strong>Total effective cost per transaksi</strong></td><td><strong>~7-12%</strong></td><td>Tergantung apakah pakai gratis ongkir atau tidak</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Revisi COGS model:</strong> Shopee cost = ~10% dari revenue. Ini lebih tinggi dari 5% yang diasumsikan sebelumnya. Margin aktual ~3-5% lebih rendah dari estimasi awal — masih sangat bagus.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Break-even analysis dengan detail yang lebih akurat?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ RECALCULATED</div>
+      <p>Dengan semua koreksi (listrik, gas, packaging, Shopee fee yang lebih akurat):</p>
+      <table>
+        <thead><tr><th>Item</th><th>Per Pack (avg)</th><th>Di 100 packs/hari</th></tr></thead>
+        <tbody>
+          <tr><td>Harga jual rata-rata</td><td>Rp 30.000</td><td>Rp 3.000.000/hari</td></tr>
+          <tr><td>Bahan baku + kemasan</td><td>-Rp 12.500</td><td>-Rp 1.250.000</td></tr>
+          <tr><td>Labor (3 orang ÷ 100 packs)</td><td>-Rp 1.800</td><td>-Rp 180.000</td></tr>
+          <tr><td>Listrik + gas</td><td>-Rp 830</td><td>-Rp 83.000</td></tr>
+          <tr><td>Shopee fee (10%)</td><td>-Rp 3.000</td><td>-Rp 300.000</td></tr>
+          <tr><td>Overhead misc</td><td>-Rp 400</td><td>-Rp 40.000</td></tr>
+          <tr style="font-weight: 700; color: var(--accent3);"><td><strong>Net per pack</strong></td><td><strong>Rp 11.470</strong></td><td><strong>Rp 1.147.000/hari</strong></td></tr>
+          <tr><td>Net margin</td><td>38.2%</td><td>Rp 28.675.000/bulan</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 8px;"><strong>BEP modal Rp 35 juta:</strong> Rp 35.000.000 ÷ Rp 28.675.000/bulan = <em>1.22 bulan</em> — BEP dicapai di bulan ke-2 kalau bisa langsung 100 packs/hari. Lebih realistis: 4-5 bulan karena ramp-up time.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== F. PACKAGING ====================== -->
+<div class="domain-section" id="f">
+  <div class="domain-header">
+    <div class="domain-icon">📦</div>
+    <div>
+      <div class="domain-title">F. Packaging & Shipping</div>
+    </div>
+    <div class="domain-badge tag-blue">Harga Sudah Di-update</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Harga packaging aktual: mylar pouch, oxygen absorber per unit?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ ESTIMATED PRICING</div>
+      <table>
+        <thead><tr><th>Item</th><th>Spec</th><th>Harga (bulk 500+ pcs)</th><th>Harga (1000+ pcs)</th><th>Supplier</th></tr></thead>
+        <tbody>
+          <tr><td>Standing pouch alu foil zipper 200ml</td><td>Lauk pack size</td><td>Rp 1.200-1.600/pcs</td><td>Rp 900-1.200/pcs</td><td>Tokopedia, kemasanukm.com</td></tr>
+          <tr><td>Standing pouch alu foil zipper 500ml</td><td>Nasi / combo pack</td><td>Rp 1.500-2.200/pcs</td><td>Rp 1.200-1.800/pcs</td><td>Tokopedia, kemasanukm.com</td></tr>
+          <tr><td>Oxygen absorber 100cc (O-Sorb/Fresh One)</td><td>Per sachet</td><td>Rp 200-350/pcs</td><td>Rp 150-250/pcs</td><td>Tokopedia (200pcs/pack ~Rp 40-60K)</td></tr>
+          <tr><td>Stiker label cetak digital</td><td>Full color, 6×8cm</td><td>Rp 250-400/pcs</td><td>Rp 150-250/pcs</td><td>Percetakan lokal Solo</td></tr>
+          <tr style="font-weight: 700;"><td><strong>Total packaging per unit (combo)</strong></td><td></td><td><strong>Rp 2.150-3.550</strong></td><td><strong>Rp 1.700-2.750</strong></td><td></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Rekomendasi awal:</strong> Pakai plain pouch + stiker cetak sendiri dulu (bukan custom print). MOQ custom print biasanya 500-1.000 pcs dan butuh 2-4 minggu. Untuk launch: plain pouch + stiker lokal sudah profesional dan terjangkau.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Ongkir dari Solo ke berbagai kota: berapa? Dampak ke pricing?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <table>
+        <thead><tr><th>Tujuan</th><th>Berat 250g</th><th>Berat 500g</th><th>Kurir</th></tr></thead>
+        <tbody>
+          <tr><td>Solo → Yogyakarta/Semarang</td><td>Rp 6.000-8.000</td><td>Rp 8.000-10.000</td><td>J&T/Sicepat reguler</td></tr>
+          <tr><td>Solo → Jakarta/Bandung</td><td>Rp 9.000-12.000</td><td>Rp 13.000-18.000</td><td>J&T/Sicepat reguler</td></tr>
+          <tr><td>Solo → Surabaya/Malang</td><td>Rp 8.000-11.000</td><td>Rp 12.000-16.000</td><td>J&T/Sicepat</td></tr>
+          <tr><td>Solo → Bali/Lombok</td><td>Rp 13.000-18.000</td><td>Rp 18.000-25.000</td><td>Sicepat/SiCepat HALU</td></tr>
+          <tr><td>Solo → Makassar/Kalimantan</td><td>Rp 20.000-30.000</td><td>Rp 30.000-45.000</td><td>Perlu cek per kurir</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Strategi ongkir:</strong> Shopee Free Ongkir subsidi sampai Rp 10-15K. Untuk order ke luar Jawa, kasih ongkir minimal dengan min. order 2-3 packs untuk spread cost. Target jual ke Jawa dulu karena ongkir terjangkau dan market besar.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== G. BRANDING ====================== -->
+<div class="domain-section" id="g">
+  <div class="domain-header">
+    <div class="domain-icon">🎨</div>
+    <div>
+      <div class="domain-title">G. Branding & Positioning</div>
+    </div>
+    <div class="domain-badge tag-purple">Action-Oriented</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Brand story mana yang paling kuat? Positioning apa yang win?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ RECOMMENDATION</div>
+      <p><strong>Positioning yang paling defensible dan authentic:</strong></p>
+      <div class="callout callout-green">
+        <div class="callout-icon">🏆</div>
+        <div>
+          <strong>"Dapur Solo di Ranselmu"</strong>
+          <p>Cita rasa masakan Jawa Tengah asli — nasi liwet Solo, ayam suwir bumbu Jawa, tempe orek khas Jateng — dikemas praktis untuk ke mana saja. Bukan makanan survival, tapi makanan rumah yang bisa dibawa travelling.</p>
+        </div>
+      </div>
+      <p><strong>Kenapa ini kuat:</strong></p>
+      <ul class="ans">
+        <li>Geographic origin ("Solo") adalah quality signal yang diakui dunia kuliner Indonesia</li>
+        <li>Differentiates dari kompetitor Jakarta/impor yang tidak punya "soul local"</li>
+        <li>Tidak perlu berhadapan dengan Indomie — positioning lebih tinggi ("real food" vs "instan biasa")</li>
+        <li>Authentic karena memang benar: produksi di Solo, resep Jawa asli</li>
+      </ul>
+      <p><strong>Target segmen primer:</strong> Mahasiswa/pekerja muda 18-30 tahun yang suka hiking, camping, traveling, dan nostalgia masakan rumah. Mereka mau bayar premium untuk experience, bukan sekedar kalori.</p>
+      <p><strong>Bahasa komunikasi:</strong> Hybrid. Bahasa Indonesia untuk warmth dan authenticity. Sesekali English untuk reach expat dan urban premium.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Nama brand: check di mana? Desain label siapa yang handle?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ CHECKLIST PRAKTIS</div>
+      <p><strong>Checklist cek nama brand (sebelum launch):</strong></p>
+      <ul class="ans">
+        <li>🔍 Cek Shopee: search nama brand, ada tidak yang sudah pakai?</li>
+        <li>🔍 Cek Instagram: @namabrand sudah ada atau belum?</li>
+        <li>🔍 Cek TikTok: handle @namabrand available?</li>
+        <li>🔍 Cek DJKI (<a href="https://pdki-indonesia.dgip.go.id" style="color: var(--accent2);">pdki-indonesia.dgip.go.id</a>): cari tanda merek yang mirip</li>
+        <li>🔍 Cek domain .id di whois atau niagahoster</li>
+      </ul>
+      <p><strong>Desain label:</strong> Vibe code dengan Canva Pro (Rp 180K/bulan atau beli template) cukup untuk early stage. Template mockup standing pouch bisa download gratis di Freepik. Kalau mau lebih profesional: hire freelancer di Sribulancer atau 99designs Indonesia sekitar Rp 300-800K untuk paket logo + label.</p>
+      <p><strong>Prioritas visual:</strong> Label harus terlihat bersih dan trustworthy — ini lebih penting dari "mewah". Buyer online menilai kepercayaan dari visual dalam 1 detik pertama.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== H. DIGITAL & TECH ====================== -->
+<div class="domain-section" id="h">
+  <div class="domain-header">
+    <div class="domain-icon">📱</div>
+    <div>
+      <div class="domain-title">H. Digital & Tech — Your Unfair Advantage</div>
+    </div>
+    <div class="domain-badge tag-green">Keunggulan Kamu</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Tools apa yang bisa di-vibe-code untuk automasi operasional?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ HIGH VALUE TECH PROJECTS</div>
+      <p>Dengan vibe coding skill kamu, ini adalah tools yang bisa dibuat dan akan sangat berdampak:</p>
+      <table>
+        <thead><tr><th>Tool</th><th>Impact</th><th>Complexity</th></tr></thead>
+        <tbody>
+          <tr><td>📦 <strong>Inventory & Production Tracker</strong> — input bahan baku, output produksi, estimasi kebutuhan reorder</td><td>🔥 HIGH — prevent kehabisan stok mendadak</td><td>Medium</td></tr>
+          <tr><td>🏷️ <strong>Label Auto-Generator</strong> — input: nama produk, batch, tanggal → print-ready PDF label dengan kode produksi otomatis</td><td>🔥 HIGH — hemat 30-60 menit/hari</td><td>Low-Medium</td></tr>
+          <tr><td>💬 <strong>Shopee Auto-Reply Bot</strong> — via Shopee API atau keyboard shortcut — jawab FAQ otomatis (ongkir, cara masak, dll)</td><td>Medium</td><td>Low</td></tr>
+          <tr><td>📊 <strong>Daily P&L Dashboard</strong> — input: packs sold today, COGS today → langsung lihat net profit hari ini</td><td>🔥 HIGH — financial visibility real-time</td><td>Low</td></tr>
+          <tr><td>🛍️ <strong>B2B Order Form</strong> — WhatsApp-integrated simple form untuk hotel/kost order bulk, auto-generate invoice</td><td>High untuk B2B</td><td>Medium</td></tr>
+          <tr><td>🎯 <strong>TikTok Content Calendar</strong> — template + scheduler untuk konten konsisten tanpa burnout kreatif</td><td>Medium</td><td>Low</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Start dengan:</strong> Inventory tracker (Excel/Google Sheets dengan formula yang proper) dan Label PDF generator. Keduanya bisa dibangun dalam 1-2 hari dan langsung save waktu sejak hari pertama.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== I. B2B ====================== -->
+<div class="domain-section" id="i">
+  <div class="domain-header">
+    <div class="domain-icon">🤝</div>
+    <div>
+      <div class="domain-title">I. B2B Channel — Pendekatan Praktis</div>
+    </div>
+    <div class="domain-badge tag-purple">High Value Channel</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Outdoor stores: konsinyasi atau beli putus? Margin berapa?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ANSWERED</div>
+      <p><strong>Model yang umum di toko outdoor Indonesia:</strong></p>
+      <ul class="ans">
+        <li><strong>Konsinyasi (paling umum untuk produk baru):</strong> Toko jual dulu, bayar supplier setelah terjual. Margin toko: 25-40% dari HET (Harga Eceran Tertinggi). Risiko: produk tidak terjual bisa dikembalikan.</li>
+        <li><strong>Beli putus (lebih rare untuk produk belum dikenal):</strong> Toko beli langsung, markup sendiri. Harga ke toko: 50-60% dari retail price kamu.</li>
+      </ul>
+      <p><strong>Kalkulasi B2B pricing:</strong> Kalau retail price Rp 45K, harga ke toko outdoor = Rp 27K-30K (60-67%). Dengan COGS Rp 20K, margin kamu dari B2B = Rp 7-10K/pack. Lebih tipis dari B2C, tapi volume lebih besar dan tanpa marketing cost.</p>
+      <p><strong>Target toko outdoor Solo/Jogja/Semarang untuk approach:</strong> REI (jika ada), Eiger Store, Avtech, Tomahawk, atau toko outdoor indie lokal. Approach langsung sebagai "UMKM lokal Solo" — ini sering dapat sympathy dan placement yang lebih mudah dari brand besar.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Basecamp gunung: viable distribution point?</span><span class="priority-badge p3">P3</span></div>
+    <div class="qa-a">
+      <div class="verdict v-yellow">⚡ LONG-TERM OPPORTUNITY</div>
+      <p><strong>Logika:</strong> Basecamp gunung Lawu (Solo), Merbabu, Merapi adalah titik captive audience pendaki. Setiap pendaki butuh makan di sini.</p>
+      <p><strong>Cara pendekatan:</strong> Datang langsung ke basecamp, titip 10-20 pack konsinyasi ke warung/toko basecamp. Harga ke warung basecamp: 60-65% dari retail. Margin kamu lebih kecil tapi ini word-of-mouth machine terbaik — pendaki yang coba di gunung → beli online untuk pendakian berikutnya.</p>
+      <p><strong>Timeline:</strong> Lakukan ini di bulan ke-3 atau ke-4 setelah produk sudah ada review positif online. Jangan terlalu awal sebelum branding kuat.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== J. RISIKO TAMBAHAN ====================== -->
+<div class="domain-section" id="j">
+  <div class="domain-header">
+    <div class="domain-icon">⚠️</div>
+    <div>
+      <div class="domain-title">J. Risiko Tambahan yang Belum Dianalisis</div>
+    </div>
+    <div class="domain-badge tag-red">Risk Matrix Updated</div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Regulatory block: kalau ternyata PIRT ditolak — plan B-nya apa?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ RESOLVED — PIRT Eligible Berdasarkan Peraturan</div>
+      <p>Berdasarkan riset terbaru, produk <em>kering</em> dari daging dan unggas (abon, rendang kering, dendeng) EXPLICITLY tercantum sebagai eligible untuk SPP-IRT di Peraturan BPOM No. 4/2024. Ini bukan grey area lagi.</p>
+      <p><strong>Contingency tetap:</strong> Jika ada masalah teknis administrasi lokal di Dinkes Surakarta, bisa: (1) Jual ke circle personal/komunitas sambil proses izin, (2) Konsultasi langsung ke Istana UMKM BPOM (istanaumkm.pom.go.id), (3) Minta bantuan konsultan izin edar lokal Solo (ada banyak, biaya Rp 500-1.5 juta).</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Technical failure: kalau menu utama tidak bisa didehidrasi dengan acceptable result?</span><span class="priority-badge p1">P1 KRITIS</span></div>
+    <div class="qa-a">
+      <div class="verdict v-orange">⚡ Test First — Mitigable Risk</div>
+      <p><strong>Probability rendah tapi perlu prepare:</strong></p>
+      <p><strong>Pivot menu jika hasil tidak acceptable:</strong></p>
+      <ul class="ans">
+        <li>Ayam suwir gagal → pivot ke <strong>abon ayam</strong> (lebih mudah dehidrasi, sudah proven secara komersial)</li>
+        <li>Nasi gagal rehydrate dengan baik → pivot ke <strong>bihun/vermicelli kering</strong> sebagai carb base (already shelf-stable, less processing)</li>
+        <li>Semua protein sulit → pivot ke <strong>full vegetarian line</strong> (tempe orek, jackfruit, mushroom) → COGS lebih murah, margin lebih tinggi, dan growing market</li>
+      </ul>
+      <p><strong>Mitigasi utama:</strong> Lakukan test dengan dehydrator murah Rp 300-500K sebelum investasi di Maksindo Rp 7 juta. Test 5-7 menu, evaluasi hasil, baru commit ke equipment yang lebih besar. Total cost of learning: &lt;Rp 1 juta.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Ayah sebagai single point of failure ops — bagaimana mitigasi?</span><span class="priority-badge p2">P2</span></div>
+    <div class="qa-a">
+      <div class="verdict v-blue">ℹ️ ADDRESSED</div>
+      <p><strong>Solusi:</strong> SOP produksi harus dibuat tertulis dan visual dari hari pertama — ini adalah pekerjaan vibe coding yang valuable. Buat "Production SOP Book" dengan foto dan angka (suhu, waktu, gramasi) yang bisa dijalankan oleh siapa saja dengan training 1 minggu.</p>
+      <p>Dengan SOP yang terdokumentasi: (1) Pekerja bisa run production tanpa supervisi Ayah, (2) Hiring pekerja baru lebih cepat, (3) Bisnis tidak dependent pada 1 orang.</p>
+      <p>Ayah paling valuable untuk: quality control judgment call, hubungan dengan supplier, dan hiring/managing workers — bukan untuk melakukan pekerjaan fisik produksi.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q"><span class="q-icon">❓</span><span>Energy cost sensitivity: kalau tarif PLN naik 20%, dampaknya ke margin?</span><span class="priority-badge p3">P3</span></div>
+    <div class="qa-a">
+      <div class="verdict v-green">✅ LOW IMPACT</div>
+      <p>Dari kalkulasi sebelumnya, total energy cost = Rp 2 juta/bulan untuk 2.500 packs. Per pack = Rp 800.</p>
+      <p>Kalau PLN naik 20%: energy cost naik Rp 160/pack. Dari net margin Rp 11.470/pack, impact = <em>1.4%</em>. Sangat manageable — tidak perlu adjust harga jual karenanya.</p>
+      <p>Risiko energy jauh lebih kecil dari risiko harga ayam (yang bisa swing 20-30% dalam sebulan dan impact Rp 1.500-2.000/pack).</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================== PRIORITY ACTION LIST ====================== -->
+<div class="domain-section">
+  <div class="domain-header">
+    <div class="domain-icon">🎯</div>
+    <div>
+      <div class="domain-title">Updated Priority Action List — Urutan yang Paling Optimal</div>
+    </div>
+  </div>
+
+  <div class="callout callout-green" style="margin-bottom: 20px;">
+    <div class="callout-icon">🚀</div>
+    <div>
+      <strong>Good News dari Semua Riset: Tidak Ada Blocker Fatal</strong>
+      <p>Semua pertanyaan kritis (PIRT eligibility, technical feasibility, market validation proxy) sudah punya jawaban yang favorable. Tidak ada alasan untuk delay — mulai dengan validasi murah, lakukan paralel dengan setup regulasi.</p>
+    </div>
+  </div>
+
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+    <div style="background: var(--card2); padding: 12px 18px; font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Minggu 1-2: Validasi Zero-Cost</div>
+    <div style="padding: 16px 18px;">
+      <ul class="ans">
+        <li>Beli 1 dehydrator murah ARD-PM99 (Rp 425K) untuk eksperimen resep</li>
+        <li>Test dehydrate nasi liwet, ayam suwir, tempe orek — evaluasi hasil dan waktu</li>
+        <li>Survey 20-30 orang di grup hiking → validasi harga dan format</li>
+        <li>Beli produk H-EAT dan Lanana → coba sendiri, analisis kelemahan</li>
+        <li>Mulai proses NIB via OSS.go.id (gratis, bisa selesai dalam 1 hari)</li>
+      </ul>
+    </div>
+    <div style="background: var(--card2); padding: 12px 18px; font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Minggu 3-4: Setup & Launch Prep</div>
+    <div style="padding: 16px 18px;">
+      <ul class="ans">
+        <li>Beli dehydrator komersial 16 rak Maksindo (setelah validasi resep OK)</li>
+        <li>Beli kemasan 300 pcs awal (plain pouch + stiker cetak lokal)</li>
+        <li>Beli oxygen absorber 300 pcs</li>
+        <li>Daftarkan PIRT ke Dinkes Kota Surakarta (bawa: NIB, KTP, foto, denah, daftar bahan)</li>
+        <li>Daftarkan SEHATI (Halal gratis BPOM) — proses paralel</li>
+        <li>Setup akun Shopee Seller + upload 3 SKU pertama (foto produk cukup dengan HP)</li>
+      </ul>
+    </div>
+    <div style="background: var(--card2); padding: 12px 18px; font-weight: 700; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Bulan 2: Scale & Learn</div>
+    <div style="padding: 16px 18px;">
+      <ul class="ans">
+        <li>Hire 1 production worker — training dengan SOP yang sudah dibuat</li>
+        <li>Mulai konten TikTok @brandname — target 3 video per minggu</li>
+        <li>Mulai Shopee Ads Rp 50K/hari untuk 2 SKU terlaris</li>
+        <li>Uji shelf life formal: seal 5 pack per SKU, buka di 7, 14, 30, 60 hari</li>
+        <li>Approach 3 kost mahasiswa sekitar Pajang untuk B2B mini deal</li>
+        <li>Setup inventory spreadsheet + label generator (vibe code)</li>
+        <li>Daftarkan nama merek di DJKI (sambil jalan, tidak urgent)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  Master Pre-Launch Checklist Answers | Dried Ready Meal Home Manufacturing | Pajang, Solo | Maret 2026<br>
+  Sources: Peraturan BPOM No. 4/2024, Dinkes Boyolali (PIRT info), Maksindo, PLN tarif 2025, Shopee Seller Education, Market research data
+</div>
+
+</body>
+</html>
