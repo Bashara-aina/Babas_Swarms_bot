@@ -24,7 +24,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 LLM_MOCK_RESPONSE = "Mocked Legion response with soul context properly injected"
 
 

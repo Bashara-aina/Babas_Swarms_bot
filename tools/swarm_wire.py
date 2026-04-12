@@ -36,11 +36,11 @@ logger = logging.getLogger(__name__)
 # ── LLM bridge (single-turn chat, no tools) ──────────────────────────────────
 
 _KEY_MAP: dict[str, str] = {
-    "cerebras":   "CEREBRAS_API_KEY",
-    "groq":       "GROQ_API_KEY",
-    "gemini":     "GEMINI_API_KEY",
+    "cerebras": "CEREBRAS_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "gemini": "GEMINI_API_KEY",
     "openrouter": "OPENROUTER_API_KEY",
-    "zai":        "ZAI_API_KEY",
+    "zai": "ZAI_API_KEY",
     "ollama_chat": "",  # no key needed for local Ollama
 }
 
@@ -57,6 +57,9 @@ async def _llm_call(
     Uses litellm directly so it works with all providers already configured
     in llm_client.py without importing the full agentic loop.
 
+    Soul context is injected at the top of the system prompt to ensure
+    Legion's identity is present in all debate responses.
+
     Args:
         model:       litellm model string, e.g. 'groq/llama-3.3-70b-versatile'
         system:      System prompt
@@ -64,6 +67,12 @@ async def _llm_call(
         max_tokens:  Token limit (default 1500 — enough for full debate position)
         temperature: Sampling temperature (default 0.75 — creative but structured)
     """
+    from core.soul_engine import build_soul_context
+
+    # Inject soul context into system prompt
+    soul_context = build_soul_context()
+    full_system = f"{soul_context}\n\n{system}" if soul_context else system
+
     provider = model.split("/")[0].lower()
     env_var = _KEY_MAP.get(provider, "")
     api_key = os.getenv(env_var) if env_var else None
@@ -71,8 +80,8 @@ async def _llm_call(
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": [
-            {"role": "system", "content": system},
-            {"role": "user",   "content": user},
+            {"role": "system", "content": full_system},
+            {"role": "user", "content": user},
         ],
         "max_tokens": max_tokens,
         "temperature": temperature,
@@ -111,14 +120,29 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "⚙️",
         "lead": "Lead Engineer",
         "agents": [
-            ("Senior Backend Dev",   "You specialise in APIs, databases, and system reliability. You think in terms of latency, failure modes, and schema design."),
-            ("Senior Frontend Dev",  "You specialise in UI architecture, component design, and user-facing performance. You care deeply about UX consistency."),
-            ("DevOps / SRE",         "You think in pipelines, uptime, and blast radius. You ask: what breaks first and who gets paged at 3am?"),
-            ("Security Engineer",    "You find vulnerabilities. Every design decision is a potential attack surface to you."),
-            ("ML Engineer",          "You specialise in model training pipelines, GPU utilisation, and bridging research code to production."),
-            ("Data Engineer",        "You design data pipelines, lake architectures, and the systems that feed ML models."),
-            ("Mobile Dev",           "You think in cross-platform constraints, offline-first design, and app store dynamics."),
-            ("Platform / Infra",     "You think in Kubernetes, cloud costs, and developer experience at scale."),
+            (
+                "Senior Backend Dev",
+                "You specialise in APIs, databases, and system reliability. You think in terms of latency, failure modes, and schema design.",
+            ),
+            (
+                "Senior Frontend Dev",
+                "You specialise in UI architecture, component design, and user-facing performance. You care deeply about UX consistency.",
+            ),
+            (
+                "DevOps / SRE",
+                "You think in pipelines, uptime, and blast radius. You ask: what breaks first and who gets paged at 3am?",
+            ),
+            (
+                "Security Engineer",
+                "You find vulnerabilities. Every design decision is a potential attack surface to you.",
+            ),
+            (
+                "ML Engineer",
+                "You specialise in model training pipelines, GPU utilisation, and bridging research code to production.",
+            ),
+            ("Data Engineer", "You design data pipelines, lake architectures, and the systems that feed ML models."),
+            ("Mobile Dev", "You think in cross-platform constraints, offline-first design, and app store dynamics."),
+            ("Platform / Infra", "You think in Kubernetes, cloud costs, and developer experience at scale."),
         ],
         "synthesis_instruction": "Synthesize your team's technical findings into ONE clear engineering recommendation. Flag the top risk and the fastest path to working code.",
     },
@@ -126,14 +150,26 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "🔬",
         "lead": "Research Director",
         "agents": [
-            ("Literature Analyst",   "You surface what is known in academic and industry literature. You cite precedent and distinguish proven from speculative."),
-            ("Domain Expert",        "You provide deep subject-matter knowledge. You correct misconceptions and add nuance."),
-            ("Data Scientist",       "You look for quantitative evidence. If there is no data, you say so clearly."),
-            ("Fact Checker",         "You verify claims. You flag speculation presented as fact. You demand primary sources."),
-            ("Trend Analyst",        "You identify where the field is moving over the next 2-3 years based on current signals."),
-            ("Contrarian Scholar",   "You find the papers that disagree. You surface the evidence against the mainstream view."),
-            ("Synthesizer",          "You integrate findings across sources into a coherent picture, noting where evidence conflicts."),
-            ("Methodology Critic",   "You evaluate research quality: sample size, bias, reproducibility, confounds."),
+            (
+                "Literature Analyst",
+                "You surface what is known in academic and industry literature. You cite precedent and distinguish proven from speculative.",
+            ),
+            ("Domain Expert", "You provide deep subject-matter knowledge. You correct misconceptions and add nuance."),
+            ("Data Scientist", "You look for quantitative evidence. If there is no data, you say so clearly."),
+            ("Fact Checker", "You verify claims. You flag speculation presented as fact. You demand primary sources."),
+            (
+                "Trend Analyst",
+                "You identify where the field is moving over the next 2-3 years based on current signals.",
+            ),
+            (
+                "Contrarian Scholar",
+                "You find the papers that disagree. You surface the evidence against the mainstream view.",
+            ),
+            (
+                "Synthesizer",
+                "You integrate findings across sources into a coherent picture, noting where evidence conflicts.",
+            ),
+            ("Methodology Critic", "You evaluate research quality: sample size, bias, reproducibility, confounds."),
         ],
         "synthesis_instruction": "Synthesize your team's research into a crisp evidence summary. Separate what is well-established from what is contested. Note the highest-confidence finding and the biggest open question.",
     },
@@ -141,14 +177,20 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "📦",
         "lead": "Head of Product",
         "agents": [
-            ("Product Manager",      "You think in user problems, prioritisation, and roadmap trade-offs. You ask: is this the right thing to build?"),
-            ("UX Researcher",        "You represent the user. You ask who actually has this problem and whether they would pay for the solution."),
-            ("Growth PM",            "You think in acquisition, activation, retention, and referral loops."),
-            ("B2B PM",               "You think in enterprise sales cycles, procurement, and multi-stakeholder decisions."),
-            ("B2C PM",               "You think in consumer psychology, virality, and daily habit formation."),
-            ("Platform PM",          "You think in APIs, ecosystems, and developer adoption."),
-            ("Monetisation PM",      "You think in pricing models, conversion funnels, and unit economics."),
-            ("Roadmap Strategist",   "You balance now/next/later and push back on scope creep with evidence."),
+            (
+                "Product Manager",
+                "You think in user problems, prioritisation, and roadmap trade-offs. You ask: is this the right thing to build?",
+            ),
+            (
+                "UX Researcher",
+                "You represent the user. You ask who actually has this problem and whether they would pay for the solution.",
+            ),
+            ("Growth PM", "You think in acquisition, activation, retention, and referral loops."),
+            ("B2B PM", "You think in enterprise sales cycles, procurement, and multi-stakeholder decisions."),
+            ("B2C PM", "You think in consumer psychology, virality, and daily habit formation."),
+            ("Platform PM", "You think in APIs, ecosystems, and developer adoption."),
+            ("Monetisation PM", "You think in pricing models, conversion funnels, and unit economics."),
+            ("Roadmap Strategist", "You balance now/next/later and push back on scope creep with evidence."),
         ],
         "synthesis_instruction": "Synthesize your team's product thinking into ONE recommendation: what to build first, for whom, and why. Include the key metric that would prove success.",
     },
@@ -156,13 +198,16 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "📣",
         "lead": "CMO",
         "agents": [
-            ("Brand Strategist",     "You think in positioning, perception, and differentiation. You ask: what do we want people to feel?"),
-            ("Growth Hacker",        "You think in channels, CAC, and virality coefficients."),
-            ("Content Strategist",   "You think in narratives, distribution, and audience building."),
-            ("SEO/SEM Specialist",   "You think in search intent, keyword clusters, and conversion paths."),
-            ("Social Media Lead",    "You think in platform algorithms, content formats, and community engagement."),
-            ("PR Strategist",        "You think in earned media, narrative control, and crisis communication."),
-            ("Email Marketer",       "You think in segmentation, lifecycle automation, and deliverability."),
+            (
+                "Brand Strategist",
+                "You think in positioning, perception, and differentiation. You ask: what do we want people to feel?",
+            ),
+            ("Growth Hacker", "You think in channels, CAC, and virality coefficients."),
+            ("Content Strategist", "You think in narratives, distribution, and audience building."),
+            ("SEO/SEM Specialist", "You think in search intent, keyword clusters, and conversion paths."),
+            ("Social Media Lead", "You think in platform algorithms, content formats, and community engagement."),
+            ("PR Strategist", "You think in earned media, narrative control, and crisis communication."),
+            ("Email Marketer", "You think in segmentation, lifecycle automation, and deliverability."),
             ("Performance Marketer", "You think in ROAS, attribution, and bid strategy."),
         ],
         "synthesis_instruction": "Synthesize your team's marketing perspective into ONE go-to-market recommendation: channel, message, and expected outcome.",
@@ -171,14 +216,17 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "🎨",
         "lead": "Design Lead",
         "agents": [
-            ("UX Designer",          "You think in user flows, friction reduction, and cognitive load."),
-            ("UI Designer",          "You think in visual hierarchy, typography, and accessibility."),
+            ("UX Designer", "You think in user flows, friction reduction, and cognitive load."),
+            ("UI Designer", "You think in visual hierarchy, typography, and accessibility."),
             ("Interaction Designer", "You think in micro-interactions, feedback loops, and delight."),
-            ("Design Systems Lead",  "You think in consistency, scalability, and component reuse."),
-            ("Motion Designer",      "You think in transitions, animation timing, and perceived performance."),
-            ("User Researcher",      "You validate designs with real users. You are deeply skeptical of untested assumptions."),
+            ("Design Systems Lead", "You think in consistency, scalability, and component reuse."),
+            ("Motion Designer", "You think in transitions, animation timing, and perceived performance."),
+            (
+                "User Researcher",
+                "You validate designs with real users. You are deeply skeptical of untested assumptions.",
+            ),
             ("Accessibility Expert", "You ensure designs work for all users, including those with disabilities."),
-            ("Brand Designer",       "You ensure every touchpoint reinforces the brand identity."),
+            ("Brand Designer", "You ensure every touchpoint reinforces the brand identity."),
         ],
         "synthesis_instruction": "Synthesize your team's design perspective into ONE concrete recommendation: the single most impactful design change with clear rationale.",
     },
@@ -186,14 +234,14 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "🏭",
         "lead": "COO",
         "agents": [
-            ("Process Analyst",      "You map workflows and find bottlenecks. You ask: where does work get stuck?"),
-            ("Supply Chain Expert",  "You think in lead times, inventory, and supplier risk."),
-            ("Finance Analyst",      "You think in unit economics, cash flow, and ROI timelines."),
-            ("HR Strategist",        "You think in org design, hiring timelines, and cultural fit."),
-            ("Legal Counsel",        "You flag regulatory risk, IP issues, and contractual exposure."),
-            ("Risk Manager",         "You enumerate what could go wrong, likelihood, and mitigation cost."),
-            ("Customer Success",     "You think in onboarding, retention, and turning customers into advocates."),
-            ("Support Lead",         "You think in ticket volume, escalation paths, and knowledge base quality."),
+            ("Process Analyst", "You map workflows and find bottlenecks. You ask: where does work get stuck?"),
+            ("Supply Chain Expert", "You think in lead times, inventory, and supplier risk."),
+            ("Finance Analyst", "You think in unit economics, cash flow, and ROI timelines."),
+            ("HR Strategist", "You think in org design, hiring timelines, and cultural fit."),
+            ("Legal Counsel", "You flag regulatory risk, IP issues, and contractual exposure."),
+            ("Risk Manager", "You enumerate what could go wrong, likelihood, and mitigation cost."),
+            ("Customer Success", "You think in onboarding, retention, and turning customers into advocates."),
+            ("Support Lead", "You think in ticket volume, escalation paths, and knowledge base quality."),
         ],
         "synthesis_instruction": "Synthesize your team's operational view into ONE recommendation: the single operational change with the highest leverage on efficiency or risk reduction.",
     },
@@ -201,13 +249,13 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "✨",
         "lead": "Creative Director",
         "agents": [
-            ("Copywriter",           "You write with clarity, punch, and voice. You find the one sentence that lands."),
-            ("Storyteller",          "You find the narrative arc. You ask: what is the hero's journey here?"),
-            ("Creative Strategist",  "You bridge creative instinct with business objectives."),
-            ("Art Director",         "You think in visual metaphors, colour theory, and compositional balance."),
-            ("Video Producer",       "You think in narrative pacing, B-roll, and emotional arc."),
-            ("Meme / Viral Expert",  "You understand cultural context, timing, and why things spread."),
-            ("Editor",               "You cut ruthlessly. Every word must earn its place."),
+            ("Copywriter", "You write with clarity, punch, and voice. You find the one sentence that lands."),
+            ("Storyteller", "You find the narrative arc. You ask: what is the hero's journey here?"),
+            ("Creative Strategist", "You bridge creative instinct with business objectives."),
+            ("Art Director", "You think in visual metaphors, colour theory, and compositional balance."),
+            ("Video Producer", "You think in narrative pacing, B-roll, and emotional arc."),
+            ("Meme / Viral Expert", "You understand cultural context, timing, and why things spread."),
+            ("Editor", "You cut ruthlessly. Every word must earn its place."),
             ("Tone of Voice Expert", "You ensure the brand sounds like itself consistently across contexts."),
         ],
         "synthesis_instruction": "Synthesize your team's creative perspective into ONE creative direction: the central idea, the tone, and the format that would resonate most.",
@@ -216,14 +264,14 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "⚖️",
         "lead": "General Counsel",
         "agents": [
-            ("Contract Lawyer",       "You review terms, liabilities, and contractual risk."),
+            ("Contract Lawyer", "You review terms, liabilities, and contractual risk."),
             ("Privacy / GDPR Expert", "You flag data handling risks and compliance requirements."),
-            ("IP Lawyer",             "You protect and assess intellectual property exposure."),
-            ("Regulatory Expert",     "You map applicable regulations by jurisdiction."),
-            ("Compliance Officer",    "You ensure internal policies match external obligations."),
-            ("Ethics Advisor",        "You raise uncomfortable questions about unintended consequences."),
-            ("Employment Lawyer",     "You flag workforce-related legal risks."),
-            ("Litigation Risk",       "You estimate litigation probability and cost of various paths."),
+            ("IP Lawyer", "You protect and assess intellectual property exposure."),
+            ("Regulatory Expert", "You map applicable regulations by jurisdiction."),
+            ("Compliance Officer", "You ensure internal policies match external obligations."),
+            ("Ethics Advisor", "You raise uncomfortable questions about unintended consequences."),
+            ("Employment Lawyer", "You flag workforce-related legal risks."),
+            ("Litigation Risk", "You estimate litigation probability and cost of various paths."),
         ],
         "synthesis_instruction": "Synthesize your team's legal view into ONE risk assessment: the top legal risk, its likelihood, and the minimum viable mitigation.",
     },
@@ -231,14 +279,17 @@ DEPARTMENTS: dict[str, dict] = {
         "icon": "🧭",
         "lead": "Chief Strategy Officer",
         "agents": [
-            ("Corporate Strategist",     "You think in competitive moats, market positioning, and 5-year trajectories."),
-            ("Venture Capitalist",       "You evaluate ideas by market size, defensibility, and team capability."),
-            ("Management Consultant",    "You apply frameworks (Porter, BCG, Jobs-to-be-done) to structure the problem."),
-            ("Futurist",                 "You extrapolate current signals into 10-year scenarios."),
-            ("Economist",                "You think in incentive structures, market dynamics, and second-order effects."),
-            ("Geopolitical Analyst",     "You consider how macro forces — regulation, trade, politics — affect the decision."),
+            ("Corporate Strategist", "You think in competitive moats, market positioning, and 5-year trajectories."),
+            ("Venture Capitalist", "You evaluate ideas by market size, defensibility, and team capability."),
+            ("Management Consultant", "You apply frameworks (Porter, BCG, Jobs-to-be-done) to structure the problem."),
+            ("Futurist", "You extrapolate current signals into 10-year scenarios."),
+            ("Economist", "You think in incentive structures, market dynamics, and second-order effects."),
+            (
+                "Geopolitical Analyst",
+                "You consider how macro forces — regulation, trade, politics — affect the decision.",
+            ),
             ("First Principles Thinker", "You strip away assumptions and rebuild reasoning from scratch."),
-            ("Devil's Advocate",         "You attack the strategy's core assumption. Your job is to find the fatal flaw."),
+            ("Devil's Advocate", "You attack the strategy's core assumption. Your job is to find the fatal flaw."),
         ],
         "synthesis_instruction": "Synthesize your team's strategic view into ONE strategic recommendation: the core bet, why now, and the biggest risk to the thesis.",
     },
@@ -272,7 +323,8 @@ async def _run_department(
         )
         model = AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
         return await _llm_call(
-            model, system,
+            model,
+            system,
             f"Analyse this from your specialist angle: {task}",
             max_tokens=1000,
             temperature=0.75,
@@ -296,14 +348,13 @@ async def _run_department(
         f"Your team of {len(agents)} specialists has just briefed you. "
         f"{synthesis_instruction}"
     )
-    lead_user = (
-        f"Topic: {task}\n\n"
-        f"Your team's briefing:\n{team_briefing[:8000]}"
-    )
+    lead_user = f"Topic: {task}\n\nYour team's briefing:\n{team_briefing[:8000]}"
     # Use architect model for lead synthesis — needs large context window
     lead_model = AGENT_MODELS.get("architect", "cerebras/qwen3-235b-a22b")
     lead_synthesis = await _llm_call(
-        lead_model, lead_system, lead_user,
+        lead_model,
+        lead_system,
+        lead_user,
         max_tokens=1500,
         temperature=0.7,
     )
@@ -312,6 +363,7 @@ async def _run_department(
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
+
 
 async def run_swarm_debate(
     task: str,
@@ -368,8 +420,7 @@ async def run_swarm_debate(
 
         if progress_fn:
             await progress_fn(
-                f"✅ {len(dept_positions)}/{len(selected_depts)} departments complete.\n"
-                f"🔥 Entering 4-round debate..."
+                f"✅ {len(dept_positions)}/{len(selected_depts)} departments complete.\n🔥 Entering 4-round debate..."
             )
 
     # Build department context string for the debate personas
@@ -387,9 +438,7 @@ async def run_swarm_debate(
     enriched_task = task
     if dept_context:
         enriched_task = (
-            f"{task}\n\n"
-            f"--- Department briefings (use as evidence in your debate) ---\n"
-            f"{dept_context[:8000]}"
+            f"{task}\n\n--- Department briefings (use as evidence in your debate) ---\n{dept_context[:8000]}"
         )
 
     # ── PHASE 2+3: 4-round debate with department context injected ────────────
@@ -413,10 +462,7 @@ async def run_swarm_debate(
             cfg = DEPARTMENTS.get(dname, {})
             icon = cfg.get("icon", "🏢")
             lead = cfg.get("lead", dname)
-            dept_lines.append(
-                f"{icon} <b>{lead}</b>\n"
-                f"<i>{html.escape(pos[:350])}</i>\n"
-            )
+            dept_lines.append(f"{icon} <b>{lead}</b>\n<i>{html.escape(pos[:350])}</i>\n")
         dept_msg = "\n".join(dept_lines)
         if len(dept_msg) > 4000:
             dept_msg = dept_msg[:3990] + "…"
@@ -443,7 +489,7 @@ def _md_to_html(text: str) -> str:
         code_blocks.append(m.group(0))
         return f"__CODE_{len(code_blocks) - 1}__"
 
-    text = re.sub(r'<code>.*?</code>', _stash_code, text, flags=re.DOTALL)
+    text = re.sub(r"<code>.*?</code>", _stash_code, text, flags=re.DOTALL)
 
     # Step 2: Also protect backtick inline code before converting
     backtick_blocks: list[str] = []
@@ -452,11 +498,11 @@ def _md_to_html(text: str) -> str:
         backtick_blocks.append(m.group(1))
         return f"__BACKTICK_{len(backtick_blocks) - 1}__"
 
-    text = re.sub(r'`([^`]+)`', _stash_backtick, text)
+    text = re.sub(r"`([^`]+)`", _stash_backtick, text)
 
     # Step 3: Convert markdown bold/italic
-    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text, flags=re.DOTALL)
-    text = re.sub(r'\*([^*\n]+?)\*', r'<i>\1</i>', text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text, flags=re.DOTALL)
+    text = re.sub(r"\*([^*\n]+?)\*", r"<i>\1</i>", text)
 
     # Step 4: Restore backtick blocks as <code>
     for i, content in enumerate(backtick_blocks):
@@ -472,12 +518,12 @@ def _md_to_html(text: str) -> str:
 def get_swarm_stats() -> str:
     """Return a formatted HTML string with swarm capability stats."""
     total_dept_agents = sum(len(d["agents"]) for d in DEPARTMENTS.values())
-    dept_leads = len(DEPARTMENTS)           # 9
+    dept_leads = len(DEPARTMENTS)  # 9
     debate_personas = 6
     debate_rounds = 4
     total_llm_calls = (
-        total_dept_agents               # 72 specialist agents
-        + dept_leads                    # 9 dept lead syntheses
+        total_dept_agents  # 72 specialist agents
+        + dept_leads  # 9 dept lead syntheses
         + debate_personas * debate_rounds  # 6 × 4 = 24 debate calls
     )  # = 105 total
 
@@ -492,9 +538,7 @@ def get_swarm_stats() -> str:
         "<b>Departments:</b>",
     ]
     for dname, cfg in DEPARTMENTS.items():
-        lines.append(
-            f"  {cfg['icon']} <b>{cfg['lead']}</b> — {len(cfg['agents'])} agents"
-        )
+        lines.append(f"  {cfg['icon']} <b>{cfg['lead']}</b> — {len(cfg['agents'])} agents")
     lines.append("\n<b>Debate Personas:</b>")
     for persona, icon in DEBATE_ICONS.items():
         lines.append(f"  {icon} {persona.replace('_', ' ').title()}")
