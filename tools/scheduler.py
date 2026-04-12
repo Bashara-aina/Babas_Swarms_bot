@@ -107,7 +107,10 @@ class TaskScheduler:
         lines = ["<b>📋 Scheduled Tasks</b>\n"]
         for t in tasks:
             status_icon = {
-                "active": "🟢", "paused": "⏸", "cancelled": "❌", "completed": "✅",
+                "active": "🟢",
+                "paused": "⏸",
+                "cancelled": "❌",
+                "completed": "✅",
             }.get(t["status"], "⚪")
 
             tid = t["id"]
@@ -170,23 +173,16 @@ class TaskScheduler:
                 try:
                     result = await _run_command(command)
                     await persistence.update_task_last_run(task_id)
-                    await persistence.record_task_execution(
-                        task_id, result, success=True
-                    )
+                    await persistence.record_task_execution(task_id, result, success=True)
 
                     # Check alert condition
                     if alert_cond:
                         should_alert = _eval_condition(alert_cond, result)
                         if should_alert:
-                            await self._notify(
-                                f"🔔 <b>Alert: {task['description']}</b>\n\n"
-                                f"<pre>{result[:2000]}</pre>"
-                            )
+                            await self._notify(f"🔔 <b>Alert: {task['description']}</b>\n\n<pre>{result[:2000]}</pre>")
                 except Exception as e:
                     logger.error("Monitor %s error: %s", task_id, e)
-                    await persistence.record_task_execution(
-                        task_id, str(e), success=False
-                    )
+                    await persistence.record_task_execution(task_id, str(e), success=False)
 
                 await asyncio.sleep(interval)
         except asyncio.CancelledError:
@@ -207,18 +203,12 @@ class TaskScheduler:
             await persistence.record_task_execution(task_id, result, success=True)
             await persistence.update_task_status(task_id, "completed")
 
-            await self._notify(
-                f"✅ <b>Scheduled task done:</b> {task['description']}\n\n"
-                f"<pre>{result[:2000]}</pre>"
-            )
+            await self._notify(f"✅ <b>Scheduled task done:</b> {task['description']}\n\n<pre>{result[:2000]}</pre>")
         except asyncio.CancelledError:
             logger.info("Scheduled task %s cancelled", task_id)
         except Exception as e:
             await persistence.record_task_execution(task_id, str(e), success=False)
-            await self._notify(
-                f"❌ <b>Task failed:</b> {task['description']}\n"
-                f"<code>{e}</code>"
-            )
+            await self._notify(f"❌ <b>Task failed:</b> {task['description']}\n<code>{e}</code>")
 
         if task_id in self._running:
             del self._running[task_id]
@@ -226,9 +216,7 @@ class TaskScheduler:
     async def _notify(self, text: str) -> None:
         """Send notification to user via Telegram."""
         try:
-            await self._bot.send_message(
-                self._user_id, text, parse_mode="HTML"
-            )
+            await self._bot.send_message(self._user_id, text, parse_mode="HTML")
         except Exception as e:
             logger.error("Failed to send notification: %s", e)
 
@@ -261,15 +249,24 @@ def _eval_condition(condition: str, result: str) -> bool:
     and `output` (alias for result).
     """
     try:
-        return bool(eval(condition, {"__builtins__": {}}, {
-            "result": result,
-            "output": result,
-            "len": len,
-            "int": int,
-            "float": float,
-            "str": str,
-            "re": re,
-        }))
+        return bool(
+            eval(
+                condition,
+                {"__builtins__": {}},
+                {
+                    "result": result,
+                    "output": result,
+                    "len": len,
+                    "int": int,
+                    "float": float,
+                    "str": str,
+                    "re": re,
+                },
+            )
+        )
+    except re.error as e:
+        logger.warning("Alert condition regex error: %s — %s", condition, e)
+        return False
     except Exception as e:
         logger.warning("Alert condition eval failed: %s — %s", condition, e)
         return False
@@ -277,5 +274,10 @@ def _eval_condition(condition: str, result: str) -> bool:
 
 async def _run_command(command: str) -> str:
     """Run a shell command and return output."""
-    from computer_agent import run_shell
-    return await run_shell(command, timeout=30)
+    try:
+        from computer_agent import run_shell
+
+        return await run_shell(command, timeout=30)
+    except Exception as e:
+        logger.error("_run_command failed: %s — %s", command, e)
+        return f"⛔ Command failed: {e}"

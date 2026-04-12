@@ -1,7 +1,9 @@
 """PM/content/email handlers: /task_from /tasks_due /task_done /delegate /post /brand_check /email."""
+
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -14,6 +16,7 @@ from .shared import (
 )
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 # ── /task_from ────────────────────────────────────────────────────────────────
@@ -33,8 +36,10 @@ async def cmd_task_from(msg: Message) -> None:
         return
     status_msg = await msg.answer("extracting tasks...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
     try:
         from tools.project_manager import transcript_to_tasks, save_tasks_local
+
         tasks = await transcript_to_tasks(text)
         await save_tasks_local(tasks, "telegram")
         typing_task.cancel()
@@ -58,6 +63,7 @@ async def cmd_tasks_due(msg: Message) -> None:
         return
     try:
         from tools.project_manager import check_deadlines
+
         result = await check_deadlines()
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
@@ -75,6 +81,7 @@ async def cmd_task_done(msg: Message) -> None:
         return
     try:
         from tools.project_manager import complete_task
+
         result = await complete_task(int(task_id_str))
         await msg.answer(result)
     except Exception as e:
@@ -96,6 +103,7 @@ async def cmd_delegate(msg: Message) -> None:
         return
     try:
         from tools.openclaw_bridge import delegate_to_openclaw
+
         result = await delegate_to_openclaw(task)
         await send_chunked(msg, result, model_used="openclaw")
     except Exception as e:
@@ -121,8 +129,10 @@ async def cmd_post(msg: Message) -> None:
     topic = parts[1] if len(parts) > 1 else text
     status_msg = await msg.answer(f"drafting {platform} post...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
     try:
         from tools.content import draft_linkedin_post, draft_tweet
+
         if platform == "linkedin":
             result = await draft_linkedin_post(topic)
         elif platform == "tweet":
@@ -152,8 +162,10 @@ async def cmd_brand_check(msg: Message) -> None:
         return
     status_msg = await msg.answer(f"searching for: {keyword}...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
     try:
         from tools.content import monitor_brand
+
         result = await monitor_brand([keyword])
         typing_task.cancel()
         await status_msg.delete()
@@ -173,8 +185,10 @@ async def cmd_email(msg: Message) -> None:
     if not text:
         status_msg = await msg.answer("📧 checking inbox…")
         typing_task = asyncio.create_task(_keep_typing(msg))
+        typing_task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
         try:
             from tools.email_client import check_inbox
+
             result = await check_inbox(limit=10, unread_only=True)
             typing_task.cancel()
             await status_msg.delete()
@@ -194,6 +208,7 @@ async def cmd_email(msg: Message) -> None:
     if subcmd == "check":
         status_msg = await msg.answer("📧 checking…")
         from tools.email_client import check_inbox
+
         result = await check_inbox(limit=10, unread_only="unread" in arg or not arg)
         await status_msg.delete()
         await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
@@ -201,6 +216,7 @@ async def cmd_email(msg: Message) -> None:
     elif subcmd == "read" and arg:
         status_msg = await msg.answer("📧 reading…")
         from tools.email_client import read_email
+
         result = await read_email(arg.strip())
         await status_msg.delete()
         await send_chunked(msg, result, model_used="email")
@@ -208,6 +224,7 @@ async def cmd_email(msg: Message) -> None:
     elif subcmd == "search" and arg:
         status_msg = await msg.answer(f"🔍 searching: {arg}…")
         from tools.email_client import search_emails
+
         result = await search_emails(arg.strip())
         await status_msg.delete()
         await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")

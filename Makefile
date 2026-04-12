@@ -1,4 +1,4 @@
-.PHONY: install test lint run docker clean format check
+.PHONY: install test lint run docker clean format check verify
 
 PYTHON := python3
 PIP    := pip
@@ -30,6 +30,10 @@ format:
 
 ## Check everything (lint + test)
 check: lint test
+
+## Verify all wiring is connected
+verify:
+	$(PYTHON) scripts/verify_wiring.py
 
 ## Run the bot locally
 run:
@@ -69,6 +73,7 @@ help:
 	@echo "  make lint        Lint with ruff"
 	@echo "  make format      Auto-fix lint issues"
 	@echo "  make check       Lint + test"
+	@echo "  make verify      Verify all wiring is connected"
 	@echo "  make run         Start the bot"
 	@echo "  make docker      Start Redis + ChromaDB"
 	@echo "  make hooks       Install pre-commit hooks"

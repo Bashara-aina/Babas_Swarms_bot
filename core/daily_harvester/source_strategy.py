@@ -11,6 +11,9 @@ from core.daily_harvester.types import SourceInfo, SourceType, TrustTier
 
 logger = logging.getLogger(__name__)
 
+# Planned feature flags
+FEATURE_WEB_SEARCH_ENABLED = False  # Planned: v2.0
+
 # Trust scores by source type
 _TRUST_SCORES: dict[SourceType, int] = {
     SourceType.GOV: 10,
@@ -65,6 +68,8 @@ async def search_sources(query: str, topic: str) -> list[SourceInfo]:
     TODO: integrate with Tavily, Firecrawl, or similar search API.
     For now, returns an empty list (mock implementation).
     """
+    if not FEATURE_WEB_SEARCH_ENABLED:
+        logger.info("Web search feature is planned for v2.0 — not yet available.")
     # TODO: real search integration
     return []
 

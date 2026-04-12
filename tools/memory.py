@@ -505,6 +505,13 @@ async def init_memory_db() -> None:
         logger.debug("OpenViking warmup skipped: %s", e)
 
 
+def close_memory_db() -> None:
+    """No-op since aiosqlite connections are managed via context managers.
+
+    Kept for API compatibility with callers that expect a teardown function.
+    """
+
+
 class Memory:
     """Unified long-context memory wrapper.
 
@@ -609,6 +616,7 @@ __all__ = [
     "export_to_obsidian",
     "format_memory_result",
     "init_memory_db",
+    "close_memory_db",
     "store_memory",
     "search_memories",
     "Memory",

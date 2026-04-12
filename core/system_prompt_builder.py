@@ -20,11 +20,13 @@ Per-turn session continuity uses :mod:`core.working_memory` and
 
 This replaces the old build_system_prompt() in agents.py.
 """
+
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Any
 
+from core.gsa_voice import classify_message_context, get_gsa_injection, ContextClassification
 from core.personality.personality import LEGION_PERSONALITY
 
 if TYPE_CHECKING:
@@ -78,15 +80,52 @@ def build_full_system_prompt(
     # 0. Soul context — Legion's living identity document (FIRST, before everything)
     try:
         from core.soul_engine import build_soul_context
+
         soul = build_soul_context()
         if soul:
             parts.append(soul)
     except Exception as e:
         logger.debug("[PromptBuilder] soul_engine not available: %s", e)
 
+    # 0b. Bashara identity — always injected, guaranteed
+    from core.wiki_loader import get_bashara_identity_context
+
+    parts.append(get_bashara_identity_context())
+
+    # 0c. Wiki context — Legion's second brain
+    from core.wiki_loader import load_wiki_context
+
+    wiki = load_wiki_context()
+    if wiki and "not found" not in wiki:
+        parts.append(f"## LEGION'S KNOWLEDGE BASE (from .wiki/)\n{wiki}")
+
+    # 0b. GSA voice injection — comes AFTER soul but BEFORE task-specific context
+    # Also sets enforcement context for character_enforcer
+    if user_msg:
+        try:
+            from core.gsa_voice import classify_message_context, get_gsa_injection
+            from core.character_enforcer import set_enforcement_context, EnforcementContext
+
+            gsa_classification = classify_message_context(user_msg)
+            gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)
+            if gsa_injection:
+                parts.append(gsa_injection)
+
+            # Set enforcement context for character_enforcer post-processing
+            ctx = EnforcementContext(
+                context_type=gsa_classification.primary.value,
+                confidence=gsa_classification.confidence,
+                visual_signals=gsa_classification.visual_signals,
+                flow_state=gsa_classification.flow_state,
+            )
+            set_enforcement_context(ctx)
+        except Exception as e:
+            logger.debug("[PromptBuilder] gsa_voice skipped: %s", e)
+
     # 1. Core personality (from agents.py PERSONALITY_WRAPPER)
     try:
         from agents import PERSONALITY_WRAPPER
+
         parts.append(PERSONALITY_WRAPPER.strip())
     except Exception as e:
         logger.warning("[PromptBuilder] Could not load PERSONALITY_WRAPPER: %s", e)
@@ -95,6 +134,7 @@ def build_full_system_prompt(
     # 2. Disagreement & debate protocol
     try:
         from core.character.disagreement_protocol import get_disagreement_prompt
+
         parts.append(get_disagreement_prompt())
     except Exception as e:
         logger.debug("[PromptBuilder] disagreement_protocol not available: %s", e)
@@ -103,6 +143,7 @@ def build_full_system_prompt(
     if user_id:
         try:
             from core.memory.user_profile import get_user_profile
+
             profile = get_user_profile(user_id)
             profile_block = profile.build_context_block()
             if profile_block:
@@ -114,6 +155,7 @@ def build_full_system_prompt(
     if user_id and user_msg:
         try:
             from core.memory.episodic_store import get_episodic_store
+
             store = get_episodic_store()
             memory_block = store.build_context_block(user_id, user_msg)
             if memory_block:
@@ -133,6 +175,7 @@ def build_full_system_prompt(
     if emotion and emotion != "neutral":
         try:
             from core.emotion_modulator import build_emotion_modifier
+
             modifier = build_emotion_modifier(emotion)
             if modifier:
                 parts.append(modifier)
@@ -144,6 +187,7 @@ def build_full_system_prompt(
         try:
             from core.debate_engine import build_debate_instruction
             from core.soul_engine import read_beliefs
+
             debate_block = build_debate_instruction(user_msg, read_beliefs())
             if debate_block:
                 parts.append(debate_block)
@@ -158,6 +202,7 @@ def build_full_system_prompt(
     if user_id:
         try:
             from agents import get_conversation_summary_prompt
+
             ctx = get_conversation_summary_prompt(user_id)
             if ctx:
                 parts.append(ctx)
@@ -175,6 +220,7 @@ def build_debate_system_prompt(
     """Build a system prompt specifically for debate/opinion-giving mode."""
     try:
         from core.character.disagreement_protocol import build_debate_pre_prompt
+
         debate_prefix = build_debate_pre_prompt(topic)
     except Exception:
         debate_prefix = f"Give your honest opinion on: '{topic[:100]}'.\n"
@@ -203,6 +249,11 @@ class SystemPromptBuilder:
         self.emotion = emotion
         self.graph = graph
         self.reflection = reflection
+        self._last_user_msg: str = ""
+
+    def set_user_message(self, msg: str) -> None:
+        """Set the user message for GSA context classification."""
+        self._last_user_msg = msg
 
     def build(
         self,
@@ -223,11 +274,23 @@ class SystemPromptBuilder:
         # Soul context is ALWAYS first — it is Legion's living identity
         try:
             from core.soul_engine import build_soul_context
+
             soul = build_soul_context()
             if soul:
                 sections.append(soul)
         except Exception as e:
             logger.debug("[SystemPromptBuilder] soul_engine skipped: %s", e)
+
+        # GSA voice injection — context-aware communication style
+        try:
+            from core.gsa_voice import classify_message_context, get_gsa_injection
+
+            if hasattr(self, "_last_user_msg") and self._last_user_msg:
+                gsa_classification = classify_message_context(self._last_user_msg)
+                gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)
+                sections.append(gsa_injection)
+        except Exception as e:
+            logger.debug("[SystemPromptBuilder] gsa_voice skipped: %s", e)
 
         if include_personality:
             sections.append(LEGION_PERSONALITY.to_description())
@@ -298,6 +361,7 @@ class SystemPromptBuilder:
         try:
             from core.debate_engine import build_opinion_injection
             from core.soul_engine import read_beliefs
+
             opinion_block = build_opinion_injection(read_beliefs(), limit=3)
             if opinion_block:
                 sections.append(opinion_block)

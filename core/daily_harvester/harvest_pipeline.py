@@ -15,6 +15,9 @@ from core.daily_harvester.wiki_storage import WikiStorage
 
 logger = logging.getLogger(__name__)
 
+# Planned feature flags
+FEATURE_BRIEFING_CONSOLIDATION_ENABLED = False  # Planned: v2.0
+
 
 class HarvestPipeline:
     """
@@ -153,6 +156,8 @@ class HarvestPipeline:
         rejected: int,
     ) -> str:
         """Generate the morning Telegram report."""
+        if not FEATURE_BRIEFING_CONSOLIDATION_ENABLED:
+            logger.info("Briefing consolidation feature is planned for v2.0 — not yet available.")
         report_gen = MorningReport()
         return report_gen.generate(accepted, verdicts, budget, conflicts, rejected)
 

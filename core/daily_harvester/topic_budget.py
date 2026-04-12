@@ -13,6 +13,9 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Planned feature flags
+FEATURE_GIT_LOG_ANALYSIS_ENABLED = False  # Planned: v2.0
+
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 WIKI_ROOT = REPO_ROOT / ".wiki" / "knowledge"
 TOPIC_WEIGHTS_PATH = WIKI_ROOT / "TOPIC_WEIGHTS.json"
@@ -47,6 +50,9 @@ def _days_since(ts: str) -> float:
 
 def _get_git_commit_count(topic: str, days: int = 3) -> int:
     """Count git commits mentioning a topic in the last N days (mock/placeholder)."""
+    if not FEATURE_GIT_LOG_ANALYSIS_ENABLED:
+        logger.debug("Git log analysis feature is planned for v2.0 — not yet available.")
+        return 0
     # TODO: implement real git log analysis
     # For now returns 0 (no real git integration yet)
     return 0

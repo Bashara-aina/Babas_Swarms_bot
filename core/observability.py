@@ -15,12 +15,24 @@ try:
 except Exception:
     agentops = None
 
-_PROVIDER_STATS: dict[str, dict[str, float]] = defaultdict(lambda: {
-    "calls": 0.0,
-    "tokens": 0.0,
-    "latency_ms": 0.0,
-    "errors": 0.0,
-})
+_PROVIDER_STATS: dict[str, dict[str, float]] = defaultdict(
+    lambda: {
+        "calls": 0.0,
+        "tokens": 0.0,
+        "latency_ms": 0.0,
+        "errors": 0.0,
+    }
+)
+
+# ── Cumulative token budget tracking (across retries) ─────────────────────────
+_SESSION_TOKEN_BUDGET: dict[str, dict[str, int]] = defaultdict(
+    lambda: {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+    }
+)
+_token_budget_lock = asyncio.Lock()
 
 
 def init_observability() -> None:
@@ -83,12 +95,28 @@ def track_agent(agent_name: str) -> Callable[[Callable[..., Awaitable[Any]]], Ca
                         )
                     except Exception:
                         pass
+
         return wrapper
+
     return decorator
 
 
 def get_metrics_snapshot() -> dict[str, dict[str, float]]:
     return {k: dict(v) for k, v in _PROVIDER_STATS.items()}
+
+
+async def track_tokens(session_id: str, prompt_tokens: int, completion_tokens: int) -> None:
+    """Record cumulative token usage for a session across all LLM calls."""
+    async with _token_budget_lock:
+        sess = _SESSION_TOKEN_BUDGET[session_id]
+        sess["prompt_tokens"] += max(0, prompt_tokens)
+        sess["completion_tokens"] += max(0, completion_tokens)
+        sess["total_tokens"] = sess["prompt_tokens"] + sess["completion_tokens"]
+
+
+def get_session_token_stats(session_id: str) -> dict[str, int]:
+    """Return cumulative token stats for a session."""
+    return dict(_SESSION_TOKEN_BUDGET.get(session_id, {}))
 
 
 async def notify_limit_warnings(send_fn: Callable[[str], Awaitable[None]], provider_limits: dict[str, float]) -> None:
@@ -99,7 +127,7 @@ async def notify_limit_warnings(send_fn: Callable[[str], Awaitable[None]], provi
         used = stats.get("calls", 0.0)
         pct = used / daily_limit
         if pct >= 0.8:
-            await send_fn(f"⚠️ provider {provider} at {pct*100:.1f}% of daily limit")
+            await send_fn(f"⚠️ provider {provider} at {pct * 100:.1f}% of daily limit")
 
 
 def render_metrics_html() -> str:

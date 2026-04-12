@@ -455,13 +455,15 @@ async def get_clipboard() -> str:
 
 
 async def set_clipboard(text: str) -> str:
-    """Copy text to clipboard."""
+    """Copy text to clipboard. Uses shlex.quote for shell safety."""
+    import shlex
+
     from computer_agent.shell import run_shell as _run_shell
 
     display = await detect_display()
-    safe = text.replace("'", "'\\''")
+    safe_text = shlex.quote(text)
     out = await _run_shell(
-        f"echo '{safe}' | DISPLAY={display} xclip -selection clipboard 2>/dev/null || "
+        f"echo {safe_text} | DISPLAY={display} xclip -selection clipboard 2>/dev/null || "
         "echo 'clipboard tool not installed'",
         timeout=5,
     )

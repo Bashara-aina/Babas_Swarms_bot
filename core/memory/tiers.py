@@ -208,6 +208,10 @@ class ArchivalMemory:
         row = self.conn.execute("SELECT COUNT(*) FROM memories").fetchone()
         return int(row[0]) if row else 0
 
+    def close(self) -> None:
+        """Close the SQLite connection."""
+        self.conn.close()
+
 
 class RecallMemory:
     """Permanent conversation history for context and pattern analysis."""
@@ -307,3 +311,7 @@ class RecallMemory:
         ).fetchall()
         contents = [row[0] for row in rows]
         return "\n".join(contents[-50:])
+
+    def close(self) -> None:
+        """Close the SQLite connection."""
+        self.conn.close()

@@ -28,7 +28,10 @@ def _is_allowed(msg: Message) -> bool:
 
 
 def _get_bridge():
+    if not os.getenv("FEATURE_WHATSAPP_ENABLED", "0").strip().lower() in ("1", "true"):
+        return None
     from bridges.whatsapp_bridge import WhatsAppBridge
+
     return WhatsAppBridge()
 
 
@@ -39,6 +42,9 @@ async def cmd_wa(msg: Message) -> None:
         return
 
     bridge = _get_bridge()
+    if bridge is None:
+        await msg.answer("WhatsApp feature is disabled.", parse_mode="HTML")
+        return
     status = await bridge.get_status()
     wa_status = status.get("status", "offline")
 
@@ -73,9 +79,7 @@ async def cmd_wa(msg: Message) -> None:
         group = " [group]" if m.get("isGroup") else ""
         lines.append(f"<b>{name}</b>{group}: {body}")
 
-    lines.append(
-        f"\n<i>Use: <code>/wa_reply &lt;name_or_number&gt; &lt;message&gt;</code></i>"
-    )
+    lines.append(f"\n<i>Use: <code>/wa_reply &lt;name_or_number&gt; &lt;message&gt;</code></i>")
     await msg.answer("\n".join(lines), parse_mode="HTML")
 
 
@@ -104,6 +108,9 @@ async def cmd_wa_reply(msg: Message) -> None:
         chat_id = f"{chat_id}@c.us"
 
     bridge = _get_bridge()
+    if bridge is None:
+        await msg.answer("WhatsApp feature is disabled.", parse_mode="HTML")
+        return
     status = await bridge.get_status()
     if status.get("status") != "ready":
         await msg.answer("WhatsApp not ready. Use <code>/wa_status</code>.", parse_mode="HTML")
@@ -130,6 +137,9 @@ async def cmd_wa_qr(msg: Message) -> None:
 
     await msg.answer("Fetching QR code...", parse_mode="HTML")
     bridge = _get_bridge()
+    if bridge is None:
+        await msg.answer("WhatsApp feature is disabled.", parse_mode="HTML")
+        return
 
     # Auto-start sidecar if not running
     healthy = await bridge._is_healthy()
@@ -151,8 +161,7 @@ async def cmd_wa_qr(msg: Message) -> None:
             await msg.answer("Already authenticated — WhatsApp is ready!", parse_mode="HTML")
         else:
             await msg.answer(
-                f"QR not ready yet (status: {status.get('status', 'unknown')}). "
-                "Wait 10 seconds and try again.",
+                f"QR not ready yet (status: {status.get('status', 'unknown')}). Wait 10 seconds and try again.",
                 parse_mode="HTML",
             )
         return
@@ -160,7 +169,7 @@ async def cmd_wa_qr(msg: Message) -> None:
     await msg.answer_photo(
         BufferedInputFile(qr_bytes, filename="whatsapp_qr.png"),
         caption="Scan this QR code with WhatsApp on your phone.\n"
-                "Go to: <b>WhatsApp → Settings → Linked Devices → Link a Device</b>",
+        "Go to: <b>WhatsApp → Settings → Linked Devices → Link a Device</b>",
         parse_mode="HTML",
     )
 
@@ -172,6 +181,9 @@ async def cmd_wa_status(msg: Message) -> None:
         return
 
     bridge = _get_bridge()
+    if bridge is None:
+        await msg.answer("WhatsApp feature is disabled.", parse_mode="HTML")
+        return
     status = await bridge.get_status()
     wa_status = status.get("status", "offline")
     msg_count = status.get("message_count", 0)

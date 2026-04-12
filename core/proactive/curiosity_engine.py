@@ -142,6 +142,10 @@ async def _check_site_health() -> str | None:
 
 async def _check_sleep_pattern(get_last_user_ts: Callable[[], float]) -> str | None:
     """If no message in >8h during typical waking hours, send a check-in."""
+    # U4: respect 4h cooldown between sleep check-ins
+    if not can_send_sleep_checkin():
+        return None
+
     now_ts = time.time()
     last_ts = get_last_user_ts()
 
@@ -165,10 +169,13 @@ async def _check_sleep_pattern(get_last_user_ts: Callable[[], float]) -> str | N
             display = f"{silence_h // 24} days"
         else:
             display = f"{silence_h} hours"
-        return (
-            f"You've been quiet for about {display}. Everything good? "
-            f"Anything you want me to prep or check while I'm idle?"
-        )
+
+        # U4: use CHECKIN_POOL for message variety
+        import random
+
+        message = random.choice(CHECKIN_POOL)
+        record_sleep_checkin()
+        return message
     return None
 
 
@@ -224,3 +231,22 @@ async def _tick(
         _state.record_send()
         logger.info("[CuriosityEngine] firing proactive message (%d/%d today)", _state.sent_today, _MAX_PER_DAY)
         await notify(message)
+
+
+async def check_and_fire(bot, user_id: int) -> None:
+    """Heartbeat-compatible wrapper — checks and fires proactive message if needed.
+
+    Args:
+        bot: aiogram Bot instance
+        user_id: Telegram user ID to send message to
+    """
+
+    async def _notify(text: str) -> None:
+        await bot.send_message(user_id, text)
+
+    def _get_last_user_ts() -> float:
+        from core.conversation_interface import get_last_message_timestamp
+
+        return get_last_message_timestamp(str(user_id))
+
+    await _tick(_notify, _get_last_user_ts)

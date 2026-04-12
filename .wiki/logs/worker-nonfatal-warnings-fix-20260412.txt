@@ -1,0 +1,33 @@
+# Worker Log: nonfatal-warnings-fix
+
+**Date**: 2026-04-12
+**Subtasks completed**: 4/4
+
+## Subtask 1 — `close_memory_db()` in `tools/memory.py`
+- Added no-op `close_memory_db() -> None` (aiosqlite connections are context-managed)
+- Exported in `__all__`
+- **Verified**: `python -c "from tools.memory import close_memory_db; print('OK')"` → OK
+
+## Subtask 2 — `close()` on `ArchivalMemory` and `RecallMemory` in `core/memory/tiers.py`
+- Added `def close(self) -> None: self.conn.close()` to both classes
+- Added `close()` to `MemoryManager` in `core/memory/memory_manager.py` to close both sub-instances
+- **Verified**: `python -c "from core.memory.tiers import ArchivalMemory, RecallMemory; a=ArchivalMemory(); a.close(); r=RecallMemory(); r.close(); print('OK')"` → OK
+
+## Subtask 3 — Wired cleanup into `on_shutdown()` in `main.py`
+- Added `end_session` call (from `tools.agentops_client`) in shutdown step 4
+- Added `get_memory().close()` to close ArchivalMemory and RecallMemory via MemoryManager
+- All calls wrapped in try/except for graceful handling when modules unavailable
+- **Verified**: `python -c "import main; print('OK')"` → OK
+
+## Subtask 4 — Tests
+- **Result**: 364 passed in 26.73s (0 failures)
+- Ignored: `test_circuit_breaker.py`, `test_multi_user_isolation.py` (as directed)
+
+## Summary
+Fixed resource warning issues:
+1. `tools/memory.py` now exports `close_memory_db()` for API compatibility
+2. `ArchivalMemory` and `RecallMemory` now have `close()` methods
+3. `MemoryManager.close()` cascades close to both memory tier instances
+4. `on_shutdown()` in `main.py` now properly cleans up memory + agentops connections
+
+No SOUL.md, character_enforcer.py, or nihongo mode files modified.

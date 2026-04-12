@@ -1,7 +1,7 @@
 # Legion Wiki Index
 *Last rebuilt: 2026-04-11 17:28*
 
-*Total pages: 137 (archived: 6)*
+*Total pages: 157 (archived: 6) — added 20 wiki-loop pages 2026-04-12*
 
 ## agents
 - [[agents/planner]] (233w) — Planner Agent
@@ -53,6 +53,8 @@
 - [[logs/api-health]] (68w) — Auto-Generated Health Log
 - [[logs/legion-upgrade-2026-04]] (2833w) — Legion Upgrade Log — 2026-04
 - [[logs/legion-upgrade-tasks-2026-04-10]] (2153w) — Legion Upgrade — Worker Task List
+- [[logs/planner-cycles-1-5]] (6.5k) — Wiki Loop Cycles 1-5 Plan
+- [[logs/LOOP_LOG]] (4.5k) — Wiki Loop Session Log 2026-04-12
 
 ## profiles
 - [[profiles/BASHARA-MASTER-PROFILE]] (1571w) — Bashara — Complete Personal Profile
@@ -112,6 +114,86 @@
 
 ## workflows
 - [[workflows/n8n-documentation]] (217w) — n8n Workflow Documentation
+
+## wiki-loop-2026-04-12 (74 pages — 17 cycles 1-5, 17 cycles 6-10, 30 cycles 11-20)
+
+### Cycles 1-5: Foundation (Bashara Context, LLM Routing, Memory, Intent, Personality)
+| Page | Impact | Tokens | Injects Into |
+|------|--------|--------|--------------|
+| [[bashara-profile]] | 9 | 400 | all |
+| [[bashara-projects]] | 8 | 450 | all |
+| [[bashara-vocabulary]] | 7 | 350 | all |
+| [[bashara-schedule]] | 7 | 300 | all |
+| [[llm-routing-map]] | 9 | 700 | llm calls |
+| [[llm-cost-optimization]] | 7 | 400 | llm calls |
+| [[llm-context-strategy]] | 7 | 350 | all |
+| [[memory-architecture]] | 9 | 550 | all |
+| [[memory-gaps]] | 8 | 400 | all |
+| [[memory-injection-strategy]] | 7 | 350 | all |
+| [[intent-routing-map]] | 9 | 600 | all |
+| [[intent-gaps]] | 8 | 350 | intent routing |
+| [[multi-intent-strategy]] | 7 | 300 | all |
+| [[soul-enforcement-map]] | 9 | 500 | all |
+| [[personality-gaps]] | 8 | 400 | all |
+| [[debate-system-guide]] | 7 | 350 | debate, research |
+| [[emotional-vocabulary]] | 7 | 350 | emotional |
+
+### Cycles 6-10: Operations (Proactive, Tools, Security, Context, Future)
+| Page | Impact | Tokens | Injects Into |
+|------|--------|--------|--------------|
+| [[proactive-schedule]] | 9 | 480 | all |
+| [[proactive-gaps]] | 8 | 380 | proactive |
+| [[bashara-quiet-hours]] | 8 | 280 | all |
+| [[briefing-format-spec]] | 7 | 320 | briefing |
+| [[tools-inventory]] | 9 | 620 | all |
+| [[tools-gaps]] | 8 | 340 | tools |
+| [[tool-output-formatting]] | 7 | 290 | all |
+| [[security-audit]] | 9 | 420 | all |
+| [[stability-map]] | 8 | 360 | all |
+| [[rate-limit-strategy]] | 7 | 280 | all |
+| [[context-window-map]] | 9 | 420 | all |
+| [[context-optimization]] | 8 | 340 | all |
+| [[system-prompt-spec]] | 7 | 310 | all |
+| [[legion-vision-2026]] | 9 | 420 | all |
+| [[high-leverage-changes]] | 8 | 340 | all |
+| [[agent-topology-design]] | 7 | 320 | agents |
+| [[use-case-optimization]] | 8 | 340 | all |
+
+### Cycles 11-20: Integration, Voice, Data, Database, Git, Deployment, API, Error Handling, Testing
+| Page | Domain | Impact | Tokens | Injects Into |
+|------|--------|--------|--------|--------------|
+| [[browser-agent-architecture]] | browser-web | 8 | 590 | tools |
+| [[video-url-pipeline]] | browser-web | 8 | 595 | tools |
+| [[web-scraping-patterns]] | browser-web | 7 | 545 | tools |
+| [[composio-email-setup]] | communications | 8 | 420 | system |
+| [[composio-calendar-guide]] | communications | 7 | 380 | system |
+| [[email-security-patterns]] | communications | 8 | 400 | security |
+| [[voice-pipeline]] | voice-media | 9 | 620 | handlers |
+| [[media-processing-guide]] | voice-media | 8 | 580 | handlers |
+| [[tts-setup]] | voice-media | 7 | 540 | handlers |
+| [[observability-stack]] | data-analytics | 9 | 480 | all |
+| [[data-privacy-guide]] | data-analytics | 8 | 420 | all |
+| [[supabase-query-patterns]] | data-analytics | 7 | 390 | all |
+| [[supabase-schema-overview]] | database | 8 | 480 | all |
+| [[supabase-security-guide]] | database | 8 | 520 | security |
+| [[database-resilience]] | database | 8 | 590 | stability |
+| [[github-integration-guide]] | git-version-control | 8 | 480 | handlers |
+| [[github-security-patterns]] | git-version-control | 8 | 510 | security |
+| [[self-upgrade-mechanism]] | git-version-control | 8 | 530 | core |
+| [[deployment-architecture]] | deployment-cicd | 8 | 520 | system |
+| [[ci-cd-pipeline]] | deployment-cicd | 8 | 490 | system |
+| [[logging-strategy]] | deployment-cicd | 7 | 480 | system |
+| [[n8n-bridge-guide]] | api-integrations | 8 | 520 | tools |
+| [[api-key-management]] | api-integrations | 8 | 590 | security |
+| [[webhook-patterns]] | api-integrations | 7 | 480 | tools |
+| [[error-patterns-catalog]] | error-handling | 9 | 780 | core |
+| [[circuit-breaker-design]] | error-handling | 9 | 640 | core |
+| [[debugging-guide]] | error-handling | 8 | 680 | core |
+| [[test-patterns-guide]] | testing | 8 | 520 | ci |
+| [[test-security-patterns]] | testing | 8 | 480 | security |
+| [[quality-gates-spec]] | testing | 8 | 490 | ci |
+
+**Session total: 74 pages, ~23,580 tokens estimated**
 
 ## root
 - [[MASTER-INTELLIGENCE]] — SwarmBot Master Intelligence Index

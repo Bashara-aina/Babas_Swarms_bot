@@ -80,6 +80,7 @@ _ROUTER_ORDER = [
     orchestrate.router,  # /orchestrate /orchestrate_cancel
     legion_extras.router,  # /simulate /screenpipe_status /mcp_status /voice_room /websearch /quickscrape
     wiki_router,  # /wiki_audit /wiki_flush /wiki_restore /wiki_scan /wiki_stats
+    admin_handlers.router,  # /budget /soul (owner-only)
     ai.router,  # /run /think /agent /swarm + NL catch-all (LAST)
 ]
 

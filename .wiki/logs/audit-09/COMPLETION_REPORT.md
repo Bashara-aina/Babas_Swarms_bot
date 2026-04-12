@@ -1,0 +1,136 @@
+# LEGION AUDIT 09 — Completion Report
+> Generated: 2026-04-12
+> Auditor: Reviewer Agent
+
+---
+
+## Audit Scope
+
+- **Audit ID:** LEGION AUDIT 09
+- **Focus:** Skills Layer & Skill Registry
+- **Files Audited:** 10 subtask files in `.wiki/logs/audit-09/`
+
+---
+
+## Summary Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Number of skills audited** | 6 (from `skills/manifest.json`) |
+| **Number of violations found** | 1 |
+| **Number of skills with missing intent mapping** | 3 |
+| **Number of skills with missing autonomous_router mapping** | 6 (all have handler mismatches; 3 have no SKILL_PATTERNS entry at all) |
+
+---
+
+## Violations Found
+
+### 🔴 BLOCKER: DuckDuckGo Timeout Exceeds Spec (1 violation)
+
+| File | Line | Current | Spec | Severity |
+|------|------|---------|------|----------|
+| `skills/web_search.py` | 31 | `ClientTimeout(total=10)` | `total=8` | ⚠️ MEDIUM |
+
+**Fix:** Change line 31 from `total=10` to `total=8`.
+
+---
+
+## Missing Intent Mappings (3 skills)
+
+| Skill ID | Handler | Issue |
+|----------|---------|-------|
+| `screenpipe_recall` | `screenpipe_tool` | No `Intent.SCREEN_CONTEXT` enum value exists |
+| `mirofish_simulation` | `mirofish` | No `Intent.SIMULATION` or matching enum |
+| `open_interpreter` | `interpreter_tool` | No `Intent.CODE_EXECUTION` or matching enum |
+
+---
+
+## Missing/Incomplete SKILL_PATTERNS Mappings (6 skills)
+
+| Manifest Skill | Manifest Handler | SKILL_PATTERNS Key | SKILL_PATTERNS Handler | Status |
+|----------------|-------------------|---------------------|------------------------|--------|
+| `web_search` | `WebSearch` | *(none)* | — | ❌ No entry |
+| `geo_intelligence` | `GeoIntelligence` | `location_advice` | `location` | ❌ Handler mismatch |
+| `screenpipe_recall` | `screenpipe_tool` | *(none)* | — | ❌ No entry |
+| `mirofish_simulation` | `mirofish` | `strategic_simulation` | `simulation` | ❌ Handler mismatch |
+| `open_interpreter` | `interpreter_tool` | *(none)* | — | ❌ No entry |
+| `database_agent` | `DatabaseAgent` | `business_query` | `business` | ❌ Handler mismatch |
+
+**Root Cause:** Manifest uses Python class names (`WebSearch`, `GeoIntelligence`); SKILL_PATTERNS uses lowercase action names (`location`, `business`). These two routing systems are not wired together.
+
+---
+
+## Architecture Issue: Dual Skill Registration
+
+Two separate systems exist without integration:
+
+1. **`core/skills/registry.py`** — Python class-based `SkillRegistry` with `Skill` dataclass and `find_by_example()` method
+2. **`core/skill_registry.py`** — JSON manifest loader that reads `skills/manifest.json` + `config/legion_skills.json`
+
+These are **not connected** — the class-based registry is not populated from the JSON manifests.
+
+See: `.wiki/decisions/ADR-055-dual-skill-registration.md`
+
+---
+
+## Test Results Verification
+
+| Suite | Reported | Actual | Status |
+|-------|----------|--------|--------|
+| `test_skill_registry.py` | 3 passed | 3 passed | ✅ VERIFIED |
+| `test_intent_router.py` | 21 passed | 21 passed | ✅ VERIFIED |
+| **TOTAL** | **24 passed** | **24 passed** | ✅ VERIFIED |
+
+Ran: `pytest tests/test_skill_registry.py tests/test_intent_router.py -x --asyncio-mode=auto -q -v`
+Result: **24 passed in 0.08s**
+
+---
+
+## Recommended Fix Priority
+
+### P0 — Immediate (Production Impact)
+
+1. **Fix `skills/web_search.py` line 31:** Change `total=10` → `total=8` to comply with spec
+
+### P1 — High (Routing Broken)
+
+2. **Wire manifest skills to SKILL_PATTERNS:** Add `web_search`, `screenpipe_recall`, `open_interpreter` entries to `SKILL_PATTERNS` in `core/autonomous_router.py`
+3. **Standardize handler naming:** Choose either class names or action names as canonical; reconcile the two systems
+
+### P2 — Medium (Architecture Debt)
+
+4. **Add Intent enum values:** `SCREEN_CONTEXT`, `SIMULATION`, `CODE_EXECUTION` for unmapped skills
+5. **Consolidate dual registration:** Either deprecate `core/skills/registry.py` class system or connect it to JSON manifest loading
+
+### P3 — Low (Nice to Have)
+
+6. **Add autonomous_router tests** for new skills before shipping
+
+---
+
+## Subtask Completion Checklist
+
+| Subtask | File | Status |
+|---------|------|--------|
+| web_search timeout audit | `web_search_audit.md` | ✅ Complete |
+| web_search findings | `web_search_findings.md` | ✅ Complete |
+| skill registry duality | `skill_registry_duality.md` | ✅ Complete |
+| skill registry findings | `skill_registry_findings.md` | ✅ Complete |
+| intent mapping | `intent_mapping.md` | ✅ Complete |
+| autonomous mapping | `autonomous_mapping.md` | ✅ Complete |
+| manifest coverage | `manifest_coverage.md` | ✅ Complete |
+| skills inventory | `skills_inventory.md` | ✅ Complete |
+| nihongo sensei soul audit | `nihongo_sensei_soul_audit.md` | ✅ Complete |
+| test results | `test_results.md` | ✅ VERIFIED |
+
+**All 10 subtasks completed and verified.**
+
+---
+
+## ADR Produced
+
+- **ADR-055:** `.wiki/decisions/ADR-055-dual-skill-registration.md`
+
+---
+
+*Report generated by Reviewer Agent on 2026-04-12*

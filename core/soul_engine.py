@@ -39,6 +39,36 @@ _SOUL_ENABLED = os.getenv("LEGION_SOUL_ENABLED", "true").strip().lower() not in 
 SOUL_PATH = Path(__file__).resolve().parent.parent / "SOUL.md"
 BELIEFS_PATH = Path(__file__).resolve().parent.parent / "data" / "beliefs.json"
 
+# ── SOUL INJECTION GUARD — anti-prompt-injection assertion ───────────────────────
+# At import time, verify SOUL.md contains "Legion" identity marker.
+# This detects any attempt to tamper with or replace the soul file.
+
+
+def _assert_soul_injection() -> None:
+    """Assert that SOUL.md contains the 'Legion' identity marker.
+
+    This is a security check: if the file has been tampered with to remove
+    the identity marker, the bot refuses to start.
+    """
+    if not _SOUL_ENABLED:
+        return
+    try:
+        content = SOUL_PATH.read_text(encoding="utf-8")
+        assert "Legion" in content[:500], (
+            "SOUL INJECTION FAILED — 'Legion' not found in first 500 chars of SOUL.md. "
+            "The soul file may have been tampered with. Bot refuses to start."
+        )
+    except FileNotFoundError:
+        logger.debug("[SoulEngine] SOUL.md not found — skipping injection assertion")
+    except AssertionError:
+        logger.critical("SOUL INJECTION FAILED — 'Legion' not found in SOUL.md. Bot refusing to start.")
+        raise
+    except Exception as exc:
+        logger.warning("[SoulEngine] SOUL injection assertion skipped: %s", exc)
+
+
+_assert_soul_injection()
+
 # ── Cache for SOUL.md content (5-min TTL) ─────────────────────────────────────
 
 _SOUL_CACHE_TTL = 300  # 5 minutes
@@ -407,3 +437,16 @@ def build_soul_context() -> str:
     Legacy context builder — calls enhanced version with defaults.
     """
     return build_enhanced_soul_context()
+
+
+# ── Alias for API compatibility ──────────────────────────────────────────────
+
+
+def get_system_prompt() -> str:
+    """
+    Alias for build_soul_context() — returns the full soul context string.
+
+    This is the canonical entry point expected by system_prompt_builder.py
+    and other callers that need Legion's identity block.
+    """
+    return build_soul_context()

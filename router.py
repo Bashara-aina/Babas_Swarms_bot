@@ -18,11 +18,10 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# ── Re-export everything from agents.py (single source of truth) ────────────
 _agents_file = Path(__file__).with_name("agents.py")
 _spec = importlib.util.spec_from_file_location("agents_single_source", _agents_file)
 if _spec is None or _spec.loader is None:
-  raise ImportError(f"Unable to load agents module from {_agents_file}")
+    raise ImportError(f"Unable to load agents module from {_agents_file}")
 
 _agents_module = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = _agents_module
@@ -43,7 +42,6 @@ PERSONALITY_WRAPPER = _agents_module.PERSONALITY_WRAPPER
 detect_agent = _agents_module.detect_agent
 get_model = _agents_module.get_model
 get_fallback_chain = _agents_module.get_fallback_chain
-build_system_prompt = _agents_module.build_system_prompt
 list_agents = _agents_module.list_agents
 list_all_departments = _agents_module.list_all_departments
 add_to_thread = _agents_module.add_to_thread
@@ -56,15 +54,37 @@ get_conversation_history = _agents_module.get_conversation_history
 clear_conversation = _agents_module.clear_conversation
 get_conversation_summary_prompt = _agents_module.get_conversation_summary_prompt
 
+try:
+    from agents import build_system_prompt
+except ImportError:
+    logger.warning("build_system_prompt not available from agents package")
+    build_system_prompt = None
+
 __all__ = [
-  "AGENT_MODELS", "AGENT_REGISTRY", "FALLBACK_CHAIN", "TASK_KEYWORDS", "DEFAULT_AGENT",
-    "ACTIVE_THREADS", "CONVERSATION_HISTORY",
-    "DEBATE_PERSONAS", "DEBATE_PERSONA_MODELS",
-    "DEBATE_ICONS", "PERSONALITY_WRAPPER",
-    "detect_agent", "get_model", "get_fallback_chain", "build_system_prompt",
-    "list_agents", "list_all_departments",
-    "add_to_thread", "get_thread_context", "list_threads",
-    "list_threads_raw", "clear_thread",
-    "add_to_conversation", "get_conversation_history",
-    "clear_conversation", "get_conversation_summary_prompt",
+    "AGENT_MODELS",
+    "AGENT_REGISTRY",
+    "FALLBACK_CHAIN",
+    "TASK_KEYWORDS",
+    "DEFAULT_AGENT",
+    "ACTIVE_THREADS",
+    "CONVERSATION_HISTORY",
+    "DEBATE_PERSONAS",
+    "DEBATE_PERSONA_MODELS",
+    "DEBATE_ICONS",
+    "PERSONALITY_WRAPPER",
+    "detect_agent",
+    "get_model",
+    "get_fallback_chain",
+    "build_system_prompt",
+    "list_agents",
+    "list_all_departments",
+    "add_to_thread",
+    "get_thread_context",
+    "list_threads",
+    "list_threads_raw",
+    "clear_thread",
+    "add_to_conversation",
+    "get_conversation_history",
+    "clear_conversation",
+    "get_conversation_summary_prompt",
 ]

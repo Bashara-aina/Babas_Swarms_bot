@@ -15,32 +15,20 @@ from __future__ import annotations
 import logging
 
 from core.agent_registry import (
+    _LEGACY_AGENT_MODELS,
     AGENT_REGISTRY,
+    DEBATE_ICONS,
+    DEBATE_PERSONA_MODELS,
+    DEBATE_PERSONAS,
     DEFAULT_AGENT,
     FALLBACK_CHAIN,
     LEGACY_TASK_KEYWORDS,
     PERSONA_WRAPPER,
     TASK_KEYWORDS,
-    _LEGACY_AGENT_MODELS,
     detect_agent,
     get_fallback_chain,
     get_model,
 )
-
-logger = logging.getLogger(__name__)
-
-# ── Re-export from core.agent_registry (single source of truth) ───────────────
-# AGENT_MODELS: {agent_key: primary_model} — mirrors old agents.py AGENT_MODELS
-AGENT_MODELS = _LEGACY_AGENT_MODELS.copy()
-
-# Alias for backwards compat
-PERSONALITY_WRAPPER = PERSONA_WRAPPER
-
-# Pull DEBATE_* from core.agent_registry (loaded from personality.yaml there)
-from core.agent_registry import DEBATE_PERSONAS, DEBATE_PERSONA_MODELS, DEBATE_ICONS
-
-# ── Conversation interface (shared state with llm_client/router) ───────────────
-# All conversation state and thread memory now live in core.conversation_interface
 from core.conversation_interface import (
     ACTIVE_THREADS,
     CONVERSATION_HISTORY,
@@ -54,22 +42,29 @@ from core.conversation_interface import (
     list_threads,
     list_threads_raw,
 )
+from core.conversation_interface import (
+    detect_agent as detect_agent,
+)
+from core.conversation_interface import (
+    get_fallback_chain as get_fallback_chain,
+)
 
-# Re-export for backwards compat (detect_agent/get_fallback_chain are from core.agent_registry)
-from core.conversation_interface import detect_agent as detect_agent
-from core.conversation_interface import get_fallback_chain as get_fallback_chain
+logger = logging.getLogger(__name__)
 
-# ── Build system prompt ────────────────────────────────────────────────────────
+# ── Re-export from core.agent_registry (single source of truth) ───────────────
+AGENT_MODELS = _LEGACY_AGENT_MODELS.copy()
+
+PERSONALITY_WRAPPER = PERSONA_WRAPPER
 
 
 def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
-    parts = [PERSONALITY_WRAPPER.strip()]
-    if user_id:
-        ctx = get_conversation_summary_prompt(user_id)
-        if ctx:
-            parts.append(ctx)
-    parts.append(role_prompt)
-    return "\n\n".join(parts)
+    """Legacy compat stub — prepends personality wrapper to a role prompt.
+
+    Real implementation lives in ``agents/__init__.py`` (the package).
+    This stub satisfies the ``router.py`` re-export path.
+    """
+    wrapper = PERSONA_WRAPPER.strip() if PERSONA_WRAPPER else ""
+    return f"{wrapper}\n\n{role_prompt}" if wrapper else role_prompt
 
 
 # ── List agents/departments ───────────────────────────────────────────────────

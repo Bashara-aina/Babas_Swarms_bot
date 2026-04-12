@@ -28,18 +28,23 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import signal
 import subprocess
 import sys
 import time
+from contextvars import copy_context
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 from urllib import error as urlerror
 from urllib import request as urlrequest
+from uuid import uuid4
 
 from aiogram import BaseMiddleware, Bot, Dispatcher
 from aiogram.types import BotCommand, Message
 from dotenv import load_dotenv
+
+from core.log_config import set_request_id
 
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env")
@@ -54,7 +59,7 @@ import computer_agent
 import handlers
 import handlers.shared as _shared
 from handlers import register_all_routers
-from llm_client import verify_api_keys
+from llm_client import verify_api_keys, init_humanization_layer
 from core.daily_harvester.scheduler import DailyHarvesterScheduler
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
 from core.observability import init_observability
@@ -77,13 +82,18 @@ logger = logging.getLogger(__name__)
 
 
 def _trim_log_text(value: Any, limit: int = 1200) -> str:
+    """Truncate value to limit chars for log safety. Returns string."""
     text = "" if value is None else str(value)
     text = text.replace("\n", "\\n").replace("\r", "")
     return text[:limit] + ("…" if len(text) > limit else "")
 
 
 class ActivityLogMiddleware(BaseMiddleware):
-    """Logs all inbound Telegram messages for observability."""
+    """Logs all inbound Telegram messages for observability.
+
+    Generates a short UUID request_id (8 hex chars) and propagates it via contextvars
+    so all downstream async calls include it in log entries.
+    """
 
     async def __call__(
         self,
@@ -91,13 +101,17 @@ class ActivityLogMiddleware(BaseMiddleware):
         event: Message,
         data: dict[str, Any],
     ) -> Any:
+        request_id = uuid4().hex[:8]
+        ctx = copy_context()
+        token = set_request_id(request_id)
         try:
             user_id = event.from_user.id if event.from_user else None
             username = event.from_user.username if event.from_user else None
             chat_id = event.chat.id if event.chat else None
             text = event.text or event.caption or ""
             logger.info(
-                "[IN][chat=%s][user=%s|@%s] %s",
+                "[IN][request_id=%s][chat=%s][user=%s|@%s] %s",
+                request_id,
                 chat_id,
                 user_id,
                 username,
@@ -113,7 +127,10 @@ class ActivityLogMiddleware(BaseMiddleware):
                 _sh._last_user_message_ts = time.time()
         except Exception:
             pass
-        return await handler(event, data)
+        try:
+            return await handler(event, data)
+        finally:
+            set_request_id("")  # clear after request
 
 
 def _install_outbound_logging(bot: Bot) -> None:
@@ -161,6 +178,184 @@ def _install_outbound_logging(bot: Bot) -> None:
     bot.edit_message_text = edit_message_text_logged  # type: ignore[assignment]
     bot.send_photo = send_photo_logged  # type: ignore[assignment]
     logger.info("Activity outbound logging hooks installed (send/edit/photo)")
+
+
+# ── Graceful Shutdown ─────────────────────────────────────────────────────────
+_shutdown_flag = False
+
+
+def _handle_signal(sig: int, frame) -> None:
+    """Handle SIGTERM/SIGINT — set flag for graceful shutdown."""
+    global _shutdown_flag
+    if _shutdown_flag:
+        return
+    _shutdown_flag = True
+    logger.warning("Received signal %d — graceful shutdown initiated", sig)
+
+
+signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, _handle_signal)
+
+
+# ── LEGION BOOT Subsystem Health Checks ───────────────────────────────────────
+
+
+async def _probe_telegram(bot: Bot) -> tuple[bool, str]:
+    """Check Telegram API connection by fetching Me."""
+    try:
+        me = await bot.get_me()
+        return True, f"@{me.username}"
+    except Exception as e:
+        return False, str(e)[:80]
+
+
+async def _probe_llm() -> tuple[bool, str]:
+    """Ping primary LLM with a lightweight call to verify connectivity."""
+    try:
+        import litellm
+
+        primary = os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
+        result = await litellm.acompletion(
+            model=primary,
+            messages=[{"role": "user", "content": "ping"}],
+            max_tokens=2,
+        )
+        return True, primary
+    except Exception as e:
+        return False, str(e)[:80]
+
+
+async def _probe_chromadb() -> tuple[bool, str]:
+    """Check ChromaDB availability. Warns but doesn't fail."""
+    try:
+        import chromadb
+
+        client = chromadb.Client()
+        client.heartbeat()
+        return True, "connected"
+    except Exception as e:
+        return False, f"unavailable ({e})"
+
+
+async def _probe_wiki() -> tuple[bool, str]:
+    """Check .wiki/ directory is readable and count documents."""
+    try:
+        wiki_path = Path(".wiki")
+        if not wiki_path.exists():
+            return False, "not found"
+        docs = [d for d in wiki_path.rglob("*.md") if "_quarantine" not in str(d) and "_archive" not in str(d)]
+        return True, f"{len(docs)} documents loaded"
+    except Exception as e:
+        return False, f"error: {e}"
+
+
+async def _probe_data_writable() -> tuple[bool, str]:
+    """Check data/ directory is writable."""
+    try:
+        data_path = Path("data")
+        data_path.mkdir(exist_ok=True)
+        test_file = data_path / ".health_check_write_test"
+        test_file.write_text("ok")
+        test_file.unlink()
+        return True, "writable"
+    except Exception as e:
+        return False, f"not writable ({e})"
+
+
+async def _probe_voicevox() -> tuple[bool, str]:
+    """Check VoiceVox engine availability. Warns but doesn't fail."""
+    try:
+        from bridges.voicevox_bridge import VoiceVoxBridge
+
+        bridge = VoiceVoxBridge()
+        available = await bridge._check_voicevox()
+        if available:
+            return True, "running"
+        return False, "not running (voice mode disabled)"
+    except Exception:
+        return False, "not installed (voice mode disabled)"
+
+
+async def _probe_duckduckgo() -> tuple[bool, str]:
+    """Test DuckDuckGo search returns actual content."""
+    try:
+        from duckduckgo_search import DDGS
+
+        result = await asyncio.wait_for(
+            asyncio.to_thread(lambda: list(DDGS().text("test", max_results=1))),
+            timeout=10.0,
+        )
+        return (True, "OK") if result else (False, "empty response")
+    except ImportError:
+        return False, "duckduckgo-search not installed"
+    except Exception as e:
+        return False, f"error: {e}"
+
+
+async def run_legion_boot_health(bot: Bot) -> dict[str, dict[str, str]]:
+    """Run full startup health check across all subsystems."""
+    results: dict[str, dict[str, str]] = {}
+
+    telegram_ok, telegram_detail = await _probe_telegram(bot)
+    llm_ok, llm_detail = await _probe_llm()
+    chroma_ok, chroma_detail = await _probe_chromadb()
+    wiki_ok, wiki_detail = await _probe_wiki()
+    data_ok, data_detail = await _probe_data_writable()
+    voicevox_ok, voicevox_detail = await _probe_voicevox()
+    ddg_ok, ddg_detail = await _probe_duckduckgo()
+
+    results["telegram"] = {"ok": telegram_ok, "detail": telegram_detail}
+    results["llm"] = {"ok": llm_ok, "detail": llm_detail}
+    results["chromadb"] = {"ok": chroma_ok, "detail": chroma_detail}
+    results["wiki"] = {"ok": wiki_ok, "detail": wiki_detail}
+    results["data"] = {"ok": data_ok, "detail": data_detail}
+    results["voicevox"] = {"ok": voicevox_ok, "detail": voicevox_detail}
+    results["duckduckgo"] = {"ok": ddg_ok, "detail": ddg_detail}
+
+    return results
+
+
+def print_legion_boot_report(results: dict[str, dict[str, str]]) -> None:
+    """Print the LEGION BOOT startup report in the specified format."""
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n🚀 LEGION BOOT — {ts}")
+
+    checks = [
+        ("telegram", "Telegram", None),
+        ("llm", "LLM", None),
+        ("chromadb", "ChromaDB", "unavailable (memory degraded)"),
+        ("wiki", "Wiki", None),
+        ("data", "Data", None),
+        ("voicevox", "VoiceVox", "not running (voice mode disabled)"),
+        ("duckduckgo", "Search", None),
+    ]
+
+    degraded: list[str] = []
+    for key, label, degrade_msg in checks:
+        entry = results.get(key, {"ok": False, "detail": "unknown"})
+        ok = entry["ok"]
+        detail = entry["detail"]
+
+        if ok:
+            icon = "✅"
+        else:
+            icon = "⚠️"
+
+        if key == "chromadb" and not ok:
+            print(f"{icon} {label}: {degrade_msg}")
+            degraded.append("memory")
+        elif key == "voicevox" and not ok:
+            print(f"{icon} {label}: {degrade_msg}")
+            degraded.append("voice")
+        elif key == "llm" and ok:
+            print(f"{icon} {label}: {detail}")
+        elif key == "wiki" and ok:
+            print(f"{icon} {label}: {detail}")
+        else:
+            print(f"{icon} {label}: {detail}")
+
+    degraded_str = ", ".join(degraded) if degraded else "none"
+    print(f"Legion ready. Degraded mode: {degraded_str}.")
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -357,23 +552,32 @@ async def _run_group_a_startup(bot: Bot) -> None:
                 except Exception:
                     return 0.0
 
-            asyncio.create_task(run_curiosity_loop(_curiosity_notify, _get_last_user_ts))
+            task = asyncio.create_task(run_curiosity_loop(_curiosity_notify, _get_last_user_ts))
+            task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
             logger.info("Curiosity engine started")
         except Exception as e:
             logger.warning("Curiosity engine init failed (non-fatal): %s", e)
 
     async def _start_voice_prewarm() -> None:
         try:
-            from tools.voice_engine import run_prewarm
+            from tools.voice_engine import prewarm
 
-            await run_prewarm()
+            await prewarm()
             logger.info("Voice engine pre-warmed")
         except Exception as e:
             logger.warning("Voice prewarm failed (non-fatal): %s", e)
 
     async def _start_gemma4_prep() -> None:
         try:
-            agents_registry.ensure_gemma4_local_available()
+            import importlib.util
+
+            spec = importlib.util.spec_from_file_location("agents_root", Path(__file__).parent / "agents.py")
+            if spec and spec.loader:
+                agents_root = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(agents_root)
+                agents_root.ensure_gemma4_local_available()
+        except Exception as e:
+            logger.warning("gemma4 local prep failed (non-fatal): %s", e)
         except Exception as e:
             logger.warning("gemma4 local prep failed (non-fatal): %s", e)
 
@@ -436,8 +640,46 @@ async def _run_group_a_startup(bot: Bot) -> None:
 
 
 async def on_startup(bot: Bot) -> None:
+    """Initializes bot, registers routers, starts background daemons.
+
+    Called by aiogram when the bot starts. Sets up:
+    - Skills registry
+    - Schedulers (daily briefing, nightly capability, memory consolidation, GitHub intel)
+    - Heartbeat daemon
+    - Persistence and memory DBs
+    - Session transcript store
+    - swarms_bot enterprise layer (via core/swarm.py)
+    - Webhook server (core/webhooks/)
+    - MCP manager (core/mcp/)
+    - Sidecar processes (ruflo, opencode)
+    All initializations are wrapped in try/except — failures are non-fatal.
+    """
+    # Store bot reference in shared state for cross-module access
+    _shared._bot = bot
+
+    # Import and initialize skills registry
+    try:
+        from core.skills import get_skill_registry
+
+        _ = get_skill_registry()  # triggers module-level registration
+        skill_count = len(get_skill_registry().list_all())
+        logger.info("Skills registry initialized (%d skills)", skill_count)
+    except Exception as e:
+        logger.warning("Skills registry init failed (non-fatal): %s", e)
+
     # Group A: Run all independent tasks in parallel
     await _run_group_a_startup(bot)
+
+    # Heartbeat daemon (proactive health monitoring during active hours)
+    try:
+        from core.heartbeat.daemon import _heartbeat
+
+        asyncio.create_task(_heartbeat.start(bot, ALLOWED_USER_ID)).add_done_callback(
+            lambda t: logger.error("Heartbeat daemon crashed: %s", t.exception()) if t.exception() else None
+        )
+        logger.info("Heartbeat daemon started (interval=%ds)", _heartbeat.interval // 60)
+    except Exception as e:
+        logger.warning("Heartbeat daemon init failed (non-fatal): %s", e)
 
     # Group B: Run sequentially after parallel tasks complete
     # Initialize persistence and scheduler
@@ -463,11 +705,15 @@ async def on_startup(bot: Bot) -> None:
 
     # Initialize persistent conversation history DB + cleanup old turns
     try:
-        from agents import _cleanup_old_turns, _init_conv_db
+        from core.conversation_interface import _cleanup_old_turns, _init_conv_db
 
         await _init_conv_db()
-        asyncio.create_task(_cleanup_old_turns())
+        asyncio.create_task(_cleanup_old_turns()).add_done_callback(
+            lambda t: logger.error("Cleanup old turns crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Conversation history DB initialized (SQLite-backed)")
+    except Exception as e:
+        logger.warning("Conversation history DB init failed (non-fatal): %s", e)
 
     # Initialize session transcript store (U1 — SQLite-backed, separate from conversation history)
     try:
@@ -478,27 +724,37 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Session transcript store initialized")
     except Exception as e:
         logger.warning("Session transcript store init failed (non-fatal): %s", e)
-    except Exception as e:
-        logger.warning("Conversation history DB init failed (non-fatal): %s", e)
 
     # Group C: Fire-and-forget tasks (already using create_task — no changes needed)
     # Bootstrap Supabase skill file from live schema (non-blocking)
-    asyncio.create_task(_bootstrap_supabase_skill())
+    asyncio.create_task(_bootstrap_supabase_skill()).add_done_callback(
+        lambda t: logger.error("Bootstrap supabase skill crashed: %s", t.exception()) if t.exception() else None
+    )
 
-    # Schedule daily briefing at 7:30 AM
-    try:
-        from tools.briefing import schedule_daily_briefing
-
-        asyncio.create_task(schedule_daily_briefing(bot, ALLOWED_USER_ID, hour=7, minute=30))
-        logger.info("Daily briefing scheduled for 07:30")
-    except Exception as e:
-        logger.warning("Briefing schedule failed (non-fatal): %s", e)
+    # Schedule daily briefing at 7:30 AM via tools/briefing.py
+    # NOTE: ProactiveScheduler in core/proactive/scheduler.py ALSO fires a briefing at DAILY_BRIEFING_HOUR (default 8AM).
+    # This creates duplicate briefings. For now, let ProactiveScheduler handle it (8AM) and disable this one.
+    # TODO: Consolidate into single briefing mechanism — see ADR-006
+    FEATURE_BRIEFING_CONSOLIDATION_ENABLED = False  # Planned: v2.0
+    if not FEATURE_BRIEFING_CONSOLIDATION_ENABLED:
+        logger.info("Briefing consolidation is planned for v2.0 — not yet available.")
+    # try:
+    #     from tools.briefing import schedule_daily_briefing
+    #
+    #     asyncio.create_task(schedule_daily_briefing(bot, ALLOWED_USER_ID, hour=7, minute=30))
+    #     logger.info("Daily briefing scheduled for 07:30")
+    # except Exception as e:
+    #     logger.warning("Briefing schedule failed (non-fatal): %s", e)
 
     # Schedule nightly capability regression at 03:40 AM
     try:
         from tools.capability_nightly import schedule_nightly_capability_report
 
-        asyncio.create_task(schedule_nightly_capability_report(bot, ALLOWED_USER_ID, hour=3, minute=40))
+        asyncio.create_task(
+            schedule_nightly_capability_report(bot, ALLOWED_USER_ID, hour=3, minute=40)
+        ).add_done_callback(
+            lambda t: logger.error("Nightly capability report crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Nightly capability regression scheduled for 03:40")
     except Exception as e:
         logger.warning("Nightly capability schedule failed (non-fatal): %s", e)
@@ -534,7 +790,9 @@ async def on_startup(bot: Bot) -> None:
                     logger.warning("Memory consolidation failed: %s", _ce)
                 await asyncio.sleep(60)
 
-        asyncio.create_task(_run_memory_consolidation_nightly())
+        asyncio.create_task(_run_memory_consolidation_nightly()).add_done_callback(
+            lambda t: logger.error("Memory consolidation nightly crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Nightly memory consolidation scheduled for 02:00")
     except Exception as e:
         logger.warning("Memory consolidation schedule failed (non-fatal): %s", e)
@@ -576,7 +834,9 @@ async def on_startup(bot: Bot) -> None:
                     logger.warning("GitHub intel daily scan failed: %s", _ge)
                 await asyncio.sleep(60)
 
-        asyncio.create_task(_run_github_intel_daily())
+        asyncio.create_task(_run_github_intel_daily()).add_done_callback(
+            lambda t: logger.error("GitHub intel daily crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Daily GitHub intel scheduled for 09:00")
     except Exception as e:
         logger.warning("GitHub intel schedule failed (non-fatal): %s", e)
@@ -585,7 +845,9 @@ async def on_startup(bot: Bot) -> None:
     try:
         from tools.proactive_initiator import start_proactive_initiator
 
-        asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID))
+        asyncio.create_task(start_proactive_initiator(bot, ALLOWED_USER_ID)).add_done_callback(
+            lambda t: logger.error("Proactive initiator crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Proactive initiator started (Legion talks first)")
     except Exception as e:
         logger.warning("Proactive initiator init failed (non-fatal): %s", e)
@@ -598,7 +860,9 @@ async def on_startup(bot: Bot) -> None:
             await bot.send_message(chat_id=int(os.getenv("ALLOWED_USER_ID")), text=text, parse_mode="Markdown")
 
         register_sender(_legion_proactive_send)
-        asyncio.create_task(run_proactive_loop())
+        asyncio.create_task(run_proactive_loop()).add_done_callback(
+            lambda t: logger.error("Proactive engine loop crashed: %s", t.exception()) if t.exception() else None
+        )
         logger.info("Proactive engine started (site/GPU/thesis monitoring)")
     except Exception as e:
         logger.warning("Proactive engine init failed (non-fatal): %s", e)
@@ -615,7 +879,11 @@ async def on_startup(bot: Bot) -> None:
                 from bridges.screenpipe_bridge import ScreenpipeBridge
 
                 _sp_bridge = ScreenpipeBridge(bot, ALLOWED_USER_ID)
-                asyncio.create_task(_sp_bridge.monitor_loop())
+                asyncio.create_task(_sp_bridge.monitor_loop()).add_done_callback(
+                    lambda t: (
+                        logger.error("Screenpipe monitor loop crashed: %s", t.exception()) if t.exception() else None
+                    )
+                )
                 logger.info("Screenpipe proactive monitor started")
     except Exception as e:
         logger.warning("Screenpipe bridge init failed (non-fatal): %s", e)
@@ -661,37 +929,45 @@ async def on_startup(bot: Bot) -> None:
 
     # Initialize swarms_bot enterprise layer
     try:
-        from swarms_bot.audit.audit_logger import AuditLogger
-        from swarms_bot.evaluation.evaluator import AgentEvaluator
-        from swarms_bot.observability.cost_metrics import CostMetricsCollector
-        from swarms_bot.observability.logging_config import configure_structured_logging
-        from swarms_bot.orchestrator.chief_of_staff import ChiefOfStaff
-        from swarms_bot.routing.budget_manager import BudgetManager
-        from swarms_bot.routing.cost_router import CostAwareRouter
-        from swarms_bot.security.guard import SecurityGuard
-        from swarms_bot.sessions.session_manager import SessionManager
+        from core.swarm import init_swarm_layer
 
-        _shared._cost_router = CostAwareRouter()
-        _shared._budget_manager = BudgetManager()
-        _shared._security_guard = SecurityGuard()
-        _shared._audit_logger = AuditLogger()
-        _shared._evaluator = AgentEvaluator()
-        _shared._session_manager = SessionManager()
-        _shared._cost_metrics = CostMetricsCollector()
-
-        _shared._chief_of_staff = ChiefOfStaff(
-            budget_manager=_shared._budget_manager,
-            security_guard=_shared._security_guard,
-            audit_logger=_shared._audit_logger,
-            cost_metrics=_shared._cost_metrics,
-            cost_router=_shared._cost_router,
-            session_manager=_shared._session_manager,
-        )
-
-        configure_structured_logging()
-        logger.info("\u2705 swarms_bot enterprise layer initialized (with integrations)")
+        init_swarm_layer()
     except Exception as e:
         logger.warning("swarms_bot init failed (non-fatal): %s", e)
+
+    # HTTP health endpoint for uptime monitors (GET /health → 200 {"status": "ok"})
+    try:
+        from core.health import start_health_server
+
+        asyncio.create_task(start_health_server(port=8080)).add_done_callback(
+            lambda t: logger.error("Health server crashed: %s", t.exception()) if t.exception() else None
+        )
+        logger.info("Health endpoint scheduled on port 8080")
+    except Exception as e:
+        logger.warning("Health server init failed (non-fatal): %s", e)
+
+    # Webhook server (GitHub, system alerts, etc.)
+    try:
+        from core.webhooks import WEBHOOK_SERVER
+        from core.webhooks.handlers import github, system
+
+        WEBHOOK_SERVER.register("github", github.handle_github_pr_merged)
+        WEBHOOK_SERVER.register("system", system.handle_system_alert)
+        asyncio.create_task(WEBHOOK_SERVER.start()).add_done_callback(
+            lambda t: logger.error("Webhook server crashed: %s", t.exception()) if t.exception() else None
+        )
+        logger.info("Webhook server started on port %d", WEBHOOK_SERVER.port)
+    except Exception as e:
+        logger.warning("Webhook server init failed (non-fatal): %s", e)
+
+    # MCP servers (Brave, GitHub, Filesystem, Obsidian, Supabase, Browser)
+    try:
+        from core.mcp import MCP_MANAGER
+
+        await MCP_MANAGER.start_all()
+        logger.info("MCP manager started")
+    except Exception as e:
+        logger.warning("MCP manager init failed (non-fatal): %s", e)
 
     # fix: wrap set_my_commands in try/except — Telegram API slowness on startup
     # must not prevent the rest of the boot sequence from completing.
@@ -843,21 +1119,95 @@ async def on_startup(bot: Bot) -> None:
 
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
-    logger.info("Legion shutting down — cancelling %d tasks", len(asyncio.all_tasks()))
-    if _harvester_scheduler:
-        await _harvester_scheduler.stop()
+    """Graceful shutdown: stop accepting new messages, finish in-flight, flush, close."""
+    global _shutdown_flag
+    _shutdown_flag = True
+    logger.info("Legion shutting down gracefully — %d tasks running", len(asyncio.all_tasks()))
+
+    # 1. Stop accepting new messages (flag set)
+    logger.info("Shutdown step 1/5: new message acceptance disabled")
+
+    # 2. Finish processing in-flight (wait up to 10s)
+    logger.info("Shutdown step 2/5: waiting for in-flight tasks (max 10s)")
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-    for task in tasks:
-        task.cancel()
     if tasks:
+        for task in tasks:
+            task.cancel()
         await asyncio.wait(tasks, timeout=10.0)
-    logger.info("Legion shutdown complete")
+
+    # 3. Flush memory writes
+    logger.info("Shutdown step 3/5: flushing memory writes")
+    try:
+        from tools.persistence import get_engine
+
+        engine = get_engine()
+        if engine:
+            engine.flush()
+    except Exception:
+        pass
+
+    # 4. Close DB connections
+    logger.info("Shutdown step 4/5: closing DB connections")
+    try:
+        if _harvester_scheduler:
+            await _harvester_scheduler.stop()
+    except Exception:
+        pass
+    try:
+        from core.mcp import MCP_MANAGER
+
+        await MCP_MANAGER.stop_all()
+    except Exception:
+        pass
+    try:
+        from tools.memory import close_memory_db
+
+        close_memory_db()
+    except Exception:
+        pass
+    try:
+        from tools.agentops_client import end_session
+
+        end_session()
+    except Exception:
+        pass
+    try:
+        from core.memory.memory_manager import get_memory
+
+        mem = get_memory()
+        mem.close()
+    except Exception:
+        pass
+
+    # 5. Log shutdown
+    logger.info("Shutdown step 5/5: shutdown complete")
+    logger.info("Legion shutdown complete — exiting cleanly")
 
 
 async def main() -> None:
+    # LEGION BOOT — full subsystem health check
+    boot_health = await run_legion_boot_health(bot)
+    print_legion_boot_report(boot_health)
+
+    # Legacy health check (feature flags)
     health = run_health_check()
     print_health_report(health)
     _shared.FEATURE_FLAGS = FEATURE_FLAGS
+
+    # Environment validation
+    _required = ["TELEGRAM_BOT_TOKEN"]
+    _missing_req = [k for k in _required if not os.getenv(k)]
+    _optional_warn = []
+    for _opt in ["SUPABASE_URL", "CHROMADB_HOST", "ADMIN_USER_IDS"]:
+        if not os.getenv(_opt):
+            _optional_warn.append(_opt)
+
+    if _missing_req:
+        logger.critical("Missing required env vars: %s — exiting.", _missing_req)
+        sys.exit(1)
+    if _optional_warn:
+        logger.warning("Missing optional env vars (functionality may be limited): %s", _optional_warn)
+
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     await dp.start_polling(bot, skip_updates=True)

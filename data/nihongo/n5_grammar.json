@@ -1,0 +1,169 @@
+{
+  "grammar_patterns": [
+    {
+      "id": 1,
+      "pattern": "は",
+      "romaji": "wa",
+      "usage": "topik marker",
+      "explanation": "は (wa) adalah partikel topik yang menandai apa yang dibicarakan.",
+      "example": "私は学生です。",
+      "example_reading": "わたしはがくせいです",
+      "example_meaning": "Saya adalah mahasiswa.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 2,
+      "pattern": "が",
+      "romaji": "ga",
+      "usage": "subjek marker",
+      "explanation": "が (ga) menandai subjek dalam kalimat.",
+      "example": "私が学生です。",
+      "example_reading": "わたしががくせいです",
+      "example_meaning": "Saya yang mahasiswa.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 3,
+      "pattern": "を",
+      "romaji": "wo/o",
+      "usage": "objek langsung",
+      "explanation": "を (wo/o) menandai objek dari kata kerja.",
+      "example": "水を飲みます。",
+      "example_reading": "みずをのみます",
+      "example_meaning": "(Saya) minum air.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 4,
+      "pattern": "に",
+      "romaji": "ni",
+      "usage": "arah, tujuan, waktu",
+      "explanation": "に (ni) menandai arah, tujuan, atau waktu tertentu.",
+      "example": "大学に行きます。",
+      "example_reading": "だいがくにいきます",
+      "example_meaning": "(Saya) pergi ke universitas.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 5,
+      "pattern": "で",
+      "romaji": "de",
+      "usage": "tempat, alat, alasan",
+      "explanation": "で (de) menandai tempat kejadian, alat transportasi, atau alasan.",
+      "example": "バスで行きます。",
+      "example_reading": "バスでいきます",
+      "example_meaning": "(Saya) pergi dengan bus.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 6,
+      "pattern": "と",
+      "romaji": "to",
+      "usage": "dan, dengan",
+      "explanation": "と (to) menghubungkan kata benda (dan/dengan).",
+      "example": "友達と話します。",
+      "example_reading": "ともだちとはなします",
+      "example_meaning": "(Saya) bicara dengan teman.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 7,
+      "pattern": "から",
+      "romaji": "kara",
+      "usage": "karena, dari",
+      "explanation": "から (kara) berarti 'karena' atau 'dari'.",
+      "example": "忙しいから行れません。",
+      "example_reading": "いそがしいからいれません",
+      "example_meaning": "Karena sibuk, tidak bisa pergi.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 8,
+      "pattern": "まで",
+      "romaji": "made",
+      "usage": "sampai",
+      "explanation": "まで (made) berarti 'sampai' (waktu/tempat).",
+      "example": "5時まで勉強します。",
+      "example_reading": "ごじまでべんきょうします",
+      "example_meaning": "(Saya) belajar sampai jam 5.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 9,
+      "pattern": "も",
+      "romaji": "mo",
+      "usage": "juga",
+      "explanation": "も (mo) berarti 'juga' menggantikan は.",
+      "example": "私も学生です。",
+      "example_reading": "わたしがくせいです",
+      "example_meaning": "Saya juga mahasiswa.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 10,
+      "pattern": "ね",
+      "romaji": "ne",
+      "usage": "konfirmasi, minta setuju",
+      "explanation": "ね (ne) di akhir kalimat untuk minta persetujuan.",
+      "example": "美味しいですね。",
+      "example_reading": "おいしいですね",
+      "example_meaning": "Enak ya (kan)?",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 11,
+      "pattern": "よ",
+      "romaji": "yo",
+      "usage": "penegasan",
+      "explanation": "よ (yo) di akhir kalimat untuk menekankan.",
+      "example": "明日来ますよ。",
+      "example_reading": "あしたきますよ",
+      "example_meaning": "(Saya) akan datang besok lho.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 12,
+      "pattern": "か",
+      "romaji": "ka",
+      "usage": "tanda tanya",
+      "explanation": "か (ka) di akhir kalimat mengubahnya menjadi pertanyaan.",
+      "example": "何をしますか。",
+      "example_reading": "なにをしますか",
+      "example_meaning": "Apa yang dilakukan?",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 13,
+      "pattern": "ですが",
+      "romaji": "desu ga",
+      "usage": "tetapi",
+      "explanation": "ですが (desu ga) berarti 'tetapi' / 'namun'.",
+      "example": "行きたいですが、忙しいです。",
+      "example_reading": "いきたですが、いそがしいです",
+      "example_meaning": "Mau pergi, tapi sibuk.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 14,
+      "pattern": "ましょう",
+      "romaji": "mashou",
+      "usage": "ajakan",
+      "explanation": "ましょう (mashou) di akhir kata kerja untuk ajakan.",
+      "example": "一緒に食べましょう。",
+      "example_reading": "いっしょに食べましょう",
+      "example_meaning": "Mari makan bersama.",
+      "jlpt_level": "N5"
+    },
+    {
+      "id": 15,
+      "pattern": "たい",
+      "romaji": "tai",
+      "usage": "ingin",
+      "explanation": "たい (tai) setelah kata kerja untuk menyatakan keinginan.",
+      "example": "水が飲みたいです。",
+      "example_reading": "みずがのみたいです",
+      "example_meaning": "(Saya) ingin minum air.",
+      "jlpt_level": "N5"
+    }
+  ]
+}

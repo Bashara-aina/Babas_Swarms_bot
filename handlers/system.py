@@ -1,4 +1,5 @@
 """System info handlers: /status /gpu /keys /models /resources."""
+
 from __future__ import annotations
 
 import asyncio
@@ -73,6 +74,7 @@ async def _build_home_panel(msg: Message) -> str:
 
     try:
         from tools.resource_monitor import get_resource_snapshot
+
         snap = await get_resource_snapshot(force=True)
         lines.insert(3, f"🧠 RAM free: <code>{snap.ram_free_gb:.1f}GB</code>")
     except Exception:
@@ -83,6 +85,7 @@ async def _build_home_panel(msg: Message) -> str:
 
 async def _build_agents_panel() -> str:
     import router as agents
+
     lines = ["<b>🤖 Agent Universe</b>"]
     models = getattr(agents, "AGENT_MODELS", {}) or {}
     lines.append(f"Total configured agents: <b>{len(models)}</b>")
@@ -249,6 +252,7 @@ async def _build_visual_summary(msg: Message) -> str:
 
     try:
         from tools.resource_monitor import get_resource_snapshot
+
         snap = await get_resource_snapshot(force=True)
         ram_pct = max(0.0, min(100.0, (1.0 - (snap.ram_free_gb / max(snap.ram_total_gb, 0.1))) * 100.0))
         lines.append(f"🧠 RAM usage  {_bar(ram_pct)}")
@@ -330,22 +334,92 @@ async def cmd_visualize(msg: Message) -> None:
 
 
 # ── /status ───────────────────────────────────────────────────────────────────
+def _feature_flags_block() -> str:
+    """Build a feature flags display block for /status."""
+    lines = ["", "<b>🔧 Feature Flags</b>"]
+
+    # Planned features (explicit FF flags in codebase)
+    planned_flags = [
+        ("FEATURE_GIT_LOG_ANALYSIS_ENABLED", "Git log analysis"),
+        ("FEATURE_BRIEFING_CONSOLIDATION_ENABLED", "Briefing consolidation"),
+        ("FEATURE_WEB_SEARCH_ENABLED", "Web search integration"),
+        ("FEATURE_TOPIC_WEIGHTS_ENABLED", "Topic weights engine"),
+    ]
+    for flag_name, label in planned_flags:
+        # Check if the flag exists and is True
+        import os as _os
+
+        enabled = _os.getenv(flag_name, "").strip().lower() in ("1", "true", "yes", "on")
+        icon = "✅" if enabled else "🔇"
+        status = "ON" if enabled else "OFF (v2.0)"
+        lines.append(f"{icon} <code>{flag_name}</code> — {label} [{status}]")
+
+    # Health check flags (conditional dependencies)
+    lines.append("")
+    lines.append("<b>📦 Conditional Features</b>")
+    try:
+        from core.health_check import FEATURE_FLAGS, run_health_check
+
+        results = run_health_check()
+        for feat, data in FEATURE_FLAGS.items():
+            available = data.get("enabled", False)
+            reason = results.get(feat, {}).get("reason", "OK")
+            icon = "✅" if available else "⚠️"
+            lines.append(f"{icon} <code>{feat}</code> — {reason[:40]}")
+        # Show archived features as 🔇
+        from core.health_check import _ARCHIVED_FEATURES
+
+        for feat, data in _ARCHIVED_FEATURES.items():
+            lines.append(f"🔇 <code>{feat}</code> — archived")
+    except Exception:
+        lines.append("⚠️ Could not load feature flags")
+
+    # Optional external services
+    lines.append("")
+    lines.append("<b>🔗 External Services</b>")
+    _has_voicevox = False
+    try:
+        import importlib.util
+
+        _has_voicevox = importlib.util.find_spec("voicevox_core") is not None
+    except Exception:
+        pass
+    icon_vv = "✅" if _has_voicevox else "⚠️"
+    vv_status = "loaded" if _has_voicevox else "not installed"
+    lines.append(f"{icon_vv} <code>VOICEVOX</code> — {vv_status}")
+
+    _has_chromadb = False
+    try:
+        import chromadb
+
+        _has_chromadb = True
+    except Exception:
+        pass
+    icon_cdb = "✅" if _has_chromadb else "⚠️"
+    cdb_status = "connected" if _has_chromadb else "not connected"
+    lines.append(f"{icon_cdb} <code>CHROMADB</code> — {cdb_status}")
+
+    return "\n".join(lines)
+
+
 @router.message(Command("status"))
 @router.message(F.text == "\u2699\ufe0f Status")
 async def cmd_status(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    uptime_s  = int(time.time() - _start_time)
-    h, rem    = divmod(uptime_s, 3600)
-    m, s      = divmod(rem, 60)
-    uptime    = f"{h}h {m}m {s}s"
-    py_ver    = platform.python_version()
-    os_info   = f"{platform.system()} {platform.release()}"
+    uptime_s = int(time.time() - _start_time)
+    h, rem = divmod(uptime_s, 3600)
+    m, s = divmod(rem, 60)
+    uptime = f"{h}h {m}m {s}s"
+    py_ver = platform.python_version()
+    os_info = f"{platform.system()} {platform.release()}"
 
     key_block = _key_status()
+    feature_block = _feature_flags_block()
 
     try:
         from tools.resource_monitor import get_resource_snapshot
+
         snap = await get_resource_snapshot()
         local_line = (
             "\U0001f916 Ollama: \u2705 ready"
@@ -368,14 +442,112 @@ async def cmd_status(msg: Message) -> None:
         f"\U0001f40d Python: <code>{py_ver}</code>\n"
         f"\U0001f4bb OS: <code>{os_info}</code>\n"
         f"{resource_block}\n\n"
-        f"{key_block}"
+        f"{key_block}\n\n"
+        f"{feature_block}"
     )
     await msg.answer(text, parse_mode="HTML")
 
 
 @router.message(Command("stats"))
 async def cmd_stats(msg: Message) -> None:
-    await cmd_status(msg)
+    if not is_allowed(msg):
+        return
+    status_msg = await msg.answer("\U0001f4ca building stats\u2026")
+    try:
+        lines = ["<b>📊 Performance Metrics</b>", ""]
+
+        # ── LLM latency percentiles ──────────────────────────────────────────
+        try:
+            from core.observability import get_metrics_snapshot
+
+            data = get_metrics_snapshot()
+            if data:
+                all_latencies: list[float] = []
+                for provider, stats in data.items():
+                    calls = int(stats.get("calls", 0))
+                    total_lat = float(stats.get("latency_ms", 0.0))
+                    tokens = int(stats.get("tokens", 0))
+                    errors = int(stats.get("errors", 0))
+                    avg = total_lat / calls if calls else 0.0
+                    all_latencies.append(avg)
+                    lines.append(
+                        f"• <b>{provider}</b>: calls={calls}, tokens={tokens}, avg={avg:.0f}ms, errors={errors}"
+                    )
+                if all_latencies:
+                    sorted_lat = sorted(all_latencies)
+                    p50 = sorted_lat[len(sorted_lat) // 2]
+                    p95_idx = min(len(sorted_lat) - 1, int(len(sorted_lat) * 0.95))
+                    p99_idx = min(len(sorted_lat) - 1, int(len(sorted_lat) * 0.99))
+                    lines.append("")
+                    lines.append(
+                        f"LLM latency percentiles: p50=<b>{p50:.0f}ms</b>, "
+                        f"p95=<b>{sorted_lat[p95_idx]:.0f}ms</b>, "
+                        f"p99=<b>{sorted_lat[p99_idx]:.0f}ms</b>"
+                    )
+            else:
+                lines.append("No LLM metrics yet.")
+        except Exception as e:
+            lines.append(f"⚠️ LLM metrics error: <code>{html_mod.escape(str(e)[:100])}</code>")
+
+        # ── Token usage per session ────────────────────────────────────────────
+        try:
+            from core.observability import get_session_token_stats
+
+            token_stats = get_session_token_stats(str(msg.from_user.id if msg.from_user else 0))
+            if token_stats:
+                lines.append("")
+                lines.append(
+                    f"Token usage (session): in=<b>{token_stats.get('prompt_tokens', 0)}</b> "
+                    f"out=<b>{token_stats.get('completion_tokens', 0)}</b> "
+                    f"total=<b>{token_stats.get('total_tokens', 0)}</b>"
+                )
+            else:
+                lines.append("No token stats yet for this session.")
+        except Exception:
+            pass
+
+        # ── Circuit breaker state ─────────────────────────────────────────────
+        try:
+            from core.circuit_breaker import get_circuit_breakers
+
+            cbs = get_circuit_breakers()
+            if cbs:
+                lines.append("")
+                lines.append("<b>Circuit Breakers</b>")
+                for name, cb in cbs.items():
+                    lines.append(f"• <b>{name}</b>: <code>{cb.state.value}</code> (failures={cb._failure_count})")
+        except Exception as e:
+            lines.append(f"⚠️ circuit breaker error: <code>{html_mod.escape(str(e)[:100])}</code>")
+
+        # ── Memory tier counts ────────────────────────────────────────────────
+        try:
+            from core.memory_engine import MemoryEngine
+
+            me = MemoryEngine()
+            stats = me.get_stats()
+            wm = stats.get("working", {})
+            lines.append("")
+            lines.append("<b>Memory Tiers</b>")
+            lines.append(
+                f"• Working: buffer=<b>{wm.get('buffer_size', 0)}</b>, "
+                f"tokens=<b>{wm.get('total_tokens', 0)}</b>, "
+                f"summary=<b>{'yes' if wm.get('has_summary') else 'no'}</b>"
+            )
+            em = stats.get("episodic", {})
+            lines.append(f"• Episodic: db=<b>{'yes' if em.get('db_exists') else 'no'}</b>")
+            pm = stats.get("permanent", {})
+            lines.append(
+                f"• Permanent: collection=<b>{pm.get('collection', '?')}</b>, docs~<b>{pm.get('approx_count', 0)}</b>"
+            )
+        except Exception as e:
+            lines.append(f"⚠️ memory stats error: <code>{html_mod.escape(str(e)[:100])}</code>")
+
+        await status_msg.edit_text("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await status_msg.edit_text(
+            f"stats error: <code>{html_mod.escape(str(e)[:350])}</code>",
+            parse_mode="HTML",
+        )
 
 
 # ── /gpu ──────────────────────────────────────────────────────────────────────
@@ -386,12 +558,14 @@ async def cmd_gpu(msg: Message) -> None:
     status_msg = await msg.answer("\U0001f3ae checking GPU\u2026")
     try:
         from tools.resource_monitor import get_resource_snapshot, format_resource_html
+
         snap = await get_resource_snapshot(force=True)
         await status_msg.edit_text(format_resource_html(snap), parse_mode="HTML")
     except Exception as e:
         # Fallback to raw nvidia-smi
         try:
             from llm_client import run_shell_command
+
             out = await run_shell_command("nvidia-smi", timeout=10)
             await status_msg.edit_text(
                 f"<pre>{html_mod.escape(out[:3000])}</pre>",
@@ -459,6 +633,7 @@ async def cmd_resources(msg: Message) -> None:
     status_msg = await msg.answer("\U0001f4ca reading system resources\u2026")
     try:
         from tools.resource_monitor import get_resource_snapshot, format_resource_html
+
         # force=True to bypass cache and get a fresh reading
         snap = await get_resource_snapshot(force=True)
         await status_msg.edit_text(format_resource_html(snap), parse_mode="HTML")

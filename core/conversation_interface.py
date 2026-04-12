@@ -280,6 +280,13 @@ def clear_thread(thread_id: str) -> bool:
     return False
 
 
+def get_last_message_timestamp(user_id: str) -> float:
+    """Return timestamp of last message from user, or 0 if no messages."""
+    if user_id not in CONVERSATION_HISTORY or not CONVERSATION_HISTORY[user_id]:
+        return 0.0
+    return CONVERSATION_HISTORY[user_id][-1].get("ts", 0.0)
+
+
 __all__ = [
     "detect_agent",
     "get_fallback_chain",

@@ -8,6 +8,9 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Planned feature flags
+FEATURE_TOPIC_WEIGHTS_ENABLED = False  # Planned: v2.0
+
 _EXCEPTIONS_NEVER_BELOW_MIN = {"cekwajar", "popw", "babas_bot_ai"}
 
 
@@ -20,6 +23,8 @@ class TopicEvolution:
         Detect emerging topics from a list of mention strings.
         Returns new topics not currently in TOPIC_WEIGHTS.json.
         """
+        if not FEATURE_TOPIC_WEIGHTS_ENABLED:
+            logger.debug("Topic weights feature is planned for v2.0 — not yet available.")
         # TODO: cross-reference with existing TOPIC_WEIGHTS.json
         # For now, return empty — real implementation needs topic classifier
         new_topics: list[str] = []
