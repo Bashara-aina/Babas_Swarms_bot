@@ -98,7 +98,7 @@ async def cmd_swarm(msg: Message) -> None:
         )
         return
 
-    from handlers.swarm_handler import parse_swarm_args
+    from core.swarm_args import parse_swarm_args
 
     args = parse_swarm_args(raw)
     use_sdk = args.use_sdk

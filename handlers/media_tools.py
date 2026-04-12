@@ -195,6 +195,40 @@ async def cmd_search(msg: Message) -> None:
             await status.edit_text(f"❌ {result}")
             return
 
+        # Concern 4 fix: Synthesize search results through LLM before returning to user.
+        # Self-awareness gate only triggers on "I don't know" responses, so we proactively
+        # inject search results into the LLM context here so the response is natural/synthesized.
+        logger.info("Search completed for '%s', synthesizing via LLM...", text)
+        try:
+            from llm_client import chat
+
+            synthesis_prompt = (
+                f"User asked: {text}\n\n"
+                f"Here are web search results for '{text}':\n\n"
+                f"{result}\n\n"
+                f"Sintesiskan hasil pencarian di atas menjadi jawaban natural dalam Bahasa Indonesia. "
+                f"Jawab dengan ringkas dan jelas."
+            )
+            synthesized, _model_used = await chat(
+                task=synthesis_prompt,
+                agent_key="general",
+                run_post_hooks=False,
+            )
+            # If synthesis succeeded and is not empty/error, use it
+            if synthesized and not synthesized.startswith("[") and len(synthesized) > 10:
+                await status.delete()
+                await send_chunked(
+                    msg,
+                    f"🔍 <b>Results for:</b> {_clean_html(text)}\n\n{synthesized}",
+                    parse_mode="HTML",
+                )
+                logger.info("Search synthesis successful, model used: %s", _model_used)
+                return
+            # Fall through to raw results if synthesis failed or was too short
+            logger.warning("Search synthesis returned weak result, falling back to raw")
+        except Exception as synth_err:
+            logger.warning("Search synthesis failed, using raw results: %s", synth_err)
+
         await status.delete()
         await send_chunked(msg, f"🔍 <b>Results for:</b> {_clean_html(text)}\n\n{result}", parse_mode="HTML")
     except Exception as exc:

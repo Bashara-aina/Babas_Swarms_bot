@@ -1,4 +1,4 @@
-# LegionSwarm v3 🤖
+# LegionSwarm v10 🤖
 
 **Full autonomous AI agent — controls your Linux PC via Telegram. 100% free APIs, real computer use.**
 
@@ -8,21 +8,18 @@
 
 | Agent | Model | Provider | Best For |
 |-------|-------|----------|----------|
-| **vision** | gemma4:e4b | Local Ollama 🔒 | Screenshot analysis (stays on your machine) |
-| **coding** | llama-3.3-70b | Groq free | Code generation, fast |
-| **debug** | GLM-4 | Z.AI free | PyTorch/CUDA errors (GPQA 85.7%) |
-| **math** | GLM-4 | Z.AI free | Tensors, gradients, math (AIME 95.7%) |
-| **architect** | Qwen3-235B-A22B | Cerebras free | System design (1,500 tok/s) |
-| **analyst** | Kimi K2 (1T MoE) | Groq free | Data analysis, deep reasoning |
-| **computer** | llama-3.3-70b | Groq free | Agentic tool-calling loop |
-| **general** | llama-3.3-70b | Groq free | Default fallback |
-| **owl** ⭐NEW | Kimi K2 | Groq | Complex tasks, GAIA-style workflows |
-| **ag2_researcher** ⭐ | Kimi K2 | Groq | Deep research pipelines |
-| **ag2_critic** ⭐ | GLM-4 | Z.AI | Critique and adversarial analysis |
-| **ag2_synthesizer** ⭐ | Qwen3-235B | Cerebras | Multi-perspective synthesis |
-| **code_exec** ⭐ | qwen3-coder:free | OpenRouter | Write + execute Python/bash loops |
-| **predictor** ⭐ | Qwen3-235B | Cerebras | Swarm consensus complexity/prediction |
-| **claude_orch** ⭐ | claude-opus-4 | OpenRouter | Claude-native orchestration via ruflo |
+| **vision** | gemma3:12b | Local Ollama 🔒 | Screenshot analysis (stays on your machine) |
+| **coding** | qwen3.5:35b | Local Ollama 🔒 | Code generation |
+| **debug** | exaone-deep:32b | Local Ollama 🔒 | Deep reasoning, complex debugging |
+| **math** | phi4 | Local Ollama 🔒 | Math, tensors, gradients |
+| **architect** | llama3.3:70b | Groq free | System design |
+| **general** | gemma3:12b | Local Ollama 🔒 | Default fallback |
+| **OWL** ⭐ | llama3.3:70b | Groq | Complex GAIA-style workflows |
+| **code_exec** ⭐ | qwen3.5:35b | Local Ollama | Write + execute Python/bash loops |
+| **predictor** ⭐ | llama3.3:70b | Groq | Swarm consensus complexity prediction |
+| **ag2_researcher** ⭐ | llama3.3:70b | Groq | Deep research pipelines |
+| **ag2_critic** ⭐ | exaone-deep:32b | Local Ollama | Critique and adversarial analysis |
+| **ag2_synthesizer** ⭐ | qwen3.5:35b | Local Ollama | Multi-perspective synthesis |
 
 Every agent has automatic fallback chains — no rate limit ever blocks you.
 
@@ -45,17 +42,21 @@ Every agent has automatic fallback chains — no rate limit ever blocks you.
 | Command | Description |
 |---------|-------------|
 | `/run <task>` | LLM chat (no computer, fast) |
-| `/think <query>` | QwQ deep reasoning mode |
+| `/think <query>` | Deep reasoning mode |
 | `/agent <key> <task>` | Force a specific agent |
 | `/swarm <task>` | Multi-agent parallel execution |
+| `/debate <topic>` | Multi-agent debate with competing perspectives |
+| `/opinion <question>` | Get an opinionated analysis |
+| `/soul` | Interact with the soul engine |
 
-### v5 New Commands
+### Advanced Agents
 | Command | Description |
 |---------|-------------|
 | `/owl <task>` | OWL agent for complex real-world tasks |
-| `/predict <question>` | MiroFish swarm consensus + confidence |
+| `/predict <question>` | Swarm consensus + confidence prediction |
 | `/code_exec <task>` | Generate + run code with stdout/stderr |
 | `/ag2 <task>` | AG2 multi-agent research conversation |
+| `/budget` | Cost tracking dashboard |
 | `/swarm --topology <name> <task>` | Select topology (`spreadsheet`, `mixture`, `graph`, `sequential`, `concurrent`, `debate`, `auto`) |
 
 ### Web & Research
@@ -142,7 +143,7 @@ Every agent has automatic fallback chains — no rate limit ever blocks you.
 
 - Ubuntu/Debian Linux (tested 22.04+)
 - RTX 3060 12GB (or any GPU for local vision)
-- Python 3.10+
+- Python 3.11+
 - [Ollama](https://ollama.ai) installed
 
 ```bash
@@ -162,14 +163,22 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
+### Pull Models
+
+```bash
+ollama pull gemma3:12b
+ollama pull qwen3.5:35b
+ollama pull exaone-deep:32b
+ollama pull phi4
+ollama pull llama3.3:70b
+```
+
 ### API Keys
 
 | Provider | URL | Free Tier |
 |----------|-----|-----------|
 | Groq | https://console.groq.com/keys | 1,000 req/day |
-| Z.AI | https://bigmodel.cn/usercenter/apikeys | Reasonable use |
 | Cerebras | https://cloud.cerebras.ai | 14,400 req/day |
-| Gemini | https://aistudio.google.com | 1,000 req/day |
 | OpenRouter | https://openrouter.ai/keys | 50 free/day |
 | Telegram | [@BotFather](https://t.me/botfather) | Free |
 
@@ -185,16 +194,8 @@ TELEGRAM_BOT_TOKEN=your_bot_token
 ALLOWED_USER_ID=your_telegram_user_id
 
 GROQ_API_KEY=your_groq_key
-ZAI_API_KEY=your_zai_key
 CEREBRAS_API_KEY=your_cerebras_key
-GEMINI_API_KEY=your_gemini_key
 OPENROUTER_API_KEY=your_openrouter_key
-```
-
-### Pull Vision Model
-
-```bash
-ollama pull gemma3:12b
 ```
 
 ### Run
@@ -257,6 +258,12 @@ sudo journalctl -u swarm-bot -f
 
 # Git workflow
 /do git add -A && git commit -m "update" && git push
+
+# Multi-agent debate
+/debate Should AI agents have rights?
+
+# Cost tracking
+/budget
 ```
 
 ---
