@@ -1745,9 +1745,38 @@ def get_fallback_chain(agent_key: str) -> list[str]:
     return FALLBACK_CHAIN.get(agent_key, FALLBACK_CHAIN["general"])
 
 
-def build_system_prompt(role_prompt: str) -> str:
-    """Prepend the personality wrapper to any agent system prompt."""
-    return PERSONALITY_WRAPPER.strip() + "\n\n" + role_prompt
+def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
+    """Prepend the personality wrapper to any agent system prompt.
+
+    This is a *sync shim* that calls the new async
+    ``core.system_prompt_builder.build_system_prompt`` internally.
+    When a running loop is detected (pytest async mode), it schedules the
+    coroutine on the loop's executor to avoid deadlocking the loop itself.
+    """
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+
+    from core.system_prompt_builder import build_system_prompt as _async_build
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop — create one (normal for sync call paths)
+        return asyncio.run(_async_build(user_id=user_id, query=role_prompt, extras={}))
+
+    # Running loop detected — submit to loop's default executor so we don't
+    # deadlock the loop (which would prevent the task from ever executing).
+    # Use a brief timeout to avoid hanging tests.
+    try:
+        future = loop.run_in_executor(
+            None,
+            lambda: asyncio.run(_async_build(user_id=user_id, query=role_prompt, extras={})),
+        )
+        return asyncio.wrap_future(future).result(timeout=10)
+    except Exception:
+        # Fallback: return the role prompt with personality wrapper directly
+        wrapper = PERSONALITY_WRAPPER.strip() if PERSONALITY_WRAPPER else ""
+        return f"{wrapper}\n\n{role_prompt}" if wrapper else role_prompt
 
 
 def list_agents() -> str:

@@ -2,16 +2,25 @@
 
 Merges episodic store, MemoryManager (core/recall/profile + archival FTS),
 so retrieval is not gated on a single subsystem or keyword routing.
+
+PRIORITY 2 UPGRADE: Now includes semantic (vector) search via LongTermMemory
+as the primary retrieval path, with FTS as fallback. This is the single
+retrieval entry point replacing the old multi-backend concatenation.
 """
 
 from __future__ import annotations
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 async def build_unified_memory_context(user_id: str, query: str) -> str:
-    """Return a single prompt block with all available memory layers."""
+    """Return a single prompt block with all available memory layers.
+
+    PRIORITY 2: Uses semantic search (LongTermMemory) as primary,
+    with FTS + episodic as fallback layers. Deduplicates across tiers.
+    """
     if not user_id:
         return ""
 
@@ -19,45 +28,66 @@ async def build_unified_memory_context(user_id: str, query: str) -> str:
     q = (query or "").strip()
     search_q = q if len(q) > 2 else "projects preferences schedule work"
 
-    # 1) Episodic + schedule (Supabase or local JSON)
+    # ── Tier 2: Long-Term Memory (semantic search) — PRIMARY ─────────────────
     try:
-        from core.memory.episodic_store import get_episodic_store
+        from core.long_term_memory import LongTermMemory
 
-        store = get_episodic_store()
-        ep_block = store.build_context_block(user_id, search_q)
-        if ep_block:
-            parts.append(ep_block)
+        hits = await LongTermMemory().search(search_q, str(user_id), limit=5)
+        if hits:
+            lines = ["[LONG-TERM MEMORY (semantic)]"]
+            for hit in hits:
+                src_marker = f"[{hit.source}]" if hit.source != "semantic" else ""
+                lines.append(f"  {src_marker} {hit.text[:300]}")
+            parts.append("\n".join(lines))
     except Exception as e:
-        logger.debug("[unified_context] episodic: %s", e)
+        logger.debug("[unified_context] LongTermMemory: %s", e)
 
-    # 2) Core + profile + short recall + archival FTS
+    # ── Tier 1: Core + Profile + Recall (always included) ───────────────────
     try:
         from core.memory.memory_manager import MemoryManager
 
         mm = MemoryManager()
         base = mm.build_context_block()
         if base:
-            parts.append("[LOCAL MEMORY TIERS]\n" + base)
+            parts.append("[WORKING MEMORY]\n" + base)
+    except Exception as e:
+        logger.debug("[unified_context] MemoryManager: %s", e)
 
+    # ── Tier 2 Fallback: Archival FTS (if semantic didn't return enough) ─────
+    try:
         import re
 
         fts_q = " ".join(re.findall(r"[\w\u0080-\uFFFF]+", search_q)) or "memory"
         try:
-            archival = await mm.search(fts_q, limit=8)
+            from core.memory.memory_manager import MemoryManager
+
+            mm = MemoryManager()
+            archival = await mm.search(fts_q, limit=5)
         except Exception:
             archival = []
-        if archival:
-            lines = ["[ARCHIVAL MEMORY — FTS matches]"]
-            for row in archival[:8]:
-                content = str(row.get("content", "") or row.get("summary", ""))[:320]
-                created = str(row.get("created_at", ""))[:10]
-                if content.strip():
-                    lines.append(f"  [{created}] {content}")
-            parts.append("\n".join(lines))
-    except Exception as e:
-        logger.debug("[unified_context] MemoryManager: %s", e)
 
-    # 3) Thin profile extras (schedule / travel) — avoids duplicating full profile block
+        if archival:
+            # Check for duplicates against what we already have
+            existing_snippets = set()
+            for part in parts:
+                # Extract text snippets from existing parts for dedup
+                for line in part.split("\n"):
+                    if line.strip().startswith(("  -", "  [", "  (")):
+                        existing_snippets.add(line.strip()[:50])
+
+            lines = ["[ARCHIVAL MEMORY — FTS matches]"]
+            for row in archival[:5]:
+                content = str(row.get("content", "") or row.get("summary", ""))[:280]
+                created = str(row.get("created_at", ""))[:10]
+                snippet_key = f"  [{created}] {content[:50]}"
+                if content.strip() and snippet_key not in existing_snippets:
+                    lines.append(f"  [{created}] {content}")
+            if len(lines) > 1:  # only append if we have actual results
+                parts.append("\n".join(lines))
+    except Exception as e:
+        logger.debug("[unified_context] Archival FTS: %s", e)
+
+    return "\n\n".join(parts) if parts else ""
     try:
         from core.memory.user_profile import get_user_profile
 
@@ -80,7 +110,4 @@ async def build_unified_memory_context(user_id: str, query: str) -> str:
     if not parts:
         return ""
 
-    return (
-        "\n\n".join(parts)
-        + "\n\nUse the above naturally; cite what you used when it matters."
-    )
+    return "\n\n".join(parts) + "\n\nUse the above naturally; cite what you used when it matters."

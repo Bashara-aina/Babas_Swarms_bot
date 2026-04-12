@@ -64,7 +64,9 @@ def _wa_is_confirm(text: str) -> bool:
     return t in phrases
 
 
-def _wa_extract_contact_message(text: str, fallback_contact: Optional[str] = None) -> tuple[Optional[str], Optional[str]]:
+def _wa_extract_contact_message(
+    text: str, fallback_contact: Optional[str] = None
+) -> tuple[Optional[str], Optional[str]]:
     raw = _wa_normalize(text)
     lower = raw.lower()
 
@@ -87,7 +89,7 @@ def _wa_extract_contact_message(text: str, fallback_contact: Optional[str] = Non
     verb_match = re.search(r"\b(send|chat|kirim|pesan|message|tell)\b", lower)
     prep_match = re.search(r"\b(to|ke)\b", lower)
     if verb_match and prep_match and prep_match.start() > verb_match.start():
-        tail = raw[prep_match.end():].strip()
+        tail = raw[prep_match.end() :].strip()
         for phrase in love_phrases:
             idx = tail.lower().rfind(phrase)
             if idx > 0:
@@ -145,14 +147,20 @@ async def handle_plain_message(
 
     # Optional Manus-killer task router (parallel specialists) — runs before AutonomousRouter
     if os.getenv("LEGION_TASK_ROUTER_ENABLED", "0").strip().lower() in (
-        "1", "true", "yes", "on",
+        "1",
+        "true",
+        "yes",
+        "on",
     ):
         try:
             from core.task_router import get_task_router
 
             stream_cb = None
             if os.getenv("LEGION_TASK_ROUTER_STREAM", "0").strip().lower() in (
-                "1", "true", "yes", "on",
+                "1",
+                "true",
+                "yes",
+                "on",
             ):
 
                 async def _tr_stream(t: str) -> None:
@@ -187,6 +195,24 @@ async def handle_plain_message(
     handler_key = SKILL_PATTERNS.get(skill_match.skill_name, {}).get("handler", "chat")
     _route_hint = skill_match.skill_name if skill_match.confidence >= 0.3 else None
 
+    # ── Clarification intercept (Priority 5) ──────────────────────────────────
+    # Ask ONE clarifying question when message is short AND confidence is low.
+    # This fires BEFORE generic chat fallback, making Legion feel thoughtful.
+    try:
+        from core.clarification import ask_if_needed
+
+        clarification_q = await ask_if_needed(
+            user_msg,
+            skill_match.skill_name,  # intent
+            skill_match.confidence,
+        )
+        if clarification_q:
+            await msg.answer(clarification_q)
+            auto_router.record_performance(skill_match.skill_name, True)
+            return
+    except Exception:
+        pass  # Non-fatal — proceed to normal routing
+
     try:
         # Jarvis: 3-word keyword hits score ~0.375 confidence — allow slightly lower floor
         _min_route_conf = 0.35 if handler_key == "jarvis" else 0.4
@@ -204,13 +230,9 @@ async def handle_plain_message(
                 memories = await memory.search(user_msg, limit=8)
                 if memories:
                     mem_context = "\n".join(
-                        f"[{str(m.get('created_at', ''))[:10]}] {str(m.get('content', ''))[:300]}"
-                        for m in memories[:5]
+                        f"[{str(m.get('created_at', ''))[:10]}] {str(m.get('content', ''))[:300]}" for m in memories[:5]
                     )
-                    enriched = (
-                        f"{user_msg}\n\n"
-                        f"[Memory search results — use these to answer]:\n{mem_context}"
-                    )
+                    enriched = f"{user_msg}\n\n[Memory search results — use these to answer]:\n{mem_context}"
                     await _execute_chat(msg, enriched, routing_hint=_route_hint)
                     auto_router.record_performance(skill_match.skill_name, True)
                     return
@@ -226,33 +248,25 @@ async def handle_plain_message(
 
         # ── code generation ──────────────────────────────────────────────────
         if handler_key == "/run":
-            await _execute_chat(
-                msg, user_msg, forced_agent="coding", routing_hint=_route_hint
-            )
+            await _execute_chat(msg, user_msg, forced_agent="coding", routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── deep reasoning ───────────────────────────────────────────────────
         if handler_key == "/think":
-            await _execute_chat(
-                msg, user_msg, forced_agent="think", routing_hint=_route_hint
-            )
+            await _execute_chat(msg, user_msg, forced_agent="think", routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── multi-agent swarm ────────────────────────────────────────────────
         if handler_key == "/swarm":
-            await _execute_chat(
-                msg, user_msg, forced_agent="architect", routing_hint=_route_hint
-            )
+            await _execute_chat(msg, user_msg, forced_agent="architect", routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
         # ── multi-source research ────────────────────────────────────────────
         if handler_key == "/research":
-            await _execute_chat(
-                msg, user_msg, forced_agent="researcher", routing_hint=_route_hint
-            )
+            await _execute_chat(msg, user_msg, forced_agent="researcher", routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
@@ -299,9 +313,7 @@ async def handle_plain_message(
 
         # ── debate / opinion (auto-triggered without /debate) ────────────────
         if handler_key == "debate":
-            await _execute_chat(
-                msg, user_msg, forced_agent="debate", routing_hint=_route_hint
-            )
+            await _execute_chat(msg, user_msg, forced_agent="debate", routing_hint=_route_hint)
             auto_router.record_performance(skill_match.skill_name, True)
             return
 
@@ -383,9 +395,7 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
                 "Draft a reply or new email as requested. "
                 "Use send_email() or reply_email() when ready.]"
             )
-            await _execute_chat(
-                msg, enriched, forced_agent="general", routing_hint="email_management"
-            )
+            await _execute_chat(msg, enriched, forced_agent="general", routing_hint="email_management")
         else:
             # Default: show inbox summary
             summary = await client.summarize_inbox()
@@ -394,9 +404,7 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
                 f"[Current inbox summary]:\n{summary[:2000]}\n\n"
                 "Summarise what's important and ask if the user wants to act on anything."
             )
-            await _execute_chat(
-                msg, enriched, forced_agent="general", routing_hint="email_management"
-            )
+            await _execute_chat(msg, enriched, forced_agent="general", routing_hint="email_management")
 
         router.record_performance("email_management", True)
     except Exception as exc:
@@ -440,9 +448,7 @@ async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter
                 f"[Supabase query result]:\n{str(result)[:2000]}\n\n"
                 "Present this data clearly and suggest what the user might want to do next."
             )
-            await _execute_chat(
-                msg, enriched, forced_agent="analyst", routing_hint="business_query"
-            )
+            await _execute_chat(msg, enriched, forced_agent="analyst", routing_hint="business_query")
         else:
             # Fallback: researcher with Supabase/business context injected
             enriched = (
@@ -451,9 +457,7 @@ async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter
                 "business in Indonesia. The database is on Supabase. "
                 "Answer using your knowledge of the business, or ask for more detail.]"
             )
-            await _execute_chat(
-                msg, enriched, forced_agent="analyst", routing_hint="business_query"
-            )
+            await _execute_chat(msg, enriched, forced_agent="analyst", routing_hint="business_query")
 
         router.record_performance("business_query", True)
     except Exception as exc:
@@ -479,6 +483,7 @@ async def _handle_location(msg: Message, user_msg: str, router: AutonomousRouter
         # Fallback: inject location into researcher prompt
         try:
             from core.memory.user_profile import UserProfile
+
             location = UserProfile().get("location", "Tokyo, Japan")
         except Exception:
             location = "Tokyo, Japan"
@@ -488,9 +493,7 @@ async def _handle_location(msg: Message, user_msg: str, router: AutonomousRouter
             "Use this location to give specific, personalised recommendations. "
             "Search online for up-to-date options.]"
         )
-        await _execute_chat(
-            msg, enriched, forced_agent="researcher", routing_hint="location_advice"
-        )
+        await _execute_chat(msg, enriched, forced_agent="researcher", routing_hint="location_advice")
         router.record_performance("location_advice", False)
 
 
@@ -598,9 +601,7 @@ async def _handle_whatsapp(msg: Message, user_msg: str, router: AutonomousRouter
                 f"[Unread WhatsApp messages]:\n{summary}\n\n"
                 "Summarise and ask if the user wants to reply to any."
             )
-            await _execute_chat(
-                msg, enriched, forced_agent="general", routing_hint="whatsapp_action"
-            )
+            await _execute_chat(msg, enriched, forced_agent="general", routing_hint="whatsapp_action")
 
         router.record_performance("whatsapp_action", True)
     except ImportError:
@@ -622,9 +623,7 @@ async def _handle_github_intel(msg: Message, user_msg: str, router: AutonomousRo
 
         engine = GitHubIntelEngine()
         await msg.answer("Scanning GitHub trending... this takes ~30s.", parse_mode="HTML")
-        report = await engine.generate_intel_report(
-            await engine.fetch_trending()
-        )
+        report = await engine.generate_intel_report(await engine.fetch_trending())
         await msg.answer(report[:4000], parse_mode="HTML")
         router.record_performance("github_intel", True)
     except ImportError:
@@ -635,9 +634,7 @@ async def _handle_github_intel(msg: Message, user_msg: str, router: AutonomousRo
         router.record_performance("github_intel", False)
     except Exception as exc:
         logger.warning("[github_intel handler] %s", exc)
-        await _execute_chat(
-            msg, user_msg, forced_agent="researcher", routing_hint="github_intel"
-        )
+        await _execute_chat(msg, user_msg, forced_agent="researcher", routing_hint="github_intel")
         router.record_performance("github_intel", False)
 
 
@@ -662,14 +659,10 @@ async def _handle_codebase_understanding(msg: Message, user_msg: str, router: Au
             "Use these results to answer the question. Reference file paths and line numbers. "
             "If the results are incomplete, say so and suggest a more specific search."
         )
-        await _execute_chat(
-            msg, enriched, forced_agent="coding", routing_hint="codebase_reader"
-        )
+        await _execute_chat(msg, enriched, forced_agent="coding", routing_hint="codebase_reader")
         router.record_performance("codebase_understanding", True)
     except Exception as exc:
         logger.warning("[codebase_reader handler] %s", exc)
         # Fallback: just ask the coding agent
-        await _execute_chat(
-            msg, user_msg, forced_agent="coding", routing_hint="codebase_reader"
-        )
+        await _execute_chat(msg, user_msg, forced_agent="coding", routing_hint="codebase_reader")
         router.record_performance("codebase_understanding", False)

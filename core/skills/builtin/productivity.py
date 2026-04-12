@@ -135,44 +135,21 @@ async def _translate_handler(text: str) -> str:
 
 
 async def _timer_handler(text: str) -> str:
-    """Set a timer with notification."""
-    import re
+    """Set a timer with notification using the real timer skill."""
+    try:
+        from core.skills.timer import handle_timer_message, set_bot
+        import handlers.shared as _shared
 
-    # Try to extract minutes
-    minutes_match = re.search(r"(\d+)\s*(?:min|minute|menit)", text, re.IGNORECASE)
-    seconds_match = re.search(r"(\d+)\s*(?:sec|second|detik)", text, re.IGNORECASE)
-    hours_match = re.search(r"(\d+)\s*(?:hour|jam)", text, re.IGNORECASE)
+        # Ensure bot is set for timer notifications
+        if _shared._bot is not None:
+            set_bot(_shared._bot)
 
-    total_seconds = 0
-    if minutes_match:
-        total_seconds += int(minutes_match.group(1)) * 60
-    if seconds_match:
-        total_seconds += int(seconds_match.group(1))
-    if hours_match:
-        total_seconds += int(hours_match.group(1)) * 3600
+        # Default user_id for non-interactive contexts
+        user_id = _shared.ALLOWED_USER_ID if hasattr(_shared, "ALLOWED_USER_ID") else 0
 
-    if total_seconds == 0:
-        # Default to 5 minutes
-        total_seconds = 300
-
-    # Extract timer label
-    label = "Timer"
-    label_match = re.search(r"(?:for|called|named)\s+(['\"]?[\w\s]+['\"]?)(?:\s|$)", text, re.IGNORECASE)
-    if label_match:
-        label = label_match.group(1).strip().strip("'\"")
-
-    # Max 2 hours
-    if total_seconds > 7200:
-        return "⚠️ Timer cannot exceed 2 hours."
-
-    # Try to get bot and user_id for notification
-    # For now, return confirmation with instructions
-    return (
-        f"⏱️ Timer set: {label}\n"
-        f"Duration: {total_seconds // 60} min {total_seconds % 60} sec\n"
-        f"I'll notify you when it expires.\n"
-        "(Timer functionality requires bot instance — use /timer command for full support)"
-    )
+        return await handle_timer_message(text, user_id)
+    except Exception as e:
+        return f"❌ Timer error: {e}"
 
 
 def _register_productivity_skills() -> None:

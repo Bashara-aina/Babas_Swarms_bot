@@ -578,8 +578,6 @@ async def _run_group_a_startup(bot: Bot) -> None:
                 agents_root.ensure_gemma4_local_available()
         except Exception as e:
             logger.warning("gemma4 local prep failed (non-fatal): %s", e)
-        except Exception as e:
-            logger.warning("gemma4 local prep failed (non-fatal): %s", e)
 
     async def _start_daily_harvester() -> None:
         global _harvester_scheduler
@@ -664,6 +662,15 @@ async def on_startup(bot: Bot) -> None:
         _ = get_skill_registry()  # triggers module-level registration
         skill_count = len(get_skill_registry().list_all())
         logger.info("Skills registry initialized (%d skills)", skill_count)
+
+        # Initialize timer skill with bot reference for notifications
+        try:
+            from core.skills.timer import set_bot as timer_set_bot
+
+            timer_set_bot(bot)
+            logger.info("Timer skill bot reference set")
+        except Exception as e:
+            logger.warning("Timer bot init failed (non-fatal): %s", e)
     except Exception as e:
         logger.warning("Skills registry init failed (non-fatal): %s", e)
 
@@ -1062,6 +1069,8 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="loop_resume", description="Resume paused loop"),
                 BotCommand(command="multi_execute", description="Alias multi-agent compare"),
                 BotCommand(command="budget", description="Cost tracking dashboard"),
+                BotCommand(command="capabilities", description="Honest capability status"),
+                BotCommand(command="self_report", description="24h activity summary"),
                 BotCommand(command="metrics", description="Performance metrics dashboard"),
                 BotCommand(command="routing_stats", description="Routing analytics"),
                 BotCommand(command="audit_summary", description="Audit log summary"),

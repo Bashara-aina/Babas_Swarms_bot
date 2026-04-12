@@ -829,3 +829,69 @@ def clear_thread(thread_id: str) -> bool:
         del ACTIVE_THREADS[thread_id]
         return True
     return False
+
+
+# ---------------------------------------------------------------------------
+# Team selection for multi-agent orchestration
+# ---------------------------------------------------------------------------
+
+
+async def select_team(
+    task_description: str,
+    max_agents: int = 5,
+) -> list[AgentDef]:
+    """Select the best team of agents for a task using capability + semantic matching.
+
+    Uses a tiered approach:
+    1. Keyword capability match (Layer 1)
+    2. Semantic similarity (Layer 2)
+    3. Diversity filtering to avoid picking agents from same department
+
+    Returns up to max_agents AgentDef objects sorted by relevance.
+    """
+    task_lower = task_description.lower()
+    task_keywords = [w for w in task_lower.split() if len(w) > 3]
+
+    # Layer 1: Keyword matching
+    keyword_results = search_by_capability(task_keywords)
+    scores: dict[str, float] = {}
+    for name, kw_score in keyword_results:
+        scores[name] = scores.get(name, 0.0) + kw_score * 2.0
+
+    # Layer 2: Semantic similarity
+    semantic_results = semantic_search(task_description, top_k=max_agents * 2)
+    for name, sim in semantic_results:
+        scores[name] = scores.get(name, 0.0) + sim * 3.0
+
+    if not scores:
+        # Ultimate fallback: return general agent
+        general = get_agent("general")
+        return [general] if general else []
+
+    # Sort by combined score
+    ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+    # Diversity filtering: prefer agents from different departments
+    selected: list[AgentDef] = []
+    seen_departments: set[str] = set()
+
+    for name, _ in ranked:
+        agent = get_agent(name)
+        if not agent:
+            continue
+        # Allow up to 2 agents per department for diversity
+        dept_count = sum(1 for a in selected if a.department == agent.department)
+        if dept_count >= 2:
+            continue
+        selected.append(agent)
+        if len(selected) >= max_agents:
+            break
+
+    # Ensure at least 1 agent
+    if not selected:
+        general = get_agent("general")
+        if general:
+            selected = [general]
+
+    logger.debug("select_team: selected %d agents for task '%s'", len(selected), task_description[:50])
+    return selected

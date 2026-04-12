@@ -1,8 +1,11 @@
-"""handlers/admin_handlers.py — Admin commands for Legion: /budget, /soul.
+"""handlers/admin_handlers.py — Admin commands for Legion: /budget, /soul, /capabilities, /self_report.
 
 P2-3: /budget — Cost tracking dashboard
 P2-4: /soul — Show current SOUL.md contents
+P9: /capabilities — Honest capability status (✅ ⚠️ ❌)
+P9: /self_report — 24h activity report
 """
+
 from __future__ import annotations
 
 import html
@@ -17,13 +20,16 @@ from aiogram.types import Message
 logger = logging.getLogger(__name__)
 router = Router()
 
-ALLOWED_USER_ID: int = int((os.getenv("ALLOWED_USER_ID") or os.getenv("BASHARA_TELEGRAM_ID") or "0").strip().split(",")[0])
+ALLOWED_USER_ID: int = int(
+    (os.getenv("ALLOWED_USER_ID") or os.getenv("BASHARA_TELEGRAM_ID") or "0").strip().split(",")[0]
+)
 
 
 async def _require_owner(message: Message) -> bool:
     """Return True if allowed; send rejection and return False otherwise."""
     try:
         from handlers.shared import ALLOWED_USER_ID as _uid  # type: ignore[attr-defined]
+
         allowed = _uid
     except Exception:
         allowed = ALLOWED_USER_ID
@@ -37,6 +43,7 @@ async def _split_and_send(message: Message, text: str) -> None:
     """Send text chunked at 4000 chars."""
     try:
         from handlers.shared import split_and_send  # type: ignore[attr-defined]
+
         await split_and_send(message, text)
         return
     except Exception:
@@ -56,14 +63,16 @@ async def cmd_budget(message: Message) -> None:
         # Try to get budget manager from swarms_bot
         try:
             from handlers.shared import _budget_manager  # type: ignore[attr-defined]
+
             budget = _budget_manager
         except Exception:
             from swarms_bot.routing.budget_manager import BudgetManager  # type: ignore[import]
+
             budget = BudgetManager()
 
         # Get budget stats
         stats = budget.get_stats()  # type: ignore[attr-defined]
-        
+
         daily_limit = float(os.getenv("BUDGET_DAILY_LIMIT_USD", "2.00"))
         spent = stats.get("total_spent_today", 0.0)
         remaining = daily_limit - spent
@@ -105,15 +114,14 @@ async def cmd_soul(message: Message) -> None:
     soul_path = Path("SOUL.md")
     if not soul_path.exists():
         await message.answer(
-            "<b>SOUL.md not found.</b>\n"
-            "<i>Legion's identity file should be at the repository root.</i>",
+            "<b>SOUL.md not found.</b>\n<i>Legion's identity file should be at the repository root.</i>",
             parse_mode="HTML",
         )
         return
 
     try:
         content = soul_path.read_text(encoding="utf-8")
-        
+
         # Add header
         response = (
             "<b>🧠 SOUL.md — Legion's Living Identity</b>\n"
@@ -124,9 +132,95 @@ async def cmd_soul(message: Message) -> None:
         await _split_and_send(message, response)
 
     except Exception as exc:
-        logger.exception("Soul command error: %s", exc)
+        logger.exception("Soul read error: %s", exc)
         safe_err = html.escape(str(exc)[:200])
         await message.answer(
             f"<b>Soul read error:</b> <code>{safe_err}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("capabilities"))
+async def cmd_capabilities(message: Message) -> None:
+    """Returns honest list of what works vs what's partial vs what's stub."""
+    if not await _require_owner(message):
+        return
+
+    try:
+        from core.capability_audit import CapabilityAudit
+
+        audit = CapabilityAudit()
+        result = await audit.run_audit()
+        report_html = result.get("report_html", "")
+
+        # Convert HTML summary to markdown-friendly text
+        present = result.get("present", [])
+        missing = result.get("missing", [])
+
+        lines = ["*Legion Capabilities — Honest Status*\n"]
+
+        if present:
+            lines.append("✅ *Working*")
+            for cap, _path in present:
+                lines.append(f"  ✅ {cap}")
+
+        if missing:
+            lines.append("\n⚠️ *Missing / Not Ready*")
+            for cap, _path in missing:
+                lines.append(f"  ❌ {cap} (not ready)")
+
+        # Coverage summary
+        coverage = result.get("coverage_pct", 0)
+        lines.append(f"\n📊 Coverage: {coverage}% ({len(present)}/{len(present) + len(missing)})")
+
+        await message.answer("\n".join(lines), parse_mode="Markdown")
+
+    except Exception as exc:
+        logger.exception("Capabilities command error: %s", exc)
+        safe_err = html.escape(str(exc)[:200])
+        await message.answer(
+            f"<b>Capabilities error:</b> <code>{safe_err}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("self_report"))
+async def cmd_self_report(message: Message) -> None:
+    """24h activity report — what Legion did, failed at, learned."""
+    if not await _require_owner(message):
+        return
+
+    try:
+        from data.message_count import load_message_count
+        from data.self_improvement_buffer import get_recent_learnings
+
+        count = load_message_count()
+        learnings = await get_recent_learnings(n=10)
+
+        # Format learnings
+        if learnings:
+            learn_lines = []
+            for idx, learn in enumerate(learnings, 1):
+                learn_lines.append(f"  {idx}. {learn}")
+            learn_text = "\n".join(learn_lines)
+        else:
+            learn_text = "  (none yet)"
+
+        report = f"""*Legion — 24h Self Report*
+
+📨 Messages processed: {count}
+
+🧠 Recent learnings:
+{learn_text}
+
+*Run /capabilities for full capability status.*"""
+
+        await message.answer(report, parse_mode="Markdown")
+
+    except Exception as exc:
+        logger.exception("Self report command error: %s", exc)
+        safe_err = html.escape(str(exc)[:200])
+        await message.answer(
+            f"<b>Self report error:</b> <code>{safe_err}</code>",
             parse_mode="HTML",
         )
