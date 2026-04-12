@@ -1201,6 +1201,36 @@ async def chat(
             }
         )
 
+    # ── PRIORITY 1: Pre-Response Reasoning Loop ─────────────────────────────────
+    # For messages >20 words OR confidence <0.7: decompose, gather sources, build reasoning context
+    try:
+        _intent_for_reasoning = "general"
+        _confidence_for_reasoning = 0.5
+        try:
+            _fast_intent = classify_intent_fast(task)
+            _intent_for_reasoning = (
+                _fast_intent.intent.value if hasattr(_fast_intent.intent, "value") else str(_fast_intent.intent)
+            )
+            _confidence_for_reasoning = _fast_intent.confidence
+        except Exception:
+            pass
+
+        _reasoning_prompt = None
+        try:
+            from core.reasoning_loop import run_reasoning_loop_if_needed
+
+            _reasoning_prompt = await run_reasoning_loop_if_needed(
+                task, _intent_for_reasoning, _confidence_for_reasoning
+            )
+        except Exception as _rl_err:
+            logger.debug("Pre-response reasoning loop skipped: %s", _rl_err)
+
+        if _reasoning_prompt:
+            _audit_messages.append({"role": "system", "content": _reasoning_prompt})
+            logger.debug("Pre-response reasoning injected (%d chars)", len(_reasoning_prompt))
+    except Exception as _rl_outer_err:
+        logger.warning("Pre-response reasoning failed (non-fatal): %s", _rl_outer_err)
+
     # ── Conversation history ─────────────────────────────────────────────────────
     _conversation_history: list[dict] = []
     if user_id:
@@ -1483,6 +1513,18 @@ async def chat(
                 clear_enforcement_context()
             except Exception:
                 pass
+
+            # === QUALITY GATE: check response before returning ===
+            try:
+                from core.quality_gate import QualityGate
+
+                _qg = QualityGate()
+                _quality = await _qg.check(task, result, agent_key or "general")
+                if _quality.should_retry:
+                    logger.info("Quality gate triggered: %s", _quality.issues)
+                    result = await _qg.retry(messages, _quality.issues)
+            except Exception as _qg_err:
+                logger.warning("Quality gate error (non-fatal): %s", _qg_err)
 
             return result, model
 

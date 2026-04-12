@@ -161,6 +161,7 @@ def check_core_imports() -> bool:
         "core.multi_user",
         "core.natural_command_parser",
         "core.nexus_orchestrator",
+        "core.orchestrator",
         "core.observability",
         "core.openai_agents_bridge",
         "core.opencode_bridge",

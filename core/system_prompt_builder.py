@@ -37,6 +37,326 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# ── Context Window Budget Management (Priority 10) ─────────────────────────────
+
+MODEL_CONTEXT_LIMITS: dict[str, int] = {
+    "default": 16000,
+    "gpt-4o": 128000,
+    "claude-3-5-haiku": 200000,
+}
+CONTEXT_BUDGET_RATIO = 0.35  # use max 35% of context for system prompt
+
+# Priority order (highest to lowest):
+# soul is ALWAYS first and never compressed
+LAYER_PRIORITY: list[str] = [
+    "soul",  # ALWAYS included, never compressed
+    "user_profile",  # ALWAYS included (top 5 facts only)
+    "working_memory",  # Last 5 exchanges, compressed if tight
+    "relevant_memory",  # Top-3 semantic results, dropped if very tight
+    "wiki_context",  # Only if directly relevant to query
+    "search_results",  # Only if search was triggered
+    "personality",  # Compressed to key traits if tight
+    "skill_context",  # Only if skill was triggered
+]
+
+
+def estimate_tokens(text: str) -> int:
+    """Rough token estimate: len(text) // 4 (good for English-dominated text)."""
+    if not text:
+        return 0
+    return max(1, len(text) // 4)
+
+
+def compress_section(content: str, target_tokens: int = 200) -> str:
+    """Compress content to target token count using simple truncation.
+
+    Preserves structure by truncating from the middle, keeping start and end.
+    """
+    target_chars = target_tokens * 4
+    if len(content) <= target_chars:
+        return content
+
+    # Keep start and end, truncate middle
+    start_len = target_chars // 2 - 10
+    end_len = target_chars // 2 - 10
+    if start_len < 50 or end_len < 50:
+        # Too short to split, just truncate
+        return content[:target_chars]
+    return (
+        content[:start_len]
+        + f"\n... [COMPRESSED from {estimate_tokens(content)} to {target_tokens} tokens] ...\n"
+        + content[-end_len:]
+    )
+
+
+# ── Layer Content Fetchers ─────────────────────────────────────────────────────
+
+
+async def _get_soul_content() -> str:
+    """Get soul layer content — ALWAYS first, never compressed."""
+    try:
+        from core.soul_engine import build_soul_context
+
+        return build_soul_context()
+    except Exception as e:
+        logger.debug("[PromptBuilder] soul_engine not available: %s", e)
+        return ""
+
+
+async def _get_user_profile_content(user_id: str) -> str:
+    """Get user profile content — top 5 facts only."""
+    if not user_id:
+        return ""
+    try:
+        from core.memory.user_profile import get_user_profile
+
+        profile = get_user_profile(user_id)
+        block = profile.build_context_block()
+        # Limit to top 5 lines
+        lines = [ln for ln in block.split("\n") if ln.strip()][:8]
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug("[PromptBuilder] user_profile not available: %s", e)
+        return ""
+
+
+async def _get_working_memory_content(user_id: str) -> str:
+    """Get working memory — last 5 exchanges."""
+    if not user_id:
+        return ""
+    try:
+        from core.working_memory import load_state
+
+        st = load_state(user_id)
+        if not st.get("turn_count"):
+            return ""
+        lines = ["[WORKING MEMORY — session continuity]"]
+        tc = st.get("turn_count", 0)
+        if tc:
+            lines.append(f"Exchange count this session (approx): {tc}")
+        focus = st.get("current_focus", "")
+        if focus:
+            lines.append(f"Current focus: {focus}")
+        threads = st.get("open_threads", [])
+        if threads:
+            lines.append("Open threads (newest first):")
+            for th in threads[:5]:
+                lines.append(f"  • {th}")
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug("[PromptBuilder] working_memory not available: %s", e)
+        return ""
+    try:
+        from core.working_memory import get_recent_exchanges
+
+        exchanges = await get_recent_exchanges(user_id, n=5)
+        if not exchanges:
+            return ""
+        lines = ["[RECENT EXCHANGES — last 5]"]
+        for ex in exchanges[-5:]:
+            role = ex.get("role", "user").upper()
+            content = str(ex.get("content", ""))[:200]
+            lines.append(f"  {role}: {content}")
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug("[PromptBuilder] working_memory not available: %s", e)
+        return ""
+
+
+async def _get_relevant_memory_content(user_id: str, query: str) -> str:
+    """Get relevant memory — top 3 semantic results."""
+    if not user_id or not query:
+        return ""
+    try:
+        from core.memory_manager import LegionSemanticMemory
+
+        mem = LegionSemanticMemory()
+        results = await mem.search_memories(query, str(user_id), limit=3)
+        if not results:
+            return ""
+        lines = ["[RELEVANT MEMORIES — top 3]"]
+        for m in results[:3]:
+            content = str(m.get("content", ""))[:200]
+            lines.append(f"  - {content}")
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug("[PromptBuilder] relevant_memory not available: %s", e)
+        return ""
+    try:
+        from core.memory.semantic_cache import get_relevant_memories
+
+        memories = await get_relevant_memories(user_id, query, limit=3)
+        if not memories:
+            return ""
+        lines = ["[RELEVANT MEMORIES — top 3]"]
+        for m in memories[:3]:
+            content = str(m.get("content", ""))[:200]
+            lines.append(f"  - {content}")
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug("[PromptBuilder] relevant_memory not available: %s", e)
+        return ""
+
+
+async def _get_wiki_context_content(query: str) -> str:
+    """Get wiki context — only if directly relevant to query."""
+    if not query:
+        return ""
+    try:
+        from core.wiki_loader import load_wiki_context
+
+        wiki = load_wiki_context()
+        if wiki and "not found" not in wiki:
+            return f"## LEGION'S KNOWLEDGE BASE (from .wiki/)\n{wiki}"
+        return ""
+    except Exception as e:
+        logger.debug("[PromptBuilder] wiki_context not available: %s", e)
+        return ""
+
+
+async def _get_search_results_content(extras: dict) -> str:
+    """Get search results — only if search was triggered."""
+    search_results = extras.get("search_results", [])
+    if not search_results:
+        return ""
+    lines = ["[WEB SEARCH RESULTS]"]
+    for r in search_results[:3]:
+        title = r.get("title", "")[:80]
+        snippet = r.get("snippet", "")[:150]
+        lines.append(f"  - {title}: {snippet}")
+    return "\n".join(lines)
+
+
+async def _get_personality_content() -> str:
+    """Get personality content."""
+    try:
+        return LEGION_PERSONALITY.to_description()
+    except Exception as e:
+        logger.debug("[PromptBuilder] personality not available: %s", e)
+        return ""
+
+
+async def _get_skill_context_content(extras: dict) -> str:
+    """Get skill context — only if skill was triggered."""
+    skill = extras.get("active_skill")
+    if not skill:
+        return ""
+    try:
+        from core.skills import get_skill_registry
+
+        registry = get_skill_registry()
+        skill_obj = registry.find_by_example(skill)
+        if skill_obj:
+            return f"[SKILL ACTIVE: {skill_obj.name}] {skill_obj.description}"
+        return ""
+    except Exception as e:
+        logger.debug("[PromptBuilder] skill_context not available: %s", e)
+        return ""
+    try:
+        from core.skills import get_skill_registry
+
+        registry = get_skill_registry()
+        skill_obj = registry.get(skill)
+        if skill_obj and hasattr(skill_obj, "system_prompt_block"):
+            return skill_obj.system_prompt_block()
+        return ""
+    except Exception as e:
+        logger.debug("[PromptBuilder] skill_context not available: %s", e)
+        return ""
+
+
+# ── Layer Dispatcher ────────────────────────────────────────────────────────────
+
+
+async def get_layer_content(layer_name: str, user_id: str, query: str, extras: dict) -> str:
+    """Fetch content for a named layer."""
+    fetchers = {
+        "soul": lambda: _get_soul_content(),
+        "user_profile": lambda: _get_user_profile_content(user_id),
+        "working_memory": lambda: _get_working_memory_content(user_id),
+        "relevant_memory": lambda: _get_relevant_memory_content(user_id, query),
+        "wiki_context": lambda: _get_wiki_context_content(query),
+        "search_results": lambda: _get_search_results_content(extras),
+        "personality": lambda: _get_personality_content(),
+        "skill_context": lambda: _get_skill_context_content(extras),
+    }
+    fetcher = fetchers.get(layer_name)
+    if fetcher:
+        return await fetcher()
+    return ""
+
+
+# ── Main Builder with Budget Management ───────────────────────────────────────
+
+
+async def build_system_prompt(
+    user_id: str,
+    query: str,
+    model: str = "default",
+    extras: dict | None = None,
+) -> str:
+    """Build system prompt with priority-based token budget management.
+
+    Uses max 35% of model's context window for system prompt.
+    Layers are added in priority order until budget is exhausted.
+    Soul layer is ALWAYS first and never compressed.
+
+    Args:
+        user_id: Telegram user ID for memory lookup.
+        query: Current user message (used for relevance scoring).
+        model: Model key for context limit lookup.
+        extras: Optional dict with search_results, active_skill, etc.
+
+    Returns:
+        Assembled system prompt string.
+    """
+    if extras is None:
+        extras = {}
+
+    budget_tokens = int(MODEL_CONTEXT_LIMITS.get(model, 16000) * CONTEXT_BUDGET_RATIO)
+    used_tokens = 0
+    sections: list[str] = []
+
+    for layer_name in LAYER_PRIORITY:
+        content = await get_layer_content(layer_name, user_id, query, extras)
+        if not content:
+            continue
+
+        layer_tokens = estimate_tokens(content)
+
+        if used_tokens + layer_tokens > budget_tokens:
+            # Try compressing
+            if layer_name == "soul":
+                # Soul is NEVER compressed — if it doesn't fit, skip lower layers
+                if not sections:
+                    # Very rare case: soul itself exceeds budget, include truncated
+                    sections.append(compress_section(content, target_tokens=int(budget_tokens * 0.9)))
+                    used_tokens = int(budget_tokens * 0.9)
+                # else skip adding more
+            else:
+                compressed = compress_section(content, target_tokens=200)
+                compressed_tokens = estimate_tokens(compressed)
+                if used_tokens + compressed_tokens <= budget_tokens:
+                    sections.append(compressed)
+                    used_tokens += compressed_tokens
+                # If still over budget: skip this layer
+        else:
+            sections.append(content)
+            used_tokens += layer_tokens
+
+    logger.debug(
+        "System prompt build: %s/%s tokens, %s/%s layers",
+        used_tokens,
+        budget_tokens,
+        len(sections),
+        len(LAYER_PRIORITY),
+    )
+
+    return "\n\n".join(sections)
+
+
+# ── Legacy Functions (kept for backward compatibility) ────────────────────────
+
 _BEHAVIORAL_RULES = """[BEHAVIORAL RULES — always follow these]
 - Reference past memories naturally when it genuinely helps; do not name-drop irrelevant history.
 - If something is wrong or suboptimal, say so directly with reasons — not vague hedging.
