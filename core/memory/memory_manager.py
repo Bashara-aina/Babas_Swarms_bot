@@ -123,6 +123,11 @@ class MemoryManager:
             "profile_patterns": len(self.profile.get("interaction_patterns", [])),
         }
 
+    def close(self) -> None:
+        """Close all SQLite connections held by this manager."""
+        self.archival.close()
+        self.recall.close()
+
 
 _memory: MemoryManager | None = None
 

@@ -163,3 +163,25 @@ def skills_prompt_block_for_query(user_message: str = "") -> str:
 def skills_prompt_block() -> str:
     """Backward-compatible: query-agnostic fallback ranking."""
     return skills_prompt_block_for_query("")
+
+
+# ── Skill lookup interface ───────────────────────────────────────────────────
+# Provides get_skill(name) expected by callers that need to retrieve
+# a specific skill by name and invoke it.
+
+
+def get_skill(name: str) -> dict[str, Any] | None:
+    """
+    Retrieve a registered skill by name or id.
+
+    Args:
+        name: The skill name or id to look up.
+
+    Returns:
+        The skill dict with 'name', 'description', 'handler', etc., or None if not found.
+    """
+    skills = load_skills()
+    for sk in skills:
+        if sk.get("name") or sk.get("id") == name:
+            return sk
+    return None

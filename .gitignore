@@ -24,3 +24,8 @@ screenshots/
 everything-claude-code-main/
 ungate/
 _graveyard/
+
+.env
+.env.local
+.env.production
+secrets.json

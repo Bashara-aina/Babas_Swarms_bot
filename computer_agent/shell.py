@@ -164,11 +164,18 @@ async def install_packages(packages: list[str]) -> str:
     return result
 
 
-async def upgrade_from_git(repo_dir: str = "~/swarm-bot") -> str:
-    """git pull latest from remote."""
+async def upgrade_from_git(repo_dir: str = "") -> str:
+    """git pull latest from remote.
+
+    Args:
+        repo_dir: Path to repository. Defaults to the swarm-bot directory
+                  resolved from this file's location (not hardcoded).
+    """
+    if not repo_dir:
+        repo_dir = str(Path(__file__).resolve().parent.parent)
     expanded = str(Path(repo_dir).expanduser())
     return await run_shell(
-        f"cd '{expanded}' && git pull origin main 2>&1",
+        f"cd {shlex.quote(expanded)} && git pull origin main 2>&1",
         timeout=30,
     )
 

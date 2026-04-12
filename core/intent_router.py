@@ -319,6 +319,34 @@ def classify_intent_fast(message: str) -> IntentResult:
     Fast pattern-based intent classification. Sub-millisecond.
     Returns highest-confidence match or CASUAL_CHAT as fallback.
     """
+    # URL auto-detection: check for video URLs first
+    import re
+
+    url_match = re.search(r'https?://[^\s\'"<>\)]+', message)
+    if url_match:
+        url = url_match.group(0).lower()
+        _video_domains = {
+            "youtube.com",
+            "youtu.be",
+            "youtube-nocookie.com",
+            "twitter.com",
+            "x.com",
+            "tiktok.com",
+            "instagram.com",
+            "facebook.com",
+            "vimeo.com",
+        }
+        if any(domain in url for domain in _video_domains):
+            return IntentResult(
+                intent=Intent.WEB_SCRAPE,
+                confidence=0.95,
+                method="url_pattern",
+                raw_message=message,
+                suggested_agent="general",
+                needs_tools=True,
+                needs_research=True,
+            )
+
     msg_lower = message.lower()
     scores: dict[Intent, int] = {}
 
@@ -441,10 +469,27 @@ async def classify_intent(message: str) -> IntentResult:
     Two-stage intent classification:
       1. Fast pattern match (sub-millisecond)
       2. LLM-based refinement when confidence < 0.7
+      3. Skill registry fallback when confidence < 0.50
     """
     result = classify_intent_fast(message)
     if result.confidence < 0.7 and result.intent == Intent.CASUAL_CHAT:
         result = await classify_intent_llm(message)
+
+    # Skill registry fallback for low-confidence cases
+    if result.confidence < 0.50:
+        try:
+            from core.skills import get_skill_registry
+
+            skill = get_skill_registry().find_by_example(message)
+            if skill:
+                logger.info("[IntentRouter] Low-confidence (%s) — skill fallback: %s", result.confidence, skill.name)
+                result.intent = Intent.CASUAL_CHAT
+                result.suggested_agent = "general"
+                result.needs_tools = True
+                result.needs_research = True
+        except Exception:
+            pass
+
     return result
 
 

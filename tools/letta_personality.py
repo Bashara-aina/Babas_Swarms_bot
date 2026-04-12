@@ -3,6 +3,7 @@ Letta stateful personality engine — Phase 3.
 Persists persona_state.json to disk so emotion + traits survive restarts.
 Injects memory block into every LLM system prompt.
 """
+
 from __future__ import annotations
 
 import json
@@ -129,9 +130,7 @@ def update_emotion(
         em["current_mood"] = "melancholy"
     else:
         em["current_mood"] = "neutral"
-    state["relationship"]["interactions_total"] = (
-        state["relationship"].get("interactions_total", 0) + 1
-    )
+    state["relationship"]["interactions_total"] = state["relationship"].get("interactions_total", 0) + 1
     save_persona(state)
     return state
 
@@ -145,11 +144,11 @@ def build_persona_system_block() -> str:
     forbidden = "\n".join(f'  - "{p}"' for p in state.get("forbidden_phrases", []))
     notes = "\n".join(f"  - {n}" for n in state.get("personality_notes", [])) or "  (none yet)"
     return f"""[LEGION PERSONA MEMORY BLOCK]
-Name: {state['name']}
-Core identity: {state['core_identity']}
-Current mood: {em['current_mood']} (valence={em['valence']:.2f}, arousal={em['arousal']:.2f})
-OCEAN: O={ocean['openness']:.2f} C={ocean['conscientiousness']:.2f} E={ocean['extraversion']:.2f} A={ocean['agreeableness']:.2f} N={ocean['neuroticism']:.2f}
-Relationship trust: {rel['trust_level']:.2f} | familiarity: {rel['familiarity']:.2f} | total interactions: {rel['interactions_total']}
+Name: {state["name"]}
+Core identity: {state["core_identity"]}
+Current mood: {em["current_mood"]} (valence={em["valence"]:.2f}, arousal={em["arousal"]:.2f})
+OCEAN: O={ocean["openness"]:.2f} C={ocean["conscientiousness"]:.2f} E={ocean["extraversion"]:.2f} A={ocean["agreeableness"]:.2f} N={ocean["neuroticism"]:.2f}
+Relationship trust: {rel["trust_level"]:.2f} | familiarity: {rel["familiarity"]:.2f} | total interactions: {rel["interactions_total"]}
 Forbidden phrases (never say these):
 {forbidden}
 Personality notes learned from user:
@@ -180,6 +179,19 @@ def add_personality_note(note: str) -> None:
 
 def get_persona_state() -> dict[str, Any]:
     """Return persisted persona; includes dominant_emotion for llm_client / emotion hooks."""
+    state = load_persona()
+    mood = state.get("emotion", {}).get("current_mood", "neutral")
+    out: dict[str, Any] = dict(state)
+    out["dominant_emotion"] = mood
+    return out
+
+
+def init_personality_state() -> dict[str, Any]:
+    """Initialize persona state, loading from disk or creating default.
+
+    Returns the current persona state dict with dominant_emotion key.
+    Safe to call multiple times — idempotent.
+    """
     state = load_persona()
     mood = state.get("emotion", {}).get("current_mood", "neutral")
     out: dict[str, Any] = dict(state)

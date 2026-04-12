@@ -67,6 +67,7 @@ def _format_for_telegram_html(text: str) -> str:
 
 # ── Shared mutable state ──────────────────────────────────────────────────────
 ALLOWED_USER_ID: int = 0  # set by main.py at startup
+_bot = None  # aiogram Bot instance, set in main.py on_startup
 _user_thread: dict[int, str] = {}
 _last_screenshot: dict[int, str] = {}
 _start_time: float = time.time()
@@ -315,6 +316,7 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
     except Exception as e:
         await _cancel_task(typing_task)
         from core.error_humanizer import humanize_error_for_display
+
         friendly = humanize_error_for_display(e, context="/do agent loop")
         err_short = str(e)[:300]
         hint = friendly
@@ -374,6 +376,7 @@ async def _execute_chat(
     except Exception as e:
         await _cancel_task(typing_task)
         from core.error_humanizer import humanize_error_for_display
+
         friendly = humanize_error_for_display(e, context="chat")
         err_short = str(e)[:300]
         hint = friendly

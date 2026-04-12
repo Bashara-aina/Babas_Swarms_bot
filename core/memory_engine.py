@@ -490,3 +490,49 @@ class MemoryEngine:
             "episodic": self.episodic.get_stats(),
             "permanent": self.permanent.get_stats(),
         }
+
+
+# ── Module-level convenience wrappers ────────────────────────────────────────
+# These provide a simple read_memory(user_id, query) / write_memory(user_id, content)
+# interface expected by callers, delegating to a shared MemoryEngine instance.
+
+_engine_instance: MemoryEngine | None = None
+
+
+def _get_engine() -> MemoryEngine:
+    """Get or create the shared MemoryEngine singleton."""
+    global _engine_instance
+    if _engine_instance is None:
+        _engine_instance = MemoryEngine()
+    return _engine_instance
+
+
+async def read_memory(user_id: str, query: str, limit: int = 5) -> list[dict[str, Any]]:
+    """
+    Search memory for a user. Convenience wrapper around MemoryEngine.search().
+
+    Args:
+        user_id: Telegram user ID string.
+        query: Search query string.
+        limit: Maximum results to return.
+
+    Returns:
+        List of memory result dicts with 'tier' field indicating source.
+    """
+    engine = _get_engine()
+    engine.set_user_id(user_id)
+    return await engine.search(query, tier="all", limit=limit)
+
+
+async def write_memory(user_id: str, content: str, **kwargs: Any) -> None:
+    """
+    Store a memory entry for a user. Convenience wrapper around MemoryEngine.store().
+
+    Args:
+        user_id: Telegram user ID string.
+        content: The content to store (will be stored as a conversation turn).
+        **kwargs: Additional fields passed to the turn dict (e.g., sentiment, importance).
+    """
+    engine = _get_engine()
+    turn: dict[str, Any] = {"user": content, "assistant": "", "user_id": user_id, **kwargs}
+    await engine.store(turn)

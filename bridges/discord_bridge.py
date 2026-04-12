@@ -11,8 +11,10 @@ Or run alongside Telegram in main.py:
     from bridges.discord_bridge import start_discord_bridge
     asyncio.create_task(start_discord_bridge())
 """
+
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 
@@ -88,11 +90,15 @@ async def start_discord_bridge() -> None:
                     user_id=str(message.author.id),
                 )
                 # Split response for Discord 2000-char limit
-                chunks = [response[i:i+1900] for i in range(0, len(response), 1900)]
+                chunks = [response[i : i + 1900] for i in range(0, len(response), 1900)]
                 for chunk in chunks:
                     await message.reply(chunk)
             except Exception as e:
                 await message.reply(f"\u274c Error: {str(e)[:200]}")
                 logger.error("Discord bridge error: %s", e)
 
-    await client.start(token)
+    try:
+        await asyncio.wait_for(client.start(token), timeout=30.0)
+    except asyncio.TimeoutError:
+        logger.error("Discord bridge failed to connect within 30s timeout")
+        return

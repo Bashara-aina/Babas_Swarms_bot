@@ -18,6 +18,7 @@ Auto-routing via SKILL_PATTERNS:
 
 from __future__ import annotations
 
+import aiofiles
 import html as html_mod
 import logging
 import os
@@ -135,8 +136,8 @@ async def cmd_imagine(msg: Message) -> None:
 
         # Send the image back
         try:
-            with open(result, "rb") as f:
-                image_data = f.read()
+            async with aiofiles.open(result, "rb") as f:
+                image_data = await f.read()
             await msg.answer_document(
                 BufferedInputFile(image_data, filename="generated.png"),
                 caption=f"✨ <b>{_clean_html(prompt)}</b>\nAspect ratio: {aspect_ratio}",
@@ -246,8 +247,8 @@ async def cmd_speak(msg: Message) -> None:
 
         # Send as voice message
         try:
-            with open(result, "rb") as f:
-                audio_data = f.read()
+            async with aiofiles.open(result, "rb") as f:
+                audio_data = await f.read()
             await msg.answer_voice(
                 BufferedInputFile(audio_data, filename="speech.mp3"),
             )
@@ -318,6 +319,149 @@ async def handle_photo(msg: Message) -> None:
         if tmp_path and os.path.exists(tmp_path):
             try:
                 os.unlink(tmp_path)
+            except Exception:
+                pass
+
+
+# ── Video handling (F.video) ─────────────────────────────────────────────────
+
+
+@router.message(F.video)
+async def handle_video(msg: Message) -> None:
+    """Analyze a video sent by the user.
+
+    Extracts keyframes using ffmpeg and transcribes audio.
+    User can add a caption/prompt: "What's in this video?" or "Summarize this."
+    """
+    if not is_allowed(msg):
+        return
+
+    caption = (msg.caption or "").strip()
+    text = (msg.text or "").strip()
+    prompt = caption or text or "Describe what happens in this video clip."
+
+    status = await msg.answer("🎬 Analyzing video… this may take a moment.")
+
+    tmp_video_path = ""
+    tmp_frames_dir = ""
+    try:
+        # Download video
+        video = msg.video
+        if video is None:
+            await status.edit_text("❌ No video found in message.")
+            return
+
+        if video.file_size and video.file_size > 100 * 1024 * 1024:
+            await status.edit_text("❌ Video too large (max 100 MB).")
+            return
+
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
+            tmp_video_path = tmp.name
+
+        file = await msg.bot.get_file(video.file_id)
+        await msg.bot.download_file(file.file_path, destination=tmp_video_path)
+
+        # Extract keyframes using ffmpeg (1 frame every 10 seconds, max 8 frames)
+        import subprocess
+        import shutil
+
+        tmp_frames_dir = tempfile.mkdtemp(prefix="video_frames_")
+        frame_pattern = os.path.join(tmp_frames_dir, "frame_%03d.jpg")
+
+        # Get video duration
+        duration_proc = await asyncio.create_subprocess_shell(
+            f'ffprobe -v error -show_entries format=duration -of csv=p=0 "{tmp_video_path}"',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        duration_out, _ = await duration_proc.communicate()
+        try:
+            duration_sec = float(duration_out.decode().strip())
+        except Exception:
+            duration_sec = 60
+
+        # Extract frames: 1 every 10s, max 8
+        interval_sec = min(10, max(1, duration_sec / 8))
+        n_frames = min(8, max(1, int(duration_sec / interval_sec)))
+
+        extract_cmd = (
+            f'ffmpeg -i "{tmp_video_path}" -vf "fps=1/{interval_sec},scale=640:-1" '
+            f'-q:v 2 -frames:v {n_frames} "{frame_pattern}" -y'
+        )
+        extract_proc = await asyncio.create_subprocess_shell(
+            extract_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        await extract_proc.communicate()
+
+        # Transcribe audio using faster-whisper if available
+        audio_transcript = ""
+        try:
+            from tools.minimax_media import understand_audio
+
+            audio_tmp = tempfile.mktemp(suffix=".mp3")
+            conv_proc = await asyncio.create_subprocess_shell(
+                f'ffmpeg -i "{tmp_video_path}" -vn -acodec libmp3lame -q:a 2 "{audio_tmp}" -y',
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await conv_proc.communicate()
+            audio_transcript = await understand_audio(audio_tmp)
+            try:
+                os.unlink(audio_tmp)
+            except Exception:
+                pass
+        except Exception as exc:
+            logger.debug("Audio transcription skipped: %s", exc)
+
+        # Analyze keyframes
+        frame_results: list[str] = []
+        import glob as glob_mod
+
+        frame_files = sorted(glob_mod.glob(os.path.join(tmp_frames_dir, "frame_*.jpg")))
+        for frame_path in frame_files[:4]:
+            try:
+                from tools.minimax_media import understand_image
+
+                frame_desc = await understand_image(
+                    prompt="Describe what you see in this frame from a video. Be brief.",
+                    image_path=frame_path,
+                )
+                frame_results.append(frame_desc)
+            except Exception as exc:
+                logger.debug("Frame analysis failed: %s", exc)
+
+        # Build response
+        lines = [f"🎬 <b>Video Analysis</b>", "", f"<i>Prompt: {_clean_html(prompt)}</i>", ""]
+
+        if frame_results:
+            lines.append("<b>Key frames:</b>")
+            for i, fr in enumerate(frame_results, 1):
+                lines.append(f"  {i}. {fr}")
+            lines.append("")
+
+        if audio_transcript and not audio_transcript.startswith("Error"):
+            snippet = audio_transcript[:500]
+            if len(audio_transcript) > 500:
+                snippet += "…"
+            lines.append(f"<b>Audio transcript:</b> {snippet}")
+
+        await status.delete()
+        await send_chunked(msg, "\n".join(lines), parse_mode="HTML")
+
+    except Exception as exc:
+        logger.exception("video analysis failed")
+        await status.edit_text(f"❌ Error analyzing video: {str(exc)[:200]}")
+    finally:
+        if tmp_video_path and os.path.exists(tmp_video_path):
+            try:
+                os.unlink(tmp_video_path)
+            except Exception:
+                pass
+        if tmp_frames_dir and os.path.exists(tmp_frames_dir):
+            try:
+                shutil.rmtree(tmp_frames_dir)
             except Exception:
                 pass
 

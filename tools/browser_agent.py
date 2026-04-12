@@ -7,14 +7,95 @@ Two modes:
 browser-use requires BROWSER_USE_MODEL env var (e.g. openrouter/google/gemini-flash-1.5)
 Falls back gracefully if browser-use is not installed.
 """
+
 from __future__ import annotations
 
 import logging
 import os
+import re
 import time
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# ── Prompt injection protection ─────────────────────────────────────────────
+
+INJECTION_PATTERNS = [
+    r"<script[^>]*>.*?</script>",
+    r"javascript:",
+    r"on\w+\s*=",
+    r"<iframe[^>]*>.*?</iframe>",
+    r"{{.*?}}",
+    r"{%.*?%}",
+    r"<additional_instruction",
+    r"system prompt",
+]
+
+
+def sanitize_user_content(text: str) -> str:
+    """Remove prompt injection patterns from user-provided text."""
+    for pattern in INJECTION_PATTERNS:
+        text = re.sub(pattern, "[BLOCKED]", text, flags=re.IGNORECASE | re.DOTALL)
+    return text
+
+
+# ── SSRF protection ────────────────────────────────────────────────────────────────
+
+_PRIVATE_IP_PATTERNS = [
+    re.compile(r"^10\."),
+    re.compile(r"^172\.(1[6-9]|2[0-9]|3[0-1])\."),
+    re.compile(r"^192\.168\."),
+    re.compile(r"^127\."),
+    re.compile(r"^localhost$", re.IGNORECASE),
+    re.compile(r"^0\."),
+    re.compile(r"^::1$"),
+    re.compile(r"^fe80:"),
+]
+
+
+def _is_private_ip(host: str) -> bool:
+    """Check if host is a private/internal IP."""
+    for pattern in _PRIVATE_IP_PATTERNS:
+        if pattern.match(host):
+            return True
+    return False
+
+
+def validate_url(url: str) -> tuple[bool, str]:
+    """Validate URL against SSRF allowlist.
+
+    Returns (is_safe, error_message).
+    """
+    try:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+        host = parsed.netloc.lower().split(":")[0]
+
+        # Block dangerous schemes
+        if scheme in ("file", "ftp", "gopher"):
+            return False, f"Disallowed scheme: {scheme}"
+
+        if scheme not in ("http", "https"):
+            return False, f"Disallowed scheme: {scheme}"
+
+        # Block private IPs
+        if _is_private_ip(host):
+            return False, f"Private IP blocked: {host}"
+
+        # Check against allowlist if configured
+        allowed = os.getenv("BROWSER_ALLOWED_DOMAINS", "")
+        if allowed:
+            allowed_domains = {d.strip().lower() for d in allowed.split(",") if d.strip()}
+            if allowed_domains and not any(host.endswith(d) or host == d for d in allowed_domains):
+                return False, f"Domain not in allowlist: {host}"
+
+        return True, ""
+
+    except Exception as exc:
+        return False, f"URL parse error: {exc}"
+
 
 # ── Site health check (Playwright direct, no browser-use needed) ──────────────
 
@@ -27,6 +108,16 @@ async def check_site_health(url: str | None = None) -> dict[str, Any]:
     Returns: {url, status, load_time_ms, title, error (optional)}
     """
     target = url or RUMAHLABUH_URL
+
+    is_safe, err = validate_url(target)
+    if not is_safe:
+        return {
+            "url": target,
+            "status": "blocked",
+            "error": f"SSRF check failed: {err}",
+            "source": "browser_agent",
+        }
+
     try:
         from playwright.async_api import async_playwright
     except ImportError:
@@ -81,6 +172,7 @@ async def check_site_health(url: str | None = None) -> dict[str, Any]:
 
 # ── Autonomous browsing via browser-use ──────────────────────────────────────
 
+
 async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
     """
     Perform an autonomous browser task using the browser-use library.
@@ -90,7 +182,21 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
 
     Falls back to a Playwright-only scrape if browser-use is not available.
     """
+    # Sanitize user input to prevent prompt injection
+    user_text = sanitize_user_content(task)
     model_str = os.getenv("BROWSER_USE_MODEL", "")
+
+    # Extract and validate URL before browsing
+    url_match = re.search(r"https?://[^\s'\"]+", task)
+    if url_match:
+        url_to_check = url_match.group(0).rstrip(".,)")
+        is_safe, err = validate_url(url_to_check)
+        if not is_safe:
+            return {
+                "success": False,
+                "error": f"SSRF check failed: {err}",
+                "source": "browser_agent",
+            }
 
     try:
         from browser_use import Agent as BrowserAgent
@@ -123,7 +229,7 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
         )
 
         agent = BrowserAgent(
-            task=task,
+            task=user_text,
             llm=llm,
             browser=browser,
             max_actions_per_step=5,
@@ -139,7 +245,7 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
 
     except ImportError:
         logger.info("[BrowserAgent] browser-use not installed — falling back to Playwright scrape")
-        return await _playwright_fallback(task)
+        return await _playwright_fallback(user_text)
     except Exception as exc:
         logger.warning("[BrowserAgent] browse_task failed: %s", exc)
         return {"success": False, "error": str(exc)[:300], "source": "browser_use"}
@@ -147,20 +253,50 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
 
 async def _playwright_fallback(task: str) -> dict[str, Any]:
     """
-    Lightweight fallback: scrape the most relevant URL from the task description.
-    Extracts text content and returns it so the LLM can reason over it.
+    Lightweight fallback using Crawl4AI (preferred) or Playwright.
+    Crawl4AI provides AI-friendly extracted content.
     """
     import re
 
+    # Sanitize input for defense-in-depth
+    task = sanitize_user_content(task)
     url_match = re.search(r'https?://[^\s\'"]+', task)
     if not url_match:
         return {
             "success": False,
-            "error": "browser-use not installed and no URL found in task for Playwright fallback",
+            "error": "browser-use not installed and no URL found in task for Crawl4AI/Playwright fallback",
             "source": "playwright_fallback",
         }
 
     url = url_match.group(0).rstrip(".,)")
+
+    # SSRF validation before browsing
+    is_safe, err = validate_url(url)
+    if not is_safe:
+        return {
+            "success": False,
+            "error": f"SSRF check failed: {err}",
+            "url": url,
+            "source": "playwright_fallback",
+        }
+
+    # Try Crawl4AI first
+    try:
+        from crawl4ai import AsyncWebCrawler
+
+        async with AsyncWebCrawler(verbose=False) as crawler:
+            result = await crawler.arun(url=url)
+            if result and result.get("markdown"):
+                return {
+                    "success": True,
+                    "result": result["markdown"][:4000],
+                    "url": url,
+                    "source": "crawl4ai",
+                }
+    except Exception as exc:
+        logger.debug("[BrowserAgent] Crawl4AI fallback failed for %s: %s", url, exc)
+
+    # Fall back to Playwright
     try:
         from playwright.async_api import async_playwright
     except ImportError:
@@ -175,7 +311,6 @@ async def _playwright_fallback(task: str) -> dict[str, Any]:
             page = await browser.new_page()
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=15000)
-                # Extract visible text content
                 text = await page.evaluate("""
                     () => {
                         const elements = document.querySelectorAll('h1, h2, h3, p, li, td, th');

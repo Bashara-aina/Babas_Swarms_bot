@@ -100,6 +100,17 @@ apscheduler>=3.10.0
 browser-use==0.1.40  # autonomous LLM-driven browsing (browse_task)
 pytz>=2024.1  # timezone support (fallback to stdlib where possible)
 
+# === Phase 1 ClawCode Upgrade ===
+yt-dlp>=2026.1.0  # video/audio download (ffmpeg-backed)
+crawl4ai>=0.4.0  # AI-friendly web crawler
+python-pptx>=0.6.21  # PowerPoint file parsing
+ebooklib>=0.18  # EPUB file parsing
+
+# === Nihongo Mode — Japanese Teacher Plugin ===
+pykakasi>=2.2.1  # furigana + romaji conversion
+gtts>=2.5.0  # TTS fallback (no API key needed)
+# openai-whisper>=20231117  # local whisper (optional, only if WHISPER_USE_API=false)
+
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils
 # sudo apt install tesseract-ocr tesseract-ocr-eng

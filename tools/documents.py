@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 # ── PDF ──────────────────────────────────────────────────────────────────────
 
+
 async def read_pdf(path: str, pages: str = "all", max_chars: int = 8000) -> str:
     """Extract text from a PDF file.
 
@@ -32,6 +33,7 @@ async def read_pdf(path: str, pages: str = "all", max_chars: int = 8000) -> str:
 
     def _extract():
         import pdfplumber
+
         with pdfplumber.open(str(p)) as pdf:
             total_pages = len(pdf.pages)
             page_nums = _parse_page_range(pages, total_pages)
@@ -59,6 +61,7 @@ async def pdf_extract_tables(path: str, pages: str = "all") -> str:
 
     def _extract():
         import pdfplumber
+
         with pdfplumber.open(str(p)) as pdf:
             total_pages = len(pdf.pages)
             page_nums = _parse_page_range(pages, total_pages)
@@ -77,10 +80,7 @@ async def pdf_extract_tables(path: str, pages: str = "all") -> str:
                             md_lines.append("| " + " | ".join(cells) + " |")
                             if row_idx == 0:
                                 md_lines.append("|" + "|".join(["---"] * len(cells)) + "|")
-                        tables_found.append(
-                            f"Table {len(tables_found) + 1} (page {i + 1}):\n"
-                            + "\n".join(md_lines)
-                        )
+                        tables_found.append(f"Table {len(tables_found) + 1} (page {i + 1}):\n" + "\n".join(md_lines))
 
             if not tables_found:
                 return "No tables found in PDF."
@@ -91,6 +91,7 @@ async def pdf_extract_tables(path: str, pages: str = "all") -> str:
 
 # ── Excel ────────────────────────────────────────────────────────────────────
 
+
 async def read_excel(path: str, sheet: str = "", max_rows: int = 100) -> str:
     """Read Excel file, return as markdown table."""
     p = Path(path).expanduser()
@@ -99,6 +100,7 @@ async def read_excel(path: str, sheet: str = "", max_rows: int = 100) -> str:
 
     def _read():
         import openpyxl
+
         wb = openpyxl.load_workbook(str(p), read_only=True, data_only=True)
         sheet_names = wb.sheetnames
 
@@ -132,6 +134,7 @@ async def write_excel(
 
     def _write():
         import openpyxl
+
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = sheet_name
@@ -157,6 +160,7 @@ async def excel_update_cell(
 
     def _update():
         import openpyxl
+
         wb = openpyxl.load_workbook(str(p))
         ws = wb[sheet] if sheet in wb.sheetnames else wb.active
         ws[cell] = value
@@ -168,6 +172,7 @@ async def excel_update_cell(
 
 # ── OCR ──────────────────────────────────────────────────────────────────────
 
+
 async def ocr_image(path: str, lang: str = "eng") -> str:
     """OCR an image file using Tesseract."""
     p = Path(path).expanduser()
@@ -177,6 +182,7 @@ async def ocr_image(path: str, lang: str = "eng") -> str:
     def _ocr():
         import pytesseract
         from PIL import Image
+
         img = Image.open(str(p))
         text = pytesseract.image_to_string(img, lang=lang)
         return f"OCR result ({p.name}, lang={lang}):\n\n{text.strip()}"
@@ -223,6 +229,7 @@ async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
 
 # ── Word documents ───────────────────────────────────────────────────────────
 
+
 async def read_docx(path: str, max_chars: int = 8000) -> str:
     """Read a Word document (.docx)."""
     p = Path(path).expanduser()
@@ -231,6 +238,7 @@ async def read_docx(path: str, max_chars: int = 8000) -> str:
 
     def _read():
         from docx import Document
+
         doc = Document(str(p))
         paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
         text = "\n\n".join(paragraphs)
@@ -241,7 +249,129 @@ async def read_docx(path: str, max_chars: int = 8000) -> str:
     return await asyncio.get_event_loop().run_in_executor(None, _read)
 
 
+# ── CSV ────────────────────────────────────────────────────────────────────
+
+
+async def read_csv(path: str, max_rows: int = 200, delimiter: str = ",") -> str:
+    """Read a CSV file and return as markdown table."""
+    p = Path(path).expanduser()
+    if not p.exists():
+        return f"file not found: {path}"
+
+    def _read():
+        import csv
+
+        rows: list[list[str]] = []
+        try:
+            with open(p, newline="", encoding="utf-8", errors="replace") as f:
+                reader = csv.reader(f, delimiter=delimiter)
+                for i, row in enumerate(reader):
+                    if i >= max_rows:
+                        rows.append([f"[...truncated at {max_rows} rows]"])
+                        break
+                    rows.append(row)
+        except Exception as exc:
+            return f"Error reading CSV: {exc}"
+
+        if not rows:
+            return "Empty CSV file."
+
+        lines = []
+        for i, row in enumerate(rows):
+            cells = [c.strip() for c in row]
+            lines.append("| " + " | ".join(cells) + " |")
+            if i == 0:
+                lines.append("|" + "|".join(["---"] * len(cells)) + "|")
+
+        return f"CSV: {p.name} ({len(rows)} rows)\n\n" + "\n".join(lines)
+
+    return await asyncio.get_event_loop().run_in_executor(None, _read)
+
+
+# ── PowerPoint (PPTX) ────────────────────────────────────────────────────────
+
+
+async def read_pptx(path: str, max_slides: int = 50) -> str:
+    """Extract text from a PowerPoint (.pptx) file."""
+    p = Path(path).expanduser()
+    if not p.exists():
+        return f"file not found: {path}"
+
+    def _read():
+        from pptx import Presentation
+
+        prs = Presentation(str(p))
+        slides = list(prs.slides)[:max_slides]
+
+        lines = [f"PPTX: {p.name} ({len(slides)}/{len(prs.slides)} slides)", ""]
+
+        for i, slide in enumerate(slides, 1):
+            slide_text: list[str] = []
+            for shape in slide.shapes:
+                if hasattr(shape, "text") and shape.text.strip():
+                    slide_text.append(shape.text.strip())
+            if slide_text:
+                lines.append(f"--- Slide {i} ---")
+                lines.append("\n".join(slide_text))
+                lines.append("")
+
+        result = "\n".join(lines)
+        if len(result) > 8000:
+            result = result[:8000] + f"\n\n[...truncated, {len(result)} total chars]"
+        return result
+
+    return await asyncio.get_event_loop().run_in_executor(None, _read)
+
+
+# ── EPUB ────────────────────────────────────────────────────────────────────
+
+
+async def read_epub(path: str, max_chars: int = 8000) -> str:
+    """Extract text from an EPUB file."""
+    p = Path(path).expanduser()
+    if not p.exists():
+        return f"file not found: {path}"
+
+    def _read():
+        from ebooklib import epub
+
+        book = epub.read_epub(str(p))
+        texts: list[str] = []
+
+        # Try to get title and author
+        title = book.get_metadata("DC", "title")
+        creator = book.get_metadata("DC", "creator")
+        header = f"EPUB: {p.name}"
+        if title:
+            header += f" | Title: {title[0][0] if title else 'unknown'}"
+        if creator:
+            header += f" | Author: {creator[0][0] if creator else 'unknown'}"
+        texts.append(header)
+        texts.append("")
+
+        # Extract text from HTML items
+        for item in book.get_items():
+            if item.get_type() == 9:  # EPUBDoc = 9
+                try:
+                    from bs4 import BeautifulSoup
+
+                    soup = BeautifulSoup(item.get_content(), "html.parser")
+                    text = soup.get_text(separator="\n", strip=True)
+                    if text.strip():
+                        texts.append(text)
+                except Exception:
+                    pass
+
+        result = "\n\n".join(texts)
+        if len(result) > max_chars:
+            result = result[:max_chars] + f"\n\n[...truncated, {len(result)} total chars]"
+        return result
+
+    return await asyncio.get_event_loop().run_in_executor(None, _read)
+
+
 # ── File management ──────────────────────────────────────────────────────────
+
 
 async def organize_files(directory: str, strategy: str = "by_type") -> str:
     """Organize files in a directory.
@@ -325,6 +455,7 @@ async def file_info(path: str) -> str:
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _parse_page_range(pages: str, total: int) -> list[int]:
     """Parse page range string into list of 0-indexed page numbers."""

@@ -36,8 +36,12 @@ from core.memory.memory_manager import MemoryManager
 from core.memory.temporal_graph import TemporalKnowledgeGraph
 from core.personality.emotion_engine import EmotionEngine
 from core.reflection.reflection_engine import ReflectionEngine
+from core.relationship_memory import get_relationship_context
 from core.system_prompt_builder import SystemPromptBuilder
 from tools.letta_personality import build_persona_block, get_persona_state, update_emotion
+from core.episodic_narrative import build_narrative_context
+from core.cognition_pipeline import build_cognition_system_fragment
+from core.intent_router import build_intent_hint, classify_intent_fast
 
 try:
     import computer_agent
@@ -55,6 +59,13 @@ except ImportError as _ca_err:
 
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
+
+__all__ = [
+    "call_llm",
+    "chat",
+    "agent_loop",
+    "wiki_raw_completion",
+]
 
 _PERSONA = (
     "You are Legion — Bashara's autonomous AI coworker on his Linux workstation "
@@ -206,12 +217,10 @@ def init_humanization_layer() -> dict[str, object]:
     memory = MemoryManager()
     graph = TemporalKnowledgeGraph()
     emotion = EmotionEngine()
-    reflection = ReflectionEngine()
-    auto_router = AutonomousRouter()
+    from llm_client import llm_client as _llm_client
 
-    from core.observability_hooks import register_observability_hooks
-
-    register_observability_hooks()
+    reflection = ReflectionEngine(memory, _llm_client)
+    auto_router = AutonomousRouter(memory, reflection)
 
     return {
         "memory": memory,
@@ -340,6 +349,100 @@ async def _execute_tool_with_self_heal(
     return f"tool error: {'; '.join(set(errors))}"
 
 
+async def call_llm(
+    messages: list[dict],
+    model: str = None,
+    tools: list = None,
+    stream: bool = False,
+    **kwargs,
+) -> str | dict:
+    """Public LLM call interface with fallback chain and tool call support.
+
+    Args:
+        messages: List of message dicts with 'role' and 'content' keys.
+        model: Model string (e.g. "minimax/MiniMax-M2.7"). Defaults to LEGION_LLM_MODEL env var.
+        tools: Optional list of tool definitions for function calling.
+        stream: Whether to stream responses (not implemented yet).
+        **kwargs: Additional arguments passed to litellm.
+
+    Returns:
+        str: Normal text response
+        dict: Tool call response with keys 'type' (="tool_call"), 'name', 'args'
+    """
+    model = model or os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
+
+    if _is_rate_limited(model):
+        chain = get_fallback_chain(model.split("/")[0] if "/" in model else model)
+        for fallback_model in chain:
+            if not _is_rate_limited(fallback_model):
+                model = fallback_model
+                break
+        else:
+            return "rate limited on all providers — retry shortly"
+
+    provider = model.split("/")[0].lower()
+    api_kwargs: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        **kwargs,
+    }
+
+    if tools:
+        api_kwargs["tools"] = tools
+        api_kwargs["tool_choice"] = "auto"
+
+    if provider == "openrouter":
+        api_kwargs["api_base"] = "https://openrouter.ai/api/v1"
+        api_key = os.getenv("OPENROUTER_API_KEY", "")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY not set")
+        api_kwargs["api_key"] = api_key
+        api_kwargs["extra_body"] = {
+            "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
+            "X-Title": "LegionSwarm",
+        }
+    elif provider == "minimax":
+        api_kwargs["api_base"] = "https://api.minimax.io/v1"
+        api_key = os.getenv("MINIMAX_API_KEY", "")
+        if not api_key:
+            raise ValueError("MINIMAX_API_KEY not set")
+        api_kwargs["api_key"] = api_key
+    elif provider == "anthropic":
+        api_kwargs["api_base"] = "https://api.minimax.io/anthropic"
+        api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not set")
+        api_kwargs["api_key"] = api_key
+    else:
+        api_key = os.getenv("LEGION_API_KEY", "") or os.getenv(f"{provider.upper()}_API_KEY", "")
+        if not api_key:
+            raise ValueError(f"No API key for '{provider}'")
+        api_kwargs["api_key"] = api_key
+
+    try:
+        response = await acompletion(**api_kwargs)
+    except litellm.RateLimitError:
+        _mark_rate_limited(model)
+        chain = get_fallback_chain(provider)
+        for fallback_model in chain:
+            if not _is_rate_limited(fallback_model):
+                return await call_llm(messages, fallback_model, tools, stream, **kwargs)
+        return "rate limited on all providers — retry shortly"
+    except Exception as e:
+        raise
+
+    msg = response.choices[0].message
+    if msg.tool_calls:
+        tc = msg.tool_calls[0]
+        return {
+            "type": "tool_call",
+            "name": tc.function.name,
+            "args": json.loads(tc.function.arguments),
+        }
+
+    return (msg.content or "").strip()
+
+
 # ── Core model call ─────────────────────────────────────────────────────────────
 
 
@@ -348,65 +451,89 @@ async def _call_model(
     messages: list[dict],
     temperature: float = 0.7,
     max_tokens: int | None = None,
+    _fallback_chain: list[str] | None = None,
+    _timeout: float = 30.0,
     **kwargs: Any,
 ) -> Any:
-    """Call a model via litellm acompletion."""
-    provider = model.split("/")[0].lower()
+    """Call a model via litellm acompletion.
 
-    kwargs: dict[str, Any] = {
-        "model": model,
-        "messages": messages,
-        "temperature": temperature,
-        **kwargs,
-    }
+    Hardened with:
+    - 30s hard timeout per call
+    - Exponential backoff retry: 1s→2s→4s, max 3 attempts
+    - Retry on: RateLimitError, APIConnectionError, Timeout
+    - Model fallback chain support
+    """
+    chain = _fallback_chain or [model]
 
-    if max_tokens is not None:
-        kwargs["max_tokens"] = max_tokens
+    for attempt_idx, model_name in enumerate(chain):
+        provider = model_name.split("/")[0].lower()
 
-    if provider == "openrouter":
-        kwargs["api_base"] = "https://openrouter.ai/api/v1"
-        api_key = os.getenv("OPENROUTER_API_KEY", "")
-        if not api_key:
-            raise ValueError("OPENROUTER_API_KEY not set")
-        kwargs["api_key"] = api_key
-        kwargs["extra_body"] = {
-            "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
-            "X-Title": "LegionSwarm",
+        kwargs: dict[str, Any] = {
+            "model": model_name,
+            "messages": messages,
+            "temperature": temperature,
+            **kwargs,
         }
 
-    elif provider == "minimax":
-        kwargs["api_base"] = "https://api.minimax.io/v1"
-        api_key = os.getenv("MINIMAX_API_KEY", "")
-        if not api_key:
-            raise ValueError("MINIMAX_API_KEY not set")
-        kwargs["api_key"] = api_key
+        if max_tokens is not None:
+            kwargs["max_tokens"] = max_tokens
 
-    elif provider == "anthropic":
-        kwargs["api_base"] = "https://api.minimax.io/anthropic"
-        api_key = os.getenv("ANTHROPIC_API_KEY", "")
-        if not api_key:
-            raise ValueError("ANTHROPIC_API_KEY not set")
-        kwargs["api_key"] = api_key
+        if provider == "openrouter":
+            kwargs["api_base"] = "https://openrouter.ai/api/v1"
+            api_key = os.getenv("OPENROUTER_API_KEY", "")
+            if not api_key:
+                raise ValueError("OPENROUTER_API_KEY not set")
+            kwargs["api_key"] = api_key
+            kwargs["extra_body"] = {
+                "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
+                "X-Title": "LegionSwarm",
+            }
 
-    else:
-        api_key = _get_api_key(model)
-        if not api_key:
-            raise ValueError(f"No API key for '{provider}'")
-        kwargs["api_key"] = api_key
+        elif provider == "minimax":
+            kwargs["api_base"] = "https://api.minimax.io/v1"
+            api_key = os.getenv("MINIMAX_API_KEY", "")
+            if not api_key:
+                raise ValueError("MINIMAX_API_KEY not set")
+            kwargs["api_key"] = api_key
 
-    # MiniMax retry logic — exponential backoff with jitter: 30s -> 60s -> 120s
-    if provider == "minimax":
-        for attempt in range(3):
+        elif provider == "anthropic":
+            kwargs["api_base"] = "https://api.minimax.io/anthropic"
+            api_key = os.getenv("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                raise ValueError("ANTHROPIC_API_KEY not set")
+            kwargs["api_key"] = api_key
+
+        else:
+            api_key = _get_api_key(model_name)
+            if not api_key:
+                raise ValueError(f"No API key for '{provider}'")
+            kwargs["api_key"] = api_key
+
+        # Retry with exponential backoff: 1s → 2s → 4s
+        for retry_attempt in range(3):
             try:
-                return await acompletion(**kwargs)
-            except litellm.RateLimitError as e:
-                if attempt < 2:
-                    wait = min(30 * (2**attempt) + random.uniform(0, 5), 300)
-                    logger.warning(f"MiniMax rate limit, attempt {attempt + 1}/3, waiting {wait:.1f}s: {e}")
+                # AUDIT04: Log every actual acompletion call
+                logger.debug(
+                    f"[AUDIT04] acompletion call: model={model_name}, messages={len(messages)}, roles={[m.get('role') for m in messages]}"
+                )
+                return await asyncio.wait_for(acompletion(**kwargs), timeout=_timeout)
+            except (litellm.RateLimitError, litellm.APIConnectionError, asyncio.TimeoutError) as exc:
+                if retry_attempt < 2:
+                    wait = (2**retry_attempt) + random.uniform(0, 1)
+                    logger.warning(
+                        "[_call_model] %s on '%s' (attempt %d/3), retrying in %.1fs: %s",
+                        type(exc).__name__,
+                        model_name,
+                        retry_attempt + 1,
+                        wait,
+                        exc,
+                    )
                     await asyncio.sleep(wait)
                 else:
-                    raise
-    return await acompletion(**kwargs)
+                    logger.warning("[_call_model] %s on '%s' — trying fallback model", type(exc).__name__, model_name)
+                    break  # Break retry loop, try next model in chain
+            except Exception:
+                raise  # Non-retryable error — propagate immediately
 
 
 # ── Wiki completion (lightweight, no humanization stack) ──────────────────────
@@ -526,6 +653,10 @@ async def _agent_loop_inner(
 
     for iteration in range(20):
         try:
+            # AUDIT04: Log agent loop LLM calls
+            logger.debug(
+                f"[AUDIT04] agent_loop LLM call: iter={iteration}, messages={len(messages)}, roles={[m.get('role') for m in messages]}"
+            )
             response = await _call_model(
                 model,
                 messages,
@@ -848,9 +979,7 @@ async def chat(
     if not agent_key:
         agent_key = detect_agent(task)
         try:
-            from core.intent_router import classify_intent_fast as _cif
-
-            _intent = _cif(task)
+            _intent = classify_intent_fast(task)
             if _intent.confidence >= 0.65 and _intent.suggested_agent:
                 agent_key = _intent.suggested_agent
         except Exception:
@@ -888,18 +1017,71 @@ async def chat(
         except Exception:
             pass
 
-    prompt_sections: list[str] = []
+    # ── AUDIT04: Build messages[] with DISTINCT system messages ──────────────────
+    # Priority order: soul → memory → wiki → conversation → user
+    # Each context layer gets its OWN system message (not concatenated)
 
+    _audit_messages: list[dict] = []
+
+    # 0. Soul — FIRST system message, always present
     _soul = build_soul_context()
     if _soul:
-        prompt_sections.append(_soul)
+        _audit_messages.append({"role": "system", "content": _soul})
 
-    prompt_sections.append(build_base_persona())
+    # 0b. Base persona + disagreement — SECOND system message
+    _base_persona = build_base_persona()
+    if _base_persona:
+        _audit_messages.append({"role": "system", "content": _base_persona})
 
     _disagree = get_disagreement_prompt()
     if _disagree:
-        prompt_sections.append(_disagree)
+        _audit_messages.append({"role": "system", "content": _disagree})
 
+    # GSA Voice injection — context-aware communication style
+    try:
+        from core.gsa_voice import classify_message_context, get_gsa_injection
+        from core.character_enforcer import set_enforcement_context, EnforcementContext
+
+        gsa_classification = classify_message_context(task)
+        gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)
+        if gsa_injection:
+            _audit_messages.append({"role": "system", "content": gsa_injection})
+
+        ctx = EnforcementContext(
+            context_type=gsa_classification.primary.value,
+            confidence=gsa_classification.confidence,
+            visual_signals=gsa_classification.visual_signals,
+            flow_state=gsa_classification.flow_state,
+        )
+        set_enforcement_context(ctx)
+    except Exception:
+        pass
+
+    # 1. Memory — separate system message
+    _memory_context_lines: list[str] = []
+    try:
+        from core.memory_manager import LegionSemanticMemory
+
+        semantic_memory_lines = await LegionSemanticMemory().search_memories(task, str(user_id), limit=5)
+        if semantic_memory_lines:
+            _memory_context_lines = semantic_memory_lines
+    except Exception:
+        pass
+    if _memory_context_lines:
+        _audit_messages.append({"role": "system", "content": "[Memory]\n" + "\n".join(_memory_context_lines)})
+
+    # 2. Wiki — from unified_prompt_context (separate system messages per block)
+    try:
+        from core.unified_prompt_context import gather_parallel_prompt_layers
+
+        _chat_mode = os.getenv("LEGION_CHAT_MODE", "text")
+        for _layer in await gather_parallel_prompt_layers(task, str(user_id), mode=_chat_mode):
+            if _layer:
+                _audit_messages.append({"role": "system", "content": _layer})
+    except Exception:
+        pass
+
+    # 3. Other context blocks — agent mode, emotion, narrative, cognition, etc.
     _agent_role_full = SYSTEM_PROMPTS.get(agent_key, "")
     if _agent_role_full:
         _persona_prefix = _PERSONA + "\n\n"
@@ -910,7 +1092,9 @@ async def chat(
         else:
             _agent_specialization = _agent_role_full
         if _agent_specialization.strip():
-            prompt_sections.append(f"[AGENT MODE: {agent_key.upper()}]\n{_agent_specialization.strip()}")
+            _audit_messages.append(
+                {"role": "system", "content": f"[AGENT MODE: {agent_key.upper()}]\n{_agent_specialization.strip()}"}
+            )
 
     _current_emotion = "neutral"
     try:
@@ -921,64 +1105,103 @@ async def chat(
         if detected != _current_emotion:
             update_emotion(detected, event=f"Context shift from message: {task[:50]}")
             _current_emotion = detected
-        prompt_sections.append(build_emotion_modifier(_current_emotion))
+        _emotion_mod = build_emotion_modifier(_current_emotion)
+        if _emotion_mod:
+            _audit_messages.append({"role": "system", "content": _emotion_mod})
     except Exception:
         pass
+
+    for _ctx_name, _ctx_getter in [
+        ("episodic_narrative", lambda: build_narrative_context(task)),
+        ("relationship_memory", get_relationship_context),
+        ("cognition", lambda: build_cognition_system_fragment(str(user_id), task, routing_hint=routing_hint)),
+        ("intent_hint", lambda: build_intent_hint(classify_intent_fast(task))),
+    ]:
+        try:
+            _ctx = _ctx_getter()
+            if _ctx:
+                _audit_messages.append({"role": "system", "content": _ctx})
+        except Exception:
+            pass
 
     try:
-        from core.episodic_narrative import build_narrative_context
+        from core.memory.unified_context import build_unified_memory_context
 
-        _narrative = build_narrative_context(task)
-        if _narrative:
-            prompt_sections.append(_narrative)
+        umc = await build_unified_memory_context(str(user_id), task)
+        if umc:
+            _audit_messages.append({"role": "system", "content": umc})
     except Exception:
         pass
+
+    for _ctx_name, _ctx_builder in [
+        (
+            "memoryos",
+            lambda: (
+                f"[Long-term conversation context from MemoryOS:]\n{mos_retrieve_context(query=task, user_id=str(user_id))}"
+                if (mos_retrieve_context(query=task, user_id=str(user_id)))
+                else ""
+            ),
+        ),
+        ("open_memory", lambda: build_om_context(om_search(user_id=str(user_id), query=task, limit=8))),
+        ("legacy_memory", lambda: build_memory_context(task, top_k=3, user_id=str(user_id))),
+        ("instinct", lambda: get_instinct_context(max_tokens=300)),
+        ("skills", lambda: get_skills_for_agent(agent_key, max_chars=6000)),
+        ("mode_instructions", lambda: build_mode_instructions(agent_key)),
+    ]:
+        try:
+            _ctx = _ctx_builder()
+            if _ctx:
+                _audit_messages.append({"role": "system", "content": _ctx})
+        except Exception:
+            pass
 
     try:
-        from core.relationship_memory import get_relationship_context
+        from core.research_policy import maybe_attach_research_context
 
-        rel_ctx = get_relationship_context()
-        if rel_ctx:
-            prompt_sections.append(rel_ctx)
+        r_block, _ran = await maybe_attach_research_context(task, str(user_id), agent_key or "general")
+        if r_block:
+            _audit_messages.append({"role": "system", "content": r_block})
     except Exception:
         pass
 
-    try:
-        from core.cognition_pipeline import build_cognition_system_fragment
+    if agent_key not in ("computer", "vision"):
+        try:
+            from core.character_voice import get_debate_trigger, get_humor_nudge, get_opinion_on, get_proactive_check
 
-        _cog = build_cognition_system_fragment(str(user_id), task, routing_hint=routing_hint)
-        if _cog:
-            prompt_sections.append(_cog)
-    except Exception:
-        pass
+            proactive_nudge = get_proactive_check(task)
+            if proactive_nudge:
+                _audit_messages.append({"role": "system", "content": proactive_nudge})
+            debate_block = get_debate_trigger(task)
+            if debate_block:
+                _audit_messages.append({"role": "system", "content": debate_block})
+            else:
+                opinion_block = get_opinion_on(task)
+                if opinion_block:
+                    _audit_messages.append({"role": "system", "content": opinion_block})
+            humor_block = get_humor_nudge(task)
+            if humor_block:
+                _audit_messages.append({"role": "system", "content": humor_block})
+        except Exception:
+            pass
 
-    try:
-        from core.intent_router import classify_intent_fast, build_intent_hint
+    # Add Internal Reasoning Discipline for longer messages
+    _word_count = len(task.split()) if task else 0
+    if agent_key not in ("computer", "vision", "think") and _word_count > 12:
+        _audit_messages.append(
+            {
+                "role": "system",
+                "content": (
+                    "\n\n[INTERNAL REASONING DISCIPLINE]\n"
+                    "Before finalising your response, briefly stress-test it: "
+                    "ask yourself 'Is this actually correct? What would a smart skeptic push back on?' "
+                    "If the self-check reveals a real weakness or blind spot, lead with it honestly. "
+                    "If your first take holds up, answer with confidence — no need to hedge. "
+                    "This is about intellectual honesty, not performative uncertainty."
+                ),
+            }
+        )
 
-        _intent_result = classify_intent_fast(task)
-        _intent_hint = build_intent_hint(_intent_result)
-        if _intent_hint:
-            prompt_sections.append(_intent_hint)
-    except Exception:
-        pass
-
-    try:
-        from core.memory_manager import LegionSemanticMemory
-
-        semantic_memory_lines = await LegionSemanticMemory().search_memories(task, str(user_id), limit=5)
-    except Exception:
-        pass
-
-    try:
-        from core.unified_prompt_context import gather_parallel_prompt_layers
-
-        _chat_mode = os.getenv("LEGION_CHAT_MODE", "text")
-        for _layer in await gather_parallel_prompt_layers(task, str(user_id), mode=_chat_mode):
-            if _layer:
-                prompt_sections.append(_layer)
-    except Exception:
-        pass
-
+    # ── Conversation history ─────────────────────────────────────────────────────
     _conversation_history: list[dict] = []
     if user_id:
         try:
@@ -988,117 +1211,10 @@ async def chat(
         except Exception:
             pass
 
-        try:
-            from core.memory.unified_context import build_unified_memory_context
-
-            umc = await build_unified_memory_context(str(user_id), task)
-            if umc:
-                prompt_sections.append(umc)
-        except Exception:
-            pass
-
-    try:
-        from tools.memoryos_client import mos_retrieve_context
-
-        mos_ctx = await mos_retrieve_context(query=task, user_id=str(user_id))
-        if mos_ctx:
-            prompt_sections.append(f"[Long-term conversation context from MemoryOS:]\n{mos_ctx}")
-    except Exception:
-        pass
-
-    try:
-        from tools.open_memory import om_search, build_om_context
-
-        om_results = await om_search(user_id=str(user_id), query=task, limit=8)
-        om_ctx = build_om_context(om_results)
-        if om_ctx:
-            prompt_sections.append(om_ctx)
-    except Exception:
-        pass
-
-    try:
-        from tools.memory import search_memory, build_memory_context
-
-        legacy_memories = await search_memory(task, top_k=3, user_id=str(user_id))
-        legacy_ctx = await build_memory_context(task, top_k=3, user_id=str(user_id))
-        if legacy_ctx:
-            prompt_sections.append(legacy_ctx)
-    except Exception:
-        pass
-
-    try:
-        from tools.persistence import get_instinct_context
-
-        instinct_block = await get_instinct_context(max_tokens=300)
-        if instinct_block:
-            prompt_sections.append(instinct_block)
-    except Exception:
-        pass
-
-    try:
-        from tools.skill_loader import get_skills_for_agent
-
-        skills_block = get_skills_for_agent(agent_key, max_chars=6000)
-        if skills_block:
-            prompt_sections.append(skills_block)
-    except Exception:
-        pass
-
-    try:
-        prompt_sections.append(build_mode_instructions(agent_key))
-    except Exception:
-        pass
-
-    try:
-        from core.research_policy import maybe_attach_research_context
-
-        r_block, _ran = await maybe_attach_research_context(task, str(user_id), agent_key or "general")
-        if r_block:
-            prompt_sections.append(r_block)
-    except Exception:
-        pass
-
-    if agent_key not in ("computer", "vision"):
-        try:
-            from core.character_voice import (
-                get_debate_trigger,
-                get_humor_nudge,
-                get_opinion_on,
-                get_proactive_check,
-            )
-
-            proactive_nudge = get_proactive_check(task)
-            if proactive_nudge:
-                prompt_sections.append(proactive_nudge)
-
-            debate_block = get_debate_trigger(task)
-            if debate_block:
-                prompt_sections.append(debate_block)
-            else:
-                opinion_block = get_opinion_on(task)
-                if opinion_block:
-                    prompt_sections.append(opinion_block)
-
-            humor_block = get_humor_nudge(task)
-            if humor_block:
-                prompt_sections.append(humor_block)
-
-        except Exception:
-            pass
-
-    system_prompt = "\n\n".join(section for section in prompt_sections if section)
-
-    _word_count = len(task.split()) if task else 0
-    if agent_key not in ("computer", "vision", "think") and _word_count > 12:
-        system_prompt += (
-            "\n\n[INTERNAL REASONING DISCIPLINE]\n"
-            "Before finalising your response, briefly stress-test it: "
-            "ask yourself 'Is this actually correct? What would a smart skeptic push back on?' "
-            "If the self-check reveals a real weakness or blind spot, lead with it honestly. "
-            "If your first take holds up, answer with confidence — no need to hedge. "
-            "This is about intellectual honesty, not performative uncertainty."
-        )
-
+    # Build final messages list
+    messages: list[dict] = list(_audit_messages)  # All system context messages
+    messages.extend(_conversation_history)  # Conversation history
+    # User message — LAST
     if image_b64:
         user_content: Any = [
             {"type": "text", "text": task},
@@ -1106,9 +1222,6 @@ async def chat(
         ]
     else:
         user_content = task
-
-    messages: list[dict] = [{"role": "system", "content": system_prompt}]
-    messages.extend(_conversation_history)
     messages.append({"role": "user", "content": user_content})
 
     _skip_cache = image_b64 is not None or show_thinking or agent_key == "vision"
@@ -1145,6 +1258,10 @@ async def chat(
                     "model": model,
                     "task": task[:200],
                 },
+            )
+            # AUDIT04: Debug logging before every LLM call
+            logger.debug(
+                f"[AUDIT04] Before LLM call: messages={len(messages)}, roles={[m.get('role') for m in messages]}"
             )
             resp = await _call_model(
                 model,
@@ -1207,7 +1324,7 @@ async def chat(
 
             if run_post_hooks:
                 try:
-                    asyncio.create_task(
+                    _task = asyncio.create_task(
                         _post_call_hooks(
                             user_msg=task,
                             response=result,
@@ -1216,6 +1333,7 @@ async def chat(
                             user_id=user_id,
                         )
                     )
+                    _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
                 except Exception:
                     pass
 
@@ -1230,17 +1348,77 @@ async def chat(
                 result = enforce_character(result, agent_key)
             except Exception:
                 pass
+
+            # === SELF-AWARENESS GATE: intercept "I don't know" and search instead ===
+            _search_trigger_sent = False
+            try:
+                from core.self_awareness_gate import (
+                    should_search_instead,
+                    get_search_trigger_message,
+                    build_search_query_from_message,
+                )
+                from tools.web_search import search_web
+
+                if should_search_instead(result, task):
+                    # Send "Lagi cari..." trigger to Telegram (caller should hook this)
+                    try:
+                        _trigger_msg = get_search_trigger_message(task)
+                        # Caller may hook this via a callback if needed
+                        logger.info("Search trigger: %s", _trigger_msg)
+                        _search_trigger_sent = True
+                    except Exception as e:
+                        logger.warning("Failed to send search trigger: %s", e)
+
+                    # Build search query and execute search
+                    search_query = build_search_query_from_message(task)
+                    logger.info("Self-awareness gate searching: %s", search_query)
+                    search_results = await search_web(search_query)
+
+                    if search_results and not search_results.startswith("[Search error"):
+                        # AUDIT04: Inject search results as SYSTEM message (not user message)
+                        tool_result_msg = {
+                            "role": "system",
+                            "content": (
+                                f"[Search Results for: {task}]\n"
+                                f"{search_results}\n\n"
+                                f"Sintesiskan informasi di atas menjadi jawaban yang natural dalam bahasa Indonesia."
+                            ),
+                        }
+                        messages.append(tool_result_msg)
+
+                        # Re-call LLM to synthesize proper response with search context
+                        try:
+                            synth_resp = await _call_model(
+                                model=chain[0],
+                                messages=messages,
+                                temperature=0.7,
+                            )
+                            synth_raw = (synth_resp.choices[0].message.content or "").strip()
+                            if synth_raw:
+                                result = synth_raw
+                                logger.info("Search synthesis successful")
+                        except Exception as e:
+                            logger.warning("Search synthesis failed, appending raw: %s", e)
+                            # Fallback: append raw search results to original response
+                            if search_results:
+                                result = f"{result}\n\n{search_results}"
+                    elif search_results.startswith("[Search error"):
+                        result = f"{result}\n\n{search_results}"
+            except Exception as e:
+                logger.warning("Self-awareness gate error: %s", e)
             try:
                 from core.episodic_narrative import update_narrative_from_conversation
 
-                asyncio.create_task(asyncio.to_thread(update_narrative_from_conversation, task, result))
+                _task = asyncio.create_task(asyncio.to_thread(update_narrative_from_conversation, task, result))
+                _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
             except Exception:
                 pass
             try:
                 from core.self_improvement import buffer_conversation, maybe_run_self_review
 
                 buffer_conversation(task, result)
-                asyncio.create_task(maybe_run_self_review())
+                _task = asyncio.create_task(maybe_run_self_review())
+                _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
             except Exception:
                 pass
             try:
@@ -1254,7 +1432,8 @@ async def chat(
                 try:
                     from core.wiki_manager import schedule_wiki_ingest_exchange
 
-                    asyncio.create_task(schedule_wiki_ingest_exchange(str(user_id), task, result))
+                    _task = asyncio.create_task(schedule_wiki_ingest_exchange(str(user_id), task, result))
+                    _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
                 except Exception:
                     pass
 
@@ -1262,7 +1441,8 @@ async def chat(
                 try:
                     from core.wiki_auto_ingest import on_conversation_turn
 
-                    asyncio.create_task(on_conversation_turn(str(user_id), task, result))
+                    _task = asyncio.create_task(on_conversation_turn(str(user_id), task, result))
+                    _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
                 except Exception:
                     pass
 
@@ -1295,6 +1475,14 @@ async def chat(
                     )
                 except Exception:
                     pass
+
+            # Clear GSA enforcement context after response is complete
+            try:
+                from core.character_enforcer import clear_enforcement_context
+
+                clear_enforcement_context()
+            except Exception:
+                pass
 
             return result, model
 
@@ -1402,7 +1590,8 @@ async def _post_call_hooks(
                 {"role": "user", "content": user_msg},
                 {"role": "assistant", "content": response},
             ]
-            asyncio.create_task(promote_important(recent))
+            _task = asyncio.create_task(promote_important(recent))
+            _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
         except Exception:
             pass
 

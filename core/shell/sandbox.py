@@ -51,7 +51,7 @@ class SandboxConfig:
             r"python.*-c.*http",
             r"perl.*-e.*http",
             r"ruby.*-e.*http",
-            r"nc\s+-\s+[lnp",
+            r"nc\s+-\s+[lnp]",
             r"/dev/tcp/",
             r"/dev/udp/",
             r"chmod\s+777\s+/",

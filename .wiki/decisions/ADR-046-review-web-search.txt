@@ -1,0 +1,57 @@
+### Review: Web Search Result Injection Fix
+**Date:** 2026-04-12
+**Reviewer:** Reviewer Agent
+**Files Reviewed:**
+- `tools/web_search.py`
+- `core/self_awareness_gate.py`
+- `llm_client/__init__.py` (lines 1255-1311)
+
+---
+
+## ✅ PASSED
+
+### `tools/web_search.py`
+1. **Bug #4 Fix — 8-second timeout**: `asyncio.wait_for()` with `timeout=8.0` properly applied (line 26-28)
+2. **Bug #4 Fix — Retry on timeout**: `asyncio.TimeoutError` caught and retry attempted with simplified query (lines 44-75)
+3. **Bug #1 Fix — Proper await**: `DDGS()` wrapped in `asyncio.to_thread()` and awaited correctly (line 27)
+4. **No bare `try/except: pass`**: All error paths return descriptive messages with `logger.warning()` logs
+
+### `core/self_awareness_gate.py`
+1. **Bug #5 Fix — Person search query building**: "cari siapa [name]" properly transforms to "name researcher" (line 91)
+2. **Bug #5 Fix — Academic/professional site suffixes**: Person searches include `site:linkedin.com OR site:researchgate.net OR site:scholar.google.com` (line 103)
+3. **Query pattern cleanup**: Fillers (bisa, coba, tolong, etc.) properly stripped before search (lines 81-82)
+
+### `llm_client/__init__.py`
+1. **Bug #1 Fix — Search properly awaited**: `search_results = await search_web(search_query)` at line 1278
+2. **Bug #2 Fix — Trigger message called**: `get_search_trigger_message(task)` called at line 1268
+3. **Bug #2 Fix — Results injected into LLM context**: Search results added as a user role message (lines 1282-1290) with synthesis instruction
+4. **Bug #2 Fix — LLM re-called for synthesis**: `_call_model()` re-executed with search context at lines 1294-1301
+5. **Bug #2 Fix — Fallback on synthesis failure**: Raw search results appended to response if re-call fails (lines 1303-1307)
+
+---
+
+## ⚠️ WARNINGS
+
+**All warnings resolved.** Lines 73-80 in web_search.py now use generic error messages without exposing raw exception strings.
+
+---
+
+## SUMMARY
+
+| Bug | Status |
+|-----|--------|
+| Bug #1 — Search not awaited | ✅ Fixed |
+| Bug #2 — Search result dropped | ✅ Fixed |
+| Bug #3 — Vague "kemungkinan" errors | ✅ Fixed (honest messages used) |
+| Bug #4 — No timeout/retry | ✅ Fixed (8s timeout + retry) |
+| Bug #5 — Poor person search queries | ✅ Fixed (adds researcher + site suffixes) |
+
+**Verdict**: ✅ **APPROVED FOR MERGE** — All core functionality is correct. Minor warning about error message quality (cosmetic only).
+
+---
+
+## Post-Review Updates (2026-04-12)
+
+- Cosmetic warnings fixed: web_search.py lines 73-80 now use generic user-facing messages
+- Bot restarted and running (PID 219019)
+- All 315 tests pass

@@ -92,7 +92,7 @@ def _pick_trigger(user_id: int) -> str | None:
 
 async def _build_message(trigger: str, user_id: int | None = None) -> str:
     """Generate a context-appropriate proactive message."""
-    jst_hour = (datetime.utcnow().hour + 9) % 24
+    jst_hour = (datetime.now(timezone.utc).hour + 9) % 24
 
     if trigger == "check_in":
         greetings = [

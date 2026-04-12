@@ -1,4 +1,5 @@
 """Artifact preview — serves generated HTML/JS/CSS on localhost for 10 minutes."""
+
 from __future__ import annotations
 
 import asyncio
@@ -7,6 +8,8 @@ import os
 import tempfile
 import time
 import uuid
+
+import aiofiles
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -28,13 +31,14 @@ async def serve_artifact(html_content: str, title: str = "Legion Artifact") -> s
     tmp_dir = tempfile.mkdtemp(prefix="legion_artifact_")
     html_path = os.path.join(tmp_dir, "index.html")
 
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
+    async with aiofiles.open(html_path, "w", encoding="utf-8") as f:
+        await f.write(html_content)
 
     expires_at = time.time() + _TTL_SECONDS
     _active_artifacts[artifact_id] = (tmp_dir, expires_at)
 
-    asyncio.create_task(_expire_artifact(artifact_id))
+    task = asyncio.create_task(_expire_artifact(artifact_id))
+    task.add_done_callback(lambda t: logger.error(t.exception()) if t.exception() else None)
 
     return f"http://localhost:{_ARTIFACT_PORT}/{artifact_id}/"
 
@@ -45,6 +49,7 @@ async def _expire_artifact(artifact_id: str) -> None:
         tmp_dir, _ = _active_artifacts.pop(artifact_id)
         try:
             import shutil
+
             shutil.rmtree(tmp_dir, ignore_errors=True)
             logger.debug("Artifact %s expired and cleaned up", artifact_id)
         except Exception:
@@ -72,8 +77,8 @@ async def start_artifact_server() -> None:
             if not os.path.exists(full_path):
                 full_path = os.path.join(tmp_dir, "index.html")
 
-            with open(full_path, "r", encoding="utf-8") as f:
-                content = f.read()
+            async with aiofiles.open(full_path, "r", encoding="utf-8") as f:
+                content = await f.read()
 
             content_type = "text/html"
             if file_path.endswith(".css"):
@@ -106,14 +111,12 @@ async def cmd_preview(msg: Message) -> None:
     raw = (msg.text or "").removeprefix("/preview").strip()
     if not raw:
         await msg.answer(
-            "Usage: <code>/preview &lt;html&gt;</code>\n"
-            "Or let the bot auto-preview when it generates HTML code.",
+            "Usage: <code>/preview &lt;html&gt;</code>\nOr let the bot auto-preview when it generates HTML code.",
             parse_mode="HTML",
         )
         return
     url = await serve_artifact(raw, title="Legion Preview")
     await msg.answer(
-        f"🌐 Preview ready (10 min):\n<code>{url}</code>\n\n"
-        "Open in browser on this machine.",
+        f"🌐 Preview ready (10 min):\n<code>{url}</code>\n\nOpen in browser on this machine.",
         parse_mode="HTML",
     )

@@ -1,0 +1,84 @@
+{
+  "lesson_templates": [
+    {
+      "id": "greetings",
+      "title": "Salam dan Ucapan Sehari-hari",
+      "title_jp": "挨拶",
+      "description": "Belajar salam dan ucapan selamat dalam Bahasa Jepang",
+      "estimated_time": "10 menit",
+      "vocab": ["こんにちは", "おはよう", "こんばんは", "さようなら", "ありがとう"],
+      "grammar": ["は", "の"],
+      "situations": ["konbini", "stasiun", "kampus"]
+    },
+    {
+      "id": "self_introduction",
+      "title": "Perkenalan Diri (Jikoshoukai)",
+      "title_jp": "自己紹介",
+      "description": "Cara memperkenalkan diri dalam Bahasa Jepang",
+      "estimated_time": "15 menit",
+      "vocab": ["名前", "国籍", "出身", "年齢", "職業", "学生"],
+      "grammar": ["は", "です", "が"],
+      "situations": ["kampus", "orientation", "pertemuan baru"]
+    },
+    {
+      "id": "numbers",
+      "title": "Angka dan Bilangan",
+      "title_jp": "数字",
+      "description": "Angka dalam Bahasa Jepang (1-100)",
+      "estimated_time": "15 menit",
+      "vocab": ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百"],
+      "grammar": ["を", "で", "が"],
+      "situations": ["belanja", "uang", "waktu"]
+    },
+    {
+      "id": "time",
+      "title": "Waktu dan Jam",
+      "title_jp": "時",
+      "description": "Cara mengatakan waktu dalam Bahasa Jepang",
+      "estimated_time": "10 menit",
+      "vocab": ["時", "分", "半", "今日", "明日", "昨日", "朝", "昼", "夜"],
+      "grammar": ["に", "まで"],
+      "situations": ["jadwal", "约定", "waktu 약속"]
+    },
+    {
+      "id": "directions",
+      "title": "Arah dan Tempat",
+      "title_jp": "方角",
+      "description": "Mengarah dan bertanya tempat",
+      "estimated_time": "15 menit",
+      "vocab": ["右", "左", "前", "後ろ", "上", "下", "中", "外"],
+      "grammar": ["で", "に", "の"],
+      "situations": ["stasiun", "jalan", "tempat umum"]
+    },
+    {
+      "id": "shopping",
+      "title": "Belanja dan Transaksi",
+      "title_jp": "買い物",
+      "description": "Berbelanja di toko dan konbini",
+      "estimated_time": "15 menit",
+      "vocab": ["いくら", "買い物", "可愛い", "高い", "安い", "現金"],
+      "grammar": ["を", "で", "のが"],
+      "situations": ["konbini", "toko", "pasar"]
+    },
+    {
+      "id": "food",
+      "title": "Makanan dan Minuman",
+      "title_jp": "食事",
+      "description": "Memesan makanan dan minuman",
+      "estimated_time": "15 menit",
+      "vocab": ["食べる", "飲む", "美味しい", "食堂", "メニュー", "注文"],
+      "grammar": ["を", "たい", "ましょう"],
+      "situations": ["restaurant", "食堂 kampus", "konbini"]
+    },
+    {
+      "id": "university",
+      "title": "Bahasa Jepang di Kampus",
+      "title_jp": "大学用語",
+      "description": "Kosakata untuk kehidupan kampus",
+      "estimated_time": "15 menit",
+      "vocab": ["教室", "研究室", "教授", "学生", "試験", "課題"],
+      "grammar": ["に", "で", "は"],
+      "situations": ["kampus", "lab", "pertemuan dengan sensei"]
+    }
+  ]
+}

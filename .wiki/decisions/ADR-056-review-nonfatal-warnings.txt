@@ -1,0 +1,61 @@
+# Review: ADR-056 Fix Non-Fatal Warnings (Shutdown Cleanup)
+
+**Date**: 2026-04-12
+**Reviewer**: Reviewer Agent
+**Task**: Verify shutdown cleanup implementation for ResourceWarnings fix
+
+---
+
+## Summary
+
+All three files contain the expected cleanup code. No blocking issues found. Tests pass.
+
+---
+
+## ✅ Passed
+
+### 1. `tools/memory.py`
+- `close_memory_db()` function added (lines 508-512)
+- Function is a proper no-op with docstring explaining aiosqlite uses context managers
+- Exported in `__all__` at line 619
+
+### 2. `core/memory/tiers.py`
+- `close()` method added to `ArchivalMemory` (lines 211-213) — calls `self.conn.close()`
+- `close()` method added to `RecallMemory` (lines 315-317) — calls `self.conn.close()`
+- Both methods have proper docstrings
+
+### 3. `main.py` — `on_shutdown()` cleanup
+- `close_memory_db()` called at lines 1135-1140
+- `end_session()` from agentops_client called at lines 1141-1146
+- `get_memory().close()` called at lines 1147-1153 (memory_manager cleanup)
+- All cleanup calls wrapped in try/except with `pass` — non-fatal
+
+### Tests
+- 373 tests passed (pytest, asyncio mode auto)
+
+---
+
+## ⚠️ Warnings
+
+### Minor: `close_memory_db()` is a no-op
+The function intentionally does nothing because aiosqlite uses context managers (`async with aiosqlite.connect()`). This is correct but worth noting:
+- If `tools/memory.py` ever accumulates connection state that needs cleanup, this stub should be enhanced
+- Current implementation is correct for the stated problem (ResourceWarnings from SQLite connections in `tiers.py`, not `tools/memory.py`)
+
+---
+
+## ❌ Blockers
+
+None.
+
+---
+
+## Conclusion
+
+Implementation matches ADR-056 specification exactly:
+- ✅ `close_memory_db()` added to `tools/memory.py`
+- ✅ `close()` method added to `ArchivalMemory` and `RecallMemory` in `core/memory/tiers.py`
+- ✅ All cleanup wired into `on_shutdown()` in `main.py`
+- ✅ Tests pass
+
+Safe to merge.

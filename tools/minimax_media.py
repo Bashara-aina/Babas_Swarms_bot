@@ -189,6 +189,30 @@ async def generate_image(prompt: str, aspect_ratio: str = "1:1") -> str:
 # ── Speech Generation ───────────────────────────────────────────────────────────
 
 
+async def understand_audio(audio_path: str) -> str:
+    """Transcribe an audio file using faster-whisper (GPU-accelerated).
+
+    This function delegates to core.utils.multimodal_processor.transcribe_voice.
+    Keeping it here maintains backward compatibility with existing import sites.
+
+    Args:
+        audio_path: Path to local audio file (MP3, WAV, OGG, M4A, etc.).
+
+    Returns:
+        Transcript text, or an error string.
+    """
+    try:
+        import os
+        from core.utils.multimodal_processor import transcribe_voice
+
+        with open(audio_path, "rb") as f:
+            audio_data = f.read()
+        return await transcribe_voice(audio_data, extension=os.path.splitext(audio_path)[1] or ".mp3")
+    except Exception as exc:
+        logger.warning("understand_audio failed for %s: %s", audio_path, exc)
+        return f"Error: transcription failed — {exc}"
+
+
 async def generate_speech(
     text: str,
     voice_id: str = "English_expressive_narrator",

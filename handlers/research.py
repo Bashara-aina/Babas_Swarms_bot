@@ -1,8 +1,10 @@
 """Research handlers: /scrape /research /paper /ask_paper /workernet_papers."""
+
 from __future__ import annotations
 
 import asyncio
 import html as html_mod
+import logging
 import os
 from pathlib import Path
 
@@ -32,9 +34,13 @@ async def cmd_scrape(msg: Message) -> None:
         return
     status_msg = await msg.answer(f"🔍 scraping <code>{url}</code>…", parse_mode="HTML")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(
+        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
+    )
 
     try:
         from tools.web_browser import browse_url
+
         result = await browse_url(url)
         typing_task.cancel()
         await status_msg.delete()
@@ -58,7 +64,7 @@ async def cmd_scrape(msg: Message) -> None:
         typing_task.cancel()
         output = await run_shell_command(
             f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
-            "python3 -c \""
+            'python3 -c "'
             "import sys; from html.parser import HTMLParser\n"
             "class P(HTMLParser):\n"
             "    def __init__(self): super().__init__(); self.d=[]; self.skip=False\n"
@@ -67,7 +73,7 @@ async def cmd_scrape(msg: Message) -> None:
             "    def handle_data(self,d):\n"
             "        if not self.skip and d.strip(): self.d.append(d.strip())\n"
             "p=P(); p.feed(sys.stdin.read()); print('\\n'.join(p.d[:100]))"
-            "\"",
+            '"',
             timeout=25,
         )
         await status_msg.delete()
@@ -96,6 +102,9 @@ async def cmd_research(msg: Message) -> None:
         return
     status_msg = await msg.answer(f"🧠 [Plan] researching: <i>{topic[:80]}</i>…", parse_mode="HTML")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(
+        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
+    )
 
     if os.getenv("LEGION_RESEARCH_USE_PIPELINE", "0").strip().lower() in ("1", "true", "yes", "on"):
         try:
@@ -220,8 +229,12 @@ async def cmd_paper(msg: Message) -> None:
         return
     status_msg = await msg.answer(f"searching arXiv: {query[:50]}...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(
+        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
+    )
     try:
         from tools.arxiv import search_arxiv
+
         papers = await search_arxiv(query, max_results=3)
         typing_task.cancel()
         await status_msg.delete()
@@ -264,8 +277,12 @@ async def cmd_ask_paper(msg: Message) -> None:
     question = parts[1] if len(parts) > 1 else "Summarize the key contributions."
     status_msg = await msg.answer(f"downloading {arxiv_id}...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(
+        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
+    )
     try:
         from tools.arxiv import download_paper, extract_paper_text, analyze_paper
+
         pdf_path = await download_paper(arxiv_id)
         await status_msg.edit_text("extracting text...")
         paper_text = extract_paper_text(pdf_path)
@@ -276,6 +293,7 @@ async def cmd_ask_paper(msg: Message) -> None:
         await send_chunked(msg, analysis, model_used="debug/paper-analysis")
         try:
             from tools.memory import auto_save_research
+
             await auto_save_research(analysis, arxiv_id)
         except Exception:
             pass
@@ -291,10 +309,17 @@ async def cmd_workernet_papers(msg: Message) -> None:
         return
     status_msg = await msg.answer("fetching 6 WorkerNet papers...")
     typing_task = asyncio.create_task(_keep_typing(msg))
+    typing_task.add_done_callback(
+        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
+    )
     try:
         from tools.arxiv import (
-            WORKERNET_PAPERS, download_paper, extract_paper_text, analyze_paper,
+            WORKERNET_PAPERS,
+            download_paper,
+            extract_paper_text,
+            analyze_paper,
         )
+
         for name, info in WORKERNET_PAPERS.items():
             try:
                 await status_msg.edit_text(f"processing: {name}...")
@@ -310,6 +335,7 @@ async def cmd_workernet_papers(msg: Message) -> None:
                 await send_chunked(msg, header + analysis, model_used="debug")
                 try:
                     from tools.memory import auto_save_research
+
                     await auto_save_research(header + analysis, info["arxiv_id"])
                 except Exception:
                     pass

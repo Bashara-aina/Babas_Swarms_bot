@@ -4,6 +4,7 @@ Usage in any handler:
     from handlers.streaming import stream_chat
     await stream_chat(msg, task, agent_key="coding")
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -19,7 +20,7 @@ import router as agents
 
 logger = logging.getLogger(__name__)
 
-_EDIT_INTERVAL = 0.8   # seconds between edits (avoid Telegram flood limits)
+_EDIT_INTERVAL = 0.8  # seconds between edits (avoid Telegram flood limits)
 _STREAM_ENABLED = os.getenv("STREAM_RESPONSES", "true").lower() == "true"
 
 
@@ -33,6 +34,7 @@ async def stream_chat(
     if not _STREAM_ENABLED:
         # Fall back to non-streaming
         from handlers.shared import _execute_chat
+
         await _execute_chat(msg, task, forced_agent=agent_key)
         return
 
@@ -62,7 +64,7 @@ async def stream_chat(
             delta = chunk.choices[0].delta.content or ""
             accumulated += delta
 
-            now = asyncio.get_event_loop().time()
+            now = asyncio.get_running_loop().time()
             if now - last_edit_time >= _EDIT_INTERVAL and accumulated.strip():
                 try:
                     safe = html_mod.escape(accumulated[-3800:])  # keep last 3800 chars
@@ -77,6 +79,7 @@ async def stream_chat(
         # Final edit with full response
         if accumulated.strip():
             from handlers.shared import send_chunked
+
             await status_msg.delete()
             await send_chunked(msg, accumulated, model_used=model_used)
         else:
@@ -90,4 +93,5 @@ async def stream_chat(
         except Exception:
             pass
         from handlers.shared import _execute_chat
+
         await _execute_chat(msg, task, forced_agent=key)

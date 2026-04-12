@@ -15,11 +15,20 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   chromadb:
     image: ghcr.io/chroma-core/chroma:latest
@@ -32,11 +41,20 @@ services:
       - ALLOW_RESET=TRUE
       - ANONYMIZED_TELEMETRY=FALSE
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
       interval: 15s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   n8n:
     image: n8nio/n8n:latest
@@ -45,6 +63,8 @@ services:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
+    env_file:
+      - .env
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
@@ -55,11 +75,20 @@ services:
       - WEBHOOK_URL=http://localhost:5678/
       - GENERIC_TIMEZONE=Asia/Tokyo
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 384m
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
 
   # Uncomment to run the bot itself in Docker (needs X11/display passthrough)
   # legion-bot:
@@ -76,15 +105,26 @@ services:
   #       condition: service_healthy
   #     chromadb:
   #       condition: service_healthy
-  #   # GPU passthrough for RTX 3060 (NVIDIA Container Toolkit required)
   #   deploy:
   #     resources:
+  #       limits:
+  #         memory: 2g
   #       reservations:
   #         devices:
   #           - driver: nvidia
   #             count: 1
   #             capabilities: [gpu]
   #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       max-size: "50m"
+  #       max-file: "3"
 
   # --- Optional profiles (do not start by default) ---
   # docker compose --profile livekit up -d livekit

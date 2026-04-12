@@ -11,8 +11,10 @@ Handles:
   F.voice  — voice note messages (transcribe → LLM → optional TTS reply)
   F.audio  — audio file uploads (same pipeline)
 """
+
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import tempfile
@@ -49,12 +51,13 @@ async def _transcribe(ogg_path: str) -> str:
             import openai
 
             client = openai.AsyncOpenAI(api_key=openai_key)
-            with open(ogg_path, "rb") as f:
-                result = await client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=f,
-                    language="id",
-                )
+            loop = asyncio.get_running_loop()
+            audio_bytes = await loop.run_in_executor(None, lambda: open(ogg_path, "rb").read())
+            result = await client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_bytes,
+                language="id",
+            )
             return result.text
         except Exception as exc:
             logger.warning("OpenAI Whisper failed: %s", exc)
@@ -64,14 +67,15 @@ async def _transcribe(ogg_path: str) -> str:
         try:
             import httpx
 
+            loop = asyncio.get_running_loop()
+            audio_bytes = await loop.run_in_executor(None, lambda: open(ogg_path, "rb").read())
             async with httpx.AsyncClient(timeout=30) as client:
-                with open(ogg_path, "rb") as f:
-                    resp = await client.post(
-                        "https://api.groq.com/openai/v1/audio/transcriptions",
-                        headers={"Authorization": f"Bearer {groq_key}"},
-                        files={"file": ("audio.ogg", f, "audio/ogg")},
-                        data={"model": "whisper-large-v3", "response_format": "text"},
-                    )
+                resp = await client.post(
+                    "https://api.groq.com/openai/v1/audio/transcriptions",
+                    headers={"Authorization": f"Bearer {groq_key}"},
+                    files={"file": ("audio.ogg", audio_bytes, "audio/ogg")},
+                    data={"model": "whisper-large-v3", "response_format": "text"},
+                )
                 resp.raise_for_status()
                 return resp.text.strip()
         except Exception as exc:
@@ -84,7 +88,9 @@ async def _transcribe(ogg_path: str) -> str:
         result = model.transcribe(ogg_path)
         return result["text"]
     except ImportError as exc:
-        raise RuntimeError("No Whisper available. Set OPENAI_API_KEY or GROQ_API_KEY, or install openai-whisper") from exc
+        raise RuntimeError(
+            "No Whisper available. Set OPENAI_API_KEY or GROQ_API_KEY, or install openai-whisper"
+        ) from exc
 
 
 async def _reply_with_optional_tts(msg: Message, response: str) -> None:
@@ -104,6 +110,7 @@ async def _reply_with_optional_tts(msg: Message, response: str) -> None:
 
 
 # ── Voice mode commands ────────────────────────────────────────────────────────────────────────────────
+
 
 @router.message(Command("voice_on"))
 async def cmd_voice_on(msg: Message) -> None:
@@ -151,23 +158,24 @@ async def cmd_vcsearch(msg: Message) -> None:
     """
     if not is_allowed(msg):
         return
-    
+
     query = msg.text.replace("/vcsearch", "").strip()
     if not query:
         await msg.answer("❌ Usage: /vcsearch <query>")
         return
-    
+
     # Search voice transcripts (implementation depends on storage)
     # For now, return placeholder
     await msg.answer(
         f"🔍 Searching voice transcripts for: <b>{query}</b>\n\n"
         "⚠️ Voice transcript search not yet implemented.\n"
         "This feature requires a transcript storage backend.",
-        parse_mode="HTML"
+        parse_mode="HTML",
     )
 
 
 # ── Voice/audio message handlers ──────────────────────────────────────────────────────────────────
+
 
 @router.message(F.voice)
 async def handle_voice(msg: Message) -> None:

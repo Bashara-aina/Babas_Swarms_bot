@@ -6,14 +6,6 @@ import subprocess
 from typing import Any
 
 FEATURE_FLAGS: dict[str, dict[str, Any]] = {
-    "openai_agents": {"pkg": "agents", "env": None, "enabled": False},
-    "owl": {"pkg": "camel", "env": None, "enabled": False},
-    "ag2": {"pkg": "autogen", "env": None, "enabled": False},
-    "smolagents": {"pkg": "smolagents", "env": None, "enabled": False},
-    "pydantic_ai": {"pkg": "pydantic_ai", "env": None, "enabled": False},
-    "agentops": {"pkg": "agentops", "env": "AGENTOPS_API_KEY", "enabled": False},
-    "mirofish": {"pkg": None, "env": None, "enabled": False},
-    "ruflo": {"pkg": None, "env": "OPENROUTER_API_KEY", "enabled": False},
     "gemma4_local": {"pkg": None, "env": None, "enabled": False},
 }
 
@@ -67,3 +59,16 @@ def print_health_report(results: dict[str, dict[str, Any]]) -> None:
         icon = "✅" if status.get("available") else "⚠️ "
         print(f"  {icon} {feature:<22} {status.get('reason', '')}")
     print("=" * 60 + "\n")
+
+
+# Archived in AUDIT-13 — no pip package ever installed / key never set
+_ARCHIVED_FEATURES: dict[str, dict[str, Any]] = {
+    "openai_agents": {"status": "abandoned", "pkg": "agents", "env": None, "enabled": False},
+    "owl": {"status": "abandoned", "pkg": "camel", "env": None, "enabled": False},
+    "ag2": {"status": "abandoned", "pkg": "autogen", "env": None, "enabled": False},
+    "smolagents": {"status": "abandoned", "pkg": "smolagents", "env": None, "enabled": False},
+    "pydantic_ai": {"status": "abandoned", "pkg": "pydantic_ai", "env": None, "enabled": False},
+    "agentops": {"status": "abandoned", "pkg": "agentops", "env": "AGENTOPS_API_KEY", "enabled": False},
+    "mirofish": {"status": "abandoned", "pkg": None, "env": None, "enabled": False},
+    "ruflo": {"status": "abandoned", "pkg": None, "env": "OPENROUTER_API_KEY", "enabled": False},
+}

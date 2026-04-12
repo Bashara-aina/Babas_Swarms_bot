@@ -29,33 +29,34 @@ from typing import Any, Callable, Coroutine, Optional
 logger = logging.getLogger(__name__)
 
 MAX_RUNTIME_HOURS = 10
-HEARTBEAT_INTERVAL = 900   # 15 min
+HEARTBEAT_INTERVAL = 900  # 15 min
 CHECKPOINT_PATH = Path.home() / ".legion_overnight_checkpoint.json"
 
 
 # ── Status & Models ────────────────────────────────────────────────────────────
 
+
 class TaskStatus(str, Enum):
-    PENDING   = "pending"
-    RUNNING   = "running"
-    DONE      = "done"
-    FAILED    = "failed"
-    SKIPPED   = "skipped"
+    PENDING = "pending"
+    RUNNING = "running"
+    DONE = "done"
+    FAILED = "failed"
+    SKIPPED = "skipped"
 
 
 @dataclass
 class OvernightTask:
-    task_id:    str
-    title:      str
-    prompt:     str
-    agent:      str          # agent key from AGENT_MODELS
-    status:     TaskStatus   = TaskStatus.PENDING
-    result:     str          = ""
-    error:      str          = ""
-    started_at: float        = 0.0
-    ended_at:   float        = 0.0
-    tokens_used: int         = 0
-    depends_on: list         = field(default_factory=list)  # task_ids this depends on
+    task_id: str
+    title: str
+    prompt: str
+    agent: str  # agent key from AGENT_MODELS
+    status: TaskStatus = TaskStatus.PENDING
+    result: str = ""
+    error: str = ""
+    started_at: float = 0.0
+    ended_at: float = 0.0
+    tokens_used: int = 0
+    depends_on: list = field(default_factory=list)  # task_ids this depends on
 
     @property
     def duration_sec(self) -> float:
@@ -70,14 +71,14 @@ class OvernightTask:
         secs = self.duration_sec
         if secs < 60:
             return f"{secs:.0f}s"
-        return f"{secs/60:.1f}m"
+        return f"{secs / 60:.1f}m"
 
 
 # ── Global state ────────────────────────────────────────────────────────────────
 
 # Map: job_id → list of OvernightTask
 _jobs: dict[str, list] = {}
-_active_job: Optional[str] = None       # currently running job id
+_active_job: Optional[str] = None  # currently running job id
 _job_cancelled: dict[str, bool] = {}
 _job_paused: dict[str, bool] = {}
 
@@ -95,15 +96,16 @@ def _update_agent_status(
     job_id: str = "",
 ) -> None:
     AGENT_STATUS[agent] = {
-        "status":     status,
-        "task":       task_title,
-        "progress":   progress,
-        "job_id":     job_id,
+        "status": status,
+        "task": task_title,
+        "progress": progress,
+        "job_id": job_id,
         "updated_at": time.time(),
     }
 
 
 # ── Checkpoint helpers ────────────────────────────────────────────────────────
+
 
 def _save_checkpoint(job_id: str, tasks: list) -> None:
     try:
@@ -152,6 +154,7 @@ def clear_checkpoint() -> None:
 
 # ── Job creation helpers ───────────────────────────────────────────────────────
 
+
 def create_job(tasks: list) -> tuple:
     """
     Create a new overnight job.
@@ -162,11 +165,11 @@ def create_job(tasks: list) -> tuple:
     task_objs = []
     for t in tasks:
         ot = OvernightTask(
-            task_id    = str(uuid.uuid4())[:6],
-            title      = t["title"],
-            prompt     = t["prompt"],
-            agent      = t.get("agent", "general"),
-            depends_on = list(t.get("depends_on", [])),  # BUG FIX: always copy the list
+            task_id=str(uuid.uuid4())[:6],
+            title=t["title"],
+            prompt=t["prompt"],
+            agent=t.get("agent", "general"),
+            depends_on=list(t.get("depends_on", [])),  # BUG FIX: always copy the list
         )
         task_objs.append(ot)
     _jobs[job_id] = task_objs
@@ -198,6 +201,7 @@ async def plan_job_with_llm(
     raw = await llm_call(AGENT_MODELS["architect"], system, f"Goal: {goal}")
 
     import re
+
     # Strip markdown fences if present
     raw = re.sub(r"```(?:json)?\n?", "", raw).strip().rstrip("`")
 
@@ -212,12 +216,14 @@ async def plan_job_with_llm(
                 continue
             if "title" not in t or "prompt" not in t:
                 continue
-            validated.append({
-                "title":      str(t.get("title", f"Task {i+1}")),
-                "prompt":     str(t.get("prompt", "")),
-                "agent":      str(t.get("agent", "general")),
-                "depends_on": list(t.get("depends_on", [])),
-            })
+            validated.append(
+                {
+                    "title": str(t.get("title", f"Task {i + 1}")),
+                    "prompt": str(t.get("prompt", "")),
+                    "agent": str(t.get("agent", "general")),
+                    "depends_on": list(t.get("depends_on", [])),
+                }
+            )
         return validated if validated else [{"title": goal[:80], "prompt": goal, "agent": "general", "depends_on": []}]
     except (json.JSONDecodeError, ValueError):
         logger.warning("LLM returned invalid JSON for task planning, using single-task fallback")
@@ -225,6 +231,7 @@ async def plan_job_with_llm(
 
 
 # ── Main runner ────────────────────────────────────────────────────────────────
+
 
 async def run_overnight_job(
     job_id: str,
@@ -260,13 +267,13 @@ async def run_overnight_job(
         f"🌙 <b>Overnight job started</b> — Job <code>{job_id}</code>\n"
         f"📋 <b>{total} tasks</b> queued across agents\n"
         f"⏰ Max runtime: {MAX_RUNTIME_HOURS}h\n\n"
-        + "\n".join(f"  {i+1}. [{t.agent}] {t.title}" for i, t in enumerate(tasks))
+        + "\n".join(f"  {i + 1}. [{t.agent}] {t.title}" for i, t in enumerate(tasks))
     )
 
     # Start heartbeat
-    heartbeat_task = asyncio.create_task(
-        _heartbeat_loop(job_id, tasks, notify_fn),
-        name=f"heartbeat-{job_id}"
+    heartbeat_task = asyncio.create_task(_heartbeat_loop(job_id, tasks, notify_fn), name=f"heartbeat-{job_id}")
+    heartbeat_task.add_done_callback(
+        lambda t: logger.error("Heartbeat task failed: %s", t.exception()) if t.exception() else None
     )
 
     completed_ids: set = set()
@@ -287,7 +294,8 @@ async def run_overnight_job(
 
             # Find tasks ready to run (deps met, not yet started)
             ready = [
-                t for t in tasks
+                t
+                for t in tasks
                 if t.status == TaskStatus.PENDING
                 and all(dep in completed_ids or dep in failed_ids for dep in t.depends_on)
             ]
@@ -315,12 +323,15 @@ async def run_overnight_job(
                 _update_agent_status(t.agent, "🟡 running", t.title, "starting...", job_id)
                 if update_dashboard_fn:
                     await update_dashboard_fn()
-                run_tasks.append(
-                    asyncio.create_task(
-                        _execute_single_task(t, job_id, llm_call, notify_fn, update_dashboard_fn),
-                        name=f"task-{t.task_id}"
+                task = asyncio.create_task(
+                    _execute_single_task(t, job_id, llm_call, notify_fn, update_dashboard_fn), name=f"task-{t.task_id}"
+                )
+                task.add_done_callback(
+                    lambda t: (
+                        logger.error("Task %s failed: %s", t.exception(), t.exception()) if t.exception() else None
                     )
                 )
+                run_tasks.append(task)
 
             if run_tasks:
                 results = await asyncio.gather(*run_tasks, return_exceptions=True)
@@ -372,12 +383,13 @@ async def _execute_single_task(
     )
 
     try:
-        await notify_fn(
-            f"▶️ <b>[{agent_key.upper()}]</b> Starting: <i>{task.title}</i>"
-        )
+        await notify_fn(f"▶️ <b>[{agent_key.upper()}]</b> Starting: <i>{task.title}</i>")
         _update_agent_status(agent_key, "🟡 running", task.title, "calling LLM...", job_id)
         if update_dashboard_fn:
-            asyncio.create_task(update_dashboard_fn())
+            dashboard_task = asyncio.create_task(update_dashboard_fn())
+            dashboard_task.add_done_callback(
+                lambda t: logger.error("Dashboard update failed: %s", t.exception()) if t.exception() else None
+            )
 
         result = await llm_call(model, system, task.prompt)
 
@@ -389,6 +401,7 @@ async def _execute_single_task(
         # Save to memory
         try:
             from tools.memory import add_memory
+
             await add_memory(
                 f"Overnight task [{agent_key}]: {task.title}\n\nResult:\n{result[:800]}",
                 tags=["overnight", agent_key, job_id],
@@ -401,7 +414,7 @@ async def _execute_single_task(
         header = f"✅ <b>[{agent_key.upper()}]</b> <i>{task.title}</i> — done in {task.duration_str}\n\n"
         result_preview = result[:3500]
         if len(result) > 3500:
-            result_preview += f"\n\n<i>...({len(result)-3500} chars truncated — saved to memory)</i>"
+            result_preview += f"\n\n<i>...({len(result) - 3500} chars truncated — saved to memory)</i>"
         await notify_fn(header + result_preview)
 
     except Exception as e:
@@ -410,13 +423,13 @@ async def _execute_single_task(
         task.ended_at = time.time()
         _update_agent_status(agent_key, "🔴 failed", task.title, str(e)[:80], job_id)
         logger.exception("Task %s failed: %s", task.task_id, e)
-        await notify_fn(
-            f"❌ <b>[{agent_key.upper()}]</b> <i>{task.title}</i> failed\n"
-            f"<code>{str(e)[:300]}</code>"
-        )
+        await notify_fn(f"❌ <b>[{agent_key.upper()}]</b> <i>{task.title}</i> failed\n<code>{str(e)[:300]}</code>")
 
     if update_dashboard_fn:
-        asyncio.create_task(update_dashboard_fn())
+        dashboard_task = asyncio.create_task(update_dashboard_fn())
+        dashboard_task.add_done_callback(
+            lambda t: logger.error("Dashboard update failed: %s", t.exception()) if t.exception() else None
+        )
 
 
 async def _heartbeat_loop(
@@ -429,10 +442,10 @@ async def _heartbeat_loop(
             await asyncio.sleep(HEARTBEAT_INTERVAL)
             if _job_cancelled.get(job_id):
                 break
-            done   = sum(1 for t in tasks if t.status == TaskStatus.DONE)
+            done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
             failed = sum(1 for t in tasks if t.status == TaskStatus.FAILED)
             running = [t.title for t in tasks if t.status == TaskStatus.RUNNING]
-            total  = len(tasks)
+            total = len(tasks)
             running_str = ", ".join(running) if running else "none"
             await notify_fn(
                 f"💓 <b>Overnight heartbeat</b> — Job <code>{job_id}</code>\n"
@@ -443,8 +456,8 @@ async def _heartbeat_loop(
 
 
 def _build_summary(job_id: str, tasks: list, total_sec: float) -> str:
-    done    = [t for t in tasks if t.status == TaskStatus.DONE]
-    failed  = [t for t in tasks if t.status == TaskStatus.FAILED]
+    done = [t for t in tasks if t.status == TaskStatus.DONE]
+    failed = [t for t in tasks if t.status == TaskStatus.FAILED]
     skipped = [t for t in tasks if t.status == TaskStatus.SKIPPED]
     total_min = total_sec / 60
 
@@ -469,6 +482,7 @@ def _build_summary(job_id: str, tasks: list, total_sec: float) -> str:
 
 
 # ── Control functions ────────────────────────────────────────────────────────
+
 
 def cancel_job(job_id: str) -> str:
     if job_id not in _jobs:
@@ -504,7 +518,7 @@ def list_all_jobs() -> str:
         return "No overnight jobs registered."
     lines = ["<b>🌙 Overnight Jobs</b>\n"]
     for jid, tasks in _jobs.items():
-        done  = sum(1 for t in tasks if t.status == TaskStatus.DONE)
+        done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
         total = len(tasks)
         active_marker = " ← active" if jid == _active_job else ""
         lines.append(f"  <code>{jid}</code> — {done}/{total} done{active_marker}")

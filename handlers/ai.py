@@ -1,4 +1,5 @@
 """AI agent handlers: /run /think /agent /swarm /multi_execute /orchestrate /multi_plan /loop* + NL."""
+
 from __future__ import annotations
 
 import asyncio
@@ -28,6 +29,7 @@ async def _send_swarm_visualization(msg: Message) -> None:
     if not msg.from_user:
         return
     from tools.swarm_observability import build_swarm_viz_html
+
     report = build_swarm_viz_html(msg.from_user.id)
     await send_chunked(msg, report, model_used="swarm-observability")
 
@@ -35,108 +37,32 @@ async def _send_swarm_visualization(msg: Message) -> None:
 # ── /think ────────────────────────────────────────────────────────────────────
 @router.message(Command("think"))
 async def cmd_think(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
+    """Handle /think command — layered extended thinking with adversarial critique."""
     raw = (msg.text or "").removeprefix("/think").strip()
-    if not raw:
-        await msg.answer(
-            "usage: <code>/think [--depth=3] [--branches=5] &lt;hard question&gt;</code>\n"
-            "runs layered extended thinking with adversarial critique + synthesis",
-            parse_mode="HTML",
-        )
-        return
+    from core.agent import cmd_think_impl
 
-    depth = 3
-    branches = 5
-    tokens = raw.split()
-    query_tokens: list[str] = []
-    for token in tokens:
-        if token.startswith("--depth="):
-            try:
-                depth = max(2, min(6, int(token.split("=", 1)[1])))
-            except Exception:
-                pass
-            continue
-        if token.startswith("--branches="):
-            try:
-                branches = max(3, min(8, int(token.split("=", 1)[1])))
-            except Exception:
-                pass
-            continue
-        query_tokens.append(token)
-
-    query = " ".join(query_tokens).strip()
-    if not query:
-        await msg.answer(
-            "usage: <code>/think [--depth=3] [--branches=5] &lt;hard question&gt;</code>",
-            parse_mode="HTML",
-        )
-        return
-
-    status_msg = await msg.answer(
-        f"🧠 starting layered deep think… (depth={depth}, branches={branches})",
-        parse_mode="HTML",
+    await cmd_think_impl(
+        msg,
+        raw,
+        is_allowed_fn=is_allowed,
+        keep_typing_fn=_keep_typing,
+        send_chunked_fn=send_chunked,
     )
-    typing_task = asyncio.create_task(_keep_typing(msg))
-
-    async def _progress(text: str) -> None:
-        safe = html_mod.escape(text)
-        try:
-            await status_msg.edit_text(safe, parse_mode="HTML")
-        except Exception:
-            try:
-                await msg.answer(f"<i>{safe}</i>", parse_mode="HTML")
-            except Exception:
-                pass
-
-    try:
-        from llm_client import _call_model
-        from tools.deep_think import format_think_result, run_deep_think
-
-        async def _llm_call(model: str, system_prompt: str, user_prompt: str) -> str:
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-            resp = await _call_model(model=model, messages=messages, max_tokens=2200, temperature=0.7)
-            return (resp.choices[0].message.content or "").strip()
-
-        result = await run_deep_think(
-            question=query,
-            llm_call=_llm_call,
-            progress_fn=_progress,
-            depth=depth,
-            branches=branches,
-        )
-        rendered = format_think_result(result)
-        try:
-            await status_msg.delete()
-        except Exception:
-            pass
-        await send_chunked(msg, rendered, model_used=f"think/deep:d{depth}:b{branches}")
-    except Exception as e:
-        await status_msg.edit_text(
-            f"deep think error: <code>{html_mod.escape(str(e)[:380])}</code>",
-            parse_mode="HTML",
-        )
-    finally:
-        typing_task.cancel()
 
 
 # ── /run ──────────────────────────────────────────────────────────────────────
 @router.message(Command("run"))
 async def cmd_run(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
+    """Handle /run command — LLM chat only, no computer access."""
     task = (msg.text or "").removeprefix("/run").strip()
-    if not task:
-        await msg.answer(
-            "usage: <code>/run &lt;task&gt;</code>  — LLM chat only, no computer access\n"
-            "for full computer control use <code>/do &lt;task&gt;</code>",
-            parse_mode="HTML",
-        )
-        return
-    await _execute_chat(msg, task, forced_agent="general")
+    from core.agent import cmd_run_impl
+
+    await cmd_run_impl(
+        msg,
+        task,
+        is_allowed_fn=is_allowed,
+        execute_chat_fn=_execute_chat,
+    )
 
 
 # ── /agent ────────────────────────────────────────────────────────────────────
@@ -230,6 +156,7 @@ async def cmd_owl(msg: Message) -> None:
     status = await msg.answer("🦉 OWL Agent activated (GAIA-style specialist)…")
     try:
         from agents.owl_agent import run_owl_task
+
         result = await run_owl_task(task)
         await status.delete()
         await send_chunked(msg, result, model_used="owl")
@@ -246,6 +173,7 @@ async def cmd_predict(msg: Message) -> None:
         await msg.answer("usage: <code>/predict &lt;question&gt;</code>", parse_mode="HTML")
         return
     from agents.mirofish_agent import MiroFishAgent
+
     result = await MiroFishAgent().predict(question)
     text = (
         "<b>🔮 Swarm Consensus</b>\n"
@@ -267,6 +195,7 @@ async def cmd_code_exec(msg: Message) -> None:
     status = await msg.answer("⚙️ running code execution agent…")
     try:
         from agents.code_agent import run_code_agent
+
         result = await run_code_agent(task)
         await status.delete()
         payload = (
@@ -291,6 +220,7 @@ async def cmd_ag2(msg: Message) -> None:
     status = await msg.answer("🧪 AG2 research swarm running…")
     try:
         from agents.ag2_pipeline import run_ag2_conversation
+
         result = await run_ag2_conversation(task, max_turns=6)
         await status.delete()
         transcript = "\n\n".join(f"[{t.speaker}] {t.content}" for t in result.turns)
@@ -390,6 +320,7 @@ async def cmd_multi_execute(msg: Message) -> None:
             await _phase("🌐 [Act] collecting fused evidence (web + arXiv + memory) for all agents")
             try:
                 from tools.quality_guard import gather_fused_evidence
+
                 fused = await gather_fused_evidence(
                     task,
                     user_id=user_id,
@@ -416,6 +347,7 @@ async def cmd_multi_execute(msg: Message) -> None:
         if _shared._chief_of_staff:
             await _phase("⚙️ [Act] running multi-agent execution via Chief of Staff")
             from swarms_bot.orchestrator.chief_of_staff import Task as STask
+
             stask = STask.create(
                 user_id=msg.from_user.id,
                 chat_id=msg.chat.id,
@@ -660,6 +592,7 @@ async def cmd_orchestrate(msg: Message) -> None:
     try:
         from llm_client import chunk_output
         from tools.orchestrate_engine import orchestrate_task
+
         result = await orchestrate_task(task, progress_cb=_progress)
 
         # FIX #10: Use chunk_output() to avoid cutting mid-HTML tag
@@ -742,6 +675,7 @@ async def cmd_loop_stop(msg: Message) -> None:
     if not is_allowed(msg):
         return
     from tools.autonomous_loop import stop_loop
+
     if stop_loop(msg.from_user.id):
         await msg.answer("Loop stop signal sent. It will halt after the current step.")
     else:
@@ -754,6 +688,7 @@ async def cmd_loop_status(msg: Message) -> None:
     if not is_allowed(msg):
         return
     from tools.autonomous_loop import get_loop_state, format_loop_status_html
+
     state = get_loop_state(msg.from_user.id)
     if not state:
         await msg.answer("No loop found. Start one with /loop")
@@ -767,6 +702,7 @@ async def cmd_loop_pause(msg: Message) -> None:
     if not is_allowed(msg):
         return
     from tools.autonomous_loop import pause_loop
+
     if pause_loop(msg.from_user.id):
         await msg.answer("\u23f8\ufe0f Loop paused. Resume with /loop_resume")
     else:
@@ -779,6 +715,7 @@ async def cmd_loop_resume(msg: Message) -> None:
     if not is_allowed(msg):
         return
     from tools.autonomous_loop import resume_loop
+
     if resume_loop(msg.from_user.id):
         await msg.answer("\u25b6\ufe0f Loop resumed.")
     else:
@@ -802,6 +739,26 @@ async def kbd_agent_hint(msg: Message) -> None:
 async def handle_nl(msg: Message) -> None:
     if not is_allowed(msg):
         return
+
+    # === NIHONGO MODE INTERCEPT — runs FIRST, completely isolated ===
+    try:
+        from handlers.nihongo_handler import handle_nihongo_command, handle_nihongo_message
+        from skills.nihongo.mode_manager import NihongoModeManager
+
+        user_id = msg.from_user.id if msg.from_user else 0
+
+        if msg.text and msg.text.strip().lower().startswith("/nihonko"):
+            handled = await handle_nihongo_command(msg, ContextTypes.DEFAULT_TYPE)
+            if handled:
+                return
+
+        if NihongoModeManager.is_active(user_id):
+            await handle_nihongo_message(msg, ContextTypes.DEFAULT_TYPE)
+            return
+    except Exception:
+        pass
+    # === END NIHONGO MODE INTERCEPT ===
+
     task = (msg.text or "").strip()
     if not task or task.startswith("/"):
         return
@@ -820,11 +777,13 @@ async def handle_nl(msg: Message) -> None:
 
         # Re-import after potential init
         from llm_client import auto_router as _ar
+
         if _ar is not None:
             await handle_plain_message(msg, _ar)
             _router_handled = True
     except Exception as _router_err:
         import logging as _log
+
         _log.getLogger(__name__).warning(
             "autonomous router failed for NL message — falling back to keyword dispatch: %s",
             _router_err,
@@ -840,6 +799,7 @@ async def handle_nl(msg: Message) -> None:
     # Check OpenClaw delegation first
     try:
         from tools.openclaw_bridge import should_delegate_to_openclaw, is_openclaw_running, delegate_to_openclaw
+
         if should_delegate_to_openclaw(task):
             if await is_openclaw_running():
                 result = await delegate_to_openclaw(task)
@@ -850,41 +810,103 @@ async def handle_nl(msg: Message) -> None:
 
     # Detect questions (knowledge queries -> chat mode, no tools)
     question_starters = [
-        "apa ", "berapa", "bagaimana", "kenapa", "mengapa", "siapa",
-        "dimana", "kapan", "gimana", "apakah", "bisakah",
-        "what ", "how ", "why ", "when ", "where ", "which ",
-        "who ", "is it", "are there", "does ", "do you", "can you",
-        "could you", "would you", "should ",
-        "ada berapa", "apa saja", "apa itu", "ada apa",
+        "apa ",
+        "berapa",
+        "bagaimana",
+        "kenapa",
+        "mengapa",
+        "siapa",
+        "dimana",
+        "kapan",
+        "gimana",
+        "apakah",
+        "bisakah",
+        "what ",
+        "how ",
+        "why ",
+        "when ",
+        "where ",
+        "which ",
+        "who ",
+        "is it",
+        "are there",
+        "does ",
+        "do you",
+        "can you",
+        "could you",
+        "would you",
+        "should ",
+        "ada berapa",
+        "apa saja",
+        "apa itu",
+        "ada apa",
     ]
-    is_question = (
-        task_lower.rstrip().endswith("?")
-        or any(task_lower.startswith(q) for q in question_starters)
-    )
+    is_question = task_lower.rstrip().endswith("?") or any(task_lower.startswith(q) for q in question_starters)
 
     strong_computer = [
-        "screenshot", "take screenshot",
-        "click on", "click at", "klik pada",
-        "drag", "scroll down", "scroll up",
-        "open whatsapp", "buka whatsapp", "open chrome", "buka chrome",
-        "open browser", "buka browser", "open firefox", "buka firefox",
-        "open vscode", "buka vscode", "open terminal", "buka terminal",
-        "open supabase", "open gmail", "open spotify", "open telegram",
-        "launch ", "jalankan ",
-        "search for", "search the web", "cari di internet",
-        "browse to", "go to website", "scrape",
-        "read pdf", "read excel", "extract table",
-        "organize files", "baca dokumen",
-        "git commit", "git push", "git pull",
-        "run tests", "pytest", "format code",
-        "disk space", "check services", "system cleanup",
+        "screenshot",
+        "take screenshot",
+        "click on",
+        "click at",
+        "klik pada",
+        "drag",
+        "scroll down",
+        "scroll up",
+        "open whatsapp",
+        "buka whatsapp",
+        "open chrome",
+        "buka chrome",
+        "open browser",
+        "buka browser",
+        "open firefox",
+        "buka firefox",
+        "open vscode",
+        "buka vscode",
+        "open terminal",
+        "buka terminal",
+        "open supabase",
+        "open gmail",
+        "open spotify",
+        "open telegram",
+        "launch ",
+        "jalankan ",
+        "search for",
+        "search the web",
+        "cari di internet",
+        "browse to",
+        "go to website",
+        "scrape",
+        "read pdf",
+        "read excel",
+        "extract table",
+        "organize files",
+        "baca dokumen",
+        "git commit",
+        "git push",
+        "git pull",
+        "run tests",
+        "pytest",
+        "format code",
+        "disk space",
+        "check services",
+        "system cleanup",
     ]
 
     soft_computer = [
-        "open", "buka", "show me", "check on",
-        "cek langsung", "tolong cek", "lihat di",
-        "tampilkan", "periksa", "cari online",
-        "monitor", "research", "klik", "ketik",
+        "open",
+        "buka",
+        "show me",
+        "check on",
+        "cek langsung",
+        "tolong cek",
+        "lihat di",
+        "tampilkan",
+        "periksa",
+        "cari online",
+        "monitor",
+        "research",
+        "klik",
+        "ketik",
     ]
 
     has_strong = any(kw in task_lower for kw in strong_computer)
