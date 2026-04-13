@@ -39,8 +39,6 @@ jobs:
   claude-review:
     needs: pre-review-checks
     runs-on: ubuntu-latest
-    # Uncomment and set ANTHROPIC_API_KEY in repo secrets to enable full Claude review
-    # if: false  # Set to true after configuring ANTHROPIC_API_KEY
     steps:
       - uses: actions/checkout@v6
         with:
@@ -48,7 +46,6 @@ jobs:
 
       - name: Run Claude Code PR Review
         uses: anthropics/claude-code-action@v1
-        if: false  # Enable after setting ANTHROPIC_API_KEY in repo secrets
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
