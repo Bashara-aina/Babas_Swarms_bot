@@ -1,5 +1,5 @@
 ---
-title: ADR — Budget Guard Fix: can_spend() Added to BudgetManager
+title: "ADR - Budget Guard Fix: can_spend() Added to BudgetManager"
 type: decision
 status: active
 tags: [legion, budget, daily-harvester, swarm-debate, background-tasks]
