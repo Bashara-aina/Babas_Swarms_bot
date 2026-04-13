@@ -10,7 +10,7 @@ Refactor the component described below. Safety rules: do not break existing test
 5. After refactor: run same tests → must show same pass count
 6. Check for remaining old references: grep -r "[old name]" . --include="*.py" | grep -v ".git"
    Must return empty for complete rename refactors
-7. Update wiki/architecture/legion-module-map.md if module structure changed
+7. Update .wiki/architecture/legion-module-map.md if module structure changed
 
 Verify: pytest tests/ -x -q | tail -5 → paste output (must match pre-refactor result)
 

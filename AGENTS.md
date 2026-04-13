@@ -11,7 +11,7 @@
 - **Planner** (@planner): Decomposes tasks, never edits files directly
 - **Worker** (@worker): Executes code changes, full file + bash access
 - **Reviewer** (@reviewer): Reviews all changes before commit, read-only
-- **WikiBot** (@wikibot): Writes session summaries and decisions to wiki/
+- **WikiBot** (@wikibot): Writes session summaries and decisions to .wiki/
 
 ## 📖 Wiki Auto-Ingest (Karpathy LLM Wiki Pattern)
 Legion automatically learns from every conversation. After each session:
@@ -33,10 +33,10 @@ To disable: `LEGION_WIKI_AUTO_INGEST=0`
 - NEVER edit .env, .env.local, .env.production, secrets.json directly
 - NEVER hardcode API keys — always use os.getenv()
 - ALWAYS run tests before committing: `pytest tests/ -x --asyncio-mode=auto -q`
-- ALWAYS write decisions to wiki/decisions/ as ADR-XXX files
-- ALWAYS log completed tasks to wiki/logs/
+- ALWAYS write decisions to .wiki/decisions/ as ADR-XXX files
+- ALWAYS log completed tasks to .wiki/logs/
 - Use async/await for all I/O operations
-- Check wiki/ for existing context before starting any task
+- Check .wiki/ for existing context before starting any task
 - LLM calls go through llm_client.py — never call litellm directly
 
 ## 🛠️ Common Commands
@@ -61,5 +61,5 @@ pip install -r requirements.txt
 - **agents/** — 76+ specialized agents across 9 departments
 - **tools/** — External integrations (browser, email, GitHub, n8n)
 - **config/** — YAML configs for models, departments, routing keywords
-- **wiki/** — Knowledge base (architecture, agents, decisions, logs, research)
+- **.wiki/** — Knowledge base (architecture, agents, decisions, logs, research)
 - **tests/** — pytest-asyncio test suite

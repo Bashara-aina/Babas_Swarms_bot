@@ -9,7 +9,7 @@ from pathlib import Path
 from functools import lru_cache
 from typing import Optional
 
-WIKI_DIR = Path(".wiki")
+WIKI_DIR = Path("/home/newadmin/swarm-bot/wiki")
 
 # Priority files — always injected, full content
 PRIORITY_FILES = [

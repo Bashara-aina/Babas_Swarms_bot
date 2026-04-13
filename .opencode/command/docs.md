@@ -21,15 +21,15 @@ grep -rn "async def\|def " --include="*.py" handlers/ | grep -v "__\|test\|#" | 
 
 If target = architecture:
 ```bash
-cat wiki/SCHEMA.md | head -50
-cat wiki/architecture/legion-module-map.md 2>/dev/null | head -30
+cat .wiki/SCHEMA.md | head -50
+cat .wiki/architecture/legion-module-map.md 2>/dev/null | head -30
 ```
 
 ## STEP 2 — Generate Documentation
 
-For modules, create a wiki article at `wiki/[category]/[module-name].md`:
+For modules, create a wiki article at `.wiki/[category]/[module-name].md`:
 
-Required frontmatter (from wiki/SCHEMA.md):
+Required frontmatter (from .wiki/SCHEMA.md):
 ```yaml
 ---
 title: [Module Name]
@@ -58,12 +58,12 @@ wikilinks:
 
 ```bash
 # Check frontmatter validity
-python -c "import yaml; yaml.safe_load(open('wiki/[category]/[module-name].md').read().split('---')[1])"
+python -c "import yaml; yaml.safe_load(open('.wiki/[category]/[module-name].md').read().split('---')[1])"
 
 # Check wikilinks resolve
 python3 << 'EOF'
 import glob, re
-f = 'wiki/[category]/[module-name].md'
+f = '.wiki/[category]/[module-name].md'
 links = re.findall(r'\[\[([^\]]+)\]\]', open(f).read())
 print(f"Links found: {len(links)}")
 EOF
@@ -71,4 +71,4 @@ EOF
 
 ## STEP 4 — Update SCHEMA.md if needed
 
-If new category: add to wiki/SCHEMA.md category list
+If new category: add to .wiki/SCHEMA.md category list

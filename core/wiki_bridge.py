@@ -22,7 +22,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = REPO_ROOT / "wiki"
+WIKI_DIR = REPO_ROOT / ".wiki"
 OPENCODE_SESSION_DIR = WIKI_DIR / "opencode" / "sessions"
 OPENCODE_DECISIONS_DIR = WIKI_DIR / "decisions"
 

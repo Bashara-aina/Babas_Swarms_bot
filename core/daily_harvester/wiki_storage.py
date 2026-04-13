@@ -14,8 +14,8 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-# Active vault is wiki/ per CLAUDE.md section 2b — harvester writes to wiki/legion/harvester/
-WIKI_ROOT = REPO_ROOT / "wiki" / "legion" / "harvester"
+# Active vault is .wiki/ per CLAUDE.md section 2b — harvester writes to .wiki/legion/harvester/
+WIKI_ROOT = REPO_ROOT / ".wiki" / "legion" / "harvester"
 DATA_DIR = REPO_ROOT / "data" / "harvest"
 
 _TOPIC_PREFIXES: dict[str, str] = {

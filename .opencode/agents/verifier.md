@@ -55,7 +55,7 @@ Date: [date]
 
 | Contract | Criterion | Expected | Actual | Status |
 |----------|-----------|----------|--------|--------|
-| #1       | File exists | wiki/x.md exists | [ls output] | ✅/❌ |
+| #1       | File exists | .wiki/x.md exists | [ls output] | ✅/❌ |
 | #1       | Has frontmatter | starts with --- | [head output] | ✅/❌ |
 | #1       | Word count | >300 words | [wc output] | ✅/❌ |
 | #2       | Tests pass | 0 failed | [pytest output] | ✅/❌ |

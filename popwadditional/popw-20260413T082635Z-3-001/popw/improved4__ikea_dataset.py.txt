@@ -1,0 +1,627 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import gc
+import json
+import logging
+import random
+import pickle
+import sqlite3
+import tempfile
+import threading
+from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+import cv2
+cv2.setNumThreads(0) # CRITICAL: STOPS OPENCV FROM SEGFAULTING PYTORCH WORKERS
+try:
+    cv2.setLogLevel(cv2.LOG_LEVEL_ERROR)
+except AttributeError:
+    pass
+
+import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
+
+import config as C
+
+logger = logging.getLogger(__name__)
+
+_IMAGENET_MEAN = torch.tensor(C.IMAGENET_MEAN).view(3, 1, 1)
+_IMAGENET_STD  = torch.tensor(C.IMAGENET_STD).view(3, 1, 1)
+
+# ---------------------------------------------------------------------------
+# Compact tuple index constants for dataset.samples rows.
+# Used by temporal_metrics.py and any code that accesses samples directly.
+# Row layout from _SELECT_SQL:
+#   (furniture=0, video_id=1, video_key=2, frame_num=3,
+#    img_path=4, coco_file=5, pose_dir=6, activity_id=7)
+# ---------------------------------------------------------------------------
+_S_FURNITURE   = 0
+_S_VIDEO_ID    = 1
+_S_VIDEO_KEY   = 2
+_S_FRAME_NUM   = 3
+_S_IMG_PATH    = 4
+_S_COCO_FILE   = 5
+_S_POSE_DIR    = 6
+_S_ACTIVITY_ID = 7
+
+CORRUPTED_VIDEOS = {
+    "Kallax_Shelf_Drawer/0040_black_floor_09_04_2019_08_28_13_21",
+    "Lack_TV_Bench/0041_white_floor_09_04_2019_08_28_12_51",
+    "Lack_Side_Table/0005_white_table_10_04_2019_08_28_14_40",
+    "Lack_Side_Table/0033_oak_floor_06_03_2019_08_21_11_06",
+}
+
+# ---------------------------------------------------------------------------
+# Process-level COCO cache
+# ---------------------------------------------------------------------------
+_PROC_COCO_CACHE: Dict[str, Dict[int, Dict]] = {}
+_PROC_COCO_LOCK  = threading.Lock()
+_PROC_COCO_CACHE_MAX = max(1, min(int(getattr(C, 'COCO_CACHE_SIZE', 8)), 8))
+
+def _get_coco(coco_path: str) -> Dict[int, Dict]:
+    """Return per-process cached COCO annotation dict, loading once if needed."""
+    with _PROC_COCO_LOCK:
+        if coco_path in _PROC_COCO_CACHE:
+            return _PROC_COCO_CACHE[coco_path]
+
+    result = None
+    pkl_path = Path(coco_path).with_suffix('.pkl')
+    if pkl_path.exists():
+        try:
+            with open(pkl_path, 'rb') as f:
+                result = pickle.load(f)
+        except Exception:
+            pass
+            
+    if result is None:
+        result = _parse_coco_file(coco_path)
+
+    with _PROC_COCO_LOCK:
+        if len(_PROC_COCO_CACHE) >= _PROC_COCO_CACHE_MAX:
+            _PROC_COCO_CACHE.pop(next(iter(_PROC_COCO_CACHE)))
+        _PROC_COCO_CACHE[coco_path] = result
+        return _PROC_COCO_CACHE[coco_path]
+
+def _parse_coco_file(coco_path: str) -> Dict[int, Dict]:
+    if not Path(coco_path).exists():
+        return {}
+    try:
+        with open(coco_path, 'r', encoding='utf-8', errors='ignore') as f:
+            coco = json.load(f)
+    except Exception:
+        return {}
+
+    id_to_frame: Dict[int, int] = {}
+    for img_info in coco.get('images', []):
+        stem = Path(img_info['file_name']).stem
+        try:
+            id_to_frame[img_info['id']] = int(stem)
+        except ValueError:
+            continue
+
+    frame_annos: Dict[int, Dict] = defaultdict(lambda: {'boxes': [], 'labels': []})
+    for ann in coco.get('annotations', []):
+        img_id = ann['image_id']
+        if img_id not in id_to_frame:
+            continue
+        fn = id_to_frame[img_id]
+        frame_annos[fn]['boxes'].append(ann['bbox'])
+        frame_annos[fn]['labels'].append(ann['category_id'])
+
+    return dict(frame_annos)
+
+
+# ---------------------------------------------------------------------------
+# SQLite-backed sample index
+# ---------------------------------------------------------------------------
+
+_CREATE_SQL = """
+CREATE TABLE IF NOT EXISTS samples (
+    rowid      INTEGER PRIMARY KEY,
+    furniture  TEXT    NOT NULL,
+    video_id   TEXT    NOT NULL,
+    video_key  TEXT    NOT NULL,
+    frame_num  INTEGER NOT NULL,
+    img_path   TEXT    NOT NULL,
+    coco_file  TEXT    NOT NULL,
+    pose_dir   TEXT    NOT NULL,
+    activity_id INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rowid ON samples(rowid);
+"""
+
+_INSERT_SQL = """
+INSERT INTO samples
+    (furniture, video_id, video_key, frame_num, img_path, coco_file, pose_dir, activity_id)
+VALUES (?,?,?,?,?,?,?,?)
+"""
+
+_SELECT_SQL = "SELECT furniture, video_id, video_key, frame_num, img_path, coco_file, pose_dir, activity_id FROM samples WHERE rowid=?"
+
+
+def _build_db(records: List[Tuple]) -> str:
+    """Write records to a temp SQLite file and return its path."""
+    fd, db_path = tempfile.mkstemp(suffix='.db', prefix='ikea_idx_')
+    os.close(fd)
+    con = sqlite3.connect(db_path)
+    con.executescript(_CREATE_SQL)
+    con.executemany(_INSERT_SQL, records)
+    con.commit()
+    con.close()
+    return db_path
+
+
+class IKEAMultiTaskDataset(Dataset):
+
+    def __init__(
+        self,
+        images_root: str = str(C.IMAGES_ROOT),
+        coco_root:   str = str(C.COCO_ROOT),
+        anno_root:   str = str(C.ANNO_ROOT),
+        action_file: str = str(C.ACTION_LOOKUP_FILE),
+        split:       str = 'train',
+        img_size:    Tuple[int, int] = C.IMG_SIZE,
+        augment:     bool = False,
+        coco_cache:  int  = C.COCO_CACHE_SIZE, 
+        seed:        int  = C.SEED,
+    ):
+        super().__init__()
+        self.images_root   = Path(images_root)
+        self.coco_root     = Path(coco_root)
+        self.anno_root     = Path(anno_root)
+        self.img_w, self.img_h = img_size
+        self.augment = augment
+        self.split   = split
+        self.seed    = seed
+
+        self.sx = self.img_w / C.ORIGINAL_WIDTH
+        self.sy = self.img_h / C.ORIGINAL_HEIGHT
+
+        self.coco_cache = max(1, min(int(coco_cache), 8))
+        global _PROC_COCO_CACHE_MAX
+        _PROC_COCO_CACHE_MAX = self.coco_cache
+
+        self._db_path:  str          = ''
+        self._db_conn:  sqlite3.Connection | None = None  
+
+        with open(action_file, 'r') as f:
+            action_lookup: Dict[str, List[int]] = json.load(f)
+
+        all_videos, all_records = self._scan_and_index(action_lookup)
+        del action_lookup
+        gc.collect()
+
+        self._on_disk_videos = set(all_videos)
+        split_videos    = self._load_official_splits(split, seed)
+        split_video_set = set(split_videos)
+
+        split_records = [r for r in all_records if r[2] in split_video_set]
+        del all_records
+        gc.collect()
+
+        stride = C.DEBUG_FRAME_STRIDE if C.DEBUG_MODE else (
+            C.TRAIN_FRAME_STRIDE if split == 'train' else C.EVAL_FRAME_STRIDE
+        )
+        if stride > 1:
+            by_vid: Dict[str, List] = defaultdict(list)
+            for r in split_records:
+                by_vid[r[2]].append(r)
+            strided: List = []
+            for vk in sorted(by_vid):
+                vframes = sorted(by_vid[vk], key=lambda x: x[3])
+                strided.extend(vframes[::stride])
+            split_records = strided
+
+        self._db_path = _build_db(split_records)
+        self._length   = len(split_records)
+
+        # Cache activity_ids and samples for temporal_metrics and sampler.
+        # samples is a list of compact tuples matching _SELECT_SQL column order:
+        #   (furniture, video_id, video_key, frame_num, img_path,
+        #    coco_file, pose_dir, activity_id)
+        # Use _S_* index constants above to access fields.
+        self.samples = list(split_records)
+        self.activity_ids = np.array([r[_S_ACTIVITY_ID] for r in split_records], dtype=np.int32)
+        self.class_counts = np.bincount(
+            self.activity_ids, minlength=C.NUM_ACT_CLASSES
+        )
+        del split_records
+        gc.collect()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['_db_conn'] = None
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._db_conn = None
+
+    def _conn(self) -> sqlite3.Connection:
+        if self._db_conn is None:
+            self._db_conn = sqlite3.connect(
+                f"file:{self._db_path}?mode=ro", 
+                uri=True,
+                check_same_thread=False
+            )
+            self._db_conn.execute("PRAGMA cache_size=-4096")
+        return self._db_conn
+
+    def _fetch_row(self, idx: int):
+        row = self._conn().execute(_SELECT_SQL, (idx + 1,)).fetchone()
+        return row 
+
+    def _scan_and_index(self, action_lookup: Dict) -> Tuple[List[str], List[Tuple]]:
+        all_records: List[Tuple] = []
+        video_set:   set  = set()
+
+        for furniture_dir in sorted(self.images_root.iterdir()):
+            if not furniture_dir.is_dir():
+                continue
+            furniture = furniture_dir.name
+            vids_for_this_furn = 0
+
+            for video_dir in sorted(furniture_dir.iterdir()):
+                if not video_dir.is_dir():
+                    continue
+                video_id = video_dir.name
+
+                if C.DEBUG_MODE and vids_for_this_furn >= C.DEBUG_MAX_VIDEOS:
+                    break
+
+                img_dir = video_dir / C.CAMERA / 'images'
+                if not img_dir.exists():
+                    continue
+
+                video_key = f'{furniture}/{video_id}'
+                if video_key in CORRUPTED_VIDEOS:
+                    continue
+                if video_key not in action_lookup:
+                    continue
+
+                action_labels = action_lookup[video_key]
+
+                frame_nums = sorted(
+                    int(entry.name.split('.')[0])
+                    for entry in img_dir.iterdir()
+                    if entry.name.endswith('.jpg')
+                    and entry.name.split('.')[0].isdigit()
+                )
+                if not frame_nums:
+                    continue
+
+                coco_file = str(
+                    self.coco_root / furniture / video_id
+                    / C.CAMERA / 'all_gt_coco_format.json'
+                )
+
+                pose_dir = str(
+                    self.anno_root / furniture / video_id / C.CAMERA
+                    / 'predictions' / 'pose2d' / 'openpose'
+                )
+
+                video_set.add(video_key)
+                vids_for_this_furn += 1
+
+                for fn in frame_nums:
+                    act_id = (
+                        int(action_labels[fn])
+                        if fn < len(action_labels) else 0
+                    )
+                    act_id = max(0, min(act_id, C.NUM_ACT_CLASSES - 1))
+                    all_records.append((
+                        furniture, video_id, video_key, fn,
+                        str(img_dir / f'{fn:06d}.jpg'),
+                        coco_file, pose_dir, act_id,
+                    ))
+        return sorted(video_set), all_records
+
+    def _load_official_splits(self, split: str, seed: int) -> List[str]:
+        def _read(path: Path) -> List[str]:
+            with open(path) as f:
+                return [ln.strip() for ln in f if ln.strip()]
+
+        official_train = _read(C.TRAIN_SPLIT_FILE)
+        official_test  = _read(C.TEST_SPLIT_FILE)
+
+        if split == 'test':
+            return [v for v in official_test if v in self._on_disk_videos]
+
+        rng = random.Random(seed)
+        by_furniture: Dict[str, List[str]] = defaultdict(list)
+        for vk in official_train:
+            by_furniture[vk.split('/')[0]].append(vk)
+
+        train_vids, val_vids = [], []
+        for furn in sorted(by_furniture.keys()):
+            vids  = sorted(by_furniture[furn])
+            rng.shuffle(vids)
+            n_val = max(1, int(len(vids) * C.VAL_RATIO))
+            val_vids.extend(vids[:n_val])
+            train_vids.extend(vids[n_val:])
+
+        chosen = {'train': train_vids, 'val': val_vids}[split]
+        return [v for v in chosen if v in self._on_disk_videos]
+
+    @staticmethod
+    def _load_pose(pose_dir: str, frame_num: int) -> np.ndarray:
+        pose_file = Path(pose_dir) / f'scan_video_{frame_num:012d}_keypoints.json'
+        if not pose_file.exists():
+            return np.zeros((C.NUM_KEYPOINTS, 3), dtype=np.float32)
+        try:
+            with open(pose_file, 'r') as f:
+                data = json.load(f)
+        except Exception:
+            return np.zeros((C.NUM_KEYPOINTS, 3), dtype=np.float32)
+
+        people = data.get('people', [])
+        if not people:
+            return np.zeros((C.NUM_KEYPOINTS, 3), dtype=np.float32)
+        kpts_flat = people[0].get('pose_keypoints_2d', [])
+        if len(kpts_flat) < C.NUM_KEYPOINTS * 3:
+            return np.zeros((C.NUM_KEYPOINTS, 3), dtype=np.float32)
+
+        raw_kpts = np.array(kpts_flat, dtype=np.float32).reshape(-1, 3)
+
+        # OpenPose export in this dataset is 19-keypoint body format:
+        # 0:nose, 1:neck, 2:r_shoulder, 3:r_elbow, 4:r_wrist,
+        # 5:l_shoulder, 6:l_elbow, 7:l_wrist, 8:mid_hip,
+        # 9:r_hip, 10:r_knee, 11:r_ankle, 12:l_hip, 13:l_knee, 14:l_ankle,
+        # 15:r_eye, 16:l_eye, 17:r_ear, 18:l_ear.
+        # Model expects COCO-17 order from C.KEYPOINT_NAMES.
+        if raw_kpts.shape[0] >= 19:
+            openpose19_to_coco17 = [
+                0,   # nose
+                16,  # left_eye
+                15,  # right_eye
+                18,  # left_ear
+                17,  # right_ear
+                5,   # left_shoulder
+                2,   # right_shoulder
+                6,   # left_elbow
+                3,   # right_elbow
+                7,   # left_wrist
+                4,   # right_wrist
+                12,  # left_hip
+                9,   # right_hip
+                13,  # left_knee
+                10,  # right_knee
+                14,  # left_ankle
+                11,  # right_ankle
+            ]
+            return raw_kpts[openpose19_to_coco17]
+
+        return raw_kpts[:C.NUM_KEYPOINTS]
+
+    def _apply_augmentation(
+        self, img: np.ndarray, boxes: np.ndarray, keypoints: np.ndarray,
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        h, w = img.shape[:2]
+        img = np.nan_to_num(img, nan=0.0, posinf=255.0, neginf=0.0)
+
+        if random.random() < 0.5:
+            img = np.fliplr(img).copy()
+            if len(boxes) > 0:
+                boxes[:, 0] = w - boxes[:, 0] - boxes[:, 2]
+            visible = keypoints[:, 2] > 0
+            keypoints[visible, 0] = w - keypoints[visible, 0]
+            for li, ri in C.KEYPOINT_FLIP_PAIRS:
+                keypoints[[li, ri]] = keypoints[[ri, li]]
+
+        if random.random() < 0.5:
+            img = np.clip(img * random.uniform(0.7, 1.3), 0, 255)
+        if random.random() < 0.5:
+            factor = random.uniform(0.7, 1.3)
+            mean   = img.mean()
+            img    = np.clip((img - mean) * factor + mean, 0, 255)
+        if random.random() < 0.3:
+            factor = random.uniform(0.7, 1.3)
+            gray   = np.mean(img, axis=2, keepdims=True)
+            img    = np.clip(gray + (img - gray) * factor, 0, 255)
+        if random.random() < 0.2:
+            img   = np.nan_to_num(img, nan=0.0, posinf=255.0, neginf=0.0)
+            with np.errstate(over='ignore', invalid='ignore'):
+                noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            img   = np.clip(img + noise, 0, 255)
+
+        return img, boxes, keypoints
+
+    def _get_dummy_sample(self) -> Tuple[torch.Tensor, Dict[str, Any]]:
+        img_t   = torch.zeros(3, self.img_h, self.img_w)
+        targets = {
+            'boxes':     torch.zeros(0, 4).float(),
+            'labels':    torch.zeros(0).long(),
+            'keypoints': torch.zeros(C.NUM_KEYPOINTS, 3).float(),
+            'activity':  torch.tensor(0, dtype=torch.long),
+        }
+        return img_t, targets
+
+    def __len__(self) -> int:
+        return self._length
+
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, Dict[str, Any]]:
+        for attempt in range(5):
+            try:
+                row = self._fetch_row(idx)
+                if row is None:
+                    return self._get_dummy_sample()
+
+                (furniture, video_id, video_key,
+                 frame_num, img_path, coco_file, pose_dir, activity_id) = row
+
+                img = cv2.imread(img_path)
+                if img is None:
+                    raise ValueError(f"Cannot read: {img_path}")
+
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                img = cv2.resize(
+                    img, (self.img_w, self.img_h), interpolation=cv2.INTER_AREA
+                ).astype(np.float32)
+                img = np.nan_to_num(img, nan=0.0, posinf=255.0, neginf=0.0)
+
+                coco_data = _get_coco(coco_file)
+                frame_det = coco_data.get(frame_num, {'boxes': [], 'labels': []})
+
+                if frame_det['boxes']:
+                    boxes  = np.array(frame_det['boxes'],  dtype=np.float32)
+                    labels = np.array(frame_det['labels'], dtype=np.int64)
+                    boxes[:, 0] *= self.sx
+                    boxes[:, 1] *= self.sy
+                    boxes[:, 2] *= self.sx
+                    boxes[:, 3] *= self.sy
+                else:
+                    boxes  = np.zeros((0, 4), dtype=np.float32)
+                    labels = np.zeros(0, dtype=np.int64)
+
+                keypoints = self._load_pose(pose_dir, frame_num)
+                keypoints[:, 0] *= self.sx
+                keypoints[:, 1] *= self.sy
+
+                if self.augment:
+                    img, boxes, keypoints = self._apply_augmentation(
+                        img, boxes, keypoints
+                    )
+
+                if C.USE_UINT8_DATA_PIPELINE:
+                    img_t = torch.from_numpy(img.astype(np.uint8)).permute(2, 0, 1)
+                else:
+                    img_t = torch.from_numpy(img).permute(2, 0, 1).float() / 255.0
+                    img_t = (img_t - _IMAGENET_MEAN) / _IMAGENET_STD
+
+                if len(boxes) > 0:
+                    boxes_xyxy        = boxes.copy()
+                    boxes_xyxy[:, 2]  = boxes[:, 0] + boxes[:, 2]
+                    boxes_xyxy[:, 3]  = boxes[:, 1] + boxes[:, 3]
+                    boxes_xyxy[:, 0]  = np.clip(boxes_xyxy[:, 0], 0, self.img_w)
+                    boxes_xyxy[:, 1]  = np.clip(boxes_xyxy[:, 1], 0, self.img_h)
+                    boxes_xyxy[:, 2]  = np.clip(boxes_xyxy[:, 2], 0, self.img_w)
+                    boxes_xyxy[:, 3]  = np.clip(boxes_xyxy[:, 3], 0, self.img_h)
+                    valid      = (
+                        (boxes_xyxy[:, 2] > boxes_xyxy[:, 0]) &
+                        (boxes_xyxy[:, 3] > boxes_xyxy[:, 1])
+                    )
+                    boxes_xyxy = boxes_xyxy[valid]
+                    labels     = labels[valid]
+                else:
+                    boxes_xyxy = np.zeros((0, 4), dtype=np.float32)
+
+                if len(labels) > 0:
+                    det_labels = labels - 1
+                    invalid = det_labels < 0
+                    if invalid.any():
+                        logger.warning(
+                            f'Invalid category_id=0 in {coco_file} frame '
+                            f'{frame_num}: {invalid.sum()} annotations skipped'
+                        )
+                        valid_det = ~invalid
+                        boxes_xyxy = boxes_xyxy[valid_det]
+                        det_labels = det_labels[valid_det]
+                else:
+                    det_labels = labels
+
+                targets = {
+                    'boxes':     torch.from_numpy(boxes_xyxy).float(),
+                    'labels':    torch.from_numpy(det_labels).long(),
+                    'keypoints': torch.from_numpy(keypoints).float(),
+                    'activity':  torch.tensor(activity_id, dtype=torch.long),
+                }
+                return img_t, targets
+
+            except MemoryError:
+                gc.collect()
+                return self._get_dummy_sample()
+            except Exception:
+                if attempt == 4:
+                    return self._get_dummy_sample()
+                idx = (idx + 997) % len(self)
+
+        return self._get_dummy_sample()
+
+    def get_sampler(self) -> WeightedRandomSampler:
+        beta      = C.CB_BETA
+        counts    = self.class_counts.astype(np.float64)
+        effective = np.where(
+            counts > 0,
+            (1.0 - np.power(beta, counts)) / (1.0 - beta),
+            1.0,
+        )
+        class_weights  = 1.0 / np.maximum(effective, 1e-8)
+        class_weights /= class_weights.sum()
+        sample_weights = np.array(
+            [class_weights[aid] for aid in self.activity_ids], dtype=np.float64
+        )
+        return WeightedRandomSampler(
+            weights=sample_weights, num_samples=len(sample_weights), replacement=True
+        )
+
+def collate_fn(batch):
+    items = list(batch)
+    while True:
+        try:
+            images, targets_list = zip(*items)
+            images = torch.stack(images, dim=0)
+            break
+        except RuntimeError as exc:
+            msg = str(exc)
+            is_cpu_oom = (
+                'DefaultCPUAllocator' in msg
+                or "can't allocate memory" in msg
+                or 'Error code 12' in msg
+            )
+            if not is_cpu_oom or len(items) <= 1:
+                raise
+            new_len = max(1, len(items) // 2)
+            logger.warning(
+                f'[collate_fn] CPU OOM while stacking batch={len(items)}; '
+                f'retrying with batch={new_len}'
+            )
+            gc.collect()
+            items = items[:new_len]
+
+    detection, kpts_list, act_list = [], [], []
+    for t in targets_list:
+        detection.append({'boxes': t['boxes'], 'labels': t['labels']})
+        kpts_list.append(t['keypoints'])
+        act_list.append(t['activity'])
+
+    keypoints  = torch.stack(kpts_list, dim=0)
+    visibility = (keypoints[:, :, 2] > C.POSE_CONF_THRESHOLD).float()
+
+    return images, {
+        'detection':      detection,
+        'keypoints':      keypoints[:, :, :2],
+        'visibility':     visibility,
+        'kpt_confidence': keypoints[:, :, 2],
+        'activity':       torch.stack(act_list, dim=0),
+    }
+
+def build_dataloaders(
+    batch_size:  int = C.BATCH_SIZE,
+    num_workers: int = C.NUM_WORKERS,
+    img_size:    Tuple[int, int] = C.IMG_SIZE,
+    seed:        int = C.SEED,
+    splits:      Tuple[str, ...] = ('train', 'val'),
+) -> Dict[str, DataLoader]:
+    loaders = {}
+    for split in splits:
+        ds = IKEAMultiTaskDataset(
+            split=split, img_size=img_size,
+            augment=(split == 'train'), seed=seed,
+        )
+        sampler = ds.get_sampler() if split == 'train' else None
+        loaders[split] = DataLoader(
+            ds,
+            batch_size=batch_size,
+            sampler=sampler,
+            shuffle=False,
+            num_workers=num_workers,
+            collate_fn=collate_fn,
+            pin_memory=C.PIN_MEMORY,
+            drop_last=(split == 'train'),
+            persistent_workers=False,
+            prefetch_factor=2 if num_workers > 0 else None,
+        )
+    return loaders

@@ -2,7 +2,7 @@
 
 Shows top pending candidates from the daily harvester and allows
 one-tap accept/reject feedback. Feedback is written immediately to
-wiki/legion/harvester/harvest-log.md and updates the scoring bias.
+.wiki/legion/harvester/harvest-log.md and updates the scoring bias.
 """
 
 from __future__ import annotations
@@ -156,7 +156,7 @@ async def _load_harvest_stats() -> dict[str, Any]:
     import re
     from datetime import datetime, timezone, timedelta
 
-    wiki_root = Path(__file__).resolve().parent.parent.parent / "wiki" / "legion" / "harvester"
+    wiki_root = Path(__file__).resolve().parent.parent.parent / ".wiki" / "legion" / "harvester"
     log_file = wiki_root / "harvest-log.md"
     if not log_file.exists():
         return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
@@ -297,7 +297,7 @@ async def _write_feedback_to_log(
     from datetime import datetime, timezone
     from pathlib import Path
 
-    wiki_root = Path(__file__).resolve().parent.parent.parent / "wiki" / "legion" / "harvester"
+    wiki_root = Path(__file__).resolve().parent.parent.parent / ".wiki" / "legion" / "harvester"
     wiki_root.mkdir(parents=True, exist_ok=True)
     log_file = wiki_root / "harvest-log.md"
 

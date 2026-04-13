@@ -149,7 +149,7 @@ class Scorer:
 
         if log_path is None:
             repo_root = Path(__file__).resolve().parent.parent.parent
-            log_path = repo_root / "wiki" / "legion" / "harvester" / "harvest-log.md"
+            log_path = repo_root / ".wiki" / "legion" / "harvester" / "harvest-log.md"
 
         if not log_path.exists():
             logger.info("No harvest log found at %s — skipping feedback load", log_path)

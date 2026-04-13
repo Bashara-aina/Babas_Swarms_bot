@@ -20,7 +20,7 @@ Before reviewing quality, verify the basics yourself:
 
 ```bash
 # Run these commands, paste all outputs
-find wiki/ -name "*.md" | sort          # What files actually exist?
+find .wiki/ -name "*.md" | sort          # What files actually exist?
 git diff --stat HEAD                    # What actually changed?
 git status                             # Any uncommitted files?
 ```
@@ -51,7 +51,7 @@ Run ALL checks that apply to the task type. Do not skip any.
 - [ ] Tests exist for new functionality
 - [ ] All tests pass: paste `pytest tests/ -x -q` output
 
-### For FILE_OPERATION tasks (wiki/docs):
+### For FILE_OPERATION tasks (.wiki/docs):
 - [ ] Every .md file has valid frontmatter (starts with `---`)
 - [ ] All required frontmatter fields present per SCHEMA.md
 - [ ] No [[wikilinks]] pointing to non-existent files
@@ -73,7 +73,7 @@ Run ALL checks that apply to the task type. Do not skip any.
 
 ## Step 3 — Write Review Output
 
-Always write to: `wiki/issues/review-[YYYY-MM-DD]-[task-slug].md`
+Always write to: `.wiki/issues/review-[YYYY-MM-DD]-[task-slug].md`
 
 Format:
 ```
@@ -113,7 +113,7 @@ This is loop [N] of 3 maximum.
 ## Step 4 — After Approval
 
 If APPROVED ✅:
-1. Write final approval to `wiki/logs/reviewer-approved-[date]-[task].md`
+1. Write final approval to `.wiki/logs/reviewer-approved-[date]-[task].md`
 2. Signal completion: `PIPELINE COMPLETE ✅ — ready for git commit`
 3. Remind to run: `git add -A && git commit -m "[type]: [task] — swarm pipeline"`
 

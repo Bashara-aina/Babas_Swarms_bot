@@ -1,6 +1,6 @@
 """
 LegionWikiManager — Karpathy LLM Wiki pattern for Legion.
-Reads, writes, and maintains a git-tracked markdown wiki under wiki/.
+Reads, writes, and maintains a git-tracked markdown wiki under .wiki/.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = REPO_ROOT / "wiki"
+WIKI_DIR = REPO_ROOT / ".wiki"
 
 _wiki_singleton: WikiManager | None = None
 
@@ -47,7 +47,7 @@ def _parse_wiki_plan(text: str) -> list[dict[str, str]]:
                 action = lu.split(":", 1)[1].strip().lower()
             elif ul.startswith("CONTENT_SUMMARY:"):
                 summary = lu.split(":", 1)[1].strip()
-        page = page.replace("wiki/", "").lstrip("/")
+        page = page.replace(".wiki/", "").replace("wiki/", "").lstrip("/")
         if page and page not in ("SCHEMA.md",):
             out.append({"page": page, "action": action, "summary": summary})
         if len(out) >= 5:
@@ -186,7 +186,7 @@ Return ONLY the full updated INDEX.md markdown, nothing else."""
                 await f.write(updated.strip() + "\n")
         else:
             async with aiofiles.open(self.index_path, encoding="utf-8", mode="a") as f:
-                await f.write(f"\n- [[wiki/{new_page_path}]] — added by Legion\n")
+                await f.write(f"\n- [[{new_page_path}]] — added by Legion\n")
 
     async def ingest(
         self,
@@ -222,7 +222,7 @@ PAGE: relative/path.md
 ACTION: create
 CONTENT_SUMMARY: one line describing what to write
 
-Paths are relative to wiki/ (e.g. bashara/preferences.md), never use ... or absolute paths."""
+Paths are relative to .wiki/ (e.g. bashara/preferences.md), never use ... or absolute paths."""
 
         plan_response = await self._wiki_llm(planning_prompt, max_tokens=1200)
         pages_modified: list[str] = []
@@ -249,7 +249,7 @@ Information to integrate:
 Source:
 {source[:2000]}
 
-Return ONLY complete markdown for the page. Use [[wiki/other/path.md]] for cross-links. Tag uncertainty with [uncertain] and sources with [source: ...]."""
+Return ONLY complete markdown for the page. Use [[other/path]] for cross-links. Tag uncertainty with [uncertain] and sources with [source: ...]."""
 
             page_content = await self._wiki_llm(write_prompt, max_tokens=2500)
             if not page_content.strip():
@@ -267,7 +267,7 @@ Return ONLY complete markdown for the page. Use [[wiki/other/path.md]] for cross
 
 User question: {question}
 
-Which {top_k} wiki pages are most relevant? List ONLY paths relative to wiki/, one per line (e.g. legion/architecture.md), most relevant first.
+Which {top_k} wiki pages are most relevant? List ONLY paths relative to .wiki/, one per line (e.g. legion/architecture.md), most relevant first.
 If nothing applies, reply exactly: NONE"""
 
         relevant_raw = await self._wiki_llm(
@@ -284,14 +284,14 @@ If nothing applies, reply exactly: NONE"""
             line = line.strip().strip("`").strip("-• ")
             if not line or line.upper() == "NONE":
                 continue
-            page_path = line.replace("wiki/", "").split()[0]
+            page_path = line.replace(".wiki/", "").replace("wiki/", "").split()[0]
             if page_path in seen:
                 continue
             seen.add(page_path)
             content = await self.read_page(page_path)
             if "does not exist" in content:
                 continue
-            context_parts.append(f"### From wiki/{page_path}:\n{content[:1500]}")
+            context_parts.append(f"### From .wiki/{page_path}:\n{content[:1500]}")
             if len(context_parts) >= top_k:
                 break
 
@@ -413,13 +413,13 @@ EXISTING AGENTS.md:
 (do not include this in output)
 
 WIKI KNOWLEDGE:
-## Recent Decisions (from wiki/decisions/):
+## Recent Decisions (from .wiki/decisions/):
 {adr_block or "- No decisions recorded yet"}
 
-## Recent OpenCode Sessions (from wiki/opencode/sessions/):
+## Recent OpenCode Sessions (from .wiki/opencode/sessions/):
 {session_block or "- No sessions recorded yet"}
 
-## Wiki Pages (from wiki/):
+## Wiki Pages (from .wiki/):
 {chr(10).join(f"- {p}" for p in wiki_pages[:40])}
 
 ## Schema excerpt:

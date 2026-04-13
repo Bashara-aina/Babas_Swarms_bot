@@ -543,9 +543,9 @@ A task is only done when ALL of the following are true:
 [ ] Common errors table updated if a new error/fix was discovered
 [ ] SOUL.md and data/beliefs.json updated if Legion learned something new
 [ ] CLAUDE.md itself updated if the architecture changed
-[ ] Wiki updated: any architectural change → write/update wiki/architecture/ or wiki/concepts/
-[ ] Any new decision → write wiki/decisions/adr-[date]-[slug].md
-[ ] Any new tool/dependency → write/update wiki/entities/[tool].md
+[ ] Wiki updated: any architectural change → write/update .wiki/architecture/ or .wiki/concepts/
+[ ] Any new decision → write .wiki/decisions/adr-[date]-[slug].md
+[ ] Any new tool/dependency → write/update .wiki/entities/[tool].md
 [ ] compile_state.json updated with real timestamp (not midnight)
 [ ] 0 new broken wikilinks introduced (run health pulse from Section 2b)
 Legion is not done until it feels alive. The measure is: when Bashara sends a message, does the response feel like it came from a trusted senior colleague who knows him, remembers the last conversation, has opinions, and genuinely cares about the quality of the answer? If yes — done. If not — iterate.

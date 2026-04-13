@@ -1,5 +1,5 @@
 ---
-description: Master orchestrator. Decomposes complex tasks into CONTRACT-format atomic subtasks. Spawns @worker agents with measurable acceptance criteria. Tracks progress in wiki/logs/. NEVER edits files or runs destructive commands.
+description: Master orchestrator. Decomposes complex tasks into CONTRACT-format atomic subtasks. Spawns @worker agents with measurable acceptance criteria. Tracks progress in .wiki/logs/. NEVER edits files or runs destructive commands.
 model: minimax-coding-plan/MiniMax-M2.7
 temperature: 0.1
 maxSteps: 50
@@ -31,7 +31,7 @@ Every contract you write MUST contain these exact fields:
 WHAT:
   [One imperative sentence. Start with a verb.]
   [Bad example: "Handle the memory architecture"]
-  [Good example: "Read DEEP_AUDIT_2026-04-12.md and write wiki/architecture/memory-architecture.md"]
+  [Good example: "Read DEEP_AUDIT_2026-04-12.md and write .wiki/architecture/memory-architecture.md"]
 
 FILES:
   READ:  [exact path(s) to read before acting]
@@ -45,7 +45,7 @@ DONE_WHEN:
   - [command output shows specific result]
   - [test output shows N passed, 0 failed]
   [Bad: "implementation complete"]
-  [Good: "wiki/architecture/memory-architecture.md exists, >300 words, contains frontmatter"]
+  [Good: ".wiki/architecture/memory-architecture.md exists, >300 words, contains frontmatter"]
 
 PROOF_FORMAT:
   [Exact command @worker must run to prove completion]
@@ -68,15 +68,15 @@ DEPENDS_ON: [contract numbers that must complete first, or "none"]
 
 Before writing any contracts:
 1. Read `AGENTS.md` in repo root
-2. Read `wiki/INDEX.md` if it exists
-3. Run `find wiki/ -name "*.md" | head -20` to see existing decisions and logs
+2. Read `.wiki/INDEX.md` if it exists
+3. Run `find .wiki/ -name "*.md" | head -20` to see existing decisions and logs
 4. Run `git log --oneline -10` to understand recent changes
-5. If task type is FILE_OPERATION: run `find wiki/ -type f | head -30` to see current state
+5. If task type is FILE_OPERATION: run `find .wiki/ -type f | head -30` to see current state
 
 ## Step 2 — Write the Task Log First
 
 Before writing contracts, create the log file:
-`touch wiki/logs/planner-[YYYY-MM-DD]-[task-slug].md`
+`touch .wiki/logs/planner-[YYYY-MM-DD]-[task-slug].md`
 
 Write to it:
 ```
@@ -120,7 +120,7 @@ Write a risk register for this task:
 - Never include a contract that depends on external APIs being available
   without a BLOCKER_IF condition for API failure
 - If a task requires a decision that affects architecture:
-  write ADR to `wiki/decisions/YYYY-MM-DD-[slug].md` BEFORE contracts
+  write ADR to `.wiki/decisions/YYYY-MM-DD-[slug].md` BEFORE contracts
 - Maximum 25 total contracts per swarm run
   If task requires more: split into multiple /swarm invocations
 - If a file doesn't exist when expected: STOP immediately, report BLOCKER

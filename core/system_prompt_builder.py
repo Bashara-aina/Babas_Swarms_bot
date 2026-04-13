@@ -26,6 +26,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from core.character.svara_surya import get_svara_injection, should_activate
 from core.gsa_voice import classify_message_context, get_gsa_injection, ContextClassification
 from core.personality.personality import LEGION_PERSONALITY
 
@@ -51,6 +52,7 @@ CONTEXT_BUDGET_RATIO = 0.35  # use max 35% of context for system prompt
 LAYER_PRIORITY: list[str] = [
     "soul",  # ALWAYS included, never compressed
     "user_profile",  # ALWAYS included (top 5 facts only)
+    "svara_context",  # Business/strategy overlay — only when should_activate() fires
     "working_memory",  # Last 5 exchanges, compressed if tight
     "relevant_memory",  # Top-3 semantic results, dropped if very tight
     "wiki_context",  # Only if directly relevant to query
@@ -268,11 +270,22 @@ async def _get_skill_context_content(extras: dict) -> str:
 # ── Layer Dispatcher ────────────────────────────────────────────────────────────
 
 
+async def _get_svara_context_content(query: str) -> str:
+    """Get Svāra Sūrya injection — only when should_activate() fires."""
+    if not query:
+        return ""
+    activation = should_activate(query)
+    if not activation.active:
+        return ""
+    return get_svara_injection(query, topic=query)
+
+
 async def get_layer_content(layer_name: str, user_id: str, query: str, extras: dict) -> str:
     """Fetch content for a named layer."""
     fetchers = {
         "soul": lambda: _get_soul_content(),
         "user_profile": lambda: _get_user_profile_content(user_id),
+        "svara_context": lambda: _get_svara_context_content(query),
         "working_memory": lambda: _get_working_memory_content(user_id),
         "relevant_memory": lambda: _get_relevant_memory_content(user_id, query),
         "wiki_context": lambda: _get_wiki_context_content(query),

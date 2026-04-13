@@ -209,3 +209,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - Remove trailing slashes from directory links
 - Add batch_fix_wikilinks.py script for future fixes
 ---
+## Commit: e03e5e4
+- Date: Mon Apr 13 06:58:15 PM JST 2026
+- Message: refactor: wikilink path corrections in wiki content
+---

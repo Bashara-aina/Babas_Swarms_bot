@@ -194,7 +194,7 @@ Only report success when ALL of:
 - [ ] @Diff-Analyzer returns VERIFIED ✅
 - [ ] @reviewer returns APPROVED ✅ (no ❌ blockers)
 
-Write final summary to `wiki/logs/swarm-[YYYY-MM-DD]-[task-slug].md`:
+Write final summary to `.wiki/logs/swarm-[YYYY-MM-DD]-[task-slug].md`:
 ```
 ## Swarm Run: [task]
 Date: [date]
@@ -220,7 +220,7 @@ Halt the entire pipeline immediately if:
 - @Diff-Analyzer finds a file that @worker claimed to write but doesn't exist
 - Task type = DEPLOYMENT and user has not confirmed
 
-On emergency stop: write incident to `wiki/issues/emergency-[date].md` and halt.
+On emergency stop: write incident to `.wiki/issues/emergency-[date].md` and halt.
 
 ---
 

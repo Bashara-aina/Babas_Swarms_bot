@@ -27,7 +27,7 @@ LOW_QUALITY_THRESHOLD = 0.3  # quarantine below this score on daily scan
 LLM_CALL_DELAY = 1.0  # seconds between deep_gate calls
 
 # Paths
-WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
+WIKI_DIR = Path("/home/newadmin/swarm-bot/wiki")
 QUARANTINE_DIR = WIKI_DIR / "_quarantine"
 QUALITY_REPORT_PATH = WIKI_DIR / "_quality_report.md"
 
