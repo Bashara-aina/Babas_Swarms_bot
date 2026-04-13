@@ -82,13 +82,10 @@ async def cmd_site_health(msg: Message) -> None:
 
     # Check website
     try:
-        import aiohttp
+        from tools.rumahlabuh_http import get_resilient_session
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://rumahlabuh.com",
-                timeout=aiohttp.ClientTimeout(total=10),
-            ) as resp:
+        async with get_resilient_session() as session:
+            async with session.get("https://rumahlabuh.com") as resp:
                 status = resp.status
                 lines.append(f"rumahlabuh.com: {'✅' if status < 400 else '❌'} HTTP {status}")
 

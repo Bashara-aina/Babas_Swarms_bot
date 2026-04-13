@@ -79,9 +79,9 @@ async def check_site_health() -> None:
         # "cekwajar.id": "https://cekwajar.id",  # Not deployed yet
     }
     try:
-        import aiohttp
+        from tools.rumahlabuh_http import get_resilient_session
 
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
+        async with get_resilient_session() as session:
             for name, url in sites.items():
                 try:
                     async with session.get(url) as resp:

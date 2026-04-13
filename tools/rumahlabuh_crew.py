@@ -86,13 +86,14 @@ async def _query_supabase(query_description: str) -> str:
 
 async def check_website_uptime(url: str = "https://rumahlabuh.com") -> dict[str, Any]:
     """Check if rumahlabuh.com is up and responding."""
-    import aiohttp
     import time
+
+    from tools.rumahlabuh_http import get_resilient_session
 
     try:
         start = time.time()
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+        async with get_resilient_session() as session:
+            async with session.get(url) as resp:
                 elapsed = round((time.time() - start) * 1000, 1)
                 return {
                     "url": url,
