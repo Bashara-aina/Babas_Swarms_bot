@@ -6,7 +6,10 @@ tags: [memory, architecture, concepts]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Memory architecture defines how Legion stores, retrieves, and manages information across sessions using multiple storage tiers.
-wikilinks: [[intent-routing]], [[reasoning-loop]], [[memory-system-architecture]]
+wikilinks:
+  - [[intent-routing]]
+  - [[reasoning-loop]]
+  - [[memory-system-architecture]]
 confidence: high
 source: audit
 ---

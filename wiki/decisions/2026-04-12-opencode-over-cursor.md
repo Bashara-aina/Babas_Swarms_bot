@@ -6,7 +6,10 @@ tags: [opencode, cursor, backend, decision, coding-agent]
 created: 2026-04-12
 updated: 2026-04-12
 summary: OpenCode was selected over Cursor for backend coding tasks due to superior CLI integration, native server mode, and direct Telegram workflow compatibility. OpenCode provides terminal TUI, native M2.7 model support, and MCP protocol compatibility essential for Legion's automation pipeline.
-wikilinks: [[opencode]], [[cursor]], [[adr-2026-04-11-opencode-integration]]
+wikilinks:
+  - [[opencode]]
+  - [[cursor]]
+  - [[adr-2026-04-11-opencode-integration]]
 confidence: high
 source: decision
 ---

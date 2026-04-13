@@ -6,7 +6,9 @@ tags: [indonesia, property, rental, web-app]
 created: 2026-04-13
 updated: 2026-04-13
 summary: rumahlabuh.com is an Indonesian property rental platform built with Next.js and Supabase, featuring property listings and inquiry management.
-wikilinks: [[supabase]], [[cekwajar-id]]
+wikilinks:
+  - [[supabase]]
+  - [[cekwajar-id]]
 confidence: high
 source: implementation
 ---

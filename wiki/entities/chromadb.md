@@ -6,7 +6,9 @@ tags: [vector, database, embeddings, rag]
 created: 2026-04-13
 updated: 2026-04-13
 summary: ChromaDB is the vector database used for storing embeddings powering memory recall and knowledge retrieval in Legion.
-wikilinks: [[vector-search]], [[memory-architecture]]
+wikilinks:
+  - [[vector-search]]
+  - [[memory-architecture]]
 confidence: high
 source: implementation
 ---

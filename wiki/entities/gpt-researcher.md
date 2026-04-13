@@ -6,7 +6,9 @@ tags: [research, agent, web, autonomous]
 created: 2026-04-13
 updated: 2026-04-13
 summary: GPT Researcher is an autonomous research agent that performs multi-source web research and synthesizes findings into reports.
-wikilinks: [[multi-agent-orchestration]], [[reasoning-loop]]
+wikilinks:
+  - [[multi-agent-orchestration]]
+  - [[reasoning-loop]]
 confidence: medium
 source: research
 ---

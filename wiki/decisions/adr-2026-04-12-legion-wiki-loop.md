@@ -6,7 +6,9 @@ tags: [wiki, knowledge-base, karpathy, pattern]
 created: 2026-04-12
 updated: 2026-04-12
 summary: Wiki auto-ingest configured with KARPATHY_KB_PATTERN for structured knowledge storage with frontmatter and TL;DR summaries.
-wikilinks: [[karpathy-kb-pattern]], [[SCHEMA]]
+wikilinks:
+  - [[karpathy-kb-pattern]]
+  - [[SCHEMA]]
 confidence: high
 source: decision
 ---

@@ -3,7 +3,9 @@ title: Business Research Indonesia
 type: concept
 project: cekwajar
 sources: [065-levelsio-playbook.md, 066-solo-founder-ai-tools-2025.md, 067-a16z-one-person-unicorn.md, 068-indonesia-saas-acquisition.md, 069-saas-metrics-benchmarks.md, 070-pt-pma-indonesia-startup.md, 071-ppn-saas-indonesia-vat.md, 072-affiliate-saas-referral.md, 073-salary-data-monetization-hr.md, 074-uu-pdp-indonesia-privacy.md]
-related: [[intent-routing]], [[vector-search]]
+related:
+  - [[intent-routing]]
+  - [[vector-search]]
 confidence: high
 last_compiled: 2026-04-13
 status: stub

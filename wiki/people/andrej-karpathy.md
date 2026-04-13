@@ -7,7 +7,10 @@ tags: [ai, researcher, educator, neural-networks, karpathy]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Andrej Karpathy is an AI researcher and educator known for building LLM knowledge bases and educational content on neural networks.
-wikilinks: [[karpathy-kb-pattern]], [[llm-cost-routing]], [[self-improvement-loop]]
+wikilinks:
+  - [[karpathy-kb-pattern]]
+  - [[llm-cost-routing]]
+  - [[self-improvement-loop]]
 confidence: high
 source: external
 last_compiled: 2026-04-13

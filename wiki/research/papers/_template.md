@@ -17,4 +17,4 @@ _Last updated: (Legion fills on save)_
 ## Links
 
 - DOI / arXiv:
-- Related wiki: [[wiki/research/_template.md]]
+- Related wiki: [[wiki/research/_template]]

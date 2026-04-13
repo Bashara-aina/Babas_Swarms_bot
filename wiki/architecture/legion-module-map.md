@@ -6,7 +6,11 @@ tags: [architecture, modules, core, overview, handlers]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Legion's module architecture spans Telegram handlers (45+ modules), core orchestration (intent routing, LLM client, memory tiers), skill system, proactive behaviors, and multi-agent swarm with 76+ agents across 9 departments.
-wikilinks: [[legion-bot]], [[intent-routing]], [[memory-architecture]], [[memory-system-architecture]]
+wikilinks:
+  - [[legion-bot]]
+  - [[intent-routing]]
+  - [[memory-architecture]]
+  - [[memory-system-architecture]]
 confidence: high
 source: implementation
 ---

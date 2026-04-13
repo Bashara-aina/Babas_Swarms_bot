@@ -6,7 +6,11 @@ tags: [indonesia, salary, fairness, web-app, nextjs, supabase]
 created: 2026-04-13
 updated: 2026-04-13
 summary: cekwajar.id is an Indonesian wage fairness platform built with Next.js and Supabase that helps workers compare their salaries against market rates and understand compensation fairness using aggregated salary data and UU PDP compliance.
-wikilinks: [[supabase]], [[cekwajar-tech-stack]], [[freemium-gate]], [[rumahlabuh-com]]
+wikilinks:
+  - [[supabase]]
+  - [[cekwajar-tech-stack]]
+  - [[freemium-gate]]
+  - [[rumahlabuh-com]]
 confidence: high
 source: implementation
 ---
