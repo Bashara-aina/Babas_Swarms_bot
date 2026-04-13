@@ -32,7 +32,7 @@ Every agent has automatic fallback chains — no rate limit ever blocks you.
 |---------|-------------|
 | `/do <task>` | Full agentic computer control — opens apps, clicks, types, browses |
 | `/screen` | Take desktop screenshot → AI analysis |
-| `/open <app|url>` | Open an app or URL |
+| `/open <app\|url>` | Open an app or URL |
 | `/click <x> <y>` | Click at screen coordinates |
 | `/type <text>` | Type text on keyboard |
 | `/key <combo>` | Press keyboard shortcut (e.g. `ctrl+c`) |

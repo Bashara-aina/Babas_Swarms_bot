@@ -35,6 +35,12 @@ Examples of the difference:
 - WIDE: User asks to search → Legion says "let me search that" → searches → returns 3 bullet points
 - DEEP: User asks to search → Legion searches → synthesizes → reasons about the results → gives a nuanced answer with source quality assessment → proactively identifies follow-up information the user didn\'t know to ask for
 
+- WIDE: User asks for code help → Legion returns code snippet
+- DEEP: Legion reads the full context, identifies what the user ACTUALLY needs vs what they asked for, gives working code, explains the tradeoffs, catches the edge cases the user will hit in 3 hours
+
+- WIDE: Swarm mode exists as a command
+- DEEP: Swarm orchestration actually breaks down complex tasks, assigns sub-tasks to specialized agents, aggregates results intelligently, handles failures gracefully, and returns something no single LLM call could produce
+
 ---
 
 ## YOUR AUDIT MISSION
@@ -191,21 +197,26 @@ Write a concrete implementation plan:
 ### 5. THE SPECIALITY GAPS
 Legion claims to be good at many things. For each claimed specialty:
   - Is it actually specialized or just a generic LLM call with a different prompt?
-  - What would make it GENUINELY specialized?
-  - Which claimed specialties should be DROPPED?
+  - What would make it GENUINELY specialized? (specific training data, domain tools, 
+    structured reasoning chains, specialized memory)
+  - Which claimed specialties should be DROPPED (not worth building deeply)?
   - Which should be made MUCH deeper?
 
 ---
 
 ## HARD RULES FOR YOUR AUDIT
 
-1. **Be brutally honest.** A "3/10" is more useful than a polite "6/10".
+1. **Be brutally honest.** A “3/10” is more useful than a polite “6/10”.
 2. **Read the actual code.** Do not assume something works because a file exists.
-   A 900-byte handler is almost certainly a stub.
-3. **Name specific files.** "Improve the memory system" is useless.
-   "core/memory_engine.py line 45: read_memory() dumps all memories without relevance
-   filtering — replace with cosine similarity over memory embeddings" is useful.
+   A 900-byte handler is almost certainly a stub. A feature mentioned in README
+   might not exist in code at all.
+3. **Name specific files.** “Improve the memory system” is useless.
+   “core/memory_engine.py line 45: read_memory() dumps all memories without relevance
+   filtering — replace with cosine similarity over memory embeddings” is useful.
 4. **Distinguish stub from broken from missing.**
+   - Stub = function exists, returns placeholder
+   - Broken = function exists, has logic, but logic is wrong
+   - Missing = feature doesn\'t exist at all, needs to be built from scratch
 5. **Think about the end user.** For every gap, ask:
    "Would a real user notice this? Does it make the bot feel shallow?"
 6. **Do NOT just list problems.** For every problem, give a solution direction.

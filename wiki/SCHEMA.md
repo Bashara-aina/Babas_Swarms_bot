@@ -28,7 +28,9 @@ tags: [tag1, tag2, tag3]
 created: 2026-04-13
 updated: 2026-04-13
 summary: 2-3 sentence TL;DR for Dataview indexing
-wikilinks: [[relative/path.md]], [[another/path.md]]
+wikilinks:
+  - [[concepts/karpathy-kb-pattern.md]]
+  - [[INDEX.md]]
 confidence: high | medium | low
 source: conversation | research | implementation | external
 ---
@@ -229,7 +231,7 @@ SORT title ASC
 - [ ] No bare URLs (use footnotes or reference section)
 - [ ] Uncertain claims marked with `[uncertain]`
 - [ ] Source noted where applicable `[source: ...]`
-- [ ] Internal cross-references use `[[wikilink]]` syntax
+- [ ] Internal cross-references use bracket link syntax
 
 ---
 

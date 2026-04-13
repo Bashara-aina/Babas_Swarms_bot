@@ -167,10 +167,9 @@ SORT file.folder ASC, title ASC
 ```
 
 ### Raw Structure
-- [[wiki/raw/docs/]] — Documentation
-- [[wiki/raw/skills_ref/]] — Skills documentation
-- [[wiki/raw/decisions/]] — Decision archives
-- [[wiki/raw/audits/]] — Audit reports
+- [[raw/docs/readme.md]] — Documentation
+- [[raw/skills_ref/AGENTS.md]] — Skills reference index
+- [[raw/audits/deep-audit-2026-04-12.md]] — Latest audit
 
 ---
 
@@ -187,7 +186,7 @@ LIMIT 5
 
 ## Related
 
-- [[wiki/SCHEMA.md]] — Schema definition
-- [[wiki/_meta/obsidian-plugins.md]] — Plugin setup
-- [[wiki/_meta/graph-config.json]] — Graph colors
-- [[wiki/_meta/audit_report_2026-04-13.md]] — Migration audit
+- [[SCHEMA.md]] — Schema definition
+- [[_meta/obsidian-plugins.md]] — Plugin setup
+- [[_meta/graph-config.json]] — Graph colors
+- [[_meta/audit_report_2026-04-13.md]] — Migration audit

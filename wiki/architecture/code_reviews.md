@@ -41,4 +41,4 @@ def merge_intervals(intervals):
 The provided code is well-structured and follows good practices for readability and maintainability. It includes comments to explain the purpose of each section, which is beneficial for understanding the code's logic. However, [uncertain] it might be beneficial to include more detailed documentation or type hints for better clarity.
 
 ## Conclusion
-The reviewed Python function for merging overlapping intervals is efficient, with a complexity of O(n log n), and handles various edge cases effectively. For further learning on algorithms and data structures, visit [[wiki/algorithms/data_structures.md]]. This page was created based on a conversation about code reviews and efficient algorithms [source: conversation 2026-04-08].
+The reviewed Python function for merging overlapping intervals is efficient, with a complexity of O(n log n), and handles various edge cases effectively. This page was created based on a conversation about code reviews and efficient algorithms [source: conversation 2026-04-08].

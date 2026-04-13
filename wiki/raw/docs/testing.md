@@ -254,5 +254,5 @@ All 10 should work without errors.
 | `/paper` or `/ask_paper` fails with ImportError | arxiv package missing | Run `/install arxiv` |
 | `/research` or `/scrape` fails with Playwright error | playwright not installed | `/install playwright` then in terminal: `playwright install chromium` |
 | Memory init error | aiosqlite missing or DB corrupt | `/install aiosqlite`, or delete `~/swarm-bot/memory.db` |
-| `ZAI_API_KEY not set` | Missing in .env | Add `ZAI_API_KEY=...` to `.env`, restart bot |
+| `ZAI_API_KEY not set` | Missing in .env | Add `ZAI_API_KEY=...` to `.env`, restart |
 | Scheduler not initialized | aiosqlite missing | `/install aiosqlite` |

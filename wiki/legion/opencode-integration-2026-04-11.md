@@ -77,6 +77,4 @@ Flow:
 
 ## Related Pages
 
-- [[.wiki/decisions/ADR-001-opencode-integration.md]]
-- [[.wiki/logs/2026-04-11-opencode-integration.md]]
-- [[wiki/legion/conversations_log.md]]
+- [[conversations_log.md]]

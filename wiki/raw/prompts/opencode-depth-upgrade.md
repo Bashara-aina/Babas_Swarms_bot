@@ -24,9 +24,9 @@ READ FIRST (before touching any code):
 
 Do NOT touch: SOUL.md, CLAUDE.md, LEGION_MASTER.md
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 1 — PRE-RESPONSE REASONING LOOP (Highest impact)
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: Claude found that every message follows the SAME path:
   classify intent → build context → single LLM call → send.
@@ -118,9 +118,9 @@ Verify:
   Send "Analisis trade-offs antara PostgreSQL dan MongoDB untuk use case high-write"
   → reasoning_loop.run returns ReasoningContext with 3 sub-questions
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 2 — UNIFY MEMORY TO 2 TIERS (Biggest structural fix)
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: 8 memory subsystems + 4 facades = context bloat + silent data loss +
 non-semantic retrieval. Asking "What\'s my main project?" fails because there\'s
@@ -132,7 +132,7 @@ CURRENT STATE (read these files first):
   core/legion_memory_facade.py   ← overlapping with memory_manager
   core/memory_engine.py          ← old version, also still active
   core/memory/episodic_store.py line ~120:  self._local = self._local[-2000:]
-                                              ↑ SILENT DATA LOSS. Fix this first.
+                                             ↑ SILENT DATA LOSS. Fix this first.
 
 TARGET: 2-tier model
 
@@ -172,8 +172,8 @@ IMPLEMENTATION STEPS:
          # Summarize oldest 500 entries instead of deleting them
          old_entries = self._local[:500]
          summary = await self._summarize_batch(old_entries)
-         self._local = [{'type': 'summary', 'content': summary,
-                          'timestamp': old_entries[-1]['timestamp']}] + self._local[500:]
+         self._local = [{\'type\': \'summary\', \'content\': summary,
+                          \'timestamp\': old_entries[-1][\'timestamp\']}] + self._local[500:]
 
 2. Create core/memory/long_term_memory.py with:
    - LongTermMemory class
@@ -208,9 +208,9 @@ Verify:
   Retrieve: ltm.retrieve(12345, "What is my main project?")  → should return the above
   Token budget: unified_context.get_context() never exceeds 400 tokens
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 3 — WIRE SELF-IMPROVEMENT LOOP (Quickest win: code exists)
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: core/self_improvement.py already exists with maybe_run_self_review()
 and buffer_conversation(). They are DEAD CODE — never called anywhere.
@@ -272,9 +272,9 @@ Verify:
   Check that buffer_conversation was called 3 times (add log line to confirm).
   Check data/message_count.json increments.
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 4 — KILL FAKE SPECIALTIES, DEEPEN REAL ONES
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: 76 agents declared, ~15 real. Empty __init__.py files for design, legal,
 marketing, ML. This is theater that adds complexity without value.
@@ -341,9 +341,9 @@ Verify:
   Count should decrease from 76+ to <= 20.
   Run: python scripts/verify_wiring.py  → must still pass.
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 5 — CLARIFYING QUESTIONS (Make Legion feel thoughtful)
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: When intent confidence < 0.4, Legion defaults to "conversation" skill.
 This means ambiguous messages get generic chatbot responses instead of
@@ -394,9 +394,9 @@ Verify:
   Send "Hei" → Legion responds normally (not a clarifying question)
   Send "Analisis sistem memory yang terbaik untuk AI agent" → Legion proceeds normally
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 6 — RESPONSE QUALITY GATE
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: Currently if LLM returns a shallow/vague/wrong answer, it gets sent.
 No system checks response quality before sending.
@@ -449,9 +449,9 @@ Verify:
   Mock LLM to return short answer to long question → quality gate triggers retry
   Mock LLM to return "As an AI" → quality gate catches the artifact
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 7 — CONSOLIDATE 4 ORCHESTRATORS INTO 1
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: 4 orchestrators with unclear ownership:
   task_orchestrator.py  (492 lines)
@@ -526,9 +526,9 @@ Verify:
   python -c "from core.orchestrator import LegionOrchestrator; print(\'OK\')"
   Send /swarm <complex task> → confirm it uses core/orchestrator.py
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 8 — FIX FAKE SKILLS (Timer + Code Review)
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: Claude scored Timer 1/10 and Code Review 0/10 — they\'re theater.
 If a user sets a timer and it doesn\'t fire, they never trust the bot again.
@@ -581,9 +581,9 @@ Verify:
   /timer 1 Test reminder → wait 60 seconds → bot sends reminder message
   /review followed by a code block → bot returns structured BUGS/PERFORMANCE/etc.
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 9 — ADD /CAPABILITIES AND /SELF_REPORT COMMANDS
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: Legion can\'t explain itself. No /capabilities. No honest status.
 core/capability_audit.py exists but its output is never surfaced to user.
@@ -624,9 +624,9 @@ Verify:
   /capabilities → returns list with ✅ ⚠️ ❌ icons, honest status
   /self_report → returns 24h summary with message count and learnings
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 PRIORITY 10 — CONTEXT WINDOW BUDGET MANAGEMENT
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 WHY: All 13 prompt injection layers concatenated linearly.
 1500+ token memory block per turn when all layers are full.
@@ -690,9 +690,9 @@ Verify:
   Confirm: soul is always first
   Confirm: log line appears for each build
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 FINAL GATE: Run after all 10 priorities are done
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
   # 1. Import check
   python -c "
@@ -714,9 +714,9 @@ FINAL GATE: Run after all 10 priorities are done
   python scripts/verify_wiring.py && pytest tests/ -v -q && \
   echo "🟢 Legion: 4.2/10 → Target 9/10 — Upgrades applied"
 
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 HARD RULES
-═══════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════
 
 1. Work ONE priority at a time. Do not start Priority 2 until Priority 1 passes verify.
 2. After EACH priority: run python scripts/verify_wiring.py to confirm nothing broke.
@@ -726,5 +726,5 @@ HARD RULES
    rather than 100% of it poorly. Partial is better than fake.
 6. Every new file must have: proper imports, async def, try/except, logger calls.
 7. The goal is not completing all 10. The goal is:
-   "After this session, Legion does 3-5 things DEEPLY that it currently does shallowly."
+   “After this session, Legion does 3-5 things DEEPLY that it currently does shallowly.”
 ```
