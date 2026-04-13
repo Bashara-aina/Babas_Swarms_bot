@@ -158,3 +158,9 @@ This update addressed Legion feeling "robotic" by adding genuine persistent iden
 - [[legion-bot]] — Current state
 - [[adr-2026-04-12-opencode-over-cursor-for-backend]] — OpenCode selection
 - [[memory-system-architecture]] — Memory tiers
+- [[architecture/audit-2026-04-11-fixes]] — Critical fixes applied 2026-04-11
+- [[architecture/refactoring-2026-04-11]] — Refactoring round 2
+- [[architecture/orchestrator-comparison]] — Consolidation planning
+- [[timelines/2026-04-10]] — Session log 2026-04-10
+- [[timelines/2026-04-11]] — Session log 2026-04-11
+- [[timelines/2026-04-12]] — Session log 2026-04-12

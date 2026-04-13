@@ -135,3 +135,9 @@ From `wiki/raw/docs/legion-master.md`, cekwajar.id is one of Bashara's active pr
 - [[supabase]] — Database provider
 - [[freemium-gate]] — Monetization strategy
 - [[rumahlabuh-com]] — Sister project (rental platform)
+- [[concepts/bpjs-reference]] — Indonesian social security data for salary benchmarking
+- [[concepts/labor-law-indonesia]] — Indonesian labor law regulations
+- [[concepts/tax-indonesia]] — PPh 21 tax calculations
+- [[concepts/market-data-indonesia]] — Salary survey aggregation methodology
+- [[concepts/business-research]] — Solo-founder research methodology and market analysis
+- [[projects/cekwajar-roadmap]] — Development roadmap and milestones

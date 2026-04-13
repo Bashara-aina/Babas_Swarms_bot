@@ -1,15 +1,17 @@
 ---
 title: Code Reviews
 type: architecture
-status: stub
-tags: [architecture, general]
+status: active
+tags: [architecture, code-quality, reviews]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
-wikilinks: []
-confidence: low
-source: migration
-project: general
+summary: Legion performs AI-assisted code reviews focusing on readability, maintainability, edge cases, and algorithmic complexity. Example review targets merge_overlapping_intervals function with O(n log n) sorting approach.
+wikilinks:
+  - [[legion-module-map]]
+  - [[projects/legion-bot]]
+confidence: medium
+source: implementation
+project: legion
 ---
 
 # Legion/Code Reviews
@@ -18,6 +20,12 @@ This page provides a review of a Python function to merge overlapping intervals,
 
 ## Introduction to Code Reviews
 Code reviews are an essential part of software development, ensuring that code is readable, maintainable, and efficient. They help in identifying bugs, improving code quality, and reducing the likelihood of errors. This page will delve into a specific example of a code review for a Python function designed to merge overlapping intervals.
+
+## See Also
+
+- [[legion-module-map]] — Core module organization
+- [[projects/legion-bot]] — Project overview
+- [[timelines/legion-version-history]] — Version history
 
 ## Merging Overlapping Intervals
 The function in question is designed to take a list of intervals as input, where each interval is a tuple of two integers representing the start and end of the interval. It merges these intervals if they overlap, resulting in a new list of non-overlapping intervals. The complexity of this function is O(n log n) due to the sorting operation.

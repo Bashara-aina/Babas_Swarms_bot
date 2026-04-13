@@ -54,6 +54,9 @@ cekwajar.id development spanned MVP, data collection, features, and monetization
 | 2026-03 | Market data API |
 | 2026-04 | Freemium launch |
 
-## Related Pages
+## See Also
 
-- [[cekwajar-id]] — Project overview
+- [[projects/cekwajar-id]] — Project overview
+- [[concepts/labor-law-indonesia]] — Labor law data referenced in Phase 2
+- [[concepts/bpjs-reference]] — BPJS data referenced in Phase 2
+- [[concepts/market-data-indonesia]] — Market salary data collected in Phase 2

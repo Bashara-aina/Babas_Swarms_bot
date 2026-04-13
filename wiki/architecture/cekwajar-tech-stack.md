@@ -69,7 +69,48 @@ Next.js App Router frontend with Supabase PostgreSQL backend, deployed on Vercel
 - `/api/market-data` — Query market rates
 - `/api/report` — Generate PDF report
 
-## Related Pages
+## API Routes
 
-- [[cekwajar-id]] — Project overview
-- [[supabase]] — Database
+### /api/submit-salary
+Accepts anonymous salary submissions with validation:
+- Request body: `{ industry, role, experience_years, monthly_salary, location }`
+- Server-side validation: all fields required, salary > 0
+- RLS: submitted anonymously, no user_id tracking
+- Returns: `{ success: true, submission_id: uuid }`
+
+### /api/market-data
+Returns aggregated salary benchmarks:
+- Query params: `?industry=&role=&region=`
+- Reads from `market_bands` table
+- Returns: `{ p25, p50, p75, sample_size, source }`
+
+### /api/report
+Generates PDF salary report for user:
+- Requires: Supabase Auth session
+- Calls: Puppeteer/headless Chrome for PDF generation
+- Returns: Signed URL to PDF (expires: 24h)
+
+## Deployment
+
+| Environment | Platform | URL |
+|------------|----------|-----|
+| Production | Vercel | cekwajar.vercel.app |
+| Staging | Vercel Preview | preview cekwajar |
+| Database | Supabase | cekwajar-db.supabase.co |
+
+## Environment Variables
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...  # server-only
+MIDTRANS_SERVER_KEY=xxx
+MIDTRANS_CLIENT_KEY=xxx
+```
+
+## See Also
+
+- [[projects/cekwajar-id]] — Project overview
+- [[entities/supabase]] — Database provider
+- [[concepts/labor-law-indonesia]] — Indonesian labor regulations affecting salary data
+- [[concepts/market-data-indonesia]] — Salary benchmark data sources

@@ -1,15 +1,17 @@
 ---
 title: Audit 2026 04 11 Fixes
 type: architecture
-status: stub
-tags: [architecture, general]
+status: active
+tags: [architecture, audit, fixes, handlers]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
-wikilinks: []
-confidence: low
-source: migration
-project: general
+summary:: " 2026-04-11 audit applied 4 critical fixes: duplicate handler registration, missing shutdown handler, env validation, and Ollama bypass removal. All 276 tests pass after fixes."
+wikilinks:
+  - [[legion-module-map]]
+  - [[projects/legion-bot]]
+confidence: high
+source: implementation
+project: legion
 ---
 
 # Audit 2026-04-11: Critical Fixes Applied
@@ -28,6 +30,12 @@ project: general
 | 2 | `main.py` | new | Added `on_shutdown` handler via `dp.shutdown.register()` — cancels all asyncio tasks on SIGTERM/SIGINT for graceful shutdown | critical |
 | 3 | `main.py` | after `load_dotenv()` | Added fail-fast env validation — `TELEGRAM_BOT_TOKEN` and `ALLOWED_USER_ID` raise `RuntimeError` if missing | critical |
 | 4 | `llm_client.py` | Ollama bypass removal | Removed Ollama blocking for local `ollama_chat/` model fallbacks — all agents now can use local Ollama | warning |
+
+## See Also
+
+- [[legion-module-map]] — Core module organization
+- [[projects/legion-bot]] — Project overview
+- [[timelines/legion-version-history]] — Version history
 | 5 | `llm_client.py` | MiniMax retry | Replaced fixed 30s retry with exponential backoff + jitter: ~30s → ~60s → ~120s delays | warning |
 | 6 | `llm_client.py` | `chunk_output()` | Added `if remaining_space <= 0: break` guard to prevent infinite loop when `max_length == remaining_space` | critical |
 | 7 | `core/agent_registry.py` | `LEGACY_FALLBACK_CHAIN` | Updated all 22 legacy agents: primary=`minimax/MiniMax-M2.7`, fallback1=`ollama_chat/llama3.3:70b`, fallback2=`ollama_chat/gemma4:e4b` | warning |
