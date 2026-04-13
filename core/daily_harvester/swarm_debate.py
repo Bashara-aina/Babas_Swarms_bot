@@ -15,6 +15,16 @@ from core.daily_harvester.types import (
 logger = logging.getLogger(__name__)
 
 
+def _budget_guard_check(task_type: str) -> bool:
+    """Return True if budget allows the LLM call, False to skip."""
+    try:
+        from swarms_bot.routing.budget_guard import get_budget_guard
+
+        return get_budget_guard().can_spend(task_type)
+    except Exception:
+        return True  # If budget guard fails, allow the call
+
+
 async def run_prosecutor(candidate: CandidateInfo) -> list[str]:
     """
     PROSECUTOR agent: identify concerns and weaknesses in a candidate piece.
@@ -38,6 +48,9 @@ List 1-5 specific concerns. Be concrete and skeptical.
 Reply with a JSON object: {{"concerns": ["concern 1", "concern 2", ...]}}"""
 
     try:
+        if not _budget_guard_check("debate"):
+            logger.warning("Budget exceeded — skipping Prosecutor for %s", candidate.get("candidate_id"))
+            return ["Budget exceeded — candidate skipped"]
         response, _ = await chat(
             task=prompt,
             agent_key="debate",
@@ -75,6 +88,9 @@ If a concern is valid, acknowledge it honestly but explain why the piece is stil
 Reply with a JSON object: {{"rebuttals": ["rebuttal 1", "rebuttal 2", ...]}}"""
 
     try:
+        if not _budget_guard_check("debate"):
+            logger.warning("Budget exceeded — skipping Defender for %s", candidate.get("candidate_id"))
+            return ["Budget exceeded — candidate skipped"]
         response, _ = await chat(
             task=prompt,
             agent_key="debate",
@@ -118,6 +134,9 @@ Reply with a JSON object:
 }}"""
 
     try:
+        if not _budget_guard_check("research"):
+            logger.warning("Budget exceeded — skipping FactChecker for %s", candidate.get("candidate_id"))
+            return {"result": "UNABLE_TO_VERIFY", "contradiction_file": None, "supporting_sources": []}
         response, _ = await chat(
             task=prompt,
             agent_key="researcher",
@@ -187,6 +206,18 @@ Reply JSON:
 }}"""
 
     try:
+        if not _budget_guard_check("analyst"):
+            logger.warning("Budget exceeded — skipping Judge for %s", candidate.get("candidate_id"))
+            return SwarmVerdict(
+                candidate_id=candidate.get("candidate_id", ""),
+                verdict=VerdictDecision.NEEDS_MORE_RESEARCH,
+                confidence=0.0,
+                concerns=concerns,
+                rebuttals=rebuttals,
+                fact_check_result=fact_check,
+                reasoning="Budget exceeded",
+                final_citations=[],
+            )
         response, _ = await chat(
             task=prompt,
             agent_key="analyst",

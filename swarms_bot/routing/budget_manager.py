@@ -118,6 +118,18 @@ class BudgetManager:
             "monthly_limit": self.monthly_limit,
         }
 
+    def can_spend(self, task_type: str = "chat") -> bool:
+        """Return True if budget allows spending for the given task type.
+
+        Args:
+            task_type: Type of task (e.g., 'chat', 'debate', 'research').
+                       Currently unused but reserved for per-task limits.
+
+        Returns:
+            True if daily and monthly limits are not exceeded.
+        """
+        return self.check_budget()["allowed"]
+
     def get_cost_breakdown(self, period: str = "day") -> Dict[str, Any]:
         """Get cost breakdown by agent and model.
 
