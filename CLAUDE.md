@@ -23,7 +23,7 @@ Babas_Swarms_bot/
 ├── agents.py                    ← SINGLE SOURCE OF TRUTH: models, TASK_KEYWORDS, PERSONALITY_WRAPPER
 ├── router.py                    ← Thin shim — re-exports from agents.py only
 ├── llm_client.py                ← chat(), agent_loop(), fallback chains — all LLM calls go through here
-├── computer_agent.py            ← Desktop control (screenshot, mouse, keyboard, shell)
+├── computer_agent/              ← Desktop control (split: display, shell, tools, __init__)
 ├── task_orchestrator.py         ← Task chaining, swarm debate
 ├── SOUL.md                      ← Legion's living identity — read at boot + every conversation
 ├── data/beliefs.json            ← Structured beliefs for debate_engine.py
@@ -325,8 +325,8 @@ core/proactive/curiosity_engine.py
 ✅ Yes
 Daily briefing
 07:30 JST
-core/proactive/daily_briefing.py
-✅ Yes
+❌ DISABLED — commented out in main.py lines 749-751 (tools/briefing.py)
+❌ No (disabled)
 GitHub intel scan
 09:00 JST
 tools/composio_hub.py
@@ -337,7 +337,7 @@ core/memory/consolidator.py
 ❌ Local only
 Proactive scheduler
 Event-driven
-core/proactive/proactive_scheduler.py
+core/proactive/scheduler.py
 ✅ Yes
 ruflo Node.js sidecar
 On boot
@@ -399,11 +399,7 @@ jobs:
       - run: pytest tests/ -x --asyncio-mode=auto -q
 
 This ensures no future push (including from Claude) silently breaks core systems.
-P3-2: Modularize computer_agent.py computer_agent.py is 79KB — too large to maintain or test. Split into:
-computer/screen.py — screenshot, OCR, vision analysis
-computer/input.py — mouse, keyboard, xdotool
-computer/shell.py — command execution with timeout
-computer/apps.py — app launch, window management Keep the existing public API intact so handlers/computer.py doesn't break.
+P3-2: ✅ Modularize computer_agent.py — Done (split into computer_agent/ directory: __init__.py, display.py, shell.py, tools.py)
 P3-3: Add LegionMemoryFacade validation In core/memory/memory_manager.py, add a method async validate_consistency() that checks whether mem0 and chromadb embeddings have drifted (cosine similarity check on last 10 stored items). Run this check weekly at 03:00 JST and alert Bashara via Telegram if drift > 0.15.
 P3-4: Add URL allowlist to browser_agent.py Before any Playwright navigation, check the target URL against a configurable allowlist in .env (BROWSER_ALLOWED_DOMAINS). This prevents prompt injection via the curiosity engine navigating to malicious pages.
 
@@ -496,7 +492,7 @@ Check core/soul_engine.py loads; add smoke test
 After every change, run this full test sequence before considering the task done:
 Smoke tests (run every time):
 python -c "from core.soul_engine import build_soul_context; print(build_soul_context()[:100])"
-python -c "from core.intent_router import IntentRouter; r = IntentRouter(); print(r.classify('write me code'))"
+python -c "from core.intent_router import IntentRouter; r = IntentRouter(); print(r.route_sync('write me code'))"
 python -c "from core.system_prompt_builder import build_full_system_prompt; print(build_full_system_prompt('test')[:200])"
 python -c "from core.debate_engine import build_debate_instruction; print('debate ok')"
 
