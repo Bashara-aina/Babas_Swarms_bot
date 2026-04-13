@@ -24,6 +24,7 @@ class HarvestPipeline:
 
     Pipeline timestamps (JST):
     - 04:00  → context_read (load topic budget)
+    - 04:05  → load_feedback (load harvest-review bias from wiki log)
     - 04:15  → parallel_harvest (gather candidates)
     - 04:45  → swarm_debate (4-agent debate)
     - 05:00  → write_to_wiki (persist accepted entries)
@@ -32,6 +33,15 @@ class HarvestPipeline:
 
     def __init__(self) -> None:
         self.wiki_storage = WikiStorage()
+        self._scorer = None  # lazily initialized
+
+    def _get_scorer(self):
+        """Lazy-load scorer to avoid circular imports at module init."""
+        if self._scorer is None:
+            from core.daily_harvester.scorer import Scorer
+
+            self._scorer = Scorer()
+        return self._scorer
 
     async def _context_read(self) -> dict[str, int]:
         """Load topic budget from topic_budget engine."""
@@ -227,6 +237,16 @@ class HarvestPipeline:
         # Step 1: load topic budget
         budget = await self._context_read()
         await asyncio.sleep(0.2)
+
+        # Step 1b: load harvest-review feedback into scorer (closes feedback loop)
+        scorer = self._get_scorer()
+        try:
+            feedback_deltas = await scorer.load_harvest_feedback(lookback_days=30)
+            if feedback_deltas:
+                await scorer.apply_loaded_feedback(feedback_deltas)
+                logger.info("Harvest feedback loaded into scorer: %d topic adjustments", len(feedback_deltas))
+        except Exception as e:
+            logger.warning("Could not load harvest feedback (non-fatal): %s", e)
 
         # Step 2: harvest candidates
         candidates = await self._parallel_harvest(budget)

@@ -74,7 +74,7 @@ Life's fundamental operation is: generate variation, filter by selection, propag
 
 **Core Insight**: An organism's genes don't just shape its body — they shape the environment it constructs and the artifacts it builds. The beaver's dam is as much an expression of beaver genes as the beaver's teeth. "The phenotype" extends beyond the organism to include the world it actively modifies.
 
-**Why it matters**: For AI agents, the "extended phenotype" is the interface the agent creates in the world — the documents it writes, the systems it modifies, the knowledge structures it builds. Legion's [[SOUL.md]] is part of Legion's extended phenotype.
+**Why it matters**: For AI agents, the "extended phenotype" is the interface the agent creates in the world — the documents it writes, the systems it modifies, the knowledge structures it builds. Legion's [[SOUL]] is part of Legion's extended phenotype.
 
 **LEGION RULE**: "When evaluating the success of an agent, look beyond its internal state to the artifacts it produces that change the environment. A model that performs well on benchmarks but produces artifacts that degrade downstream processes has a narrow phenotype. Legitimate performance extends to the extended phenotype."
 

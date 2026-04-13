@@ -151,6 +151,142 @@ async def _mark_reviewed(
     return found
 
 
+async def _load_harvest_stats() -> dict[str, Any]:
+    """Compute harvest statistics from the harvest log."""
+    import re
+    from datetime import datetime, timezone, timedelta
+
+    wiki_root = Path(__file__).resolve().parent.parent.parent / "wiki" / "legion" / "harvester"
+    log_file = wiki_root / "harvest-log.md"
+    if not log_file.exists():
+        return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
+
+    try:
+        content = log_file.read_text(encoding="utf-8")
+    except OSError:
+        return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    total = 0
+    accepted = 0
+    rejected = 0
+    by_source: dict[str, dict[str, int]] = {}
+    reason_counts: dict[str, int] = {}
+
+    json_blocks = re.findall(r'```json\s*\n(.*?)\n```', content, re.DOTALL)
+    for block in json_blocks:
+        block = block.strip()
+        if not block:
+            continue
+        try:
+            entry = json.loads(block)
+        except json.JSONDecodeError:
+            continue
+
+        entry_date_str = entry.get("date", "")
+        try:
+            entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            continue
+
+        if entry_date < cutoff:
+            continue
+
+        for candidate in entry.get("candidates_reviewed", []):
+            total += 1
+            decision = candidate.get("decision", "")
+            source = candidate.get("source", "unknown")
+            reason = candidate.get("reason", "unknown")
+
+            # Normalize source label
+            if "arxiv" in source:
+                src_label = "arxiv"
+            elif "github" in source:
+                src_label = "github"
+            else:
+                src_label = "web"
+
+            if src_label not in by_source:
+                by_source[src_label] = {"accepted": 0, "rejected": 0}
+
+            if decision == "accepted":
+                accepted += 1
+                by_source[src_label]["accepted"] += 1
+            elif decision == "rejected":
+                rejected += 1
+                by_source[src_label]["rejected"] += 1
+                if reason:
+                    reason_counts[reason] = reason_counts.get(reason, 0) + 1
+
+    top_reasons = sorted(reason_counts.items(), key=lambda x: -x[1])[:5]
+
+    # Load current bias
+    from core.daily_harvester.scorer import Scorer
+
+    scorer = Scorer()
+    bias = scorer.get_bias()
+
+    return {
+        "total": total,
+        "accepted": accepted,
+        "rejected": rejected,
+        "by_source": by_source,
+        "top_reasons": top_reasons,
+        "bias": bias,
+    }
+
+
+@router.message(Command("harvest_stats"))
+async def cmd_harvest_stats(message: Message) -> None:
+    """Show harvest quality statistics."""
+    if not is_allowed(message):
+        return
+
+    stats = await _load_harvest_stats()
+    total = stats["total"]
+
+    if total == 0:
+        await message.answer(
+            "📊 <b>Harvest Stats</b>\n\nNo harvest review data in the last 30 days.\n"
+            "Run /harvest_review after a daily harvest cycle to start collecting feedback.",
+            parse_mode="HTML",
+        )
+        return
+
+    accepted = stats["accepted"]
+    rejected = stats["rejected"]
+    acceptance_rate = (accepted / total * 100) if total > 0 else 0
+
+    lines = [
+        f"📊 <b>Harvest Stats</b> (last 30 days)\n",
+        f"Total reviewed: {total} | ✅ {accepted} | ❌ {rejected} | "
+        f"Accept rate: <b>{acceptance_rate:.0f}%</b>\n",
+        "<b>By source:</b>",
+    ]
+
+    for src, counts in stats["by_source"].items():
+        src_total = counts["accepted"] + counts["rejected"]
+        src_rate = (counts["accepted"] / src_total * 100) if src_total > 0 else 0
+        lines.append(f"  {src}: {src_total} reviewed, {src_rate:.0f}% accept")
+
+    if stats["top_reasons"]:
+        lines.append("\n<b>Top rejection reasons:</b>")
+        for reason, count in stats["top_reasons"]:
+            lines.append(f"  <code>{reason}</code>: {count}")
+
+    lines.append("\n<b>Current scorer bias:</b>")
+    bias = stats["bias"]
+    active_bias = {k: v for k, v in sorted(bias.items(), key=lambda x: -abs(x[1]))[:8] if abs(v) >= 0.01}
+    if active_bias:
+        for k, v in active_bias.items():
+            arrow = "▲" if v > 0 else "▼"
+            lines.append(f"  {arrow} <code>{k}</code>: {v:+.2f}")
+    else:
+        lines.append("  (no active bias adjustments)")
+
+    await message.answer("\n".join(lines), parse_mode="HTML")
+
+
 async def _write_feedback_to_log(
     candidate: dict[str, Any],
     decision: str,

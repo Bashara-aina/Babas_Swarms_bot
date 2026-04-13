@@ -52,25 +52,27 @@ async def get_business_summary() -> str:
     """Get a combined business summary for morning briefing."""
     lines = ["📊 **Business Snapshot**\n"]
 
+    # rumahlabuh.com — query actual tables: rooms, bookings, branches
     try:
-        listings = await supabase_query("listings", limit=1, filters={"status": "active"})
-        if listings and "error" not in listings[0]:
+        rooms = await supabase_query("rooms", limit=10, filters={"status": "active"})
+        bookings = await supabase_query("bookings", limit=5, filters={"status": "confirmed"})
+        branches = await supabase_query("branches", limit=5)
+        if rooms and "error" not in rooms[0]:
+            active_rooms = len(rooms) if isinstance(rooms, list) else 0
+            total_bookings = len(bookings) if isinstance(bookings, list) else 0
+            branch_count = len(branches) if isinstance(branches, list) else 0
             lines.append(f"**rumahlabuh.com**")
-            lines.append(f"  Active listings: {len(listings)}")
+            lines.append(f"  Active rooms: {active_rooms}")
+            lines.append(f"  Confirmed bookings: {total_bookings}")
+            lines.append(f"  Branches: {branch_count}")
         else:
-            lines.append("**rumahlabuh.com**: query failed")
+            err = rooms[0].get("error", "unknown") if rooms else "no data"
+            lines.append(f"**rumahlabuh.com**: {err}")
     except Exception as e:
         lines.append(f"**rumahlabuh.com**: {e}")
 
-    try:
-        calcs = await supabase_query("salary_checks", limit=1)
-        if calcs and "error" not in calcs[0]:
-            lines.append(f"**cekwajar.id**")
-            lines.append(f"  Recent checks: {len(calcs)}")
-        else:
-            lines.append("**cekwajar.id**: query failed")
-    except Exception as e:
-        lines.append(f"**cekwajar.id**: {e}")
+    # cekwajar.id — no local Supabase (hosted externally)
+    lines.append("**cekwajar.id**: managed externally (no local DB)")
 
     return "\n".join(lines)
 

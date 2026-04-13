@@ -131,6 +131,112 @@ class Scorer:
         logger.info("Scorer bias updated: %s", {k: f"{v:+.2f}" for k, v in delta.items()})
         return delta
 
+    async def load_harvest_feedback(
+        self,
+        log_path: Path | None = None,
+        lookback_days: int = 30,
+    ) -> dict[str, float]:
+        """Read harvest-log.md, extract accept/reject patterns, return bias deltas.
+
+        Parses each YAML+JSON log session entry from the last {lookback_days} days.
+        For each accepted candidate: boost its topic/tag bias slightly.
+        For each rejected candidate: penalize its topic/tag more strongly.
+        Returns a dict of {topic_tag: delta} representing the net adjustment
+        to apply to the current bias vector.
+        """
+        import re
+        from datetime import datetime, timezone, timedelta
+
+        if log_path is None:
+            repo_root = Path(__file__).resolve().parent.parent.parent
+            log_path = repo_root / "wiki" / "legion" / "harvester" / "harvest-log.md"
+
+        if not log_path.exists():
+            logger.info("No harvest log found at %s — skipping feedback load", log_path)
+            return {}
+
+        try:
+            content = log_path.read_text(encoding="utf-8")
+        except OSError as e:
+            logger.warning("Could not read harvest log: %s", e)
+            return {}
+
+        # Split into individual entries separated by --- markers
+        # Each entry starts with --- then YAML frontmatter then JSON block
+        cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+        topic_scores: dict[str, float] = {}  # topic → cumulative delta
+        topic_counts: dict[str, int] = {}    # topic → count for weighting
+
+        # Match JSON blocks that follow YAML frontmatter
+        json_blocks = re.findall(r'```json\s*\n(.*?)\n```', content, re.DOTALL)
+        for block in json_blocks:
+            block = block.strip()
+            if not block:
+                continue
+            try:
+                entry = json.loads(block)
+            except json.JSONDecodeError:
+                continue
+
+            # Parse date from frontmatter or entry
+            entry_date_str = entry.get("date", "")
+            try:
+                entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=timezone.utc)
+            except (ValueError, TypeError):
+                continue
+
+            if entry_date < cutoff:
+                continue
+
+            for candidate in entry.get("candidates_reviewed", []):
+                decision = candidate.get("decision", "")
+                tags = candidate.get("tags", [])
+                topic = candidate.get("topic", "")
+                reason = candidate.get("reason", "")
+
+                # Use topic, first tag, or reason as the bias key
+                key = topic or (tags[0] if tags else reason or "unknown")
+
+                if decision == "accepted":
+                    delta = 0.02
+                elif decision == "rejected":
+                    delta = -0.05
+                else:
+                    continue
+
+                topic_scores[key] = topic_scores.get(key, 0.0) + delta
+                topic_counts[key] = topic_counts.get(key, 0) + 1
+
+        if not topic_scores:
+            logger.info("No harvest feedback entries found in last %d days", lookback_days)
+            return {}
+
+        # Clamp deltas and return only non-zero ones
+        result = {}
+        for key, raw_delta in topic_scores.items():
+            count = topic_counts[key]
+            # Scale delta by inverse count (many small adjustments vs. few strong ones)
+            adjusted = raw_delta * (1.0 / (1.0 + 0.1 * count))
+            clamped = max(-0.3, min(0.3, adjusted))
+            if abs(clamped) >= 0.01:
+                result[key] = clamped
+
+        logger.info(
+            "Loaded harvest feedback: %d topics adjusted over %d days",
+            len(result),
+            lookback_days,
+        )
+        return result
+
+    async def apply_loaded_feedback(self, deltas: dict[str, float]) -> None:
+        """Apply pre-computed bias deltas to the current bias vector."""
+        await self.load_bias()
+        for key, delta in deltas.items():
+            self._bias[key] = self._bias.get(key, 0.0) + delta
+            self._bias[key] = max(-0.5, min(0.3, self._bias[key]))
+        await self.save_bias()
+        logger.info("Applied harvest feedback deltas: %s", {k: f"{v:+.2f}" for k, v in deltas.items()})
+
     async def _append_history(self, entry: dict) -> None:
         """Append a scoring update entry to scores_history.jsonl."""
         DATA_DIR.mkdir(parents=True, exist_ok=True)

@@ -37,10 +37,26 @@ def _load_narrative() -> dict:
         "recent_wins": [],
         "current_struggles": [],
         "ongoing_projects": {
-            "legion_bot": "Babas_Swarms_bot — multi-agent Telegram bot, active development",
-            "thesis": "Assembly action recognition, ResNet-50 + FiLM, deadline July 2026, Shibaura Institute of Technology",
-            "cekwajar_id": "Indonesian wage verification SaaS, Next.js + Supabase + Midtrans",
-            "rumahlabuh": "Property rental platform, Koto City focus, Supabase backend",
+            "legion_bot": "Babas_Swarms_bot — multi-agent Telegram bot, active development (RTX 3060 + systemd)",
+            "thesis": (
+                "WorkerNet IKEA: assembly action recognition in video — ResNet-50-FPN backbone, "
+                "3 task heads (Detection + Pose + Activity), FiLM conditioning module, "
+                "Kendall uncertainty weighting. Dataset: 685,516 frames, 254 videos, 33 actions. "
+                "Deadline: July 2026, Shibaura Institute of Technology. "
+                "Current status: Epoch 74+ (as of 2026-03-28). "
+                "Known issue: FiLM gradient blocking prevents activity loss from improving pose quality."
+            ),
+            "cekwajar_id": (
+                "Indonesian wage verification SaaS — Next.js + Supabase + Midtrans. "
+                "Validates formal/informal worker wages against Indonesian wage standards. "
+                "Managed externally (no local DB)."
+            ),
+            "rumahlabuh": (
+                "Rental booking platform for Labuh Banyu & Labuh Biru properties (Koto City). "
+                "Next.js + Supabase (rooms, bookings, payments, branches tables) + Midtrans payment gateway. "
+                "Tracks tenant contracts, extensions, and payment status. "
+                "Admin panel at /admin route."
+            ),
         },
         "last_updated": 0,
         "conversation_count": 0,
