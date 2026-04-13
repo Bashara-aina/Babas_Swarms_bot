@@ -130,6 +130,22 @@ State of repo: [did you write any files before hitting blocker? list them]
 - `git diff` before and after to show exactly what changed
 - No feature is complete without at least one test
 
+### TDD Enforcement (Soft — from superpowers pattern)
+For FEATURE and BUG_FIX contracts:
+1. **BEFORE writing any implementation code**, check that a test file exists or can be created
+2. If the contract's scope includes tests:
+   - Read the existing test file (if any)
+   - Write the test FIRST — it must fail before implementation begins
+   - Run the test to confirm it fails (red)
+   - ONLY THEN write the implementation code
+   - Run the test again to confirm it passes (green)
+3. If no test file exists for the target module:
+   - Create `tests/` directory if needed
+   - Write a basic test that covers the contract's DONE_WHEN criteria
+   - This test must be runnable with `pytest` or `python -m unittest`
+4. **Never write implementation code for a feature that has no test coverage unless the contract explicitly waives this requirement**
+5. This rule is advisory (soft) — if the worker cannot create a test (e.g., contract is research-only), document why and proceed
+
 ### REFACTOR contracts
 - After every rename: `grep -r "old_name" . --include="*.py" | grep -v ".git"`
   Must return empty (no remaining references)
