@@ -1,15 +1,11 @@
-# Review: AUDIT 14 — Wiring Verification
-
-**Date**: 2026-04-12  
-**Reviewer**: @reviewer  
-**Status**: ✅ LGTM — no blockers
-
 ---
-
 ## Files Reviewed
 
+---
 | File | Review Result |
-|------|---------------|
+|
+---
+---|---------------|
 | `scripts/verify_wiring.py` | ✅ PASS |
 | `Makefile` | ✅ PASS |
 | `.github/workflows/ci.yml` | ✅ PASS |

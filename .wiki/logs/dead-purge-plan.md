@@ -1,3 +1,4 @@
+---
 # Dead File Purge Execution Plan
 > Created: 2026-04-11 | Planner: @planner | Task: Safe dead file cleanup with 3-pass confirmation
 

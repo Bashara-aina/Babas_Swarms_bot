@@ -1,14 +1,7 @@
-# Review: ADR-059 `_cif` Scope Bug Fix
-
-**File**: `llm_client/__init__.py`  
-**Date**: 2026-04-12  
-**Auditor**: Reviewer Agent  
-**Verdict**: ✅ **PASS**
-
 ---
-
 ## Changes Audited
 
+---
 ### 1. Line 44 — Module-level import
 ```python
 from core.intent_router import build_intent_hint, classify_intent_fast
@@ -34,8 +27,8 @@ if not agent_key:
 ("intent_hint", lambda: build_intent_hint(classify_intent_fast(task))),
 ```
 **Status**: ✅ Correct. Now uses the module-level `classify_intent_fast` directly instead of the old `_cif` alias.
-
 ---
+
 
 ## Verification
 

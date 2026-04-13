@@ -1,18 +1,12 @@
-# Context Engineering Guide for Legion
-
-> Source: [Meirtz/Awesome-Context-Engineering](https://github.com/Meirtz/Awesome-Context-Engineering)  
-> Paper: ["A Survey of Context Engineering for Large Language Models"](https://arxiv.org/abs/2507.13334) (arXiv:2507.13334)  
-> Last updated: 2026-04-11
-
 ---
-
 ## 1. Overview
 
+---
 **Context Engineering** is the discipline of constructing, managing, and optimizing the information payload delivered to an LLM at inference time. Unlike static prompting, it encompasses dynamic context assembly, memory systems, retrieval pipelines, and runtime state management.
 
 As of 2026, context engineering sits inside a broader **agent engineering** stack that includes agent harnesses, interoperability protocols (MCP, A2A), project memory, and observability.
-
 ---
+
 
 ## 2. RAG Patterns
 

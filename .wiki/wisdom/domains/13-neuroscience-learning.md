@@ -1,23 +1,14 @@
-# Domain 13: Neuroscience & Learning
-
-## [Hermann Ebbinghaus] — Memory: A Contribution to Experimental Psychology
-**Type**: Paper
-**Year**: 1885
-**Core Insight**: Forgetting curve; spaced repetition; savings; retention; forgetting; memory; learning; recall; rehearsal; experimental method.
-**LEGION RULE**: Apply spaced repetition and retrieval practice when learning because the forgetting curve shows exponential decay and retrieval strengthens memory traces more effectively than passive review.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Massed practice
-
 ---
 ## [Michael Polanyi] — Personal Knowledge: Towards a Post-Critical Philosophy
+---
 **Type**: Book
 **Year**: 1958
 **Core Insight**: Tacit knowledge; personal participation; emergence; meaning; indwelling; knowledge; science; subjectivity; articulation; gestalt.
 **LEGION RULE**: Engage in personal participation and deliberate articulation when acquiring expertise because tacit knowledge cannot be fully explicit and expertise resides in gestalt patterns that emerge through embodied practice.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Explicit-only knowledge
-
 ---
+
 ## [Robert Bjork] — Desirable Difficulties in Learning
 **Type**: Paper
 **Year**: 1994

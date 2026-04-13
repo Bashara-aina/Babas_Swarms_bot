@@ -1,13 +1,9 @@
-# n8n Workflow Documentation
-Generated: April 11, 2026
-Source: tools/n8n_bridge.py
-
 ---
-
 ## Overview
-n8n is configured as a workflow automation layer. The bridge runs as a webhook listener on port 7835.
-
 ---
+n8n is configured as a workflow automation layer. The bridge runs as a webhook listener on port 7835.
+---
+
 
 ## n8n Bridge (tools/n8n_bridge.py)
 

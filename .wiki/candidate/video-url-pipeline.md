@@ -1,18 +1,7 @@
-# video-url-pipeline.md
-Score: 8/10 — HIGH PRIORITY WRITE
-
-## 1. Executive Summary
-
-`tools/video.py` handles video URL understanding via a pipeline: URL classification → yt-dlp metadata extraction → optional faster-whisper transcription. Supports 12 video platforms. Falls back gracefully when transcription is unavailable.
-
-**Pipeline**: is_video_url() → understand_video_url() → _transcribe_video_audio() → transcript appended to output
-
-**Key finding**: Audio transcription is best-effort — failures are silently swallowed and return empty string, but the metadata output is always returned.
-
 ---
-
 ## 2. URL Classification
 
+---
 ```python
 def is_video_url(url: str) -> bool
 ```
@@ -29,8 +18,8 @@ Checks URL against hardcoded `_VIDEO_DOMAINS` set. Returns `True` if any domain 
 **Note**: `x.com` and `twitter.com` are the same — X rebranding not fully reflected in code.
 
 **Limitation**: Uses simple substring matching, not regex. No protocol check. A URL like `https://youtube.com.evil.com` would match.
-
 ---
+
 
 ## 3. Metadata Extraction (`understand_video_url`)
 

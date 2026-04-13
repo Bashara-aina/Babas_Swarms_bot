@@ -1,16 +1,10 @@
-# Production Agent Patterns for Legion
-
-> Source: [EthicalML/awesome-production-agentic-systems](https://github.com/EthicalML/awesome-production-agentic-systems)  
-> Categories: Agentic Frameworks, Observability, Protocols, Memory, Security  
-> Last updated: 2026-04-11
-
 ---
-
 ## 1. Overview
 
-This document covers production-grade patterns for deploying, monitoring, and scaling agentic systems. It bridges the gap between "working prototype" and "production-ready" by addressing memory at scale, context management, multi-agent orchestration, observability, and security.
-
 ---
+This document covers production-grade patterns for deploying, monitoring, and scaling agentic systems. It bridges the gap between "working prototype" and "production-ready" by addressing memory at scale, context management, multi-agent orchestration, observability, and security.
+---
+
 
 ## 2. Memory Management at Scale
 

@@ -1,3 +1,4 @@
+---
 # Harvester Implementation Log — 2026-04-11
 
 ## Date: 2026-04-11

@@ -1,18 +1,14 @@
-# Thesis — WorkerNet / POPW Protocol
-Generated: April 11, 2026
-Source: BASHARA-MASTER-PROFILE
-
 ---
-
 ## Overview
+---
 - **Project name**: WorkerNet (also called POPW protocol)
 - **Type**: Multi-task deep learning for industrial assembly action recognition
 - **Institution**: Shibaura Institute of Technology (SIT), Tokyo
 - **Advisor**: Prof. Masaomi Kimura
 - **Thesis deadline**: July 2026
 - **Zemi**: Thursday 1–3PM JST
-
 ---
+
 
 ## Technical Details
 

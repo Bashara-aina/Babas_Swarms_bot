@@ -1,44 +1,7 @@
-# Review: Async Correctness Sweep
-
-## 1. `handlers/voice.py` — Blocking `open()` in Async Context
-
-### ✅ Issue Confirmed
-
-#### Line 52 — Blocking file read inside async function
-```python
-async def _transcribe(ogg_path: str) -> str:
-    # ...
-    client = openai.AsyncOpenAI(api_key=openai_key)
-    with open(ogg_path, "rb") as f:           # ← LINE 52: BLOCKING I/O
-        result = await client.audio.transcriptions.create(
-            model="whisper-1",
-            file=f,
-            language="id",
-        )
-```
-**Problem:** `open()` is synchronous/blocking. Inside an `async` function, this blocks the event loop.
-
-**Fix:** Use `aiofiles.open()` or wrap in `asyncio.to_thread()`:
-```python
-import aiofiles
-async with aiofiles.open(ogg_path, "rb") as f:
-    result = await client.audio.transcriptions.create(...)
-```
-
-#### Line 68 — Same blocking pattern in Groq fallback
-```python
-async with httpx.AsyncClient(timeout=30) as client:
-    with open(ogg_path, "rb") as f:           # ← LINE 68: BLOCKING I/O
-        resp = await client.post(
-            "https://api.groq.com/openai/v1/audio/transcriptions",
-            ...
-        )
-```
-
 ---
-
 ## 2. `asyncio.create_task` Without Error Handlers — Systemic Pattern
 
+---
 ### ✅ Issue Confirmed
 
 **Total `asyncio.create_task` calls found:** 68  
@@ -48,7 +11,9 @@ async with httpx.AsyncClient(timeout=30) as client:
 ### Files with Unprotected `asyncio.create_task` Calls:
 
 | File | Line(s) | Notes |
-|------|---------|-------|
+|
+---
+---|---------|-------|
 | `main.py` | 555, 676, 708, 725, 746, 782, 824, 833, 846, 863, 919, 931 | 12 calls |
 | `llm_client/__init__.py` | 1325, 1409, 1416, 1430, 1438, 1586 | 6 calls |
 | `handlers/nihongo_handler.py` | 266 | 1 call |

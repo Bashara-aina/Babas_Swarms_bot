@@ -1,3 +1,4 @@
+---
 ### CONTRACT #1: Verify existing wiki files actually exist and have content
 
 WHAT:

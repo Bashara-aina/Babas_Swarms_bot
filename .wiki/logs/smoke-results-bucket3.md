@@ -1,3 +1,4 @@
+---
 # Smoke Results — Bucket 3: Core Intent & Memory Systems
 
 **Date**: 2026-04-11 20:35:40  

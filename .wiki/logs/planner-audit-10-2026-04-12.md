@@ -1,3 +1,4 @@
+---
 # AUDIT 10 — Async Correctness Sweep
 **Date:** 2026-04-12
 **Task:** Decompose async correctness audit into atomic subtasks

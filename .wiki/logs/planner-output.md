@@ -1,3 +1,4 @@
+---
 # Planner Output — Repository Cleanup
 **Date**: 2026-04-12
 **Task**: Full repository cleanup + README update

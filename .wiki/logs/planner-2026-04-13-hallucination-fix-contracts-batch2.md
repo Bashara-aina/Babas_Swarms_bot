@@ -1,3 +1,4 @@
+---
 ### CONTRACT #6: Update wiki/_meta/compile_state.json with correct article counts
 
 WHAT:

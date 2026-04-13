@@ -1,12 +1,7 @@
-# cekwajar.id — 3-Year Financial Model & Strategic Analysis
-**Last Updated:** April 2026
-**Status:** Pre-launch, founder-operated
-**Confidence Level:** Medium (based on comparable Indonesian SaaS + international data platform benchmarks)
-
 ---
-
 ## EXECUTIVE SUMMARY
 
+---
 This document models cekwajar.id as a **freemium B2C data platform with B2B licensing** targeting Indonesian salary, property, and financial transparency. The business launches April 2026 with a solo founder and negative cash burn of IDR 7-12M/month.
 
 **Key findings:**
@@ -21,8 +16,8 @@ This document models cekwajar.id as a **freemium B2C data platform with B2B lice
 - Bootstrapped (Pessimistic): IDR 80M cumulative by Month 12 (feasible if founder has reserves)
 - Base Case: IDR 400M-600M cumulative by Month 12 (likely requires angel round Month 6-9)
 - Optimistic: IDR 200M-300M (growth capital + hiring)
-
 ---
+
 
 ## PART A: UNIT ECONOMICS & COHORT ANALYSIS
 

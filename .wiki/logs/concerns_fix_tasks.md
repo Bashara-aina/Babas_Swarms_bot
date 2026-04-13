@@ -1,3 +1,4 @@
+---
 # Fix 7 Critical Concerns — Subtask Plan
 
 **Date**: 2026-04-12

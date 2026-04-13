@@ -1,17 +1,14 @@
-# Review: Cycles 11-15 Wiki Pages
-**Reviewer**: @reviewer | **Date**: 2026-04-12 | **Total Pages**: 15
-
 ---
-
 ## Page: browser-agent-architecture.md
+---
 - **Status**: FLAGGED
 - **Issues**:
   - [Format] Uses old format (Score: X/10) instead of YAML frontmatter required by WIKI PAGE FORMAT
   - [Token Budget] tokens_estimated: 650 exceeds 600 max
   - [Format] Missing `injects_into` field in frontmatter
 - **Verdict**: Accurate security documentation of SSRF vulnerability (confirmed in `tools/browser_agent.py`) but format non-compliant.
-
 ---
+
 
 ## Page: video-url-pipeline.md
 - **Status**: FLAGGED

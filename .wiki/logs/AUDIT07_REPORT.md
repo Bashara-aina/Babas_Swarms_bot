@@ -1,3 +1,4 @@
+---
 # AUDIT07 Final Report
 > Planner: Bashara | Date: 2026-04-12 | 10 handlers audited
 

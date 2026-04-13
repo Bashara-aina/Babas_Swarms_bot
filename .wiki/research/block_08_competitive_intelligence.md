@@ -1,15 +1,7 @@
-# Competitive Intelligence: cekwajar.id
-## Indonesian Consumer Salary & Property Data Intelligence Platform
-
-**Document Date:** April 2026
-**Prepared for:** cekwajar.id Executive Team
-**Classification:** Strategic
-**Analysis Depth:** Evidence-Based Competitive Teardown
-
 ---
-
 ## EXECUTIVE SUMMARY
 
+---
 cekwajar.id enters a market with surprisingly light direct competition but significant indirect competitive pressure from platforms with 100M+ users and enormous distribution advantages. The core opportunity exists because no Indonesian consumer platform has systematically built the "is my salary/property fair?" verdict engine paired with Indonesian regulatory context (BPJS, UMR, PPh21, UU Ketenagakerjaan No. 13/2003).
 
 **Key Finding:** cekwajar.id's defensible position is NOT in salary data collection — competitors can replicate that in 6-18 months. The moat is in:
@@ -18,8 +10,8 @@ cekwajar.id enters a market with surprisingly light direct competition but signi
 3. **Regulation-as-feature** — making compliance and legal understanding part of the user experience, not an afterthought
 
 This analysis reveals that the most credible threat comes not from startups, but from Tokopedia or LinkedIn localizing their products to Indonesia within 18-24 months. However, neither has built the payslip auditing engine that makes cekwajar legally defensible and user-loyal.
-
 ---
+
 
 # PART A: COMPETITOR TEARDOWN
 

@@ -1,15 +1,7 @@
-# cekwajar.id Pre-Mortem & Kill Criteria Document
-## "Why We Failed: A Month 18 Retrospective"
-
-**Document Status:** Strategic Planning Document
-**Prepared for:** Founder & future stakeholders
-**Scope:** 18-month timeline from launch (Month 0) to critical juncture (Month 18)
-**Operative Date:** Month 0 (Pre-launch)
-
 ---
-
 ## EXECUTIVE SUMMARY
 
+---
 This document exists to make failure visible before it happens. We are building cekwajar.id — an Indonesian consumer data intelligence platform with 5 tools, one-man operation, AI-first architecture, and TikTok-first GTM. The goal: 50K MAU by Month 12, path to profitability by Month 18.
 
 The probability of reaching Month 18 in currently-planned form is approximately **35%**. This is not pessimism; it is calibration.
@@ -22,8 +14,8 @@ We will identify 10 specific failure modes with:
 - **Pivot options** for each failure mode (keep business alive if this specific thing breaks)
 
 This document is not a business plan. It is a **mortality audit** — a conversation with your future self on why the company failed and how to recognize failure early enough to avoid it.
-
 ---
+
 
 ## PART A: FAILURE MODE ANALYSIS
 

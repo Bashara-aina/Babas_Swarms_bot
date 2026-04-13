@@ -1,3 +1,4 @@
+---
 # LEGION AUDIT 12 — Worker Completion Log
 
 **Date:** 2026-04-12  

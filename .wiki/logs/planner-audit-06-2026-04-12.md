@@ -1,3 +1,4 @@
+---
 # AUDIT 06 — LLM Client Layer
 **Date:** 2026-04-12
 **Task:** Fix: unified client, tool calls returned, fallback wired

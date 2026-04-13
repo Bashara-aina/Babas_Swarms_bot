@@ -1,19 +1,13 @@
-# ADR-048: Fix Pre-existing Async Issues
-
-**Date:** 2026-04-12  
-**Status:** Accepted  
-**Deciders:** Planner, Reviewer  
-
 ---
-
 ## Context
 
+---
 AUDIT 10 identifies two categories of pre-existing async/scheduling issues:
 
 1. **Blocking I/O inside async functions** (`handlers/voice.py`)
 2. **68 `asyncio.create_task()` calls without error handlers** — silent failures
-
 ---
+
 
 ## Decision 1: Fix `handlers/voice.py` blocking `open()`
 

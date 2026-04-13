@@ -1,16 +1,10 @@
-# ADR-041: Nihongo Mode v2.0 — Ultra Upgrade Architecture
-
-> **Status**: Proposed  
-> **Date**: 2026-04-12  
-> **Deciders**: @planner, @worker
-
 ---
-
 ## Summary
 
-Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated, multi-component language learning system while maintaining full backward compatibility with existing commands and complete isolation from Legion's core.
-
 ---
+Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated, multi-component language learning system while maintaining full backward compatibility with existing commands and complete isolation from Legion's core.
+---
+
 
 ## Current Architecture Summary
 

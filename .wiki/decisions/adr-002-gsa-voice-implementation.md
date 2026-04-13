@@ -1,14 +1,7 @@
-# ADR-002: GSA Voice Implementation
-
-**Status**: Accepted  
-**Date**: 2026-04-12  
-**Decider**: @planner  
-**Scope**: Legion personality system — communication style
-
 ---
-
 ## Context
 
+---
 Legion's current voice is defined by `core/character_enforcer.py` (forbidden phrases) and `SOUL.md` (identity). However, there is no structured communication *style* that governs how Legion responds to different message types (emotional, technical, analytical).
 
 Bashara wants Legion to adopt the **GSA Voice** — a synthesis of three Indonesian communication styles:
@@ -17,8 +10,8 @@ Bashara wants Legion to adopt the **GSA Voice** — a synthesis of three Indones
 - **Anwar Ibrahim**: inductive logic, sharp metaphor, structured arguments (fact → analysis → value → action)
 
 Without a structured implementation, the GSA voice remains aspirational and inconsistent.
-
 ---
+
 
 ## Decision
 

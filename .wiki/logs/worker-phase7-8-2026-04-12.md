@@ -1,3 +1,4 @@
+---
 # Worker Log: Phase 7 & 8 — Deployment Readiness + Final Verification
 
 **Date:** 2026-04-12  

@@ -1,15 +1,11 @@
-# Anti-Slop Defense System — Code Review
-
-**Reviewer**: @reviewer  
-**Date**: 2026-04-11  
-**Files Reviewed**: `legion/anti_slop/core.py`, `legion/anti_slop/integration.py`, `legion/anti_slop/monitor.py`, `tests/test_legion_quality.py`, `legion/anti_slop/nemo_config/config.yml`, `legion/anti_slop/nemo_config/rails.co`
-
 ---
-
 ## Summary
 
+---
 | File | Status | Issues |
-|------|--------|--------|
+|
+---
+---|--------|--------|
 | `core.py` | ✅ | Correct |
 | `integration.py` | ⚠️ Fix imports | 1 import order issue |
 | `monitor.py` | ✅ | Correct |

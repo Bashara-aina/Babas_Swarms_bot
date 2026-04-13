@@ -1,18 +1,7 @@
-# browser-agent-architecture.md
-Score: 8/10 — HIGH PRIORITY WRITE
-
-## 1. Executive Summary
-
-`tools/browser_agent.py` provides two browser automation modes: (1) `check_site_health()` using raw Playwright for lightweight health checks, and (2) `browse_task()` using the `browser-use` library for LLM-driven autonomous browsing with a 3-tier fallback chain.
-
-**Architecture**: Playwright (headless chromium) → browser-use (LangChain + LLM) → Crawl4AI → raw Playwright
-**URL allowlist**: **NONE — NO SSRF PROTECTION IMPLEMENTED**
-**Key risk**: No domain restriction on any mode. Any URL passed to `browse_task()` or `check_site_health()` will be fetched.
-
 ---
-
 ## 2. Mode 1: Site Health Check
 
+---
 ```python
 async def check_site_health(url: str | None = None) -> dict[str, Any]
 ```
@@ -39,8 +28,8 @@ async def check_site_health(url: str | None = None) -> dict[str, Any]
 **Degraded status**: If any error phrase found in page content → `status: "degraded"`
 
 **Fails**: Returns `{"url": target, "error": "...", "status": "unreachable"}` — never raises.
-
 ---
+
 
 ## 3. Mode 2: Autonomous Browsing (`browse_task`)
 

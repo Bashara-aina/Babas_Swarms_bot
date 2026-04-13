@@ -1,13 +1,7 @@
-# Wiki Fix Review — 2026-04-13
-
-**Reviewer:** @reviewer
-**Date:** 2026-04-13
-**Task:** Verify fixes for malformed wikilinks and duplicate files
-
 ---
-
 ## CHECK 1: Malformed wikilink in legion-bot.md
 
+---
 **File:** `wiki/projects/legion-bot.md` line 9
 
 **Current state:**
@@ -20,8 +14,8 @@ wikilinks: [[entities/opencode.md], [concepts/multi-agent-orchestration.md], [ar
 **Result:** ❌ **FAIL** — Wikilinks are comma-separated inside a single bracket group, which is malformed. The parser likely treats this as a single link `[[entities/opencode.md], [concepts/multi-agent-orchestration.md], [architecture/legion-module-map.md]]`.
 
 **Additional malformed wikilinks found:** 29 files have the same pattern in their frontmatter `wikilinks:` field. All use comma-separated links inside a single `[[...]]` group.
-
 ---
+
 
 ## CHECK 2: Duplicate memory-architecture.md
 

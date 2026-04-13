@@ -1,3 +1,4 @@
+---
 # Active Tasks Log
 **Updated:** 2026-04-11
 

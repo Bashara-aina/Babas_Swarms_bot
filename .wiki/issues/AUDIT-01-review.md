@@ -1,16 +1,10 @@
-# LEGION AUDIT 01 — Review Report
-
-**Reviewer:** @reviewer  
-**Date:** 2026-04-12  
-**Task:** LEGION AUDIT 01 — admin_handlers router registration fix  
-
 ---
-
 ## Summary
 
-The @worker applied two changes to register the `admin_handlers` router in the dispatcher pipeline. This review verifies correctness of the implementation.
-
 ---
+The @worker applied two changes to register the `admin_handlers` router in the dispatcher pipeline. This review verifies correctness of the implementation.
+---
+
 
 ## 1. `handlers/__init__.py` — ✅ VERIFIED
 

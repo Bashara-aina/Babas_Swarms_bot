@@ -1,3 +1,4 @@
+---
 # Worker Log — Phase 5-6 Completion
 
 **Date:** 2026-04-12  

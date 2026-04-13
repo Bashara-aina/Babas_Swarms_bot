@@ -1,3 +1,4 @@
+---
 # AUDIT-13 SUBTASK D — Feature Flag Verification Report
 
 **Date:** 2026-04-12  

@@ -1,10 +1,11 @@
 
-# Legion Wiring Audit Report
-**Date**: 2026-04-12
-**Status**: Complete
-**Wires Checked**: 32 handlers, 49 core modules, 9 tools, 6 bridges, 28 skills
-
 ---
+date: "2026-04-12"
+status: "Complete"
+wires_checked: "32 handlers, 49 core modules, 9 tools, 6 bridges, 28 skills"
+---
+
+# Legion Wiring Audit Report
 
 ## Executive Summary
 

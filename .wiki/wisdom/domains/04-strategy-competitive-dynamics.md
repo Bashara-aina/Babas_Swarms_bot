@@ -1,23 +1,14 @@
-# Domain 04: Strategy & Competitive Dynamics
-
-## [Michael Porter] — Competitive Strategy
-**Type**: Book
-**Year**: 1980
-**Core Insight**: Competitive strategy is about differentiation and cost leadership; five forces determine industry attractiveness.
-**LEGION RULE**: Use Five Forces when analyzing industry because competitive strategy is about differentiation and cost leadership and industry structure determines profitability.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Shareholder value maximization
-
 ---
 ## [Michael Porter] — Competitive Advantage
+---
 **Type**: Book
 **Year**: 1985
 **Core Insight**: Competitive advantage stems from value chain activities; firms win by performing activities better or differently.
 **LEGION RULE**: Analyze the value chain when building advantage because competitive advantage stems from performing activities better or differently.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
-
 ---
+
 ## [Michael Porter] — The Five Forces
 **Type**: Framework
 **Year**: 1979

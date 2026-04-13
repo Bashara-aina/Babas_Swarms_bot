@@ -1,3 +1,4 @@
+---
 # Smoke Results — Bucket 7: Proactive Systems & Schedulers
 
 **Date**: 2026-04-11  

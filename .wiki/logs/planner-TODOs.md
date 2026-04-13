@@ -1,3 +1,4 @@
+---
 # Planner TODO Log — cekwajar.id Wiki Build
 > Created: 2026-04-11 | Agent: @planner | Task: Build complete .wiki/ knowledge base for cekwajar.id
 

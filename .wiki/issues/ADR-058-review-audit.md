@@ -1,15 +1,9 @@
-# ADR-058 Review Audit: llm_client/__init__.py
-
-**Audited file**: `llm_client/__init__.py`
-**Date**: 2026-04-12
-**Reviewer**: Reviewer Agent
-**Task**: ADR-058 — Audit 4 fixes (imports + `_cif` refactor)
-
 ---
-
 ## Verdict: **FAIL** — 2 blockers, 1 warning
+---
 
 ---
+
 
 ## ✅ Passed
 

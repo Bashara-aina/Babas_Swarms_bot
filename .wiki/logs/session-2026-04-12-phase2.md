@@ -1,3 +1,4 @@
+---
 # Session Log: Phase 2 Planning
 
 **Date:** 2026-04-12  

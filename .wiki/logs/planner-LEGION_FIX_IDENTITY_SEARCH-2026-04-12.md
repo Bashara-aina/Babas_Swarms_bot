@@ -1,11 +1,7 @@
-# PLANNER LOG: LEGION_FIX_IDENTITY_SEARCH
-## Date: 2026-04-12
-## Task: Execute full three-agent pipeline for fixing identity search issues
-
 ---
-
 ## FILES READ
 
+---
 1. `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md` - 757 lines
    - Contains 3 fix plans for wiki injection, Chinese character stripping, and web search gate
 
@@ -17,8 +13,8 @@
 
 4. `/home/newadmin/swarm-bot/core/system_prompt_builder.py` - 376 lines
    - Already has wiki_loader wired in (lines 91-100)
-
 ---
+
 
 ## THREE FIX PLANS IDENTIFIED
 

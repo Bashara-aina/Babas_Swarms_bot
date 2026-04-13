@@ -1,12 +1,7 @@
-# Top 10 Wisdom Sources Report
-
-## Executive Summary
-This report identifies the 10 most influential and applicable wisdom sources across all domains, selected based on cross-domain relevance, actionable insights, and practical utility for the Bashara context (cekwajar.id, rumahlabuh.com, thesis).
-
 ---
-
 ## #1: Nassim Taleb — Antifragile
 
+---
 ### Source Profile
 **Type**: Book
 **Year**: 2012
@@ -27,8 +22,8 @@ Systems that gain from disorder are superior to those that merely resist it; ant
 
 ### Why #1
 Universal applicability across all domains; transforms understanding of risk and uncertainty; practical framework for living and building.
-
 ---
+
 
 ## #2: Daniel Kahneman — Thinking, Fast and Slow
 

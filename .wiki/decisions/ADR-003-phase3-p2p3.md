@@ -1,19 +1,12 @@
-# ADR-003: Phase 3 Legion Upgrades + P2/P3 CLAUDE.md Tasks
-
-**Date:** 2026-04-13  
-**Phase:** Phase 3 (Webhooks + MCP Backbone) + P2/P3 remaining CLAUDE.md tasks  
-**Status:** Planned  
-**Deciders:** Bashara, Planner Agent
-
 ---
-
 ## Context
 
+---
 Phase 2 (Skills Registry, Heartbeat Daemon, Prompt Injection Protection) completed 2026-04-12.  
 Phase 3 adds the final integration layer: event-driven webhooks and MCP-backed external tools.  
 Additionally, several P2/P3 tasks from CLAUDE.md remain: swarm logic migration, /run /think migration, documentation.
-
 ---
+
 
 ## Phase 3 — Webhooks + MCP Backbone (~5h)
 

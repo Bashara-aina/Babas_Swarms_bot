@@ -1,17 +1,11 @@
-# AUDIT-01: Handler Registration Report
-
-## Summary
-
-**Status: 1 MISSING ROUTER FOUND**
-
-`admin_handlers.py` has `router = Router()` but is **NOT registered** in `handlers/__init__.py _ROUTER_ORDER`.
-
 ---
-
 ## Subtask 1 — Full Router Scan (40 files)
 
+---
 | File | Has Router | Router Name | In _ROUTER_ORDER | Commands/Decorators |
-|------|-----------|-------------|------------------|---------------------|
+|
+---
+---|-----------|-------------|------------------|---------------------|
 | admin_handlers.py | ✅ | `router` | ❌ **MISSING** | `Command("budget")`, `Command("soul")` |
 | ai.py | ✅ | `router` | ✅ ai.router (last) | `Command("think")`, `Command("run")`, `Command("agent")`, `Command("swarm")`, `Command("owl")`, `Command("predict")`, `Command("code_exec")`, `Command("ag2")`, `Command("swarm_viz")`, `Command("agents_viz")`, `Command("multi_execute")`, `Command("multi_plan")`, `Command("orchestrate_legacy")`, `Command("loop")`, `Command("loop_stop")`, `Command("loop_status")`, `Command("loop_pause")`, `Command("loop_resume")`, `F.text` (NL catch-all) |
 | artifact.py | ✅ | `router` | ✅ artifact.router | `Command("preview")` |

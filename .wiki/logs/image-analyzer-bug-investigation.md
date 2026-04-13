@@ -1,3 +1,4 @@
+---
 # Image Analyzer Bug Investigation
 
 **Date:** 2026-04-12  

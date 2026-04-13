@@ -1,19 +1,14 @@
-# cekwajar.id — VC Partner Evaluation
-**Role:** Senior VC evaluating seed investment in cekwajar.id
-**Date:** April 2026
-**Verdict:** Conditional — see Section F
-
 ---
-
 ## Strongest reason this company could fail
 
+---
 The salary benchmark product depends entirely on crowdsourced data that does not yet exist. Before critical mass (~5,000 verified submissions per province × job-group cell), the "verdicts" are statistically unreliable extrapolations from province-level BPS data that any government website already publishes for free. If the "contribute-to-unlock" flywheel stalls — which it does in 70%+ of similar platforms — the company has no proprietary data, no moat, and no product that a competitor cannot replicate in six weeks.
 
 ## Strongest reason this company could succeed
 
 Wajar Slip is a legally defensible, technically complex, high-urgency product with no direct competitor in Indonesia. PPh21 + BPJS compliance calculation on an actual payslip is a task that 140 million formal employees need done, almost none of them can do themselves, and no existing platform delivers. The regulatory complexity (PMK 168/2023 TER method, progressive bracket reconciliation, 6 BPJS components) creates a real technical moat that compounds with every rule change. If the founder can make this tool accurate and trustworthy, it can anchor the entire platform's monetization and credibility — even before the salary database reaches statistical maturity.
-
 ---
+
 
 ## Section A: VC Scoring Table
 

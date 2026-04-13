@@ -1,13 +1,7 @@
-# ADR-007: POPW Research Wiki Construction Pipeline
-
-**Date**: 2026-04-11  
-**Status**: ACCEPTED  
-**Deciders**: Multi-agent pipeline (planner + 10 workers + reviewer)
-
 ---
-
 ## Context
 
+---
 POPW-PROTOCOL requires 100 research paper wiki pages for a multi-task assembly action recognition project. The papers span 10 tiers from foundational (ResNet, FPN) to domain-specific (IKEA ASM, Frame2Freq-ST) to training optimization (FP16, gradient checkpointing).
 
 **Key POPW Architecture**:
@@ -19,8 +13,8 @@ POPW-PROTOCOL requires 100 research paper wiki pages for a multi-task assembly a
 - Hardware: RTX 3060 12GB VRAM
 
 **Research Gap**: No published paper does pose→FiLM→CNN for assembly action recognition. POPW is likely novel.
-
 ---
+
 
 ## Decision
 

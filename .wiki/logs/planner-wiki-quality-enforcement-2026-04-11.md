@@ -1,15 +1,10 @@
-# Planner Completion Log: Wiki Quality Enforcement System
-
-**Date:** 2026-04-11  
-**Mission:** Build permanent wiki quality enforcement system for Legion
-
 ---
-
 ## Mission Summary
 
-Successfully built and deployed a permanent wiki quality enforcement system for Legion, consisting of a two-tier quality gate, scheduled maintenance scans, and user-facing wiki management commands.
-
 ---
+Successfully built and deployed a permanent wiki quality enforcement system for Legion, consisting of a two-tier quality gate, scheduled maintenance scans, and user-facing wiki management commands.
+---
+
 
 ## Subtask Completion Status
 

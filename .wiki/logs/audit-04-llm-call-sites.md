@@ -1,3 +1,4 @@
+---
 # AUDIT 04: LLM Call Sites Inventory
 
 **Date:** 2026-04-12

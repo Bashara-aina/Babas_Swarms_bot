@@ -1,15 +1,10 @@
-# SwarmBot Master Intelligence Index
-> Single file loaded first in every OpenCode session
-> Auto-generated: 2026-04-12
-> Total knowledge sources: 7 repositories + custom wiki + Bashara profiles + project docs
-
 ---
-
 ## HOW TO USE THIS FILE
+---
 At the start of every session, read this file completely before taking any action.
 It contains distilled knowledge from 7 world-class knowledge bases plus project-specific context.
-
 ---
+
 
 ## 1 CONTEXT ENGINEERING PRINCIPLES
 Source: ~/swarm-bot/.wiki/research/context-engineering

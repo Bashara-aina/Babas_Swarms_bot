@@ -1,3 +1,4 @@
+---
 # Worker Log — 2026-04-12/13
 
 ## Task: Fix Telegram bot garbled text (Russian/Cyrillic in Matsuya/Toyosu response)

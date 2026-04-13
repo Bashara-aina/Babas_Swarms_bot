@@ -1,23 +1,14 @@
-# Domain 05: Mathematics & Quantitative Thinking
-
-## [George Pólya] — How to Solve It
-**Type**: Book
-**Year**: 1945
-**Core Insight**: Problem-solving follows discoverable heuristics: understand problem, devise plan, execute, review; analogy and decomposition key.
-**LEGION RULE**: Apply Polya's heuristics when stuck on problems because problem-solving follows discoverable heuristics and decomposition, analogies, and working backward are key.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
 ---
 ## [George Pólya] — Mathematics and Plausible Reasoning
+---
 **Type**: Book
 **Year**: 1954
 **Core Insight**: Mathematical discovery relies on plausible (inductive) reasoning; patterns and analogies guide conjectures before proof.
 **LEGION RULE**: Use inductive reasoning when doing mathematics because mathematical discovery relies on plausible reasoning and intuition guides conjectures before proof.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Deduction-only view
-
 ---
+
 ## [George Pólya] — Mathematical Discovery
 **Type**: Book
 **Year**: 1965

@@ -1,14 +1,11 @@
-# Review: All Changes Summary
-**Reviewer:** @reviewer  
-**Date:** 2026-04-10  
-**Session:** @worker changes for agent registry refactor
-
 ---
-
 ## Files Reviewed
 
+---
 | File | Change Type |
-|------|-------------|
+|
+---
+---|-------------|
 | `config/departments.yaml` | Modified (added `legacy` department, 23 agents) |
 | `config/personality.yaml` | **NEW FILE** (117 lines) |
 | `core/agent_registry.py` | Modified (added legacy data + personality loading) |

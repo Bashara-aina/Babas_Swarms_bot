@@ -1,15 +1,11 @@
-# cekwajar.id Knowledge Base — Master Index
-
-**Generated:** 2026-04-11  
-**Total Pages:** 81  
-**Purpose:** Salary transparency and wage fairness intelligence for Indonesia's #1 labor platform
-
 ---
-
 ## Domain Overview
 
+---
 | Domain | Count | Description |
-|--------|-------|-------------|
+|
+---
+-----|-------|-------------|
 | [Labor Law](#domain-labor-law) | 19 | Indonesian employment regulations |
 | [Tax](#domain-tax) | 10 | PPh 21, TER, PTKP calculations |
 | [BPJS](#domain-bpjs) | 10 | Social security contributions |

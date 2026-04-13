@@ -1,3 +1,4 @@
+---
 # LEGION WIKI LOOP — Executive Summary
 **Date**: 2026-04-12  
 **Reviewer**: Reviewer Agent  

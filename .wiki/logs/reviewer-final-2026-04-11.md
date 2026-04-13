@@ -1,3 +1,4 @@
+---
 # POPW-PROTOCOL Research Wiki — Final Review Report
 
 **Review Date**: 2026-04-11  

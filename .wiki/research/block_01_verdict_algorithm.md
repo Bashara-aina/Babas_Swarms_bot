@@ -1,23 +1,15 @@
-# CEKWAJAR.ID: Verdict Algorithm Architecture
-## Production-Grade Technical Specification v1.0
-
-**Document Status:** Final Specification
-**Last Updated:** April 7, 2026
-**Platform:** cekwajar.id (Indonesian Consumer Data Intelligence)
-**Tech Stack:** Next.js 15 + TypeScript + Supabase + Vercel + Tailwind CSS
-
 ---
-
 ## TABLE OF CONTENTS
 
+---
 1. [WAJAR GAJI - Salary Benchmark Engine](#wajar-gaji)
 2. [WAJAR SLIP - Payslip Decoder & Compliance Auditor](#wajar-slip)
 3. [WAJAR TANAH - Land Price Benchmark](#wajar-tanah)
 4. [WAJAR KABUR - Abroad Salary & Life Quality Comparison](#wajar-kabur)
 5. [WAJAR HIDUP - Cost of Living by City](#wajar-hidup)
 6. [Cross-Tool Architecture & Freemium Gating](#cross-tool-architecture)
-
 ---
+
 
 ## WAJAR GAJI: Salary Benchmark Engine
 

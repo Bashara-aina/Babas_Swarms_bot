@@ -1,15 +1,10 @@
-# Review: Priority 10 Context Window Budget Management
-**Date:** 2026-04-12
-**Reviewer:** @reviewer
-**Status:** FAIL — Critical Integration Blocker
-
 ---
-
 ## Summary
 
-The new `build_system_prompt()` function with priority-based token budget management was added to `core/system_prompt_builder.py`, but it is **never called** by any active code path. All existing call sites continue to use the legacy stub from `agents.py`.
-
 ---
+The new `build_system_prompt()` function with priority-based token budget management was added to `core/system_prompt_builder.py`, but it is **never called** by any active code path. All existing call sites continue to use the legacy stub from `agents.py`.
+---
+
 
 ## ✅ Passed
 

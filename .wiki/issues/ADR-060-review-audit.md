@@ -1,22 +1,15 @@
-# Review: ADR-060 — `classify_intent_fast` Redundant Import Removal
-
-**File**: `llm_client/__init__.py`  
-**Change**: Removed redundant local import at line 982  
-**Date**: 2026-04-12  
-**Verdict**: ✅ **PASS**
-
 ---
-
 ## 1. Module-Level Import Verification
 
+---
 **Line 44**:
 ```python
 from core.intent_router import build_intent_hint, classify_intent_fast
 ```
 
 ✅ `classify_intent_fast` is correctly imported at module level and remains available throughout the file.
-
 ---
+
 
 ## 2. Try Block Structural Integrity
 

@@ -1,3 +1,4 @@
+---
 # Anti-Slop Defense System — Task Decomposition
 > Planner: Bashara | Date: 2026-04-11 | Project: Babas_Swarms_bot (Legion)
 

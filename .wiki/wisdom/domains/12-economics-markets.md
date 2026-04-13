@@ -1,23 +1,14 @@
-# Domain 12: Economics & Markets
-
-## [Friedrich Hayek] — The Use of Knowledge in Society
-**Type**: Paper
-**Year**: 1945
-**Core Insight**: Knowledge problem; price mechanism; decentralized; spontaneous order; information distribution; coordination; no central planner.
-**LEGION RULE**: Trust the price mechanism when planning economies because the knowledge problem means decentralized spontaneous order outperforms central planning.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Central planning
-
 ---
 ## [Adam Smith] — The Wealth of Nations
+---
 **Type**: Book
 **Year**: 1776
 **Core Insight**: Invisible hand; division of labor; specialization; self-interest; competition; free markets; productivity; pins example.
 **LEGION RULE**: Trust the invisible hand when markets function because self-interest, competition, and free markets with division of labor drive productivity.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Interventionism
-
 ---
+
 ## [Richard Thaler] — Nudge: Improving Decisions About Health, Wealth, and Happiness
 **Type**: Book
 **Year**: 2008

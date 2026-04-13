@@ -1,15 +1,11 @@
-# Legion / Babas_Swarms_bot — Roadmap
-Generated: April 11, 2026
-Source: CLAUDE.md + ADR-001 + BASHARA-MASTER-PROFILE
-
 ---
-
 ## Project Vision
+---
 Legion is not an assistant — Legion is Bashara's permanent AI coworker.
 Jarvis-level personal AI with: soul, long-term memory, proactive intelligence, autonomous skill selection.
 Manages all of Bashara's businesses, thesis, research, and daily life without being asked explicitly.
-
 ---
+
 
 ## Current Version: v10 (April 10, 2026)
 - Most recent commit: e074f45

@@ -1,15 +1,11 @@
-# Review: ADR-057 — `get_relationship_context` Import Audit
-
-**Date**: 2026-04-12  
-**Task**: Audit the import `from core.relationship_memory import get_relationship_context` at `llm_client/__init__.py` line 39  
-**Verdict**: ✅ **PASS** (for the specific change)
-
 ---
-
 ## ✅ Passed
 
+---
 | Check | Status |
-|-------|--------|
+|
+---
+----|--------|
 | Import statement at line 39 is syntactically correct | ✅ |
 | `get_relationship_context` is properly defined in `core/relationship_memory.py` (line 164) | ✅ |
 | Function signature: `def get_relationship_context() -> Optional[str]:` | ✅ |

@@ -1,3 +1,4 @@
+---
 # Worker Cycle 11 Log — Browser & Web Agent
 
 **Date:** 2026-04-12

@@ -1,19 +1,7 @@
-# Second Brain — Blueprint
-
-> This is the genesis document for this project. It describes the pattern, the requirements, and how we implemented it. You can use this as a blueprint to build your own version from scratch, or just install our implementation via `npx skills add` (see README.md).
-
-## ORIGIN
-
-Andrej Karpathy posted a thread about using LLMs to build personal knowledge bases — dump raw source material into a folder, let the LLM compile it into a structured wiki, and use Obsidian to browse the whole thing.
-
-https://x.com/karpathy/status/2039805659525644595
-
-A few days later he extended the theory to include a pattern via an idea file that is intentionally vague to allow creativity. The idea file is available here: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f and also stored locally in `llm-wiki.md`.
-
 ---
-
 ## THE PATTERN
 
+---
 You end up with three folders:
 
 - **raw/** is your inbox. Articles, papers, notes, transcripts — you dump them here and never think about organizing them.
@@ -23,8 +11,8 @@ You end up with three folders:
 Once it's running, you can ask the LLM questions against your wiki and it'll navigate the files, pull in the relevant material, and answer. No fancy RAG setup needed — just markdown files and a good prompt.
 
 The magic is in the agent config file (CLAUDE.md, AGENTS.md, etc.) at the root of the vault. That's where you tell the LLM how to behave as your librarian — the architecture, operations, page format, and rules it must follow.
-
 ---
+
 
 ## WHAT YOU NEED TO BUILD THIS
 

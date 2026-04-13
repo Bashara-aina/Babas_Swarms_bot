@@ -1,23 +1,15 @@
-# CEKWAJAR.ID — Comprehensive Technical Architecture Specification
-
-**Version**: 1.0
-**Status**: Production-Ready, Build-Grade
-**Last Updated**: April 7, 2026
-**Platform**: Vercel + Next.js 15 + TypeScript + Supabase + Swarms Framework
-**Author Context**: AI-first, one-man operation with full automation
-
 ---
-
 ## TABLE OF CONTENTS
 
+---
 1. [Executive Summary](#executive-summary)
 2. [PART A: Next.js Application Architecture](#part-a-nextjs-application-architecture)
 3. [PART B: Supabase Edge Functions Specification](#part-b-supabase-edge-functions-specification)
 4. [PART C: AI Agent Technical Specification (Swarms Framework)](#part-c-ai-agent-technical-specification)
 5. [PART D: Midtrans Payment Integration](#part-d-midtrans-payment-integration)
 6. [PART E: Security Architecture & Environment](#part-e-security-architecture--environment)
-
 ---
+
 
 ## EXECUTIVE SUMMARY
 

@@ -1,14 +1,7 @@
-# ADR-002: Wiki Quality Gate — Review Complete
-
-**Date:** 2026-04-11  
-**Status:** ACCEPTED  
-**Deciders:** @reviewer agent  
-**Supersedes:** ADR-001-wiki-build-strategy
-
 ---
-
 ## Context
 
+---
 We completed a comprehensive review of all wiki pages created by @worker agents across 7 domains:
 - Labor Law (19 files, 001-019)
 - Tax (10 files, 020-029)
@@ -19,8 +12,8 @@ We completed a comprehensive review of all wiki pages created by @worker agents 
 - Engineering (7 files, 085-091)
 
 **Total Files Reviewed:** 21 sampled (3 per domain)
-
 ---
+
 
 ## Decision
 

@@ -1,16 +1,12 @@
-# LEGION AUDIT 09 — Completion Report
-> Generated: 2026-04-12
-> Auditor: Reviewer Agent
-
 ---
-
 ## Audit Scope
 
+---
 - **Audit ID:** LEGION AUDIT 09
 - **Focus:** Skills Layer & Skill Registry
 - **Files Audited:** 10 subtask files in `.wiki/logs/audit-09/`
-
 ---
+
 
 ## Summary Metrics
 

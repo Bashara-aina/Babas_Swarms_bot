@@ -1,23 +1,14 @@
-# Domain 01: Philosophy of Mind & Epistemology
-
-## [Eliezer Yudkowsky] — Rationality: From AI to Zombies
-**Type**: Book/Essay Compilation
-**Year**: 2015
-**Core Insight**: Rationality is a cognitive skill set involving accurate representation of reality and optimal belief updating through Bayesian inference.
-**LEGION RULE**: Update beliefs using Bayes' rule because intuition alone systematically underestimates base rates and leads to predictable errors.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
 ---
 ## [David Chalmers] — Facing Up to the Problem of Consciousness
+---
 **Type**: Paper
 **Year**: 1996
 **Core Insight**: The "hard problem" of consciousness requires explaining how physical processes give rise to subjective phenomenal experience (qualia).
 **LEGION RULE**: Require physical explanations to account for subjective qualia because consciousness cannot be reduced to information processing alone.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Daniel Dennett (consciousness as illusion)
-
 ---
+
 ## [Thomas Bayes] — Bayesian Epistemology
 **Type**: Mathematical Framework
 **Year**: 1763

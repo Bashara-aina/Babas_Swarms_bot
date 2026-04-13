@@ -1,3 +1,4 @@
+---
 # Worker Completion Notes — Concerns 3 & 4
 
 **Date**: 2026-04-12  

@@ -1,27 +1,15 @@
-# ADR-006: Wiki Quality Gate System
-
-**Date**: 2026-04-11
-**Status**: Accepted
-**Type**: Architecture Decision
-
-## Context
-
-The wiki system needs automated quality controls to prevent low-quality, spam, or malicious content from being persisted. This ADR defines a two-tier quality gate system with quarantine capabilities.
-
-## Decision
-
-Implement a two-tier wiki quality gate system with heuristic fast checks and LLM-based deep evaluation.
-
 ---
-
 ## Quality Gates
 
+---
 ### 1. Fast Gate (Heuristic, <5ms target)
 
 Synchronous checks that run before any I/O or LLM call:
 
 | Check | Logic | Result |
-|-------|-------|--------|
+|
+---
+----|-------|--------|
 | Length | `< 50 chars` | `REJECT` |
 | Path Traversal | Contains `../` or absolute path patterns | `REJECT` |
 | Spam: Excessive Caps | `> 70%` uppercase characters | `REJECT` |

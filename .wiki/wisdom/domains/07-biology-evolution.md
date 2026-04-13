@@ -1,24 +1,14 @@
-# Domain 07: Biology & Evolution
-
-## Richard Dawkins — "The Selfish Gene"
-**Type**: Book
-**Year**: 1976
-**Core Insight**: Genes are the fundamental unit of selection; organisms are survival machines for genes; altruism evolves through kin selection.
-**LEGION RULE**: When analyzing evolutionary behavior, think gene-centered because selection operates on genetic replicators, not individuals.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
 ---
-
 ## Richard Dawkins — "The Extended Phenotype"
+---
 **Type**: Book
 **Year**: 1982
 **Core Insight**: Organism's genes influence environment and behavior beyond its body; phenotype extends into world; natural selection acts on extended effects.
 **LEGION RULE**: When considering adaptation, include environmental effects because genes influence more than direct body traits.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
-
 ---
+
 
 ## E.O. Wilson — "Sociobiology: The New Synthesis"
 **Type**: Book

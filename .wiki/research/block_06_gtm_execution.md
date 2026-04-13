@@ -1,17 +1,10 @@
-# CEKWAJAR.ID — COMPREHENSIVE GO-TO-MARKET EXECUTION DOCUMENT
-
-**Last Updated:** April 2026
-**Platform Focus:** TikTok + Reddit + Facebook Communities
-**Target:** Indonesian salary/finance seekers, fresh grads, job changers
-**Status:** Ready for Day 0 Launch
-
 ---
-
 ## PART A: 30 COMPLETE TIKTOK SCRIPTS
 
-### SCRIPTS 1-5: WAJAR GAJI HOOKS
-
 ---
+### SCRIPTS 1-5: WAJAR GAJI HOOKS
+---
+
 
 ### **Script 1: "Gajimu Wajar Nggak Sih?"**
 

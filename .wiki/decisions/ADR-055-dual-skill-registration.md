@@ -1,14 +1,7 @@
-# ADR-055: Dual Skill Registration Architecture
-
-**Date:** 2026-04-12  
-**Status:** Accepted  
-**Auditor:** Reviewer Agent  
-**Related:** LEGION AUDIT 09
-
 ---
-
 ## Context
 
+---
 During LEGION AUDIT 09 (Skills Layer & Skill Registry), a **dual skill registration architecture** was discovered. Two separate, disconnected systems handle skill registration in the codebase:
 
 ### System 1: `core/skills/registry.py` — Python Class-Based Registry
@@ -61,8 +54,8 @@ def get_skill(name: str) -> dict[str, Any] | None:
 - **Purpose:** Dynamic skill discovery from JSON manifests for LLM context
 - **How it works:** Loads `skills/manifest.json` (6 skills) and `config/legion_skills.json` (3 legacy additions)
 - **Scope:** Global skill registry including external tools (`screenpipe_recall`, `mirofish_simulation`, `open_interpreter`)
-
 ---
+
 
 ## Architecture Diagram
 

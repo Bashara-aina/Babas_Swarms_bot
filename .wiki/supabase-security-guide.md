@@ -1,10 +1,10 @@
 # SUPABASE SECURITY GUIDE
 
-**Domain**: RLS policies, API key storage, injection prevention
-**Cycle**: 15 — SUPABASE & DATABASE
-**Date**: 2026-04-12
-**Status**: candidate
-
+---
+domain: "RLS policies, API key storage, injection prevention"
+cycle: "15 — SUPABASE & DATABASE"
+date: "2026-04-12"
+status: "candidate"
 ---
 
 ## 1. API Key Management

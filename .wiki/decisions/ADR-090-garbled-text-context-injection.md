@@ -1,18 +1,12 @@
-# ADR-090: Fix Garbled Text from Silent Context Injection Failures
-
-**Date**: 2026-04-12  
-**Status**: ACCEPTED  
-**Type**: Bugfix (encoding + defensive coding)
-
 ---
-
 ## Error
 
+---
 Bot responded with garbled text mixing Russian words ("конкрет", "памяти") and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu.
 
 **Root Cause**: Missing imports in `llm_client/__init__.py` caused context builders to fail silently with `NameError`, resulting in malformed LLM context and hallucinations.
-
 ---
+
 
 ## Affected Code
 

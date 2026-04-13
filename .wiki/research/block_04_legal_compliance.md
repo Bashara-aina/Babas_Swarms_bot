@@ -1,21 +1,15 @@
-# Legal Architecture Document: cekwajar.id
-## Indonesian Law Compliance Framework
-
-**Document Version:** 1.0
-**Last Updated:** April 2026
-**Jurisdiction:** Indonesia
-**Applicable Laws:** UU No. 27/2022 (Personal Data Protection), UU ITE No. 11/2008, UU No. 5/2011 (Public Accountants), POJK 21/2023, PMK 111/2014
-
 ---
-
 ## PART A: UU PERLINDUNGAN DATA PRIBADI (UU No. 27/2022) COMPLIANCE
 
+---
 ### 1. DATA CLASSIFICATION & LEGAL BASIS
 
 #### 1.1 Data Classification Matrix
 
 | Data Point | Category | Legal Basis (Pasal 20) | Retention | Explicit Opt-In | Notes |
-|---|---|---|---|---|---|
+|
+---
+|---|---|---|---|---|
 | Salary Amount | **Umum** | Consent + Contract | 24 months (anonymized after 90 days) | Yes | Employment data, not inherently sensitif per Pasal 4 |
 | PTKP Status (K/1, TK/0) | **SENSITIF** | Consent (Pasal 4 ayat 3) | 90 days | **YES - Separate** | Reveals family status—explicitly sensitif per Pasal 4(3)(a) |
 | Payslip Photo/PDF | **SENSITIF** | Explicit Consent (Pasal 20 ayat 2(a)) | 30 days | **YES - Separate** | Contains composite sensitive data: financial + identity |

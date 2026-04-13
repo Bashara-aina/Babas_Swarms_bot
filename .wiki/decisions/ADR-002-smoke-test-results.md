@@ -1,16 +1,10 @@
-# ADR-002: Smoke Test Results
-
-**Date**: 2026-04-11  
-**Agent**: @reviewer  
-**Status**: FINAL_APPROVED (with caveats)
-
 ---
-
 ## Summary
 
-Smoke tests executed across 10 functional buckets. **8/10 buckets pass cleanly**. The 2 FAIL and 1 PARTIAL results are **test specification issues, not actual import/runtime errors**. All modules load correctly when using the correct import paths.
-
 ---
+Smoke tests executed across 10 functional buckets. **8/10 buckets pass cleanly**. The 2 FAIL and 1 PARTIAL results are **test specification issues, not actual import/runtime errors**. All modules load correctly when using the correct import paths.
+---
+
 
 ## Bucket Results
 

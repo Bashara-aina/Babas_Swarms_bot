@@ -1,3 +1,4 @@
+---
 # Refactoring Log — 2026-04-11 Round 2
 
 ## Overview

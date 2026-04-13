@@ -1,29 +1,7 @@
-# ADR-043: MiniMax Multi-Modal MCP Tool Integration
-
-## Status
-Proposed: 2026-04-11
-
-## Context
-
-The bot needs to gain 4 multi-modal capabilities powered by MiniMax MCP tools:
-1. **Image understanding** — analyze photos sent by users
-2. **Web search** — real-time web search via MiniMax
-3. **Image generation** — generate images from text prompts
-4. **Speech generation** — text-to-speech voice output
-
-**Existing infrastructure:**
-- `core/mcp_client.py` — stdio-based MCP client (for traditional MCP servers like Gmail, GitHub)
-- `tools/search_tool.py` — Tavily web search wrapper
-- `handlers/voice.py` — voice note transcription + optional TTS reply
-- `core/autonomous_router.py` — `SKILL_PATTERNS` dict maps intents → handlers
-- `handlers/__init__.py` — router registration order (ai.router MUST be last)
-
-**Key constraint:** The MiniMax tools are **function-calling MCP tools** exposed directly by the OpenCode/MiniMax platform (not stdio MCP servers). They are called via the function tools already registered in the conversation context, NOT via `core/mcp_client.py`.
-
 ---
-
 ## Decision
 
+---
 ### Architecture
 
 ```
@@ -34,8 +12,8 @@ handlers/__init__.py         ← MODIFY — register media_tools.router
 ```
 
 The MiniMax tools are invoked as **function calls** inside the LLM's tool-use loop. A new `MiniMaxMedia` class in `tools/minimax_media.py` will expose `understand_image`, `web_search`, `generate_image`, `generate_speech` — each calling the respective function tool.
-
 ---
+
 
 ## What to Create / Modify
 

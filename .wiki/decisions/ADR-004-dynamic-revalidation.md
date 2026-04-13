@@ -1,13 +1,7 @@
-# ADR-004: Dynamic Revalidation System — Time-Aware TTL for cekwajar.id
-
-**Date**: 2026-04-11  
-**Status**: PROPOSED  
-**Deciders**: @planner, @worker (pending execution)  
-
 ---
-
 ## Summary
 
+---
 Implement a **Dynamic Revalidation System** that makes every regulatory number (UMR, PTKP, BPJS rates, tax brackets) time-aware with explicit TTL (time-to-live). This ensures all verdict computations use only current, non-expired data, and alerts Legion when data goes stale.
 
 ## Motivation
@@ -21,8 +15,8 @@ Currently, `taxRules` table has `effectiveFrom`/`effectiveUntil` columns but:
 **Problem**: If maintainer forgets to update rates after January 1 (UMR changes) or PTKP changes, verdicts compute with stale data → user harm.
 
 **Solution**: TTL-gated verifications with proactive alerts to Legion.
-
 ---
+
 
 ## Technical Design
 

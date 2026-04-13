@@ -1,3 +1,4 @@
+---
 # Worker Completion Report: Concerns 5, 6, 7
 
 **Date**: 2026-04-12  

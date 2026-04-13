@@ -1,14 +1,7 @@
-# Review: Priority 9 — /capabilities and /self_report commands
-
-## Summary
-**Status: PASS** — Both blockers fixed and verified.
-
-**Date:** 2026-04-12 (re-review after fixes)
-
 ---
-
 ## ✅ Passed
 
+---
 ### handlers/admin_handlers.py
 - `cmd_capabilities()` exists (line 143) with proper `async def`
 - `cmd_self_report()` exists (line 187) with proper `async def`
@@ -30,8 +23,8 @@
 - `get_recent_learnings()` and `log_learning()` now use `asyncio.to_thread()`
 - Has try/except blocks and returns empty list on failure
 - Type hints present on all functions
-
 ---
+
 
 ## Previous Blockers — Now Fixed
 

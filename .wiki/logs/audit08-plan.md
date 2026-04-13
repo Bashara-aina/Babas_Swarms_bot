@@ -1,3 +1,4 @@
+---
 # LEGION AUDIT 08 — Bridges Layer Connectivity
 > Created: 2026-04-12 | Agent: @planner | Status: ✅ COMPLETE
 

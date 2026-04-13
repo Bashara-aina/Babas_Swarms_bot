@@ -1,3 +1,4 @@
+---
 # NIHONGO MODE v2.0 — Upgrade Task List
 > Planned by @planner | Date: 2026-04-12
 

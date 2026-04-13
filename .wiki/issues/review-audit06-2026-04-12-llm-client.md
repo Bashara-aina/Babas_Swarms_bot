@@ -1,17 +1,11 @@
-# Review: AUDIT 06 — LLM Client Layer Review
-
-**Reviewer:** Reviewer Agent  
-**Date:** 2026-04-12  
-**Files Reviewed:**
-- `/home/newadmin/swarm-bot/llm_client/__init__.py` (call_llm implementation, lines 348-439)
-- `/home/newadmin/swarm-bot/llm_client.py` (re-exports and __all__)
-
 ---
-
 ## ✅ Passed
 
+---
 | # | Check | Details |
-|---|-------|---------|
+|
+---
+|-------|---------|
 | 1 | **Correct signature** | `async def call_llm(messages: list[dict], model: str = None, tools: list = None, stream: bool = False, **kwargs) -> str \| dict` — matches required signature exactly |
 | 2 | **Returns `str \| dict`** | Return type annotation present and correct |
 | 3 | **Tool calls surfaced as dict** | Lines 431-437: `{"type": "tool_call", "name": tc.function.name, "args": json.loads(tc.function.arguments)}` — correct structure |

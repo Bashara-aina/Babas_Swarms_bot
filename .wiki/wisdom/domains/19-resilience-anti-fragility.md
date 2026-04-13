@@ -1,23 +1,14 @@
-# Domain 19: Resilience & Anti-Fragility
-
-## [Nassim Taleb] — Antifragile
-**Type**: Book
-**Year**: 2012
-**Core Insight**: Antifragility beyond robust/resilient; gains from disorder; optionality; barbell strategy; skin in the game.
-**LEGION RULE**: When facing uncertainty, seek antifragility through barbell strategy and optionality because antifragile systems gain from disorder while robust ones merely survive; skin in the game ensures consequences align with risks.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: Resilience-only thinking
-
 ---
 ## [Nassim Taleb] — Skin in the Game
+---
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Asymmetric risk; ethics of risk; agency problem; leadership accountability; survival of the ethical.
 **LEGION RULE**: When taking risks, ensure skin in the game exists for all decision-makers because asymmetric risk without accountability creates agency problems; ethical survival requires those who create risks to face their consequences.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Agency-free environments
-
 ---
+
 ## [Marcus Aurelius] — Meditations
 **Type**: Book
 **Year**: 180

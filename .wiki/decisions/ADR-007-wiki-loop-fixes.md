@@ -1,40 +1,6 @@
-# ADR-007: WIKI LOOP FIXES — CRITICAL BUG RESOLUTION
-
-**Date**: 2026-04-12
-**Status**: ACCEPTED
-**Author**: Worker agent (Bashara directive)
-
-## Context
-
-ADR-044 identified a critical bug where `understand_audio` was called from `tools/video.py:176` and `handlers/media_tools.py:400` but never defined in `tools/minimax_media.py`, causing silent transcription failure.
-
-The wiki loop also identified multiple security/stability issues requiring immediate remediation.
-
-## Decisions
-
-### FIX 1: understand_audio implementation
-**File**: `tools/minimax_media.py`
-
-Added `understand_audio(audio_path: str)` function that delegates to `core.utils.multimodal_processor.transcribe_voice`:
-
-```python
-async def understand_audio(audio_path: str) -> str:
-    try:
-        import os
-        from core.utils.multimodal_processor import transcribe_voice
-        with open(audio_path, "rb") as f:
-            audio_data = f.read()
-        return await transcribe_voice(audio_data, extension=os.path.splitext(audio_path)[1] or ".mp3")
-    except Exception as exc:
-        logger.warning("understand_audio failed for %s: %s", audio_path, exc)
-        return f"Error: transcription failed — {exc}"
-```
-
-**Verification**: ✅ Import succeeds, function callable
-
 ---
-
 ### FIX 2: SSRF protection in browser_agent.py
+---
 **File**: `tools/browser_agent.py`
 
 Added URL validation with private IP blocking and scheme allowlisting:
@@ -60,8 +26,8 @@ def validate_url(url: str) -> tuple[bool, str]:
 Applied to: `check_site_health()`, `browse_task()`, `_playwright_fallback()`
 
 **Verification**: ✅ `file:///etc/passwd` blocked, `http://127.0.0.1` blocked, `https://google.com` allowed
-
 ---
+
 
 ### FIX 3: Duplicate briefing disabled
 **File**: `main.py:525-534`

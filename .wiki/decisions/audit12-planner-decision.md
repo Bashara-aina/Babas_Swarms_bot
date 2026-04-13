@@ -1,14 +1,7 @@
-# ADR-??? — LEGION AUDIT 12: Nihongo Mode User Isolation Fix
-> Architecture Decision Record
-
-**Date:** 2026-04-12  
-**Status:** Proposed  
-**Deciders:** @planner, @worker, @reviewer  
-
 ---
-
 ## Context
 
+---
 LEGION AUDIT 12 identified a potential issue: nihongo mode may leak between users. The concern is that if the nihongo active flag is stored globally (rather than per-user), one user's activation could affect another user's experience.
 
 ### Current Implementation Analysis
@@ -44,8 +37,8 @@ The code **appears correct** — `_sessions` is keyed by `user_id` (int), and al
 1. **Missing test coverage**: `tests/test_multi_user_isolation.py:10-24` only checks `user_a != user_b` — it does NOT actually test that nihongo mode is isolated
 2. **Potential confusion**: The command is `/stopp` and `/stop`, but documentation mentions `/nihongo_off`
 3. **No dedicated isolation test**: `tests/test_nihongo_isolation.py` does not exist
-
 ---
+
 
 ## Decision
 

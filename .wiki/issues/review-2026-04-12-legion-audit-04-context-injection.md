@@ -1,12 +1,7 @@
-# Review: LEGION AUDIT 04 — Context Injection
-**Date:** 2026-04-12  
-**Reviewer:** @reviewer  
-**Files Reviewed:** 6 key files + tests
-
 ---
-
 ## ✅ Passed
 
+---
 ### 1. LLM Call Sites (`llm_client/__init__.py`)
 - **[Line 515-518]** AUDIT04 debug logging present:
   ```python
@@ -69,8 +64,8 @@
 ### 7. No Regressions
 - **Tests:** 369 passed, 2 warnings (minor RuntimeWarning about unawaited coroutine - not a blocker)
 - **Ruff:** Pre-existing import-order issues in `agents.py` (E402, I001) — not introduced by this audit
-
 ---
+
 
 ## ⚠️ Warnings
 

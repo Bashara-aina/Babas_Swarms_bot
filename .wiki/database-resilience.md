@@ -1,10 +1,10 @@
 # DATABASE RESILIENCE
 
-**Domain**: Connection handling, fallback patterns, recovery
-**Cycle**: 15 — SUPABASE & DATABASE
-**Date**: 2026-04-12
-**Status**: candidate
-
+---
+domain: "Connection handling, fallback patterns, recovery"
+cycle: "15 — SUPABASE & DATABASE"
+date: "2026-04-12"
+status: "candidate"
 ---
 
 ## 1. Architecture: Two-Tier Resilience

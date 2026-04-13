@@ -1,18 +1,12 @@
-# MCP Servers Available to Legion
-
-> Source: [punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) (84.6k stars)  
-> See also: [glama.ai/mcp/servers](https://glama.ai/mcp/servers) — web directory of 5000+ servers  
-> Last updated: 2026-04-11
-
 ---
-
 ## 1. Overview
 
+---
 **MCP (Model Context Protocol)** is the open standard that enables AI models to connect to external tools and data sources. Think of it as "USB-C for AI" — a standardized interface between the LLM and the tools it needs.
 
 For Legion, the key value is: **Legion can self-install MCP servers on demand** to gain new capabilities without manual setup.
-
 ---
+
 
 ## 2. Memory Servers
 

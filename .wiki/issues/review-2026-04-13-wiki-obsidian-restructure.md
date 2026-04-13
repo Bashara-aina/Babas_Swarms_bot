@@ -1,14 +1,7 @@
-# Review: wiki/Obsidian Knowledge Base Restructure
-> Generated: 2026-04-13 by @reviewer
-
-## PHASE 0: Audit Report ✅
-- `.wiki/_meta/audit_report.md` exists (2026-04-13)
-- Contains all required sections: Executive Summary, Directory Structure, Source Files, Issues, Recommended Structure, Migration Plan, NOT-to-touch list
-
 ---
-
 ## PHASE 1: Directory Structure ⚠️ PARTIAL
 
+---
 ### ✅ Created:
 - `wiki/raw/` — exists with 9 subdirectories (audits, changelogs, configs, docs, papers, prompts, roadmaps, skills_ref, snapshots)
 - `wiki/legion/`, `wiki/conversations/`, `wiki/opencode/`, `wiki/research/`, `wiki/rumahlabuh/`, `wiki/tools/`, `wiki/tokyo/`, `wiki/bashara/`, `wiki/decisions/` — directories exist
@@ -31,8 +24,8 @@ All 9 subdirectories under `wiki/raw/` are EMPTY — no source files copied:
 - `wiki/concepts/` — does not exist
 - `wiki/synthesis/` — does not exist
 - `wiki/output/` — does not exist
-
 ---
+
 
 ## PHASE 2: SCHEMA.md ⚠️ INCOMPLETE
 

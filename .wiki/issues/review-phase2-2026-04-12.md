@@ -1,12 +1,7 @@
-# Review: Phase 2 Changes
-**Date:** 2026-04-12
-**Task:** Phase 2 skill registry, heartbeat daemon, and injection protection
-**Status:** ⚠️ Warnings / ✅ Pass (tests)
-
 ---
-
 ## ✅ Passed
 
+---
 - **Tests:** 305/305 passed (`pytest tests/ -x --asyncio-mode=auto -q`)
 - **Skill loading:** 28 skills registered successfully across 8 categories (web, research, github, system, memory, productivity, personal, media)
 - **No circular imports:** `core/skills/registry.py` imports only stdlib; builtin modules import from it cleanly
@@ -15,8 +10,8 @@
 - **sanitize_user_content() patterns:** Covers `<script>`, `javascript:`, `on*=` event handlers, `<iframe>`, template injection (`{{`, `{%`)
 - **Intent router fallback:** Skill fallback only triggers at confidence < 0.50, is additive (not replacing existing logic), sets appropriate `needs_tools=True, needs_research=True`
 - **Heartbeat wired:** `asyncio.create_task(_heartbeat.start(...))` in `on_startup` — fire-and-forget, non-blocking boot
-
 ---
+
 
 ## ⚠️ Warnings
 

@@ -1,15 +1,11 @@
-# Review: Nihongo Mode v2.0 Upgrade
-
-**Date:** 2026-04-12  
-**Reviewer:** @reviewer  
-**Status:** ✅ All 18 tests pass
-
 ---
-
 ## ✅ Passed
 
+---
 | Check | Status |
-|-------|--------|
+|
+---
+----|--------|
 | All 18 nihongo tests pass | ✅ |
 | No hardcoded API keys or secrets | ✅ |
 | Type hints present on all public methods | ✅ |

@@ -1,3 +1,4 @@
+---
 # Worker Audit 10 — Async Correctness Sweep
 
 **Date:** 2026-04-12

@@ -1,13 +1,11 @@
-# POPW Research Paper Index
-> Master index of 100 papers organized by relevance to POPW (Pose-Conditioned Action Recognition with FiLM Modulation)
-> Generated: 2026-04-11 | Total Papers: 100 | Status: COMPLETE
-
 ---
-
 ## 📊 Priority Queue: Top 20 CRITICAL/HIGH Papers by Impact
 
+---
 | Priority | ID | Title | Year | Venue | POPW Relevance |
-|----------|----|-------|------|-------|----------------|
+|
+---
+-------|----|-------|------|-------|----------------|
 | 1 | 097 | Attention Is All You Need | 2017 | NeurIPS | CRITICAL |
 | 2 | 001 | Deep Residual Learning for Image Recognition | 2016 | CVPR | CRITICAL |
 | 3 | 005 | The IKEA ASM Dataset | 2021 | WACV | CRITICAL |

@@ -1,13 +1,7 @@
-# ADR-DEAD-PURGE-001: Dead File Purge Strategy
-
-**Date**: 2026-04-11  
-**Status**: ACCEPTED  
-**Deciders**: @planner  
-
 ---
-
 ## Context
 
+---
 The `/home/newadmin/swarm-bot` repository has accumulated dead files over time:
 - Backup files (`.bak`, `.backup`)
 - Old installers (`.deb`)
@@ -16,8 +10,8 @@ The `/home/newadmin/swarm-bot` repository has accumulated dead files over time:
 - Unused test files
 
 Before any deletion, we need a **safe, reversible, well-documented process**.
-
 ---
+
 
 ## Decision: Graveyard Pattern + 3-Pass Confirmation
 

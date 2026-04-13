@@ -1,15 +1,9 @@
-# ADR-013: Feature Flag Audit — Decisions
-
-**Date:** 2026-04-12  
-**Status:** ACCEPTED  
-**Auditor:** @planner  
-
 ---
-
 ## Context
-AUDIT-13 required cataloging all feature flags, identifying dead code (never-enabled features), and ensuring every disabled feature has an explicit flag and user message.
-
 ---
+AUDIT-13 required cataloging all feature flags, identifying dead code (never-enabled features), and ensuring every disabled feature has an explicit flag and user message.
+---
+
 
 ## Decision 1: ABANDONED Features — Archive in health_check.py
 

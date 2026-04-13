@@ -1,3 +1,4 @@
+---
 # Planner Log: get_relationship_context Bugfix
 
 **Date**: 2026-04-12  

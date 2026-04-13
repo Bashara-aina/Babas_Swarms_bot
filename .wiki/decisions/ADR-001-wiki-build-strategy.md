@@ -1,19 +1,14 @@
-# ADR-001: cekwajar.id Salary Transparency Wiki Build Strategy
-
-**Date**: 2026-04-11  
-**Status**: ACCEPTED  
-**Deciders**: @planner, @worker  
-**Task**: Build 100+ wiki knowledge pages for cekwajar.id salary transparency platform
-
 ---
-
 ## Context
 
+---
 cekwajar.id is an Indonesian salary transparency platform. The platform needs comprehensive wiki documentation covering Indonesian employment law, tax regulations, BPJS (social security), market salary data, product information, business operations, and engineering topics.
 
 **Domains and Page Ranges**:
 | Domain | Range | Description | Count |
-|--------|-------|-------------|-------|
+|
+---
+-----|-------|-------------|-------|
 | labor-law | 019 | Indonesian labor law (UU Ketenagakerjaan) | ~10 pages |
 | tax | 020-029 | PPh, PPn, tax regulations | 10 pages |
 | bpjs | 030-039 | BPJS Kesehatan, BPJS TK, JHT, JP | 10 pages |

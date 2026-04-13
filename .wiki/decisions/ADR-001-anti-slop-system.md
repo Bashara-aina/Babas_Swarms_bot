@@ -1,19 +1,12 @@
-# ADR-001: Anti-Slop Defense System
-
-**Date**: 2026-04-11  
-**Status**: Accepted  
-**Decider**: Bashara (Planner Agent)  
-**Supersedes**: N/A
-
 ---
-
 ## Context
 
+---
 Babas_Swarms_bot (Legion) sends every LLM response directly to Telegram users without content quality filtering. Users receive filler-heavy, generic, or repetitive "slop" responses that damage bot credibility.
 
 The existing `core/wiki_quality_gate.py` provides a proven 2-guard (fast+deep) pattern for wiki writes. We extend this to all bot output.
-
 ---
+
 
 ## Decision
 

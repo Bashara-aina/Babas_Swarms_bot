@@ -1,3 +1,4 @@
+---
 # cekwajar.id Wiki Build Progress
 > Tracker: @planner | Start: 2026-04-11 | Goal: 100+ wiki pages
 

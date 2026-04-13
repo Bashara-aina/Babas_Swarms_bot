@@ -1,3 +1,4 @@
+---
 # AUDIT 05 — Core Module Wiring
 **Date:** 2026-04-12
 **Status:** PLANNED

@@ -1,18 +1,12 @@
-# Memory Architecture Guide for Legion
-
-> Sources: [mem0ai/mem0](https://github.com/mem0ai/mem0) (52.6k stars) + [letta-ai/letta-obsidian](https://github.com/letta-ai/letta-obsidian)  
-> Paper: [Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory](https://arxiv.org/abs/2504.19413)  
-> Last updated: 2026-04-11
-
 ---
-
 ## 1. Overview
 
+---
 This guide covers how to wire production-grade memory concepts into Legion's existing 3-tier memory system. It draws from Mem0's universal memory architecture and Letta's stateful agent memory approach.
 
 **Key insight from Mem0 paper**: Memory is not one-size-fits-all. Effective agent memory requires distinct tiers with different retention policies, retrieval strategies, and update mechanisms.
-
 ---
+
 
 ## 2. Memory Tiers — What to Store Where
 

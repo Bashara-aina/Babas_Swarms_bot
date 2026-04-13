@@ -1,20 +1,15 @@
-# Audit 12 Reviewer Decision — LEGION AUDIT 12
-
-**Task:** Nihongo Mode User Isolation
-**Date:** 2026-04-12
-**Reviewer:** @reviewer
-**Decision:** APPROVED ✅
-
 ---
-
 ## Summary
 
+---
 LEGION AUDIT 12 verified that nihongo mode is fully per-user and cannot leak between users.
 
 ## Changes Reviewed
 
 | File | Line | Change |
-|------|------|--------|
+|
+---
+---|------|--------|
 | `handlers/nihongo_handler.py` | 117 | Added `/nihongo_off` alias to deactivation |
 | `tests/test_nihongo_isolation.py` | New | 4 isolation tests created |
 

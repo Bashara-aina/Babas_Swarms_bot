@@ -1,16 +1,13 @@
-# AUDIT-03: Router Layer Coverage
-**Date:** 2026-04-12  
-**Status:** COMPLETE — No broken wires found  
-**Router Chain:** `message_handler.py` → `task_router` (optional) → `autonomous_router` → handler dispatch  
-
 ---
-
 ## 1. Intent Coverage Map
 
+---
 ### AutonomousRouter Skills (core/autonomous_router.py)
 
 | Skill | Handler Key | Handler Function | Status |
-|-------|-------------|------------------|--------|
+|
+---
+----|-------------|------------------|--------|
 | computer_control | `/do` | `_run_agent_loop()` | ✅ |
 | deep_research | `/research` | `_execute_chat(..., forced_agent="researcher")` | ✅ |
 | code_generation | `/run` | `_execute_chat(..., forced_agent="coding")` | ✅ |

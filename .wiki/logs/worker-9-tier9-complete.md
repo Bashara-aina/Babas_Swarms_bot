@@ -1,3 +1,4 @@
+---
 # Worker Task Complete: Tier 9 Papers (086-093)
 
 **Date**: April 11, 2026  

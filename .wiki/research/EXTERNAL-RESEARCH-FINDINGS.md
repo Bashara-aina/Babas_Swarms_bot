@@ -1,11 +1,7 @@
-# Legion Wiki — External Research Findings
-Generated: April 11, 2026
-Source: Perplexity deep research
-
 ---
-
 ## 📊 IKEA ASM Dataset — Thesis Benchmark Baselines
 
+---
 **Source**: WACV 2021 paper + GitHub (IkeaASM/IKEA_ASM_Dataset)
 **Dataset**: 3 million frames, multi-view, multi-modal (RGB + depth + pose + atomic actions)
 **Tasks**: Action recognition, pose estimation, instance segmentation, part tracking
@@ -20,8 +16,8 @@ Source: Perplexity deep research
 ### Legion implication
 If WorkerNet exceeds I3D/P3D FA score, that IS publishable.
 Dataset is deliberately hard — I3D drops 10% points vs Kinetics.
-
 ---
+
 
 ## 🤖 MiniMax M2.7 — Benchmark Evaluation
 

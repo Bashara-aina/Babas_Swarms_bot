@@ -1,15 +1,10 @@
-# Autonomous Agent Capabilities Reference
-
-> Source: [e2b-dev/awesome-ai-agents](https://github.com/e2b-dev/awesome-ai-agents) (27k stars)  
-> Last updated: 2026-04-11
-
 ---
-
 ## 1. Overview
 
-This reference maps the full landscape of autonomous AI agent capabilities, drawn from the production-grade systems tracked in the awesome-ai-agents ecosystem. Each capability is defined, explained with implementation principles, and tied to how Legion could leverage it.
-
 ---
+This reference maps the full landscape of autonomous AI agent capabilities, drawn from the production-grade systems tracked in the awesome-ai-agents ecosystem. Each capability is defined, explained with implementation principles, and tied to how Legion could leverage it.
+---
+
 
 ## 2. Code Generation & Debugging
 

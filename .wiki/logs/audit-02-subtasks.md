@@ -1,3 +1,4 @@
+---
 # AUDIT 02 — Message Pipeline Connectivity
 > Planner: @planner | Created: 2026-04-12 | Status: IN PROGRESS
 

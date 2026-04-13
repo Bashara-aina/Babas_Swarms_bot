@@ -1,20 +1,13 @@
-# ADR-002: Phase 2 Legion Upgrades
-
-**Date:** 2026-04-12  
-**Phase:** Phase 2  
-**Status:** Completed ✅  
-**Deciders:** Bashara, Planner Agent
-
 ---
-
 ## Context
 
+---
 Phase 1 (Foundation) is complete. Phase 2 adds three focused upgrades:
 - **U5:** Skills Registry — 30 curated skills with auto-fire from intent_router
 - **U6:** Prompt Injection Protection — sanitization for all user content
 - **U7:** Heartbeat Daemon — proactive monitoring during active hours (9am–11pm JST)
-
 ---
+
 
 ## Decisions
 

@@ -1,3 +1,4 @@
+---
 # LEGION AUDIT 04 — Context Injection (Search / Wiki / Memory / Soul)
 **Date:** 2026-04-12
 **Status:** In Progress

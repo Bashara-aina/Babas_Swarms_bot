@@ -1,3 +1,4 @@
+---
 # WIKI RESTRUCTURE — PLANNER DECOMPOSITION
 **Task**: Full wiki/Obsidian KB restructure following Karpathy LLM KB pattern  
 **Date**: 2026-04-13  

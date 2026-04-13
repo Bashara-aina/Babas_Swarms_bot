@@ -1,18 +1,12 @@
-# Worker Brief: Garbled Text Fix
-
-**Task**: Fix encoding issue in episodic_narrative.py + verify imports  
-**Assigned by**: @planner  
-**ADR**: `.wiki/decisions/ADR-090-garbled-text-context-injection.md`
-
 ---
-
 ## Background
 
+---
 Bot was producing garbled responses with Russian words ("конкрет", "памяти") and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu. Root cause was silent NameError failures in context injection loop.
 
 All major import fixes (ADR-057, 058, 059, 060) have been applied. Remaining issue is a latent encoding bug and verification.
-
 ---
+
 
 ## Subtask 1: Fix Encoding in episodic_narrative.py
 

@@ -1,3 +1,4 @@
+---
 # Audit 2026-04-11: Critical Fixes Applied
 
 **Date:** 2026-04-11  

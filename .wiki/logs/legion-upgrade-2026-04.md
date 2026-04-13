@@ -1,3 +1,4 @@
+---
 # Legion Upgrade Log — 2026-04
 
 *Consolidated from 3 session logs on 2026-04-12 for wiki cleanup.*

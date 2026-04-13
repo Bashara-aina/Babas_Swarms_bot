@@ -1,23 +1,14 @@
-# Domain 16: Mathematics of Information & Computation
-
-## [Claude Shannon] — A Mathematical Theory of Communication
-**Type**: Paper
-**Year**: 1948
-**Core Insight**: Information can be quantified as entropy; communication consists of source, transmitter, channel, noise, receiver; optimal coding achieves channel capacity.
-**LEGION RULE**: Measure entropy and use optimal coding when quantifying information because Shannon showed information can be quantified and optimal codes achieve channel capacity while accounting for noise.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
 ---
 ## [Claude Shannon] — Communication in the Presence of Noise
+---
 **Type**: Paper
 **Year**: 1949
 **Core Insight**: Noise limits channel capacity; error-correcting codes can achieve reliable communication near channel capacity through redundancy.
 **LEGION RULE**: Add redundancy through error-correcting codes when designing communication systems because noise limits channel capacity but redundant coding enables reliable communication approaching Shannon's limit.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
-
 ---
+
 ## [Andrey Kolmogorov] — On Tables of Random Numbers
 **Type**: Paper
 **Year**: 1963

@@ -1,29 +1,7 @@
-# Cekwajar.id — Production-Ready Supabase PostgreSQL Database Schema
-
-**Version**: 1.0
-**Platform**: Supabase PostgreSQL with pgvector
-**Last Updated**: 2026-04-07
-**Status**: Production-Ready
-
-## Table of Contents
-
-1. [Executive Summary](#executive-summary)
-2. [Architecture Overview](#architecture-overview)
-3. [Core Tables with Complete SQL](#core-tables-with-complete-sql)
-4. [Row-Level Security (RLS) Policies](#row-level-security-policies)
-5. [Indexing Strategy](#indexing-strategy)
-6. [Foreign Key Relationships & Constraints](#foreign-key-relationships--constraints)
-7. [Production Queries](#production-queries)
-8. [Supabase Edge Function Pattern](#supabase-edge-function-pattern)
-9. [pgvector Integration: Fuzzy Job Matching](#pgvector-integration-fuzzy-job-matching)
-10. [Data Partitioning Strategy](#data-partitioning-strategy)
-11. [Privacy Architecture & Anonymization](#privacy-architecture--anonymization)
-12. [Implementation Checklist](#implementation-checklist)
-
 ---
-
 ## Executive Summary
 
+---
 Cekwajar.id is an Indonesian consumer data intelligence platform with five core tools:
 - **Wajar Gaji** (Salary benchmarks)
 - **Wajar Slip** (Payslip analysis)
@@ -42,8 +20,8 @@ This schema enforces **privacy-first architecture**: raw user data never touches
 - Audit trails via `data_sources` for compliance
 - Partitioned `verdict_logs` and `api_usage_logs` for horizontal scaling
 - Tax rule versioning for historical accuracy
-
 ---
+
 
 ## Architecture Overview
 

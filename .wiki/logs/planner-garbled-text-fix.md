@@ -1,3 +1,4 @@
+---
 # Planner Log: Garbled Text Fix (Matsuya/Toyosu Restaurant Response)
 
 **Date**: 2026-04-12  

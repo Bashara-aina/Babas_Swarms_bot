@@ -1,3 +1,4 @@
+---
 # Swarm Upgrade Log — 2026-04-13
 
 ## Swarm Bot v2.0 Anti-Hallucination Upgrade

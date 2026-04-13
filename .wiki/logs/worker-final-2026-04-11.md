@@ -1,3 +1,4 @@
+---
 # Worker Final Log — 2026-04-11
 
 ## Tasks Completed

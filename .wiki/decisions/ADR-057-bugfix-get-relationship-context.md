@@ -1,17 +1,11 @@
-# ADR-057-bugfix-get-relationship-context
-
-**Date**: 2026-04-12  
-**Type**: Bugfix (import missing)  
-**Status**: Proposed  
-
 ---
-
 ## Error
+---
 ```
 NameError: name 'get_relationship_context' is not defined
 ```
-
 ---
+
 
 ## Root Cause
 `llm_client/__init__.py` line 1114 references `get_relationship_context` in a context-injection loop:

@@ -1,33 +1,13 @@
-# Review: Phase 1 Session (2026-04-12)
-
-## Files Reviewed
-### Created:
-- `core/session/transcript.py` — SessionTranscriptStore (SQLite-backed)
-- `core/shell/sandbox.py` — SandboxConfig, SandboxExecutor
-- `tools/video.py` — understand_video_url()
-
-### Modified:
-- `main.py` — ruflo_manager wiring, transcript init
-- `llm_client/__init__.py` — budget hard-stop
-- `conversation_interface.py` — save_turn() fire-and-forget
-- `computer_agent/shell.py` — sandbox integration
-- `core/proactive/curiosity_engine.py` — CHECKIN_POOL, 4h cooldown
-- `handlers/media_tools.py` — F.video handler
-- `tools/documents.py` — CSV, PPTX, EPUB handlers
-- `browser_agent.py` → `tools/browser_agent.py` — Crawl4AI integration
-- `core/intent_router.py` — URL auto-routing
-- `requirements.txt` — new deps
-
 ---
-
 ## Test Results
+---
 ```
 pytest tests/ -x --asyncio-mode=auto -q
 305 passed, 1 warning in 21.30s
 ```
 ✅ All tests pass
-
 ---
+
 
 ## ✅ Passed
 

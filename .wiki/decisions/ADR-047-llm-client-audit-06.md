@@ -1,13 +1,7 @@
-# ADR-047 — LLM Client Layer Audit 06
-
-**Date:** 2026-04-12  
-**Type:** Architecture — LLM Interface Standardization  
-**Status:** Accepted
-
 ---
-
 ## Context
 
+---
 AUDIT 06 identified that the LLM client layer lacks a canonical `call_llm()` function with the signature:
 
 ```python
@@ -27,8 +21,8 @@ The codebase has:
 - Internal `_call_model()` returning raw litellm response objects
 - `agent_loop()` handling tool_calls in a full agentic loop
 - No `call_llm()` public function at all
-
 ---
+
 
 ## Decision
 

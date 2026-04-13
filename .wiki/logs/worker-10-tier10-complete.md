@@ -1,3 +1,4 @@
+---
 # Worker Log — Tier 10 Completion
 
 **Date**: 2026-04-11  

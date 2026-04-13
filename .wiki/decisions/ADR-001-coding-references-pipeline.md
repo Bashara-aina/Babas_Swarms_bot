@@ -1,19 +1,13 @@
-# ADR-001: Coding References Documentation Pipeline
-
-**Date**: 2026-04-11  
-**Status**: ACCEPTED  
-**Deciders**: Three-agent pipeline (planner + worker + reviewer)
-
 ---
-
 ## Context
 
+---
 User requested adding coding reference repos documentation to `.wiki/06-legion-instructions/CODING-REFERENCES.md`. The content consists of 20 curated GitHub repos intended to make opencode/Legion into a 10/10 full-stack engineer.
 
 **Target file**: `.wiki/06-legion-instructions/CODING-REFERENCES.md`  
 **Target directory**: Already exists at `.wiki/06-legion-instructions/`
-
 ---
+
 
 ## Pipeline Architecture
 

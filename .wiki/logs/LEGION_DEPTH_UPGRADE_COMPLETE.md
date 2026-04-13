@@ -1,3 +1,4 @@
+---
 # LEGION DEPTH UPGRADE — Final Completion Report
 
 **Date:** 2026-04-12/13  

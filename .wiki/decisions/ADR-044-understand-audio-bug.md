@@ -1,33 +1,12 @@
-# ADR-044: BUG — understand_audio Not Implemented in minimax_media.py
-
-## Status
-Documented: 2026-04-12
-
-## Context
-
-ADR-043 planned `tools/minimax_media.py` with 4 function wrappers:
-- `understand_image(prompt, image_source)`
-- `web_search(query)`
-- `generate_image(prompt, aspect_ratio)`
-- `generate_speech(text, voice_id, speed)`
-
-**Bug found in review (cycle 13):** The file also imports `understand_audio` but this function is **never defined** in `minimax_media.py`.
-
-**Call sites:**
-- `handlers/media_tools.py:400` — imports `understand_audio` from `tools.minimax_media`
-- `tools/video.py:176` — calls `tools.minimax_media.understand_audio(actual_path)`
-
-The call in `video.py` is for transcribing audio extracted from videos (used in `_transcribe_video_audio()`).
-
 ---
-
 ## Decision
 
+---
 **DO NOT MODIFY PRODUCTION CODE.** This is a wiki loop session — production fixes require separate implementation task.
 
 This ADR documents the bug for future remediation.
-
 ---
+
 
 ## Bug Analysis
 

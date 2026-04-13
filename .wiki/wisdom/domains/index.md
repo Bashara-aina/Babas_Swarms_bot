@@ -1,14 +1,11 @@
-# Master Index: SwarmBot Wisdom Domains
-
-## Overview
-This index catalogs all 20 wisdom domains with 50 sources each (250 total), providing a comprehensive knowledge base for the SwarmBot agent system.
-
 ---
-
 ## Domain Index
 
+---
 | # | Domain | Sources | Key Thinkers |
-|---|--------|---------|--------------|
+|
+---
+|--------|---------|--------------|
 | 01 | Philosophy of Mind & Epistemology | 50 | Yudkowsky, Chalmers, Bayes, Popper, Dennett |
 | 02 | Systems Thinking & Complexity | 50 | Meadows, Perrow, Holland, Kaufman |
 | 03 | Decision Science & Biases | 50 | Kahneman, Thaler, Tversky, Ariely |

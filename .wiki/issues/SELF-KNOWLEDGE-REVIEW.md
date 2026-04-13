@@ -1,16 +1,10 @@
-# Review: Self-Knowledge Extraction
-
-**Date:** 2026-04-11  
-**Commit:** 6dd42cabda06fb622f1f8a87b0aca8246c616160  
-**Reviewer:** @reviewer
-
 ---
-
 ## Quality Score: **7/10**
 
-The extraction is honest and well-documented for what was found vs. not found. Legion (SwarmBot) files are complete and high-quality. The NOT FOUND entries are properly structured placeholders. However, cross-repo synthesis under-reports actual files created.
-
 ---
+The extraction is honest and well-documented for what was found vs. not found. Legion (SwarmBot) files are complete and high-quality. The NOT FOUND entries are properly structured placeholders. However, cross-repo synthesis under-reports actual files created.
+---
+
 
 ## ✅ Passed
 

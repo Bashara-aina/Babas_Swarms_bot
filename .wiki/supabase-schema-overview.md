@@ -1,10 +1,10 @@
 # SUPABASE SCHEMA OVERVIEW
 
-**Domain**: Database schema, table relationships, API patterns
-**Cycle**: 15 — SUPABASE & DATABASE
-**Date**: 2026-04-12
-**Status**: candidate
-
+---
+domain: "Database schema, table relationships, API patterns"
+cycle: "15 — SUPABASE & DATABASE"
+date: "2026-04-12"
+status: "candidate"
 ---
 
 ## 1. Architecture Summary

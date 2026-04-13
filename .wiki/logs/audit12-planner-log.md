@@ -1,3 +1,4 @@
+---
 # LEGION AUDIT 12 — Planner Log
 ## Nihongo Mode User Isolation
 

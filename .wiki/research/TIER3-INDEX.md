@@ -1,16 +1,10 @@
-# POPW Protocol — Tier 3: Multi-Task Learning Methods
-
-**Generated**: 2026-04-11  
-**Papers**: 13 (023-035)  
-**Priority Papers**: 028 (AMTL), 029 (UW-SO)
-
 ---
-
 ## Overview
 
-This tier covers Multi-Task Learning (MTL) methods for loss function balancing. These papers are essential for understanding how to replace Kendall UW in POPW's losses.py with more principled approaches.
-
 ---
+This tier covers Multi-Task Learning (MTL) methods for loss function balancing. These papers are essential for understanding how to replace Kendall UW in POPW's losses.py with more principled approaches.
+---
+
 
 ## Paper Index
 

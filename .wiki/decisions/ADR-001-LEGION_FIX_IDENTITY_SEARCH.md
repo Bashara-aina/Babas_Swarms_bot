@@ -1,22 +1,15 @@
-# ADR-001: LEGION_FIX_IDENTITY_SEARCH
-
-**Status**: Accepted  
-**Date**: 2026-04-12  
-**Deciders**: @planner, @worker  
-**Technical Story**: Three critical failures observed in Telegram screenshot — Legion doesn't know Bashara, leaks Chinese characters, and refuses to search web.
-
 ---
-
 ## Context
 
+---
 Bashara asked: "Bisa cari info bashara aina tuh siapa ga?"  
 Legion responded with three separate failures:
 
 1. **Amnesia**: Said "no idea who Bashara Aina is" — `.wiki/` content never injected into system prompt
 2. **Language contamination**: "好奇" (Chinese "curious") leaked into Indonesian response  
 3. **No self-search**: Said "tidak tahu" instead of automatically searching the web
-
 ---
+
 
 ## Decision
 

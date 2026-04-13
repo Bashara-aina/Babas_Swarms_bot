@@ -1,3 +1,4 @@
+---
 # WORKER CYCLE 15 LOG
 **Agent**: @worker
 **Cycle**: 15 — SUPABASE & DATABASE

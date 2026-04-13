@@ -1,3 +1,4 @@
+---
 # LEGION AUDIT 01 — Handler Registration Audit (COMPLETE)
 
 **Date:** 2026-04-12

@@ -1,3 +1,4 @@
+---
 # Worker Completion Log: Concerns 1 & 2
 
 **Date**: 2026-04-12  

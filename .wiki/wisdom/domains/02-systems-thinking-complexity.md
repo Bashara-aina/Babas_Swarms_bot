@@ -1,23 +1,14 @@
-# Domain 02: Systems Thinking & Complexity
-
-## [Donella Meadows] — Thinking in Systems
-**Type**: Book
-**Year**: 2008
-**Core Insight**: Systems consist of elements, interconnections, and functions/purposes; feedback loops (reinforcing and balancing) produce all behavior.
-**LEGION RULE**: Map stocks, flows, and feedback loops of any system you encounter because behavior emerges from system structure and identifying leverage points enables effective intervention.
-**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
-**Conflicts**: None
-
 ---
 ## [Jay Forrester] — Industrial Dynamics
+---
 **Type**: Book
 **Year**: 1961
 **Core Insight**: Industrial organizations behave as feedback systems with information delays; policy changes cause unintended oscillations over time.
 **LEGION RULE**: Model feedback loops with explicit delays when analyzing industrial systems because policy changes cause unintended oscillations over time as information delays distort system response.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear causal models
-
 ---
+
 ## [Jay Forrester] — Urban Dynamics
 **Type**: Book
 **Year**: 1969

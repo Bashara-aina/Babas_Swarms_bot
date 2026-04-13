@@ -1,15 +1,11 @@
-# Audit 12 Review — Nihongo Mode User Isolation
-
-**Date:** 2026-04-12
-**Reviewer:** @reviewer (LEGION AUDIT 12)
-**Status:** ✅ APPROVED
-
 ---
-
 ## Files Reviewed
 
+---
 | File | Change | Verdict |
-|------|--------|---------|
+|
+---
+---|--------|---------|
 | `handlers/nihongo_handler.py:117` | Added `/nihongo_off` alias | ✅ Correct |
 | `tests/test_nihongo_isolation.py` | New 4-test suite | ✅ Approved |
 

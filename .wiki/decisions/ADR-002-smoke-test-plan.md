@@ -1,19 +1,12 @@
-# ADR-002: Smoke Test Plan — 10-Bucket Parallel Testing
-
-**Date**: 2026-04-11  
-**Status**: Accepted  
-**Decider**: @planner  
-**Goal**: Test all major features of Legion bot using 10 parallel subagents
-
 ---
-
 ## Overview
 
+---
 This ADR defines a smoke test strategy that divides the Legion codebase into 10 logical buckets for parallel testing. Each bucket focuses on a distinct feature area and verifies basic functionality ("doesn't crash") without deep testing.
 
 **Test Philosophy**: Smoke tests validate that modules initialize, import cleanly, and handle basic calls without exceptions. They are NOT comprehensive tests.
-
 ---
+
 
 ## Bucket Definitions
 

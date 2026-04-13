@@ -1,3 +1,4 @@
+---
 # Worker Labor Law Progress Log
 
 ## Task: Create 19 Wiki Pages for Indonesian Labor Law (Domain 019)

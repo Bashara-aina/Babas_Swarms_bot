@@ -1,13 +1,7 @@
-# Review: Weather Handler Bot Unresponsiveness Fix
-
-**Date:** 2026-04-12  
-**Task:** Fix bot unresponsiveness after weather command  
-**Status:** ❌ BLOCKERS FOUND
-
 ---
-
 ## Root Cause Analysis
 
+---
 The `_weather_handler` in `core/skills/builtin/productivity.py` contains a **critical session lifecycle bug** at lines 37-53:
 
 ```python
@@ -28,8 +22,8 @@ async with session.get(weather_url, params=params, timeout=aiohttp.ClientTimeout
 ```
 
 **Problem:** The `async with session.get(...)` block at line 37 creates and immediately closes the session at line 41 when the first `async with` block exits. The second `async with session.get(...)` at line 53 tries to reuse the closed `session` variable, which causes the bot to hang indefinitely.
-
 ---
+
 
 ## ❌ Blockers
 

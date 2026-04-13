@@ -1,3 +1,4 @@
+---
 # AUDIT 15 — Final Integration Test Plan
 > Planner output for @worker agents | Generated: 2026-04-12
 

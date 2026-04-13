@@ -1,15 +1,7 @@
-# PPh21 dan BPJS Calculation Engine Specification v2026
-**Wajar Slip untuk cekwajar.id**
-
-**Document Version:** 2.0
-**Effective Date:** 2026-01-01
-**Last Updated:** 2026-04-07
-**Status:** Production Specification
-
 ---
-
 ## EXECUTIVE SUMMARY
 
+---
 This document specifies the complete, legally compliant PPh21 (Pajak Penghasilan Pasal 21) and BPJS (Badan Penyelenggara Jaminan Sosial) calculation engine for Indonesian payroll processing. The engine must accurately calculate:
 
 1. **PPh21 withholding tax** using either progressive bracket method or TER (Tarif Efektif Rata-rata) method
@@ -19,8 +11,8 @@ This document specifies the complete, legally compliant PPh21 (Pajak Penghasilan
 5. **Historical rate versioning** for payslip auditing across years
 
 Target accuracy: **IDR 100 (within one hundred rupiah)** for all calculations.
-
 ---
+
 
 ## PART A: PPh21 ENGINE SPECIFICATION
 
