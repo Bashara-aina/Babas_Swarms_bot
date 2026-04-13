@@ -117,6 +117,7 @@ LIMIT 10
 - [[adr-2026-04-12-legion-wiki-loop]] — Wiki strategy
 - [[adr-2026-04-12-circuit-breaker]] — Resilience pattern
 - [[adr-2026-04-12-multi-agent-pipeline]] — Three-agent pipeline
+- [[adr-2026-04-13-ecc-integration]] — Everything Claude Code integrated
 
 ---
 

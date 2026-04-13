@@ -126,6 +126,17 @@ class IntentRouter:
 | Nexus | core/nexus_orchestrator.py | 3-layer routing |
 | Jarvis | core/jarvis_orchestrator.py | Context bundling |
 
+### External Integrations
+
+#### Everything Claude Code (`ext/everything-claude-code/`)
+- **Source**: https://github.com/affaan-m/everything-claude-code (MIT, 140K+ stars)
+- **Integration**: `ext/everything_claude_code/__init__.py` Python facade
+- **Agents**: 13 specialized coding agents (planner, code-reviewer, security-reviewer, tdd-guide, build-error-resolver, refactor-cleaner, e2e-runner, loop-operator, performance-optimizer, harness-optimizer, architect, silent-failure-hunter, type-design-analyzer)
+- **Skills**: 6 high-value skills (agentic-engineering, autonomous-loops, continuous-learning, tdd-workflow, security-review, security-scan)
+- **Hooks**: 17 hooks reference for quality enforcement (pre-commit lint, tmux reminder, secrets detection)
+- **Rules**: Language-specific linting rules (python/, typescript/, common/)
+- **Wiki ADR**: [[decisions/adr-2026-04-13-ecc-integration]]
+
 ## Skill System
 
 ### Skill Registry (`core/skills/registry.py`)
