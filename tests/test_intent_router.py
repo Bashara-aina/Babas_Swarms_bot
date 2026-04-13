@@ -84,6 +84,46 @@ class TestClassifyIntentFast:
         result = classify_intent_fast("read the contents of readme.md")
         assert result.intent == Intent.FILE_OPERATION
 
+    def test_classify_memory_store(self):
+        """Remember/SAVE commands should be MEMORY_STORE."""
+        result = classify_intent_fast("remember that I prefer dark mode")
+        assert result.intent == Intent.MEMORY_STORE
+
+    def test_classify_email_write(self):
+        """Draft/send email commands should be EMAIL_WRITE."""
+        result = classify_intent_fast("send an email to john@example.com saying hello")
+        assert result.intent == Intent.EMAIL_WRITE
+
+    def test_classify_database_audit(self):
+        """Database operations should be DATABASE_AUDIT."""
+        result = classify_intent_fast("check the supabase users table for duplicates")
+        assert result.intent == Intent.DATABASE_AUDIT
+
+    def test_classify_weather_query(self):
+        """Weather queries should be WEATHER_QUERY."""
+        result = classify_intent_fast("what's the weather like in Tokyo today?")
+        assert result.intent == Intent.WEATHER_QUERY
+
+    def test_classify_location_query(self):
+        """Location queries should be LOCATION_QUERY."""
+        result = classify_intent_fast("find good ramen restaurants near Shibuya")
+        assert result.intent == Intent.LOCATION_QUERY
+
+    def test_classify_data_analysis(self):
+        """Data analysis queries should be DATA_ANALYSIS."""
+        result = classify_intent_fast("run a data analysis on this CSV file")
+        assert result.intent == Intent.DATA_ANALYSIS
+
+    def test_classify_api_call(self):
+        """External API calls should be API_CALL."""
+        result = classify_intent_fast("call the GitHub API to list my repos")
+        assert result.intent == Intent.API_CALL
+
+    def test_classify_self_upgrade(self):
+        """Self-upgrade queries should be SELF_UPGRADE."""
+        result = classify_intent_fast("check what changed in the latest commit")
+        assert result.intent == Intent.SELF_UPGRADE
+
     def test_classify_unknown_defaults_to_casual(self):
         """Unknown patterns should default to CASUAL_CHAT."""
         result = classify_intent_fast("asjdkfhaskjdhf")

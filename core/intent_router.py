@@ -87,7 +87,6 @@ _PATTERNS: dict[Intent, list[str]] = {
     ],
     Intent.WEB_RESEARCH: [
         r"\bresearch\b",
-        r"\bwhat is\b",
         r"\bwho is\b",
         r"\bhow does\b",
         r"\bexplain\b",
@@ -236,6 +235,7 @@ _PATTERNS: dict[Intent, list[str]] = {
         r"\bself.*update\b",
         r"\bcheck.*repo\b",
         r"\blatest.*library\b",
+        r"\blatest.*commit\b",
     ],
     Intent.CREATIVE_WRITE: [
         r"\bwrite.*\b(post|essay|story|poem|caption|tweet)\b",
@@ -249,6 +249,7 @@ _PATTERNS: dict[Intent, list[str]] = {
         r"\bplot\b.*\b(graph|chart)\b",
         r"\bstats\b.*\b(for|of)\b",
         r"\banalisis\b.*\bdata\b",
+        r"\bdata analysis\b",
     ],
     Intent.FILE_OPERATION: [
         r"\bread.*file\b",
