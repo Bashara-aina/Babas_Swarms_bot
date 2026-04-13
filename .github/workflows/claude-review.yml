@@ -46,6 +46,6 @@ jobs:
       - name: Run Claude Code PR Review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_oauth: true
           prompt: "Review PR for the Legion Telegram bot project (Babas_Swarms_bot). Focus: Security (no hardcoded secrets), Async correctness (no threading/sleep), Telegram compliance (parse_mode HTML, chunking at 4000 chars), Memory writes (memory_manager facade), LLM calls (llm_client.chat only). Write findings as PR comments."
           claude_args: "--allowedTools mcp__github__create_inline_comment,Bash(gh pr comment),Bash(gh pr diff)"
