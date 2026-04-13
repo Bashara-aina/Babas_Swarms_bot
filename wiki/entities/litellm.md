@@ -6,7 +6,7 @@ tags: [llm, routing, client, proxy]
 created: 2026-04-13
 updated: 2026-04-13
 summary: LiteLLM is the LLM client library providing unified interface to 100+ models with automatic retries, fallbacks, and cost tracking.
-wikilinks: [[entities/openrouter.md], [concepts/llm-cost-routing.md]]
+wikilinks: [[openrouter]], [[llm-cost-routing]]
 confidence: high
 source: implementation
 ---
@@ -46,5 +46,5 @@ In `llm_client.py`:
 
 ## Related Pages
 
-- [[entities/openrouter.md]] — Primary provider
-- [[concepts/llm-cost-routing.md]] — Routing logic
+- [[openrouter]] — Primary provider
+- [[llm-cost-routing]] — Routing logic

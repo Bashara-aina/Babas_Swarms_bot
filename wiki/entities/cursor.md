@@ -6,7 +6,7 @@ tags: [ide, coding, agent, alternative]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Cursor is an AI-powered IDE that was evaluated but not selected in favor of OpenCode for backend Legion tasks.
-wikilinks: [[entities/opencode.md]]
+wikilinks: [[opencode]]
 confidence: high
 source: decision
 ---
@@ -27,7 +27,7 @@ Cursor is an AI-first IDE evaluated for Legion's coding tasks, but OpenCode was 
 
 ## Decision
 
-See [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md]]
+See [[adr-2026-04-12-opencode-over-cursor-for-backend]]
 
 ## Current Status
 
@@ -35,5 +35,5 @@ See [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md]]
 
 ## Related Pages
 
-- [[entities/opencode.md]] — Selected alternative
-- [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md]] — Decision record
+- [[opencode]] — Selected alternative
+- [[adr-2026-04-12-opencode-over-cursor-for-backend]] — Decision record

@@ -6,7 +6,7 @@ tags: [agent, workflow, no-code, llm-apps]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Dify is an open-source LLM app development platform enabling workflow orchestration, agent creation, and RAG pipelines.
-wikilinks: [[entities/opencode.md], [concepts/skill-registry.md]]
+wikilinks: [[opencode]], [[skill-registry]]
 confidence: medium
 source: research
 ---
@@ -41,5 +41,5 @@ Dify is an open-source platform for building LLM applications with visual workfl
 
 ## Related Pages
 
-- [[entities/opencode.md]] — Code agent alternative
-- [[concepts/skill-registry.md]] — Skill management
+- [[opencode]] — Code agent alternative
+- [[skill-registry]] — Skill management

@@ -108,8 +108,8 @@ updated: YYYY-MM-DD
 - [Source 2 with link]
 
 ## Lihat Juga (See Also)
-- [[related-page-1]]
-- [[related-page-2]]
+- [[karpathy-kb-pattern]]
+- [[SCHEMA]]
 ```
 
 ---
