@@ -97,3 +97,13 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - Date: Mon Apr 13 01:22:59 PM JST 2026
 - Message: fix: batch1 — wikilinks, YAML frontmatter, path wiring, opencode.json
 ---
+## Commit: 7cbc402
+- Date: Mon Apr 13 05:34:24 PM JST 2026
+- Message: wiki: ingest POPW research meetings 4th-14th — concepts, entities, timelines, decisions
+
+- concepts/: film-modulation, pose-derived-detection, kendall-loss, wise-iou, multi-task-learning
+- entities/: ikea-asm, assembly101, ha4m, industreal, ego-exo4d
+- timelines/: popw-meetings-nov-dec-2025, popw-meetings-jan-mar-2026, popw-meetings-mar-apr-2026
+- decisions/: adr-2026-01-film-over-attention, adr-2026-03-pdd-pivot, adr-2026-04-conference-submission-strategy
+- projects/: popw-research (updated)
+---
