@@ -1,363 +1,375 @@
 ---
 title: Tax Indonesia PPh 21
 type: concept
-project: cekwajar
-sources: [020-pph21-ter-pmk168-2023.md, 021-ptkp-2024-pmk101-2016.md, 022-pph17-pasal-17-progresif.md, 023-biaya-jabatan-pph21-5-persen.md, 024-pph21-bonus-thr-penghasilan-tidak-teratur.md, 025-pph21-karyawan-tidak-tetap-harian-lepas.md, 026-npwp-wajib-pajak-sanksi-tidak-punya.md, 027-natura-kenikmatan-pmk66-2023.md, 028-spt-tahunan-pph-orang-pribadi.md, 029-pph21-direksi-komisaris-tidak-tetap.md]
-related:
-  - [[intent-routing]]
-  - [[vector-search]]
+status: active
+tags: [pph21, pph17, ptkp, ter, biaya-jabatan, bonus, thr, natura, npwp, pajak, indonesia, bpjs, labor-law, cekwajar, pmk168]
+created: 2026-04-13
+updated: 2026-04-13
+summary: "Indonesian PPh 21 (income tax on employment) uses two calculation methods: TER (Tarif Efektif Rata-rata) for monthly withholding per PMK 168/2023, and progressive rates per UU HPP No.7/2021 (amending UU 36/2008 Pasal 17) for December true-up and final reconciliation. TER simplifies monthly calculation by using pre-computed effective rates by PTKP category, but December requires full progressive recalculation with credit for all TER paid."
+wikilinks:
+  - [[bpjs-reference]]
+  - [[labor-law-indonesia]]
+  - [[cekwajar-id]]
+  - [[cekwajar-verdict-engine]]
 confidence: high
-last_compiled: 2026-04-13
-status: stub
-tags: [pph21, pph17, pt kp, ter, biaya-jabatan, bonus, thr, natura, npwp, pajak, indonesia, bpjs, labor-law]
-word_count: 3300
+source: research
 ---
 
 # Tax Indonesia PPh 21
 
-## Overview
+## TL;DR
 
-This document covers Indonesian income tax (PPh Pasal 21) calculations for employees, including TER (Tarif Efektif Rata-rata), progressive rates, deductions, and special cases for various employment types.
+Indonesian PPh 21 (income tax on employment) is calculated using two systems: the TER (Tarif Efektif Rata-rata) method per PMK 168/2023 for monthly withholding — where tax = gross × applicable TER rate based on PTKP category (A/B/C) — and the progressive bracket method per UU HPP No.7/2021 for December true-up reconciliation. Key deductions before tax: PTKP (PTKP status × annual, ranging IDR 54M-72M), Biaya Jabatan (5% of gross, max IDR 500K/month), and if applicable, pension contributions. Monthly TER is an approximation; December reconciles using full progressive rates with credit for all TER paid Jan-Nov.
 
 ---
 
-## 1. PPh 21 TER - Tarif Efektif Rata-Rata (PMK 168/2023)
+## 1. PTKP (Penghasilan Tidak Kena Pajak)
 
-### Why This Matters
-PPh 21 TER is cekwajar's **#1 most-used tax calculation**. Every payroll run requires correct TER application to compute monthly tax deductions. Wrong TER = wrong salary = employee complaints + DJP penalties.
+### 1.1 PTKP Values
 
-### Core Knowledge
+PTKP establishes the non-taxable income threshold. Rates per PMK 101/PMK.010/2016 (unchanged since 2016):
 
-Since January 2024, PPh 21 for employees uses **Tarif Efektif Rata-Rata (TER)** based on PP 58/2023 and PMK 168/2023.
+| Status | Kode | Annual PTKP | Monthly Equivalent |
+|--------|------|-------------|-------------------|
+| Tidak Kawin, 0 tanggungan | TK/0 | IDR 54,000,000 | IDR 4,500,000 |
+| Tidak Kawin, 1 tanggungan | TK/1 | IDR 58,500,000 | IDR 4,875,000 |
+| Tidak Kawin, 2 tanggungan | TK/2 | IDR 63,000,000 | IDR 5,250,000 |
+| Tidak Kawin, 3 tanggungan | TK/3 | IDR 67,500,000 | IDR 5,625,000 |
+| Kawin, 0 tanggungan | K/0 | IDR 58,500,000 | IDR 4,875,000 |
+| Kawin, 1 tanggungan | K/1 | IDR 63,000,000 | IDR 5,250,000 |
+| Kawin, 2 tanggungan | K/2 | IDR 67,500,000 | IDR 5,625,000 |
+| Kawin, 3 tanggungan | K/3 | IDR 72,000,000 | IDR 6,000,000 |
 
-**Key Principles:**
-- TER simplifies monthly PPh 21 calculation by using pre-computed effective rates
-- For Jan–Nov: multiply gross monthly income by applicable TER category
-- In December (or final month): recalculate using progressive Pasal 17 rates, credit taxes already withheld
+**Tanggungan definition**: Children (max 3) who live with taxpayer, have no independent income, and are fully supported. Adopted children count.
 
-**Three TER Categories:**
+### 1.2 PTKP Selection Logic
 
-| Kategori | PTKP Status | Annual PTKP |
+```python
+def get_ptkp_values(ptkp_status: str, spouse_working: bool = False) -> dict:
+    """
+    Return annual and monthly PTKP based on status.
+    
+    If spouse is also working and income is merged (K/I), PTKP is doubled
+    for the spouse portion (K/I/0 = TK/0 × 2, etc.).
+    """
+    ptkp_annual_base = {
+        'TK/0': 54_000_000, 'TK/1': 58_500_000, 'TK/2': 63_000_000, 'TK/3': 67_500_000,
+        'K/0': 58_500_000, 'K/1': 63_000_000, 'K/2': 67_500_000, 'K/3': 72_000_000
+    }.get(ptkp_status, 54_000_000)
+    
+    if spouse_working:
+        # K/I status: spouse PTKP is added separately
+        ptkp_annual = ptkp_annual_base + 54_000_000
+    else:
+        ptkp_annual = ptkp_annual_base
+    
+    return {
+        'annual': ptkp_annual,
+        'monthly': ptkp_annual / 12
+    }
+```
+
+---
+
+## 2. TER Method (Monthly Withholding)
+
+### 2.1 TER Concept
+
+PMK 168/2023 introduced TER (Tarif Efektif Rata-rata) to simplify monthly PPh 21 calculation. Instead of applying progressive brackets monthly, employers use pre-computed effective rates.
+
+**Three TER Categories**:
+
+| Category | PTKP Status | Annual PTKP |
 |----------|-------------|-------------|
-| A | TK/0 | Rp 54,000,000 |
-| A | TK/1, K/0 | Rp 58,500,000 |
-| B | TK/2, K/1 | Rp 63,000,000 |
-| B | TK/3, K/2 | Rp 67,500,000 |
-| C | K/3 | Rp 72,000,000 |
+| **A** | TK/0, TK/1, K/0 | ≤ IDR 58,500,000 |
+| **B** | TK/2, K/1 | IDR 58,500,001 – 67,500,000 |
+| **C** | TK/3, K/2, K/3 | > IDR 67,500,000 |
 
-**TER Bulanan Tables (Kategori A - PTKP Rp 54M dan Rp 58,5M):**
+### 2.2 TER Tables (PMK 168/2023 Lampiran A/B/C)
+
+**Category A (PTKP TK/0, TK/1, K/0)**:
 
 | Gross Monthly (IDR) | TER % |
-|----------------------|-------|
+|---------------------|-------|
 | 0 – 4,500,000 | 0% |
 | 4,500,001 – 5,000,000 | 0.25% |
-| 5,000,001 – 6,000,000 | 0.5% |
+| 5,000,001 – 6,000,000 | 0.50% |
 | 6,000,001 – 7,000,000 | 0.75% |
-| 7,000,001 – 8,000,000 | 1.0% |
-| 8,000,001 – 9,000,000 | 1.5% |
-| 9,000,001 – 10,000,000 | 2.0% |
-| 10,000,001 – 12,000,000 | 2.5% |
-| 12,000,001 – 15,000,000 | 3.0% |
-| 15,000,001 – 18,000,000 | 3.5% |
-| 18,000,001 – 22,000,000 | 4.0% |
-| 22,000,001 – 25,000,000 | 4.5% |
-| 25,000,001 – 30,000,000 | 5.0% |
-| 30,000,001 – 35,000,000 | 6.0% |
-| 35,000,001 – 40,000,000 | 7.0% |
-| 40,000,001 – 45,000,000 | 8.0% |
-| 45,000,001 – 50,000,000 | 9.0% |
-| > 50,000,000 | 10.0% |
+| 7,000,001 – 8,000,000 | 1.00% |
+| 8,000,001 – 9,000,000 | 1.50% |
+| 9,000,001 – 10,000,000 | 2.00% |
+| 10,000,001 – 12,000,000 | 2.50% |
+| 12,000,001 – 15,000,000 | 3.00% |
+| 15,000,001 – 18,000,000 | 3.50% |
+| 18,000,001 – 22,000,000 | 4.00% |
+| 22,000,001 – 25,000,000 | 4.50% |
+| 25,000,001 – 30,000,000 | 5.00% |
+| 30,000,001 – 35,000,000 | 6.00% |
+| 35,000,001 – 40,000,000 | 7.00% |
+| 40,000,001 – 45,000,000 | 8.00% |
+| 45,000,001 – 50,000,000 | 9.00% |
+| > 50,000,000 | 10.00% |
 
-**TER Harian:**
-- Gross ≤ Rp 450,000/day → 0%
-- Rp 450,001 – Rp 2,500,000/day → 0.5%
-- > Rp 2,500,000/day → use Pasal 17 progressive on 50% of daily gross
+**Category B (PTKP TK/2, K/1)** — slightly lower rates due to higher PTKP.
 
----
+**Category C (PTKP TK/3, K/2, K/3)** — lowest rates.
 
-## 2. PTKP 2024 - Penghasilan Tidak Kena Pajak (PMK 101/2016)
+### 2.3 TER Calculation Implementation
 
-### Core Knowledge
+```python
+TER_TABLE_A = [
+    (4_500_000, 0.0),
+    (5_000_000, 0.0025),
+    (6_000_000, 0.005),
+    (7_000_000, 0.0075),
+    (8_000_000, 0.01),
+    (9_000_000, 0.015),
+    (10_000_000, 0.02),
+    (12_000_000, 0.025),
+    (15_000_000, 0.03),
+    (18_000_000, 0.035),
+    (22_000_000, 0.04),
+    (25_000_000, 0.045),
+    (30_000_000, 0.05),
+    (35_000_000, 0.06),
+    (40_000_000, 0.07),
+    (45_000_000, 0.08),
+    (50_000_000, 0.09),
+    (float('inf'), 0.10),
+]
 
-PTKP (Penghasilan Tidak Kena Pajak) is regulated under **PMK 101/PMK.010/2016**. The values have NOT changed since 2016.
+def get_ter_category(ptkp_annual: int) -> str:
+    """Determine TER category based on annual PTKP."""
+    if ptkp_annual <= 58_500_000:
+        return 'A'
+    elif ptkp_annual <= 67_500_000:
+        return 'B'
+    else:
+        return 'C'
 
-**PTKP Values Table:**
+def calculate_ter_rate(gross_monthly: int, category: str) -> float:
+    """Look up TER rate from table based on gross and category."""
+    table = TER_TABLES[category]  # A, B, or C
+    for threshold, rate in table:
+        if gross_monthly <= threshold:
+            return rate
+    return 0.10  # Default for >50M
 
-| Status | Kode | Annual PTKP |
-|--------|------|-------------|
-| Tidak Kawin, 0 tanggungan | TK/0 | Rp 54,000,000 |
-| Tidak Kawin, 1 tanggungan | TK/1 | Rp 58,500,000 |
-| Tidak Kawin, 2 tanggungan | TK/2 | Rp 63,000,000 |
-| Tidak Kawin, 3 tanggungan | TK/3 | Rp 67,500,000 |
-| Kawin, 0 tanggungan | K/0 | Rp 58,500,000 |
-| Kawin, 1 tanggungan | K/1 | Rp 63,000,000 |
-| Kawin, 2 tanggungan | K/2 | Rp 67,500,000 |
-| Kawin, 3 tanggungan | K/3 | Rp 72,000,000 |
-| Kawin + Income merged (0 tanggungan) | K/I/0 | Rp 112,500,000 |
-| Kawin + Income merged (1 tanggungan) | K/I/1 | Rp 117,000,000 |
-| Kawin + Income merged (2 tanggungan) | K/I/2 | Rp 121,500,000 |
-| Kawin + Income merged (3 tanggungan) | K/I/3 | Rp 126,000,000 |
-
-**Tanggungan definition (max 3):**
-- Must live with the taxpayer
-- No independent income
-- Supported by the taxpayer
-- Includes legitimate children, adopted children, parents
-
----
-
-## 3. PPh Pasal 17 - Tarif Progresif 5 Bracket
-
-### Core Knowledge
-
-**Pasal 17 UU PPh No. 36/2008** establishes progressive income tax rates for individual taxpayers.
-
-**5 Bracket Progressive Tax Rates:**
-
-| Lapisan | Penghasilan Kena Pajak (PKP) Tahunan | Tarif |
-|---------|--------------------------------------|-------|
-| I | Rp 0 – Rp 60,000,000 | 5% |
-| II | Rp 60,000,001 – Rp 250,000,000 | 15% |
-| III | Rp 250,000,001 – Rp 500,000,000 | 25% |
-| IV | Rp 500,000,001 – Rp 5,000,000,000 | 30% |
-| V | > Rp 5,000,000,000 | 35% |
-
-**Important notes:**
-- Rates are **progressive** (graduated) — only the income above each threshold is taxed at the higher rate
-- Used for: December reconciliation, employees with >Rp 2.5M daily, bukan pegawai, mantan pegawai
-- When combined with no NPWP: add 20% surcharge to each bracket rate
-
----
-
-## 4. Biaya Jabatan PPh 21 - 5% dari Penghasilan Bruto
-
-### Core Knowledge
-
-**Biaya jabatan** is a standard expense deduction for fixed employees (pegawai tetap).
-
-**Rules (PMK 168/2023):**
-- **Rate**: 5% of gross monthly income
-- **Monthly cap**: Rp 500,000
-- **Annual cap**: Rp 6,000,000
-- **Only for**: Fixed employees (pegawai tetap)
-- **Not for**: Freelancers, daily workers, contract employees
-
-**Formula:**
-```
-biaya_jabatan = min(5% × gross_monthly, Rp 500,000)
+def calculate_pph21_ter(gross_monthly: int, ptkp_annual: int) -> int:
+    """
+    Calculate monthly PPh 21 using TER method per PMK 168/2023.
+    """
+    category = get_ter_category(ptkp_annual)
+    ter_rate = calculate_ter_rate(gross_monthly, category)
+    return round(gross_monthly * ter_rate)
 ```
 
-**Relationship with Biaya Pensiun:**
-- Biaya pensiun: 5% of gross, cap Rp 200,000/month (Rp 2,400,000/year)
-- Both can be deducted simultaneously from gross income
-- Total deduction cap: Rp 700,000/month combined
+### 2.4 TER Example
+
+```
+Scenario: K/1 status (PTKP = IDR 63,000,000/year), gross = IDR 10,000,000/month
+
+Category: B (PTKP between 58.5M and 67.5M)
+TER for 10M (Category B): 2.0%
+PPh21 = 10,000,000 × 0.02 = IDR 200,000/month
+```
 
 ---
 
-## 5. Bonus dan THR - Penghasilan Tidak Teratur
+## 3. Progressive Method (December True-Up)
 
-### Core Knowledge
+### 3.1 When Progressive Is Used
 
-Since 2024 (PMK 168/2023), bonus and THR are **no longer taxed separately** — they must be combined with regular salary in the month received.
+1. **December reconciliation**: True-up using full progressive rates with credit for TER paid
+2. **Final employment month**: When employment terminates
+3. **Employees with multiple employers**: Combined income calculation
+4. **Bonus/THR month**: Combined with regular salary
 
-**Key rules:**
-- Bonus/THR + regular salary in same month → combined gross income
-- Apply TER based on combined income for that month
-- December: use Pasal 17 progressive + credit all TER paid Jan–Nov
+### 3.2 Progressive Tax Brackets
 
-**Common bonus types:**
-1. Bonus kinerja (performance bonus)
-2. Bonus tahunan (annual bonus)
-3. Bonus referral
-4. THR (religious holiday allowance)
-5. Tantiem (board bonuses)
+Per UU HPP No.7/2021 (amending UU 36/2008 Pasal 17):
 
----
+| Bracket | Annual PKP (IDR) | Rate |
+|---------|-----------------|------|
+| I | 0 – 60,000,000 | 5% |
+| II | 60,000,001 – 250,000,000 | 15% |
+| III | 250,000,001 – 500,000,000 | 25% |
+| IV | 500,000,001 – 5,000,000,000 | 30% |
+| V | > 5,000,000,000 | 35% |
 
-## 6. PPh 21 Karyawan Tidak Tetap - Harian dan Lepas
+### 3.3 Progressive Calculation Implementation
 
-### Core Knowledge
+```python
+BRACKET_THRESHOLDS = [0, 60_000_000, 250_000_000, 500_000_000, 5_000_000_000]
+BRACKET_RATES = [0.05, 0.15, 0.25, 0.30, 0.35]
 
-**Definitions (PMK 168/2023):**
-- **Pegawai tidak tetap**: Paid only when working, based on days worked, units produced, or task completion
-- Includes: daily workers, weekly workers, piece workers, task-based workers
+def calculate_progressive_tax(pkp_annual: int, has_npwp: bool = True) -> int:
+    """
+    Calculate annual PPh 21 using stepped progressive rates.
+    Only income above each threshold is taxed at the higher rate.
+    """
+    tax = 0
+    remaining_pkp = pkp_annual
+    
+    for i, rate in enumerate(BRACKET_RATES):
+        if remaining_pkp <= 0:
+            break
+        
+        lower = BRACKET_THRESHOLDS[i]
+        upper = BRACKET_THRESHOLDS[i + 1] if i < len(BRACKET_THRESHOLDS) - 1 else float('inf')
+        
+        taxable_in_bracket = min(remaining_pkp, upper - lower)
+        tax += taxable_in_bracket * rate
+        remaining_pkp -= taxable_in_bracket
+    
+    if not has_npwp:
+        tax *= 1.20  # 20% surcharge for missing NPWP
+    
+    return round(tax)
+```
 
-**Two calculation methods:**
+### 3.4 December True-Up Formula
 
-### 1. Daily Payment (TER Harian)
-| Daily Gross Income | TER Rate |
-|-------------------|----------|
-| ≤ Rp 450,000 | 0% |
-| Rp 450,001 – Rp 2,500,000 | 0.5% |
-| > Rp 2,500,000 | Use Pasal 17 on 50% of daily gross |
-
-### 2. Monthly Payment (for non-fixed employees paid monthly)
-- Use **TER Bulanan** same as fixed employees
-
----
-
-## 7. NPWP - Sanksi Tidak Punya NPWP
-
-### Core Knowledge
-
-**NPWP requirement (UU PPh Article 2):**
-- Every taxpayer conducting taxable activities must have NPWP
-- For PPh 21: Employee without NPWP → 20% surcharge on all tax rates
-
-**Surcharge impact:**
-
-| Bracket | Normal Rate | Without NPWP |
-|---------|------------|--------------|
-| 0 – 60M | 5% | 6% |
-| 60M – 250M | 15% | 18% |
-| 250M – 500M | 25% | 30% |
-| 500M – 5B | 30% | 36% |
-| > 5B | 35% | 42% |
-
-**Current policy (2024+):**
-- NIK can be used as tax identifier (bridged with population data)
-- If NIK is valid and registered, the 20% surcharge may not apply
-
----
-
-## 8. Natura dan Kenikmatan (PMK 66/2023)
-
-### Core Knowledge
-
-**PMK 66/2023 Key Points:**
-
-**Taxable Natura (became taxable since July 1, 2023):**
-- Meals/lunch allowances
-- Transportation allowances
-- Housing allowances
-- Any non-cash benefits given regularly
-
-**Exempt Natura (not taxable if ≤ Rp 2,000,000/month):**
-- Work equipment: laptops, tools, safety gear
-- Work facilities: company cars for work use, mobile phones for work
-- Uniforms/work clothing
-- Medical facilities for work-related injuries
-
----
-
-## 9. SPT Tahunan PPh Orang Pribadi
-
-### Core Knowledge
-
-**SPT Tahunan OP (Orang Pribadi) deadlines:**
-- **Original deadline**: March 31 of following year
-- **Extended deadline for 2025**: April 30, 2026 (per DJP extension)
-
-**Who must file:**
-- Employees with annual income > PTKP (Rp 54M for TK/0)
-- All employees who had tax deducted by employer
-- Anyone with other taxable income
-
-**Filing methods:**
-1. **Coretax DJP** (new system) - primary platform
-2. **e-Filing DJP** (legacy) - still available
-3. **Manual** - only for specific cases
-
-**Form types:**
-- **1721-A1**: For employees with one employer (most common)
-- **1721-A2**: For employees with multiple employers
-- **1770**: For self-employed/freelancers
-
----
-
-## 10. PPh 21 Direksi Komisaris Tidak Tetap
-
-### Core Knowledge
-
-**Two types of board member taxation:**
-
-### 1. Board Member Who is Also Fixed Employee
-- Receives regular salary → use **TER Bulanan** like normal employee
-- Taxed together with their employee income
-
-### 2. Board Member Who is NOT an Employee (non-fixed)
-- Receives irregular/occasional payments → use **Pasal 17 progressive directly**
-- DPP (dasar pengenaan pajak) = 50% of gross income per payment
-- No cumulative calculation across payments throughout year
-
-**Key difference:**
-
-| Type | TER Applicable | Calculation Method |
-|------|---------------|-------------------|
-| Fixed employee + board | Yes (Jan–Nov) | TER × monthly gross |
-| Non-fixed board only | No (always Pasal 17) | 50% × DPP × progressive rate |
-
----
-
-## 11. Implementation Notes for cekwajar.id
-
-### Key Functions
-
-```typescript
-// TER calculation
-const TER_TABLE_A = [
-  { minGross: 0, maxGross: 4_500_000, terRate: 0.00 },
-  { minGross: 4_500_001, maxGross: 5_000_000, terRate: 0.0025 },
-  // ... full table
-];
-
-function getTERCategory(ptkpAnnual: number): 'A' | 'B' | 'C' {
-  if (ptkpAnnual <= 58_500_000) return 'A';
-  if (ptkpAnnual <= 67_500_000) return 'B';
-  return 'C';
-}
-
-function lookupTER(grossMonthly: number, category: 'A' | 'B' | 'C'): number {
-  const table = category === 'A' ? TER_TABLE_A : TER_TABLE_B;
-  for (const tier of table) {
-    if (grossMonthly >= tier.minGross && grossMonthly <= tier.maxGross) {
-      return tier.terRate;
+```python
+def calculate_december_trueup(
+    monthly_gross: list[int],  # Jan through Nov gross
+    ptkp_annual: int,
+    has_npwp: bool,
+    has_pension: bool = False,
+    pension_contribution_monthly: int = 0
+) -> dict:
+    """
+    December true-up calculation:
+    1. Sum annual gross
+    2. Deduct biaya jabatan (5%, max 500K/month)
+    3. Deduct pension if applicable
+    4. Apply PTKP
+    5. Calculate progressive tax
+    6. Credit TER paid Jan-Nov
+    7. Result is December withholding
+    """
+    # Annualize
+    annual_gross = sum(monthly_gross)
+    
+    # Biaya jabatan: 5% of each month, capped at 500K/month, 6M/year
+    annual_biaya_jabatan = min(
+        sum(min(g * 0.05, 500_000) for g in monthly_gross),
+        6_000_000
+    )
+    
+    # Pension deduction (if applicable)
+    annual_pension = pension_contribution_monthly * 12
+    annual_pension = min(annual_pension, 2_400_000)  # Cap per year
+    
+    # Calculate PKP
+    pkp_annual = max(
+        annual_gross - annual_biaya_jabatan - annual_pension - ptkp_annual,
+        0
+    )
+    
+    # Progressive tax for full year
+    annual_progressive_tax = calculate_progressive_tax(pkp_annual, has_npwp)
+    
+    # TER paid Jan-Nov
+    category = get_ter_category(ptkp_annual)
+    ter_paid = sum(
+        calculate_ter_rate(g, category) * g
+        for g in monthly_gross
+    )
+    
+    # December adjustment
+    december_tax = annual_progressive_tax - round(ter_paid)
+    
+    return {
+        'annual_gross': annual_gross,
+        'biaya_jabatan': annual_biaya_jabatan,
+        'pension_deduction': annual_pension,
+        'pkp_annual': pkp_annual,
+        'annual_progressive_tax': annual_progressive_tax,
+        'ter_paid_jan_nov': round(ter_paid),
+        'december_withholding': max(december_tax, 0),
+        'is_refund': december_tax < 0
     }
-  }
-  return 0.10;
-}
-
-// Biaya jabatan
-const BIAYA_JABATAN_MONTHLY_CAP = 500_000;
-function calculateBiayaJabatan(grossMonthly: number): number {
-  return Math.min(grossMonthly * 0.05, BIAYA_JABATAN_MONTHLY_CAP);
-}
-
-// Progressive tax calculation
-function calculateProgressiveTax(pkp: number, hasNPWP: boolean = true): number {
-  const NPWP_SURCHARGE = 1.20;
-  let tax = 0;
-  
-  if (pkp <= 60_000_000) {
-    tax = pkp * 0.05;
-  } else if (pkp <= 250_000_000) {
-    tax = 60_000_000 * 0.05 + (pkp - 60_000_000) * 0.15;
-  } else if (pkp <= 500_000_000) {
-    tax = 60_000_000 * 0.05 + 190_000_000 * 0.15 + (pkp - 250_000_000) * 0.25;
-  } else if (pkp <= 5_000_000_000) {
-    tax = 60_000_000 * 0.05 + 190_000_000 * 0.15 + 250_000_000 * 0.25 + (pkp - 500_000_000) * 0.30;
-  } else {
-    tax = 60_000_000 * 0.05 + 190_000_000 * 0.15 + 250_000_000 * 0.25 + 4_500_000_000 * 0.30 + (pkp - 5_000_000_000) * 0.35;
-  }
-  
-  return hasNPWP ? tax : tax * NPWP_SURCHARGE;
-}
 ```
-
-### Update Frequency
-
-- PTKP values: Static (rarely changed)
-- TER tables: Static unless PP 58/2023 amended
-- Biaya jabatan caps: Static
-- Natura rules: When PMK 66/2023 changes
 
 ---
 
-## Sources and References
+## 4. Biaya Jabatan (5% Deduction)
 
-- PMK 168/2023: https://jdih.kemenkeu.go.id/PMK168/2023
-- PMK 101/2016 (PTKP): https://jdih.kemenkeu.go.id/dok/101-pmk-010-2016
-- PMK 66/2023 (Natura): https://jdih.kemenkeu.go.id/api/download/dce5daf1-d4e5-4bd1-bc4e-2c086ae33c04/2023pmkeuangan066.pdf
-- UU PPh No. 36/2008 Pasal 17
-- PP 58/2023 (base law): https://pp58tahun2023.com
-- DJP Coretax: https://coretax.djp.go.id
+### 4.1 Rules
+
+- **Rate**: 5% of gross monthly salary
+- **Monthly cap**: IDR 500,000
+- **Annual cap**: IDR 6,000,000
+- **Purpose**: Standard expense deduction for employment-related costs
+- **Applicable to**: Pegawai tetap (permanent employees) only
+
+### 4.2 Example
+
+```
+Gross = IDR 8,000,000/month
+Biaya Jabatan = min(8,000,000 × 0.05, 500,000) = min(400,000, 500,000) = IDR 400,000
+
+Taxable income = 8,000,000 - 400,000 - PTKP(K/1) 5,250,000 = IDR 2,350,000
+```
+
+---
+
+## 5. Special Cases
+
+### 5.1 THR and Bonus (Penghasilan Tidak Teratur)
+
+Per PMK 168/2023, THR and bonus in the same month as regular salary are combined for TER calculation:
+
+```python
+def calculate_month_with_thr(
+    regular_gross: int,
+    thr_amount: int,
+    ptkp_annual: int
+) -> int:
+    """
+    When THR is paid in same month as regular salary:
+    Combine for TER calculation in that month.
+    """
+    combined_gross = regular_gross + thr_amount
+    return calculate_pph21_ter(combined_gross, ptkp_annual)
+```
+
+### 5.2 Non-Resident Foreign Workers (TKA)
+
+| Scenario | Tax Treatment |
+|----------|---------------|
+| TKA with NPWP | Normal PPh 21 rates |
+| TKA without NPWP (≤183 days) | PPh 26: 20% flat on gross |
+| Treaty country (e.g., Singapore, Japan) | Reduced treaty rate (10-15%) |
+
+### 5.3 Daily Workers (Pegawai Tidak Tetap)
+
+TER Harian applies to daily-paid workers:
+
+| Daily Gross | TER Rate |
+|-------------|----------|
+| ≤ IDR 450,000 | 0% |
+| IDR 450,001 – 2,500,000 | 0.5% |
+| > IDR 2,500,000 | Use Pasal 17 progressive on 50% of daily gross |
+
+---
+
+## 6. Regulatory Reference Table
+
+| Regulation | Subject | Key Point |
+|------------|---------|------------|
+| UU HPP No.7/2021 | Tax amendment | Updated brackets, removed 35% top bracket ceiling |
+| UU 36/2008 Pasal 17 | Progressive rates | 5-bracket progressive system |
+| PMK 168/2023 | TER method | Monthly withholding tables by PTKP category |
+| PMK 101/2016 | PTKP values | Static since 2016 |
+| PMK 66/2023 | Natura | Taxable allowances changed July 2023 |
+
+---
+
+## Related Articles
+
+- [[bpjs-reference]] — Deductions that affect gross salary before PPh21
+- [[labor-law-indonesia]] — Employment classification affecting tax treatment
+- [[cekwajar-id]] — Project using these calculations
+- [[cekwajar-verdict-engine]] — Implementation of TER + progressive in verdict pipeline

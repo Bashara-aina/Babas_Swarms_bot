@@ -1,439 +1,305 @@
 ---
 title: Market Data Indonesia
 type: concept
-project: cekwajar
-sources: [040-tech-salaries-2025.md, 041-mercer-salary-survey.md, 042-jobstreet-salary-report.md, 043-glints-salary-insights.md, 044-linkedin-salary-insights.md, 045-bps-rata-rata-upah.md, 046-banking-finance-fmcg-salaries.md, 047-gender-pay-gap.md, 048-gig-economy-income.md, 049-remote-work-premium.md, 050-salary-growth-projection.md, 051-executive-remuneration.md, 052-salary-negotiation-tips.md, 053-cost-of-living-comparison.md, 054-inflation-real-wage.md]
-related:
-  - [[intent-routing]]
-  - [[vector-search]]
+status: active
+tags: [market-data, salary, benchmark, tech-salaries, banking, fmcg, gig-economy, remote-work, inflation, gender-pay-gap, cost-of-living, indonesia, cekwajar,bps, sakernas, umk]
+created: 2026-04-13
+updated: 2026-04-13
+summary: "Indonesian salary market data for cekwajar.id comes from 4 layers: BPS Sakernas (province × 9 occupation groups, free), Kemnaker UMK (514 cities annual), crowdsourced submissions (k-anonymity n≥10), and licensed surveys (Mercer/Korn Ferry, IDR 60-150M/year). City-level data is the gap: BPS only provides province-level, creating false precision risk if displayed as city-level."
+wikilinks:
+  - [[cekwajar-id]]
+  - [[labor-law-indonesia]]
+  - [[bpjs-reference]]
+  - [[cekwajar-verdict-engine]]
 confidence: high
-last_compiled: 2026-04-13
-status: stub
-tags: [market-data, salary, benchmark, tech-salaries, banking, fmcg, gig-economy, remote-work, inflation, gender-pay-gap, cost-of-living, indonesia]
-word_count: 3200
+source: research
 ---
 
 # Market Data Indonesia
 
-## Overview
+## TL;DR
 
-This document covers Indonesian salary market data, compensation benchmarks, and economic indicators essential for calculating "gaji wajar" (fair salary) recommendations.
-
----
-
-## 1. Tech Salaries
-
-### 1.1 Tech Salaries Indonesia 2024-2025: Junior, Mid, Senior Benchmark
-
-#### Software Engineer Salary Ranges by Level (Jakarta)
-
-| Level | Monthly (IDR) | Annual (IDR) |
-|-------|---------------|--------------|
-| Junior (0-2 yrs) | Rp 5,000,000 – 10,000,000 | Rp 60M – 120M |
-| Mid (3-5 yrs) | Rp 12,000,000 – 25,000,000 | Rp 144M – 300M |
-| Senior (5+ yrs) | Rp 20,000,000 – 35,000,000 | Rp 240M – 420M |
-| Lead/Principal | Rp 35,000,000 – 60,000,000+ | Rp 420M – 720M+ |
-
-#### By Source Data Points
-
-- **levels.fyi (Jakarta Senior)**: IDR 237M – 459M annually
-- **SalaryExpert (Jakarta)**: Rp 563M average, Rp 399M entry, Rp 650M senior
-- **Jobstreet Indonesia**: Rp 7M – 10M monthly range for software engineers
-- **Glassdoor Jakarta Junior**: ~Rp 106M annually (~$8.8M/month)
-- **Glassdoor Jakarta Senior**: ~Rp 310M annually (~$25.8M/month)
-
-#### Regional Variations
-
-- **Jakarta**: Premium 20-40% above national average
-- **Bandung**: 10-20% below Jakarta for tech
-- **Surabaya**: 5-15% below Jakarta
-- **Remote/International**: Can command USD salaries (IDR 150M-350M for mid-level)
-
-#### Tech vs Non-Tech Premium
-
-Tech roles command 40-100% premium over non-tech equivalents in Indonesia.
+Indonesian salary market data is fragmented across government statistics (BPS Sakernas: province × 9 occupation groups), regulatory minimums (Kemnaker UMK: 514 cities), and crowdsourced submissions. For cekwajar.id's Wajar Gaji tool, the critical insight is that **city-level salary data is structurally unavailable on Day 1** — BPS provides province aggregates, and crowdsource data requires n≥10 for display per cell. The data flywheel starts with Wajar Slip audits generating verified salary submissions, not the other way around.
 
 ---
 
-## 2. Salary Surveys and Reports
+## 1. Official Government Data Sources
 
-### 2.1 Mercer Salary Survey Indonesia 2024-2025
+### 1.1 BPS Sakernas (Survei Angkatan Kerja Nasional)
 
-#### Key Mercer Survey Highlights for Indonesia 2024-2025
+**Access**: https://www.bps.go.id/id/statistics-table/2/MTQ1OCMy/rata-rata-upah-gaji-bersih-sebulan-burus-pekerja-menurut-provinsi-dan-jenis-pekerjaan-utama.html
 
-- **Overall Salary Increase Prediction 2026**: 5.8% average (down from 2025)
-- **Asia-Pacific Average**: 5.2% for 2024
+**What it provides**:
+- Average monthly net salary by province
+- By 9 major occupation groups (ISCO-adapted classification)
+- ~900,000 respondents across 34 provinces
+- Published annually (August survey → Q1 publication)
 
-#### Sector Variations (Projected 2026 Raises)
+**Critical limitation**: Province × occupation = ~306 cells. **Cannot deliver "Software Engineer in Surabaya" — only "Professional/Technical worker in Jawa Timur."**
 
-| Sector | Expected Raise |
-|--------|---------------|
-| Chemical | 6.0% |
-| Financial Services | 5.5% |
-| Technology | 5.8% |
-| Consumer Goods | 5.2% |
-| Healthcare | 5.5% |
-| Manufacturing | 4.8% |
+| Province | Occupation Group | Sample Size | Median Salary |
+|----------|-----------------|-------------|---------------|
+| DKI Jakarta | All 9 groups | ~150,000 | Rp 8,824,817 |
+| Jawa Timur | All 9 groups | ~180,000 | Rp 3,800,000 |
+| Jawa Barat | All 9 groups | ~200,000 | Rp 4,200,000 |
 
-#### Mercer-Specific Findings for Indonesia
+**Commercial use**: BPS data is public statistical information. Citation required ("Sumber: Badan Pusat Statistik (BPS), Sakernas [year]"). Gray area for automated commercial products — conservative practice is written clearance from BPS webmaster.
 
-- **Pay Disparity Across Cities**: Significant pay gaps between Jakarta and other cities
-- **Total Remuneration Approach**: Mercer recommends looking at total compensation (base + benefits + bonuses)
+### 1.2 Kemnaker UMK Data (514 Cities)
 
----
+**Access**: https://kemnaker.go.id/informasi/berita (annual UMK announcements) + SIPP Online portal
 
-### 2.2 JobStreet Salary Report Indonesia 2024
+**What it provides**:
+- UMK (Upah Minimum Kabupaten/Kota) for all 514 cities/regencies
+- Updated annually, effective January 1
+- Legal minimum wage floor for each city
 
-#### JobStreet HCB Report 2024 Key Findings
+**Data format**: Published as PDF SK Gubernur from each of 34 provinces. No official API.
 
-- **Hiring Growth**: 97% of companies recruited at least one employee in 2023
-- **Average Salary Increase 2023**: 7%
-- **Market Sentiment**: Positive hiring intent continuing into 2024
+**Operational approach**: Manual parsing of 34 PDF documents (~1h each = 34h/year). Automate with Python PDF parser + Supabase insert.
 
-#### Salary Ranges by Role (JobStreet Indonesia April 2026)
+**cekwajar.id use**: UMK is the **hard legal floor** for Wajar Slip's V06 violation (below-UMK detection). Cannot be crowdsourced — it's regulatory.
 
-| Role | Monthly Range (IDR) |
-|------|-------------------|
-| Software Engineer | Rp 7,000,000 – 10,000,000 |
-| Officer/Staff | Rp 4,150,000 – 6,500,000 |
-| Account Manager | Rp 44M – 615M annually |
-| Business Development | Rp 42M – 50M annually |
-| Marketing | Rp 42M – 60M annually |
+### 1.3 BPS Sakernas vs UMK — Key Distinction
 
----
+| Data | What It Measures | Geographic Granularity | Update | Legal Status |
+|------|-----------------|----------------------|--------|-------------|
+| BPS Sakernas | Market wage distribution | Province × 9 occupations | Annual | Public, citation required |
+| Kemnaker UMK | Legal minimum floor | 514 cities | Annual | Mandatory compliance |
 
-### 2.3 Glints Salary Insights Indonesia 2024
-
-#### Glints Hiring Guide Indonesia Key Data
-
-- **Median Salary Comparison**: Indonesia has the lowest median salary compared to rest of Southeast Asia
-- **Tech Talent Advantage**: Hiring skilled tech talent is more economical in Indonesia vs regional peers
-
-#### Salary Differentials: Tech vs Non-Tech
-
-| Category | Indonesia Median | Singapore Median |
-|----------|-----------------|------------------|
-| Tech Roles | Rp 8-15M/month | $4,000-8,000/month |
-| Non-Tech Roles | Rp 4-8M/month | $2,500-5,000/month |
+**For Wajar Gaji benchmarks**: Use BPS Sakernas with explicit disclaimer "Provinsi, bukan kota."  
+**For Wajar Slip V06**: Use Kemnaker UMK[kota] as hard floor.
 
 ---
 
-### 2.4 LinkedIn Salary Insights Indonesia 2024-2025
+## 2. Crowdsourced Data Strategy
 
-#### Salary Ranges by Professional Level
+### 2.1 Cold-Start Problem
 
-| Level | Annual Range (IDR) | Notes |
-|-------|-------------------|-------|
-| Entry Professional | Rp 48M – 80M | Fresh grad to 2 years |
-| Mid Professional | Rp 80M – 150M | 3-5 years experience |
-| Senior Professional | Rp 150M – 300M | 5-10 years |
-| Executive | Rp 300M – 1B+ | Director and above |
+The fundamental challenge: users submit salary data in exchange for seeing better benchmarks, but better benchmarks require submitted data they don't yet have.
 
-#### Industry Premiums (LinkedIn Data)
+**Phase 0 — Pre-launch seeding (Month -2 to 0, ~200 submissions)**:
+- Recruit 200 beta testers from tech LinkedIn, r/indonesia, Telegram finance communities
+- Offer: 6 months free Pro access for verified salary submission
+- Target: 50 submissions each across 4 categories: Software Engineer (Jakarta), Teacher (3+ provinces), Nurse (3+ provinces), Marketing/Sales (Jakarta + Surabaya)
 
-- **Technology**: 30-50% above professional average
-- **Financial Services**: 20-40% above average
-- **Consulting**: 25-45% above average
-- **Healthcare**: 10-25% above average
+### 2.2 K-Anonymity Threshold
 
----
+Display benchmarks only when cell sample size is sufficient:
 
-## 3. Official Government Data (BPS)
+| Cell Sample Size | Action | UI Message |
+|-----------------|--------|------------|
+| n < 10 | Do not show benchmark | "Belum cukup data lokal (n<10). Menampilkan estimasi provinsi BPS." |
+| 10 ≤ n < 30 | Bayesian blend toward BPS prior | "Estimasi awal — berdasarkan 15 laporan + data provinsi BPS" |
+| 30 ≤ n < 100 | Show P25/P50/P75 with confidence interval | "Berdasarkan 42 laporan terverifikasi di area Anda" |
+| n ≥ 100 | Full percentile distribution | "Berdasarkan 134 laporan terverifikasi" |
 
-### 3.1 BPS Statistics Indonesia 2024: Average Employee Wages & Salaries
+**K-anonymity formula (Bayesian smoothing)**:
+```
+Blended_P50 = (n / (n + k)) × Sample_P50 + (k / (n + k)) × Prior_P50
 
-#### BPS Official Average Salary Data 2024
-
-- **February 2024**: Rp 3,04 million/month (average employee salary)
-- **August 2024**: Rp 3,27 million/month (up from previous year)
-- **August 2025**: Rp 3,33 million/month (latest available)
-
-#### By Sector (August 2024)
-
-| Sector | Monthly Wage |
-|--------|-------------|
-| Informatics | Rp 5,23 million (highest) |
-| Financial Services | Rp 4,5-5 million |
-| Construction | Rp 3,8 million |
-| Trade/Retail | Rp 2,9 million |
-| Other Services | Rp 1,97 million (lowest) |
-
-#### By Province (2024)
-
-| Province | Monthly Wage |
-|----------|-------------|
-| DKI Jakarta | Rp 8,824,817 |
-| Jawa Barat | Rp 4,200,000 |
-| Jawa Timur | Rp 3,800,000 |
-| Jawa Tengah | Rp 3,200,000 |
-| Banten | Rp 4,500,000 |
-| Bali | Rp 4,100,000 |
-
----
-
-## 4. Industry-Specific Salaries
-
-### 4.1 Industry Salary Comparisons 2024: Banking, Finance & FMCG
-
-#### Banking Sector Salaries 2024
-
-| Position | Monthly Salary |
-|----------|---------------|
-| Teller (Fresh Grad) | Rp 4,700,000 |
-| Staff/Sales & Marketing | Rp 4,700,000 |
-| Personal Financial Consultant | Rp 5,750,000 |
-| Account Officer | Rp 7,300,000 |
-| IT Business Analyst (Senior) | Rp 15-25 million |
-| Senior Backend Developer (Retail Banking) | Rp 40 million |
-| Marketing Manager | Rp 30 million |
-
-#### FMCG Sector Salaries 2024
-
-- **FMCG Industry**: Second-highest paying sector after banking
-- **Entry level**: Rp 6-9M
-- **Mid level**: Rp 12-20M
-- **Senior**: Rp 25-45M
-
----
-
-## 5. Special Topics
-
-### 5.1 Gender Pay Gap Indonesia 2023-2024
-
-#### Indonesia Gender Pay Gap Statistics 2024
-
-**By Position Level**:
-
-| Level | Male Avg | Female Avg | Gap |
-|-------|----------|------------|-----|
-| Entry | Rp 5.2M | Rp 4.8M | 8% |
-| Mid | Rp 12M | Rp 10.2M | 15% |
-| Senior | Rp 25M | Rp 19.5M | 22% |
-| Executive | Rp 55M | Rp 38M | 31% |
-
-#### Contributing Factors
-
-1. **Occupational Segregation**: Women concentrated in lower-paying sectors
-2. **Motherhood Penalty**: Career breaks for childbearing
-3. **Seniority Gap**: Women underrepresented in senior positions
-4. **Negotiation Differences**: Research shows women negotiate salaries less aggressively
-5. **Unpaid Care Work**: Disproportionate domestic responsibilities
-
----
-
-### 5.2 Gig Economy Income Indonesia 2024
-
-#### Gig Economy Scale in Indonesia 2024
-
-- **Total Gig Workers**: ~2.3 million (74% on Java island)
-- **Platform Dominance**: Gojek, Grab, inDrive
-
-#### Ojek Online (Motorcycle Taxi) Income
-
-**Monthly Income Estimates**:
-
-| Category | Low | Average | High |
-|----------|-----|---------|------|
-| Full-time Ojol | Rp 2.5M | Rp 4-6M | Rp 8M+ |
-| Part-time Ojol | Rp 1M | Rp 1.5-2.5M | Rp 3M+ |
-
-#### Gig Sectors & Average Earnings
-
-| Sector | Monthly Average |
-|--------|----------------|
-| Transportation (Ojol/Taksol) | Rp 4-6M |
-| Delivery Services | Rp 3-5M |
-| Professional Services | Rp 4.9M |
-| Education | Rp 3-4M |
-| Digital Freelance | Rp 2-8M (highly variable) |
-
----
-
-### 5.3 Remote Work Salary Premium Indonesia 2024
-
-#### Remote Job Salary Ranges (Indonesia-based)
-
-| Role Type | Remote Monthly Range | Notes |
-|-----------|---------------------|-------|
-| Software Engineer (Mid) | Rp 12.5M – 29M ($9,400-22,000) | IDR 150-350M annually |
-| UI/UX Designer | Rp 10M – 25M ($7,500-18,800) | IDR 120-300M annually |
-| Digital Marketing | Rp 8M – 18M | Lower than design |
-| Customer Service | Rp 2-4M | Often part-time |
-
-#### International Remote (USD-denominated)
-
-Indonesian remote workers earning USD can command:
-- **Entry Level**: $2,000-4,000/month
-- **Mid Level**: $4,000-8,000/month
-- **Senior Level**: $8,000-15,000+/month
-
----
-
-## 6. Salary Growth and Projections
-
-### 6.1 Indonesia Salary Growth Projection 2025-2026
-
-#### Historical Context
-
-| Year | Average Increase | Inflation |
-|------|-----------------|-----------|
-| 2023 | 7.0% | 3.5% |
-| 2024 | 6.2% | 1.7% |
-| 2025 | 6.0% | 2.5% |
-| 2026 (Proj) | 5.8% | 2.8% |
-
-#### 2026 Sector Breakdown
-
-| Sector | Projected Raise | Sentiment |
-|--------|-----------------|-----------|
-| Chemical | 6.0% | Most optimistic |
-| Financial Services | 5.5% | Stable |
-| Technology | 5.8% | Competitive |
-| Consumer Goods | 5.2% | Moderate |
-| Healthcare | 5.5% | Growing |
-| Manufacturing | 4.8% | Conservative |
-
----
-
-### 6.2 Executive Remuneration Indonesia 2024
-
-#### BUMN (State-Owned Enterprise) Director Salaries 2024-2025
-
-| BUMN | Monthly | Annual (incl. bonus) |
-|------|---------|---------------------|
-| Pertamina | Rp 3.2M – 4.6B | Rp 38-55B |
-| PLN | ~Rp 277M base | + Rp 19.1B tantiem |
-| PGN | Rp 2.5B | Rp 30B total |
-| BRI | Highest banking | Rp 40-108B total remuneration |
-
-#### Private Company Executive Compensation
-
-**Multinational Corporations (MNC)**:
-- CEO: Rp 150-500M monthly base
-- Director: Rp 75-250M monthly
-- VP: Rp 40-100M monthly
-
-**Large Private Indonesian Groups**:
-- CEO: Rp 80-300M monthly
-- Director: Rp 40-150M monthly
-
----
-
-## 7. Supporting Data
-
-### 7.1 Cost of Living Comparison 2024
-
-#### Major City Cost Comparison (Monthly Expenses)
-
-| City | Kost | Food | Transport | Total | Index |
-|------|------|------|-----------|-------|-------|
-| Jakarta | Rp 2-5M | Rp 1.5-3M | Rp 0.5-1.5M | Rp 4-9.5M | 100 |
-| Surabaya | Rp 1-2M | Rp 1-1.8M | Rp 0.3-0.8M | Rp 2.3-4.6M | 70 |
-| Bandung | Rp 0.9-1.5M | Rp 1-1.4M | Rp 0.3-0.6M | Rp 2.2-3.5M | 65 |
-| Yogyakarta | Rp 0.6-1.2M | Rp 0.8-1.2M | Rp 0.2-0.4M | Rp 1.6-2.8M | 50 |
-| Bali (Denpasar) | Rp 1-2M | Rp 1.2-2M | Rp 0.3-0.7M | Rp 2.5-4.7M | 75 |
-| Medan | Rp 0.7-1.5M | Rp 0.8-1.3M | Rp 0.2-0.5M | Rp 1.7-3.3M | 55 |
-
-#### Living Cost Index (Jakarta = 100)
-
-| City | Index | vs Jakarta |
-|------|-------|------------|
-| Jakarta | 100 | - |
-| Bali (Denpasar) | 75 | 25% cheaper |
-| Surabaya | 70 | 30% cheaper |
-| Medan | 65 | 35% cheaper |
-| Bandung | 63 | 37% cheaper |
-| Yogyakarta | 50 | 50% cheaper |
-
----
-
-### 7.2 Indonesia Inflation 2024-2025
-
-#### Indonesia Inflation Data 2024-2025
-
-| Month | 2024 | 2025 |
-|-------|------|------|
-| January | 2.9% | 2.3% |
-| February | 3.0% | 2.2% |
-| March | 3.1% | 2.1% |
-| April | 3.0% | 2.0% |
-| May | 2.8% | 2.1% |
-| June | 2.5% | 2.3% |
-| July | 2.1% | 2.4% |
-| August | 2.1% | 2.6% |
-| September | 1.9% | 2.65% |
-| October | 1.7% | 2.86% |
-| November | 1.6% | 2.72% |
-| December | 1.7% | 2.92% |
-
-#### Real Wage Growth Analysis
-
-| Year | Nominal Increase | Inflation | Real Wage Growth |
-|------|-----------------|-----------|-----------------|
-| 2023 | 7.0% | 3.5% | 3.4% |
-| 2024 | 6.2% | 1.7% | 4.4% |
-| 2025 | 6.0% | 2.5% | 3.4% |
-| 2026 (Proj) | 5.8% | 2.8% | 2.9% |
-
----
-
-## 8. Implementation Notes for cekwajar.id
-
-### Key Functions
-
-```typescript
-interface SalaryBenchmark {
-  level: 'entry' | 'mid' | 'senior' | 'executive';
-  city: string;
-  industry: string;
-  monthlyGross: number;
-  annualGross: number;
-}
-
-function calculateGajiLayakIndex(actualSalary: number, expectedSalary: number): number {
-  return Math.round((actualSalary / expectedSalary) * 100);
-}
-
-function calculateAdjustedSalary(jakartaSalary: number, targetCity: string): number {
-  const cityIndex = {
-    jakarta: 100,
-    surabaya: 70,
-    bandung: 63,
-    yogya: 50,
-    bali: 75,
-    medan: 65
-  };
-  return jakartaSalary * ((cityIndex[targetCity] || 65) / 100);
-}
-
-function calculateRealWageGrowth(nominalIncrease: number, inflation: number): number {
-  return ((1 + nominalIncrease) / (1 + inflation) - 1) * 100;
-}
+where:
+  k = smoothing weight = 15 (tuned to collapse toward prior at n < 15)
+  Prior_P50 = BPS province × occupation group average wage
 ```
 
-### Data Sources Integration
+### 2.3 Outlier Detection
 
-- **BPS Official Data**: Bi-annual Sakernas survey (February, August)
-- **Mercer Survey**: Annual Total Remuneration Survey (Q4 release)
-- **JobStreet/Glints/LinkedIn**: Continuous job posting analysis
-- **Bank Indonesia**: Monthly inflation data
+Before including submissions in benchmarks, apply IQR filter:
 
-### Update Frequency
-
-- BPS wages: Bi-annual
-- Sector benchmarks: Annual
-- Tech salaries: Quarterly
-- Inflation: Monthly
-- Cost of living: Annual
+```python
+def detect_outliers(submissions: list[int]) -> tuple[list, list]:
+    """
+    Flag outliers using 1.5× IQR rule.
+    Extreme outliers (>3× IQR) excluded.
+    Standard outliers (1.5-3× IQR) included with reduced weight.
+    """
+    q1, median, q3 = np.percentile(submissions, [25, 50, 75])
+    iqr = q3 - q1
+    
+    lower_fence = q1 - 1.5 * iqr
+    upper_fence = q3 + 1.5 * iqr
+    
+    extreme_lower = q1 - 3 * iqr
+    extreme_upper = q3 + 3 * iqr
+    
+    included = []
+    reduced_weight = []
+    excluded = []
+    
+    for s in submissions:
+        if s < extreme_lower or s > extreme_upper:
+            excluded.append(s)
+        elif s < lower_fence or s > upper_fence:
+            reduced_weight.append(s)  # Weight 0.5 in calculation
+        else:
+            included.append(s)
+    
+    return included, reduced_weight, excluded
+```
 
 ---
 
-## Sources and References
+## 3. Licensed Survey Data (Mercer/Korn Ferry)
 
-- BPS Official Statistics: https://www.bps.go.id
-- Mercer Indonesia: https://www.imercer.com
-- JobStreet Indonesia: https://id.jobstreet.com
-- Glints: https://employers.glints.id
-- LinkedIn Talent Insights
-- Bank Indonesia Inflation Data: https://www.bi.go.id
-- Levels.fyi, Glassdoor for tech salaries
+### 3.1 Why License Data?
+
+BPS Sakernas provides province × 9 occupation groups — too coarse for useful benchmarking. Crowdsource takes 12+ months to accumulate meaningful data.
+
+**Recommendation**: License one survey before Wajar Gaji launches. This is the first IDR 60-80M check to write.
+
+| Provider | Coverage | Cost Estimate | Lead Time |
+|----------|----------|---------------|-----------|
+| Mercer Indonesia | 500+ companies, 30,000+ positions, 6 major cities | IDR 80-150M/year | 4-8 weeks |
+| Korn Ferry Indonesia | 400+ companies, 25,000+ positions | IDR 60-120M/year | 3-6 weeks |
+| WTW | 300+ companies | IDR 70-130M/year | 4-8 weeks |
+| EY Hay Group | 250+ companies | IDR 70-130M/year | 6-10 weeks |
+
+### 3.2 Negotiation Leverage
+
+Offer co-marketing deal: cekwajar.id credits Mercer/KF as "data partner" on all benchmark pages. Mercer/KF gets marketing exposure to 140M Indonesian formal workers. May reduce licensing cost to IDR 30-60M.
+
+---
+
+## 4. City-Level Data Gap Problem
+
+### 4.1 Why City-Level Data Is Structurally Missing
+
+BPS Sakernas aggregates to province level. Kemnaker UMK is regulatory minimum, not market rate. Crowdsource requires n≥10 per cell to display.
+
+**Cell definition for crowdsource**: Province × Job Category (L2) × Seniority Band (Junior/Mid/Senior)
+
+For "Software Engineer in Surabaya":
+- Province: Jawa Timur ✓
+- Job Category: Technology/IT ✓
+- Seniority: Mid ✓
+- Cell is valid BUT may only have 3-5 submissions for months
+
+### 4.2 Fallback Hierarchy
+
+| Query | Minimum Cell | Fallback |
+|-------|--------------|----------|
+| City × Job Title × Seniority | 30 submissions | Province × Occupation Group |
+| Province × Job Title × Seniority | 20 submissions | Province × Occupation Group (BPS) |
+| Province × Occupation Group | BPS data (no minimum) | National average |
+| National × Occupation Group | BPS data | — |
+
+**Rule**: Do not create city-level cells until 30+ submissions exist. Over-segmentation with low n creates false precision.
+
+---
+
+## 5. Special Data Sources for cekwajar.id Tools
+
+### 5.1 Wajar Kabur (Abroad Comparison)
+
+| Source | Coverage | Cost | Update | Legal |
+|--------|----------|------|--------|-------|
+| World Bank Open Data (PPP) | 190+ countries | Free (CC-BY 4.0) | Annual | None |
+| Numbeo | 100+ cities, cost of living | USD 149/month | Monthly | None |
+| frankfurter.app | Exchange rates | Free tier | Daily | None |
+
+### 5.2 Wajar Hidup (Cost of Living)
+
+| Source | Coverage | Cost | Update |
+|--------|----------|------|--------|
+| BPS CPI | 514 cities, inflation | Free | Monthly |
+| Numbeo | 100+ cities, detailed basket | USD 149/month | Monthly |
+| Susenas (BPS) | Household consumption | Free | Annual |
+
+### 5.3 Wajar Tanah (Property) — DO NOT USE
+
+| Source | Why Excluded |
+|--------|--------------|
+| 99.co | ToS violation, UU ITE Pasal 30 risk |
+| Rumah123 | Same ToS risk |
+| OLX Properti | Same risk |
+| BHUMI ATR/BPN | No bulk API, interactive only |
+
+**Path forward**: Formal data partnership with ATR/BPN or major property portal after 5,000+ MAU.
+
+---
+
+## 6. Data Source Summary Table
+
+From master_analysis_cekwajar.md Section 2.5:
+
+| Source | Day 1 Available | Refresh Cadence | Legal Risk | Monthly Cost |
+|--------|:---:|---------------|------------|-------------|
+| BPS Sakernas (province × occupation) | ✅ | Annual | LOW-MED (cite clearly) | IDR 0 |
+| Kemnaker UMK/UMR (514 cities) | ✅ | Annual (Dec-Jan) | NONE | IDR 0 |
+| BPJS rate tables | ✅ | Regulatory changes | NONE | IDR 0 |
+| PMK 168/2023 TER tables | ✅ | PMK amendments | NONE | IDR 0 |
+| Mercer/Korn Ferry survey | ❌ | Annual | LOW (licensed) | IDR 6-12.5M |
+| Crowdsourced salary | ❌ | Real-time | LOW (consented) | IDR 0 |
+| Numbeo (cost of living) | ❌ (v3) | Monthly | LOW | USD ~149 |
+| World Bank PPP | ❌ (v4) | Annual | NONE | IDR 0 |
+| Google Cloud Vision OCR | ✅ | Real-time API | LOW | ~USD 1.5/1000 docs |
+
+---
+
+## 7. Confidence Scoring for Benchmarks
+
+### 7.1 Confidence Factors
+
+| Factor | Weight | Description |
+|--------|--------|-------------|
+| Sample size (n) | 40% | Direct n in cell |
+| Data recency | 20% | BPS: 0-12mo=1.0, 12-24mo=0.8; Crowdsource: <1mo=1.0, >6mo=0.7 |
+| Variance | 20% | Low variance = higher confidence |
+| Source reliability | 20% | Licensed > BPS > Crowdsource |
+
+### 7.2 Confidence Score Formula
+
+```python
+def calculate_confidence(
+    n: int,
+    source_type: str,  # 'bps', 'crowdsource', 'licensed'
+    age_months: int,
+    variance: float,
+    cell_variance: float
+) -> int:
+    # Sample factor: grows from 0 to 1 at n=50
+    sample_factor = min(n / 50, 1.0) if n > 0 else 0.3
+    
+    # Recency factor
+    if source_type == 'bps':
+        recency = 1.0 if age_months <= 12 else (0.8 if age_months <= 24 else 0.6)
+    else:  # crowdsource
+        recency = 1.0 if age_months <= 1 else (0.85 if age_months <= 3 else 0.7)
+    
+    # Variance factor: penalize high CV
+    cv = cell_variance / (n ** 0.5) if n > 0 else 1.0
+    variance_factor = 1 / (1 + cv)
+    
+    # Source reliability
+    source_weights = {'licensed': 1.0, 'bps': 0.8, 'crowdsource': 0.6}
+    source_factor = source_weights.get(source_type, 0.5)
+    
+    # Combined
+    confidence = 100 * (
+        sample_factor * 0.4 +
+        recency * 0.2 +
+        variance_factor * 0.2 +
+        source_factor * 0.2
+    )
+    
+    return min(max(int(confidence), 0), 100)
+```
+
+### 7.3 Confidence UI Levels
+
+| Score | Badge | Interpretation |
+|-------|-------|----------------|
+| 80-100 | 🟢 Terverifikasi | High confidence — use for career decisions |
+| 60-79 | 🟡 Cukup Data | Medium — use as reference |
+| 40-59 | 🟠 Data Terbatas | Low — rough estimate |
+| <40 | ⚪ Tidak Cukup | Very low — do not show percentile bands |
+
+---
+
+## Related Articles
+
+- [[cekwajar-id]] — Project using this data
+- [[labor-law-indonesia]] — Regulatory minimums (UMK) and employment classification
+- [[bpjs-reference]] — Mandatory deductions affecting take-home pay
+- [[cekwajar-verdict-engine]] — How data feeds into verdict calculation
