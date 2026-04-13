@@ -12,7 +12,4 @@ On 2026-04-10, Legion had a conversation with user_id=5755393949. The conversati
 On 2026-04-11, Legion had another conversation with user_id=5755393949. The user expressed their feelings, saying "Galau nih" [source: conversation 2026-04-11]. Legion responded with "Waduh, kenapa nih? Lagi galau soal apa? 😔" and continued to offer support, saying "Sini cerita, aku siap dengerin. Mau curhat santai aja, mau cari perspektif baru, atau mau kita ngobrolin topik random biar pikiran agak *refresh*? Gak perlu dipikirin harus gimana, yang penting udah keluarin aja. 😊" [source: conversation 2026-04-11].
 
 ## Future Updates
-This page will be updated with new conversations and relevant information [uncertain]. For more information on Legion's interactions, see [[wiki/legion/interactions.md]].
-
-## Related Pages
-For information on how Legion processes conversations, see [[wiki/legion/conversation_processing.md]]. For a list of frequently asked questions, see [[wiki/legion/faq.md]].
+This page will be updated with new conversations and relevant information [uncertain].

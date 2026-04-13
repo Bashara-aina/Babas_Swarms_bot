@@ -5,7 +5,7 @@
 ### Core (bundled with Obsidian)
 - **Backlinks** — Shows incoming links to each page
 - **Outgoing Links** — Shows outgoing links from page
-- **Internal Embed** — `![[page]]` embeds
+- **Internal Embed** — uses embed syntax
 
 ### Community Plugins (must install)
 
@@ -96,5 +96,5 @@ Use `graph-config.json` in vault root for node coloring.
 
 ## Related Pages
 
-- [[wiki/_meta/graph-config.json]] — Graph colors
+- [[_meta/graph-config.json]] — Graph colors
 - [[wiki/INDEX.md]] — Main index with queries
