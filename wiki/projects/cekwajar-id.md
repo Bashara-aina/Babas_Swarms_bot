@@ -374,13 +374,163 @@ Community strategy:
 
 ---
 
-## 9. Related Articles
+---
+
+## 10. Financial Model
+
+### Unit Economics
+
+| Metric | Value |
+|--------|-------|
+| ARPU | IDR 45.5K/month |
+| LTV:CAC ratio | **7:1** (target) |
+| CAC payback | 1.4 months |
+| Monthly churn | 8% |
+| Breakeven | Month 17–19 (base case) |
+
+### 3-Year Scenarios
+
+| Scenario | Month 36 Revenue | Month 36 MAU | Survival? |
+|----------|-----------------|--------------|-----------|
+| Pessimistic | IDR 125M/mo | 3,000 | ✅ Month 19 |
+| **Base** | IDR 360M/mo | 10,000 | ✅ Month 17 |
+| Optimistic | IDR 1.2B/mo | 30,000 | ✅ Month 14 |
+
+### Cost Structure (Monthly, Base Case)
+
+| Category | Month 6 | Month 18 | Month 36 |
+|----------|---------|----------|----------|
+| Vercel (Pro) | IDR 1.2M | IDR 2.5M | IDR 5M |
+| Supabase (Pro) | IDR 1.5M | IDR 3M | IDR 6M |
+| Midtrans fees | 2.5% | 2.5% | 2.5% |
+| LLM APIs | IDR 1M | IDR 2M | IDR 5M |
+| Swarms agents | IDR 0.5M | IDR 2M | IDR 5M |
+| Total COGS | ~IDR 5M | ~IDR 12M | ~IDR 25M |
+
+### 17 Swarms Agents
+
+| Agent | Role |
+|-------|------|
+| `DataHarvestAgent` | Scrapes UMK data from Kemnaker |
+| `UMRUpdaterAgent` | Updates UMK database per province |
+| `PPh21UpdaterAgent` | Tracks TER table changes (PMK 168/2023) |
+| `NJOPHarvesterAgent` | Collects NJOP per municipality |
+| `ListingScraperAgent` | Scrapes 99.co/Rumah123 listings |
+| `CrowdsourceValidatorAgent` | Validates crowdsourced salary data |
+| `ContentFactoryAgent` | Generates SEO blog content |
+| `SEOPageGeneratorAgent` | Generates tool pages per keyword |
+| `SupportBotAgent` | Handles Tier 1 support queries |
+| `BenchmarkAggregatorAgent` | Aggregates salary benchmarks |
+| `ChurnPredictorAgent` | Identifies at-risk subscribers |
+| `AbuseDetectorAgent` | Detects OCR/payslip fraud |
+| `AlertingAgent` | Monitors calculation anomalies |
+| `DataQualityAgent` | Validates crowdsource submissions |
+| `CompetitorMonitorAgent` | Tracks Glints/WaChrome pricing |
+| `RevenueReportAgent` | Generates daily revenue dashboards |
+| `UserOnboardingAgent` | Guides new free → paid conversion |
+
+---
+
+## 11. Technical Architecture
+
+### Rendering Strategy (Next.js 15)
+
+| Page | Strategy | Rationale |
+|------|---------|-----------|
+| Landing page | SSG | SEO, near-instant |
+| Tool pages (wajar-slip) | ISR (1hr) | Fresh P50 data without rebuild |
+| User dashboard | SSR | Personalized, auth required |
+| Blog posts | SSG + ISR | SEO + fresh content |
+| API routes | Edge | Low latency verdict responses |
+| Webhook handlers | Edge | Payment processing |
+
+### Supabase Edge Functions
+
+| Function | Purpose |
+|----------|---------|
+| `calculate_salary_verdict` | Wajar Gaji benchmark aggregation |
+| `calculate_slip_compliance` | Wajar Slip violation detection |
+| `calculate_land_verdict` | Wajar Tanah price fairness |
+
+### Midtrans Payment Flows
+
+| Flow | Trigger | Midtrans Method |
+|------|---------|----------------|
+| Monthly subscription | Basic/Pro monthly | `subscription` |
+| Annual subscription | 2 months free deal | `subscription` with `reccurance_token` |
+| One-time report | Wajar Tanah single query | `snap.createTransaction` |
+| B2B invoice | SME/Enterprise billing | `snap.createTransaction` with cust_email |
+
+### 3-Layer Rate Limiting
+
+1. **Vercel Edge**: 100 req/min per IP (free tier)
+2. **Redis** (Upstash): 1000 req/min per user for verdict APIs
+3. **Supabase RLS**: Anonymous users limited to 5 audits/month
+
+### UU PDP Compliance
+
+- Consent banner on first visit (not on return visits)
+- Payslip images **never stored** — OCR → text → raw image deleted immediately
+- Benchmark data anonymized via k-anonymity (n ≥ 10 per cell)
+- Data retention: 90 days for audit history (auto-delete via pg_cron)
+- Export/delete: User can request full data export or account deletion
+
+---
+
+## 12. Fundraising Framework
+
+### Decision Tree
+
+```
+Start (Bootstrap)
+  │
+  ├─► Month 6 revenue > IDR 50M/mo?
+  │     YES → Consider Angel (IDR 500M-1B for 10-15%)
+  │     NO  → Continue bootstrap
+  │
+  └─► Month 12 revenue > IDR 100M/mo?
+        YES → Consider Seed (IDR 3-5B for 15-20%)
+        NO  → Reassess or wind down
+```
+
+### Target Acquirers
+
+| Company | Rationale |
+|---------|----------|
+| BCA Digital | Digital banking + payroll integration |
+| GOTO (Gojek) | Employee benefits platform play |
+| PropertyGuru (Indonesia) | Wajar Tanah data synergy |
+| Glints | Recruitment + salary data |
+| KoinWorks | MSME payroll + lending |
+
+**Target valuation at exit**: IDR 1.2B–2.4B (2–4× ARR at 10K MAU, IDR 360M ARR)
+
+---
+
+## 13. Out of Scope (Permanent)
+
+- SPT 1770/1721-A1 form generation (tax filing)
+- Property listings (benchmarks only)
+- B2B payroll processing ( Month 9+ only)
+- Investment or financial product referral
+- Real-time stock or crypto data
+- Legal document generation
+- English/Mandarin support before Month 9
+- Native iOS/Android app before Month 12
+
+---
+
+## 14. Related Articles
 
 - [[cekwajar-verdict-engine]] — Technical implementation of the compliance calculation
 - [[cekwajar-tech-stack]] — Architecture details
+- [[cekwajar-data-sources]] — Data sources per tool (BPS, Kemnaker, World Bank)
+- [[cekwajar-ocr-pipeline]] — OCR pipeline with confidence thresholds
 - [[freemium-gate]] — Freemium access control pattern
 - [[supabase]] — Database provider
 - [[concepts/bpjs-reference]] — Regulatory formulas for 6-component BPJS
 - [[concepts/tax-indonesia]] — PPh21 TER and progressive calculation
 - [[concepts/labor-law-indonesia]] — Employment law for violation detection
+- [[concepts/bayesian-blending]] — Wajar Gaji P50 formula with k=15 smoothing
+- [[concepts/market-data-indonesia]] — Data collection strategy
 - [[decisions/adr-2026-04-13-cekwajar-mvp-scope-lock]] — MVP scope decision
