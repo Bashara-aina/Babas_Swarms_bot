@@ -1,6 +1,6 @@
 {
-  "last_compiled": "2026-04-13T19:09:24.058507+09:00",
-  "articles": 2113,
+  "last_compiled": "2026-04-13T20:36:28.429113+09:00",
+  "articles": 2138,
   "stubs": 19,
   "enriched_today": 16,
   "created_today": 20,
@@ -20,5 +20,6 @@
   "qc_score_corrected": "8/8",
   "wisdom_domains": 20,
   "harvest_session": "2026-04-13",
-  "track_b_complete": true
+  "track_b_complete": true,
+  "conversation_stubs": 24
 }
