@@ -25,9 +25,10 @@ logger = logging.getLogger(__name__)
 
 # ── Directory constants ────────────────────────────────────────────────────────
 
-WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
+WIKI_DIR = Path("/home/newadmin/swarm-bot/wiki")
 QUARANTINE_DIR = WIKI_DIR / "_quarantine"
 _REJECTIONS_LOG = Path.home() / ".legion" / "wiki_rejections.json"
+REJECTION_LOG = _REJECTIONS_LOG  # public alias
 
 # ── EvaluationResult ───────────────────────────────────────────────────────────
 

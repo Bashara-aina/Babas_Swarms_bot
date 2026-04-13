@@ -40,7 +40,16 @@ project: general
     "08-psychology-motivation",
     "09-eastern-philosophy-strategy",
     "10-stoicism-resilience",
-    "20-ai-agent-design"
+    "11-product-ux-design",
+    "12-economics-markets",
+    "13-neuroscience-learning",
+    "14-ethics-ai-safety",
+    "15-history-patterns",
+    "16-computation-information",
+    "17-creativity-innovation",
+    "18-communication-writing",
+    "19-leadership-management",
+    "20-religion-meaning-purpose"
   ],
   "highest_value_find": {
     "source": "Russell — Human-Compatible AI",
