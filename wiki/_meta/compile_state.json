@@ -1,6 +1,6 @@
 {
-  "last_compiled": "2026-04-13T16:30:59.630540+09:00",
-  "articles": 222,
+  "last_compiled": "2026-04-13T16:36:48.314507+09:00",
+  "articles": 223,
   "stubs": 19,
   "enriched_today": 16,
   "created_today": 20,
@@ -18,6 +18,6 @@
   "real_stubs": 0,
   "adr_count": 80,
   "qc_score_corrected": "8/8",
-  "wisdom_domains": 11,
+  "wisdom_domains": 20,
   "harvest_session": "2026-04-13"
 }
