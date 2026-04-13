@@ -46,3 +46,26 @@ BOUNDARIES:
 - Do not speculate about information you haven't located
 - Do not provide recommendations or next steps
 - Stop when you have answered the research query
+
+---
+
+## Anti-Hallucination Rules for Research Output
+
+1. **Research output MUST be written to a file** — never return findings as raw text in a response
+2. **File must be >200 words** — verify with: `wc -w [file]`
+3. **File path must be included in output** — so caller knows where findings reside
+4. **Include sources section** — list specific file paths and line numbers referenced
+
+PROOF FORMAT:
+```
+Research findings written to: /path/to/research.md
+Word count: $(wc -w < /path/to/research.md)
+Sources: [list of referenced files]
+```
+
+STATUS REPORTING:
+```
+RESEARCH STATUS: ✅ Written to /path/to/file.md | ❌ FAILED
+```
+
+(End of file)

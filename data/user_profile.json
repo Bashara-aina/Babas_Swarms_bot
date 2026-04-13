@@ -60,7 +60,9 @@
   "interaction_patterns": [
     "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nDebug this issue: AttributeError NoneType has no attribute keys",
     "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nDesign a resilient async Telegram bot architecture with fallbac",
-    "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nResearch latest transformer efficiency techniques and include s"
+    "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nResearch latest transformer efficiency techniques and include s",
+    "Preference signal: Repair this answer using verifier feedback while keeping claims grounded.\n\nTask:\nDebug this issue: AttributeError NoneType has no attribute keys after json parsing. Give root cause",
+    "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nCompute gradient of y = x^2 + 3x and explain each derivation st"
   ],
   "schedule_notes": [],
   "contacts_highlight": [],

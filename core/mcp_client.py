@@ -89,20 +89,20 @@ class MCPClient:
     async def call_tool(self, server_name: str, tool_name: str, arguments: dict[str, Any]) -> str:
         srv = self._find_server(server_name)
         if not srv:
-            return f"MCP server '{server_name}' not in config."
+            return f"Error: MCP server '{server_name}' not in config."
         if not srv.get("enabled"):
-            return f"MCP server '{server_name}' is disabled in config."
+            return f"Error: MCP server '{server_name}' is disabled in config."
 
         try:
             from mcp import ClientSession, StdioServerParameters  # type: ignore
             from mcp.client.stdio import stdio_client  # type: ignore
         except Exception as exc:
             logger.warning("mcp SDK not installed: %s", exc)
-            return "MCP Python SDK not installed (pip install mcp)."
+            return "Error: MCP Python SDK not installed (pip install mcp)."
 
         cmd = srv.get("command")
         if not cmd:
-            return f"MCP server '{server_name}' has no command configured."
+            return f"Error: MCP server '{server_name}' has no command configured."
         args = list(srv.get("args") or [])
         env = {**os.environ, **(srv.get("env") or {})}
         params = StdioServerParameters(command=str(cmd), args=args, env=env)
@@ -115,7 +115,7 @@ class MCPClient:
                     return _tool_result_to_text(result)[:12000] or "(empty tool result)"
         except Exception as exc:
             logger.error("MCP call_tool %s/%s failed: %s", server_name, tool_name, exc)
-            return f"MCP error ({server_name}/{tool_name}): {exc}"
+            return f"Error: MCP error ({server_name}/{tool_name}): {exc}"
 
     async def list_tools(self, server_name: str) -> list[dict[str, str]]:
         srv = self._find_server(server_name)

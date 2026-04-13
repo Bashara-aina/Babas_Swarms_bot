@@ -40,20 +40,20 @@ async def _weather_handler(text: str) -> str:
                     return f"❌ Geocoding failed: {resp.status}"
                 geo_data = await resp.json()
 
-        if not geo_data:
-            return f"❌ Location not found: {location}"
+            if not geo_data:
+                return f"❌ Location not found: {location}"
 
-        lat = geo_data[0]["lat"]
-        lon = geo_data[0]["lon"]
-        city_name = geo_data[0].get("name", location)
+            lat = geo_data[0]["lat"]
+            lon = geo_data[0]["lon"]
+            city_name = geo_data[0].get("name", location)
 
-        # Get weather
-        weather_url = "https://api.openweathermap.org/data/2.5/weather"
-        params = {"lat": lat, "lon": lon, "appid": api_key, "units": "metric"}
-        async with session.get(weather_url, params=params, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-            if resp.status != 200:
-                return f"❌ Weather API error: {resp.status}"
-            weather_data = await resp.json()
+            # Get weather
+            weather_url = "https://api.openweathermap.org/data/2.5/weather"
+            params = {"lat": lat, "lon": lon, "appid": api_key, "units": "metric"}
+            async with session.get(weather_url, params=params, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    return f"❌ Weather API error: {resp.status}"
+                weather_data = await resp.json()
 
         temp = weather_data.get("main", {}).get("temp", "?")
         feels_like = weather_data.get("main", {}).get("feels_like", "?")

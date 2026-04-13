@@ -118,7 +118,7 @@ If APPROVED ✅:
 3. Remind to run: `git add -A && git commit -m "[type]: [task] — swarm pipeline"`
 
 ## Absolute Rules
-- Never approve when a ❌ BLOCKER exists — no exceptions
+- Never APPROVED when blocker exists — no exceptions
 - Never write vague FIX directives like "fix the error" or "improve this"
   Every FIX must specify: file + problem + required change + verify command
 - Never run bash commands that write files (read-only bash only)

@@ -1,0 +1,77 @@
+---
+version: "3.8"
+services:
+  dify-api:
+    image: langgenius/dify-api:latest
+    restart: always
+    environment:
+      MODE: api
+      SECRET_KEY: ${DIFY_SECRET_KEY:-change-me-in-env}
+      DB_USERNAME: dify
+      DB_PASSWORD: ${DIFY_DB_PASSWORD:-difypassword}
+      DB_HOST: dify-db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: dify-redis
+      STORAGE_TYPE: local
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      OPENAI_API_BASE: https://openrouter.ai/api/v1
+    ports:
+      - "5001:5001"
+    depends_on:
+      - dify-db
+      - dify-redis
+    volumes:
+      - dify-storage:/app/api/storage
+
+  dify-worker:
+    image: langgenius/dify-api:latest
+    restart: always
+    environment:
+      MODE: worker
+      SECRET_KEY: ${DIFY_SECRET_KEY:-change-me-in-env}
+      DB_USERNAME: dify
+      DB_PASSWORD: ${DIFY_DB_PASSWORD:-difypassword}
+      DB_HOST: dify-db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: dify-redis
+      STORAGE_TYPE: local
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      OPENAI_API_BASE: https://openrouter.ai/api/v1
+    depends_on:
+      - dify-db
+      - dify-redis
+    volumes:
+      - dify-storage:/app/api/storage
+
+  dify-web:
+    image: langgenius/dify-web:latest
+    restart: always
+    environment:
+      NEXTAUTH_SECRET_KEY: ${DIFY_SECRET_KEY:-change-me-in-env}
+      CONSOLE_API_URL: http://dify-api:5001
+      APP_API_URL: http://dify-api:5001
+    ports:
+      - "3001:3000"
+
+  dify-db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: dify
+      POSTGRES_PASSWORD: ${DIFY_DB_PASSWORD:-difypassword}
+      POSTGRES_DB: dify
+    volumes:
+      - dify-db-data:/var/lib/postgresql/data
+
+  dify-redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - dify-redis-data:/data
+
+volumes:
+  dify-storage:
+  dify-db-data:
+  dify-redis-data:
