@@ -213,3 +213,15 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - Date: Mon Apr 13 06:58:15 PM JST 2026
 - Message: refactor: wikilink path corrections in wiki content
 ---
+## Commit: 3e9ca87
+- Date: Mon Apr 13 07:07:22 PM JST 2026
+- Message: refactor: remove split-brain wiki/ vault — .wiki/ is canonical
+
+Deleted wiki/ (2.1M, 242 files) — Obsidian vault at project root was
+duplicate of .wiki/. Both had .obsidian/ dirs and identical harvester
+output. .wiki/ is the canonical vault per CLAUDE.md Section 2b.
+
+main.py and all code already reference .wiki/ — no path updates needed.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---

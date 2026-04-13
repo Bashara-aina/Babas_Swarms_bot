@@ -29,3 +29,11 @@ _graveyard/
 .env.local
 .env.production
 secrets.json
+
+# Scattered project dirs (not part of swarm-bot)
+project/
+cekwajar/
+meeting/
+popwadditional/
+wiki/
+.remember/tmp/
