@@ -5,7 +5,7 @@ status: active
 tags: [popw, research, meetings, pdd-pivot, temporal-attention, conference-prep]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Final phase of POPW meetings: PDD (Pose-Derived Detection) pivot officially adopted, temporal attention added to activity head, dataset alternatives analyzed (Assembly101, IndustReal, HA4M, Ego-Exo4D), and conference paper preparation begins with submission target.
+summary: "Final phase of POPW meetings: PDD pivot officially adopted, temporal attention added to activity head, dataset alternatives analyzed (Assembly101, IndustReal, HA4M, Ego-Exo4D), and conference paper preparation begins with submission target."
 wikilinks:
   - [[projects/popw-research]]
   - [[timelines/popw-meetings-jan-mar-2026]]
