@@ -139,3 +139,13 @@ Plus:
 - [[opencode]] — OpenCode integration
 - [[openrouter]] — LLM routing provider
 - [[minimax-m2-7]] — Primary model
+- [[architecture/audit-2026-04-11-fixes]] — 2026-04-11 critical fixes applied
+- [[architecture/code_reviews]] — Legion's code review patterns
+- [[architecture/opencode-integration-2026-04-11]] — OpenCode integration log
+- [[architecture/refactoring-2026-04-11]] — April refactoring changes
+- [[architecture/orchestrator-comparison]] — Four competing orchestrators analysis
+- [[architecture/memory-gaps-analysis]] — Memory system gaps identified
+- [[entities/markitdown]] — Document conversion pipeline
+- [[entities/obsidian]] — Wiki platform configuration
+- [[people/andrej-karpathy]] — Pattern inspiration for knowledge base
+- [[logs/reviewer-approved-2026-04-13-wiki-restructure]] — Latest wiki restructure log

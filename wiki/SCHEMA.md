@@ -223,6 +223,16 @@ SORT title ASC
 
 ---
 
+## Orphan Policy Exception
+
+**ADRs (wiki/decisions/) are exempt from the orphan rule.**
+Decision records are standalone documents by design. They record what was decided and why — they do not need to be cited elsewhere to be valid. The INDEX.md decisions section is their canonical entry point.
+
+**ADRs are also exempt from word count minimums.**
+A decision record is complete when it fully answers: what was decided, why, and what the consequences are. This can be 80 words or 800 words depending on complexity.
+
+---
+
 ## Page Quality Checklist
 
 - [ ] Has valid frontmatter with all required fields

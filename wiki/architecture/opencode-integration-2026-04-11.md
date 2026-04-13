@@ -1,15 +1,17 @@
 ---
 title: Opencode Integration 2026 04 11
 type: architecture
-status: stub
-tags: [architecture, general]
+status: active
+tags: [architecture, opencode, integration, telegram]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
-wikilinks: []
-confidence: low
-source: migration
-project: general
+summary: Three-agent pipeline (Planner → Worker → Reviewer) integrated opencode CLI into Legion's Telegram bot via /opencode command. Bridge at core/opencode_bridge.py handles subprocess spawning, zombie prevention, and report extraction.
+wikilinks:
+  - [[entities/opencode]]
+  - [[projects/legion-bot]]
+confidence: high
+source: implementation
+project: legion
 ---
 
 # LEGION × OPENCODE INTEGRATION — 2026-04-11
@@ -91,5 +93,7 @@ Flow:
 
 ## Related Pages
 
-- [[adr-2026-04-11-opencode-integration]]
-- [[conversations_log]]
+- [[adr-2026-04-11-opencode-integration]] — Original integration ADR
+- [[entities/opencode]] — OpenCode entity documentation
+- [[projects/legion-bot]] — Project overview
+- [[legion-module-map]] — Core modules

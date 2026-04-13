@@ -1,17 +1,18 @@
 ---
-title: memory-architecture
-type: concept
+title: Memory Gaps Analysis
+type: architecture
 status: active
-tags: [memory, architecture, concepts]
+tags: [memory, architecture, gaps, audit]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Memory architecture defines how Legion stores, retrieves, and manages information across sessions using multiple storage tiers.
+summary:: " Legion's memory system ranked 4.5/10 — 8+ subsystems with critical gaps: silent data loss at 2000 entries, redundant overlapping facades, no semantic vector retrieval for natural language queries, and incomplete per-user isolation."
 wikilinks:
-  - [[intent-routing]]
-  - [[reasoning-loop]]
   - [[memory-system-architecture]]
+  - [[memory-architecture]]
+  - [[intent-routing]]
 confidence: high
 source: audit
+project: legion
 ---
 
 # Memory Architecture
@@ -72,5 +73,15 @@ Core memory, archival memory, and temporal graph are NOT user-scoped.
 ## Related Pages
 
 - [[memory-system-architecture]] — Technical implementation details
-- [[reasoning-loop]] — How reasoning uses memory
-- [[intent-routing]] — How routing interacts with memory
+- [[memory-architecture]] — Memory concepts
+- [[projects/legion-bot]] — Project using this architecture
+
+## Audit Findings Summary
+
+| Issue | Severity | Affected Subsystem | Impact |
+|-------|----------|-------------------|--------|
+| Silent truncation at 2000 entries | Critical | Episodic Store | Data loss invisible to user |
+| 4+ redundant memory facades | High | memory_manager, unified_context, legion_memory_facade | Maintenance burden, inconsistent API |
+| No vector search for NL queries | High | Semantic Cache | Natural language memory queries fail |
+| Per-user isolation incomplete | Medium | Core/Archival/Temporal Graph | Cross-user data leakage risk |
+| mem0 integration untested | Medium | mem0 | Vector search may not work in prod |
