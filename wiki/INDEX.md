@@ -38,18 +38,24 @@ SORT title ASC
 ```
 
 ### Concept Map
-- [[concepts/intent-routing.md]] — Message classification
-- [[concepts/memory-architecture.md]] — Memory layers
-- [[concepts/reasoning-loop.md]] — Step-by-step reasoning
-- [[concepts/skill-registry.md]] — Capability catalog
-- [[concepts/multi-agent-orchestration.md]] — Agent coordination
-- [[concepts/self-improvement-loop.md]] — Learning from experience
-- [[concepts/karpathy-kb-pattern.md]] — Wiki structure pattern
-- [[concepts/bayesian-blending.md]] — Model selection
-- [[concepts/freemium-gate.md]] — Access control
-- [[concepts/llm-cost-routing.md]] — Cost optimization
-- [[concepts/vector-search.md]] — Semantic search
-- [[concepts/context-window-budget.md]] — Token management
+
+- [[intent-routing]] — Message classification
+- [[memory-architecture]] — Memory layers
+- [[reasoning-loop]] — Step-by-step reasoning
+- [[skill-registry]] — Capability catalog
+- [[multi-agent-orchestration]] — Agent coordination
+- [[self-improvement-loop]] — Learning from experience
+- [[karpathy-kb-pattern]] — Wiki structure pattern
+- [[bayesian-blending]] — Model selection
+- [[freemium-gate]] — Access control
+- [[llm-cost-routing]] — Cost optimization
+- [[vector-search]] — Semantic search
+- [[context-window-budget]] — Token management
+- [[bpjs-reference]] — Indonesian social security (BPJS) reference data
+- [[business-research]] — Business research methodology
+- [[labor-law-indonesia]] — Indonesian labor law regulations
+- [[market-data-indonesia]] — Indonesian market data sources
+- [[tax-indonesia]] — Indonesian tax regulations
 
 ---
 
@@ -63,17 +69,18 @@ SORT title ASC
 ```
 
 ### Entity Map
-- [[entities/minimax-m2-7.md]] — Primary vision model
-- [[entities/openrouter.md]] — LLM gateway
-- [[entities/supabase.md]] — Database
-- [[entities/litellm.md]] — LLM client
-- [[entities/chromadb.md]] — Vector DB
-- [[entities/opencode.md]] — Code agent
-- [[entities/cursor.md]] — IDE (deprecated)
-- [[entities/obsidian.md]] — Wiki platform
-- [[entities/gpt-researcher.md]] — Research agent
-- [[entities/dify.md]] — Workflow platform
-- [[entities/markitdown.md]] — Document converter
+
+- [[minimax-m2-7]] — Primary vision model
+- [[openrouter]] — LLM gateway
+- [[supabase]] — Database
+- [[litellm]] — LLM client
+- [[chromadb]] — Vector DB
+- [[opencode]] — Code agent
+- [[cursor]] — IDE (deprecated)
+- [[obsidian]] — Wiki platform
+- [[gpt-researcher]] — Research agent
+- [[dify]] — Workflow platform
+- [[markitdown]] — Document converter
 
 ---
 
@@ -87,9 +94,10 @@ SORT title ASC
 ```
 
 ### Project Map
-- [[projects/legion-bot.md]] — Telegram AI bot
-- [[projects/cekwajar-id.md]] — Salary fairness tool
-- [[projects/rumahlabuh-com.md]] — Property rental platform
+
+- [[legion-bot]] — Telegram AI bot
+- [[cekwajar-id]] — Salary fairness tool
+- [[rumahlabuh-com]] — Property rental platform
 
 ---
 
@@ -103,11 +111,12 @@ LIMIT 10
 ```
 
 ### Decision Map
-- [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md]] — OpenCode selected
-- [[decisions/adr-2026-04-11-opencode-integration.md]] — Initial integration
-- [[decisions/adr-2026-04-12-legion-wiki-loop.md]] — Wiki strategy
-- [[decisions/adr-2026-04-12-circuit-breaker.md]] — Resilience pattern
-- [[decisions/adr-2026-04-12-multi-agent-pipeline.md]] — Three-agent pipeline
+
+- [[adr-2026-04-12-opencode-over-cursor-for-backend]] — OpenCode selected
+- [[adr-2026-04-11-opencode-integration]] — Initial integration
+- [[adr-2026-04-12-legion-wiki-loop]] — Wiki strategy
+- [[adr-2026-04-12-circuit-breaker]] — Resilience pattern
+- [[adr-2026-04-12-multi-agent-pipeline]] — Three-agent pipeline
 
 ---
 
@@ -121,11 +130,12 @@ SORT title ASC
 ```
 
 ### Architecture Map
-- [[architecture/legion-module-map.md]] — Core modules
-- [[architecture/memory-system-architecture.md]] — Memory system
-- [[architecture/skill-execution-flow.md]] — Skill execution
-- [[architecture/orchestrator-comparison.md]] — Orchestration patterns
-- [[architecture/cekwajar-tech-stack.md]] — Cekwajar stack
+
+- [[legion-module-map]] — Core modules
+- [[memory-system-architecture]] — Memory system
+- [[skill-execution-flow]] — Skill execution
+- [[orchestrator-comparison]] — Orchestration patterns
+- [[cekwajar-tech-stack]] — Cekwajar stack
 
 ---
 
@@ -139,8 +149,9 @@ SORT title ASC
 ```
 
 ### Timeline Map
-- [[timelines/legion-version-history.md]] — Legion releases
-- [[timelines/cekwajar-phase-log.md]] — Cekwajar phases
+
+- [[legion-version-history]] — Legion releases
+- [[cekwajar-phase-log]] — Cekwajar phases
 
 ---
 
@@ -154,7 +165,18 @@ SORT title ASC
 ```
 
 ### People Map
-- [[people/andrej-karpathy.md]] — AI researcher (pattern inspiration)
+
+- [[andrej-karpathy]] — AI researcher (pattern inspiration)
+
+---
+
+## Stubs (Status: Stub)
+
+```dataview
+TABLE title, status, summary
+WHERE status = "stub"
+SORT title ASC
+```
 
 ---
 
@@ -167,9 +189,10 @@ SORT file.folder ASC, title ASC
 ```
 
 ### Raw Structure
-- [[raw/docs/readme.md]] — Documentation
-- [[raw/skills_ref/AGENTS.md]] — Skills reference index
-- [[raw/audits/deep-audit-2026-04-12.md]] — Latest audit
+
+- [[raw/docs/readme]] — Documentation
+- [[raw/skills_ref/AGENTS]] — Skills reference index
+- [[raw/audits/deep-audit-2026-04-12]] — Latest audit
 
 ---
 
@@ -186,7 +209,7 @@ LIMIT 5
 
 ## Related
 
-- [[SCHEMA.md]] — Schema definition
-- [[_meta/obsidian-plugins.md]] — Plugin setup
-- [[_meta/graph-config.json]] — Graph colors
-- [[_meta/audit_report_2026-04-13.md]] — Migration audit
+- [[SCHEMA]] — Schema definition
+- [[_meta/obsidian-plugins]] — Plugin setup
+- [[_meta/graph-config]] — Graph colors
+- [[_meta/audit_report_2026-04-13]] — Migration audit

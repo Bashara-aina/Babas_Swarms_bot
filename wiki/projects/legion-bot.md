@@ -7,12 +7,12 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Legion is Bashara's permanent AI coworker — a Telegram bot with 76+ specialized agents across 9 departments, multi-tier memory, autonomous coding via OpenCode, and full media processing capabilities deployed as a systemd service on Ubuntu with RTX 3060.
 wikilinks:
-  - [[entities/opencode.md]]
-  - [[entities/openrouter.md]]
-  - [[entities/minimax-m2-7.md]]
-  - [[concepts/multi-agent-orchestration.md]]
-  - [[architecture/legion-module-map.md]]
-  - [[architecture/memory-system-architecture.md]]
+  - [[opencode]]
+  - [[openrouter]]
+  - [[minimax-m2-7]]
+  - [[multi-agent-orchestration]]
+  - [[legion-module-map]]
+  - [[memory-system-architecture]]
 confidence: high
 source: implementation
 ---
@@ -133,9 +133,9 @@ Plus:
 
 ## Related Pages
 
-- [[architecture/legion-module-map.md]] — Core module organization
-- [[architecture/memory-system-architecture.md]] — Memory tiers
-- [[concepts/multi-agent-orchestration.md]] — Agent coordination
-- [[entities/opencode.md]] — OpenCode integration
-- [[entities/openrouter.md]] — LLM routing provider
-- [[entities/minimax-m2-7.md]] — Primary model
+- [[legion-module-map]] — Core module organization
+- [[memory-system-architecture]] — Memory tiers
+- [[multi-agent-orchestration]] — Agent coordination
+- [[opencode]] — OpenCode integration
+- [[openrouter]] — LLM routing provider
+- [[minimax-m2-7]] — Primary model

@@ -6,7 +6,7 @@ tags: [resilience, circuit-breaker, error-handling]
 created: 2026-04-12
 updated: 2026-04-12
 summary: Circuit breaker pattern implemented for external services to prevent cascading failures.
-wikilinks: [[concepts/memory-architecture.md], [projects/legion-bot.md]]
+wikilinks: [[memory-architecture]], [[legion-bot]]
 confidence: medium
 source: decision
 ---
@@ -56,4 +56,4 @@ class CircuitBreaker:
 
 ## Related Pages
 
-- [[projects/legion-bot.md]] — Resilience
+- [[legion-bot]] — Resilience

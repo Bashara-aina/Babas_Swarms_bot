@@ -6,7 +6,7 @@ tags: [agent, coding, cli, autonomous]
 created: 2026-04-13
 updated: 2026-04-13
 summary: OpenCode is a CLI agent system for autonomous code tasks, integrated with Legion via core/opencode_bridge.py.
-wikilinks: [[projects/legion-bot.md], [architecture/legion-module-map.md]]
+wikilinks: [[legion-bot]], [[legion-module-map]]
 confidence: high
 source: implementation
 ---
@@ -39,5 +39,5 @@ OpenCode is an autonomous coding agent accessed via CLI that Legion uses for com
 
 ## Related Pages
 
-- [[projects/legion-bot.md]] — Main project
-- [[architecture/legion-module-map.md]] — System architecture
+- [[legion-bot]] — Main project
+- [[legion-module-map]] — System architecture

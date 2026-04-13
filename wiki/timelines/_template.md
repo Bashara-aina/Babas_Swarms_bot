@@ -10,4 +10,4 @@ _Last updated: (Legion fills on save)_
 
 ## Related
 
-- [[wiki/INDEX.md]]
+- [[INDEX]]

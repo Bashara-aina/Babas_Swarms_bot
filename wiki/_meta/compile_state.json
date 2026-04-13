@@ -1,1 +1,9 @@
-{ "last_compiled": "2026-04-13T00:00:00Z", "articles": 247 }
+{
+  "last_compiled": "2026-04-13T20:30:00Z",
+  "articles": 190,
+  "stubs": 13,
+  "enriched_today": 12,
+  "created_today": 9,
+  "broken_links_fixed": 45,
+  "schema_violations_fixed": 5
+}

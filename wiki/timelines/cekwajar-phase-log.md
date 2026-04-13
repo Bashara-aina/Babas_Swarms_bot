@@ -6,7 +6,7 @@ tags: [cekwajar, phases, development, progress]
 created: 2026-04-13
 updated: 2026-04-13
 summary: cekwajar.id development progressed through MVP, data collection, and feature expansion phases.
-wikilinks: [[projects/cekwajar-id.md], [wiki/decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md]]
+wikilinks: [[cekwajar-id]], [[adr-2026-04-12-opencode-over-cursor-for-backend]]
 confidence: medium
 source: internal
 ---
@@ -54,4 +54,4 @@ cekwajar.id development spanned MVP, data collection, features, and monetization
 
 ## Related Pages
 
-- [[projects/cekwajar-id.md]] — Project overview
+- [[cekwajar-id]] — Project overview

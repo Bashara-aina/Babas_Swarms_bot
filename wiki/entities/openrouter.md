@@ -6,7 +6,7 @@ tags: [llm, routing, provider, api]
 created: 2026-04-13
 updated: 2026-04-13
 summary: OpenRouter is a unified LLM API gateway that provides access to 100+ models with consistent pricing and rate limiting.
-wikilinks: [[entities/litellm.md], [concepts/llm-cost-routing.md]]
+wikilinks: [[litellm]], [[llm-cost-routing]]
 confidence: high
 source: implementation
 ---
@@ -42,5 +42,5 @@ response = litellm.completion(
 
 ## Related Pages
 
-- [[entities/litellm.md]] — LLM client using OpenRouter
-- [[concepts/llm-cost-routing.md]] — Routing strategy
+- [[litellm]] — LLM client using OpenRouter
+- [[llm-cost-routing]] — Routing strategy
