@@ -23,7 +23,7 @@ class HeartbeatDaemon:
 
     async def _check_service_health(self) -> None:
         proc = await asyncio.create_subprocess_shell(
-            "systemctl is-active swarm-bot",
+            "systemctl --user is-active swarm-bot.service",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

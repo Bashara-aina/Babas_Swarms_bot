@@ -12,7 +12,7 @@ MEMORY_ROOT.mkdir(parents=True, exist_ok=True)
 class CoreMemory:
     """Always-in-context high-priority memory (small and editable)."""
 
-    MAX_CHARS = 2000
+    MAX_CHARS = 4000
     path = MEMORY_ROOT / "core_memory.json"
 
     def __init__(self) -> None:
@@ -29,7 +29,7 @@ class CoreMemory:
     def _save(self) -> None:
         # Enforce a rough cap by truncating values if total chars grows too large.
         total_chars = sum(len(k) + len(v) for k, v in self._data.items())
-        if total_chars > self.MAX_CHARS:
+        if total_chars >= self.MAX_CHARS:
             trimmed: dict[str, str] = {}
             running = 0
             for key, value in self._data.items():

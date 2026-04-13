@@ -225,3 +225,38 @@ main.py and all code already reference .wiki/ — no path updates needed.
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: 9defd78
+- Date: Mon Apr 13 07:08:35 PM JST 2026
+- Message: chore: add scattered dirs to .gitignore, clean embedded repos
+
+- Add project/, cekwajar/, meeting/, popwadditional/, wiki/ to .gitignore
+- These are separate project directories, not part of swarm-bot
+- Remove embedded git repo reference for project/rumahlabuh
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: e966d49
+- Date: Mon Apr 13 07:09:27 PM JST 2026
+- Message: wiki: fix last YAML fail in contracts-batch4-wiki-wiring.md
+
+summary field had unquoted colon-containing value.
+Compile state: 2113 articles, 0 yaml_fails, 0 broken_links.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 00d78d6
+- Date: Mon Apr 13 08:36:58 PM JST 2026
+- Message: wiki: add session_harvester.py — auto-capture Claude Code + OpenClaude + Legion sessions as draft stubs
+---
+## Commit: 7af1e42
+- Date: Mon Apr 13 08:53:51 PM JST 2026
+- Message: wiki: add session_harvester.py + session_synthesizer.py — full auto-ingestion pipeline
+
+Pipeline:
+- session_harvester.py: captures Claude Code + OpenClaude + Legion bot sessions every 30min
+- session_synthesizer.py: synthesizes stubs into wiki articles (concepts/decisions) using Cerebras llama3.1-8b
+- stubs → .wiki/conversations/ (draft review)
+- synthesized → .wiki/concepts/ + .wiki/decisions/ (proper articles with frontmatter + wikilinks)
+- Cron: harvester */30min, synthesizer */35min
+- 24 stubs processed → 16 wiki articles in first run
+---
