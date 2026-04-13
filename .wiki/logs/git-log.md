@@ -107,3 +107,11 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - decisions/: adr-2026-01-film-over-attention, adr-2026-03-pdd-pivot, adr-2026-04-conference-submission-strategy
 - projects/: popw-research (updated)
 ---
+## Commit: 3071c8d
+- Date: Mon Apr 13 05:36:04 PM JST 2026
+- Message: wiki: ingest POPW research meetings — concepts, entities, timelines, and decisions
+---
+## Commit: ab54128
+- Date: Mon Apr 13 05:36:12 PM JST 2026
+- Message: fix: quote summary field in popw-meetings-mar-apr-2026 timeline
+---
