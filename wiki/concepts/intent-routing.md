@@ -31,7 +31,7 @@ Slash commands give explicit routing, but Bashara talks naturally. "pusing nih" 
 ## Key Properties
 
 - **Two-stage classification**: pattern match → LLM fallback for confidence < 0.7
-- **25 intent categories** covering code, web, memory, email, scheduling, translation, analysis, and more
+- **23 intent categories** (see below) covering code, web, memory, email, scheduling, translation, analysis, and more
 - **URL auto-detection**: embeds regex for video domains (YouTube, TikTok, Instagram) and routes to web scraping
 - **Skill registry fallback**: when confidence < 0.50, the intent router queries the skill registry for trigger-based matching
 - **Confidence thresholds**: ≥0.9 → direct dispatch, 0.7–0.9 → handler with confirmation, 0.5–0.7 → clarification question, <0.5 → skill fallback or casual chat
@@ -58,7 +58,18 @@ Intent routing is the entry point for almost every user interaction. It feeds di
 
 ## Current Status
 
-**Implemented.** The full two-stage pipeline is running in production. URL auto-detection for video domains was added in the 2026-04-12 session. Skill registry fallback is wired but the registry itself is still being populated (Phase 2 work). LLM classification uses MiniMax/ai-01 as primary with litellm fallback.
+**Implemented and active.** The full two-stage pipeline is running in production.
+
+**File**: `core/intent_router.py` (509 lines)
+
+**23 Intent categories**:
+COMPUTER_CONTROL, CODE_GENERATION, CODE_REVIEW, WEB_RESEARCH, WEB_SCRAPE, MEMORY_SEARCH, MEMORY_STORE, SCHEDULE_TASK, EMAIL_READ, EMAIL_WRITE, SITE_ANALYSIS, DATABASE_AUDIT, WEATHER_QUERY, LOCATION_QUERY, FILE_OPERATION, TRANSLATION, MATH_REASONING, CREATIVE_WRITE, DATA_ANALYSIS, API_CALL, SELF_UPGRADE, CASUAL_CHAT, DEEP_REASONING
+
+Each has keyword patterns for fast heuristic matching. Indonesian keywords supported (buka, tutup app, ingatkan, jadwalkan).
+
+**Confidence thresholds**: ≥0.9 → direct dispatch, 0.7–0.9 → handler with confirmation, <0.7 → LLM fallback or skill registry.
+
+Note: Intent router is a pre-pass that injects intent hints into the system prompt. It complements `core/autonomous_router.py` (585L) for full autonomous routing.
 
 ## See Also
 

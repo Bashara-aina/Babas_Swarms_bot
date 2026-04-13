@@ -75,20 +75,31 @@ class IntentRouter:
 ```
 
 ### System Prompt Builder (`core/system_prompt_builder.py`)
-- **Lines**: 377
-- **Layers**: 13 injection layers in correct order
-- **Layer Order**: soul → user_profile → working_memory → relevant_memory → wiki → search_results → personality → skill_context → conversation
+- **Lines**: 696
+- **Layer Order** (highest to lowest priority, soul is ALWAYS first):
+  1. `soul` — ALWAYS included, never compressed
+  2. `user_profile` — ALWAYS included (top 5 facts only)
+  3. `working_memory` — Last 5 exchanges, compressed if tight
+  4. `relevant_memory` — Top-3 semantic results, dropped if very tight
+  5. `wiki_context` — Only if query directly relevant to wiki content
+  6. `search_results` — Only if search was triggered
+  7. `personality` — Compressed to key traits if context tight
+  8. `skill_context` — Only if skill was triggered
+
+Async cross-cutting layers (wiki, Screenpipe, JST calendar, MCP calendar, RAG, skills, KG) are gathered in parallel by `core.unified_prompt_context` and appended within `llm_client.chat`.
 
 ### Soul Engine (`core/soul_engine.py`)
-- **Lines**: 432
+- **Lines**: 452
 - **Function**: Reads SOUL.md at boot, builds soul_context for every prompt
 - **Enforcement**: Character consistency via `core/character_enforcer.py`
+- **Identity contract**: SOUL.md is Legion's living identity — updated when Legion learns new facts about Bashara or forms new opinions
 
 ### LLM Client (`core/llm_client/`)
-- **Lines**: ~1809 across module
 - **Function**: Unified LLM interface via litellm
-- **Providers**: OpenRouter, MiniMax, Cerebras, Groq, Gemini, Ollama
-- **Agents**: computer, coding, debug, vision, math, architect, analyst, general
+- **Providers**: OpenRouter, MiniMax M2.7, Cerebras Qwen3-235B, Groq (Llama3.3-70B, Kimi-K2), Gemini, Ollama (Gemma4, Llama3.3-70B for local/vision)
+- **Primary models**: MiniMax M2.7 (coding/reasoning), Cerebras Qwen3-235B-A22B (fast long-context)
+- **Fallback chains**: Per-agent configured in `config/models.yaml` and `config/departments.yaml`
+- **Key functions**: `chat()`, `agent_loop()`, `get_fallback_chain()`
 
 ## Memory Architecture
 
@@ -113,18 +124,55 @@ class IntentRouter:
 ## Multi-Agent System
 
 ### Agent Registry (`core/agent_registry.py`)
-- **Lines**: 798
-- **Agents**: 76 defined in `config/departments.yaml`
-- **Departments**: 9 (Engineering, Research, Product, Marketing, Design, Operations, Creative, Legal, Strategy)
+- **Lines**: 897
+- **Agents**: 84 active + 23 legacy = 107 total defined in `config/departments.yaml`
+- **Departments**: 9 active (Engineering 15, Design 10, Research 12, Marketing 12, Operations 7, Legal Compliance 6, Product 8, Creative 8, Vision/Multimodal 6)
+- **Legacy**: 23 archived agents in `legacy/` department
 
-### Orchestrators (4 competing)
+### Orchestrator System — CONSOLIDATED
 
-| Orchestrator | File | Purpose |
-|--------------|------|---------|
-| Task Orchestrator | task_orchestrator.py (492 lines) | Task chaining + debate |
-| Legion Swarm | core/legion_swarm.py (322 lines) | 11-agent team |
-| Nexus | core/nexus_orchestrator.py | 3-layer routing |
-| Jarvis | core/jarvis_orchestrator.py | Context bundling |
+The 4 legacy orchestrators were merged into a single unified entry point:
+
+| Legacy File | Status | Current Location |
+|------------|--------|-----------------|
+| `task_orchestrator.py` (491L) | Archived | `_archive/task_orchestrator.py` |
+| `core/legion_swarm.py` (321L) | Archived | `_archive/core/legion_swarm.py` |
+| `core/nexus_orchestrator.py` (385L) | Shim (re-exports) | `_archive/core/nexus_orchestrator.py` |
+| `core/jarvis_orchestrator.py` (207L) | Archived | `_archive/core/jarvis_orchestrator.py` |
+
+**Current consolidated orchestrator:** `core/orchestrator.py` (1324 lines)
+
+Contains 4 orchestrator classes:
+- `SwarmDebateOrchestrator` (line 277) — task chaining + debate
+- `NexusOrchestrator` (line 693) — 3-layer routing (keyword → semantic → LLM)
+- `LegionSwarmOrchestrator` (line 972) — 11-agent parallel swarm team
+- `LegionOrchestrator` (line 1192) — **primary entry point** for `LegionOrchestrator.run(task, user_id)`
+
+Plus `run_legion_swarm()` (line 1304) — standalone swarm runner.
+
+### Structured Orchestration Layer (`swarms_bot/`)
+
+Separate from `agents/` (root-level agent scripts). `swarms_bot/` is the enterprise-grade orchestration package:
+
+```
+swarms_bot/
+├── routing/
+│   ├── budget_guard.py       # Budget enforcement for LLM calls
+│   ├── budget_manager.py     # Daily/monthly spend tracking
+│   └── cost_router.py       # Cost-optimized model selection
+├── orchestrator/
+│   ├── agent_base.py         # Base class for swarms agents
+│   ├── agent_messaging.py     # Inter-agent messaging
+│   ├── chief_of_staff.py     # Top-level coordination
+│   ├── dag_executor.py       # DAG-based task execution
+│   ├── dag_planner.py        # DAG planning from natural language
+│   ├── human_in_loop.py      # Approval gates for destructive actions
+│   ├── model_router.py       # Per-task model routing
+│   ├── nested_agents.py      # Sub-agent creation
+│   ├── orchestration_runner.py# Main orchestration loop
+│   └── registry.py           # Agent registry for orchestration layer
+└── observability/            # Metrics and monitoring
+```
 
 ### External Integrations
 
@@ -166,27 +214,54 @@ class IntentRouter:
 - Allowed paths configuration
 - Replaces raw subprocess calls
 
+## Daily Harvester (`core/daily_harvester/`)
+
+Autonomous research and synthesis system — runs daily to keep Legion's knowledge current:
+
+```
+core/daily_harvester/
+├── swarm_debate.py       # Daily debate on sourced topics (LLM calls guarded by budget)
+├── harvest_pipeline.py   # Multi-source content gathering pipeline
+├── morning_report.py     # Formatted morning digest
+├── scheduler.py          # Cron scheduling logic
+├── scorer.py             # Topic relevance scoring
+├── source_strategy.py    # Source selection logic
+├── topic_budget.py       # Daily topic allocation
+├── topic_evolution.py    # Topic depth evolution
+├── types.py             # Typed data classes
+├── wiki_indexer.py      # Wiki content indexing
+└── wiki_storage.py     # Wiki write-back logic
+```
+
+Primary entry: `daily_harvester.py` (root) → imports `core/daily_harvester/`
+
 ## Module Dependency Graph
 
 ```
 main.py
-├── handlers/
+├── handlers/                           # 40 handler modules
 │   ├── ai.py → llm_client → system_prompt_builder → soul_engine
-│   ├── dev.py → opencode_bridge → sandbox
-│   └── brain.py → memory_manager → memory subsystems
+│   ├── brain.py → memory_manager → memory subsystems
+│   └── orchestrate.py → core/orchestrator.py (LegionOrchestrator)
 ├── core/
-│   ├── intent_router.py → handler selection
-│   ├── system_prompt_builder.py → 13 layers
-│   ├── soul_engine.py → SOUL.md
-│   ├── llm_client/ → litellm
-│   ├── agent_registry.py → orchestrators
-│   └── proactive/
-│       ├── curiosity_engine.py
-│       └── daily_briefing.py
-└── tools/
-    ├── browser_agent.py
-    ├── deep_research.py
-    └── documents.py
+│   ├── orchestrator.py                 # CONSOLIDATED (1324L) — 4 legacy merged
+│   ├── intent_router.py                # 23-intent classifier (509L)
+│   ├── autonomous_router.py            # Autonomous mode router (585L)
+│   ├── task_router.py                  # Task-level routing (446L)
+│   ├── system_prompt_builder.py       # 8 priority layers (696L)
+│   ├── soul_engine.py                  # SOUL.md → context (452L)
+│   ├── debate_engine.py                # Belief-based debate (181L)
+│   ├── agent_registry.py              # 107 agents, 9 departments (897L)
+│   ├── llm_client/                    # LiteLLM unified client
+│   ├── memory/                        # MemoryManager + subsystems
+│   ├── personality/                   # Personality + emotion engine
+│   ├── proactive/                      # Curiosity + daily briefing
+│   ├── daily_harvester/               # Autonomous research (11 modules)
+│   └── ...
+├── swarms_bot/                        # Enterprise orchestration layer
+│   ├── routing/budget_manager.py       # Cost tracking
+│   └── orchestrator/                  # DAG-based execution
+└── tools/                             # 70+ external integrations
 ```
 
 ## Related Pages

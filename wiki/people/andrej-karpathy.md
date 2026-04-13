@@ -11,6 +11,7 @@ wikilinks:
   - [[karpathy-kb-pattern]]
   - [[llm-cost-routing]]
   - [[self-improvement-loop]]
+  - [[legion-bot]]
 confidence: high
 source: external
 ---

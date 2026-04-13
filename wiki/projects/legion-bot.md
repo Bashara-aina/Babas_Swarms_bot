@@ -81,71 +81,89 @@ Legion's swarm system comprises:
 
 | Layer | Count | Description |
 |-------|-------|-------------|
-| Specialist Agents | 72 | 9 departments × 8 agents |
-| Department Leads | 9 | One per department |
+| Specialist Agents | 84 | 9 departments (see below) |
+| Legacy Agents | 23 | Archived, unused |
+| Department Leads | 9 | One per active department |
 | Debate Personas | 6 | Structured debate participants |
-| Total per /swarm | ~87 | Full research swarm |
-| LLM Calls | ~96 | 4-round debate mode |
+| Total per /swarm | ~99 | Full research swarm |
 
-### Departments
-1. Engineering — Software development
-2. Research — Academic and market research
-3. Product — Feature planning and roadmapping
-4. Marketing — Content and growth
-5. Design — UI/UX considerations
-6. Operations — Process automation
-7. Creative — Content generation
-8. Legal — Compliance and contracts
-9. Strategy — Long-term planning
+### Departments (config/departments.yaml)
+
+| Department | Agents | Description |
+|-----------|--------|-------------|
+| Engineering | 15 | Python, React, FastAPI, systems, security |
+| Research | 12 | Academic, market, data analysis |
+| Product | 8 | Feature planning, roadmapping |
+| Marketing | 12 | Content, social, growth |
+| Design | 10 | UI/UX considerations |
+| Operations | 7 | Process automation |
+| Creative | 8 | Content generation |
+| Legal/Compliance | 6 | Contracts, regulatory (BPJS, tax, labor) |
+| Vision/Multimodal | 6 | Image, video, voice processing |
+| **Legacy** | **23** | **Archived — do not use** |
 
 ## Memory System
 
-Three-tier memory architecture:
+Five-tier memory architecture with a unified facade:
 
-1. **Core Memory** — High-priority facts always in prompt
-2. **Archival Memory** — Unlimited SQLite FTS5 store
-3. **Recall Memory** — Full conversation history
+| Tier | Technology | Purpose |
+|------|-----------|---------|
+| Working | `core/working_memory.py` | Per-session: 8 open threads, 5 pending follow-ups |
+| Episodic | `core/memory/episodic_store.py` (SQLite) | Session events, 30-day retention |
+| Semantic | mem0ai (vector) | Semantic search across all conversations |
+| Core Facts | `data/user_profile.json` | Persistent key facts about Bashara |
+| Graph | TemporalKnowledgeGraph (aiosqlite) | Time-based relationship graph |
 
-Plus:
-- Temporal Knowledge Graph (graphiti)
-- User Profile (memobase)
-- Reflection Engine (Reflexion)
+**Facade**: `core/legion_memory_facade.py` — RAG compositor combining mem0 + wiki + Screenpipe for tool context.  
+**Manager**: `core/memory/memory_manager.py` — unified write/read interface (never write directly to individual stores).
 
 ## Directory Structure
 
 ```
 /home/newadmin/swarm-bot/
-├── main.py                    # Bot entry point (refactored to ~230 lines)
-├── core/                      # Core orchestration
-│   ├── intent_router.py       # Message classification (509 lines)
-│   ├── system_prompt_builder.py  # 13-layer prompt injection
-│   ├── soul_engine.py         # Character enforcement (432 lines)
-│   ├── llm_client/            # LLM routing (1809 lines)
-│   ├── memory/                # Memory subsystems
-│   ├── skills/                # Skill registry
-│   └── proactive/            # Curiosity engine, check-ins
-├── handlers/                  # 45+ handler modules
-├── agents/                    # 76+ agent definitions
-├── tools/                     # External integrations
-├── config/                    # YAML configurations
-└── data/                      # Persistent storage
+├── main.py                     # Bot entry point (1227 lines)
+├── agents.py                   # Legacy agent routing (→ core/agent_registry.py)
+├── router.py                  # Legacy router shim
+├── task_orchestrator.py        # LEGACY — use _archive/ instead
+│
+├── core/                       # Core orchestration (60+ modules)
+│   ├── orchestrator.py         # CONSOLIDATED orchestrator (1324L)
+│   ├── agent_registry.py        # 107 agents, 9 departments (897L)
+│   ├── intent_router.py         # 23-intent classifier (509L)
+│   ├── autonomous_router.py    # Autonomous mode routing (585L)
+│   ├── task_router.py          # Task-level routing (446L)
+│   ├── system_prompt_builder.py # 8-layer prompt assembly (696L)
+│   ├── soul_engine.py          # SOUL.md → context (452L)
+│   ├── debate_engine.py        # Belief-based debate (181L)
+│   ├── llm_client/             # Unified LiteLLM client
+│   ├── memory/                 # MemoryManager + subsystems
+│   ├── personality/             # Personality + emotion engine
+│   ├── proactive/               # Curiosity engine + daily briefing
+│   ├── daily_harvester/        # Autonomous research (11 modules)
+│   └── ...
+│
+├── handlers/                   # 40 Telegram handler modules
+├── tools/                     # 70+ external integrations
+├── swarms_bot/                # Enterprise orchestration layer
+│   ├── routing/               # budget_guard, budget_manager, cost_router
+│   └── orchestrator/          # DAG executor, chief of staff, human-in-loop
+├── agents/                    # Standalone agent scripts
+├── config/                    # departments.yaml (107 agents), models.yaml, routing_keywords.yaml
+├── _archive/                  # Archived legacy orchestrators
+├── data/                      # Persistent storage (user_profile.json)
+├── SOUL.md                    # Legion's living identity
+└── wiki/                      # Obsidian knowledge base (142 articles)
 ```
 
 ## Related Pages
 
-- [[legion-module-map]] — Core module organization
-- [[memory-system-architecture]] — Memory tiers
-- [[multi-agent-orchestration]] — Agent coordination
-- [[opencode]] — OpenCode integration
+- [[legion-module-map]] — Core module organization (updated 2026-04-13)
+- [[memory-system-architecture]] — Memory tiers and facade
+- [[multi-agent-orchestration]] — Agent coordination and swarm patterns
+- [[intent-routing]] — 23-intent classification system
+- [[opencode]] — OpenCode CLI integration
 - [[openrouter]] — LLM routing provider
-- [[minimax-m2-7]] — Primary model
-- [[architecture/audit-2026-04-11-fixes]] — 2026-04-11 critical fixes applied
-- [[architecture/code_reviews]] — Legion's code review patterns
-- [[architecture/opencode-integration-2026-04-11]] — OpenCode integration log
-- [[architecture/refactoring-2026-04-11]] — April refactoring changes
-- [[architecture/orchestrator-comparison]] — Four competing orchestrators analysis
-- [[architecture/memory-gaps-analysis]] — Memory system gaps identified
-- [[entities/markitdown]] — Document conversion pipeline
-- [[entities/obsidian]] — Wiki platform configuration
+- [[minimax-m2-7]] — Primary coding/reasoning model
+- [[entities/litellm]] — LiteLLM unified client
+- [[entities/obsidian]] — Wiki platform (Karpathy KB pattern)
 - [[people/andrej-karpathy]] — Pattern inspiration for knowledge base
-- [[logs/reviewer-approved-2026-04-13-wiki-restructure]] — Latest wiki restructure log

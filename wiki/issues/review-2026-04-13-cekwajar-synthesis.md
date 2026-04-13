@@ -1,3 +1,17 @@
+---
+title: "Review: cekwajar.id wiki synthesis"
+type: review
+status: completed
+tags: [review, cekwajar, wiki, quality-gate]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Review record for cekwajar.id wiki synthesis - approved on first review, all 11 articles passed quality gate
+wikilinks:
+  - [[projects/cekwajar-id]]
+confidence: high
+source: review
+---
+
 ## Review: cekwajar.id wiki synthesis
 Date: 2026-04-13
 Reviewer: @reviewer
