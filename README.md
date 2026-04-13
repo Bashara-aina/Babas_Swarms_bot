@@ -1,158 +1,38 @@
-# LegionSwarm v10 🤖
+# LegionSwarm v10
 
-**Full autonomous AI agent — controls your Linux PC via Telegram. 100% free APIs, real computer use.**
+Multi-agent Telegram copilot for Linux, designed for real workflows: coding, research, memory, automation, and controlled computer actions.
 
----
+## What this project is
 
-## Architecture
+Legion is an async-first AI operating layer built on:
 
-| Agent | Model | Provider | Best For |
-|-------|-------|----------|----------|
-| **vision** | gemma3:12b | Local Ollama 🔒 | Screenshot analysis (stays on your machine) |
-| **coding** | qwen3.5:35b | Local Ollama 🔒 | Code generation |
-| **debug** | exaone-deep:32b | Local Ollama 🔒 | Deep reasoning, complex debugging |
-| **math** | phi4 | Local Ollama 🔒 | Math, tensors, gradients |
-| **architect** | llama3.3:70b | Groq free | System design |
-| **general** | gemma3:12b | Local Ollama 🔒 | Default fallback |
-| **OWL** ⭐ | llama3.3:70b | Groq | Complex GAIA-style workflows |
-| **code_exec** ⭐ | qwen3.5:35b | Local Ollama | Write + execute Python/bash loops |
-| **predictor** ⭐ | llama3.3:70b | Groq | Swarm consensus complexity prediction |
-| **ag2_researcher** ⭐ | llama3.3:70b | Groq | Deep research pipelines |
-| **ag2_critic** ⭐ | exaone-deep:32b | Local Ollama | Critique and adversarial analysis |
-| **ag2_synthesizer** ⭐ | qwen3.5:35b | Local Ollama | Multi-perspective synthesis |
+- `aiogram 3.4+` for Telegram command routing
+- `litellm` for model/provider routing and fallbacks
+- Memory + wiki synthesis for long-horizon context
+- Tool bridges (browser, docs, messaging, integrations)
 
-Every agent has automatic fallback chains — no rate limit ever blocks you.
+The bot is intended for owner-controlled operation via Telegram with strong environment-driven configuration.
 
----
+## Current architecture snapshot
 
-## Commands
+- **Entry point**: `main.py`
+- **Model + agent routing**: `agents.py`, `llm_client.py`, `core/intent_router.py`
+- **System prompt composition**: `core/system_prompt_builder.py`
+- **Memory facade**: `core/memory/memory_manager.py`
+- **Computer control**: `computer_agent/`
+- **Feature handlers**: `handlers/`
+- **Knowledge base**: `wiki/`
 
-### Computer Control
-| Command | Description |
-|---------|-------------|
-| `/do <task>` | Full agentic computer control — opens apps, clicks, types, browses |
-| `/screen` | Take desktop screenshot → AI analysis |
-| `/open <app\|url>` | Open an app or URL |
-| `/click <x> <y>` | Click at screen coordinates |
-| `/type <text>` | Type text on keyboard |
-| `/key <combo>` | Press keyboard shortcut (e.g. `ctrl+c`) |
-| `/cmd <shell>` | Run raw shell command |
+## Quick start
 
-### AI Agents
-| Command | Description |
-|---------|-------------|
-| `/run <task>` | LLM chat (no computer, fast) |
-| `/think <query>` | Deep reasoning mode |
-| `/agent <key> <task>` | Force a specific agent |
-| `/swarm <task>` | Multi-agent parallel execution |
-| `/debate <topic>` | Multi-agent debate with competing perspectives |
-| `/opinion <question>` | Get an opinionated analysis |
-| `/soul` | Interact with the soul engine |
+### 1) Prerequisites
 
-### Advanced Agents
-| Command | Description |
-|---------|-------------|
-| `/owl <task>` | OWL agent for complex real-world tasks |
-| `/predict <question>` | Swarm consensus + confidence prediction |
-| `/code_exec <task>` | Generate + run code with stdout/stderr |
-| `/ag2 <task>` | AG2 multi-agent research conversation |
-| `/budget` | Cost tracking dashboard |
-| `/swarm --topology <name> <task>` | Select topology (`spreadsheet`, `mixture`, `graph`, `sequential`, `concurrent`, `debate`, `auto`) |
+- Linux (Ubuntu/Debian recommended)
+- Python `3.11+`
+- `ffmpeg` (for media paths)
+- Optional but common: Ollama, Playwright, GPU drivers/CUDA
 
-### Web & Research
-| Command | Description |
-|---------|-------------|
-| `/scrape <url>` | JS-rendered page scrape (Playwright) |
-| `/research <topic>` | Deep multi-page web research |
-
-### System
-| Command | Description |
-|---------|-------------|
-| `/stats` | CPU / GPU / RAM usage |
-| `/monitor <sec> <cmd>` | Background recurring task with optional alert |
-| `/schedule <time> <cmd>` | One-time scheduled task |
-| `/tasks` | List background tasks |
-| `/cancel <id>` | Cancel a background task |
-| `/alert <sec> <cmd> --alert "<condition>"` | Alert when condition is met |
-| `/maintenance` | Full system health check |
-| `/git` | Git status |
-
-### Bot Management
-| Command | Description |
-|---------|-------------|
-| `/install <packages>` | pip install + auto-restart |
-| `/upgrade` | git pull + auto-restart |
-| `/models` | Agent roster |
-| `/keys` | API key status |
-
-### Complete Command Reference
-| Command | Description |
-|---|---|
-| `/do` | Autonomous computer control |
-| `/screen` | Take desktop screenshot |
-| `/run` | LLM chat (no computer) |
-| `/swarm` | Multi-agent team execution |
-| `/think` | Deep reasoning mode |
-| `/cmd` | Run shell command |
-| `/paper` | Search arXiv papers |
-| `/ask_paper` | Ask about a paper |
-| `/workernet_papers` | Analyze WorkerNet papers |
-| `/research` | Deep web research |
-| `/scrape` | Scrape a URL |
-| `/remember` | Save a note to memory |
-| `/recall` | Search memory |
-| `/memories` | Show recent memories |
-| `/briefing` | Morning briefing |
-| `/scaffold` | Create project scaffold |
-| `/build` | Parallel fullstack build |
-| `/gpu` | GPU health status |
-| `/vuln_scan` | Vulnerability scan |
-| `/task_from` | Extract tasks from text |
-| `/tasks_due` | Show pending tasks |
-| `/post` | Draft social post |
-| `/brand_check` | Monitor brand mentions |
-| `/review` | AI code review |
-| `/security_review` | Security audit |
-| `/orchestrate` | Decompose + execute complex task |
-| `/multi_plan` | Compare 3 agent approaches |
-| `/loop` | Autonomous goal execution loop |
-| `/loop_stop` | Stop running loop |
-| `/loop_status` | Show loop progress status |
-| `/loop_pause` | Pause running loop |
-| `/loop_resume` | Resume paused loop |
-| `/multi_execute` | Compare multiple agents |
-| `/budget` | Cost tracking dashboard |
-| `/metrics` | Performance metrics dashboard |
-| `/routing_stats` | Routing analytics |
-| `/audit_summary` | Audit log summary |
-| `/save` | Save session state |
-| `/resume` | Resume saved session |
-| `/sessions` | List saved sessions |
-| `/learn` | Teach a pattern |
-| `/instincts` | Show learned patterns |
-| `/audit` | Activity audit trail |
-| `/resources` | RAM / GPU / local model policy |
-| `/stats` | System stats |
-| `/start` | Help + status |
-
----
-
-## Setup
-
-### Prerequisites
-
-- Ubuntu/Debian Linux (tested 22.04+)
-- RTX 3060 12GB (or any GPU for local vision)
-- Python 3.11+
-- [Ollama](https://ollama.ai) installed
-
-```bash
-# System tools for computer control
-sudo apt install xdotool wmctrl scrot xclip xdg-utils
-sudo apt install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ind
-```
-
-### Install
+### 2) Install
 
 ```bash
 git clone https://github.com/Bashara-aina/Babas_Swarms_bot.git
@@ -163,143 +43,108 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
-### Pull Models
-
-```bash
-ollama pull gemma3:12b
-ollama pull qwen3.5:35b
-ollama pull exaone-deep:32b
-ollama pull phi4
-ollama pull llama3.3:70b
-```
-
-### API Keys
-
-| Provider | URL | Free Tier |
-|----------|-----|-----------|
-| Groq | https://console.groq.com/keys | 1,000 req/day |
-| Cerebras | https://cloud.cerebras.ai | 14,400 req/day |
-| OpenRouter | https://openrouter.ai/keys | 50 free/day |
-| Telegram | [@BotFather](https://t.me/botfather) | Free |
-
-### Configure
+### 3) Configure environment
 
 ```bash
 cp .env.example .env
-nano .env
 ```
+
+Minimum required variables:
 
 ```env
-TELEGRAM_BOT_TOKEN=your_bot_token
-ALLOWED_USER_ID=your_telegram_user_id
-
-GROQ_API_KEY=your_groq_key
-CEREBRAS_API_KEY=your_cerebras_key
-OPENROUTER_API_KEY=your_openrouter_key
+TELEGRAM_BOT_TOKEN=
+ALLOWED_USER_ID=
+MINIMAX_API_KEY=
+GROQ_API_KEY=
 ```
 
-### Run
+Then enable optional providers/tools you use (OpenRouter, Anthropic, Gemini, Mem0, Dify, Tavily, Firecrawl, etc.).
+
+### 4) Run
 
 ```bash
-python3 main.py
+source .venv/bin/activate
+python main.py
 ```
 
-### Run as Service
+## Commands (common)
+
+Command coverage evolves quickly; use `/help` inside Telegram for the live list.
+
+Frequently used:
+
+- `/start` – bot status/help
+- `/run <task>` – general LLM task
+- `/swarm <task>` – multi-agent execution
+- `/research <topic>` – deep research flow
+- `/screen` – screenshot capture + analysis
+- `/do <task>` – computer-action workflow
+- `/cmd <shell>` – controlled shell execution
+- `/debate <topic>` and `/opinion <question>`
+- `/budget` – spend visibility
+
+## Development workflow
 
 ```bash
-sudo nano /etc/systemd/system/swarm-bot.service
+# lint
+ruff check .
+
+# tests
+pytest tests/ -x --asyncio-mode=auto -q
 ```
 
-```ini
-[Unit]
-Description=Legion Telegram Bot
-After=network.target
+If you touch prompt/routing/memory wiring, run smoke checks for:
 
-[Service]
-Type=simple
-User=YOUR_USERNAME
-WorkingDirectory=/home/YOUR_USERNAME/Babas_Swarms_bot
-EnvironmentFile=/home/YOUR_USERNAME/Babas_Swarms_bot/.env
-ExecStart=/home/YOUR_USERNAME/Babas_Swarms_bot/.venv/bin/python3 main.py
-Restart=always
-RestartSec=10
-Environment="CUDA_VISIBLE_DEVICES=0"
+- `core/soul_engine.py`
+- `core/intent_router.py`
+- `core/system_prompt_builder.py`
+- `core/debate_engine.py`
 
-[Install]
-WantedBy=multi-user.target
+## Security and operations
+
+- Never commit `.env`, `.env.local`, `.env.production`, or `secrets.json`
+- Keep `ALLOWED_USER_ID` / owner checks enabled in handlers
+- Route LLM calls through `llm_client.py` (not direct provider SDK calls)
+- Prefer async I/O; avoid blocking operations in handlers
+
+## Project layout
+
+```text
+main.py                  # bot startup + router registration
+agents.py                # agent/model registry
+llm_client.py            # LLM call entrypoint + fallback routing
+computer_agent/          # desktop and shell tooling
+core/                    # orchestration, memory, prompts, routing
+handlers/                # Telegram command handlers
+tools/                   # integrations and utility agents
+tests/                   # pytest suite
+wiki/                    # synthesized project knowledge base
 ```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable swarm-bot
-sudo systemctl start swarm-bot
-sudo journalctl -u swarm-bot -f
-```
-
----
-
-## Examples
-
-```
-# Open WhatsApp Web and check messages
-/do open whatsapp web and read my last 3 messages
-
-# Take a screenshot and analyze
-/screen
-
-# Research something
-/research latest pytorch 2.x performance improvements
-
-# Monitor GPU temperature every 30s
-/monitor 30 nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader --alert "int(result) > 85"
-
-# Write and run code
-/do write a python script to plot my training logs and save to ~/plots/
-
-# Git workflow
-/do git add -A && git commit -m "update" && git push
-
-# Multi-agent debate
-/debate Should AI agents have rights?
-
-# Cost tracking
-/budget
-```
-
----
-
-## Security
-
-- **Single-user**: `ALLOWED_USER_ID` blocks everyone else
-- **Local vision**: Screenshots analyzed by Ollama locally, never sent to cloud
-- **No secrets in logs**: Message content is never logged
-- **Shell safety**: Dangerous commands blocked in `/cmd`
-
----
 
 ## Troubleshooting
 
-**Bot not responding**
+**Bot doesn’t respond**
+
 ```bash
-sudo journalctl -u swarm-bot -n 50
+python main.py
 ```
 
-**Screenshot black/fails**
+or if running under systemd:
+
 ```bash
-# Check display
-echo $DISPLAY
-# Pre-warm vision model
-ollama run gemma3:12b ""
+sudo journalctl -u swarm-bot -n 100 -f
 ```
 
-**Rate limited**
-Fallback auto-engages. Check: `sudo journalctl -u swarm-bot | grep fallback`
+**Playwright errors**
 
-**Playwright missing**
 ```bash
 playwright install chromium
 ```
 
+**Provider/rate-limit issues**
+
+Check your API keys and fallback providers in `.env` and `config/models.yaml`.
+
 ---
 
-**Built by [@Bashara-aina](https://github.com/Bashara-aina)**
+Built by [@Bashara-aina](https://github.com/Bashara-aina)
