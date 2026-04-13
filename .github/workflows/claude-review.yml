@@ -37,6 +37,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,36 +47,5 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: "Review PR for Legion Telegram bot project. Focus: Security (no hardcoded secrets), Async correctness (no threading/sleep), Telegram compliance (parse_mode HTML, chunking at 4000 chars), Memory writes (memory_manager facade), LLM calls (llm_client.chat only). Write findings as PR comments."
+          prompt: "Review PR for the Legion Telegram bot project (Babas_Swarms_bot). Focus: Security (no hardcoded secrets), Async correctness (no threading/sleep), Telegram compliance (parse_mode HTML, chunking at 4000 chars), Memory writes (memory_manager facade), LLM calls (llm_client.chat only). Write findings as PR comments."
           claude_args: "--allowedTools mcp__github__create_inline_comment,Bash(gh pr comment),Bash(gh pr diff)"
-
-  pr-summary-comment:
-    needs: pre-review-checks
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Write PR body to file
-        run: |
-          cat > /tmp/pr_body.txt << 'EOF'
-          ## PR Review Summary
-
-          Changed files: ${{ needs.pre-review-checks.outputs.changed_files }}
-
-          Automated Checks: Ruff lint passed, type hints verified.
-
-          Review Areas:
-          - Security: No hardcoded secrets, ALLOWED_USER_ID checks
-          - Async: No threading or blocking time.sleep()
-          - Telegram: parse_mode HTML, chunking at 4000 chars
-          - Memory: Writes via memory_manager.py facade
-          - LLM: All calls via llm_client.chat()
-
-          CLAUDE Review: Full AI review enabled on this PR.
-
-          Legion PR Review - Babas_Swarms_bot
-          EOF
-
-      - name: Post PR comment
-        run: gh pr comment ${{ github.event.pull_request.number }} --body-file /tmp/pr_body.txt
