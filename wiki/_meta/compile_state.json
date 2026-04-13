@@ -1,9 +1,10 @@
 {
-  "last_compiled": "2026-04-13T20:30:00Z",
+  "last_compiled": "2026-04-13T13:22:22.008925+09:00",
   "articles": 190,
   "stubs": 13,
   "enriched_today": 12,
   "created_today": 9,
   "broken_links_fixed": 45,
-  "schema_violations_fixed": 5
+  "schema_violations_fixed": 5,
+  "batch1_fixed": true
 }

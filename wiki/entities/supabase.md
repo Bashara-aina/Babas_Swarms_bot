@@ -6,7 +6,9 @@ tags: [database, backend, postgres, realtime]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Supabase is the primary database for rumahlabuh.com and cekwajar.id, providing PostgreSQL, auth, and realtime subscriptions.
-wikilinks: [[rumahlabuh-com]], [[cekwajar-id]]
+wikilinks:
+  - [[rumahlabuh-com]]
+  - [[cekwajar-id]]
 confidence: high
 source: implementation
 ---

@@ -1,3 +1,3 @@
 # conversations_log
 
-_Stub file - see [[legion/conversations_log.md]]_
+_Stub file - see [[legion/conversations_log]]_

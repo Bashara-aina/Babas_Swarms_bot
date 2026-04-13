@@ -3,7 +3,9 @@ title: BPJS Reference Indonesia
 type: concept
 project: cekwajar
 sources: [030-bpjs-kesehatan.md, 031-bpjs-ketenagakerjaan-iuran.md, 032-batas-upah.md, 033-jht-klaim.md, 034-jp-manfaat.md, 035-bpu.md, 036-sanksi.md, 037-integrasi-payroll.md, 038-kelas-rawat.md, 039-kris.md]
-related: [[intent-routing]], [[vector-search]]
+related:
+  - [[intent-routing]]
+  - [[vector-search]]
 confidence: high
 last_compiled: 2026-04-13
 status: stub

@@ -6,7 +6,8 @@ tags: [ide, coding, agent, alternative]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Cursor is an AI-powered IDE that was evaluated but not selected in favor of OpenCode for backend Legion tasks.
-wikilinks: [[opencode]]
+wikilinks:
+  - [[opencode]]
 confidence: high
 source: decision
 ---

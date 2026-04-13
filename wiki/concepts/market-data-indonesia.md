@@ -3,7 +3,9 @@ title: Market Data Indonesia
 type: concept
 project: cekwajar
 sources: [040-tech-salaries-2025.md, 041-mercer-salary-survey.md, 042-jobstreet-salary-report.md, 043-glints-salary-insights.md, 044-linkedin-salary-insights.md, 045-bps-rata-rata-upah.md, 046-banking-finance-fmcg-salaries.md, 047-gender-pay-gap.md, 048-gig-economy-income.md, 049-remote-work-premium.md, 050-salary-growth-projection.md, 051-executive-remuneration.md, 052-salary-negotiation-tips.md, 053-cost-of-living-comparison.md, 054-inflation-real-wage.md]
-related: [[intent-routing]], [[vector-search]]
+related:
+  - [[intent-routing]]
+  - [[vector-search]]
 confidence: high
 last_compiled: 2026-04-13
 status: stub

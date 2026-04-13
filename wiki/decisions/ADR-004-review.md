@@ -6,7 +6,8 @@ tags: [revalidation, freshness, ADR-004, review]
 created: 2026-04-11
 updated: 2026-04-11
 summary: Verified that the `ok` severity case exists in revalidation engine as the correct final branch mapping freshnessStatus 'FRESH' to severity 'ok'.
-wikilinks: [[ADR-004-dynamic-revalidation]]
+wikilinks:
+  - [[ADR-004-dynamic-revalidation]]
 confidence: high
 source: review
 ---

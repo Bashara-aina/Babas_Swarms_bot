@@ -6,7 +6,10 @@ tags: [legion, versions, history, changelog, humanization]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Legion evolved from a simple Telegram bot (v1.0) to a multi-agent swarm platform (v8.0) over 2025-2026, with v6.0.0 being the major humanization update introducing persistent memory tiers, emotion engine, reflection engine, and autonomous skill selection.
-wikilinks: [[legion-bot]], [[adr-2026-04-12-opencode-over-cursor-for-backend]], [[memory-system-architecture]]
+wikilinks:
+  - [[legion-bot]]
+  - [[adr-2026-04-12-opencode-over-cursor-for-backend]]
+  - [[memory-system-architecture]]
 confidence: high
 source: documentation
 ---

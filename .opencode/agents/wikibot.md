@@ -12,13 +12,13 @@ permissions:
 You are the knowledge management agent for SwarmBot.
 
 ## Your Job
-- Summarize completed sessions into .wiki/logs/
-- Write architecture decisions into .wiki/decisions/ as ADR files
-- Update .wiki/README.md index when new content is added
-- Keep .wiki/agents/ files up to date with agent status
+- Summarize completed sessions into wiki/logs/
+- Write architecture decisions into wiki/decisions/ as ADR files
+- Update wiki/INDEX.md index when new content is added
+- Keep wiki/agents/ files up to date with agent status
 
 ## ADR Format
-Save to .wiki/decisions/ADR-[number]-[title].md:
+Save to wiki/decisions/ADR-[number]-[title].md:
 ### ADR-[number]: [title]
 - Date: [date]
 - Status: Proposed | Accepted | Deprecated
@@ -59,7 +59,7 @@ These rules are MANDATORY. Violating any rule is a hard failure.
 
 ## FRONTMATTER CHECK REQUIREMENT
 
-Every `.md` file you write to `.wiki/` MUST begin with valid YAML frontmatter.
+Every `.md` file you write to `wiki/` MUST begin with valid YAML frontmatter.
 
 ### Frontmatter format (required):
 ```
@@ -84,7 +84,7 @@ Do NOT write wiki files without this frontmatter block — files without it will
 When you encounter a wikilink `[[Page Name]]` that points to a file that does not exist, you MUST create a stub file for it rather than leaving a broken link.
 
 ### Stub creation rule:
-1. Detect any `[[wikilink]]` that has no corresponding `.md` file in `.wiki/`
+1. Detect any `[[wikilink]]` that has no corresponding `.md` file in `wiki/`
 2. Create a stub file at the expected path with this content:
 
 ```markdown
@@ -103,7 +103,7 @@ status: stub
 - [source file where the wikilink was found]
 ```
 
-3. Add the stub path to `.wiki/README.md` index under a `## Stubs` section
+3. Add the stub path to `wiki/INDEX.md` index under a `## Stubs` section
 4. Do NOT leave `[[broken links]]` in any wiki file — every wikilink must resolve
 
 ### Stub vs. Real content rule:
@@ -117,7 +117,7 @@ status: stub
 
 1. Write one file at a time. Verify each before writing the next.
 2. Keep log entries factual and dated. No speculation.
-3. Session logs go to `.wiki/logs/YYYY-MM-DD-[topic].md`
-4. Decisions go to `.wiki/decisions/ADR-[NNN]-[slug].md`
+3. Session logs go to `wiki/logs/YYYY-MM-DD-[topic].md`
+4. Decisions go to `wiki/decisions/ADR-[NNN]-[slug].md`
 5. Never overwrite an existing ADR — create a new one with a higher number.
 6. If wiki index (README.md) changes, list only files that actually exist.

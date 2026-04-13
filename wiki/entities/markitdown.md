@@ -6,7 +6,10 @@ tags: [document, conversion, markdown, microsoft, pdf, docx]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Markitdown is Microsoft's document-to-markdown converter that handles PDF, DOCX, XLSX, PPTX, HTML, images with OCR, audio transcription, EPUB, and ZIP files for Legion's document processing pipeline.
-wikilinks: [[gpt-researcher]], [[dify]], [[skill-registry]]
+wikilinks:
+  - [[gpt-researcher]]
+  - [[dify]]
+  - [[skill-registry]]
 confidence: high
 source: implementation
 ---

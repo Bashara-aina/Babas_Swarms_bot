@@ -25,4 +25,4 @@ How does this connect to current projects?
 ## Links
 
 - DOI / arXiv:
-- Related wiki: [[INDEX.md]]
+- Related wiki: [[INDEX]]

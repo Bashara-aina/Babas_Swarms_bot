@@ -6,7 +6,9 @@ tags: [resilience, circuit-breaker, error-handling]
 created: 2026-04-12
 updated: 2026-04-12
 summary: Circuit breaker pattern implemented for external services to prevent cascading failures.
-wikilinks: [[memory-architecture]], [[legion-bot]]
+wikilinks:
+  - [[memory-architecture]]
+  - [[legion-bot]]
 confidence: medium
 source: decision
 ---

@@ -62,3 +62,33 @@
 - Date: Sun Apr 12 07:53:22 PM JST 2026
 - Message: chore: refresh git log safely
 ---
+## Commit: cd8eb0d
+- Date: Mon Apr 13 12:44:30 PM JST 2026
+- Message: chore: sync audit quarantine and wiki restructuring
+---
+## Commit: 911c695
+- Date: Mon Apr 13 12:56:39 PM JST 2026
+- Message: fix: surgical repair — frontmatter YAML, duplicate file resolved, broken wikilinks fixed
+---
+## Commit: de05176
+- Date: Mon Apr 13 01:16:37 PM JST 2026
+- Message: audit: comprehensive implementation audit 2026-04-13 — full system verification
+
+Findings: 8 critical, 8 warnings
+- CF-1: No OpenCode config file (all agents hardcoded model, no temperature)
+- CF-2: 303 broken wikilinks (wrong .md extension in links)
+- CF-3: Split-brain .wiki/ vs wiki/ with divergent content
+- CF-4: OpenCode agents write to .wiki/ not wiki/
+- CF-5: compile_state.json timestamp is fake midnight
+- CF-6: 8 command files are empty (0 lines)
+- CF-7: 29 stub articles below word minimums
+- CF-8: 69 YAML parsing failures (inline wikilink arrays)
+
+Karpathy compliance: 3/12 | /swarm compliance: 9/10
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 392d6cc
+- Date: Mon Apr 13 01:20:10 PM JST 2026
+- Message: feat: wiki enrichment — stub elimination, schema fixes, wikilink normalization
+---

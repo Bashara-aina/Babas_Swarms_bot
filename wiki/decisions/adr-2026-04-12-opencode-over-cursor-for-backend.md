@@ -6,7 +6,9 @@ tags: [opencode, cursor, backend, decision]
 created: 2026-04-12
 updated: 2026-04-12
 summary: OpenCode was selected over Cursor for backend coding tasks due to superior CLI integration and Telegram workflow compatibility.
-wikilinks: [[opencode]], [[cursor]]
+wikilinks:
+  - [[opencode]]
+  - [[cursor]]
 confidence: high
 source: decision
 ---

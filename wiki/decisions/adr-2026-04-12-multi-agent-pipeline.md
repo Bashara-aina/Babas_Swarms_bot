@@ -6,7 +6,9 @@ tags: [multi-agent, pipeline, planner, worker, reviewer]
 created: 2026-04-12
 updated: 2026-04-12
 summary: Three-agent pipeline (Planner → Worker → Reviewer) adopted as standard for complex tasks.
-wikilinks: [[multi-agent-orchestration]], [[legion-bot]]
+wikilinks:
+  - [[multi-agent-orchestration]]
+  - [[legion-bot]]
 confidence: high
 source: decision
 ---

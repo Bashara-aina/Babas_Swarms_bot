@@ -46,12 +46,12 @@ Legend: ✅ = working correctly | ⚠️ = partially working | ❌ = broken/miss
 ```
 TOTAL BROKEN WIKILINKS: 303
 wiki/INDEX.md alone has 45 broken links including:
-  [[concepts/intent-routing.md]] → 'concepts/intent-routing.md' not found
-  [[SCHEMA.md]] → 'schema.md' not found
-  [[_meta/obsidian-plugins.md]] → '_meta/obsidian-plugins.md' not found
+  [[concepts/intent-routing]] → 'concepts/intent-routing.md' not found
+  [[SCHEMA]] → 'schema.md' not found
+  [[_meta/obsidian-plugins]] → '_meta/obsidian-plugins.md' not found
 ```
 - **Impact**: Dataview queries fail, Obsidian graph is fragmented, agents cannot navigate the KB reliably
-- **Fix**: The wikilinks use full filenames with `.md` extension but Obsidian slug matching strips it. `[[concepts/intent-routing.md]]` should be `[[concepts/intent-routing]]`. Run a bulk fix:
+- **Fix**: The wikilinks use full filenames with `.md` extension but Obsidian slug matching strips it. `[[concepts/intent-routing]]` should be `[[concepts/intent-routing]]`. Run a bulk fix:
 ```python
 import glob, re
 for f in sorted(glob.glob('wiki/**/*.md')):
@@ -146,21 +146,21 @@ wiki/research/papers/_template.md: 36w (need 150)
 ```
 wiki/entities/opencode.md: while parsing a block mapping
   expected <block end>, but found ','
-  wikilinks: [[projects/legion-bot.md]], [[architecture/legion-module-m ...
+  wikilinks: [[projects/legion-bot]], [[architecture/legion-module-m ...
 
 wiki/entities/litellm.md: expected <block end>, but found ','
-  wikilinks: [[entities/openrouter.md]], [[concepts/llm-cost-routing.md]]
+  wikilinks: [[entities/openrouter]], [[concepts/llm-cost-routing]]
 ```
 - **Impact**: These 69 files have frontmatter that cannot be parsed as valid YAML. Any tool trying to read frontmatter (Dataview, wikibot, lint scripts) fails on these files.
 - **Fix**: Convert inline wikilink arrays to proper YAML lists:
 ```
 # WRONG (inline):
-wikilinks: [[entities/openrouter.md]], [[concepts/llm-cost-routing.md]]
+wikilinks: [[entities/openrouter]], [[concepts/llm-cost-routing]]
 
 # CORRECT (YAML list):
 wikilinks:
-  - [[entities/openrouter.md]]
-  - [[concepts/llm-cost-routing.md]]
+  - [[entities/openrouter]]
+  - [[concepts/llm-cost-routing]]
 ```
 - **Effort**: Medium (<2h)
 
@@ -422,7 +422,7 @@ OpenCode /swarm command (.opencode/command/swarm.md) [✅ v2.0 upgraded]
 /swarm Fix wiki wikilink extensions, YAML frontmatter, and OpenCode path wiring
 
 BATCH 1 fixes:
-1. Strip .md extension from all [[slug.md]] wikilinks across wiki/ (303 broken links)
+1. Strip .md extension from all [[slug]] wikilinks across wiki/ (303 broken links)
 2. Fix YAML inline wikilink arrays → proper YAML lists in 69 files  
 3. Update .opencode/agents/*.md and .opencode/command/*.md to write to wiki/ not .wiki/
 4. Create opencode.json with per-agent temperature settings

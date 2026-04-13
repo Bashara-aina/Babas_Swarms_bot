@@ -3,7 +3,9 @@ title: Labor Law Indonesia
 type: concept
 project: cekwajar
 sources: [001-uu-ketenagakerjaan-13-2003.md, 002-uu-cipta-kerja-11-2020.md, 003-pp-pengupahan-36-2021.md, 004-pp-pengupahan-51-2023.md, 005-ump-2025-provinsi.md, 006-umk-2025-kabupaten-kota.md, 007-permenaker-struktur-skala-upah.md, 008-uu-sjsn-40-2004.md, 009-kepmenaker-upah-lembur.md, 010-pp-pesangon-35-2021.md, 011-permenaker-thr.md, 012-aturan-cuti.md, 013-pkwt-pkwtt-kontrak.md, 014-tunjangan-wajib.md, 015-uu-pph-36-2008-ptkp.md, 016-umsp-umsk.md, 017-aturan-wfh.md, 018-gaji-tka.md, 019-sanksi-pengupahan.md]
-related: [[intent-routing]], [[vector-search]]
+related:
+  - [[intent-routing]]
+  - [[vector-search]]
 confidence: high
 last_compiled: 2026-04-13
 status: stub

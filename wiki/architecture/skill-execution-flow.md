@@ -6,7 +6,11 @@ tags: [skills, execution, flow, registry, intent-router]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Skills execute through a dual-layer system: executable Python skills in core/skills/ for direct actions (weather, web search, timer), and reference markdown skills injected into LLM prompts. Skills are triggered by intent router, executed with tool/API calls, and results flow back into the LLM context for response synthesis.
-wikilinks: [[skill-registry]], [[legion-module-map]], [[gpt-researcher]], [[opencode]]
+wikilinks:
+  - [[skill-registry]]
+  - [[legion-module-map]]
+  - [[gpt-researcher]]
+  - [[opencode]]
 confidence: high
 source: implementation
 ---

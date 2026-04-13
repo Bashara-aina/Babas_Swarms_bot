@@ -3,7 +3,9 @@ title: Tax Indonesia PPh 21
 type: concept
 project: cekwajar
 sources: [020-pph21-ter-pmk168-2023.md, 021-ptkp-2024-pmk101-2016.md, 022-pph17-pasal-17-progresif.md, 023-biaya-jabatan-pph21-5-persen.md, 024-pph21-bonus-thr-penghasilan-tidak-teratur.md, 025-pph21-karyawan-tidak-tetap-harian-lepas.md, 026-npwp-wajib-pajak-sanksi-tidak-punya.md, 027-natura-kenikmatan-pmk66-2023.md, 028-spt-tahunan-pph-orang-pribadi.md, 029-pph21-direksi-komisaris-tidak-tetap.md]
-related: [[intent-routing]], [[vector-search]]
+related:
+  - [[intent-routing]]
+  - [[vector-search]]
 confidence: high
 last_compiled: 2026-04-13
 status: stub

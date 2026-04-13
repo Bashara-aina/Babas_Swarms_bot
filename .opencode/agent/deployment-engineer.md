@@ -125,9 +125,9 @@ Service: [service-name]
 ```
 
 ### Deployment Logging
-- All deployment operations MUST be logged to `.wiki/logs/deploy-[date]-[service].md`
+- All deployment operations MUST be logged to `wiki/logs/deploy-[date]-[service].md`
 - Log entry must include: timestamp, command executed, user confirmation, outcome
-- Example log path: `.wiki/logs/deploy-2026-04-13-my-service.md`
+- Example log path: `wiki/logs/deploy-2026-04-13-my-service.md`
 
 ### Deployment Status Reporting
 After every deployment, report status using this exact format:
@@ -136,7 +136,7 @@ DEPLOY STATUS: ✅ SUCCESS | ❌ FAILED
 Service: [service-name]
 Environment: [environment]
 Timestamp: [ISO timestamp]
-Log: [.wiki/logs/deploy-[date]-[service].md]
+Log: [wiki/logs/deploy-[date]-[service].md]
 ```
 
 ### Confirmation Requirements

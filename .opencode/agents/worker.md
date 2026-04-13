@@ -28,7 +28,7 @@ If you cannot produce the PROOF_FORMAT output, you have NOT completed the contra
 2. If any READ file doesn't exist: STOP. Report BLOCKER immediately.
    Do NOT create a placeholder. Do NOT improvise.
 3. Run `git status` to understand current repo state
-4. If contract requires context: read `.wiki/logs/` for prior work
+4. If contract requires context: read `wiki/logs/` for prior work
 
 ### Phase B — Execute
 5. Execute the WHAT action exactly as specified
