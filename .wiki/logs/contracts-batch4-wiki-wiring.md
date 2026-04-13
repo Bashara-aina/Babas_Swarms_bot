@@ -4,7 +4,7 @@ type: contract
 status: active
 tags: [wiring-fix, wiki]
 created: 2026-04-13
-summary: Fix remaining broken links: timelines, midtrans, Bashara-aina, YAML in nested paths
+summary: "Fix remaining broken links: timelines, midtrans, Bashara-aina, YAML in nested paths"
 ---
 
 ## CONTRACT #12: Fix Timelines Conversations Log Link
