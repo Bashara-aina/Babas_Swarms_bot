@@ -6,6 +6,7 @@ updated: 2026-04-11
 ---
 
 # I3D: Two-Stream Inflated 3D ConvNets
+pdf_path: "project/popw/working/external/papers/1705.07750.pdf"
 
 **Carreira & Zisserman** | CVPR 2017 | [arXiv:1705.07750](https://arxiv.org/abs/1705.07750)
 

@@ -1,6 +1,7 @@
 ---
 paper_id: 095
 title: "You Only Look Once: Unified, Real-Time Object Detection"
+pdf_path: "project/popw/working/external/papers/YOLO_Redmon_2016.pdf"
 authors: "Joseph Redmon, Santosh Divvala, Ross Girshick, Ali Farhadi"
 year: 2016
 venue: "CVPR 2016"

@@ -1,6 +1,7 @@
 ---
 paper_id: "007"
 title: "Mask R-CNN"
+pdf_path: "project/popw/working/external/papers/1703_06870.pdf"
 authors: "Kaiming He, Georgia Gkioxari, Piotr Dollár, Ross Girshick"
 year: 2017
 venue: "ICCV 2017"

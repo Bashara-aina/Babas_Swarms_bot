@@ -1,6 +1,7 @@
 ---
 paper_id: 096
 title: "End-to-End Object Detection with Transformers"
+pdf_path: "project/popw/working/external/papers/DETR_Carion_2020.pdf"
 authors: "Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, Sergey Zagoruyko"
 year: 2020
 venue: "ECCV 2020"

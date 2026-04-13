@@ -143,3 +143,29 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: c1e4e37
+- Date: Mon Apr 13 06:01:20 PM JST 2026
+- Message: wiki: fix 100 YAML failures across research papers, decisions, wisdom
+
+- Fix bold metadata in decisions (ADR files): **Key:** value → proper YAML
+- Fix research paper implementation fields with 3-value comma issues
+- Fix YAML list blank line in hoi-survey-2023-2024
+- Fix wikilinks in research: comma-separated → proper YAML list
+- Fix git-log.md wrongly had FM delimiters (working doc, no FM needed)
+- Fix ADR-001-api-key-fix.md unquoted backtick-heavy current_vision_chain
+- Compile state: 2098 articles, 0 yaml_fails, 0 broken_links
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: e9a805e
+- Date: Mon Apr 13 06:09:11 PM JST 2026
+- Message: wiki: add PDF paths to FiLM/Kendall/IKEA ASM research articles
+
+- Add pdf_path frontmatter to 003-film-perez-2018.md
+- Add pdf_path to 004-kendall-uncertainty-2018.md
+- Add pdf_path to 005-ikea-asm-dataset-2021.md
+- Fix broken wikilink in 028-amtl-yun-cho-2023.md
+- Archive duplicate Kendall/IKEA files to _archived_duplicates/
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---

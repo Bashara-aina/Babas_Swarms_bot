@@ -7,6 +7,7 @@ popw-tier: 3
 ---
 
 # Paper 025 — PCGrad: Gradient Surgery for Multi-Task Learning
+pdf_path: "project/popw/working/external/papers/2001_06782.pdf"
 
 ## Metadata
 

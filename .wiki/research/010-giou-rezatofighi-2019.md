@@ -1,6 +1,7 @@
 ---
 paper_id: "010"
 title: "Generalized Intersection over Union: A Metric and A Loss for Bounding Box Regression"
+pdf_path: "project/popw/working/external/papers/1902_09630.pdf"
 authors: "Hamid Rezatofighi, Nathan Tsoi, JunYoung Gwak, Amir Sadeghian, Ian Reid, Silvio Savarese"
 year: 2019
 venue: "CVPR 2019"

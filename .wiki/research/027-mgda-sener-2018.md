@@ -7,6 +7,7 @@ popw-tier: 3
 ---
 
 # Paper 027 — MGDA: Multi-Task Learning as Multi-Objective Optimization
+pdf_path: "project/popw/working/external/papers/1810_04650.pdf"
 
 ## Metadata
 

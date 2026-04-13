@@ -7,6 +7,7 @@ popw-tier: 3
 ---
 
 # Paper 024 — GradNorm: Gradient Normalization for Adaptive Loss Balancing
+pdf_path: "project/popw/working/external/papers/1711_02257.pdf"
 
 ## Metadata
 

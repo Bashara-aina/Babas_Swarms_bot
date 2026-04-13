@@ -6,6 +6,7 @@ updated: 2026-04-11
 ---
 
 # DINOv2: Learning Robust Visual Features
+pdf_path: "project/popw/working/external/papers/DINOv2_Oquab_2023.pdf"
 
 **Oquab, Daras, Galy, Alt, Piantanida, Teytaud, Battiste, Yuan, Xu, Liang, Morrow, Brown, Giraud, Cormier, Head, Wu, Jun, Lew, Lew, Brown, Dawit, Moysan, Zhang, McWilliams, Hacene, Gila, Beeler, Greene, Powell, Mares, Brown, Mery, Collobert, Joulin** | TMLR 2024 (Meta FAIR) | [arXiv:2304.07193](https://arxiv.org/abs/2304.07193)
 

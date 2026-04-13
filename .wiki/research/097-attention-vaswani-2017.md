@@ -1,6 +1,7 @@
 ---
 paper_id: 097
 title: "Attention Is All You Need"
+pdf_path: "project/popw/working/external/papers/1706.03762.pdf"
 authors: "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Illia Polosukhin, Gordon Kapernick, ChrisApps"
 year: 2017
 venue: "NeurIPS 2017"

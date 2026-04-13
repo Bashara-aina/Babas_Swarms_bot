@@ -1,6 +1,7 @@
 ---
 paper_id: "041"
 title: "Assembly101: A Large-Scale Multi-View Video Dataset for Understanding Procedural Activities"
+pdf_path: "project/popw/working/external/papers/2203.14712.pdf"
 authors: "Sener, Fadime; Chatterjee, Dibyadip; Shelepov, Daniel; He, Kun; Singhania, Dipika; Wang, Robert; Yao, Angela"
 year: 2022
 venue: "CVPR 2022"

@@ -1,6 +1,7 @@
 ---
 paper_id: "006"
 title: "Focal Loss for Dense Object Detection"
+pdf_path: "project/popw/working/external/papers/1708_02002.pdf"
 authors: "Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, Piotr Dollár"
 year: 2017
 venue: "ICCV 2017"
