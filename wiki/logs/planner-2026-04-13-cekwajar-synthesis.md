@@ -1,3 +1,16 @@
+---
+title: planner-2026-04-13-cekwajar-synthesis
+type: timeline
+status: active
+tags: [cekwajar, wiki, planning]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Plan for synthesizing cekwajar.id documents into wiki articles following the Karpathy KB Pattern.
+wikilinks: []
+confidence: medium
+source: implementation
+---
+
 ## Plan: cekwajar.id Wiki Synthesis
 Date: 2026-04-13
 Type: FILE_OPERATION (wiki synthesis from source documents)

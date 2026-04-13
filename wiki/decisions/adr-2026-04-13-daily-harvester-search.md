@@ -9,6 +9,7 @@ summary: search_sources() in source_strategy.py was a stub returning []. Impleme
 wikilinks:
   - [[architecture/daily-harvester]]
   - [[entities/litellm]]
+  - [[concepts/self-improvement-loop]]
 confidence: high
 source: loop-1-implementation
 project: legion

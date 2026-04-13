@@ -13,8 +13,6 @@ wikilinks:
   - [[self-improvement-loop]]
 confidence: high
 source: external
-last_compiled: 2026-04-13
-word_count: 0
 ---
 
 # Andrej Karpathy

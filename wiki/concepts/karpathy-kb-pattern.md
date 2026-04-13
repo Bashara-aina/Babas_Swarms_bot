@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: The Karpathy KB Pattern is a wiki structure methodology where every page is written for a smart AI reading it later — frontmatter metadata, TL;DR first, structured sections, and wikilinks throughout. It is the foundation of Legion's wiki organization.
 wikilinks:
-  - [[SCHEMA]]
-  - [[memory-architecture]]
-  - [[intent-routing]]
-  - [[self-improvement-loop]]
+  - [[SCHEMA|schema]]
+  - [[concepts/memory-architecture|memory-architecture]]
+  - [[concepts/intent-routing|intent-routing]]
+  - [[concepts/self-improvement-loop|self-improvement-loop]]
 confidence: high
 source: design
 ---

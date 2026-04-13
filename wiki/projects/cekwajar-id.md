@@ -38,25 +38,44 @@ Indonesian formal workers face a structural information asymmetry in payroll:
 
 ---
 
-## 2. Target Users (3 Personas)
+## 2. The 5-Tool Vision
 
-### Persona 1: Rina — HRD Staff (Jakarta, 28)
+cekWajar.id's long-term roadmap spans 5 distinct fairness tools, each addressing a specific life decision where Indonesian workers face information asymmetry:
+
+**Wajar Slip** (MVP, May 2026): The payslip compliance auditor. Employees upload or manually enter payslip data; cekWajar calculates what PPh21 TER and 6-component BPJS should be deducted; reports violations with IDR shortfall amounts. This is the data foundation — every payslip audit creates an anonymized salary data point.
+
+**Wajar Gaji** (Month 6-8 gate): City-level salary benchmarks crowdsourced from payslip flywheel data. Employee enters role, city, seniority; gets P25/P50/P75 market rates. Requires 500+ verified submissions before credible. Wajar Slip users become Wajar Gaji data contributors organically.
+
+**Wajar Hidup** (Month 6-9 gate): Cost of living comparison using BPS Susenas CPI data. Compares purchasing power across 50+ Indonesian cities. Useful for transfer decisions, career negotiations, relocation planning.
+
+**Wajar Tanah** (Month 10-12 gate): Property price fairness using NJOP + market transaction data + property portal partnerships. Compares asking prices to fair-value estimates by neighborhood. Requires formal ATR/BPN or property portal data partnership to avoid scraping legal liability.
+
+**Wajar Kabur** (Month 12-18 gate): PPP-adjusted international comparison. Compares Indonesian salary to cost of living in Singapore, Malaysia, Australia, Japan. Sensitive political content — requires World Bank + OECD data pipeline and political risk assessment before launch.
+
+---
+
+## 3. Target Users (3 Personas)
+
+### Persona 1: Endang — HRD Staff (Jakarta, 28)
 - **Primary tool**: Wajar Slip (verify payroll outputs), Wajar Gaji (benchmarks)
-- **Use case**: Rina processes 50 employee payslips monthly. She wants to verify Mekari/Gadjian-generated deductions are correct before payment run.
-- **WTP**: IDR 29K/month (Basic) — will pay from personal funds for verification
-- **Pain point**: Her company uses a payroll system she doesn't fully trust; has found errors before
+- **Use case**: Endang processes 50 employee payslips monthly at a mid-sized manufacturing company. She wants to verify Mekari/Gadjian-generated deductions are correct before the 25th payment run. She has found errors before — last year a new payroll officer misconfigured the JP cap, under-deducting for 3 months before detection.
+- **WTP**: IDR 29K/month (Basic) — will pay from personal funds for work-related verification; company expense report is too slow
+- **Pain point**: Her company uses Gadjian but she doesn't fully understand all the PPh21 TER nuances; has to rely on external tax consultant for year-end true-up
+- **Trigger moment**: "I just ran December true-up and the number seems wrong — is this system bug or user error?"
 
 ### Persona 2: Dimas — Gen Z Software Engineer (Surabaya, 24)
 - **Primary tool**: Wajar Slip (first payslip at new company), Wajar Kabur (comparing to Singapore offers)
-- **Use case**: First real job, wants to know if IDR 12M offer is fair, whether to take overseas opportunity
-- **WTP**: IDR 79K once for specific question (not recurring)
-- **Pain point**: No one to ask, no data, negotiating blind
+- **Use case**: First real job out of university, received IDR 12M offer in Surabaya. Wants to know if this is fair for his skill level. Also comparing to a Singapore startup opportunity that offered SGD 4,500/month.
+- **WTP**: IDR 79K once for a specific verification question (not recurring subscription)
+- **Pain point**: No one in his circle has experience negotiating tech salaries; LinkedIn salary data is US-centric; Glassdoor Indonesia has <100 data points for his role
+- **Trigger moment**: "Should I take the remote role at SGD 4,500 or stay in Surabaya at IDR 12M?"
 
 ### Persona 3: Sari — Supervisor (Bekasi, 32)
-- **Primary tool**: Wajar Tanah (property), Wajar Gaji (benchmark before buying)
-- **Use case**: Considering property purchase in Bekasi, wants to know if IDR 850M asking price is fair for the area
-- **WTP**: IDR 29K once for specific search
-- **Pain point**: Agent always has more information, NJOP is useless as benchmark
+- **Primary tool**: Wajar Tanah (property), Wajar Gaji (benchmark before major purchase)
+- **Use case**: Sari is considering a property purchase in Bekasi — a 2BR apartment asking IDR 850M near her factory job. She wants to know if the price is fair relative to her IDR 9M/month salary. Her colleague was quoted IDR 780M for a similar unit; another colleague says prices will drop 20% in 2026.
+- **WTP**: IDR 29K once for a specific property fairness query
+- **Pain point**: Real estate agent always has more information; NJOP data is 3 years stale and useless as benchmark; bank appraiser uses different methodology
+- **Trigger moment**: "Is IDR 850M for this location fair? My mom says wait, my agent says buy now."
 
 ---
 
@@ -161,9 +180,9 @@ CREATE POLICY "users_own_submissions" ON payslip_submissions
 
 ---
 
-## 4. Freemium Model
+## 5. Freemium Model
 
-### 4.1 Pricing Tiers
+### 5.1 Pricing Tiers
 
 | Feature | Free | Basic IDR 29K/mo | Pro IDR 79K/mo |
 |---------|------|-----------------|----------------|
@@ -176,13 +195,47 @@ CREATE POLICY "users_own_submissions" ON payslip_submissions
 | PDF report | ❌ | ✅ | ✅ |
 | December true-up sim | ❌ | ❌ | ✅ |
 
-### 4.2 Freemium Gate Logic
+### 5.2 Freemium Gate Mechanics
 
-The gate moment is critical for conversion:
-- **Free user sees**: "Ditemukan 2 pelanggaran (V02, V06)" — no amounts
-- **Paid user sees**: "BPJS JHT underpaid IDR 37,200/bulan × 12 = IDR 446,400/year" + "Gaji pokok di bawah UMK Bekasi IDR 2,499,443"
+The freemium gate is designed around a single insight: **Indonesian workers pay when they know exactly how much money is at stake**. Abstract fairness concerns do not convert; concrete IDR amounts do.
 
-The concrete IDR amount is the conversion trigger — "your employer owes you IDR X" is immediately actionable.
+**Free user experience**:
+1. Upload payslip PDF or enter manual data
+2. System calculates PPh21 TER and 6-component BPJS
+3. Free verdict: "COMPLIANT ✅" OR "2 VIOLATIONS FOUND ⚠️"
+4. If violations: See violation codes only (e.g., "V02: BPJS JHT underpaid" — no amount)
+5. Paywall prompt: "Unlock IDR shortfall amounts — subscribe for IDR 29K/month"
+
+**Paid user experience**:
+1. All free features
+2. See exact IDR shortfall per violation (e.g., "BPJS JHT underpaid IDR 37,200/bulan × 12 = IDR 446,400/year")
+3. See IDR amount employer owes for all violations combined
+4. PDF report for HR negotiation or legal counsel
+5. December PPh21 progressive true-up simulation (Pro tier)
+
+**Conversion psychology**: The free tier shows the violation exists. The paid tier reveals the stakes. "Your employer has been underpaying your JHT by IDR 446,400/year for 2 years = IDR 892,800 owed" is a different conversation than "your payslip has a violation."
+
+### 5.3 Freemium Funnel Metrics
+
+Target funnel metrics for MVP launch:
+- Landing page → Sign up: 8-12%
+- Sign up → First audit: 60-70%
+- First audit → Paid conversion: 2-4%
+- Paid 30-day retention: >70%
+- Paid 90-day retention: >50%
+
+Conversion failure modes:
+- Too many steps to first audit → simplify onboarding
+- OCR failures → improve fallback to manual entry
+- Payment friction → Midtrans installment options for Pro
+- No violations found → freemium users feel no urgency; need trust-building content
+
+### 5.4 Annual vs Monthly Subscription
+
+Single-tier monthly (IDR 29K Basic, IDR 79K Pro) for MVP. Annual subscriptions (2 months free = IDR 290K/348K) added at Month 4-6 after:
+- Midtrans recurring payment integration validated
+- 30+ monthly subscribers to test annual conversion
+- Content calendar for annual subscriber retention campaigns
 
 ---
 
@@ -239,9 +292,9 @@ Per ADR-2026-04-13-cekwajar-mvp-scope-lock, v1 excludes Wajar Gaji, Wajar Tanah,
 
 ---
 
-## 8. GTM Channels
+## 9. GTM Channels
 
-### 8.1 Channel Mix
+### 9.1 Channel Mix
 
 | Channel | Month 1-6 MAU Target | CAC | Conversion |
 |---------|---------------------|-----|-----------|
@@ -250,13 +303,74 @@ Per ADR-2026-04-13-cekwajar-mvp-scope-lock, v1 excludes Wajar Gaji, Wajar Tanah,
 | WhatsApp/Telegram communities | 200-600 | IDR 10-30K | 3.0-5.0% |
 | Reddit r/indonesia | 100-300 | IDR 5-20K | 4.0-7.0% |
 
-### 8.2 TikTok Content Strategy
+### 9.2 TikTok Content Strategy
 
 **60% viral + 40% trust in Month 1-3**:
 - Viral: "Gaji lo wajar nggak?" salary reveal, "Boss gue nggak bayar BPJS — ini buktinya"
 - Trust: Step-by-step "cara cek slip gajimu", real user proof of IDR X found
 
 **Batch production**: Film 8-10 videos in one day per week. 12-15 hours/week total content time sustainable for solo founder.
+
+**Content pillars for Month 1-6**:
+1. **Salary reveal** (30%): "Gaji gue di [company类型] sekarang [amount] — wajar nggak?" — engagement bait, community building
+2. **Violation proof** (20%): "Cek slip gue nemuin masalah [violation type] — ini cara gue nemuin" — trust building, conversion
+3. **Tutorial** (25%): "Step-by-step cek slip gajimu dalam 5 menit" — SEO value, trust, evergreen
+4. **Industry news** (15%): PPh21 regulation changes, UMK updates, BPJS cap changes — timely, shareable
+5. **User testimonials** (10%): After 50+ paying users — "Gue nemuin IDR X dari payslip gue" — social proof
+
+### 9.3 Google SEO Strategy
+
+Target keywords for organic acquisition:
+- Primary: "cara cek slip gaji" (500-800 monthly searches), "cek pajak gaji" (300-500)
+- Secondary: "BPJS kesehatan potongan" (200-400), "PPh21 TER" (100-200)
+- Long-tail: "aplikasi cek payslip" (50-100), "verifikasi slip gaji online" (30-50)
+
+SEO approach:
+- Landing page optimized for primary keywords
+- Blog content for secondary/long-tail (tax calculator guides, Indonesian payroll explainers)
+- Internal linking between blog posts and tool
+- Build backlinks via tax consultant partnerships and HR software reviews
+
+### 9.4 Community Channels
+
+WhatsApp and Telegram communities for Indonesian workers:
+- Reddit r/indonesia (English and Bahasa threads)
+- Facebook groups: "Gaji Indonesia", "Kerja di Jakarta", "HR Indonesia"
+- Telegram: @grabgajian (salary discussion), @digitalnomad_id (expat/remote)
+- Kaskus forum (older demographic, underutilized)
+
+Community strategy:
+- Provide genuine value (payroll tips, regulation updates) before promotion
+- Engage authentically — solo founder voice, not corporate
+- Target communities with HR/finance professionals who will share with their networks
+
+### 9.5 May 2026 Launch Timeline
+
+| Week | Milestone | Success Criteria |
+|------|-----------|------------------|
+| 1-2 | Soft launch to 50 personal network users | 30+ audits completed, zero crashes |
+| 3-4 | Invite 200 beta users (HR communities) | AUTO_ACCEPT rate >55%, NPS >40 |
+| 5 | Tax consultant audit (TC-01 to TC-15) | Zero calculation errors |
+| 6 | Midtrans production activation | Payment flow tested |
+| 7 | Public beta with waitlist | 500+ signups from TikTok |
+| 8 (May 2026) | Public launch | 1,000+ MAU, first paying subscribers |
+
+### 9.6 Kill Criteria
+
+**Launch gate (Week 8)**:
+- <200 signups by Week 6: Investigate channel mix, improve content
+- <0.5% trial-to-paid by Week 8: Re-examine paywall positioning, lower entry price
+- Any confirmed PPh21/BPJS calculation error: Pause launch, fix, re-audit
+
+**Post-launch (Month 3)**:
+- <50 paying subscribers: Pivot freemium model or GTM
+- AUTO_ACCEPT rate <50%: Disable OCR, manual form only
+- >3 confirmed calculation errors: Pull tool, full audit, relaunch
+
+**Platform-level kill criteria**:
+- Government (DJP, Kemnaker) formal C&D: Immediate compliance review
+- Security breach: Shutter immediately, notify users per UU PDP
+- >100 users affected by systematic error: Full platform audit before resume
 
 ---
 

@@ -15,6 +15,14 @@ confidence: high
 source: research
 ---
 
+## TL;DR
+
+cekWajar.id was originally designed as a 5-tool platform (Wajar Slip, Wajar Gaji, Wajar Tanah, Wajar Kabur, Wajar Hidup). This ADR locks the MVP to **Wajar Slip only**. Rationale: Wajar Slip is the only tool with zero cold-start data problem, the only tool where the paywall is immediately justified by concrete IDR shortfall findings, and the only tool with the deepest technical moat (PPh21 TER + progressive + 6-component BPJS). Wajar Gaji, Wajar Tanah, Wajar Kabur, and Wajar Hidup are deferred until explicit release gates are met (500+ payslip audits for Gaji; formal ATR/BPN data partnership for Tanah; 10,000+ MAU for Kabur).
+
+The decision prioritizes execution quality over feature breadth. A mediocre Wajar Slip launched in 12 weeks is worse than an excellent Wajar Slip launched in 5-6 weeks — the paywall conversion depends entirely on users trusting the calculation accuracy. Any calculation error at scale risks not just lost conversions but potential DJP/Kemnaker scrutiny. The 136 engineering hours required for Wajar Slip MVP represent roughly 5-6 weeks of full-time solo founder work, making the timeline aggressive but achievable.
+
+---
+
 # ADR-2026-04-13: MVP Scope Lock — Wajar Slip Only
 
 **Date**: 2026-04-13  
@@ -152,20 +160,23 @@ A combined launch fails because it:
 ## Consequences
 
 ### Positive
-- Engineering focus on one tool excellence
-- Clear go/no-go metrics for each tool addition
-- Avoids data quality problems that could damage brand
-- Allows proper legal/compliance investment for Slip before diversification
+- Engineering focus on one tool excellence ensures the core calculation engine is battle-tested before expanding
+- Clear go/no-go metrics for each tool addition prevent premature diversification
+- Avoids data quality problems that could damage brand — Wajar Gaji without 500+ verified submissions is worse than useless
+- Allows proper legal/compliance investment for Slip before diversification — UU PDP, PSE registration, tax consultant audit all need to be done right
+- Data flywheel effect: every Wajar Slip audit creates a verified salary data point that seeds the Wajar Gaji benchmark pool organically
 
 ### Negative
-- Delays monetization from other tools
-- Single-tool risk (if Slip fails, whole platform fails)
-- Misses early-mover opportunity in salary benchmark space
+- Delays monetization from other tools — Wajar Tanah could launch within 10-12 months if data partnership secured
+- Single-tool risk: if Wajar Slip fails to convert or has a calculation scandal, the entire platform fails
+- Misses early-mover opportunity in salary benchmark space — Gadjian/GoodsCooker may add similar features
+- Scope creep pressure: investors or users may push for Gaji/Tanah before release gates are met
 
 ### Mitigations
-- Wajar Slip's market is large enough (60% of workers can't verify payslip)
-- Clear extension roadmap reassures users/investors
-- Data flywheel from Slip seeds future Gaji launch
+- Wajar Slip's market is large enough (60%+ of Indonesian formal workers cannot independently verify payslip)
+- Clear extension roadmap with published release gates demonstrates strategic discipline to investors
+- Data flywheel from Slip seeds future Gaji launch with organic, verified salary data
+- Monthly metric reviews at each gate checkpoint provide early warning if Slip underperforms
 
 ---
 

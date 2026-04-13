@@ -19,7 +19,7 @@ source: research
 
 ## TL;DR
 
-BPJS (Badan Penyelenggara Jaminan Sosial) is Indonesia's mandatory social security system comprising BPJS Kesehatan (health insurance) and BPJS Ketenagakerjaan (employment insurance). For cekwajar.id's Wajar Slip tool, the critical calculations are the 6-component BPJS deduction engine: JHT employee (2%) + employer (3.7%), JP employee (1%) + employer (2%), plus employer-paid JKK (0.24–1.74%) and JKM (0.30%). All component calculations use salary caps — JP capped at IDR 9,559,600/month (2023 figure, updated annually) and BPJS Kesehatan capped at IDR 12,000,000/month. PMK 168/2023 and PP 46/2015 / PP 45/2015 form the regulatory basis for these calculations.
+BPJS (Badan Penyelenggara Jaminan Sosial) is Indonesia's mandatory social security system comprising BPJS Kesehatan (health insurance) and BPJS Ketenagakerjaan (employment insurance). For cekwajar.id's Wajar Slip tool, the critical calculations are the 6-component BPJS deduction engine: JHT employee (2%) + employer (3.7%), JP employee (1%) + employer (2%), plus employer-paid JKK (0.24–1.74%) and JKM (0.30%). All component calculations use salary caps — JP capped at IDR 9,559,600/month (2023 figure, updated annually) and BPJS Kesehatan capped at IDR 12,000,000/month. PMK 168/2023 and PP 46/2015 / PP 45/2015 form the regulatory basis for these calculations. The JP cap is particularly important because salaries above IDR 9,559,600 see diminishing JP contributions — a common source of confusion for high-earning employees who expect proportional deductions. BPJS Kesehatan similarly caps at IDR 12,000,000, meaning an employee earning IDR 20,000,000/month still only contributes 1% of IDR 12,000,000 = IDR 120,000, not IDR 200,000. Both caps are reviewed annually by Kemnaker and BNP (for JP) or Perpres (for Kesehatan), making rate-table version control essential for compliance.
 
 ---
 
@@ -187,6 +187,45 @@ From master_analysis_cekwajar.md Section 4.3, the following violations are detec
 
 **Note**: V03 (PPh21 missing), V04 (PPh21 underpaid), and V06 (UMK violation) are tax/labor law violations, not purely BPJS.
 
+### 4.1 Detailed V02 Detection Algorithm
+
+The V02 "underpaid" detection uses a 5% tolerance threshold to account for rounding differences in payroll systems:
+
+```python
+def detect_v02_bpjs_underpaid(gross_salary: int, extracted_jht: int) -> dict:
+    """
+    V02: BPJS JHT underpaid detection with 5% tolerance.
+    
+    Indonesian payroll systems sometimes round differently (banker's rounding,
+    truncation vs rounding at each step). We allow 5% tolerance before flagging.
+    """
+    expected_jht = gross_salary * 0.02
+    tolerance = expected_jht * 0.05  # 5% tolerance
+    minimum_acceptable = expected_jht - tolerance
+    
+    shortfall = expected_jht - extracted_jht
+    is_violation = extracted_jht < minimum_acceptable
+    
+    return {
+        "violation": is_violation,
+        "expected_jht": round(expected_jht),
+        "minimum_acceptable": round(minimum_acceptable),
+        "extracted_jht": extracted_jht,
+        "shortfall_per_month": round(max(0, expected_jht - extracted_jht)),
+        "shortfall_per_year": round(max(0, (expected_jht - extracted_jht) * 12))
+    }
+```
+
+### 4.2 Common Underpayment Patterns
+
+Wajar Slip's violation detection is informed by common payroll error patterns observed in Indonesian SME environments:
+
+1. **JKK/JKM passed to employee**: Some employers incorrectly deduct JKK or JKM from employee salary, which is illegal under PP 44/2015. While JKK/JKM do not appear on the payslip deduction line, cekwajar.id detects this when total deductions exceed the legal employee share.
+
+2. **JP cap manipulation**: Employers with employees earning above the JP cap sometimes incorrectly apply the cap to employee contributions or skip JP entirely, violating PP 45/2015.
+
+3. **Fixed-rate JKK**: Rather than risk-based classification (0.24–1.74%), some employers use a single 0.24% rate regardless of industry risk class, understating JKK contributions for high-risk industries.
+
 ---
 
 ## 5. Salary Cap Update Mechanism
@@ -224,6 +263,35 @@ LIMIT 1;
 | PP 44/2015 | JKK/JKM rates | JKK 0.24–1.74%, JKM 0.30% (employer only) |
 | Perpres 82/2018 | BPJS Kesehatan | Employee 1%, Employer 4%, Cap IDR 12,000,000 |
 | PMK 168/2023 | TER method for PPh21 | Applied after gross → PTKP → taxable income |
+
+### 6.1 Full Regulatory Timeline
+
+Understanding when each regulation was enacted helps trace the evolution of Indonesian payroll compliance:
+
+| Year | Regulation | Change |
+|------|------------|--------|
+| 2015 | PP 46/2015, PP 45/2015, PP 44/2015 | Original BPJS Ketenagakerjaan components established |
+| 2015 | Perpres 82/2018 (original) | BPJS Kesehatan rates set: employee 1%, employer 4% |
+| 2018 | Perpres 82/2018 amendments | BPJS Kesehatan cap increased from IDR 10M to IDR 12M |
+| 2020 | Presidential instruction | COVID-19 contribution period (BPJS Kesehatan 1%特殊) |
+| 2023 | PMK 168/2023 | PPh21 TER method introduced, replacing PKP-based rates |
+| 2024 | Annual Kemnaker review | JP cap updated (IDR 8,965,800 → IDR 9,559,600) |
+
+### 6.2 Interaction with PPh21 Calculations
+
+BPJS deductions reduce gross salary before PPh21 calculation, creating an important interaction:
+
+```
+Gross Salary (Gaji Pokok + Tunjangan Tetap)
+  ↓ minus: Employee BPJS contributions (JHT + JP + Kesehatan)
+  ↓ = Net Gross ( untuk perhitungan PPh21)
+  ↓ minus: PTKP deduction
+  ↓ = Taxable Income (Penghasilan Kena Pajak)
+  ↓ apply: TER rate or progressive brackets
+  ↓ = PPh21 payable
+```
+
+This sequence means that when an employer underpays BPJS, the PPh21 withholding is also calculated on an inflated taxable income, potentially causing double damage to the employee. Wajar Slip detects both issues simultaneously and reports them as separate violations.
 
 ---
 

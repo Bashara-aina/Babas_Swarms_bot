@@ -1,8 +1,14 @@
 ---
 title: "ADR-SELF-KNOWLEDGE-001: Master Architecture Overview"
-source_type: ARCHITECTURE_DECISION
-date: 2026-04-11
+type: decision
+status: active
 tags: [adr, architecture, self-knowledge, cross-repo]
+created: 2026-04-11
+updated: 2026-04-11
+summary: Architecture overview of all repositories and projects in Bashara's AI agent system, providing self-knowledge mapping for the SwarmBot/Legion system to understand its own ecosystem.
+wikilinks: []
+confidence: high
+source: implementation
 ---
 
 # ADR-SELF-KNOWLEDGE-001: Master Architecture Overview
