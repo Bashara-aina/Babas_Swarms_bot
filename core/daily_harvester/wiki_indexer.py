@@ -16,7 +16,7 @@ from core.daily_harvester.types import WikiEntry
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-WIKI_ROOT = REPO_ROOT / ".wiki" / "knowledge"
+WIKI_ROOT = REPO_ROOT / "wiki" / "legion" / "harvester"
 
 
 class WikiIndexer:

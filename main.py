@@ -1016,6 +1016,7 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="teach", description="Teach/correct Legion profile"),
                 BotCommand(command="memories", description="Show recent memories"),
                 BotCommand(command="briefing", description="Morning briefing"),
+                BotCommand(command="harvest_review", description="Review pending harvest candidates"),
                 BotCommand(command="monitor", description="System health + alert thresholds"),
                 # Business
                 BotCommand(command="biz", description="Business metrics dashboard"),

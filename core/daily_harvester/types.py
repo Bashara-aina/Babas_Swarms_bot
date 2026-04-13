@@ -95,3 +95,47 @@ class WikiEntry(TypedDict):
     created_at: str  # ISO8601
     veracity_score: float  # 0.0-1.0
     superseded_ids: list[str]  # file_ids this entry supersedes
+
+
+class FeedbackReason(str, Enum):
+    """Reason codes for harvest candidate feedback."""
+
+    TOPIC_DRIFT = "topic_drift"
+    LOW_QUALITY = "low_quality"
+    DUPLICATE = "duplicate"
+    NOT_RELEVANT = "not_relevant"
+    OUTDATED = "outdated"
+    UNRELIABLE_SOURCE = "unreliable_source"
+    ACCEPTED = "accepted"
+
+
+class HarvestCandidate(TypedDict):
+    """A single candidate in a harvest session log entry."""
+
+    candidate_id: str
+    source: str  # e.g. "arxiv/cs.AI/2504.01999" or "duckduckgo/123"
+    title: str
+    url: str
+    score: float  # 0.0-1.0
+    decision: str  # "pending" | "accepted" | "rejected" | "skipped"
+    reason: str  # FeedbackReason value or "pending"
+    reason_detail: str
+    tags: list[str]
+
+
+class HarvestMetadata(TypedDict):
+    """Metadata block within a harvest session log entry."""
+
+    candidates_found: int
+    candidates_reviewed: int
+    pending: int
+    review_mode: str  # "telegram" | "auto" | "none"
+
+
+class HarvestSession(TypedDict):
+    """A structured harvest session log entry — one per harvester run."""
+
+    date: str  # YYYY-MM-DD
+    session_id: str  # UUID
+    candidates_reviewed: list[HarvestCandidate]
+    metadata: HarvestMetadata

@@ -14,7 +14,9 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-WIKI_ROOT = REPO_ROOT / ".wiki" / "knowledge"
+# Active vault is wiki/ per CLAUDE.md section 2b — harvester writes to wiki/legion/harvester/
+WIKI_ROOT = REPO_ROOT / "wiki" / "legion" / "harvester"
+DATA_DIR = REPO_ROOT / "data" / "harvest"
 
 _TOPIC_PREFIXES: dict[str, str] = {
     "cekwajar_labor_law": "CW-",
@@ -113,9 +115,15 @@ class WikiStorage:
 
     def __init__(self, wiki_root: Path | None = None) -> None:
         self.wiki_root = (wiki_root or WIKI_ROOT).resolve()
-        self.rejected_log = self.wiki_root.parent / "harvest_rejected.md"
-        self.conflict_log = self.wiki_root.parent / "harvest_conflicts.md"
-        self.harvest_log = self.wiki_root.parent / "harvest_log.md"
+        self.harvest_log = self.wiki_root / "harvest-log.md"
+        self.pending_file = DATA_DIR / "pending_candidates.jsonl"
+        self.scores_history = self.wiki_root / "scores_history.jsonl"
+        self._ensure_dirs()
+
+    def _ensure_dirs(self) -> None:
+        """Ensure harvester directories and data directories exist."""
+        self.wiki_root.mkdir(parents=True, exist_ok=True)
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     def _make_filename(self, topic: str, title: str, date: str) -> str:
         """Build a harvester entry filename: PREFIX-NNN-slug-YYYY-MM-DD.md."""
@@ -225,34 +233,186 @@ class WikiStorage:
             await f.write("\n".join(lines_out))
 
     async def append_rejected_log(self, candidate: dict[str, Any], reason: str) -> None:
-        """Append a rejected candidate to the harvest_rejected.md log."""
-        lines = [
-            f"## {candidate.get('title', 'Untitled')} (rejected {datetime.now(timezone.utc).strftime('%Y-%m-%d')})",
-            "",
-            f"**Reason**: {reason}",
-            "",
-            f"**Topic**: {candidate.get('topic', 'unknown')}",
-            "",
-        ]
-        async with aiofiles.open(self.rejected_log, encoding="utf-8", mode="a") as f:
-            await f.write("\n".join(lines) + "\n")
+        """Deprecated: kept for compat. Rejected entries are now in harvest-log.md."""
+        pass
 
     async def append_conflict_log(self, file_id1: str, file_id2: str, reason: str) -> None:
-        """Append a conflict between two wiki entries to harvest_conflicts.md."""
-        lines = [
-            f"## Conflict: {file_id1} vs {file_id2} ({datetime.now(timezone.utc).strftime('%Y-%m-%d')})",
+        """Deprecated: kept for compat. Conflict entries are now in harvest-log.md."""
+        pass
+
+    async def append_harvest_log(
+        self,
+        accepted_count: int,
+        rejected_count: int,
+        date: str,
+        candidates: list[dict[str, Any]] | None = None,
+    ) -> None:
+        """Append a structured harvest session to harvest-log.md (Karpathy KB format).
+
+        Each session is a YAML-frontmatter block followed by a JSON body.
+        """
+        import uuid
+
+        session_id = str(uuid.uuid4())[:8]
+        candidates_reviewed = []
+        pending = []
+
+        if candidates:
+            for c in candidates:
+                decision = "accepted" if c.get("_accepted") else "rejected"
+                reason = c.get("_reason", "auto_scored")
+                candidates_reviewed.append(
+                    {
+                        "candidate_id": c.get("candidate_id", ""),
+                        "source": c.get("source", "unknown"),
+                        "title": c.get("title", "Untitled"),
+                        "url": c.get("url", ""),
+                        "score": c.get("relevance_score", 0.5),
+                        "decision": decision,
+                        "reason": reason,
+                        "reason_detail": c.get("_reason_detail", ""),
+                        "tags": c.get("tags", []),
+                    }
+                )
+            pending_count = len([c for c in candidates if not c.get("_accepted") and not c.get("_rejected")])
+        else:
+            pending_count = 0
+
+        # Build YAML frontmatter + JSON body
+        frontmatter = [
+            "---",
+            f"title: harvest-session-{date}-{session_id}",
+            "type: timeline",
+            "status: active",
+            f"tags: [legion, harvester, harvest-session]",
+            f"created: {date}",
+            f"updated: {date}",
+            f"summary: Harvest session — {accepted_count} accepted, {rejected_count} rejected, {pending_count} pending",
+            "wikilinks: []",
+            "confidence: high",
+            'source: legion-harvester',
+            "---",
             "",
-            f"**Reason**: {reason}",
+            "# Harvest Session",
             "",
-            f"**File 1**: {file_id1}",
-            f"**File 2**: {file_id2}",
+            f"**Date**: {date}",
+            f"**Session ID**: {session_id}",
+            f"**Accepted**: {accepted_count} | **Rejected**: {rejected_count} | **Pending**: {pending_count}",
+            "",
+            "## Candidates",
             "",
         ]
-        async with aiofiles.open(self.conflict_log, encoding="utf-8", mode="a") as f:
-            await f.write("\n".join(lines) + "\n")
 
-    async def append_harvest_log(self, accepted_count: int, rejected_count: int, date: str) -> None:
-        """Append a daily harvest summary to harvest_log.md."""
-        line = f"- **{date}**: {accepted_count} accepted, {rejected_count} rejected"
+        json_body: dict[str, Any] = {
+            "date": date,
+            "session_id": session_id,
+            "candidates_reviewed": candidates_reviewed,
+            "metadata": {
+                "candidates_found": len(candidates) if candidates else accepted_count + rejected_count,
+                "candidates_reviewed": len(candidates_reviewed),
+                "pending": pending_count,
+                "review_mode": "auto",
+            },
+        }
+
+        # Append YAML frontmatter
         async with aiofiles.open(self.harvest_log, encoding="utf-8", mode="a") as f:
-            await f.write(line + "\n")
+            await f.write("\n".join(frontmatter) + "\n")
+
+        # Append JSON body as fenced code block
+        import json
+
+        async with aiofiles.open(self.harvest_log, encoding="utf-8", mode="a") as f:
+            await f.write("```json\n")
+            await f.write(json.dumps(json_body, indent=2, ensure_ascii=False))
+            await f.write("\n```\n\n")
+
+    # -------------------------------------------------------------------------
+    # Pending candidates (JSONL) — read/write for Telegram review
+    # -------------------------------------------------------------------------
+
+    async def write_pending_candidates(self, candidates: list[dict[str, Any]]) -> None:
+        """Overwrite pending_candidates.jsonl with current pending queue."""
+        import json
+
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(self.pending_file, encoding="utf-8", mode="w") as f:
+            for c in candidates:
+                await f.write(json.dumps(c, ensure_ascii=False) + "\n")
+
+    async def read_pending_candidates(self) -> list[dict[str, Any]]:
+        """Read all pending candidates from pending_candidates.jsonl."""
+        import json
+
+        if not self.pending_file.exists():
+            return []
+        candidates: list[dict[str, Any]] = []
+        async with aiofiles.open(self.pending_file, encoding="utf-8", mode="r") as f:
+            async for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        candidates.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        pass
+        return candidates
+
+    async def append_pending_candidate(self, candidate: dict[str, Any]) -> None:
+        """Append a single candidate to pending_candidates.jsonl."""
+        import json
+
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(self.pending_file, encoding="utf-8", mode="a") as f:
+            await f.write(json.dumps(candidate, ensure_ascii=False) + "\n")
+
+    async def mark_candidate_reviewed(self, candidate_id: str, decision: str, reason: str) -> bool:
+        """Mark a candidate as reviewed in pending_candidates.jsonl. Returns True if found."""
+        import json
+
+        pending = await self.read_pending_candidates()
+        updated: list[dict[str, Any]] = []
+        found = False
+        for c in pending:
+            if c.get("candidate_id") == candidate_id:
+                c["decision"] = decision
+                c["reason"] = reason
+                c["reviewed"] = True
+                found = True
+            updated.append(c)
+
+        if found:
+            await self.write_pending_candidates(updated)
+        return found
+
+    # -------------------------------------------------------------------------
+    # Scores history (for scorer feedback)
+    # -------------------------------------------------------------------------
+
+    async def append_scores_history(self, entry: dict[str, Any]) -> None:
+        """Append a scoring bias update to scores_history.jsonl."""
+        import json
+
+        self.wiki_root.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(self.scores_history, encoding="utf-8", mode="a") as f:
+            await f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+    async def read_scores_history(self, days: int = 30) -> list[dict[str, Any]]:
+        """Read last `days` days of scoring history from scores_history.jsonl."""
+        import json
+
+        if not self.scores_history.exists():
+            return []
+        history: list[dict[str, Any]] = []
+        cutoff = datetime.now(timezone.utc).timestamp() - (days * 86400)
+        async with aiofiles.open(self.scores_history, encoding="utf-8", mode="r") as f:
+            async for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        entry = json.loads(line)
+                        ts = entry.get("timestamp", 0)
+                        if ts >= cutoff:
+                            history.append(entry)
+                    except json.JSONDecodeError:
+                        pass
+        return history

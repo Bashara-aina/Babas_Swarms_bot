@@ -17,6 +17,7 @@ from handlers import (
     brain,
     communications,
     debate_handlers,
+    harvest_review,
     legion_extras,
     business_handler,
     wiki_handler,
@@ -82,6 +83,7 @@ _ROUTER_ORDER = [
     orchestrate.router,  # /orchestrate /orchestrate_cancel
     legion_extras.router,  # /simulate /screenpipe_status /mcp_status /voice_room /websearch /quickscrape
     wiki_router,  # /wiki_audit /wiki_flush /wiki_restore /wiki_scan /wiki_stats
+    harvest_review.router,  # /harvest_review
     admin_handlers.router,  # /budget /soul (owner-only)
     ai.router,  # /run /think /agent /swarm + NL catch-all (LAST)
 ]

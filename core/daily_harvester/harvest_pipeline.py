@@ -87,12 +87,15 @@ class HarvestPipeline:
         logger.info("Swarm debate complete: %d verdicts", len(verdicts))
         return verdicts
 
-    async def _write_to_wiki(self, candidates: list[CandidateInfo], verdicts: list[SwarmVerdict]) -> list[str]:
-        """Write accepted entries to wiki, return list of file_ids written."""
+    async def _write_to_wiki(
+        self, candidates: list[CandidateInfo], verdicts: list[SwarmVerdict]
+    ) -> tuple[list[str], list[dict[str, Any]]]:
+        """Write accepted entries to wiki, return (file_ids, pending_candidates)."""
         from core.daily_harvester.types import VerdictDecision
 
         written: list[str] = []
         accepted: list[CandidateInfo] = []
+        pending: list[dict[str, Any]] = []
         rejected_count = 0
 
         verdict_map = {v["candidate_id"]: v for v in verdicts}
@@ -101,6 +104,30 @@ class HarvestPipeline:
             verdict = verdict_map.get(candidate["candidate_id"])
             if not verdict:
                 continue
+
+            c_id = candidate["candidate_id"]
+            source = candidate.get("url", "unknown")
+            # Derive source label from URL domain
+            if "arxiv.org" in source:
+                source = f"arxiv/{source.split('arxiv.org/abs/')[-1]}" if "abs" in source else f"arxiv/{source}"
+            else:
+                source = f"duckduckgo/{c_id[:8]}"
+
+            candidate_log: dict[str, Any] = {
+                "candidate_id": c_id,
+                "topic": candidate["topic"],
+                "title": candidate["title"],
+                "content": candidate["content"],
+                "url": source,
+                "source": source,
+                "tags": candidate["tags"],
+                "relevance_score": candidate.get("relevance_score", 0.5),
+                "decision": "pending",
+                "reason": "pending",
+                "reason_detail": "",
+                "discovered_at": candidate["discovered_at"],
+                "reviewed": False,
+            }
 
             if verdict["verdict"] in (VerdictDecision.ACCEPT, VerdictDecision.ACCEPT_WITH_CAVEAT):
                 entry: WikiEntry = {
@@ -118,8 +145,11 @@ class HarvestPipeline:
                 await self.wiki_storage.update_index(candidate["topic"])
                 written.append(file_id)
                 accepted.append(candidate)
+                candidate_log["_accepted"] = True
+                candidate_log["decision"] = "accepted"
+                candidate_log["reason"] = "accepted"
+                candidate_log["reason_detail"] = verdict.get("reasoning", "")[:200]
             elif verdict["verdict"] == VerdictDecision.SUPERSEDE:
-                # Write with supersede link
                 entry = WikiEntry(
                     file_id="",
                     topic=candidate["topic"],
@@ -134,17 +164,32 @@ class HarvestPipeline:
                 file_id = await self.wiki_storage.write_entry(entry)
                 await self.wiki_storage.update_index(candidate["topic"])
                 written.append(file_id)
+                candidate_log["_accepted"] = True
+                candidate_log["decision"] = "superseded"
+                candidate_log["reason"] = "superseded"
+                candidate_log["reason_detail"] = verdict.get("reasoning", "")[:200]
             else:
                 reason = f"Verdict: {verdict['verdict']} — {verdict.get('reasoning', 'no reason')}"
-                await self.wiki_storage.append_rejected_log(candidate, reason)
+                candidate_log["_rejected"] = True
+                candidate_log["decision"] = "rejected"
+                candidate_log["reason"] = verdict["verdict"].value.lower()
+                candidate_log["reason_detail"] = verdict.get("reasoning", "")[:200]
                 rejected_count += 1
 
-        # Log the harvest
-        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        await self.wiki_storage.append_harvest_log(len(accepted), rejected_count, date_str)
+            # All candidates go to pending queue for review
+            pending.append(candidate_log)
 
-        logger.info("Wiki write complete: %d accepted, %d rejected", len(accepted), rejected_count)
-        return written
+        # Write structured harvest log
+        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        await self.wiki_storage.append_harvest_log(
+            len(accepted), rejected_count, date_str, candidates=pending
+        )
+
+        # Persist pending candidates to JSONL for Telegram review
+        await self.wiki_storage.write_pending_candidates(pending)
+
+        logger.info("Wiki write complete: %d accepted, %d rejected, %d pending", len(accepted), rejected_count, len(pending))
+        return written, pending
 
     async def _generate_report(
         self,
@@ -190,7 +235,7 @@ class HarvestPipeline:
         verdicts = await self._swarm_debate(candidates)
 
         # Step 4: write to wiki
-        written_files = await self._write_to_wiki(candidates, verdicts)
+        written_files, pending_candidates = await self._write_to_wiki(candidates, verdicts)
 
         # Step 5: generate report
         accepted = [
