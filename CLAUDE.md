@@ -284,32 +284,40 @@ Wire the handler in main.py router registration
 Add a test in tests/test_intent_router.py
 
 7. MEMORY SYSTEM ARCHITECTURE
-Legion runs 6 memory tiers. All writes go through core/memory/memory_manager.py:
-TierTechnologyPurposeTTL
+Legion has 4 active memory tiers plus a RAG facade. All writes go through core/memory/memory_manager.py:
+TierTechnologyPurposeOwner
 Working
-In-process dict
+CoreMemory (in-process dict)
 Current session turns
-Session
+core/memory/memory_manager.py
 Episodic
-SQLite (aiosqlite)
-Recent conversations
+RecallMemory (SQLite/aiosqlite)
+Recent conversation turns
 30 days
+core/memory/memory_manager.py
 Semantic
-mem0ai + ChromaDB
+LegionSemanticMemory (mem0ai)
 Vector semantic retrieval
 Permanent
+core/memory_manager.py
 Core facts
-memory_manager
-Bashara's persistent profile
+CoreMemory (in-process dict)
+Bashara's persistent key facts
 Permanent
+core/memory/memory_manager.py
 Graph
-graphiti-core
+TemporalKnowledgeGraph (aiosqlite)
 Relationship knowledge graph
 Permanent
-Long-term
-Letta
-Hierarchical long-term tiers
-Permanent
+core/memory/temporal_graph.py
+
+Additional layers:
+- LegionMemoryFacade (core/legion_memory_facade.py): RAG compositor — combines mem0 semantic + wiki + Screenpipe for tool/agent context
+- UserProfile (core/memory/user_profile.py): Personality/emotion state persistence
+
+NOTE: Letta (Tier 5 in prior docs) is NOT present in the codebase.
+NOTE: ChromaDB is probed in main.py health check but is NOT used as a standalone store (mem0 handles vector storage).
+
 Consistency rule: Nightly consolidation runs at 02:00 JST via core/memory/consolidator.py. Do not add ad-hoc writes that bypass the facade — they will create drift.
 
 8. BACKGROUND TASK REGISTRY
