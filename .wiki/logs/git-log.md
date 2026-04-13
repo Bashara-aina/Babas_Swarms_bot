@@ -92,3 +92,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - Date: Mon Apr 13 01:20:10 PM JST 2026
 - Message: feat: wiki enrichment — stub elimination, schema fixes, wikilink normalization
 ---
+## Commit: 5354db7
+- Date: Mon Apr 13 01:22:59 PM JST 2026
+- Message: fix: batch1 — wikilinks, YAML frontmatter, path wiring, opencode.json
+---
