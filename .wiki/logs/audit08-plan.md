@@ -1,11 +1,10 @@
 ---
-# LEGION AUDIT 08 — Bridges Layer Connectivity
-> Created: 2026-04-12 | Agent: @planner | Status: ✅ COMPLETE
-
-## Goal
-Every bridge must: (1) connect to its target service, (2) be imported by at least one handler.
 
 ---
+# LEGION AUDIT 08 — Bridges Layer Connectivity
+> Created: 2026-04-12 | Agent: @planner | Status: ✅ COMPLETE
+## Goal
+Every bridge must: (1) connect to its target service, (2) be imported by at least one handler.
 
 ## BRIDGES INVENTORY
 

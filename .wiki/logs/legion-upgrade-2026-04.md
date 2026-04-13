@@ -1,9 +1,8 @@
 ---
-# Legion Upgrade Log — 2026-04
-
-*Consolidated from 3 session logs on 2026-04-12 for wiki cleanup.*
 
 ---
+# Legion Upgrade Log — 2026-04
+*Consolidated from 3 session logs on 2026-04-12 for wiki cleanup.*
 
 ## 2026-04-10 — SwarmBot Improvement Plan (Session Log)
 
@@ -295,7 +294,6 @@ pytest tests/ -x --asyncio-mode=auto -q
 
 ### Status: ✅ COMPLETE — All 276 tests passing
 **Date completed:** 2026-04-10
-
 
 ---
 

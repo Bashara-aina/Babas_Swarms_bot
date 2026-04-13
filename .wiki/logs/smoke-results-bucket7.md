@@ -1,11 +1,10 @@
 ---
-# Smoke Results — Bucket 7: Proactive Systems & Schedulers
 
+---
+# Smoke Results — Bucket 7: Proactive Systems & Schedulers
 **Date**: 2026-04-11  
 **Bucket**: 7  
 **Focus**: Proactive Systems & Schedulers
-
----
 
 ## Result: ✅ PASS
 

@@ -1,11 +1,10 @@
 ---
-# Smoke Results — Bucket 3: Core Intent & Memory Systems
 
+---
+# Smoke Results — Bucket 3: Core Intent & Memory Systems
 **Date**: 2026-04-11 20:35:40  
 **Worker**: @worker  
 **Bucket**: 3 — Core Intent & Memory Systems
-
----
 
 ## Status: ✅ PASS
 

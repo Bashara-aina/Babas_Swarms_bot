@@ -1,11 +1,10 @@
 ---
-# NIHONGO MODE v2.0 — Upgrade Task List
-> Planned by @planner | Date: 2026-04-12
-
-## Overview
-Upgrade the existing Nihongo Mode with 9 major components while maintaining full backward compatibility with the existing command interface (`/nihonko`, `/nihonko off`, `/nihonko quiz`, etc.).
 
 ---
+# NIHONGO MODE v2.0 — Upgrade Task List
+> Planned by @planner | Date: 2026-04-12
+## Overview
+Upgrade the existing Nihongo Mode with 9 major components while maintaining full backward compatibility with the existing command interface (`/nihonko`, `/nihonko off`, `/nihonko quiz`, etc.).
 
 ## CONSTRAINTS (MUST NOT BREAK)
 - Existing command interface: `/nihonko`, `/nihonko chat`, `/nihonko voice`, `/nihonko quiz`, `/nihonko story`, `/nihonko free`, `/stop`, `/nihonko status`, `/nihonko level`, `/furigana on/off`, `/romaji on/off`, `/slow on/off`

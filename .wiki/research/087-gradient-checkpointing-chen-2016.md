@@ -9,7 +9,7 @@ venue: "arXiv:1604.06174"
 arXiv: "1604.06174"
 date: 2016-04-21
 cited: "~2000+"
-implementation: "PyTorch checkpoint", "TensorFlow memory optimizer"
+implementation: ["PyTorch checkpoint", "TensorFlow memory optimizer"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

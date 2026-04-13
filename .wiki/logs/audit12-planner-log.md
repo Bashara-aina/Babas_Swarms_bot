@@ -1,12 +1,9 @@
 ---
-# LEGION AUDIT 12 — Planner Log
-## Nihongo Mode User Isolation
-
-**Date:** 2026-04-12  
-**Task:** Fix nihongo mode so it is fully per-user and cannot leak between users  
-**Planner:** @planner (MiniMax M2.7)
-
+date: "2026-04-12"
+task: "Fix nihongo mode so it is fully per-user and cannot leak between users"
+planner: "@planner (MiniMax M2.7)"
 ---
+# LEGION AUDIT 12 — Planner Log
 
 ## Subtask Decomposition
 

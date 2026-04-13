@@ -1,10 +1,9 @@
 ---
-# Planner Log: get_relationship_context Bugfix
-
-**Date**: 2026-04-12  
-**Task**: Fix `NameError: name 'get_relationship_context' is not defined`
 
 ---
+# Planner Log: get_relationship_context Bugfix
+**Date**: 2026-04-12  
+**Task**: Fix `NameError: name 'get_relationship_context' is not defined`
 
 ## Investigation Summary
 

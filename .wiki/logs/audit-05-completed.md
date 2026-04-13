@@ -1,10 +1,9 @@
 ---
-# AUDIT 05 — Core Module Wiring — COMPLETED
-**Date:** 2026-04-12
-**Status:** ✅ COMPLETED
-**Worker:** @worker
-
+date: "2026-04-12"
+status: "✅ COMPLETED"
+worker: "@worker"
 ---
+# AUDIT 05 — Core Module Wiring — COMPLETED
 
 ## VERIFICATION COMMAND
 ```bash

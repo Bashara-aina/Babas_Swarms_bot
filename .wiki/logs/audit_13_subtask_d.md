@@ -1,11 +1,9 @@
 ---
-# AUDIT-13 SUBTASK D — Feature Flag Verification Report
-
-**Date:** 2026-04-12  
-**Auditor:** @reviewer  
-**Task:** Verify all disabled features have user messages
-
+date: "2026-04-12"
+auditor: "@reviewer"
+task: "Verify all disabled features have user messages"
 ---
+# AUDIT-13 SUBTASK D — Feature Flag Verification Report
 
 ## Verification Commands Run
 

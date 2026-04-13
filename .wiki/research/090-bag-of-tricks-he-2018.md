@@ -9,7 +9,7 @@ venue: "arXiv:1812.01187"
 arXiv: "1812.01187"
 date: 2018-12-04
 cited: "~2000+"
-implementation: " torchvision built-in", "timm library"
+implementation: [" torchvision built-in", "timm library"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

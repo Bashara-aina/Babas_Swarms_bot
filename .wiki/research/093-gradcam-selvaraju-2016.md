@@ -9,7 +9,7 @@ venue: "ICCV 2017 (Best Paper Honorable Mention)"
 arXiv: "1610.02391"
 date: 2016-10-07
 cited: "~8000+"
-implementation: "PyTorch grad-cam", "torchvision.gradcam", "captum"
+implementation: ["PyTorch grad-cam", "torchvision.gradcam", "captum"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

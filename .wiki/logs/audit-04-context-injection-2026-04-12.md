@@ -1,10 +1,9 @@
 ---
-# LEGION AUDIT 04 — Context Injection (Search / Wiki / Memory / Soul)
-**Date:** 2026-04-12
-**Status:** In Progress
-**Goal:** Ensure search results, wiki, memory, and soul are ALL in LLM context before every call
-
+date: "2026-04-12"
+status: "In Progress"
+goal: "Ensure search results, wiki, memory, and soul are ALL in LLM context before every call"
 ---
+# LEGION AUDIT 04 — Context Injection (Search / Wiki / Memory / Soul)
 
 ## Overview
 

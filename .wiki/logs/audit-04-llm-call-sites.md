@@ -1,10 +1,8 @@
 ---
-# AUDIT 04: LLM Call Sites Inventory
-
-**Date:** 2026-04-12
-**Audit:** Context Injection — Soul/Wiki/Memory/Search
-
+date: "2026-04-12"
+audit: "Context Injection — Soul/Wiki/Memory/Search"
 ---
+# AUDIT 04: LLM Call Sites Inventory
 
 ## Primary LLM Call Site: `llm_client/__init__.py`
 

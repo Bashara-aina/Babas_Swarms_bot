@@ -1,10 +1,10 @@
 ---
+
+---
 # Anti-Slop Defense System — Task Decomposition
 > Planner: Bashara | Date: 2026-04-11 | Project: Babas_Swarms_bot (Legion)
-
 ## Context
 Implement a full anti-slop defense stack into Babas_Swarms_bot. Every LLM response must pass through quality gates before reaching the user. This builds on the existing `core/wiki_quality_gate.py` pattern but extends it to all bot output.
-
 ## Directory Structure
 ```
 legion/                          # NEW — anti-slop module root
@@ -22,8 +22,6 @@ tests/
   workflows/
     quality-gate.yml           # CI quality gate workflow
 ```
-
----
 
 ## STAGE 0: Safety Checkpoint
 **Subtask 0.1**: Create git tag `anti-slop-start` before beginning work

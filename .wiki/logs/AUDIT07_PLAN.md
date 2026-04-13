@@ -1,8 +1,8 @@
 ---
-# AUDIT 07 — Orphan & Stub Handler Plan (REVISED)
-> Planner: Bashara | Date: 2026-04-12 | Files: 10 high-risk handlers
 
 ---
+# AUDIT 07 — Orphan & Stub Handler Plan (REVISED)
+> Planner: Bashara | Date: 2026-04-12 | Files: 10 high-risk handlers
 
 ## Executive Summary
 

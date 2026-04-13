@@ -1,4 +1,3 @@
----
 ## @worker BRIEF: LEGION_FIX_IDENTITY_SEARCH — Three-Fix Plan
 
 **Source**: `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md`  

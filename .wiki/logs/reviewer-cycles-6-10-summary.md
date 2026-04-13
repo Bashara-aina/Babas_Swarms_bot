@@ -1,10 +1,9 @@
 ---
-# Reviewer Summary: Cycles 6-10
-**Reviewer:** @reviewer
-**Date:** 2026-04-12
-**Session:** LEGION WIKI LOOP 2026-04-12
-
+reviewer: "@reviewer"
+date: "2026-04-12"
+session: "LEGION WIKI LOOP 2026-04-12"
 ---
+# Reviewer Summary: Cycles 6-10
 
 ## Total Pages Reviewed: 17
 

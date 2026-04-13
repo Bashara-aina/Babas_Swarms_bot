@@ -1,12 +1,10 @@
 ---
+date: "2026-04-12"
+status: "PLANNED"
+---
 # AUDIT 05 — Core Module Wiring
-**Date:** 2026-04-12
-**Status:** PLANNED
-
 ## Goal
 Every file in `core/` is actively used; every export matches what callers import.
-
----
 
 ## Findings (Pre-planning)
 

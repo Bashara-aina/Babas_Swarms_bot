@@ -1,11 +1,9 @@
 ---
-# AUDIT-13 Review Summary
-
-**Date:** 2026-04-12  
-**Auditor:** @reviewer  
-**Task:** AUDIT-13 SUBTASK D — Verify all disabled features have user messages
-
+date: "2026-04-12"
+auditor: "@reviewer"
+task: "AUDIT-13 SUBTASK D — Verify all disabled features have user messages"
 ---
+# AUDIT-13 Review Summary
 
 ## What Was Verified
 

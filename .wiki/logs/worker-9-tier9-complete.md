@@ -1,11 +1,10 @@
 ---
-# Worker Task Complete: Tier 9 Papers (086-093)
 
+---
+# Worker Task Complete: Tier 9 Papers (086-093)
 **Date**: April 11, 2026  
 **Task**: Write wiki pages for Tier 9 — Training Optimization for RTX 3060  
 **Worker**: Bashara
-
----
 
 ## Completed Papers
 

@@ -9,7 +9,7 @@ venue: "ICLR 2017"
 arXiv: "1608.03983"
 date: 2016-08-12
 cited: "~3000+"
-implementation: "PyTorch CosineAnnealingWarmRestarts", "TensorFlow"
+implementation: ["PyTorch CosineAnnealingWarmRestarts", "TensorFlow"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

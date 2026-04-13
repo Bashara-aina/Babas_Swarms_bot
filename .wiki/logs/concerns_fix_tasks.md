@@ -1,11 +1,10 @@
 ---
-# Fix 7 Critical Concerns — Subtask Plan
 
+---
+# Fix 7 Critical Concerns — Subtask Plan
 **Date**: 2026-04-12
 **Planner**: @planner
 **Status**: Draft — requires @worker execution
-
----
 
 ## Concern 1: Dual llm_client — llm_client.py (root) AND llm_client/ (dir)
 

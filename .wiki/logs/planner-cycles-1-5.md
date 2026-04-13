@@ -1,11 +1,11 @@
 ---
+
+---
 # PLANNER — Cycles 1-5 Wiki Knowledge Expansion
 > Session: 2026-04-12
 > Target: Fill .wiki/ with 100x-performance-impact knowledge pages
 > Debate threshold: Judge score >= 7 to write
 > Last updated: 2026-04-12
-
----
 
 ## OVERVIEW
 

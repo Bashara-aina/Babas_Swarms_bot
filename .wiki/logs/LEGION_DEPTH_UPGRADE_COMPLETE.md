@@ -1,11 +1,9 @@
 ---
-# LEGION DEPTH UPGRADE — Final Completion Report
-
-**Date:** 2026-04-12/13  
-**Task:** Execute all 10 priorities from `DEEP_AUDIT_2026-04-12.md`  
-**Status:** ✅ ALL 10 PRIORITIES COMPLETE
-
+date: "2026-04-12/13"
+task: "Execute all 10 priorities from `DEEP_AUDIT_2026-04-12.md`"
+status: "✅ ALL 10 PRIORITIES COMPLETE"
 ---
+# LEGION DEPTH UPGRADE — Final Completion Report
 
 ## 1. THE 10 PRIORITIES — STATUS TABLE
 

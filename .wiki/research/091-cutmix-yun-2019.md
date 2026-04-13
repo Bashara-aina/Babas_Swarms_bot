@@ -9,7 +9,7 @@ venue: "ICCV 2019 (Oral)"
 arXiv: "1905.04899"
 date: 2019-05-13
 cited: "~2000+"
-implementation: "PyTorch CutMix", "clovaai/CutMix-PyTorch"
+implementation: ["PyTorch CutMix", "clovaai/CutMix-PyTorch"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

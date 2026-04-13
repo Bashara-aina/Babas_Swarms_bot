@@ -1,11 +1,9 @@
 ---
-# LEGION AUDIT 01 — Handler Registration Audit (COMPLETE)
-
-**Date:** 2026-04-12
-**Agent:** @worker
-**Status:** ✅ COMPLETE
-
+date: "2026-04-12"
+agent: "@worker"
+status: "✅ COMPLETE"
 ---
+# LEGION AUDIT 01 — Handler Registration Audit (COMPLETE)
 
 ## Summary
 

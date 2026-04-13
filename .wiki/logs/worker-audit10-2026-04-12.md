@@ -1,11 +1,9 @@
 ---
-# Worker Audit 10 — Async Correctness Sweep
-
-**Date:** 2026-04-12
-**Worker:** @worker
-**Scope:** handlers/ + core/
-
+date: "2026-04-12"
+worker: "@worker"
+scope: "handlers/ + core"
 ---
+# Worker Audit 10 — Async Correctness Sweep
 
 ## Subtask 1: Missing `await` on async function calls
 

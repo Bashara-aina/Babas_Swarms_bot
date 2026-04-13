@@ -1,11 +1,10 @@
 ---
-# POPW-PROTOCOL Research Wiki — Final Review Report
 
+---
+# POPW-PROTOCOL Research Wiki — Final Review Report
 **Review Date**: 2026-04-11  
 **Reviewer**: @reviewer  
 **Scope**: POPW-PROTOCOL wiki — 100 papers across 10 tiers  
-
----
 
 ## Executive Summary
 

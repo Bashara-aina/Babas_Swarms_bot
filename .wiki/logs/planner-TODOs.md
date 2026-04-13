@@ -1,11 +1,10 @@
 ---
-# Planner TODO Log — cekwajar.id Wiki Build
-> Created: 2026-04-11 | Agent: @planner | Task: Build complete .wiki/ knowledge base for cekwajar.id
-
-## Task Summary
-Build the complete .wiki/ knowledge base for Bashara's cekwajar.id project (Bashara-aina/slip_cekwajar_id repo), creating all directory structures and markdown files with provided content.
 
 ---
+# Planner TODO Log — cekwajar.id Wiki Build
+> Created: 2026-04-11 | Agent: @planner | Task: Build complete .wiki/ knowledge base for cekwajar.id
+## Task Summary
+Build the complete .wiki/ knowledge base for Bashara's cekwajar.id project (Bashara-aina/slip_cekwajar_id repo), creating all directory structures and markdown files with provided content.
 
 ## Subtask Breakdown
 

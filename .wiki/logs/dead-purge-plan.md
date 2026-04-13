@@ -1,11 +1,10 @@
 ---
-# Dead File Purge Execution Plan
-> Created: 2026-04-11 | Planner: @planner | Task: Safe dead file cleanup with 3-pass confirmation
-
-## Overview
-Identify and safely remove confirmed-dead files from `/home/newadmin/swarm-bot` using a 3-pass confirmation protocol and graveyard pattern.
 
 ---
+# Dead File Purge Execution Plan
+> Created: 2026-04-11 | Planner: @planner | Task: Safe dead file cleanup with 3-pass confirmation
+## Overview
+Identify and safely remove confirmed-dead files from `/home/newadmin/swarm-bot` using a 3-pass confirmation protocol and graveyard pattern.
 
 ## Safety Rules (MUST FOLLOW)
 

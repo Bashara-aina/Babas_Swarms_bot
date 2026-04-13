@@ -1,11 +1,9 @@
 ---
+created: "2026-04-12 | **Planner:** @planner | **Status:** IN PROGRESS"
+---
 # AUDIT 13 — Feature Flag Audit Plan
-**Created:** 2026-04-12 | **Planner:** @planner | **Status:** IN PROGRESS
-
 ## Executive Summary
 Every disabled feature must have an explicit flag and user message. No permanently dead code masquerading as live.
-
----
 
 ## Step 1 — Feature Flags Inventory
 

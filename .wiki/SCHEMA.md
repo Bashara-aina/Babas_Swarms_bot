@@ -1,9 +1,8 @@
 ---
-# Legion Wiki Schema v2.0 — Karpathy LLM KB Pattern
-
-> The wiki is Legion's long-term memory. Every page is written for a smart AI reading it later.
 
 ---
+# Legion Wiki Schema v2.0 — Karpathy LLM KB Pattern
+> The wiki is Legion's long-term memory. Every page is written for a smart AI reading it later.
 
 ## Core Philosophy
 

@@ -1,44 +1,7 @@
 ---
-### CONTRACT #6: Update wiki/_meta/compile_state.json with correct article counts
-
-WHAT:
-  Read current wiki structure, count articles by type, and update compile_state.json with accurate last_compiled timestamp and article counts.
-
-FILES:
-  READ:
-    - wiki/concepts/
-    - wiki/entities/
-    - wiki/projects/
-    - wiki/architecture/
-    - wiki/timelines/
-    - wiki/people/
-  WRITE:
-    - wiki/_meta/compile_state.json
-  RUN:
-    - `find wiki/concepts/ -name "*.md" -type f | wc -l`
-    - `find wiki/entities/ -name "*.md" -type f | wc -l`
-    - `find wiki/projects/ -name "*.md" -type f | wc -l`
-
-DONE_WHEN:
-  - compile_state.json contains valid JSON
-  - compile_state.json has last_compiled set to "2026-04-13T12:00:00Z" or later
-  - compile_state.json has articles field with total count > 50
-  - compile_state.json has concepts, entities, projects, architecture, timelines, people subcounts
-
-PROOF_FORMAT:
-  Command: `cat wiki/_meta/compile_state.json`
-  Expected: JSON with "last_compiled" after 2026-04-13, "articles" > 50, and category breakdown
-
-BLOCKER_IF:
-  - compile_state.json cannot be parsed as valid JSON
-  - articles count is 0 or missing
-  - last_compiled is still "1970-01-01T00:00:00Z"
-
-DEPENDS_ON: 2
-
+DEPENDS_ON: "2"
 ---
-
-### CONTRACT #7: Verify and update wiki/_meta/migration_report_2026-04-13.md
+# ### CONTRACT #7: Verify and update wiki/_meta/migration_report_2026-04-13.md
 
 WHAT:
   Read migration_report_2026-04-13.md, verify it accurately reflects actual file counts, update with corrected counts if needed.

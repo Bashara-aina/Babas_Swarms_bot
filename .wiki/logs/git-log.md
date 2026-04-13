@@ -1,8 +1,7 @@
----
-## Commit: 20c3c09
-- Date: Sat Apr 11 06:28:30 PM JST 2026
-- Message: chore: commit and sync all local changes
----
+# git-log
+
+## Commits
+
 ## Commit: e9262e8
 - Date: Sat Apr 11 06:29:48 PM JST 2026
 - Message: chore: sync all local changes excluding env files
@@ -114,4 +113,20 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ## Commit: ab54128
 - Date: Mon Apr 13 05:36:12 PM JST 2026
 - Message: fix: quote summary field in popw-meetings-mar-apr-2026 timeline
+---
+## Commit: 7625978
+- Date: Mon Apr 13 05:37:57 PM JST 2026
+- Message: wiki: fix YAML frontmatter in 3 audit files
+
+Fixed WIRING_AUDIT_REPORT.md (bold metadata → proper YAML FM),
+legion/audit-2026-04-11-fixes.md, logs/worker-final-2026-04-11.md
+(prepend --- to fix malformed frontmatter blocks).
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: c9fec77
+- Date: Mon Apr 13 05:38:49 PM JST 2026
+- Message: wiki: update compile_state — merged vault, 2091 articles, 1688 proper FM (80.5%)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---

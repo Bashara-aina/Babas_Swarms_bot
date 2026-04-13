@@ -1,11 +1,9 @@
 ---
-# LEGION AUDIT 12 — Worker Completion Log
-
-**Date:** 2026-04-12  
-**Agent:** @worker  
-**Scope:** Nihongo Mode per-user isolation audit
-
+date: "2026-04-12"
+agent: "@worker"
+scope: "Nihongo Mode per-user isolation audit"
 ---
+# LEGION AUDIT 12 — Worker Completion Log
 
 ## Subtask Results
 

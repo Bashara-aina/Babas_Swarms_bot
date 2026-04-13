@@ -1,9 +1,8 @@
 ---
-# SwarmBot Planner Decomposition
-**Date:** 2026-04-11  
-**Task:** Bug fixes + MiniMax multi-modal integration + security audit
-
+date: "2026-04-11"
+task: "Bug fixes + MiniMax multi-modal integration + security audit"
 ---
+# SwarmBot Planner Decomposition
 
 ## 🔴 Critical Bug Fixes
 

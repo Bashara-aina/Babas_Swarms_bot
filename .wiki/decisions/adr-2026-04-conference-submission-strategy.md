@@ -1,11 +1,12 @@
 ---
+
 title: "ADR-2026-04: Conference Submission Strategy"
 type: decision
 status: active
 tags: [popw, conference, submission, strategy, timeline]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Conference submission strategy for POPW research targeting mid-to-late 2026 venues focused on computer vision, human activity recognition, or industrial AI. Primary target: CV/PRCV workshop on multi-task learning; secondary: ICRA/IROS for industrial robotics audience.
+summary: "Conference submission strategy for POPW research targeting mid-to-late 2026 venues focused on computer vision, human activity recognition, or industrial AI. Primary target: CV/PRCV workshop on multi-task learning; secondary: ICRA/IROS for industrial robotics audience."
 wikilinks:
   - [[projects/popw-research]]
   - [[concepts/film-modulation]]
@@ -13,7 +14,9 @@ wikilinks:
 confidence: high
 source: research
 project: popw
+
 ---
+
 
 # ADR-2026-04: Conference Submission Strategy
 

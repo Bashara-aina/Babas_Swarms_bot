@@ -1,9 +1,8 @@
 ---
-# AUDIT 11 — Task List
-**Date:** 2026-04-12
-**Status:** IN PROGRESS
-
+date: "2026-04-12"
+status: "IN PROGRESS"
 ---
+# AUDIT 11 — Task List
 
 ## SUBTASK 1: bridges/__init__.py — Create with re-exports
 **Priority:** P1 (will break if missing)

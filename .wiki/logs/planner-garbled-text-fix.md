@@ -1,11 +1,10 @@
 ---
-# Planner Log: Garbled Text Fix (Matsuya/Toyosu Restaurant Response)
 
+---
+# Planner Log: Garbled Text Fix (Matsuya/Toyosu Restaurant Response)
 **Date**: 2026-04-12  
 **Task**: Fix Telegram bot response containing garbled Russian text and gibberish  
 **Status**: ✅ Planned → Assigned to @worker
-
----
 
 ## Problem
 

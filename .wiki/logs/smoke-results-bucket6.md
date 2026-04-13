@@ -1,11 +1,10 @@
 ---
-# Smoke Test Results: Bucket 6 — LLM Client & Model Routing
 
+---
+# Smoke Test Results: Bucket 6 — LLM Client & Model Routing
 **Date**: 2026-04-11 20:36:19  
 **Bucket**: 6 — LLM Client & Model Routing  
 **Status**: ❌ FAIL
-
----
 
 ## Test Results
 

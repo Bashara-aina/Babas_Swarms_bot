@@ -1,11 +1,9 @@
 ---
-# Image Analyzer Bug Investigation
-
-**Date:** 2026-04-12  
-**Investigator:** @planner  
-**Status:** Root Cause Identified
-
+date: "2026-04-12"
+investigator: "@planner"
+status: "Root Cause Identified"
 ---
+# Image Analyzer Bug Investigation
 
 ## 1. Which Handler Processes Image Messages
 

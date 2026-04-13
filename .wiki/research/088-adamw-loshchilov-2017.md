@@ -9,7 +9,7 @@ venue: "ICLR 2019"
 arXiv: "1711.05101"
 date: 2017-11-14
 cited: "~4000+"
-implementation: "PyTorch optim.AdamW", "TensorFlow"
+implementation: ["PyTorch optim.AdamW", "TensorFlow"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

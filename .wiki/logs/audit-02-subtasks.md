@@ -1,10 +1,10 @@
 ---
+
+---
 # AUDIT 02 — Message Pipeline Connectivity
 > Planner: @planner | Created: 2026-04-12 | Status: IN PROGRESS
-
 ## Overview
 Trace plain text message end-to-end through the SwarmBot pipeline and fix every broken hop.
-
 ## Happy Path (Expected)
 ```
 main.py: dp.start_polling()
@@ -23,8 +23,6 @@ handlers/shared.py: send_chunked()
      ↓ await
 msg.answer(response)
 ```
-
----
 
 ## SUBTASK 1: Trace Hop-1 — aiogram Dispatcher → ai.router
 **Assigned to**: @worker

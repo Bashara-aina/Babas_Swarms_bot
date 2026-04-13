@@ -1,8 +1,8 @@
 ---
-# Review Summary: Cycles 11-15 Wiki Pages
-**Reviewer**: @reviewer | **Date**: 2026-04-12 | **Session**: 2026-04-12 LEGION WIKI LOOP
 
 ---
+# Review Summary: Cycles 11-15 Wiki Pages
+**Reviewer**: @reviewer | **Date**: 2026-04-12 | **Session**: 2026-04-12 LEGION WIKI LOOP
 
 ## Overview
 - **Total Pages Reviewed**: 15

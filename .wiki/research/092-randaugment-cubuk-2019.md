@@ -9,7 +9,7 @@ venue: "NeurIPS 2020"
 arXiv: "1909.13719"
 date: 2019-09-30
 cited: "~3000+"
-implementation: "PyTorch RandAugment", "TensorFlow Augment", "timm"
+implementation: ["PyTorch RandAugment", "TensorFlow Augment", "timm"]
 status: verified
 tier: 9
 hardware: "RTX 3060 12GB VRAM"

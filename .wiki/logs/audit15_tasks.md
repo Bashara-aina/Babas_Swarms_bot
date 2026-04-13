@@ -1,15 +1,14 @@
 ---
+
+---
 # AUDIT 15 — Final Integration Test Plan
 > Planner output for @worker agents | Generated: 2026-04-12
-
 ## Context
-
 ### Message Flow Architecture
 1. **Entry**: `handlers/ai.py` (commands) + `handlers/message_handler.py` (plain text)
 2. **Routing**: `AutonomousRouter.analyze_async()` → skill → handler
 3. **Execution**: `_execute_chat()` (shared.py) → `llm_client.chat()` → `litellm.acompletion()`
 4. **Response**: `send_chunked()` → `msg.answer()`
-
 ### Key Code Locations
 - `llm_client/__init__.py` lines 963-1520: `chat()` builds messages[] (soul FIRST, user LAST)
 - `llm_client/__init__.py` line 420: `await acompletion(**api_kwargs)` — THE LLM call
@@ -18,12 +17,9 @@
 - `handlers/message_handler.py` lines 129-364: `handle_plain_message()` — autonomous routing
 - `core/soul_engine.py` lines 358-429: `build_enhanced_soul_context()` — soul injection
 - `core/conversation_interface.py`: `add_to_conversation()` for history tracking
-
 ### What Must Be True (Invariant)
 > **Soul must always be first in messages[]**  
 > Verified at line 1026-1028: `_audit_messages.append({"role": "system", "content": _soul})`
-
----
 
 ## 10 Test Scenarios
 
