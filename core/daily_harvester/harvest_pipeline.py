@@ -15,8 +15,7 @@ from core.daily_harvester.wiki_storage import WikiStorage
 
 logger = logging.getLogger(__name__)
 
-# Planned feature flags
-FEATURE_BRIEFING_CONSOLIDATION_ENABLED = False  # Planned: v2.0
+FEATURE_BRIEFING_CONSOLIDATION_ENABLED = False
 
 
 class HarvestPipeline:
@@ -44,8 +43,8 @@ class HarvestPipeline:
         """
         Harvest candidate info pieces across topics in parallel.
 
-        TODO: real web search integration (Tavily, Firecrawl, arXiv, etc.)
-        For now, returns an empty list (stub).
+        Real web search is wired via source_strategy.search_sources()
+        (DuckDuckGo primary, arXiv fallback).
         """
         from core.daily_harvester.source_strategy import search_sources
 
@@ -163,13 +162,12 @@ class HarvestPipeline:
 
     async def _send_telegram_report(self, report: str) -> None:
         """
-        Send the morning report to Telegram.
+        Log the morning report.
 
-        TODO: integrate with actual Telegram bot (aiogram).
-        For now, just logs it.
+        Actual Telegram delivery is handled by DailyHarvesterScheduler,
+        which calls _notify(result['report']) after run_full_pipeline() completes.
         """
-        logger.info("Morning report (Telegram would send):\n%s", report)
-        # TODO: use aiogram bot to send to BASHARA_TELEGRAM_ID
+        logger.info("Morning report (delivery via scheduler callback):\n%s", report)
 
     async def run_full_pipeline(self) -> dict[str, Any]:
         """

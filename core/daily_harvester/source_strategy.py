@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -11,8 +12,7 @@ from core.daily_harvester.types import SourceInfo, SourceType, TrustTier
 
 logger = logging.getLogger(__name__)
 
-# Planned feature flags
-FEATURE_WEB_SEARCH_ENABLED = False  # Planned: v2.0
+FEATURE_WEB_SEARCH_ENABLED = True
 
 # Trust scores by source type
 _TRUST_SCORES: dict[SourceType, int] = {
@@ -63,15 +63,118 @@ async def fetch_source(url: str) -> str:
 
 async def search_sources(query: str, topic: str) -> list[SourceInfo]:
     """
-    Search for sources matching a query and topic (placeholder).
+    Search for sources matching a query and topic.
 
-    TODO: integrate with Tavily, Firecrawl, or similar search API.
-    For now, returns an empty list (mock implementation).
+    Strategy: primary via DuckDuckGo (web search), fallback via arXiv API
+    (academic papers). Results are de-duplicated by URL and limited to 10.
+
+    Returns list of SourceInfo dicts with url, title, snippet,
+    source_type (inferred from domain), and trust_score.
     """
     if not FEATURE_WEB_SEARCH_ENABLED:
-        logger.info("Web search feature is planned for v2.0 — not yet available.")
-    # TODO: real search integration
-    return []
+        logger.info("Web search feature is disabled (FEATURE_WEB_SEARCH_ENABLED=False).")
+        return []
+
+    sources: list[SourceInfo] = []
+    seen_urls: set[str] = set()
+
+    # Primary: DuckDuckGo web search (run in thread to avoid blocking)
+    def _ddg_search() -> list[SourceInfo]:
+        try:
+            from duckduckgo_search import DDGS
+
+            with DDGS() as ddg:
+                results = list(ddg.text(query, max_results=10))
+        except Exception as e:
+            logger.warning("DuckDuckGo search failed: %s", e)
+            return []
+        found: list[SourceInfo] = []
+        for r in results:
+            url = r.get("href", "")
+            if not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            src_type = _classify_domain(url)
+            found.append(
+                SourceInfo(
+                    url=url,
+                    source_type=src_type,
+                    trust_score=get_trust_score(src_type),
+                    title=r.get("title") or "Untitled",
+                    snippet=r.get("body") or "",
+                )
+            )
+        return found
+
+    # Fallback: arXiv API for academic papers
+    async def _arxiv_search() -> list[SourceInfo]:
+        try:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+                resp = await client.get(
+                    "http://export.arxiv.org/api/query",
+                    params={"search_query": f"all:{query}", "start": 0, "max_results": 5, "sortBy": "relevance"},
+                )
+            if resp.status_code != 200:
+                return []
+            text = resp.text
+            # Parse atom feed (simple regex approach for no-dep parsing)
+            import re
+
+            entries = re.findall(r"<entry>(.*?)</entry>", text, re.DOTALL)
+            found: list[SourceInfo] = []
+            for entry in entries:
+                url_match = re.search(r"<id>(.*?)</id>", entry)
+                title_match = re.search(r"<title>(.*?)</title>", entry, re.DOTALL)
+                summary_match = re.search(r"<summary>(.*?)</summary>", entry, re.DOTALL)
+                if not url_match:
+                    continue
+                url = url_match.group(1).strip()
+                if url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                title = title_match.group(1).strip().replace("\n", " ") if title_match else "Untitled"
+                snippet = summary_match.group(1).strip()[:300] if summary_match else ""
+                found.append(
+                    SourceInfo(
+                        url=url,
+                        source_type=SourceType.ACADEMIC,
+                        trust_score=get_trust_score(SourceType.ACADEMIC),
+                        title=title,
+                        snippet=snippet,
+                    )
+                )
+            return found
+        except Exception as e:
+            logger.warning("arXiv search failed: %s", e)
+            return []
+
+    # Run both in parallel, prefer DuckDuckGo results
+    ddg_sources = await asyncio.to_thread(_ddg_search)
+    sources.extend(ddg_sources)
+
+    # Only fall back to arXiv if DuckDuckGo returned nothing
+    if not sources:
+        arxiv_sources = await _arxiv_search()
+        sources.extend(arxiv_sources)
+
+    logger.debug("search_sources('%s', '%s') -> %d results", query, topic, len(sources))
+    return sources[:10]
+
+
+def _classify_domain(url: str) -> SourceType:
+    """Infer SourceType from URL domain."""
+    lower = url.lower()
+    if "arxiv.org" in lower:
+        return SourceType.ACADEMIC
+    if "github.com" in lower:
+        return SourceType.INDUSTRY
+    if "wikipedia.org" in lower:
+        return SourceType.COMMUNITY
+    if "twitter.com" in lower or "x.com" in lower:
+        return SourceType.SOCIAL
+    if any(tld in lower for tld in [".gov", ".go.jp", ".ac.jp"]):
+        return SourceType.GOV
+    return SourceType.COMMUNITY
 
 
 class ContradictionResolver:
