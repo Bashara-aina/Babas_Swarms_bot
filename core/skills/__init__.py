@@ -6,7 +6,7 @@ from core.skills.registry import SKILL_REGISTRY, get_skill_registry
 from core.skills.builtin import github, media, memory, personal, productivity, research, system, web
 
 # Import standalone skill modules to trigger registration
-from core.skills import code_review, timer
+from core.skills import code_review, timer, deep_research, dify_analysis, doc_parser
 
 __all__ = [
     "SKILL_REGISTRY",
@@ -21,4 +21,7 @@ __all__ = [
     "web",
     "code_review",
     "timer",
+    "deep_research",
+    "dify_analysis",
+    "doc_parser",
 ]

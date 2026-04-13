@@ -66,6 +66,7 @@ async def _get_github_prs() -> str:
             return "No open PRs by you."
 
         import json
+
         prs = json.loads(output)
         lines = []
         for pr in prs:
@@ -90,6 +91,7 @@ async def _get_review_prs() -> str:
             return "No reviews requested."
 
         import json
+
         prs = json.loads(output)
         lines = [f"  📝 {pr.get('title', '?')}" for pr in prs]
         return "\n".join(lines) if lines else "None."
@@ -103,6 +105,7 @@ async def _get_training_status() -> str:
     if not log_path:
         # Try common locations
         from pathlib import Path
+
         candidates = [
             Path.home() / "projects" / "POPW" / "logs" / "train.log",
             Path("/media/newadmin/master/POPW/logs/train.log"),
@@ -158,8 +161,22 @@ async def _get_system_stats() -> str:
 
 
 async def _get_weather() -> str:
-    """Get weather from wttr.in."""
-    city = os.getenv("CITY_FOR_WEATHER", "Jakarta")
+    """Get weather from wttr.in for the user's profile location."""
+    try:
+        from core.memory.user_profile import get_user_profile
+
+        profile = get_user_profile()
+        # Extract city from location (e.g., "Koto City, Tokyo, Japan" -> "Tokyo")
+        location_raw = str(profile.get("location", "Tokyo"))
+        # Use the city name, not full address
+        if "," in location_raw:
+            city = location_raw.split(",")[-2].strip() if len(location_raw.split(",")) >= 2 else location_raw
+        else:
+            city = location_raw
+        if city in ("Tokyo", "Japan"):
+            city = "Tokyo"
+    except Exception:
+        city = "Tokyo"
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
@@ -251,6 +268,7 @@ async def schedule_daily_briefing(bot, user_id: int, hour: int = 7, minute: int 
         try:
             # Handle month rollover
             import calendar
+
             days_in_month = calendar.monthrange(target.year, target.month)[1]
             if target.day > days_in_month:
                 if target.month == 12:
@@ -269,6 +287,7 @@ async def schedule_daily_briefing(bot, user_id: int, hour: int = 7, minute: int 
             briefing = await generate_briefing()
             # Chunk if needed
             from llm_client import chunk_output
+
             for chunk in chunk_output(briefing):
                 try:
                     await bot.send_message(user_id, chunk, parse_mode="HTML")
@@ -280,7 +299,6 @@ async def schedule_daily_briefing(bot, user_id: int, hour: int = 7, minute: int 
 
         # Sleep until next day (with buffer)
         await asyncio.sleep(60)  # Prevent double-send
-
 
 
 async def get_quick_brief() -> str:

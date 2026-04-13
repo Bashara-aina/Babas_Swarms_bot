@@ -29,7 +29,7 @@ NARRATIVE_PATH.parent.mkdir(parents=True, exist_ok=True)
 def _load_narrative() -> dict:
     if NARRATIVE_PATH.exists():
         try:
-            return json.loads(NARRATIVE_PATH.read_text())
+            return json.loads(NARRATIVE_PATH.read_text(encoding="utf-8"))
         except Exception:
             pass
     return {

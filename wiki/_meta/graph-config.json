@@ -1,0 +1,61 @@
+{
+  "nodeColorGroups": [
+    {
+      "name": "concepts",
+      "color": "#4a90d9",
+      "description": "Knowledge concepts: intent-routing, memory-architecture, reasoning-loop, etc."
+    },
+    {
+      "name": "entities",
+      "color": "#50c853",
+      "description": "External entities: supabase, litellm, openrouter, chromadb, etc."
+    },
+    {
+      "name": "projects",
+      "color": "#f44336",
+      "description": "Active projects: legion-bot, cekwajar-id, rumahlabuh-com"
+    },
+    {
+      "name": "decisions",
+      "color": "#ff9800",
+      "description": "Architecture Decision Records: ADR-001, ADR-002, etc."
+    },
+    {
+      "name": "architecture",
+      "color": "#9c27b0",
+      "description": "System architecture: module maps, data flows, tech stacks"
+    },
+    {
+      "name": "people",
+      "color": "#00bcd4",
+      "description": "People references: andrej-karpathy, etc."
+    },
+    {
+      "name": "timelines",
+      "color": "#795548",
+      "description": "Version histories and phase logs"
+    },
+    {
+      "name": "raw",
+      "color": "#757575",
+      "description": "Raw source files: docs, skills_ref, audits"
+    }
+  ],
+  "nodeSizeGroups": [
+    {
+      "name": "primary",
+      "size": 8,
+      "filter": ["projects/*", "concepts/*"]
+    },
+    {
+      "name": "secondary",
+      "size": 5,
+      "filter": ["entities/*", "decisions/*", "architecture/*"]
+    },
+    {
+      "name": "tertiary",
+      "size": 3,
+      "filter": ["timelines/*", "people/*", "raw/**"]
+    }
+  ]
+}

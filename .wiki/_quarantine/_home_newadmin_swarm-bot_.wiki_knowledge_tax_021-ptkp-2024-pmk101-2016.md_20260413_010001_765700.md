@@ -1,0 +1,116 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/knowledge/tax/021-ptkp-2024-pmk101-2016.md",
+  "reason": "daily_fast_scan: verdict=REJECT, score=0.000 < 0.3",
+  "score": 0.0,
+  "quarantined_at": "2026-04-13T01:00:01.765720"
+}
+---
+
+---
+source_id: 021
+title: "PTKP 2024 - Penghasilan Tidak Kena Pajak PMK 101/2016"
+source_type: REGULATION
+authority: OFFICIAL_GOV
+url: "https://jdih.kemenkeu.go.id/dok/101-pmk-010-2016"
+last_verified: "2026-04-11"
+tags: [ptkp, pph21, bpjs, umr, labor-law, pajak]
+cekwajar_impact: CRITICAL
+legion_can_act: YES
+---
+
+# PTKP 2024 - Penghasilan Tidak Kena Pajak PMK 101/2016
+
+## Why This Matters for cekwajar.id
+PTKP determines the **tax threshold** — employees earning below PTKP pay zero PPh 21. Correct PTKP status (TK/0, K/1, K/3, etc.) is critical for accurate tax calculation and TER categorization. Wrong PTKP = wrong tax bracket = DJP penalties.
+
+## Core Knowledge
+
+PTKP (Penghasilan Tidak Kena Pajak) is regulated under **PMK 101/PMK.010/2016**. The values have NOT changed since 2016 and remain valid through 2024–2026.
+
+**PTKP Values Table:**
+
+| Status | Kode | Annual PTKP |
+|--------|------|-------------|
+| Tidak Kawin, 0 tanggungan | TK/0 | Rp 54,000,000 |
+| Tidak Kawin, 1 tanggungan | TK/1 | Rp 58,500,000 |
+| Tidak Kawin, 2 tanggungan | TK/2 | Rp 63,000,000 |
+| Tidak Kawin, 3 tanggungan | TK/3 | Rp 67,500,000 |
+| Kawin, 0 tanggungan | K/0 | Rp 58,500,000 |
+| Kawin, 1 tanggungan | K/1 | Rp 63,000,000 |
+| Kawin, 2 tanggungan | K/2 | Rp 67,500,000 |
+| Kawin, 3 tanggungan | K/3 | Rp 72,000,000 |
+| Kawin + Income merged (0 tanggungan) | K/I/0 | Rp 112,500,000 |
+| Kawin + Income merged (1 tanggungan) | K/I/1 | Rp 117,000,000 |
+| Kawin + Income merged (2 tanggungan) | K/I/2 | Rp 121,500,000 |
+| Kawin + Income merged (3 tanggungan) | K/I/3 | Rp 126,000,000 |
+
+**Tanggungan definition (max 3):**
+- Must live with the taxpayer
+- No independent income
+- Supported by the taxpayer
+- Includes legitimate children, adopted children, parents
+
+**Key rules:**
+- PTKP is determined at the **beginning of the tax year** (January 1)
+- If status changes mid-year (marriage, child birth), PTKP remains unchanged until next tax year
+- Wife's income can be merged with husband's (K/I status) for combined PTKP of Rp 112.5M + tanggungan
+
+## Exact Formulas / Numbers (if applicable)
+
+```typescript
+// PTKP values and lookup
+const PTKP_VALUES = {
+  'TK/0': 54_000_000,
+  'TK/1': 58_500_000,
+  'TK/2': 63_000_000,
+  'TK/3': 67_500_000,
+  'K/0':  58_500_000,
+  'K/1':  63_000_000,
+  'K/2':  67_500_000,
+  'K/3':  72_000_000,
+  'K/I/0': 112_500_000,
+  'K/I/1': 117_000_000,
+  'K/I/2': 121_500_000,
+  'K/I/3': 126_000_000,
+} as const;
+
+function getPTKP(ptkpCode: keyof typeof PTKP_VALUES): number {
+  return PTKP_VALUES[ptkpCode] ?? 54_000_000;
+}
+
+// TER category mapping from PTKP
+function getTERCategory(ptkpAnnual: number): 'A' | 'B' | 'C' {
+  if (ptkpAnnual <= 58_500_000) return 'A';  // TK/0, TK/1, K/0
+  if (ptkpAnnual <= 67_500_000) return 'B';  // TK/2, K/1, TK/3, K/2
+  return 'C';  // K/3
+}
+```
+
+## Edge Cases and Common Mistakes
+
+1. **Confusing TK/1 vs K/0**: Both have PTKP Rp 58.5M but different tax status meanings
+2. **Max 3 tanggungan**: Having 4+ children doesn't add more PTKP deduction
+3. **Mid-year marriage**: PTKP stays the same until next January; cannot change status mid-year
+4. ** wife working separately**: If wife has separate NPWP income, cannot use K/I merging
+5. **NPWP without merged income**: K/0 for married male with working wife (not merged)
+
+## cekwajar.id Implementation Notes
+
+- **File to update**: `src/tax/ptkp-table.ts`
+- **Function to modify/create**: `getPTKP()`, `getTERCategory()`, `getPTKPStatus()`
+- **Data source to query**: `employees.ptkp_code` field in Supabase
+- **Update frequency**: Static unless PMK updates PTKP values (rare)
+- **Legion action**: Can read employee PTKP codes from DB; can flag anomalies in payslip generation
+
+## Monetization Angle
+
+- PTKP-driven tax calculation is the foundation of payroll SaaS pricing
+- Accurate PTKP prevents tax audit risk for employers using cekwajar
+- Premium support tier includes PTKP counseling for complex family situations
+
+## Sources and Cross-References
+
+- Official URL: https://jdih.kemenkeu.go.id/dok/101-pmk-010-2016
+- Related: 020-pph21-ter-pmk168-2023 (TER calculation)
+- Related: 022-pph17-pasal-17-progresif (progressive tax rates)

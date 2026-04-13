@@ -123,6 +123,20 @@ async def cmd_research(msg: Message) -> None:
         await send_chunked(msg, out or "(empty)")
         return
 
+    # GPT-Researcher integration
+    if os.getenv("LEGION_RESEARCH_USE_GPTR", "0").strip().lower() in ("1", "true", "yes", "on"):
+        try:
+            from core.skills.deep_research import execute as gptr_execute
+
+            typing_task.cancel()
+            await status_msg.edit_text(f"🔬 GPT-Researcher: {topic[:40]}…", parse_mode="HTML")
+            result = await gptr_execute(topic)
+            await send_chunked(msg, result)
+            return
+        except Exception as e:
+            await msg.answer(f"GPT-Researcher error: {e}")
+            return
+
     async def _phase(text: str) -> None:
         try:
             if text.startswith("💭"):

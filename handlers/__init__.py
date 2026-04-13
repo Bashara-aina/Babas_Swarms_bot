@@ -24,6 +24,7 @@ from handlers import (
     computer,
     ecc_compat,
     dev,
+    draft,
     e2e,
     enterprise,
     github_intel_handler,
@@ -57,6 +58,7 @@ _ROUTER_ORDER = [
     whatsapp_handler.router,  # /wa /wa_reply /wa_qr /wa_status
     system.router,  # /start /stats /keys /models /git /maintenance /gpu
     research.router,  # /scrape /research /paper /ask_paper
+    draft.router,  # /draft
     memory_commands.router,  # /memory /remember /recall /emotion /opinions /forget /profile /teach
     wiki_handler.router,  # /wiki /wiki_ingest /wiki_lint
     brain.router,  # /memories /briefing /learn /instincts

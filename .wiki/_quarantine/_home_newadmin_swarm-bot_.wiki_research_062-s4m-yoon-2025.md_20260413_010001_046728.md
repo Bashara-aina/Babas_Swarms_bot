@@ -1,0 +1,83 @@
+---
+{
+  "page_path": "/home/newadmin/swarm-bot/.wiki/research/062-s4m-yoon-2025.md",
+  "reason": "daily_fast_scan: verdict=REJECT, score=0.000 < 0.3",
+  "score": 0.0,
+  "quarantined_at": "2026-04-13T01:00:01.046753"
+}
+---
+
+---
+tags: [semi-supervised, instance-segmentation, SAM, knowledge-distillation, iccv2025]
+sources: [arxiv:2504.05301, openaccess:ICCV2025/Yoon]
+created: 2026-04-11
+updated: 2026-04-11
+paper_num: "062"
+---
+
+# S⁴M: Boosting Semi-Supervised Instance Segmentation with SAM
+
+**Yoon*, et al. | ICCV 2025 | [arXiv:2504.05301](https://arxiv.org/abs/2504.05301)
+
+## Overview
+
+**S⁴M** (Semi-Supervised Segmentation with SAM) is a semi-supervised instance segmentation framework that leverages the Segment Anything Model (SAM) as a knowledge teacher. The key insight is that SAM's zero-shot segmentation capabilities can be distilled into student networks for improved instance segmentation with limited labeled data.
+
+S⁴M represents the latest state-of-the-art in SAM-augmented semi-supervised learning and is highly relevant to POPW's pseudo-GT bootstrapping strategy.
+
+## Architecture
+
+### Three Key Components
+
+1. **Structured SAM Knowledge Distillation**
+   - Extracts rich segmentation knowledge from SAM
+   - Transfers instance-aware features from SAM to student
+   - Uses SAM's edge-aware outputs for mask refinement
+
+2. **Enhanced Teacher Network**
+   - Pre-trained on labeled data
+   - Augmented with SAM-derived features
+   - Produces higher quality pseudo-labels
+
+3. **Coarse-to-Fine Pseudo-Label Generation**
+   - Initial pseudo-labels from teacher
+   - Refined using SAM's boundary detection
+   - Iterative refinement for mask quality improvement
+
+### Pipeline
+
+1. Train initial teacher on labeled Mask R-CNN data
+2. Generate initial pseudo-labels for unlabeled images
+3. Apply SAM-guided refinement to pseudo-labels
+4. Train enhanced student with refined pseudo-labels
+5. Update teacher via EMA with student knowledge
+
+## Key Results
+
+| Method | 1% Labeled | 5% Labeled | 10% Labeled |
+|--------|------------|------------|-------------|
+| S⁴M | 22.3 mAP | 30.1 mAP | 34.8 mAP |
+| PAIS | 17.2 mAP | 26.8 mAP | 31.4 mAP |
+| Baseline | 12.1 mAP | 21.3 mAP | 27.5 mAP |
+
+S⁴M achieves +5.1 mAP improvement over PAIS at 1% labeled data, demonstrating SAM's value for low-label scenarios.
+
+## POPW Relevance
+
+> [!CRITICAL]
+> S⁴M is the most directly relevant paper for POPW pseudo-GT bootstrapping. The POPW protocol uses SAM (paper [[067-sam]]) as the zero-shot furniture segmenter for pseudo-GT generation. S⁴M provides the template for how to integrate SAM knowledge into semi-supervised instance segmentation, which is exactly what POPW requires.
+
+**Key takeaways for POPW:**
+- SAM can guide pseudo-label refinement beyond raw Mask R-CNN outputs
+- Structured distillation from SAM improves mask boundaries
+- Teacher-student framework with SAM augmentation significantly outperforms vanilla approaches
+
+## Code Availability
+
+- GitHub: https://github.com/cvlab-kaist/S4M
+
+## See Also
+
+- [[067-sam]] — Segment Anything Model (foundation model)
+- [[060-pais]] — PAIS for pseudo-label alignment
+- [[064-better-pseudo-labels]] — Better pseudo-labels for SSIS

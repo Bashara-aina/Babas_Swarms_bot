@@ -336,7 +336,16 @@ async def handle_photo(msg: Message) -> None:
 
         result = await understand_image(prompt=prompt, image_path=tmp_path)
 
-        if result.startswith("Error:"):
+        is_error = (
+            result.startswith("Error:")
+            or "not in config" in result
+            or "is disabled" in result
+            or "no command configured" in result
+            or "MCP error" in result
+            or "not available" in result
+            or result.startswith("MCP ")
+        )
+        if is_error:
             await status.edit_text(f"❌ {result}")
             return
 

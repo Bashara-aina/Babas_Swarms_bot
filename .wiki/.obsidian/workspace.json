@@ -11,14 +11,10 @@
             "id": "13a279f88b200140",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "wisdom/01-munger-latticework.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "01-munger-latticework"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -74,8 +70,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -186,32 +181,33 @@
   },
   "active": "13a279f88b200140",
   "lastOpenFiles": [
-    "logs/LEGION_DEPTH_UPGRADE_COMPLETE.md",
-    "issues/FINAL_REVIEW.md",
-    "logs/FINAL_COMPLETION_REPORT.md",
-    "issues/priority-10-budget-issues.md",
-    "_quarantine/_home_newadmin_swarm-bot_.wiki_research_076-dino-caron-2021.md_20260411_181442_405840.md",
-    "agents.md",
-    "issues/review-2026-04-12-priority-10-budget-issues.md",
-    "logs/priority-10-budget.md",
-    "decisions/ADR-019.md",
-    "issues/priority-9-commands-issues.md",
-    "logs/priority-9-commands.md",
-    "decisions/ADR-018.md",
-    "logs/priority-8-fake-skills.md",
-    "decisions/ADR-017.md",
-    "issues/priority-7-orchestrator-issues.md",
-    "logs/priority-7-orchestrator.md",
-    "decisions/ADR-016.md",
-    "logs/priority-6-quality-gate.md",
-    "decisions/ADR-015.md",
-    "issues/priority-5-clarification-issues.md",
-    "logs/priority-5-clarification.md",
-    "decisions/ADR-014.md",
-    "logs/priority-5-worker-brief.md",
-    "logs/priority-3-self-improvement-complete.md",
-    "logs/priority-2-memory-unification-complete.md",
-    "logs/priority-2-worker-brief.md",
+    "logs/planner-2026-04-13-hallucination-fix-contracts-batch1.md",
+    "logs/planner-2026-04-13-hallucination-fix.md",
+    "issues/review-2026-04-13-verify.md",
+    "logs/swarm-upgrade-2026-04-13.md",
+    "logs/planner-swarm-upgrade-2026-04-13.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_research_060-pais-hu-2023.md_20260412_010000_759468.md",
+    "issues/review-2026-04-13-wiki-obsidian-restructure.md",
+    "logs/planner-wiki-restructure-2026-04-13.md",
+    "_meta/audit_report.md",
+    "_meta",
+    "logs/planner-2026-04-13.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_086-nextjs14-app-router-saas.md_20260413_010002_026905.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_089-typescript-money-precision.md_20260413_010002_021187.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_087-midtrans-integration.md_20260413_010002_015184.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_085-supabase-rls-patterns.md_20260413_010002_009305.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_091-api-rate-limiting.md_20260413_010002_003998.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_engineering_088-vercel-zero-downtime.md_20260413_010001_997567.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_040-tech-salaries-2025.md_20260413_010001_991850.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_041-mercer-salary-survey.md_20260413_010001_986258.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_050-salary-growth-projection.md_20260413_010001_981819.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_042-jobstreet-salary-report.md_20260413_010001_977124.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_053-cost-of-living-comparison.md_20260413_010001_972415.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_051-executive-remuneration.md_20260413_010001_967747.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_052-salary-negotiation-tips.md_20260413_010001_963028.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_045-bps-rata-rata-upah.md_20260413_010001_958856.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_043-glints-salary-insights.md_20260413_010001_954841.md",
+    "_quarantine/_home_newadmin_swarm-bot_.wiki_knowledge_market_054-inflation-real-wage.md_20260413_010001_949389.md",
     "decisions/ADR-056-review-nonfatal-warnings.txt",
     "logs/worker-nonfatal-warnings-fix-20260412.txt",
     "logs/audit-09",
@@ -221,7 +217,6 @@
     "logs/worker-web-search-fix-20260412.txt",
     "candidates",
     "candidate",
-    "logs/worker-cycle-1.log",
     "_archive/cekwajar/slide-12.png",
     "_archive/cekwajar/slide-11.png",
     "_archive/cekwajar/slide-10.png",

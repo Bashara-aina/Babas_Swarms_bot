@@ -21,7 +21,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# === CJK/Arabic Language Detection ===
+# === CJK/Arabic/Cyrillic Language Detection ===
 import re as _re
 
 # Detect CJK characters (Chinese/Japanese/Korean)
@@ -29,6 +29,9 @@ CJK_PATTERN = _re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\u3400-\u4db
 
 # Arabic script
 ARABIC_PATTERN = _re.compile(r"[\u0600-\u06ff]")
+
+# Cyrillic script (Russian, Ukrainian, etc.)
+CYRILLIC_PATTERN = _re.compile(r"[\u0400-\u04ff\u0500-\u052f\u2de0-\u2dff\ua640-\ua69f]")
 
 ALLOWED_SCRIPTS = [
     r"[a-zA-Z]",  # Latin (English)
@@ -42,8 +45,8 @@ ALLOWED_SCRIPTS = [
 
 
 def has_non_allowed_script(text: str) -> bool:
-    """Returns True if text contains CJK or Arabic characters."""
-    return bool(CJK_PATTERN.search(text)) or bool(ARABIC_PATTERN.search(text))
+    """Returns True if text contains CJK, Arabic, or Cyrillic characters."""
+    return bool(CJK_PATTERN.search(text)) or bool(ARABIC_PATTERN.search(text)) or bool(CYRILLIC_PATTERN.search(text))
 
 
 def strip_non_allowed_script(text: str) -> str:
@@ -70,9 +73,10 @@ def strip_non_allowed_script(text: str) -> str:
     for cjk, replacement in CJK_REPLACEMENTS.items():
         text = text.replace(cjk, replacement)
 
-    # Strip any remaining CJK/Arabic
+    # Strip any remaining CJK/Arabic/Cyrillic
     text = CJK_PATTERN.sub("", text)
     text = ARABIC_PATTERN.sub("", text)
+    text = CYRILLIC_PATTERN.sub("", text)
 
     # Clean up double spaces from removals
     text = _re.sub(r"  +", " ", text)

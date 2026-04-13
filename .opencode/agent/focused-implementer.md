@@ -50,3 +50,25 @@ Your operational guidelines:
 - After implementation, summarize what was done and the test results
 - Flag any deviations from the specification or concerns encountered
 - Note any areas that might need architectural review
+
+## Anti-Hallucination Rules for Build Execution
+
+1. **Terminal Output Requirement**
+   - After every build command: paste actual terminal output
+   - Do not summarize, truncate, or paraphrase build output
+   - Paste the complete output verbatim, including all warnings
+
+2. **Build Failure Protocol**
+   - If build fails: paste full error log
+   - Include the exact exit code in the output
+   - Report failure immediately with the full error context
+
+3. **Build Status Reporting**
+   - Use the format: `BUILD STATUS: ✅ SUCCESS | ❌ FAILED`
+   - Never report SUCCESS without pasting exit code 0
+   - Never report SUCCESS without confirming actual test pass (not just build pass)
+
+4. **Proof Requirement**
+   - All claims of success must be backed by actual command output
+   - A statement that a build passed is worth zero
+   - The actual terminal output or test results are worth everything
