@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Intent routing is Legion's two-stage classification system — fast pattern matching for deterministic cases, LLM classification for ambiguous messages — that determines how every user message is handled.
 wikilinks:
-  - [[reasoning-loop]]
+  - [[./concepts/reasoning-loop]]
   - [[memory-architecture]]
-  - [[skill-registry]]
+  - [[./concepts/skill-registry]]
   - [[legion-module-map]]
 confidence: high
 source: implementation
@@ -54,7 +54,7 @@ Before pattern matching, a regex extracts URLs. If the domain matches known vide
 
 ## Relationships
 
-Intent routing is the entry point for almost every user interaction. It feeds directly into [[reasoning-loop]] — when the routing result includes DEEP_REASONING, the reasoning loop activates with plan → execute → observe → refine phases. The [[skill-registry]] is consulted as a fallback when pattern and LLM classification both fail to reach 0.50 confidence. The routing result also populates the `suggested_agent` field which determines which specialized agent (coder, reviewer, researcher, etc.) is invoked. [[memory-architecture]] provides context: past user messages and stated preferences are available to the LLM classifier to improve accuracy on ambiguous cases.
+Intent routing is the entry point for almost every user interaction. It feeds directly into [[./concepts/reasoning-loop]] — when the routing result includes DEEP_REASONING, the reasoning loop activates with plan → execute → observe → refine phases. The [[./concepts/skill-registry]] is consulted as a fallback when pattern and LLM classification both fail to reach 0.50 confidence. The routing result also populates the `suggested_agent` field which determines which specialized agent (coder, reviewer, researcher, etc.) is invoked. [[memory-architecture]] provides context: past user messages and stated preferences are available to the LLM classifier to improve accuracy on ambiguous cases.
 
 ## Current Status
 
@@ -73,7 +73,7 @@ Note: Intent router is a pre-pass that injects intent hints into the system prom
 
 ## See Also
 
-- [[reasoning-loop]] — Reasoning that follows routing decisions
-- [[skill-registry]] — Skill fallback when routing confidence is low
+- [[./concepts/reasoning-loop]] — Reasoning that follows routing decisions
+- [[./concepts/skill-registry]] — Skill fallback when routing confidence is low
 - [[memory-architecture]] — Context available to LLM classifier
 - [[legion-module-map]] — Core modules overview

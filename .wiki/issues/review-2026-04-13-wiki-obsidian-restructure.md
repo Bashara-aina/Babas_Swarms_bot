@@ -99,13 +99,13 @@ All files use `_Last updated:` line instead of YAML frontmatter.
 ### ❌ CRITICAL: Broken wikilinks detected
 
 **wiki/conversations/2026-04-10.md (line 12-15):**
-- `[[wiki/conversations/support.md]]` — does not exist
-- `[[wiki/mental_health.md]]` — does not exist
+- `[[conversations/support.md]]` — does not exist
+- `[[mental_health.md]]` — does not exist
 
 **wiki/legion/conversations_log.md (line 22, 26):**
-- `[[wiki/legion/interactions.md]]` — does not exist
-- `[[wiki/legion/conversation_processing.md]]` — does not exist
-- `[[wiki/legion/faq.md]]` — does not exist
+- `[[legion/interactions.md]]` — does not exist
+- `[[legion/conversation_processing.md]]` — does not exist
+- `[[legion/faq.md]]` — does not exist
 
 ### ❌ Empty directories (should contain articles):
 | Directory | Expected | Actual |

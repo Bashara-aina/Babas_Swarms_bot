@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Cursor is an AI-first IDE evaluated for Legion's coding tasks but OpenCode was selected instead for its CLI-first approach, native subprocess model, and Telegram-compatible agent output. Decision recorded in adr-2026-04-12-opencode-over-cursor-for-backend.
 wikilinks:
-  - [[opencode]]
+  - [[./entities/opencode]]
   - [[adr-2026-04-12-opencode-over-cursor-for-backend]]
 confidence: high
 source: decision
@@ -54,5 +54,5 @@ OpenCode's server model (`opencode serve --port 4096`) is purpose-built for prog
 
 ## Related Pages
 
-- [[opencode]] — Selected alternative
+- [[./entities/opencode]] — Selected alternative
 - [[adr-2026-04-12-opencode-over-cursor-for-backend]] — Decision record

@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary:: " Skills execute through a dual-layer system: executable Python skills in core/skills/ for direct actions (weather, web search, timer), and reference markdown skills injected into LLM prompts. Skills are triggered by intent router, executed with tool/API calls, and results flow back into the LLM context for response synthesis."
 wikilinks:
-  - [[skill-registry]]
+  - [[./concepts/skill-registry]]
   - [[legion-module-map]]
-  - [[gpt-researcher]]
-  - [[opencode]]
+  - [[./entities/gpt-researcher]]
+  - [[./entities/opencode]]
 confidence: high
 source: implementation
 ---
@@ -174,7 +174,7 @@ Skills can be called within swarm agents:
 
 ## Related Pages
 
-- [[skill-registry]] — Skill management concepts
+- [[./concepts/skill-registry]] — Skill management concepts
 - [[legion-module-map]] — Module overview
-- [[gpt-researcher]] — Deep research integration
-- [[opencode]] — Code execution integration
+- [[./entities/gpt-researcher]] — Deep research integration
+- [[./entities/opencode]] — Code execution integration

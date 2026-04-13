@@ -7,11 +7,11 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Bayesian blending selects the optimal LLM model for each task by computing expected quality minus cost and latency weighted by task requirements — using probabilistic routing to balance capability against budget constraints.
 wikilinks:
-  - [[llm-cost-routing]]
-  - [[intent-routing]]
-  - [[litellm]]
-  - [[openrouter]]
-  - [[context-window-budget]]
+  - [[./concepts/llm-cost-routing]]
+  - [[./concepts/intent-routing]]
+  - [[./entities/litellm]]
+  - [[./entities/openrouter]]
+  - [[./concepts/context-window-budget]]
 confidence: medium
 source: research
 ---
@@ -86,16 +86,16 @@ This progressively biases selection toward free/cheap models as the budget deple
 
 ## Relationships
 
-Bayesian blending is an extension of [[llm-cost-routing]] — it replaces the deterministic fallback chain with a probabilistic decision function. The framework requires knowing [[openrouter]] model availability and [[litellm]] cost structures to compute expected utilities. [[intent-routing]] provides the task complexity signals (intent category, estimated tool use) that feed into the Bayesian model's likelihood function. [[context-window-budget]] and Bayesian blending share the theme of efficient resource use — context budget maximizes what fits in the prompt, Bayesian blending maximizes what quality is obtained per yen.
+Bayesian blending is an extension of [[./concepts/llm-cost-routing]] — it replaces the deterministic fallback chain with a probabilistic decision function. The framework requires knowing [[./entities/openrouter]] model availability and [[./entities/litellm]] cost structures to compute expected utilities. [[./concepts/intent-routing]] provides the task complexity signals (intent category, estimated tool use) that feed into the Bayesian model's likelihood function. [[./concepts/context-window-budget]] and Bayesian blending share the theme of efficient resource use — context budget maximizes what fits in the prompt, Bayesian blending maximizes what quality is obtained per yen.
 
 ## Current Status
 
-**Research/conceptual.** The probabilistic framework is defined and documented. Actual implementation of Bayesian selection as a runtime decision layer is not yet wired into `llm_client.py`. The fallback chain in [[llm-cost-routing]] currently uses deterministic priority ordering. Implementing Bayesian blending would require: (1) task complexity scoring function, (2) per-model quality/cost/latency estimates, (3) budget-aware λ weight adjustment, (4) integration point in `llm_client.chat()` before fallback chain selection.
+**Research/conceptual.** The probabilistic framework is defined and documented. Actual implementation of Bayesian selection as a runtime decision layer is not yet wired into `llm_client.py`. The fallback chain in [[./concepts/llm-cost-routing]] currently uses deterministic priority ordering. Implementing Bayesian blending would require: (1) task complexity scoring function, (2) per-model quality/cost/latency estimates, (3) budget-aware λ weight adjustment, (4) integration point in `llm_client.chat()` before fallback chain selection.
 
 ## See Also
 
-- [[llm-cost-routing]] — Current deterministic fallback chain implementation
-- [[intent-routing]] — Task complexity signals from intent classification
-- [[litellm]] — Library whose fallback mechanism could be replaced by Bayesian selection
-- [[openrouter]] — Provider with model cost and availability data
-- [[context-window-budget]] — Token budget management complementary to cost routing
+- [[./concepts/llm-cost-routing]] — Current deterministic fallback chain implementation
+- [[./concepts/intent-routing]] — Task complexity signals from intent classification
+- [[./entities/litellm]] — Library whose fallback mechanism could be replaced by Bayesian selection
+- [[./entities/openrouter]] — Provider with model cost and availability data
+- [[./concepts/context-window-budget]] — Token budget management complementary to cost routing

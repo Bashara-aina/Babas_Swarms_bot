@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: LiteLLM is the unified LLM client used by Legion to call OpenRouter, Groq, Cerebras, and local Ollama models through a single interface, with automatic retries, fallbacks, and cost tracking.
 wikilinks:
-  - [[openrouter]]
-  - [[llm-cost-routing]]
+  - [[./entities/openrouter]]
+  - [[./concepts/llm-cost-routing]]
   - [[memory-architecture]]
 confidence: high
 source: implementation
@@ -78,6 +78,6 @@ Model routing is defined in `config/models.yaml` and `agents.py` TASK_KEYWORDS d
 - Provider returns XML instead of JSON (Groq quirk): `_parse_groq_xml_tool_call()` in `llm_client.py` recovers
 
 ## See Also
-[[openrouter]] — Primary provider, unified gateway for 100+ models
-[[llm-cost-routing]] — How model selection is optimized for cost
+[[./entities/openrouter]] — Primary provider, unified gateway for 100+ models
+[[./concepts/llm-cost-routing]] — How model selection is optimized for cost
 [[memory-architecture]] — Memory system uses litellm for semantic embeddings

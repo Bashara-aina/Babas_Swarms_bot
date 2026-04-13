@@ -27,7 +27,7 @@ datasets:
   - "IKEA ASM"
 key_insight: "Skeleton-only methods lose object interaction information; treating object centers as additional joints preserves spatial relationships"
 limitations: ["Depends on object detector quality", "Limited to known object categories"]
-code_url: ""
+pdf_path: "project/popw/working/external/papers/ObjectInfo_HAR_Assembly.pdf"
 project_url: ""
 ---
 

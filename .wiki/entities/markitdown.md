@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Markitdown is Microsoft's document-to-markdown converter that handles PDF, DOCX, XLSX, PPTX, HTML, images with OCR, audio transcription, EPUB, and ZIP files for Legion's document processing pipeline.
 wikilinks:
-  - [[gpt-researcher]]
-  - [[dify]]
-  - [[skill-registry]]
+  - [[./entities/gpt-researcher]]
+  - [[./entities/dify]]
+  - [[./concepts/skill-registry]]
 confidence: high
 source: implementation
 ---
@@ -126,6 +126,6 @@ pip install markitdown[all]
 
 ## Related Pages
 
-- [[gpt-researcher]] — Research agent using markitdown for doc parsing
-- [[dify]] — Dify workflow platform alternative
-- [[skill-registry]] — How skills are registered in Legion
+- [[./entities/gpt-researcher]] — Research agent using markitdown for doc parsing
+- [[./entities/dify]] — Dify workflow platform alternative
+- [[./concepts/skill-registry]] — How skills are registered in Legion

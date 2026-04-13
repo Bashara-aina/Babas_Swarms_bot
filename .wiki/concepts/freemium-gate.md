@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: The freemium gate is the access control layer that determines which features are available to free versus premium users, using tier checking, budget remaining, and pay-per-use options to balance accessibility with monetization.
 wikilinks:
-  - [[cekwajar-id]]
-  - [[rumahlabuh-com]]
-  - [[bayesian-blending]]
-  - [[llm-cost-routing]]
+  - [[projects/cekwajar-id]]
+  - [[projects/rumahlabuh-com]]
+  - [[./concepts/bayesian-blending]]
+  - [[./concepts/llm-cost-routing]]
 confidence: medium
 source: business
 ---
@@ -100,7 +100,7 @@ rumahlabuh.com's core value is rental inquiry management. The freemium gate:
 
 ## Relationships
 
-The freemium gate's pay-per-use system is closely related to [[bayesian-blending]] and [[llm-cost-routing]] — pay-per-use pricing must account for actual LLM API costs. A video analysis feature that costs ¥10 in LLM calls shouldn't be sold for ¥5 pay-per-use. [[cekwajar-id]] and [[rumahlabuh-com]] are the two projects implementing this pattern. The gate is a business logic layer separate from the technical feature implementation.
+The freemium gate's pay-per-use system is closely related to [[./concepts/bayesian-blending]] and [[./concepts/llm-cost-routing]] — pay-per-use pricing must account for actual LLM API costs. A video analysis feature that costs ¥10 in LLM calls shouldn't be sold for ¥5 pay-per-use. [[projects/cekwajar-id]] and [[projects/rumahlabuh-com]] are the two projects implementing this pattern. The gate is a business logic layer separate from the technical feature implementation.
 
 ## Current Status
 
@@ -108,7 +108,7 @@ The freemium gate's pay-per-use system is closely related to [[bayesian-blending
 
 ## See Also
 
-- [[cekwajar-id]] — Salary fairness platform using freemium gate
-- [[rumahlabuh-com]] — Property rental platform using freemium gate
-- [[bayesian-blending]] — Cost-aware model selection relevant to pay-per-use pricing
-- [[llm-cost-routing]] — LLM cost structure that informs pay-per-use pricing
+- [[projects/cekwajar-id]] — Salary fairness platform using freemium gate
+- [[projects/rumahlabuh-com]] — Property rental platform using freemium gate
+- [[./concepts/bayesian-blending]] — Cost-aware model selection relevant to pay-per-use pricing
+- [[./concepts/llm-cost-routing]] — LLM cost structure that informs pay-per-use pricing

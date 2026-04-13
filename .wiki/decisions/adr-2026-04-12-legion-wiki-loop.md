@@ -7,7 +7,7 @@ created: 2026-04-12
 updated: 2026-04-12
 summary: Wiki auto-ingest configured with KARPATHY_KB_PATTERN for structured knowledge storage with frontmatter and TL;DR summaries.
 wikilinks:
-  - [[karpathy-kb-pattern]]
+  - [[./concepts/karpathy-kb-pattern]]
   - [[SCHEMA]]
 confidence: high
 source: decision
@@ -55,5 +55,5 @@ Use Karpathy KB Pattern with:
 
 ## Related Pages
 
-- [[karpathy-kb-pattern]] — Pattern reference
+- [[./concepts/karpathy-kb-pattern]] — Pattern reference
 - [[SCHEMA]] — Schema definition

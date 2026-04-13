@@ -169,3 +169,43 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: 8aa4d1d
+- Date: Mon Apr 13 06:41:07 PM JST 2026
+- Message: wiki: link 17 downloaded papers to pdf_path frontmatter
+
+Updated pdf_path for papers downloaded in previous session:
+- ResNet, FPN, FiLM, Kendall, IKEA ASM (already done)
+- Focal Loss, Mask R-CNN, Simple Baselines, GIoU, GradNorm
+- PCGrad, MGDA, Assembly101, I3D, TSM, DINOv2, YOLO, DETR, Attention
+
+Also archived 2 duplicate articles (004-multitask-kendall, 005-ikea-asm-benshabat)
+that were less POPW-specific than their canonical counterparts.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: aa2f895
+- Date: Mon Apr 13 06:55:14 PM JST 2026
+- Message: wiki: add 8 research articles for Assembly101 and IndustReal papers
+
+Added articles:
+- 075: ATTACH Dataset (two-handed assembly actions)
+- 076: Fusing Hand Body Skeleton + Object features
+- 077: Foundation Model Augmentation for Hand Pose
+- 078: ProMQA-Assembly multimodal procedural QA
+- 079: Object-Aware Egocentric Online Action Detection
+- 080: Procedure-Aware Pretraining for Instructional Video
+- 081: Prompt-Enhanced Hierarchical Transformer (CPR)
+- 082: MS-TCN for Action Segmentation
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 3738c7c
+- Date: Mon Apr 13 06:58:10 PM JST 2026
+- Message: refactor: fix 228 broken wikilinks across 54 wiki files
+
+- Add ./concepts/ prefix to bare concept links
+- Add ./entities/ prefix to bare entity links
+- Remove incorrect wiki/ prefixes
+- Remove trailing slashes from directory links
+- Add batch_fix_wikilinks.py script for future fixes
+---

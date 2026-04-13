@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: GPT Researcher is an autonomous multi-agent research system used by Legion for deep research tasks. It plans, executes parallel web searches, and synthesizes findings into structured reports. Accessed via the three-agent pipeline or /research command.
 wikilinks:
-  - [[multi-agent-orchestration]]
-  - [[reasoning-loop]]
-  - [[llm-cost-routing]]
+  - [[./concepts/multi-agent-orchestration]]
+  - [[./concepts/reasoning-loop]]
+  - [[./concepts/llm-cost-routing]]
 confidence: medium
 source: research
 project: legion
@@ -58,6 +58,6 @@ Primary research tool: `browser_agent.py` (Playwright) which is more reliable fo
 - Synthesis fails: Returns raw search results with error note
 
 ## See Also
-[[multi-agent-orchestration]] — How research fits into the three-agent pipeline
-[[reasoning-loop]] — Research reasoning pattern
-[[llm-cost-routing]] — Model selection for research tasks
+[[./concepts/multi-agent-orchestration]] — How research fits into the three-agent pipeline
+[[./concepts/reasoning-loop]] — Research reasoning pattern
+[[./concepts/llm-cost-routing]] — Model selection for research tasks

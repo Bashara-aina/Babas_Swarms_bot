@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Obsidian is the knowledge base platform for Legion's wiki, structured following the Karpathy KB pattern with Dataview queries.
 wikilinks:
-  - [[karpathy-kb-pattern]]
+  - [[./concepts/karpathy-kb-pattern]]
   - [[SCHEMA]]
 confidence: high
 source: implementation
@@ -62,4 +62,4 @@ Required plugins are configured in `wiki/.obsidian/`:
 ## Related Pages
 
 - [[SCHEMA]] — Schema definition and frontmatter requirements
-- [[karpathy-kb-pattern]] — Pattern reference for wiki article structure
+- [[./concepts/karpathy-kb-pattern]] — Pattern reference for wiki article structure

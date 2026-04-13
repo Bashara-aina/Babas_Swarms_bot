@@ -9,7 +9,7 @@ summary: OpenCode is an autonomous CLI coding agent integrated with Legion via c
 wikilinks:
   - [[legion-bot]]
   - [[legion-module-map]]
-  - [[llm-cost-routing]]
+  - [[./concepts/llm-cost-routing]]
 confidence: high
 source: implementation
 project: legion
@@ -60,4 +60,4 @@ OpenCode agents use `groq/llama-3.3-70b-versatile` for general tasks and `openro
 ## See Also
 [[legion-bot]] — Main project using OpenCode
 [[legion-module-map]] — System architecture overview
-[[llm-cost-routing]] — Cost optimization for coding tasks
+[[./concepts/llm-cost-routing]] — Cost optimization for coding tasks

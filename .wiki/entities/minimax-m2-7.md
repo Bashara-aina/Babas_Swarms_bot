@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: MiniMax M2.7 is Legion's primary LLM model for coding and reasoning tasks, offering 100 TPS throughput and achieving 56% on SWE-Pro benchmarks at $0.30 input/$1.20 output per million tokens.
 wikilinks:
-  - [[litellm]]
-  - [[openrouter]]
-  - [[llm-cost-routing]]
+  - [[./entities/litellm]]
+  - [[./entities/openrouter]]
+  - [[./concepts/llm-cost-routing]]
 confidence: high
 source: implementation
 ---
@@ -108,6 +108,6 @@ result = await chat("coding", [{"role": "user", "content": "Write a FastAPI endp
 
 ## Related Pages
 
-- [[litellm]] — LiteLLM client that routes to MiniMax
-- [[openrouter]] — Alternative routing provider
-- [[llm-cost-routing]] — Cost optimization strategy
+- [[./entities/litellm]] — LiteLLM client that routes to MiniMax
+- [[./entities/openrouter]] — Alternative routing provider
+- [[./concepts/llm-cost-routing]] — Cost optimization strategy

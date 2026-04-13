@@ -97,4 +97,4 @@ Use `graph-config.json` in vault root for node coloring.
 ## Related Pages
 
 - [[_meta/graph-config.json]] — Graph colors
-- [[wiki/INDEX]] — Main index with queries
+- [[INDEX]] — Main index with queries

@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Multi-agent orchestration coordinates specialized agents in structured pipelines and large-scale swarm debates, enabling Legion to tackle complex tasks beyond single-agent capability.
 wikilinks:
-  - [[reasoning-loop]]
-  - [[skill-registry]]
-  - [[self-improvement-loop]]
+  - [[./concepts/reasoning-loop]]
+  - [[./concepts/skill-registry]]
+  - [[./concepts/self-improvement-loop]]
   - [[legion-module-map]]
   - [[legion-bot]]
 confidence: high
@@ -62,7 +62,7 @@ Communication is via structured JSON task objects passed through a shared contex
 
 ## Relationships
 
-Multi-agent orchestration is the execution layer built on top of [[reasoning-loop]]. Each agent in the pipeline runs its own reasoning loop — Planner's decomposition is a reasoning loop, Worker's execution is instrumented with observe/refine cycles, Reviewer triggers another loop if issues are found. The three-agent pipeline directly implements the Planner-Worker-Reviewer pattern documented in the swarm architecture. [[skill-registry]] provides the capability catalog that agents draw from when executing skill-based tasks. [[self-improvement-loop]] captures outcomes: if a swarm debate produces a particularly good synthesis or a pipeline stage fails repeatedly, that learning gets stored for future iterations.
+Multi-agent orchestration is the execution layer built on top of [[./concepts/reasoning-loop]]. Each agent in the pipeline runs its own reasoning loop — Planner's decomposition is a reasoning loop, Worker's execution is instrumented with observe/refine cycles, Reviewer triggers another loop if issues are found. The three-agent pipeline directly implements the Planner-Worker-Reviewer pattern documented in the swarm architecture. [[./concepts/skill-registry]] provides the capability catalog that agents draw from when executing skill-based tasks. [[./concepts/self-improvement-loop]] captures outcomes: if a swarm debate produces a particularly good synthesis or a pipeline stage fails repeatedly, that learning gets stored for future iterations.
 
 ## Current Status
 
@@ -70,6 +70,6 @@ Multi-agent orchestration is the execution layer built on top of [[reasoning-loo
 
 ## See Also
 
-- [[reasoning-loop]] — Reasoning cycles within each agent
+- [[./concepts/reasoning-loop]] — Reasoning cycles within each agent
 - [[legion-module-map]] — System architecture
 - [[legion-bot]] — Main project documentation

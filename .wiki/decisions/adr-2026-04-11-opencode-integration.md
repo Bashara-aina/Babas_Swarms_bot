@@ -7,7 +7,7 @@ created: 2026-04-11
 updated: 2026-04-11
 summary: Initial decision to integrate OpenCode CLI into Legion's Telegram interface for autonomous task execution.
 wikilinks:
-  - [[opencode]]
+  - [[./entities/opencode]]
   - [[legion-bot]]
 confidence: high
 source: decision
@@ -47,5 +47,5 @@ Legion needed autonomous code execution capability beyond simple command running
 
 ## Related Pages
 
-- [[opencode]] — OpenCode entity
+- [[./entities/opencode]] — OpenCode entity
 - [[legion-bot]] — Legion project

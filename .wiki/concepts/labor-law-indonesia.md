@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Indonesian labor law centers on UU 13/2003 (primary employment statute) and its implementing regulations. For cekwajar.id's Wajar Slip tool, the critical rules are: PKWT vs PKWTT employment classification, UMK/UMP minimum wage compliance (514 cities, updated annually), 75/25 wage component split (minimum 75% must be base salary), and mandatory benefit calculations including THR (1 month salary after 12 months) and BPJS (5 components)."
 wikilinks:
-  - [[bpjs-reference]]
-  - [[tax-indonesia]]
+  - [[./concepts/bpjs-reference]]
+  - [[./concepts/tax-indonesia]]
   - [[cekwajar-id]]
-  - [[market-data-indonesia]]
+  - [[./concepts/market-data-indonesia]]
 confidence: high
 source: research
 ---
@@ -299,7 +299,7 @@ For Wajar Slip's compliance engine, apply rules in this priority order:
 
 ## Related Articles
 
-- [[bpjs-reference]] — Social security calculations that interact with wage rules
-- [[tax-indonesia]] — PPh21 calculations on gross salary
+- [[./concepts/bpjs-reference]] — Social security calculations that interact with wage rules
+- [[./concepts/tax-indonesia]] — PPh21 calculations on gross salary
 - [[cekwajar-id]] — Project applying these rules in Wajar Slip
-- [[market-data-indonesia]] — Market salary benchmarks for Wajar Gaji
+- [[./concepts/market-data-indonesia]] — Market salary benchmarks for Wajar Gaji

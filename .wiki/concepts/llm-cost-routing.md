@@ -7,11 +7,11 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: LLM cost routing uses litellm's unified API to route requests across multiple providers (OpenRouter, Groq, Cerebras, Ollama) with automatic fallback chains, exponential backoff retry, and BudgetManager integration for daily caps.
 wikilinks:
-  - [[litellm]]
-  - [[openrouter]]
-  - [[bayesian-blending]]
-  - [[context-window-budget]]
-  - [[intent-routing]]
+  - [[./entities/litellm]]
+  - [[./entities/openrouter]]
+  - [[./concepts/bayesian-blending]]
+  - [[./concepts/context-window-budget]]
+  - [[./concepts/intent-routing]]
 confidence: high
 source: implementation
 ---
@@ -86,7 +86,7 @@ When a `RateLimitError` occurs, the model is marked in `_rate_limited` with time
 
 ## Relationships
 
-LLM cost routing directly enables [[bayesian-blending]]: the probabilistic model selection calculus requires knowing which models are available, their cost structure, and current rate limit states. [[context-window-budget]] and cost routing share the goal of efficient resource use — context window budget maximizes what fits in a prompt, cost routing maximizes what model quality is obtained per yen. [[intent-routing]] feeds into routing by determining which agent key is used, which maps to a specific fallback chain (e.g., "coding" → higher capability models, "general" → cheaper models). [[litellm]] is the library that powers the unified API.
+LLM cost routing directly enables [[./concepts/bayesian-blending]]: the probabilistic model selection calculus requires knowing which models are available, their cost structure, and current rate limit states. [[./concepts/context-window-budget]] and cost routing share the goal of efficient resource use — context window budget maximizes what fits in a prompt, cost routing maximizes what model quality is obtained per yen. [[./concepts/intent-routing]] feeds into routing by determining which agent key is used, which maps to a specific fallback chain (e.g., "coding" → higher capability models, "general" → cheaper models). [[./entities/litellm]] is the library that powers the unified API.
 
 ## Current Status
 
@@ -94,7 +94,7 @@ LLM cost routing directly enables [[bayesian-blending]]: the probabilistic model
 
 ## See Also
 
-- [[litellm]] — Library powering the unified API
-- [[openrouter]] — Primary provider with best model availability
-- [[bayesian-blending]] — Probabilistic model selection based on task complexity
-- [[context-window-budget]] — Token budgeting that complements cost routing
+- [[./entities/litellm]] — Library powering the unified API
+- [[./entities/openrouter]] — Primary provider with best model availability
+- [[./concepts/bayesian-blending]] — Probabilistic model selection based on task complexity
+- [[./concepts/context-window-budget]] — Token budgeting that complements cost routing

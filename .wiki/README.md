@@ -7,13 +7,13 @@ tags: [README]
 > Powered by OpenCode + MiniMax M2.7 + Obsidian | Karpathy LLM Wiki Method
 
 ## 🗂 Structure
-- [[architecture/]] — System design, diagrams, data flow
-- [[agents/]] — Each agent's role, model, prompt, status
-- [[prompts/]] — Master prompts and templates
-- [[logs/]] — Agent session logs and decisions
-- [[research/]] — External research, benchmarks, papers
-- [[issues/]] — Known bugs, blockers, open questions
-- [[decisions/]] — Architecture decision records (ADRs)
+- [[architecture]] — System design, diagrams, data flow
+- [[agents]] — Each agent's role, model, prompt, status
+- [[prompts]] — Master prompts and templates
+- [[logs]] — Agent session logs and decisions
+- [[research]] — External research, benchmarks, papers
+- [[issues]] — Known bugs, blockers, open questions
+- [[decisions]] — Architecture decision records (ADRs)
 
 ## 🤖 Active Agents
 | Agent | Model | Role | Status |

@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Indonesian PPh 21 (income tax on employment) uses two calculation methods: TER (Tarif Efektif Rata-rata) for monthly withholding per PMK 168/2023, and progressive rates per UU HPP No.7/2021 (amending UU 36/2008 Pasal 17) for December true-up and final reconciliation. TER simplifies monthly calculation by using pre-computed effective rates by PTKP category, but December requires full progressive recalculation with credit for all TER paid."
 wikilinks:
-  - [[bpjs-reference]]
-  - [[labor-law-indonesia]]
+  - [[./concepts/bpjs-reference]]
+  - [[./concepts/labor-law-indonesia]]
   - [[cekwajar-id]]
   - [[cekwajar-verdict-engine]]
 confidence: high
@@ -369,7 +369,7 @@ TER Harian applies to daily-paid workers:
 
 ## Related Articles
 
-- [[bpjs-reference]] — Deductions that affect gross salary before PPh21
-- [[labor-law-indonesia]] — Employment classification affecting tax treatment
+- [[./concepts/bpjs-reference]] — Deductions that affect gross salary before PPh21
+- [[./concepts/labor-law-indonesia]] — Employment classification affecting tax treatment
 - [[cekwajar-id]] — Project using these calculations
 - [[cekwajar-verdict-engine]] — Implementation of TER + progressive in verdict pipeline

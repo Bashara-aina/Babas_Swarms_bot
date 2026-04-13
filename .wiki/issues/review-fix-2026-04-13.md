@@ -48,10 +48,10 @@ wikilinks: [[entities/opencode.md], [concepts/multi-agent-orchestration.md], [ar
 
 **Sample broken links:**
 ```
-legion/opencode-integration-2026-04-11.md: [[.wiki/decisions/ADR-001-opencode-integration.md]]
-legion/conversations_log.md: [[wiki/legion/interactions.md]]
-conversations/2026-04-11.md: [[wiki/conversations.md]]
-timelines/2026-04-10.md: [[wiki/mental_health.md]]
+legion/opencode-integration-2026-04-11.md: [[decisions/ADR-001-opencode-integration.md]]
+legion/conversations_log.md: [[legion/interactions.md]]
+conversations/2026-04-11.md: [[conversations.md]]
+timelines/2026-04-10.md: [[mental_health.md]]
 _meta/obsidian-plugins.md: [[page]]
 ```
 

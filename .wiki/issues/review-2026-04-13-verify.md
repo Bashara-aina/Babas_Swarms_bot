@@ -218,7 +218,7 @@ tags: [wiki, knowledge-base, pattern, karpathy]
 created: 2026-04-13
 updated: 2026-04-13
 summary: The Karpathy KB Pattern is a wiki structure optimized for AI reading - every page has frontmatter, TL;DR summaries, and wikilinks to related content.
-wikilinks: [[wiki/SCHEMA.md]], [[concepts/memory-architecture.md]]
+wikilinks: [[SCHEMA.md]], [[concepts/memory-architecture.md]]
 confidence: high
 source: design
 ---

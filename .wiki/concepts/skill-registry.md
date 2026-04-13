@@ -8,9 +8,9 @@ updated: 2026-04-13
 summary: The skill registry is a centralized capability catalog mapping trigger phrases to handler implementations, enabling Legion to扩展 capabilities without modifying core routing logic.
 wikilinks:
   - [[intent-routing]]
-  - [[reasoning-loop]]
+  - [[./concepts/reasoning-loop]]
   - [[skill-execution-flow]]
-  - [[self-improvement-loop]]
+  - [[./concepts/self-improvement-loop]]
 confidence: high
 source: implementation
 ---
@@ -76,7 +76,7 @@ When a skill is matched, the handler is called with the original message and any
 
 ## Relationships
 
-The skill registry is the capability layer that sits above intent routing. [[intent-routing]] uses the registry as a fallback when pattern matching and LLM classification both fail to reach 0.50 confidence — so skills effectively extend the routing vocabulary without modifying the intent classifier. Skills use [[reasoning-loop]] internally: complex skills like `web_search` and `arxiv_search` run through plan → execute → observe phases. The execution flow is detailed in [[skill-execution-flow]]. When skills succeed or fail, [[self-improvement-loop]] records the outcome so future skill selections are better calibrated.
+The skill registry is the capability layer that sits above intent routing. [[intent-routing]] uses the registry as a fallback when pattern matching and LLM classification both fail to reach 0.50 confidence — so skills effectively extend the routing vocabulary without modifying the intent classifier. Skills use [[./concepts/reasoning-loop]] internally: complex skills like `web_search` and `arxiv_search` run through plan → execute → observe phases. The execution flow is detailed in [[skill-execution-flow]]. When skills succeed or fail, [[./concepts/self-improvement-loop]] records the outcome so future skill selections are better calibrated.
 
 ## Current Status
 
@@ -86,4 +86,4 @@ The skill registry is the capability layer that sits above intent routing. [[int
 
 - [[intent-routing]] — Intent router fallback to skill registry
 - [[skill-execution-flow]] — How skills execute in detail
-- [[self-improvement-loop]] — Learning from skill outcomes
+- [[./concepts/self-improvement-loop]] — Learning from skill outcomes

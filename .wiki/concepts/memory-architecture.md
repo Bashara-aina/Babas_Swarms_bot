@@ -8,9 +8,9 @@ updated: 2026-04-13
 summary: Legion's memory is a multi-layered system spanning short-term conversation context, medium-term session transcripts, and long-term semantic knowledge, with graceful degradation when any layer fails.
 wikilinks:
   - [[intent-routing]]
-  - [[vector-search]]
-  - [[self-improvement-loop]]
-  - [[chromadb]]
+  - [[./concepts/vector-search]]
+  - [[./concepts/self-improvement-loop]]
+  - [[./entities/chromadb]]
 confidence: high
 source: implementation
 ---
@@ -54,7 +54,7 @@ Important facts, learned patterns, and project context are embedded and stored i
 
 ## Relationships
 
-Memory architecture is the foundation that makes every other intelligence layer possible. [[intent-routing]] depends on memory to retrieve context about past user requests when classifying ambiguous messages. [[self-improvement-loop]] writes lessons learned back into memory so future reasoning can avoid repeat failures. [[vector-search]] is the retrieval mechanism ChromaDB uses — without vector search, semantic memory recall would collapse to keyword matching. The [[chromadb]] entity page details the specific configuration (collection name, embedding model, top-k) used in production.
+Memory architecture is the foundation that makes every other intelligence layer possible. [[intent-routing]] depends on memory to retrieve context about past user requests when classifying ambiguous messages. [[./concepts/self-improvement-loop]] writes lessons learned back into memory so future reasoning can avoid repeat failures. [[./concepts/vector-search]] is the retrieval mechanism ChromaDB uses — without vector search, semantic memory recall would collapse to keyword matching. The [[./entities/chromadb]] entity page details the specific configuration (collection name, embedding model, top-k) used in production.
 
 ## Current Status
 
@@ -63,6 +63,6 @@ Memory architecture is the foundation that makes every other intelligence layer 
 ## See Also
 
 - [[intent-routing]] — Intent classification uses memory context
-- [[vector-search]] — ChromaDB semantic search engine
-- [[self-improvement-loop]] — Learning from memory outcomes
-- [[chromadb]] — Vector database backing long-term memory
+- [[./concepts/vector-search]] — ChromaDB semantic search engine
+- [[./concepts/self-improvement-loop]] — Learning from memory outcomes
+- [[./entities/chromadb]] — Vector database backing long-term memory

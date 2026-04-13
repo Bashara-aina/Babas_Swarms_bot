@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: OpenRouter is Legion's primary LLM gateway providing unified access to 100+ models via a single API at https://openrouter.ai/api/v1, with $0 cost for specified free-tier models.
 wikilinks:
-  - [[litellm]]
-  - [[llm-cost-routing]]
-  - [[opencode]]
+  - [[./entities/litellm]]
+  - [[./concepts/llm-cost-routing]]
+  - [[./entities/opencode]]
 confidence: high
 source: implementation
 project: legion
@@ -59,6 +59,6 @@ Legion never calls OpenRouter directly — all calls go through `llm_client.chat
 - For high-volume tasks (debug, math), Cerebras/Groq are faster and cheaper
 
 ## See Also
-[[litellm]] — LLM client that wraps OpenRouter calls
-[[llm-cost-routing]] — Model selection strategy including OpenRouter free tiers
-[[opencode]] — Code agent using OpenRouter devstral for free coding tasks
+[[./entities/litellm]] — LLM client that wraps OpenRouter calls
+[[./concepts/llm-cost-routing]] — Model selection strategy including OpenRouter free tiers
+[[./entities/opencode]] — Code agent using OpenRouter devstral for free coding tasks

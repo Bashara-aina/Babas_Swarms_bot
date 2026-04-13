@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Vector search converts text into numerical embeddings and finds similar content using cosine similarity in high-dimensional space, powering semantic memory recall and wiki retrieval in Legion.
 wikilinks:
-  - [[chromadb]]
+  - [[./entities/chromadb]]
   - [[memory-architecture]]
-  - [[karpathy-kb-pattern]]
-  - [[context-window-budget]]
+  - [[./concepts/karpathy-kb-pattern]]
+  - [[./concepts/context-window-budget]]
 confidence: high
 source: implementation
 ---
@@ -73,7 +73,7 @@ MemoryManager.search(query="gpu training status")
 
 ## Relationships
 
-Vector search is the retrieval mechanism for [[memory-architecture]]'s Layer 3 (long-term memory). Without it, semantic recall would collapse to keyword matching, making memory practically useless for queries with different phrasing. The [[chromadb]] entity page details the specific configuration (collection name, embedding model, top-k) and operational considerations. Embedding computation is token-intensive and factors into [[context-window-budget]] — each memory search consumes tokens from the embedding model's context window. The [[karpathy-kb-pattern]] wiki structure makes wiki retrieval viable: structured, synthesized pages with clear summaries can be efficiently embedded and retrieved.
+Vector search is the retrieval mechanism for [[memory-architecture]]'s Layer 3 (long-term memory). Without it, semantic recall would collapse to keyword matching, making memory practically useless for queries with different phrasing. The [[./entities/chromadb]] entity page details the specific configuration (collection name, embedding model, top-k) and operational considerations. Embedding computation is token-intensive and factors into [[./concepts/context-window-budget]] — each memory search consumes tokens from the embedding model's context window. The [[./concepts/karpathy-kb-pattern]] wiki structure makes wiki retrieval viable: structured, synthesized pages with clear summaries can be efficiently embedded and retrieved.
 
 ## Current Status
 
@@ -81,7 +81,7 @@ Vector search is the retrieval mechanism for [[memory-architecture]]'s Layer 3 (
 
 ## See Also
 
-- [[chromadb]] — Vector database configuration and operational details
+- [[./entities/chromadb]] — Vector database configuration and operational details
 - [[memory-architecture]] — Memory layers where vector search is Layer 3
-- [[context-window-budget]] — Token costs of embedding computation
-- [[karpathy-kb-pattern]] — Wiki pattern that makes wiki retrieval effective
+- [[./concepts/context-window-budget]] — Token costs of embedding computation
+- [[./concepts/karpathy-kb-pattern]] — Wiki pattern that makes wiki retrieval effective

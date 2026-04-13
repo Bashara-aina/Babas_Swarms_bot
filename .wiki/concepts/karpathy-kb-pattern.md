@@ -119,7 +119,7 @@ SORT title ASC
 
 ## Relationships
 
-The Karpathy KB Pattern is the structural foundation that makes [[memory-architecture]] traversable — without wikilinks, the AI wouldn't know how concepts relate. [[intent-routing]] benefits from the pattern when the intent classifier retrieves wiki context: structured pages with clear summaries are much faster to scan than unstructured notes. [[self-improvement-loop]] writes its learned outcomes to the wiki in this format, ensuring future reasoning loops can retrieve past learnings efficiently.
+The Karpathy KB Pattern is the structural foundation that makes [[memory-architecture]] traversable — without wikilinks, the AI wouldn't know how concepts relate. [[intent-routing]] benefits from the pattern when the intent classifier retrieves wiki context: structured pages with clear summaries are much faster to scan than unstructured notes. [[./concepts/self-improvement-loop]] writes its learned outcomes to the wiki in this format, ensuring future reasoning loops can retrieve past learnings efficiently.
 
 ## Current Status
 

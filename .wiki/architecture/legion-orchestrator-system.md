@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: The 4 legacy orchestrators (TaskOrchestrator, LegionSwarm, Nexus, Jarvis) were consolidated into a single `core/orchestrator.py` (1324 lines) with `LegionOrchestrator` as the primary entry point.
 wikilinks:
   - [[legion-module-map]]
-  - [[multi-agent-orchestration]]
-  - [[llm-cost-routing]]
+  - [[./concepts/multi-agent-orchestration]]
+  - [[./concepts/llm-cost-routing]]
 confidence: high
 source: implementation
 ---
@@ -97,5 +97,5 @@ handlers/orchestrate.py
 ## Related Pages
 
 - [[legion-module-map]] — Full module architecture
-- [[multi-agent-orchestration]] — Agent coordination patterns
+- [[./concepts/multi-agent-orchestration]] — Agent coordination patterns
 - [[swarms-bot-routing]] — Enterprise routing layer (swarms_bot/)

@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: "Indonesian salary market data for cekwajar.id comes from 4 layers: BPS Sakernas (province × 9 occupation groups, free), Kemnaker UMK (514 cities annual), crowdsourced submissions (k-anonymity n≥10), and licensed surveys (Mercer/Korn Ferry, IDR 60-150M/year). City-level data is the gap: BPS only provides province-level, creating false precision risk if displayed as city-level."
 wikilinks:
   - [[cekwajar-id]]
-  - [[labor-law-indonesia]]
-  - [[bpjs-reference]]
+  - [[./concepts/labor-law-indonesia]]
+  - [[./concepts/bpjs-reference]]
   - [[cekwajar-verdict-engine]]
 confidence: high
 source: research
@@ -300,6 +300,6 @@ def calculate_confidence(
 ## Related Articles
 
 - [[cekwajar-id]] — Project using this data
-- [[labor-law-indonesia]] — Regulatory minimums (UMK) and employment classification
-- [[bpjs-reference]] — Mandatory deductions affecting take-home pay
+- [[./concepts/labor-law-indonesia]] — Regulatory minimums (UMK) and employment classification
+- [[./concepts/bpjs-reference]] — Mandatory deductions affecting take-home pay
 - [[cekwajar-verdict-engine]] — How data feeds into verdict calculation

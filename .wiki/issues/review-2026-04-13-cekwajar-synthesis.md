@@ -64,7 +64,7 @@ wiki/projects/cekwajar-id.md (386 lines)
 - UU PDP (Personal Data Protection): referenced in tech-stack.md and adr-mvp-scope-lock.md as legal requirement
 
 **Wikilinks (sample verification):**
-- cekwajar-verdict-engine.md → [[cekwajar-id]], [[tax-indonesia]], [[bpjs-reference]], [[freemium-gate]]
+- cekwajar-verdict-engine.md → [[cekwajar-id]], [[./concepts/tax-indonesia]], [[./concepts/bpjs-reference]], [[./concepts/freemium-gate]]
 - All link to existing wiki articles
 - No [[wikilinks]] to non-existent files
 

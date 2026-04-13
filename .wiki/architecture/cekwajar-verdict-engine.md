@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: The cekwajar.id verdict engine is a 7-stage pipeline that transforms raw payslip data into a compliance verdict. It validates input, calculates PPh21 (TER method + progressive true-up), calculates 6-component BPJS, detects 7 violation types (V01-V07), computes confidence scores, applies freemium gating, and outputs structured verdict JSON.
 wikilinks:
-  - [[cekwajar-id]]
-  - [[tax-indonesia]]
-  - [[bpjs-reference]]
-  - [[freemium-gate]]
+  - [[projects/cekwajar-id]]
+  - [[./concepts/tax-indonesia]]
+  - [[./concepts/bpjs-reference]]
+  - [[./concepts/freemium-gate]]
 confidence: high
 source: implementation
 ---
@@ -255,7 +255,7 @@ def calculate_december_trueup(
 
 ## 5. Stage 4: BPJS 6-Component Calculation
 
-From [[bpjs-reference]], the 6 components:
+From [[./concepts/bpjs-reference]], the 6 components:
 
 ```python
 def calculate_bpjs_6_component(gross_salary: int, jkk_rate: float = 0.0054) -> dict:
@@ -488,6 +488,6 @@ def apply_freemium_gate(verdict: dict, user_tier: str) -> dict:
 ## Related Articles
 
 - [[cekwajar-id]] — Project using this engine
-- [[tax-indonesia]] — PPh21 TER and progressive calculation details
-- [[bpjs-reference]] — 6-component BPJS calculation details
-- [[freemium-gate]] — Freemium access control pattern
+- [[./concepts/tax-indonesia]] — PPh21 TER and progressive calculation details
+- [[./concepts/bpjs-reference]] — 6-component BPJS calculation details
+- [[./concepts/freemium-gate]] — Freemium access control pattern
