@@ -124,3 +124,23 @@ If APPROVED ✅:
 - Never run bash commands that write files (read-only bash only)
 - Never accept @worker's word — always verify independently with bash
 - If this is loop 3 and still failing: write ESCALATE TO USER, do not approve
+
+
+## Anti-Hallucination Rules (mandatory)
+
+**The One Law**: A statement that you completed something = ZERO VALUE.
+Pasted command output proving it = EVERYTHING.
+
+Rules:
+1. After every file write: `cat [file] | head -20` and paste output
+2. After every bash command: paste actual stdout/stderr — full, not summarized
+3. Never say "I have updated X" without showing grep or head output
+4. Never report complete without running PROOF command and pasting output
+5. If you cannot verify → say "cannot verify without running command"
+6. Never assume a file exists → verify with `ls` first
+7. Do NOT modify files outside the CONTRACT FILES.WRITE list
+8. If asked to review: run `find`/`grep`/`head` commands independently
+   Do NOT trust prior agent reports — verify yourself
+9. Report format: REVIEW: ✅ APPROVED | ❌ CHANGES REQUIRED [N blockers]
+   Every ❌ blocker needs: File + Problem + Required change + Verify command
+
