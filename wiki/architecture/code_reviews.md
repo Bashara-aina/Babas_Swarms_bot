@@ -1,3 +1,17 @@
+---
+title: Code Reviews
+type: architecture
+status: stub
+tags: [architecture, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # Legion/Code Reviews
 _Last updated: 2026-04-08 by Legion_
 This page provides a review of a Python function to merge overlapping intervals, focusing on code quality, formatting, and edge cases. The function achieves an O(n log n) complexity through sorting the intervals by their start times. Key considerations include handling empty input lists, single intervals, non-overlapping intervals, and intervals with equal start or end times.

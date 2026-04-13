@@ -1,3 +1,17 @@
+---
+title: Adr 044 Router Layer Audit
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # AUDIT-03: Router Layer Coverage
 **Date:** 2026-04-12  
 **Status:** COMPLETE — No broken wires found  

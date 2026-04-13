@@ -45,7 +45,21 @@ WHERE status = "active"
 SORT updated DESC
 ```
 
+## Vault Structure
+
+The vault root is `~/swarm-bot/wiki/`. Obsidian resolves all paths relative to this root:
+- Dataview queries use `FROM "concepts"` (not `FROM "wiki/concepts"`)
+- Wikilinks use relative paths without `.md` extension: `[[entities/litellm]]`
+- Attachments stored in `raw/assets/` (not inline in articles)
+
+## Plugin Configuration
+
+Required plugins are configured in `wiki/.obsidian/`:
+- `community-plugins.json`: `["dataview","obsidian-git","metadata-extractor","obsidian-advanced-tables"]`
+- `graph.json`: Color groups per directory type
+- `dataview/data.json`: Refresh interval 2500ms, inline query enabled
+
 ## Related Pages
 
-- [[SCHEMA]] — Schema definition
-- [[karpathy-kb-pattern]] — Pattern reference
+- [[SCHEMA]] — Schema definition and frontmatter requirements
+- [[karpathy-kb-pattern]] — Pattern reference for wiki article structure

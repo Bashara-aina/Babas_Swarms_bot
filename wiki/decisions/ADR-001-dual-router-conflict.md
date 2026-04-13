@@ -1,3 +1,17 @@
+---
+title: Adr 001 Dual Router Conflict
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-001: Dual Router Conflict (agents.py vs autonomous_router.py)
 
 **Date**: 2026-04-12  

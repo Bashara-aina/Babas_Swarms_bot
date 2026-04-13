@@ -1,3 +1,17 @@
+---
+title: Conversations Log
+type: architecture
+status: stub
+tags: [architecture, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # Conversations Log
 _Last updated: 2026-04-11 by Legion_
 This page serves as a log of conversations, starting with user_id=5755393949 on 2026-04-10. It will be updated with new conversations and relevant information. The log will help track interactions and identify patterns or important topics.

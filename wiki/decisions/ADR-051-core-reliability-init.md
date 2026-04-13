@@ -1,3 +1,17 @@
+---
+title: Adr 051 Core Reliability Init
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-051: core.reliability — Empty `__init__.py` Needs Re-exports
 
 **Date:** 2026-04-12

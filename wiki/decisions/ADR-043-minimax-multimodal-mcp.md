@@ -1,3 +1,17 @@
+---
+title: Adr 043 Minimax Multimodal Mcp
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-043: MiniMax Multi-Modal MCP Tool Integration
 
 ## Status

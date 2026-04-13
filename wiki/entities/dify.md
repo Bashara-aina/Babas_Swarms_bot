@@ -35,13 +35,20 @@ Dify is an open-source platform for building LLM applications with visual workfl
 | Open source | ✅ | ✅ | ✅ (Microsoft) |
 | Self-hosted | ✅ | ✅ | ❌ |
 
-## Potential Use Cases
+## Potential Use Cases for Legion
 
-- Rapid prototyping of new skills
-- Workflow automation for business processes
-- Knowledge base chat interfaces
+- **Rapid prototyping**: Visual workflow builder for new skill pipelines
+- **Business automation**: cekwajar salary survey processing workflows
+- **RAG pipelines**: Dify datasets for rumahlabuh property Q&A
+
+## Integration with Legion
+
+Dify is not currently integrated — it was evaluated as a potential skill execution platform. Current skill execution uses `core/skills/` (Python functions) and the intent router. Dify could replace the skill registry for visual workflow-based skills.
+
+Status: **Not integrated** — evaluated but not selected. Could be revisited if workflow complexity grows.
 
 ## Related Pages
 
 - [[opencode]] — Code agent alternative
-- [[skill-registry]] — Skill management
+- [[skill-registry]] — Current skill management system
+- [[cekwajar-id]] — Potential workflow automation target

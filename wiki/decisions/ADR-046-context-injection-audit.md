@@ -1,3 +1,17 @@
+---
+title: Adr 046 Context Injection Audit
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-046: Context Injection Audit — Ensure All Context Sources in LLM Calls
 
 **Date:** 2026-04-12

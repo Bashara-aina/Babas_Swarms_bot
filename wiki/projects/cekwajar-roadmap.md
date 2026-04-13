@@ -1,3 +1,17 @@
+---
+title: Cekwajar Roadmap
+type: project
+status: stub
+tags: [projects, cekwajar]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: cekwajar
+---
+
 ***
 title: "cekwajar.id — Gallagher-Model Growth Roadmap"
 ***

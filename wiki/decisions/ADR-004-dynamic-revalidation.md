@@ -1,3 +1,17 @@
+---
+title: Adr 004 Dynamic Revalidation
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-004: Dynamic Revalidation System — Time-Aware TTL for cekwajar.id
 
 **Date**: 2026-04-11  

@@ -5,7 +5,7 @@ status: active
 tags: [orchestration, agents, comparison, swarm, nexus, jarvis]
 created: 2026-04-13
 updated: 2026-04-13
-summary: Legion has 4 competing orchestrators: task_orchestrator (492 lines, task chaining + debate), legion_swarm (322 lines, 11-agent 3-phase), nexus_orchestrator (3-layer routing), and jarvis_orchestrator (context bundling). Consolidation into a single orchestrator is planned per the 2026-04-12 audit.
+summary:: " Legion has 4 competing orchestrators: task_orchestrator (492 lines, task chaining + debate), legion_swarm (322 lines, 11-agent 3-phase), nexus_orchestrator (3-layer routing), and jarvis_orchestrator (context bundling). Consolidation into a single orchestrator is planned per the 2026-04-12 audit."
 wikilinks:
   - [[multi-agent-orchestration]]
   - [[intent-routing]]

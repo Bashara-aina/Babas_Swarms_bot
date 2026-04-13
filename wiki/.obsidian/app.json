@@ -1,0 +1,10 @@
+{
+  "legacyEditor": false,
+  "livePreview": true,
+  "defaultViewMode": "source",
+  "promptDelete": false,
+  "showUnsupportedFiles": false,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "concepts",
+  "attachmentFolderPath": "raw/assets"
+}
