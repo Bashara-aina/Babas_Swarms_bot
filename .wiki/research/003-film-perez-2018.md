@@ -5,6 +5,7 @@ authors: "Ethan Perez, Florian Strub, Harm de Vries, Vincent Dumoulin, Aaron Cou
 year: 2018
 venue: "AAAI 2018"
 arxiv: "1709.07871"
+pdf_path: "project/popw/working/external/papers/FiLM_Perez_2017.pdf"
 citations: 4001
 tier: 1
 tags: ["film", "conditioning", "visual-reasoning", "modulation", "reasoning"]

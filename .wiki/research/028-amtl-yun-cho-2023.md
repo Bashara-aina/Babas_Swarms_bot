@@ -94,7 +94,7 @@ $$w_i = \frac{1}{a_i(t) + \epsilon} \bigg/ \sum_j \frac{1}{a_j(t) + \epsilon}$$
 ## Connections to Other Wiki Papers
 
 - [[029-uw-so-kirchdorfer-2024]] — UW-SO is analytical alternative to Kendall UW
-- [[004-multitask-kendall-2018]] — Kendall UW is the current POPW baseline to replace
+- [[004-kendall-uncertainty-2018]] — Kendall UW is the current POPW baseline to replace
 - [[027-mgda-sener-2018]] — MGDA provides theoretical foundation for Pareto optimality
 
 ## POPW Action Item

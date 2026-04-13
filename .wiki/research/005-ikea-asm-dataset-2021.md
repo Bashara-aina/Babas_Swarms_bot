@@ -6,6 +6,7 @@ tags: [dataset, assembly, ikea, furniture, action-recognition, multi-view]
 created: 2026-04-13
 updated: 2026-04-13
 summary: The IKEA Assembly in the Wild dataset contains 685,516 frames from 254 videos across 4 furniture types, with 33 assembly action classes and 7 part detection classes. This IS Bashara's dataset, the entire foundation of the POPW thesis.
+pdf_path: "project/popw/working/external/papers/IKEA_ASM_Ben-Shabat_2020.pdf"
 wikilinks:
   - [[002-fpn-lin-2017]]
   - [[007-focal-loss-lin-2017]]
