@@ -6,7 +6,9 @@ tags: [architecture, integration, ecc, agents]
 created: 2026-04-13
 updated: 2026-04-13
 summary: Integrated Everything Claude Code (ECC) as ext/everything-claude-code/ — 13 specialized agents, 6 high-value skills, hooks reference, and language rules.
-wikilinks: [[ext/everything-claude-code]], [[concepts/multi-agent-orchestration]]
+wikilinks:
+  - [[ext/everything-claude-code]]
+  - [[concepts/multi-agent-orchestration]]
 confidence: high
 source: implementation
 ---
@@ -121,4 +123,4 @@ ext/
 
 [[ext/everything_claude_code/__init__]] — Integration module
 [[concepts/multi-agent-orchestration]] — How agents coordinate
-[[wiki/projects/legion-bot.md]] — Legion bot project
+[[wiki/projects/legion-bot]] — Legion bot project

@@ -1,3 +1,17 @@
+---
+title: Adr 090 Garbled Text Context Injection
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-090: Fix Garbled Text from Silent Context Injection Failures
 
 **Date**: 2026-04-12  

@@ -1,3 +1,17 @@
+---
+title: Adr 052 Core Subpackages Init
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-052: core Subpackages — Empty `__init__.py` Files Need Docstrings
 
 **Date:** 2026-04-12

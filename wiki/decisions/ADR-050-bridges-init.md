@@ -1,3 +1,17 @@
+---
+title: Adr 050 Bridges Init
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-050: bridges Package — Missing `__init__.py`
 
 **Date:** 2026-04-12

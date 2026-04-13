@@ -1,3 +1,17 @@
+---
+title: Adr 007 Handlers Audit
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-007: Handler Audit — No Changes Required
 
 **Date**: 2026-04-12  

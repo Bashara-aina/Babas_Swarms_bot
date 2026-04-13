@@ -1,3 +1,17 @@
+---
+title: Adr Wire 001 Legion Wiring Audit Fixes
+type: decision
+status: stub
+tags: [decisions, legion]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: legion
+---
+
 # ADR-WIRE-001: Legion Wiring Audit Fixes
 
 **Date**: 2026-04-12

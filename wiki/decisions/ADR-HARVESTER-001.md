@@ -1,3 +1,17 @@
+---
+title: Adr Harvester 001
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-HARVESTER-001: Legion Daily Intelligence Harvester v1.0
 
 **created:** 2026-04-11  

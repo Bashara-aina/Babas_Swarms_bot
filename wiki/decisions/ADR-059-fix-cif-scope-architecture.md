@@ -1,3 +1,17 @@
+---
+title: Adr 059 Fix Cif Scope Architecture
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-059: Fix `_cif` Scope Bug in llm_client/__init__.py
 
 ## Status

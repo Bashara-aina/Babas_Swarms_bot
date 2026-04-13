@@ -1,3 +1,17 @@
+---
+title: Adr 006 Legion Wiki Loop 2026 04 12 Pt2
+type: decision
+status: stub
+tags: [decisions, legion]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: legion
+---
+
 # ADR-006: LEGION WIKI LOOP — CYCLES 11-20 (PART 2)
 
 **Date**: 2026-04-12

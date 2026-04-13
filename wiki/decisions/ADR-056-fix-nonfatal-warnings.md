@@ -1,3 +1,17 @@
+---
+title: Adr 056 Fix Nonfatal Warnings
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-056: Fix Non-Fatal Warnings on Legion Bot Shutdown
 
 **Date**: 2026-04-12  

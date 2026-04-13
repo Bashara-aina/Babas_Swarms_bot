@@ -1,11 +1,16 @@
 {
-  "last_compiled": "2026-04-13T13:32:34.767894",
-  "articles": 192,
-  "stubs": 13,
+  "last_compiled": "2026-04-13T13:57:27.670805+09:00",
+  "articles": 129,
+  "stubs": 23,
   "enriched_today": 12,
   "created_today": 9,
   "broken_links_fixed": 45,
   "schema_violations_fixed": 5,
   "batch1_fixed": true,
-  "ecc_integrated": true
+  "ecc_integrated": true,
+  "qc_score": "6/8",
+  "no_fm": 0,
+  "yaml_fails": 0,
+  "broken_links": 0,
+  "orphans": 95
 }

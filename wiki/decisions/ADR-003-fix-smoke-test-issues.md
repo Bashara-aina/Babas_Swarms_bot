@@ -1,3 +1,17 @@
+---
+title: Adr 003 Fix Smoke Test Issues
+type: decision
+status: stub
+tags: [decisions, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # ADR-003: Fix Smoke Test Issues
 
 **Date**: 2026-04-11  

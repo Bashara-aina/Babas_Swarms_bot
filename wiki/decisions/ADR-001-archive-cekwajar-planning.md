@@ -1,3 +1,17 @@
+---
+title: Adr 001 Archive Cekwajar Planning
+type: decision
+status: stub
+tags: [decisions, cekwajar]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: cekwajar
+---
+
 # ADR-001: Archive cekwajar.id Planning Docs
 
 **Date:** 2026-04-11  

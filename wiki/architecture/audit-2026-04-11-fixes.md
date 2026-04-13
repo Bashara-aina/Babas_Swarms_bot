@@ -1,3 +1,17 @@
+---
+title: Audit 2026 04 11 Fixes
+type: architecture
+status: stub
+tags: [architecture, general]
+created: 2026-04-13
+updated: 2026-04-13
+summary: Stub — needs enrichment. Auto-added frontmatter during QC restructure.
+wikilinks: []
+confidence: low
+source: migration
+project: general
+---
+
 # Audit 2026-04-11: Critical Fixes Applied
 
 **Date:** 2026-04-11  
