@@ -1,3 +1,11 @@
+---
+title: "ADR-047: Async Correctness Audit — AUDIT 10"
+date: "2026-04-12"
+decider: "@planner"
+fix: "Add `await`: `result = await some_async_func()`"
+reviewer: "@reviewer"
+status: "PROPOSED"
+---
 # ADR-047: Async Correctness Audit — AUDIT 10
 
 **Date:** 2026-04-12

@@ -1,3 +1,9 @@
+---
+title: "ADR-058: Fix Missing Imports in llm_client/__init__.py"
+created: 2026-04-12
+type: decision
+tags: [ADR-058-fix-all-missing-imports]
+---
 # ADR-058: Fix Missing Imports in llm_client/__init__.py
 
 ## Status

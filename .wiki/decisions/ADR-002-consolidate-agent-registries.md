@@ -1,3 +1,9 @@
+---
+title: "ADR-002: Consolidate Dual Agent Registries"
+created: 2026-04-10
+type: decision
+tags: [ADR-002-consolidate-agent-registries]
+---
 # ADR-002: Consolidate Dual Agent Registries
 - Date: 2026-04-10
 - Status: Accepted

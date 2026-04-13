@@ -1,3 +1,9 @@
+---
+title: "Steelmanning — The Anti-Strawman Discipline"
+source: "LessWrong rationality community + r/PromptEngineering 2026"
+tags: [08-steelmanning]
+type: wisdom
+---
 # Steelmanning — The Anti-Strawman Discipline
 
 Source: LessWrong rationality community + r/PromptEngineering 2026

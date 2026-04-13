@@ -1,3 +1,8 @@
+---
+title: "DATABASE RESILIENCE"
+tags: [database-resilience]
+---
+# DATABASE RESILIENCE
 # DATABASE RESILIENCE
 
 ---

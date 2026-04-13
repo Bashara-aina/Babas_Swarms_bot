@@ -1,3 +1,9 @@
+---
+title: "ADR-007: Handler Audit — No Changes Required"
+auditor: "AUDIT 07"
+date: "2026-04-12"
+status: "Accepted"
+---
 # ADR-007: Handler Audit — No Changes Required
 
 **Date**: 2026-04-12  

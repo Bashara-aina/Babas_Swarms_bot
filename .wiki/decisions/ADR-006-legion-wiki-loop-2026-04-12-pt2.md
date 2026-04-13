@@ -1,3 +1,9 @@
+---
+title: "ADR-006: LEGION WIKI LOOP — CYCLES 11-20 (PART 2)"
+author: "Three-agent pipeline (planner → worker × 10 cycles → 2× reviewer)"
+date: "2026-04-12"
+status: "ACCEPTED"
+---
 # ADR-006: LEGION WIKI LOOP — CYCLES 11-20 (PART 2)
 
 **Date**: 2026-04-12

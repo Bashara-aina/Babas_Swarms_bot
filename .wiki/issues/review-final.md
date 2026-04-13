@@ -1,3 +1,8 @@
+---
+title: "Review: Phase 7-8 Final Review"
+type: review
+tags: [review-final]
+---
 # Review: Phase 7-8 Final Review
 
 ## ✅ Passed

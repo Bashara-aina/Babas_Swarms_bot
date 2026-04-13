@@ -1,3 +1,9 @@
+---
+title: "ADR-021: Dify Integration"
+agent: "worker"
+date: "2026-04-12"
+status: "Accepted"
+---
 # ADR-021: Dify Integration
 
 **Date:** 2026-04-12

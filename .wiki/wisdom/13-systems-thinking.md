@@ -1,3 +1,9 @@
+---
+title: "Systems Thinking — Seeing the Whole"
+source: "Donella Meadows (Thinking in Systems) + Peter Senge (The Fifth Discipline)"
+tags: [13-systems-thinking]
+type: wisdom
+---
 # Systems Thinking — Seeing the Whole
 
 Source: Donella Meadows (Thinking in Systems) + Peter Senge (The Fifth Discipline)

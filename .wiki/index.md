@@ -1,3 +1,8 @@
+---
+title: "Legion Wiki Index"
+tags: [index]
+---
+# Legion Wiki Index
 # Legion Wiki Index
 *Last rebuilt: 2026-04-11 17:28*
 

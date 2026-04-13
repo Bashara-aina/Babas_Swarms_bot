@@ -1,3 +1,9 @@
+---
+title: "ADR-051: core.reliability — Empty `__init__.py` Needs Re-exports"
+date: "2026-04-12"
+decider: "@planner"
+status: "Accepted"
+---
 # ADR-051: core.reliability — Empty `__init__.py` Needs Re-exports
 
 **Date:** 2026-04-12

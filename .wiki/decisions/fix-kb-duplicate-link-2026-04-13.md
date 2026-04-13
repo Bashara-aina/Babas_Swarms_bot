@@ -1,3 +1,12 @@
+---
+title: "ADR-006: Fix KB Duplicate memory-architecture.md and Malformed Wikilink"
+date: "2026-04-13"
+file: "`wiki/projects/legion-bot.md` line 9"
+fix: "Changed wikilinks format from `[[link1], [link2], [link3]]` to `[[link1]], [[link2]], [[link3]]`"
+problem: "`[[entities/opencode.md],` — errant comma inside bracket"
+resolution: "Renamed `wiki/architecture/memory-architecture.md` → `wiki/architecture/memory-gaps-analysis.md`"
+status: "Resolved"
+---
 # ADR-006: Fix KB Duplicate memory-architecture.md and Malformed Wikilink
 
 **Date**: 2026-04-13

@@ -1,3 +1,9 @@
+---
+title: "Nassim Taleb — Antifragile Systems Thinking"
+source: "Antifragile (book) + O'Reilly Antifragile GenAI Architecture 2025"
+tags: [02-taleb-antifragile]
+type: wisdom
+---
 # Nassim Taleb — Antifragile Systems Thinking
 
 Source: Antifragile (book) + O'Reilly Antifragile GenAI Architecture 2025

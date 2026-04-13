@@ -1,3 +1,9 @@
+---
+title: "ADR-052: core Subpackages — Empty `__init__.py` Files Need Docstrings"
+date: "2026-04-12"
+decider: "@planner"
+status: "Accepted"
+---
 # ADR-052: core Subpackages — Empty `__init__.py` Files Need Docstrings
 
 **Date:** 2026-04-12

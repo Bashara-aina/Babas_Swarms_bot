@@ -1,3 +1,10 @@
+---
+title: "ADR-053: Orphan Module Classification Policy"
+audit: "AUDIT 05"
+date: "2026-04-13"
+likely_candidates: "`character_voice.py`, `error_humanizer.py`, `health.py`, `intent_classifier.py`, `natural_command_parser.py`, `research_policy.py`, `self_awareness_gate.py`, `swarm.py`, `wiki_bridge.py`"
+status: "PROPOSED"
+---
 # ADR-053: Orphan Module Classification Policy
 **Date:** 2026-04-13  
 **Status:** PROPOSED  

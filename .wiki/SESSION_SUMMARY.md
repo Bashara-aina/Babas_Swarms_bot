@@ -1,3 +1,9 @@
+---
+title: "LEGION WIKI LOOP — SESSION SUMMARY"
+created: 2026-04-12
+type: article
+tags: [SESSION_SUMMARY]
+---
 # LEGION WIKI LOOP — SESSION SUMMARY
 Date: 2026-04-12 (Cycles 11-20)
 

@@ -1,3 +1,8 @@
+---
+title: "Review: Missing TASK_KEYWORDS for 11 Legacy Agents"
+type: review
+tags: [002-missing-task-keywords]
+---
 # Review: Missing TASK_KEYWORDS for 11 Legacy Agents
 **File:** `core/agent_registry.py` lines 436-660  
 **Severity:** ⚠️ Warning  

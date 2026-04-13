@@ -1,3 +1,8 @@
+---
+title: "SUPABASE SCHEMA OVERVIEW"
+tags: [supabase-schema-overview]
+---
+# SUPABASE SCHEMA OVERVIEW
 # SUPABASE SCHEMA OVERVIEW
 
 ---

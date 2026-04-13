@@ -1,3 +1,9 @@
+---
+title: "ADR-089: LEGION MASTER CONCERN FIX"
+date: "2026-04-12"
+result: ""
+status: "ACCEPTED"
+---
 # ADR-089: LEGION MASTER CONCERN FIX
 
 **Date**: 2026-04-12

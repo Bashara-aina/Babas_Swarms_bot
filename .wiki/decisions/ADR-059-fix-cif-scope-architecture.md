@@ -1,3 +1,9 @@
+---
+title: "ADR-059: Fix `_cif` Scope Bug in llm_client/__init__.py"
+bug_(b1): "In `llm_client/__init__.py`, the `_cif` alias for `classify_intent_fast` is defined **only** inside the `if not agent_key:` conditional block at lines 979–988:"
+failure_mode: "When `agent_key` is already set (truthy) at call time, the `if not agent_key:` block is skipped entirely, `_cif` is never defined, yet the for loop at 1116–1127 still executes and captures `_cif` → `NameError` silently swallowed by the bare `except Exception: pass`."
+selected:_solution_1: "— Move `classify_intent_fast` import to module level."
+---
 # ADR-059: Fix `_cif` Scope Bug in llm_client/__init__.py
 
 ## Status

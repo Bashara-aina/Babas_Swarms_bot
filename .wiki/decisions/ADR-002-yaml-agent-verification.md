@@ -1,3 +1,9 @@
+---
+title: "ADR-002: YAML Agent Configs Not Fully Verified at Runtime"
+date: "2026-04-12"
+deciders: "Worker agent (audit task)"
+status: "Accepted"
+---
 # ADR-002: YAML Agent Configs Not Fully Verified at Runtime
 
 **Date**: 2026-04-12  

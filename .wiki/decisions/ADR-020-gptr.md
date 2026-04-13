@@ -1,3 +1,9 @@
+---
+title: "ADR-020: gpt-researcher Integration"
+date: "2026-04-12"
+deciders: "Worker agent (Legion Swarm Bot)"
+status: "Accepted"
+---
 # ADR-020: gpt-researcher Integration
 
 **Date:** 2026-04-12  

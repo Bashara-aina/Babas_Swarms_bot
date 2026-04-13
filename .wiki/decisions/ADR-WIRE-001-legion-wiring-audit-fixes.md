@@ -1,3 +1,11 @@
+---
+title: "ADR-WIRE-001: Legion Wiring Audit Fixes"
+date: "2026-04-12"
+problem: "`handlers/admin_handlers.py` was imported in `handlers/__init__.py` but NOT registered in `_ROUTER_ORDER`. It has duplicate `/budget` handler that conflicts with `enterprise.py`."
+solution: "Removed `admin_handlers` from imports in `handlers/__init__.py`. The `enterprise.py` handler is the canonical `/budget` implementation and is already properly registered."
+status: "Accepted"
+type: "Bug Fix"
+---
 # ADR-WIRE-001: Legion Wiring Audit Fixes
 
 **Date**: 2026-04-12

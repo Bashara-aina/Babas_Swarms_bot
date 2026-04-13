@@ -1,3 +1,10 @@
+---
+title: "ADR-003: Import Resilience — Lazy Import Strategy"
+date: "2026-04-12"
+decider: "@planner"
+reviewer: "@reviewer"
+status: "PROPOSED"
+---
 # ADR-003: Import Resilience — Lazy Import Strategy
 
 **Date:** 2026-04-12  

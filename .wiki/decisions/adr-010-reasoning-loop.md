@@ -1,3 +1,9 @@
+---
+title: "ADR-010: Pre-Response Reasoning Loop"
+component: "core/reasoning_loop.py, llm_client/__init__.py"
+date: "2026-04-12"
+status: "ACCEPTED"
+---
 # ADR-010: Pre-Response Reasoning Loop
 
 **Date:** 2026-04-12

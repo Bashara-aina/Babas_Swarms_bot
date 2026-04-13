@@ -130,3 +130,16 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: 99a1a65
+- Date: Mon Apr 13 05:55:34 PM JST 2026
+- Message: wiki: add POPW research articles + architectural diagram
+
+- architecture/worker-net-architecture-diagram.md: Full pipeline diagram with embedded local image
+- architecture/worker-net-improved4.md: ResNet50-FPN + 3 heads + PoseFiLMModule
+- architecture/popw-training-pipeline.md: FP16 training, Kendall weighting, validation metrics
+- research/popw-film-literature-gap.md: Novelty argument — no prior pose→FiLM→action work
+- research/popw-model-comparison.md: improved4_film benchmark: mAP@0.5=0.600, PCK@0.1=99.9%
+- research/popw-v14-ground-truth.md: Source code audit — P3 shape [B,256,80,60] correction
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---

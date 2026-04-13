@@ -1,3 +1,9 @@
+---
+title: "ADR-046: Context Injection Audit — Ensure All Context Sources in LLM Calls"
+date: "2026-04-12"
+status: "Active"
+type: "Audit / Bug Fix"
+---
 # ADR-046: Context Injection Audit — Ensure All Context Sources in LLM Calls
 
 **Date:** 2026-04-12

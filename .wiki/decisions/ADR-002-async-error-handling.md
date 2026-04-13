@@ -1,3 +1,10 @@
+---
+title: "ADR-002: Async Task Error Handling Policy"
+date: "2026-04-12"
+decider: "@planner"
+reviewer: "@reviewer"
+status: "PROPOSED"
+---
 # ADR-002: Async Task Error Handling Policy
 
 **Date:** 2026-04-12  

@@ -1,3 +1,9 @@
+---
+title: "ADR-022: markitdown Document Parser Integration"
+date: "2026-04-12"
+decider: "@planner → @worker"
+status: "Accepted"
+---
 # ADR-022: markitdown Document Parser Integration
 
 **Date**: 2026-04-12  

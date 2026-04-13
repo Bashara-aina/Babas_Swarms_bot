@@ -1,3 +1,7 @@
+---
+title: "ADR-060: Cleanup Redundant Import in llm_client/__init__.py"
+proposed: "| 2026-04-12"
+---
 # ADR-060: Cleanup Redundant Import in llm_client/__init__.py
 
 ## Status

@@ -1,3 +1,8 @@
+---
+title: "Review: Legacy Agent Count Mismatch"
+type: review
+tags: [001-legacy-agent-count-mismatch]
+---
 # Review: Legacy Agent Count Mismatch
 **File:** `config/departments.yaml` line 713-715  
 **Severity:** ⚠️ Warning  

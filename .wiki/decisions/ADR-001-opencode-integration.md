@@ -1,3 +1,9 @@
+---
+title: "ADR-001: LEGION × OPENCODE INTEGRATION"
+author: "Bashara (via three-agent pipeline)"
+date: "2026-04-11"
+status: "ACCEPTED"
+---
 # ADR-001: LEGION × OPENCODE INTEGRATION
 
 **Date**: 2026-04-11

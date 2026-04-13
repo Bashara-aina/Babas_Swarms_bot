@@ -1,3 +1,9 @@
+---
+title: "ADR-003: Main.py Orphaned Except Block"
+date: "2026-04-12"
+deciders: "Worker agent (audit task)"
+status: "Accepted"
+---
 # ADR-003: Main.py Orphaned Except Block
 
 **Date**: 2026-04-12  

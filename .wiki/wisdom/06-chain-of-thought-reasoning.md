@@ -1,3 +1,9 @@
+---
+title: "Chain-of-Thought Reasoning — System 2 for AI"
+source: "Lakera AI Prompt Engineering Guide 2026 + Awesome-Long-CoT-Reasoning GitHub"
+tags: [06-chain-of-thought-reasoning]
+type: wisdom
+---
 # Chain-of-Thought Reasoning — System 2 for AI
 
 Source: Lakera AI Prompt Engineering Guide 2026 + Awesome-Long-CoT-Reasoning GitHub

@@ -1,3 +1,8 @@
+---
+title: "ADR-088: AUDIT-15 Final Integration Test"
+date: "2026-04-12"
+status: "ACCEPTED"
+---
 # ADR-088: AUDIT-15 Final Integration Test
 
 **Date**: 2026-04-12

@@ -1,3 +1,11 @@
+---
+title: "ADR-056: Fix Non-Fatal Warnings on Legion Bot Shutdown"
+date: "2026-04-12"
+decider: "Planner Agent"
+fix: "Call `end_session()` from `tools.agentops_client` in `on_shutdown()`."
+root_cause: ""
+status: "Accepted"
+---
 # ADR-056: Fix Non-Fatal Warnings on Legion Bot Shutdown
 
 **Date**: 2026-04-12  

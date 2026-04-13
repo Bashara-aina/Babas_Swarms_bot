@@ -1,3 +1,9 @@
+---
+title: "Epistemic Humility — Knowing What You Don't Know"
+source: "Philip Tetlock (Superforecasting) + LessWrong + Eliezer Yudkowsky"
+tags: [10-epistemic-humility]
+type: wisdom
+---
 # Epistemic Humility — Knowing What You Don't Know
 
 Source: Philip Tetlock (Superforecasting) + LessWrong + Eliezer Yudkowsky

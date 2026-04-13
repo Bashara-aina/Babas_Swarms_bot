@@ -1,3 +1,8 @@
+---
+title: "SwarmBot Master Wiki"
+type: article
+tags: [README]
+---
 # SwarmBot Master Wiki
 > Powered by OpenCode + MiniMax M2.7 + Obsidian | Karpathy LLM Wiki Method
 

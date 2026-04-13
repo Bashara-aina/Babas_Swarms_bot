@@ -1,3 +1,10 @@
+---
+title: "ADR-045: Fix Web Search Result Injection Pipeline"
+date: "2026-04-12"
+location: "`llm_client/__init__.py` lines 1255-1272"
+status: "Active"
+type: "Bug Fix"
+---
 # ADR-045: Fix Web Search Result Injection Pipeline
 
 **Date:** 2026-04-12

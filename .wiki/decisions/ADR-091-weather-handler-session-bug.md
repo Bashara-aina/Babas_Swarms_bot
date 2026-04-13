@@ -1,3 +1,9 @@
+---
+title: "ADR-091: Weather Handler Session Lifecycle Bug"
+date: "2026-04-12"
+status: "ACCEPTED - FIXED"
+type: "Bugfix"
+---
 # ADR-091: Weather Handler Session Lifecycle Bug
 
 **Date:** 2026-04-12  

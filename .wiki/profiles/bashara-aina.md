@@ -1,3 +1,8 @@
+---
+title: "BASHARA AINA — Owner & Master"
+type: profile
+tags: [bashara-aina]
+---
 # BASHARA AINA — Owner & Master
 
 ## IDENTITAS

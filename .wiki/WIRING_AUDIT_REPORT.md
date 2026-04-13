@@ -1,3 +1,8 @@
+---
+title: "Legion Wiring Audit Report"
+tags: [WIRING_AUDIT_REPORT]
+---
+# Legion Wiring Audit Report
 
 ---
 date: "2026-04-12"

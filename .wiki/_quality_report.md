@@ -1,3 +1,9 @@
+---
+title: "Wiki Quality Report"
+created: 2026-04-12
+type: article
+tags: [_quality_report]
+---
 # Wiki Quality Report
 
 Generated: 2026-04-12 06:23 JST

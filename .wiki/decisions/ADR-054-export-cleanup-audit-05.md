@@ -1,3 +1,12 @@
+---
+title: "ADR-054: Core Module Export Policy"
+audit: "AUDIT 05"
+date: "2026-04-13"
+option_a_(selected): "Explicit Re-Export Policy"
+option_b: "Document the Direct Import Pattern"
+option_c: "Lazy Export with `__getattr__`"
+status: "PROPOSED"
+---
 # ADR-054: Core Module Export Policy
 **Date:** 2026-04-13  
 **Status:** PROPOSED  

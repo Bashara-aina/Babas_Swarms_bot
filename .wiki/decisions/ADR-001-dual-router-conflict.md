@@ -1,3 +1,9 @@
+---
+title: "ADR-001: Dual Router Conflict (agents.py vs autonomous_router.py)"
+date: "2026-04-12"
+deciders: "Worker agent (audit task)"
+status: "Accepted"
+---
 # ADR-001: Dual Router Conflict (agents.py vs autonomous_router.py)
 
 **Date**: 2026-04-12  

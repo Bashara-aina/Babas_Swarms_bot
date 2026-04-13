@@ -1,3 +1,9 @@
+---
+title: "ADR-001: Archive cekwajar.id Planning Docs"
+date: "2026-04-11"
+deciders: "SwarmBot Team"
+status: "Accepted"
+---
 # ADR-001: Archive cekwajar.id Planning Docs
 
 **Date:** 2026-04-11  

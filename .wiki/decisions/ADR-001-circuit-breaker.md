@@ -1,3 +1,10 @@
+---
+title: "ADR-001: Circuit Breaker Design"
+date: "2026-04-12"
+decider: "@planner"
+reviewer: "@reviewer"
+status: "PROPOSED"
+---
 # ADR-001: Circuit Breaker Design
 
 **Date:** 2026-04-12  

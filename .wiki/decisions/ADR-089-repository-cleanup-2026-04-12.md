@@ -1,3 +1,10 @@
+---
+title: "ADR-089: Repository Cleanup 2026-04-12"
+action: "Delete all identified stale files to reduce confusion and maintenance burden."
+date: "2026-04-12"
+deciders: "@worker, @reviewer"
+status: "Accepted"
+---
 # ADR-089: Repository Cleanup 2026-04-12
 
 **Date**: 2026-04-12  

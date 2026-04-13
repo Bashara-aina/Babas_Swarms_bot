@@ -1,3 +1,9 @@
+---
+title: "Pre-Mortem Thinking — Kill It Before It Fails"
+source: "Gary Klein research + Shane Parrish (Farnam Street) + Decision Stack 2026"
+tags: [09-pre-mortem-thinking]
+type: wisdom
+---
 # Pre-Mortem Thinking — Kill It Before It Fails
 
 Source: Gary Klein research + Shane Parrish (Farnam Street) + Decision Stack 2026

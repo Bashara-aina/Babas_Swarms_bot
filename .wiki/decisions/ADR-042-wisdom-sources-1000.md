@@ -1,3 +1,9 @@
+---
+title: "ADR-042: Wisdom Sources Quality Requirements"
+affected_files: "01, 03, 04, 05, 11, 12, 14, 15"
+decision: "These names should NOT appear as standalone primary entries. They may appear in:"
+note: "Aristotle, Feynman, Marcus Aurelius appear LEGITIMATELY in domains 06 (Physics), 09 (Communication - rhetorical example), 14 (Ethics), 15 (History) as foundational thinkers."
+---
 # ADR-042: Wisdom Sources Quality Requirements
 
 ## Status

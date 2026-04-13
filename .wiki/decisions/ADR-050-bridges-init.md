@@ -1,3 +1,9 @@
+---
+title: "ADR-050: bridges Package — Missing `__init__.py`"
+date: "2026-04-12"
+decider: "@planner"
+status: "Accepted"
+---
 # ADR-050: bridges Package — Missing `__init__.py`
 
 **Date:** 2026-04-12

@@ -1,3 +1,9 @@
+---
+title: "First Principles Thinking — Elon Musk / Aristotle Method"
+source: "Aristotle's Posterior Analytics + Musk interviews + GoDaddy AI Agents blog 2025"
+tags: [04-first-principles-thinking]
+type: wisdom
+---
 # First Principles Thinking — Elon Musk / Aristotle Method
 
 Source: Aristotle's Posterior Analytics + Musk interviews + GoDaddy AI Agents blog 2025

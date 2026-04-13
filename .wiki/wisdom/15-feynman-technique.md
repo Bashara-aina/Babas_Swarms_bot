@@ -1,3 +1,9 @@
+---
+title: "Feynman Technique — The Ultimate Clarity Test"
+source: "Richard Feynman + fs.blog/feynman-technique"
+tags: [15-feynman-technique]
+type: wisdom
+---
 # Feynman Technique — The Ultimate Clarity Test
 
 Source: Richard Feynman + fs.blog/feynman-technique

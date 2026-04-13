@@ -1,3 +1,9 @@
+---
+title: "ADR-001: MiniMax M2.7 over Claude Code"
+created: 2026-04-10
+type: decision
+tags: [ADR-001-minimax-over-claude]
+---
 # ADR-001: MiniMax M2.7 over Claude Code
 - Date: 2026-04-10
 - Status: Accepted

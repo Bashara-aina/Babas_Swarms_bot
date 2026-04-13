@@ -1,3 +1,8 @@
+---
+title: "SUPABASE SECURITY GUIDE"
+tags: [supabase-security-guide]
+---
+# SUPABASE SECURITY GUIDE
 # SUPABASE SECURITY GUIDE
 
 ---
