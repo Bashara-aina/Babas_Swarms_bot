@@ -37,3 +37,7 @@ meeting/
 popwadditional/
 wiki/
 .remember/tmp/
+
+# Tool configs
+.mcp.json
+.claude/settings.json

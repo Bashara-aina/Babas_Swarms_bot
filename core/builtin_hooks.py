@@ -106,8 +106,6 @@ def register_builtin_hooks() -> None:
     hooks = get_hooks()
     hooks.register("post_llm_call", audit_logger_hook, name="audit_logger")
     hooks.register("command_received", command_audit_hook, name="command_audit")
-    hooks.register("pre_tool_use", opencode_session_start_hook, name="opencode_session_start")
-    hooks.register("post_tool_use", opencode_session_end_hook, name="opencode_session_end")
     hooks.register("post_llm_call", opencode_decision_hook, name="opencode_decision")
 
     _ensure_opencode_dirs()

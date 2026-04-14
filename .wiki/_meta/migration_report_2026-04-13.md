@@ -1,3 +1,19 @@
+---
+title: "Migration Report"
+date: 2026-04-13
+tags:
+  - migration
+  - wiki
+  - karpathy-pattern
+  - wiki-restructuring
+type: migration_report
+status: complete
+summary: "Successfully restructured wiki/ to follow Karpathy LLM KB Pattern with 170+ files migrated"
+confidence: high
+sources:
+  - .wiki/_meta/
+---
+
 # Migration Report — 2026-04-13
 
 ## Summary

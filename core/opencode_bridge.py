@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import uuid
 from datetime import datetime
 
 
@@ -63,6 +64,19 @@ async def run_opencode_task(
     if process.returncode != 0:
         await process.wait()
         return f"⛔ opencode error:\n{stderr.decode()[:2000]}"
+
+    # Direct write of session summary after subprocess completes
+    try:
+        from core.wiki_bridge import opencode_write_session_summary
+
+        await opencode_write_session_summary(
+            session_id=f"task-{uuid.uuid4().hex[:8]}",
+            task_description="opencode-task",
+            actions_taken="",
+            outcome=stdout.decode()[:2000],
+        )
+    except Exception:
+        pass  # wiki bridge may be unavailable
 
     return stdout.decode()
 

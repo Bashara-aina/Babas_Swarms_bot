@@ -1,3 +1,18 @@
+---
+title: "Wiki Audit Report"
+date: 2026-04-13
+tags:
+  - audit
+  - wiki
+  - migration
+  - wiki-audit
+type: audit_report
+status: complete
+summary: "Comprehensive audit of wiki structure covering root .md files, wiki/, .wiki/, docs/, skills/ directories"
+sources:
+  - wiki/_meta/
+---
+
 # Wiki Audit Report — 2026-04-13
 
 ## Audit Scope
