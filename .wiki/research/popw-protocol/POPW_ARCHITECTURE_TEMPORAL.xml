@@ -1,252 +1,395 @@
-<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+<mxGraphModel dx="2086" dy="1175" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
   <root>
     <mxCell id="0" />
     <mxCell id="1" parent="0" />
-
-    <!-- Title -->
-    <mxCell id="title" value="POPW Architecture — Temporal Path with BiGRU" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="400" y="20" width="300" height="30" as="geometry" />
+    <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=15;" value="POPW: Pose-Conditioned Multi-Task Architecture for IKEA Assembly Recognition (Temporal)" vertex="1">
+      <mxGeometry height="28" width="950" x="150" y="14" as="geometry" />
     </mxCell>
-
-    <!-- ==================== INPUT SECTION ==================== -->
-    <!-- Video Input -->
-    <mxCell id="video_input" value="Video Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a90e2;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="80" y="100" width="100" height="40" as="geometry" />
+    <mxCell id="legend_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#aaaaaa;arcSize=4;" value="" vertex="1">
+      <mxGeometry height="210" width="175" x="960" y="10" as="geometry" />
     </mxCell>
-
-    <!-- Clip Sampler (T=8 frames) -->
-    <mxCell id="clip_sampler" value="Clip Sampler&#xa;(T=8 frames)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f39c12;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="220" y="100" width="120" height="50" as="geometry" />
+    <mxCell id="legend_title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=11;" value="Color legend" vertex="1">
+      <mxGeometry height="20" width="175" x="960" y="13" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: Video → Clip Sampler -->
-    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="video_input" target="clip_sampler">
+    <mxCell id="leg1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e6fa8;strokeColor=#185886;fontColor=#ffffff;fontSize=10;" value="Detection branch" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="37" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;fontSize=10;" value="Pose branch / FPN" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="61" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c0392b;strokeColor=#9a2e22;fontColor=#ffffff;fontSize=10;" value="Loss functions" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="85" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8860b;strokeColor=#936b09;fontColor=#ffffff;fontSize=10;" value="FiLM module" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="109" as="geometry" />
+    </mxCell>
+    <mxCell id="leg5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6a0dad;strokeColor=#550a8a;fontColor=#ffffff;fontSize=10;" value="C5 / semantic feature" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="133" as="geometry" />
+    </mxCell>
+    <mxCell id="leg6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;strokeColor=#ff1493;fontColor=#ffffff;fontSize=10;" value="Feature Bank (NEW)" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="157" as="geometry" />
+    </mxCell>
+    <mxCell id="leg7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;strokeColor=#b22222;fontColor=#ffffff;fontSize=10;" value="BiGRU (NEW)" vertex="1">
+      <mxGeometry height="20" width="159" x="968" y="181" as="geometry" />
+    </mxCell>
+    <mxCell id="clip_sampler" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f39c12;strokeColor=#d68910;fontColor=#ffffff;arcSize=6;fontSize=12;fontStyle=1;" value="Clip Sampler&#xa;(T=8 frames)" vertex="1">
+      <mxGeometry height="42" width="160" x="290" y="55" as="geometry" />
+    </mxCell>
+    <mxCell id="input_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=6;fontSize=12;fontStyle=1;" value="Input [B×T, 3, 480, 640]" vertex="1">
+      <mxGeometry height="42" width="230" x="490" y="55" as="geometry" />
+    </mxCell>
+    <mxCell id="c2_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=6;fontSize=12;" value="C2  ·  stride 4&lt;br/&gt;&lt;font style=&#39;font-size:10px;font-style:italic;&#39;&gt;256 × 120 × 160&lt;/font&gt;" vertex="1">
+      <mxGeometry height="48" width="180" x="80" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="c3_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=6;fontSize=12;" value="C3  ·  stride 8&lt;br/&gt;&lt;font style=&#39;font-size:10px;font-style:italic;&#39;&gt;512 × 60 × 80&lt;/font&gt;" vertex="1">
+      <mxGeometry height="48" width="180" x="290" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="c4_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=6;fontSize=12;" value="C4  ·  stride 16&lt;br/&gt;&lt;font style=&#39;font-size:10px;font-style:italic;&#39;&gt;1024 × 30 × 40&lt;/font&gt;" vertex="1">
+      <mxGeometry height="48" width="180" x="500" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="c5_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6a0dad;strokeColor=#550a8a;fontColor=#ffffff;arcSize=6;fontSize=12;" value="C5  ·  stride 32&lt;br/&gt;&lt;font style=&#39;font-size:10px;font-style:italic;&#39;&gt;2048 × 15 × 20&lt;/font&gt;" vertex="1">
+      <mxGeometry height="48" width="220" x="720" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="fpn_neck" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=4;fontSize=12;" value="Feature Pyramid Network (FPN)&lt;br/&gt;&lt;font style=&#39;font-size:10px;font-style:italic;&#39;&gt;lateral 1×1  ·  top-down upsample  ·  3×3 smooth  ·  P6/P7 via stride-2 conv on C5&lt;/font&gt;" vertex="1">
+      <mxGeometry height="46" width="860" x="80" y="245" as="geometry" />
+    </mxCell>
+    <mxCell id="p3_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=6;fontSize=12;" value="P3&lt;br/&gt;&lt;i&gt;256×60×80&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="140" x="80" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="p4_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=6;fontSize=12;" value="P4&lt;br/&gt;&lt;i&gt;256×30×40&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="140" x="250" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="p5_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=6;fontSize=12;" value="P5&lt;br/&gt;&lt;i&gt;256×15×20&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="140" x="430" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="p6_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=6;fontSize=11;" value="P6  &lt;i&gt;256×8×10&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="120" x="600" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="p7_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=6;fontSize=11;" value="P7  &lt;i&gt;256×4×5&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="120" x="750" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="det_container" parent="1" style="swimlane;startSize=28;rounded=1;arcSize=4;fillColor=#dbeafe;strokeColor=#1e6fa8;fontColor=#1e6fa8;fontStyle=1;fontSize=13;" value="Detection Head" vertex="1">
+      <mxGeometry height="300" width="330" x="20" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="cls_subnet" parent="det_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e6fa8;strokeColor=#185886;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Cls subnet  (shared P3–P7)&lt;br/&gt;&lt;i&gt;4× Conv 3×3 + ReLU  →  Conv(9×7)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="42" width="135" x="180" y="52" as="geometry" />
+    </mxCell>
+    <mxCell id="reg_subnet" parent="det_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e6fa8;strokeColor=#185886;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Reg subnet  (shared P3–P7)&lt;br/&gt;&lt;i&gt;4× Conv 3×3 + ReLU  →  Conv(9×4)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="42" width="145" x="15" y="52" as="geometry" />
+    </mxCell>
+    <mxCell id="det_outputs" parent="det_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e6fa8;strokeColor=#185886;fontColor=#ffffff;arcSize=4;fontSize=11;" value="cls_preds [B, N, 7]   ·   reg_preds [B, N, 4]" vertex="1">
+      <mxGeometry height="32" width="300" x="15" y="134" as="geometry" />
+    </mxCell>
+    <mxCell id="e22" edge="1" parent="det_container" source="reg_subnet" style="edgeStyle=orthogonalEdgeStyle;" target="det_outputs">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== BACKBONE SECTION ==================== -->
-    <!-- ResNet-50 Backbone -->
-    <mxCell id="resnet50" value="ResNet-50&#xa;Backbone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="380" y="100" width="100" height="50" as="geometry" />
-    </mxCell>
-
-    <!-- Arrow: Clip Sampler → ResNet-50 -->
-    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="clip_sampler" target="resnet50">
+    <mxCell id="e23" edge="1" parent="det_container" source="cls_subnet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;curved=0;" target="det_outputs">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- FPN (Feature Pyramid Network) -->
-    <mxCell id="fpn" value="FPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="520" y="100" width="80" height="40" as="geometry" />
+    <mxCell id="l_det" parent="det_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c0392b;strokeColor=#9a2e22;fontColor=#ffffff;arcSize=4;fontSize=11;" value="𝓛det  =  Focal Loss (α=0.25, γ=2) + SmoothL1" vertex="1">
+      <mxGeometry height="36" width="300" x="15" y="180" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: ResNet-50 → FPN -->
-    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="resnet50" target="fpn">
+    <mxCell id="e24" edge="1" parent="det_container" source="det_outputs" style="edgeStyle=orthogonalEdgeStyle;" target="l_det">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== POSE HEAD SECTION ==================== -->
-    <!-- Pose Head -->
-    <mxCell id="pose_head" value="Pose Head" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8e44ad;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="640" y="80" width="100" height="40" as="geometry" />
+    <mxCell id="anchors_note" parent="det_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#cccccc;fontColor=#555555;arcSize=4;fontSize=10;" value="3 aspect ratios × 3 scales · base: 32–512 px · 7 classes" vertex="1">
+      <mxGeometry height="28" width="300" x="15" y="230" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: FPN → Pose Head -->
-    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fpn" target="pose_head">
+    <mxCell id="pose_container" parent="1" style="swimlane;startSize=28;rounded=1;arcSize=4;fillColor=#d1fae5;strokeColor=#1a7a4a;fontColor=#1a7a4a;fontStyle=1;fontSize=13;" value="Pose Head" vertex="1">
+      <mxGeometry height="300" width="330" x="390" y="440" as="geometry" />
+    </mxCell>
+    <mxCell id="l_pose" parent="pose_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c0392b;strokeColor=#9a2e22;fontColor=#ffffff;arcSize=4;fontSize=11;" value="𝓛pose  =  Wing Loss (ω=0.05, ε=0.005)" vertex="1">
+      <mxGeometry height="36" width="300" x="15" y="240" as="geometry" />
+    </mxCell>
+    <mxCell id="pose_kpts" parent="pose_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Soft-argmax  →  keypoints  [B, 17, 2]" vertex="1">
+      <mxGeometry height="34" width="300" x="15" y="180" as="geometry" />
+    </mxCell>
+    <mxCell id="e25" edge="1" parent="pose_container" source="pose_kpts" style="edgeStyle=orthogonalEdgeStyle;" target="l_pose">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- PoseFiLM (Pose-guided Feature-wise Linear Modulation) -->
-    <mxCell id="posefilm" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="640" y="140" width="100" height="40" as="geometry" />
+    <mxCell id="pose_heatmaps" parent="pose_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Conv 1×1  →  heatmaps  [B, 17, 120, 160]" vertex="1">
+      <mxGeometry height="34" width="300" x="15" y="120" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: Pose Head → PoseFiLM -->
-    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="pose_head" target="posefilm">
+    <mxCell id="e26" edge="1" parent="pose_container" source="pose_heatmaps" style="edgeStyle=orthogonalEdgeStyle;" target="pose_kpts">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== TEMPORAL FEATURES SECTION ==================== -->
-    <!-- Feature Bank (pink #ff69b4) - stores temporal features -->
-    <mxCell id="feature_bank" value="Feature Bank&#xa;(temporal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="520" y="200" width="100" height="50" as="geometry" />
+    <mxCell id="pose_convt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=4;fontSize=11;" value="ConvTranspose2d  (k=4, s=2, p=1)&lt;br/&gt;GroupNorm(32) + ReLU&lt;br/&gt;&lt;i&gt;[B, 256, 120, 160]&lt;/i&gt;" vertex="1">
+      <mxGeometry height="50" width="300" x="405" y="480" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: PoseFiLM → Feature Bank -->
-    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;dashed=1;" edge="1" parent="1" source="posefilm" target="feature_bank">
+    <mxCell id="act_container" parent="1" style="swimlane;startSize=28;rounded=1;arcSize=4;fillColor=#f3f4f6;strokeColor=#555555;fontColor=#333333;fontStyle=1;fontSize=13;" value="Activity Head (Temporal)" vertex="1">
+      <mxGeometry height="299" width="340" x="760" y="441" as="geometry" />
+    </mxCell>
+    <mxCell id="l_act" parent="act_container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c0392b;strokeColor=#9a2e22;fontColor=#ffffff;arcSize=4;fontSize=11;" value="𝓛act  =  CB-Focal Loss (β=0.999, γ=2.0,  33 cls)" vertex="1">
+      <mxGeometry height="36" width="317" x="13" y="248" as="geometry" />
+    </mxCell>
+    <mxCell id="gap_c5mod" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6a0dad;strokeColor=#550a8a;fontColor=#ffffff;arcSize=4;fontSize=11;" value="GAP(C5_mod)  [B, 2048]" vertex="1">
+      <mxGeometry height="34" width="152" x="773" y="477" as="geometry" />
+    </mxCell>
+    <mxCell id="gap_p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a7a4a;strokeColor=#15623b;fontColor=#ffffff;arcSize=4;fontSize=11;" value="GAP(P4)  [B, 256]" vertex="1">
+      <mxGeometry height="34" width="152" x="938" y="477" as="geometry" />
+    </mxCell>
+    <mxCell id="act_concat" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=4;fontSize=12;" value="Concat  →  [B, 2304] (self-attention removed for BiGRU)" vertex="1">
+      <mxGeometry height="30" width="317" x="773" y="535" as="geometry" />
+    </mxCell>
+    <mxCell id="act_mlp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#185886;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Residual MLP&lt;br/&gt;&lt;i&gt;2304→512→256→512,  skip 2304→512&lt;br/&gt;BN + ReLU + Dropout(0.3)  ·  out: 512→33&lt;/i&gt;" vertex="1">
+      <mxGeometry height="56" width="317" x="773" y="577" as="geometry" />
+    </mxCell>
+    <mxCell id="act_logits" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#555555;strokeColor=#333333;fontColor=#ffffff;arcSize=4;fontSize=12;" value="act_logits  [B, 33]" vertex="1">
+      <mxGeometry height="30" width="317" x="773" y="645" as="geometry" />
+    </mxCell>
+    <mxCell id="film_container" parent="1" style="swimlane;startSize=28;rounded=1;arcSize=4;fillColor=#fef3c7;strokeColor=#b8860b;fontColor=#b8860b;fontStyle=1;fontSize=13;" value="PoseFiLM Module" vertex="1">
+      <mxGeometry height="220" width="710" x="390" y="760" as="geometry" />
+    </mxCell>
+    <mxCell id="film_conf" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#cccccc;fontColor=#333333;arcSize=4;fontSize=11;" value="Confidence extraction  [no_grad]&lt;br/&gt;&lt;i&gt;heatmaps → max → sigmoid → nan_to_num(0.5)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="340" x="405" y="796" as="geometry" />
+    </mxCell>
+    <mxCell id="film_pose_flat" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#cccccc;fontColor=#333333;arcSize=4;fontSize=11;" value="pose_flat  [B, 51]&lt;br/&gt;&lt;i&gt;keypoints [B,34] ‖ confidence [B,17]&lt;/i&gt;" vertex="1">
+      <mxGeometry height="40" width="340" x="405" y="848" as="geometry" />
+    </mxCell>
+    <mxCell id="film_gamma" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8860b;strokeColor=#936b09;fontColor=#ffffff;arcSize=4;fontSize=11;" value="γ-net&lt;br/&gt;&lt;i&gt;51→512→2048&lt;br/&gt;1 + tanh(·) ∈ (0,2)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="55" width="155" x="405" y="914" as="geometry" />
+    </mxCell>
+    <mxCell id="film_beta" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8860b;strokeColor=#936b09;fontColor=#ffffff;arcSize=4;fontSize=11;" value="β-net&lt;br/&gt;&lt;i&gt;51→512→2048&lt;br/&gt;linear (unbounded)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="55" width="155" x="580" y="914" as="geometry" />
+    </mxCell>
+    <mxCell id="film_c5_direct" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6a0dad;strokeColor=#550a8a;fontColor=#ffffff;arcSize=4;fontSize=11;" value="C5  [B, 2048, 15, 20]&lt;br/&gt;&lt;i&gt;direct from backbone (bypasses FPN)&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="285" x="800" y="796" as="geometry" />
+    </mxCell>
+    <mxCell id="film_c5mod" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8860b;strokeColor=#936b09;fontColor=#ffffff;arcSize=4;fontSize=12;" value="C5_mod  =  γ · C5 + β&lt;br/&gt;&lt;i&gt;[B, 2048, 15, 20]&lt;/i&gt;" vertex="1">
+      <mxGeometry height="44" width="285" x="800" y="858" as="geometry" />
+    </mxCell>
+    <mxCell id="film_gap_out" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6a0dad;strokeColor=#550a8a;fontColor=#ffffff;arcSize=4;fontSize=12;" value="GAP(C5_mod)  [B, 2048]" vertex="1">
+      <mxGeometry height="40" width="285" x="800" y="916" as="geometry" />
+    </mxCell>
+    <mxCell id="feature_bank" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;strokeColor=#ff1493;fontColor=#ffffff;arcSize=4;fontSize=11;" value="Feature Bank&#xa;(T×2048, clip-level)&lt;br/&gt;&lt;i&gt;stores temporal features for BiGRU&lt;/i&gt;" vertex="1">
+      <mxGeometry height="50" width="180" x="480" y="900" as="geometry" />
+    </mxCell>
+    <mxCell id="bigru" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;strokeColor=#b22222;fontColor=#ffffff;arcSize=4;fontSize=11;" value="BiGRU&#xa;(256 hidden, bidirectional)&#xa;&lt;i&gt;processes temporal sequence&lt;/i&gt;" vertex="1">
+      <mxGeometry height="55" width="200" x="240" y="900" as="geometry" />
+    </mxCell>
+    <mxCell id="kendall_box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=light-dark(#c0392b, #1f1f1f);strokeColor=#999999;fontColor=#111111;arcSize=4;fontSize=11;" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Kendall Homoscedastic Uncertainty Weighting  (Kendall et al., 2018)&lt;br&gt;&lt;i&gt;𝓛 = exp(−s_d)·𝓛det + s_d  +  exp(−s_p)·𝓛pose + s_p  +  exp(−s_a)·𝓛act·ramp + s_a&lt;br&gt;s_t = clamp(log σ²_t , −4, 2)  ·  init: s_det=0, s_pose=−1, s_act=0  ·  act_ramp = min(1, epoch/5)&lt;/i&gt;&lt;/font&gt;" vertex="1">
+      <mxGeometry height="60" width="1080" x="20" y="1000" as="geometry" />
+    </mxCell>
+    <mxCell id="e1" edge="1" parent="1" source="clip_sampler" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#f39c12;" target="input_box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="470" y="76" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="input_box" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="c2_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== TEMPORAL MODELING ==================== -->
-    <!-- BiGRU (crimson #dc143c) - 256 hidden units, bidirectional -->
-    <mxCell id="bigru" value="BiGRU&#xa;(256 units, bidirectional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="520" y="290" width="100" height="50" as="geometry" />
-    </mxCell>
-
-    <!-- Bidirectional arrows between Feature Bank and BiGRU -->
-    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc143c;strokeWidth=2;dashed=1;" edge="1" parent="1" source="feature_bank" target="bigru">
+    <mxCell id="e3" edge="1" parent="1" source="input_box" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="c3_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc143c;strokeWidth=2;dashed=1;" edge="1" parent="1" source="bigru" target="feature_bank">
+    <mxCell id="e4" edge="1" parent="1" source="input_box" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="c4_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== DETECTION HEAD ==================== -->
-    <!-- Detection Head -->
-    <mxCell id="detection_head" value="Detection Head" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e74c3c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="760" y="80" width="100" height="40" as="geometry" />
+    <mxCell id="e5" edge="1" parent="1" source="input_box" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="c5_box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="830" y="76" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
-    <!-- Arrow: FPN → Detection Head -->
-    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fpn" target="detection_head">
+    <mxCell id="e6" edge="1" parent="1" source="c3_box" style="edgeStyle=orthogonalEdgeStyle;" target="fpn_neck">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== ACTIVITY HEAD (UPDATED TEMPORAL PATH) ==================== -->
-    <!-- Activity Head Container -->
-    <mxCell id="activity_head_label" value="Activity Head" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="680" y="200" width="120" height="20" as="geometry" />
-    </mxCell>
-
-    <!-- C5 (Final conv layer from backbone) -->
-    <mxCell id="c5" value="C5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3498db;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="640" y="240" width="60" height="35" as="geometry" />
-    </mxCell>
-
-    <!-- Arrow: C5 → PoseFiLM -->
-    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5" target="posefilm">
+    <mxCell id="e7" edge="1" parent="1" source="c4_box" style="edgeStyle=orthogonalEdgeStyle;" target="fpn_neck">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- PoseFiLM inside Activity Head -->
-    <mxCell id="c5_mod_label" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="720" y="240" width="70" height="35" as="geometry" />
-    </mxCell>
-
-    <!-- Arrow: C5 → PoseFiLM (inside head) -->
-    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5" target="c5_mod_label">
+    <mxCell id="e8" edge="1" parent="1" source="c5_box" style="edgeStyle=orthogonalEdgeStyle;" target="fpn_neck">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- C5_mod (PoseFiLM output) -->
-    <mxCell id="c5_mod" value="C5_mod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1abc9c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="800" y="240" width="70" height="35" as="geometry" />
+    <mxCell id="e9" edge="1" parent="1" source="c5_box" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#6a0dad;fontColor=#6a0dad;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="film_c5_direct" value="direct bypass">
+      <mxGeometry relative="1" x="-0.1711" as="geometry">
+        <mxPoint as="offset" />
+        <Array as="points">
+          <mxPoint x="1120" y="174" />
+          <mxPoint x="1120" y="818" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
-    <!-- Arrow: PoseFiLM → C5_mod -->
-    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5_mod_label" target="c5_mod">
+    <mxCell id="e10" edge="1" parent="1" source="fpn_neck" style="edgeStyle=orthogonalEdgeStyle;" target="p3_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Arrow: C5_mod → Feature Bank -->
-    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff69b4;strokeWidth=2;dashed=1;" edge="1" parent="1" source="c5_mod" target="feature_bank">
+    <mxCell id="e11" edge="1" parent="1" source="fpn_neck" style="edgeStyle=orthogonalEdgeStyle;" target="p4_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- FC Layer -->
-    <mxCell id="fc_layer" value="FC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="720" y="320" width="80" height="35" as="geometry" />
-    </mxCell>
-
-    <!-- Arrow: BiGRU → FC -->
-    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="bigru" target="fc_layer">
+    <mxCell id="e12" edge="1" parent="1" source="fpn_neck" style="edgeStyle=orthogonalEdgeStyle;" target="p5_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Classification Output -->
-    <mxCell id="classification" value="Classification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#34495e;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="720" y="400" width="100" height="40" as="geometry" />
-    </mxCell>
-
-    <!-- Arrow: FC → Classification -->
-    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fc_layer" target="classification">
+    <mxCell id="e13" edge="1" parent="1" source="fpn_neck" style="edgeStyle=orthogonalEdgeStyle;" target="p6_box">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- ==================== LEGEND ==================== -->
-    <!-- Legend Background -->
-    <mxCell id="legend_bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;strokeWidth=1;" vertex="1" parent="1">
-      <mxGeometry x="40" y="450" width="300" height="280" as="geometry" />
+    <mxCell id="e14" edge="1" parent="1" source="fpn_neck" style="edgeStyle=orthogonalEdgeStyle;" target="p7_box">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Legend Title -->
-    <mxCell id="legend_title" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="50" y="460" width="100" height="25" as="geometry" />
+    <mxCell id="e15" edge="1" parent="1" source="p3_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1a7a4a;fontColor=#1a7a4a;fontSize=10;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="pose_container" value="P3 only">
+      <mxGeometry relative="1" x="0.9151" as="geometry">
+        <mxPoint as="offset" />
+        <Array as="points">
+          <mxPoint x="150" y="380" />
+          <mxPoint x="555" y="380" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
-    <!-- Legend: Backbone components (green) -->
-    <mxCell id="leg1" value="ResNet-50 / FPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="500" width="100" height="25" as="geometry" />
+    <mxCell id="e16" edge="1" parent="1" source="p4_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1a7a4a;fontColor=#1a7a4a;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="act_container" value="P4">
+      <mxGeometry relative="1" x="0.938" as="geometry">
+        <mxPoint as="offset" />
+        <Array as="points">
+          <mxPoint x="320" y="390" />
+          <mxPoint x="930" y="390" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-    <mxCell id="leg1_label" value="Backbone (ResNet-50 + FPN)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="160" y="500" width="170" height="25" as="geometry" />
+    <mxCell id="e17" edge="1" parent="1" source="pose_convt" style="edgeStyle=orthogonalEdgeStyle;" target="pose_heatmaps">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="555" y="540" as="targetPoint" />
+      </mxGeometry>
     </mxCell>
-
-    <!-- Legend: Pose components (purple) -->
-    <mxCell id="leg2" value="Pose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8e44ad;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="535" width="100" height="25" as="geometry" />
+    <mxCell id="e18" edge="1" parent="1" source="p3_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1e6fa8;fontColor=#1e6fa8;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="det_container" value="P3–P7">
+      <mxGeometry relative="1" x="0.6039" as="geometry">
+        <mxPoint as="offset" />
+        <Array as="points">
+          <mxPoint x="150" y="410" />
+          <mxPoint x="185" y="410" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-    <mxCell id="leg2_label" value="Pose Estimation Head" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="160" y="535" width="170" height="25" as="geometry" />
+    <mxCell id="e19" edge="1" parent="1" source="gap_c5mod" style="edgeStyle=orthogonalEdgeStyle;" target="act_concat">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Legend: PoseFiLM (teal) -->
-    <mxCell id="leg3" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="570" width="100" height="25" as="geometry" />
+    <mxCell id="e20" edge="1" parent="1" source="gap_p4" style="edgeStyle=orthogonalEdgeStyle;" target="act_concat">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="leg3_label" value="Pose-guided Feature Modulation" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="160" y="570" width="170" height="25" as="geometry" />
+    <mxCell id="e21" edge="1" parent="1" source="act_concat" style="edgeStyle=orthogonalEdgeStyle;" target="act_mlp">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Legend: Feature Bank (pink #ff69b4) -->
-    <mxCell id="leg4" value="Feature Bank" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="605" width="100" height="25" as="geometry" />
+    <mxCell id="e27" edge="1" parent="1" source="act_mlp" style="edgeStyle=orthogonalEdgeStyle;" target="act_logits">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="leg4_label" value="Temporal Feature Storage (NEW)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#ff69b4;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="160" y="605" width="170" height="25" as="geometry" />
+    <mxCell id="e28" edge="1" parent="1" source="act_logits" style="edgeStyle=orthogonalEdgeStyle;" target="l_act">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Legend: BiGRU (crimson #dc143c) -->
-    <mxCell id="leg5" value="BiGRU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="640" width="100" height="25" as="geometry" />
+    <mxCell id="e29" edge="1" parent="1" source="pose_kpts" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#c0392b;fontColor=#c0392b;fontSize=10;" target="film_conf" value="no_grad">
+      <mxGeometry relative="1" x="0.1111" as="geometry">
+        <mxPoint as="offset" />
+        <Array as="points">
+          <mxPoint x="555" y="750" />
+          <mxPoint x="555" y="750" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-    <mxCell id="leg5_label" value="Bidirectional GRU 256 units (NEW)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#dc143c;fontStyle=bold;" vertex="1" parent="1">
-      <mxGeometry x="160" y="640" width="170" height="25" as="geometry" />
+    <mxCell id="e30" edge="1" parent="1" source="film_conf" style="edgeStyle=orthogonalEdgeStyle;" target="film_pose_flat">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Legend: Detection (red) -->
-    <mxCell id="leg6" value="Detection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e74c3c;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="50" y="675" width="100" height="25" as="geometry" />
+    <mxCell id="e31" edge="1" parent="1" source="film_pose_flat" style="edgeStyle=orthogonalEdgeStyle;" target="film_gamma">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="leg6_label" value="Object Detection Head" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="160" y="675" width="170" height="25" as="geometry" />
+    <mxCell id="e32" edge="1" parent="1" source="film_pose_flat" style="edgeStyle=orthogonalEdgeStyle;" target="film_beta">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Dashed line legend -->
-    <mxCell id="leg7" value="------" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#ff69b4;strokeWidth=2;dashed=1;" vertex="1" parent="1">
-      <mxGeometry x="50" y="710" width="50" height="20" as="geometry" />
+    <mxCell id="e33" edge="1" parent="1" source="film_gamma" style="edgeStyle=orthogonalEdgeStyle;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="483" y="990" />
+          <mxPoint x="760" y="990" />
+          <mxPoint x="760" y="880" />
+          <mxPoint x="800" y="880" />
+        </Array>
+        <mxPoint x="483" y="970" as="sourcePoint" />
+        <mxPoint x="800" y="880" as="targetPoint" />
+      </mxGeometry>
     </mxCell>
-    <mxCell id="leg7_label" value="Temporal feature flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
-      <mxGeometry x="160" y="710" width="170" height="20" as="geometry" />
+    <mxCell id="e34" edge="1" parent="1" source="film_beta" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="film_c5mod">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="657" y="990" />
+          <mxPoint x="760" y="990" />
+          <mxPoint x="760" y="880" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
-    <!-- ==================== FLOW ANNOTATIONS ==================== -->
-    <mxCell id="flow1" value="T=8 frames sampled" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#7f8c8d;fontStyle=italic;" vertex="1" parent="1">
-      <mxGeometry x="250" y="160" width="120" height="20" as="geometry" />
+    <mxCell id="e35" edge="1" parent="1" source="film_c5_direct" style="edgeStyle=orthogonalEdgeStyle;" target="film_c5mod">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <mxCell id="flow2" value="spatial features" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#7f8c8d;fontStyle=italic;" vertex="1" parent="1">
-      <mxGeometry x="430" y="130" width="80" height="20" as="geometry" />
+    <mxCell id="e36" edge="1" parent="1" source="film_c5mod" style="edgeStyle=orthogonalEdgeStyle;" target="film_gap_out">
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <mxCell id="flow3" value="pose conditioning" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#16a085;fontStyle=italic;" vertex="1" parent="1">
-      <mxGeometry x="650" y="185" width="90" height="20" as="geometry" />
+    <mxCell id="e37" edge="1" parent="1" source="film_gap_out" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6a0dad;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="gap_c5mod">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1110" y="936" />
+          <mxPoint x="1110" y="750" />
+          <mxPoint x="740" y="750" />
+          <mxPoint x="740" y="494" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
-    <mxCell id="flow4" value="temporal context" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#dc143c;fontStyle=italic;" vertex="1" parent="1">
-      <mxGeometry x="510" y="260" width="90" height="20" as="geometry" />
+    <mxCell id="e38" edge="1" parent="1" source="film_gap_out" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ff69b4;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="feature_bank" value="temporal features">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="800" y="936" />
+          <mxPoint x="480" y="936" />
+          <mxPoint x="480" y="925" />
+        </Array>
+      </mxGeometry>
     </mxCell>
-
+    <mxCell id="e39" edge="1" parent="1" source="feature_bank" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#dc143c;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="bigru" value="read">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="570" y="900" />
+          <mxPoint x="440" y="900" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e40" edge="1" parent="1" source="bigru" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#dc143c;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="feature_bank" value="write">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="340" y="955" />
+          <mxPoint x="570" y="955" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e41" edge="1" parent="1" source="bigru" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#dc143c;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="act_concat" value="temporal context">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="440" y="927" />
+          <mxPoint x="770" y="927" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e42" edge="1" parent="1" source="l_det" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c0392b;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="kendall_box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="185" y="860" />
+          <mxPoint x="185" y="860" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e43" edge="1" parent="1" source="l_pose" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c0392b;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="kendall_box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="405" y="700" />
+          <mxPoint x="360" y="700" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e44" edge="1" parent="1" source="l_act" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c0392b;" target="kendall_box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="780" y="930" />
+          <mxPoint x="780" y="930" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="backbone_header" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#aaaaaa;fontColor=#333333;arcSize=4;fontSize=11;fontStyle=2;" value="ResNet-50 Backbone  (ImageNet pretrained, BN frozen)" vertex="1">
+      <mxGeometry height="24" width="860" x="80" y="107" as="geometry" />
+    </mxCell>
+    <mxCell id="clip_note" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=10;fontColor=#f39c12;" value="T=8 frames per clip" vertex="1">
+      <mxGeometry height="16" width="100" x="320" y="97" as="geometry" />
+    </mxCell>
   </root>
 </mxGraphModel>
