@@ -86,10 +86,16 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
     t0 = time.perf_counter()
 
     # Always pass for essential meta files (whitelist)
-    _ESSENTIAL_FILES = frozenset([
-        "readme", "changelog", "license", "contributing",
-        "master-intelligence", "legion-knowledge",
-    ])
+    _ESSENTIAL_FILES = frozenset(
+        [
+            "readme",
+            "changelog",
+            "license",
+            "contributing",
+            "master-intelligence",
+            "legion-knowledge",
+        ]
+    )
     stem_lower = Path(path).stem.lower().replace("_", "-")
     if stem_lower in _ESSENTIAL_FILES:
         return _result("PASS", 0.75, "whitelisted essential file", "fast", t0)
@@ -178,9 +184,9 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
     if score >= 0.7:
         verdict: Verdict = "PASS"
         reason = f"PASS (score={score:.2f}): {', '.join(reasons)}"
-    elif score < 0.15:  # Stricter threshold — score of 0.0 means BUGGY, not truly low quality
-        verdict = "NEEDS_IMPROVEMENT"  # Route to deep gate instead of auto-quarantine
-        reason = f"NEEDS_IMPROVEMENT (score={score:.2f}): {', '.join(reasons)}"
+    elif score < 0.05:  # Strict threshold — score ≤ 0.05 gets quarantined
+        verdict = "REJECT"  # Quarantine
+        reason = f"REJECT (score={score:.2f}): {', '.join(reasons)}"
     else:
         verdict = "NEEDS_IMPROVEMENT"
         reason = f"NEEDS_IMPROVEMENT (score={score:.2f}): {', '.join(reasons)}"
