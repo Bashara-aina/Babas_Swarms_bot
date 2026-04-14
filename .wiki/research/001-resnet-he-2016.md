@@ -1,7 +1,6 @@
 ---
 paper_id: "001"
 title: "Deep Residual Learning for Image Recognition"
-pdf_path: "project/popw/working/external/papers/1512_03385.pdf"
 authors: "Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun"
 year: 2016
 venue: "CVPR 2016"

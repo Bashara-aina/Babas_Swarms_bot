@@ -1,8 +1,3 @@
----
-title: "Bashara — Gemini Profile Export"
-type: profile
-tags: [bashara-gemini-profile]
----
 # Bashara — Gemini Profile Export
 
 This profile is synthesized from our interactions, your project documentation, and your digital footprint. It is designed to serve as a baseline for your personal AI wiki.

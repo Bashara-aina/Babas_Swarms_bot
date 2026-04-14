@@ -1,9 +1,3 @@
----
-title: "Pareto Principle — 80/20 Ruthlessness"
-source: "Vilfredo Pareto + Tim Ferriss (4HWW) + Paul Graham"
-tags: [11-pareto-80-20-principle]
-type: wisdom
----
 # Pareto Principle — 80/20 Ruthlessness
 
 Source: Vilfredo Pareto + Tim Ferriss (4HWW) + Paul Graham

@@ -1,9 +1,3 @@
----
-title: "Network Effects and Moats — Hamilton Helmer (7 Powers)"
-source: "Hamilton Helmer (7 Powers) + Andreessen Horowitz + NFX Guild"
-tags: [19-network-effects-and-moats]
-type: wisdom
----
 # Network Effects and Moats — Hamilton Helmer (7 Powers)
 
 Source: Hamilton Helmer (7 Powers) + Andreessen Horowitz + NFX Guild

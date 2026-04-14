@@ -1,9 +1,3 @@
----
-title: "Skin in the Game — Accountability and Alignment"
-source: "Nassim Taleb (Skin in the Game, 2018)"
-tags: [17-skin-in-the-game-accountability]
-type: wisdom
----
 # Skin in the Game — Accountability and Alignment
 
 Source: Nassim Taleb (Skin in the Game, 2018)

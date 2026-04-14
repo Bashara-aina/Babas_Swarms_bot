@@ -1,12 +1,17 @@
----
-## Summary
+# Reviewer Agent Findings
+**Date:** 2026-04-11  
+**Task:** Wiki Build Audit (commit 0ef8ad7)  
+**Files Reviewed:** 13 files across 8 directories
 
 ---
+
+## Summary
+
 **Status: ⚠️ 2 BLOCKERS (stub files)**
 
 The majority of files (11/13) are complete and well-structured. However, 2 files are stub placeholders that must be replaced before this commit can be considered complete.
----
 
+---
 
 ## ✅ Passed
 

@@ -1,14 +1,23 @@
+# Domain 17: Eastern Philosophy & Wisdom
+
+## [Lao Tzu] — Tao Te Ching
+**Type**: Book
+**Year**: -400
+**Core Insight**: The Way (Tao) is the fundamental principle; Wu Wei (non-action) achieves harmony; softness overcomes hardness; simplicity guides all.
+**LEGION RULE**: When seeking harmony, apply Wu Wei (non-action) because forcing against the Tao exhausts energy while yielding accomplishes more through less effort; softness overcomes hardness through alignment, not force.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Aggressive action-oriented approaches
+
 ---
 ## [Miyamoto Musashi] — The Book of Five Rings
----
 **Type**: Book
 **Year**: 1645
 **Core Insight**: Strategy through five elements (earth, water, fire, wind, void); direct perception; no-secondary thought; empty mind wins.
 **LEGION RULE**: When facing competition, cultivate the empty mind (no-secondary thought) because a mind free of excess thought perceives situations directly and flows like water, adapting to any form without resistance.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Over-complicated strategy
----
 
+---
 ## [Confucius] — The Analects
 **Type**: Book
 **Year**: -500

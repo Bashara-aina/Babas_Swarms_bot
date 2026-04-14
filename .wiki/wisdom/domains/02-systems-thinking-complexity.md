@@ -1,19 +1,28 @@
+# Domain 02: Systems Thinking & Complexity
+
+## [Donella Meadows] — Thinking in Systems
+**Type**: Book
+**Year**: 2008
+**Core Insight**: Systems consist of elements, interconnections, and functions/purposes; feedback loops (reinforcing and balancing) produce all behavior.
+**LEGION RULE**: When analyzing complex problems, do Y because Z (identify stocks, flows, feedback loops; behavior emerges from structure; leverage points exist)
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
 ## [Jay Forrester] — Industrial Dynamics
----
 **Type**: Book
 **Year**: 1961
 **Core Insight**: Industrial organizations behave as feedback systems with information delays; policy changes cause unintended oscillations over time.
-**LEGION RULE**: Model feedback loops with explicit delays when analyzing industrial systems because policy changes cause unintended oscillations over time as information delays distort system response.
+**LEGION RULE**: When diagnosing industrial behavior, do Y because Z (model feedback with delays; policies have long-term consequences; structure drives behavior)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear causal models
----
 
+---
 ## [Jay Forrester] — Urban Dynamics
 **Type**: Book
 **Year**: 1969
 **Core Insight**: Urban decay results from self-reinforcing feedback loops: investment decline → maintenance decline → capital flight → further decline.
-**LEGION RULE**: Identify self-reinforcing feedback loops when addressing urban decline because investment decline → maintenance decline → capital flight → further decline creates collapse spirals that only leverage points can break.
+**LEGION RULE**: When addressing urban problems, do Y because Z (identify reinforcing loops; intervention at leverage points; don't fight feedback)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -22,7 +31,7 @@
 **Type**: Book
 **Year**: 1971
 **Core Insight**: Global systems (population, resources, pollution, food, capital) interact through feedback causing exponential growth followed by collapse.
-**LEGION RULE**: Model feedback dynamics when analyzing global futures because population, resources, pollution, food, and capital interact through reinforcing loops causing exponential growth followed by collapse.
+**LEGION RULE**: When analyzing global futures, do Y because Z (model feedback dynamics; limits to growth; exponential behavior precedes collapse)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Cornucopian views
 
@@ -31,7 +40,7 @@
 **Type**: Book
 **Year**: 1990
 **Core Insight**: Learning organizations master five disciplines: personal mastery, mental models, shared vision, team learning, systems thinking (integrating discipline).
-**LEGION RULE**: Cultivate systems thinking and shared vision when building organizations because mental models constrain perception and aligning around a shared vision enables collective learning beyond individual cognition.
+**LEGION RULE**: When building organizations, do Y because Z (cultivate systems thinking; mental models constrain; shared vision aligns)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -40,7 +49,7 @@
 **Type**: Management Approach
 **Year**: 1981
 **Core Insight**: Planning should be interactive and participatory; ideal planning shapes present through stakeholder engagement, not just predicting future.
-**LEGION RULE**: Engage stakeholders through interactive planning when developing strategy because ideal planning shapes the present through participation and commitment emerges from involvement, not prediction.
+**LEGION RULE**: When developing strategy, do Y because Z (engage stakeholders; interactive process; commitment through participation)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Top-down planning
 
@@ -49,7 +58,7 @@
 **Type**: Book
 **Year**: 2011
 **Core Insight**: Systems thinking requires operational thinking (multi-loop feedback) and interactive design; systems are purposeful, not merely complicated.
-**LEGION RULE**: Use multi-loop feedback and operational thinking when managing complex systems because systems are purposeful organisms rather than complicated machines and design must interact with the environment dynamically.
+**LEGION RULE**: When managing complex systems, do Y because Z (use multi-loop feedback; operational thinking; design interacts with environment)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear management
 
@@ -58,7 +67,7 @@
 **Type**: Book
 **Year**: 1996
 **Core Insight**: Living systems exhibit interconnectedness, self-organization, and emergence; underlying pattern of life is networks.
-**LEGION RULE**: Look for networks and self-organization patterns when understanding living systems because underlying life patterns repeat across biological, cognitive, social, and ecological scales through interconnected networks.
+**LEGION RULE**: When understanding living systems, do Y because Z (look for networks; patterns repeat across scales; life is systemic)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Reductionism
 
@@ -67,7 +76,7 @@
 **Type**: Book
 **Year**: 2014
 **Core Insight**: A unifying systems framework integrates biological, cognitive, social, ecological dimensions; life is pattern of organization.
-**LEGION RULE**: Apply a systems framework integrating biological, cognitive, social, and ecological dimensions when crossing disciplinary boundaries because life is a pattern of organization that manifests across all scales simultaneously.
+**LEGION RULE**: When integrating disciplines, do Y because Z (use systems framework; four dimensions interact; integration across scales)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Disciplinary silos
 
@@ -76,7 +85,7 @@
 **Type**: Book
 **Year**: 1993
 **Core Insight**: Biological order is largely self-organized; spontaneous order (not just selection) generates complexity in evolution.
-**LEGION RULE**: Recognize self-organization alongside natural selection when studying evolution because spontaneous order generates biological complexity and the adjacent possible constantly expands what can evolve.
+**LEGION RULE**: When studying evolution, do Y because Z (recognize self-organization; order emerges without selection; adjacent possible)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Neo-Darwinism (selection only)
 
@@ -85,7 +94,7 @@
 **Type**: Book
 **Year**: 1994
 **Core Insight**: Complexity exists along spectrum from simple to complex; complexity measures capture interesting behavior; adaptive systems evolve.
-**LEGION RULE**: Use complexity measures that capture interesting behavior when measuring systems because complexity exists along a spectrum from simple to complex and adaptive systems evolve by exploring the adjacent possible.
+**LEGION RULE**: When measuring complexity, do Y because Z (use appropriate measures; complexity is not randomness; adaptive agents explore)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Information theory (Shannon)
 
@@ -94,7 +103,7 @@
 **Type**: Book
 **Year**: 1994
 **Core Insight**: Positive feedback creates multiple equilibria, lock-in, and path dependence; small events can redirect entire systems.
-**LEGION RULE**: Expect increasing returns and path dependence in early technology adoption because positive feedback creates multiple equilibria and small events can redirect entire systems toward lock-in or breakthrough.
+**LEGION RULE**: When in early stages of technology adoption, do Y because Z (expect increasing returns; lock-in possible; history matters)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Diminishing returns models
 
@@ -103,7 +112,7 @@
 **Type**: Book
 **Year**: 2006
 **Core Insight**: Wealth = differentiate, select, amplify (evolutionary cycle); economics is complex adaptive system; traditional models fail.
-**LEGION RULE**: Apply a complexity and evolutionary lens when understanding economics because wealth emerges through differentiate-select-amplify cycles and traditional equilibrium models fail to capture dynamic, adaptive markets.
+**LEGION RULE**: When understanding economics, do Y because Z (apply complexity lens; evolutionary dynamics; non-equilibrium economics)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Neoclassical equilibrium economics
 
@@ -112,7 +121,7 @@
 **Type**: Methodology
 **Year**: 1981
 **Core Insight**: Problem situations in social systems require "soft" (qualitative, participatory) approaches; models of purposeful activity guide learning.
-**LEGION RULE**: Build conceptual models of purposeful activity using Soft Systems Methodology when facing messy social problems because comparing models to reality enables learning through participatory action.
+**LEGION RULE**: When facing messy social problems, do Y because Z (use SSM; build conceptual models; compare to reality; learn through action)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Hard systems (quantitative)
 
@@ -121,7 +130,7 @@
 **Type**: Book
 **Year**: 1980
 **Core Insight**: Living systems are autopoietic (self-producing); cognition = the process of living; nervous system extends autopoeisis.
-**LEGION RULE**: Recognize autopoietic organization where living systems are self-producing when understanding life and cognition because cognition is the process of living and nervous system operation extends autopoeisis.
+**LEGION RULE**: When understanding life and cognition, do Y because Z (autopoietic organization; living = cognizing; no separation)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Cognitivism (representation)
 
@@ -130,7 +139,7 @@
 **Type**: Paper
 **Year**: 1999
 **Core Insight**: Leverage points (where to intervene) range from parameters to paradigms; highest leverage is paradigm shift.
-**LEGION RULE**: Go for the highest leverage intervention point when seeking system change because leverage points range from parameters to paradigms and paradigm shifts produce orders-of-magnitude more change than structural edits.
+**LEGION RULE**: When seeking intervention, do Y because Z (go for high leverage; paradigm shift > goals > feedback > structure)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -139,7 +148,7 @@
 **Type**: Essay
 **Year**: 1981
 **Core Insight**: Messes (interconnected problems) require interactive planning;不能在真空中分析问题; solution finding is collective.
-**LEGION RULE**: Participate with stakeholders through interactive planning when facing messes because interconnected problems cannot be solved in isolation and mess transforms through engagement rather than analysis alone.
+**LEGION RULE**: When facing messes, do Y because Z (participate with stakeholders; interactive planning; mess transforms through engagement)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Analytic (reductive) planning
 
@@ -148,7 +157,7 @@
 **Type**: Book
 **Year**: 1970
 **Core Insight**: Rapid change causes stress syndrome; adaptive capacity is overwhelmed when novelty rate exceeds learning rate.
-**LEGION RULE**: Build adaptive capacity and manage the rate of novelty when change accelerates because adaptive capacity is overwhelmed when novelty rate exceeds learning rate, causing future shock syndrome.
+**LEGION RULE**: When change accelerates, do Y because Z (build adaptive capacity; manage novelty rate; future shock is overload)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -157,7 +166,7 @@
 **Type**: Book
 **Year**: 1968
 **Core Insight**: All dynamic systems share common behaviors from feedback loop structures; oscillating, growing, declining behaviors are predictable.
-**LEGION RULE**: Identify feedback structure when observing system behavior because oscillating, growing, and declining behaviors are predictable outcomes of feedback loop structures where delays cause oscillations and exponential growth precedes collapse.
+**LEGION RULE**: When observing system behavior, do Y because Z (identify feedback structure; delays cause oscillations; exponential growth precedes collapse)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -166,7 +175,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Deterministic systems can be chaotic (sensitive dependence); long-term prediction impossible even without randomness.
-**LEGION RULE**: Expect chaos and limit prediction horizons when modeling dynamic systems because deterministic systems exhibit sensitive dependence where small initial errors grow exponentially and long-term prediction becomes impossible.
+**LEGION RULE**: When modeling dynamic systems, do Y because Z (expect chaos; small errors grow; limit prediction horizon)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Determinism (without chaos)
 
@@ -175,7 +184,7 @@
 **Type**: Book
 **Year**: 1972
 **Core Insight**: Exponential growth on finite planet leads to overshoot and collapse; feedback delays cause overshoot before correction.
-**LEGION RULE**: Expect overshoot and respect limits when projecting growth because exponential growth on a finite planet causes feedback delays to produce collapse before correction mechanisms engage.
+**LEGION RULE**: When projecting growth, do Y because Z (expect overshoot; limits exist; delays cause collapse before correction)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Cornucopian optimism
 
@@ -184,7 +193,7 @@
 **Type**: Book
 **Year**: 1994
 **Core Insight**: Practical tools for learning organizations: systems archetypes, ladder of inference, shared vision exercises, dialogue.
-**LEGION RULE**: Use practical tools like systems archetypes, ladder of inference, and dialogue when building learning organizations because archetypes reveal patterns and dialogue enables collective inquiry beyond individual mental models.
+**LEGION RULE**: When building learning organizations, do Y because Z (use practical tools; archetypes reveal patterns; dialogue enables inquiry)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -193,7 +202,7 @@
 **Type**: Book
 **Year**: 1990
 **Core Insight**: Organizations should be designed as messes-to-missions systems; workers should design their own jobs.
-**LEGION RULE**: Engage workers in designing their own jobs when redesigning organizations because mess transforms into mission through participation and workers possess local knowledge that management lacks.
+**LEGION RULE**: When redesigning organizations, do Y because Z (worker participation; mess becomes mission; systems approach to redesign)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Scientific management
 
@@ -202,7 +211,7 @@
 **Type**: Paper
 **Year**: 1985
 **Core Insight**: Social systems require viable models integrating production, reproduction, direction, alliance functions.
-**LEGION RULE**: Apply the Viable System Model integrating production, reproduction, direction, and alliance functions when analyzing social systems because viability of the whole depends on proper functioning of recursive subsystems.
+**LEGION RULE**: When analyzing social systems, do Y because Z (viable system model; production/reproduction/direction/alliance; viability matters)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -211,7 +220,7 @@
 **Type**: Book
 **Year**: 1972
 **Core Insight**: Organizations are viable systems modeled on nervous system; recursive subsystems ensure survival.
-**LEGION RULE**: Use the Viable System Model modeled on the nervous system when structuring organizations because recursion ensures viability and recursive subsystems from firm to individual all require proper regulation for survival.
+**LEGION RULE**: When structuring organizations, do Y because Z (use viable system model; recursion ensures viability; nervous system analogy)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Mechanistic organization theory
 
@@ -220,7 +229,7 @@
 **Type**: Book
 **Year**: 1944
 **Core Insight**: Complex social phenomena exhibit spontaneous order; central planning destroys local knowledge and leads to serfdom.
-**LEGION RULE**: Preserve spontaneous order and local knowledge when designing systems because central planning destroys information that dispersed actors hold and the price system coordinates without central direction.
+**LEGION RULE**: When designing systems, do Y because Z (preserve spontaneous order; central planning destroys information; price system matters)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Central planning advocates
 
@@ -229,7 +238,7 @@
 **Type**: Book
 **Year**: 1984
 **Core Insight**: Far-from-equilibrium systems can self-organize; dissipative structures maintain order through energy flows.
-**LEGION RULE**: Look for self-organization at far-from-equilibrium conditions when studying complex systems because dissipative structures maintain order through energy flows and fluctuations drive emergence of new structure.
+**LEGION RULE**: When studying complex systems, do Y because Z (non-equilibrium produces order; self-organization at far-from-equilibrium; dissipative structures)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Equilibrium thermodynamics
 
@@ -238,7 +247,7 @@
 **Type**: Book
 **Year**: 1977
 **Core Insight**: Self-organization emerges from cooperation between microscopic subsystems; order parameters constrain subsystems.
-**LEGION RULE**: Examine how cooperation between microscopic subsystems produces macroscopic patterns when studying self-organization because order parameters constrain subsystem behavior through synergetic effects rather than external control.
+**LEGION RULE**: When studying self-organization, do Y because Z (cooperation produces order; macroscopic patterns constrain; synergetic effects)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -247,7 +256,7 @@
 **Type**: Book
 **Year**: 1997
 **Core Insight**: Complexity crosses scales; multi-scale analysis needed; concepts of complexity apply across physics, biology, social.
-**LEGION RULE**: Use multi-scale analysis when analyzing complex systems because complexity crosses scales from physics to biology to social systems and the same concepts apply across all domains.
+**LEGION RULE**: When analyzing complex systems, do Y because Z (multi-scale approach; cross-scale patterns; complexity universal)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Single-scale analysis
 
@@ -256,7 +265,7 @@
 **Type**: Book
 **Year**: 1995
 **Core Insight**: Complex adaptive systems operate through supply and demand of information; building blocks and recombination drive adaptation.
-**LEGION RULE**: Trace information supply and demand through building block recombination when understanding adaptation because complex adaptive systems operate like economies where agents compete for information resources and building blocks combine to create novelty.
+**LEGION RULE**: When understanding adaptation, do Y because Z (information dynamics; building blocks; recombination; CAS operate via economics of information)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -265,7 +274,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Complex adaptive systems built from agents with signals (inputs) and boundaries (constraints); adaptation occurs at multiple levels.
-**LEGION RULE**: Define agents by their signals (inputs) and boundaries (constraints) when modeling complex adaptive systems because adaptation occurs at multiple levels and hierarchical structure emerges from nested agent interactions.
+**LEGION RULE**: When modeling CAS, do Y because Z (agents have signals/boundaries; hierarchy emerges; adaptation multi-level)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -274,7 +283,7 @@
 **Type**: Paper/System
 **Year**: 1990s
 **Core Insight**: Effective complexity measures distinguish pattern from randomness; ACE library automates complexity analysis.
-**LEGION RULE**: Use algorithmic approaches measuring effective complexity when analyzing systems because effective complexity distinguishes pattern from randomness and the ACE library automates this analysis.
+**LEGION RULE**: When measuring complexity, do Y because Z (effective complexity; pattern vs randomness; algorithmic approaches)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Shannon entropy (as sole measure)
 
@@ -283,7 +292,7 @@
 **Type**: Research Program
 **Year**: 1984
 **Core Insight**: Complexity science studies emergent, adaptive systems; traditional disciplinary boundaries dissolve.
-**LEGION RULE**: Embrace interdisciplinary approaches and expect emergence when studying complex phenomena because traditional disciplinary boundaries dissolve as adaptive systems display properties irreducible to any single discipline.
+**LEGION RULE**: When studying complex phenomena, do Y because Z (embrace interdisciplinary; emergence; adaptation; traditional boundaries break down)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Reductionist science
 
@@ -292,7 +301,7 @@
 **Type**: Book
 **Year**: 2009
 **Core Insight**: Technologies are combinations of phenomena orchestrated by humans; technologies evolve like ecosystems.
-**LEGION RULE**: View technologies as combinations of phenomena orchestrated by humans when understanding technology because technologies evolve like ecosystems through recombination and selective retention of functional combinations.
+**LEGION RULE**: When understanding technology, do Y because Z (phenomena + orchestration; technologies combine; evolutionary dynamics)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Technology as machine
 
@@ -301,7 +310,7 @@
 **Type**: Book
 **Year**: 1995
 **Core Insight**: Life is natural from self-organization; biosphere co-evolves; the adjacent possible expands.
-**LEGION RULE**: Recognize natural self-organization and co-evolution when studying life because the biosphere co-evolves as a whole and the adjacent possible constantly expands what can emerge through spontaneous order.
+**LEGION RULE**: When studying life, do Y because Z (self-organization natural; co-evolution; adjacent possible expands)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Chance-only life
 
@@ -310,7 +319,7 @@
 **Type**: Book
 **Year**: 2017
 **Core Insight**: Cities and organisms scale sublinearly (economies of scale); growth is limited; innovation scales superlinearly.
-**LEGION RULE**: Apply scaling laws recognizing sublinear growth for infrastructure and superlinear scaling for innovation when analyzing cities because cities exhibit economies of scale while innovation drives growth that cannot continue indefinitely.
+**LEGION RULE**: When analyzing cities, do Y because Z (sublinear scaling; economies of scale; innovation superlinear; limits to growth)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Linear growth models
 
@@ -319,7 +328,7 @@
 **Type**: Book
 **Year**: 1999
 **Core Insight**: Networks exhibit small-world properties (high clustering, short paths); dynamics on networks depend on structure.
-**LEGION RULE**: Examine small-world properties including clustering and path length when analyzing networks because network structure determines dynamics and high clustering with short paths emerges universally in complex networks.
+**LEGION RULE**: When analyzing networks, do Y because Z (small-world properties; clustering; path length; structure matters)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Random networks
 
@@ -328,7 +337,7 @@
 **Type**: Book
 **Year**: 2002
 **Core Insight**: Networks follow scale-free (power law) degree distributions; hubs dominate; preferential attachment drives growth.
-**LEGION RULE**: Look for scale-free degree distributions and hubs when analyzing networks because preferential attachment drives growth and power laws characterize the topology of most real-world networks.
+**LEGION RULE**: When analyzing networks, do Y because Z (scale-free networks; hubs; preferential attachment; power laws)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Random networks (Poisson)
 
@@ -337,7 +346,7 @@
 **Type**: Book
 **Year**: 2012
 **Core Insight**: Some systems improve from volatility (antifragile); fragile systems break from variation; convexity matters.
-**LEGION RULE**: Prefer antifragile systems that improve from volatility when designing because fragile systems break from variation and convexity/concavity analysis reveals which systems will thrive under stress.
+**LEGION RULE**: When designing systems, do Y because Z (prefer antifragile; avoid fragile; convexity/concavity analysis)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Robustness as goal
 
@@ -346,7 +355,7 @@
 **Type**: Essay
 **Year**: 2002
 **Core Insight**: Systems resist external control; effective intervention requires humility and understanding of system structure.
-**LEGION RULE**: Practice humility and understand system structure before intervening in systems because systems resist external control and ineffective intervention wastes resources while potentially worsening the situation.
+**LEGION RULE**: When intervening in systems, do Y because Z (humility required; systems resist control; understanding before action)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Control illusion
 
@@ -355,7 +364,7 @@
 **Type**: Book
 **Year**: 1974
 **Core Insight**: Management science failed by ignoring social context; systems approach required for social systems.
-**LEGION RULE**: Incorporate social context and use systems thinking when applying management science because ignoring messy social reality causes management science to fail in real organizational settings.
+**LEGION RULE**: When applying management science, do Y because Z (social context; systems thinking; ignoring messy reality leads to failure)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Pure analytics
 
@@ -364,7 +373,7 @@
 **Type**: Book
 **Year**: 1981
 **Core Insight**: Hard systems (optimization) suit problems with goals; soft systems suit messy social situations; methodology must fit problem type.
-**LEGION RULE**: Match methodology to problem type when choosing approach because hard systems suit optimization problems with clear goals while soft systems are necessary for ill-structured social situations.
+**LEGION RULE**: When choosing approach, do Y because Z (match methodology to problem; hard vs soft; ill-structured situations need soft)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: One methodology for all
 
@@ -373,7 +382,7 @@
 **Type**: Book
 **Year**: 1975
 **Core Insight**: Leadership requires understanding feedback dynamics; policies create behaviors; structure determines outcomes.
-**LEGION RULE**: Apply systems thinking and understand that structure determines behavior when leading because policy resistance indicates hidden system structure and leadership effectiveness depends on structural understanding.
+**LEGION RULE**: When leading, do Y because Z (systems thinking; structure determines behavior; policy resistance indicates structure)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Person-focused leadership
 
@@ -382,7 +391,7 @@
 **Type**: Framework
 **Year**: 1990s
 **Core Insight**: Common system patterns (archetypes) recur: balancing feedback with delay, shifting burden, success to successful.
-**LEGION RULE**: Recognize system archetypes like shifting burden and success to successful when diagnosing patterns because chronic organizational problems follow predictable systemic structures rather than random causes.
+**LEGION RULE**: When diagnosing patterns, do Y because Z (recognize archetypes; shift burden = addiction; success to successful = lock-in)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
 
@@ -391,7 +400,7 @@
 **Type**: Paper
 **Year**: 1990s
 **Core Insight**: System archetypes enable diagnosis of chronic organizational problems; causal loop diagrams reveal structure.
-**LEGION RULE**: Use system archetypes and causal loop diagrams when diagnosing chronic problems because chronic issues are systemic rather than personal and patterns revealed by loops point to leverage rather than blame.
+**LEGION RULE**: When diagnosing chronic problems, do Y because Z (use archetypes; causal loops reveal; chronic = systemic, not personal)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Blame culture
 
@@ -400,7 +409,7 @@
 **Type**: Book
 **Year**: 2000
 **Core Insight**: All models are wrong; some are useful; simulation reveals counterintuitive dynamics; mental models must be formalized.
-**LEGION RULE**: Formalize mental models and use simulation when modeling businesses because all models are wrong but some are useful and simulation reveals counterintuitive dynamics that mental models miss.
+**LEGION RULE**: When modeling businesses, do Y because Z (formalize mental models; simulation reveals; all models wrong but some useful)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Intuitive management
 
@@ -409,7 +418,7 @@
 **Type**: Book
 **Year**: 2007
 **Core Insight**: Extreme events (Black Swans) dominate outcomes; domains with "silent evidence" distort our understanding of probability.
-**LEGION RULE**: Protect against Black Swans and examine silent evidence when assessing risk because extreme events dominate outcomes and human cognition systematically ignores their significance until too late.
+**LEGION RULE**: When assessing risk, do Y because Z (protect against Black Swans; silent evidence bias; normal distribution inadequate)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Gaussian statistics
 
@@ -418,7 +427,7 @@
 **Type**: Book
 **Year**: 1987
 **Core Insight**: Chaos theory revealed deterministic unpredictability; butterfly effect; fractals; order in chaos.
-**LEGION RULE**: Expect chaos and fractal patterns when encountering complex dynamics because deterministic systems can be unpredictable with sensitive dependence on initial conditions producing order within chaos.
+**LEGION RULE**: When encountering complex dynamics, do Y because Z (expect chaos; sensitive dependence; fractal patterns)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Deterministic predictability
 
@@ -427,6 +436,6 @@
 **Type**: Book
 **Year**: 2002
 **Core Insight**: Biological complexity grows from self-organization plus selection; "the adjacent possible" limits but enables creativity.
-**LEGION RULE**: Consider adjacent possible expansion through self-organization plus selection when studying complexity because creativity is enabled by constraints and biological order emerges from the interplay between spontaneous ordering and selective retention.
+**LEGION RULE**: When studying complexity, do Y because Z (adjacent possible; self-organization + selection; creativity enabled by constraints)
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Selection-only view

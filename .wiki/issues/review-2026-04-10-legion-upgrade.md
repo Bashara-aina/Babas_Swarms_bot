@@ -1,7 +1,12 @@
----
-## T3.3 — llm_client.py update ✅
+# Review: Legion Upgrade (Session 2026-04-10)
+
+## Summary
+All Phase 3.3, 4, and 5 changes reviewed. 276 tests pass. No blockers.
 
 ---
+
+## T3.3 — llm_client.py update ✅
+
 **Changes verified:**
 - `build_soul_context()` → `build_enhanced_soul_context()` at line 1046
 - `MemoryEngine.store()` call added after `record_turn()` (lines 1579–1593)
@@ -11,8 +16,8 @@
 - ✅ `MemoryEngine.store()` uses `await` correctly
 - ✅ No hardcoded secrets or API keys
 - ✅ Type hints present on `chat()` function
----
 
+---
 
 ## Phase 4 — Autonomous Skill Selection ✅
 

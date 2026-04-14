@@ -1,8 +1,7 @@
----
-title: "Bashara — Perplexity Session Export"
-type: profile
-tags: [bashara-perplexity-profile]
----
+Here is your complete Legion AI wiki export, synthesized from our entire conversation history today, your stored profile, and your live GitHub data.
+
+***
+
 # Bashara — Perplexity Session Export
 *Generated: Friday, April 10, 2026 — 20:22 JST*
 *For use in: Legion AI Personal Wiki*

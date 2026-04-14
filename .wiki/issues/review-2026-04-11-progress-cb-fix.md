@@ -1,7 +1,12 @@
----
-## Changes Reviewed
+# Review: Worker Changes — 2026-04-11
+
+## Summary
+Worker modified 3 files to fix `agent_loop() got an unexpected keyword argument 'progress_cb'` error.
 
 ---
+
+## Changes Reviewed
+
 ### 1. `handlers/shared.py:303` — `progress_fn` parameter ✅
 
 **Before:** `progress_cb=on_progress`
@@ -18,8 +23,8 @@ async def agent_loop(
 ```
 
 **Status:** ✅ Correct fix.
----
 
+---
 
 ### 2. `handlers/computer.py:161` — `_progress` parameter ✅
 

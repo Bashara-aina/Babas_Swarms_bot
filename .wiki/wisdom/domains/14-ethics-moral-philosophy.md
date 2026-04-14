@@ -1,14 +1,23 @@
+# Domain 14: Ethics & Moral Philosophy
+
+## [Peter Singer] — The Life You Can Save
+**Type**: Book
+**Year**: 2003
+**Core Insight**: Effective altruism; moral circle; speciesism; suffering; animals; global poverty; charity; utilitarian; maximize; impact.
+**LEGION RULE**: Apply effective altruism when giving because maximizing suffering reduction requires rigor in measuring impact, not just intent.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Charity without rigor
+
 ---
 ## [John Rawls] — A Theory of Justice
----
 **Type**: Book
 **Year**: 1971
 **Core Insight**: Justice as fairness; veil of ignorance; original position; principles; liberty; difference principle; equal basic liberties; fairness.
 **LEGION RULE**: Use the veil of ignorance when designing institutions because justice as fairness requires designing principles without knowledge of your own position.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Utility over fairness
----
 
+---
 ## [Immanuel Kant] — Groundwork of the Metaphysics of Morals
 **Type**: Book
 **Year**: 1785

@@ -1,7 +1,13 @@
----
-## Context
+# ADR-003: Fix Smoke Test Issues
+
+**Date**: 2026-04-11  
+**Agent**: @planner  
+**Status**: PLANNED
 
 ---
+
+## Context
+
 ADR-002 smoke test identified 5 failing buckets. This ADR captures the decomposition and fix plan.
 
 All issues are **test specification mismatches** — the actual code works. The fixes are:
@@ -11,8 +17,8 @@ All issues are **test specification mismatches** — the actual code works. The 
 3. **Bucket 6**: Add alias for `core/reliability/model_router.py` or verify class export
 4. **Bucket 8**: Add `Humanizer` class wrapper in `core/humanizer.py`
 5. **Bucket 10**: Add wrapper classes in `tools/persistence.py`
----
 
+---
 
 ## Subtasks
 

@@ -1,14 +1,24 @@
+# Domain 09: Communication & Rhetoric
+
+## Aristotle — "The Art of Rhetoric"
+**Type**: Book
+**Year**: ~350 BCE
+**Core Insight**: Three appeals: ethos (credibility), pathos (emotion), logos (logic); rhetoric is the art of finding available means of persuasion.
+**LEGION RULE**: When persuading, balance ethos/pathos/logos because effective rhetoric integrates all three appeals.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
+
 ## Aristotle — Rhetorical Situation
----
 **Type**: Framework
 **Year**: ~350 BCE
 **Core Insight**: Rhetoric depends on three elements: speaker, subject, audience; audience determines appropriate style and arguments.
 **LEGION RULE**: When preparing communication, analyze speaker-subject-audience triad because all three determine effective rhetoric.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
----
 
+---
 
 ## George Orwell — "Politics and the English Language"
 **Type**: Essay

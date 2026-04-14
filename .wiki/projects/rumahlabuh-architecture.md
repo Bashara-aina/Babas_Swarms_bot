@@ -1,6 +1,10 @@
+# rumahlabuh.com — Architecture & Business Context
+Generated: April 11, 2026
+Source: swarm-bot codebase + BASHARA-MASTER-PROFILE
+
 ---
+
 ## Business Overview
----
 - **Type**: Premium kos (boarding house) booking platform
 - **Properties**:
   - Kost Labuh Biru, Pajang, Surakarta (23 rooms)
@@ -10,8 +14,8 @@
 - **Current occupancy**: ~40% (down from ~80% in 2025)
 - **Revenue**: 30–50 million IDR/month (varies)
 - **Definition of "done"**: Stable 80–100% occupancy
----
 
+---
 
 ## Tech Stack
 - **Frontend**: Next.js + React

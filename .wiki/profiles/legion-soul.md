@@ -1,8 +1,3 @@
----
-title: "Legion — Soul File"
-type: profile
-tags: [legion-soul]
----
 # Legion — Soul File
 > Copied from: `/home/newadmin/swarm-bot/SOUL.md`
 > Last updated: auto-managed by Legion

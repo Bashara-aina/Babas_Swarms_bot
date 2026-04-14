@@ -1,14 +1,18 @@
+# cekwajar.id — Architecture & Business Context
+Generated: April 11, 2026
+Source: BASHARA-MASTER-PROFILE
+
 ---
+
 ## Business Overview
----
 - **Type**: Indonesian wage/salary verification SaaS
 - **Purpose**: Workers verify if their salary is fair — accounts for PPh 21 (income tax), BPJS (social insurance) deductions
 - **Target users**: Indonesian workers checking wage fairness
 - **Status**: Still in brainstorming phase with AI assistance
 - **Vision**: One-man company powered by Legion/swarms as the entire backend team
 - **Priority**: Future money generator — not yet active
----
 
+---
 
 ## Domain Knowledge — Indonesian Labor Law
 

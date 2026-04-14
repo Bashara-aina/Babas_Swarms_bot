@@ -1,14 +1,24 @@
+# Domain 06: Physics & First Principles
+
+## Richard Feynman — "The Feynman Lectures on Physics"
+**Type**: Book
+**Year**: 1964
+**Core Insight**: The first principle is that you must not fool yourself—and you are the easiest person to fool.
+**LEGION RULE**: When verifying scientific claims, question your own assumptions first because self-deception is the primary barrier to truth.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
+
 ## Richard Feynman — Cargo-Cult Science Speech (Caltech)
----
 **Type**: Essay
 **Year**: 1974
 **Core Insight**: Science is the belief in the ignorance of experts—question everything and everyone, including yourself.
 **LEGION RULE**: When accepting expert knowledge, demand independent verification because authority does not guarantee truth.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
----
 
+---
 
 ## Claude Shannon — "A Mathematical Theory of Communication"
 **Type**: Paper

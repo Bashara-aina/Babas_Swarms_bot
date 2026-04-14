@@ -1,7 +1,11 @@
----
-## Hardware
+# Bashara — Technical Deep Dive
+Generated: April 11, 2026
+Source: BASHARA-MASTER-PROFILE + swarm-bot codebase
 
 ---
+
+## Hardware
+
 ### Main Machine (24/7 swarm server)
 - **Hostname**: takamatsu-System-Product-Name
 - **OS**: Ubuntu Linux
@@ -14,8 +18,8 @@
 
 ### Secondary Machine
 - MacBook M1 (used for OpenCode/local development)
----
 
+---
 
 ## AI Tool Subscriptions (April 2026)
 | Tool | Plan | Cost | Status |

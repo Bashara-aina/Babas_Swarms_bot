@@ -1,8 +1,3 @@
----
-title: "Review: Pre-existing Test Failure"
-type: review
-tags: [003-pre-existing-test-failure]
----
 # Review: Pre-existing Test Failure
 **File:** `tests/test_humanization.py::test_temporal_graph_add_and_retrieve`  
 **Severity:** ❌ Blocker (for test suite health)  

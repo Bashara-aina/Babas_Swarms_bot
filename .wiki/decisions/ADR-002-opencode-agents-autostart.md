@@ -1,10 +1,3 @@
----
-title: "ADR-002: OPENCODE AGENTS + AUTOSTART"
-author: "Bashara (via three-agent pipeline)"
-date: "2026-04-11"
-model: "`minimax-coding-plan/MiniMax-M2.7` (set in YAML frontmatter of each agent)"
-status: "ACCEPTED"
----
 # ADR-002: OPENCODE AGENTS + AUTOSTART
 
 **Date**: 2026-04-11

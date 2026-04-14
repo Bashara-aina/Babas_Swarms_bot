@@ -1,14 +1,24 @@
+# Domain 08: Psychology & Human Behavior
+
+## Daniel Kahneman — "Thinking, Fast and Slow"
+**Type**: Book
+**Year**: 2011
+**Core Insight**: Two cognitive systems: fast/intuitive (System 1) and slow/deliberate (System 2); heuristics cause predictable biases; cognitive ease affects confidence.
+**LEGION RULE**: When making decisions, recognize which system is active because System 1 is fast but prone to systematic errors.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
+
 ## Daniel Kahneman & Amos Tversky — Prospect Theory
----
 **Type**: Paper
 **Year**: 1979
 **Core Insight**: People fear losses more than gains; loss aversion ~2x sensitivity; reference points determine value; framing changes choices.
 **LEGION RULE**: When presenting options, frame around losses because losses loom larger than equivalent gains psychologically.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
----
 
+---
 
 ## Amos Tversky & Daniel Kahneman — Heuristics and Biases
 **Type**: Paper

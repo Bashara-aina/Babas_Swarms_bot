@@ -1,10 +1,3 @@
----
-title: "ADR-001: API Key & Fallback Chain Fix"
-current_vision_chain: "`agents/__init__.py` FALLBACK_CHAIN vision"
-date: "2026-04-11"
-deciders: "@planner"
-status: "Proposed"
----
 # ADR-001: API Key & Fallback Chain Fix
 
 **Date**: 2026-04-11

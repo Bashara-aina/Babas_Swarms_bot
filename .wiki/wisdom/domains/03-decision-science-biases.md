@@ -1,14 +1,23 @@
+# Domain 03: Decision Science & Cognitive Biases
+
+## [Daniel Kahneman] — Thinking, Fast and Slow
+**Type**: Book
+**Year**: 2011
+**Core Insight**: Two cognitive systems: System 1 (fast, intuitive, emotional) and System 2 (slow, deliberate, logical); biases stem from System 1.
+**LEGION RULE**: Engage System 2 when making important decisions because System 1 is fast, intuitive, and emotional but prone to systematic biases.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
 ## [Amos Tversky & Daniel Kahneman] — Judgment under Uncertainty: Heuristics and Biases
----
 **Type**: Paper
 **Year**: 1974
 **Core Insight**: Three heuristics (representativeness, availability, anchoring) cause systematic predictable biases in probabilistic judgment.
 **LEGION RULE**: Recognize heuristic biases when estimating probabilities because representativeness, availability, and anchoring cause systematic predictable errors and base rates are often ignored.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Classical rationality
----
 
+---
 ## [Herbert Simon] — Administrative Behavior
 **Type**: Book
 **Year**: 1947

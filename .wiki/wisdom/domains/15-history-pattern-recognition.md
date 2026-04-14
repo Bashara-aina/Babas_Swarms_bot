@@ -1,14 +1,23 @@
+# Domain 15: History & Pattern Recognition
+
+## [Will Durant] — The Lessons of History
+**Type**: Book
+**Year**: 1968
+**Core Insight**: History lessons; patterns; human nature; inequality; moral; economics; government; religion; war; progress; cycles;Durant.
+**LEGION RULE**: When studying history, identify recurring patterns in human behavior and social structures because those patterns reveal the consistent aspects of human nature that will likely recur in future analogous situations.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Linear progress only
+
 ---
 ## [Arnold Toynbee] — A Study of History
----
 **Type**: Book
 **Year**: 1934
 **Core Insight**: Civilizations; cycles; challenge-response; withdrawal; transcendence; universal states; breakdowns;genesis; Toynbee.
 **LEGION RULE**: When analyzing civilizations, assess how they respond to challenges through innovation or withdrawal because civilizations that transcend challenges evolve while those that retreat decline.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Single-cause theories
----
 
+---
 ## [Edward Gibbon] — The History of the Decline and Fall of the Roman Empire
 **Type**: Book
 **Year**: 1776

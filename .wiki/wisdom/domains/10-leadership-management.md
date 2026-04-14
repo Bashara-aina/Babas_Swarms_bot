@@ -1,14 +1,24 @@
+# Domain 10: Leadership & Management
+
+## Andy Grove — "High Output Management"
+**Type**: Book
+**Year**: 1983
+**Core Insight**: Management is maximizing the output of your team; leverage through managerial leverage points (meetings, decisions, information flow); task-relevant maturity determines management style.
+**LEGION RULE**: When managing, focus on team output, not personal activity because manager's productivity is team productivity.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
+
 ## Andy Grove — OKR System at Intel
----
 **Type**: Framework
 **Year**: 1970s
 **Core Insight**: Objectives and Key Results: ambitious objectives + measurable key results; objectives should be qualitative, key results quantitative; regular review required.
 **LEGION RULE**: When setting goals, define measurable key results because objectives without measurement lack accountability.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: None
----
 
+---
 
 ## Ben Horowitz — "The Hard Thing About Hard Things"
 **Type**: Book

@@ -1,14 +1,14 @@
----
-
----
 # Worker Final Log — 2026-04-11
+
 ## Tasks Completed
+
 ### Task 1: Create Subtask 18 Implementation Log ✅
 - Created `.wiki/logs/harvester-implementation-2026-04-11.md`
 - Documented all 18 subtasks with status
 - Listed key decisions, files created/modified
 - Included reviewer issues and fixes applied
 - Current state: READY FOR COMMIT
+
 ### Task 2: Fix `test_weight_formula` ✅
 - **Problem**: Test expected total=100 but got 87 due to `int()` truncation in slot calculation
 - **Root Cause**: `int(remaining * fraction)` truncated instead of rounding, causing sum to be less than 100
@@ -16,6 +16,8 @@
   - Changed `int()` to `round()` in `topic_budget.py` line 101
   - Added `normalize_budget()` call after slot allocation
 - **Result**: Test now passes
+
+---
 
 ## Changes Made
 

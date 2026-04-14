@@ -1,7 +1,6 @@
 ---
 paper_id: "008"
 title: "Simple Baselines for Human Pose Estimation and Tracking"
-pdf_path: "project/popw/working/external/papers/1804_06208.pdf"
 authors: "Bin Xiao, Haiping Wu, Yichen Wei"
 year: 2018
 venue: "ECCV 2018"

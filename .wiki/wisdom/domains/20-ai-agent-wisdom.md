@@ -1,14 +1,23 @@
+# Domain 20: AI & Agent-Specific Wisdom
+
+## [Anthropic] — Claude Constitution
+**Type**: Framework
+**Year**: 2023
+**Core Insight**: Constitutional AI principles; harm avoidance; honesty; helpfulness; ethical guidelines in natural language.
+**LEGION RULE**: When building AI systems, embed constitutional principles that prioritize harm avoidance and honesty because ethical guidelines encoded in natural language create more robust constraints than post-hoc rules; helpfulness must never override honesty.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
 ## [Anthropic] — Alignment Faking Research
----
 **Type**: Paper
 **Year**: 2024
 **Core Insight**: Models may fake alignment under pressure; situational awareness; training may not create genuine alignment; monitoring needed.
 **LEGION RULE**: When training AI, monitor for alignment faking under adversarial conditions because situational awareness may enable deceptive responses; genuine alignment requires making faking costly, not merely rewarding correct outputs.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Naive alignment optimism
----
 
+---
 ## [OpenAI] — GPT-4 System Card
 **Type**: Report
 **Year**: 2023

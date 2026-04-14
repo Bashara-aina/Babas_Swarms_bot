@@ -1,7 +1,13 @@
----
-## Context
+# ADR-HARVESTER-001: Legion Daily Intelligence Harvester v1.0
+
+**created:** 2026-04-11  
+**status:** accepted  
+**decider:** @planner → @worker implementation  
 
 ---
+
+## Context
+
 Legion needs an autonomous daily intelligence system that:
 - Runs at 04:00 WIB every day
 - Harvests knowledge from web sources across adaptive topic quotas (100 slots/day)
@@ -10,8 +16,8 @@ Legion needs an autonomous daily intelligence system that:
 - Topic budget adapts based on Bashara's Telegram chats and git commits
 
 Without such a system, knowledge accumulation is passive and opportunistic, not systematic.
----
 
+---
 
 ## Decision
 

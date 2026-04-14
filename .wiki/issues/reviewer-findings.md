@@ -1,11 +1,14 @@
----
-## Summary
+# Wiki Review Findings
+**Review Date:** 2026-04-11  
+**Reviewer:** @reviewer agent  
+**Scope:** 21 sampled files (3 per domain × 7 domains)
 
 ---
+
+## Summary
+
 | Status | Count | Files |
-|
----
------|-------|-------|
+|--------|-------|-------|
 | ✅ PASS | 18 | 003, 008, 015, 021, 025, 030, 037, 040, 046, 052, 055, 059, 064, 067, 071, 074, 085, 088, 091 |
 | ⚠️ MINOR ISSUES | 2 | 030, 059 |
 | ❌ CRITICAL ISSUES | 1 | 031 |

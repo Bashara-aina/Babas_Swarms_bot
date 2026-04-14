@@ -1,7 +1,12 @@
----
-## 1. Identity & Context
+# Bashara — Claude Profile Export
+
+> Generated: April 2026 | Source: Conversation history + public profiles
+> Links: [GitHub](https://github.com/Bashara-aina) · [LinkedIn](https://linkedin.com/in/bashara-aina) · [Medium](https://medium.com/@basharaaina) · [ResearchGate](https://www.researchgate.net/profile/Bashara-Aina) · [Rumah Labuh](https://rumahlabuh.com)
 
 ---
+
+## 1. Identity & Context
+
 * **Full name:** Bashara Aina
 * **Nationality:** Indonesian
 * **Current location:** Tokyo, Japan (Toyosu area, Shibaura Institute of Technology)
@@ -11,8 +16,8 @@
 * **Came to Japan:** Initially as an exchange student in 2023, converted to regular master's student
 * **Professional background:** Data analysis & Master Data Management at Danone Indonesia
 * **Mentor:** Mauro Portela, Managing Director at Danone
----
 
+---
 
 ## 2. Technical Skills & Stack
 

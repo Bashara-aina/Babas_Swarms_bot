@@ -1,14 +1,23 @@
+# Domain 11: Product & UX Design
+
+## [Clayton Christensen] — Competing Against Luck
+**Type**: Book
+**Year**: 2016
+**Core Insight**: Customers hire products to get "jobs" done; focus on job-to-be-done over demographics; progress definers; causal mechanism.
+**LEGION RULE**: Focus on the job-to-be-done when understanding customer behavior because customers hire products to get jobs done and progress definers reveal causal mechanism.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: Demographic targeting
+
 ---
 ## [Don Norman] — The Design of Everyday Things
----
 **Type**: Book
 **Year**: 1988
 **Core Insight**: Affordances; signifiers; feedback; conceptual models; discoverability; visibility; mapping; constraints; user-centered design.
 **LEGION RULE**: Design for affordances and feedback when designing interfaces because good design requires conceptual models and discoverability through visible affordances.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Complexity-first design
----
 
+---
 ## [Marty Cagan] — Inspired: How to Create Products Customers Love
 **Type**: Book
 **Year**: 2008

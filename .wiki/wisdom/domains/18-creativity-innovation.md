@@ -1,14 +1,23 @@
+# Domain 18: Creativity & Innovation
+
+## [Ed Catmull] — Creativity, Inc.
+**Type**: Book
+**Year**: 2014
+**Core Insight**: Braintrust; failure-pes; protect the creative; candor required; iteration; quality is the business proposition.
+**LEGION RULE**: When fostering creativity, establish a braintrust with honest feedback because protecting creative risk-taking requires candor, not politeness; iteration and quality emerge when failure is permitted and iterated upon.
+**Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
+**Conflicts**: None
+
 ---
 ## [Steven Johnson] — Where Good Ideas Come From
----
 **Type**: Book
 **Year**: 2010
 **Core Insight**: Slow hunch; adjacent possible; liquid networks; serendipitous collisions; hunch network effect; error as seed.
 **LEGION RULE**: When seeking ideas, cultivate slow hunches and build liquid networks because good ideas emerge from serendipitous collisions over time; the adjacent possible expands when hunches connect across domains.
 **Applied to Bashara**: cekwajar.id | rumahlabuh.com | thesis
 **Conflicts**: Eureka moment mythology
----
 
+---
 ## [David Kelley] — Creative Confidence
 **Type**: Book
 **Year**: 2013

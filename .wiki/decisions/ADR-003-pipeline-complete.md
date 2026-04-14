@@ -1,15 +1,19 @@
----
-## Summary
+# ADR-003: cekwajar.id Wiki Pipeline — Execution Complete
+
+**Date**: 2026-04-11  
+**Status**: ACCEPTED  
+**Deciders**: @planner, @worker, @reviewer  
 
 ---
+
+## Summary
+
 Successfully executed the full three-agent pipeline to build cekwajar.id's 81-page knowledge base.
 
 ## Pipeline Execution
 
 | Stage | Agent | Duration | Output |
-|
----
-----|-------|----------|--------|
+|-------|-------|----------|--------|
 | Decomposition | @planner | 1 turn | ADR-001 + 73 subtasks |
 | Execution | @worker ×7 | parallel | 81 wiki pages |
 | Review | @reviewer | 1 turn | ADR-002 + findings |
