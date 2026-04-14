@@ -146,7 +146,8 @@ async def _timer_handler(text: str) -> str:
             set_bot(_shared._bot)
 
         # Default user_id for non-interactive contexts
-        user_id = _shared.ALLOWED_USER_ID if hasattr(_shared, "ALLOWED_USER_ID") else 0
+        # NOTE: ALLOWED_USER_ID is admin ID, not user ID — cannot use as fallback
+        user_id = 0  # Must be passed explicitly when handler is wired up
 
         return await handle_timer_message(text, user_id)
     except Exception as e:

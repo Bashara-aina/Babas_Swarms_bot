@@ -146,11 +146,11 @@ Requirements:
 Draft:"""
 
     try:
-        import litellm
+        from llm_client import call_llm
 
-        response = await litellm.acompletion(
-            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
+        response = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
             max_tokens=300,
             temperature=0.7,
         )
