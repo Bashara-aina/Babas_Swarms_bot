@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import aiosqlite
 import json
-import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -71,11 +71,16 @@ class ArchivalMemory:
     db_path = MEMORY_ROOT / "archival.db"
 
     def __init__(self) -> None:
-        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
-        self._init_db()
+        self.conn: aiosqlite.Connection | None = None
 
-    def _init_db(self) -> None:
-        self.conn.execute(
+    async def _ensure_connection(self) -> aiosqlite.Connection:
+        if self.conn is None:
+            self.conn = await aiosqlite.connect(str(self.db_path))
+        return self.conn
+
+    async def _init_db(self) -> None:
+        conn = await self._ensure_connection()
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS memories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,13 +95,13 @@ class ArchivalMemory:
             )
             """
         )
-        self.conn.execute(
+        await conn.execute(
             """
             CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts
             USING fts5(content, summary, tags, content='memories', content_rowid='id')
             """
         )
-        self.conn.execute(
+        await conn.execute(
             """
             CREATE TRIGGER IF NOT EXISTS memories_ai AFTER INSERT ON memories BEGIN
                 INSERT INTO memories_fts(rowid, content, summary, tags)
@@ -104,7 +109,7 @@ class ArchivalMemory:
             END
             """
         )
-        self.conn.execute(
+        await conn.execute(
             """
             CREATE TRIGGER IF NOT EXISTS memories_ad AFTER DELETE ON memories BEGIN
                 INSERT INTO memories_fts(memories_fts, rowid, content, summary, tags)
@@ -112,7 +117,7 @@ class ArchivalMemory:
             END
             """
         )
-        self.conn.execute(
+        await conn.execute(
             """
             CREATE TRIGGER IF NOT EXISTS memories_au AFTER UPDATE ON memories BEGIN
                 INSERT INTO memories_fts(memories_fts, rowid, content, summary, tags)
@@ -122,9 +127,9 @@ class ArchivalMemory:
             END
             """
         )
-        self.conn.commit()
+        await conn.commit()
 
-    def store(
+    async def store(
         self,
         content: str,
         summary: str = "",
@@ -132,19 +137,21 @@ class ArchivalMemory:
         importance: float = 0.5,
         source: str = "conversation",
     ) -> int:
+        conn = await self._ensure_connection()
         tags_str = ",".join(tags or [])
-        cur = self.conn.execute(
+        cur = await conn.execute(
             """
             INSERT INTO memories (content, summary, tags, importance, source)
             VALUES (?, ?, ?, ?, ?)
             """,
             (content, summary, tags_str, importance, source),
         )
-        self.conn.commit()
+        await conn.commit()
         return int(cur.lastrowid)
 
-    def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
-        rows = self.conn.execute(
+    async def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+        conn = await self._ensure_connection()
+        rows = await conn.execute(
             """
             SELECT m.id, m.content, m.summary, m.tags, m.importance,
                    m.created_at, m.access_count
@@ -155,10 +162,11 @@ class ArchivalMemory:
             LIMIT ?
             """,
             (query, limit),
-        ).fetchall()
+        )
+        rows_data = await rows.fetchall()
 
-        for row in rows:
-            self.conn.execute(
+        for row in rows_data:
+            await conn.execute(
                 """
                 UPDATE memories
                 SET access_count = access_count + 1,
@@ -167,7 +175,7 @@ class ArchivalMemory:
                 """,
                 (row[0],),
             )
-        self.conn.commit()
+        await conn.commit()
 
         return [
             {
@@ -179,11 +187,12 @@ class ArchivalMemory:
                 "created_at": row[5] or "",
                 "access_count": int(row[6] or 0),
             }
-            for row in rows
+            for row in rows_data
         ]
 
-    def get_recent(self, n: int = 20) -> list[dict[str, Any]]:
-        rows = self.conn.execute(
+    async def get_recent(self, n: int = 20) -> list[dict[str, Any]]:
+        conn = await self._ensure_connection()
+        rows = await conn.execute(
             """
             SELECT id, content, summary, tags, importance, created_at
             FROM memories
@@ -191,7 +200,8 @@ class ArchivalMemory:
             LIMIT ?
             """,
             (n,),
-        ).fetchall()
+        )
+        rows_data = await rows.fetchall()
         return [
             {
                 "id": row[0],
@@ -201,16 +211,19 @@ class ArchivalMemory:
                 "importance": float(row[4] or 0.5),
                 "created_at": row[5] or "",
             }
-            for row in rows
+            for row in rows_data
         ]
 
-    def total_count(self) -> int:
-        row = self.conn.execute("SELECT COUNT(*) FROM memories").fetchone()
+    async def total_count(self) -> int:
+        conn = await self._ensure_connection()
+        row = await conn.execute("SELECT COUNT(*) FROM memories").fetchone()
         return int(row[0]) if row else 0
 
-    def close(self) -> None:
+    async def close(self) -> None:
         """Close the SQLite connection."""
-        self.conn.close()
+        if self.conn:
+            await self.conn.close()
+            self.conn = None
 
 
 class RecallMemory:
@@ -219,11 +232,16 @@ class RecallMemory:
     db_path = MEMORY_ROOT / "recall.db"
 
     def __init__(self) -> None:
-        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
-        self._init_db()
+        self.conn: aiosqlite.Connection | None = None
 
-    def _init_db(self) -> None:
-        self.conn.execute(
+    async def _ensure_connection(self) -> aiosqlite.Connection:
+        if self.conn is None:
+            self.conn = await aiosqlite.connect(str(self.db_path))
+        return self.conn
+
+    async def _init_db(self) -> None:
+        conn = await self._ensure_connection()
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS conversations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -237,9 +255,9 @@ class RecallMemory:
             )
             """
         )
-        self.conn.commit()
+        await conn.commit()
 
-    def add(
+    async def add(
         self,
         role: str,
         content: str,
@@ -248,7 +266,8 @@ class RecallMemory:
         session_id: str | None = None,
         importance: float = 0.5,
     ) -> None:
-        self.conn.execute(
+        conn = await self._ensure_connection()
+        await conn.execute(
             """
             INSERT INTO conversations
             (role, content, agent_used, emotion_state, session_id, importance)
@@ -263,11 +282,12 @@ class RecallMemory:
                 importance,
             ),
         )
-        self.conn.commit()
+        await conn.commit()
 
-    def get_recent(self, n: int = 50, session_id: str | None = None) -> list[dict[str, Any]]:
+    async def get_recent(self, n: int = 50, session_id: str | None = None) -> list[dict[str, Any]]:
+        conn = await self._ensure_connection()
         if session_id:
-            rows = self.conn.execute(
+            rows = await conn.execute(
                 """
                 SELECT role, content, agent_used, timestamp
                 FROM conversations
@@ -276,9 +296,9 @@ class RecallMemory:
                 LIMIT ?
                 """,
                 (session_id, n),
-            ).fetchall()
+            )
         else:
-            rows = self.conn.execute(
+            rows = await conn.execute(
                 """
                 SELECT role, content, agent_used, timestamp
                 FROM conversations
@@ -286,8 +306,9 @@ class RecallMemory:
                 LIMIT ?
                 """,
                 (n,),
-            ).fetchall()
-        rows = list(reversed(rows))
+            )
+        rows_data = await rows.fetchall()
+        rows_data = list(reversed(rows_data))
         return [
             {
                 "role": row[0],
@@ -295,11 +316,12 @@ class RecallMemory:
                 "agent": row[2],
                 "timestamp": row[3] or "",
             }
-            for row in rows
+            for row in rows_data
         ]
 
-    def get_patterns(self, n_sessions: int = 30) -> str:
-        rows = self.conn.execute(
+    async def get_patterns(self, n_sessions: int = 30) -> str:
+        conn = await self._ensure_connection()
+        rows = await conn.execute(
             """
             SELECT content
             FROM conversations
@@ -308,10 +330,13 @@ class RecallMemory:
             LIMIT ?
             """,
             (n_sessions * 10,),
-        ).fetchall()
-        contents = [row[0] for row in rows]
+        )
+        rows_data = await rows.fetchall()
+        contents = [row[0] for row in rows_data]
         return "\n".join(contents[-50:])
 
-    def close(self) -> None:
+    async def close(self) -> None:
         """Close the SQLite connection."""
-        self.conn.close()
+        if self.conn:
+            await self.conn.close()
+            self.conn = None

@@ -44,24 +44,7 @@ async def _set_voice_reply_enabled(enabled: bool) -> None:
 
 
 async def _transcribe(ogg_path: str) -> str:
-    """Transcribe audio file using OpenAI Whisper API or local whisper."""
-    openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
-    if openai_key and os.getenv("OPENAI_API_KEY"):
-        try:
-            import openai
-
-            client = openai.AsyncOpenAI(api_key=openai_key)
-            loop = asyncio.get_running_loop()
-            audio_bytes = await loop.run_in_executor(None, lambda: open(ogg_path, "rb").read())
-            result = await client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_bytes,
-                language="id",
-            )
-            return result.text
-        except Exception as exc:
-            logger.warning("OpenAI Whisper failed: %s", exc)
-
+    """Transcribe audio file using Groq Whisper API or local whisper."""
     groq_key = os.getenv("GROQ_API_KEY")
     if groq_key:
         try:
@@ -88,9 +71,7 @@ async def _transcribe(ogg_path: str) -> str:
         result = model.transcribe(ogg_path)
         return result["text"]
     except ImportError as exc:
-        raise RuntimeError(
-            "No Whisper available. Set OPENAI_API_KEY or GROQ_API_KEY, or install openai-whisper"
-        ) from exc
+        raise RuntimeError("No Whisper available. Set GROQ_API_KEY or install openai-whisper") from exc
 
 
 async def _reply_with_optional_tts(msg: Message, response: str) -> None:
