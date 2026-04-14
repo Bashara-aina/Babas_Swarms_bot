@@ -64,6 +64,7 @@ Babas_Swarms_bot/
 ├── tools/
 │   ├── composio_hub.py          ← Composio integrations (email, calendar, GitHub)
 │   ├── browser_agent.py         ← Playwright + browser-use autonomous browsing
+│   ├── computer_use_agent.py    ← Vision-action loop: screenshot → vision model → execute → repeat
 │   ├── location_aware.py        ← Google Places / weather context
 │   ├── n8n_bridge.py            ← n8n workflow automation
 │   ├── letta_personality.py     ← Local JSON persona state (personality/emotion persistence)

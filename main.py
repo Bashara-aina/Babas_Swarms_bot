@@ -981,7 +981,9 @@ async def on_startup(bot: Bot) -> None:
     try:
         await bot.set_my_commands(
             [
-                BotCommand(command="do", description="Autonomous computer control"),
+                BotCommand(command="do", description="Autonomous computer control (tool-calling)"),
+                BotCommand(command="autopilot", description="Vision-action loop — desktop automation"),
+                BotCommand(command="confirm", description="Confirm dangerous action in autopilot"),
                 BotCommand(command="screen", description="Take desktop screenshot"),
                 BotCommand(command="run", description="LLM chat (no computer)"),
                 BotCommand(command="swarm", description="Multi-agent team execution"),

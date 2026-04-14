@@ -60,7 +60,11 @@
     "You are the PROSECUTOR in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Find Malaysian Properties for Sale & Rent | iProperty\n- Content: Browse verified property listings for sale and rent across Malaysia. Acc",
     "You are the PROSECUTOR in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Abacus.AI\n- Content: Abacus.AI is the AI Brain for your organization. Your very own AI Engineer will build applied AI systems across a wi",
     "You are the DEFENDER in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Abacus.AI\n- Content: Abacus.AI is the AI Brain for your organization. Your very own AI Engineer will build applied AI systems across a wide",
-    "You are the PROSECUTOR in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: What does PERSONAL LIFE mean? - Definitions.net\n- Content: Personal life is often characterized by a greater degree of autonomy and priva"
+    "You are the PROSECUTOR in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: What does PERSONAL LIFE mean? - Definitions.net\n- Content: Personal life is often characterized by a greater degree of autonomy and priva",
+    "You are the PROSECUTOR in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Results for \"irouter tonight desert microphone\" :: Steam ...\n- Content: And a friend of mine was fighting a statue, and after defeating i",
+    "You are the DEFENDER in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Results for \"irouter tonight desert microphone\" :: Steam ...\n- Content: And a friend of mine was fighting a statue, and after defeating it ",
+    "You are the FACT_CHECKER in a 4-agent intelligence debate.\n\nCandidate info:\n- Title: Results for \"irouter tonight desert microphone\" :: Steam ...\n- Content: And a friend of mine was fighting a statue, and after defeating",
+    "You are the JUDGE in a 4-agent intelligence debate.\n\nCandidate:\n- Title: Results for \"irouter tonight desert microphone\" :: Steam ...\n- Content: And a friend of mine was fighting a statue, and after defeating it was stuc"
   ],
   "interaction_patterns": [
     "Preference signal: You are a strict verifier. Validate if the answer below is grounded, complete, and directly answers the task.\n\nTask:\nDebug this issue: AttributeError NoneType has no attribute keys",

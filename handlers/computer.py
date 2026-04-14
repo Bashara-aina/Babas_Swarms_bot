@@ -14,6 +14,11 @@ from aiogram.types import CallbackQuery, FSInputFile, Message
 import computer_agent
 from llm_client import run_shell_command
 import llm_client
+from tools.computer_use_agent import (
+    computer_use_loop,
+    get_pending_confirmations,
+    confirm_command,
+)
 from .shared import (
     _last_screenshot,
     _keep_typing,
@@ -70,6 +75,130 @@ async def cmd_do(msg: Message) -> None:
             pass
 
     await _run_agent_loop(msg, task)
+
+
+# ── /autopilot — Vision-action loop for desktop automation ───────────────────
+@router.message(Command("autopilot"))
+async def cmd_autopilot(msg: Message) -> None:
+    """Run the vision-action loop to autonomously automate desktop tasks.
+
+    This takes screenshots, analyzes them with a vision model, decides actions,
+    executes them via xdotool, and repeats until the task is done.
+    """
+    if not is_allowed(msg):
+        return
+    task = (msg.text or "").removeprefix("/autopilot").strip()
+    if not task:
+        await msg.answer(
+            "usage: <code>/autopilot &lt;task&gt;</code>\n\n"
+            "Legion will:\n"
+            "\u2022 take screenshots to see the screen\n"
+            "\u2022 analyze with vision model\n"
+            "\u2022 click/type/open/command\n"
+            "\u2022 verify results\n"
+            "\u2022 repeat until done\n\n"
+            "examples:\n"
+            "<code>/autopilot open whatsapp and send 'test' to mom</code>\n"
+            "<code>/autopilot open firefox and search for 'weather Tokyo'</code>\n"
+            "<code>/autopilot open vscode with ~/swarm-bot</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer("\U0001f916 autopilot engaging\u2026")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    async def on_progress(step_num: int, description: str) -> None:
+        try:
+            await status_msg.edit_text(
+                f"<code>[{step_num}]</code> {html_mod.escape(description[:100])}",
+                parse_mode="HTML",
+            )
+        except Exception:
+            pass
+
+    try:
+        result = await computer_use_loop(
+            task,
+            max_steps=20,
+            progress_callback=on_progress,
+        )
+        typing_task.cancel()
+
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+        if get_pending_confirmations():
+            pending = get_pending_confirmations()[0]
+            await msg.answer(
+                "\u26a0\ufe0f <b>Confirmation required</b>\n\n"
+                f"Step {pending['step']}: dangerous action detected:\n"
+                f"<code>{html_mod.escape(pending['command'] or pending['keys'] or '?')}</code>\n\n"
+                f"Reason: {html_mod.escape(pending.get('reason', 'n/a'))}\n\n"
+                "To confirm, reply: <code>/confirm</code>",
+                parse_mode="HTML",
+            )
+            return
+
+        if not result.success and result.error:
+            await msg.answer(
+                f"\u274c <b>Autopilot error</b>\n\n<code>{html_mod.escape(result.error)}</code>",
+                parse_mode="HTML",
+            )
+            return
+
+        # Send final report
+        steps_summary = "\n".join(
+            f"  step {s.step_number}: {s.parsed_action.action_type.value}"
+            for s in result.steps
+        )
+        summary = (
+            f"\u2705 <b>Autopilot complete</b>\n\n"
+            f"Task: <i>{html_mod.escape(result.task[:80])}</i>\n"
+            f"Steps taken: <code>{len(result.steps)}</code>\n"
+            f"Final state: {html_mod.escape(result.final_state[:200])}\n"
+        )
+        await send_chunked(msg, summary)
+
+    except Exception as e:
+        typing_task.cancel()
+        from core.error_humanizer import humanize_error_for_display
+        friendly = humanize_error_for_display(e, context="/autopilot")
+        try:
+            await status_msg.edit_text(
+                f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
+                parse_mode="HTML",
+            )
+        except Exception:
+            await msg.answer(
+                f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
+                parse_mode="HTML",
+            )
+
+
+@router.message(Command("confirm"))
+async def cmd_confirm(msg: Message) -> None:
+    """Confirm the last dangerous action and retry."""
+    if not is_allowed(msg):
+        return
+    pending = get_pending_confirmations()
+    if not pending:
+        await msg.answer("no pending confirmations")
+        return
+    cmd_to_confirm = (msg.text or "").removeprefix("/confirm").strip()
+    if cmd_to_confirm:
+        confirm_command(cmd_to_confirm)
+        await msg.answer(f"\u2705 confirmed: <code>{html_mod.escape(cmd_to_confirm[:80])}</code>", parse_mode="HTML")
+    else:
+        # Confirm the most recent one
+        latest = pending[-1]
+        confirm_command(latest.get("command", ""))
+        await msg.answer(
+            f"\u2705 confirmed last pending action (step {latest['step']})",
+            parse_mode="HTML",
+        )
 
 
 @router.message(Command("do_local"))

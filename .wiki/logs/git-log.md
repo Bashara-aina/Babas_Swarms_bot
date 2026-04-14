@@ -329,3 +329,26 @@ Pipeline:
 - Date: Tue Apr 14 01:19:45 PM JST 2026
 - Message: wiki: fix 016 frontmatter, add 020 comprehensive survey
 ---
+## Commit: b432562
+- Date: Tue Apr 14 01:26:13 PM JST 2026
+- Message: research: BiGRU replacement comparison — Mamba recommended for POPW activity head
+---
+## Commit: c6bf1b9
+- Date: Tue Apr 14 02:25:51 PM JST 2026
+- Message: wiki: add 20 Mamba + MMN papers for pose-aware activity recognition
+
+Mamba papers (8):
+- mamba-selective-ssm (foundation)
+- vision-mamba, video-mamba (backbone/temporal)
+- spikmamba, ms-temba, vl-mamba, mamba-track, mamba-motion-generation
+
+MMN/Motion papers (10):
+- 015-motion-modulation-acmmm-2025 (MMN foundation)
+- mans-tarm, psumnet, lsta-net, epam-net (temporal/attention)
+- dmm-motion, just-add-pi, pogars, posescript, st-gcn
+
+Comprehensive survey:
+- mamba-pose-activity-survey (full 18-paper synthesis)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
