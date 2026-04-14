@@ -1,0 +1,252 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- Title -->
+    <mxCell id="title" value="POPW Architecture — Temporal Path with BiGRU" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="400" y="20" width="300" height="30" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== INPUT SECTION ==================== -->
+    <!-- Video Input -->
+    <mxCell id="video_input" value="Video Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a90e2;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="80" y="100" width="100" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Clip Sampler (T=8 frames) -->
+    <mxCell id="clip_sampler" value="Clip Sampler&#xa;(T=8 frames)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f39c12;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="220" y="100" width="120" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: Video → Clip Sampler -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="video_input" target="clip_sampler">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== BACKBONE SECTION ==================== -->
+    <!-- ResNet-50 Backbone -->
+    <mxCell id="resnet50" value="ResNet-50&#xa;Backbone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="380" y="100" width="100" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: Clip Sampler → ResNet-50 -->
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="clip_sampler" target="resnet50">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- FPN (Feature Pyramid Network) -->
+    <mxCell id="fpn" value="FPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="520" y="100" width="80" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: ResNet-50 → FPN -->
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="resnet50" target="fpn">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== POSE HEAD SECTION ==================== -->
+    <!-- Pose Head -->
+    <mxCell id="pose_head" value="Pose Head" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8e44ad;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="640" y="80" width="100" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: FPN → Pose Head -->
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fpn" target="pose_head">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- PoseFiLM (Pose-guided Feature-wise Linear Modulation) -->
+    <mxCell id="posefilm" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="640" y="140" width="100" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: Pose Head → PoseFiLM -->
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="pose_head" target="posefilm">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== TEMPORAL FEATURES SECTION ==================== -->
+    <!-- Feature Bank (pink #ff69b4) - stores temporal features -->
+    <mxCell id="feature_bank" value="Feature Bank&#xa;(temporal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="520" y="200" width="100" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: PoseFiLM → Feature Bank -->
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;dashed=1;" edge="1" parent="1" source="posefilm" target="feature_bank">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== TEMPORAL MODELING ==================== -->
+    <!-- BiGRU (crimson #dc143c) - 256 hidden units, bidirectional -->
+    <mxCell id="bigru" value="BiGRU&#xa;(256 units, bidirectional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="520" y="290" width="100" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Bidirectional arrows between Feature Bank and BiGRU -->
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc143c;strokeWidth=2;dashed=1;" edge="1" parent="1" source="feature_bank" target="bigru">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc143c;strokeWidth=2;dashed=1;" edge="1" parent="1" source="bigru" target="feature_bank">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== DETECTION HEAD ==================== -->
+    <!-- Detection Head -->
+    <mxCell id="detection_head" value="Detection Head" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e74c3c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="760" y="80" width="100" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: FPN → Detection Head -->
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fpn" target="detection_head">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== ACTIVITY HEAD (UPDATED TEMPORAL PATH) ==================== -->
+    <!-- Activity Head Container -->
+    <mxCell id="activity_head_label" value="Activity Head" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="680" y="200" width="120" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- C5 (Final conv layer from backbone) -->
+    <mxCell id="c5" value="C5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3498db;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="640" y="240" width="60" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: C5 → PoseFiLM -->
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5" target="posefilm">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- PoseFiLM inside Activity Head -->
+    <mxCell id="c5_mod_label" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="720" y="240" width="70" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: C5 → PoseFiLM (inside head) -->
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5" target="c5_mod_label">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- C5_mod (PoseFiLM output) -->
+    <mxCell id="c5_mod" value="C5_mod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1abc9c;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="800" y="240" width="70" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: PoseFiLM → C5_mod -->
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="c5_mod_label" target="c5_mod">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: C5_mod → Feature Bank -->
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ff69b4;strokeWidth=2;dashed=1;" edge="1" parent="1" source="c5_mod" target="feature_bank">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- FC Layer -->
+    <mxCell id="fc_layer" value="FC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="720" y="320" width="80" height="35" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: BiGRU → FC -->
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="bigru" target="fc_layer">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Classification Output -->
+    <mxCell id="classification" value="Classification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#34495e;fontColor=#ffffff;align=center;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="720" y="400" width="100" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Arrow: FC → Classification -->
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2c3e50;strokeWidth=2;" edge="1" parent="1" source="fc_layer" target="classification">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== LEGEND ==================== -->
+    <!-- Legend Background -->
+    <mxCell id="legend_bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="450" width="300" height="280" as="geometry" />
+    </mxCell>
+
+    <!-- Legend Title -->
+    <mxCell id="legend_title" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontStyle=bold;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="50" y="460" width="100" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: Backbone components (green) -->
+    <mxCell id="leg1" value="ResNet-50 / FPN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="500" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg1_label" value="Backbone (ResNet-50 + FPN)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="160" y="500" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: Pose components (purple) -->
+    <mxCell id="leg2" value="Pose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8e44ad;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="535" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2_label" value="Pose Estimation Head" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="160" y="535" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: PoseFiLM (teal) -->
+    <mxCell id="leg3" value="PoseFiLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a085;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="570" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3_label" value="Pose-guided Feature Modulation" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="160" y="570" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: Feature Bank (pink #ff69b4) -->
+    <mxCell id="leg4" value="Feature Bank" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff69b4;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="605" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4_label" value="Temporal Feature Storage (NEW)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#ff69b4;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="160" y="605" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: BiGRU (crimson #dc143c) -->
+    <mxCell id="leg5" value="BiGRU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc143c;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="640" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg5_label" value="Bidirectional GRU 256 units (NEW)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#dc143c;fontStyle=bold;" vertex="1" parent="1">
+      <mxGeometry x="160" y="640" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Legend: Detection (red) -->
+    <mxCell id="leg6" value="Detection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e74c3c;fontColor=#ffffff;align=center;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="50" y="675" width="100" height="25" as="geometry" />
+    </mxCell>
+    <mxCell id="leg6_label" value="Object Detection Head" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="160" y="675" width="170" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- Dashed line legend -->
+    <mxCell id="leg7" value="------" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#ff69b4;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="50" y="710" width="50" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg7_label" value="Temporal feature flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#2c3e50;" vertex="1" parent="1">
+      <mxGeometry x="160" y="710" width="170" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- ==================== FLOW ANNOTATIONS ==================== -->
+    <mxCell id="flow1" value="T=8 frames sampled" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#7f8c8d;fontStyle=italic;" vertex="1" parent="1">
+      <mxGeometry x="250" y="160" width="120" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="flow2" value="spatial features" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#7f8c8d;fontStyle=italic;" vertex="1" parent="1">
+      <mxGeometry x="430" y="130" width="80" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="flow3" value="pose conditioning" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#16a085;fontStyle=italic;" vertex="1" parent="1">
+      <mxGeometry x="650" y="185" width="90" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="flow4" value="temporal context" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#dc143c;fontStyle=italic;" vertex="1" parent="1">
+      <mxGeometry x="510" y="260" width="90" height="20" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
