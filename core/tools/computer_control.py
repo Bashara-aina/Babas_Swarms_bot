@@ -35,11 +35,19 @@ _last_screenshot_time: float = 0.0
 
 # Destructive command patterns requiring confirmation
 DESTRUCTIVE_PATTERNS = [
-    "rm ", "rm -", "rmdir", "sudo rm",
-    "format", "mkfs", "dd if=",
-    "git push --force", "git reset --hard",
-    "DROP TABLE", "DROP DATABASE",
-    "> /dev/", "truncate",
+    "rm ",
+    "rm -",
+    "rmdir",
+    "sudo rm",
+    "format",
+    "mkfs",
+    "dd if=",
+    "git push --force",
+    "git reset --hard",
+    "DROP TABLE",
+    "DROP DATABASE",
+    "> /dev/",
+    "truncate",
 ]
 
 
@@ -56,12 +64,12 @@ def _is_destructive(command: str) -> bool:
     return any(pat.lower() in cmd_lower for pat in DESTRUCTIVE_PATTERNS)
 
 
-def _rate_limit_screenshot() -> None:
+async def _rate_limit_screenshot() -> None:
     """Block until screenshot rate limit has passed."""
     global _last_screenshot_time
     elapsed = time.monotonic() - _last_screenshot_time
     if elapsed < SCREENSHOT_RATE_LIMIT_SEC:
-        time.sleep(SCREENSHOT_RATE_LIMIT_SEC - elapsed)
+        await asyncio.sleep(SCREENSHOT_RATE_LIMIT_SEC - elapsed)
     _last_screenshot_time = time.monotonic()
 
 
@@ -95,8 +103,9 @@ class ComputerController:
         # Attempt to import pyautogui (requires X11 display)
         try:
             import pyautogui
+
             pyautogui.FAILSAFE = True  # Emergency stop: move mouse to corner
-            pyautogui.PAUSE = 0.3      # 300ms safety delay between actions
+            pyautogui.PAUSE = 0.3  # 300ms safety delay between actions
             self._pyautogui = pyautogui
             logger.info("✓ pyautogui loaded successfully (X11 display available)")
         except ImportError as e:
@@ -104,14 +113,13 @@ class ComputerController:
             self._pyautogui = None
         except Exception as e:
             # Catch X11 DisplayConnectionError and other runtime failures
-            logger.error(
-                f"pyautogui import failed - likely running headless without X11: {e}"
-            )
+            logger.error(f"pyautogui import failed - likely running headless without X11: {e}")
             self._pyautogui = None
 
         # Attempt to import OCR engine
         try:
             import pytesseract
+
             self._tesseract = pytesseract
             logger.debug("✓ pytesseract (OCR) loaded")
         except ImportError as e:
@@ -121,6 +129,7 @@ class ComputerController:
         # Attempt to import image processing library
         try:
             from PIL import Image
+
             self._PIL_Image = Image
             logger.debug("✓ PIL (Pillow) loaded")
         except ImportError as e:
@@ -169,10 +178,7 @@ class ComputerController:
         """
         self._action_count += 1
         if self._action_count > MAX_ACTIONS_PER_CHAIN:
-            raise RuntimeError(
-                f"Action limit reached ({MAX_ACTIONS_PER_CHAIN}). "
-                "Start a new command to continue."
-            )
+            raise RuntimeError(f"Action limit reached ({MAX_ACTIONS_PER_CHAIN}). Start a new command to continue.")
 
     # ── Screenshots ────────────────────────────────────────────────────────
 
@@ -388,10 +394,9 @@ class ComputerController:
             List of window title strings.
         """
         import subprocess
+
         try:
-            out = subprocess.check_output(
-                ["wmctrl", "-l"], text=True, env={**os.environ, "DISPLAY": ":0"}
-            )
+            out = subprocess.check_output(["wmctrl", "-l"], text=True, env={**os.environ, "DISPLAY": ":0"})
             titles = [line.split(None, 3)[-1] for line in out.strip().splitlines() if line]
             logger.info("Found %d windows", len(titles))
             return titles
@@ -409,6 +414,7 @@ class ComputerController:
             True if window was found and focused.
         """
         import subprocess
+
         try:
             subprocess.run(
                 ["wmctrl", "-a", name],
@@ -535,9 +541,7 @@ async def analyze_screen(question: str, region: Optional[tuple] = None) -> str:
         RuntimeError: If running headless without X11 display.
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(
-        None, _get_controller().analyze_screen_sync, question, region
-    )
+    return await loop.run_in_executor(None, _get_controller().analyze_screen_sync, question, region)
 
 
 async def click_on(text: str) -> bool:

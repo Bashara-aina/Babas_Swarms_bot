@@ -166,7 +166,7 @@ class ProactiveScheduler:
         except Exception as e:
             logger.debug("[Proactive] wiki lint failed: %s", e)
 
-    # ── Rumahlabuh.com 30-min monitor ────────────────────────────────────────
+    # ── Rumahlabuh.com 30-min monitor (uses resilient DNS via rumahlabuh_http) ──
 
     async def _check_rumahlabuh_30min(self, now: datetime) -> None:
         """Ping rumahlabuh.com every 30 min during active hours."""
@@ -249,7 +249,7 @@ class ProactiveScheduler:
             logger.debug("[Proactive] late night check failed: %s", e)
             return ""
 
-    # ── Daily briefing ───────────────────────────────────────────────────────
+    # ── Daily briefing (uses resilient DNS via rumahlabuh_http) ───────────────
 
     async def _build_daily_briefing(self, now: datetime) -> str:
         """Build a morning briefing message with weather + tasks."""

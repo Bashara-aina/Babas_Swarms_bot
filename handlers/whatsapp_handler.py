@@ -17,14 +17,10 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile, Message
 
+from handlers.shared import is_allowed
+
 router = Router()
 logger = logging.getLogger(__name__)
-
-ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
-
-
-def _is_allowed(msg: Message) -> bool:
-    return msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID
 
 
 def _get_bridge():
@@ -38,7 +34,7 @@ def _get_bridge():
 @router.message(Command("wa"))
 async def cmd_wa(msg: Message) -> None:
     """Show unread WhatsApp messages."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     bridge = _get_bridge()
@@ -86,7 +82,7 @@ async def cmd_wa(msg: Message) -> None:
 @router.message(Command("wa_reply"))
 async def cmd_wa_reply(msg: Message) -> None:
     """Send a WhatsApp reply. Usage: /wa_reply <chat_id_or_name> <message>"""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     args = (msg.text or "").replace("/wa_reply", "", 1).strip()
@@ -132,7 +128,7 @@ async def cmd_wa_reply(msg: Message) -> None:
 @router.message(Command("wa_qr"))
 async def cmd_wa_qr(msg: Message) -> None:
     """Show the WhatsApp QR code for first-time authentication."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     await msg.answer("Fetching QR code...", parse_mode="HTML")
@@ -177,7 +173,7 @@ async def cmd_wa_qr(msg: Message) -> None:
 @router.message(Command("wa_status"))
 async def cmd_wa_status(msg: Message) -> None:
     """Check WhatsApp sidecar connection status."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     bridge = _get_bridge()

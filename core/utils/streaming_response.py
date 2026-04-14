@@ -61,7 +61,7 @@ class StreamingResponseManager:
         """
         # Check provider health and apply proactive fallback
         effective_model = await self._select_healthy_provider(model, chat_id)
-        
+
         # Placeholder message
         label = header or f"<b>🤖 {agent_key.upper()}</b>"
         msg = await self.bot.send_message(
@@ -91,29 +91,26 @@ class StreamingResponseManager:
 
     async def _select_healthy_provider(self, model: str, chat_id: int) -> str:
         """Check provider health and proactively fallback if unavailable.
-        
+
         Args:
             model: Requested model string
             chat_id: Telegram chat ID for status updates
-            
+
         Returns:
             Model string to use (original or fallback)
         """
         try:
             from core.reliability.provider_health import check_provider_health
-            
+
             # Extract provider name
             provider = model.split("/")[0] if "/" in model else "unknown"
-            
+
             # Check health
             status = check_provider_health(provider)
-            
+
             if status == "unavailable":
                 # Circuit breaker open — immediately fallback
-                logger.warning(
-                    "Provider '%s' circuit open, using fallback for chat %d",
-                    provider, chat_id
-                )
+                logger.warning("Provider '%s' circuit open, using fallback for chat %d", provider, chat_id)
                 await self.bot.send_message(
                     chat_id,
                     f"⚠️ <b>{provider}</b> is temporarily unavailable (rate limited).\n"
@@ -121,23 +118,19 @@ class StreamingResponseManager:
                     parse_mode="HTML",
                 )
                 return "ollama_chat/qwen3.5:35b"
-            
+
             elif status == "degraded":
                 # Recently rate-limited but usable — warn user
-                logger.info(
-                    "Provider '%s' degraded (recent rate limit) for chat %d",
-                    provider, chat_id
-                )
+                logger.info("Provider '%s' degraded (recent rate limit) for chat %d", provider, chat_id)
                 await self.bot.send_message(
                     chat_id,
-                    f"⚠️ <b>{provider}</b> was recently rate limited.\n"
-                    f"Proceeding with caution…",
+                    f"⚠️ <b>{provider}</b> was recently rate limited.\nProceeding with caution…",
                     parse_mode="HTML",
                 )
-            
+
         except Exception as exc:
             logger.debug("Provider health check skipped: %s", exc)
-        
+
         return model
 
     def _produce_chunks(
@@ -154,41 +147,42 @@ class StreamingResponseManager:
         CRITICAL FIX: Check circuit breaker INSIDE retry loop to immediately abort
         when provider becomes unavailable mid-retry.
         """
-        import time as _time
-        
         # Apply request throttling before starting
         self._apply_throttle_sync(model, loop)
-        
+
         max_retries = 5
         current_model = model
-        
+
         for attempt in range(max_retries + 1):
             # ✅ CRITICAL FIX: Check circuit breaker at START of each retry attempt
             try:
                 from core.reliability.provider_health import check_provider_health
+
                 provider = current_model.split("/")[0] if "/" in current_model else "unknown"
                 status = check_provider_health(provider)
-                
+
                 if status == "unavailable" and provider != "ollama" and "ollama" not in provider:
                     # Circuit breaker open — skip ALL remaining retries, go straight to Ollama
                     logger.warning(
                         "Circuit breaker open for '%s' at retry attempt %d — switching to Ollama immediately",
-                        provider, attempt
+                        provider,
+                        attempt,
                     )
                     asyncio.run_coroutine_threadsafe(
                         queue.put(
                             "\n🔄 <b>Provider temporarily blocked (rate limited).</b>\n"
                             "Switching to local Ollama model immediately…\n\n"
-                        ), 
-                        loop
+                        ),
+                        loop,
                     )
                     current_model = "ollama_chat/qwen3.5:35b"
                     # Don't break - continue with Ollama attempt
             except Exception as exc:
                 logger.debug("Circuit check in retry loop failed: %s", exc)
-            
+
             try:
                 import core.interpreter_bridge as interpreter_bridge
+
                 interpreter_bridge.configure_interpreter(current_model, agent_key)
                 from interpreter import interpreter
 
@@ -201,91 +195,89 @@ class StreamingResponseManager:
                     if chunk_type == "message":
                         asyncio.run_coroutine_threadsafe(queue.put(content), loop)
                     elif chunk_type == "code":
-                        asyncio.run_coroutine_threadsafe(
-                            queue.put(f"\n```\n{content}\n```\n"), loop
-                        )
+                        asyncio.run_coroutine_threadsafe(queue.put(f"\n```\n{content}\n```\n"), loop)
                     elif chunk_type == "console":
-                        asyncio.run_coroutine_threadsafe(
-                            queue.put(f"\n<code>$ {content}</code>\n"), loop
-                        )
+                        asyncio.run_coroutine_threadsafe(queue.put(f"\n<code>$ {content}</code>\n"), loop)
                 break  # Success — exit retry loop
-                
+
             except Exception as exc:
                 exc_name = type(exc).__name__
                 exc_msg = str(exc)
                 is_rate_limit = "RateLimitError" in exc_name or "429" in exc_msg
-                
+
                 # Skip display_markdown_message errors (Open Interpreter internal issue)
                 if "display_markdown_message" in exc_msg:
                     logger.debug("Ignoring Open Interpreter display error: %s", exc)
                     continue  # Try again
-                
+
                 if is_rate_limit:
                     # Record rate limit for provider health tracking
                     self._record_rate_limit_sync(current_model, loop)
-                
+
                 if is_rate_limit and attempt < max_retries:
                     # Check if we should switch to Ollama immediately instead of retrying
                     try:
                         from core.reliability.provider_health import check_provider_health
+
                         provider = current_model.split("/")[0] if "/" in current_model else "unknown"
                         status = check_provider_health(provider)
-                        
+
                         if status == "unavailable" and provider != "ollama" and "ollama" not in provider:
                             # Circuit just opened - switch to Ollama instead of retrying
                             logger.warning(
                                 "Circuit breaker opened after rate limit — switching to Ollama instead of retry %d/%d",
-                                attempt + 1, max_retries
+                                attempt + 1,
+                                max_retries,
                             )
                             asyncio.run_coroutine_threadsafe(
                                 queue.put(
                                     "\n🔄 <b>Provider rate limited and circuit breaker activated.</b>\n"
                                     "Switching to local Ollama model…\n\n"
-                                ), 
-                                loop
+                                ),
+                                loop,
                             )
                             current_model = "ollama_chat/qwen3.5:35b"
-                            _time.sleep(1)  # Brief pause
+                            await asyncio.sleep(1)  # Brief pause
                             continue  # Retry immediately with Ollama
                     except Exception:
                         pass
-                    
+
                     # Normal exponential backoff: 3s, 6s, 12s, 24s, 48s
-                    wait = (2 ** attempt) * 3
+                    wait = (2**attempt) * 3
                     logger.warning(
                         "Rate limit on attempt %d/%d — retrying in %ds: %s",
-                        attempt + 1, max_retries, wait, exc,
+                        attempt + 1,
+                        max_retries,
+                        wait,
+                        exc,
                     )
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(
-                            f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), "
-                            f"retrying in {wait}s…\n"
-                        ), 
-                        loop
+                        queue.put(f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), retrying in {wait}s…\n"),
+                        loop,
                     )
-                    _time.sleep(wait)
-                    
+                    await asyncio.sleep(wait)
+
                 elif is_rate_limit and attempt == max_retries:
                     # Exhausted all retries — fallback to Ollama
                     logger.error(
-                        "All %d retries exhausted for %s, falling back to local Ollama",
-                        max_retries, current_model
+                        "All %d retries exhausted for %s, falling back to local Ollama", max_retries, current_model
                     )
                     asyncio.run_coroutine_threadsafe(
                         queue.put(
                             "\n🔄 <b>OpenRouter rate limit persists after all retries.</b>\n"
                             "Switching to local Ollama model for reliability…\n\n"
-                        ), 
-                        loop
+                        ),
+                        loop,
                     )
                     current_model = "ollama_chat/qwen3.5:35b"
-                    _time.sleep(2)
-                    
+                    await asyncio.sleep(2)
+
                     try:
                         import core.interpreter_bridge as interpreter_bridge
+
                         interpreter_bridge.configure_interpreter(current_model, agent_key)
                         from interpreter import interpreter
-                        
+
                         for chunk in interpreter.chat(task, stream=True, display=False):
                             chunk_type = chunk.get("type", "")
                             content = chunk.get("content", "")
@@ -294,15 +286,11 @@ class StreamingResponseManager:
                             if chunk_type == "message":
                                 asyncio.run_coroutine_threadsafe(queue.put(content), loop)
                             elif chunk_type == "code":
-                                asyncio.run_coroutine_threadsafe(
-                                    queue.put(f"\n```\n{content}\n```\n"), loop
-                                )
+                                asyncio.run_coroutine_threadsafe(queue.put(f"\n```\n{content}\n```\n"), loop)
                             elif chunk_type == "console":
-                                asyncio.run_coroutine_threadsafe(
-                                    queue.put(f"\n<code>$ {content}</code>\n"), loop
-                                )
+                                asyncio.run_coroutine_threadsafe(queue.put(f"\n<code>$ {content}</code>\n"), loop)
                         break  # Ollama succeeded
-                        
+
                     except Exception as fallback_exc:
                         logger.error("Ollama fallback failed: %s", fallback_exc)
                         asyncio.run_coroutine_threadsafe(
@@ -311,38 +299,34 @@ class StreamingResponseManager:
                                 f"OpenRouter: Rate limited\n"
                                 f"Ollama: {fallback_exc}\n\n"
                                 f"Please check system logs and ensure Ollama is running."
-                            ), 
-                            loop
+                            ),
+                            loop,
                         )
                         break
                 else:
                     # Non-rate-limit error
                     logger.error("Streaming producer error: %s", exc)
                     asyncio.run_coroutine_threadsafe(
-                        queue.put(f"\n⚠️ <b>Error:</b> {exc_name}\n{exc_msg[:200]}\n"), 
-                        loop
+                        queue.put(f"\n⚠️ <b>Error:</b> {exc_name}\n{exc_msg[:200]}\n"), loop
                     )
                     break
-                    
+
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)  # sentinel
 
     def _apply_throttle_sync(self, model: str, loop: asyncio.AbstractEventLoop) -> None:
         """Apply request throttling in synchronous context (thread-safe).
-        
+
         Args:
             model: Model string
             loop: Event loop for async calls
         """
         try:
             from core.reliability.request_throttle import RequestThrottle
-            
+
             # Run async throttle in the event loop
-            future = asyncio.run_coroutine_threadsafe(
-                RequestThrottle.acquire(model, timeout=30.0),
-                loop
-            )
+            future = asyncio.run_coroutine_threadsafe(RequestThrottle.acquire(model, timeout=30.0), loop)
             acquired = future.result(timeout=35.0)
-            
+
             if not acquired:
                 logger.warning("Request throttle timeout for model: %s", model)
         except Exception as exc:
@@ -350,14 +334,14 @@ class StreamingResponseManager:
 
     def _record_rate_limit_sync(self, model: str, loop: asyncio.AbstractEventLoop) -> None:
         """Record rate limit event in synchronous context (thread-safe).
-        
+
         Args:
             model: Model string
             loop: Event loop (unused but kept for consistency)
         """
         try:
             from core.reliability.provider_health import record_rate_limit
-            
+
             # Extract provider name
             provider = model.split("/")[0] if "/" in model else "unknown"
             record_rate_limit(provider)
@@ -390,8 +374,7 @@ class StreamingResponseManager:
 
             now = time.monotonic()
             should_flush = (
-                now - last_edit >= _EDIT_INTERVAL
-                or len(buffer) - (len(buffer) - len(chunk)) >= _CHUNK_FLUSH_SIZE
+                now - last_edit >= _EDIT_INTERVAL or len(buffer) - (len(buffer) - len(chunk)) >= _CHUNK_FLUSH_SIZE
             )
             if should_flush:
                 await self._safe_edit(msg, f"{label}\n\n{buffer}")

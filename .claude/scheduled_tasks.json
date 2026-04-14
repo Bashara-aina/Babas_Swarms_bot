@@ -1,11 +1,3 @@
 {
-  "tasks": [
-    {
-      "id": "fcca7fb8",
-      "cron": "*/10 * * * *",
-      "prompt": "Audit Cycle - I need you to run an ongoing deep audit every 10 minutes. The audit covers: ClaudeCode, OpenCode, and LegionBot (Babas_Swarms_bot). Each cycle should: 1) Check git status and recent changes across all three codebases, 2) Run the wiki health scan from CLAUDE.md Section 2b, 3) Check for any new broken links or orphaned wiki articles, 4) Scan core Python files for potential bugs (async issues, security issues, error handling gaps), 5) Check the memory system health, 6) Verify the intent router and soul engine still function correctly. After each audit cycle, APPEND findings to /home/newadmin/swarm-bot/audit-report.md. If the file doesn't exist yet, create it with a header. Format each cycle as: ## Audit Cycle [N] - [timestamp]\n\nFindings:\n- [issue found]\n- [how to fix]\n\nDo NOT stop until 6 hours have passed. All permissions granted.",
-      "createdAt": 1776089055160,
-      "recurring": true
-    }
-  ]
+  "tasks": []
 }

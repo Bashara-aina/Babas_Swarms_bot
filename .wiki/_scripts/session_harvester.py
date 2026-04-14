@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -23,6 +22,7 @@ WIKI_CONVERSATIONS = Path(__file__).parent.parent / "conversations"
 WIKI_CONVERSATIONS.mkdir(parents=True, exist_ok=True)
 
 # ── Source 1: Claude Code history.jsonl ──────────────────────────────────────
+
 
 def harvest_claude_code(since_hours: int = 24) -> list[dict[str, Any]]:
     """Read ~/.claude/history.jsonl for recent sessions."""
@@ -63,6 +63,7 @@ def harvest_claude_code(since_hours: int = 24) -> list[dict[str, Any]]:
 
 # ── Source 2: OpenClaude sessions ─────────────────────────────────────────────
 
+
 def harvest_opencode(since_hours: int = 24) -> list[dict[str, Any]]:
     """Read ~/.opencode/sessions/ for recent OpenClaude sessions."""
     sessions_dir = Path.home() / ".opencode" / "sessions"
@@ -88,21 +89,28 @@ def harvest_opencode(since_hours: int = 24) -> list[dict[str, Any]]:
         if not messages:
             continue
 
-        results.append({
-            "session_id": data.get("sessionId", json_file.stem),
-            "project": data.get("cwd", ""),
-            "started_at": started,
-            "messages": [
-                {"role": m.get("role", "user"), "content": str(m.get("content", ""))[:500], "ts": m.get("timestamp", "")}
-                for m in messages[-10:]
-                if m.get("content")
-            ],
-        })
+        results.append(
+            {
+                "session_id": data.get("sessionId", json_file.stem),
+                "project": data.get("cwd", ""),
+                "started_at": started,
+                "messages": [
+                    {
+                        "role": m.get("role", "user"),
+                        "content": str(m.get("content", ""))[:500],
+                        "ts": m.get("timestamp", ""),
+                    }
+                    for m in messages[-10:]
+                    if m.get("content")
+                ],
+            }
+        )
 
     return results
 
 
 # ── Source 3: Legion bot RecallMemory ──────────────────────────────────────────
+
 
 def harvest_legion(since_hours: int = 24) -> list[dict[str, Any]]:
     """Read Legion's RecallMemory for recent conversations."""
@@ -138,17 +146,20 @@ def harvest_legion(since_hours: int = 24) -> list[dict[str, Any]]:
         sid = row[5] or "no_session"
         if sid not in sessions:
             sessions[sid] = {"session_id": sid, "messages": [], "started_at": row[4]}
-        sessions[sid]["messages"].append({
-            "role": row[1],
-            "content": str(row[2])[:500],
-            "agent": row[3],
-            "ts": row[4],
-        })
+        sessions[sid]["messages"].append(
+            {
+                "role": row[1],
+                "content": str(row[2])[:500],
+                "agent": row[3],
+                "ts": row[4],
+            }
+        )
 
     return list(sessions.values())
 
 
 # ── Draft stub writer ──────────────────────────────────────────────────────────
+
 
 def write_stub(session: dict[str, Any], source: str) -> Path:
     """Write a single draft stub to .wiki/conversations/."""
@@ -171,27 +182,27 @@ def write_stub(session: dict[str, Any], source: str) -> Path:
     msg_lines = []
     for m in messages[:20]:
         role = m.get("role", "?").upper()
-        content = re.sub(r'\s+', ' ', str(m.get("content", ""))[:300])
+        content = re.sub(r"\s+", " ", str(m.get("content", ""))[:300])
         msg_lines.append(f"- **{role}**: {content}")
 
     messages_md = "\n".join(msg_lines) if msg_lines else "- (no messages captured)"
 
     content = f"""---
-title: "{slug.replace('-', ' ')}"
+title: "{slug.replace("-", " ")}"
 type: conversation
 status: draft
 tags: [{source}, session]
-created: {dt.strftime('%Y-%m-%d')}
-updated: {dt.strftime('%Y-%m-%d')}
-summary: "{source}" session with {len(messages)} messages captured on {dt.strftime('%Y-%m-%d %H:%M')} JST
+created: {dt.strftime("%Y-%m-%d")}
+updated: {dt.strftime("%Y-%m-%d")}
+summary: "{source}" session with {len(messages)} messages captured on {dt.strftime("%Y-%m-%d %H:%M")} JST
 source: {source}
 session_id: "{sid}"
 confidence: low
 ---
 
-## {source.title()} Session — {dt.strftime('%Y-%m-%d %H:%M')} JST
+## {source.title()} Session — {dt.strftime("%Y-%m-%d %H:%M")} JST
 
-**Project/CWD**: {session.get('project', 'unknown')}
+**Project/CWD**: {session.get("project", "unknown")}
 
 ### Messages ({len(messages)})
 
@@ -209,6 +220,7 @@ _To learn how to write wiki articles: see .wiki/SCHEMA.md_
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     print(f"[HARVESTER] Starting session harvest at {datetime.now(JST).isoformat()}")

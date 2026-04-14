@@ -13,22 +13,15 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
+from handlers.shared import is_allowed
+
 logger = logging.getLogger(__name__)
 router = Router()
 
 
-async def _is_allowed(msg: Message) -> bool:
-    try:
-        from handlers.shared import is_allowed as shared_is_allowed
-
-        return shared_is_allowed(msg)
-    except Exception:
-        return True
-
-
 @router.message(Command("draft"))
 async def cmd_draft(msg: Message) -> None:
-    if not await _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     args = (msg.text or "").removeprefix("/draft").strip().split()

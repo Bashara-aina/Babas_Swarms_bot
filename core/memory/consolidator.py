@@ -31,6 +31,7 @@ _session_promote_count = 0
 
 # ── TF-IDF helpers (no external deps) ────────────────────────────────────────
 
+
 def _tokenise(text: str) -> list[str]:
     return re.findall(r"[a-z]{3,}", text.lower())
 
@@ -58,6 +59,7 @@ def _cosine(a: dict[str, float], b: dict[str, float]) -> float:
 
 # ── Core jobs ─────────────────────────────────────────────────────────────────
 
+
 async def deduplicate() -> int:
     """Remove near-duplicate ArchivalMemory entries. Returns count deleted."""
     from core.memory.tiers import ArchivalMemory
@@ -65,9 +67,7 @@ async def deduplicate() -> int:
     archival = ArchivalMemory()
 
     def _fetch_all() -> list[dict[str, Any]]:
-        rows = archival.conn.execute(
-            "SELECT id, content, importance FROM memories ORDER BY importance DESC"
-        ).fetchall()
+        rows = archival.conn.execute("SELECT id, content, importance FROM memories ORDER BY importance DESC").fetchall()
         return [{"id": r[0], "content": r[1], "importance": r[2]} for r in rows]
 
     rows = await asyncio.to_thread(_fetch_all)
@@ -112,7 +112,7 @@ async def deduplicate() -> int:
 async def run_nightly() -> dict[str, int]:
     """Consolidate memories older than 30 days into topic-clustered summaries."""
     from core.memory.tiers import ArchivalMemory
-    import litellm
+    from llm_client import call_llm
 
     archival = ArchivalMemory()
     cutoff = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
@@ -137,9 +137,7 @@ async def run_nightly() -> dict[str, int]:
         return {"consolidated": 0, "deleted_duplicates": 0}
 
     # Ask LLM to cluster entries into topics and summarise each cluster
-    combined = "\n".join(
-        f"[{i+1}] {e['content'][:300]}" for i, e in enumerate(old_entries[:80])
-    )
+    combined = "\n".join(f"[{i + 1}] {e['content'][:300]}" for i, e in enumerate(old_entries[:80]))
     prompt = (
         "You are a memory consolidator for an AI assistant. "
         "These are old memory entries from conversations over the past months. "
@@ -153,13 +151,14 @@ async def run_nightly() -> dict[str, int]:
     )
 
     try:
-        resp = await litellm.acompletion(
-            model="groq/moonshotai/kimi-k2-instruct",
+        llm_output = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="groq/moonshotai/kimi-k2-instruct",
             temperature=0.2,
             max_tokens=2000,
         )
-        llm_output = resp.choices[0].message.content or ""
+        if isinstance(llm_output, dict):
+            llm_output = ""
     except Exception as exc:
         logger.warning("[Consolidator] LLM clustering failed: %s", exc)
         return {"consolidated": 0, "deleted_duplicates": 0}
@@ -201,6 +200,7 @@ async def run_nightly() -> dict[str, int]:
 
     # Mark originals as archived (add tag — don't delete, keep for audit)
     if archived_ids:
+
         def _mark_archived(ids: list[int]) -> None:
             for entry_id in ids:
                 archival.conn.execute(
@@ -216,7 +216,8 @@ async def run_nightly() -> dict[str, int]:
 
     logger.info(
         "[Consolidator] Nightly complete: %d clusters consolidated, %d duplicates removed",
-        consolidated, deleted,
+        consolidated,
+        deleted,
     )
     return {"consolidated": consolidated, "deleted_duplicates": deleted}
 
@@ -228,14 +229,13 @@ async def promote_important(recent_turns: list[dict[str, str]]) -> None:
         return
 
     from core.memory.tiers import CoreMemory
-    import litellm
+    from llm_client import call_llm
 
     core = CoreMemory()
     existing = core.all()
 
     conversation = "\n".join(
-        f"{t.get('role', 'unknown').upper()}: {t.get('content', '')[:400]}"
-        for t in recent_turns[-8:]
+        f"{t.get('role', 'unknown').upper()}: {t.get('content', '')[:400]}" for t in recent_turns[-8:]
     )
     if len(conversation) < 100:
         return
@@ -251,17 +251,18 @@ async def promote_important(recent_turns: list[dict[str, str]]) -> None:
         f"Conversation:\n{conversation}\n\n"
         "Output a JSON object with key-value pairs to add to core memory. "
         "Max 2 entries. If nothing new is worth storing, output: {}\n"
-        "Example: {\"preferred_framework\": \"FastAPI over Flask\", \"home_location\": \"Koto City, Tokyo\"}"
+        'Example: {"preferred_framework": "FastAPI over Flask", "home_location": "Koto City, Tokyo"}'
     )
 
     try:
-        resp = await litellm.acompletion(
-            model="groq/llama-3.3-70b-versatile",
+        raw = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="groq/llama-3.3-70b-versatile",
             temperature=0.1,
             max_tokens=200,
         )
-        raw = resp.choices[0].message.content or "{}"
+        if isinstance(raw, dict):
+            raw = "{}"
         # Extract JSON
         json_match = re.search(r"\{[^}]*\}", raw, re.DOTALL)
         if not json_match:

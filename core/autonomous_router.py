@@ -535,7 +535,7 @@ class AutonomousRouter:
     async def _llm_classify(self, message: str) -> SkillMatch | None:
         """Call Groq Llama to classify the message into a skill category."""
         try:
-            import litellm
+            from llm_client import call_llm
 
             skill_desc = "\n".join(f"- {s}: {SKILL_PATTERNS[s]['description']}" for s in _LLM_CLASSIFY_SKILLS)
             prompt = (
@@ -546,13 +546,12 @@ class AutonomousRouter:
                 "Reply with ONLY the skill name (e.g. location_advice). "
                 "If the message is casual conversation, reply: conversation"
             )
-            resp = await litellm.acompletion(
-                model="minimax/MiniMax-M2.7",
+            raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="minimax/MiniMax-M2.7",
                 temperature=0.0,
                 max_tokens=20,
             )
-            raw = resp.choices[0].message.content.strip().lower()
             # Normalise (strip markdown, replace spaces/dashes with underscore)
             skill_name = raw.replace("-", "_").replace(" ", "_").strip("`*")
             if skill_name not in SKILL_PATTERNS:

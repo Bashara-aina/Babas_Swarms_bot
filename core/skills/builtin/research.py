@@ -113,16 +113,17 @@ async def _summarize_url_handler(text: str) -> str:
         return f"❌ Failed to fetch URL: {exc}"
 
     try:
-        import litellm
+        from llm_client import call_llm
 
         prompt = f"Summarize the following content concisely:\n\n{content}"
-        resp = await litellm.acompletion(
-            model="minimax/ai-01",
+        summary = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="minimax/ai-01",
             max_tokens=300,
             temperature=0.3,
         )
-        summary = (resp.choices[0].message.content or "").strip()
+        if isinstance(summary, dict):
+            summary = ""
         return f"📄 Summary of {url}:\n\n{summary}"
     except Exception as exc:
         return f"❌ LLM summarization failed: {exc}"

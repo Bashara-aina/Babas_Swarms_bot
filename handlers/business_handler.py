@@ -17,14 +17,10 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
+from handlers.shared import is_allowed
+
 router = Router()
 logger = logging.getLogger(__name__)
-
-ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
-
-
-def _is_allowed(msg: Message) -> bool:
-    return msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID
 
 
 def _get_db():
@@ -42,7 +38,7 @@ def _get_db():
 @router.message(Command("db"))
 async def cmd_db(msg: Message) -> None:
     """Natural language query against the business database."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
     query = (msg.text or "").replace("/db", "", 1).strip()
     if not query:
@@ -75,7 +71,7 @@ async def cmd_db(msg: Message) -> None:
 @router.message(Command("site_health"))
 async def cmd_site_health(msg: Message) -> None:
     """Check rumahlabuh.com website + Supabase connection health."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     lines: list[str] = ["<b>Site Health Check</b>"]
@@ -122,7 +118,7 @@ async def cmd_site_health(msg: Message) -> None:
 @router.message(Command("bookings"))
 async def cmd_bookings(msg: Message) -> None:
     """Show booking summary for today / this week / this month."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     args = (msg.text or "").replace("/bookings", "", 1).strip().lower()
@@ -157,7 +153,7 @@ async def cmd_bookings(msg: Message) -> None:
 @router.message(Command("db_schema"))
 async def cmd_db_schema(msg: Message) -> None:
     """Regenerate skills/rumahlabuh-manager.md from live Supabase schema."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     db = _get_db()
@@ -187,7 +183,7 @@ async def cmd_db_schema(msg: Message) -> None:
 @router.message(Command("biz"))
 async def cmd_biz_summary(msg: Message) -> None:
     """Business metrics dashboard — rumahlabuh + cekwajar + Vercel."""
-    if not _is_allowed(msg):
+    if not is_allowed(msg):
         return
 
     status = await msg.answer("📊 Fetching business metrics...")

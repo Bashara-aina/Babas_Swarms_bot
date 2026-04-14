@@ -25,7 +25,7 @@ import os
 import re
 from typing import Any, Callable, Coroutine, Optional
 
-import litellm
+from llm_client import call_llm
 
 from agents import AGENT_MODELS, DEBATE_ICONS, build_system_prompt
 from task_orchestrator import SwarmDebateOrchestrator, format_debate_for_telegram
@@ -54,7 +54,7 @@ async def _llm_call(
 ) -> str:
     """Minimal single-turn LLM call used by the debate orchestrator.
 
-    Uses litellm directly so it works with all providers already configured
+    Uses call_llm so it works with all providers already configured
     in llm_client.py without importing the full agentic loop.
 
     Soul context is injected at the top of the system prompt to ensure
@@ -73,38 +73,28 @@ async def _llm_call(
     soul_context = build_soul_context()
     full_system = f"{soul_context}\n\n{system}" if soul_context else system
 
-    provider = model.split("/")[0].lower()
-    env_var = _KEY_MAP.get(provider, "")
-    api_key = os.getenv(env_var) if env_var else None
-
-    kwargs: dict[str, Any] = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": full_system},
-            {"role": "user", "content": user},
-        ],
-        "max_tokens": max_tokens,
-        "temperature": temperature,
-    }
-    if api_key:
-        kwargs["api_key"] = api_key
-    if provider == "openrouter":
-        kwargs["extra_headers"] = {
-            "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
-            "X-Title": "LegionSwarm",
-        }
-
     try:
-        resp = await litellm.acompletion(**kwargs)
-        return resp.choices[0].message.content or ""
+        return await call_llm(
+            messages=[
+                {"role": "system", "content": full_system},
+                {"role": "user", "content": user},
+            ],
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
     except Exception as e:
         logger.warning("Primary model %s failed (%s), falling back to groq", model, e)
-        kwargs["model"] = "groq/llama-3.3-70b-versatile"
-        kwargs["api_key"] = os.getenv("GROQ_API_KEY", "")
-        kwargs.pop("extra_headers", None)
         try:
-            resp = await litellm.acompletion(**kwargs)
-            return resp.choices[0].message.content or ""
+            return await call_llm(
+                messages=[
+                    {"role": "system", "content": full_system},
+                    {"role": "user", "content": user},
+                ],
+                model="groq/llama-3.3-70b-versatile",
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
         except Exception as e2:
             logger.error("Fallback also failed for model %s: %s", model, e2)
             return f"[model error: {e2}]"

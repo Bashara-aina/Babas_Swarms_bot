@@ -3,8 +3,10 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+import asyncio
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -24,18 +26,19 @@ def test_is_destructive_safe_command():
     assert computer_control.is_destructive("python train.py") is False
 
 
-def test_rate_limit_enforced(monkeypatch):
+@pytest.mark.asyncio
+async def test_rate_limit_enforced(monkeypatch):
     """Rate limiter should pause if called too fast."""
     import time
-    calls = []
-    original_sleep = time.sleep
 
-    def mock_sleep(secs):
+    calls = []
+
+    async def mock_sleep(secs):
         calls.append(secs)
 
-    monkeypatch.setattr(time, "sleep", mock_sleep)
+    monkeypatch.setattr(asyncio, "sleep", mock_sleep)
     computer_control._last_screenshot_time = time.monotonic()  # simulate recent screenshot
-    computer_control._rate_limit_screenshot()
+    await computer_control._rate_limit_screenshot()
     assert len(calls) == 1  # sleep was called
 
 

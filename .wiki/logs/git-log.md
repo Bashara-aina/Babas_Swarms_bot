@@ -260,3 +260,15 @@ Pipeline:
 - Cron: harvester */30min, synthesizer */35min
 - 24 stubs processed → 16 wiki articles in first run
 ---
+## Commit: 263adb9
+- Date: Mon Apr 13 11:05:11 PM JST 2026
+- Message: research: temporal attention alternatives for POPW BiGRU replacement
+---
+## Commit: ee745fa
+- Date: Mon Apr 13 11:05:37 PM JST 2026
+- Message: research: log POPW architecture improvement swarm run (2026-04-13)
+---
+## Commit: e1ca3e6
+- Date: Mon Apr 13 11:19:23 PM JST 2026
+- Message: fix: DNS-resilient HTTP client for rumahlabuh.com connectivity
+---

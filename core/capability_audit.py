@@ -144,7 +144,7 @@ class CapabilityAudit:
     async def _llm_gap_summary(self, missing: list[tuple[str, str]]) -> str:
         """Use LLM to generate actionable summary of missing capabilities."""
         try:
-            import litellm
+            from llm_client import call_llm
         except ImportError:
             return ""
 
@@ -157,13 +157,14 @@ class CapabilityAudit:
             "Keep it concise. Reply in Telegram HTML format (bullet points).\n"
         )
         try:
-            resp = await litellm.acompletion(
-                model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
+            content = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
                 temperature=0.3,
                 max_tokens=512,
             )
-            content = resp.choices[0].message.content or ""
+            if isinstance(content, dict):
+                return ""
             return content.strip()
         except Exception as e:
             logger.warning("[CapabilityAudit] LLM gap summary failed: %s", e)

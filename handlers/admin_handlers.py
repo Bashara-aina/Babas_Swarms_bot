@@ -17,26 +17,10 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
+from handlers.shared import is_allowed
+
 logger = logging.getLogger(__name__)
 router = Router()
-
-ALLOWED_USER_ID: int = int(
-    (os.getenv("ALLOWED_USER_ID") or os.getenv("BASHARA_TELEGRAM_ID") or "0").strip().split(",")[0]
-)
-
-
-async def _require_owner(message: Message) -> bool:
-    """Return True if allowed; send rejection and return False otherwise."""
-    try:
-        from handlers.shared import ALLOWED_USER_ID as _uid  # type: ignore[attr-defined]
-
-        allowed = _uid
-    except Exception:
-        allowed = ALLOWED_USER_ID
-    if message.from_user and message.from_user.id == allowed:
-        return True
-    await message.answer("<b>Unauthorized.</b>", parse_mode="HTML")
-    return False
 
 
 async def _split_and_send(message: Message, text: str) -> None:
@@ -56,7 +40,8 @@ async def _split_and_send(message: Message, text: str) -> None:
 @router.message(Command("budget"))
 async def cmd_budget(message: Message) -> None:
     """Show cost tracking dashboard — current API spend vs. MAX_PROACTIVE_PER_DAY."""
-    if not await _require_owner(message):
+    if not is_allowed(message):
+        await message.answer("<b>Unauthorized.</b>", parse_mode="HTML")
         return
 
     try:
@@ -108,7 +93,8 @@ async def cmd_budget(message: Message) -> None:
 @router.message(Command("soul"))
 async def cmd_soul(message: Message) -> None:
     """Show the current contents of SOUL.md — Legion's living identity."""
-    if not await _require_owner(message):
+    if not is_allowed(message):
+        await message.answer("<b>Unauthorized.</b>", parse_mode="HTML")
         return
 
     soul_path = Path("SOUL.md")
@@ -143,7 +129,8 @@ async def cmd_soul(message: Message) -> None:
 @router.message(Command("capabilities"))
 async def cmd_capabilities(message: Message) -> None:
     """Returns honest list of what works vs what's partial vs what's stub."""
-    if not await _require_owner(message):
+    if not is_allowed(message):
+        await message.answer("<b>Unauthorized.</b>", parse_mode="HTML")
         return
 
     try:
@@ -187,7 +174,8 @@ async def cmd_capabilities(message: Message) -> None:
 @router.message(Command("self_report"))
 async def cmd_self_report(message: Message) -> None:
     """24h activity report — what Legion did, failed at, learned."""
-    if not await _require_owner(message):
+    if not is_allowed(message):
+        await message.answer("<b>Unauthorized.</b>", parse_mode="HTML")
         return
 
     try:

@@ -46,15 +46,15 @@ async def stream_chat(
     model_used = key
 
     try:
-        import litellm
-        from agents import AGENT_MODELS, get_fallback_chain
+        from llm_client import call_llm
+        from agents import AGENT_MODELS
 
         model = AGENT_MODELS.get(key, AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile"))
         messages = [{"role": "user", "content": task}]
 
-        stream = await litellm.acompletion(
-            model=model,
+        stream = await call_llm(
             messages=messages,
+            model=model,
             stream=True,
             temperature=0.7,
         )

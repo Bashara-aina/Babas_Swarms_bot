@@ -21,13 +21,14 @@ from aiogram import Router
 from aiogram.types import Message, BufferedInputFile
 from aiogram.filters import Command
 
+from handlers.shared import is_allowed
+
 logger = logging.getLogger(__name__)
 router = Router()
 
 
 def _auth(msg: Message) -> bool:
-    from handlers.shared import ALLOWED_USER_ID
-    return bool(msg.from_user and msg.from_user.id == ALLOWED_USER_ID)
+    return is_allowed(msg)
 
 
 async def _notify(bot, user_id: int, text: str) -> None:
@@ -35,7 +36,7 @@ async def _notify(bot, user_id: int, text: str) -> None:
     MAX = 4000
     for i in range(0, max(len(text), 1), MAX):  # BUG FIX: max(len,1) prevents zero-range on empty string
         try:
-            await bot.send_message(user_id, text[i:i+MAX], parse_mode="HTML")
+            await bot.send_message(user_id, text[i : i + MAX], parse_mode="HTML")
         except Exception as e:
             logger.warning("notify failed: %s", e)
         if len(text) > MAX:
@@ -43,6 +44,7 @@ async def _notify(bot, user_id: int, text: str) -> None:
 
 
 # ── /overnight ─────────────────────────────────────────────────────────────────
+
 
 @router.message(Command("overnight"))
 async def cmd_overnight(msg: Message) -> None:
@@ -59,14 +61,13 @@ async def cmd_overnight(msg: Message) -> None:
             "  /overnight audit the codebase for bugs, write fixes, and draft a PR description\n"
             "  /overnight draft 5 LinkedIn posts about WorkerNet and a tweet thread\n"
             "  /overnight analyze my training logs and suggest 3 architecture improvements",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
     status_msg = await msg.answer(
-        f"🌙 Planning overnight job for: <i>{goal[:100]}</i>\n"
-        f"🧠 Architect agent decomposing goal into tasks...",
-        parse_mode="HTML"
+        f"🌙 Planning overnight job for: <i>{goal[:100]}</i>\n🧠 Architect agent decomposing goal into tasks...",
+        parse_mode="HTML",
     )
 
     try:
@@ -78,23 +79,19 @@ async def cmd_overnight(msg: Message) -> None:
 
         if not task_dicts:  # BUG FIX: guard against empty plan
             await status_msg.edit_text(
-                "❌ Could not decompose goal into tasks. Try a more specific description.",
-                parse_mode="HTML"
+                "❌ Could not decompose goal into tasks. Try a more specific description.", parse_mode="HTML"
             )
             return
 
         job_id, tasks = create_job(task_dicts)
 
-        task_preview = "\n".join(
-            f"  {i+1}. <b>[{t.agent}]</b> {t.title}"
-            for i, t in enumerate(tasks)
-        )
+        task_preview = "\n".join(f"  {i + 1}. <b>[{t.agent}]</b> {t.title}" for i, t in enumerate(tasks))
         await status_msg.edit_text(
             f"✅ <b>Plan ready</b> — Job <code>{job_id}</code>\n\n"
             f"{task_preview}\n\n"
             f"⚡ Starting execution... You can sleep now 🌙\n"
             f"I'll send updates and a summary when done.",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
 
         bot = msg.bot
@@ -124,12 +121,15 @@ async def cmd_overnight(msg: Message) -> None:
                 notify_fn=notify,
                 update_dashboard_fn=update_dashboard,
             ),
-            name=f"overnight-{job_id}"
+            name=f"overnight-{job_id}",
         )
         # Attach done callback so unhandled exceptions get logged
         _bg_task.add_done_callback(
-            lambda t: logger.error("overnight job crashed: %s", t.exception())
-            if not t.cancelled() and t.exception() else None
+            lambda t: (
+                logger.error("overnight job crashed: %s", t.exception())
+                if not t.cancelled() and t.exception()
+                else None
+            )
         )
 
     except Exception as e:
@@ -138,6 +138,7 @@ async def cmd_overnight(msg: Message) -> None:
 
 
 # ── /overnight_status ──────────────────────────────────────────────────────────
+
 
 @router.message(Command("overnight_status"))
 async def cmd_overnight_status(msg: Message) -> None:
@@ -163,11 +164,13 @@ async def cmd_overnight_status(msg: Message) -> None:
 
 # ── /overnight_cancel ──────────────────────────────────────────────────────────
 
+
 @router.message(Command("overnight_cancel"))
 async def cmd_overnight_cancel(msg: Message) -> None:
     if not _auth(msg):
         return
     from tools.overnight import get_active_job_id, cancel_job
+
     job_id = get_active_job_id()
     if not job_id:
         await msg.answer("No active overnight job to cancel.")
@@ -178,11 +181,13 @@ async def cmd_overnight_cancel(msg: Message) -> None:
 
 # ── /overnight_pause / resume ──────────────────────────────────────────────────
 
+
 @router.message(Command("overnight_pause"))
 async def cmd_overnight_pause(msg: Message) -> None:
     if not _auth(msg):
         return
     from tools.overnight import get_active_job_id, pause_job
+
     job_id = get_active_job_id()
     if not job_id:
         await msg.answer("No active job.")
@@ -195,6 +200,7 @@ async def cmd_overnight_resume(msg: Message) -> None:
     if not _auth(msg):
         return
     from tools.overnight import get_active_job_id, resume_job
+
     job_id = get_active_job_id()
     if not job_id:
         await msg.answer("No active job.")
@@ -204,15 +210,18 @@ async def cmd_overnight_resume(msg: Message) -> None:
 
 # ── /overnight_jobs ────────────────────────────────────────────────────────────
 
+
 @router.message(Command("overnight_jobs"))
 async def cmd_overnight_jobs(msg: Message) -> None:
     if not _auth(msg):
         return
     from tools.overnight import list_all_jobs
+
     await msg.answer(list_all_jobs(), parse_mode="HTML")
 
 
 # ── /dashboard ────────────────────────────────────────────────────────────────
+
 
 @router.message(Command("dashboard"))
 async def cmd_dashboard(msg: Message) -> None:
@@ -222,8 +231,8 @@ async def cmd_dashboard(msg: Message) -> None:
     from tools.dashboard import build_ascii_dashboard
 
     job_id = get_active_job_id()
-    tasks  = get_job_tasks(job_id) if job_id else None
-    dash   = build_ascii_dashboard(
+    tasks = get_job_tasks(job_id) if job_id else None
+    dash = build_ascii_dashboard(
         AGENT_STATUS,
         job_id=job_id,
         job_tasks=tasks,
@@ -233,6 +242,7 @@ async def cmd_dashboard(msg: Message) -> None:
 
 
 # ── /dashboard_png ────────────────────────────────────────────────────────────
+
 
 @router.message(Command("dashboard_png"))
 async def cmd_dashboard_png(msg: Message) -> None:
@@ -244,7 +254,7 @@ async def cmd_dashboard_png(msg: Message) -> None:
     thinking = await msg.answer("📊 Rendering dashboard chart...")
 
     job_id = get_active_job_id()
-    tasks  = get_job_tasks(job_id) if job_id else None
+    tasks = get_job_tasks(job_id) if job_id else None
 
     try:
         png_bytes = await build_png_dashboard(AGENT_STATUS, job_id=job_id, job_tasks=tasks)

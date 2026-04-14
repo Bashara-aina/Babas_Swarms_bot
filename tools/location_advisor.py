@@ -95,14 +95,13 @@ class LocationAdvisor:
         raw = await self._web_gather(search_query)
         if not raw:
             return f"Couldn't find travel info for <b>{destination}</b>."
-        return await self._format_response(
-            f"travel from {from_location} to {destination}", destination, "travel", raw
-        )
+        return await self._format_response(f"travel from {from_location} to {destination}", destination, "travel", raw)
 
     async def _web_gather(self, search_query: str, max_chars: int = 6000) -> str:
         """Scrape the web for results. Returns raw text for LLM processing."""
         try:
             from tools.web_browser import deep_research
+
             result = await deep_research(search_query, max_pages=5)
             return result[:max_chars] if result else ""
         except Exception as exc:
@@ -110,6 +109,7 @@ class LocationAdvisor:
             # Fallback: try simple DuckDuckGo search
             try:
                 from tools.web_browser import web_search
+
                 results = await web_search(search_query)
                 if results:
                     return "\n".join(str(r)[:500] for r in results[:5])
@@ -125,27 +125,26 @@ class LocationAdvisor:
         raw_data: str,
     ) -> str:
         """Use LLM to format raw web results into a clean Telegram recommendation."""
-        try:
-            import litellm
+        from llm_client import call_llm
 
-            prompt = (
-                f"You are Legion, Bashara's AI companion. He asked: '{query}'\n"
-                f"His location: {location}\n"
-                f"Category: {category}\n\n"
-                f"Here's what the web says:\n{raw_data[:4000]}\n\n"
-                "Write a helpful, friendly recommendation in Telegram HTML format. "
-                "Include: specific place names, rough addresses or areas, why each is good. "
-                "Keep it under 350 words. Use <b> for place names. "
-                "If you can't find specific recommendations in the data, say so honestly "
-                "and suggest how to find them."
-            )
-            resp = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+        prompt = (
+            f"You are Legion, Bashara's AI companion. He asked: '{query}'\n"
+            f"His location: {location}\n"
+            f"Category: {category}\n\n"
+            f"Here's what the web says:\n{raw_data[:4000]}\n\n"
+            "Write a helpful, friendly recommendation in Telegram HTML format. "
+            "Include: specific place names, rough addresses or areas, why each is good. "
+            "Keep it under 350 words. Use <b> for place names. "
+            "If you can't find specific recommendations in the data, say so honestly "
+            "and suggest how to find them."
+        )
+        try:
+            return await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="groq/llama-3.3-70b-versatile",
                 temperature=0.5,
                 max_tokens=500,
             )
-            return resp.choices[0].message.content.strip()
         except Exception as exc:
             logger.warning("[LocationAdvisor] LLM format failed: %s", exc)
             # Return raw truncated data as fallback

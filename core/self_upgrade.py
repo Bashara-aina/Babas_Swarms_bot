@@ -32,6 +32,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Coroutine, Dict, List, Optional, Tuple
 
+from llm_client import call_llm
+
 logger = logging.getLogger(__name__)
 
 _BLOCKED_PATTERNS = [
@@ -255,9 +257,9 @@ Scoring guide:
 
 Output ONLY the JSON.
 """
-        resp = await litellm.acompletion(
-            model="groq/llama-3.3-70b-versatile",
+        resp = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="groq/llama-3.3-70b-versatile",
             temperature=0.1,
             max_tokens=512,
         )
@@ -393,9 +395,9 @@ Rules:
 - No os.system(), eval(), exec()
 - Respond with ONLY the JSON
 """
-            response = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+            response = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="groq/llama-3.3-70b-versatile",
                 temperature=0.1,
                 max_tokens=8192,
             )

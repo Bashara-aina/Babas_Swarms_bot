@@ -42,7 +42,7 @@ _LEGION_CONTEXT = (
 
 @dataclass
 class TrendingRepo:
-    name: str           # e.g. "owner/repo"
+    name: str  # e.g. "owner/repo"
     url: str
     description: str
     stars: str
@@ -53,7 +53,7 @@ class TrendingRepo:
 @dataclass
 class RepoEvaluation:
     repo: TrendingRepo
-    relevance_score: int        # 0-10
+    relevance_score: int  # 0-10
     pros: list[str]
     cons: list[str]
     use_case: str
@@ -78,6 +78,7 @@ class GitHubIntelEngine:
 
         try:
             from tools.web_browser import browse_url
+
             html_content = await browse_url(url)
             return self._parse_trending_html(html_content)
         except Exception as exc:
@@ -90,7 +91,7 @@ class GitHubIntelEngine:
         # Find repo name patterns: "owner/repo"
         name_pattern = re.compile(r'href="/([a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)"')
         desc_pattern = re.compile(r'<p[^>]*class="[^"]*color-fg-muted[^"]*"[^>]*>\s*([^<]{10,300})\s*</p>')
-        star_pattern = re.compile(r'([\d,]+)\s*stars?\s+today', re.IGNORECASE)
+        star_pattern = re.compile(r"([\d,]+)\s*stars?\s+today", re.IGNORECASE)
 
         names_found: list[str] = []
         for m in name_pattern.finditer(content):
@@ -104,19 +105,22 @@ class GitHubIntelEngine:
         stars_list = [m.group(1) for m in star_pattern.finditer(content)]
 
         for i, name in enumerate(names_found):
-            repos.append(TrendingRepo(
-                name=name,
-                url=f"https://github.com/{name}",
-                description=descriptions[i] if i < len(descriptions) else "",
-                stars=stars_list[i] if i < len(stars_list) else "?",
-                language="",
-            ))
+            repos.append(
+                TrendingRepo(
+                    name=name,
+                    url=f"https://github.com/{name}",
+                    description=descriptions[i] if i < len(descriptions) else "",
+                    stars=stars_list[i] if i < len(stars_list) else "?",
+                    language="",
+                )
+            )
         return repos
 
     async def _fetch_trending_fallback(self, url: str) -> list[TrendingRepo]:
         """Fallback: use aiohttp raw GET + regex."""
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as resp:
                     content = await resp.text()
@@ -131,6 +135,7 @@ class GitHubIntelEngine:
         raw_url += "/refs/heads/main/README.md"
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(raw_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status == 200:
@@ -141,6 +146,7 @@ class GitHubIntelEngine:
         raw_url_master = raw_url.replace("/main/README.md", "/master/README.md")
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(raw_url_master, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status == 200:
@@ -153,7 +159,7 @@ class GitHubIntelEngine:
 
     async def evaluate_relevance(self, repo: TrendingRepo) -> RepoEvaluation:
         """Ask LLM to score the repo's relevance to Legion (0-10) with pros/cons."""
-        import litellm
+        from llm_client import call_llm
 
         prompt = (
             f"You are evaluating a GitHub repository for relevance to an AI assistant called Legion.\n\n"
@@ -169,16 +175,16 @@ class GitHubIntelEngine:
             '"use_case": "How Legion could use this", "risk": "Any concerns"}'
         )
         try:
-            resp = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+            raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="groq/llama-3.3-70b-versatile",
                 temperature=0.2,
                 max_tokens=300,
             )
-            raw = resp.choices[0].message.content.strip()
             json_match = re.search(r"\{.*\}", raw, re.DOTALL)
             if json_match:
                 import json
+
                 data = json.loads(json_match.group(0))
                 return RepoEvaluation(
                     repo=repo,
@@ -197,7 +203,7 @@ class GitHubIntelEngine:
         results: list[RepoEvaluation] = []
         chunk_size = 5
         for i in range(0, len(repos), chunk_size):
-            chunk = repos[i:i + chunk_size]
+            chunk = repos[i : i + chunk_size]
             batch = await asyncio.gather(
                 *[self.evaluate_relevance(r) for r in chunk],
                 return_exceptions=True,
@@ -291,7 +297,7 @@ class GitHubIntelEngine:
 
     async def _draft_skill_file(self, ev: RepoEvaluation, readme: str) -> str:
         """Ask LLM to generate a skill markdown file."""
-        import litellm
+        from llm_client import call_llm
 
         prompt = (
             f"Write a Legion skill file for this GitHub library:\n\n"
@@ -303,13 +309,12 @@ class GitHubIntelEngine:
             "Include: when to use, how to import/call it, example code snippets, limitations."
         )
         try:
-            resp = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+            raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="groq/llama-3.3-70b-versatile",
                 temperature=0.3,
                 max_tokens=800,
             )
-            return resp.choices[0].message.content.strip()
         except Exception as exc:
             logger.warning("[GitHubIntel] skill draft failed: %s", exc)
             return ""

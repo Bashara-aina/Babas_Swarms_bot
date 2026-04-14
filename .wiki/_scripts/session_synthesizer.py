@@ -11,10 +11,12 @@ Schedule: after session_harvester.py, or as a separate hourly task
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import subprocess
 import sqlite3
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -37,7 +39,8 @@ WIKI_ENTITIES.mkdir(parents=True, exist_ok=True)
 MAX_STUBS_PER_RUN = 5  # one synthesization per run to stay within budget
 
 
-# ── LLM synthesis via litellm (same chain as Legion) ─────────────────────────
+# ── LLM synthesis via call_llm (with keyword fallback) ────────────────────────
+
 
 def _load_env() -> None:
     """Load .env from wiki root so API keys are available."""
@@ -47,16 +50,23 @@ def _load_env() -> None:
             if "=" in line and not line.strip().startswith("#"):
                 k, v = line.split("=", 1)
                 import os as _os
+
                 _os.environ.setdefault(k.strip(), v.strip())
 
 
 def synthesize_with_llm(stub_text: str, source: str) -> dict[str, Any] | None:
     """Analyze a stub and produce structured synthesis decisions."""
     _load_env()
+
+    # Add project root to path for llm_client import
+    project_root = WIKI_ROOT.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
     try:
-        import litellm
-        litellm.drop_params = True
+        from llm_client import call_llm
     except ImportError:
+        print("  [LLM] call_llm not available, will use keyword fallback")
         return None
 
     system_prompt = f"""You are a wiki synthesis assistant. Analyze this conversation stub from a {source} session and produce a structured JSON response.
@@ -84,16 +94,22 @@ Rules:
 """
 
     try:
-        response = litellmcompletion(
-            model="cerebras/llama3.1-8b",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": stub_text[:3000]},
-            ],
-            temperature=0.3,
-            max_tokens=1500,
+        response = asyncio.run(
+            call_llm(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": stub_text[:3000]},
+                ],
+                model="cerebras/llama3.1-8b",
+                temperature=0.3,
+                max_tokens=1500,
+            )
         )
-        text = response["choices"][0]["message"]["content"]
+        text = (
+            response
+            if isinstance(response, str)
+            else response.get("choices", [{}])[0].get("message", {}).get("content", "")
+        )
         # strip markdown code fences
         text = re.sub(r"^```json\s*", "", text)
         text = re.sub(r"\s*```$", "", text)
@@ -101,12 +117,6 @@ Rules:
     except Exception as e:
         print(f"  [LLM] synthesis failed: {e}")
         return None
-
-
-def litellmcompletion(model: str, messages: list[dict], **kwargs):
-    """Minimal litellm completion wrapper."""
-    import litellm
-    return litellm.completion(model=model, messages=messages, **kwargs)
 
 
 # ── Keyword-based fallback synthesis ──────────────────────────────────────────
@@ -210,6 +220,7 @@ _Synthesized via session_synthesizer.py keyword fallback (LLM unavailable)_
 
 # ── Wiki article writer ────────────────────────────────────────────────────────
 
+
 def write_article(synthesis: dict[str, Any], source: str) -> Path | None:
     """Write a synthesized article to the appropriate wiki directory."""
     art_type = synthesis.get("type", "concept")
@@ -241,13 +252,13 @@ def write_article(synthesis: dict[str, Any], source: str) -> Path | None:
     wikilinks_md = "\n".join(f"  - {link}" for link in wikilinks)
 
     frontmatter = f"""---
-title: {synthesis.get('title', slug)}
+title: {synthesis.get("title", slug)}
 type: {art_type}
-status: {synthesis.get('status', 'active')}
-tags: {json.dumps(synthesis.get('tags', [source]), ensure_ascii=False)}
+status: {synthesis.get("status", "active")}
+tags: {json.dumps(synthesis.get("tags", [source]), ensure_ascii=False)}
 created: {created}
-updated: {dt.strftime('%Y-%m-%d')}
-summary: {synthesis.get('summary', '')}
+updated: {dt.strftime("%Y-%m-%d")}
+summary: {synthesis.get("summary", "")}
 wikilinks:
 {wikilinks_md}
 confidence: {confidence}
@@ -261,6 +272,7 @@ source: {source}
 
 
 # ── Decision extractor ────────────────────────────────────────────────────────
+
 
 def extract_decisions(stub_text: str) -> list[dict[str, str]]:
     """Detect decision-like statements in conversation stub."""
@@ -277,14 +289,17 @@ def extract_decisions(stub_text: str) -> list[dict[str, str]]:
         for match in re.finditer(pat, stub_text, re.IGNORECASE):
             decision_text = match.group(1).strip()
             if len(decision_text) > 15:
-                decisions.append({
-                    "decision": decision_text[:200],
-                    "pattern": pat[:40],
-                })
+                decisions.append(
+                    {
+                        "decision": decision_text[:200],
+                        "pattern": pat[:40],
+                    }
+                )
     return decisions[:3]  # cap at 3 decisions per stub
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     print(f"[SYNTHESIZER] Starting synthesis at {datetime.now(JST).isoformat()}")
@@ -342,14 +357,22 @@ def main() -> None:
         convs = len(list(WIKI_CONVERSATIONS.glob("*.md")))
         convs_processed = len(list(WIKI_PROCESSED.glob("*.md")))
         from glob import glob as _glob
-        articles = len([x for x in _glob(str(WIKI_ROOT / "**/*.md"), recursive=True)
-                        if not any(s in x for s in ["_meta", "INDEX", "SCHEMA", "output", "conversations"])])
-        d.update({
-            "last_compiled": datetime.now(JST).isoformat(),
-            "articles": articles,
-            "conversation_stubs": convs,
-            "conversation_stubs_processed": convs_processed,
-        })
+
+        articles = len(
+            [
+                x
+                for x in _glob(str(WIKI_ROOT / "**/*.md"), recursive=True)
+                if not any(s in x for s in ["_meta", "INDEX", "SCHEMA", "output", "conversations"])
+            ]
+        )
+        d.update(
+            {
+                "last_compiled": datetime.now(JST).isoformat(),
+                "articles": articles,
+                "conversation_stubs": convs,
+                "conversation_stubs_processed": convs_processed,
+            }
+        )
         json.dump(d, open(f, "w"), indent=2)
     except Exception as e:
         print(f"[WARN] compile_state update failed: {e}")

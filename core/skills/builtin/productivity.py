@@ -119,16 +119,17 @@ async def _translate_handler(text: str) -> str:
         content = content[:1000] + "..."
 
     try:
-        import litellm
+        from llm_client import call_llm
 
         prompt = f"Translate the following text to {target_lang_full}. Return ONLY the translation, nothing else.\n\nText: {content}"
-        resp = await litellm.acompletion(
-            model="minimax/ai-01",
+        translation = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="minimax/ai-01",
             max_tokens=500,
             temperature=0.3,
         )
-        translation = (resp.choices[0].message.content or "").strip()
+        if isinstance(translation, dict):
+            translation = ""
         return f"🌐 Translation ({lang_code.upper()}):\n{translation}"
     except Exception as exc:
         return f"❌ Translation failed: {exc}"

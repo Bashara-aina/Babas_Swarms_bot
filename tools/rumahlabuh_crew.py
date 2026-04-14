@@ -116,15 +116,13 @@ async def draft_guest_reply(guest_message: str, guest_name: str = "Guest") -> st
     Returns a draft message in Indonesian (primary) with English option.
     """
     try:
-        from tools.mem0_client import mem0_search
+        from core.memory_manager import LegionSemanticMemory
 
         # Search for any past context about this guest or similar inquiries
-        memories = await mem0_search(
-            user_id="bashara", query=f"rumahlabuh guest {guest_name} {guest_message[:50]}", limit=3
+        memories = await LegionSemanticMemory().search_memories(
+            query=f"rumahlabuh guest {guest_name} {guest_message[:50]}", user_id="bashara", limit=3
         )
-        memory_context = ""
-        if memories:
-            memory_context = "\n".join(m.get("memory", "") for m in memories[:2])
+        memory_context = "\n".join(memories[:2]) if memories else ""
     except Exception:
         memory_context = ""
 
@@ -149,10 +147,8 @@ Draft:"""
 
     try:
         import litellm
-        import asyncio
 
-        response = await asyncio.to_thread(
-            litellm.completion,
+        response = await litellm.acompletion(
             model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,

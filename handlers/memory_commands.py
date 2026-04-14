@@ -66,12 +66,6 @@ async def cmd_remember(msg: Message) -> None:
     )
     memory.core.set(f"explicit_{mem_id}", text[:200])
     memory.profile.add_known_fact(text[:200])
-    try:
-        from tools.mem0_client import mem0_add
-
-        await mem0_add(user_id=str(msg.from_user.id), content=text, metadata={"source": "explicit", "memory_id": mem_id})
-    except Exception:
-        pass
     await msg.answer("Got it. That's saved permanently — I won't forget.")
 
 
@@ -90,18 +84,7 @@ async def cmd_recall(msg: Message) -> None:
         return
 
     results = await memory.search(query, limit=6)
-    try:
-        from tools.mem0_client import mem0_search, build_mem0_context
-
-        mem0_results = await mem0_search(user_id=str(msg.from_user.id), query=query, limit=8)
-        mem0_ctx = build_mem0_context(mem0_results, query=query)
-    except Exception:
-        mem0_results = []
-        mem0_ctx = ""
     if not results:
-        if mem0_ctx:
-            await msg.answer(mem0_ctx, parse_mode="HTML")
-            return
         await msg.answer("Nothing found in memory for that.")
         return
 
@@ -111,10 +94,6 @@ async def cmd_recall(msg: Message) -> None:
         content = str(item.get("content", ""))[:200]
         lines.append(f"<b>[{date}]</b> {content}")
         lines.append("")
-
-    if mem0_ctx:
-        lines.append("<b>Mem0 context</b>")
-        lines.append(mem0_ctx)
 
     await msg.answer("\n".join(lines), parse_mode="HTML")
 
@@ -130,9 +109,14 @@ async def cmd_emotion(msg: Message) -> None:
     emotion_name = state.get("dominant_emotion", "neutral")
     profile = get_emotion_profile(str(emotion_name))
     events = state.get("recent_emotional_events", []) or []
-    events_text = "\n".join(
-        f"• {item.get('emotion', 'neutral')}: {item.get('event', '')}" for item in events[:3] if isinstance(item, dict)
-    ) or "• none"
+    events_text = (
+        "\n".join(
+            f"• {item.get('emotion', 'neutral')}: {item.get('event', '')}"
+            for item in events[:3]
+            if isinstance(item, dict)
+        )
+        or "• none"
+    )
     await msg.answer(
         (
             f"<b>🧠 Legion Emotional State</b>\n\n"
@@ -221,8 +205,6 @@ async def cmd_teach(msg: Message) -> None:
         source="user-teach",
     )
     if reflection is not None:
-        reflection._opinions["lessons"].append(
-            f"[{datetime.now():%Y-%m-%d}] User taught me: {text}"
-        )
+        reflection._opinions["lessons"].append(f"[{datetime.now():%Y-%m-%d}] User taught me: {text}")
         reflection._save_opinions()
     await msg.answer("Got it — updating my understanding. I'll factor that in going forward.")

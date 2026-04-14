@@ -909,25 +909,20 @@ class NexusOrchestrator:
         max_tokens: int = 4000,
     ) -> str:
         """Call any LiteLLM-compatible model asynchronously."""
-        try:
-            import litellm  # type: ignore
+        from llm_client import call_llm
 
+        try:
             messages = []
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": user_prompt})
 
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: litellm.completion(
-                    model=model_id,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    temperature=0.7,
-                ),
+            content = await call_llm(
+                messages=messages,
+                model=model_id,
+                max_tokens=max_tokens,
+                temperature=0.7,
             )
-            content: str = response.choices[0].message.content or ""
             return content.strip()
 
         except Exception as exc:

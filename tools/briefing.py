@@ -190,27 +190,26 @@ async def _get_weather() -> str:
 
 async def _conversational_wrap(raw_data: str, now: datetime) -> str:
     """Pass raw briefing data through LLM to generate a friend-like conversational message."""
-    try:
-        import litellm
+    from llm_client import call_llm
 
-        hour = now.hour
-        time_of_day = "morning" if hour < 12 else "afternoon" if hour < 17 else "evening"
-        prompt = (
-            f"You are Legion — Bashara's AI companion. It's {time_of_day} ({now.strftime('%H:%M')}, "
-            f"{now.strftime('%A %B %d')}). Write a short, friendly briefing message to Bashara "
-            f"based on the following raw data. Talk like a smart friend catching them up — "
-            f"casual, direct, a bit witty. Use Telegram HTML (<b>, <i>, <code>). "
-            f"Point out anything that needs attention, mention anything interesting, "
-            f"and keep it under 400 words. Don't just list everything — prioritise what matters.\n\n"
-            f"RAW DATA:\n{raw_data}"
-        )
-        resp = await litellm.acompletion(
-            model="groq/llama-3.3-70b-versatile",
+    hour = now.hour
+    time_of_day = "morning" if hour < 12 else "afternoon" if hour < 17 else "evening"
+    prompt = (
+        f"You are Legion — Bashara's AI companion. It's {time_of_day} ({now.strftime('%H:%M')}, "
+        f"{now.strftime('%A %B %d')}). Write a short, friendly briefing message to Bashara "
+        f"based on the following raw data. Talk like a smart friend catching them up — "
+        f"casual, direct, a bit witty. Use Telegram HTML (<b>, <i>, <code>). "
+        f"Point out anything that needs attention, mention anything interesting, "
+        f"and keep it under 400 words. Don't just list everything — prioritise what matters.\n\n"
+        f"RAW DATA:\n{raw_data}"
+    )
+    try:
+        return await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="groq/llama-3.3-70b-versatile",
             temperature=0.7,
             max_tokens=600,
         )
-        return resp.choices[0].message.content.strip()
     except Exception as exc:
         logger.warning("conversational briefing LLM wrap failed: %s", exc)
         return raw_data  # Fallback to raw data if LLM fails

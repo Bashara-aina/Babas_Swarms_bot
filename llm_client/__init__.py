@@ -419,6 +419,10 @@ async def call_llm(
             raise ValueError(f"No API key for '{provider}'")
         api_kwargs["api_key"] = api_key
 
+    # Streaming: return async generator directly without awaiting
+    if stream:
+        return acompletion(**api_kwargs)
+
     try:
         response = await acompletion(**api_kwargs)
     except litellm.RateLimitError:

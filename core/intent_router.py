@@ -404,11 +404,12 @@ async def classify_intent_llm(message: str) -> IntentResult:
     Uses MiniMax when available for fast, cheap classification.
     Falls back to any available litellm model.
     """
-    import litellm
+    try:
+        from llm_client import call_llm
 
-    categories = ", ".join(i.value for i in Intent)
+        categories = ", ".join(i.value for i in Intent)
 
-    prompt = f"""Classify this user message into exactly ONE intent category.
+        prompt = f"""Classify this user message into exactly ONE intent category.
 
 Categories: {categories}
 
@@ -421,14 +422,12 @@ Message: {message[:500]}
 
 Respond with ONLY the intent name, nothing else."""
 
-    try:
-        resp = await litellm.acompletion(
-            model="minimax/ai-01",
+        raw = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="minimax/ai-01",
             max_tokens=32,
             temperature=0.1,
         )
-        raw = (resp.choices[0].message.content or "").strip().lower()
         # Match against known intents
         matched_intent: Intent | None = None
         for intent in Intent:

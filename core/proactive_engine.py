@@ -20,7 +20,6 @@ from typing import Any, Callable, Awaitable
 logger = logging.getLogger(__name__)
 
 JST = timezone(timedelta(hours=9))
-ALLOWED_USER_ID = int(os.getenv("ALLOWED_USER_ID", "0"))
 DO_NOT_DISTURB_START = 1
 DO_NOT_DISTURB_END = 7
 

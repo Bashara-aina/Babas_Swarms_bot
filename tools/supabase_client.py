@@ -15,6 +15,7 @@ Env vars required:
     SUPABASE_ANON_KEY         public anon key
     SUPABASE_SERVICE_ROLE_KEY service role key (bypasses RLS, for bot-internal ops)
 """
+
 from __future__ import annotations
 
 import logging
@@ -24,6 +25,7 @@ from typing import Any, Dict, List, Optional
 
 try:
     import httpx
+
     _HTTPX_AVAILABLE = True
 except ImportError:
     _HTTPX_AVAILABLE = False
@@ -83,12 +85,7 @@ class SupabaseClient:
         try:
             payload = resp.json()
             if isinstance(payload, dict):
-                detail = (
-                    payload.get("message")
-                    or payload.get("error_description")
-                    or payload.get("error")
-                    or ""
-                )
+                detail = payload.get("message") or payload.get("error_description") or payload.get("error") or ""
             else:
                 detail = str(payload)
         except Exception:
@@ -340,12 +337,14 @@ class SupabaseClient:
             required = defn.get("required", [])
             columns: List[Dict[str, Any]] = []
             for col, col_def in props.items():
-                columns.append({
-                    "column": col,
-                    "type": col_def.get("type", col_def.get("format", "unknown")),
-                    "nullable": col not in required,
-                    "description": col_def.get("description", ""),
-                })
+                columns.append(
+                    {
+                        "column": col,
+                        "type": col_def.get("type", col_def.get("format", "unknown")),
+                        "nullable": col not in required,
+                        "description": col_def.get("description", ""),
+                    }
+                )
             schema[table_name] = columns
 
         return schema
@@ -355,9 +354,7 @@ class SupabaseClient:
 
         Returns the generated file path.
         """
-        import json as _json
-        from pathlib import Path
-        import litellm
+        from llm_client import call_llm
 
         schema = await self.introspect_schema()
         if not schema:
@@ -378,13 +375,12 @@ class SupabaseClient:
             "Format as clean markdown. Start with `# Skill: rumahlabuh.com Business Manager`"
         )
 
-        resp = await litellm.acompletion(
-            model="cerebras/qwen-3-235b-a22b",
+        content = await call_llm(
             messages=[{"role": "user", "content": prompt}],
+            model="cerebras/qwen-3-235b-a22b",
             temperature=0.2,
             max_tokens=3000,
         )
-        content = resp.choices[0].message.content.strip()
 
         path = Path(output_path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -403,7 +399,8 @@ class SupabaseClient:
         (run /site_health to trigger schema bootstrap if missing).
         """
         import json as _json
-        import litellm
+        import re
+        from llm_client import call_llm
         from pathlib import Path
 
         # Inject schema context from skill file if available
@@ -428,18 +425,16 @@ class SupabaseClient:
             '{"table": "table_name", "select": "col1,col2", "filters": {"col": "eq.value"}, '
             '"order": "col.desc", "limit": 20}\n'
             "Use PostgREST filter syntax: eq.value, gt.value, lt.value, ilike.*search*\n"
-            "If you cannot determine the query, output: {\"error\": \"cannot determine query\"}"
+            'If you cannot determine the query, output: {"error": "cannot determine query"}'
         )
 
         try:
-            resp = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+            raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
+                model="groq/llama-3.3-70b-versatile",
                 temperature=0.1,
                 max_tokens=300,
             )
-            raw = resp.choices[0].message.content.strip()
-            import re
             json_match = re.search(r"\{.*\}", raw, re.DOTALL)
             if not json_match:
                 return f"Could not parse query: {raw[:200]}"
@@ -527,6 +522,7 @@ class SupabaseClient:
 # Singleton accessor
 # ------------------------------------------------------------------ #
 
+
 def get_client(
     url: Optional[str] = None,
     anon_key: Optional[str] = None,
@@ -546,14 +542,10 @@ def get_client(
 
     if not _url:
         raise ValueError(
-            "SUPABASE_URL is not set. "
-            "Add it to your .env file: SUPABASE_URL=https://<project>.supabase.co"
+            "SUPABASE_URL is not set. Add it to your .env file: SUPABASE_URL=https://<project>.supabase.co"
         )
     if not _anon:
-        raise ValueError(
-            "SUPABASE_ANON_KEY is not set. "
-            "Find it in: Supabase Dashboard → Project Settings → API."
-        )
+        raise ValueError("SUPABASE_ANON_KEY is not set. Find it in: Supabase Dashboard → Project Settings → API.")
 
     _INSTANCE = SupabaseClient(_url, _anon, _svc)
     logger.info("SupabaseClient initialised: %s", _url)
