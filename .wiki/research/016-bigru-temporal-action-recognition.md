@@ -1,20 +1,17 @@
 ---
-title: Bigru Temporal Action Recognition
-type: concept
+title: "BiGRU and Feature Banks for Temporal Action Recognition"
+type: research
 status: active
-tags:
-- /
-- home
-- newadmin
-- swarm-bot
-- research
+tags: [biGRU, temporal-action-recognition, feature-banks, video-understanding, multi-task-learning, pose, activity-detection]
 created: '2026-04-14'
 updated: '2026-04-14'
-summary: This article surveys academic papers on temporal action recognition, video
-  understanding, and multi-task learning architectures using BiGRU, GRU, LSTM, and
-  feature bank approaches.
-wikilinks: []
-confidence: medium
+summary: "Survey of 20 academic papers on BiGRU/GRU architectures and feature bank approaches for temporal action recognition, video understanding, and multi-task learning with pose + detection + activity recognition."
+wikilinks:
+  - [[bigru-temporal-action-recognition]]
+  - [[pose-aware-feature-bank]]
+  - [[pose-conditioned-temporal-modeling]]
+  - [[projects/popw-multi-task-ikea]]
+confidence: high
 source: research
 ---
 
