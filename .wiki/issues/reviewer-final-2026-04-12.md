@@ -1,5 +1,19 @@
 ---
-## ✅ Test Status
+title: Reviewer Final 2026 04 12
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: pytest tests/ -x --asyncio-mode=auto -q
+wikilinks: []
+confidence: medium
+source: research
 ---
 ```
 pytest tests/ -x --asyncio-mode=auto -q

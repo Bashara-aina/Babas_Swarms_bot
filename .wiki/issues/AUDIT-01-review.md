@@ -1,6 +1,20 @@
 ---
-## Summary
-
+title: Audit 01 Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The @worker applied two changes to register the `admin_handlers` router in
+  the dispatcher pipeline. This review verifies correctness of the implementation.
+wikilinks: []
+confidence: medium
+source: research
 ---
 The @worker applied two changes to register the `admin_handlers` router in the dispatcher pipeline. This review verifies correctness of the implementation.
 ---

@@ -1,6 +1,19 @@
 ---
-## Independent Verification
-
+title: Review 2026 04 13 Wiki Restructure
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: $ find wiki/ -name "*.md" | wc -l
+wikilinks: []
+confidence: medium
+source: research
 ---
 ```bash
 $ find wiki/ -name "*.md" | wc -l

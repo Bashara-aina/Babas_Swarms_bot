@@ -1,8 +1,19 @@
 ---
-title: "Feynman Technique — The Ultimate Clarity Test"
-source: "Richard Feynman + fs.blog/feynman-technique"
-tags: [15-feynman-technique]
-type: wisdom
+title: Feynman Technique
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Richard Feynman + fs.blog/feynman-technique'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Feynman Technique — The Ultimate Clarity Test
 

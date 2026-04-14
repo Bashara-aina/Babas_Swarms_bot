@@ -1,3 +1,20 @@
+---
+title: Swarm Wiring
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> How to activate the full swarm in `main.py`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # 🐝 Swarm Wiring Guide
 
 > How to activate the full swarm in `main.py`

@@ -1,13 +1,21 @@
 ---
-source_id: 052
-title: "Salary Negotiation Tips Indonesia 2024: Research-Based Strategies"
-source_type: TUTORIAL
-authority: INDUSTRY
-url: "https://www.reddit.com/r/indonesia/comments/1dzozr1/salary_expectations_in_indonesia_guide/, https://www.sunlife.co.id/en/life-moments/starting-my-career/strategi-negosiasi-gaji-untuk-fresh-graduate/"
-last_verified: "2026-04-11"
-tags: [salary-negotiation, tips, fresh-graduate, research, negotiation-strategy]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Salary Negotiation Tips
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Salary negotiation skills directly impact whether workers achieve "gaji wajar."
+  By providing negotiation guidance, cekwajar.id adds value beyond salary data - helping
+  users actually close the gap b...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Salary Negotiation Tips Indonesia 2024: Research-Based Strategies

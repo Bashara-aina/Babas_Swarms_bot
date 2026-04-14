@@ -1,10 +1,20 @@
 ---
-title: LLM Cost Optimization
-domain: llm-routing
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 400
+title: Llm Cost Optimization
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- llm-cost-optimization.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Slash AI spend from ~$40/mo to ~$20/mo by routing 60% of tasks to free groq
+  tier.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LLM COST OPTIMIZATION

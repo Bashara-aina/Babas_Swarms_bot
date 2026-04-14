@@ -1,13 +1,21 @@
 ---
-source_id: 022
-title: "PPh Pasal 17 Ayat 1 Huruf a - Tarif Progresif 5 Bracket"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://ortsax.org/mengenal-tarif-pph-pasal-17-dalam-menghitung-pph-21"
-last_verified: "2026-04-11"
-tags: [pph21, pph17, progresif, tarif, pajak, labor-law]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Pph17 Pasal 17 Progresif
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: PPh Pasal 17 progressive rates are used for **December reconciliation** (annual
+  true-up) and for all non-TER calculations. This is the definitive tax rate table
+  that determines the final tax amount...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PPh Pasal 17 Ayat 1 Huruf a - Tarif Progresif 5 Bracket

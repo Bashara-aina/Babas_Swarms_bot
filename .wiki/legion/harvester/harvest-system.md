@@ -1,18 +1,21 @@
 ---
-name: legion-harvest-system
-description: Harvest feedback loop architecture, scorer bias system, and Telegram review workflow
-type: architecture
+title: Harvest System
+type: timeline
 status: active
-tags: [legion, harvester, feedback-loop, scorer, active-learning]
-created: 2026-04-13
-updated: 2026-04-13
-summary: The daily intelligence harvest system uses a closed feedback loop where Bashara's Telegram accept/reject decisions adjust the candidate scorer bias for future harvests.
-wikilinks:
-  - [[legion/harvester/harvest-log]]
-  - [[core/daily_harvester/scorer]]
-  - [[core/daily_harvester/harvest-pipeline]]
-confidence: high
-source: legion-engineering
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- legion
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The harvest system continuously collects intelligence candidates (papers,
+  GitHub repos, web articles) relevant to Bashara's projects. The **feedback loop**
+  closes the gap between what Bashara consi...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Legion Harvest System — Feedback Loop Architecture

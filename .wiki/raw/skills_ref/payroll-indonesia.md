@@ -1,3 +1,21 @@
+---
+title: Payroll Indonesia
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use this protocol for salary slip validation and payroll calculations in
+  Indonesia.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Payroll Indonesia (PPh 21 + BPJS + THR Audit)
 
 Use this protocol for salary slip validation and payroll calculations in Indonesia.

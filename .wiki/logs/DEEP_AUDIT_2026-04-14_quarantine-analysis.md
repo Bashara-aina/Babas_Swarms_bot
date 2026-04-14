@@ -1,11 +1,19 @@
 ---
-title: "DEEP_AUDIT_2026-04-14_quarantine-analysis"
-type: analysis
-tags: [wiki, quarantine, quality-gate]
-date: 2026-04-14
+title: Deep Audit 2026 04 14 Quarantine Analysis
+type: concept
 status: active
-category: wiki-maintenance
-summary: "Comprehensive analysis of why good information is being quarantined by fast_gate, with specific recommendations to fix the scoring bias issue."
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Analyst:** Worker Agent'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DEEP AUDIT: Why Good Information Is Being Quarantined

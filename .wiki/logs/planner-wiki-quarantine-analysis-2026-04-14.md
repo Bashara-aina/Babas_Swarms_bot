@@ -1,3 +1,21 @@
+---
+title: Planner Wiki Quarantine Analysis 2026 04 14
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- .wiki/ has 2211 articles across concepts, entities, decisions, architecture,
+  etc.'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Investigate Wiki Quarantine Pattern
 Date: 2026-04-14
 Type: RESEARCH

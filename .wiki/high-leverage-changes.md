@@ -1,10 +1,19 @@
 ---
-title: high-leverage-changes
-domain: future-architecture
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 340
+title: High Leverage Changes
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- high-leverage-changes.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Top 5 architectural changes ranked by impact per hour of development time.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # High-Leverage Changes

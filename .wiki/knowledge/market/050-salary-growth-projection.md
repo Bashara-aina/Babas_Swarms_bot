@@ -1,13 +1,21 @@
 ---
-source_id: 050
-title: "Indonesia Salary Growth Projection 2025-2026: Wage Increase Forecasts"
-source_type: RESEARCH
-authority: INDUSTRY
-url: "https://www.suara.com/bisnis/2025/12/23/155254/kenaikan-gaji-pekerja-ri-bakal-melambat-58-persen-tahun-2026"
-last_verified: "2026-04-11"
-tags: [salary-growth, wage-increase, projection, ump, inflation, merit-increase]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Salary Growth Projection
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Accurate salary growth projections are essential for cekwajar.id to provide
+  forward-looking "gaji wajar" recommendations. Understanding whether wages are growing
+  faster or slower than inflation hel...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Indonesia Salary Growth Projection 2025-2026: Wage Increase Forecasts

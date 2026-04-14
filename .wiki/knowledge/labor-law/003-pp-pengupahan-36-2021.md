@@ -1,13 +1,21 @@
 ---
-source_id: 003
-title: "PP 36 Tahun 2021 tentang Pengupahan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/161909"
-last_verified: "2026-04-11"
-tags: [labor-law,pp36-2021,pengupahan,upah-minimum,struktur-upah]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Pp Pengupahan 36 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: PP 36/2021 adalah dasar perhitungan upah minimum dan struktur gaji di Indonesia.
+  Payroll system harus mengimplementasikan formula ini untuk menghitung kepatuhan
+  terhadap UMK/UMP dan memastikan tida...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PP 36 Tahun 2021 tentang Pengupahan

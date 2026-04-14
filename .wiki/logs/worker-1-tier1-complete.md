@@ -1,3 +1,20 @@
+---
+title: Worker 1 Tier1 Complete
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Write wiki pages for Tier 1 papers (001-012)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tier 1 Wiki Pages Complete — Worker-1
 
 **Date**: 2026-04-11

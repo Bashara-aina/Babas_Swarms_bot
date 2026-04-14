@@ -1,8 +1,19 @@
 ---
-title: "ADR-SELF-KNOWLEDGE-001: Master Architecture Overview"
-source_type: ARCHITECTURE_DECISION
-date: 2026-04-11
-tags: [adr, architecture, self-knowledge, cross-repo]
+title: Adr Self Knowledge 001
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Type**: Architecture Decision Record'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # ADR-SELF-KNOWLEDGE-001: Master Architecture Overview

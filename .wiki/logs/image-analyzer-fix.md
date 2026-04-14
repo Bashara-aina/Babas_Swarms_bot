@@ -1,3 +1,22 @@
+---
+title: Image Analyzer Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: When user sends a picture, bot analyzes but returns no response. Error detection
+  in `handlers/media_tools.py` was too narrow - it only checked `result.startswith("Error:")`
+  but MCP errors return st...
+wikilinks: []
+confidence: medium
+source: research
+---
 # Image Analyzer Bug Fix - 2026-04-12
 
 ## Bug Summary

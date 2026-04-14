@@ -1,14 +1,21 @@
 ---
-paper_id: "001"
-title: "Deep Residual Learning for Image Recognition"
-authors: "Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun"
-year: 2016
-venue: "CVPR 2016"
-arxiv: "1512.03385"
-citations: 314715
-tier: 1
-tags: ["resnet", "deep-learning", "residual-learning", "image-classification", "backbone"]
-popw_relevance: 10
+title: Resnet He 2016
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: ResNet is the **foundational backbone** of virtually all modern vision systems
+  including POPW's architecture. The residual connection (`skip connection`) innovation
+  solved the degradation problem t...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

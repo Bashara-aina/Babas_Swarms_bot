@@ -1,10 +1,19 @@
 ---
-title: rate-limit-strategy
-domain: security-stability
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 280
+title: Rate Limit Strategy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- rate-limit-strategy.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Telegram and OpenRouter rate limits — how Legion handles them.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Rate Limit Strategy

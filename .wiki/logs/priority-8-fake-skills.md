@@ -1,3 +1,20 @@
+---
+title: Priority 8 Fake Skills
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Fix Timer (1/10) and Code Review (0/10) skills'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Priority 8: Fix Fake Skills — COMPLETION LOG
 
 **Date:** 2026-04-12

@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Concerns Fix Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 3 @worker agents executed fixes for 7 concerns. Most concerns required NO
+  changes (root shims are intentional). 4 concerns required actual fixes, all of which
+  are correctly implemented.
+wikilinks: []
+confidence: medium
+source: research
 ---
 3 @worker agents executed fixes for 7 concerns. Most concerns required NO changes (root shims are intentional). 4 concerns required actual fixes, all of which are correctly implemented.
 ---

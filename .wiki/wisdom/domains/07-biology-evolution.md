@@ -1,3 +1,21 @@
+---
+title: Biology Evolution
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Genes are the fundamental unit of selection; organisms
+  are survival machines for genes; altruism evolves through kin selection.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 07: Biology & Evolution
 
 ## Richard Dawkins — "The Selfish Gene"

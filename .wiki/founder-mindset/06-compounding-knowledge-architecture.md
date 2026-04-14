@@ -1,3 +1,20 @@
+---
+title: Compounding Knowledge Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Karpathy LLM Wiki pattern + Glean Enterprise Context'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Compounding Knowledge Architecture
 
 Source: Karpathy LLM Wiki pattern + Glean Enterprise Context

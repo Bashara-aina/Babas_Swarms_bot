@@ -1,10 +1,20 @@
 ---
-title: github-integration-guide
-domain: git-version-control
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: handlers/github_intel_handler.py, core/self_upgrade.py, tools/github_intel.py
-tokens_estimated: 480
+title: Github Integration Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- github-integration-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: How Legion fetches GitHub data, which API endpoints are used, how rate limits
+  are handled, and what error handling exists.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # GitHub Integration Guide

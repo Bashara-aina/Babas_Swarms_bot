@@ -1,10 +1,20 @@
 ---
 title: Bashara Projects
-domain: bashara-context
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: research, code, system
-tokens_estimated: 450
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bashara-projects.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Five active projects with specific blockers and priorities — Legion must
+  track all.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BASHARA PROJECTS

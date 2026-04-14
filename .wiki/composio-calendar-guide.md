@@ -1,10 +1,20 @@
 ---
-title: composio-calendar-guide
-domain: communications
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: system, agents, briefing
-tokens_estimated: 380
+title: Composio Calendar Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- composio-calendar-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Google Calendar integration via Composio — reads ALL calendar events without
+  user filtering, hardcoded to Asia/Tokyo timezone, used in daily briefings.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Composio Calendar Guide

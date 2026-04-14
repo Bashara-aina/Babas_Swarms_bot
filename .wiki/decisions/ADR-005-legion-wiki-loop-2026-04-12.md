@@ -1,8 +1,19 @@
 ---
-title: "ADR-005: LEGION WIKI LOOP — 10-HOUR KNOWLEDGE EXPANSION"
-author: "Three-agent pipeline (planner → 10x worker → 2x reviewer)"
-date: "2026-04-12"
-status: "ACCEPTED"
+title: Adr 005 Legion Wiki Loop 2026 04 12
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Author**: Three-agent pipeline (planner → 10x worker → 2x reviewer)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-005: LEGION WIKI LOOP — 10-HOUR KNOWLEDGE EXPANSION
 

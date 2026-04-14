@@ -1,6 +1,21 @@
 ---
-## EXECUTIVE SUMMARY
-
+title: Block 08 Competitive Intelligence
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id enters a market with surprisingly light direct competition but
+  significant indirect competitive pressure from platforms with 100M+ users and enormous
+  distribution advantages. The core o...
+wikilinks: []
+confidence: medium
+source: research
 ---
 cekwajar.id enters a market with surprisingly light direct competition but significant indirect competitive pressure from platforms with 100M+ users and enormous distribution advantages. The core opportunity exists because no Indonesian consumer platform has systematically built the "is my salary/property fair?" verdict engine paired with Indonesian regulatory context (BPJS, UMR, PPh21, UU Ketenagakerjaan No. 13/2003).
 

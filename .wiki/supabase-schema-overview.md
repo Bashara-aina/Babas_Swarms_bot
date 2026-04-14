@@ -1,6 +1,19 @@
 ---
-title: "SUPABASE SCHEMA OVERVIEW"
-tags: [supabase-schema-overview]
+title: Supabase Schema Overview
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- supabase-schema-overview.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'domain: "Database schema, table relationships, API patterns"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # SUPABASE SCHEMA OVERVIEW
 # SUPABASE SCHEMA OVERVIEW

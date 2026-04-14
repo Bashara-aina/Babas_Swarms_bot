@@ -1,3 +1,20 @@
+---
+title: Worker Subtask 4 Soul Update 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Subtask 4 - Update SOUL.md add VOICE section'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Subtask 4 Complete — SOUL.md VOICE Section Added
 
 **Date:** 2026-04-12

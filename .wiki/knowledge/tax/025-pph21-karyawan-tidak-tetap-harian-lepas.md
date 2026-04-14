@@ -1,13 +1,21 @@
 ---
-source_id: 025
-title: "PPh 21 Karyawan Tidak Tetap - Harian dan Lepas"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://ortax.org/penghitungan-pph-21-atas-upah-tenaga-kerja-lepas"
-last_verified: "2026-04-11"
-tags: [pph21, harian, lepas, freelancer, tenaga-kerja, ter-harian]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Pph21 Karyawan Tidak Tetap Harian Lepas
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Daily workers (tenaga kerja lepas) and freelancers follow **different TER
+  rules** than fixed employees. Wrong application of daily TER rates leads to over/under-taxation
+  and compliance issues with ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PPh 21 Karyawan Tidak Tetap - Harian dan Lepas

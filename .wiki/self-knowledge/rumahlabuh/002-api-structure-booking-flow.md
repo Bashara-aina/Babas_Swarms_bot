@@ -1,9 +1,19 @@
 ---
-title: "rumahlabuh API Structure - PARTIAL"
-source_type: CODE_EXTRACTION
-extracted_from: rumahlabuh
-date: 2026-04-11
-tags: [rumahlabuh, api, booking, flow, PARTIAL]
+title: Api Structure Booking Flow
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'rumahlabuh integration is found in:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # rumahlabuh API Structure and Booking Flow

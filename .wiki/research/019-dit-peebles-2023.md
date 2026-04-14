@@ -1,17 +1,21 @@
 ---
-paper_id: 019
-title: "Scalable Diffusion Models with Transformers (DiT)"
-authors: "William Peebles, Saining Xie"
-venue: "ICCV 2023"
-url: "https://arxiv.org/abs/2212.09748"
-arxiv: "2212.09748"
-code: "https://github.com/facebookresearch/dit"
+title: Dit Peebles 2023
+type: concept
+status: active
 tags:
-  - diffusion
-  - transformer
-  - adaLN
-  - latent-diffusion
-  - generative-modeling
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: DiT demonstrated that **transformers could replace U-Nets in diffusion models**,
+  achieving state-of-the-art image generation. The key architectural innovation was
+  **AdaLN** (Adaptive Layer Normaliz...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

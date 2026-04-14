@@ -1,3 +1,22 @@
+---
+title: Adr 002 Consolidate Agent Registries
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Context: Two parallel agent registries (`agents.py` with 22 agents + `core/agent_registry.py`
+  with 76 YAML agents) created routing confusion, duplicate logic, and maintenance
+  burden'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-002: Consolidate Dual Agent Registries
 - Date: 2026-04-10
 - Status: Accepted

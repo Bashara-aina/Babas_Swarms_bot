@@ -1,3 +1,21 @@
+---
+title: Readme
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This plugin allows to add responsive custom controls to reveal.js which allow
+  arbitrary positioning, layout, and behaviour of the controls.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Custom controls
 
 This plugin allows to add responsive custom controls to reveal.js which allow arbitrary positioning, layout, and behaviour of the controls.

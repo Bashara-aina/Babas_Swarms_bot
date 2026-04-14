@@ -1,10 +1,20 @@
 ---
-title: tool-output-formatting
-domain: tools-skills
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: code, research, system
-tokens_estimated: 290
+title: Tool Output Formatting
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tool-output-formatting.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: How tool output should be formatted for Telegram display — truncation, HTML,
+  chunking.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Tool Output Formatting

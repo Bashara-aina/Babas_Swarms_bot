@@ -1,10 +1,20 @@
 ---
-title: bashara-quiet-hours
-domain: proactive-intelligence
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 280
+title: Bashara Quiet Hours
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bashara-quiet-hours.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: When Legion must NOT send proactive messages — quiet hours, sleep patterns,
+  focus time.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Bashara Quiet Hours

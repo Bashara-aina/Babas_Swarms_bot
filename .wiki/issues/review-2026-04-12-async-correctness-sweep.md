@@ -1,6 +1,20 @@
 ---
-## Compilation & Tests
-
+title: Review 2026 04 12 Async Correctness Sweep
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| `python -m py_compile handlers/ai.py core/autonomous_router.py core/memory_engine.py`
+  | ✅ PASSED |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Check | Result |
 |

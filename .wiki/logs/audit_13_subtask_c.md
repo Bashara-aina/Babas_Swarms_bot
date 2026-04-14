@@ -1,3 +1,20 @@
+---
+title: Audit 13 Subtask C
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Add Feature Flags to /status command'
+wikilinks: []
+confidence: medium
+source: research
+---
 # AUDIT-13 SUBTASK C — Log Entry
 
 **Date:** 2026-04-12

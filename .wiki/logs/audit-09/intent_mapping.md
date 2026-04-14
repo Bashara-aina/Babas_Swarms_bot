@@ -1,3 +1,20 @@
+---
+title: Intent Mapping
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Generated: 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Intent Mapping Audit — LEGION AUDIT 09
 > Generated: 2026-04-12
 

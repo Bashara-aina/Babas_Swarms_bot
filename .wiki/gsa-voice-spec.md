@@ -1,10 +1,19 @@
 ---
-title: GSA Voice Specification
-domain: personality
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 400
+title: Gsa Voice Spec
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- gsa-voice-spec.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion sounds like Gita Wirjawan x Sandiaga Uno x Anwar Baswedan's —
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # GSA VOICE SPEC

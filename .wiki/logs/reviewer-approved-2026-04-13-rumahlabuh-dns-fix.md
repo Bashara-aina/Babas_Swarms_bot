@@ -1,3 +1,21 @@
+---
+title: Reviewer Approved 2026 04 13 Rumahlabuh Dns Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Task: Fix rumahlabuh.com connectivity by replacing bare aiohttp.ClientSession
+  with DNS-resilient session using Cloudflare (1.1.1.1) + Google (8.8.8.8) DNS fallback'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Approved: rumahlabuh.com DNS-resilient HTTP client (bug fix)
 Date: 2026-04-13
 Task: Fix rumahlabuh.com connectivity by replacing bare aiohttp.ClientSession with DNS-resilient session using Cloudflare (1.1.1.1) + Google (8.8.8.8) DNS fallback

@@ -1,6 +1,19 @@
 ---
-## Domain Overview
-
+title: Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- index.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Domain | Count | Description |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Domain | Count | Description |
 |

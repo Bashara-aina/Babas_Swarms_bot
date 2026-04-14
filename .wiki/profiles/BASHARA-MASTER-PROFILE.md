@@ -1,8 +1,19 @@
 ---
-# Bashara — Complete Personal Profile
-Generated: April 11, 2026
-Sources: Personal answers + Perplexity memory + GitHub commit history
-
+title: Bashara Master Profile
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Full name**: Bashara Aina'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## 👤 Identity

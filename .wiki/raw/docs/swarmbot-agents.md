@@ -1,3 +1,20 @@
+---
+title: Swarmbot Agents
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Key | Primary Model | Use Case | Trigger Keywords |'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion v4 — Agent Reference
 
 ## Agent Keys & Models

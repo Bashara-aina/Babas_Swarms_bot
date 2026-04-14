@@ -1,3 +1,20 @@
+---
+title: Adr 001 Opencode Integration
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Author**: Bashara (via three-agent pipeline)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-001: LEGION × OPENCODE INTEGRATION
 
 **Date**: 2026-04-11

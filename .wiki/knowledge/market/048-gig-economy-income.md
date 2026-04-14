@@ -1,13 +1,21 @@
 ---
-source_id: 048
-title: "Gig Economy Income Indonesia 2024: Ojek Online & Freelancer Earnings"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://merdika.id/tren-ekonomi-gig-akhiri-kerentanan-pengemudi-daring/, https://igpa.map.ugm.ac.id/wp-content/uploads/sites/274/2021/12/Ebook_Menyoal-Kerja-Layak-dan-Adil-dalam-Ekonomi-Gig-di-Indonesia_IGPA-Press.pdf"
-last_verified: "2026-04-11"
-tags: [gig-economy, ojol, gojek, grab, freelancer, informal-economy]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Gig Economy Income
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The gig economy represents a growing segment of Indonesia's workforce (2.3+
+  million workers). Understanding gig worker earnings helps cekwajar.id serve this
+  underserved segment with fair wage recom...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Gig Economy Income Indonesia 2024: Ojek Online & Freelancer Earnings

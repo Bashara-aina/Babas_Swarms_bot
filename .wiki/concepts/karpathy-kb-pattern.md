@@ -83,8 +83,8 @@ source: implementation | design | external | conversation
 [Implemented? Planned? Broken?]
 
 ## See Also
-- [[memory-architecture]]
-- [[intent-routing]]
+- [[./concepts/memory-architecture]]
+- [[./concepts/intent-routing]]
 ```
 
 ## Schema Requirements
@@ -119,7 +119,7 @@ SORT title ASC
 
 ## Relationships
 
-The Karpathy KB Pattern is the structural foundation that makes [[memory-architecture]] traversable — without wikilinks, the AI wouldn't know how concepts relate. [[intent-routing]] benefits from the pattern when the intent classifier retrieves wiki context: structured pages with clear summaries are much faster to scan than unstructured notes. [[./concepts/self-improvement-loop]] writes its learned outcomes to the wiki in this format, ensuring future reasoning loops can retrieve past learnings efficiently.
+The Karpathy KB Pattern is the structural foundation that makes [[./concepts/memory-architecture]] traversable — without wikilinks, the AI wouldn't know how concepts relate. [[./concepts/intent-routing]] benefits from the pattern when the intent classifier retrieves wiki context: structured pages with clear summaries are much faster to scan than unstructured notes. [[./concepts/self-improvement-loop]] writes its learned outcomes to the wiki in this format, ensuring future reasoning loops can retrieve past learnings efficiently.
 
 ## Current Status
 
@@ -128,5 +128,5 @@ The Karpathy KB Pattern is the structural foundation that makes [[memory-archite
 ## See Also
 
 - [[SCHEMA]] — Full schema definition with page type definitions
-- [[memory-architecture]] — Memory system using wiki structure
-- [[intent-routing]] — Intent routing that retrieves wiki context
+- [[./concepts/memory-architecture]] — Memory system using wiki structure
+- [[./concepts/intent-routing]] — Intent routing that retrieves wiki context

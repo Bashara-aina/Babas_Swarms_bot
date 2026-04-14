@@ -51,4 +51,4 @@ Status: **Not integrated** — evaluated but not selected. Could be revisited if
 
 - [[./entities/opencode]] — Code agent alternative
 - [[./concepts/skill-registry]] — Current skill management system
-- [[cekwajar-id]] — Potential workflow automation target
+- [[projects/cekwajar-id]] — Potential workflow automation target

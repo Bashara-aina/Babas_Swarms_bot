@@ -1,9 +1,19 @@
 ---
-title: "ADR-002: Async Task Error Handling Policy"
-date: "2026-04-12"
-decider: "@planner"
-reviewer: "@reviewer"
-status: "PROPOSED"
+title: Adr 002 Async Error Handling
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-002: Async Task Error Handling Policy
 

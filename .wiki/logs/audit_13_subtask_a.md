@@ -1,3 +1,20 @@
+---
+title: Audit 13 Subtask A
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Document & Archive ABANDONED features in `core/health_check.py`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # AUDIT-13 Subtask A — Log Entry
 
 **Date:** 2026-04-12  

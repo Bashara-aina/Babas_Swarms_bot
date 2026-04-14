@@ -1,3 +1,20 @@
+---
+title: Deep Audit 2026 04 12
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- audits
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Auditor: Claude Opus 4.6 (full repo access, code-level analysis)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Deep Audit — April 12, 2026
 
 Auditor: Claude Opus 4.6 (full repo access, code-level analysis)

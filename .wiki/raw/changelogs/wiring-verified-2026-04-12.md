@@ -1,3 +1,20 @@
+---
+title: Wiring Verified 2026 04 12
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- changelogs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Script**: `scripts/verify_wiring.py`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Wiring Verification Report
 
 **Date**: 2026-04-12  

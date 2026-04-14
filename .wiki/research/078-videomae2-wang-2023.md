@@ -1,14 +1,21 @@
 ---
-paper_id: 078
-title: "VideoMAE V2: Scaling Video Masked Autoencoders with Dual Masking"
-authors: "Wang, Limin; Huang, Bingkun; Zhao, Zhiyu; Tong, Zhan; He, Yinan; Wang, Yi; Wang, Yali; Qiao, Yu"
-year: 2023
-venue: "CVPR"
-arxiv: "2303.16727"
-citations: 450
-tier: 7
-tags: [video, masked-autoencoder, self-supervised, pretraining, backbone]
-popw_relevance: MEDIUM
+title: Videomae2 Wang 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW's activity head uses frame-level RGB features from a ResNet-50 backbone.
+  VideoMAE V2 demonstrates that video masked autoencoders are scalable foundation
+  model pre-trainers — meaning POPW could...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # VideoMAE V2: Scaling Video Masked Autoencoders with Dual Masking
@@ -73,9 +80,9 @@ Wang's group has consistently pushed video representation learning from SlowFast
 
 ## Connections to Other Wiki Papers
 
-- [[077-dinov2-oquab-2024]] — DINOv2 is the current frozen backbone choice for Frame2Freq-ST
-- [[038-ponbagavathi-frame2freq-2026]] — Frame2Freq-ST achieves 78.1% with DINOv2 + spectral adapters
-- [[039-thiyakesan-order-matters-2025]] — Step uses frozen DINOv2 + temporal probe
+- [[research/077-dinov2-oquab-2024]] — DINOv2 is the current frozen backbone choice for Frame2Freq-ST
+- [[research/038-ponbagavathi-frame2freq-2026]] — Frame2Freq-ST achieves 78.1% with DINOv2 + spectral adapters
+- [[research/039-thiyakesan-order-matters-2025]] — Step uses frozen DINOv2 + temporal probe
 
 ## POPW Action Item
 

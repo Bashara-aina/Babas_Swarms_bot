@@ -1,6 +1,20 @@
 ---
-## Context
-
+title: Adr 003 Phase3 P2P3
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Phase 2 (Skills Registry, Heartbeat Daemon, Prompt Injection Protection)
+  completed 2026-04-12.
+wikilinks: []
+confidence: medium
+source: research
 ---
 Phase 2 (Skills Registry, Heartbeat Daemon, Prompt Injection Protection) completed 2026-04-12.  
 Phase 3 adds the final integration layer: event-driven webhooks and MCP-backed external tools.  

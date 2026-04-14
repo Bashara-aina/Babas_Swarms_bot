@@ -1,13 +1,21 @@
 ---
-source_id: 037
-title: "Integrasi BPJS dengan Payroll: E-Payment System dan Remitansi"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.bpjsketenagakerjaan.go.id/artikel/18917/artikel-bayar-iuran-bpjs-ketenagakerjaan-makin-mudah-dengan-eps-serta-kanal-pembayarannya.bpjs"
-last_verified: "2026-04-11"
-tags: [bpjs, payroll, integrasi, eps, payment, remittance, hrtech, software]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Integrasi Payroll
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: For a payroll SaaS like cekwajar.id, integrating with BPJS payment systems
+  is critical. Understanding EPS (Electronic Payment System), virtual accounts, and
+  payment channels enables accurate deduct...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Integrasi BPJS dengan Payroll: E-Payment System dan Remitansi

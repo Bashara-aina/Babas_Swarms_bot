@@ -1,3 +1,20 @@
+---
+title: Planner Wiki Wiring 2026 04 13
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Type: REFACTOR (wiki wiring fix)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Wiki Wiring Audit — Fix Broken Links and References
 Date: 2026-04-13
 Type: REFACTOR (wiki wiring fix)

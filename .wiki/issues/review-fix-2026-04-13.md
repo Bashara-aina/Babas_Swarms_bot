@@ -1,6 +1,19 @@
 ---
-## CHECK 1: Malformed wikilink in legion-bot.md
-
+title: Review Fix 2026 04 13
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File:** `wiki/projects/legion-bot.md` line 9'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **File:** `wiki/projects/legion-bot.md` line 9
 

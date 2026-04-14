@@ -1,9 +1,20 @@
 ---
-title: "cekwajar API Routes - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: cekwajar
-date: 2026-04-11
-tags: [cekwajar, api, routes, NOT-FOUND]
+title: Api Routes
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: `/home/newadmin/swarm-bot/.wiki/knowledge/cekwajar/` (or separate
+  cekwajar repo)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # cekwajar API Routes Extraction

@@ -1,7 +1,21 @@
 ---
-date: "2026-04-12"
-status: "In Progress"
-goal: "Ensure search results, wiki, memory, and soul are ALL in LLM context before every call"
+title: Audit 04 Context Injection 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This audit verifies that ALL context sources (soul, memory, wiki, search)
+  are properly injected into the `messages[]` list before every `litellm.acompletion()`
+  call.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # LEGION AUDIT 04 — Context Injection (Search / Wiki / Memory / Soul)
 

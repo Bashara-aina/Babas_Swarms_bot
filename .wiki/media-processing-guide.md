@@ -1,10 +1,21 @@
 ---
-title: media-processing-guide
-domain: voice-media
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: handlers
-tokens_estimated: 580
+title: Media Processing Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- media-processing-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: All media processing pipelines — MiniMax MCP (image gen, TTS, web search),
+  video keyframe extraction, document formats (PDF/Excel/Word/CSV/EPUB/PPTX), and
+  temp file management.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Media Processing Guide

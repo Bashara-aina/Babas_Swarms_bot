@@ -1,13 +1,21 @@
 ---
-source_id: 053
-title: "Cost of Living Comparison 2024: Jakarta, Surabaya, Bandung, Yogyakarta, Bali"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://livingcost.org/cost/bandung/surabaya, https://www.traveloka.com/id-id/explore/destination/kota-dengan-biaya-hidup-termurah-di-indonesia-acc/268895"
-last_verified: "2026-04-11"
-tags: [cost-of-living, jakarta, surabaya, bandung, bali, yogya, comparison, col]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Cost Of Living Comparison
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Cost of living is crucial for "gaji wajar" calculations - the same salary
+  means different things in different cities. This data allows cekwajar.id to provide
+  city-adjusted salary recommendations an...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Cost of Living Comparison 2024: Jakarta, Surabaya, Bandung, Yogyakarta, Bali

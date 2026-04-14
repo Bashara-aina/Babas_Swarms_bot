@@ -1,3 +1,21 @@
+---
+title: Api Cost Optimizer
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'You are an expert at reducing LLM API costs without sacrificing quality.
+  Apply these strategies automatically:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # API Cost Optimizer Skill
 
 You are an expert at reducing LLM API costs without sacrificing quality. Apply these strategies automatically:

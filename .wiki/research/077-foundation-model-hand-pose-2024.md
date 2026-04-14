@@ -1,19 +1,21 @@
 ---
-paper_id: "077"
-title: "Leveraging Foundation Model Automatic Data Augmentation for Hand Pose Estimation"
-authors: "Various"
-year: 2024
-venue: "arXiv"
-citations: ""
-domain: "Hand Pose Estimation"
-popw_relevance: "Foundation model-based augmentation could benefit POPW's pose head"
-key_contribution: "Uses foundation models to generate diverse hand pose training data"
+title: Foundation Model Hand Pose 2024
+type: concept
+status: active
 tags:
-  - foundation models
-  - data augmentation
-  - hand pose
-  - pose estimation
-pdf_path: "project/popw/working/external/papers/FoundationModel_Augmentation_Hands_Assembly.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper explores using foundation models for automatic data augmentation
+  in hand pose estimation tasks. The approach leverages pre-trained models to generate
+  synthetic training samples with vari...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

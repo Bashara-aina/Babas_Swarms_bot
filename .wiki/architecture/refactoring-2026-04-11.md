@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: April 2026 refactoring split computer_agent.py (2077 lines) into computer_agent/ package (4 modules) and llm_client.py (1917 lines) into llm_client/ package with full backwards compatibility. All 276 tests pass.
 wikilinks:
-  - [[legion-module-map]]
-  - [[adr-2026-04-12-opencode-over-cursor-for-backend]]
+  - [[architecture/legion-module-map]]
+  - [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]]
 confidence: high
 source: implementation
 project: legion
@@ -146,6 +146,6 @@ Added `max_turns` alias parameter to `_compact_messages()`:
 
 ## See Also
 
-- [[legion-module-map]] — Core module organization
+- [[architecture/legion-module-map]] — Core module organization
 - [[projects/legion-bot]] — Project overview
 - [[decisions/ADR-005-package-split-computer-agent-llm-client]] — ADR for this refactoring

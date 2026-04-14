@@ -1,13 +1,21 @@
 ---
-source_id: 013
-title: "PKWT PKWTT Aturan Kontrak Kerja Masa Percobaan Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.cekindo.com/id/blog/perbedaan-pkwt-pkwtt"
-last_verified: "2026-04-11"
-tags: [pkwt,pkwtt,kontrak-kerja,masa-percobaan,probation,hubungan-kerja]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Pkwt Pkwtt Kontrak
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: .cekwajar.id HR module harus properly classify employee type (PKWT vs PKWTT)
+  dan track contract expiry dates. Contract workers (PKWT) tidak boleh punya masa
+  percobaan dan ada batasan durasi maksimal.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PKWT PKWTT Aturan Kontrak Kerja Masa Percobaan Indonesia

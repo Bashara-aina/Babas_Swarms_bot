@@ -1,19 +1,21 @@
 ---
-paper_id: 080
-title: "HigherHRNet: Scale-Aware Representation Learning for Bottom-Up Human Pose Estimation"
-authors: "Bowen Cheng, Bin Xiao, Jingdong Wang, Honghui Shi, Thomas S. Huang, Lei Zhang"
-year: 2020
-venue: "CVPR 2020"
-arxiv: "1908.10357"
-github: "https://github.com/HRNet/Higher-HRNet-Human-Pose-Estimation"
+title: Higherhrnet Cheng 2020
+type: concept
+status: legacy
 tags:
-  - pose-estimation
-  - bottom-up
-  - high-resolution
-  - scale-aware
-  - hrnet
-  - multi-person
-popw_relevance: HIGH
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW's pose head uses heatmap regression with 17 COCO keypoints. **HigherHRNet
+  is the most directly applicable paper** in this tier — it specifically addresses
+  scale variation in bottom-up multi-pe...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

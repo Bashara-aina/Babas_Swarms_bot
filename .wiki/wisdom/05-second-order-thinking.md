@@ -1,8 +1,20 @@
 ---
-title: "Second and Third Order Thinking"
-source: "Howard Marks (Oaktree) + Shane Parrish (Farnam Street) + The Decision Stack 2026"
-tags: [05-second-order-thinking]
-type: wisdom
+title: Second Order Thinking
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Howard Marks (Oaktree) + Shane Parrish (Farnam Street) + The Decision
+  Stack 2026'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Second and Third Order Thinking
 

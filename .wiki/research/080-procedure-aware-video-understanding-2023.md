@@ -1,21 +1,21 @@
 ---
-paper_id: "080"
-title: "Procedure-Aware Pretraining for Instructional Video Understanding"
-authors: "Zhou, Honglu; Martín-Martín, Roberto; Kapadia, Mubbasir; Savarese, Silvio; Niebles, Juan Carlos"
-year: 2023
-venue: "arXiv 2303.18230"
-arxiv: "2303.18230"
-doi: "10.48550/arXiv.2303.18230"
-citations: ""
-domain: "Instructional Video Understanding"
-popw_relevance: "Procedure-aware pretraining directly applicable to POPW's assembly activity recognition"
-key_contribution: "Pretraining strategy that learns procedural structure from instructional videos"
+title: Procedure Aware Video Understanding 2023
+type: concept
+status: active
 tags:
-  - pretraining
-  - instructional video
-  - procedural
-  - video understanding
-pdf_path: "project/popw/working/external/papers/ProcedureAware_Video_Understanding.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper presents a procedure-aware pretraining approach for instructional
+  video understanding. The method learns to recognize procedural patterns in instructional
+  videos, enabling better underst...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

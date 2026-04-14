@@ -1,30 +1,21 @@
 ---
-paper_id: "037"
-title: "Including Semantic Information via Word Embeddings for Skeleton-based Action Recognition"
-aka_titles:
-  - "Semantic-Volume Encoding for Skeleton+Object Action Recognition (2025)"
-authors: "Aganian, Dustin; Franze, Erik; Eisenbach, Markus; Gross, Horst-Michael"
-year: 2025
-venue: "IJCNN 2025"
-arxiv: "2506.18721"
-doi: "10.48550/arXiv.2506.18721"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Extends 036 with semantic word embeddings; advances skeleton-based methods for assembly"
-key_contribution: "Replaces one-hot keypoint encodings with semantic volumes using word embeddings to capture joint relationships"
+title: Aganian Semantic Volume 2025
+type: concept
+status: active
 tags:
-  - skeleton-based
-  - semantic embeddings
-  - word embeddings
-  - assembly recognition
-  - generalization
-architecture:
-  - type: "GCN with Semantic Volume Encoding"
-  - key_components: ["Word embeddings for joint semantics", "Semantic volume keypoint encoding", "Cross-skeleton generalization support"]
-datasets:
-  - "IKEA ASM"
-  - "Other assembly datasets"
-key_insight: "One-hot encodings lose semantic relationships between joints; word embeddings capture meaningful anatomical and functional relationships"
-improvements_over_036: "Enhanced generalization across different skeleton types and object classes through semantic representations"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This follow-up to paper 036 introduces semantic information into skeleton-based
+  action recognition by leveraging word embeddings. Instead of using traditional one-hot
+  encodings for skeleton keypoin...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

@@ -1,13 +1,21 @@
 ---
-source_id: 046
-title: "Industry Salary Comparisons 2024: Banking, Finance & FMCG Indonesia"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://www.michaelpage.co.id/salary-guide, https://dealls.com/pengembangan-karir/gaji-kerja-di-bank"
-last_verified: "2026-04-11"
-tags: [banking, finance, fmcg, salary, banking-salary, director-salary]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Banking Finance Fmcg Salaries
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Understanding salary benchmarks by industry allows cekwajar.id to provide
+  sector-specific "gaji wajar" recommendations. Banking, finance, and FMCG are among
+  the highest-paying sectors and serve as ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Industry Salary Comparisons 2024: Banking, Finance & FMCG Indonesia

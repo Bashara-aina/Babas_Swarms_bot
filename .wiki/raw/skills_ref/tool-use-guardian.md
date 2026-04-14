@@ -1,3 +1,21 @@
+---
+title: Tool Use Guardian
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'You are a reliability wrapper for tool calls. Apply this protocol to every
+  tool invocation:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tool Use Guardian Skill
 
 You are a reliability wrapper for tool calls. Apply this protocol to every tool invocation:

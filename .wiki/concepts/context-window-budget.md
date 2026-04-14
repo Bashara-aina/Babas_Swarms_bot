@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Context window budget actively manages token usage across Legion's prompt layers, allocating space to system prompt, memory, wiki, and conversation context while always preserving the SOUL definition.
 wikilinks:
-  - [[memory-architecture]]
+  - [[./concepts/memory-architecture]]
   - [[./concepts/vector-search]]
   - [[./concepts/llm-cost-routing]]
-  - [[intent-routing]]
+  - [[./concepts/intent-routing]]
 confidence: high
 source: implementation
 ---
@@ -79,7 +79,7 @@ Budget is computed as `MODEL_CONTEXT_LIMITS[model] * CONTEXT_BUDGET_RATIO`.
 
 ## Relationships
 
-Context window budget is closely tied to [[./concepts/llm-cost-routing]] — every token in the prompt costs money (or API rate credits). Budgeting directly affects which models can be used cost-effectively: a 128K context model at 35% budget gives ~44K tokens for system prompt vs ~5.6K for a 16K model. [[memory-architecture]] is constrained by the budget: memory layers compete with wiki context and conversation history for the same finite space. [[./concepts/vector-search]] retrieval results are among the "relevant_memory" layer — if too many memories are retrieved, they can crowd out other layers. [[intent-routing]] result (the IntentResult) is injected into prompts and must fit within budget.
+Context window budget is closely tied to [[./concepts/llm-cost-routing]] — every token in the prompt costs money (or API rate credits). Budgeting directly affects which models can be used cost-effectively: a 128K context model at 35% budget gives ~44K tokens for system prompt vs ~5.6K for a 16K model. [[./concepts/memory-architecture]] is constrained by the budget: memory layers compete with wiki context and conversation history for the same finite space. [[./concepts/vector-search]] retrieval results are among the "relevant_memory" layer — if too many memories are retrieved, they can crowd out other layers. [[./concepts/intent-routing]] result (the IntentResult) is injected into prompts and must fit within budget.
 
 ## Current Status
 
@@ -88,6 +88,6 @@ Context window budget is closely tied to [[./concepts/llm-cost-routing]] — eve
 ## See Also
 
 - [[./concepts/llm-cost-routing]] — Cost implications of token budgeting
-- [[memory-architecture]] — Memory layers that compete for budget space
+- [[./concepts/memory-architecture]] — Memory layers that compete for budget space
 - [[./concepts/vector-search]] — Retrieval results that fill relevant_memory layer
-- [[intent-routing]] — Intent hint injected into prompt context
+- [[./concepts/intent-routing]] — Intent hint injected into prompt context

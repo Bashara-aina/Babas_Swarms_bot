@@ -1,3 +1,20 @@
+---
+title: Block 06 Gtm Execution
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Last Updated:** April 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # CEKWAJAR.ID — COMPREHENSIVE GO-TO-MARKET EXECUTION DOCUMENT
 
 **Last Updated:** April 2026

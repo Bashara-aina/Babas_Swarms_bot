@@ -1,6 +1,19 @@
 ---
-## 1. Intent Coverage Map
-
+title: Adr 044 Router Layer Audit
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Skill | Handler Key | Handler Function | Status |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### AutonomousRouter Skills (core/autonomous_router.py)
 

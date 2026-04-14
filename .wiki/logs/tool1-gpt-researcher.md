@@ -1,3 +1,20 @@
+---
+title: Tool1 Gpt Researcher
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Wire gpt-researcher into Legion as a deep research skill'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tool 1: gpt-researcher Integration — WORKER LOG
 
 **Date:** 2026-04-12  

@@ -1,3 +1,21 @@
+---
+title: History Pattern Recognition
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: History lessons; patterns; human nature; inequality; moral;
+  economics; government; religion; war; progress; cycles;Durant.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 15: History & Pattern Recognition
 
 ## [Will Durant] — The Lessons of History

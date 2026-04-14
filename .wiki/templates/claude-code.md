@@ -1,3 +1,20 @@
+---
+title: Claude Code
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This template generates a `CLAUDE.md` file at the vault root.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Claude Code Agent Config Template
 
 This template generates a `CLAUDE.md` file at the vault root.

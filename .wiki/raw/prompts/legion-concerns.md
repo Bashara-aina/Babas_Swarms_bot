@@ -1,3 +1,20 @@
+---
+title: Legion Concerns
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- prompts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Single session. Paste everything inside the code block into OpenCode.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # LEGION — MASTER CONCERN FIX PROMPT
 > Single session. Paste everything inside the code block into OpenCode.
 > This prompt is written from direct inspection of the actual repo.

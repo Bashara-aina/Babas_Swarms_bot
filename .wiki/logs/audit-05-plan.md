@@ -1,6 +1,20 @@
 ---
-date: "2026-04-12"
-status: "PLANNED"
+title: Audit 05 Plan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every file in `core/` is actively used; every export matches what callers
+  import.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 05 — Core Module Wiring
 ## Goal

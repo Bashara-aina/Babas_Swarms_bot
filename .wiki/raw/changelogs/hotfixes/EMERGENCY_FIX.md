@@ -1,3 +1,20 @@
+---
+title: Emergency Fix
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- changelogs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Moved from root to `docs/hotfixes/` for cleaner repo structure.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Emergency Fix Log
 
 > Moved from root to `docs/hotfixes/` for cleaner repo structure.

@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: cekwajar.id uses Next.js App Router, Supabase PostgreSQL, and Vercel deployment.
 wikilinks:
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[./entities/supabase]]
 confidence: high
 source: implementation

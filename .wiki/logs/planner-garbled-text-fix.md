@@ -1,5 +1,20 @@
 ---
-
+title: Planner Garbled Text Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Fix Telegram bot response containing garbled Russian text and
+  gibberish'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Planner Log: Garbled Text Fix (Matsuya/Toyosu Restaurant Response)
 **Date**: 2026-04-12  

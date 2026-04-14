@@ -1,13 +1,21 @@
 ---
-source_id: 007
-title: "Permenaker 1 Tahun 2017 Struktur dan Skala Upah"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/146240"
-last_verified: "2026-04-11"
-tags: [permenaker-1-2017,struktur-skala-upah,阶梯-gaji,gaji-rangking]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Permenaker Struktur Skala Upah
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Setiap perusahaan wajib memiliki struktur dan skalaupah yang dipublikasikan
+  kepada worker. cekwajar.id harus dapat generate dan memvalidasi strukturupah sesuai
+  ketentuan Permenaker 1/2017 untuk mem...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Permenaker 1 Tahun 2017 Struktur dan Skala Upah

@@ -1,8 +1,19 @@
 ---
-title: "ADR-022: markitdown Document Parser Integration"
-date: "2026-04-12"
-decider: "@planner → @worker"
-status: "Accepted"
+title: Adr 022 Markitdown
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider**: @planner → @worker'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-022: markitdown Document Parser Integration
 

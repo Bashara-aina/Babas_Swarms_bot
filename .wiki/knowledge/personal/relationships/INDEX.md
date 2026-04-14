@@ -1,8 +1,19 @@
 ---
-title: "personal/relationships — INDEX"
-created: 2026-04-11
-type: article
-tags: [INDEX]
+title: Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- personal
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '_Last updated: 2026-04-11 by Legion Daily Harvester_'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # personal/relationships — INDEX
 

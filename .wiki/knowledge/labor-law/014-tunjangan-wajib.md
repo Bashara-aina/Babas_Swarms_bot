@@ -1,13 +1,21 @@
 ---
-source_id: 014
-title: "Tunjangan Wajib dan Tunjangan Umum Karyawan Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.talenta.co/blog/contoh-tunjangan-tetap-karyawan-yang-harus-diketahui/"
-last_verified: "2026-04-11"
-tags: [tunjangan,tunjangan-tetap,tunjangan-tidak-tetap,tunjangan-jabatan,tunjangan-makan,thr]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Tunjangan Wajib
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Klasifikasi tunjangan (tetap vs tidak tetap) mempengaruhi banyak calculation:
+  dasarupah minimum, perhitunganpesangon, iuran BPJS, dan PPh 21. Mistakes in classification
+  lead to compliance issues.'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Tunjangan Wajib dan Tunjangan Umum Karyawan Indonesia

@@ -1,10 +1,20 @@
 ---
-title: "Wiki Wiring Fix — Batch 1"
-type: contract
+title: Contracts Batch1 Wiki Wiring
+type: concept
 status: active
-tags: [wiring-fix, wiki]
-created: 2026-04-13
-summary: Fix wiki/ prefix and directory-style broken links
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fix 10 wikilinks that incorrectly use `wiki/` or `.wiki/` prefix by removing
+  the prefix
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## CONTRACT #1: Fix `wiki/` Prefix Wikilinks

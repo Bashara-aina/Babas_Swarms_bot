@@ -1,8 +1,19 @@
 ---
-title: "ADR-002: YAML Agent Configs Not Fully Verified at Runtime"
-date: "2026-04-12"
-deciders: "Worker agent (audit task)"
-status: "Accepted"
+title: Adr 002 Yaml Agent Verification
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: Worker agent (audit task)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-002: YAML Agent Configs Not Fully Verified at Runtime
 

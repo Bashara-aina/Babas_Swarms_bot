@@ -1,13 +1,21 @@
 ---
-source_id: 063
-title: "Salary Transparency Laws: Colorado, EU, UK Impact Analysis"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://ogletreedeakins.co.uk/insights-resources/blog-posts/eu-pay-transparency-directive-updates-on-implementation-across-member-states/"
-last_verified: "2026-04-11"
-tags: [salary-transparency, Colorado, EU-Directive, UK, pay-equity, gender-pay-gap, compliance, job-posting]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Salary Transparency Laws
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Global trend toward salary transparency is accelerating. Colorado's law (effective
+  Jan 2024) requires salary ranges on job postings. EU directive (June 2026 deadline)
+  mandates pay information durin...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Salary Transparency Laws: Colorado, EU, UK Impact Analysis

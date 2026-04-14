@@ -1,14 +1,21 @@
 ---
-paper_id: 028
-title: "Achievement-Based Training Progress Balancing for Multi-Task Learning"
-authors: "Yun, Sungyong; Cho, Kian"
-year: 2023
-venue: "ICCV"
-arxiv: "[~approx]2307.14183"
-citations: 180
-tier: 3
-tags: [mtl, loss-balancing, achievement-based, training-dynamics, iccv2023]
-popw_relevance: CRITICAL
+title: Amtl Yun Cho 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW uses Kendall uncertainty weighting in `losses.py` for its 3-task setup
+  (detection, pose, activity). AMTL (ICCV 2023) is a direct, modern replacement that
+  weights tasks by learning progress rat...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Achievement-Based Training Progress Balancing for Multi-Task Learning (AMTL)
@@ -93,9 +100,9 @@ $$w_i = \frac{1}{a_i(t) + \epsilon} \bigg/ \sum_j \frac{1}{a_j(t) + \epsilon}$$
 
 ## Connections to Other Wiki Papers
 
-- [[029-uw-so-kirchdorfer-2024]] — UW-SO is analytical alternative to Kendall UW
-- [[004-kendall-uncertainty-2018]] — Kendall UW is the current POPW baseline to replace
-- [[027-mgda-sener-2018]] — MGDA provides theoretical foundation for Pareto optimality
+- [[research/popw-protocol/029-uw-so-kirchdorfer-2024]] — UW-SO is analytical alternative to Kendall UW
+- [[research/004-kendall-uncertainty-2018]] — Kendall UW is the current POPW baseline to replace
+- [[research/popw-protocol/027-mgda-sener-2018]] — MGDA provides theoretical foundation for Pareto optimality
 
 ## POPW Action Item
 

@@ -1,14 +1,21 @@
 ---
-paper_id: "008"
-title: "Simple Baselines for Human Pose Estimation and Tracking"
-authors: "Bin Xiao, Haiping Wu, Yichen Wei"
-year: 2018
-venue: "ECCV 2018"
-arxiv: "1804.06208"
-citations: 1393
-tier: 1
-tags: ["pose-estimation", "human-pose", "keypoint", "tracking", "baseline"]
-popw_relevance: 8
+title: Simple Baseline Xiao 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Provides the **simplicity baseline** philosophy for pose estimation. The
+  paper demonstrates that complex architectural innovations often aren't needed —
+  simple ResNet + deconvolution can match or e...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

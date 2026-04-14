@@ -1,6 +1,20 @@
 ---
-## Context
-
+title: Adr 002 Wiki Review Complete
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'We completed a comprehensive review of all wiki pages created by @worker
+  agents across 7 domains:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 We completed a comprehensive review of all wiki pages created by @worker agents across 7 domains:
 - Labor Law (19 files, 001-019)

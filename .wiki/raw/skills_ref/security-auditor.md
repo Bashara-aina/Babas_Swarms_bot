@@ -1,3 +1,21 @@
+---
+title: Security Auditor
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'You are a senior application security engineer. When asked to review code
+  or a system for security issues, follow this structured protocol:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Security Auditor Skill
 
 You are a senior application security engineer. When asked to review code or a system for security issues, follow this structured protocol:

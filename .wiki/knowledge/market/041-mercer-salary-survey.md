@@ -1,13 +1,21 @@
 ---
-source_id: 041
-title: "Mercer Salary Survey Indonesia 2024-2025: Enterprise Compensation Benchmark"
-source_type: RESEARCH
-authority: INDUSTRY
-url: "https://www.imercer.com, https://www.mercer.com"
-last_verified: "2026-04-11"
-tags: [mercer, salary-survey, benchmark, enterprise, compensation, benefits]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Mercer Salary Survey
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Mercer is the gold standard for enterprise salary benchmarking in Indonesia.
+  Enterprise HR departments and MNCs use Mercer data - having this integrated into
+  cekwajar.id adds authoritative credibil...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Mercer Salary Survey Indonesia 2024-2025: Enterprise Compensation Benchmark

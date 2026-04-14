@@ -1,8 +1,20 @@
 ---
-tags: [self-supervised, vision-transformer, distillation, dino, iccv-2021, backbone]
-sources: [arxiv:2104.14294]
-created: 2026-04-11
-updated: 2026-04-11
+title: Dino Caron 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Caron, Touvron, Misra, Jégou, Mairal, Bojanowski, Joulin** | ICCV 2021
+  | [arXiv:2104.14294](https://arxiv.org/abs/2104.14294)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DINO: Self-Distillation with No Labels
@@ -66,4 +78,4 @@ DINO ViT produces attention maps that show **semantic segmentation emerging with
 
 ## See Also
 
-- [[077-dinov2-oquab-2024]] — DINOv2 (successor, much stronger features)
+- [[research/077-dinov2-oquab-2024]] — DINOv2 (successor, much stronger features)

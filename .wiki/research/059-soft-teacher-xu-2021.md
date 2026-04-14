@@ -1,9 +1,19 @@
 ---
-tags: [semi-supervised, object-detection, pseudo-label, soft-teacher, end-to-end, iccv2021]
-sources: [arxiv:2106.09018, openaccess:ICCV2021/Xu]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "059"
+title: Soft Teacher Xu 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Xu*, Zhang*, Hu*, Wang*, Wei*, Sun* | ICCV 2021 | [arXiv:2106.09018](https://arxiv.org/abs/2106.09018)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Soft Teacher: End-to-End Semi-Supervised Object Detection
@@ -58,4 +68,4 @@ Results demonstrate that Soft Teacher achieves 97% of fully supervised performan
 ## See Also
 
 - [[063-unbiased-teacher]] — Another SS-OD approach addressing pseudo-label bias
-- [[059-soft-teacher-xu-2021]] — This paper
+- [[research/059-soft-teacher-xu-2021]] — This paper

@@ -1,14 +1,21 @@
 ---
-paper_id: 067
-title: "Segment Anything Model (SAM)"
-authors: "Kirillov, Alexander; Mintun, Eric; Ravi, Nikhila; Mao, Hanzi; Rolland, Chloe; Gustafson, Laura; Xiao, Tete; Whitehead, Spencer; Berg, Alexander C; Lo, Wan-Yi; Dollár, Piotr; Girshick, Ross"
-year: 2023
-venue: "ICCV"
-arxiv: "2304.02643"
-citations: 8500
-tier: 6
-tags: [segmentation, foundation-model, zero-shot, promptable, sam, iccv2023]
-popw_relevance: CRITICAL
+title: Sam Kirillov 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW uses pseudo-GT from Mask R-CNN for unlabeled frames. SAM (ICCV 2023
+  Best Paper Honorable Mention) is the zero-shot furniture segmenter for pseudo-GT
+  bootstrapping — it can generate high-qualit...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Segment Anything Model (SAM)
@@ -96,9 +103,9 @@ Where Q comes from prompt tokens, K,V come from image tokens
 
 ## Connections to Other Wiki Papers
 
-- [[062-s4m-yoon-2025]] — S4M leverages SAM for semi-supervised instance segmentation
-- [[066-pointrend-kirillov-2020]] — PointRend is architectural precursor to SAM decoder
-- [[059-soft-teacher-xu-2021]] — Soft Teacher uses pseudo boxes for semi-supervised detection
+- [[research/062-s4m-yoon-2025]] — S4M leverages SAM for semi-supervised instance segmentation
+- [[research/066-pointrend-kirillov-2020]] — PointRend is architectural precursor to SAM decoder
+- [[research/059-soft-teacher-xu-2021]] — Soft Teacher uses pseudo boxes for semi-supervised detection
 
 ## POPW Action Item
 

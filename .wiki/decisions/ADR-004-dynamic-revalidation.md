@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Adr 004 Dynamic Revalidation
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Implement a **Dynamic Revalidation System** that makes every regulatory number
+  (UMR, PTKP, BPJS rates, tax brackets) time-aware with explicit TTL (time-to-live).
+  This ensures all verdict computatio...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Implement a **Dynamic Revalidation System** that makes every regulatory number (UMR, PTKP, BPJS rates, tax brackets) time-aware with explicit TTL (time-to-live). This ensures all verdict computations use only current, non-expired data, and alerts Legion when data goes stale.
 

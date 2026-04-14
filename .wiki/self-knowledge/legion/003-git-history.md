@@ -1,9 +1,19 @@
 ---
-title: "Legion/SwarmBot Git History"
-source_type: CODE_EXTRACTION
-extracted_from: swarm-bot
-date: 2026-04-11
-tags: [legion, git, history, commits, development]
+title: Git History
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `0fb8fca` CHORE: move confirmed dead files to graveyard'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SwarmBot Git History

@@ -1,3 +1,20 @@
+---
+title: Adr Harvester 001
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**created:** 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-HARVESTER-001: Legion Daily Intelligence Harvester v1.0
 
 **created:** 2026-04-11  

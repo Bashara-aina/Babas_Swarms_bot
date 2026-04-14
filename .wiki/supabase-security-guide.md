@@ -1,6 +1,19 @@
 ---
-title: "SUPABASE SECURITY GUIDE"
-tags: [supabase-security-guide]
+title: Supabase Security Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- supabase-security-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'domain: "RLS policies, API key storage, injection prevention"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # SUPABASE SECURITY GUIDE
 # SUPABASE SECURITY GUIDE

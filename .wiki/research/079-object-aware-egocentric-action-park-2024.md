@@ -1,21 +1,21 @@
 ---
-paper_id: "079"
-title: "Object Aware Egocentric Online Action Detection"
-authors: "Park, Yunsu; Kang, Hyolim; Kim, Seon Joo"
-year: 2024
-venue: "arXiv 2406.01079"
-arxiv: "2406.01079"
-doi: "10.48550/arXiv.2406.01079"
-citations: ""
-domain: "Egocentric Action Detection"
-popw_relevance: "Online action detection with object awareness for egocentric video"
-key_contribution: "Real-time egocentric action detection that leverages object context"
+title: Object Aware Egocentric Action Park 2024
+type: concept
+status: active
 tags:
-  - egocentric
-  - online detection
-  - object-aware
-  - real-time
-pdf_path: "project/popw/working/external/papers/ObjectAware_Ego_ActionDetection.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper presents an object-aware approach to online egocentric action
+  detection. The method processes egocentric video streams in real-time, using object
+  context to improve action recognition ac...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

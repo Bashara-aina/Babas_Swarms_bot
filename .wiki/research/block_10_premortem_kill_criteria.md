@@ -1,6 +1,21 @@
 ---
-## EXECUTIVE SUMMARY
-
+title: Block 10 Premortem Kill Criteria
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document exists to make failure visible before it happens. We are building
+  cekwajar.id — an Indonesian consumer data intelligence platform with 5 tools, one-man
+  operation, AI-first architectur...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This document exists to make failure visible before it happens. We are building cekwajar.id — an Indonesian consumer data intelligence platform with 5 tools, one-man operation, AI-first architecture, and TikTok-first GTM. The goal: 50K MAU by Month 12, path to profitability by Month 18.
 

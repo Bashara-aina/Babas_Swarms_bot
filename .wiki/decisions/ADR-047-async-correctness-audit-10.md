@@ -1,10 +1,19 @@
 ---
-title: "ADR-047: Async Correctness Audit — AUDIT 10"
-date: "2026-04-12"
-decider: "@planner"
-fix: "Add `await`: `result = await some_async_func()`"
-reviewer: "@reviewer"
-status: "PROPOSED"
+title: Adr 047 Async Correctness Audit 10
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-047: Async Correctness Audit — AUDIT 10
 

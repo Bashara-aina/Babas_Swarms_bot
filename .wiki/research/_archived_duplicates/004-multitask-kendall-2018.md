@@ -1,14 +1,21 @@
 ---
-paper_id: "004"
-title: "Multi-Task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics"
-authors: "Alex Kendall, Yarin Gal, Roberto Cipolla"
-year: 2018
-venue: "CVPR 2018"
-arxiv: "1705.07115"
-citations: 14002
-tier: 1
-tags: ["multi-task-learning", "uncertainty", "loss-weighting", "scene-understanding", "dense-prediction"]
-popw_relevance: 9
+title: Multitask Kendall 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'POPW performs multiple tasks (detection, segmentation, pose estimation)
+  simultaneously. The key problem: **how to weight losses when tasks have different
+  scales/units?** Manual tuning is expensive....'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

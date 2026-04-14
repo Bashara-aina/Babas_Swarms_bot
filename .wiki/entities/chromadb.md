@@ -8,7 +8,7 @@ updated: 2026-04-13
 summary: ChromaDB is an open-source vector database used by Legion for storing embeddings that power semantic memory recall. Collection `legion_memory` stores facts and entity relationships queried by cosine similarity.
 wikilinks:
   - [[./concepts/vector-search]]
-  - [[memory-architecture]]
+  - [[./concepts/memory-architecture]]
   - [[./entities/litellm]]
 confidence: high
 source: implementation
@@ -58,5 +58,5 @@ ChromaDB is Tier 3 (Semantic) in Legion's 6-tier memory system:
 
 ## See Also
 [[./concepts/vector-search]] — How semantic search is implemented
-[[memory-architecture]] — Full 6-tier memory system
+[[./concepts/memory-architecture]] — Full 6-tier memory system
 [[./entities/litellm]] — Embedding generation via litellm

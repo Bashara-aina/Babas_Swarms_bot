@@ -1,3 +1,21 @@
+---
+title: Eastern Philosophy Wisdom
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: The Way (Tao) is the fundamental principle; Wu Wei (non-action)
+  achieves harmony; softness overcomes hardness; simplicity guides all.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 17: Eastern Philosophy & Wisdom
 
 ## [Lao Tzu] — Tao Te Ching

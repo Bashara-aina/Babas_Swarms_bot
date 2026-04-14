@@ -1,13 +1,19 @@
 ---
-source_id: 091
-title: "API Rate Limiting for Next.js Supabase SaaS"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://supabase.com/docs/guides/auth/rate-limits"
-last_verified: "2026-04-11"
-tags: [rate-limiting, api, nextjs, supabase, security, ddos, abuse]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Api Rate Limiting
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Without rate limiting:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # API Rate Limiting for Next.js Supabase SaaS

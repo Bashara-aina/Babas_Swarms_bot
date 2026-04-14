@@ -1,3 +1,21 @@
+---
+title: Contributing
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This is a personal AI workstation bot, but contributions and suggestions
+  are welcome.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Contributing to Legion (Babas Swarms Bot)
 
 This is a personal AI workstation bot, but contributions and suggestions are welcome.

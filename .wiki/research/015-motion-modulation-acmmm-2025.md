@@ -1,16 +1,21 @@
 ---
-paper_id: 015
-title: "Motion Matters: Motion-guided Modulation Network for Skeleton-based Micro-Action Recognition"
-authors: "Gu, Li, Wang, Wei, Wu, Fan, Wang"
-venue: "ACM MM 2025"
-url: "https://arxiv.org/abs/2507.21977"
-arxiv: "2507.21977"
-code: "https://github.com/momiji-bit/MMN"
+title: Motion Modulation Acmmm 2025
+type: concept
+status: active
 tags:
-  - skeleton-action-recognition
-  - motion-modulation
-  - temporal-modeling
-  - micro-actions
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This is a **2025 state-of-the-art paper** demonstrating how motion-guided
+  modulation can capture subtle temporal patterns in skeleton data. MMN (Motion-guided
+  Modulation Network) introduces two nov...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

@@ -1,6 +1,19 @@
 ---
-## 📊 Priority Queue: Top 20 CRITICAL/HIGH Papers by Impact
-
+title: Index
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Priority | ID | Title | Year | Venue | POPW Relevance |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Priority | ID | Title | Year | Venue | POPW Relevance |
 |

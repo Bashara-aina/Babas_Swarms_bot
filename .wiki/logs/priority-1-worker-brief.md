@@ -1,3 +1,20 @@
+---
+title: Priority 1 Worker Brief
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File to create:** `core/reasoning_loop.py`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # PRIORITY 1: Pre-Response Reasoning Loop
 **File to create:** `core/reasoning_loop.py`
 **Auditor:** DEEP_AUDIT_2026-04-12.md Section 1 (Intelligence Depth)

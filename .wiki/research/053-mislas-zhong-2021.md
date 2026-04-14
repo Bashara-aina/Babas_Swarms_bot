@@ -1,8 +1,19 @@
 ---
-tags: [long-tail-learning, mixup, label-smoothing, calibration, cvpr-2021]
-sources: [arxiv:2104.00466]
-created: 2026-04-11
-updated: 2026-04-11
+title: Mislas Zhong 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Zhong, Cui, Liu & Jia** | CVPR 2021 | [arXiv:2104.00466](https://arxiv.org/abs/2104.00466)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MiSLAS: Mixup Shifted Label-Aware Smoothing
@@ -81,6 +92,6 @@ Stage 2: Classifier Learning
 
 ## See Also
 
-- [[051-decoupling-kang-2020]] — Base decoupling framework
-- [[054-remix-chou-2020]] — Remix mixup variant
-- [[049-ldam-cao-2019]] — LDAM for classifier training
+- [[research/051-decoupling-kang-2020]] — Base decoupling framework
+- [[research/054-remix-chou-2020]] — Remix mixup variant
+- [[research/049-ldam-cao-2019]] — LDAM for classifier training

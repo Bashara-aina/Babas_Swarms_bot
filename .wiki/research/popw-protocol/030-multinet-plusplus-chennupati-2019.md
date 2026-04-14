@@ -1,9 +1,19 @@
 ---
-tags: [mtl, multi-stream, feature-aggregation, geometric-loss, multinet++]
-sources: [popw-protocol]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Multinet Plusplus Chennupati 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 030 — MultiNet++: Multi-Stream Feature Aggregation with Geometric Loss
@@ -82,7 +92,7 @@ Traditional MTL losses treat tasks independently. Geometric loss considers:
 ## References
 
 - Chennupati et al. (2019).
-- Related: [[023-mtl-overview-ruder-2017|Ruder Overview]], [[027-mgda|MGDA]]
+- Related: [[research/023-mtl-overview-ruder-2017|Ruder Overview]], [[027-mgda|MGDA]]
 
 ---
 

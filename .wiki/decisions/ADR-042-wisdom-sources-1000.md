@@ -1,8 +1,20 @@
 ---
-title: "ADR-042: Wisdom Sources Quality Requirements"
-affected_files: "01, 03, 04, 05, 11, 12, 14, 15"
-decision: "These names should NOT appear as standalone primary entries. They may appear in:"
-note: "Aristotle, Feynman, Marcus Aurelius appear LEGITIMATELY in domains 06 (Physics), 09 (Communication - rhetorical example), 14 (Ethics), 15 (History) as foundational thinkers."
+title: Adr 042 Wisdom Sources 1000
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Review of 20 wiki domain files (wisdom/domains/) revealed systematic quality
+  issues that must be addressed before the wisdom corpus can be considered authoritative.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-042: Wisdom Sources Quality Requirements
 

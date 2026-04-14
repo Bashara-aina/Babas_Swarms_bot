@@ -1,9 +1,19 @@
 ---
-title: "Legion Configuration (Models, Costs, Rate Limits)"
-source_type: CODE_EXTRACTION
-extracted_from: swarm-bot
-date: 2026-04-11
-tags: [legion, config, models, costs, rate-limits, litellm]
+title: Configuration
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Provider | Base URL | API Key Env | Daily Limit |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SwarmBot Configuration: Models, Costs, Rate Limits

@@ -1,9 +1,19 @@
 ---
-title: "cekwajar Database Schema - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: cekwajar
-date: 2026-04-11
-tags: [cekwajar, database, supabase, schema, NOT-FOUND]
+title: Database Schema
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: `/home/newadmin/swarm-bot/.wiki/knowledge/cekwajar/supabase/`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # cekwajar Database Schema Extraction

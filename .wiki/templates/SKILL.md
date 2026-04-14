@@ -1,10 +1,19 @@
 ---
-name: second-brain-lint
-description: >
-  Health-check the wiki for contradictions, orphan pages, stale claims,
-  and missing cross-references. Use when the user says "audit",
-  "health check", "lint", "find problems", or wants to improve wiki quality.
-allowed-tools: Bash Read Write Edit Glob Grep
+title: Skill
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Health-check the wiki and report issues with actionable fixes.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Second Brain — Lint

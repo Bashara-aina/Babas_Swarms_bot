@@ -1,8 +1,19 @@
 ---
-tags: [class-imbalance, mixup, regularization, re-balancing, eccv-2020]
-sources: [arxiv:2007.03943]
-created: 2026-04-11
-updated: 2026-04-11
+title: Remix Chou 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Chou, Chang, Pan, Wei & Juan** | ECCV 2020 Workshop | [arXiv:2007.03943](https://arxiv.org/abs/2007.03943)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Remix: Rebalanced Mixup
@@ -67,6 +78,6 @@ This ensures:
 
 ## See Also
 
-- [[052-class-balanced-cui-2019]] — Effective number for class weights
-- [[053-mislas-zhong-2021]] — MiSLAS framework (can use Remix)
+- [[research/052-class-balanced-cui-2019]] — Effective number for class weights
+- [[research/053-mislas-zhong-2021]] — MiSLAS framework (can use Remix)
 - [[054b-cutmix-2020]] — CutMix for long-tail (if available)

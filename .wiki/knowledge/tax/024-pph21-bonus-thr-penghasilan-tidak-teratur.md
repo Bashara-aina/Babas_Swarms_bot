@@ -1,13 +1,21 @@
 ---
-source_id: 024
-title: "PPh 21 Bonus dan THR - Penghasilan Tidak Teratur"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://klikpajak.id/blog/pajak-bonus-karyawan/"
-last_verified: "2026-04-11"
-tags: [pph21, bonus, thr, penghasilan-tidak-teratur, ter, pajak]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Pph21 Bonus Thr Penghasilan Tidak Teratur
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Bonus and THR (Tunjangan Hari Raya) are **irregular income** that must be
+  added to the monthly gross income in the month received, then taxed using the applicable
+  TER rate. Miscalculating this resu...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PPh 21 Bonus dan THR - Penghasilan Tidak Teratur

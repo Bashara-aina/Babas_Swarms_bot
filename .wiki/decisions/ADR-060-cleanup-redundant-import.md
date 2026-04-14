@@ -1,6 +1,19 @@
 ---
-title: "ADR-060: Cleanup Redundant Import in llm_client/__init__.py"
-proposed: "| 2026-04-12"
+title: Adr 060 Cleanup Redundant Import
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Proposed** | 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-060: Cleanup Redundant Import in llm_client/__init__.py
 

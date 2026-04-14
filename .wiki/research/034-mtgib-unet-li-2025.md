@@ -1,9 +1,19 @@
 ---
-tags: [mtl, graph-isomorphism, batch-normalization, multi-task-u-net, mtgib]
-sources: [popw-protocol]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Mtgib Unet Li 2025
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 034 — MTGIB-UNet: Multi-Task Graph Isomorphism Batch Normalization

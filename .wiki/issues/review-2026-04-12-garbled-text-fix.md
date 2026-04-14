@@ -1,5 +1,19 @@
 ---
-## ✅ Passed
+title: Review 2026 04 12 Garbled Text Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Python syntax valid in all checked files'
+wikilinks: []
+confidence: medium
+source: research
 ---
 - Python syntax valid in all checked files
 - Type hints present on all public methods

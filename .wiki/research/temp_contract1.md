@@ -1,8 +1,19 @@
 ---
-tags: [research, temporal-attention, lightweight, rtx-3060, video-understanding, action-segmentation]
-sources: [arxiv:2006.09220, arxiv:2110.08568, arxiv:2408.02024, arxiv:2203.01057, arxiv:2005.03209, arxiv:2601.04159]
-created: 2026-04-13
-updated: 2026-04-13
+title: Temp Contract1
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Target Hardware**: NVIDIA RTX 3060 (12GB VRAM)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Research Notes: Lightweight Temporal Attention Methods for RTX 3060

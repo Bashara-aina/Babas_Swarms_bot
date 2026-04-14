@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Adr 002 Gsa Voice Implementation
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion's current voice is defined by `core/character_enforcer.py` (forbidden
+  phrases) and `SOUL.md` (identity). However, there is no structured communication
+  *style* that governs how Legion respond...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Legion's current voice is defined by `core/character_enforcer.py` (forbidden phrases) and `SOUL.md` (identity). However, there is no structured communication *style* that governs how Legion responds to different message types (emotional, technical, analytical).
 

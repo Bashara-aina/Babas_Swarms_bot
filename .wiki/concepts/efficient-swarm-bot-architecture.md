@@ -9,7 +9,7 @@ summary: This concept outlines the design of an efficient model architecture for
 wikilinks:
   - [[./concepts/model-architecture]]
   - [[./entities/swarm-bot]]
-  - [[INDEX]]
+  - [[knowledge/cekwajar/engineering/INDEX]]
 confidence: high
 source: claude-code
 ---

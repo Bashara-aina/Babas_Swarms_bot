@@ -1,13 +1,21 @@
 ---
-source_id: 074
-title: "UU PDP Indonesia 27 2022 Personal Data Protection Compliance"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/219490"
-last_verified: "2026-04-11"
-tags: [uu-pdp, pdp-law, personal-data, indonesia, privacy, compliance, bi-data]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Uu Pdp Indonesia Privacy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'UU PDP (Undang-Undang Pelindungan Data Pribadi) is Indonesia''s first comprehensive
+  data protection law. **CRITICAL COMPLIANCE REQUIREMENT**: All companies processing
+  Indonesian personal data must c...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UU PDP Indonesia 27 2022 Personal Data Protection Compliance

@@ -1,8 +1,19 @@
 ---
-title: "ADR-007: Handler Audit — No Changes Required"
-auditor: "AUDIT 07"
-date: "2026-04-12"
-status: "Accepted"
+title: Adr 007 Handlers Audit
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Auditor**: AUDIT 07'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-007: Handler Audit — No Changes Required
 

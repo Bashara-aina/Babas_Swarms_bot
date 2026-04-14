@@ -1,13 +1,21 @@
 ---
-source_id: 054
-title: "Indonesia Inflation 2024-2025: Real Wage & Purchasing Power Analysis"
-source_type: RESEARCH
-authority: OFFICIAL_GOV
-url: "https://www.bi.go.id/id/statistik/indikator/data-inflasi.aspx, https://www.kemenkeu.go.id/opini/inflasi-dan-deflasi-memahami-dinamika-harga-dan-kebijakan-ekonomi-indonesia-2025"
-last_verified: "2026-04-11"
-tags: [inflation, real-wage, purchasing-power, bi-rate, umr, cost-of-living]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Inflation Real Wage
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Inflation directly erodes purchasing power - a Rp 5M salary last year is
+  worth less today. Understanding real wage growth vs inflation is fundamental to
+  cekwajar.id's "gaji wajar" calculations and ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Indonesia Inflation 2024-2025: Real Wage & Purchasing Power Analysis

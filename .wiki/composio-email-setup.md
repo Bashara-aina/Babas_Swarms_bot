@@ -1,10 +1,20 @@
 ---
-title: composio-email-setup
-domain: communications
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: system, agents
-tokens_estimated: 420
+title: Composio Email Setup
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- composio-email-setup.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 850+ Composio tool connectors wired via tools/composio_hub.py and tools/composio_client.py
+  — email via Gmail OAuth, graceful degradation when COMPOSIO_API_KEY is missing.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Composio Email Setup

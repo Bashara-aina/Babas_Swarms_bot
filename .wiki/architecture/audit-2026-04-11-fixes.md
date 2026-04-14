@@ -1,17 +1,19 @@
 ---
 title: Audit 2026 04 11 Fixes
 type: architecture
-status: active
-tags: [architecture, audit, fixes, handlers]
-created: 2026-04-13
-updated: 2026-04-13
-summary:: " 2026-04-11 audit applied 4 critical fixes: duplicate handler registration, missing shutdown handler, env validation, and Ollama bypass removal. All 276 tests pass after fixes."
-wikilinks:
-  - [[legion-module-map]]
-  - [[projects/legion-bot]]
-confidence: high
-source: implementation
-project: legion
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Scope:** Babas_Swarms_bot (Legion Bot)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Audit 2026-04-11: Critical Fixes Applied
@@ -33,7 +35,7 @@ project: legion
 
 ## See Also
 
-- [[legion-module-map]] — Core module organization
+- [[architecture/legion-module-map]] — Core module organization
 - [[projects/legion-bot]] — Project overview
 - [[timelines/legion-version-history]] — Version history
 | 5 | `llm_client.py` | MiniMax retry | Replaced fixed 30s retry with exponential backoff + jitter: ~30s → ~60s → ~120s delays | warning |

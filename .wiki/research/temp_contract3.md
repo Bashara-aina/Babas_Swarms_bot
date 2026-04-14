@@ -1,8 +1,20 @@
 ---
-tags: [research, ssm, mamba, s4, bigru-alternatives, state-space-model, sequence-modeling, temporal-modeling]
-sources: [arxiv:2112.13515, arxiv:2310.06710, arxiv:2307.06083, arxiv:2404.16112]
-created: 2026-04-13
-updated: 2026-04-13
+title: Temp Contract3
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Goal**: Replace BiGRU with State Space Models for temporal sequence
+  modeling'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Research Notes: SSM Methods (Mamba, S4, S4ND) as BiGRU Alternatives

@@ -1,8 +1,19 @@
 ---
-tags: [class-imbalance, effective-number, re-weighting, cvpr-2019]
-sources: [arxiv:1901.05555]
-created: 2026-04-11
-updated: 2026-04-11
+title: Class Balanced Cui 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Cui, Jia, Lin, Song & Belongie** | CVPR 2019 | [arXiv:1901.05555](https://arxiv.org/abs/1901.05555)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Class-Balanced Loss Based on Effective Number of Samples
@@ -70,6 +81,6 @@ $$\text{CB-Loss} = -\frac{1}{E_{n_y}} \log\left(\frac{\exp(s_y)}{\sum_j \exp(s_j
 
 ## See Also
 
-- [[049-ldam-cao-2019]] — LDAM margin loss
-- [[054-remix-chou-2020]] — Remix for re-balanced mixup
-- [[055-logit-adjustment-menon-2021]] — Logit adjustment (different re-balancing approach)
+- [[research/049-ldam-cao-2019]] — LDAM margin loss
+- [[research/054-remix-chou-2020]] — Remix for re-balanced mixup
+- [[research/055-logit-adjustment-menon-2021]] — Logit adjustment (different re-balancing approach)

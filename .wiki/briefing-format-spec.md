@@ -1,10 +1,20 @@
 ---
-title: briefing-format-spec
-domain: proactive-intelligence
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 320
+title: Briefing Format Spec
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- briefing-format-spec.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Optimal morning briefing structure for Bashara — concise, actionable, no
+  noise.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Briefing Format Spec

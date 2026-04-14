@@ -1,3 +1,20 @@
+---
+title: Opencode Integration
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Implement LEGION × OPENCODE INTEGRATION production master prompt
+wikilinks: []
+confidence: medium
+source: research
+---
 # 2026-04-11 — LEGION × OPENCODE INTEGRATION
 
 ## Task

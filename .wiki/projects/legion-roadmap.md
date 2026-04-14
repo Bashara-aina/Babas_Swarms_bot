@@ -1,5 +1,19 @@
 ---
-## Project Vision
+title: Legion Roadmap
+type: project
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- projects
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion is not an assistant — Legion is Bashara's permanent AI coworker.
+wikilinks: []
+confidence: medium
+source: research
 ---
 Legion is not an assistant — Legion is Bashara's permanent AI coworker.
 Jarvis-level personal AI with: soul, long-term memory, proactive intelligence, autonomous skill selection.

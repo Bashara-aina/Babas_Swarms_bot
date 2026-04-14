@@ -1,5 +1,19 @@
 ---
-file: "`core/character_enforcer.py`"
+title: Worker Garbled Russian 2026 04 13
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '1. **Added Cyrillic script detection pattern** (line 34):'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Worker Log — 2026-04-12/13
 1. **Added Cyrillic script detection pattern** (line 34):

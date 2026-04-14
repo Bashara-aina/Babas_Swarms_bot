@@ -1,6 +1,20 @@
 ---
-## Summary
-
+title: Priority 7 Orchestrator Issues
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: All components verified. One missing item in `verify_wiring.py` was corrected
+  during review.
+wikilinks: []
+confidence: medium
+source: research
 ---
 All components verified. One missing item in `verify_wiring.py` was corrected during review.
 ---

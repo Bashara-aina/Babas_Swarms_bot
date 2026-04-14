@@ -1,8 +1,19 @@
 ---
-title: "Charlie Munger — Latticework of Mental Models"
-source: "Poor Charlie's Almanack + JD Meier analysis (jdmeier.com/charlie-mungers-mental-models)"
-tags: [01-munger-latticework]
-type: wisdom
+title: Munger Latticework
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Poor Charlie''s Almanack + JD Meier analysis (jdmeier.com/charlie-mungers-mental-models)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Charlie Munger — Latticework of Mental Models
 

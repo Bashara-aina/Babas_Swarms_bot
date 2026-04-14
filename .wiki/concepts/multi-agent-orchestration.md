@@ -10,8 +10,8 @@ wikilinks:
   - [[./concepts/reasoning-loop]]
   - [[./concepts/skill-registry]]
   - [[./concepts/self-improvement-loop]]
-  - [[legion-module-map]]
-  - [[legion-bot]]
+  - [[architecture/legion-module-map]]
+  - [[projects/legion-bot]]
 confidence: high
 source: implementation
 ---
@@ -71,5 +71,5 @@ Multi-agent orchestration is the execution layer built on top of [[./concepts/re
 ## See Also
 
 - [[./concepts/reasoning-loop]] — Reasoning cycles within each agent
-- [[legion-module-map]] — System architecture
-- [[legion-bot]] — Main project documentation
+- [[architecture/legion-module-map]] — System architecture
+- [[projects/legion-bot]] — Main project documentation

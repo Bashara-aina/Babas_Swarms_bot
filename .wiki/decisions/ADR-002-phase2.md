@@ -1,6 +1,19 @@
 ---
-## Context
-
+title: Adr 002 Phase2
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Phase 1 (Foundation) is complete. Phase 2 adds three focused upgrades:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 Phase 1 (Foundation) is complete. Phase 2 adds three focused upgrades:
 - **U5:** Skills Registry — 30 curated skills with auto-fire from intent_router

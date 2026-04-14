@@ -1,10 +1,20 @@
 ---
 title: Bashara Schedule
-domain: bashara-context
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: proactive, all
-tokens_estimated: 300
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bashara-schedule.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Lives on Tokyo JST time — wake 7AM, code late, sleep often past 1AM, thesis
+  zemi Thu 1-3PM.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BASHARA SCHEDULE

@@ -64,7 +64,7 @@ Epistemology asks: how do you know what you think you know? For an AI agent, thi
 
 **Why it matters**: In software and policy, engineers often remove "stupid rules" only to discover the rule prevented a subtle failure mode that nobody documented.
 
-**LEGION RULE**: "When [[Bashara-aina]] wants to change or remove an existing system policy, first extract the original rationale from memory. If the rationale is unknown, don't remove — investigate first. Apply to [[concepts/freemium-gate]] removal, [[memory-architecture]] changes."
+**LEGION RULE**: "When [[Bashara-aina]] wants to change or remove an existing system policy, first extract the original rationale from memory. If the rationale is unknown, don't remove — investigate first. Apply to [[concepts/freemium-gate]] removal, [[./concepts/memory-architecture]] changes."
 
 **Applied to Bashara**: Whenrumahlabuh.com had an open-ended booking extension policy that caused notice-period problems, the correct approach was not to immediately remove it but first ask: why was this policy created? The answer (preventing billing disputes) reveals what removing it would break.
 

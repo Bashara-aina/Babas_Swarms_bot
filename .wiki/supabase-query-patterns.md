@@ -1,10 +1,20 @@
 ---
-title: supabase-query-patterns
-domain: data-analytics
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: tools/supabase_client.py, tools/rumahlabuh_crew.py, handlers/computer.py
-tokens_estimated: 420
+title: Supabase Query Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- supabase-query-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Async httpx REST client, PostgREST API only, no native Postgres driver, RLS
+  bypass via service role key, no query builder or ORM.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Supabase Query Patterns

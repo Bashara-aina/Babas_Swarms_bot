@@ -1,13 +1,21 @@
 ---
-source_id: 016
-title: "UMSP UMSK Upah Minimum Sektoral Provinsi Kabupaten Kota"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Download/370470"
-last_verified: "2026-04-11"
-tags: [umsp,umsk,upah-minimum-sektoral,labor-law,pengupahan]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Umsp Umsk
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: UMSP dan UMSK adalahupah minimum yang lebih tinggi dari UMK/UMP untuk sektor
+  tertentu. Perusahaan di industri tertentu (konfeksi, perhotelan, dll) mungkin harus
+  membayar sesuai UMSK, bukan UMK stan...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UMSP UMSK Upah Minimum Sektoral Provinsi Kabupaten Kota

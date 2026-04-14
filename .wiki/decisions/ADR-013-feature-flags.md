@@ -1,5 +1,20 @@
 ---
-## Context
+title: Adr 013 Feature Flags
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: AUDIT-13 required cataloging all feature flags, identifying dead code (never-enabled
+  features), and ensuring every disabled feature has an explicit flag and user message.
+wikilinks: []
+confidence: medium
+source: research
 ---
 AUDIT-13 required cataloging all feature flags, identifying dead code (never-enabled features), and ensuring every disabled feature has an explicit flag and user message.
 ---

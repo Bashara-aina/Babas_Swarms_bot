@@ -1,3 +1,20 @@
+---
+title: Worker Fix Cif Scope
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Fix `_cif` scope bug (stale alias + lambda reference)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Fix: `_cif` Scope Bug in `llm_client/__init__.py`
 
 **Date**: 2026-04-12  

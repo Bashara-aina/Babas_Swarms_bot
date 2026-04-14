@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, dual-path, slowfast, temporal-modeling, iccv-2019]
-sources: [arxiv:1812.03982]
-created: 2026-04-11
-updated: 2026-04-11
+title: Slowfast Feichtenhofer 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Feichtenhofer, Fan, Malik, He** | ICCV 2019 | [arXiv:1812.03982](https://arxiv.org/abs/1812.03982)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SlowFast Networks for Video Recognition
@@ -59,5 +70,5 @@ Video
 
 ## See Also
 
-- [[068-i3d-carreira-2017]] — I3D (two-stream baseline)
-- [[069-tsm-lin-2019]] — TSM (efficient, single-stream)
+- [[research/068-i3d-carreira-2017]] — I3D (two-stream baseline)
+- [[research/069-tsm-lin-2019]] — TSM (efficient, single-stream)

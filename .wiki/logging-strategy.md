@@ -1,10 +1,21 @@
 ---
-title: logging-strategy
-domain: deployment-cicd
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: system
-tokens_estimated: 480
+title: Logging Strategy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logging-strategy.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Dual-output logging (stdout + bot.log) with rotating file handler (10MB/5
+  backups) and secret redaction, but no persistent crash logging and no structured
+  crash recovery.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Logging Strategy

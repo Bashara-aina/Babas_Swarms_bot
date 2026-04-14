@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, temporal-modeling, action-recognition, two-stream, 3d-cnn, kinetics]
-sources: [arxiv:1705.07750]
-created: 2026-04-11
-updated: 2026-04-11
+title: I3D Carreira 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'pdf_path: "project/popw/working/external/papers/1705.07750.pdf"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # I3D: Two-Stream Inflated 3D ConvNets
@@ -63,5 +74,5 @@ I3D was trained on Kinetics-400 (240K training videos, 400 classes) and released
 
 ## See Also
 
-- [[069-tsm-lin-2019]] — Temporal Shift Module for efficient video understanding (RTX 3060-friendly)
-- [[071-slowfast-feichtenhofer-2019]] — SlowFast dual-path architecture
+- [[research/069-tsm-lin-2019]] — Temporal Shift Module for efficient video understanding (RTX 3060-friendly)
+- [[research/071-slowfast-feichtenhofer-2019]] — SlowFast dual-path architecture

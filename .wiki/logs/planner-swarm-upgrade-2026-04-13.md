@@ -1,3 +1,21 @@
+---
+title: Planner Swarm Upgrade 2026 04 13
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Existing /swarm command at .opencode/command/swarm.md (207 lines, v2.0
+  already but needs reinforcement)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: SWARM-Master v2.0 Upgrade — Anti-Hallucination Enforcement
 Date: 2026-04-13
 Type: FILE_OPERATION

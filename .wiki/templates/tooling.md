@@ -1,3 +1,21 @@
+---
+title: Tooling
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: CLI tools that extend the LLM's capabilities when working with a second-brain
+  vault.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tooling Reference
 
 CLI tools that extend the LLM's capabilities when working with a second-brain vault.

@@ -1,16 +1,21 @@
 ---
-paper_id: 013
-title: "Feature-wise Transformations"
-authors: "Dumoulin, Perez, Schucher, Strub, de Vries, Courville, Bengio"
-venue: "Distill 2018"
-url: "https://distill.pub/2018/feature-wise-transformations"
-arxiv: "None (Distill journal)"
-code: "https://github.com/ethanjperez/film"
+title: Featurewise Dumoulin 2018
+type: concept
+status: active
 tags:
-  - feature-wise
-  - conditioning
-  - fiilm
-  - survey
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper is the **foundational taxonomy and conceptual framework** for
+  Feature-wise Linear Modulation (FiLM). While not introducing FiLM itself (FiLM came
+  from Perez et al. 2017), this Distill ar...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

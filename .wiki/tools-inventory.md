@@ -1,10 +1,20 @@
 ---
-title: tools-inventory
-domain: tools-skills
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 595
+title: Tools Inventory
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tools-inventory.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every tool Legion can execute — status, trigger, error handling, and output
+  format.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Tools Inventory

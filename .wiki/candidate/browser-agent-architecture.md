@@ -1,6 +1,19 @@
 ---
-## 2. Mode 1: Site Health Check
-
+title: Browser Agent Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- candidate
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'async def check_site_health(url: str | None = None) -> dict[str, Any]'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ```python
 async def check_site_health(url: str | None = None) -> dict[str, Any]

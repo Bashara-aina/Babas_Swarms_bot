@@ -1,3 +1,20 @@
+---
+title: Swarm 2026 04 13 Wiki Wiring Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Contracts: 1 total (batch script approach taken for efficiency)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Swarm Run: Fix wiki wiring/broken links
 Date: 2026-04-13
 Type: REFACTOR
@@ -34,6 +51,6 @@ These are NOT actual broken links:
 
 ### Verification
 Git diff shows correct transformations:
-- `[[reasoning-loop]]` → `[[./concepts/reasoning-loop]]`
-- `[[chromadb]]` → `[[./entities/chromadb]]`
-- `[[wiki/SCHEMA.md]]` → `[[SCHEMA.md]]`
+- `[[./concepts/reasoning-loop]]` → `[[./concepts/reasoning-loop]]`
+- `[[./entities/chromadb]]` → `[[./entities/chromadb]]`
+- `[[SCHEMA.md]]` → `[[SCHEMA.md]]`

@@ -1,5 +1,19 @@
 ---
-
+title: Nihongo Upgrade Tasks
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Planned by @planner | Date: 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # NIHONGO MODE v2.0 — Upgrade Task List
 > Planned by @planner | Date: 2026-04-12

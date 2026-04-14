@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: "popw (Papers of Papers Worker?) is a multi-task learning research project for IKEA assembly video understanding. Architecture: ResNet50-FPN backbone → 3 task heads (Detection + Pose + Activity) with Kendall uncertainty weighting. Dataset: 685,516 frames from 254 IKEA assembly videos with 3 label types. Critical finding: FiLM `.detach()` blocks activity→pose gradient flow. Target: Activity >60.46%, Detection 70-80% mAP@0.5, Pose 85-90% PCK@0.1."
 wikilinks:
   - [[concepts/multi-agent-orchestration]]
-  - [[cekwajar-id]]
-  - [[rumahlabuh-com]]
+  - [[projects/cekwajar-id]]
+  - [[projects/rumahlabuh-com]]
 confidence: high
 source: research
 project: popw
@@ -340,6 +340,6 @@ Full implementation in `IMPLEMENTATION_GUIDE.md`.
 ## Related Articles
 
 - [[concepts/multi-agent-orchestration]] — Multi-task learning shares roots with multi-agent coordination
-- [[cekwajar-id]] — cekwajar.id (Indonesian data platform, separate ML project)
-- [[rumahlabuh-com]] — rumahlabuh.com (Indonesian rental platform, separate project)
+- [[projects/cekwajar-id]] — cekwajar.id (Indonesian data platform, separate ML project)
+- [[projects/rumahlabuh-com]] — rumahlabuh.com (Indonesian rental platform, separate project)
 - [[entities/gpt-researcher]] — Research automation patterns from this project

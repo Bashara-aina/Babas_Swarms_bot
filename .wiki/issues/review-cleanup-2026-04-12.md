@@ -1,6 +1,19 @@
 ---
-## Summary
-
+title: Review Cleanup 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Status**: ✅ CLEAN with 1 Warning'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **Status**: ✅ CLEAN with 1 Warning
 ---

@@ -1,10 +1,20 @@
 ---
 title: Bashara Profile
-domain: bashara-context
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 400
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bashara-profile.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Know who Bashara is — Master's student in Tokyo, runs 2 Indonesian businesses,
+  thesis deadline July 2026.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BASHARA PROFILE

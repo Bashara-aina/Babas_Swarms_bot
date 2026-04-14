@@ -1,10 +1,20 @@
 ---
-title: context-window-map
-domain: context-window
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 420
+title: Context Window Map
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- context-window-map.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every section injected into the LLM context — token count, purpose, and injection
+  frequency.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Context Window Map

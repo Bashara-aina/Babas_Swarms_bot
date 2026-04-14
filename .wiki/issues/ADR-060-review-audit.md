@@ -1,6 +1,19 @@
 ---
-## 1. Module-Level Import Verification
-
+title: Adr 060 Review Audit
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: from core.intent_router import build_intent_hint, classify_intent_fast
+wikilinks: []
+confidence: medium
+source: research
 ---
 **Line 44**:
 ```python

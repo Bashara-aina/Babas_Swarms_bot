@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Adr 007 Popw Wiki Pipeline
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW-PROTOCOL requires 100 research paper wiki pages for a multi-task assembly
+  action recognition project. The papers span 10 tiers from foundational (ResNet,
+  FPN) to domain-specific (IKEA ASM, Fra...
+wikilinks: []
+confidence: medium
+source: research
 ---
 POPW-PROTOCOL requires 100 research paper wiki pages for a multi-task assembly action recognition project. The papers span 10 tiers from foundational (ResNet, FPN) to domain-specific (IKEA ASM, Frame2Freq-ST) to training optimization (FP16, gradient checkpointing).
 

@@ -1,8 +1,19 @@
 ---
-title: "ADR-005: Package Split for computer_agent and llm_client"
-created: 2026-04-11
+title: Adr 005 Package Split Computer Agent Llm Client
 type: decision
-tags: [ADR-005-package-split-computer-agent-llm-client]
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Date:** 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-005: Package Split for computer_agent and llm_client
 

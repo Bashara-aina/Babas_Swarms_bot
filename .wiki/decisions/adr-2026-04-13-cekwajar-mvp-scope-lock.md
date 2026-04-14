@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Decision to lock cekwajar.id MVP to Wajar Slip only (not all 5 tools), excluding Wajar Gaji, Wajar Tanah, Wajar Kabur, and Wajar Hidup until specific release gates are met. Rationale: Wajar Slip is the only tool with zero cold-start data problem, the only tool where the paywall is immediately justified by concrete IDR shortfall findings, and the only tool with the deepest technical moat (PPh21 TER + progressive + 6-component BPJS)."
 wikilinks:
-  - [[cekwajar-id]]
-  - [[cekwajar-verdict-engine]]
+  - [[projects/cekwajar-id]]
+  - [[architecture/cekwajar-verdict-engine]]
   - [[./concepts/market-data-indonesia]]
   - [[./concepts/labor-law-indonesia]]
 confidence: high
@@ -195,7 +195,7 @@ A combined launch fails because it:
 
 ## Related Articles
 
-- [[cekwajar-id]] — Project overview
-- [[cekwajar-verdict-engine]] — Technical implementation
+- [[projects/cekwajar-id]] — Project overview
+- [[architecture/cekwajar-verdict-engine]] — Technical implementation
 - [[./concepts/market-data-indonesia]] — Wajar Gaji data sources
 - [[./concepts/labor-law-indonesia]] — Regulatory basis for Wajar Slip

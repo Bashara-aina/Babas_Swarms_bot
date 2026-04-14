@@ -1,3 +1,20 @@
+---
+title: Cekwajar Roadmap
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- growth-strategy
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "cekwajar.id — Gallagher-Model Growth Roadmap"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "cekwajar.id — Gallagher-Model Growth Roadmap"
 ***

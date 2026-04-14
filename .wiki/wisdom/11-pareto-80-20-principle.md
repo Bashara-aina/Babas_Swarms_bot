@@ -1,3 +1,20 @@
+---
+title: Pareto 80 20 Principle
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Vilfredo Pareto + Tim Ferriss (4HWW) + Paul Graham'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Pareto Principle — 80/20 Ruthlessness
 
 Source: Vilfredo Pareto + Tim Ferriss (4HWW) + Paul Graham

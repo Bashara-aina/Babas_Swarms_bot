@@ -1,3 +1,21 @@
+---
+title: Creativity Innovation
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Braintrust; failure-pes; protect the creative; candor
+  required; iteration; quality is the business proposition.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 18: Creativity & Innovation
 
 ## [Ed Catmull] — Creativity, Inc.

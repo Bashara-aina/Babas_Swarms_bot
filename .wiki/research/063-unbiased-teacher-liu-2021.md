@@ -1,9 +1,19 @@
 ---
-tags: [semi-supervised, object-detection, pseudo-label, bias, teacher-student, iclr2021]
-sources: [arxiv:2102.09480, openreview:MJIve1zgR]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "063"
+title: Unbiased Teacher Liu 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Liu*, Ma*, He*, Kuo*, et al. | ICLR 2021 | [arXiv:2102.09480](https://arxiv.org/abs/2102.09480)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Unbiased Teacher for Semi-Supervised Object Detection

@@ -1,6 +1,19 @@
 ---
-## Quality Gates
-
+title: Adr 006 Wiki Quality Gate
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Synchronous checks that run before any I/O or LLM call:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### 1. Fast Gate (Heuristic, <5ms target)
 

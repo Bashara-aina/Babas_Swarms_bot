@@ -1,3 +1,21 @@
+---
+title: Product Ux Design
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Customers hire products to get "jobs" done; focus on job-to-be-done
+  over demographics; progress definers; causal mechanism.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 11: Product & UX Design
 
 ## [Clayton Christensen] — Competing Against Luck

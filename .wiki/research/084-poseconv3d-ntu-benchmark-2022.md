@@ -1,14 +1,21 @@
 ---
-paper_id: 084
-title: "Revisiting Skeleton-Based Action Recognition: PoseConv3D on NTU RGB+D Benchmark"
-authors: "Duan, Hang; Wang, Jia; Chen, Kong; Zhao, Ding; Xiong, Yuanhan; Li, Jia"
-year: 2022
-venue: "CVPR"
-arxiv: "2104.13586"
-citations: 680
-tier: 8
-tags: [pose, skeleton, action-recognition, NTU, benchmark, CVPR2022]
-popw_relevance: HIGH
+title: Poseconv3D Ntu Benchmark 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Paper 011 introduced PoseConv3D. This paper evaluates it on NTU RGB+D benchmark
+  — the canonical skeleton action recognition dataset. NTU results inform POPW whether
+  3D heatmap volumes outperform 2D...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Revisiting Skeleton-Based Action Recognition: PoseConv3D on NTU RGB+D Benchmark
@@ -74,8 +81,8 @@ Voxelize 2D keypoints over time into 3D heatmap volume, then apply 3D convolutio
 
 ## Connections to Other Wiki Papers
 
-- [[011-poseconv3d-duan-2022]] — Original PoseConv3D paper (core method)
-- [[085-openpose-cao-2017]] — OpenPose is one source of skeleton annotations for NTU-style data
+- [[research/011-poseconv3d-duan-2022]] — Original PoseConv3D paper (core method)
+- [[research/085-openpose-cao-2017]] — OpenPose is one source of skeleton annotations for NTU-style data
 
 ## POPW Action Item
 

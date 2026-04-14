@@ -1,13 +1,21 @@
 ---
-source_id: 059
-title: "Kompas Karir.com Indonesian Salary Survey Landscape"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://dataindonesia.id/internet/detail/data-jumlah-pengguna-linkedin-di-indonesia-hingga-april-2024"
-last_verified: "2026-04-11"
-tags: [kompas, karir-com, salary-survey, indonesia, lowongan-kerja, bps, sakeras, median-gaji]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Karir Kompas Indonesia
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Indonesian salary data is fragmented across Jobstreet, Karir.com, and government
+  sources like BPS Sakernas. The average formal worker earns Rp 3.09 million/month
+  (2025 BPS data). cekwajar.id can ag...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Indonesian Salary Survey Landscape (Kompas, Karir.com)

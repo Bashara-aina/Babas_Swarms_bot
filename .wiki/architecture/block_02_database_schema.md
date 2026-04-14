@@ -1,6 +1,20 @@
 ---
-## Executive Summary
-
+title: Block 02 Database Schema
+type: architecture
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Cekwajar.id is an Indonesian consumer data intelligence platform with five
+  core tools:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 Cekwajar.id is an Indonesian consumer data intelligence platform with five core tools:
 - **Wajar Gaji** (Salary benchmarks)

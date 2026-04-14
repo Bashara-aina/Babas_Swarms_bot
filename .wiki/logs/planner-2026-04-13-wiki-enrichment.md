@@ -1,3 +1,20 @@
+---
+title: Planner 2026 04 13 Wiki Enrichment
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Type: RESEARCH / FILE_OPERATION'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Wiki Enrichment and Quality Improvement
 Date: 2026-04-13
 Type: RESEARCH / FILE_OPERATION

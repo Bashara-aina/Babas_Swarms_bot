@@ -1,6 +1,19 @@
 ---
-## #1: Nassim Taleb — Antifragile
-
+title: Top10 Sources
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Domains**: Decision Science, Risk, Resilience, Economics, Ethics'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### Source Profile
 **Type**: Book

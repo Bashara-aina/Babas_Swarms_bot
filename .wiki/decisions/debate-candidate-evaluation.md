@@ -9,7 +9,7 @@ summary: In a 4-agent intelligence debate, all candidates were rejected due to t
 wikilinks:
   - [[./concepts/topic-mismatch]]
   - [[./entities/property-rental-platform]]
-  - [[INDEX]]
+  - [[knowledge/cekwajar/engineering/INDEX]]
 confidence: high
 source: legion-bot
 ---

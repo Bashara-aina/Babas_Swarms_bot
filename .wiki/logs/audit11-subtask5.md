@@ -1,3 +1,20 @@
+---
+title: Audit11 Subtask5
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Add a docstring explaining what the `core/utils/` module does.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Audit 11 — Subtask 5: Add docstring to core/utils/__init__.py
 
 ## Task

@@ -1,6 +1,21 @@
 ---
-## Overview
-
+title: Adr 002 Smoke Test Plan
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This ADR defines a smoke test strategy that divides the Legion codebase into
+  10 logical buckets for parallel testing. Each bucket focuses on a distinct feature
+  area and verifies basic functionality...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This ADR defines a smoke test strategy that divides the Legion codebase into 10 logical buckets for parallel testing. Each bucket focuses on a distinct feature area and verifies basic functionality ("doesn't crash") without deep testing.
 

@@ -1,6 +1,19 @@
 ---
-title: "DATABASE RESILIENCE"
-tags: [database-resilience]
+title: Database Resilience
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- database-resilience.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'domain: "Connection handling, fallback patterns, recovery"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # DATABASE RESILIENCE
 # DATABASE RESILIENCE

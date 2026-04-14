@@ -1,10 +1,20 @@
 ---
-title: observability-stack
-domain: data-analytics
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 480
+title: Observability Stack
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- observability-stack.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Prometheus metrics on :8001, AgentOps optional, local structured JSON logs,
+  in-memory cost tracking — no unified dashboard.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Observability Stack

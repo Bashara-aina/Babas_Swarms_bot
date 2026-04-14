@@ -1,3 +1,21 @@
+---
+title: Physics First Principles
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: The first principle is that you must not fool yourself—and
+  you are the easiest person to fool.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 06: Physics & First Principles
 
 ## Richard Feynman — "The Feynman Lectures on Physics"

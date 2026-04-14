@@ -1,3 +1,21 @@
+---
+title: Concerns Fix Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- @planner read all pre-read files (SOUL.md, DEEP_AUDIT, IMPLEMENTATION_STATUS,
+  etc.)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Concerns Fix Log — 2026-04-12
 
 ## Task Execution

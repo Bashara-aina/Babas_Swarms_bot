@@ -1,9 +1,19 @@
 ---
-title: "ADR-089: Repository Cleanup 2026-04-12"
-action: "Delete all identified stale files to reduce confusion and maintenance burden."
-date: "2026-04-12"
-deciders: "@worker, @reviewer"
-status: "Accepted"
+title: Adr 089 Repository Cleanup 2026 04 12
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: @worker, @reviewer'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-089: Repository Cleanup 2026-04-12
 

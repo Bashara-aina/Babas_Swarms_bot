@@ -1,10 +1,19 @@
 ---
-title: proactive-gaps
-domain: proactive-intelligence
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 380
+title: Proactive Gaps
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- proactive-gaps.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Missing proactive behaviors that should exist but don't.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Proactive Gaps

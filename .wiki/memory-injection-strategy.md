@@ -1,10 +1,19 @@
 ---
 title: Memory Injection Strategy
-domain: memory
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 350
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- memory-injection-strategy.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Which memories to inject per task type, in what order, with token budget.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MEMORY INJECTION STRATEGY

@@ -1,3 +1,20 @@
+---
+title: Bashara Technical
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Generated: April 11, 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Bashara — Technical Deep Dive
 Generated: April 11, 2026
 Source: BASHARA-MASTER-PROFILE + swarm-bot codebase

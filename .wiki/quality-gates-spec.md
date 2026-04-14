@@ -1,10 +1,20 @@
 ---
 title: Quality Gates Spec
-domain: testing
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: ci, development, deployment
-tokens_estimated: 490
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- quality-gates-spec.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'CI/CD quality checks: linting, type checking, test execution, and coverage
+  requirements for Legion.'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # QUALITY GATES SPEC

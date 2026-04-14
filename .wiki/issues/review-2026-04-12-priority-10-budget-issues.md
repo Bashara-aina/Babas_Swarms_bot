@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Review 2026 04 12 Priority 10 Budget Issues
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The new `build_system_prompt()` function with priority-based token budget
+  management was added to `core/system_prompt_builder.py`, but it is **never called**
+  by any active code path. All existing c...
+wikilinks: []
+confidence: medium
+source: research
 ---
 The new `build_system_prompt()` function with priority-based token budget management was added to `core/system_prompt_builder.py`, but it is **never called** by any active code path. All existing call sites continue to use the legacy stub from `agents.py`.
 ---

@@ -1,6 +1,19 @@
 ---
-## Files Reviewed
-
+title: Audit12 Issues
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| File | Change | Verdict |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | File | Change | Verdict |
 |

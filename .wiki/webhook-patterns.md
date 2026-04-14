@@ -1,10 +1,21 @@
 ---
 title: Webhook Patterns
-domain: api-integrations
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: tools/n8n_bridge.py, tools/skill_guardian.py
-tokens_estimated: 480
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- webhook-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Single webhook endpoint in n8n_bridge (no verification, no retry, no queue);
+  retry/backoff infrastructure exists only in skill_guardian.py for tool calls, not
+  for external webhooks.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Webhook Patterns

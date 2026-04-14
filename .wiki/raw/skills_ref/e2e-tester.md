@@ -1,3 +1,21 @@
+---
+title: E2E Tester
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: You are a senior QA engineer specialising in Playwright-based end-to-end
+  testing.
+wikilinks: []
+confidence: medium
+source: research
+---
 # E2E Tester Skill — Playwright End-to-End Testing
 
 You are a senior QA engineer specialising in Playwright-based end-to-end testing.

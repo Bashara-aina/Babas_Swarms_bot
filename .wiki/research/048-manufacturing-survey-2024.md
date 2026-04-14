@@ -1,16 +1,21 @@
 ---
-paper_id: "048"
-title: "Action Recognition in Manufacturing: Survey (2023/2024)"
-status: "UNVERIFIED - Exact paper cannot be confirmed"
-note: "Searches could not locate exact paper matching this title. Related works in domain include:"
-related_papers:
-  - "Praxis: a framework for AI-driven human action recognition in assembly (J. Intell. Manuf. 2024)"
-  - "A framework for AI-driven human action recognition in assembly (Springer, 2023)"
-  - "Various surveys on human activity recognition in manufacturing"
-search_attempted:
-  - "Action Recognition in Manufacturing survey 2023 2024"
-  - "skeleton-based action recognition manufacturing survey"
-domain: "Assembly & Industrial Action Recognition"
+title: Manufacturing Survey 2024
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'The exact paper "Action Recognition in Manufacturing: Survey (2023/2024)"
+  could not be verified through available sources. The paper list entry may refer
+  to:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Status: UNVERIFIED

@@ -1,18 +1,21 @@
 ---
-paper_id: 081
-title: "Bottom-Up Human Pose Estimation via Disentangled Keypoint Regression"
-authors: "Zigang Geng, Ke Sun, Bin Xiao, Zhaoxiang Zhang, Jingdong Wang"
-year: 2021
-venue: "CVPR 2021"
-arxiv: "2104.02300"
-github: "https://github.com/HRNet/DEKR"
+title: Dekr Geng 2021
+type: concept
+status: active
 tags:
-  - pose-estimation
-  - bottom-up
-  - disentangled-regression
-  - keypoint-localization
-  - adaptive-convolution
-popw_relevance: MEDIUM-HIGH
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW's pose head uses heatmap regression for 17 COCO keypoints. DEKR introduces
+  **disentangled keypoint regression** — a multi-branch architecture where each keypoint
+  learns dedicated representatio...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

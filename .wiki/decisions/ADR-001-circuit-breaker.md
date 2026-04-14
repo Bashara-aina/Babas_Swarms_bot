@@ -1,9 +1,19 @@
 ---
-title: "ADR-001: Circuit Breaker Design"
-date: "2026-04-12"
-decider: "@planner"
-reviewer: "@reviewer"
-status: "PROPOSED"
+title: Adr 001 Circuit Breaker
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-001: Circuit Breaker Design
 

@@ -1,14 +1,21 @@
 ---
-paper_id: "011"
-title: "PoseConv3D: Revisiting Skeleton-Based Action Recognition"
-authors: "Haodong Duan, Yue Zhao, Kai Chen, Dahua Lin, Bo Dai"
-year: 2022
-venue: "CVPR 2022"
-arxiv: "2104.13586"
-citations: 1002
-tier: 1
-tags: ["skeleton", "action-recognition", "3d-convolution", "pose", "graph-convolution"]
-popw_relevance: 9
+title: Poseconv3D Duan 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'PoseConv3D (PoseC3D) is the **latest and best approach** for skeleton-based
+  action recognition, replacing GCN-based methods with 3D CNNs on heatmap volumes.
+  Key insight: **3D heatmap volumes** (fro...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

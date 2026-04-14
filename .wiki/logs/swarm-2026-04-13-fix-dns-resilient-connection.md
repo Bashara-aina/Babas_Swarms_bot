@@ -1,3 +1,20 @@
+---
+title: Swarm 2026 04 13 Fix Dns Resilient Connection
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Contracts: 4 total, 4 succeeded, 1 retry (proactive_engine.py fix), 0 failed'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Swarm Run: fix-telegram-dns-resilient-connection
 Date: 2026-04-13
 Type: BUG_FIX

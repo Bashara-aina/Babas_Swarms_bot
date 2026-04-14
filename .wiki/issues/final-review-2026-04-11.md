@@ -1,8 +1,19 @@
 ---
-title: "Final Review: Wiki Domain Files Validation"
-created: 2026-04-11
-type: review
-tags: [final-review-2026-04-11]
+title: Final Review 2026 04 11
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Reviewer**: @reviewer (SwarmBot Review Agent)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Final Review: Wiki Domain Files Validation
 **Date**: 2026-04-11

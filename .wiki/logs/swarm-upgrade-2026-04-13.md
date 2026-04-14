@@ -1,12 +1,19 @@
 ---
-# Swarm Upgrade Log — 2026-04-13
-
-## Swarm Bot v2.0 Anti-Hallucination Upgrade
-
-Date: 2026-04-13
-Type: FILE_OPERATION
-Task: Upgrade /swarm command and all 8 agent prompts with anti-hallucination enforcement
-
+title: Swarm Upgrade 2026 04 13
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| File | Size | Change |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Files Modified

@@ -1,3 +1,20 @@
+---
+title: Smoke Results Bucket2
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Date**: 2026-04-11 20:35:57'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Smoke Test Results — Bucket 2: Agent System
 
 **Date**: 2026-04-11 20:35:57

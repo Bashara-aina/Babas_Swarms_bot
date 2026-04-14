@@ -1,3 +1,20 @@
+---
+title: Reviewer Approved 2026 04 14 Quarantine Revival
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Task: Revive quarantined files with score > 0.05'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## APPROVAL: Quarantine Revival Operation
 Date: 2026-04-14
 Reviewer: @reviewer

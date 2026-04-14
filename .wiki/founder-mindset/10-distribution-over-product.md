@@ -1,3 +1,20 @@
+---
+title: Distribution Over Product
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Glean playbook + Clay.com + Relay growth case studies'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Distribution > Product — The Clay/Relay Pattern
 
 Source: Glean playbook + Clay.com + Relay growth case studies

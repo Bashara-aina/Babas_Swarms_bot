@@ -1,8 +1,19 @@
 ---
-title: "Change line 46 from:"
-created: 2026-04-12
-type: review
-tags: [review-2026-04-12-legion-wiring-audit]
+title: Review 2026 04 12 Legion Wiring Audit
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: build_system_prompt = _agents_module.build_system_prompt
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Change line 46 from:
 build_system_prompt = _agents_module.build_system_prompt

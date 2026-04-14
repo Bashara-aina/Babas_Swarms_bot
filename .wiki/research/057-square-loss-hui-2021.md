@@ -1,8 +1,19 @@
 ---
-tags: [loss-functions, square-loss, cross-entropy, classification, neurips-2021]
-sources: [arxiv:2006.07322]
-created: 2026-04-11
-updated: 2026-04-11
+title: Square Loss Hui 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Hui & Belkin** | NeurIPS 2021 | [arXiv:2006.07322](https://arxiv.org/abs/2006.07322)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Square Loss as Alternative to Cross-Entropy
@@ -75,6 +86,6 @@ Not directly. Square loss, like CE, doesn't automatically handle class imbalance
 
 ## See Also
 
-- [[055-logit-adjustment-menon-2021]] — Logit adjustment (can be applied to square loss)
-- [[052-class-balanced-cui-2019]] — Class-balanced weighting for any loss
-- [[049-ldam-cao-2019]] — LDAM (margin-based approach)
+- [[research/055-logit-adjustment-menon-2021]] — Logit adjustment (can be applied to square loss)
+- [[research/052-class-balanced-cui-2019]] — Class-balanced weighting for any loss
+- [[research/049-ldam-cao-2019]] — LDAM (margin-based approach)

@@ -1,3 +1,21 @@
+---
+title: Planner 2026 04 13 Hallucination Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `.wiki/` and `wiki/` directories exist (different locations - wiki/ is
+  the target)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Fix Worker Hallucination - Wiki File Verification
 Date: 2026-04-13
 Type: FILE_OPERATION

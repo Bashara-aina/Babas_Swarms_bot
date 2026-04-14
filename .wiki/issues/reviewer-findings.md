@@ -1,3 +1,20 @@
+---
+title: Reviewer Findings
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Review Date:** 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Wiki Review Findings
 **Review Date:** 2026-04-11  
 **Reviewer:** @reviewer agent  

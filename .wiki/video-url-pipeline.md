@@ -1,10 +1,21 @@
 ---
-title: video-url-pipeline
-domain: tools
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: tools-inventory.md, tool-output-formatting.md
-tokens_estimated: 595
+title: Video Url Pipeline
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- video-url-pipeline.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '`tools/video.py` handles video URL understanding via a pipeline: URL classification
+  → yt-dlp metadata extraction → optional faster-whisper transcription. Supports 12
+  video platforms. Falls back gra...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Video URL Pipeline

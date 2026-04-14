@@ -1,6 +1,19 @@
 ---
-## ✅ Passed
-
+title: Priority 9 Commands Issues
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `cmd_capabilities()` exists (line 143) with proper `async def`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### handlers/admin_handlers.py
 - `cmd_capabilities()` exists (line 143) with proper `async def`

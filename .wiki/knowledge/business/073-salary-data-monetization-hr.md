@@ -1,13 +1,21 @@
 ---
-source_id: 073
-title: "Salary Data Monetization HR Analytics B2B 2024"
-source_type: BUSINESS_MODEL
-authority: INDUSTRY
-url: "https://www.roberthalf.com/us/en/insights/salary-guide/human-resources"
-last_verified: "2026-04-11"
-tags: [hr-analytics, salary-data, monetization, b2b, hrtech, compensation]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Salary Data Monetization Hr
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: HR analytics and salary data is a proven B2B monetization model. Products
+  like cekwajar.id can leverage Indonesian salary benchmarks as a premium feature,
+  creating recurring revenue from HR departm...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Salary Data Monetization HR Analytics B2B 2024

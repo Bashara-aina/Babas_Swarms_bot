@@ -1,13 +1,21 @@
 ---
-source_id: 067
-title: "a16z One-Person Billion Dollar Company AI Thesis"
-source_type: RESEARCH
-authority: ACADEMIC
-url: "https://a16z.com/humans-are-for-ideas-ai-is-for-execution/"
-last_verified: "2026-04-11"
-tags: [a16z, one-person-company, ai-execution, billion-dollar, thesis, human-ideas]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: A16Z One Person Unicorn
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'The a16z thesis validates that AI enables solo founders to build billion-dollar
+  businesses. The key insight: "Humans are for ideas, AI is for execution." This directly
+  validates Bashara''s Legion ar...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # a16z One-Person Billion Dollar Company AI Thesis

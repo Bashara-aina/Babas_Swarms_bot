@@ -1,3 +1,20 @@
+---
+title: Tool2 Dify
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Wire Dify self-hosted AI workflow platform into Legion'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tool 2 Log: Dify Integration
 
 **Date:** 2026-04-12

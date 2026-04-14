@@ -1,3 +1,20 @@
+---
+title: External Research Findings
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Generated: April 11, 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Wiki — External Research Findings
 Generated: April 11, 2026
 Source: Perplexity deep research

@@ -1,3 +1,21 @@
+---
+title: Resilience Anti Fragility
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Antifragility beyond robust/resilient; gains from disorder;
+  optionality; barbell strategy; skin in the game.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 19: Resilience & Anti-Fragility
 
 ## [Nassim Taleb] — Antifragile

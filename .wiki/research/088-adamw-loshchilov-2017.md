@@ -1,18 +1,21 @@
 ---
-title: "088 — Decoupled Weight Decay Regularization (AdamW, Loshchilov & Hutter, 2017)"
-subtitle: "Fixing Adam's Weight Decay Implementation for Better Generalization"
-category: training-optimization
-subcategory: optimizer
-tags: [adamw, weight-decay, l2-regularization, optimization, generalization]
-authors: ["Ilya Loshchilov", "Frank Hutter"]
-venue: "ICLR 2019"
-arXiv: "1711.05101"
-date: 2017-11-14
-cited: "~4000+"
-implementation: ["PyTorch optim.AdamW", "TensorFlow"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Adamw Loshchilov 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: AdamW decouples weight decay from the optimization step, fixing a fundamental
+  flaw where L2 regularization and weight decay behave differently in adaptive gradient
+  methods. Improves Adam's generali...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

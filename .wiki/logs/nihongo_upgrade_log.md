@@ -1,3 +1,20 @@
+---
+title: Nihongo Upgrade Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Started: 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
+---
 # NIHONGO MODE v2.0 — Upgrade Progress Log
 > Started: 2026-04-12
 

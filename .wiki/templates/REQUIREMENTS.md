@@ -1,3 +1,22 @@
+---
+title: Requirements
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> This is the genesis document for this project. It describes the pattern,
+  the requirements, and how we implemented it. You can use this as a blueprint to
+  build your own version from scratch, or ju...'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Second Brain — Blueprint
 
 > This is the genesis document for this project. It describes the pattern, the requirements, and how we implemented it. You can use this as a blueprint to build your own version from scratch, or just install our implementation via `npx skills add` (see README.md).

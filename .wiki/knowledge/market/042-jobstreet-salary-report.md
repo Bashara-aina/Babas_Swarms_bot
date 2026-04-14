@@ -1,13 +1,21 @@
 ---
-source_id: 042
-title: "JobStreet Salary Report Indonesia 2024: Official Hiring & Compensation Data"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://id.jobstreet.com/id/about/news/article/sea-hcb-report-2024"
-last_verified: "2026-04-11"
-tags: [jobstreet, salary-report, hiring, compensation, benefits, sea]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Jobstreet Salary Report
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: JobStreet is the largest job platform in Indonesia with extensive salary
+  data. Their Hiring, Compensation & Benefits Report 2024 provides authoritative market
+  benchmarks that cekwajar.id can use to...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # JobStreet Salary Report Indonesia 2024: Official Hiring & Compensation Data

@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 14 Comprehensive 40 Bug Audit Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**find .wiki/ -name "*.md" | sort** — Wiki files exist, properly structured'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Review: comprehensive-40-bug-audit-fix
 Date: 2026-04-14
 Reviewer: @reviewer

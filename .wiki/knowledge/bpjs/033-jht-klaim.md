@@ -1,13 +1,21 @@
 ---
-source_id: 033
-title: "Klaim JHT BPJS Ketenagakerjaan: Syarat, Manfaat, dan Simulasi Pencairan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.bpjsketenagakerjaan.go.id/cara-mencairkan-saldo-jht.html"
-last_verified: "2026-04-11"
-tags: [bpjs-ketenagakerjaan, jht, klaim, pencairan, phk, pensiun, labor-law, hrtech]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Jht Klaim
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: While cekwajar.id focuses on payroll calculations, understanding JHT claim
+  conditions is essential for HR modules. When employees leave (resign, laid off,
+  retire), they may claim JHT. Knowing the r...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Klaim JHT BPJS Ketenagakerjaan: Syarat, Manfaat, dan Simulasi Pencairan

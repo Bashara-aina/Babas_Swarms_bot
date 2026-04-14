@@ -1,5 +1,19 @@
 ---
-## Verdict: **FAIL** — 2 blockers, 1 warning
+title: Adr 058 Review Audit
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| # | Item | Status |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ---

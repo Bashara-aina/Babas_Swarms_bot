@@ -1,3 +1,20 @@
+---
+title: Planner Audit 14 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Create and run `scripts/verify_wiring.py` auto-verification'
+wikilinks: []
+confidence: medium
+source: research
+---
 # AUDIT 14 — Planner Log
 
 **Date**: 2026-04-12  

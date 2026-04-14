@@ -1,3 +1,20 @@
+---
+title: Adr 001 Api Key Fix
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: @planner'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-001: API Key & Fallback Chain Fix
 
 **Date**: 2026-04-11

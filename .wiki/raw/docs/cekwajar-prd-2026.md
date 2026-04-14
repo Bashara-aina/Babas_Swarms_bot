@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Raw reference copy of req_01_master_prd.md: Master PRD for cekwajar.id v1. Contains full product requirements for all 5 planned tools (Wajar Slip, Wajar Gaji, Wajar Tanah, Wajar Kabur, Wajar Hidup) with feature lists, freemium gates, success metrics, and kill criteria. Note: MVP is locked to Wajar Slip only per ADR-2026-04-13-cekwajar-mvp-scope-lock."
 wikilinks:
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[decisions/adr-2026-04-13-cekwajar-mvp-scope-lock]]
   - [[projects/cekwajar-id]]
 confidence: high

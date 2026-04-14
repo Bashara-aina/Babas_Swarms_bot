@@ -1,3 +1,21 @@
+---
+title: Decision Science Biases
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Two cognitive systems: System 1 (fast, intuitive, emotional)
+  and System 2 (slow, deliberate, logical); biases stem from System 1.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 03: Decision Science & Cognitive Biases
 
 ## [Daniel Kahneman] — Thinking, Fast and Slow

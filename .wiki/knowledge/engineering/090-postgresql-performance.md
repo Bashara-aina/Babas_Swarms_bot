@@ -1,13 +1,19 @@
 ---
-source_id: 090
-title: "PostgreSQL Performance for SaaS: Indexing and Query Optimization"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://oneuptime.com/blog/post/2026-01-26-postgresql-query-optimization/view"
-last_verified: "2026-04-11"
-tags: [postgresql, performance, indexing, query-optimization, supabase, saas]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Postgresql Performance
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'As the payroll SaaS grows:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PostgreSQL Performance for SaaS: Indexing and Query Optimization

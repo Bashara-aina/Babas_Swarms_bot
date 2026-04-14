@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Wing Loss replaces L2 loss for pose regression with a piecewise loss that applies larger gradient to small errors (hard samples) and smaller gradient to large errors (avoiding outlier domination). POPW uses Wing Loss for the pose head (17 COCO keypoints) in improved/losses.py.
 wikilinks:
-  - [[009-deeppose-pck-toshev-2014]]
-  - [[011-coco-keypoints-lin-2014]]
-  - [[015-simple-baselines-pose-xiao-2018]]
+  - [[research/009-deeppose-pck-toshev-2014]]
+  - [[research/011-coco-keypoints-lin-2014]]
+  - [[research/015-simple-baselines-pose-xiao-2018]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
 source: canonical
@@ -135,9 +135,9 @@ class WingLoss(nn.Module):
 
 ## Related Papers in This Wiki
 
-- [[009-deeppose-pck-toshev-2014]] — PCK metric that Wing Loss is optimized to improve
-- [[011-coco-keypoints-lin-2014]] — COCO keypoint format (17 keypoints, visibility flags)
-- [[015-simple-baselines-pose-xiao-2018]] — Simple baselines use ResNet + Wing Loss
+- [[research/009-deeppose-pck-toshev-2014]] — PCK metric that Wing Loss is optimized to improve
+- [[research/011-coco-keypoints-lin-2014]] — COCO keypoint format (17 keypoints, visibility flags)
+- [[research/015-simple-baselines-pose-xiao-2018]] — Simple baselines use ResNet + Wing Loss
 - [[100-popw-protocol-self-analysis]] — POPW's Wing Loss parameters and PCK@0.1 target
 
 ## LEGION RULE

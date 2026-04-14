@@ -1,7 +1,19 @@
 ---
-date: "2026-04-11"
-scope: "Babas_Swarms_bot (Legion Bot)"
-tests: "All 276 tests passing"
+title: Audit 2026 04 11 Fixes
+type: concept
+status: completed
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- legion
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| # | File | Line(s) | Description | Severity |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Audit 2026-04-11: Critical Fixes Applied
 

@@ -1,11 +1,20 @@
 ---
-title: "ADR-054: Core Module Export Policy"
-audit: "AUDIT 05"
-date: "2026-04-13"
-option_a_(selected): "Explicit Re-Export Policy"
-option_b: "Document the Direct Import Pattern"
-option_c: "Lazy Export with `__getattr__`"
-status: "PROPOSED"
+title: Adr 054 Export Cleanup Audit 05
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'The `core/__init__.py` currently only re-exports a small subset of core
+  functionality:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-054: Core Module Export Policy
 **Date:** 2026-04-13  

@@ -1,6 +1,20 @@
 ---
-## Summary
-
+title: Image Analyzer Fix Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The fix addresses the image analyzer error detection gap comprehensively.
+  Both files have been properly updated.
+wikilinks: []
+confidence: medium
+source: research
 ---
 **Result: PASS**
 

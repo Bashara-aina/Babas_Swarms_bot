@@ -1,3 +1,20 @@
+---
+title: Audit11 Subtask3
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Add a docstring explaining what `core/orchestration/__init__.py` does.
+wikilinks: []
+confidence: medium
+source: research
+---
 # AUDIT 11 — Subtask 3: Add docstring to core/orchestration/__init__.py
 
 ## Task

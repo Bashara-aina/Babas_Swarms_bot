@@ -1,3 +1,20 @@
+---
+title: Openaugi Usage
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tools
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: ~/swarm-bot/.wiki/tools/openaugi'
+wikilinks: []
+confidence: medium
+source: research
+---
 # OpenAugi — Notes to Agent Tasks
 Source: ~/swarm-bot/.wiki/tools/openaugi
 Purpose: Extracts [[task]] items from Obsidian notes and dispatches as AI agent jobs

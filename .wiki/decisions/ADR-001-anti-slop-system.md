@@ -1,3 +1,20 @@
+---
+title: Adr 001 Anti Slop System
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider**: Bashara (Planner Agent)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-001: Anti-Slop Defense System
 
 **Date**: 2026-04-11  

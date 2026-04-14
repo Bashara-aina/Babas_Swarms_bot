@@ -1,13 +1,21 @@
 ---
-source_id: 004
-title: "PP 51 Tahun 2023 Perubahan Kedua PP 36/2021 Pengupahan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/270269"
-last_verified: "2026-04-11"
-tags: [labor-law,pp51-2023,pengupahan,perubahan,formula-upah-minimum]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Pp Pengupahan 51 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: PP 51/2023 membawa perubahan signifikan yaitu penghapusan batas atas dan
+  batas bawah dalam formula perhitungan upah minimum. Ini mempengaruhi cara cekwajar.id
+  memvalidasi kepatuhan dan menghitung p...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PP 51 Tahun 2023 Perubahan Kedua PP 36/2021 Pengupahan

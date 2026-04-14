@@ -1,3 +1,21 @@
+---
+title: Prompt Engineer
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'You are an expert prompt engineer. When asked to write, review, or improve
+  prompts:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Prompt Engineer Skill
 
 You are an expert prompt engineer. When asked to write, review, or improve prompts:

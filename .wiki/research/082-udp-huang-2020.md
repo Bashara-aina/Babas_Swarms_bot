@@ -1,14 +1,21 @@
 ---
-paper_id: 082
-title: "The Devil is in the Details: Delving into Unbiased Data Processing for Human Pose Estimation"
-authors: "Huang, Junjie; Zhu, Zheng; Guo, Feng; Huang, Guan; Du, Dalong"
-year: 2020
-venue: "CVPR"
-arxiv: "1911.07524"
-citations: 520
-tier: 8
-tags: [pose, heatmap, coordinate-system, data-processing, CVPR2020]
-popw_relevance: HIGH
+title: Udp Huang 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW's pose head uses Gaussian heatmap encoding for 17 COCO keypoints. This
+  paper reveals that standard flipping and coordinate transformations introduce systematic
+  bias — meaning POPW's pose head ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # The Devil is in the Details: Delving into Unbiased Data Processing for Human Pose Estimation (UDP)
@@ -90,9 +97,9 @@ eliminates scale bias in coordinate transforms
 
 ## Connections to Other Wiki Papers
 
-- [[080-higherhrnet-cheng-2020]] — HigherHRNet uses UDP-compliant design
-- [[008-simple-baseline-xiao-2018]] — SimpleBaseline should use UDP but doesn't by default
-- [[079-pose-survey-zheng-2020]] — Survey mentions UDP as correction for HPE evaluation
+- [[research/080-higherhrnet-cheng-2020]] — HigherHRNet uses UDP-compliant design
+- [[research/008-simple-baseline-xiao-2018]] — SimpleBaseline should use UDP but doesn't by default
+- [[research/079-pose-survey-zheng-2020]] — Survey mentions UDP as correction for HPE evaluation
 
 ## POPW Action Item
 

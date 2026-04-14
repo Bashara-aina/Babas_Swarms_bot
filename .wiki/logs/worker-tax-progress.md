@@ -1,3 +1,20 @@
+---
+title: Worker Tax Progress
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Domain:** Indonesian Tax - PPh 21 Calculation'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Tax Progress Log - PPh 21 Calculation (020-029)
 
 **Date:** 2026-04-11  

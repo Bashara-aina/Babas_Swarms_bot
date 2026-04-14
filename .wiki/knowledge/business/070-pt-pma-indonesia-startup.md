@@ -1,13 +1,21 @@
 ---
-source_id: 070
-title: "PT PMA Indonesia Mendirikan Startup Digital 2024"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.hukumonline.com/klinik/a/besaran-investasi-asing-pada-start-up-berbasis-software-lt5d669b1a6abaa/"
-last_verified: "2026-04-11"
-tags: [pt-pma, foreign-investment, startup, indonesia, modal, kbli, bkpm]
-cekwajar_impact: HIGH
-legion_can_act: NO
+title: Pt Pma Indonesia Startup
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: If cekwajar.id ever seeks foreign investment or partners with international
+  entities, it may need to convert to PT PMA structure. Understanding the requirements
+  and recent changes is critical for f...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PT PMA Indonesia Mendirikan Startup Digital 2024

@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Adr 001 Wiki Build Strategy
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id is an Indonesian salary transparency platform. The platform needs
+  comprehensive wiki documentation covering Indonesian employment law, tax regulations,
+  BPJS (social security), market sa...
+wikilinks: []
+confidence: medium
+source: research
 ---
 cekwajar.id is an Indonesian salary transparency platform. The platform needs comprehensive wiki documentation covering Indonesian employment law, tax regulations, BPJS (social security), market salary data, product information, business operations, and engineering topics.
 

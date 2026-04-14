@@ -1,10 +1,20 @@
 ---
-title: email-security-patterns
-domain: communications
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: security, agents
-tokens_estimated: 400
+title: Email Security Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- email-security-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Email display uses html.escape() for HTML injection prevention but has NO
+  anti-phishing/content scanning — all email content trusted for display.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Email Security Patterns

@@ -1,3 +1,20 @@
+---
+title: Worker Fix Reviewer Issues 11 15
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Session: LEGION WIKI LOOP'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Log — Reviewer Fixes 11-15
 Date: 2026-04-12
 Session: LEGION WIKI LOOP

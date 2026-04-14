@@ -1,8 +1,19 @@
 ---
-# Harvester Implementation Log — 2026-04-11
-
-## Date: 2026-04-11
-
+title: Harvester Implementation 2026 04 11
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| # | Subtask | Status | Notes |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Subtask Status (18 Total)

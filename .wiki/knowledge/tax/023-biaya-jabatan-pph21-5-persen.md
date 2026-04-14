@@ -1,13 +1,21 @@
 ---
-source_id: 023
-title: "Biaya Jabatan PPh 21 - 5% dari Penghasilan Bruto Maksimal Rp500rb/bulan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://klikpajak.id/blog/biaya-jabatan-pph-21/"
-last_verified: "2026-04-11"
-tags: [pph21, biaya-jabatan, bpjs, pengurang, labor-law, pajak]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Biaya Jabatan Pph21 5 Persen
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Biaya jabatan reduces taxable income before PPh 21 calculation. With Rp500,000/month
+  cap, it saves employees ~Rp60,000–Rp225,000 in annual tax depending on bracket.
+  Failing to deduct biaya jabatan ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Biaya Jabatan PPh 21 - 5% dari Penghasilan Bruto Maksimal Rp500rb/bulan

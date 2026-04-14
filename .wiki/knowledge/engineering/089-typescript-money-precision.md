@@ -1,13 +1,19 @@
 ---
-source_id: 089
-title: "TypeScript Financial Calculation Precision with Decimal.js"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://dev.to/benjamin_renoux/financial-precision-in-javascript-handle-money-without-losing-a-cent-1chc"
-last_verified: "2026-04-11"
-tags: [typescript, decimal.js, financial, money, precision, payroll, pph21]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Typescript Money Precision
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'cekwajar.id calculates:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # TypeScript Financial Calculation Precision with Decimal.js

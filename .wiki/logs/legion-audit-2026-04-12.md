@@ -1,3 +1,20 @@
+---
+title: Legion Audit 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Bug | Location | Severity | Fix Applied |'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Code Audit — 2026-04-12
 
 ## Status: COMPLETED (3-hour audit cycle)

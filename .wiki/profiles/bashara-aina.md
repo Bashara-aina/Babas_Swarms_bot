@@ -1,7 +1,19 @@
 ---
-title: "BASHARA AINA — Owner & Master"
-type: profile
-tags: [bashara-aina]
+title: Bashara Aina
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Lokasi: Narita, Chiba, Jepang'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # BASHARA AINA — Owner & Master
 

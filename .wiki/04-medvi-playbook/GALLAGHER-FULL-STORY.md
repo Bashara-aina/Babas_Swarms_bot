@@ -1,3 +1,20 @@
+---
+title: Gallagher Full Story
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- medvi-playbook
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "Matthew Gallagher & Medvi — Verified Complete Story"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "Matthew Gallagher & Medvi — Verified Complete Story"
 source: NYT (April 2, 2026), Phemex, LinkedIn verified accounts

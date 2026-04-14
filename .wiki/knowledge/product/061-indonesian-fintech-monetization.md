@@ -1,13 +1,21 @@
 ---
-source_id: 061
-title: "Indonesian Fintech Monetization Models 2024"
-source_type: BUSINESS_MODEL
-authority: INDUSTRY
-url: "https://www.kenresearch.com/indonesia-fintech-bnpl-for-smes-market"
-last_verified: "2026-04-11"
-tags: [fintech, indonesia, monetization, B2C, B2B, P2P-lending, digital-payments, BNPL, SME-finance]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Indonesian Fintech Monetization
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Indonesian fintech has exploded with B2C models (GoPay, OVO) and B2B models
+  (P2P lending, embedded finance). cekwajar.id could integrate salary disbursement
+  with fintech partners or build salary-ad...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Indonesian Fintech Monetization Models 2024

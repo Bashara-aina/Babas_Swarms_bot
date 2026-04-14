@@ -1,3 +1,21 @@
+---
+title: Review 2026 04 11 Progress Cb Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Worker modified 3 files to fix `agent_loop() got an unexpected keyword argument
+  'progress_cb'` error.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Review: Worker Changes — 2026-04-11
 
 ## Summary

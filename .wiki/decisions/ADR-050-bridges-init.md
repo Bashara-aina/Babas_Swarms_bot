@@ -1,8 +1,19 @@
 ---
-title: "ADR-050: bridges Package — Missing `__init__.py`"
-date: "2026-04-12"
-decider: "@planner"
-status: "Accepted"
+title: Adr 050 Bridges Init
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-050: bridges Package — Missing `__init__.py`
 

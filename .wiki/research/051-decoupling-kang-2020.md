@@ -1,8 +1,19 @@
 ---
-tags: [long-tail-learning, representation-decoupling, classifier-rebalancing, iclr-2020]
-sources: [arxiv:1910.09217]
-created: 2026-04-11
-updated: 2026-04-11
+title: Decoupling Kang 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Kang, Xie, Rohrbach, Yan, Gordo, Feng & Kalantidis** | ICLR 2020 | [arXiv:1910.09217](https://arxiv.org/abs/1910.09217)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Decoupling Representation and Classifier
@@ -76,6 +87,6 @@ Stage 2: Classifier Learning
 
 ## See Also
 
-- [[049-ldam-cao-2019]] — LDAM for classifier re-training
-- [[050-bbn-zhou-2020]] — Bilateral-branch architecture implementing similar ideas
-- [[055-logit-adjustment-menon-2021]] — Logit adjustment as classifier method
+- [[research/049-ldam-cao-2019]] — LDAM for classifier re-training
+- [[research/050-bbn-zhou-2020]] — Bilateral-branch architecture implementing similar ideas
+- [[research/055-logit-adjustment-menon-2021]] — Logit adjustment as classifier method

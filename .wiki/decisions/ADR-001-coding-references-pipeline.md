@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Adr 001 Coding References Pipeline
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: User requested adding coding reference repos documentation to `.wiki/06-legion-instructions/CODING-REFERENCES.md`.
+  The content consists of 20 curated GitHub repos intended to make opencode/Legion
+  i...
+wikilinks: []
+confidence: medium
+source: research
 ---
 User requested adding coding reference repos documentation to `.wiki/06-legion-instructions/CODING-REFERENCES.md`. The content consists of 20 curated GitHub repos intended to make opencode/Legion into a 10/10 full-stack engineer.
 

@@ -1,13 +1,21 @@
 ---
-source_id: 055
-title: "Glassdoor Business Model Teardown"
-source_type: COMPETITOR_ANALYSIS
-authority: INDUSTRY
-url: "https://fourweekmba.com/glassdoor-business-model/"
-last_verified: "2026-04-11"
-tags: [glassdoor, salary-data, employer-branding, job-posting, b2b-subscription, saas, hrtech, monetization]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Glassdoor Teardown
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Glassdoor is the dominant salary transparency platform globally, generating
+  ~$700M+ revenue primarily from B2B employer subscriptions. Their model proves that
+  employee-generated salary data combine...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Glassdoor Business Model Teardown

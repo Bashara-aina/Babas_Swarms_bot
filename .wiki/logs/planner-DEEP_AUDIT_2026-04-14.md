@@ -1,3 +1,20 @@
+---
+title: Planner Deep Audit 2026 04 14
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Read AGENTS.md (65 lines) — confirms LLM calls must go through llm_client.py'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: DEEP_AUDIT_2026-04-14 — 40-Bug Comprehensive Fix
 
 Date: 2026-04-14

@@ -1,3 +1,20 @@
+---
+title: Opencode External Tools
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- prompts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Wire gpt-researcher, Dify, and markitdown into Legion'
+wikilinks: []
+confidence: medium
+source: research
+---
 # OPENCODE — EXTERNAL TOOLS INTEGRATION MASTER PROMPT
 > Wire gpt-researcher, Dify, and markitdown into Legion
 > Goal: Replace Perplexity + Claude Max with self-hosted open source

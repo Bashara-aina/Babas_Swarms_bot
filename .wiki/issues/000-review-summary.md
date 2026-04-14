@@ -1,6 +1,19 @@
 ---
-## Files Reviewed
-
+title: Review Summary
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| File | Change Type |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | File | Change Type |
 |

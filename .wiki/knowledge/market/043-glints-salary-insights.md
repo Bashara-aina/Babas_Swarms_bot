@@ -1,13 +1,21 @@
 ---
-source_id: 043
-title: "Glints Salary Insights Indonesia 2024: Tech vs Non-Tech Report"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://employers.glints.id/hiring-guide/indonesia, https://ebook.glints.com/tren-hr-dan-survei-gaji-2024/"
-last_verified: "2026-04-11"
-tags: [glints, salary-insights, tech, non-tech, startup, hiring-guide]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Glints Salary Insights
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Glints is the dominant platform for tech talent and startup jobs in Indonesia.
+  Their salary data is critical for understanding the tech talent market, startup
+  compensation trends, and for positioni...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Glints Salary Insights Indonesia 2024: Tech vs Non-Tech Report

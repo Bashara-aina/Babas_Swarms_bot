@@ -1,3 +1,20 @@
+---
+title: Worker Subtask 5 Wiki Spec 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Subtask:** Create .wiki/gsa-voice-spec.md'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Subtask 5 Completion Log
 
 **Date:** 2026-04-12

@@ -1,6 +1,20 @@
 ---
-## Summary
-
+title: Audit12 Reviewer Decision
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: LEGION AUDIT 12 verified that nihongo mode is fully per-user and cannot leak
+  between users.
+wikilinks: []
+confidence: medium
+source: research
 ---
 LEGION AUDIT 12 verified that nihongo mode is fully per-user and cannot leak between users.
 

@@ -1,3 +1,20 @@
+---
+title: Network Effects And Moats
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Hamilton Helmer (7 Powers) + Andreessen Horowitz + NFX Guild'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Network Effects and Moats — Hamilton Helmer (7 Powers)
 
 Source: Hamilton Helmer (7 Powers) + Andreessen Horowitz + NFX Guild

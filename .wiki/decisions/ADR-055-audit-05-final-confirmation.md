@@ -1,6 +1,19 @@
 ---
-## Summary of Resolutions
-
+title: Adr 055 Audit 05 Final Confirmation
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Added alias function to `core/soul_engine.py`:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### 1. soul_engine.get_system_prompt() — ✅ RESOLVED
 Added alias function to `core/soul_engine.py`:

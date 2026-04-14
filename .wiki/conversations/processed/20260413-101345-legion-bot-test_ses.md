@@ -1,14 +1,19 @@
 ---
-title: "20260413 101345 legion bot test_ses"
-type: conversation
-status: draft
-tags: [legion-bot, session]
-created: 2026-04-13
-updated: 2026-04-13
-summary: "legion-bot" session with 6 messages captured on 2026-04-13 10:13 JST
-source: legion-bot
-session_id: "test_session"
-confidence: low
+title: 20260413 101345 Legion Bot Test Ses
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- conversations
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Project/CWD**: unknown'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Legion-Bot Session — 2026-04-13 10:13 JST

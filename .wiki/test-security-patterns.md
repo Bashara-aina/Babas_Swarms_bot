@@ -1,10 +1,20 @@
 ---
 title: Test Security Patterns
-domain: testing
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: security, ci, development
-tokens_estimated: 480
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- test-security-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Security-focused test suite covering prompt injection, PII redaction, credential
+  blocking, SQL injection, and dangerous pattern detection.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # TEST SECURITY PATTERNS

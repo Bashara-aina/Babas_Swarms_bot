@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Wiki Quality Review Findings
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The wiki quality gate system is well-architected and implements proper async/await
+  patterns throughout. However, **2 critical blockers** were found that must be fixed
+  before merge.
+wikilinks: []
+confidence: medium
+source: research
 ---
 The wiki quality gate system is well-architected and implements proper async/await patterns throughout. However, **2 critical blockers** were found that must be fixed before merge.
 ---

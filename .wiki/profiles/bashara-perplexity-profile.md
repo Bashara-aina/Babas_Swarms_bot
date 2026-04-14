@@ -1,3 +1,21 @@
+---
+title: Bashara Perplexity Profile
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Here is your complete Legion AI wiki export, synthesized from our entire
+  conversation history today, your stored profile, and your live GitHub data.
+wikilinks: []
+confidence: medium
+source: research
+---
 Here is your complete Legion AI wiki export, synthesized from our entire conversation history today, your stored profile, and your live GitHub data.
 
 ***

@@ -1,6 +1,19 @@
 ---
-title: "Legion Wiring Audit Report"
-tags: [WIRING_AUDIT_REPORT]
+title: Wiring Audit Report
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wiring_audit_report.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'wires_checked: "32 handlers, 49 core modules, 9 tools, 6 bridges, 28 skills"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Legion Wiring Audit Report
 

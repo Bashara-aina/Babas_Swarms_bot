@@ -1,13 +1,21 @@
 ---
-source_id: 010
-title: "PP 35 Tahun 2021 tentang Penyelesaian Perselisihan Hubungan Industrial"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/154582"
-last_verified: "2026-04-11"
-tags: [pp35-2021,pesangon,phk,uph,pengakhiran-hubungan-kerja]
-cekwajar_impact: CRITICAL
-legion_can_act: NO
+title: Pp Pesangon 35 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: PP 35/2021 mengatur kompensasi PHK yang meliputi uang pesangon (UP), uang
+  penghargaan masa kerja (UPMK), dan uang penggantian hak (UPH). System harus calculate
+  dengan tepat karena salah hitung adal...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PP 35 Tahun 2021 tentang Penyelesaian Perselisihan Hubungan Industrial

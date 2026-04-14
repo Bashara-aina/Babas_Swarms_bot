@@ -1,3 +1,20 @@
+---
+title: Pre Existing Test Failure
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File:** `tests/test_humanization.py::test_temporal_graph_add_and_retrieve`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Review: Pre-existing Test Failure
 **File:** `tests/test_humanization.py::test_temporal_graph_add_and_retrieve`  
 **Severity:** ❌ Blocker (for test suite health)  

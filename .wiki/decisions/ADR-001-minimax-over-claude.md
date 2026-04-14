@@ -1,8 +1,19 @@
 ---
-title: "ADR-001: MiniMax M2.7 over Claude Code"
-created: 2026-04-10
+title: Adr 001 Minimax Over Claude
 type: decision
-tags: [ADR-001-minimax-over-claude]
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Context: Claude Code blocked third-party API OAuth on 2026-04-04'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-001: MiniMax M2.7 over Claude Code
 - Date: 2026-04-10

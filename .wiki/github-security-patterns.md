@@ -1,10 +1,20 @@
 ---
-title: github-security-patterns
-domain: git-version-control
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: handlers/github_intel_handler.py, tools/composio_hub.py, core/self_upgrade.py, tools/github_intel.py
-tokens_estimated: 510
+title: Github Security Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- github-security-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Token storage, repo permissions, authentication failure handling, and webhook
+  security for GitHub integrations.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # GitHub Security Patterns

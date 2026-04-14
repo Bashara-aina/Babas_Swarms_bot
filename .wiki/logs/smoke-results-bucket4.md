@@ -1,3 +1,20 @@
+---
+title: Smoke Results Bucket4
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '1. **Import Path Error**: `swarms_bot.chief_of_staff` does not exist'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Smoke Results - Bucket 4: Enterprise Layer
 
 ## Date: 2026-04-11 20:35:48

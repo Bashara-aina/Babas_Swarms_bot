@@ -1,13 +1,21 @@
 ---
-source_id: 056
-title: "Levels.fyi Business Model Teardown"
-source_type: COMPETITOR_ANALYSIS
-authority: INDUSTRY
-url: "https://www.levels.fyi/2024/"
-last_verified: "2026-04-11"
-tags: [levels-fyi, salary-data, tech-compensation, stock-options, career-ladder, transparency, us-markets]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Levels Fyi Teardown
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Levels.fyi has become THE source for tech industry salary transparency, especially
+  for FAANG-level compensation. Their 2024 report shows median SWE L3 at $600K total
+  comp (including stock). This pr...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Levels.fyi Business Model Teardown

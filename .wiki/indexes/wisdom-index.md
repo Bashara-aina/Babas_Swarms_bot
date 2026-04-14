@@ -1,3 +1,20 @@
+---
+title: Wisdom Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- indexes
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> 20 distilled wisdom sources for Legion — added 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Wisdom & Mental Models Index
 > 20 distilled wisdom sources for Legion — added 2026-04-11
 

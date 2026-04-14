@@ -9,7 +9,7 @@ summary: LiteLLM is the unified LLM client used by Legion to call OpenRouter, Gr
 wikilinks:
   - [[./entities/openrouter]]
   - [[./concepts/llm-cost-routing]]
-  - [[memory-architecture]]
+  - [[./concepts/memory-architecture]]
 confidence: high
 source: implementation
 project: legion
@@ -80,4 +80,4 @@ Model routing is defined in `config/models.yaml` and `agents.py` TASK_KEYWORDS d
 ## See Also
 [[./entities/openrouter]] — Primary provider, unified gateway for 100+ models
 [[./concepts/llm-cost-routing]] — How model selection is optimized for cost
-[[memory-architecture]] — Memory system uses litellm for semantic embeddings
+[[./concepts/memory-architecture]] — Memory system uses litellm for semantic embeddings

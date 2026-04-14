@@ -1,8 +1,19 @@
 ---
-title: "ADR-003: Main.py Orphaned Except Block"
-date: "2026-04-12"
-deciders: "Worker agent (audit task)"
-status: "Accepted"
+title: Adr 003 Main Py Orphaned Except
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: Worker agent (audit task)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-003: Main.py Orphaned Except Block
 

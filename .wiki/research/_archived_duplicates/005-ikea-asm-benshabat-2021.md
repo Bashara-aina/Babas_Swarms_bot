@@ -1,14 +1,21 @@
 ---
-paper_id: "005"
-title: "The IKEA ASM Dataset: Understanding People Assembling Furniture through Actions, Objects and Pose"
-authors: "Yizhak Ben-Shabat, Xin Yu, Fatemeh Sadat Saleh, Dylan Campbell, Cristian Rodriguez-Opazo, Hongdong Li, Stephen Gould"
-year: 2021
-venue: "WACV 2021"
-arxiv: "2007.00394"
-citations: 485
-tier: 1
-tags: ["dataset", "assembly", "pose", "action-recognition", "multi-view", "ikea"]
-popw_relevance: 10
+title: Ikea Asm Benshabat 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'This is **POPW''s target domain dataset** — furniture assembly understanding.
+  The dataset captures exactly what POPW needs to understand: humans performing assembly
+  actions, interacting with parts, ...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

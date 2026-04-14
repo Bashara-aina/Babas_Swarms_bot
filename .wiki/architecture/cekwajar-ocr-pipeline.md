@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "The cekwajar.id OCR pipeline routes payslip images through Google Cloud Vision API (primary) with confidence threshold routing: AUTO_ACCEPT at 0.92 confidence (proceed directly), SOFT_CHECK at 0.80 (show to user for confirmation), and MANUAL_REQUIRED at 0.70 (block verdict, require manual entry). Tesseract.js provides fallback. Before launch, 200 real payslip samples across 5 categories must validate ≥92% per-field accuracy on digital PDFs and ≥75% on photos."
 wikilinks:
-  - [[cekwajar-id]]
-  - [[cekwajar-verdict-engine]]
+  - [[projects/cekwajar-id]]
+  - [[architecture/cekwajar-verdict-engine]]
   - [[entities/supabase]]
 confidence: high
 source: implementation
@@ -445,6 +445,6 @@ User Upload → HTTPS → Supabase Storage (encrypted at rest, ap-southeast-1)
 
 ## Related Articles
 
-- [[cekwajar-id]] — Project using this pipeline
-- [[cekwajar-verdict-engine]] — Verdict engine that consumes OCR output
+- [[projects/cekwajar-id]] — Project using this pipeline
+- [[architecture/cekwajar-verdict-engine]] — Verdict engine that consumes OCR output
 - [[entities/supabase]] — Storage and database

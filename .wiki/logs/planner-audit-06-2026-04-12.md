@@ -1,6 +1,19 @@
 ---
-date: "2026-04-12"
-task: "Fix: unified client, tool calls returned, fallback wired"
+title: Planner Audit 06 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Path | Type | Status |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 06 — LLM Client Layer
 

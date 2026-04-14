@@ -1,9 +1,20 @@
 ---
-title: "ADR-045: Fix Web Search Result Injection Pipeline"
-date: "2026-04-12"
-location: "`llm_client/__init__.py` lines 1255-1272"
-status: "Active"
-type: "Bug Fix"
+title: Adr 045 Fix Web Search Result Injection
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'When Legion detects a web search intent (e.g. "cari di google siapa X"),
+  it:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-045: Fix Web Search Result Injection Pipeline
 

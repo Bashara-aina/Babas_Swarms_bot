@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: The self-improvement loop enables Legion to learn from every interaction — recording what worked, what failed, and what the user corrected — and applying those learnings to future reasoning and responses.
 wikilinks:
-  - [[memory-architecture]]
+  - [[./concepts/memory-architecture]]
   - [[./concepts/reasoning-loop]]
   - [[./concepts/multi-agent-orchestration]]
   - [[./concepts/skill-registry]]
@@ -69,7 +69,7 @@ Learned patterns influence behavior:
 
 ## Relationships
 
-The self-improvement loop depends entirely on [[memory-architecture]] for its storage substrate — without ArchivalMemory, CoreMemory, and RecallMemory, there would be nowhere to record observations. The loop feeds into [[./concepts/reasoning-loop]] by providing learned context: when the reasoning loop retrieves past learnings, it can avoid previously failed approaches and build on previously successful ones. [[./concepts/multi-agent-orchestration]] benefits from the loop: if the swarm produces a poor synthesis or a debate persona takes a consistently suboptimal stance, those outcomes are recorded and inform future swarm calls. [[./concepts/skill-registry]] skill selection is calibrated by past performance: if `web_search` consistently returns poor results for a certain query type, that pattern is recorded and the fallback is preferred next time.
+The self-improvement loop depends entirely on [[./concepts/memory-architecture]] for its storage substrate — without ArchivalMemory, CoreMemory, and RecallMemory, there would be nowhere to record observations. The loop feeds into [[./concepts/reasoning-loop]] by providing learned context: when the reasoning loop retrieves past learnings, it can avoid previously failed approaches and build on previously successful ones. [[./concepts/multi-agent-orchestration]] benefits from the loop: if the swarm produces a poor synthesis or a debate persona takes a consistently suboptimal stance, those outcomes are recorded and inform future swarm calls. [[./concepts/skill-registry]] skill selection is calibrated by past performance: if `web_search` consistently returns poor results for a certain query type, that pattern is recorded and the fallback is preferred next time.
 
 ## Current Status
 
@@ -77,7 +77,7 @@ The self-improvement loop depends entirely on [[memory-architecture]] for its st
 
 ## See Also
 
-- [[memory-architecture]] — Storage substrate for learnings
+- [[./concepts/memory-architecture]] — Storage substrate for learnings
 - [[./concepts/reasoning-loop]] — Reasoning that retrieves past learnings
 - [[./concepts/multi-agent-orchestration]] — Swarm learning from debates
 - [[./concepts/skill-registry]] — Skill performance calibration

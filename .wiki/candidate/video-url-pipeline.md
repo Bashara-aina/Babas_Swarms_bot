@@ -1,6 +1,19 @@
 ---
-## 2. URL Classification
-
+title: Video Url Pipeline
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- candidate
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'def is_video_url(url: str) -> bool'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ```python
 def is_video_url(url: str) -> bool

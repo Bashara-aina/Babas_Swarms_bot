@@ -1,13 +1,21 @@
 ---
-source_id: 002
-title: "UU 11 Tahun 2020 Cipta Kerja Perubahan UU Ketenagakerjaan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/149750"
-last_verified: "2026-04-11"
-tags: [labor-law,uu11-2020,cipta-kerja,omnibus-law,perubahan-ketenagakerjaan]
-cekwajar_impact: CRITICAL
-legion_can_act: NO
+title: Uu Cipta Kerja 11 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: UU Cipta Kerja merupakan "omnibus law" yang mengubah signifikan ketentuan
+  ketenagakerjaan, termasuk PKWT, pesangon, dan THR. Payroll system harus mengikuti
+  formula terbaru yang ditetapkan PP turuna...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UU 11 Tahun 2020 Cipta Kerja Perubahan UU Ketenagakerjaan

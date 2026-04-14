@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Pseudo-3D ResNet (P3D) decomposes 3D convolutions into sequential 2D spatial (1×3×3) and 1D temporal (3×1×1) convolutions, drastically reducing parameters while maintaining temporal modeling capability. The baseline POPW must beat is 60.46% accuracy on IKEA ASM.
 wikilinks:
-  - [[001-resnet-he-2016]]
+  - [[research/001-resnet-he-2016]]
   - [[032-i3d-carreira-2017]]
   - [[062-twostream-simonyan-2014]]
 confidence: high
@@ -101,7 +101,7 @@ W_t[:, :, 0, 0] = mean_over_t(W_2d.weight, dim=2) / sqrt(T)
 
 ## Related Papers in This Wiki
 
-- [[001-resnet-he-2016]] — ResNet-50 is P3D's spatial backbone
+- [[research/001-resnet-he-2016]] — ResNet-50 is P3D's spatial backbone
 - [[032-i3d-carreira-2017]] — I3D: inflation trick alternative to P3D
 - [[062-twostream-simonyan-2014]] — Two-stream networks for temporal modeling
 - [[031-slowfast-feichtenhofer-2019]] — SlowFast: dual pathway with slow/fast temporal streams

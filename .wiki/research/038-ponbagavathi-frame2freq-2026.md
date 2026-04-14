@@ -1,31 +1,21 @@
 ---
-paper_id: "038"
-title: "Frame2Freq: Spectral Adapters for Fine-Grained Video Understanding"
-authors: "Ponbagavathi, Thinesh Thiyakesan; Seibold, Constantin; Roitberg, Alina"
-year: 2026
-venue: "CVPR 2026 (Main Track)"
-arxiv: "2602.18977"
-doi: "10.48550/arXiv.2602.18977"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "CRITICAL - Current SOTA at 78.1% Top-1 on IKEA ASM; POPW must beat this benchmark"
-key_contribution: "Frequency-aware adapters using FFT for spectral encoding during image-to-video adaptation of Vision Foundation Models"
+title: Ponbagavathi Frame2Freq 2026
+type: concept
+status: active
 tags:
-  - spectral methods
-  - frequency analysis
-  - fine-grained action recognition
-  - vision foundation models
-  - parameter-efficient fine-tuning
-  - CVPR 2026
-sota_metrics:
-  - dataset: "IKEA ASM"
-    top1: "78.1%"
-    top3: "N/A"
-    notes: "CVPR 2026 Main Track; surpasses fully fine-tuned models on 4 of 5 datasets"
-architecture:
-  - type: "Vision Foundation Model Adapter"
-  - key_components: ["FFT along time dimension", "Frequency-band specific embeddings", "Adaptive spectral highlighting"]
-key_insight: "Time-domain adapters pick up static cues and fast flicker but miss medium-speed motion; spectral encoding captures multi-scale temporal dynamics"
-code_url: "https://github.com/th-nesh/Frame2Freq"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Frame2Freq addresses a fundamental limitation in adapting image-pretrained
+  backbones to video: existing time-domain adapters focus on static image cues and
+  very fast temporal changes, missing cruci...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

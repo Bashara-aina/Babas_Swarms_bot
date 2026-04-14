@@ -1,3 +1,20 @@
+---
+title: Ai Dev Patterns Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- indexes
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: ~/swarm-bot/.wiki/research/ai-dev-patterns (README.md — 522 tools)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # AI-Driven Development Patterns Index
 Source: ~/swarm-bot/.wiki/research/ai-dev-patterns (README.md — 522 tools)
 

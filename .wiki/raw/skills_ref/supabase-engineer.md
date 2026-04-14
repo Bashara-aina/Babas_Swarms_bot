@@ -1,3 +1,21 @@
+---
+title: Supabase Engineer
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: You are a senior Supabase/PostgreSQL engineer. Apply these patterns for any
+  Supabase-related task.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Supabase Engineer Skill
 
 You are a senior Supabase/PostgreSQL engineer. Apply these patterns for any Supabase-related task.

@@ -1,10 +1,19 @@
 ---
-title: "Wiki Wiring Fix — Batch 3"
-type: contract
+title: Contracts Batch3 Wiki Wiring
+type: concept
 status: active
-tags: [wiring-fix, wiki]
-created: 2026-04-13
-summary: Fix template placeholders, stub links, and code path references
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Remove or replace 12 stub/template links that have no real target
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## CONTRACT #7: Remove Stub/Test Links
@@ -154,9 +163,9 @@ FILES:
     - .wiki/entities/opencode.md
 
 DONE_WHEN:
-  - `[[adr-2026-04-11-opencode-integration]]` → `[[adr-2026-04-11-opencode-integration]]` (file exists at adr-2026-04-11-opencode-integration.md, link is correct format)
-  - `[[adr-2026-04-12-multi-agent-pipeline]]` → same, file exists
-  - `[[adr-2026-04-12-opencode-over-cursor-for-backend]]` → same, file exists
+  - `[[decisions/adr-2026-04-11-opencode-integration]]` → `[[decisions/adr-2026-04-11-opencode-integration]]` (file exists at adr-2026-04-11-opencode-integration.md, link is correct format)
+  - `[[decisions/adr-2026-04-12-multi-agent-pipeline]]` → same, file exists
+  - `[[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]]` → same, file exists
 
 PROOF_FORMAT:
   Bash command: `python3 -c "

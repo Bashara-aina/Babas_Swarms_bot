@@ -1,13 +1,21 @@
 ---
-source_id: 027
-title: "Natura dan Kenikmatan PMK 66/2023 - Objek Pajak PPh 21"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://jdih.kemenkeu.go.id/api/download/dce5daf1-d4e5-4bd1-bc4e-2c086ae33c04/2023pmkeuangan066.pdf"
-last_verified: "2026-04-11"
-tags: [natura, kenikmatan, pmk66, objek-pajak, pph21]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Natura Kenikmatan Pmk66 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Natura (non-cash benefits like meals, transportation, equipment) provided
+  to employees are **now taxable** as of July 2023 under PMK 66/2023. Employers must
+  include natura value in gross income and...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Natura dan Kenikmatan PMK 66/2023 - Objek Pajak PPh 21

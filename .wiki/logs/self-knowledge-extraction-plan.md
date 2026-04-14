@@ -1,3 +1,20 @@
+---
+title: Self Knowledge Extraction Plan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Created: 2026-04-11 | Planner: Bashara'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Self-Knowledge Extraction Plan
 > Created: 2026-04-11 | Planner: Bashara
 

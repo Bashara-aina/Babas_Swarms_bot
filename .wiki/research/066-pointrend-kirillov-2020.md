@@ -1,9 +1,19 @@
 ---
-tags: [instance-segmentation, semantic-segmentation, point-based, rendering, adaptive-sampling, cvpr2020]
-sources: [arxiv:1912.08193, openaccess:CVPR2020/Kirillov]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "066"
+title: Pointrend Kirillov 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Kirillov*, Wu*, He*, Girshick* | CVPR 2020 | [arXiv:1912.08193](https://arxiv.org/abs/1912.08193)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PointRend: Image Segmentation as Rendering

@@ -1,3 +1,21 @@
+---
+title: Ethics Moral Philosophy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Effective altruism; moral circle; speciesism; suffering;
+  animals; global poverty; charity; utilitarian; maximize; impact.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 14: Ethics & Moral Philosophy
 
 ## [Peter Singer] — The Life You Can Save

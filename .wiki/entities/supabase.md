@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Supabase is the primary database for rumahlabuh.com and cekwajar.id, providing PostgreSQL, Row Level Security (RLS), auth, and realtime subscriptions for both projects.
 wikilinks:
-  - [[rumahlabuh-com]]
-  - [[cekwajar-id]]
+  - [[projects/rumahlabuh-com]]
+  - [[projects/cekwajar-id]]
 confidence: high
 source: implementation
 project: general
@@ -58,5 +58,5 @@ SUPABASE_KEY=eyJhbGciOiJIUzI1...  # anon/public key
 Never log SUPABASE_KEY values.
 
 ## See Also
-[[rumahlabuh-com]] — Property platform using Supabase
-[[cekwajar-id]] — Salary platform using Supabase for survey data
+[[projects/rumahlabuh-com]] — Property platform using Supabase
+[[projects/cekwajar-id]] — Salary platform using Supabase for survey data

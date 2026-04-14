@@ -1,6 +1,19 @@
 ---
-### ✅ Passed
-
+title: Tool1 Gptr Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '1. **`_check_available()` import error handling** (`gptr_client.py:24-31`):'
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. **`_check_available()` import error handling** (`gptr_client.py:24-31`):
    - Correctly uses `try/except ImportError` 

@@ -1,10 +1,20 @@
 ---
-title: API Key Management
-domain: api-integrations
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all tools, llm_client, swarms_bot
-tokens_estimated: 590
+title: Api Key Management
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- api-key-management.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: All 17+ API keys stored as environment variables via `os.getenv()`; no key
+  rotation automation, no secret scanning for exposures, no key scoping by environment.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # API Key Management

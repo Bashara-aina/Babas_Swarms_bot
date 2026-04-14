@@ -1,3 +1,22 @@
+---
+title: Testing Patterns
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Testing priority in this project: prevent runtime crashes in handlers, validate
+  async orchestration behavior, and harden integration boundaries (LLM, Supabase,
+  shell/web tools).'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Testing Patterns (LegionSwarm)
 
 Testing priority in this project: prevent runtime crashes in handlers, validate async orchestration behavior, and harden integration boundaries (LLM, Supabase, shell/web tools).

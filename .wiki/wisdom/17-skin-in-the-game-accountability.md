@@ -1,3 +1,20 @@
+---
+title: Skin In The Game Accountability
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Nassim Taleb (Skin in the Game, 2018)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Skin in the Game — Accountability and Alignment
 
 Source: Nassim Taleb (Skin in the Game, 2018)

@@ -1,3 +1,20 @@
+---
+title: Legion Production Hardening
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Paste everything below the horizontal rule into OpenCode.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # LEGION PRODUCTION HARDENING — OPENCODE MASTER PROMPT
 > Paste everything below the horizontal rule into OpenCode.
 > This is a single-session, fully autonomous task. Do not stop until all phases complete.

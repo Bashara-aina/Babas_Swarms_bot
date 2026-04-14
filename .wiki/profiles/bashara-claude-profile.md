@@ -1,3 +1,20 @@
+---
+title: Bashara Claude Profile
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Generated: April 2026 | Source: Conversation history + public profiles'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Bashara — Claude Profile Export
 
 > Generated: April 2026 | Source: Conversation history + public profiles

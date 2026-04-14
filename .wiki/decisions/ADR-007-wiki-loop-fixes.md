@@ -1,5 +1,19 @@
 ---
-### FIX 2: SSRF protection in browser_agent.py
+title: Adr 007 Wiki Loop Fixes
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File**: `tools/browser_agent.py`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **File**: `tools/browser_agent.py`
 

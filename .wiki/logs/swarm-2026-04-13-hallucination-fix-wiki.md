@@ -1,3 +1,20 @@
+---
+title: Swarm 2026 04 13 Hallucination Fix Wiki
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Contracts: 10 total, 10 succeeded, 2 retry loops, 0 failed'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Swarm Run: Fix worker hallucination - wiki file operations
 Date: 2026-04-13
 Type: FILE_OPERATION

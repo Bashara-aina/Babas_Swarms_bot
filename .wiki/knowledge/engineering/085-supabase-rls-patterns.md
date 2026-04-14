@@ -1,13 +1,21 @@
 ---
-source_id: 085
-title: "Supabase RLS Production Patterns"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://supabase.com/docs/guides/database/postgres/row-level-security"
-last_verified: "2026-04-11"
-tags: [supabase, rls, row-level-security, postgresql, multi-tenant, security]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Supabase Rls Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id stores employee payroll data, PPH 21 calculations, and BPJS contributions
+  — all highly sensitive personal data protected under UU PDP. Without Row Level Security
+  (RLS), any user with th...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Supabase RLS Production Patterns

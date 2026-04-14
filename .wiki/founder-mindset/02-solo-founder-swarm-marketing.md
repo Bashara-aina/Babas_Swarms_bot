@@ -1,3 +1,20 @@
+---
+title: Solo Founder Swarm Marketing
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: https://superframeworks.com/articles/openclaw-business-ideas-indie-hackers'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Solo Founder Swarm Marketing — Bhanu Teja Pattern
 
 Source: https://superframeworks.com/articles/openclaw-business-ideas-indie-hackers

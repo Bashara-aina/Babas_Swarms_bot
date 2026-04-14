@@ -1,3 +1,20 @@
+---
+title: Legion Master Context
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- meta
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'legion_priority: ALWAYS_LOAD'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 legion_priority: ALWAYS_LOAD
 last_updated: 2026-04-11

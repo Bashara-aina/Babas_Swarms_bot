@@ -1,16 +1,21 @@
 ---
-paper_id: 021
-title: "Efficient Video Object Segmentation via Network Modulation"
-authors: "Linjie Yang, Yanran Wang, Xuehan Xiong, Jianchao Yang, Aggelos K. Katsaggelos"
-venue: "CVPR 2018"
-url: "https://arxiv.org/abs/1802.01218"
-arxiv: "1802.01218"
-code: "https://github.com/linjieyangscuto/video_object_segmentation"
+title: Video Seg Modulation Yang 2018
+type: concept
+status: active
 tags:
-  - video-segmentation
-  - one-shot-learning
-  - network-modulation
-  - fiilm
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper showed that **FiLM-style modulation could enable one-shot video
+  object segmentation** — given a single annotated frame, the network could segment
+  that object throughout the entire video ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

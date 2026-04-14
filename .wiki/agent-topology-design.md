@@ -1,10 +1,19 @@
 ---
-title: agent-topology-design
-domain: future-architecture
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 320
+title: Agent Topology Design
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- agent-topology-design.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Optimal multi-agent structure for Legion's workload — single-agent vs swarm.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Agent Topology Design

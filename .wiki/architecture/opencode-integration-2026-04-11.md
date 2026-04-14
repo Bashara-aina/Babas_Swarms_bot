@@ -93,7 +93,7 @@ Flow:
 
 ## Related Pages
 
-- [[adr-2026-04-11-opencode-integration]] — Original integration ADR
+- [[decisions/adr-2026-04-11-opencode-integration]] — Original integration ADR
 - [[entities/opencode]] — OpenCode entity documentation
 - [[projects/legion-bot]] — Project overview
-- [[legion-module-map]] — Core modules
+- [[architecture/legion-module-map]] — Core modules

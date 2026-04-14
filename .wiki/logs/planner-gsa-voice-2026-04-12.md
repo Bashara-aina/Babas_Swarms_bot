@@ -1,3 +1,22 @@
+---
+title: Planner Gsa Voice 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Implement GSA Voice — a communication style synthesis of three Indonesian
+  figures (Gita Wirjawan, Sandiaga Uno, Anwar Ibrahim) into Legion's core personality
+  system.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Planner Log — GSA Voice Implementation
 Date: 2026-04-12
 

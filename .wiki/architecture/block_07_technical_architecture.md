@@ -1,6 +1,19 @@
 ---
-## TABLE OF CONTENTS
-
+title: Block 07 Technical Architecture
+type: architecture
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. [Executive Summary](#executive-summary)
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. [Executive Summary](#executive-summary)
 2. [PART A: Next.js Application Architecture](#part-a-nextjs-application-architecture)

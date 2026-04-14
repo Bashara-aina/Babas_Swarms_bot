@@ -1,3 +1,20 @@
+---
+title: Smoke Results Bucket9
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Module | Expected Import | Actual Export | Status |'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Smoke Test Results — Bucket 9: Computer Control & Desktop Agent
 
 **Date**: 2026-04-11  

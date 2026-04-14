@@ -1,3 +1,20 @@
+---
+title: Self Upgrade
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: You (Telegram)            Legion Bot
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Self-Upgrade System
 
 ## How It Works

@@ -1,7 +1,20 @@
 ---
-date: "2026-04-12"
-auditor: "@reviewer"
-task: "AUDIT-13 SUBTASK D — Verify all disabled features have user messages"
+title: Audit 13 Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '1. **grep sweeps** confirmed all `FEATURE_*_ENABLED = False  # Planned:
+  v2.0` flags are in place'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT-13 Review Summary
 

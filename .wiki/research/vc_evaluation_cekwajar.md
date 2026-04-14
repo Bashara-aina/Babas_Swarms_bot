@@ -1,6 +1,21 @@
 ---
-## Strongest reason this company could fail
-
+title: Vc Evaluation Cekwajar
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The salary benchmark product depends entirely on crowdsourced data that does
+  not yet exist. Before critical mass (~5,000 verified submissions per province ×
+  job-group cell), the "verdicts" are stat...
+wikilinks: []
+confidence: medium
+source: research
 ---
 The salary benchmark product depends entirely on crowdsourced data that does not yet exist. Before critical mass (~5,000 verified submissions per province × job-group cell), the "verdicts" are statistically unreliable extrapolations from province-level BPS data that any government website already publishes for free. If the "contribute-to-unlock" flywheel stalls — which it does in 70%+ of similar platforms — the company has no proprietary data, no moat, and no product that a competitor cannot replicate in six weeks.
 

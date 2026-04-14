@@ -1,5 +1,19 @@
 ---
-
+title: Smoke Results Bucket6
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Date**: 2026-04-11 20:36:19'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Smoke Test Results: Bucket 6 — LLM Client & Model Routing
 **Date**: 2026-04-11 20:36:19  

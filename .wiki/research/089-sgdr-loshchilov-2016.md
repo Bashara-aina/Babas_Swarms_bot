@@ -1,18 +1,21 @@
 ---
-title: "089 — SGDR: Stochastic Gradient Descent with Warm Restarts (Loshchilov & Hutter, 2016)"
-subtitle: "Cosine Annealing Learning Rate Scheduling with Periodic Restarts"
-category: training-optimization
-subcategory: learning-rate-schedule
-tags: [cosine-annealing, warm-restarts, learning-rate, sgdr, scheduler, cyclic-lr]
-authors: ["Ilya Loshchilov", "Frank Hutter"]
-venue: "ICLR 2017"
-arXiv: "1608.03983"
-date: 2016-08-12
-cited: "~3000+"
-implementation: ["PyTorch CosineAnnealingWarmRestarts", "TensorFlow"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Sgdr Loshchilov 2016
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: SGDR combines cosine annealing with periodic warm restarts, enabling faster
+  convergence and better final performance. The warm restarts help escape local minima
+  and find flatter regions of the loss...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

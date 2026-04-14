@@ -1,6 +1,20 @@
 ---
-## Summary
-
+title: Review Legion Fix Identity Search
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: All three fixes were audited with **305 tests passing** and **no blockers
+  found**.
+wikilinks: []
+confidence: medium
+source: research
 ---
 All three fixes were audited with **305 tests passing** and **no blockers found**.
 ---

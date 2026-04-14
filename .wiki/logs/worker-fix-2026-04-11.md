@@ -1,3 +1,20 @@
+---
+title: Worker Fix 2026 04 11
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fixed 3 CRITICAL and 2 MODERATE issues in the Legion Daily Intelligence Harvester.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Fix Completion - 2026-04-11
 
 ## Summary

@@ -1,6 +1,21 @@
 ---
-## 1. Overview
-
+title: Agent Capabilities Reference
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This reference maps the full landscape of autonomous AI agent capabilities,
+  drawn from the production-grade systems tracked in the awesome-ai-agents ecosystem.
+  Each capability is defined, explained...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This reference maps the full landscape of autonomous AI agent capabilities, drawn from the production-grade systems tracked in the awesome-ai-agents ecosystem. Each capability is defined, explained with implementation principles, and tied to how Legion could leverage it.
 ---

@@ -1,8 +1,19 @@
 ---
-tags: [long-tail-learning, logit-adjustment, class-prior, iclr-2021]
-sources: [arxiv:2007.07314]
-created: 2026-04-11
-updated: 2026-04-11
+title: Logit Adjustment Menon 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Menon, Jayasumana, Rawat, Jain, Veit & Kumar** | ICLR 2021 | [arXiv:2007.07314](https://arxiv.org/abs/2007.07314)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Long-Tail Learning via Logit Adjustment
@@ -74,6 +85,6 @@ The paper provides a generalization bound showing that logit adjustment achieves
 
 ## See Also
 
-- [[051-decoupling-kang-2020]] — Decoupled framework (logit adj as classifier stage)
-- [[052-class-balanced-cui-2019]] — Class-balanced loss (alternative approach)
-- [[049-ldam-cao-2019]] — LDAM (margin-based alternative)
+- [[research/051-decoupling-kang-2020]] — Decoupled framework (logit adj as classifier stage)
+- [[research/052-class-balanced-cui-2019]] — Class-balanced loss (alternative approach)
+- [[research/049-ldam-cao-2019]] — LDAM (margin-based alternative)

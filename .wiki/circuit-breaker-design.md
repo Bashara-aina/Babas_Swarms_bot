@@ -1,10 +1,20 @@
 ---
-title: circuit-breaker-design
-domain: error-handling
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 590
+title: Circuit Breaker Design
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- circuit-breaker-design.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Two independent circuit breaker systems (provider-level and agent-level)
+  prevent retry storms and cascading failures across Legion's multi-provider LLM routing.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # CIRCUIT BREAKER DESIGN

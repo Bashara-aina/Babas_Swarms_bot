@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: cekwajar.id development progressed through MVP, data collection, and feature expansion phases.
 wikilinks:
-  - [[cekwajar-id]]
-  - [[adr-2026-04-12-opencode-over-cursor-for-backend]]
+  - [[projects/cekwajar-id]]
+  - [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]]
 confidence: medium
 source: internal
 ---

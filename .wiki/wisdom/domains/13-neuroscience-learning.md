@@ -1,3 +1,21 @@
+---
+title: Neuroscience Learning
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Forgetting curve; spaced repetition; savings; retention;
+  forgetting; memory; learning; recall; rehearsal; experimental method.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 13: Neuroscience & Learning
 
 ## [Hermann Ebbinghaus] — Memory: A Contribution to Experimental Psychology

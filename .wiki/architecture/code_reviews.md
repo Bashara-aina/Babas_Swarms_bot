@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Legion performs AI-assisted code reviews focusing on readability, maintainability, edge cases, and algorithmic complexity. Example review targets merge_overlapping_intervals function with O(n log n) sorting approach.
 wikilinks:
-  - [[legion-module-map]]
+  - [[architecture/legion-module-map]]
   - [[projects/legion-bot]]
 confidence: medium
 source: implementation
@@ -23,7 +23,7 @@ Code reviews are an essential part of software development, ensuring that code i
 
 ## See Also
 
-- [[legion-module-map]] — Core module organization
+- [[architecture/legion-module-map]] — Core module organization
 - [[projects/legion-bot]] — Project overview
 - [[timelines/legion-version-history]] — Version history
 

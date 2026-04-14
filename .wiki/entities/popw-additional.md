@@ -8,7 +8,7 @@ updated: 2026-04-13
 summary: Popw additional information has been stored in /.wiki /home/newadmin/swarm-bot/popwadditional. An architectural diagram of the model is also included.
 wikilinks:
   - [[./concepts/model-architecture]]
-  - [[INDEX]]
+  - [[knowledge/cekwajar/engineering/INDEX]]
 confidence: high
 source: claude-code
 ---

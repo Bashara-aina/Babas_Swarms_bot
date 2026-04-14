@@ -1,9 +1,19 @@
 ---
-tags: [mtl, multi-task-learning, survey, deep-learning, ruder, bayes, uncertainty]
-sources: [popw-protocol, arxiv:1706.05098]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Mtl Overview Ruder 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 023 — An Overview of Multi-Task Learning in Deep Neural Networks

@@ -1,5 +1,20 @@
 ---
-
+title: Schema
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- schema.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> The wiki is Legion''s long-term memory. Every page is written for a smart
+  AI reading it later.'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Legion Wiki Schema v2.0 — Karpathy LLM KB Pattern
 > The wiki is Legion's long-term memory. Every page is written for a smart AI reading it later.
@@ -30,7 +45,7 @@ updated: 2026-04-13
 summary: 2-3 sentence TL;DR for Dataview indexing
 wikilinks:
   - [[./concepts/karpathy-kb-pattern]]
-  - [[INDEX]]
+  - [[./knowledge/cekwajar/engineering/INDEX]]
 confidence: high | medium | low
 source: conversation | research | implementation | external
 ---
@@ -159,7 +174,7 @@ wiki/
 
 ```markdown
 # Basic link
-[[memory-architecture]]
+[[./concepts/memory-architecture]]
 
 # Link to specific section  
 [[memory-architecture#failure-modes]]
@@ -171,7 +186,7 @@ wiki/
 [[./entities/litellm]]
 
 # Link to project
-[[cekwajar-id]]
+[[./projects/cekwajar-id]]
 ```
 
 ---

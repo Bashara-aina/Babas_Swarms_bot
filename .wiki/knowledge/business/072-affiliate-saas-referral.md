@@ -1,13 +1,21 @@
 ---
-source_id: 072
-title: "Affiliate Program Indonesia SaaS Referral 2024 Best Practice"
-source_type: TUTORIAL
-authority: INDUSTRY
-url: "https://www.rewardful.com/articles/saas-affiliate-program-benchmarks"
-last_verified: "2026-04-11"
-tags: [affiliate, referral, saas, monetization, indonesia, b2b-saas, commission]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Affiliate Saas Referral
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Affiliate programs provide a cost-effective customer acquisition channel.
+  With 59% of Indonesians purchasing via affiliate marketing, this is a proven growth
+  lever for Indonesian SaaS products like...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Affiliate Program Indonesia SaaS Referral 2024 Best Practice

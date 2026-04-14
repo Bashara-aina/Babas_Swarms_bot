@@ -1,10 +1,20 @@
 ---
 title: Memory Architecture
-domain: memory
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 550
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- memory-architecture.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 6 memory tiers working together — working, episodic, semantic, core, graph,
+  long-term.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MEMORY ARCHITECTURE

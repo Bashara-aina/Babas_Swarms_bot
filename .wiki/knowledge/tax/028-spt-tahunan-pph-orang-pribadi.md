@@ -1,13 +1,21 @@
 ---
-source_id: 028
-title: "SPT Tahunan PPh Orang Pribadi - Cara Lapor dan Deadline 2025"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://pajak.go.id/panduan-layanan-pajak/pelaporan-2025"
-last_verified: "2026-04-11"
-tags: [spt-tahunan, pph-org-pribadi, deadline, coretax, DJP]
-cekwajar_impact: MEDIUM
-legion_can_act: NO
+title: Spt Tahunan Pph Orang Pribadi
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every employee who earns above PTKP must file SPT Tahunan (annual tax return).
+  cekwajar should remind employees of deadlines and provide accurate annual income
+  data (Form 1721-A1) for filing. Misse...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SPT Tahunan PPh Orang Pribadi - Cara Lapor dan Deadline 2025

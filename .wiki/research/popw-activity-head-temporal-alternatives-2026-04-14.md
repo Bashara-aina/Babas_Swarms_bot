@@ -1,18 +1,20 @@
 ---
-title: POPW Activity Head Temporal Alternatives (TSM vs BiGRU and Beyond)
+title: Popw Activity Head Temporal Alternatives 2026 04 14
 type: concept
 status: active
-tags: [popw, temporal-modeling, activity-head, tsm, bigru, posefilm, architecture]
-created: 2026-04-14
-updated: 2026-04-14
-summary: POPW temporal modeling options were compared across six approaches with implementation cost, VRAM, dataset requirements, and novelty. The core result is that both TSM and BiGRU require multi-frame dataset changes, but BiGRU preserves multi-task head isolation and aligns better with PoseFiLM. Recommendation: choose BiGRU + feature bank for stronger paper novelty, or TSM for fastest implementation.
-wikilinks:
-  - [[research/069-tsm-lin-2019]]
-  - [[research/071-slowfast-feichtenhofer-2019]]
-  - [[research/097-attention-vaswani-2017]]
-  - [[research/temporal-attention-alternatives]]
-  - [[INDEX]]
-confidence: high
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: TSM is a zero-parameter temporal operator that shifts feature channels across
+  adjacent frames, while BiGRU is an explicit sequence model that learns temporal
+  memory after feature extraction. Both a...
+wikilinks: []
+confidence: medium
 source: research
 ---
 

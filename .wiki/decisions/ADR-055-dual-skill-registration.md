@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Adr 055 Dual Skill Registration
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'During LEGION AUDIT 09 (Skills Layer & Skill Registry), a **dual skill registration
+  architecture** was discovered. Two separate, disconnected systems handle skill registration
+  in the codebase:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 During LEGION AUDIT 09 (Skills Layer & Skill Registry), a **dual skill registration architecture** was discovered. Two separate, disconnected systems handle skill registration in the codebase:
 

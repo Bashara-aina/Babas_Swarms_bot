@@ -1,18 +1,21 @@
 ---
-title: "086 — Mixed Precision Training (Micikevicius et al., 2017)"
-subtitle: "FP16 Training for Deep Neural Networks"
-category: training-optimization
-subcategory: memory-optimization
-tags: [fp16, mixed-precision, gradient-scaling, nvidia, memory-efficient]
-authors: ["Paulius Micikevicius", "Sharan Narang", "Jonah Alben", "Gregory Diamos", "Erich Elsen", "David Garcia", "Boris Ginsburg", "Michael Houston", "Oleksii Kuchaiev", "Ganesh Venkatesh", "Hao Wu"]
-venue: "ICLR 2018"
-arXiv: "1710.03740"
-date: 2017-10-10
-cited: "~5000+"
-implementation: "NVIDIA APEX, PyTorch native AMP"
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Fp16 Micikevicius 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Mixed Precision Training enables training deep neural networks with **half-precision
+  (FP16)** floating point, nearly **halving memory consumption** while maintaining
+  accuracy. Essential for RTX 306...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

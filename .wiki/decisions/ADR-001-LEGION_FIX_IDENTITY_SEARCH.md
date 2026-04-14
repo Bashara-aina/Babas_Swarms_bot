@@ -1,6 +1,19 @@
 ---
-## Context
-
+title: Adr 001 Legion Fix Identity Search
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Bashara asked: "Bisa cari info bashara aina tuh siapa ga?"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 Bashara asked: "Bisa cari info bashara aina tuh siapa ga?"  
 Legion responded with three separate failures:

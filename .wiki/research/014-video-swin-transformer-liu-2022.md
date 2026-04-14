@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Video Swin Transformer extends Shifted Window attention to video by adding a temporal attention module alongside the spatial shifted-window attention. POPW's improved4_transformer/model.py uses Video Swin Transformer as the backbone, replacing the ResNet-50 baseline for higher temporal modeling capacity.
 wikilinks:
-  - [[001-resnet-he-2016]]
+  - [[research/001-resnet-he-2016]]
   - [[032-i3d-carreira-2017]]
-  - [[006-p3d-resnet-qiu-2017]]
+  - [[research/006-p3d-resnet-qiu-2017]]
   - [[031-slowfast-feichtenhofer-2019]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
@@ -99,8 +99,8 @@ Activity Classification Head (33 classes)
 
 ## Related Papers in This Wiki
 
-- [[001-resnet-he-2016]] — ResNet-50 is POPW's baseline; Video Swin is the upgrade
-- [[006-p3d-resnet-qiu-2017]] — P3D's 1D temporal conv is replaced by 3D temporal attention
+- [[research/001-resnet-he-2016]] — ResNet-50 is POPW's baseline; Video Swin is the upgrade
+- [[research/006-p3d-resnet-qiu-2017]] — P3D's 1D temporal conv is replaced by 3D temporal attention
 - [[032-i3d-carreira-2017]] — I3D's inflation trick inspired Video Swin's 2D→3D transfer
 - [[031-slowfast-feichtenhofer-2019]] — SlowFast's two-pathway approach vs Video Swin's unified transformer
 

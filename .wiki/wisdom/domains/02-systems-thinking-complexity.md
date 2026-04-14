@@ -1,3 +1,21 @@
+---
+title: Systems Thinking Complexity
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Systems consist of elements, interconnections, and functions/purposes;
+  feedback loops (reinforcing and balancing) produce all behavior.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 02: Systems Thinking & Complexity
 
 ## [Donella Meadows] — Thinking in Systems

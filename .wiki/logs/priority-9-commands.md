@@ -1,3 +1,20 @@
+---
+title: Priority 9 Commands
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: ADD /CAPABILITIES AND /SELF_REPORT COMMANDS'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Priority 9 Log: /capabilities and /self_report Commands
 
 **Date**: 2026-04-13

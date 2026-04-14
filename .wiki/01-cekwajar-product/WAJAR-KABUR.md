@@ -1,3 +1,20 @@
+---
+title: Wajar Kabur
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- cekwajar-product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "Wajar Kabur — Abroad Salary & Life Quality Comparison — Full Spec"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "Wajar Kabur — Abroad Salary & Life Quality Comparison — Full Spec"
 ***

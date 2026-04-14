@@ -9,7 +9,7 @@ summary: "rumahlabuh.com is a Labuh Biru kost (boarding house) booking platform 
 wikilinks:
   - [[./entities/supabase]]
   - [[./entities/midtrans]]
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
 confidence: high
 source: implementation
 project: rumahlabuh
@@ -289,5 +289,5 @@ As of 2026-04-13:
 ## Related Articles
 
 - [[./entities/supabase]] — Database provider
-- [[cekwajar-id]] — Related project (Indonesian salary/property data platform)
-- [[cekwajar-tech-stack]] — cekwajar tech stack reference (similar Next.js + Supabase pattern)
+- [[projects/cekwajar-id]] — Related project (Indonesian salary/property data platform)
+- [[architecture/cekwajar-tech-stack]] — cekwajar tech stack reference (similar Next.js + Supabase pattern)

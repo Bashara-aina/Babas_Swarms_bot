@@ -1,8 +1,19 @@
 ---
-title: "Theory of Mind — Social Reasoning for AI Agents"
-source: "MetaMind NeurIPS 2025 Spotlight (github.com/XMZhangAI/MetaMind)"
-tags: [07-theory-of-mind-social-reasoning]
-type: wisdom
+title: Theory Of Mind Social Reasoning
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: MetaMind NeurIPS 2025 Spotlight (github.com/XMZhangAI/MetaMind)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Theory of Mind — Social Reasoning for AI Agents
 

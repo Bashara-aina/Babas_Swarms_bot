@@ -1,3 +1,20 @@
+---
+title: Legion Soul
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Copied from: `/home/newadmin/swarm-bot/SOUL.md`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion — Soul File
 > Copied from: `/home/newadmin/swarm-bot/SOUL.md`
 > Last updated: auto-managed by Legion

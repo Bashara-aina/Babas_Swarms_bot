@@ -1,8 +1,19 @@
 ---
-title: "LEGION WIKI LOOP — SESSION SUMMARY"
-created: 2026-04-12
-type: article
-tags: [SESSION_SUMMARY]
+title: Session Summary
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- session_summary.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Date: 2026-04-12 (Cycles 11-20)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # LEGION WIKI LOOP — SESSION SUMMARY
 Date: 2026-04-12 (Cycles 11-20)

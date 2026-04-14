@@ -1,5 +1,20 @@
 ---
-### Review: AUDIT 07 Handler Audit
+title: Audit07 Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. **Classification of all 10 handler files is correct** — verified each
+  against source
+wikilinks: []
+confidence: medium
+source: research
 ---
 #### ✅ Passed:
 1. **Classification of all 10 handler files is correct** — verified each against source

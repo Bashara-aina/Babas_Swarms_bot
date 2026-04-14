@@ -1,3 +1,21 @@
+---
+title: Planner 2026 04 13 Popw Architecture Improvement
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Existing LaTeX paper skeleton at `/home/newadmin/swarm-bot/project/popw/paper_skeleton/popw_paper_skeleton.tex`
+  (384 lines)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Improve POPW Paper Skeleton Architecture Description
 Date: 2026-04-13
 Type: RESEARCH

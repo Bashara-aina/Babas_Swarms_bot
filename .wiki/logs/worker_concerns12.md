@@ -1,5 +1,19 @@
 ---
-
+title: Worker Concerns12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Worker**: @worker (Bashara)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Worker Completion Log: Concerns 1 & 2
 **Date**: 2026-04-12  

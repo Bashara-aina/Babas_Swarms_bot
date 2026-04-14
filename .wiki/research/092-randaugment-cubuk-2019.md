@@ -1,18 +1,21 @@
 ---
-title: "092 — RandAugment: Practical Automated Data Augmentation (Cubuk et al., 2019)"
-subtitle: "Simplified Automated Augmentation That Works Out of the Box"
-category: training-optimization
-subcategory: data-augmentation
-tags: [randaugment, automated-augmentation, data-augmentation, augmentation-policy, imagenet]
-authors: ["Ekin D. Cubuk", "Barret Zoph", "Jonathon Shlens", "Quoc V. Le"]
-venue: "NeurIPS 2020"
-arXiv: "1909.13719"
-date: 2019-09-30
-cited: "~3000+"
-implementation: ["PyTorch RandAugment", "TensorFlow Augment", "timm"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Randaugment Cubuk 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'RandAugment simplifies automated data augmentation by reducing the search
+  space to just **2 hyperparameters** (N, M): N augmentations applied with magnitude
+  M. Works out of the box, matching or sur...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

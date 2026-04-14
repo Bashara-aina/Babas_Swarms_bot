@@ -1,6 +1,19 @@
 ---
-## Verification Checklist
-
+title: Final Verification 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| # | Item | Status | Notes |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | # | Item | Status | Notes |
 |

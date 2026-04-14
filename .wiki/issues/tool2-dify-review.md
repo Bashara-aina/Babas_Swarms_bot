@@ -1,6 +1,19 @@
 ---
-## 1. `docker/dify-compose.yml`
-
+title: Tool2 Dify Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- YAML syntax is valid'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### ✅ Passed
 - YAML syntax is valid

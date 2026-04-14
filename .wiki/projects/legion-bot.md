@@ -11,8 +11,8 @@ wikilinks:
   - [[./entities/openrouter]]
   - [[./entities/minimax-m2-7]]
   - [[./concepts/multi-agent-orchestration]]
-  - [[legion-module-map]]
-  - [[memory-system-architecture]]
+  - [[architecture/legion-module-map]]
+  - [[architecture/memory-system-architecture]]
 confidence: high
 source: implementation
 ---
@@ -157,10 +157,10 @@ Five-tier memory architecture with a unified facade:
 
 ## Related Pages
 
-- [[legion-module-map]] — Core module organization (updated 2026-04-13)
-- [[memory-system-architecture]] — Memory tiers and facade
+- [[architecture/legion-module-map]] — Core module organization (updated 2026-04-13)
+- [[architecture/memory-system-architecture]] — Memory tiers and facade
 - [[./concepts/multi-agent-orchestration]] — Agent coordination and swarm patterns
-- [[intent-routing]] — 23-intent classification system
+- [[./concepts/intent-routing]] — 23-intent classification system
 - [[./entities/opencode]] — OpenCode CLI integration
 - [[./entities/openrouter]] — LLM routing provider
 - [[./entities/minimax-m2-7]] — Primary coding/reasoning model

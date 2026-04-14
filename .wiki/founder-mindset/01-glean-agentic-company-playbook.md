@@ -1,3 +1,20 @@
+---
+title: Glean Agentic Company Playbook
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: https://marketcurve.substack.com/p/how-to-build-an-ai-agent-company'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Glean $7.2B Agentic Company Playbook
 
 Source: https://marketcurve.substack.com/p/how-to-build-an-ai-agent-company

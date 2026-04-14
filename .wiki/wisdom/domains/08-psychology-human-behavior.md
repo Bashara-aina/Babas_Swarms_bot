@@ -1,3 +1,21 @@
+---
+title: Psychology Human Behavior
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Two cognitive systems: fast/intuitive (System 1) and slow/deliberate
+  (System 2); heuristics cause predictable biases; cognitive ease affects confidence.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 08: Psychology & Human Behavior
 
 ## Daniel Kahneman — "Thinking, Fast and Slow"

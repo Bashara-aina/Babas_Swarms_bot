@@ -1,17 +1,21 @@
 ---
-title: orchestrator-comparison
+title: Orchestrator Comparison
 type: architecture
 status: active
-tags: [orchestration, agents, comparison, swarm, nexus, jarvis]
-created: 2026-04-13
-updated: 2026-04-13
-summary:: " Legion has 4 competing orchestrators: task_orchestrator (492 lines, task chaining + debate), legion_swarm (322 lines, 11-agent 3-phase), nexus_orchestrator (3-layer routing), and jarvis_orchestrator (context bundling). Consolidation into a single orchestrator is planned per the 2026-04-12 audit."
-wikilinks:
-  - [[./concepts/multi-agent-orchestration]]
-  - [[intent-routing]]
-  - [[legion-module-map]]
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Legion operates four concurrent orchestration systems at different complexity
+  levels: intent routing for simple commands (<100ms), three-agent pipeline for coding
+  tasks (30-120s), full 87-agent swa...'
+wikilinks: []
 confidence: medium
-source: implementation
+source: research
 ---
 
 # Orchestrator Comparison
@@ -180,5 +184,5 @@ class LegionOrchestrator:
 ## Related Pages
 
 - [[./concepts/multi-agent-orchestration]] — Agent coordination
-- [[intent-routing]] — Simple routing
-- [[legion-module-map]] — Module overview
+- [[./concepts/intent-routing]] — Simple routing
+- [[architecture/legion-module-map]] — Module overview

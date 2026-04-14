@@ -1,10 +1,21 @@
 ---
-title: deployment-architecture
-domain: deployment-cicd
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: system
-tokens_estimated: 520
+title: Deployment Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- deployment-architecture.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion runs as a systemd service with a 10s auto-restart on failure, parallel
+  startup orchestration, and 4-layer health monitoring (feature flags, HTTP endpoint,
+  sidecar probes, heartbeat daemon).
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Deployment Architecture

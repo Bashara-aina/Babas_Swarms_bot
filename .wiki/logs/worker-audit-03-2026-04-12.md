@@ -1,6 +1,19 @@
 ---
-## Files Read
-
+title: Worker Audit 03 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. `router.py` (root) — re-export shim, 90 lines
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. `router.py` (root) — re-export shim, 90 lines
 2. `core/autonomous_router.py` — 585 lines, 18 skills with SKILL_PATTERNS

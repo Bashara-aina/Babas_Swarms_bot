@@ -1,8 +1,21 @@
 ---
-title: "ADR-089: LEGION MASTER CONCERN FIX"
-date: "2026-04-12"
-result: ""
-status: "ACCEPTED"
+title: Adr 089 Legion Concerns Fix
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 7 critical concerns identified through direct repo inspection on 2026-04-12.
+  These represent accumulated technical debt from an unfinished refactor (dual llm_client,
+  dual agents) and several real f...
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-089: LEGION MASTER CONCERN FIX
 

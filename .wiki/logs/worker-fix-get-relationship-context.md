@@ -1,3 +1,20 @@
+---
+title: Worker Fix Get Relationship Context
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Fix missing import for `get_relationship_context`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Fix Log: get_relationship_context Import
 
 **Date**: 2026-04-12  

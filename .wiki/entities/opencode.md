@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: OpenCode is an autonomous CLI coding agent integrated with Legion via core/opencode_bridge.py. It replaces Cursor for all backend Legion tasks, chosen for its CLI-first design and native Telegram integration. Runs as a subprocess on port 4096.
 wikilinks:
-  - [[legion-bot]]
-  - [[legion-module-map]]
+  - [[projects/legion-bot]]
+  - [[architecture/legion-module-map]]
   - [[./concepts/llm-cost-routing]]
 confidence: high
 source: implementation
@@ -18,7 +18,7 @@ project: legion
 # OpenCode
 
 ## TL;DR
-OpenCode is an autonomous CLI coding agent that Legion uses for complex code tasks, wired through `core/opencode_bridge.py`. It replaces Cursor as the selected tool for backend coding, chosen over Cursor for its CLI-first approach and native Telegram integration. The ADR decision is documented in [[adr-2026-04-12-opencode-over-cursor-for-backend]].
+OpenCode is an autonomous CLI coding agent that Legion uses for complex code tasks, wired through `core/opencode_bridge.py`. It replaces Cursor as the selected tool for backend coding, chosen over Cursor for its CLI-first approach and native Telegram integration. The ADR decision is documented in [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]].
 
 ## Integration Architecture
 ```
@@ -58,6 +58,6 @@ OpenCode agents use `groq/llama-3.3-70b-versatile` for general tasks and `openro
 - Malformed report output: returns error message to user
 
 ## See Also
-[[legion-bot]] — Main project using OpenCode
-[[legion-module-map]] — System architecture overview
+[[projects/legion-bot]] — Main project using OpenCode
+[[architecture/legion-module-map]] — System architecture overview
 [[./concepts/llm-cost-routing]] — Cost optimization for coding tasks

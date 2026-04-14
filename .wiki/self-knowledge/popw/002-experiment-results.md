@@ -1,9 +1,19 @@
 ---
-title: "popw Experiment Results - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: popw-protocol
-date: 2026-04-11
-tags: [popw, experiments, results, NOT-FOUND]
+title: Experiment Results
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: `/home/newadmin/Documents/popw-protocol/`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # popw Protocol Experiment Results

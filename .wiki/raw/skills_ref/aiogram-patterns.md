@@ -1,3 +1,20 @@
+---
+title: Aiogram Patterns
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Apply these patterns for robust Telegram handlers in this project.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Aiogram 3.x Patterns (Legion)
 
 Apply these patterns for robust Telegram handlers in this project.

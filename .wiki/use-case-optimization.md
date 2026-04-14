@@ -1,10 +1,19 @@
 ---
-title: use-case-optimization
-domain: future-architecture
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 340
+title: Use Case Optimization
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- use-case-optimization.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 100x performance definition for each of Bashara's 5 main use cases.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Use Case Optimization

@@ -1,13 +1,21 @@
 ---
-source_id: 058
-title: "Mekari Talenta Indonesia HR Tech Market Analysis"
-source_type: COMPETITOR_ANALYSIS
-authority: INDUSTRY
-url: "https://getlatka.com/companies/mekari"
-last_verified: "2026-04-11"
-tags: [mekari, talenta, hrtech, indonesia, payroll, hcm, sas, market-share, southeast-asia]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Mekari Talenta Indonesia
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Mekari is Indonesia's dominant HR-tech player with $97.5M revenue (2024),
+  300K customers, and 63% YoY growth. They prove the Indonesian HR software market
+  is massive and growing. cekwajar.id needs ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Mekari Talenta Indonesia HR Tech Market Analysis

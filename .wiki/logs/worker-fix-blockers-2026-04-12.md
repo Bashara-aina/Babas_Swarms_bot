@@ -1,3 +1,20 @@
+---
+title: Worker Fix Blockers 2026 04 12
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Fix 2 critical blockers found by reviewer in cycles 1-5 wiki pages:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker: Fix Wiki Blockers — 2026-04-12
 
 ## Task

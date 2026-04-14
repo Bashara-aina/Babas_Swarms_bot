@@ -1,6 +1,20 @@
 ---
-## Root Cause Analysis
-
+title: Review 2026 04 12 Weather Handler Unresponsiveness
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'The `_weather_handler` in `core/skills/builtin/productivity.py` contains
+  a **critical session lifecycle bug** at lines 37-53:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 The `_weather_handler` in `core/skills/builtin/productivity.py` contains a **critical session lifecycle bug** at lines 37-53:
 

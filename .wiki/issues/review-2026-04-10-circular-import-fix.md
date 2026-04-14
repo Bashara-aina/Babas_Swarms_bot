@@ -1,6 +1,20 @@
 ---
-## ✅ Passed
-
+title: Review 2026 04 10 Circular Import Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **No hardcoded secrets** | No API keys, passwords, or secrets in any changed
+  file |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Check | Details |
 |

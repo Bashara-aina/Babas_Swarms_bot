@@ -1,7 +1,19 @@
 ---
-reviewer: "@reviewer"
-date: "2026-04-12"
-session: "LEGION WIKI LOOP 2026-04-12"
+title: Reviewer Cycles 6 10 Summary
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. proactive-schedule.md
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Reviewer Summary: Cycles 6-10
 

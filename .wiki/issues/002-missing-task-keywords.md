@@ -1,7 +1,19 @@
 ---
-title: "Review: Missing TASK_KEYWORDS for 11 Legacy Agents"
-type: review
-tags: [002-missing-task-keywords]
+title: Missing Task Keywords
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File:** `core/agent_registry.py` lines 436-660'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Review: Missing TASK_KEYWORDS for 11 Legacy Agents
 **File:** `core/agent_registry.py` lines 436-660  

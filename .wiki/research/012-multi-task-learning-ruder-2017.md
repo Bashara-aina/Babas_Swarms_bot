@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Ruder 2017 provides the definitive survey of multi-task learning (MTL) approaches, categorizing them as: hard parameter sharing (all tasks share encoder), soft parameter sharing (tasks have separate encoders with regularization), and auxiliary tasks (helper tasks enhance main task). POPW is a 3-task hard sharing model (detection + pose + activity via ResNet-50-FPN backbone)."
 wikilinks:
-  - [[001-resnet-he-2016]]
-  - [[003-film-perez-2018]]
-  - [[004-kendall-uncertainty-2018]]
+  - [[research/001-resnet-he-2016]]
+  - [[research/003-film-perez-2018]]
+  - [[research/004-kendall-uncertainty-2018]]
   - [[025-cross-stitch-misra-2016]]
   - [[026-mtan-liu-2019]]
   - [[100-popw-protocol-self-analysis]]
@@ -55,7 +55,7 @@ Multi-Task Learning
 ├── Soft Parameter Sharing
 │   ├── Cross-Stitch (Misra 2016) [[025-cross-stitch-misra-2016]]
 │   ├── MTAN (Liu 2019) [[026-mtan-liu-2019]]
-│   ├── FiLM (Perez 2018) [[003-film-perez-2018]] (modulation-based)
+│   ├── FiLM (Perez 2018) [[research/003-film-perez-2018]] (modulation-based)
 │   └── LwF (Learning without Forgetting)
 └── Auxiliary Tasks
     ├── Symmetric tasks (pose helps detection)
@@ -87,7 +87,7 @@ This is **hard parameter sharing**: one ResNet-50, one FPN, three task-specific 
 ## What POPW Can Steal Directly
 
 1. **Hard sharing is the simplest stable baseline**: POPW's shared ResNet-50-FPN architecture is intentionally conservative — it avoids the gradient conflict issues that plague soft-sharing approaches.
-2. **Loss weighting is the main tuning knob**: With hard sharing, the only way to balance tasks is loss weighting (hence Kendall, GradNorm, etc. — see [[004-kendall-uncertainty-2018]], [[045-gradnorm-chen-2018]])
+2. **Loss weighting is the main tuning knob**: With hard sharing, the only way to balance tasks is loss weighting (hence Kendall, GradNorm, etc. — see [[research/004-kendall-uncertainty-2018]], [[045-gradnorm-chen-2018]])
 3. **Equal weighting works for POPW**: Since Kendall is disabled, POPW uses equal loss weights. The survey notes that equal weighting is surprisingly competitive with learned weighting methods.
 
 ## Implemented in POPW?
@@ -121,9 +121,9 @@ where α_ij are learnable cross-stitch coefficients
 
 ## Related Papers in This Wiki
 
-- [[001-resnet-he-2016]] — ResNet-50 is POPW's shared encoder
-- [[003-film-perez-2018]] — FiLM is POPW's aspirational soft-sharing (DISABLED)
-- [[004-kendall-uncertainty-2018]] — Kendall is POPW's aspirational loss weighting (DISABLED)
+- [[research/001-resnet-he-2016]] — ResNet-50 is POPW's shared encoder
+- [[research/003-film-perez-2018]] — FiLM is POPW's aspirational soft-sharing (DISABLED)
+- [[research/004-kendall-uncertainty-2018]] — Kendall is POPW's aspirational loss weighting (DISABLED)
 - [[025-cross-stitch-misra-2016]] — Cross-stitch networks for soft parameter sharing
 - [[026-mtan-liu-2019]] — MTAN (Masked Adaptive Transfer Network)
 - [[100-popw-protocol-self-analysis]] — Documents POPW's hard sharing architecture

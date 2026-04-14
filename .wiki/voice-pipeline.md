@@ -1,10 +1,20 @@
 ---
-title: voice-pipeline
-domain: voice-media
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: handlers
-tokens_estimated: 620
+title: Voice Pipeline
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- voice-pipeline.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Voice note transcription pipeline — 3-tier Whisper backend (GPU→API→CPU),
+  language detection, temp file cleanup, optional TTS reply.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Voice Pipeline

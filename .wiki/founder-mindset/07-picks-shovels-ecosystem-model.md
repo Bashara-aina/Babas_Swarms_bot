@@ -1,3 +1,20 @@
+---
+title: Picks Shovels Ecosystem Model
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: https://superframeworks.com/articles/openclaw-business-ideas-indie-hackers'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Picks and Shovels Ecosystem Model
 
 Source: https://superframeworks.com/articles/openclaw-business-ideas-indie-hackers

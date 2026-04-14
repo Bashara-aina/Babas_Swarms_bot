@@ -1,3 +1,20 @@
+---
+title: Adr 003 Pipeline Complete
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: @planner, @worker, @reviewer'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-003: cekwajar.id Wiki Pipeline — Execution Complete
 
 **Date**: 2026-04-11  

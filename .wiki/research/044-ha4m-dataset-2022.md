@@ -1,35 +1,21 @@
 ---
-paper_id: "044"
-title: "The HA4M Dataset: Multi-Modal Monitoring of an Assembly Task for Human Action Recognition in Manufacturing"
-authors: "Cicirelli, Grazia; Marani, Roberto; Romeo, Laura; García Domínguez, Manuel; Heras, Jónathan; Perri, Anna G.; D'Orazio, Tiziana"
-year: 2022
-venue: "Scientific Data (Nature)"
-doi: "10.1038/s41597-022-01843-z"
-citations: "61"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "First multi-modal assembly dataset with 6 data types; enables multi-modal fusion research"
-key_contribution: "First multi-modal dataset about assembly containing RGB, Depth, IR, RGB-D-Aligned, Point Clouds, and Skeleton data"
+title: Ha4M Dataset 2022
+type: concept
+status: active
 tags:
-  - multi-modal dataset
-  - manufacturing
-  - assembly action recognition
-  - RGB-D
-  - skeleton data
-  - Azure Kinect
-dataset_stats:
-  videos: 217
-  subjects: 41
-  actions: 12
-  total_annotations: 4124
-data_types:
-  - "RGB images (2048×1536)"
-  - "Depth maps (640×576, 16-bit)"
-  - "IR images"
-  - "RGB-to-Depth-Aligned images"
-  - "Point Clouds (PLY format)"
-  - "Skeleton data (32 joints)"
-task: "Assembly of Epicycloid Gear Train (EGT)"
-dataset_url: "https://baltig.cnr.it/ISP/ha4m"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: HA4M (Human Action Multi-Modal Monitoring in Manufacturing) is a comprehensive
+  multi-modal dataset for assembly action recognition. It features 217 videos of 41
+  subjects performing assembly of an E...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

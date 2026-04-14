@@ -1,8 +1,19 @@
 ---
-title: "ADR-051: core.reliability — Empty `__init__.py` Needs Re-exports"
-date: "2026-04-12"
-decider: "@planner"
-status: "Accepted"
+title: Adr 051 Core Reliability Init
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-051: core.reliability — Empty `__init__.py` Needs Re-exports
 

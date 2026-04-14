@@ -1,6 +1,19 @@
 ---
-date: "2026-04-12"
-audit: "Context Injection — Soul/Wiki/Memory/Search"
+title: Audit 04 Llm Call Sites
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**messages[] at call time (line 1153-1155):**'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 04: LLM Call Sites Inventory
 

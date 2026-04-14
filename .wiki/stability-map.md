@@ -1,10 +1,19 @@
 ---
-title: stability-map
-domain: security-stability
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 360
+title: Stability Map
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- stability-map.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Crash scenarios, recovery behavior, and gaps — what happens when things break.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Stability Map

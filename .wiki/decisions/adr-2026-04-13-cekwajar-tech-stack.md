@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Decision to build cekwajar.id on Next.js 15 App Router, Supabase PostgreSQL with Row Level Security, Vercel deployment, and markitdown for document conversion. Rationale: Next.js 15 provides SSR+API routes in one framework; Supabase RLS enforces user data isolation; Vercel is native Next.js host with edge functions; markitdown handles PDF/DOCX conversion reliably. Individual Midtrans merchant account enables IDR 29K/79K/month subscription payments."
 wikilinks:
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[entities/supabase]]
   - [[entities/openrouter]]
-  - [[cekwajar-verdict-engine]]
+  - [[architecture/cekwajar-verdict-engine]]
 confidence: high
 source: implementation
 ---
@@ -255,7 +255,7 @@ Company name → industry + size category (after 90 days). NIK (if on payslip) �
 
 ## Related Articles
 
-- [[cekwajar-id]] — Project using this stack
-- [[cekwajar-verdict-engine]] — Verdict engine running on this stack
+- [[projects/cekwajar-id]] — Project using this stack
+- [[architecture/cekwajar-verdict-engine]] — Verdict engine running on this stack
 - [[entities/supabase]] — Database provider
-- [[cekwajar-ocr-pipeline]] — OCR pipeline using this infrastructure
+- [[architecture/cekwajar-ocr-pipeline]] — OCR pipeline using this infrastructure

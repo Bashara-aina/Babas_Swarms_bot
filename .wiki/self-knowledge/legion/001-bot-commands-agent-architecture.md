@@ -1,9 +1,19 @@
 ---
-title: "Legion Bot Commands and Agent Architecture"
-source_type: CODE_EXTRACTION
-extracted_from: swarm-bot
-date: 2026-04-11
-tags: [legion, bot, commands, agents, architecture, handlers]
+title: Bot Commands Agent Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Type**: Python Telegram bot with multi-agent orchestration'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Legion/SwarmBot Bot Commands and Agent Architecture

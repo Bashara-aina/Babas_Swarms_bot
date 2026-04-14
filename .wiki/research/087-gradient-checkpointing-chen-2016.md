@@ -1,18 +1,21 @@
 ---
-title: "087 — Training Deep Nets with Sublinear Memory Cost (Chen et al., 2016)"
-subtitle: "Gradient Checkpointing for Memory-Efficient Deep Networks"
-category: training-optimization
-subcategory: memory-optimization
-tags: [gradient-checkpointing, memory-optimization, checkpointing, sublinear, deep-networks]
-authors: ["Tianqi Chen", "Bing Xu", "Chiyuan Zhang", "Carlos Guestrin"]
-venue: "arXiv:1604.06174"
-arXiv: "1604.06174"
-date: 2016-04-21
-cited: "~2000+"
-implementation: ["PyTorch checkpoint", "TensorFlow memory optimizer"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Gradient Checkpointing Chen 2016
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Gradient Checkpointing reduces memory cost from O(n) to **O(√n)** with only
+  a single extra forward pass per mini-batch. Enables training **1000-layer ResNets**
+  on 12GB GPU (from 48GB).
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

@@ -1,30 +1,21 @@
 ---
-paper_id: "042"
-title: "CASA: Context-Aware Sequence Alignment Using 4D Skeletal Augmentation"
-authors: "Kwon, Taein; Tekin, Bugra; Tang, Siyu; Pollefeys, Marc"
-year: 2022
-venue: "CVPR 2022 (Oral)"
-arxiv: "2204.12223"
-doi: "10.48550/arXiv.2204.12223"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Self-supervised skeletal representation learning with temporal alignment; addresses action phase progress estimation"
-key_contribution: "Novel context-aware self-supervised learning framework for 3D skeleton alignment using 4D augmentation"
+title: Kwon Casa 2022
+type: concept
+status: active
 tags:
-  - self-supervised learning
-  - skeleton alignment
-  - 4D augmentation
-  - temporal alignment
-  - action phase progress
-  - CVPR 2022 Oral
-architecture:
-  type: "Self-Supervised Skeleton Alignment"
-  key_components:
-    - "Self-attention and cross-attention mechanisms"
-    - "4D skeletal augmentation (spatial + temporal)"
-    - "Spatial and temporal context modeling"
-key_insight: "Image-based embedding spaces suffer temporal discontinuity; skeletal representations with context modeling solve this"
-code_url: "https://github.com/taeinkwon/CASA"
-project_url: "http://www.taeinkwon.com/projects/casa"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: CASA addresses temporal alignment of fine-grained human actions, which is
+  crucial for applications in robotics and mixed reality. The authors identify that
+  state-of-the-art image-based methods prod...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

@@ -1,3 +1,20 @@
+---
+title: Philosophy Mind Epistemology
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Type**: Book/Essay Compilation'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 01: Philosophy of Mind & Epistemology
 
 ## [Eliezer Yudkowsky] — Rationality: From AI to Zombies

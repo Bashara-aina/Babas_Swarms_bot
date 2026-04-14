@@ -1,3 +1,20 @@
+---
+title: Opencode Depth Upgrade
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- prompts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Based directly on DEEP_AUDIT_2026-04-12.md by Claude Opus 4.6'
+wikilinks: []
+confidence: medium
+source: research
+---
 # OPENCODE — DEPTH UPGRADE MASTER PROMPT
 > Based directly on DEEP_AUDIT_2026-04-12.md by Claude Opus 4.6
 > Overall score: 4.2/10. Target: 9/10.

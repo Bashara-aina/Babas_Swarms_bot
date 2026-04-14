@@ -1,10 +1,19 @@
 ---
-title: legion-vision-2026
-domain: future-architecture
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 420
+title: Legion Vision 2026
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- legion-vision-2026.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: What Legion becomes by May 2026 — architecture, capabilities, and timeline.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Legion Vision 2026

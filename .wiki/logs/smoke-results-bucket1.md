@@ -1,3 +1,20 @@
+---
+title: Smoke Results Bucket1
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Category** | Telegram Handler Routes |'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Smoke Test Results — Bucket 1: Telegram Handler Routes
 
 ## Summary

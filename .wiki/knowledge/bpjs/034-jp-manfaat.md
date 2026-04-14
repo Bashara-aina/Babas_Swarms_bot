@@ -1,13 +1,21 @@
 ---
-source_id: 034
-title: "Jaminan Pensiun (JP) BPJS: Manfaat Bulanan dan Formula Perhitungan"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.bpjsketenagakerjaan.go.id/artikel/17621/artikel-mengenal-jaminan-pensiun-dari-bpjs-ketenagakerjaan.bpjs"
-last_verified: "2026-04-11"
-tags: [bpjs-ketenagakerjaan, jp, pensiun, manfaat-bulanan, formula, labor-law, hrtech]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Jp Manfaat
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Jaminan Pensiun provides monthly income after retirement or in case of disability/death.
+  The benefit calculation is complex (actuarial formula) and the wage cap affects
+  contributions. Understanding...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Jaminan Pensiun (JP) BPJS: Manfaat Bulanan dan Formula Perhitungan

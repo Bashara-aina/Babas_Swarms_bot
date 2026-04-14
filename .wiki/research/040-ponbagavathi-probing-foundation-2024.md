@@ -1,23 +1,21 @@
 ---
-paper_id: "040"
-title: "Probing Fine-Grained Action Understanding and Cross-View Generalization of Foundation Models"
-authors: "Ponbagavathi, Thinesh Thiyakesan; Peng, Kunyu; Roitberg, Alina"
-year: 2024
-venue: "arXiv preprint"
-arxiv: "2407.15605"
-doi: "10.48550/arXiv.2407.15605"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Systematic study of foundation models for fine-grained action recognition; provides guidance for backbone selection"
-key_contribution: "First systematic study of different foundation models and design choices for human activity recognition from unknown views"
+title: Ponbagavathi Probing Foundation 2024
+type: concept
+status: active
 tags:
-  - foundation models
-  - cross-view generalization
-  - fine-grained action
-  - video understanding
-  - temporal aggregation
-datasets:
-  - "Multiple including industrial assembly datasets"
-key_insight: "Popular benchmarks offer diverse views but only coarse actions; domain-specific datasets (industrial assembly) use limited static perspectives"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper provides the first systematic evaluation of how perspective changes
+  affect different Vision Foundation Models (VFMs) in fine-grained human activity
+  recognition. The authors compare multi...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

@@ -1,3 +1,20 @@
+---
+title: Worker Fix Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **File**: `handlers/shared.py` line 303'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Fix Log — 2026-04-11
 
 ## Subtask 1: Fix `agent_loop()` parameter name ✅

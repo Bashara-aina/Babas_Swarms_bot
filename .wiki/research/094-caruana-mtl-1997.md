@@ -1,19 +1,21 @@
 ---
-paper_id: 094
-title: "Multitask Learning"
-authors: "Rich Caruana"
-year: 1997
-venue: "Machine Learning, 28(1), 41–75"
-doi: "10.1023/A:1007379606734"
-arxiv: ""
-citation_count: "~25,000+ (estimated)"
-popw_relevance: CRITICAL
+title: Caruana Mtl 1997
+type: concept
+status: active
 tags:
-  - multitask-learning
-  - inductive-transfer
-  - neural-networks
-  - generalization
-  - popw-core
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Original MTL paper.** Rich Caruana at Microsoft Research formalized multitask
+  learning (MTL) as an approach to inductive transfer that improves generalization
+  by using domain information containe...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 094 — Multitask Learning (Caruana 1997)

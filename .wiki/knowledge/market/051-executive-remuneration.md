@@ -1,13 +1,21 @@
 ---
-source_id: 051
-title: "Executive Remuneration Indonesia 2024: BUMN & Private Company Director Salaries"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://tuwaga.id/artikel/gaji-direksi-bumn/, https://www.cnnindonesia.com/edukasi/20250904110239-561-1270039/berapa-gaji-komisaris-dan-direktur-bumn-ini-kisarannya"
-last_verified: "2026-04-11"
-tags: [executive-salary, direktur, komisaris, BUMN, board-remuneration, tantiem]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Executive Remuneration
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Understanding executive compensation provides the upper ceiling for salary
+  benchmarks. For cekwajar.id's "gaji wajar" system, knowing director-level pay helps
+  establish salary bands and demonstrate...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Executive Remuneration Indonesia 2024: BUMN & Private Company Director Salaries

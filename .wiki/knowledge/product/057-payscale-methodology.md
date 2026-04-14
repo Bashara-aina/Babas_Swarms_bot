@@ -1,13 +1,21 @@
 ---
-source_id: 057
-title: "PayScale Salary.com Data Methodology Analysis"
-source_type: RESEARCH
-authority: INDUSTRY
-url: "https://www.payscale.com/career-advice/salary-data-whe"
-last_verified: "2026-04-11"
-tags: [payscale, salary-data, methodology, data-collection, accuracy, crowdsourced, statistical-analysis]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Payscale Methodology
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Understanding how leading salary data platforms validate their data helps
+  cekwajar.id build trust with Indonesian users. PayScale claims "largest real-time
+  online employee salary database" and vali...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PayScale & Salary.com Data Methodology Analysis

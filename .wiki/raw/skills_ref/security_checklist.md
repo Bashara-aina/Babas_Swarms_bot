@@ -1,3 +1,20 @@
+---
+title: Security Checklist
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use this checklist before shipping any handler/tool change.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Security Checklist (Telegram + Agentic Bot)
 
 Use this checklist before shipping any handler/tool change.

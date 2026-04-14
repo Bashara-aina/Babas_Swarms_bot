@@ -1,8 +1,19 @@
 ---
-tags: [class-imbalance, oversampling, smote, synthetic-samples, jair-2002]
-sources: [arxiv:1106.1813, doi:10.1613/jair.953]
-created: 2026-04-11
-updated: 2026-04-11
+title: Smote Chawla 2002
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Chawla, Bowyer, Hall & Kegelmeyer** | JAIR 2002 | [DOI:10.1613/jair.953](https://doi.org/10.1613/jair.953)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SMOTE: Synthetic Minority Over-sampling Technique
@@ -72,6 +83,6 @@ For modern deep learning, **Remix (054)** or **Mixup-based methods** generally o
 
 ## See Also
 
-- [[054-remix-chou-2020]] — Remix (deep learning evolution of SMOTE ideas)
-- [[053-mislas-zhong-2021]] — MiSLAS (mixup + calibration for long-tail)
-- [[052-class-balanced-cui-2019]] — Class-balanced loss (re-weighting alternative)
+- [[research/054-remix-chou-2020]] — Remix (deep learning evolution of SMOTE ideas)
+- [[research/053-mislas-zhong-2021]] — MiSLAS (mixup + calibration for long-tail)
+- [[research/052-class-balanced-cui-2019]] — Class-balanced loss (re-weighting alternative)

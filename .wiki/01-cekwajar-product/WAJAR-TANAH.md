@@ -1,3 +1,20 @@
+---
+title: Wajar Tanah
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- cekwajar-product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "Wajar Tanah — Land Price Benchmark — Full Spec"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "Wajar Tanah — Land Price Benchmark — Full Spec"
 ***

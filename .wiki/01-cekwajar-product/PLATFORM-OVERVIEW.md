@@ -1,3 +1,20 @@
+---
+title: Platform Overview
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- cekwajar-product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "cekwajar.id — Complete Platform Specification"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "cekwajar.id — Complete Platform Specification"
 version: 1.0 | April 2026

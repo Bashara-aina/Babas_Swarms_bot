@@ -1,13 +1,21 @@
 ---
-source_id: 071
-title: "PPN 11% SaaS Software Indonesia VAT Digital Service"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.pajak.go.id/en/digitaltax"
-last_verified: "2026-04-11"
-tags: [ppn, vat, saas, software, indonesia, digital-service, 11-persen, pmse]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Ppn Saas Indonesia Vat
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: As a SaaS product serving Indonesian businesses, cekwajar.id MUST correctly
+  handle PPN (VAT) on digital services. Non-compliance risks penalties and legal issues.
+  Understanding the 12% VAT (effecti...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PPN 11% SaaS Software Indonesia VAT Digital Service

@@ -1,3 +1,21 @@
+---
+title: Adr 003 Fix Smoke Test Issues
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: ADR-002 smoke test identified 5 failing buckets. This ADR captures the decomposition
+  and fix plan.
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-003: Fix Smoke Test Issues
 
 **Date**: 2026-04-11  

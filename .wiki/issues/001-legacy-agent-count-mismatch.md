@@ -1,7 +1,19 @@
 ---
-title: "Review: Legacy Agent Count Mismatch"
-type: review
-tags: [001-legacy-agent-count-mismatch]
+title: Legacy Agent Count Mismatch
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**File:** `config/departments.yaml` line 713-715'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Review: Legacy Agent Count Mismatch
 **File:** `config/departments.yaml` line 713-715  

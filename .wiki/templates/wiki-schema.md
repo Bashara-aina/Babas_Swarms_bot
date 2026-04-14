@@ -1,3 +1,21 @@
+---
+title: Wiki Schema
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Canonical rules for LLM-maintained knowledge base wikis. This is the single
+  source of truth — agent config templates pull from this document.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Wiki Schema
 
 Canonical rules for LLM-maintained knowledge base wikis. This is the single source of truth — agent config templates pull from this document.

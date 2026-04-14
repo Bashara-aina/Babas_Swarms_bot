@@ -1,9 +1,21 @@
 ---
-title: "ADR-053: Orphan Module Classification Policy"
-audit: "AUDIT 05"
-date: "2026-04-13"
-likely_candidates: "`character_voice.py`, `error_humanizer.py`, `health.py`, `intent_classifier.py`, `natural_command_parser.py`, `research_policy.py`, `self_awareness_gate.py`, `swarm.py`, `wiki_bridge.py`"
-status: "PROPOSED"
+title: Adr 053 Orphan Modules Audit 05
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: During AUDIT 05, 18 modules in `core/` were identified as having zero internal
+  imports (no other core/ file imports them). These represent potential dead code,
+  architectural drift, or intentionally...
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-053: Orphan Module Classification Policy
 **Date:** 2026-04-13  

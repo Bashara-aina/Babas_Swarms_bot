@@ -1,8 +1,19 @@
 ---
-title: "ADR-001: Archive cekwajar.id Planning Docs"
-date: "2026-04-11"
-deciders: "SwarmBot Team"
-status: "Accepted"
+title: Adr 001 Archive Cekwajar Planning
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders:** SwarmBot Team'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-001: Archive cekwajar.id Planning Docs
 

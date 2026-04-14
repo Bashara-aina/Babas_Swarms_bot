@@ -1,6 +1,21 @@
 ---
-## EXECUTIVE SUMMARY
-
+title: Block 09 Financial Model
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document models cekwajar.id as a **freemium B2C data platform with B2B
+  licensing** targeting Indonesian salary, property, and financial transparency. The
+  business launches April 2026 with a so...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This document models cekwajar.id as a **freemium B2C data platform with B2B licensing** targeting Indonesian salary, property, and financial transparency. The business launches April 2026 with a solo founder and negative cash burn of IDR 7-12M/month.
 

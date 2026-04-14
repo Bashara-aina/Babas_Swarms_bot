@@ -1,6 +1,21 @@
 ---
-## Context
-
+title: Audit12 Planner Decision
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'LEGION AUDIT 12 identified a potential issue: nihongo mode may leak between
+  users. The concern is that if the nihongo active flag is stored globally (rather
+  than per-user), one user''s activation co...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 LEGION AUDIT 12 identified a potential issue: nihongo mode may leak between users. The concern is that if the nihongo active flag is stored globally (rather than per-user), one user's activation could affect another user's experience.
 

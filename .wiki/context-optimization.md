@@ -1,10 +1,19 @@
 ---
-title: context-optimization
-domain: context-window
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 340
+title: Context Optimization
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- context-optimization.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: What to cut, what to add, and how to optimize context per task type.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Context Optimization

@@ -9,7 +9,7 @@ summary: "Indonesian labor law centers on UU 13/2003 (primary employment statute
 wikilinks:
   - [[./concepts/bpjs-reference]]
   - [[./concepts/tax-indonesia]]
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[./concepts/market-data-indonesia]]
 confidence: high
 source: research
@@ -301,5 +301,5 @@ For Wajar Slip's compliance engine, apply rules in this priority order:
 
 - [[./concepts/bpjs-reference]] — Social security calculations that interact with wage rules
 - [[./concepts/tax-indonesia]] — PPh21 calculations on gross salary
-- [[cekwajar-id]] — Project applying these rules in Wajar Slip
+- [[projects/cekwajar-id]] — Project applying these rules in Wajar Slip
 - [[./concepts/market-data-indonesia]] — Market salary benchmarks for Wajar Gaji

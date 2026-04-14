@@ -1,5 +1,19 @@
 ---
-
+title: Worker Fix Flags 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fix 3 minor issues found by reviewer in cycles 6-10 wiki pages.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Worker Fix Flags — 2026-04-12
 ## TASK

@@ -1,9 +1,20 @@
 ---
-title: "Cross-Repository Patterns"
-source_type: CODE_EXTRACTION
-extracted_from: ALL_REPOS
-date: 2026-04-11
-tags: [patterns, cross-repo, env-vars, auth, error-handling]
+title: Cross Repo Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document captures shared patterns and conventions found across the SwarmBot
+  ecosystem.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Cross-Repository Patterns

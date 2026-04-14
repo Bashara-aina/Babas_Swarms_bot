@@ -1,32 +1,21 @@
 ---
-paper_id: "046"
-title: "ENIGMA-51 and ENIGMA-360: Egocentric Industrial Assembly Datasets"
-authors: "Ragusa, Francesco; Leonardi, Rosario; Mazzamuto, Michele; Bonanno, Claudia; Scavo, Rosario; Furnari, Antonino; Farinella, Giovanni Maria"
-year: "2023 (ENIGMA-51), 2026 (ENIGMA-360)"
-venue: "WACV 2024 (ENIGMA-51), arXiv 2026 (ENIGMA-360)"
-arxiv_51: "2309.14809"
-arxiv_360: "2603.09741"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Egocentric datasets for industrial assembly; ENIGMA-360 provides synchronized ego-exo views"
-key_contribution: "Egocentric datasets acquired in real industrial scenarios for human-object interaction understanding"
+title: Ragusa Enigma 2024
+type: concept
+status: active
 tags:
-  - egocentric video
-  - industrial assembly
-  - human-object interaction
-  - ego-exo views
-  - electrical board repair
-datasets:
-  ENIGMA-51:
-    videos: 51
-    subjects: 19
-    task: "Electrical board repair"
-    annotations: "Dense multi-task labels"
-  ENIGMA-360:
-    videos: 360 (180 ego + 180 exo)
-    views: "Synchronized ego-exo"
-    task: "Industrial procedural tasks"
-dataset_url: "https://fpv-iplab.github.io/ENIGMA-51/"
-dataset_url_360: "https://fpv-iplab.github.io/ENIGMA-360/"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The ENIGMA datasets provide egocentric video data for understanding human
+  behavior in industrial scenarios. ENIGMA-51 focuses on electrical board repair tasks
+  with 19 subjects, while ENIGMA-360 exp...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

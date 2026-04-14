@@ -1,3 +1,20 @@
+---
+title: Subtask 6 Wiki Handler Commands Complete
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Create wiki audit command handlers'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Subtask 6: Wiki Handler Commands - COMPLETE
 
 **Date:** 2026-04-11

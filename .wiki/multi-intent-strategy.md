@@ -1,10 +1,20 @@
 ---
-title: Multi-Intent Strategy
-domain: intent-routing
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 300
+title: Multi Intent Strategy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- multi-intent-strategy.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: How to detect and handle compound requests like "cek seo rumahlabuh dan restart
+  nginx".
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MULTI-INTENT STRATEGY

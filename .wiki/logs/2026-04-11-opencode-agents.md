@@ -1,3 +1,20 @@
+---
+title: Opencode Agents
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Create 5 opencode agents + wire opencode serve into bot startup
+wikilinks: []
+confidence: medium
+source: research
+---
 # 2026-04-11 — OPENCODE AGENTS + AUTOSTART
 
 ## Task

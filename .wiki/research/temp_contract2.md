@@ -1,8 +1,20 @@
 ---
-tags: [research, cross-modal, bidirectional, pose, activity, film, modulation, attention]
-sources: [arxiv:2604.04029, arxiv:2601.03233, arxiv:2505.05714, arxiv:2507.21977, arxiv:1709.07871]
-created: 2026-04-13
-updated: 2026-04-13
+title: Temp Contract2
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Goal**: Enable bidirectional communication between pose and activity
+  representations'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Research Notes: Cross-Modal Attention for Bidirectional Pose-Activity Communication

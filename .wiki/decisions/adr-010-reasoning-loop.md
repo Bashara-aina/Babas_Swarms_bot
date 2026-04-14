@@ -1,8 +1,19 @@
 ---
-title: "ADR-010: Pre-Response Reasoning Loop"
-component: "core/reasoning_loop.py, llm_client/__init__.py"
-date: "2026-04-12"
-status: "ACCEPTED"
+title: Adr 010 Reasoning Loop
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Component:** core/reasoning_loop.py, llm_client/__init__.py'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-010: Pre-Response Reasoning Loop
 

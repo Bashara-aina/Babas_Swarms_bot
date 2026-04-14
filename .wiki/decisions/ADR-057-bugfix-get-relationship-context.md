@@ -1,5 +1,19 @@
 ---
-## Error
+title: Adr 057 Bugfix Get Relationship Context
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'NameError: name ''get_relationship_context'' is not defined'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ```
 NameError: name 'get_relationship_context' is not defined

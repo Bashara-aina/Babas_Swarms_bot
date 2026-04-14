@@ -1,10 +1,20 @@
 ---
-title: "Wiki Wiring Fix — Batch 4 (Final)"
-type: contract
+title: Contracts Batch4 Wiki Wiring
+type: concept
 status: active
-tags: [wiring-fix, wiki]
-created: 2026-04-13
-summary: "Fix remaining broken links: timelines, midtrans, Bashara-aina, YAML in nested paths"
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fix `[[timelines/conversations_log]]` → should be `[[timelines/legion-version-history]]`
+  or similar
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## CONTRACT #12: Fix Timelines Conversations Log Link
@@ -46,7 +56,7 @@ FILES:
     - .wiki/output/health/lint_2026-04-13.md
 
 DONE_WHEN:
-  - `[[memory-architecture#failure-modes]]` changed to `[[memory-architecture]]` or `[[concepts/memory-architecture]]`
+  - `[[memory-architecture#failure-modes]]` changed to `[[./concepts/memory-architecture]]` or `[[concepts/memory-architecture]]`
 
 PROOF_FORMAT:
   Bash command: `grep "memory-architecture#failure-modes" .wiki/SCHEMA.md .wiki/output/health/lint_2026-04-13.md`

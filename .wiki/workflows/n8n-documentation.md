@@ -1,5 +1,20 @@
 ---
-## Overview
+title: N8N Documentation
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- workflows
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: n8n is configured as a workflow automation layer. The bridge runs as a webhook
+  listener on port 7835.
+wikilinks: []
+confidence: medium
+source: research
 ---
 n8n is configured as a workflow automation layer. The bridge runs as a webhook listener on port 7835.
 ---

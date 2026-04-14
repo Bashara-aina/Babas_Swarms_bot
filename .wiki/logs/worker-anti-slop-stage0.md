@@ -1,3 +1,20 @@
+---
+title: Worker Anti Slop Stage0
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Date**: 2026-04-11 | **Assigned by**: @planner'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker: Stage 0 — Safety Checkpoint
 **Date**: 2026-04-11 | **Assigned by**: @planner
 

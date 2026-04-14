@@ -1,8 +1,19 @@
 ---
-title: "ADR-001: Dual Router Conflict (agents.py vs autonomous_router.py)"
-date: "2026-04-12"
-deciders: "Worker agent (audit task)"
-status: "Accepted"
+title: Adr 001 Dual Router Conflict
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders**: Worker agent (audit task)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-001: Dual Router Conflict (agents.py vs autonomous_router.py)
 

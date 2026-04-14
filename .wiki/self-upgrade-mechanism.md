@@ -1,10 +1,20 @@
 ---
-title: self-upgrade-mechanism
-domain: git-version-control
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: core/self_upgrade.py, handlers/github_intel_handler.py
-tokens_estimated: 530
+title: Self Upgrade Mechanism
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-upgrade-mechanism.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: How Legion generates, validates, writes, hot-reloads, and rolls back code
+  upgrades triggered from Telegram.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Self-Upgrade Mechanism

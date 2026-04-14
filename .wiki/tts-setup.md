@@ -1,10 +1,20 @@
 ---
-title: tts-setup
-domain: voice-media
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: handlers
-tokens_estimated: 540
+title: Tts Setup
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tts-setup.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Two TTS backends — Kokoro-ONNX (local, high-quality) and edge-tts (cloud
+  fallback) — with 3 MiniMax voices, speed control, and WAV/MP3 output formats.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # TTS Setup

@@ -1,13 +1,21 @@
 ---
-source_id: 066
-title: "Solo Founder AI Tools 2025 - One Person Company Automation"
-source_type: BUSINESS_MODEL
-authority: INDUSTRY
-url: "https://www.entrepreneur.com/science-technology/7-ai-tools-that-run-a-one-person-business-in-2025-no/499048"
-last_verified: "2026-04-11"
-tags: [ai-tools, automation, solo-founder, productivity, one-person-company, workflow]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Solo Founder Ai Tools 2025
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion agents are Bashara's AI workforce. Understanding the 2025 solo stack
+  enables cekwajar.id to fully leverage AI for automation—turning one person into
+  a multi-agent army. This directly support...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Solo Founder AI Tools 2025 - One Person Company Automation

@@ -1,3 +1,20 @@
+---
+title: Worker Fix Whitespace Bug 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Fix off-by-character bug in `core/character_enforcer.py`'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Fix: Leading Whitespace Bug in enforce_gsa_structure()
 
 **Date:** 2026-04-12  

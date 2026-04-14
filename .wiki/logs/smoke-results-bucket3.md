@@ -1,5 +1,19 @@
 ---
-
+title: Smoke Results Bucket3
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Date**: 2026-04-11 20:35:40'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Smoke Results — Bucket 3: Core Intent & Memory Systems
 **Date**: 2026-04-11 20:35:40  

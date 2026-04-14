@@ -1,3 +1,21 @@
+---
+title: Mathematics Quantitative Thinking
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Problem-solving follows discoverable heuristics: understand
+  problem, devise plan, execute, review; analogy and decomposition key.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 05: Mathematics & Quantitative Thinking
 
 ## [George Pólya] — How to Solve It

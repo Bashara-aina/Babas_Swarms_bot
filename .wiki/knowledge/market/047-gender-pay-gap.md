@@ -1,13 +1,21 @@
 ---
-source_id: 047
-title: "Gender Pay Gap Indonesia 2023-2024: Wage Inequality Research"
-source_type: RESEARCH
-authority: ACADEMIC
-url: "https://databoks.katadata.co.id/en/tags/gender-wage-gap, https://scholarhub.ui.ac.id/jekk/vol1/iss1/4/"
-last_verified: "2026-04-11"
-tags: [gender-pay-gap, wage-inequality, equal-pay, pph21, labor-law]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Gender Pay Gap
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Gender pay gap analysis is crucial for cekwajar.id to provide equitable salary
+  recommendations. Understanding the gap helps position the platform as a fairness-focused
+  solution and addresses regula...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Gender Pay Gap Indonesia 2023-2024: Wage Inequality Research

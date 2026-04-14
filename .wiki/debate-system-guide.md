@@ -1,10 +1,20 @@
 ---
 title: Debate System Guide
-domain: personality
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: debate, research
-tokens_estimated: 350
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- debate-system-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: When to debate (Bashara wrong, belief challenged), when not to (simple questions,
+  emotional vents).
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DEBATE SYSTEM GUIDE

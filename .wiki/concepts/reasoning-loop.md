@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: The reasoning loop enables Legion to plan, execute, observe, and refine approach iteratively before committing to a final response, activated by complex or high-stakes tasks.
 wikilinks:
-  - [[intent-routing]]
+  - [[./concepts/intent-routing]]
   - [[./concepts/multi-agent-orchestration]]
   - [[./concepts/self-improvement-loop]]
 confidence: high
@@ -62,7 +62,7 @@ Final synthesized response is sent to the user. If the loop iterated multiple ti
 
 ## Relationships
 
-The reasoning loop is the mechanism that makes [[./concepts/multi-agent-orchestration]] possible. The three-agent pipeline (Planner → Worker → Reviewer) uses the reasoning loop at each handoff: Planner's decomposition is a reasoning loop output, Worker's execution is instrumented with observe/refine cycles, Reviewer's assessment triggers another loop if issues are found. [[./concepts/self-improvement-loop]] feeds outcomes back into future reasoning iterations — failed approaches are recorded so the refine phase can avoid them next time. [[intent-routing]] is the trigger source: intent classification determines whether the reasoning loop activates at all.
+The reasoning loop is the mechanism that makes [[./concepts/multi-agent-orchestration]] possible. The three-agent pipeline (Planner → Worker → Reviewer) uses the reasoning loop at each handoff: Planner's decomposition is a reasoning loop output, Worker's execution is instrumented with observe/refine cycles, Reviewer's assessment triggers another loop if issues are found. [[./concepts/self-improvement-loop]] feeds outcomes back into future reasoning iterations — failed approaches are recorded so the refine phase can avoid them next time. [[./concepts/intent-routing]] is the trigger source: intent classification determines whether the reasoning loop activates at all.
 
 ## Current Status
 
@@ -70,6 +70,6 @@ The reasoning loop is the mechanism that makes [[./concepts/multi-agent-orchestr
 
 ## See Also
 
-- [[intent-routing]] — Triggers that activate the reasoning loop
+- [[./concepts/intent-routing]] — Triggers that activate the reasoning loop
 - [[./concepts/multi-agent-orchestration]] — Three-agent pipeline using reasoning loops
 - [[./concepts/self-improvement-loop]] — Learning from loop outcomes

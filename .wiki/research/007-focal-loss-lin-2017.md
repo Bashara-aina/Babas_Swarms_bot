@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Focal Loss adds a modulating factor (1-pt)^γ to standard cross-entropy, focusing training on hard negative examples rather than easy background. Lin 2017 shows that for class-imbalanced detection, focal loss significantly outperforms balanced sampling. POPW uses Focal Loss for its detection head.
 wikilinks:
-  - [[002-fpn-lin-2017]]
-  - [[008-class-balanced-loss-cui-2019]]
+  - [[research/002-fpn-lin-2017]]
+  - [[research/008-class-balanced-loss-cui-2019]]
   - [[024-yolo-decoupled-head-2023]]
   - [[049-generalized-focal-loss-li-2020]]
   - [[100-popw-protocol-self-analysis]]
@@ -146,8 +146,8 @@ class FocalLoss(nn.Module):
 
 ## Related Papers in This Wiki
 
-- [[002-fpn-lin-2017]] — FPN + RetinaNet = focal loss was the original application
-- [[008-class-balanced-loss-cui-2019]] — CB Focal combines class-balanced + focal loss (POPW uses this for activity)
+- [[research/002-fpn-lin-2017]] — FPN + RetinaNet = focal loss was the original application
+- [[research/008-class-balanced-loss-cui-2019]] — CB Focal combines class-balanced + focal loss (POPW uses this for activity)
 - [[024-yolo-decoupled-head-2023]] — YOLOv8 uses focal loss with decoupled classification/regression heads
 - [[049-generalized-focal-loss-li-2020]] — GFL extends focal loss to bbox regression (QFL + DFL)
 

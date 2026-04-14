@@ -1,3 +1,20 @@
+---
+title: 100Pct Ai Business Principles
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: https://profitswarm.ai/the-2025-ai-business-challenge/'
+wikilinks: []
+confidence: medium
+source: research
+---
 # 100% AI Business Challenge Principles
 
 Source: https://profitswarm.ai/the-2025-ai-business-challenge/

@@ -1,6 +1,20 @@
 ---
-## PHASE 1: Directory Structure ⚠️ PARTIAL
-
+title: Review 2026 04 13 Wiki Obsidian Restructure
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `wiki/raw/` — exists with 9 subdirectories (audits, changelogs, configs,
+  docs, papers, prompts, roadmaps, skills_ref, snapshots)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### ✅ Created:
 - `wiki/raw/` — exists with 9 subdirectories (audits, changelogs, configs, docs, papers, prompts, roadmaps, skills_ref, snapshots)

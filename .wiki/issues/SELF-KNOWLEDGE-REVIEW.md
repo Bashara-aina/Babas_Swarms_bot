@@ -1,6 +1,21 @@
 ---
-## Quality Score: **7/10**
-
+title: Self Knowledge Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The extraction is honest and well-documented for what was found vs. not found.
+  Legion (SwarmBot) files are complete and high-quality. The NOT FOUND entries are
+  properly structured placeholders. How...
+wikilinks: []
+confidence: medium
+source: research
 ---
 The extraction is honest and well-documented for what was found vs. not found. Legion (SwarmBot) files are complete and high-quality. The NOT FOUND entries are properly structured placeholders. However, cross-repo synthesis under-reports actual files created.
 ---

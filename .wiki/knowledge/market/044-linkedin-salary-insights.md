@@ -1,13 +1,21 @@
 ---
-source_id: 044
-title: "LinkedIn Salary Insights Indonesia 2024-2025: Professional Salary Data"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://www.linkedin.com/posts/talentinsider_talent-insider-indonesia-salary-guide-2026-activity-7360897891990728705-wdhf"
-last_verified: "2026-04-11"
-tags: [linkedin, salary-insights, professional, benchmark, Indonesia]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Linkedin Salary Insights
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: LinkedIn Salary Insights provides professional-grade salary data with high
+  reliability due to LinkedIn's massive professional user base. This data helps validate
+  cekwajar.id benchmarks and position...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LinkedIn Salary Insights Indonesia 2024-2025: Professional Salary Data

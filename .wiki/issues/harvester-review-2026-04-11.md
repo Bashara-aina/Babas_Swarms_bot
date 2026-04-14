@@ -1,6 +1,19 @@
 ---
-## Summary: NEEDS FIXES BEFORE COMMIT
-
+title: Harvester Review 2026 04 11
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**CRITICAL issues found: 3**'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **CRITICAL issues found: 3**  
 **MODERATE issues found: 5**  

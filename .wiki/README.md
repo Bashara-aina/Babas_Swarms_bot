@@ -1,7 +1,19 @@
 ---
-title: "SwarmBot Master Wiki"
-type: article
-tags: [README]
+title: Readme
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- readme.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Powered by OpenCode + MiniMax M2.7 + Obsidian | Karpathy LLM Wiki Method'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # SwarmBot Master Wiki
 > Powered by OpenCode + MiniMax M2.7 + Obsidian | Karpathy LLM Wiki Method

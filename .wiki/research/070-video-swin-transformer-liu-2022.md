@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, transformer, swin, locality, cvpr-2022]
-sources: [arxiv:2106.13230]
-created: 2026-04-11
-updated: 2026-04-11
+title: Video Swin Transformer Liu 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Liu, Ning, Cao, Wei, Zhang, Lin, Hu** | CVPR 2022 | [arXiv:2106.13230](https://arxiv.org/abs/2106.13230)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Video Swin Transformer
@@ -49,5 +60,5 @@ Building on Swin Transformer's success in images, Video Swin Transformer applies
 
 ## See Also
 
-- [[069-tsm-lin-2019]] — TSM (efficient, 2D cost)
-- [[071-slowfast-feichtenhofer-2019]] — SlowFast for comparison
+- [[research/069-tsm-lin-2019]] — TSM (efficient, 2D cost)
+- [[research/071-slowfast-feichtenhofer-2019]] — SlowFast for comparison

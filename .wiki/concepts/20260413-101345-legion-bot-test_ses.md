@@ -1,15 +1,19 @@
 ---
-title: General Session: What's the best optimizer for ResNet?
+title: 20260413 101345 Legion Bot Test Ses
 type: concept
 status: active
-tags: ["session", "legion-bot", "legion-bot"]
-created: 2026-04-13
-updated: 2026-04-13
-summary: legion-bot session note: What's the best optimizer for ResNet?
-wikilinks:
-  - [[INDEX]]
-confidence: low
-source: legion-bot
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- concepts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Captured from legion-bot session — synthesized into a concept note.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Summary

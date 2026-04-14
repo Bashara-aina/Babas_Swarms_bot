@@ -1,6 +1,20 @@
 ---
-## PART A: UU PERLINDUNGAN DATA PRIBADI (UU No. 27/2022) COMPLIANCE
-
+title: Block 04 Legal Compliance
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Data Point | Category | Legal Basis (Pasal 20) | Retention | Explicit
+  Opt-In | Notes |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### 1. DATA CLASSIFICATION & LEGAL BASIS
 

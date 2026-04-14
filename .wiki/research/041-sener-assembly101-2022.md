@@ -1,40 +1,21 @@
 ---
-paper_id: "041"
-title: "Assembly101: A Large-Scale Multi-View Video Dataset for Understanding Procedural Activities"
-authors: "Sener, Fadime; Chatterjee, Dibyadip; Shelepov, Daniel; He, Kun; Singhania, Dipika; Wang, Robert; Yao, Angela"
-year: 2022
-venue: "CVPR 2022"
-arxiv: "2203.14712"
-doi: "10.48550/arXiv.2203.14712"
-citations: "405+"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Foundational dataset for procedural activity understanding; multi-view egocentric + static cameras"
-key_contribution: "First multi-view action dataset with simultaneous static (8) and egocentric (4) recordings; 4321 videos, 100K+ action segments"
+title: Sener Assembly101 2022
+type: concept
+status: active
 tags:
-  - multi-view dataset
-  - procedural activities
-  - egocentric video
-  - assembly understanding
-  - toy vehicle assembly
-dataset_stats:
-  videos: 4321
-  duration: "513 hours"
-  action_segments: "100K+ coarse, 1M+ fine-grained"
-  3d_hand_poses: "18M"
-  num_objects: 101
-  num_views: "8 static + 4 egocentric"
-key_features:
-  - "Multi-view: static AND egocentric cameras"
-  - "Unscripted assembly/disassembly of 101 toy vehicles"
-  - "Rich natural variations in action ordering"
-  - "Mistake detection annotations"
-  - "Long-tailed action distributions"
-tasks_enabled:
-  - "Action recognition"
-  - "Action anticipation"
-  - "Temporal segmentation"
-  - "Mistake detection"
-dataset_url: "https://assembly-101.github.io/"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Assembly101 is a foundational procedural activity dataset featuring 4,321
+  videos of people assembling and disassembling 101 different "take-apart" toy vehicles.
+  The dataset introduces the unique re...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

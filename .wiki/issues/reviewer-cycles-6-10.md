@@ -1,5 +1,19 @@
 ---
-## Page: proactive-schedule.md
+title: Reviewer Cycles 6 10
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Status:** APPROVED'
+wikilinks: []
+confidence: medium
+source: research
 ---
 - **Status:** APPROVED
 - **Issues:** None critical — factual claims match codebase (ProactiveScheduler in core/proactive/scheduler.py, CuriosityEngine config vars verified, proactive_engine.py DND verified at lines 24-25)

@@ -1,15 +1,21 @@
 ---
-paper_id: "007"
-title: "Mask R-CNN"
-pdf_path: "project/popw/working/external/papers/1703_06870.pdf"
-authors: "Kaiming He, Georgia Gkioxari, Piotr Dollár, Ross Girshick"
-year: 2017
-venue: "ICCV 2017"
-arxiv: "1703.06870"
-citations: 23351
-tier: 1
-tags: ["instance-segmentation", "object-detection", "mask", "roi-align", "panoptic"]
-popw_relevance: 10
+title: Maskrcnn He 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Mask R-CNN extends Faster R-CNN with a **parallel mask prediction branch**
+  — the standard for instance segmentation. For assembly understanding, POPW needs
+  to segment individual parts and objects. ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

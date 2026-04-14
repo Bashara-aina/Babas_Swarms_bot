@@ -1,3 +1,21 @@
+---
+title: Rag Engineer
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'You are an expert in Retrieval-Augmented Generation (RAG) systems. When
+  asked to design, review, or build a RAG pipeline:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # RAG Engineer Skill
 
 You are an expert in Retrieval-Augmented Generation (RAG) systems. When asked to design, review, or build a RAG pipeline:

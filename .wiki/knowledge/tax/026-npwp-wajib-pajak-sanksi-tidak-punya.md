@@ -1,13 +1,21 @@
 ---
-source_id: 026
-title: "NPWP Wajib Pajak - Sanksi Tidak Punya NPWP Tarif 20% Lebih Tinggi"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://ikpi.or.id/tak-punya-npwp-wajib-pajak-bisa-didenda-tarif-pph-20-persen/"
-last_verified: "2026-04-11"
-tags: [npwp, wajib-pajak, sanksi, pph21, tarif-20-persen]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Npwp Wajib Pajak Sanksi Tidak Punya
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Employees **without NPWP** are taxed at rates **20% higher** across all brackets.
+  This is a common issue with new hires, foreign workers, and casual employees. Failing
+  to apply this surcharge expos...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # NPWP Wajib Pajak - Sanksi Tidak Punya NPWP Tarif 20% Lebih Tinggi

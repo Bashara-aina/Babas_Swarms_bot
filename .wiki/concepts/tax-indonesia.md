@@ -9,8 +9,8 @@ summary: "Indonesian PPh 21 (income tax on employment) uses two calculation meth
 wikilinks:
   - [[./concepts/bpjs-reference]]
   - [[./concepts/labor-law-indonesia]]
-  - [[cekwajar-id]]
-  - [[cekwajar-verdict-engine]]
+  - [[projects/cekwajar-id]]
+  - [[architecture/cekwajar-verdict-engine]]
 confidence: high
 source: research
 ---
@@ -371,5 +371,5 @@ TER Harian applies to daily-paid workers:
 
 - [[./concepts/bpjs-reference]] — Deductions that affect gross salary before PPh21
 - [[./concepts/labor-law-indonesia]] — Employment classification affecting tax treatment
-- [[cekwajar-id]] — Project using these calculations
-- [[cekwajar-verdict-engine]] — Implementation of TER + progressive in verdict pipeline
+- [[projects/cekwajar-id]] — Project using these calculations
+- [[architecture/cekwajar-verdict-engine]] — Implementation of TER + progressive in verdict pipeline

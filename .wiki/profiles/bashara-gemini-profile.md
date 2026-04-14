@@ -1,3 +1,22 @@
+---
+title: Bashara Gemini Profile
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- profiles
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This profile is synthesized from our interactions, your project documentation,
+  and your digital footprint. It is designed to serve as a baseline for your personal
+  AI wiki.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Bashara — Gemini Profile Export
 
 This profile is synthesized from our interactions, your project documentation, and your digital footprint. It is designed to serve as a baseline for your personal AI wiki.

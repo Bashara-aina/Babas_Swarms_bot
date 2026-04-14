@@ -1,3 +1,20 @@
+---
+title: Indonesia Tax Labor Law
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- regulatory
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "Indonesian Tax & Labor Law — Complete Reference for cekwajar"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "Indonesian Tax & Labor Law — Complete Reference for cekwajar"
 last_verified: April 2026

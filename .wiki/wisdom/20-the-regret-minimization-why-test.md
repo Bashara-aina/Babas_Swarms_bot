@@ -1,8 +1,20 @@
 ---
-title: "The Why Test — Purpose-Driven Clarity"
-source: "Simon Sinek (Start with Why) + Viktor Frankl (Man's Search for Meaning) + Jeff Bezos"
-tags: [20-the-regret-minimization-why-test]
-type: wisdom
+title: The Regret Minimization Why Test
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Simon Sinek (Start with Why) + Viktor Frankl (Man''s Search for
+  Meaning) + Jeff Bezos'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # The Why Test — Purpose-Driven Clarity
 

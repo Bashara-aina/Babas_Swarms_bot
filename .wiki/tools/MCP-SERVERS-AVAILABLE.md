@@ -1,6 +1,21 @@
 ---
-## 1. Overview
-
+title: Mcp Servers Available
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tools
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**MCP (Model Context Protocol)** is the open standard that enables AI models
+  to connect to external tools and data sources. Think of it as "USB-C for AI" — a
+  standardized interface between the LLM ...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **MCP (Model Context Protocol)** is the open standard that enables AI models to connect to external tools and data sources. Think of it as "USB-C for AI" — a standardized interface between the LLM and the tools it needs.
 

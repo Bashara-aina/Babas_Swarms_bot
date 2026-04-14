@@ -1,3 +1,20 @@
+---
+title: Priority 10 Budget
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Status**: ✅ Implemented'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Priority 10: Context Window Budget Management — Log
 
 **Date**: 2026-04-12  

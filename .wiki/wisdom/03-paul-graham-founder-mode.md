@@ -1,8 +1,19 @@
 ---
-title: "Paul Graham — Founder Mode + AI Startup Principles"
-source: "paulgraham.com + charlesandsystems.substack.com/p/paul-grahams-playbook-for-ai-startup"
-tags: [03-paul-graham-founder-mode]
-type: wisdom
+title: Paul Graham Founder Mode
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: paulgraham.com + charlesandsystems.substack.com/p/paul-grahams-playbook-for-ai-startup'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Paul Graham — Founder Mode + AI Startup Principles
 

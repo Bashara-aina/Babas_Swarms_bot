@@ -1,10 +1,20 @@
 ---
 title: Personality Gaps
-domain: personality
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 400
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- personality-gaps.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Where Legion still sounds like generic AI — corporate filler slips through,
+  opinions missing, tone flat.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PERSONALITY GAPS

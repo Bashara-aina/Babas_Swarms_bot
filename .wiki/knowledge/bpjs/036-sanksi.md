@@ -1,13 +1,21 @@
 ---
-source_id: 036
-title: "Sanksi Perusahaan Tidak Daftar BPJS: Denda, Pidana, dan Larangan Layanan Publik"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.niaga.asia/perusahaan-tidak-daftar-bpjs-ketenagakerjaan-dan-kesehatan-dapat-disanksi-pidana-dan-denda/"
-last_verified: "2026-04-11"
-tags: [bpjs, sanksi, denda, pidana, perusahaan, kepatuhan, labor-law, compliance]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Sanksi
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Employers who fail to register employees to BPJS face severe consequences.
+  Understanding these sanctions helps ensure compliance and prevents legal risks for
+  businesses using cekwajar.id for payroll.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Sanksi Perusahaan Tidak Daftar BPJS: Denda, Pidana, dan Larangan Layanan Publik

@@ -1,8 +1,19 @@
 ---
-title: "Lean Startup — Validated Learning over Opinions"
-source: "Eric Ries (The Lean Startup) + Steve Blank (Customer Development)"
-tags: [16-lean-startup-validated-learning]
-type: wisdom
+title: Lean Startup Validated Learning
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Eric Ries (The Lean Startup) + Steve Blank (Customer Development)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Lean Startup — Validated Learning over Opinions
 

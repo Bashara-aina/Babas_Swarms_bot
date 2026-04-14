@@ -1,13 +1,21 @@
 ---
-source_id: 038
-title: "Kelas Rawat BPJS Kesehatan: Perbedaan Kelas 1, 2, dan 3"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.liputan6.com/bisnis/read/5595301/daftar-lengkap-iuran-bpjs-kesehatan-2024-dan-dendanya"
-last_verified: "2026-04-11"
-tags: [bpjs-kesehatan, kelas-rawat, kelas-1, kelas-2, kelas-3, iuran, manfaat, hrtech]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Kelas Rawat
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: While payroll systems mainly deal with contribution calculations, understanding
+  class benefits helps provide employee benefits information. Note that Perpres 59/2024
+  is phasing out these classes in...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Kelas Rawat BPJS Kesehatan: Perbedaan Kelas 1, 2, dan 3

@@ -1,3 +1,22 @@
+---
+title: Python Patterns
+type: reference
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Use these patterns for all Python changes in LegionSwarm. Priorities: async-safe
+  I/O, explicit error paths, Telegram reliability, and predictable behavior under
+  systemd.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Python Patterns (Async + Aiogram + Reliability)
 
 Use these patterns for all Python changes in LegionSwarm. Priorities: async-safe I/O, explicit error paths, Telegram reliability, and predictable behavior under systemd.

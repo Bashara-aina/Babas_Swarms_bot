@@ -1,3 +1,20 @@
+---
+title: Web Scraping Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- candidate
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Score: 7/10 — MEDIUM PRIORITY WRITE (FINAL REVISION)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # web-scraping-patterns.md
 Score: 7/10 — MEDIUM PRIORITY WRITE (FINAL REVISION)
 

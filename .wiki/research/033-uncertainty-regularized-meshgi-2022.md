@@ -1,9 +1,19 @@
 ---
-tags: [mtl, uncertainty-regularization, probabilistic, meshgi]
-sources: [popw-protocol]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Uncertainty Regularized Meshgi 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 033 — Uncertainty Regularized Multi-Task Learning

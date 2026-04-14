@@ -1,3 +1,20 @@
+---
+title: Worker Dead Purge 2026 04 11
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Execute dead file purge plan from `.wiki/logs/dead-purge-plan.md`
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Log: Dead File Purge (2026-04-11)
 
 ## Task

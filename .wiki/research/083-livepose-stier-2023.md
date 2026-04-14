@@ -1,14 +1,21 @@
 ---
-paper_id: 083
-title: "LivePose: Online 3D Reconstruction from Monocular Video with Dynamic Camera Poses"
-authors: "Stier, Noah; Angles, B.; Yang, L.; Yan, Y.; Colburn, A.; Chuang, M."
-year: 2023
-venue: "ICCV"
-arxiv: "2304.00054"
-citations: 85
-tier: 8
-tags: [pose, 3D-reconstruction, monocular, SLAM, assembly, ICCV2023]
-popw_relevance: MEDIUM
+title: Livepose Stier 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW operates in assembly scenarios where depth understanding matters (how
+  far are hands from furniture parts). LivePose demonstrates that 3D pose + scene
+  reconstruction from monocular video is sol...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LivePose: Online 3D Reconstruction from Monocular Video with Dynamic Camera Poses
@@ -71,8 +78,8 @@ Recover geometry lost due to pose updates by subtracting accumulated error
 
 ## Connections to Other Wiki Papers
 
-- [[043-benshabat-3dinaction-2023]] — 3DInAction also addresses 3D scene + pose for assembly
-- [[044-ha4m-dataset-2022]] — HA4M includes IMU+RGB+skeleton, similar multi-modal intent
+- [[research/043-benshabat-3dinaction-2023]] — 3DInAction also addresses 3D scene + pose for assembly
+- [[research/044-ha4m-dataset-2022]] — HA4M includes IMU+RGB+skeleton, similar multi-modal intent
 
 ## POPW Action Item
 

@@ -1,6 +1,21 @@
 ---
-## 1. Overview
-
+title: Production Agent Patterns
+type: architecture
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document covers production-grade patterns for deploying, monitoring,
+  and scaling agentic systems. It bridges the gap between "working prototype" and
+  "production-ready" by addressing memory at ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This document covers production-grade patterns for deploying, monitoring, and scaling agentic systems. It bridges the gap between "working prototype" and "production-ready" by addressing memory at scale, context management, multi-agent orchestration, observability, and security.
 ---

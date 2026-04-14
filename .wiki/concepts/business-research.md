@@ -1,16 +1,21 @@
 ---
-title: Business Research Indonesia
+title: Business Research
 type: concept
-project: cekwajar
-sources: [065-levelsio-playbook.md, 066-solo-founder-ai-tools-2025.md, 067-a16z-one-person-unicorn.md, 068-indonesia-saas-acquisition.md, 069-saas-metrics-benchmarks.md, 070-pt-pma-indonesia-startup.md, 071-ppn-saas-indonesia-vat.md, 072-affiliate-saas-referral.md, 073-salary-data-monetization-hr.md, 074-uu-pdp-indonesia-privacy.md]
-related:
-  - [[intent-routing]]
-  - [[./concepts/vector-search]]
-confidence: high
-last_compiled: 2026-04-13
-status: stub
-tags: [business-research, solo-founder, ai-tools, saas, metrics, acquisition, pt-pma, ppn, vat, affiliate, referral, salary-data, pdp, privacy, indonesia, startup]
-word_count: 2500
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- concepts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document covers business research topics relevant to Indonesian SaaS
+  and startups, including solo founder strategies, AI tools, regulatory requirements,
+  and monetization models.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Business Research Indonesia

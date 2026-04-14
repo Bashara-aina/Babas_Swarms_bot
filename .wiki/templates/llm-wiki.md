@@ -1,3 +1,20 @@
+---
+title: Llm Wiki
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: A pattern for building personal knowledge bases using LLMs.
+wikilinks: []
+confidence: medium
+source: research
+---
 # LLM Wiki
 
 A pattern for building personal knowledge bases using LLMs.

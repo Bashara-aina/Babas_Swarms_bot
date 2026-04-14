@@ -1,13 +1,21 @@
 ---
-source_id: 017
-title: "Aturan WFH Work From Home Kerja Remote Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.hukumonline.com/berita/a/dorong-efisiensi-energi--menaker-imbau-perusahaan-terapkan-wfh-sehari-seminggu-lt69cde7862cb21/"
-last_verified: "2026-04-11"
-tags: [wfh,remote-work,kerja-remote,ketenagakerjaan]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Aturan Wfh
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: .cekwajar.id HR module harus accommodate work arrangement yang fleksibel
+  termasuk WFH dan remote work. Payroll calculation tidak berubah karena aturanupah
+  tetap sama, tapi system harus track lokasi...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Aturan WFH Work From Home Kerja Remote Indonesia

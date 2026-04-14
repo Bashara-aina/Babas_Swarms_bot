@@ -1,10 +1,20 @@
 ---
-title: "Wiki Wiring Fix — Batch 2"
-type: contract
+title: Contracts Batch2 Wiki Wiring
+type: concept
 status: active
-tags: [wiring-fix, wiki]
-created: 2026-04-13
-summary: Fix broken concept/entity links by adding proper path prefix
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fix 16 broken wikilinks to concept files by ensuring links use proper path
+  prefix `./concepts/`
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## CONTRACT #4: Fix Concept Links Missing Path Prefix

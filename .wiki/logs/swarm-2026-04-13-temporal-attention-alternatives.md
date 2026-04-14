@@ -1,3 +1,20 @@
+---
+title: Swarm 2026 04 13 Temporal Attention Alternatives
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Contracts: 5 total, 5 succeeded, 0 retried, 0 failed'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Swarm Run: Temporal Attention Alternatives Research
 Date: 2026-04-13
 Type: RESEARCH

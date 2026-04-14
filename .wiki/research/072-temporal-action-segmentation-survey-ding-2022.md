@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, temporal-action-segmentation, survey, review, tcas]
-sources: [arxiv:2210.10352]
-created: 2026-04-11
-updated: 2026-04-11
+title: Temporal Action Segmentation Survey Ding 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Ding & Sener** | TPAMI 2024 (arXiv:2210.10352, 2022) | [arXiv:2210.10352](https://arxiv.org/abs/2210.10352)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Temporal Action Segmentation: An Analysis of Modern Techniques
@@ -53,6 +64,6 @@ The survey categorizes modern TAS methods into:
 
 ## See Also
 
-- [[073-ms-tcn-li-2021]] — MS-TCN++ for temporal action segmentation
-- [[074-asformer-yi-2021]] — ASFormer Transformer approach
-- [[068-i3d-carreira-2017]] — I3D for comparison
+- [[research/073-ms-tcn-li-2021]] — MS-TCN++ for temporal action segmentation
+- [[research/074-asformer-yi-2021]] — ASFormer Transformer approach
+- [[research/068-i3d-carreira-2017]] — I3D for comparison

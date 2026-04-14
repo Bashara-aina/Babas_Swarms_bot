@@ -1,14 +1,21 @@
 ---
-paper_id: "006"
-title: "Focal Loss for Dense Object Detection"
-authors: "Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, Piotr Dollár"
-year: 2017
-venue: "ICCV 2017"
-arxiv: "1708.02002"
-citations: 34327
-tier: 1
-tags: ["focal-loss", "object-detection", "class-imbalance", "retinanet", "one-stage"]
-popw_relevance: 9
+title: Focal Lin 2017
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Focal Loss addresses the **extreme foreground-background class imbalance**
+  in dense object detection. In assembly images, background (non-assembly) vastly
+  outnumbers objects/parts. Standard cross-e...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

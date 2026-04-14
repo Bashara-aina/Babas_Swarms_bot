@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, temporal-action-segmentation, transformer, asformer, bmvc-2021]
-sources: [arxiv:2110.08568]
-created: 2026-04-11
-updated: 2026-04-11
+title: Asformer Yi 2021
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Yi, Wen, Jiang** | BMVC 2021 | [arXiv:2110.08568](https://arxiv.org/abs/2110.08568)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # ASFormer: Transformer for Action Segmentation
@@ -59,5 +70,5 @@ ASFormer reduces Transformer complexity from O(T²) to O(T × k) where k is loca
 
 ## See Also
 
-- [[073-ms-tcn-li-2021]] — MS-TCN++ (TCN baseline)
-- [[072-temporal-action-segmentation-survey-ding-2022]] — Survey context
+- [[research/073-ms-tcn-li-2021]] — MS-TCN++ (TCN baseline)
+- [[research/072-temporal-action-segmentation-survey-ding-2022]] — Survey context

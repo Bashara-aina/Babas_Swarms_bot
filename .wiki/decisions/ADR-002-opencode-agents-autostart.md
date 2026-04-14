@@ -1,3 +1,20 @@
+---
+title: Adr 002 Opencode Agents Autostart
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Author**: Bashara (via three-agent pipeline)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # ADR-002: OPENCODE AGENTS + AUTOSTART
 
 **Date**: 2026-04-11

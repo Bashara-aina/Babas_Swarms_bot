@@ -1,9 +1,19 @@
 ---
-tags: [mtl, negative-transfer, transfer-learning, task-relationships]
-sources: [popw-protocol]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Negative Transfer Xin 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 031 — Reasonable Effectiveness of Negative Transfer

@@ -1,3 +1,21 @@
+---
+title: Recallmax
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use memory as a precision tool, not a dump. Prioritize relevance, recency,
+  and correctness.
+wikilinks: []
+confidence: medium
+source: research
+---
 # RecallMax — Viking Memory Protocol (L0 / L1 / L2)
 
 Use memory as a precision tool, not a dump. Prioritize relevance, recency, and correctness.

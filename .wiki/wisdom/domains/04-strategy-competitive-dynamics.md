@@ -1,3 +1,21 @@
+---
+title: Strategy Competitive Dynamics
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Competitive strategy is about differentiation and cost
+  leadership; five forces determine industry attractiveness.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 04: Strategy & Competitive Dynamics
 
 ## [Michael Porter] — Competitive Strategy

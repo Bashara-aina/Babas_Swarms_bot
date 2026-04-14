@@ -1,10 +1,21 @@
 ---
-title: data-privacy-guide
-domain: data-analytics
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 440
+title: Data Privacy Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- data-privacy-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'User data flows: Telegram ID as pseudonymous identifier, conversation transcripts
+  in SQLite, memories in SQLite, no encryption at rest, budget tracking in-memory
+  only.'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Data Privacy Guide

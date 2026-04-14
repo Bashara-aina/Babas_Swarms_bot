@@ -1,8 +1,19 @@
 ---
-tags: [self-supervised, vision-transformer, distillation, dino, dino-v2, backbone, tmlr-2024, critical]
-sources: [arxiv:2304.07193]
-created: 2026-04-11
-updated: 2026-04-11
+title: Dinov2 Oquab 2024
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'pdf_path: "project/popw/working/external/papers/DINOv2_Oquab_2023.pdf"'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DINOv2: Learning Robust Visual Features
@@ -60,6 +71,6 @@ DINOv2 features outperform CLIP and OpenCLIP on almost all benchmarks:
 
 ## See Also
 
-- [[076-dino-caron-2021]] — DINO (predecessor)
+- [[research/076-dino-caron-2021]] — DINO (predecessor)
 - Frame2Freq-ST (SIT waveform synthesis using DINOv2)
 - StepFormer (Step architecture using DINOv2)

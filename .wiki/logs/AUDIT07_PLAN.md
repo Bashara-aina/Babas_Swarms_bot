@@ -1,5 +1,19 @@
 ---
-
+title: Audit07 Plan
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Planner: Bashara | Date: 2026-04-12 | Files: 10 high-risk handlers'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 07 — Orphan & Stub Handler Plan (REVISED)
 > Planner: Bashara | Date: 2026-04-12 | Files: 10 high-risk handlers

@@ -1,3 +1,20 @@
+---
+title: Claude Deep Audit
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- prompts
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Give Claude full repo access before running this.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # CLAUDE — DEEP HONEST AUDIT: IS LEGION TRULY CAPABLE OR JUST WIDE?
 > Give Claude full repo access before running this.
 > This is not a bug hunt. This is a depth audit.

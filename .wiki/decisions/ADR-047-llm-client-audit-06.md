@@ -1,6 +1,20 @@
 ---
-## Context
-
+title: Adr 047 Llm Client Audit 06
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'AUDIT 06 identified that the LLM client layer lacks a canonical `call_llm()`
+  function with the signature:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 AUDIT 06 identified that the LLM client layer lacks a canonical `call_llm()` function with the signature:
 

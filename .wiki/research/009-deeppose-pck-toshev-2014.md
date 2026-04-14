@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "DeepPose introduced deep CNNs for pose estimation and established PCK (Probability of Correct Keypoint) as the standard evaluation metric. PCK@0.1 means a keypoint is correct if its distance from ground truth is < 10% of the torso diameter. POPW uses PCK@0.1 to evaluate its 17-keypoint COCO-format pose head."
 wikilinks:
-  - [[011-coco-keypoints-lin-2014]]
-  - [[010-wing-loss-feng-2018]]
-  - [[015-simple-baselines-pose-xiao-2018]]
+  - [[research/011-coco-keypoints-lin-2014]]
+  - [[research/010-wing-loss-feng-2018]]
+  - [[research/015-simple-baselines-pose-xiao-2018]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
 source: canonical
@@ -107,9 +107,9 @@ PCK@alpha = (1/N_test) Σ_test (1/K) Σ_k 1[dist(pred_k, gt_k) < alpha × d_tors
 
 ## Related Papers in This Wiki
 
-- [[011-coco-keypoints-lin-2014]] — COCO keypoint format (17 keypoints) used by POPW
-- [[010-wing-loss-feng-2018]] — Wing loss is POPW's pose regression loss function
-- [[015-simple-baselines-pose-xiao-2018]] — Simple baselines approach with deeper backbones
+- [[research/011-coco-keypoints-lin-2014]] — COCO keypoint format (17 keypoints) used by POPW
+- [[research/010-wing-loss-feng-2018]] — Wing loss is POPW's pose regression loss function
+- [[research/015-simple-baselines-pose-xiao-2018]] — Simple baselines approach with deeper backbones
 - [[100-popw-protocol-self-analysis]] — POPW's PCK@0.1 target is ≥85%
 
 ## LEGION RULE

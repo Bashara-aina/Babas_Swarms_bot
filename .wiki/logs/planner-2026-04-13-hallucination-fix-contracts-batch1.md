@@ -1,36 +1,19 @@
 ---
-### CONTRACT #1: Verify existing wiki files actually exist and have content
-
-WHAT:
-  Read-back verify 5 randomly selected wiki files from different directories to confirm they exist and contain valid frontmatter.
-
-FILES:
-  READ:  
-    - wiki/concepts/intent-routing.md
-    - wiki/concepts/memory-architecture.md
-    - wiki/entities/supabase.md
-    - wiki/projects/legion-bot.md
-    - wiki/decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md
-  WRITE: none
-  RUN:   none
-
-DONE_WHEN:
-  - All 5 files exist at exact paths
-  - All 5 files contain "---" frontmatter delimiters on lines 1 and ~12
-  - All 5 files contain "title:" field
-  - All 5 files have >10 lines of content
-
-PROOF_FORMAT:
-  Command: `head -15 wiki/concepts/intent-routing.md && echo "---" && head -15 wiki/entities/supabase.md`
-  Expected: Frontmatter visible with title, type, status, tags, created, updated, summary, wikilinks
-
-BLOCKER_IF:
-  - Any of the 5 files do not exist at specified path
-  - Any file missing frontmatter delimiters "---"
-  - Any file with <10 lines
-
-DEPENDS_ON: none
-
+title: Planner 2026 04 13 Hallucination Fix Contracts Batch1
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Fix missing comma separators in wikilinks arrays in supabase.md and legion-bot.md.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ### CONTRACT #2: Fix malformed wikilinks in existing wiki files

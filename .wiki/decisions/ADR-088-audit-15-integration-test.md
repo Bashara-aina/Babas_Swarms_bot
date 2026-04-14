@@ -1,7 +1,21 @@
 ---
-title: "ADR-088: AUDIT-15 Final Integration Test"
-date: "2026-04-12"
-status: "ACCEPTED"
+title: Adr 088 Audit 15 Integration Test
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Audit 15 is the final integration test that validates real data flows end-to-end
+  through the Legion bot pipeline. Unlike previous audits that check imports and wiring,
+  this audit tests actual data ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-088: AUDIT-15 Final Integration Test
 

@@ -1,13 +1,21 @@
 ---
-source_id: 069
-title: "SaaS Metrics MRR Churn LTV CAC Benchmark 2024"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://www.baremetrics.com/blog/saas-metrics-checklist-kpis-founders-should-track"
-last_verified: "2026-04-11"
-tags: [saas, mrr, arr, churn, ltv, cac, metrics, kpi, benchmark]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Saas Metrics Benchmarks
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Understanding SaaS metrics enables proper financial modeling and investor
+  readiness for cekwajar.id. The core unit economics determine sustainability and
+  growth potential.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SaaS Metrics MRR Churn LTV CAC Benchmark 2024

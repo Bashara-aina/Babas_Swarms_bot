@@ -1,13 +1,21 @@
 ---
-source_id: 005
-title: "UMP 2025 Upah Minimum Provinsi Seluruh Indonesia"
-source_type: MARKET_DATA
-authority: OFFICIAL_GOV
-url: "https://satudata.kemnaker.go.id/infografik/88"
-last_verified: "2026-04-11"
-tags: [ump2025,upah-minimum-provinsi,ump,labor-law,pengupahan]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Ump 2025 Provinsi
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: UMP 2025 adalah data terbaru yang wajib digunakan untuk memvalidasi kepatuhanupah
+  minimum. Dengan kenaikan rata-rata 6,5%, system harus melakukan update otomatis
+  untuk memastikan tidak ada employee...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UMP 2025 Upah Minimum Provinsi Seluruh Indonesia

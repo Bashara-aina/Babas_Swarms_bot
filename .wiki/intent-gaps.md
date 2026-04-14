@@ -1,10 +1,20 @@
 ---
 title: Intent Gaps
-domain: intent-routing
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 350
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- intent-gaps.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Missing intents for compound tasks, emotional nuance, and project-specific
+  commands.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # INTENT GAPS

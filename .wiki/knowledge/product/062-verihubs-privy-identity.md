@@ -1,13 +1,21 @@
 ---
-source_id: 062
-title: "Verihubs & Privy Indonesian Identity Verification B2B SaaS"
-source_type: COMPETITOR_ANALYSIS
-authority: INDUSTRY
-url: "https://verihubs.com/en/pricing/"
-last_verified: "2026-04-11"
-tags: [verihubs, privy, KYC, identity-verification, eKYC, SaaS, pricing, Indonesia, fintech, B2B]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Verihubs Privy Identity
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Verihubs and Privy are Indonesia's leading identity verification providers.
+  cekwajar.id needs KYC for employer verification and could integrate these services
+  for trusted salary data collection. Bo...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Verihubs & Privy Indonesian Identity Verification B2B SaaS

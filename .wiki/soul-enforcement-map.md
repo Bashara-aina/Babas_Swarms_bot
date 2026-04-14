@@ -1,10 +1,20 @@
 ---
 title: Soul Enforcement Map
-domain: personality
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 500
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- soul-enforcement-map.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every enforcement point that keeps Legion in character — SOUL first, banned
+  phrases blocked, debate ready.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SOUL ENFORCEMENT MAP

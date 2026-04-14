@@ -1,8 +1,19 @@
 ---
-title: "Self-Knowledge Extraction INDEX"
-source_type: INDEX
-date: 2026-04-11
-tags: [index, self-knowledge, extraction]
+title: Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Extraction Date**: 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Self-Knowledge Extraction INDEX

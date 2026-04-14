@@ -1,9 +1,19 @@
 ---
-tags: [semi-supervised, instance-segmentation, pseudo-label, confidence-calibration, 2024]
-sources: [arxiv:2403.11675]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "064"
+title: Better Pseudo Labels Porcher 2024
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Porcher*, Couprie*, Szafraniec*, Verbeek* | 2024 | [arXiv:2403.11675](https://arxiv.org/abs/2403.11675)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Better (Pseudo-)Labels for Semi-Supervised Instance Segmentation

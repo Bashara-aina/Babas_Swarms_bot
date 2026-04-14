@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Legion evolved from a simple Telegram bot (v1.0) to a multi-agent swarm platform (v8.0) over 2025-2026, with v6.0.0 being the major humanization update introducing persistent memory tiers, emotion engine, reflection engine, and autonomous skill selection.
 wikilinks:
-  - [[legion-bot]]
-  - [[adr-2026-04-12-opencode-over-cursor-for-backend]]
-  - [[memory-system-architecture]]
+  - [[projects/legion-bot]]
+  - [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]]
+  - [[architecture/memory-system-architecture]]
 confidence: high
 source: documentation
 ---
@@ -155,9 +155,9 @@ This update addressed Legion feeling "robotic" by adding genuine persistent iden
 
 ## Related Pages
 
-- [[legion-bot]] — Current state
-- [[adr-2026-04-12-opencode-over-cursor-for-backend]] — OpenCode selection
-- [[memory-system-architecture]] — Memory tiers
+- [[projects/legion-bot]] — Current state
+- [[decisions/adr-2026-04-12-opencode-over-cursor-for-backend]] — OpenCode selection
+- [[architecture/memory-system-architecture]] — Memory tiers
 - [[architecture/audit-2026-04-11-fixes]] — Critical fixes applied 2026-04-11
 - [[architecture/refactoring-2026-04-11]] — Refactoring round 2
 - [[architecture/orchestrator-comparison]] — Consolidation planning

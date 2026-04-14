@@ -1,10 +1,20 @@
 ---
 title: Test Patterns Guide
-domain: testing
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: ci, development, debugging
-tokens_estimated: 520
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- test-patterns-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: pytest-asyncio patterns, fixtures, and mocking strategies used in Legion's
+  test suite.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # TEST PATTERNS GUIDE

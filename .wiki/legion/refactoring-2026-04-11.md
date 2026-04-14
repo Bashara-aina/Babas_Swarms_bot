@@ -1,10 +1,19 @@
 ---
-# Refactoring Log — 2026-04-11 Round 2
-
-## Overview
-
-Two monolithic files split into packages. No functional changes — purely structural maintainability improvements.
-
+title: Refactoring 2026 04 11
+type: concept
+status: completed
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- legion
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Before:** `computer_agent.py` (2077 lines, single file)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## computer_agent/ Split

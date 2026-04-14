@@ -1,8 +1,19 @@
 ---
-title: "ADR-091: Weather Handler Session Lifecycle Bug"
-date: "2026-04-12"
-status: "ACCEPTED - FIXED"
-type: "Bugfix"
+title: Adr 091 Weather Handler Session Bug
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Status:** ACCEPTED - FIXED'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-091: Weather Handler Session Lifecycle Bug
 

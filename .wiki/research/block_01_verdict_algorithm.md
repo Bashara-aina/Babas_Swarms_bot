@@ -1,6 +1,19 @@
 ---
-## TABLE OF CONTENTS
-
+title: Block 01 Verdict Algorithm
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. [WAJAR GAJI - Salary Benchmark Engine](#wajar-gaji)
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. [WAJAR GAJI - Salary Benchmark Engine](#wajar-gaji)
 2. [WAJAR SLIP - Payslip Decoder & Compliance Auditor](#wajar-slip)

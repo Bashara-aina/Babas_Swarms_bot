@@ -1,13 +1,21 @@
 ---
-source_id: 039
-title: "KRIS BPJS Kesehatan: Kelas Rawat Inap Standar dan Implementasi 2025"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.cermati.com/artikel/kris-vs-kelas-bpjs"
-last_verified: "2026-04-11"
-tags: [bpjs-kesehatan, kris, kelas-rawat-inap-standar, rumah-sakit, implementasi-2025, hrtech]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Kris
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: KRIS (Kelas Rawat Inap Standar) is the new system replacing class 1, 2, 3
+  in 2025. While this is primarily about healthcare service delivery (not payroll),
+  understanding KRIS helps provide complete...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # KRIS BPJS Kesehatan: Kelas Rawat Inap Standar dan Implementasi 2025

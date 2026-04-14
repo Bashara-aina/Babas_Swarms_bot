@@ -1,10 +1,19 @@
 ---
-title: "ADR-WIRE-001: Legion Wiring Audit Fixes"
-date: "2026-04-12"
-problem: "`handlers/admin_handlers.py` was imported in `handlers/__init__.py` but NOT registered in `_ROUTER_ORDER`. It has duplicate `/budget` handler that conflicts with `enterprise.py`."
-solution: "Removed `admin_handlers` from imports in `handlers/__init__.py`. The `enterprise.py` handler is the canonical `/budget` implementation and is already properly registered."
-status: "Accepted"
-type: "Bug Fix"
+title: Adr Wire 001 Legion Wiring Audit Fixes
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'During the Legion Wiring Audit, two critical wire breaks were identified:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-WIRE-001: Legion Wiring Audit Fixes
 

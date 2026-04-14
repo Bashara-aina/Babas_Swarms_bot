@@ -1,6 +1,19 @@
 ---
-## ✅ Passed
-
+title: Nihongo V2 Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| All 18 nihongo tests pass | ✅ |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Check | Status |
 |

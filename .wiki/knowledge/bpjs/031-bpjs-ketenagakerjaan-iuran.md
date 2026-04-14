@@ -1,13 +1,21 @@
 ---
-source_id: 031
-title: "Iuran BPJS Ketenagakerjaan: JHT, JP, JKK, JKM untuk Karyawan Swasta"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.bpjsketenagakerjaan.go.id/artikel/18913/artikel-berapa-besaran-iuran-jht,-jkk,-jkm,-jp-dan-jkp"
-last_verified: "2026-04-11"
-tags: [bpjs-ketenagakerjaan, iuran, jht, jp, jkk, jkm, pph21, labor-law, saas, hrtech]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Bpjs Ketenagakerjaan Iuran
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: BPJS Ketenagakerjaan is a mandatory program with 5 sub-programs (JHT, JP,
+  JKK, JKM, JKP), each with different rates, caps, and employer/employee splits. Incorrect
+  calculation leads to non-complianc...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Iuran BPJS Ketenagakerjaan: JHT, JP, JKK, JKM untuk Karyawan Swasta

@@ -1,10 +1,20 @@
 ---
-title: debugging-guide
-domain: error-handling
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 585
+title: Debugging Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- debugging-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Covers log analysis, crash investigation, and Telegram-level debugging for
+  Legion diagnostics.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DEBUGGING GUIDE

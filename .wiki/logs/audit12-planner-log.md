@@ -1,7 +1,19 @@
 ---
-date: "2026-04-12"
-task: "Fix nihongo mode so it is fully per-user and cannot leak between users"
-planner: "@planner (MiniMax M2.7)"
+title: Audit12 Planner Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Assigned to:** @worker'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # LEGION AUDIT 12 — Planner Log
 

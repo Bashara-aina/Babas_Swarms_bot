@@ -1,3 +1,20 @@
+---
+title: Legion Master
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Paste this into OpenCode to start any session:'
+wikilinks: []
+confidence: medium
+source: research
+---
 # LEGION MASTER PROMPT
 # The single file to paste into OpenCode for every session.
 # Supersedes: AUDIT_NOW.md, LEGION_CLAWCODE_UPGRADE.md, LEGION_MCP_SKILLS_MASTER.md

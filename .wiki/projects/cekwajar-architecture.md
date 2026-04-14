@@ -1,3 +1,20 @@
+---
+title: Cekwajar Architecture
+type: project
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- projects
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Generated: April 11, 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # cekwajar.id — Architecture & Business Context
 Generated: April 11, 2026
 Source: BASHARA-MASTER-PROFILE

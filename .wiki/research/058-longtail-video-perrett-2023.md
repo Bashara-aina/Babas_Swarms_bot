@@ -1,8 +1,19 @@
 ---
-tags: [long-tail-learning, video-recognition, feature-aggregation, cvpr-2023]
-sources: [arxiv:2304.01143]
-created: 2026-04-11
-updated: 2026-04-11
+title: Longtail Video Perrett 2023
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Perrett, Sinha, Burghardt, Mirmehdi & Damen** | CVPR 2023 | [arXiv:2304.01143](https://arxiv.org/abs/2304.01143)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Use Your Head: Improving Long-Tail Video Recognition
@@ -80,6 +91,6 @@ For each tail class sample x_t:
 
 ## See Also
 
-- [[053-mislas-zhong-2021]] — MiSLAS calibration (complementary)
-- [[051-decoupling-kang-2020]] — Decoupled framework (LMR fits here)
-- [[055-logit-adjustment-menon-2021]] — Logit adjustment for tail classes
+- [[research/053-mislas-zhong-2021]] — MiSLAS calibration (complementary)
+- [[research/051-decoupling-kang-2020]] — Decoupled framework (LMR fits here)
+- [[research/055-logit-adjustment-menon-2021]] — Logit adjustment for tail classes

@@ -1,3 +1,20 @@
+---
+title: Worker Pm Callbacks 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Add error handlers to asyncio.create_task() calls in handlers/pm.py'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Log: handlers/pm.py — done-callback error handlers
 
 **Date:** 2026-04-12  

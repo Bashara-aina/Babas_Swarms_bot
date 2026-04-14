@@ -1,8 +1,19 @@
 ---
-title: "ADR-052: core Subpackages — Empty `__init__.py` Files Need Docstrings"
-date: "2026-04-12"
-decider: "@planner"
-status: "Accepted"
+title: Adr 052 Core Subpackages Init
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-052: core Subpackages — Empty `__init__.py` Files Need Docstrings
 

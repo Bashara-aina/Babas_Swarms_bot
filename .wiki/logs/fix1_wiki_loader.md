@@ -1,3 +1,20 @@
+---
+title: Fix1 Wiki Loader
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Status**: ✅ COMPLETE'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Fix 1 Log: .wiki NOT INJECTED
 
 **Date**: 2026-04-12

@@ -1,6 +1,21 @@
 ---
-## EXECUTIVE SUMMARY: THE BRUTALLY HONEST TRUTH
-
+title: Block 05 Monetization Pricing
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id has **viable unit economics IF execution is precise**. The current
+  pricing structure is defensible for Indonesian market conditions, but profitability
+  is NOT guaranteed—it's contingent ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 cekwajar.id has **viable unit economics IF execution is precise**. The current pricing structure is defensible for Indonesian market conditions, but profitability is NOT guaranteed—it's contingent on three critical variables:
 

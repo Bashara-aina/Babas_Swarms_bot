@@ -1,3 +1,20 @@
+---
+title: Worker Bpjs Complete
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Created**: 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
+---
 # BPJS Knowledge Base Progress Log
 
 **Created**: 2026-04-11

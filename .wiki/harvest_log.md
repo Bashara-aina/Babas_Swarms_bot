@@ -1,3 +1,20 @@
+---
+title: Harvest Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- harvest_log.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **2026-04-11**: 0 accepted, 0 rejected'
+wikilinks: []
+confidence: medium
+source: research
+---
 - **2026-04-11**: 0 accepted, 0 rejected
 - **2026-04-11**: 0 accepted, 0 rejected
 - **2026-04-11**: 0 accepted, 0 rejected

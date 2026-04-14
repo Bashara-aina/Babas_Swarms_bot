@@ -1,3 +1,20 @@
+---
+title: Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- cekwajar-tech
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'title: "cekwajar.id — Technical Architecture"'
+wikilinks: []
+confidence: medium
+source: research
+---
 ***
 title: "cekwajar.id — Technical Architecture"
 stack: Next.js 15 · TypeScript · Supabase · Vercel · Tailwind CSS

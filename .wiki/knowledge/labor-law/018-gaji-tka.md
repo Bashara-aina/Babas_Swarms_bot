@@ -1,13 +1,21 @@
 ---
-source_id: 018
-title: "Gaji dan Aturan TKA Tenaga Kerja Asing di Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.online-pajak.com/seputar-pph21/tenaga-kerja-asing/"
-last_verified: "2026-04-11"
-tags: [tka,tenaga-kerja-asing,expat,pajak-tka,pph26]
-cekwajar_impact: HIGH
-legion_can_act: NO
+title: Gaji Tka
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: .cekwajar.id payroll system harus handle taxation untuk TKA yang berbeda
+  dari WNI. TKA umumnya subject to PPh 26 (bukan PPh 21), dan ada aturan_IMT specific
+  tentang sponsorship dan permit.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Gaji dan Aturan TKA Tenaga Kerja Asing di Indonesia

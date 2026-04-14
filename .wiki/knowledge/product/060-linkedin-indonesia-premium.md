@@ -1,13 +1,21 @@
 ---
-source_id: 060
-title: "LinkedIn Indonesia User Data & Premium Features Analysis"
-source_type: COMPETITOR_ANALYSIS
-authority: INDUSTRY
-url: "https://dataindonesia.id/internet/detail/data-jumlah-pengguna-linkedin-di-indonesia-hingga-april-2024"
-last_verified: "2026-04-11"
-tags: [linkedin, indonesia, premium, salary-data, professional-network, 28-juta-pengguna, talent-pool]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Linkedin Indonesia Premium
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: LinkedIn has 28.36 million Indonesian users (April 2024) and is the dominant
+  professional network. Their premium features include salary insights and job matching
+  AI. cekwajar.id can integrate with...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LinkedIn Indonesia User Data & Premium Features Analysis

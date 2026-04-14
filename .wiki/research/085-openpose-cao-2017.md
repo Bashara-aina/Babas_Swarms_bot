@@ -1,19 +1,21 @@
 ---
-paper_id: 085
-title: "OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields"
-authors: "Zhe Cao, Gines Hidalgo, Tomas Simon, Shih-En Wei, Yaser Sheikh"
-year: 2017
-venue: "CVPR 2017"
-arxiv: "1812.08008"
-github: "https://github.com/CMU-Perceptual-Computing-Lab/openpose"
+title: Openpose Cao 2017
+type: concept
+status: active
 tags:
-  - pose-estimation
-  - bottom-up
-  - part-affinity-fields
-  - multi-person
-  - realtime
-  - open-source
-popw_relevance: HIGH
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: OpenPose established the **bottom-up paradigm** for multi-person pose estimation
+  using Part Affinity Fields (PAFs). As the first open-source realtime system for
+  multi-person 2D pose estimation (inc...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

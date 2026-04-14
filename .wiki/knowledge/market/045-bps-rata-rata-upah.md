@@ -1,13 +1,21 @@
 ---
-source_id: 045
-title: "BPS Statistics Indonesia 2024: Average Employee Wages & Salaries"
-source_type: MARKET_DATA
-authority: OFFICIAL_GOV
-url: "https://www.bps.go.id/id/statistics-table/1/MjI0OSMx/rata-rata-upah-gaji-bersih-sebulan-buruh-karyawan-pegawai-menurut-kelompok-umur-dan-lapangan-pekerjaan-utama--2024.html"
-last_verified: "2026-04-11"
-tags: [bps, statistics, wages, national-average, sakernas, official-data]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Bps Rata Rata Upah
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: BPS (Badan Pusat Statistik) is Indonesia's official statistics agency. Their
+  Sakernas survey data represents the ground truth for national average wages. cekwajar.id
+  must anchor our "gaji wajar" ca...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BPS Statistics Indonesia 2024: Average Employee Wages & Salaries

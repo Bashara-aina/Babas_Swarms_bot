@@ -1,3 +1,21 @@
+---
+title: Ai Agents Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- indexes
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: ~/swarm-bot/.wiki/research/ai-agents (README.md — 340+ resources,
+  20+ categories)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # AI Agents 2026 Index
 Source: ~/swarm-bot/.wiki/research/ai-agents (README.md — 340+ resources, 20+ categories)
 

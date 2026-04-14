@@ -1,14 +1,21 @@
 ---
-paper_id: 079
-title: "Deep Learning-Based Human Pose Estimation: A Survey"
-authors: "Zheng, Ce; Zhu, Zheng; Yang, Mengjia; Zhu, Feng; Huang, Guan; Du, Dalong"
-year: 2020
-venue: "arXiv"
-arxiv: "2012.13392"
-citations: 850
-tier: 8
-tags: [pose, survey, deep-learning, 2D, 3D, heatmap, regression]
-popw_relevance: HIGH
+title: Pose Survey Zheng 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: POPW's pose head predicts 17 COCO keypoints using heatmap regression. This
+  survey provides the taxonomy and evaluation protocols that define best practices
+  — essential for understanding whether POP...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Deep Learning-Based Human Pose Estimation: A Survey
@@ -73,9 +80,9 @@ where $d_i$ is Euclidean distance, $s_i$ is person scale, $\sigma_i$ is keypoint
 
 ## Connections to Other Wiki Papers
 
-- [[008-simple-baseline-xiao-2018]] — SimpleBaseline is reference method in survey
-- [[009-hrnet-wang-2020]] — HRNet is the top-performing method cited
-- [[080-higherhrnet-cheng-2020]] — HigherHRNet achieves strong bottom-up results
+- [[research/008-simple-baseline-xiao-2018]] — SimpleBaseline is reference method in survey
+- [[research/009-hrnet-wang-2020]] — HRNet is the top-performing method cited
+- [[research/080-higherhrnet-cheng-2020]] — HigherHRNet achieves strong bottom-up results
 
 ## POPW Action Item
 

@@ -1,6 +1,21 @@
 ---
-#### ✅ Passed
-
+title: Review Phase3 2026 04 13
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. **Circular dependency fix** — `handlers/shared.py:70` defines `_bot =
+  None`, `main.py:455` sets `_shared._bot = bot` in `on_startup`. Webhook handlers
+  (`github.py`, `system.py`) access it via `i...
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. **Circular dependency fix** — `handlers/shared.py:70` defines `_bot = None`, `main.py:455` sets `_shared._bot = bot` in `on_startup`. Webhook handlers (`github.py`, `system.py`) access it via `import handlers.shared as _shared` then `_shared._bot` — correct lazy-access pattern, no circular import risk.
 

@@ -1,13 +1,21 @@
 ---
-source_id: 064
-title: "SaaS Pricing Psychology Indonesia IDR Conversion Strategy"
-source_type: PRODUCT
-authority: INDUSTRY
-url: "https://id.linkedin.com/pulse/complete-guide-saas-pricing-strategy-tomasz-tunguz-qithc"
-last_verified: "2026-04-11"
-tags: [saas, pricing, psychology, Indonesia, IDR, willingness-to-pay, conversion, monetization, anchoring]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Saas Pricing Psychology Indonesia
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- product
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Indonesian SaaS pricing requires different psychology vs USD markets. With
+  ~Rp 3-5 juta average monthly salary, Rp 500k/month ($30) is a significant commitment.
+  cekwajar.id needs pricing that conve...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SaaS Pricing Psychology Indonesia IDR Conversion Strategy

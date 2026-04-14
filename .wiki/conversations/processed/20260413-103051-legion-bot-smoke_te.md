@@ -1,14 +1,19 @@
 ---
-title: "20260413 103051 legion bot smoke_te"
-type: conversation
-status: draft
-tags: [legion-bot, session]
-created: 2026-04-13
-updated: 2026-04-13
-summary: "legion-bot" session with 2 messages captured on 2026-04-13 10:30 JST
-source: legion-bot
-session_id: "smoke_test"
-confidence: low
+title: 20260413 103051 Legion Bot Smoke Te
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- conversations
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Project/CWD**: unknown'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Legion-Bot Session — 2026-04-13 10:30 JST

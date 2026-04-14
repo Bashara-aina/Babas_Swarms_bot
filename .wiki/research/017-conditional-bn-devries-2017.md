@@ -1,16 +1,21 @@
 ---
-paper_id: 017
-title: "Learning Visual Reasoning Without Strong Priors"
-authors: "Perez, de Vries, Strub, Dumoulin, Courville"
-venue: "ICML Workshop 2017 / AAAI 2018"
-url: "https://arxiv.org/abs/1707.03017"
-arxiv: "1707.03017"
-code: "https://github.com/ethanjperez/film"
+title: Conditional Bn Devries 2017
+type: concept
+status: active
 tags:
-  - conditional-batch-normalization
-  - visual-reasoning
-  - multimodal
-  - clevr
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper introduced **Conditional Batch Normalization (CBN)**—a crucial
+  technique that made FiLM practical for large-scale visual reasoning. CBN showed
+  that conditioning could be achieved by modu...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

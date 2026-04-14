@@ -1,10 +1,19 @@
 ---
 title: Memory Gaps
-domain: memory
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 400
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- memory-gaps.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: What gets forgotten that shouldn't, and what never gets deleted but should.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MEMORY GAPS

@@ -1,10 +1,20 @@
 ---
-title: LLM Context Strategy
-domain: llm-routing
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 350
+title: Llm Context Strategy
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- llm-context-strategy.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: What to inject per task type, token budget per layer, and how to avoid context
+  bloat.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LLM CONTEXT STRATEGY

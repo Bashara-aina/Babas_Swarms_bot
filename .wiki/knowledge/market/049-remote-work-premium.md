@@ -1,13 +1,21 @@
 ---
-source_id: 049
-title: "Remote Work Salary Premium Indonesia 2024: WFH Compensation Data"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://eorhq.com/jobs/indonesia/, https://dynamitejobs.com/country/remote-jobs-in-indonesia"
-last_verified: "2026-04-11"
-tags: [remote-work, wfh, work-from-home, salary-premium, digital-nomad]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Remote Work Premium
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Remote work is becoming mainstream in Indonesia, especially for tech and
+  digital roles. Understanding remote salary premiums helps cekwajar.id provide guidance
+  for the growing work-from-home workfo...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Remote Work Salary Premium Indonesia 2024: WFH Compensation Data

@@ -1,3 +1,22 @@
+---
+title: Mathematics Information Computation
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Information can be quantified as entropy; communication
+  consists of source, transmitter, channel, noise, receiver; optimal coding achieves
+  channel capacity.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 16: Mathematics of Information & Computation
 
 ## [Claude Shannon] — A Mathematical Theory of Communication

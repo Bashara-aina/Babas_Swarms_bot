@@ -1,9 +1,20 @@
 ---
-title: "Legion Tool Definitions"
-source_type: CODE_EXTRACTION
-extracted_from: swarm-bot
-date: 2026-04-11
-tags: [legion, tools, functions, capabilities]
+title: Tool Definitions
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 72 Python tool files in `/home/newadmin/swarm-bot/tools/` with 1050+ function
+  definitions.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Legion/SwarmBot Tool Definitions

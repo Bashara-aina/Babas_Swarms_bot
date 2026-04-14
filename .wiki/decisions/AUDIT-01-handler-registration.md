@@ -1,6 +1,20 @@
 ---
-## Subtask 1 — Full Router Scan (40 files)
-
+title: Audit 01 Handler Registration
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| File | Has Router | Router Name | In _ROUTER_ORDER | Commands/Decorators
+  |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | File | Has Router | Router Name | In _ROUTER_ORDER | Commands/Decorators |
 |

@@ -1,36 +1,21 @@
 ---
-paper_id: "047"
-title: "Compositional Action Recognition with Multi-View Feature Fusion"
-authors: "Zhao, Zhicheng; Liu, Yingan; Ma, Lei"
-year: 2022
-venue: "PLoS ONE 17(4): e0266259"
-doi: "10.1371/journal.pone.0266259"
-citations: "N/A"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Multi-view fusion for compositional action recognition; 18.1% improvement over single-view on IKEA ASM"
-key_contribution: "Multi-view feature fusion framework using cross-attention; enables generalization to unseen action-object combinations"
+title: Zhao Compositional 2022
+type: concept
+status: active
 tags:
-  - multi-view fusion
-  - compositional action recognition
-  - cross-attention
-  - I3D backbone
-  - assembly actions
-sota_metrics:
-  - dataset: "IKEA ASM"
-    top1: "56.2%"
-    top3: "87.3%"
-    improvement: "18.1% over single-view I3D"
-datasets:
-  - "IKEA ASM"
-  - "LEMMMA"
-architecture:
-  type: "I3D + Cross-Attention Fusion"
-  key_components:
-    - "3D ConvNet (I3D/ResNet-50 backbone)"
-    - "Cross-attention module"
-    - "Cooperative learning"
-    - "Compositional loss"
-key_insight: "Multi-view fusion captures complementary information; enables recognition of unseen verb+noun combinations"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper addresses compositional action recognition - understanding actions
+  as combinations of verbs and nouns. The authors propose a multi-view feature fusion
+  framework that leverages cross-atte...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

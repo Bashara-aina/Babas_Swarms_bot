@@ -1,13 +1,21 @@
 ---
-source_id: 086
-title: "Next.js 14 App Router SaaS Architecture Patterns"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://nextjs.org/docs/app"
-last_verified: "2026-04-11"
-tags: [nextjs, app-router, saas, multi-tenant, server-components, react]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Nextjs14 App Router Saas
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id's frontend is built on Next.js 14 App Router. Understanding the
+  correct architecture patterns for multi-tenancy, server/client component boundaries,
+  and data fetching ensures maintainab...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Next.js 14 App Router SaaS Architecture Patterns

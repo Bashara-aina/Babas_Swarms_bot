@@ -1,3 +1,21 @@
+---
+title: Planner 2026 04 13 Rumahlabuh Dns Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- DNS resolution for rumahlabuh.com works via `dig` (returns 64.29.17.65,
+  216.198.79.65)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Fix Telegram bot DNS resolution failure for rumahlabuh.com
 
 Date: 2026-04-13

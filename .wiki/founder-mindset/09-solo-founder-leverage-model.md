@@ -1,3 +1,20 @@
+---
+title: Solo Founder Leverage Model
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Klover AGD + Base44 (Maros Schlommo) + multiple 2025/2026 case studies'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Solo Founder Leverage Model
 
 Source: Klover AGD + Base44 (Maros Schlommo) + multiple 2025/2026 case studies

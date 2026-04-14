@@ -1,10 +1,20 @@
 ---
-title: proactive-schedule
-domain: proactive-intelligence
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 480
+title: Proactive Schedule
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- proactive-schedule.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every scheduled job, trigger, and frequency — Legion initiates without being
+  asked.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Proactive Schedule

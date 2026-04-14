@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: "Kendall 2018 uses learned log-variance parameters to automatically weight multi-task losses. The key insight: homoscedastic uncertainty (task-independent noise) can be learned per task to balance loss contributions. POPW's losses.py attempted Kendall but DISABLED it due to numerical instability with small loss magnitudes."
 pdf_path: "project/popw/working/external/papers/Kendall_2018.pdf"
 wikilinks:
-  - [[001-resnet-he-2016]]
-  - [[003-film-perez-2018]]
+  - [[research/001-resnet-he-2016]]
+  - [[research/003-film-perez-2018]]
   - [[013-gradient-surgery-yu-2020]]
   - [[045-gradnorm-chen-2018]]
   - [[100-popw-protocol-self-analysis]]
@@ -131,7 +131,7 @@ class KendallMultitaskLoss(nn.Module):
 
 ## Related Papers in This Wiki
 
-- [[003-film-perez-2018]] — FiLM conditions features; Kendall conditions loss weights — different approaches
+- [[research/003-film-perez-2018]] — FiLM conditions features; Kendall conditions loss weights — different approaches
 - [[013-gradient-surgery-yu-2020]] — PCGrad solves gradient conflicts directly
 - [[045-gradnorm-chen-2018]] — GradNorm balances by gradient magnitude
 - [[100-popw-protocol-self-analysis]] — Documents Kendall disable decision

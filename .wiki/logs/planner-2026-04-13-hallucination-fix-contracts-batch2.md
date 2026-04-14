@@ -1,5 +1,20 @@
 ---
-DEPENDS_ON: "2"
+title: Planner 2026 04 13 Hallucination Fix Contracts Batch2
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Read migration_report_2026-04-13.md, verify it accurately reflects actual
+  file counts, update with corrected counts if needed.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ### CONTRACT #7: Verify and update wiki/_meta/migration_report_2026-04-13.md
 

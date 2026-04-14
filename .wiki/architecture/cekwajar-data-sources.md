@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "cekwajar.id data sourcing follows a 4-layer strategy: Layer 1 (Government: BPS Sakernas, Kemnaker UMK, BPJS rates, PMK 168/2023 tables — all free, Day 1 ready), Layer 2 (Licensed surveys: Mercer/Korn Ferry at IDR 60-150M/year — pre-Wajar Gaji gate), Layer 3 (Crowdsource flywheel: verified salary submissions from Wajar Slip users with k-anonymity n≥10), Layer 4 (Scraped: excluded entirely — ToS violation risk outweighs value). No property portal scraping. No automated rate updates from external sources."
 wikilinks:
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[./concepts/market-data-indonesia]]
-  - [[cekwajar-verdict-engine]]
+  - [[architecture/cekwajar-verdict-engine]]
   - [[./concepts/bpjs-reference]]
 confidence: high
 source: research
@@ -416,7 +416,7 @@ Submissions flagged as outliers are excluded from live benchmarks and routed to 
 
 ## Related Articles
 
-- [[cekwajar-id]] — Project using these data sources
+- [[projects/cekwajar-id]] — Project using these data sources
 - [[./concepts/market-data-indonesia]] — Market data overview
-- [[cekwajar-verdict-engine]] — How data feeds into verdict
+- [[architecture/cekwajar-verdict-engine]] — How data feeds into verdict
 - [[./concepts/bpjs-reference]] — Regulatory basis for BPJS data

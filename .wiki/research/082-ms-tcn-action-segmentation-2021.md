@@ -1,21 +1,21 @@
 ---
-paper_id: "082"
-title: "MS-TCN: Multi-Stage Temporal Convolutional Network for Action Segmentation"
-authors: "Abu Farha, Yazan; Gall, Juergen"
-year: 2021
-venue: "ECCV 2020 / arXiv 1903.01945"
-arxiv: "1903.01945"
-doi: "10.48550/arXiv.1903.01945"
-citations: 1000+
-domain: "Temporal Action Segmentation"
-popw_relevance: "Foundational action segmentation architecture; POPW's temporal modeling can build on MS-TCN"
-key_contribution: "Multi-stage temporal convolutional network with dilated convolutions for action segmentation"
+title: Ms Tcn Action Segmentation 2021
+type: concept
+status: active
 tags:
-  - temporal convolutional network
-  - action segmentation
-  - multi-stage
-  - dilated convolutions
-pdf_path: "project/popw/working/external/papers/MS-TCN_ActionSegmentation.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: MS-TCN proposes a multi-stage temporal convolutional network for action segmentation
+  in unconstrained videos. The architecture uses multiple stages of dilated 1D convolutions
+  to progressively refin...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

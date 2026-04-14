@@ -1,10 +1,19 @@
 ---
-title: "ADR-056: Fix Non-Fatal Warnings on Legion Bot Shutdown"
-date: "2026-04-12"
-decider: "Planner Agent"
-fix: "Call `end_session()` from `tools.agentops_client` in `on_shutdown()`."
-root_cause: ""
-status: "Accepted"
+title: Adr 056 Fix Nonfatal Warnings
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider**: Planner Agent'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-056: Fix Non-Fatal Warnings on Legion Bot Shutdown
 

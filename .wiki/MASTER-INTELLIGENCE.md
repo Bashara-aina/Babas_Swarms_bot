@@ -1,5 +1,20 @@
 ---
-## HOW TO USE THIS FILE
+title: Master Intelligence
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- master-intelligence.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: At the start of every session, read this file completely before taking any
+  action.
+wikilinks: []
+confidence: medium
+source: research
 ---
 At the start of every session, read this file completely before taking any action.
 It contains distilled knowledge from 7 world-class knowledge bases plus project-specific context.

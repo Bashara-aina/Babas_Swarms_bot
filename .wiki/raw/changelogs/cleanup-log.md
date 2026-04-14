@@ -1,3 +1,21 @@
+---
+title: Cleanup Log
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- changelogs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- app/layout.tsx, page.tsx, globals.css, next.config.mjs, tailwind.config.ts,
+  tsconfig.json'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Dead File Purge Cleanup Log
 > Date: 2026-04-11
 

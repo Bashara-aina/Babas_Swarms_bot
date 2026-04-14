@@ -1,3 +1,20 @@
+---
+title: Vertical Niche Domination
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Glean Playbook + Harvey AI + EvenUp patterns'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Vertical Niche Domination — The Anti-Horizontal Trap
 
 Source: Glean Playbook + Harvey AI + EvenUp patterns

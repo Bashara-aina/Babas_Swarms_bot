@@ -1,21 +1,21 @@
 ---
-paper_id: "081"
-title: "Prompt-Enhanced Hierarchical Transformer for Action Segmentation"
-authors: "Zhou, Jun; Li, Wei; Shen, Xiaoming"
-year: 2023
-venue: "arXiv 2308.16552"
-arxiv: "2308.16552"
-doi: "10.48550/arXiv.2308.16552"
-citations: ""
-domain: "Temporal Action Segmentation"
-popw_relevance: "Prompt-enhanced transformer for action segmentation; relevant for POPW's temporal action understanding"
-key_contribution: "Hierarchical transformer with prompt enhancement for accurate action segmentation"
+title: Prompt Enhanced Temporal Action 2023
+type: concept
+status: active
 tags:
-  - transformer
-  - action segmentation
-  - temporal
-  - prompt-enhanced
-pdf_path: "project/popw/working/external/papers/TemporalActionSeg_CPR.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This paper presents a prompt-enhanced hierarchical transformer approach for
+  temporal action segmentation. The method uses prompt tokens to guide the transformer
+  toward more accurate boundary detect...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

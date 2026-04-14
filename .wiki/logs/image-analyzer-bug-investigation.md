@@ -1,7 +1,19 @@
 ---
-date: "2026-04-12"
-investigator: "@planner"
-status: "Root Cause Identified"
+title: Image Analyzer Bug Investigation
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Handler:** `handlers/media_tools.py`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Image Analyzer Bug Investigation
 

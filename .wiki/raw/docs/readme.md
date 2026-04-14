@@ -1,3 +1,21 @@
+---
+title: Readme
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Full autonomous AI agent — controls your Linux PC via Telegram. 100% free
+  APIs, real computer use.**'
+wikilinks: []
+confidence: medium
+source: research
+---
 # LegionSwarm v10 🤖
 
 **Full autonomous AI agent — controls your Linux PC via Telegram. 100% free APIs, real computer use.**

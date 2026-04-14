@@ -1,3 +1,20 @@
+---
+title: Setup Script
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `scripts/setup_external_tools.sh` — setup script for 3 external tools'
+wikilinks: []
+confidence: medium
+source: research
+---
 # External Tools Setup Script — 2026-04-12
 
 ## Created

@@ -1,13 +1,20 @@
 ---
-source_id: 088
-title: "Vercel Zero Downtime Deployment with Edge Middleware"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://vercel.com/docs/routing-middleware"
-last_verified: "2026-04-11"
-tags: [vercel, deployment, edge-middleware, zero-downtime, blue-green, nextjs]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Vercel Zero Downtime
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'cekwajar.id is a SaaS payroll platform — downtime means users cannot access
+  payslips, submit reports, or process payroll. Vercel''s Edge Middleware enables:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Vercel Zero Downtime Deployment with Edge Middleware

@@ -1,10 +1,20 @@
 ---
-title: LLM Routing Map
-domain: llm-routing
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 700
+title: Llm Routing Map
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- llm-routing-map.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 22 legacy agents with explicit model assignments; MiniMax-M2.7 is the universal
+  fallback (not primary), local Ollama gemma4:e4b for vision/computer only.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LLM ROUTING MAP

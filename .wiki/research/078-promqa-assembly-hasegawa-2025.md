@@ -1,22 +1,21 @@
 ---
-paper_id: "078"
-title: "ProMQA-Assembly: Multimodal Procedural QA Dataset on Assembly"
-authors: "Hasegawa, Kimihiro; et al."
-year: 2025
-venue: "arXiv 2509.02949"
-arxiv: "2509.02949"
-doi: "10.48550/arXiv.2509.02949"
-citations: ""
-domain: "Assembly & Visual Question Answering"
-popw_relevance: "Multimodal QA dataset for assembly procedures; related to POPW's procedural activity understanding"
-key_contribution: "First large-scale procedural QA dataset for assembly tasks with multimodal inputs"
+title: Promqa Assembly Hasegawa 2025
+type: concept
+status: active
 tags:
-  - visual question answering
-  - multimodal
-  - procedural
-  - assembly
-  - dataset
-pdf_path: "project/popw/working/external/papers/ProMQA_Assembly.pdf"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: ProMQA-Assembly is a multimodal procedural question answering dataset focused
+  on assembly tasks. The dataset contains instructional videos with corresponding
+  question-answer pairs that require unde...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

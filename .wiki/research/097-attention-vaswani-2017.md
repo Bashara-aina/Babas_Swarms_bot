@@ -1,20 +1,21 @@
 ---
-paper_id: 097
-title: "Attention Is All You Need"
-pdf_path: "project/popw/working/external/papers/1706.03762.pdf"
-authors: "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Illia Polosukhin, Gordon Kapernick, ChrisApps"
-year: 2017
-venue: "NeurIPS 2017"
-doi: ""
-arxiv: "1706.03762"
-citation_count: "~240,000+ (verified)"
-popw_relevance: CRITICAL
+title: Attention Vaswani 2017
+type: concept
+status: active
 tags:
-  - transformer
-  - attention
-  - sequence-modeling
-  - nlp
-  - foundation模型
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**The Transformer.** This paper introduced the transformer architecture
+  — a sequence-to-sequence model based entirely on **multi-head self-attention**,
+  dispensing with recurrence and convolutions. ...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 097 — Attention Is All You Need (NeurIPS 2017)

@@ -1,3 +1,21 @@
+---
+title: Communication Rhetoric
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Three appeals: ethos (credibility), pathos (emotion),
+  logos (logic); rhetoric is the art of finding available means of persuasion.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 09: Communication & Rhetoric
 
 ## Aristotle — "The Art of Rhetoric"

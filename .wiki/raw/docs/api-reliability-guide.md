@@ -1,3 +1,21 @@
+---
+title: Api Reliability Guide
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This guide explains how to ensure your bot always has an available API, even
+  when individual providers are rate-limited or down.
+wikilinks: []
+confidence: medium
+source: research
+---
 # 🛡️ API Reliability Guide - Achieve 99.9% Uptime
 
 ## 🎯 **Goal: Make API Always Ready**

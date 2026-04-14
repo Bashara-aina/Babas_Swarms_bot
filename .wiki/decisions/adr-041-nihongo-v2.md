@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Adr 041 Nihongo V2
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated,
+  multi-component language learning system while maintaining full backward compatibility
+  with existing commands and...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated, multi-component language learning system while maintaining full backward compatibility with existing commands and complete isolation from Legion's core.
 ---

@@ -1,16 +1,21 @@
 ---
-paper_id: 018
-title: "Arbitrary Style Transfer in Real-Time with Adaptive Instance Normalization (AdaIN)"
-authors: "Xun Huang, Serge Belongie"
-venue: "ICCV 2017"
-url: "https://arxiv.org/abs/1703.06868"
-arxiv: "1703.06868"
-code: "https://github.com/xunhuang1995/AdaIN-style"
+title: Adain Huang 2017
+type: concept
+status: active
 tags:
-  - adaptive-instance-normalization
-  - style-transfer
-  - feature-statistics
-  - fiilm
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'AdaIN introduced a **revolutionary insight**: style transfer could be achieved
+  by simply aligning the **mean and variance** of content features to those of style
+  features. No need for slow iterativ...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

@@ -1,9 +1,19 @@
 ---
-title: "ADR-003: Import Resilience — Lazy Import Strategy"
-date: "2026-04-12"
-decider: "@planner"
-reviewer: "@reviewer"
-status: "PROPOSED"
+title: Adr 003 Import Resilience
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Decider:** @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-003: Import Resilience — Lazy Import Strategy
 

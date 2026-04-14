@@ -1,13 +1,21 @@
 ---
-source_id: 019
-title: "Sanksi Pidana Pengupahan di Bawah Upah Minimum"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.kompas.com/tren/read/2023/11/22/183000865/denda-hingga-penjara-ini-sanksi-perusahaan-yang-beri-gaji-di-bawah-upah"
-last_verified: "2026-04-11"
-tags: [sanksi,pidana,upah-minimum,pelanggaran,denda,pengupahan]
-cekwajar_impact: CRITICAL
-legion_can_act: NO
+title: Sanksi Pengupahan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: .cekwajar.id payroll system MUST prevent paying employees below minimum wage.
+  Violations carry CRIMINAL penalties including imprisonment and fines, not just administrative
+  sanctions. This is the hi...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Sanksi Pidana Pengupahan di Bawah Upah Minimum

@@ -1,6 +1,19 @@
 ---
-## Domain Index
-
+title: Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| # | Domain | Sources | Key Thinkers |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | # | Domain | Sources | Key Thinkers |
 |

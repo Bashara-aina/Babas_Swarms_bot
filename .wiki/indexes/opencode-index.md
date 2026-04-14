@@ -1,3 +1,20 @@
+---
+title: Opencode Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- indexes
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: ~/swarm-bot/.wiki/research/opencode (README.md)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Awesome OpenCode Index
 Source: ~/swarm-bot/.wiki/research/opencode (README.md)
 

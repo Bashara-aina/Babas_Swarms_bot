@@ -1,13 +1,21 @@
 ---
-source_id: 011
-title: "Permenaker 6 Tahun 2016 Tunjangan Hari Raya THR"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/146101"
-last_verified: "2026-04-11"
-tags: [permenaker-6-2016,thr,tunjangan-hari-raya,thr-keagamaan]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Permenaker Thr
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: THR adalah tunjangan wajib yang harus dibayar setiap tahun keagamaan. Kesalahan
+  perhitungan THR (misalnya tidak proporsional untuk karyawan baru) adalah dispute
+  umum yang harus dihindari.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Permenaker 6 Tahun 2016 Tunjangan Hari Raya THR

@@ -1,6 +1,21 @@
 ---
-## Background
-
+title: Worker Garbled Text Fix Brief
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Bot was producing garbled responses with Russian words ("конкрет", "памяти")
+  and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu. Root
+  cause was silent NameError failures in...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Bot was producing garbled responses with Russian words ("конкрет", "памяти") and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu. Root cause was silent NameError failures in context injection loop.
 

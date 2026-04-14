@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 11 Coding References
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- YAML frontmatter is present and valid (lines 1-5)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ### Review: CODING-REFERENCES.md
 
 #### ✅ Passed

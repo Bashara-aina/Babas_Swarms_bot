@@ -1,13 +1,21 @@
 ---
-source_id: 065
-title: "Pieter Levels Solo Founder Playbook"
-source_type: CASE_STUDY
-authority: INDUSTRY
-url: "https://levels.io/blog"
-last_verified: "2026-04-11"
-tags: [solo-founder, bootrapped, nomad-list, remote-ok, revenue, indie-maker, portfolio]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Levelsio Playbook
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- business
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Pieter Levels is the proven playbook for Bashara''s operational model. His
+  $3-5M ARR portfolio built with zero employees demonstrates exactly how cekwajar.id
+  can scale: multiple niche SaaS products,...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Pieter Levels Solo Founder Playbook

@@ -1,6 +1,19 @@
 ---
-## FILES READ
-
+title: Planner Legion Fix Identity Search 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md` - 757 lines
+wikilinks: []
+confidence: medium
+source: research
 ---
 1. `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md` - 757 lines
    - Contains 3 fix plans for wiki injection, Chinese character stripping, and web search gate

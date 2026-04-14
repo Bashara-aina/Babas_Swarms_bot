@@ -1,3 +1,21 @@
+---
+title: Brainstorming
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use this structured ideation flow whenever the task is ambiguous, strategic,
+  or multi-path.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Brainstorming Framework (Product + Engineering)
 
 Use this structured ideation flow whenever the task is ambiguous, strategic, or multi-path.

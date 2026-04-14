@@ -1,13 +1,21 @@
 ---
-source_id: 030
-title: "Iuran BPJS Kesehatan 2024: Perhitungan untuk Pekerja Swasta"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.liputan6.com/bisnis/read/5595301/daftar-lengkap-iuran-bpjs-kesehatan-2024-dan-dendanya"
-last_verified: "2026-04-11"
-tags: [bpjs-kesehatan, iuran, pph21, umr, labor-law, saas, hrtech, payroll]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Bpjs Kesehatan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: BPJS Kesehatan is a mandatory deduction for every employee in Indonesia.
+  Incorrect calculation causes compliance violations, employee complaints, and potential
+  penalties. This is a core payroll fea...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Iuran BPJS Kesehatan 2024: Perhitungan untuk Pekerja Swasta

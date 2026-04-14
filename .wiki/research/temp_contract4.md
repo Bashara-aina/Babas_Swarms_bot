@@ -1,8 +1,21 @@
 ---
-tags: [research, synthesis, comparison-table, temporal-attention, bigru-alternatives, pose-head, activity-head, recommendations]
-sources: [temp_contract1, temp_contract2, temp_contract3, 014-video-swin-transformer-liu-2022]
-created: 2026-04-13
-updated: 2026-04-13
+title: Temp Contract4
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'This document synthesizes research from Contracts 1-3 into a unified comparison
+  table for POPW architecture decisions. The goal is to identify the best methods
+  for:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Contract 4 Synthesis: Comparison Table and Novelty/Contribution Analysis

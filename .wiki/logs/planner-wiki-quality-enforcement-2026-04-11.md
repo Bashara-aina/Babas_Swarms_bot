@@ -1,6 +1,21 @@
 ---
-## Mission Summary
-
+title: Planner Wiki Quality Enforcement 2026 04 11
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Successfully built and deployed a permanent wiki quality enforcement system
+  for Legion, consisting of a two-tier quality gate, scheduled maintenance scans,
+  and user-facing wiki management commands.
+wikilinks: []
+confidence: medium
+source: research
 ---
 Successfully built and deployed a permanent wiki quality enforcement system for Legion, consisting of a two-tier quality gate, scheduled maintenance scans, and user-facing wiki management commands.
 ---

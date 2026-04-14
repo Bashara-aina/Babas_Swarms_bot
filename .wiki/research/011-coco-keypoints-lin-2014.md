@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "The COCO keypoint dataset defines 17人体关键点 format for pose estimation (nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles) with visibility flags. POPW uses exactly this format: 17 COCO keypoints with (x, y, visibility) per person, from config.py:NUM_KEYPOINTS=17."
 wikilinks:
-  - [[009-deeppose-pck-toshev-2014]]
-  - [[010-wing-loss-feng-2018]]
-  - [[015-simple-baselines-pose-xiao-2018]]
+  - [[research/009-deeppose-pck-toshev-2014]]
+  - [[research/010-wing-loss-feng-2018]]
+  - [[research/015-simple-baselines-pose-xiao-2018]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
 source: canonical
@@ -141,9 +141,9 @@ s = √(bbox_width × bbox_height)  # person scale in pixels
 
 ## Related Papers in This Wiki
 
-- [[009-deeppose-pck-toshev-2014]] — PCK@0.1 evaluation uses keypoint distance / torso_diameter
-- [[010-wing-loss-feng-2018]] — Wing Loss applies per-keypoint for all 17 keypoints
-- [[015-simple-baselines-pose-xiao-2018]] — Simple baselines use COCO keypoint format
+- [[research/009-deeppose-pck-toshev-2014]] — PCK@0.1 evaluation uses keypoint distance / torso_diameter
+- [[research/010-wing-loss-feng-2018]] — Wing Loss applies per-keypoint for all 17 keypoints
+- [[research/015-simple-baselines-pose-xiao-2018]] — Simple baselines use COCO keypoint format
 - [[100-popw-protocol-self-analysis]] — POPW's 17 COCO keypoints from config.py
 
 ## LEGION RULE

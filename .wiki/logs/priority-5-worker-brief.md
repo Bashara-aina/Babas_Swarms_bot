@@ -1,3 +1,20 @@
+---
+title: Priority 5 Worker Brief
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Completed:** 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
+---
 # PRIORITY 5: Clarifying Questions Mechanism — COMPLETE
 
 **Completed:** 2026-04-12

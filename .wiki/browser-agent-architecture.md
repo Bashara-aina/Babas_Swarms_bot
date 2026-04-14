@@ -1,10 +1,21 @@
 ---
-title: browser-agent-architecture
-domain: tools
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: tool-output-formatting.md
-tokens_estimated: 590
+title: Browser Agent Architecture
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- browser-agent-architecture.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '`tools/browser_agent.py` provides two browser automation modes: (1) `check_site_health()`
+  using raw Playwright for lightweight health checks, and (2) `browse_task()` using
+  the `browser-use` library...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Browser Agent Architecture

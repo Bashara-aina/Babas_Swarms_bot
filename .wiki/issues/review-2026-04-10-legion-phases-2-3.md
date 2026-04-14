@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 10 Legion Phases 2 3
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Reviewer:** @reviewer'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Review: Legion Upgrade Phases 2-3 (MiniMax + Soul Engine)
 
 **Date:** 2026-04-10

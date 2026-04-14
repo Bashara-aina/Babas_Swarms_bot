@@ -1,6 +1,19 @@
 ---
-## ✅ Passed
-
+title: Review 2026 04 12 Legion Audit 04 Context Injection
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **[Line 515-518]** AUDIT04 debug logging present:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### 1. LLM Call Sites (`llm_client/__init__.py`)
 - **[Line 515-518]** AUDIT04 debug logging present:

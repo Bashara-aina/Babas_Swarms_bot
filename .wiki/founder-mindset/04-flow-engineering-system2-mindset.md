@@ -1,3 +1,20 @@
+---
+title: Flow Engineering System2 Mindset
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- founder-mindset
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Maryam Miradi PhD, LinkedIn 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Flow Engineering — System 2 Agent Mindset
 
 Source: Maryam Miradi PhD, LinkedIn 2026

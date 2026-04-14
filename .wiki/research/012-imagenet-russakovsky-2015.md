@@ -1,14 +1,21 @@
 ---
-paper_id: "012"
-title: "ImageNet Large Scale Visual Recognition Challenge"
-authors: "Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy, Aditya Khosla, Michael Bernstein, Alexander C. Berg, Li Fei-Fei"
-year: 2015
-venue: "IJCV 2015"
-arxiv: "1409.0575"
-citations: 68951
-tier: 1
-tags: ["imagenet", "benchmark", "classification", "detection", "dataset", "large-scale"]
-popw_relevance: 10
+title: Imagenet Russakovsky 2015
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: ImageNet LSVR is the **defining benchmark** that catalyzed the deep learning
+  revolution in computer vision. It established the evaluation framework, dataset
+  scale, and methodology that all modern v...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

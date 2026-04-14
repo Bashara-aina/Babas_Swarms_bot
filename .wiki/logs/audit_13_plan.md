@@ -1,5 +1,20 @@
 ---
-created: "2026-04-12 | **Planner:** @planner | **Status:** IN PROGRESS"
+title: Audit 13 Plan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Every disabled feature must have an explicit flag and user message. No permanently
+  dead code masquerading as live.
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 13 — Feature Flag Audit Plan
 ## Executive Summary

@@ -1,3 +1,21 @@
+---
+title: Nextjs Engineer
+type: reference
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use this skill for building/reviewing Next.js apps with TypeScript strict
+  mode and Supabase SSR auth.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Next.js Engineer (App Router + Production Patterns)
 
 Use this skill for building/reviewing Next.js apps with TypeScript strict mode and Supabase SSR auth.

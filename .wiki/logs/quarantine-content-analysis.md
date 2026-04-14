@@ -1,9 +1,19 @@
 ---
-title: "Quarantine Content Analysis"
-date: 2026-04-14
+title: Quarantine Content Analysis
+type: concept
 status: active
-category: wiki-maintenance
-tags: [quarantine, wiki, content-analysis, quality-gate]
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Analyzer:** @worker'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quarantine Content Analysis

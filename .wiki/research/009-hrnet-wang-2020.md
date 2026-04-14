@@ -1,14 +1,21 @@
 ---
-paper_id: "009"
-title: "Deep High-Resolution Representation Learning for Visual Recognition"
-authors: "Jingdong Wang, Ke Sun, Tianheng Cheng, Borui Jiang, Chaorui Deng, Yang Zhao, Dong Liu, Yadong Mu, Mingkui Tan, Xinggang Wang, Wenyu Liu, Bin Xiao"
-year: 2020
-venue: "TPAMI 2020"
-arxiv: "1908.07919"
-citations: 5942
-tier: 1
-tags: ["hrnet", "high-resolution", "pose-estimation", "semantic-segmentation", "backbone"]
-popw_relevance: 10
+title: Hrnet Wang 2020
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: HRNet maintains **high-resolution representations throughout the entire network**
+  — unlike previous architectures that downsample early and then upsample. For pose
+  estimation, spatial precision mat...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

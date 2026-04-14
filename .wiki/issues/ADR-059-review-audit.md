@@ -1,6 +1,19 @@
 ---
-## Changes Audited
-
+title: Adr 059 Review Audit
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: from core.intent_router import build_intent_hint, classify_intent_fast
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### 1. Line 44 — Module-level import
 ```python

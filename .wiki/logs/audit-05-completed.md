@@ -1,7 +1,20 @@
 ---
-date: "2026-04-12"
-status: "✅ COMPLETED"
-worker: "@worker"
+title: Audit 05 Completed
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: python -c "from core import soul_engine, memory_engine, skill_registry, system_prompt_builder,
+  intent_router"
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 05 — Core Module Wiring — COMPLETED
 

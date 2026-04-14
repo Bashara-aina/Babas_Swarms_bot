@@ -1,6 +1,21 @@
 ---
-## EXECUTIVE SUMMARY
-
+title: Block 03 Pph21 Bpjs Engine
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document specifies the complete, legally compliant PPh21 (Pajak Penghasilan
+  Pasal 21) and BPJS (Badan Penyelenggara Jaminan Sosial) calculation engine for Indonesian
+  payroll processing. The en...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This document specifies the complete, legally compliant PPh21 (Pajak Penghasilan Pasal 21) and BPJS (Badan Penyelenggara Jaminan Sosial) calculation engine for Indonesian payroll processing. The engine must accurately calculate:
 

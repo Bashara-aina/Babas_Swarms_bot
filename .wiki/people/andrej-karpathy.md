@@ -11,7 +11,7 @@ wikilinks:
   - [[./concepts/karpathy-kb-pattern]]
   - [[./concepts/llm-cost-routing]]
   - [[./concepts/self-improvement-loop]]
-  - [[legion-bot]]
+  - [[projects/legion-bot]]
 confidence: high
 source: external
 ---
@@ -73,7 +73,7 @@ Karpathy's approach to LLM knowledge bases separates two concerns:
 
 Legion's wiki implementation combines both:
 - [[./concepts/vector-search]] for semantic retrieval of relevant articles
-- Dense [[intent-routing]] based on keyword matching
+- Dense [[./concepts/intent-routing]] based on keyword matching
 - Human-readable structure for debugging and manual editing
 
 ## Related Pages

@@ -1,18 +1,21 @@
 ---
-title: skill-execution-flow
+title: Skill Execution Flow
 type: architecture
 status: active
-tags: [skills, execution, flow, registry, intent-router]
-created: 2026-04-13
-updated: 2026-04-13
-summary:: " Skills execute through a dual-layer system: executable Python skills in core/skills/ for direct actions (weather, web search, timer), and reference markdown skills injected into LLM prompts. Skills are triggered by intent router, executed with tool/API calls, and results flow back into the LLM context for response synthesis."
-wikilinks:
-  - [[./concepts/skill-registry]]
-  - [[legion-module-map]]
-  - [[./entities/gpt-researcher]]
-  - [[./entities/opencode]]
-confidence: high
-source: implementation
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Skills execute through a dual-layer system: executable Python skills in
+  `core/skills/` for direct actions (weather API calls, web search, timer execution),
+  and reference markdown skills injected as...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Skill Execution Flow
@@ -175,6 +178,6 @@ Skills can be called within swarm agents:
 ## Related Pages
 
 - [[./concepts/skill-registry]] — Skill management concepts
-- [[legion-module-map]] — Module overview
+- [[architecture/legion-module-map]] — Module overview
 - [[./entities/gpt-researcher]] — Deep research integration
 - [[./entities/opencode]] — Code execution integration

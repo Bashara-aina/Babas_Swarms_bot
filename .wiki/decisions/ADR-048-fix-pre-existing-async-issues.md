@@ -1,6 +1,19 @@
 ---
-## Context
-
+title: Adr 048 Fix Pre Existing Async Issues
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'AUDIT 10 identifies two categories of pre-existing async/scheduling issues:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 AUDIT 10 identifies two categories of pre-existing async/scheduling issues:
 

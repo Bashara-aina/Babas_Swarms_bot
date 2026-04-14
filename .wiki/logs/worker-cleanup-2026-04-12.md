@@ -1,3 +1,20 @@
+---
+title: Worker Cleanup 2026 04 12
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- LEGION_MASTER_PROMPT.md'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Cleanup Log — 2026-04-12
 
 ## Task: Repository Cleanup

@@ -1,6 +1,20 @@
 ---
-## Context
-
+title: Adr Dead Purge 001
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'The `/home/newadmin/swarm-bot` repository has accumulated dead files over
+  time:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 The `/home/newadmin/swarm-bot` repository has accumulated dead files over time:
 - Backup files (`.bak`, `.backup`)

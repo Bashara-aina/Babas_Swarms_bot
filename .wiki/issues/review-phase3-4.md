@@ -1,6 +1,19 @@
 ---
-## CRITICAL BLOCKER
-
+title: Review Phase3 4
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '`router.py` line 46 does:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### ❌ `router.py` line 46 — `AttributeError` on import
 

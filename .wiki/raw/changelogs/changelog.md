@@ -1,3 +1,20 @@
+---
+title: Changelog
+type: reference
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- changelogs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: All notable changes to Legion (Babas Swarms Bot) are documented here.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Changelog
 
 All notable changes to Legion (Babas Swarms Bot) are documented here.

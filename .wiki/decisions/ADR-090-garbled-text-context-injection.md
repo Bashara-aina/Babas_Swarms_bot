@@ -1,6 +1,20 @@
 ---
-## Error
-
+title: Adr 090 Garbled Text Context Injection
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Bot responded with garbled text mixing Russian words ("конкрет", "памяти")
+  and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu.
+wikilinks: []
+confidence: medium
+source: research
 ---
 Bot responded with garbled text mixing Russian words ("конкрет", "памяти") and gibberish ("nexeny") when user asked about Matsuya restaurant in Toyosu.
 

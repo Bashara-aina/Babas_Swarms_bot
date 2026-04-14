@@ -1,32 +1,21 @@
 ---
-paper_id: "045"
-title: "IndustReal: A Dataset for Procedure Step Recognition Handling Execution Errors in Egocentric Videos"
-authors: "Schoonbeek, Tim J.; Houben, Tim; Onvlee, Hans; de With, Peter H.N.; van der Sommen, Fons"
-year: 2024
-venue: "WACV 2024"
-arxiv: "2310.17323"
-doi: "10.48550/arXiv.2310.17323"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "Introduces procedure step recognition (PSR) task; addresses error detection in assembly"
-key_contribution: "Defines novel Procedure Step Recognition (PSR) task; includes execution errors (omissions, mistakes) in dataset"
+title: Industreal Dataset 2024
+type: concept
+status: active
 tags:
-  - egocentric video
-  - procedure step recognition
-  - error detection
-  - industrial assembly
-  - WACV 2024
-dataset_stats:
-  videos: 84
-  participants: 27
-  duration: "6 hours"
-  error_types: ["omissions", "execution errors"]
-tasks_enabled:
-  - "Action Recognition (AR)"
-  - "Assembly State Detection (ASD)"
-  - "Procedure Step Recognition (PSR)"
-key_insight: "Traditional action recognition lacks success measurement; PSR focuses on correct completion AND order of procedural steps"
-code_url: "https://github.com/TimSchoonbeek/IndustReal"
-dataset_url: "https://timschoonbeek.github.io/industreal.html"
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'IndustReal addresses a fundamental flaw in action recognition for procedural
+  tasks: the lack of success measurement. While action recognition focuses on classifying
+  actions, it ignores whether acti...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

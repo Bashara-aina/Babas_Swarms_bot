@@ -1,20 +1,21 @@
 ---
-paper_id: 096
-title: "End-to-End Object Detection with Transformers"
-pdf_path: "project/popw/working/external/papers/DETR_Carion_2020.pdf"
-authors: "Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, Sergey Zagoruyko"
-year: 2020
-venue: "ECCV 2020"
-doi: "10.1007/978-3-030-58452-8_13"
-arxiv: "2005.12872"
-citation_count: "~25,000+ (estimated)"
-popw_relevance: HIGH
+title: Detr Carion 2020
+type: concept
+status: active
 tags:
-  - object-detection
-  - transformer
-  - end-to-end
-  - set-prediction
-  - detr
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**DETR** replaces the entire detection pipeline with a transformer-based
+  set prediction approach. It removes hand-crafted components (NMS, anchor boxes)
+  by directly predicting a set of objects usin...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 096 — DETR: End-to-End Object Detection with Transformers (ECCV 2020)

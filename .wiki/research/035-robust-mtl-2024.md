@@ -1,9 +1,19 @@
 ---
-tags: [mtl, robust-mtl, excess-risk-bounds, theory, generalization]
-sources: [popw-protocol]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Robust Mtl 2024
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 035 — Robust MTL with Excess Risk Bounds

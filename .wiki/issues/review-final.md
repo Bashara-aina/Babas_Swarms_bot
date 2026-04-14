@@ -1,7 +1,21 @@
 ---
-title: "Review: Phase 7-8 Final Review"
-type: review
-tags: [review-final]
+title: Review Final
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. **Startup Health Check Format** — `print_legion_boot_report()` (main.py:318-358)
+  outputs ✅/⚠️ per subsystem (Telegram, LLM, ChromaDB, Wiki, Data, VoiceVox, DuckDuckGo)
+  with correct emoji and deg...
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Review: Phase 7-8 Final Review
 

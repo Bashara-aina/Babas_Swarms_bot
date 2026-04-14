@@ -1,3 +1,20 @@
+---
+title: Founder Mindset Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- indexes
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> 10 distilled founder principles for Legion — added 2026-04-11'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Founder Mindset Index
 > 10 distilled founder principles for Legion — added 2026-04-11
 

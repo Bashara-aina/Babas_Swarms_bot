@@ -9,7 +9,7 @@ summary: BPJS is Indonesia's mandatory social security system covering health (B
 wikilinks:
   - [[./concepts/labor-law-indonesia]]
   - [[./concepts/tax-indonesia]]
-  - [[cekwajar-id]]
+  - [[projects/cekwajar-id]]
   - [[./concepts/market-data-indonesia]]
 confidence: high
 source: research
@@ -300,4 +300,4 @@ This sequence means that when an employer underpays BPJS, the PPh21 withholding 
 - [[./concepts/labor-law-indonesia]] — Employment law basis for mandatory BPJS enrollment
 - [[./concepts/tax-indonesia]] — PPh21 calculations that interact with gross salary before BPJS
 - [[./concepts/market-data-indonesia]] — Market salary data for Wajar Gaji benchmarks
-- [[cekwajar-id]] — Project using these calculations in Wajar Slip
+- [[projects/cekwajar-id]] — Project using these calculations in Wajar Slip

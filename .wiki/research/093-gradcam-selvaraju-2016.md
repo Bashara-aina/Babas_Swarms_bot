@@ -1,18 +1,21 @@
 ---
-title: "093 — Grad-CAM: Visual Explanations from Deep Networks (Selvaraju et al., 2017)"
-subtitle: "Gradient-weighted Class Activation Mapping for CNN Interpretability"
-category: training-optimization
-subcategory: interpretability
-tags: [gradcam, visualization, interpretability, cnn, explainability, xai]
-authors: ["Ramprasaath R. Selvaraju", "Michael Cogswell", "Abhishek Das", "Ramakrishna Vedantam", "Devi Parikh", "Dhruv Batra"]
-venue: "ICCV 2017 (Best Paper Honorable Mention)"
-arXiv: "1610.02391"
-date: 2016-10-07
-cited: "~8000+"
-implementation: ["PyTorch grad-cam", "torchvision.gradcam", "captum"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Gradcam Selvaraju 2016
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Grad-CAM produces "visual explanations" for CNN-based models by using gradients
+  flowing into the final convolutional layer to generate coarse localization maps
+  highlighting important regions for pr...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

@@ -1,13 +1,21 @@
 ---
-source_id: 087
-title: "Midtrans Integration Production Webhook Handler"
-source_type: ENGINEERING
-authority: INDUSTRY
-url: "https://docs.midtrans.com/docs/https-notification-webhooks"
-last_verified: "2026-04-11"
-tags: [midtrans, webhook, payment, integration, nextjs, verification]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Midtrans Integration
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- engineering
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'cekwajar.id processes subscription payments for payroll SaaS plans. The
+  Midtrans webhook is the **single source of truth** for payment status updates. A
+  broken webhook handler means:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Midtrans Integration Production Webhook Handler

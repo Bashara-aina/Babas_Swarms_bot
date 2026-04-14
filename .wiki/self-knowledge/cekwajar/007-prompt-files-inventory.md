@@ -1,9 +1,19 @@
 ---
-title: "cekwajar Prompt Files Inventory - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: cekwajar
-date: 2026-04-11
-tags: [cekwajar, prompts, context, NOT-FOUND]
+title: Prompt Files Inventory
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: `/home/newadmin/swarm-bot/.wiki/knowledge/cekwajar/`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # cekwajar Prompt Files Inventory

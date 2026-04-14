@@ -1,5 +1,19 @@
 ---
-
+title: Anti Slop Tasks
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Planner: Bashara | Date: 2026-04-11 | Project: Babas_Swarms_bot (Legion)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Anti-Slop Defense System — Task Decomposition
 > Planner: Bashara | Date: 2026-04-11 | Project: Babas_Swarms_bot (Legion)

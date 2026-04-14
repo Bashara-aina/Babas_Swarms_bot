@@ -2,17 +2,20 @@
 title: Memory Gaps Analysis
 type: architecture
 status: active
-tags: [memory, architecture, gaps, audit]
-created: 2026-04-13
-updated: 2026-04-13
-summary:: " Legion's memory system ranked 4.5/10 — 8+ subsystems with critical gaps: silent data loss at 2000 entries, redundant overlapping facades, no semantic vector retrieval for natural language queries, and incomplete per-user isolation."
-wikilinks:
-  - [[memory-system-architecture]]
-  - [[memory-architecture]]
-  - [[intent-routing]]
-confidence: high
-source: audit
-project: legion
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- architecture
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Legion's memory system spans 8+ subsystems creating context but lacking semantic
+  retrieval — ranked as 4.5/10 with primary issues being redundant facades, no vector
+  search, and silent data loss.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Memory Architecture
@@ -72,8 +75,8 @@ Core memory, archival memory, and temporal graph are NOT user-scoped.
 
 ## Related Pages
 
-- [[memory-system-architecture]] — Technical implementation details
-- [[memory-architecture]] — Memory concepts
+- [[architecture/memory-system-architecture]] — Technical implementation details
+- [[./concepts/memory-architecture]] — Memory concepts
 - [[projects/legion-bot]] — Project using this architecture
 
 ## Audit Findings Summary

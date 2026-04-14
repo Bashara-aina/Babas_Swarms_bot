@@ -1,5 +1,19 @@
 ---
-
+title: Concerns Fix Tasks
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Planner**: @planner'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Fix 7 Critical Concerns — Subtask Plan
 **Date**: 2026-04-12

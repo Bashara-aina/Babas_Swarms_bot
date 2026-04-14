@@ -1,6 +1,21 @@
 ---
-## Executive Summary
-
+title: Worker Tax Complete
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Successfully created **10 wiki pages** in `.wiki/knowledge/tax/` directory
+  covering the complete PPh 21 calculation knowledge base for Indonesian payroll tax
+  compliance.
+wikilinks: []
+confidence: medium
+source: research
 ---
 Successfully created **10 wiki pages** in `.wiki/knowledge/tax/` directory covering the complete PPh 21 calculation knowledge base for Indonesian payroll tax compliance.
 ---

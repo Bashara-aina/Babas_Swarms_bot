@@ -1,8 +1,19 @@
 ---
-tags: [video-understanding, pose-based, action-recognition, motion, cvpr-2018]
-sources: [arxiv:1711.09799]
-created: 2026-04-11
-updated: 2026-04-11
+title: Potion Choutas 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Choutas, Weinzaepfel** | CVPR 2018 | [arXiv:1711.09799](https://arxiv.org/abs/1711.09799)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PoTion: Pose MoTion Representation for Action Recognition
@@ -58,5 +69,5 @@ PoTion produces a **fixed-size 2D heatmap** (H × W × 18) representing entire c
 
 ## See Also
 
-- [[068-i3d-carreira-2017]] — I3D (RGB two-stream)
-- [[075-potion-choutas-2018]] — PoTion (this paper)
+- [[research/068-i3d-carreira-2017]] — I3D (RGB two-stream)
+- [[research/075-potion-choutas-2018]] — PoTion (this paper)

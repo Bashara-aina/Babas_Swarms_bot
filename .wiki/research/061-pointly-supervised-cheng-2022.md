@@ -1,9 +1,19 @@
 ---
-tags: [instance-segmentation, weak-supervision, point-annotation, pointly-supervised, cvpr2022]
-sources: [arxiv:2104.06404, openaccess:CVPR2022/Cheng]
-created: 2026-04-11
-updated: 2026-04-11
-paper_num: "061"
+title: Pointly Supervised Cheng 2022
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Cheng*, Parkhi*, Kirillov* | CVPR 2022 | [arXiv:2104.06404](https://arxiv.org/abs/2104.06404)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Pointly-Supervised Instance Segmentation

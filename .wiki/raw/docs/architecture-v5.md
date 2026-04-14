@@ -1,3 +1,20 @@
+---
+title: Architecture V5
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: LEGIONSWARM v5 ARCHITECTURE
+wikilinks: []
+confidence: medium
+source: research
+---
 # LEGIONSWARM v5 ARCHITECTURE
 
 ```text

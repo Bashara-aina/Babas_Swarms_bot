@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: PCGrad (Primary Gradient surgery) and its variant PCGrad+MasKD project conflicting task gradients to remove component-wise conflicts before averaging. POPW's Kendall was DISABLED due to numerical instability; PCGrad is a gradient-level alternative that doesn't require scaling losses — could re-enable if gradient conflicts emerge.
 wikilinks:
-  - [[004-kendall-uncertainty-2018]]
+  - [[research/004-kendall-uncertainty-2018]]
   - [[045-gradnorm-chen-2018]]
-  - [[012-multi-task-learning-ruder-2017]]
+  - [[research/012-multi-task-learning-ruder-2017]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
 source: canonical
@@ -108,9 +108,9 @@ shared_encoder_update = average(g_1, g_2, g_3)  # or weighted average
 
 ## Related Papers in This Wiki
 
-- [[004-kendall-uncertainty-2018]] — Kendall was DISABLED due to small-loss incompatibility; PCGrad doesn't have this issue
+- [[research/004-kendall-uncertainty-2018]] — Kendall was DISABLED due to small-loss incompatibility; PCGrad doesn't have this issue
 - [[045-gradnorm-chen-2018]] — GradNorm balances by gradient magnitude, not direction
-- [[012-multi-task-learning-ruder-2017]] — MTL survey context
+- [[research/012-multi-task-learning-ruder-2017]] — MTL survey context
 - [[046-pcgrad-pytorch-impl]] — PyTorch implementation reference
 - [[100-popw-protocol-self-analysis]] — Documents Kendall disable and PCGrad as alternative
 

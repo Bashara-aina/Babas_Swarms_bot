@@ -1,9 +1,20 @@
 ---
-title: "rumahlabuh Design System - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: rumahlabuh
-date: 2026-04-11
-tags: [rumahlabuh, design, system, components, NOT-FOUND]
+title: Design System Components
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: `/home/newadmin/swarm-bot/wiki/rumahlabuh/` (or separate rumahlabuh
+  repo)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # rumahlabuh Design System and Components

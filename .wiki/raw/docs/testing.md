@@ -1,3 +1,20 @@
+---
+title: Testing
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Copy-paste each command into Telegram. Check ✅ when it works, ❌ when it fails.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion v4 — Complete Telegram Test Checklist
 
 Copy-paste each command into Telegram. Check ✅ when it works, ❌ when it fails.

@@ -1,3 +1,21 @@
+---
+title: Worker Wiring Audit 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 1. **router.py build_system_prompt (TYPE A)** - Fixed by adding proper import
+  with fallback
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion Wiring Audit - Worker Log
 # Completed: 2026-04-12
 

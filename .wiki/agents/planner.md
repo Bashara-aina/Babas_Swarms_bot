@@ -1,3 +1,20 @@
+---
+title: Planner
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- agents
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Model**: minimax/minimax-m2-7'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Planner Agent
 - **Model**: minimax/minimax-m2-7
 - **Role**: Orchestrates all worker agents — decomposes tasks into subtask lists for executor agents

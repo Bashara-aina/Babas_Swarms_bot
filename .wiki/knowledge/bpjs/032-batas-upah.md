@@ -1,13 +1,21 @@
 ---
-source_id: 032
-title: "Batas Upah BPJS Ketenagakerjaan: JP Cap dan Perhitungan Maksimum"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://www.bpjsketenagakerjaan.go.id/artikel/18913/artikel-berapa-besaran-iuran-jht,-jkk,-jkm,-jp-dan-jkp"
-last_verified: "2026-04-11"
-tags: [bpjs-ketenagakerjaan, batas-atas, jp-cap, upah-tertinggi, pph21, labor-law]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Batas Upah
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bpjs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Jaminan Pensiun (JP) has a wage cap - salaries above this cap are calculated
+  as if they were at the cap level. This is a critical detail that affects both employer
+  costs and employee net pay. Missi...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Batas Upah BPJS Ketenagakerjaan: JP Cap dan Perhitungan Maksimum

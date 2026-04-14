@@ -1,3 +1,21 @@
+---
+title: Ai Agent Wisdom
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Constitutional AI principles; harm avoidance; honesty;
+  helpfulness; ethical guidelines in natural language.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 20: AI & Agent-Specific Wisdom
 
 ## [Anthropic] — Claude Constitution

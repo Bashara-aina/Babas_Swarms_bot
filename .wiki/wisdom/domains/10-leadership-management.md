@@ -1,3 +1,22 @@
+---
+title: Leadership Management
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Management is maximizing the output of your team; leverage
+  through managerial leverage points (meetings, decisions, information flow); task-relevant
+  maturity determines management...'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 10: Leadership & Management
 
 ## Andy Grove — "High Output Management"

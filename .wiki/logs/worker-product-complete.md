@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Worker Product Complete
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Successfully created **10 wiki pages** in `.wiki/knowledge/product/` directory
+  covering competitor analysis, market data, regulations, and business models relevant
+  to cekwajar.id's salary transpare...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Successfully created **10 wiki pages** in `.wiki/knowledge/product/` directory covering competitor analysis, market data, regulations, and business models relevant to cekwajar.id's salary transparency and HR-tech positioning.
 ---

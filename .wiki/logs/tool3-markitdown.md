@@ -1,3 +1,20 @@
+---
+title: Tool3 Markitdown
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Wire markitdown (document → markdown converter) into Legion as a skill.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Tool 3: markitdown Integration — 2026-04-12
 
 ## Task

@@ -9,7 +9,7 @@ summary: OpenCode was selected over Cursor for backend coding tasks due to super
 wikilinks:
   - [[./entities/opencode]]
   - [[./entities/cursor]]
-  - [[adr-2026-04-11-opencode-integration]]
+  - [[decisions/adr-2026-04-11-opencode-integration]]
 confidence: high
 source: decision
 ---
@@ -143,10 +143,10 @@ opencode report <session_id>
 
 ## Related Decisions
 
-- [[adr-2026-04-11-opencode-integration]] — Initial integration decision
+- [[decisions/adr-2026-04-11-opencode-integration]] — Initial integration decision
 - [[./entities/opencode]] — OpenCode entity page
 - [[./entities/cursor]] — Cursor entity page (alternative not selected)
-- [[adr-2026-04-12-multi-agent-pipeline]] — Multi-agent context
+- [[decisions/adr-2026-04-12-multi-agent-pipeline]] — Multi-agent context
 
 ---
 

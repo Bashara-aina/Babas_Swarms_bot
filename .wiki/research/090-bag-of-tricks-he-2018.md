@@ -1,18 +1,21 @@
 ---
-title: "090 — Bag of Tricks for Image Classification (He et al., 2018)"
-subtitle: "Training Procedure Refinements for CNN Performance Gains"
-category: training-optimization
-subcategory: data-augmentation
-tags: [training-tricks, label-smoothing, mixup, cosine-annealing, resnet, data-augmentation]
-authors: ["Tong He", "Zhi Zhang", "Hang Zhang", "Zhongyue Zhang", "Junyan Xie", "Mu Li"]
-venue: "arXiv:1812.01187"
-arXiv: "1812.01187"
-date: 2018-12-04
-cited: "~2000+"
-implementation: [" torchvision built-in", "timm library"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Bag Of Tricks He 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '"Bag of Tricks" systematically evaluates training procedure refinements
+  that are often only visible in source code. Combined refinements improved ResNet-50
+  accuracy from **75.3% → 79.29%** on Image...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

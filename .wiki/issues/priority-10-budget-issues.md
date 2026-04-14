@@ -1,6 +1,20 @@
 ---
-## Fix Verification
-
+title: Priority 10 Budget Issues
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| `agents.py:26` imports `PERSONA_WRAPPER` from `core.agent_registry` |
+  ✅ |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### NameError Fix: `PERSONA_WRAPPER` → `PERSONALITY_WRAPPER`
 

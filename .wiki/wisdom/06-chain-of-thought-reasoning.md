@@ -1,3 +1,21 @@
+---
+title: Chain Of Thought Reasoning
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Lakera AI Prompt Engineering Guide 2026 + Awesome-Long-CoT-Reasoning
+  GitHub'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Chain-of-Thought Reasoning — System 2 for AI
 
 Source: Lakera AI Prompt Engineering Guide 2026 + Awesome-Long-CoT-Reasoning GitHub

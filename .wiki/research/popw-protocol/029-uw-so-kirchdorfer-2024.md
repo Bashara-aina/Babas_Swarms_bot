@@ -1,10 +1,19 @@
 ---
-tags: [mtl, uncertainty-weighting, analytical, loss-balancing, uw-so]
-sources: [popw-protocol, arxiv-2024]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
-priority: HIGH
+title: Uw So Kirchdorfer 2024
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods (HIGH PRIORITY) |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 029 — UW-SO: Analytical Uncertainty-Based Loss Weighting

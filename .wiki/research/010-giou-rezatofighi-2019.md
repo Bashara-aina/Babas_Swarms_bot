@@ -1,15 +1,21 @@
 ---
-paper_id: "010"
-title: "Generalized Intersection over Union: A Metric and A Loss for Bounding Box Regression"
-pdf_path: "project/popw/working/external/papers/1902_09630.pdf"
-authors: "Hamid Rezatofighi, Nathan Tsoi, JunYoung Gwak, Amir Sadeghian, Ian Reid, Silvio Savarese"
-year: 2019
-venue: "CVPR 2019"
-arxiv: "1902.09630"
-citations: 11258
-tier: 1
-tags: ["giou", "bounding-box", "loss", "object-detection", "regression"]
-popw_relevance: 8
+title: Giou Rezatofighi 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'IoU is the **standard evaluation metric** for object detection, but using
+  L1/L2 distance as loss creates a gap: optimizing distance ≠ maximizing IoU. GIoU
+  fixes this by incorporating the area of th...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

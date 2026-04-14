@@ -1,8 +1,21 @@
 ---
-tags: [research, temporal-attention, bigru-alternatives, activity-head, pose-head, ssm, mamba, s4, film, modulation]
-sources: [arxiv:2006.09220, arxiv:2110.08568, arxiv:2112.13515, arxiv:2310.06710, arxiv:2507.21977, arxiv:1709.07871, arxiv:2601.04159, arxiv:2203.01057]
-created: 2026-04-13
-updated: 2026-04-13
+title: Temporal Attention Alternatives
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This document presents a comprehensive analysis of temporal modeling methods
+  suitable for replacing or enhancing the BiGRU components in POPW's activity and
+  pose heads. The research addresses three...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Temporal Attention Alternatives for POPW Architecture

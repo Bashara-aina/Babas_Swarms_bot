@@ -1,13 +1,21 @@
 ---
-source_id: 001
-title: "UU 13 Tahun 2003 Undang-Undang Ketenagakerjaan Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://peraturan.bpk.go.id/Details/43013"
-last_verified: "2026-04-11"
-tags: [labor-law,uu13-2003,ketenagakerjaan,hubungan-kerja,perlindungan-pekerja]
-cekwajar_impact: CRITICAL
-legion_can_act: NO
+title: Uu Ketenagakerjaan 13 2003
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This is the foundational labor law in Indonesia that establishes the core
+  rights and obligations of workers and employers. All payroll calculations, PPh 21
+  computations, and employee benefits must ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UU 13 Tahun 2003 Undang-Undang Ketenagakerjaan Indonesia

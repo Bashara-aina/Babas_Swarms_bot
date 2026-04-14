@@ -1,9 +1,19 @@
 ---
-title: "cekwajar Git History - NOT FOUND"
-source_type: CODE_EXTRACTION
-extracted_from: cekwajar
-date: 2026-04-11
-tags: [cekwajar, git, history, NOT-FOUND]
+title: Git History
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- self-knowledge
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Path**: Separate cekwajar git repository'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # cekwajar Git History Extraction

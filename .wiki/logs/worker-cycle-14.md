@@ -1,3 +1,20 @@
+---
+title: Worker Cycle 14
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `handlers/brain.py` — /briefing /memories /learn /instincts /forget /self_review'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Cycle 14 — DATA & ANALYTICS
 Date: 2026-04-12
 Executed by: @worker

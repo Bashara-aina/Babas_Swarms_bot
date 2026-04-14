@@ -1,6 +1,21 @@
 ---
-## 1. Overview
-
+title: Memory Architecture Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This guide covers how to wire production-grade memory concepts into Legion's
+  existing 3-tier memory system. It draws from Mem0's universal memory architecture
+  and Letta's stateful agent memory appr...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This guide covers how to wire production-grade memory concepts into Legion's existing 3-tier memory system. It draws from Mem0's universal memory architecture and Letta's stateful agent memory approach.
 

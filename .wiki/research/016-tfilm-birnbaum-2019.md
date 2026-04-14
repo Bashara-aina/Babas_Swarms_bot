@@ -1,16 +1,21 @@
 ---
-paper_id: 016
-title: "Temporal FiLM: Capturing Long-Range Sequence Dependencies with Feature-Wise Modulations"
-authors: "Birnbaum, Kuleshov, Enam, Koh, Ermon"
-venue: "NeurIPS 2019"
-url: "https://arxiv.org/abs/1909.06628"
-arxiv: "1909.06628"
-code: "https://github.com/tobran/DFiLM"
+title: Tfilm Birnbaum 2019
+type: concept
+status: active
 tags:
-  - temporal-fiilm
-  - sequence-modeling
-  - long-range-dependencies
-  - audio-processing
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: TFiLM (Temporal FiLM) was a breakthrough in **applying FiLM to sequential
+  data** by using a recurrent network to generate FiLM parameters. Unlike standard
+  FiLM where parameters come from a static c...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

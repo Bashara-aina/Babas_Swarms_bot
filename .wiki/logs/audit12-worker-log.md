@@ -1,7 +1,19 @@
 ---
-date: "2026-04-12"
-agent: "@worker"
-scope: "Nihongo Mode per-user isolation audit"
+title: Audit12 Worker Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **File:** `skills/nihongo/mode_manager.py:48`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # LEGION AUDIT 12 — Worker Completion Log
 

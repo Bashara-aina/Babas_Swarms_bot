@@ -1,3 +1,21 @@
+---
+title: Quarantined Vs Active Comparison
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Purpose:** Identify structural differences between quarantined and active
+  wiki content that explain why quarantined content scores 0.0'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Quarantined vs Active Content Comparison
 
 **Date:** 2026-04-14  
@@ -43,7 +61,7 @@
 |-----------|-------------------------|------------------|
 | **Quarantine Frontmatter** | ✅ Present (score=0.0, reason, quarantined_at) | ❌ Absent |
 | **Wiki Frontmatter** | ❌ Uses `***` block style only | ✅ Uses YAML `---` frontmatter with metadata |
-| **Wikilinks** | ❌ None found | ✅ Present (`[[adr-2026-04-11-opencode-integration]]`, `[[./01-cekwajar-product/...]]`) |
+| **Wikilinks** | ❌ None found | ✅ Present (`[[decisions/adr-2026-04-11-opencode-integration]]`, `[[./01-cekwajar-product/...]]`) |
 | **LEGION RULE Markers** | ❌ Absent | ✅ Present in master context files |
 | **Title Block** | `*** title: "..."` | `---` YAML frontmatter + `# H1` heading |
 | **Length Range** | 66–163 lines | 51–235 lines |
@@ -67,7 +85,7 @@ The quarantined files have **high-quality technical content** (detailed specs, t
 2. **No Wikilinks**
    - Quarantined: Content exists in isolation
    - Active: References other wiki pages via `[[wikilink]]` syntax
-   - Example: `[[adr-2026-04-11-opencode-integration]]`
+   - Example: `[[decisions/adr-2026-04-11-opencode-integration]]`
 
 3. **No LEGION RULE Integration**
    - Quarantined: No markers indicating how content integrates with Legion
@@ -128,7 +146,7 @@ tokens_estimated: 490
 CI/CD quality checks...
 
 [wikipedia-style structure with wikilinks]
-See [[adr-2026-04-11-opencode-integration]] for details.
+See [[decisions/adr-2026-04-11-opencode-integration]] for details.
 ```
 
 **Strengths:**

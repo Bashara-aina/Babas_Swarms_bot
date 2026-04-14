@@ -1,6 +1,21 @@
 ---
-## 1. Overview
-
+title: Context Engineering Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Context Engineering** is the discipline of constructing, managing, and
+  optimizing the information payload delivered to an LLM at inference time. Unlike
+  static prompting, it encompasses dynamic co...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **Context Engineering** is the discipline of constructing, managing, and optimizing the information payload delivered to an LLM at inference time. Unlike static prompting, it encompasses dynamic context assembly, memory systems, retrieval pipelines, and runtime state management.
 

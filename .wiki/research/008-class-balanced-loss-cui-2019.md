@@ -7,7 +7,7 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Class-balanced loss reweights each sample by 1/beta^(n_c-1) where n_c is the effective number of samples per class. Combined with focal loss (CB Focal), it handles both foreground-background imbalance AND class-frequency imbalance. POPW uses CB Focal for activity head (33 classes, 2545:1 imbalance).
 wikilinks:
-  - [[007-focal-loss-lin-2017]]
+  - [[research/007-focal-loss-lin-2017]]
   - [[045-gradnorm-chen-2018]]
   - [[013-gradient-surgery-yu-2020]]
   - [[100-popw-protocol-self-analysis]]
@@ -141,7 +141,7 @@ class CBFocalLoss(nn.Module):
 
 ## Related Papers in This Wiki
 
-- [[007-focal-loss-lin-2017]] — Focal loss handles easy/hard, CB loss handles common/rare — combined = CB Focal
+- [[research/007-focal-loss-lin-2017]] — Focal loss handles easy/hard, CB loss handles common/rare — combined = CB Focal
 - [[045-gradnorm-chen-2018]] — GradNorm is another approach to loss weighting by gradient magnitude
 - [[013-gradient-surgery-yu-2020]] — PCGrad solves gradient conflicts directly
 - [[100-popw-protocol-self-analysis]] — Documents CB Focal usage in POPW activity head

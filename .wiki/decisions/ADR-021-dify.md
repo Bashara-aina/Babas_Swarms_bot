@@ -1,8 +1,19 @@
 ---
-title: "ADR-021: Dify Integration"
-agent: "worker"
-date: "2026-04-12"
-status: "Accepted"
+title: Adr 021 Dify
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Legion needs a self-hosted AI workflow platform for:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-021: Dify Integration
 

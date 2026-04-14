@@ -1,6 +1,19 @@
 ---
-## 2. `asyncio.create_task` Without Error Handlers — Systemic Pattern
-
+title: Review 2026 04 12 Async Correctness
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Total `asyncio.create_task` calls found:** 68'
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### ✅ Issue Confirmed
 

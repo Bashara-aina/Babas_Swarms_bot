@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: The IKEA Assembly in the Wild dataset contains 685,516 frames from 254 videos across 4 furniture types, with 33 assembly action classes and 7 part detection classes. This IS Bashara's dataset, the entire foundation of the POPW thesis.
 pdf_path: "project/popw/working/external/papers/IKEA_ASM_Ben-Shabat_2020.pdf"
 wikilinks:
-  - [[002-fpn-lin-2017]]
-  - [[007-focal-loss-lin-2017]]
+  - [[research/002-fpn-lin-2017]]
+  - [[research/007-focal-loss-lin-2017]]
   - [[058-assembly101-sener-2022]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
@@ -107,7 +107,7 @@ SPLIT_FILES_ROOT = Path('/media/newadmin/master/POPW/github/'
 
 - [[058-assembly101-sener-2022]] — Assembly101: another multi-view assembly dataset (more classes, more videos)
 - [[056-coin-dataset-tang-2019]] — COIN: general instructional videos (transfer learning source)
-- [[007-focal-loss-lin-2017]] — Focal loss handles 2545:1 imbalance in activity classes
+- [[research/007-focal-loss-lin-2017]] — Focal loss handles 2545:1 imbalance in activity classes
 
 ## LEGION RULE
 

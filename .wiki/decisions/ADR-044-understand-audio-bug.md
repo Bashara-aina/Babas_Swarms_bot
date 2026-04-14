@@ -1,6 +1,20 @@
 ---
-## Decision
-
+title: Adr 044 Understand Audio Bug
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**DO NOT MODIFY PRODUCTION CODE.** This is a wiki loop session — production
+  fixes require separate implementation task.'
+wikilinks: []
+confidence: medium
+source: research
 ---
 **DO NOT MODIFY PRODUCTION CODE.** This is a wiki loop session — production fixes require separate implementation task.
 

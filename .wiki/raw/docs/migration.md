@@ -1,3 +1,22 @@
+---
+title: Migration
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Phase 3 introduces webhook infrastructure, MCP (Model Context Protocol) support,
+  architecture refactoring (swarm layer extraction, /run and /think command extraction),
+  and a new skills registry. Al...
+wikilinks: []
+confidence: medium
+source: research
+---
 # Legion v4 → v5 Migration Guide
 
 ## Overview

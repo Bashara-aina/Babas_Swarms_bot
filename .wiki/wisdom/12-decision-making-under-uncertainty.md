@@ -1,8 +1,19 @@
 ---
-title: "Decision-Making Under Uncertainty"
-source: "Annie Duke (Thinking in Bets) + Howard Marks + Farnam Street"
-tags: [12-decision-making-under-uncertainty]
-type: wisdom
+title: Decision Making Under Uncertainty
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Annie Duke (Thinking in Bets) + Howard Marks + Farnam Street'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Decision-Making Under Uncertainty
 

@@ -1,6 +1,19 @@
 ---
-## Verification Results
-
+title: Audit15 Review
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Check | Result | Details |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | Check | Result | Details |
 |

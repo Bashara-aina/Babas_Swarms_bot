@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 13 Rumahlabuh Dns Fix
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Loop: #1 (first review)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Review: rumahlabuh.com DNS-resilient HTTP client (bug fix)
 Date: 2026-04-13
 Reviewer: @reviewer

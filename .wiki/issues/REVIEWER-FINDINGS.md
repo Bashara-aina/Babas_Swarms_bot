@@ -1,3 +1,20 @@
+---
+title: Reviewer Findings
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task:** Wiki Build Audit (commit 0ef8ad7)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Reviewer Agent Findings
 **Date:** 2026-04-11  
 **Task:** Wiki Build Audit (commit 0ef8ad7)  

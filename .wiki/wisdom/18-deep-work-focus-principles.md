@@ -1,8 +1,19 @@
 ---
-title: "Deep Work — Cal Newport's Focus Principles"
-source: "Cal Newport (Deep Work, 2016) + Digital Minimalism"
-tags: [18-deep-work-focus-principles]
-type: wisdom
+title: Deep Work Focus Principles
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Cal Newport (Deep Work, 2016) + Digital Minimalism'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Deep Work — Cal Newport's Focus Principles
 

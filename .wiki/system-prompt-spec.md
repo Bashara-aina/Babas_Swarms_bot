@@ -1,10 +1,19 @@
 ---
-title: system-prompt-spec
-domain: context-window
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: code, research, emotional, media, system
-tokens_estimated: 310
+title: System Prompt Spec
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- system-prompt-spec.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Canonical system prompt structure for each of Legion's 5 main task types.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # System Prompt Spec

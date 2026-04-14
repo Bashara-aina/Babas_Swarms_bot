@@ -1,6 +1,21 @@
 ---
-## Overview
-
+title: Tier3 Index
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: This tier covers Multi-Task Learning (MTL) methods for loss function balancing.
+  These papers are essential for understanding how to replace Kendall UW in POPW's
+  losses.py with more principled appro...
+wikilinks: []
+confidence: medium
+source: research
 ---
 This tier covers Multi-Task Learning (MTL) methods for loss function balancing. These papers are essential for understanding how to replace Kendall UW in POPW's losses.py with more principled approaches.
 ---

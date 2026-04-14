@@ -1,7 +1,19 @@
 ---
-date: "2026-04-12"
-auditor: "@planner"
-agent: "SwarmBot Multi-Agent Orchestration"
+title: Audit11 Plan
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Package | Path | Lines | Status |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 11 — `__init__.py` Import Glue Files
 

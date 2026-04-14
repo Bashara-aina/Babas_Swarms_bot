@@ -1,3 +1,21 @@
+---
+title: Location Advisor
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: When Bashara asks for place recommendations, local info, or travel help —
+  especially
+wikilinks: []
+confidence: medium
+source: research
+---
 # Skill: Location-Aware Advisor
 
 ## When to use

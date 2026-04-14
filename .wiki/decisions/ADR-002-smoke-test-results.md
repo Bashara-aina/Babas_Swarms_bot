@@ -1,6 +1,21 @@
 ---
-## Summary
-
+title: Adr 002 Smoke Test Results
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Smoke tests executed across 10 functional buckets. **8/10 buckets pass cleanly**.
+  The 2 FAIL and 1 PARTIAL results are **test specification issues, not actual import/runtime
+  errors**. All modules l...
+wikilinks: []
+confidence: medium
+source: research
 ---
 Smoke tests executed across 10 functional buckets. **8/10 buckets pass cleanly**. The 2 FAIL and 1 PARTIAL results are **test specification issues, not actual import/runtime errors**. All modules load correctly when using the correct import paths.
 ---

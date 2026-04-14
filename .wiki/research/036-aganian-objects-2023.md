@@ -1,34 +1,21 @@
 ---
-paper_id: "036"
-title: "How Object Information Improves Skeleton-based Human Action Recognition in Assembly Tasks"
-authors: "Aganian, Dustin; Köhler, Mona; Baake, Sebastian; Eisenbach, Markus; Gross, Horst-Michael"
-year: 2023
-venue: "IJCNN 2023"
-arxiv: "2306.05844"
-doi: "10.48550/arXiv.2306.05844"
-domain: "Assembly & Industrial Action Recognition"
-popw_relevance: "SOTA baseline for IKEA ASM skeleton-based action recognition; defines POPW's competitive landscape"
-key_contribution: "Integrates object information into skeleton-based action recognition by treating object centers as additional skeleton joints"
+title: Aganian Objects 2023
+type: concept
+status: active
 tags:
-  - skeleton-based
-  - object-aware
-  - assembly tasks
-  - human-robot collaboration
-  - IKEA ASM
-sota_metrics:
-  - dataset: "IKEA ASM"
-    top1: "~70-75%"
-    top3: "~85-90%"
-    notes: "Combined skeleton + object vs skeleton-only baseline"
-architecture:
-  - type: "Graph Convolutional Networks (GCN)"
-  - key_components: ["Object centers as skeleton joints", "Instance segmentation for object detection", "Multi-modal fusion (skeleton + object)"]
-datasets:
-  - "IKEA ASM"
-key_insight: "Skeleton-only methods lose object interaction information; treating object centers as additional joints preserves spatial relationships"
-limitations: ["Depends on object detector quality", "Limited to known object categories"]
-code_url: ""
-project_url: ""
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'This paper addresses a critical limitation in skeleton-based action recognition
+  for assembly tasks: the loss of object interaction information when processing skeletons
+  alone. The authors propose i...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Summary

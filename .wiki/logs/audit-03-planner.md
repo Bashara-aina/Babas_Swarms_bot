@@ -1,3 +1,20 @@
+---
+title: Audit 03 Planner
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: └── task_router.py (OPTIONAL via LEGION_TASK_ROUTER_ENABLED=1)
+wikilinks: []
+confidence: medium
+source: research
+---
 # AUDIT 03 — Router Layer Coverage
 ## Planner Subtask Decomposition
 

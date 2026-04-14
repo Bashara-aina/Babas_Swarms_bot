@@ -1,13 +1,19 @@
 ---
+title: Home Page
+type: concept
+status: active
 tags:
-  - areas
-  - projects
-  - resources
-  - goal
-  - home
-cssclasses:
-  - daily
-date:
+- /
+- home
+- newadmin
+- swarm-bot
+- templates
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| Projects | Description |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # HOME
 

@@ -1,7 +1,20 @@
 ---
-title: "Coding References — Repo Architecture Guide"
-date: "2026-04-11"
-status: "active"
+title: Coding References
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- legion-instructions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Repository architecture guide for SwarmBot development, organized by tier
+  and relevance.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Coding References — Repo Architecture Guide

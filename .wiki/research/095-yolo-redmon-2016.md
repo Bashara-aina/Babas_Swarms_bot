@@ -1,20 +1,21 @@
 ---
-paper_id: 095
-title: "You Only Look Once: Unified, Real-Time Object Detection"
-pdf_path: "project/popw/working/external/papers/YOLO_Redmon_2016.pdf"
-authors: "Joseph Redmon, Santosh Divvala, Ross Girshick, Ali Farhadi"
-year: 2016
-venue: "CVPR 2016"
-doi: ""
-arxiv: "1506.02640"
-citation_count: "~45,000+ (estimated)"
-popw_relevance: HIGH
+title: Yolo Redmon 2016
+type: concept
+status: active
 tags:
-  - object-detection
-  - real-time
-  - deep-learning
-  - one-stage
-  - yolo
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**YOLO (You Only Look Once)** reframes object detection as a single regression
+  problem —直接从图像像素预测边界框坐标和类别概率。Unlike prior detection systems that repurposed classifiers,
+  YOLO processes the entire ima...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 095 — YOLO: Real-Time Object Detection (CVPR 2016)

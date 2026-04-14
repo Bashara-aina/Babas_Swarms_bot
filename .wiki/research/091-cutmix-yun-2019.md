@@ -1,18 +1,21 @@
 ---
-title: "091 — CutMix: Regularization Strategy to Train Strong Classifiers (Yun et al., 2019)"
-subtitle: "Regional Dropout That Makes Efficient Use of Training Data"
-category: training-optimization
-subcategory: data-augmentation
-tags: [cutmix, regularization, augmentation, localization, mixup, regional-dropout]
-authors: ["Sangdoo Yun", "Dongyoon Han", "Seong Joon Oh", "Sanghyuk Chun", "Junsuk Choe", "Youngjoon Yoo"]
-venue: "ICCV 2019 (Oral)"
-arXiv: "1905.04899"
-date: 2019-05-13
-cited: "~2000+"
-implementation: ["PyTorch CutMix", "clovaai/CutMix-PyTorch"]
-status: verified
-tier: 9
-hardware: "RTX 3060 12GB VRAM"
+title: Cutmix Yun 2019
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: CutMix cuts and pastes rectangular patches between training images, mixing
+  labels proportionally to patch area. Unlike Cutout (which removes information),
+  CutMix uses all input pixels for training....
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Quick Summary

@@ -1,3 +1,20 @@
+---
+title: Task Legion Fix Identity Search
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Source**: `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md`'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## @worker BRIEF: LEGION_FIX_IDENTITY_SEARCH — Three-Fix Plan
 
 **Source**: `/home/newadmin/swarm-bot/LEGION_FIX_IDENTITY_SEARCH.md`  

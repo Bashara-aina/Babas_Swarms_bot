@@ -1,10 +1,20 @@
 ---
-title: ci-cd-pipeline
-domain: deployment-cicd
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: system
-tokens_estimated: 490
+title: Ci Cd Pipeline
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- ci-cd-pipeline.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: GitHub Actions runs lint + test on Python 3.11/3.12, uploads coverage to
+  Codecov, runs mypy on every push/PR, and creates GitHub Releases on version tags.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # CI/CD Pipeline

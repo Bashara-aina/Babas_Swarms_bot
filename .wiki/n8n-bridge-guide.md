@@ -1,10 +1,21 @@
 ---
-title: n8n Bridge Guide
-domain: api-integrations
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: main.py, tools/n8n_bridge.py
-tokens_estimated: 520
+title: N8N Bridge Guide
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- n8n-bridge-guide.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: n8n bridge is a lightweight webhook listener on port 7835 that enables Legion
+  to receive external automation events; no built-in retry, polling, or n8n-to-Legion
+  event processing.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # n8n Bridge Guide

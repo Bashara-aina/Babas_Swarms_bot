@@ -1,5 +1,19 @@
 ---
-
+title: Planner Start
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Task**: Fix `NameError: name ''get_relationship_context'' is not defined`'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Planner Log: get_relationship_context Bugfix
 **Date**: 2026-04-12  

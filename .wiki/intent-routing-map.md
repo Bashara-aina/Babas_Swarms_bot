@@ -1,10 +1,20 @@
 ---
 title: Intent Routing Map
-domain: intent-routing
-impact_score: 9
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 600
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- intent-routing-map.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 23 intent types → 9 agent keys via two-stage classification (pattern match
+  + LLM fallback), confidence threshold 0.70.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # INTENT ROUTING MAP

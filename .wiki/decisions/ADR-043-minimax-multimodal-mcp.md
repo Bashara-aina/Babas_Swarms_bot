@@ -1,6 +1,19 @@
 ---
-## Decision
-
+title: Adr 043 Minimax Multimodal Mcp
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: handlers/media_tools.py       ← NEW — command + photo handlers
+wikilinks: []
+confidence: medium
+source: research
 ---
 ### Architecture
 

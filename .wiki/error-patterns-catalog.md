@@ -1,10 +1,20 @@
 ---
-title: error-patterns-catalog
-domain: error-handling
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 595
+title: Error Patterns Catalog
+type: concept
+status: deprecated
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- error-patterns-catalog.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Catalogs every error pattern Legion encounters with humanized Indonesian
+  messages and automated recovery actions.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # ERROR PATTERNS CATALOG

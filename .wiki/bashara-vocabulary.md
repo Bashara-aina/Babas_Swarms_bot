@@ -1,10 +1,20 @@
 ---
 title: Bashara Vocabulary
-domain: bashara-context
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 350
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- bashara-vocabulary.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Indonesian shorthand and intent mapping — "pusing" = frustrated, "cek" =
+  check, "gw" = I.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BASHARA VOCABULARY

@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 11 Archive Cekwajar Planning
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Reviewer:** @reviewer'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Review: archive-cekwajar-planning
 **Date:** 2026-04-11  
 **Reviewer:** @reviewer

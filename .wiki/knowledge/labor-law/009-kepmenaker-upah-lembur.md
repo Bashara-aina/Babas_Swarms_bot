@@ -1,13 +1,21 @@
 ---
-source_id: 009
-title: "Kepmenaker 102 Tahun 2004 Waktu Kerja Lembur dan Upah Lembur"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://jdih.kemnaker.go.id/asset/data_puu/peraturan_file_186.pdf"
-last_verified: "2026-04-11"
-tags: [kepmenaker-102-2004,upah-lembur,waktu-kerja-lembur,lembur,overtime]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Kepmenaker Upah Lembur
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Perhitunganupah lembur yang salah adalah salah satu violation paling umum.
+  System harus implement rumus dengan tepat: 1/173 × upp sebulan sebagai dasar, dengan
+  multiplier 1.5x untuk jam pertama dan...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Kepmenaker 102 Tahun 2004 Waktu Kerja Lembur dan Upah Lembur

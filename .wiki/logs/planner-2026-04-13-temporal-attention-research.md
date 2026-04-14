@@ -1,3 +1,20 @@
+---
+title: Planner 2026 04 13 Temporal Attention Research
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Context gathered: See planner log at .wiki/logs/planner-2026-04-13-temporal-attention-research.md'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Research Temporal Attention Alternatives to BiGRU
 
 Date: 2026-04-13

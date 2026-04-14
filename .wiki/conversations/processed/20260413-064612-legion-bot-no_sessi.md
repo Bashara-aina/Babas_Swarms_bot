@@ -1,14 +1,19 @@
 ---
-title: "20260413 064612 legion bot no_sessi"
-type: conversation
-status: draft
-tags: [legion-bot, session]
-created: 2026-04-13
-updated: 2026-04-13
-summary: "legion-bot" session with 106 messages captured on 2026-04-13 06:46 JST
-source: legion-bot
-session_id: "no_session"
-confidence: low
+title: 20260413 064612 Legion Bot No Sessi
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- conversations
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Project/CWD**: unknown'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Legion-Bot Session — 2026-04-13 06:46 JST

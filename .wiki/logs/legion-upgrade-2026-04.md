@@ -1,5 +1,19 @@
 ---
-
+title: Legion Upgrade 2026 04
+type: concept
+status: legacy
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '*Consolidated from 3 session logs on 2026-04-12 for wiki cleanup.*'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Legion Upgrade Log — 2026-04
 *Consolidated from 3 session logs on 2026-04-12 for wiki cleanup.*

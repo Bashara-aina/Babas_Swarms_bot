@@ -1,3 +1,20 @@
+---
+title: Worker Subtask 6 Smoke Tests 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Run smoke tests for GSA Voice implementation (Step 6 from LEGION_VOICE_UPGRADE.md).
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Subtask 6: GSA Voice Smoke Tests — 2026-04-12
 
 ## Task

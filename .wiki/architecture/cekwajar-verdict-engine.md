@@ -487,7 +487,7 @@ def apply_freemium_gate(verdict: dict, user_tier: str) -> dict:
 
 ## Related Articles
 
-- [[cekwajar-id]] — Project using this engine
+- [[projects/cekwajar-id]] — Project using this engine
 - [[./concepts/tax-indonesia]] — PPh21 TER and progressive calculation details
 - [[./concepts/bpjs-reference]] — 6-component BPJS calculation details
 - [[./concepts/freemium-gate]] — Freemium access control pattern

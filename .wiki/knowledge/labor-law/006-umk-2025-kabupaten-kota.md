@@ -1,13 +1,21 @@
 ---
-source_id: 006
-title: "UMK 2025 Upah Minimum Kabupaten/Kota Seluruh Indonesia"
-source_type: MARKET_DATA
-authority: OFFICIAL_GOV
-url: "https://satudata.kemnaker.go.id/data/kumpulan-data/2252"
-last_verified: "2026-04-11"
-tags: [umk2025,upah-minimum-kabupaten-kota,labor-law,pengupahan]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Umk 2025 Kabupaten Kota
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: UMK 2025 adalah standarupah minimum yang lebih tinggi dari UMP untuk wilayah
+  kabupaten/kota. Perusahaan yang beroperasi di wilayah dengan UMK wajib membayar
+  worker minimal sesuai UMK yang berlaku, ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # UMK 2025 Upah Minimum Kabupaten/Kota Seluruh Indonesia

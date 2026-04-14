@@ -1,8 +1,19 @@
 ---
-title: "ADR-020: gpt-researcher Integration"
-date: "2026-04-12"
-deciders: "Worker agent (Legion Swarm Bot)"
-status: "Accepted"
+title: Adr 020 Gptr
+type: decision
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- decisions
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Deciders:** Worker agent (Legion Swarm Bot)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # ADR-020: gpt-researcher Integration
 

@@ -1,9 +1,19 @@
 ---
-tags: [mtl, multi-objective-optimization, pareto-optimal, mgda, gradient-based]
-sources: [popw-protocol, arxiv:1810.04650]
-created: 2026-04-11
-updated: 2026-04-11
-popw-tier: 3
+title: Mgda Sener 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| **Tier** | 3 — Multi-Task Learning Methods |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 027 — MGDA: Multi-Task Learning as Multi-Objective Optimization

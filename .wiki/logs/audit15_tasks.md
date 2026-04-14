@@ -1,5 +1,19 @@
 ---
-
+title: Audit15 Tasks
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '> Planner output for @worker agents | Generated: 2026-04-12'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 15 — Final Integration Test Plan
 > Planner output for @worker agents | Generated: 2026-04-12

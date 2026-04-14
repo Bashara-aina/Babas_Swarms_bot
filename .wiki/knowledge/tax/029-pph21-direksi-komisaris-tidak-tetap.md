@@ -1,13 +1,21 @@
 ---
-source_id: 029
-title: "PPh 21 Direksi Komisaris Tidak Tetap - Tarif Pasal 17"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://ortax.org/penghitungan-pph-pasal-21-atas-anggota-dewan-komisaris-atau-dewan-pengawas"
-last_verified: "2026-04-11"
-tags: [pph21, direksi, komisaris, dewan-komisaris, pasal-17]
-cekwajar_impact: HIGH
-legion_can_act: YES
+title: Pph21 Direksi Komisaris Tidak Tetap
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tax
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Board members (direksi/komisaris) who are **not employees** receive irregular
+  income and are taxed using **different rules** — directly using Pasal 17 progressive
+  rates (not TER). This is a common ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PPh 21 Direksi Komisaris Tidak Tetap - Tarif Pasal 17

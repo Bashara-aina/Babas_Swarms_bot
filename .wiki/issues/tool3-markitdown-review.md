@@ -1,3 +1,21 @@
+---
+title: Tool3 Markitdown Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `parse_file()` has proper fallback when markitdown unavailable (pdfplumber
+  fallback)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ### Review: Tool 3 - markitdown doc_parser
 
 #### ✅ Passed

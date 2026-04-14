@@ -1,3 +1,21 @@
+---
+title: Planner Start 4
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Remove redundant local import of `classify_intent_fast` in `llm_client/__init__.py`
+  line 982.
+wikilinks: []
+confidence: medium
+source: research
+---
 # Planner Log: Cleanup Redundant Import Task
 
 ## Date: 2026-04-12

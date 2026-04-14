@@ -1,10 +1,19 @@
 ---
-title: tools-gaps
-domain: tools-skills
-impact_score: 8
-last_updated: 2026-04-12
-injects_into: all
-tokens_estimated: 340
+title: Tools Gaps
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- tools-gaps.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Tools that don't exist but Bashara needs — ranked by priority.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Tools Gaps

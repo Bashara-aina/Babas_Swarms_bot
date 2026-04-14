@@ -1,3 +1,20 @@
+---
+title: Git Log
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Date: Sat Apr 11 06:29:48 PM JST 2026'
+wikilinks: []
+confidence: medium
+source: research
+---
 # git-log
 
 ## Commits
@@ -279,4 +296,36 @@ Pipeline:
 ## Commit: 408d68d
 - Date: Tue Apr 14 10:07:41 AM JST 2026
 - Message: fix: productivity.py timer user_id fallback, rumahlabuh_crew draft_guest_reply call_llm — comprehensive audit fixes
+---
+## Commit: 5c29b51
+- Date: Tue Apr 14 10:18:25 AM JST 2026
+- Message: wiki: revive quarantined files with score > 0.05
+---
+## Commit: aaec6ae
+- Date: Tue Apr 14 10:32:53 AM JST 2026
+- Message: fix: tighten wiki quarantine threshold 0.15 → 0.05
+---
+## Commit: 49286e8
+- Date: Tue Apr 14 12:00:24 PM JST 2026
+- Message: fix: unify wiki path from wiki/ to .wiki/ across core modules
+---
+## Commit: af30503
+- Date: Tue Apr 14 12:58:12 PM JST 2026
+- Message: docs: add POPW temporal architecture diagram with BiGRU and Feature Bank
+---
+## Commit: 8b25a33
+- Date: Tue Apr 14 01:12:11 PM JST 2026
+- Message: docs: add BiGRU temporal modeling to POPW architecture XML
+---
+## Commit: 0d353aa
+- Date: Tue Apr 14 01:15:46 PM JST 2026
+- Message: wiki: add POPW temporal modeling research stack (BiGRU, feature bank, pose conditioning)
+---
+## Commit: 108ca0b
+- Date: Tue Apr 14 01:17:11 PM JST 2026
+- Message: fix: remove OpenAI SDK from voice.py, migrate tiers.py to aiosqlite, add wiki batch fix scripts
+---
+## Commit: 4109560
+- Date: Tue Apr 14 01:19:45 PM JST 2026
+- Message: wiki: fix 016 frontmatter, add 020 comprehensive survey
 ---

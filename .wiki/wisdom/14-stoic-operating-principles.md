@@ -1,8 +1,20 @@
 ---
-title: "Stoic Operating Principles — Marcus Aurelius / Epictetus"
-source: "Meditations (Marcus Aurelius) + Enchiridion (Epictetus) + Ryan Holiday (Obstacle is the Way)"
-tags: [14-stoic-operating-principles]
-type: wisdom
+title: Stoic Operating Principles
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Source: Meditations (Marcus Aurelius) + Enchiridion (Epictetus) + Ryan Holiday
+  (Obstacle is the Way)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # Stoic Operating Principles — Marcus Aurelius / Epictetus
 

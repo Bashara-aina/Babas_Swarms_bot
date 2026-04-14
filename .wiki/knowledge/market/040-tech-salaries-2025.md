@@ -1,13 +1,21 @@
 ---
-source_id: 040
-title: "Tech Salaries Indonesia 2024-2025: Junior, Mid, Senior Benchmark"
-source_type: MARKET_DATA
-authority: INDUSTRY
-url: "https://www.levels.fyi, https://www.glassdoor.com, https://id.jobstreet.com"
-last_verified: "2026-04-11"
-tags: [tech-salaries, software-engineer, jakarta, benchmark, salary-data, hrtech]
-cekwajar_impact: CRITICAL
-legion_can_act: YES
+title: Tech Salaries 2025
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- market
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: cekwajar.id provides salary benchmarking services - understanding exact tech
+  salary ranges by city, experience, and role is essential for accurate "gaji layak"
+  calculations and competitive position...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Tech Salaries Indonesia 2024-2025: Junior, Mid, Senior Benchmark

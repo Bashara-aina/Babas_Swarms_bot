@@ -1,3 +1,22 @@
+---
+title: Debugging
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- skills_ref
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Use this protocol for production-safe debugging in this codebase. It merges
+  tactical debugging + root-cause strategy and is optimized for `aiogram 3.x`, `litellm`,
+  `systemd`, `Supabase`, async Pyth...
+wikilinks: []
+confidence: medium
+source: research
+---
 # Debugging Playbook (LegionSwarm)
 
 Use this protocol for production-safe debugging in this codebase. It merges tactical debugging + root-cause strategy and is optimized for `aiogram 3.x`, `litellm`, `systemd`, `Supabase`, async Python, and Linux desktop control.

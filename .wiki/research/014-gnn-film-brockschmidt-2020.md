@@ -1,16 +1,21 @@
 ---
-paper_id: 014
-title: "GNN-FiLM: Graph Neural Networks with Feature-wise Linear Modulation"
-authors: "Marc Brockschmidt"
-venue: "ICML 2020"
-url: "https://arxiv.org/abs/1906.12192"
-arxiv: "1906.12192"
-code: "https://github.com/marcbrockschmidt/gnn-film"
+title: Gnn Film Brockschmidt 2020
+type: concept
+status: active
 tags:
-  - graph-neural-network
-  - fiilm
-  - message-passing
-  - molecular-graphs
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: GNN-FiLM was the **first application of FiLM to graph-structured data**,
+  introducing a novel message-passing mechanism where the representation of the **target
+  node modulates incoming messages** fr...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters

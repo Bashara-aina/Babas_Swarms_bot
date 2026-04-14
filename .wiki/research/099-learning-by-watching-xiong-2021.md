@@ -1,19 +1,21 @@
 ---
-paper_id: 099
-title: "Learning by Watching: Physical Imitation of Manipulation Skills from Human Videos"
-authors: "Haoyu Xiong, Q. Li, Y.-C. Chen, H. Bharadhwaj, S. Sinha, A. Garg"
-year: 2021
-venue: "IROS 2021"
-doi: "10.1109/IROS51168.2021.9636080"
-arxiv: "2101.07241"
-citation_count: "~400+ (estimated)"
-popw_relevance: MEDIUM
+title: Learning By Watching Xiong 2021
+type: concept
+status: active
 tags:
-  - imitation-learning
-  - video-imitation
-  - manipulation
-  - robot-learning
-  - physical-imitation
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Learning by Watching (LbW)** is an algorithmic framework for policy learning
+  through imitation from a single video specifying the task. The key insight: we can
+  translate human video demonstration...'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Paper 099 — Learning by Watching: Physical Imitation of Manipulation Skills from Human Videos (IROS 2021)

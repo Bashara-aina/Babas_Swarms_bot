@@ -1,15 +1,21 @@
 ---
-paper_id: "003"
-title: "FiLM: Visual Reasoning with a General Conditioning Layer"
-authors: "Ethan Perez, Florian Strub, Harm de Vries, Vincent Dumoulin, Aaron Courville"
-year: 2018
-venue: "AAAI 2018"
-arxiv: "1709.07871"
-pdf_path: "project/popw/working/external/papers/FiLM_Perez_2017.pdf"
-citations: 4001
-tier: 1
-tags: ["film", "conditioning", "visual-reasoning", "modulation", "reasoning"]
-popw_relevance: 8
+title: Film Perez 2018
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: FiLM provides the **conditional computation paradigm** that POPW uses to
+  modulate feature maps based on task/state input. The $\beta$ and $\gamma$ affine
+  transformation enables POPW to dynamically ...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 ## Why This Paper Matters for POPW

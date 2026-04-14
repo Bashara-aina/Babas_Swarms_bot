@@ -1,13 +1,21 @@
 ---
-source_id: 012
-title: "Aturan Cuti Tahunan, Cuti Melahirkan, Cuti Sakit di Indonesia"
-source_type: REGULATION
-authority: OFFICIAL_GOV
-url: "https://privy.id/blog/hak-cuti-karyawan-2/"
-last_verified: "2026-04-11"
-tags: [cuti,cuti-tahunan,cuti-melahirkan,cuti-sakit,hak-pekerja]
-cekwajar_impact: MEDIUM
-legion_can_act: YES
+title: Aturan Cuti
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- labor-law
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: .cekwajar.id payroll system harus track hak cuti dan menghitung jika ada
+  pembayaran cuti yang belum diambil saat PHK.особливо важливо untuk memastikan tidak
+  adahutang cuti yang terabaikan.
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Aturan Cuti Tahunan, Cuti Melitakan, Cuti Sakit di Indonesia

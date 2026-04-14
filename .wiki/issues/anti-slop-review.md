@@ -1,6 +1,19 @@
 ---
-## Summary
-
+title: Anti Slop Review
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '| File | Status | Issues |'
+wikilinks: []
+confidence: medium
+source: research
 ---
 | File | Status | Issues |
 |

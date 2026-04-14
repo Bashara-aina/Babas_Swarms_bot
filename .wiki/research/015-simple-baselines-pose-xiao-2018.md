@@ -7,10 +7,10 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Simple Baselines shows that a ResNet encoder followed by a few deconvolution layers achieves SOTA pose estimation, defeating more complex hourglass and CPM designs. POPW's pose head is directly inspired by this simple design — ResNet-50 backbone + FPN + deconv head."
 wikilinks:
-  - [[001-resnet-he-2016]]
-  - [[002-fpn-lin-2017]]
-  - [[009-deeppose-pck-toshev-2014]]
-  - [[010-wing-loss-feng-2018]]
+  - [[research/001-resnet-he-2016]]
+  - [[research/002-fpn-lin-2017]]
+  - [[research/009-deeppose-pck-toshev-2014]]
+  - [[research/010-wing-loss-feng-2018]]
   - [[100-popw-protocol-self-analysis]]
 confidence: high
 source: canonical
@@ -59,7 +59,7 @@ Simple Baselines with ResNet-152 matched CPN while using far fewer complex compo
 1. **Deconv head for heatmap**: POPW's pose head uses 3 deconv layers to upsample FPN features to heatmap resolution
 2. **MSE heatmap loss**: Standard approach — target is 2D Gaussian centered at GT keypoint location
 3. **ResNet backbone is sufficient**: No need for specialized pose architectures (hourglass, CPM); ImageNet-pretrained ResNet-50 works well
-4. **FPN is a better backbone**: POPW uses FPN (from [[002-fpn-lin-2017]]) instead of plain ResNet deconv — multi-scale features improve small keypoint detection
+4. **FPN is a better backbone**: POPW uses FPN (from [[research/002-fpn-lin-2017]]) instead of plain ResNet deconv — multi-scale features improve small keypoint detection
 
 ## POPW's Pose Head Design
 
@@ -109,15 +109,15 @@ L_heatmap = (1/17K) Σ_k Σ_(x,y) ||H_k(x,y) - G_k(x,y)||²
 
 ## Related Papers in This Wiki
 
-- [[001-resnet-he-2016]] — ResNet-50 is Simple Baselines' encoder
-- [[002-fpn-lin-2017]] — FPN replaces plain ResNet for POPW's multi-scale features
-- [[009-deeppose-pck-toshev-2014]] — PCK@0.1 evaluation metric for pose
-- [[010-wing-loss-feng-2018]] — Wing Loss replaces MSE for POPW's coordinate regression
+- [[research/001-resnet-he-2016]] — ResNet-50 is Simple Baselines' encoder
+- [[research/002-fpn-lin-2017]] — FPN replaces plain ResNet for POPW's multi-scale features
+- [[research/009-deeppose-pck-toshev-2014]] — PCK@0.1 evaluation metric for pose
+- [[research/010-wing-loss-feng-2018]] — Wing Loss replaces MSE for POPW's coordinate regression
 - [[100-popw-protocol-self-analysis]] — POPW's pose head design from Simple Baselines
 
 ## LEGION RULE
 
-When Bashara asks about "why does POPW's pose head look different from the paper (FPN + deconv vs plain ResNet + deconv)," reference this paper's finding: Simple Baselines proved that a simple ResNet + deconv is sufficient for pose estimation. POPW goes one step further by using FPN (from [[002-fpn-lin-2017]]) instead of plain ResNet — FPN's multi-scale features (P3-P7) provide better small keypoint detection than single-scale C5. The FPN + deconv combination is POPW's refinement of Simple Baselines' insight.
+When Bashara asks about "why does POPW's pose head look different from the paper (FPN + deconv vs plain ResNet + deconv)," reference this paper's finding: Simple Baselines proved that a simple ResNet + deconv is sufficient for pose estimation. POPW goes one step further by using FPN (from [[research/002-fpn-lin-2017]]) instead of plain ResNet — FPN's multi-scale features (P3-P7) provide better small keypoint detection than single-scale C5. The FPN + deconv combination is POPW's refinement of Simple Baselines' insight.
 
 Applied to POPW: If pose PCK@0.1 is below target (85%), consider:
 1. Increasing heatmap resolution from 64×64 to 128×128

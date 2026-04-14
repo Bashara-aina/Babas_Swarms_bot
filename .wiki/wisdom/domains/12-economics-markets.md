@@ -1,3 +1,21 @@
+---
+title: Economics Markets
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- wisdom
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Core Insight**: Knowledge problem; price mechanism; decentralized; spontaneous
+  order; information distribution; coordination; no central planner.'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Domain 12: Economics & Markets
 
 ## [Friedrich Hayek] — The Use of Knowledge in Society

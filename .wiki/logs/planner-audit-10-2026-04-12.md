@@ -1,7 +1,19 @@
 ---
-date: "2026-04-12"
-task: "Decompose async correctness audit into atomic subtasks"
-status: "PLANNED"
+title: Planner Audit 10 2026 04 12
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- `rg "async def" handlers/ core/` to find async functions'
+wikilinks: []
+confidence: medium
+source: research
 ---
 # AUDIT 10 — Async Correctness Sweep
 

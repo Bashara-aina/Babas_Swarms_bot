@@ -1,3 +1,20 @@
+---
+title: Worker Market Progress
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**Domain**: 040-054 (Indonesian Salary Market Data)'
+wikilinks: []
+confidence: medium
+source: research
+---
 # Worker Market Progress Log
 
 ## Task: Create 15 Indonesian Salary Market Data Wiki Pages

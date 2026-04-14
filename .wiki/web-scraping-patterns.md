@@ -1,10 +1,19 @@
 ---
-title: web-scraping-patterns
-domain: tools
-impact_score: 7
-last_updated: 2026-04-12
-injects_into: browser-agent-architecture.md, tool-output-formatting.md
-tokens_estimated: 545
+title: Web Scraping Patterns
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- web-scraping-patterns.md
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Two web scraping approaches are currently **operational** in this codebase:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Web Scraping Patterns

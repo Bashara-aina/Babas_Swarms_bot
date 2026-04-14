@@ -1,3 +1,20 @@
+---
+title: Deployment
+type: reference
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- docs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: sudo systemctl status ollama
+wikilinks: []
+confidence: medium
+source: research
+---
 # Deployment Guide - Rate Limit Resilience Update
 
 ## Quick Deploy
