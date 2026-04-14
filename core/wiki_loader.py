@@ -5,11 +5,11 @@ This is Legion's second brain. It MUST be injected every session.
 
 import os
 import re
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 from typing import Optional
 
-WIKI_DIR = Path("/home/newadmin/swarm-bot/wiki")
+WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
 
 # Priority files — always injected, full content
 PRIORITY_FILES = [

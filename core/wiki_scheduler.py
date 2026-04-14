@@ -27,7 +27,7 @@ LOW_QUALITY_THRESHOLD = 0.3  # quarantine below this score on daily scan
 LLM_CALL_DELAY = 1.0  # seconds between deep_gate calls
 
 # Paths
-WIKI_DIR = Path("/home/newadmin/swarm-bot/wiki")
+WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
 QUARANTINE_DIR = WIKI_DIR / "_quarantine"
 QUALITY_REPORT_PATH = WIKI_DIR / "_quality_report.md"
 
@@ -172,7 +172,11 @@ class WikiQualityScheduler:
                                 score=deep_result.score,
                             )
                             quarantined.append((page_path, str(dest), deep_result.score))
-                            logger.info("[WikiQualityScheduler] quarantined after deep_gate %s (score=%.3f)", page_path, deep_result.score)
+                            logger.info(
+                                "[WikiQualityScheduler] quarantined after deep_gate %s (score=%.3f)",
+                                page_path,
+                                deep_result.score,
+                            )
 
                 except Exception as e:
                     logger.warning("[WikiQualityScheduler] failed to scan %s: %s", page_path, e)
