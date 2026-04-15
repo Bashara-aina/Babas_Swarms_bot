@@ -3,6 +3,7 @@
 Currently provides:
   - audit_logger_hook: writes every LLM call to the audit_log table
   - opencode_session_hook: ingests OpenCode task sessions into the wiki brain
+  - claude_code_session_hook: ingests Claude Code sessions into the wiki brain
 """
 
 from __future__ import annotations
@@ -98,6 +99,43 @@ async def opencode_decision_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     return ctx
 
 
+# ── Claude Code session hooks ──────────────────────────────────────────────────
+
+
+async def claude_code_session_start_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """Record Claude Code session start metadata for wiki ingest on completion."""
+    import uuid
+    ctx["_cc_session_started"] = True
+    ctx["_cc_session_id"] = ctx.get("session_id") or f"cc-{uuid.uuid4().hex[:8]}"
+    ctx["_cc_session_prompt"] = ctx.get("prompt", "")[:500]
+    return ctx
+
+
+async def claude_code_session_end_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """Ingest completed Claude Code sessions into the wiki brain."""
+    if not ctx.get("_cc_session_started"):
+        return ctx
+    try:
+        import uuid
+
+        from core.wiki_bridge import claude_code_write_session
+
+        session_id = ctx.get("_cc_session_id") or f"cc-{uuid.uuid4().hex[:8]}"
+        report = ctx.get("report", "")
+        await claude_code_write_session(
+            session_md=(
+                f"# Claude Code Session\n\n"
+                f"**ID**: {session_id}\n\n"
+                f"## Prompt\n\n{ctx.get('_cc_session_prompt', '')}\n\n"
+                f"## Result\n\n{report[:2000]}"
+            ),
+            summary=f"CC session: {report[:100]}",
+        )
+    except Exception:
+        logger.debug("claude_code_session_end_hook: wiki bridge unavailable, skipping")
+    return ctx
+
+
 def register_builtin_hooks() -> None:
     """Register all built-in hooks on the global HookSystem."""
     from core.hooks import get_hooks
@@ -107,6 +145,9 @@ def register_builtin_hooks() -> None:
     hooks.register("post_llm_call", audit_logger_hook, name="audit_logger")
     hooks.register("command_received", command_audit_hook, name="command_audit")
     hooks.register("post_llm_call", opencode_decision_hook, name="opencode_decision")
+    # Claude Code session lifecycle hooks
+    hooks.register("pre_llm_call", claude_code_session_start_hook, name="cc_session_start")
+    hooks.register("post_llm_call", claude_code_session_end_hook, name="cc_session_end")
 
     _ensure_opencode_dirs()
     logger.info("Built-in hooks registered")
