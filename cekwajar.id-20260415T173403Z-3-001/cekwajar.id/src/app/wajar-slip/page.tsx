@@ -3,6 +3,7 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // cekwajar.id — Wajar Slip Page (Full Client Component)
 // Stage 4: Manual form + PPh21 TER + BPJS + violation detectors
+// Stage 5: OCR upload integration
 // ══════════════════════════════════════════════════════════════════════════════
 
 import { useReducer, useEffect, useState } from 'react'
@@ -11,7 +12,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertCircle, CheckCircle2, X, Loader2, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,14 +20,20 @@ import { Separator } from '@/components/ui/separator'
 import { PremiumGate } from '@/components/shared/PremiumGate'
 import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
 import { UMKBadge } from '@/components/wajar-slip/UMKBadge'
+import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
+import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 import type { SubscriptionTier, Violation } from '@/types'
+import type { ExtractedPayslipFields } from '@/lib/ocr/field-extractor'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type SlipState =
   | { status: 'IDLE' }
+  | { status: 'UPLOADING' }
+  | { status: 'OCR_PROCESSING'; progress?: number; source: 'vision' | 'tesseract' }
   | { status: 'MANUAL_FORM' }
   | { status: 'CALCULATING' }
+  | { status: 'OCR_CONFIRM'; extracted: ExtractedPayslipFields; filePath: string }
   | { status: 'VERDICT'; data: AuditResult }
   | { status: 'ERROR'; message: string }
 
@@ -60,6 +66,8 @@ interface GatedViolation extends Omit<Violation, 'differenceIDR'> {
 
 type SlipAction =
   | { type: 'SHOW_FORM' }
+  | { type: 'GOTO_UPLOAD' }
+  | { type: 'OCR_FIELDS_EXTRACTED'; fields: ExtractedPayslipFields; filePath: string; source: string }
   | { type: 'SUBMIT' }
   | { type: 'SUCCESS'; data: AuditResult }
   | { type: 'ERROR'; message: string }
@@ -148,7 +156,12 @@ type FormValues = z.infer<typeof formSchema>
 
 function slipReducer(state: SlipState, action: SlipAction): SlipState {
   switch (action.type) {
+    case 'GOTO_UPLOAD':
+      return { status: 'IDLE' }
     case 'SHOW_FORM':
+      return { status: 'MANUAL_FORM' }
+    case 'OCR_FIELDS_EXTRACTED':
+      // Pre-fill form and go to manual form with OCR data
       return { status: 'MANUAL_FORM' }
     case 'SUBMIT':
       return { status: 'CALCULATING' }
@@ -177,6 +190,7 @@ export default function WajarSlipPage() {
   const [state, dispatch] = useReducer(slipReducer, { status: 'IDLE' })
   const [cities, setCities] = useState<CityOption[]>([])
   const [userTier, setUserTier] = useState<SubscriptionTier>('free')
+  const [ocrSource, setOcrSource] = useState<string>('manual')
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
 
@@ -209,6 +223,24 @@ export default function WajarSlipPage() {
       takeHome: '',
     },
   })
+
+  // ─── OCR callback — pre-fill form with extracted fields ─────────────
+
+  const handleFieldsExtracted = (fields: ExtractedPayslipFields, filePath: string, source: string) => {
+    setOcrSource(source)
+    // Pre-fill form with extracted fields
+    if (fields.grossSalary) {
+      form.setValue('grossSalary', String(fields.grossSalary))
+    }
+    if (fields.takeHome) {
+      form.setValue('takeHome', String(fields.takeHome))
+    }
+    dispatch({ type: 'OCR_FIELDS_EXTRACTED', fields, filePath, source })
+  }
+
+  const handleManualMode = () => {
+    dispatch({ type: 'SHOW_FORM' })
+  }
 
   async function onSubmit(values: FormValues) {
     dispatch({ type: 'SUBMIT' })
@@ -255,7 +287,7 @@ export default function WajarSlipPage() {
             kesehatanEmployee: safe.data.reportedKesehatan,
             takeHome: safe.data.takeHome,
           },
-          ocrSource: 'manual',
+          ocrSource: ocrSource,
         }),
       })
 
@@ -270,9 +302,9 @@ export default function WajarSlipPage() {
         ...json.data,
         cityUMK: json.data?.calculations?.cityUMK ?? 0,
         city: values.city,
-        grossSalary: values.grossSalary,
-        monthNumber: values.monthNumber,
-        year: values.year,
+        grossSalary: safe.data.grossSalary,
+        monthNumber: parseInt(values.monthNumber, 10),
+        year: parseInt(values.year, 10),
       }
 
       dispatch({ type: 'SUCCESS', data: result })
@@ -281,25 +313,39 @@ export default function WajarSlipPage() {
     }
   }
 
-  // ─── IDLE state ─────────────────────────────────────────────────────────────
+  // ─── IDLE state — show OCR uploader ────────────────────────────────────
   if (state.status === 'IDLE') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-          <div className="mb-6 text-6xl">📋</div>
-          <h1 className="text-3xl font-bold text-slate-900">Cek Slip Gaji Kamu — Gratis</h1>
-          <p className="mt-3 text-slate-500 max-w-md mx-auto">
-            Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik.
+        <div className="mx-auto max-w-2xl px-4 py-10 space-y-5">
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-900">Cek Slip Gaji — Gratis</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik.
+            </p>
+          </div>
+
+          {/* Disclaimer */}
+          <DisclaimerBanner type="tax" />
+
+          {/* OCR Uploader */}
+          <PayslipUploader
+            onFieldsExtracted={handleFieldsExtracted}
+            onManualMode={handleManualMode}
+          />
+
+          {/* Manual mode link */}
+          <p className="text-center text-xs text-slate-400">
+            Atau{' '}
+            <button
+              onClick={handleManualMode}
+              className="underline hover:text-emerald-600"
+            >
+              isi form manual
+            </button>{' '}
+            — slip fisik atau tidak punya file digital.
           </p>
-          <p className="mt-2 text-sm text-slate-400">
-            OCR upload tersedia di Stage 5 — untuk saat ini gunakan form manual.
-          </p>
-          <button
-            onClick={() => dispatch({ type: 'SHOW_FORM' })}
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
-          >
-            Isi Data Manual →
-          </button>
         </div>
       </div>
     )
@@ -309,7 +355,6 @@ export default function WajarSlipPage() {
   if (state.status === 'VERDICT') {
     const { data } = state
     const isPaid = !data.isGated
-    const hasV06 = data.violations.some((v) => v.code === 'V06')
     const monthLabel = MONTHS.find((m) => m.value === data.monthNumber)?.label ?? ''
 
     return (
@@ -523,14 +568,16 @@ export default function WajarSlipPage() {
     )
   }
 
-  // ─── MANUAL FORM ────────────────────────────────────────────────────────────
+  // ─── MANUAL FORM (and OCR fields pre-filled) ───────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-slate-900">Cek Slip Gaji</h1>
-            <p className="text-sm text-slate-500">Input data manual</p>
+            <p className="text-sm text-slate-500">
+              {ocrSource !== 'manual' ? `Hasil OCR: ${ocrSource}` : 'Input data manual'}
+            </p>
           </div>
           <button
             onClick={() => dispatch({ type: 'RESET' })}
@@ -539,6 +586,11 @@ export default function WajarSlipPage() {
             <X className="h-4 w-4" />
             Batal
           </button>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mb-4">
+          <DisclaimerBanner type="tax" />
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">

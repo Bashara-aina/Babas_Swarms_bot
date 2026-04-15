@@ -1,7 +1,7 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// cekwajar.id — Disclaimer Banner
+// ==============================================================================
+// cekwajar.id ? Disclaimer Banner
 // Warning banners for tools with regulatory disclaimers
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 import { AlertTriangle } from 'lucide-react'
 
@@ -17,7 +17,7 @@ interface DisclaimerBannerProps {
 const DISCLAIMERS: Record<DisclaimerBannerProps['type'], { title: string; body: string }> = {
   tax: {
     title: 'Catatan Penting',
-    body: 'Hasil kalkulasi PPh21 bersifat indikatif berdasarkan PMK 168/2023. Angka aktual mungkin berbeda tergantung situasi pajak kamu. Ini bukan替代 nasihat perpajakan.',
+    body: 'Hasil kalkulasi PPh21 bersifat indikatif berdasarkan PMK 168/2023. Angka aktual mungkin berbeda tergantung situasi pajak kamu. Ini bukan?? nasihat perpajakan.',
   },
   ppp: {
     title: 'Tentang Data PPP',
