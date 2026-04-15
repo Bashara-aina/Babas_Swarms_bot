@@ -48,3 +48,4 @@ export {
 } from './sheet'
 export { Skeleton } from './skeleton'
 export { Alert, AlertTitle, AlertDescription, type AlertProps } from './alert'
+export { Avatar, AvatarFallback } from './avatar'

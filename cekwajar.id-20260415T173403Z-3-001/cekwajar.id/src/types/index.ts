@@ -39,6 +39,7 @@ export interface Tool {
   name: string
   href: string
   emoji: string
+  description: string
 }
 
 export interface AuditResult {

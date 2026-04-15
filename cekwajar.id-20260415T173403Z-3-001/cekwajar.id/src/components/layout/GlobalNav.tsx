@@ -2,21 +2,86 @@
 
 // ══════════════════════════════════════════════════════════════════════════════
 // cekwajar.id — Global Navigation Bar
-// Mobile-first sticky nav with hamburger sheet menu
+// Mobile-first sticky nav with auth-aware user menu
 // ══════════════════════════════════════════════════════════════════════════════
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { Menu, X, Calculator } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Menu, X, Calculator, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TOOLS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { signOut } from '@/app/auth/actions'
+import { SubscriptionBadge } from '@/components/shared/SubscriptionBadge'
+import type { SubscriptionTier } from '@/types'
+import { useRouter } from 'next/navigation'
 
 export function GlobalNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [user, setUser] = useState<{
+    id: string
+    email?: string
+    user_metadata?: { full_name?: string; avatar_url?: string }
+  } | null>(null)
+  const [tier, setTier] = useState<SubscriptionTier>('free')
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    // Get initial user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user as typeof user)
+      if (data.user) {
+        // Fetch tier from profile
+        supabase
+          .from('user_profiles')
+          .select('subscription_tier')
+          .eq('id', data.user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              setTier(profile.subscription_tier as SubscriptionTier)
+            }
+          })
+      }
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+      const u = session?.user as typeof user | null
+      setUser(u)
+      if (u) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('subscription_tier')
+          .eq('id', u.id)
+          .single()
+        setTier((profile?.subscription_tier as SubscriptionTier) ?? 'free')
+      } else {
+        setTier('free')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  function getUserInitials(email?: string): string {
+    if (!email) return 'U'
+    const name = email.split('@')[0]
+    return name.slice(0, 2).toUpperCase()
+  }
+
+  async function handleSignOut() {
+    setMenuOpen(false)
+    await signOut()
+  }
 
   return (
     <header className="stick top-0 z-50 w-full border-b bg-white shadow-sm">
@@ -45,18 +110,67 @@ export function GlobalNav() {
           ))}
         </div>
 
-        {/* Desktop CTA */}
+        {/* Desktop auth section */}
         <div className="hidden items-center gap-2 md:flex">
-          <Link href="/auth/login">
-            <Button variant="outline" size="sm" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
-              Masuk
-            </Button>
-          </Link>
-          <Link href="/wajar-slip">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-              Cek Gratis
-            </Button>
-          </Link>
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex items-center gap-2 rounded-full p-1 hover:bg-slate-100"
+              >
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                    {getUserInitials(user.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <SubscriptionBadge tier={tier} />
+              </button>
+
+              {/* Dropdown menu */}
+              {menuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border bg-white py-1 shadow-lg">
+                    <div className="border-b px-3 py-2">
+                      <p className="text-sm font-medium truncate">{user.user_metadata?.full_name ?? user.email}</p>
+                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Keluar
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <Button variant="outline" size="sm" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+                  Masuk
+                </Button>
+              </Link>
+              <Link href="/wajar-slip">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                  Cek Gratis
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -91,16 +205,50 @@ export function GlobalNav() {
               ))}
 
               <div className="mt-4 flex flex-col gap-2 border-t pt-4">
-                <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full border-emerald-600 text-emerald-700">
-                    Masuk
-                  </Button>
-                </Link>
-                <Link href="/wajar-slip" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
-                    Cek Gratis
-                  </Button>
-                </Link>
+                {user ? (
+                  <>
+                    <div className="flex items-center gap-2 px-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                          {getUserInitials(user.email)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {user.user_metadata?.full_name ?? user.email}
+                        </p>
+                        <SubscriptionBadge tier={tier} />
+                      </div>
+                    </div>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full border-emerald-600 text-emerald-700">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      onClick={handleSignOut}
+                      className="w-full text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Keluar
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                      <Button variant="outline" className="w-full border-emerald-600 text-emerald-700">
+                        Masuk
+                      </Button>
+                    </Link>
+                    <Link href="/wajar-slip" onClick={() => setMobileOpen(false)}>
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                        Cek Gratis
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </SheetContent>

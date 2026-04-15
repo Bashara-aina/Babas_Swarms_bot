@@ -447,3 +447,20 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: cedc71b
+- Date: Thu Apr 16 03:18:50 AM JST 2026
+- Message: feat(cekwajar): Stage 2 — database schema, migrations, RLS, seed data, query helpers
+
+- 19 SQL migrations covering all tables (users, subscriptions, transactions,
+  payslip_audits, salary/property/col/ppp benchmarks, reference data)
+- Full RLS policies on all tables via migrations 004 and 011
+- pg_cron jobs for record purging and subscription expiry checks
+- TER A/B/C brackets (PMK 168/2023), BPJS rates, PTKP values, 48 city UMK
+- COL indices (20 cities), 15-country PPP reference, 10 COL categories
+- src/types/database.types.ts — fully typed TypeScript definitions
+- src/lib/db/queries.ts — typed helper functions (getUserTier, getUMKForCity,
+  getTERRate, getBPJSRates, getPTKPValue, incrementOCRCounter, COL/PPP/salary/
+  property helpers)
+- Fixed NEXT_PUBLIC_SUPABASE_ANON_KEY → NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  across server.ts, client.ts, and middleware.ts
+---

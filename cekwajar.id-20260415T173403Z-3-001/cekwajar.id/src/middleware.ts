@@ -35,7 +35,14 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh session if expired — this runs on every request
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Protect /dashboard — redirect unauthenticated users to login
+  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+    const redirectUrl = new URL('/auth/login', request.url)
+    redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
+  }
 
   return supabaseResponse
 }

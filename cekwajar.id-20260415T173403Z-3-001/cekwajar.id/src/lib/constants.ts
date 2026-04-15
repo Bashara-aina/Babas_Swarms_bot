@@ -5,11 +5,11 @@
 import type { Tool } from '@/types'
 
 export const TOOLS: Tool[] = [
-  { id: 'wajar-slip', name: 'Wajar Slip', href: '/wajar-slip', emoji: '📋' },
-  { id: 'wajar-gaji', name: 'Wajar Gaji', href: '/wajar-gaji', emoji: '💰' },
-  { id: 'wajar-tanah', name: 'Wajar Tanah', href: '/wajar-tanah', emoji: '🏠' },
-  { id: 'wajar-kabur', name: 'Wajar Kabur', href: '/wajar-kabur', emoji: '✈️' },
-  { id: 'wajar-hidup', name: 'Wajar Hidup', href: '/wajar-hidup', emoji: '🏙️' },
+  { id: 'wajar-slip', name: 'Wajar Slip', href: '/wajar-slip', emoji: '📋', description: 'Cek ketidakwajaran slip gaji' },
+  { id: 'wajar-gaji', name: 'Wajar Gaji', href: '/wajar-gaji', emoji: '💰', description: 'Benchmark gaji berdasarkan UMK' },
+  { id: 'wajar-tanah', name: 'Wajar Tanah', href: '/wajar-tanah', emoji: '🏠', description: 'Analisis harga properti' },
+  { id: 'wajar-kabur', name: 'Wajar Kabur', href: '/wajar-kabur', emoji: '✈️', description: 'Cost of living 20 negara' },
+  { id: 'wajar-hidup', name: 'Wajar Hidup', href: '/wajar-hidup', emoji: '🏙️', description: 'PPP dan kelayakan hidup' },
 ]
 
 export const SUBSCRIPTION_TIERS = {
