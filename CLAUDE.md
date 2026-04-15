@@ -111,6 +111,43 @@ Usage:
     python heartbeat.py session-A --registry ~/.claude/worktrees/registry.json &
     ~/.local/bin/cc session-A  # launch Claude Code in worktree
 
+2d. Three-System Integration Architecture
+
+OpenCode, Claude Code, and LegionBot form a unified intelligence network.
+
+### Joint Brain (`.wiki/`)
+
+All three systems share the same wiki vault as the joint brain:
+- `.wiki/opencode/sessions/` — OpenCode 4-agent pipeline sessions
+- `.wiki/claude-code/sessions/` — Claude Code sessions
+- `.wiki/joint-brain/cross-refs/` — Cross-references between sessions
+
+### Cross-System Bridges
+
+| Bridge | File | Purpose |
+|--------|------|---------|
+| OpenCode → Claude Code | `core/claude_code_bridge.py` | Spawns CC as sub-agent from OpenCode |
+| OpenCode → LegionBot | `core/legion_callback_bridge.py` | Recursive depth-limited callbacks |
+| Claude Code → OpenCode | `core/claude_code_bridge.py` | Spawns OpenCode for implementation |
+| LegionBot → OpenCode | `core/opencode_bridge.py` | Routes `/run` to OpenCode pipeline |
+
+### Shared Memory Facade
+
+`core/joint_memory.py` is the single write path for all three systems.
+Never write to session directories directly — always use `joint_save()`.
+
+### Directive Protocol
+
+- `@claude <task>` — Spawn Claude Code as sub-agent
+- `@legion <task>` — Call back to LegionBot (no Telegram round-trip)
+- Depth tracking: max 3 recursive spawns to prevent infinite loops
+
+### Shared Agents
+
+`.claude/skills/legiona/` contains shared agent definitions used by all
+three systems. OpenCode references them via path rewrite:
+`.claude/skills/legiona` → `.opencode/agents/legiona`
+
 2b. WIKI GUARDIAN — Obsidian + Karpathy KB Protocol
 This .wiki/ is the Obsidian vault containing synthesized project knowledge. All sessions that touch .wiki/ must follow this protocol.
 
