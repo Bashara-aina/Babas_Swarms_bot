@@ -1,9 +1,21 @@
 """core/opencode_bridge.py — Telegram → OpenCode bridge."""
 
 import asyncio
+import logging
 import os
+import re
 import uuid
 from datetime import datetime
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+DIRECTIVES_RE = re.compile(r"@(legion|claude)[:\s]+(.+?)(?:\n|$)", re.IGNORECASE)
+
+
+def extract_directives(text: str) -> list[tuple[str, str]]:
+    """Extract @legion and @claude directives from text."""
+    return [(m.group(1).lower(), m.group(2).strip()) for m in DIRECTIVES_RE.finditer(text)]
 
 
 def build_opencode_prompt(telegram_msg: str, project: str, user: str) -> str:
@@ -36,9 +48,9 @@ async def run_opencode_task(
 ) -> str:
     """Execute a task via opencode CLI and return the result."""
     project_dir = project_dir or "/home/newadmin/swarm-bot"
-    model = model or os.getenv("LEGION_DEFAULT_MODEL", "openrouter/anthropic/claude-sonnet-4-5")
+    model = model or os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
 
-    cmd = ["opencode", "run", prompt]
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", prompt]
     if agent:
         cmd.extend(["--agent", agent])
     cmd.extend(["--model", model])
@@ -78,7 +90,17 @@ async def run_opencode_task(
     except Exception:
         pass  # wiki bridge may be unavailable
 
-    return stdout.decode()
+    # Check for cross-system directives
+    output = stdout.decode()
+    try:
+        callback_result = await handle_cross_system_callbacks(output)
+        # Log callback results for debugging
+        if callback_result.get("callbacks"):
+            logger.info("cross-system callbacks triggered: %s", callback_result)
+    except Exception:
+        pass  # non-fatal
+
+    return output
 
 
 def extract_report(opencode_output: str) -> str:
@@ -89,3 +111,32 @@ def extract_report(opencode_output: str) -> str:
         report = opencode_output[idx - 500 :] if idx > 500 else opencode_output
         return report[:4000]
     return opencode_output[-2000:] if len(opencode_output) > 2000 else opencode_output
+
+
+async def handle_cross_system_callbacks(
+    text: str,
+    depth: int = 0,
+    max_depth: int = 3,
+) -> dict[str, Any]:
+    """Parse cross-system directives and spawn appropriate agents."""
+    results = []
+    directives = extract_directives(text)
+
+    for directive_type, directive_value in directives:
+        if directive_type == "claude":
+            try:
+                from core.claude_code_bridge import spawn_claude_from_opencode
+                result = await spawn_claude_from_opencode(text, depth=depth, max_depth=max_depth)
+                results.append({"type": "claude", **result})
+            except Exception as exc:
+                results.append({"type": "claude", "error": str(exc)})
+        elif directive_type == "legion":
+            try:
+                from core.legion_callback_bridge import LegionCallbackBridge
+                bridge = LegionCallbackBridge()
+                result = await bridge.handle_legion_callback(text, depth=depth)
+                results.append({"type": "legion", **result})
+            except Exception as exc:
+                results.append({"type": "legion", "error": str(exc)})
+
+    return {"callbacks": results}
