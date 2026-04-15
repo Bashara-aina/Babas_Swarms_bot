@@ -135,9 +135,8 @@ def get_conversation_history(user_id: str, last_n: int = MAX_HISTORY_TURNS) -> l
     """Return recent conversation history as litellm-compatible messages."""
     if user_id not in _conv_db_loaded_users:
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.create_task(_load_history_from_db(user_id))
+            loop = asyncio.get_running_loop()
+            loop.create_task(_load_history_from_db(user_id))
         except Exception:
             pass
     if user_id not in CONVERSATION_HISTORY:
@@ -164,9 +163,8 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
 
     # Fire-and-forget SQLite persistence
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            asyncio.create_task(_persist_turn_to_db(user_id, role, content, ts))
+        loop = asyncio.get_running_loop()
+        loop.create_task(_persist_turn_to_db(user_id, role, content, ts))
     except Exception:
         pass
 
@@ -179,20 +177,18 @@ def add_to_conversation(user_id: str, role: str, content: str) -> None:
                 last_user_msg = t["content"]
                 break
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.create_task(_persist_to_viking(user_id, last_user_msg, content))
+            loop = asyncio.get_running_loop()
+            loop.create_task(_persist_to_viking(user_id, last_user_msg, content))
         except Exception:
             pass
 
     # Fire-and-forget session transcript persistence (U1)
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            from core.session.transcript import get_transcript_store
+        loop = asyncio.get_running_loop()
+        from core.session.transcript import get_transcript_store
 
-            store = get_transcript_store()
-            asyncio.create_task(store.save_turn(None, user_id, role, content))
+        store = get_transcript_store()
+        loop.create_task(store.save_turn(None, user_id, role, content))
     except Exception:
         pass
 

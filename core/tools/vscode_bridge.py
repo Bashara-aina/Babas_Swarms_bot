@@ -207,7 +207,7 @@ async def read_file(path: str) -> str:
     Returns:
         File contents string.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _read_file_sync, path)
 
 
@@ -221,7 +221,7 @@ async def write_file(path: str, content: str) -> str:
     Returns:
         Confirmation string.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _write_file_sync, path, content)
 
 
@@ -235,7 +235,7 @@ async def list_files(directory: str = ".", pattern: str = "**/*") -> str:
     Returns:
         Newline-separated file paths.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _list_files_sync, directory, pattern)
 
 
@@ -250,7 +250,7 @@ async def run_command(cmd: str, cwd: Optional[str] = None, timeout: int = 30) ->
     Returns:
         Command output string.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _run_command_sync, cmd, cwd, timeout)
 
 
@@ -260,7 +260,7 @@ async def git_status() -> str:
     Returns:
         Formatted git status + log.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _git_status_sync)
 
 
@@ -270,7 +270,7 @@ async def get_terminal_output() -> str:
     Returns:
         Recent terminal output string.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _get_terminal_output_sync)
 
 

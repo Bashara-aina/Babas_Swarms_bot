@@ -1,15 +1,21 @@
 ---
-title: "BiGRU Temporal Activity Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [biGRU, GRU, temporal-modeling, activity-recognition, recurrent-neural-network, video-understanding]
-authors: [Bashara]
-type: research
-summary: "How bidirectional GRU (BiGRU) encodes temporal context for activity recognition — update/reset gate mechanics, hidden state aggregation, and comparison with BiLSTM. POPW uses BiGRU over raw-C5 BiGRU because pose-conditioned C5 features produce more separable hidden states."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
+title: Bigru Activity Recognition
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: A Bidirectional Gated Recurrent Unit (BiGRU) processes a sequence in both
+  forward and backward directions using two separate GRU networks, then concatenates
+  their hidden states at each timestep. Th...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BiGRU Temporal Activity Recognition

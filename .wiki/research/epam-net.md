@@ -1,17 +1,19 @@
 ---
-title: "EPAM-Net: Evolutionary Pose-aware Modulation Network"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [epam-net, pose-modulation, evolutionary, skeleton-action, adaptive, pose-activity, mtl]
-authors: [Abdelkawy et al.]
-type: research
-summary: "EPAM-Net (Abdelkawy et al. 2024) introduces evolutionary pose-aware modulation — pose features modulate CNN/Transformer features in an adaptive, data-driven manner. Pose modulation parameters evolve during training to optimize pose→semantic feature alignment. Relevant for POPW's PoseFiLM parameter optimization."
-wikilinks:
-  - [[mmn]]
-  - [[psumnet]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2408.05421
+title: Epam Net
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2408.05421](https://arxiv.org/abs/2408.05421)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # EPAM-Net: Evolutionary Pose-aware Modulation Network

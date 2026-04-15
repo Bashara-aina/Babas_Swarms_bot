@@ -1,3 +1,19 @@
+---
+title: Obsidian Plugins Configuration
+type: reference
+status: active
+tags:
+- obsidian
+- plugins
+- wiki
+- configuration
+created: '2026-04-13'
+updated: '2026-04-13'
+summary: Configuration guide for Obsidian plugins including Dataview, Obsidian Git, and Metadata Extractor for wiki management.
+wikilinks: []
+confidence: high
+source: research
+---
 # Obsidian Plugins Configuration
 
 ## Required Plugins

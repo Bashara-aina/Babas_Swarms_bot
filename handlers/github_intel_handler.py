@@ -61,7 +61,13 @@ async def cmd_github_intel(msg: Message) -> None:
                     pass
 
             for ev in high_value[:2]:
-                asyncio.create_task(engine._discover_skill(ev, _notify))
+                task = asyncio.create_task(engine._discover_skill(ev, _notify))
+                task.add_done_callback(
+                    lambda t, repo=ev: (
+                        t.result() if not t.cancelled() and t.exception() is None
+                        else logger.warning("Skill discovery failed for %s: %s", repo.name, t.exception())
+                    )
+                )
 
     except Exception as exc:
         await msg.answer(

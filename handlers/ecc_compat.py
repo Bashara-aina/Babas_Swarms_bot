@@ -393,14 +393,14 @@ async def cmd_loop_start(msg: Message) -> None:
         except Exception:
             await _bot.send_message(msg.chat.id, html_mod.escape(text), parse_mode="HTML")
 
-    asyncio_task = run_autonomous_loop(
+    # Fire and forget — loop runs in background with notify_cb updates
+    asyncio.create_task(run_autonomous_loop(
         user_id=msg.from_user.id,
         goal=goal,
         notify_cb=notify,
         config=LoopConfig(),
         thread_id=thread_id,
-    )
-    asyncio.create_task(asyncio_task)
+    ))
 
 
 @router.message(Command("code_review"))

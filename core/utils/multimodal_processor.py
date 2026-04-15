@@ -92,8 +92,7 @@ async def transcribe_voice(audio_bytes: bytes, extension: str = ".ogg") -> str:
     Returns:
         Transcribed text string.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _transcribe_sync, audio_bytes, extension)
+    return await asyncio.to_thread(_transcribe_sync, audio_bytes, extension)
 
 
 # ── Text-to-Speech ─────────────────────────────────────────────────────────────
@@ -141,9 +140,7 @@ async def text_to_speech(text: str, voice: str = TTS_VOICE) -> bytes:
     # ── Tier 1: kokoro-onnx ───────────────────────────────────────────────────
     if _KOKORO_MODEL_PATH.exists() and _KOKORO_VOICES_PATH.exists():
         try:
-            audio_bytes = await asyncio.get_event_loop().run_in_executor(
-                None, _tts_kokoro_sync, text
-            )
+            audio_bytes = await asyncio.to_thread(_tts_kokoro_sync, text)
             logger.info("TTS: kokoro-onnx generated %d bytes for %d chars", len(audio_bytes), len(text))
             return audio_bytes
         except Exception as ko_err:
@@ -215,8 +212,7 @@ async def extract_pdf(pdf_bytes: bytes) -> str:
     Returns:
         Extracted text string.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _extract_pdf_sync, pdf_bytes)
+    return await asyncio.to_thread(_extract_pdf_sync, pdf_bytes)
 
 
 # ── DOCX Processing ────────────────────────────────────────────────────────────
@@ -262,8 +258,7 @@ async def extract_docx(docx_bytes: bytes) -> str:
     Returns:
         Extracted text string.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _extract_docx_sync, docx_bytes)
+    return await asyncio.to_thread(_extract_docx_sync, docx_bytes)
 
 
 # ── Image Analysis ─────────────────────────────────────────────────────────────
@@ -312,8 +307,7 @@ async def analyze_image(image_bytes: bytes, question: str = "Describe this image
     Returns:
         Vision model answer.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _analyze_image_sync, image_bytes, question)
+    return await asyncio.to_thread(_analyze_image_sync, image_bytes, question)
 
 
 # ── Dispatcher ─────────────────────────────────────────────────────────────────

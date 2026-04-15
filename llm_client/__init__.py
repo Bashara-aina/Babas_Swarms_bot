@@ -1594,14 +1594,14 @@ async def _post_call_hooks(
         if memory is not None:
             await memory.auto_extract_and_save(user_msg, response)
             emotion_state = emotion.state.to_dict() if emotion is not None else None
-            memory.add_conversation_turn(
+            await memory.add_conversation_turn(
                 "user",
                 user_msg,
                 agent_used=agent_used,
                 emotion_state=emotion_state,
                 session_id=session_id,
             )
-            memory.add_conversation_turn(
+            await memory.add_conversation_turn(
                 "assistant",
                 response,
                 agent_used=agent_used,

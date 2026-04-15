@@ -1,17 +1,19 @@
 ---
-title: "POGARS: Pose-Graph Attention for Activity Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [pogars, pose-graph, graph-attention, skeleton-action, spatial-modeling, pose-relations, mtl]
-authors: [Thilakarathne et al.]
-type: research
-summary: "POGARS (Pose-Graph Attention for Activity Recognition, Thilakarathne et al. 2021) represents skeleton as a pose graph with attention-based message passing between body parts. Joints are nodes, bones are edges, and graph attention learns which pose relationships matter for each action. Relevant for POPW's per-joint pose reasoning."
-wikilinks:
-  - [[mmn]]
-  - [[psumnet]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2108.04186
+title: Pogars
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2108.04186](https://arxiv.org/abs/2108.04186)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # POGARS: Pose-Graph Attention for Activity Recognition

@@ -1,3 +1,20 @@
+---
+title: Swarm 2026 04 14 Mamba Implementation
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Contracts: 5 total, 5 succeeded, 0 retried, 1 fix loop (Chinese chars)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Swarm Run: Mamba Implementation in POPW Paper
 Date: 2026-04-14
 Type: FEATURE

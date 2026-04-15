@@ -1,16 +1,19 @@
 ---
-title: "MambaTrack: Mamba as Motion Predictor for Multi-Object Tracking"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [mamba-track, mamba, motion-prediction, tracking, ssm, video-understanding, object-tracking, pose]
-authors: [Xiao et al.]
-type: research
-summary: "MambaTrack (Xiao et al. 2024) uses Mamba as a motion predictor for multi-object tracking — predicting future object trajectories from past observations. Demonstrates SSM can capture complex motion dynamics without attention. For POPW, relevant for predicting future assembly states from observed pose sequences."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2408.09178
+title: Mamba Track
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2408.09178](https://arxiv.org/abs/2408.09178)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MambaTrack: Mamba for Motion Prediction in Tracking

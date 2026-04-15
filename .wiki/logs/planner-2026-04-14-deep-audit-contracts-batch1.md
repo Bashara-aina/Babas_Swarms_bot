@@ -1,3 +1,22 @@
+---
+title: Planner 2026 04 14 Deep Audit Contracts Batch1
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Audit OpenCode at /home/newadmin/.opencode/ — architecture, agent definitions,
+  tool integrations, bridge to Telegram, config files, system prompts. Audit how OpenCode
+  sends tasks to Legion via swar...
+wikilinks: []
+confidence: medium
+source: research
+---
 ### CONTRACT #1: OpenCode Architecture Audit
 
 WHAT:

@@ -1,0 +1,11 @@
+{
+  "topic_drift": -0.15,
+  "low_quality": -0.2,
+  "duplicate": -0.1,
+  "not_relevant": -0.25,
+  "outdated": -0.1,
+  "unreliable_source": -0.2,
+  "accepted": 0.05,
+  "rumahlabuh_property": -0.5,
+  "surprise_discoveries": -0.5
+}

@@ -1,3 +1,20 @@
+---
+title: Planner 2026 04 14 Popw Mamba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Target file: /home/newadmin/swarm-bot/project/popw/paper_skeleton/popw_paper_skeleton.tex'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Add Mamba Temporal Modeling to POPW Paper Skeleton
 Date: 2026-04-14
 Type: FEATURE

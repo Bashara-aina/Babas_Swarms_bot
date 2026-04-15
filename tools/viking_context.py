@@ -111,8 +111,7 @@ def _ensure_l0_identity(client) -> None:
 
 async def _run_sync(fn, *args, **kwargs):
     """Run a sync openviking call in a thread pool to avoid blocking the event loop."""
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, lambda: fn(*args, **kwargs))
+    return await asyncio.to_thread(fn, *args, **kwargs)
 
 
 # ── Public API ─────────────────────────────────────────────────────────────
@@ -324,8 +323,7 @@ async def init_viking_db() -> None:
     Called from main.py on_startup(). Warms up the client so the first
     user request doesn't pay the initialisation cost.
     """
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _get_client_sync)
+    await asyncio.to_thread(_get_client_sync)
     if _available:
         logger.info("✅ OpenViking context database ready at %s", VIKING_DIR)
     else:

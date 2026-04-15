@@ -14,6 +14,7 @@ import logging
 import os
 import re
 import time
+import urllib.parse
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -221,6 +222,27 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
             # Default: use whatever OPENAI_API_KEY is set
             llm = ChatOpenAI(model=model_str or "gpt-4o-mini")
 
+        # Build domain restriction lists for autonomous navigation
+        # When a URL is explicitly provided, restrict browser to that domain only
+        allowed_domains: list[str] | None = None
+        prohibited_domains: list[str] | None = None
+
+        if url_match:
+            # User gave an explicit URL — lock browser to just that domain
+            extracted = url_match.group(0).rstrip(".,)")
+            parsed = urllib.parse.urlparse(extracted)
+            if parsed.hostname:
+                allowed_domains = [parsed.hostname]
+        else:
+            # No explicit URL — respect BROWSER_ALLOWED_DOMAINS if set
+            allowed_cfg = os.getenv("BROWSER_ALLOWED_DOMAINS", "")
+            if allowed_cfg:
+                allowed_domains = [d.strip() for d in allowed_cfg.split(",") if d.strip()]
+
+        prohibited_cfg = os.getenv("BROWSER_PROHIBITED_DOMAINS", "")
+        if prohibited_cfg:
+            prohibited_domains = [d.strip() for d in prohibited_cfg.split(",") if d.strip()]
+
         browser = Browser(
             config=BrowserConfig(
                 headless=True,
@@ -228,12 +250,18 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
             )
         )
 
-        agent = BrowserAgent(
-            task=user_text,
-            llm=llm,
-            browser=browser,
-            max_actions_per_step=5,
-        )
+        agent_kwargs: dict[str, Any] = {
+            "task": user_text,
+            "llm": llm,
+            "browser": browser,
+            "max_actions_per_step": 5,
+        }
+        if allowed_domains is not None:
+            agent_kwargs["allowed_domains"] = allowed_domains
+        if prohibited_domains is not None:
+            agent_kwargs["prohibited_domains"] = prohibited_domains
+
+        agent = BrowserAgent(**agent_kwargs)
 
         result = await agent.run(max_steps=max_steps)
         final_result = result.final_result() if hasattr(result, "final_result") else str(result)

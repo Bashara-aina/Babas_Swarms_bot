@@ -10,8 +10,12 @@ description: >-
 mode: primary
 model: minimax-coding-plan/MiniMax-M2.7
 tools:
-  list: false
-  webfetch: false
+  list: true
+  glob: true
+  grep: true
+  read: true
+  bash: true
+  webfetch: true
   task: false
   todowrite: false
 ---

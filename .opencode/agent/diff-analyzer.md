@@ -18,10 +18,13 @@ description: >-
 mode: primary
 model: minimax-coding-plan/MiniMax-M2.7
 tools:
-  bash: false
+  bash: true
+  read: true
+  glob: true
+  grep: true
   write: false
   edit: false
-  list: false
+  list: true
   webfetch: false
   task: false
   todowrite: false

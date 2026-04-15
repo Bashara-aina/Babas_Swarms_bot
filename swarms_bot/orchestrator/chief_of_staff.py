@@ -451,40 +451,6 @@ class ChiefOfStaff:
         responses = await asyncio.gather(*[_run_one(ak) for ak in agent_keys])
         return list(responses)
 
-    async def orchestrate_complex(
-        self,
-        task: Task,
-        progress_cb: Optional[Callable[[str], Coroutine]] = None,
-    ) -> AgentResponse:
-        """Decompose and execute a complex task using orchestrate_engine.
-
-        Delegates to existing tools/orchestrate_engine.py for DAG execution.
-        """
-        from tools.orchestrate_engine import orchestrate_task
-
-        start = time.monotonic()
-
-        try:
-            result = await orchestrate_task(
-                task.description,
-                progress_cb=progress_cb,
-            )
-            return AgentResponse(
-                success=True,
-                result=result,
-                agent_name="orchestrator",
-                execution_time_ms=int((time.monotonic() - start) * 1000),
-                metadata={"type": "orchestrated"},
-            )
-        except Exception as e:
-            return AgentResponse(
-                success=False,
-                result=str(e),
-                agent_name="orchestrator",
-                execution_time_ms=int((time.monotonic() - start) * 1000),
-                metadata={"error": str(e)},
-            )
-
     def _log_routing(
         self,
         task: Task,

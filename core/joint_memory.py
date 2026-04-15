@@ -39,7 +39,7 @@ async def joint_save(
     """Write to joint brain. source: 'opencode' | 'claude-code' | 'legionbot'."""
     _ensure_dirs()
     slug = _slug(content)
-    ts = str(asyncio.get_event_loop().time())
+    ts = str(asyncio.get_running_loop().time())
     entry_id = int(
         hashlib.md5(f"{source}{slug}{ts}".encode()).hexdigest()[:8], 16
     )

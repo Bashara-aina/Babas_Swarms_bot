@@ -192,4 +192,4 @@ async def cmd_biz_summary(msg: Message) -> None:
     summary = await get_business_summary()
     deployments = await check_vercel_deployments()
     full = summary + "\n\n" + deployments
-    await status.edit_text(full, parse_mode="Markdown")
+    await status.edit_text(full, parse_mode="HTML")

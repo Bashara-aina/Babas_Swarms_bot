@@ -223,13 +223,11 @@ class SessionManager:
         session.last_active = time.time()
         self._active_sessions[user_id] = session
 
-        # Restore thread context
-        if session.thread_id and session.thread_history:
-            try:
-                from agents import ACTIVE_THREADS
-                ACTIVE_THREADS[session.thread_id] = session.thread_history
-            except Exception:
-                pass
+        # Restore thread context — NOTE: ACTIVE_THREADS no longer exists in agents.py.
+        # Thread history is preserved in session.persistence_data for audit purposes
+        # but the in-memory thread restore path is removed (it never worked).
+        _ = session.thread_id
+        _ = session.thread_history
 
         return session
 

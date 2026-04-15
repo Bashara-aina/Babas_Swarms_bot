@@ -1,17 +1,19 @@
 ---
-title: "DMM: Deep Motion Modulation for Skeleton Action Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [dmm, deep-motion, motion-modulation, skeleton-action, velocity, temporal-modeling, pose-activity]
-authors: [Yu et al.]
-type: research
-summary: "DMM (Deep Motion Modulation, Yu et al. ICCV 2023) modulates skeleton features using deep motion representations — velocity, acceleration, and jerk. Motion features extracted at multiple temporal scales enable fine-grained action recognition. Validates motion-based modulation as effective technique for skeleton action."
-wikilinks:
-  - [[mmn]]
-  - [[mans-tarm]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2307.07754
+title: Dmm Motion
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2307.07754](https://arxiv.org/abs/2307.07754)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # DMM: Deep Motion Modulation

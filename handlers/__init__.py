@@ -17,7 +17,9 @@ from handlers import (
     brain,
     communications,
     debate_handlers,
+    gstack,
     harvest_review,
+    hermes,
     legion_extras,
     business_handler,
     wiki_handler,
@@ -35,11 +37,13 @@ from handlers import (
     orchestrate,
     overnight_handler,
     persona_handler,
+    plandex_commands,
     pm,
     research,
     session_handler,
     sessions,
     skills,
+    swe_commands,
     system,
     tasks,
     upgrade,
@@ -52,12 +56,15 @@ from handlers.wiki import router as wiki_router
 # overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
     computer.router,  # /do /screen /click /type /key /cmd /install
+    plandex_commands.router,  # /code /diff /apply /abort
+    swe_commands.router,  # /fix /fix_dry
     communications.router,  # /emails /inbox /calendar
     runbook_handler.router,  # /runbook
     business_handler.router,  # /db /site_health /bookings /db_schema
     github_intel_handler.router,  # /github_intel /eval_repo /upgrade_from
     whatsapp_handler.router,  # /wa /wa_reply /wa_qr /wa_status
     system.router,  # /start /stats /keys /models /git /maintenance /gpu
+    hermes.router,  # /hermes /hermes-search /hermes-delegate /hermes-tools /hermes-smoke
     research.router,  # /scrape /research /paper /ask_paper
     draft.router,  # /draft
     memory_commands.router,  # /memory /remember /recall /emotion /opinions /forget /profile /teach
@@ -77,6 +84,7 @@ _ROUTER_ORDER = [
     media_tools.router,  # /imagine /search /speak + F.photo (MiniMax media tools)
     inline.router,  # inline_query
     skills.router,  # /skills /skill /skill_reload
+    gstack.router,  # /review /ship /officehours /codex /investigate /qa /careful /planreview
     persona_handler.router,  # /persona /mood /persona_reset /persona_note
     ecc_compat.router,  # /harness_audit /model_route /quality_gate /verify /plan /checkpoint
     e2e.router,  # /e2etest /e2eplan /dbquery /dbhealth /dbtables

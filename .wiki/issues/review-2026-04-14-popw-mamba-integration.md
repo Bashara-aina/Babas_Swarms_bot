@@ -1,3 +1,20 @@
+---
+title: Review 2026 04 14 Popw Mamba Integration
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- issues
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'Loop: #1 (first review)'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Review: POPW Mamba Integration
 Date: 2026-04-14
 Reviewer: @reviewer

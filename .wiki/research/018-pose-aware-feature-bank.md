@@ -1,15 +1,21 @@
 ---
-title: "Pose-Aware Temporal Feature Bank"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [feature-bank, temporal-modeling, pose-conditioned, multi-task-learning, video-understanding, caching]
-authors: [Bashara]
-type: research
-summary: "Design and rationale for POPW's Pose-Aware Temporal Feature Bank — stores T=8 frames of PoseFiLM-modulated C5 features (not raw C5), enabling temporal reasoning on pose-conditioned representations without expensive per-frame backbone recomputation."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
+title: Pose Aware Feature Bank
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The Feature Bank is a sliding-window memory that stores the most recent $T-1$
+  pose-conditioned feature vectors alongside the current frame, enabling a BiGRU to
+  reason over a temporal context window...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Pose-Aware Temporal Feature Bank

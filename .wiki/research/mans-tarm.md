@@ -1,17 +1,19 @@
 ---
-title: "MANs & TARM: Motion Attention Networks and Temporal Attention Recurrent Module"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [motion-attention, tarm, temporal-attention, skeleton-action, pose-activity, attention-mechanism, recurrent]
-authors: [Xie et al.]
-type: research
-summary: "MANs (Motion Attention Networks) and TARM (Temporal Attention Recurrent Module) by Xie et al. use motion-based attention for skeleton action recognition. Motion attention computes attention weights based on pose velocity — relevant frames get high attention. TARM combines this with recurrent modules for temporal modeling. Foundation for MMN's motion-guided approach."
-wikilinks:
-  - [[mmn]]
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/1804.08254
+title: Mans Tarm
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [1804.08254](https://arxiv.org/abs/1804.08254)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MANs & TARM: Motion Attention for Skeleton Action Recognition

@@ -1,0 +1,38 @@
+# Promptflow evaluation — intent_router_eval
+# Run: pf run create --flow . --data ./test_cases.jsonl --column-mapping text=${data.text}
+
+name: intent_router_eval
+inputs:
+  test_cases_path: str
+  model: str = "groq/llama-3.3-70b-versatile"
+outputs:
+  precision: float
+  recall: float
+  f1: float
+  accuracy: float
+
+nodes:
+  - name: load_cases
+    type: python
+    source: load_cases.py
+    inputs:
+      test_cases_path: ${inputs.test_cases_path}
+
+  - name: classify
+    type: llm
+    provider: litellm
+    model: ${inputs.model}
+    prompt: |
+      Classify this message into ONE of these intents:
+      coding, research, browser, debate, computer, memory, communications,
+      scheduling, creative, data_analysis, general
+
+      Message: {{text}}
+      Respond with ONLY the intent name, nothing else.
+
+  - name: score
+    type: python
+    source: score.py
+    inputs:
+      predictions: ${classify.output}
+      ground_truth: ${load_cases.output}

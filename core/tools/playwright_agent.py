@@ -96,8 +96,7 @@ async def scrape(url: str) -> str:
     Returns:
         Page text string.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _scrape_sync, url)
+    return await asyncio.run_in_executor(None, _scrape_sync, url)
 
 
 async def screenshot(url: str) -> Path:
@@ -111,5 +110,4 @@ async def screenshot(url: str) -> Path:
     Returns:
         Path to the PNG file.
     """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _screenshot_sync, url)
+    return await asyncio.run_in_executor(None, _screenshot_sync, url)

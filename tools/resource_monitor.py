@@ -204,8 +204,7 @@ async def get_resource_snapshot(force: bool = False) -> ResourceSnapshot:
         if not force and _cache is not None and (now - _cache.timestamp) < CACHE_TTL:
             return _cache
         # Run blocking I/O in thread pool so event loop isn't blocked
-        loop = asyncio.get_event_loop()
-        _cache = await loop.run_in_executor(None, _build_snapshot)
+        _cache = await asyncio.to_thread(_build_snapshot)
         return _cache
 
 

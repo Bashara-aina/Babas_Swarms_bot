@@ -1,17 +1,19 @@
 ---
-title: "VideoMamba & Video Mamba Suite: Mamba for Video Understanding"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [video-mamba, temporal-modeling, mamba, video-understanding, action-recognition, self-distillation, multimodal]
-authors: [Li et al., Chen et al.]
-type: research
-summary: "VideoMamba (Li et al. 2024) adapts Mamba for video action recognition with linear-complexity temporal modeling and 4 core abilities. Video Mamba Suite (Chen et al. 2024) benchmarks 14 Mamba variants in 4 roles across 12 video tasks — identifies Mamba as a viable Transformer alternative and provides architecture selection guide for POPW temporal head."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[vision-mamba]]
-  - [[mamba-motion-generation]]
-  - [[ms-temba]]
-source: https://arxiv.org/abs/2403.06977
+title: Video Mamba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '**arXiv**: [2403.06977](https://arxiv.org/abs/2403.06977)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # VideoMamba & Video Mamba Suite

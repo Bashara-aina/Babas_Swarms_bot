@@ -134,9 +134,13 @@ async def cmd_swarm(msg: Message) -> None:
                 topology = "sequential"
 
         from core.swarm_topologies import run_topology
+        from core.swarm_agent_selector import get_selector
 
-        team = ["general", "coding", "debug", "architect"]
-        result = await run_topology(task=task, topology=topology, agent_names=team)
+        selector = get_selector()
+        team = selector.select(task, top_k=5, min_score=0.8)
+        agent_names = [a["key"] for a in team]
+
+        result = await run_topology(task=task, topology=topology, agent_names=agent_names)
         await status.delete()
         await send_chunked(msg, result.final_output or "(empty output)", model_used=f"swarm/{result.topology_used}")
     except Exception as e:

@@ -1,17 +1,19 @@
 ---
-title: "SpikMamba: SNN + Mamba for Event Camera Action Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [spikmamba, snn, event-camera, mamba, action-recognition, neuromorphic, energy-efficient, pose]
-authors: [Chen et al.]
-type: research
-summary: "SpikMamba (Chen et al. 2024) combines Spiking Neural Networks (SNN) with Mamba for event camera action recognition. Event cameras capture per-pixel brightness changes asynchronously — ideal for high-speed motion capture. Validates Mamba's energy efficiency with SNN spike coding for real-time pose tracking on low-power hardware."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[vision-mamba]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2410.16746
+title: Spikmamba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2410.16746](https://arxiv.org/abs/2410.16746)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # SpikMamba: SNN + Mamba for Event Camera Action Recognition

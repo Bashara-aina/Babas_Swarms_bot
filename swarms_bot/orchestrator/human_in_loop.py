@@ -71,7 +71,7 @@ class HumanApprovalGate:
             markup,
         )
 
-        future: asyncio.Future = asyncio.get_event_loop().create_future()
+        future: asyncio.Future = asyncio.get_running_loop().create_future()
         self._pending[run_id] = future
 
         try:
@@ -102,7 +102,7 @@ class HumanApprovalGate:
             None,
         )
 
-        future: asyncio.Future = asyncio.get_event_loop().create_future()
+        future: asyncio.Future = asyncio.get_running_loop().create_future()
         self._pending[f"clarify:{run_id}"] = future
 
         try:

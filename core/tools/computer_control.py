@@ -507,7 +507,7 @@ async def desktop_screenshot(region: Optional[tuple] = None) -> bytes:
     Raises:
         RuntimeError: If running headless without X11 display.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _get_controller().screenshot, region)
 
 
@@ -523,7 +523,7 @@ async def read_screen(region: Optional[tuple] = None) -> str:
     Raises:
         RuntimeError: If running headless without X11 display.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _get_controller().read_screen_text, region)
 
 
@@ -540,7 +540,7 @@ async def analyze_screen(question: str, region: Optional[tuple] = None) -> str:
     Raises:
         RuntimeError: If running headless without X11 display.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _get_controller().analyze_screen_sync, question, region)
 
 
@@ -556,7 +556,7 @@ async def click_on(text: str) -> bool:
     Raises:
         RuntimeError: If running headless without X11 display.
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _get_controller().click_element, text)
 
 

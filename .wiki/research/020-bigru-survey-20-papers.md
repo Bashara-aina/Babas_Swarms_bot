@@ -1,17 +1,21 @@
 ---
-title: "BiGRU Temporal Networks: 20-Paper Survey"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [biGRU, bigru, temporal-action-recognition, feature-bank, video-understanding, multi-task-learning, pose, activity-detection, deep-survey]
-authors: [Bashara]
-type: research
-summary: "Complete survey of 20 academic papers on BiGRU/GRU temporal modeling and feature bank approaches for action recognition. Covers 2014-2022 literature with detailed per-paper analysis, architectural comparisons, and POPW positioning."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[pose-aware-feature-bank]]
-  - [[projects/popw-multi-task-ikea]]
-  - [[multi-task-learning-architecture]]
+title: Bigru Survey 20 Papers
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Survey of temporal action recognition literature focused on recurrent architectures
+  (BiGRU, GRU, LSTM), feature bank mechanisms, and multi-task learning with pose +
+  detection + activity. This is th...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # BiGRU Temporal Networks: 20-Paper Survey

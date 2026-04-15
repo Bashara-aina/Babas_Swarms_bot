@@ -1,16 +1,21 @@
 ---
-title: "Pose-Conditioned Temporal Modeling"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [pose-conditioning, temporal-modeling, film, pose-estimation, activity-recognition, multi-task-learning]
-authors: [Bashara]
-type: research
-summary: "The tight feedback loop between pose estimation and activity recognition — pose predictions condition semantic features which are then temporally modeled. This bidirectional relationship is POPW's core innovation vs prior work."
-wikilinks:
-  - [[bigru-activity-recognition]]
-  - [[pose-aware-feature-bank]]
-  - [[tasks/pose-estimation]]
-  - [[projects/popw-multi-task-ikea]]
+title: Pose Conditioned Temporal Modeling
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: The fundamental limitation in prior multi-task pose + activity systems is
+  that pose and activity are processed in separate tracks with no information flow
+  between them. Pose estimation produces hea...
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Pose-Conditioned Temporal Modeling

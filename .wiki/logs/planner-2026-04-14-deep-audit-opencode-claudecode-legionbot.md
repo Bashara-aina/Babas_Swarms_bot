@@ -1,3 +1,20 @@
+---
+title: Planner 2026 04 14 Deep Audit Opencode Claudecode Legionbot
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- Minimal Node.js project with package.json, node_modules'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Deep Audit — OpenCode, Claude Code, LegionBot
 Date: 2026-04-14
 Type: RESEARCH

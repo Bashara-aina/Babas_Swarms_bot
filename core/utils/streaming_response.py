@@ -73,7 +73,7 @@ class StreamingResponseManager:
         queue: asyncio.Queue[str | None] = asyncio.Queue()
 
         # Run OI in thread, push chunks to queue
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         producer = loop.run_in_executor(
             None, self._produce_chunks, effective_model, task, agent_key, queue, loop, chat_id
         )
@@ -117,7 +117,7 @@ class StreamingResponseManager:
                     f"Using local Ollama model instead…",
                     parse_mode="HTML",
                 )
-                return "ollama_chat/qwen3.5:35b"
+                return "ollama_chat/gemma4:e4b"
 
             elif status == "degraded":
                 # Recently rate-limited but usable — warn user
@@ -175,7 +175,7 @@ class StreamingResponseManager:
                         ),
                         loop,
                     )
-                    current_model = "ollama_chat/qwen3.5:35b"
+                    current_model = "ollama_chat/gemma4:e4b"
                     # Don't break - continue with Ollama attempt
             except Exception as exc:
                 logger.debug("Circuit check in retry loop failed: %s", exc)
@@ -236,8 +236,8 @@ class StreamingResponseManager:
                                 ),
                                 loop,
                             )
-                            current_model = "ollama_chat/qwen3.5:35b"
-                            await asyncio.sleep(1)  # Brief pause
+                            current_model = "ollama_chat/gemma4:e4b"
+                            time.sleep(1)  # Brief pause (thread-safe)
                             continue  # Retry immediately with Ollama
                     except Exception:
                         pass
@@ -255,7 +255,7 @@ class StreamingResponseManager:
                         queue.put(f"\n⏳ Rate limited (attempt {attempt + 1}/{max_retries}), retrying in {wait}s…\n"),
                         loop,
                     )
-                    await asyncio.sleep(wait)
+                    time.sleep(wait)
 
                 elif is_rate_limit and attempt == max_retries:
                     # Exhausted all retries — fallback to Ollama
@@ -269,8 +269,8 @@ class StreamingResponseManager:
                         ),
                         loop,
                     )
-                    current_model = "ollama_chat/qwen3.5:35b"
-                    await asyncio.sleep(2)
+                    current_model = "ollama_chat/gemma4:e4b"
+                    time.sleep(2)
 
                     try:
                         import core.interpreter_bridge as interpreter_bridge

@@ -1,17 +1,19 @@
 ---
-title: "Motion Mamba: Hierarchical Bidirectional SSM for Motion Generation"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [motion-mamba, motion-generation, skeleton-generation, hierarchical-ssm, bidirectionalssm, mamba, pose-sequence]
-authors: [Zhang et al.]
-type: research
-summary: "Motion Mamba (Zhang et al. 2024) uses hierarchical bidirectional SSM for skeleton-based motion generation — the most directly relevant Mamba paper for POPW's pose sequence modeling. Motion tokens from 17-keypoint skeleton → bidirectional Mamba → generated motion sequence. Validates SSM can replace RNNs for sequential pose modeling."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[vision-mamba]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2403.07487
+title: Mamba Motion Generation
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2403.07487](https://arxiv.org/abs/2403.07487)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Motion Mamba: Hierarchical Bidirectional SSM for Motion Generation

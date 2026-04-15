@@ -160,7 +160,7 @@ async def cmd_capabilities(message: Message) -> None:
         coverage = result.get("coverage_pct", 0)
         lines.append(f"\n📊 Coverage: {coverage}% ({len(present)}/{len(present) + len(missing)})")
 
-        await message.answer("\n".join(lines), parse_mode="Markdown")
+        await message.answer("\n".join(lines), parse_mode="HTML")
 
     except Exception as exc:
         logger.exception("Capabilities command error: %s", exc)
@@ -203,7 +203,7 @@ async def cmd_self_report(message: Message) -> None:
 
 *Run /capabilities for full capability status.*"""
 
-        await message.answer(report, parse_mode="Markdown")
+        await message.answer(report, parse_mode="HTML")
 
     except Exception as exc:
         logger.exception("Self report command error: %s", exc)

@@ -4,8 +4,11 @@ model: minimax-coding-plan/MiniMax-M2.7
 temperature: 0.0
 maxSteps: 30
 permissions:
-  edit: deny
+  edit: allow
   bash: allow
+  read: allow
+  glob: allow
+  grep: true
 ---
 # Reviewer Agent — Precision Quality Gate
 

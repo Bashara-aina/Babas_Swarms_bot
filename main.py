@@ -646,6 +646,17 @@ async def _run_group_a_startup(bot: Bot) -> None:
         except Exception as e:
             logger.warning("Hook init failed (non-fatal): %s", e)
 
+        # Start observation queue (fire-and-forget non-blocking capture)
+        try:
+            from core.memory.observation_capture import register_observation_hooks
+            from core.memory.observation_queue import get_observation_queue
+
+            register_observation_hooks()
+            get_observation_queue().start()
+            logger.info("Observation capture system started")
+        except Exception as e:
+            logger.warning("Observation queue init failed (non-fatal): %s", e)
+
     # Run all Group A tasks in parallel with a 30s timeout
     await asyncio.wait_for(
         asyncio.gather(
@@ -1206,7 +1217,7 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
         pass
 
     # 4. Close DB connections
-    logger.info("Shutdown step 4/5: closing DB connections")
+    logger.info("Shutdown step 4/6: closing DB connections")
     try:
         if _harvester_scheduler:
             await _harvester_scheduler.stop()
@@ -1238,8 +1249,18 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
     except Exception:
         pass
 
-    # 5. Log shutdown
-    logger.info("Shutdown step 5/5: shutdown complete")
+    # 5. Flush and stop observation queue
+    logger.info("Shutdown step 5/6: stopping observation queue")
+    try:
+        from core.memory.observation_queue import get_observation_queue
+
+        queue = get_observation_queue()
+        await queue.stop()
+    except Exception:
+        pass
+
+    # 6. Log shutdown
+    logger.info("Shutdown step 6/6: shutdown complete")
     logger.info("Legion shutdown complete — exiting cleanly")
 
 

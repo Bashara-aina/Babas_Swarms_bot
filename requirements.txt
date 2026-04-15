@@ -107,10 +107,35 @@ crawl4ai>=0.4.0  # AI-friendly web crawler
 python-pptx>=0.6.21  # PowerPoint file parsing
 ebooklib>=0.18  # EPUB file parsing
 
+# === REPO #1: Plandex — AI pair programming with plan/diff/apply ===
+# plandex>=0.1.0  # install via: curl -sSL https://plandex.ai/install.sh | sh
+
+# === REPO #3: E2B — cloud sandboxes for safe code execution ===
+# e2b>=0.5.0  # install separately, requires E2B_API_KEY
+
+# === REPO #9: Burr — HITL state machines ===
+# burr>=1.0.0  # pip install burr
+
+# === REPO #12: Zep — knowledge graph memory (optional upgrade) ===
+# pip install zep-js
+
+# === REPO #19: MinerU — PDF intelligence for academic papers ===
+# pip install magic-pdf
+
 # === Nihongo Mode — Japanese Teacher Plugin ===
 pykakasi>=2.2.1  # furigana + romaji conversion
 gtts>=2.5.0  # TTS fallback (no API key needed)
 # openai-whisper>=20231117  # local whisper (optional, only if WHISPER_USE_API=false)
+
+# === JWT Auth (FastAPI + PostgreSQL) ===
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.29.0
+pydantic-settings>=2.0.0
 
 # Host machine tools (install via apt, not pip):
 # sudo apt install xdotool wmctrl scrot xclip xdg-utils

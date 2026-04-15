@@ -23,7 +23,7 @@ async def cmd_memory_stats(msg: Message) -> None:
         await msg.answer("memory system is not initialized yet.")
         return
 
-    stats = memory.get_memory_stats()
+    stats = await memory.get_memory_stats()
     core_facts = memory.core.all()
 
     lines = [
@@ -148,22 +148,35 @@ async def cmd_opinions(msg: Message) -> None:
     await msg.answer(f"<b>🧠 What I currently think</b>\n\n<pre>{opinions_block}</pre>", parse_mode="HTML")
 
 
-@router.message(Command("forget"))
 async def cmd_forget(msg: Message) -> None:
     if not is_allowed(msg):
         return
     from llm_client import memory
 
-    key = (msg.text or "").removeprefix("/forget").strip()
-    if not key:
+    raw = (msg.text or "").removeprefix("/forget").strip()
+    if not raw:
         await msg.answer("Usage: /forget <core memory key>")
         return
+
+    # Numeric arg → instinct deletion (delegate to brain handler)
+    if raw.isdigit():
+        try:
+            from tools.persistence import delete_instinct
+            ok = await delete_instinct(int(raw))
+            if ok:
+                await msg.answer(f"✅ Instinct #{raw} deleted.")
+            else:
+                await msg.answer(f"Instinct #{raw} not found.")
+        except Exception as e:
+            await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+        return
+
+    # String key → core memory deletion
     if memory is None:
         await msg.answer("memory system is not initialized yet.")
         return
-
-    memory.core.delete(key)
-    await msg.answer(f"Removed '{key}' from core memory.")
+    memory.core.delete(raw)
+    await msg.answer(f"Removed '{raw}' from core memory.")
 
 
 @router.message(Command("profile"))

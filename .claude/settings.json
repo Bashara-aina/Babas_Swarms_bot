@@ -15,8 +15,19 @@
       "Bash(grep -E \"\\\\.py$\")"
     ]
   },
+  "mcpServers": {
+    "contree": {
+      "command": "npx",
+      "args": ["-y", "@nebius/contree-mcp", "--path", "/home/newadmin/swarm-bot"],
+      "env": {}
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin"],
+      "env": {}
+    }
+  },
   "terminal.integrated.commandsToSkipShell": [
     "-workbench.action.quickOpen"
   ]
-  
 }

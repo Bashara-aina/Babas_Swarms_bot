@@ -1,3 +1,22 @@
+---
+title: Planner 2026 04 14 Deep Audit Contracts Batch2
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: Audit swarm-bot for async violations (blocking I/O, time.sleep, threading)
+  and memory architecture (facade vs mem0 vs memory_manager confusion). Check if any
+  blocking I/O remains in handlers/core/a...
+wikilinks: []
+confidence: medium
+source: research
+---
 ### CONTRACT #6: Async Compliance & Memory Architecture
 
 WHAT:

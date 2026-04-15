@@ -19,12 +19,17 @@ Verified working models (live logs 2026-03-09):
 """
 
 from __future__ import annotations
+import asyncio
 import logging
 import re
 import time
+import threading
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+# ── Thread-safety lock for ACTIVE_THREADS dict ────────────────────────────────
+_THREADS_LOCK = threading.Lock()  # sync lock for use in sync functions accessing shared dict
 
 # ── Personality wrapper injected into EVERY agent system prompt ──────────────
 PERSONALITY_WRAPPER = """
@@ -1750,33 +1755,56 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
 
     This is a *sync shim* that calls the new async
     ``core.system_prompt_builder.build_system_prompt`` internally.
-    When a running loop is detected (pytest async mode), it schedules the
-    coroutine on the loop's executor to avoid deadlocking the loop itself.
+
+    WARNING: ``run_in_executor`` with nested ``asyncio.run()`` is a deadlock
+    trap when called from a thread that already has a running event loop.
+    The executor pattern is only safe when no running loop exists.  In
+    practice, call sites that need async behavior should ``await`` the real
+    async function directly — this shim exists only for the rare sync-code
+    path (e.g. ``__repr__`` of an agent object) that genuinely cannot yield.
     """
     import asyncio
-    from concurrent.futures import ThreadPoolExecutor
 
     from core.system_prompt_builder import build_system_prompt as _async_build
 
+    # Fast path: no running loop — use the thread pool safely.
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        # No running loop — create one (normal for sync call paths)
+        # No running loop — asyncio.run() on a fresh loop is safe.
         return asyncio.run(_async_build(user_id=user_id, query=role_prompt, extras={}))
 
-    # Running loop detected — submit to loop's default executor so we don't
-    # deadlock the loop (which would prevent the task from ever executing).
-    # Use a brief timeout to avoid hanging tests.
+    # Running loop detected — use run_in_executor but WITHOUT nested asyncio.run.
+    # We pass the coroutine object to the thread and let it await directly
+    # using the thread's own fresh loop (not the caller's loop).
+    import concurrent.futures
+
+    def _thread_await(coro):
+        # Create a fresh event loop in this thread to await the coroutine.
+        # asyncio.run() is safe here ONLY because this thread was borrowed from
+        # the thread pool and does NOT share the caller's event loop.
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        try:
+            return new_loop.run_until_complete(coro)
+        finally:
+            new_loop.close()
+
     try:
-        future = loop.run_in_executor(
-            None,
-            lambda: asyncio.run(_async_build(user_id=user_id, query=role_prompt, extras={})),
-        )
-        return asyncio.wrap_future(future).result(timeout=10)
+        coro = _async_build(user_id=user_id, query=role_prompt, extras={})
+        future = loop.run_in_executor(None, lambda: _thread_await(coro))
+        # Wait in a way that doesn't block the caller's loop.
+        return asyncio.wrap_future(future).result(timeout=30)
     except Exception:
         # Fallback: return the role prompt with personality wrapper directly
         wrapper = PERSONALITY_WRAPPER.strip() if PERSONALITY_WRAPPER else ""
         return f"{wrapper}\n\n{role_prompt}" if wrapper else role_prompt
+
+
+def build_system_prompt_async(role_prompt: str, user_id: str = "") -> Coroutine[str, str, str]:
+    """Async entry point — use this instead of build_system_prompt in async code."""
+    from core.system_prompt_builder import build_system_prompt as _async_build
+    return _async_build(user_id=user_id, query=role_prompt, extras={})
 
 
 def list_agents() -> str:
@@ -1816,18 +1844,19 @@ def list_all_departments() -> list[str]:
 
 
 def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
-    if thread_id not in ACTIVE_THREADS:
-        ACTIVE_THREADS[thread_id] = []
-    ACTIVE_THREADS[thread_id].append(
-        {
-            "agent": agent,
-            "task": task,
-            "result": result[:500],
-            "timestamp": time.time(),
-        }
-    )
-    if len(ACTIVE_THREADS[thread_id]) > 10:
-        ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
+    with _THREADS_LOCK:
+        if thread_id not in ACTIVE_THREADS:
+            ACTIVE_THREADS[thread_id] = []
+        ACTIVE_THREADS[thread_id].append(
+            {
+                "agent": agent,
+                "task": task,
+                "result": result[:500],
+                "timestamp": time.time(),
+            }
+        )
+        if len(ACTIVE_THREADS[thread_id]) > 10:
+            ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
     logger.info("Added to thread '%s': %s agent", thread_id, agent)
 
 
@@ -1844,26 +1873,29 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
 
 
 def list_threads() -> str:
-    if not ACTIVE_THREADS:
-        return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-    lines = ["<b>📌 Active Threads</b>\n"]
-    for tid, turns in ACTIVE_THREADS.items():
-        last = turns[-1]
-        t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
-        lines.append(f"  📌 <b>{tid}</b> — {len(turns)} turns (last: {t})")
-    return "\n".join(lines)
+    with _THREADS_LOCK:
+        if not ACTIVE_THREADS:
+            return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
+        lines = ["<b>📌 Active Threads</b>\n"]
+        for tid, turns in ACTIVE_THREADS.items():
+            last = turns[-1]
+            t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
+            lines.append(f"  📌 <b>{tid}</b> — {len(turns)} turns (last: {t})")
+        return "\n".join(lines)
 
 
 def list_threads_raw() -> list[str]:
-    return list(ACTIVE_THREADS.keys())
+    with _THREADS_LOCK:
+        return list(ACTIVE_THREADS.keys())
 
 
 def clear_thread(thread_id: str) -> bool:
-    if thread_id in ACTIVE_THREADS:
-        del ACTIVE_THREADS[thread_id]
-        logger.info("Cleared thread '%s'", thread_id)
-        return True
-    return False
+    with _THREADS_LOCK:
+        if thread_id in ACTIVE_THREADS:
+            del ACTIVE_THREADS[thread_id]
+            logger.info("Cleared thread '%s'", thread_id)
+            return True
+        return False
 
 
 _LAZY_AGENT_SUBMODULES = frozenset({"owl_agent", "ag2_pipeline"})

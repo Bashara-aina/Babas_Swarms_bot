@@ -1,17 +1,19 @@
 ---
-title: "MS-Temba: Multi-Scale Temporal Action Detection with SSM"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [ms-temba, temporal-action-detection, multi-scale, ssm, video-understanding, action-segmentation, mamba, ikea-dataset]
-authors: [Sinha et al.]
-type: research
-summary: "MS-Temba (Sinha et al. 2025) uses multi-scale temporal SSM for action detection in untrimmed videos. Multiple SSM branches at different temporal scales capture both short actions (pick up) and long phases (aligning parts). Most relevant to POPW for multi-scale temporal reasoning across IKEA assembly phases."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[mamba-pose-activity-survey]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2501.06138
+title: Ms Temba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2501.06138](https://arxiv.org/abs/2501.06138)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MS-Temba: Multi-Scale Temporal Action Detection

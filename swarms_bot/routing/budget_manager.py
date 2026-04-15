@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -89,10 +89,13 @@ class BudgetManager:
             'daily_remaining', 'monthly_remaining'.
         """
         now = time.time()
-        today_start = datetime.now().replace(
+        # Use explicit timezone to be unambiguous across system configurations.
+        # .astimezone() gives timezone-aware local (JST) datetime; .timestamp()
+        # then correctly gives Unix epoch for midnight in that timezone.
+        today_start = datetime.now().astimezone().replace(
             hour=0, minute=0, second=0, microsecond=0
         ).timestamp()
-        month_start = datetime.now().replace(
+        month_start = datetime.now().astimezone().replace(
             day=1, hour=0, minute=0, second=0, microsecond=0
         ).timestamp()
 
@@ -141,13 +144,13 @@ class BudgetManager:
         """
         now = time.time()
         if period == "day":
-            cutoff = datetime.now().replace(
+            cutoff = datetime.now().astimezone().replace(
                 hour=0, minute=0, second=0, microsecond=0
             ).timestamp()
         elif period == "week":
             cutoff = now - 7 * 86400
         else:
-            cutoff = datetime.now().replace(
+            cutoff = datetime.now().astimezone().replace(
                 day=1, hour=0, minute=0, second=0, microsecond=0
             ).timestamp()
 

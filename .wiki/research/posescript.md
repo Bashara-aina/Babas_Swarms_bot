@@ -1,16 +1,19 @@
 ---
-title: "PoseScript: 3D Body Pose from 2D Images using Pose Priors"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [posescript, 3d-pose, pose-estimation, smpl, pose-prior, pose-from-image, reconstruction, mtl]
-authors: [Delmas et al.]
-type: research
-summary: "PoseScript (Delmas et al. ECCV 2022) reconstructs 3D body pose from 2D images using learned pose priors — SMPL model + neural network encoder. The pose prior captures natural human body configurations. For POPW, relevant for better 3D pose estimation and pose prior-enhanced feature conditioning."
-wikilinks:
-  - [[pose-conditioned-temporal-modeling]]
-  - [[mmn]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2210.11795
+title: Posescript
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2210.11795](https://arxiv.org/abs/2210.11795)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PoseScript: 3D Body Pose from 2D Images

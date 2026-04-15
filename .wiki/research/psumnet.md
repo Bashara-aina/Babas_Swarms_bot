@@ -1,17 +1,19 @@
 ---
-title: "PSUMNet: Part-wise Semantic and Motion Understanding Network"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [psumnet, part-wise, semantic-modulation, skeleton-action, multi-part, body-part, mtl, pose-activity]
-authors: [Trivedi et al.]
-type: research
-summary: "PSUMNet (Trivedi et al. BMVC 2022) introduces part-wise semantic understanding for skeleton action recognition — decomposes body into semantic parts (upper/lower body, left/right arms) and models each separately. Each part has its own motion stream and semantic modulation. Relevant for POPW's per-part pose conditioning."
-wikilinks:
-  - [[mmn]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[bigru-temporal-action-recognition]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2208.05775
+title: Psumnet
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2208.05775](https://arxiv.org/abs/2208.05775)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # PSUMNet: Part-wise Semantic and Motion Understanding

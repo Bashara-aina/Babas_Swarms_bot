@@ -1,13 +1,16 @@
 # /swarm — Intelligent Multi-Agent Pipeline
-# Version: 2.0 | Anti-hallucination enforced | Recursive review loop
+# Version: 3.0 | Memory + Collaboration + Exploration | Anti-hallucination enforced
 
 ## BEFORE STARTING — READ THIS ENTIRE FILE
 
-You are orchestrating a multi-agent pipeline. The pipeline has 4 agents:
+You are orchestrating a multi-agent pipeline. The pipeline has these agents:
+- @explorer  — investigates codebase before planning
+- @memory    — checks cross-session memory before planning
 - @planner   — decomposes task into CONTRACTS (not prose)
 - @worker    — executes one contract at a time, PROVES completion
 - @Diff-Analyzer  — checks proof BEFORE @reviewer sees anything
 - @reviewer  — approves or triggers retry loop
+- @collaborator — pauses for user input on ambiguous/destructive decisions
 
 The pipeline NEVER ends with a ❌ from @reviewer.
 If @reviewer rejects: @worker must fix the specific failures and re-submit.
@@ -15,7 +18,45 @@ Max retry loops: 3. If still failing after 3 loops: STOP and report to user.
 
 ---
 
-## STEP 0 — DETECT TASK TYPE
+## STEP 0 — CONTEXT GATHERING
+
+Before ANYTHING else, gather context:
+
+### 0.1 — Check Memory
+```
+@memory
+OPERATION: read
+TOPIC: [what this task relates to — e.g. "memory system", "handlers", "agents"]
+```
+
+Read `.opencode/memory/MEMORY.md` to see if relevant memory exists.
+If memory exists: incorporate it into planning.
+If memory is stale (old date): update it after task.
+
+### 0.2 — Explore (for complex tasks)
+For RESEARCH, FEATURE, or REFACTOR tasks:
+```
+@explorer
+TASK: [what you need to understand before planning]
+FOCUS: [specific module/file/pattern to investigate]
+```
+
+Run this BEFORE @planner for any task touching unknown code.
+
+### 0.3 — Collaborator Pause (if needed)
+For DEPLOYMENT or potentially destructive tasks:
+```
+@collaborator
+TYPE: confirmation
+ACTION: [what will happen]
+IMPACT: [what changes irreversibly]
+```
+
+Wait for user confirmation before proceeding.
+
+---
+
+## STEP 1 — DETECT TASK TYPE
 
 Before calling @planner, classify the task:
 

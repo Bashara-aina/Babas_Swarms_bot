@@ -1,16 +1,19 @@
 ---
-title: "ST-GCN: Spatial Temporal Graph Convolutional Networks"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [st-gcn, spatial-temporal, graph-convolution, skeleton-action, pose-recognition, foundational, 3d-pose]
-authors: [Yan, Xiong, Lin]
-type: research
-summary: "ST-GCN (Yan et al. AAAI 2018) is the foundational paper for skeleton-based action recognition using graph convolutions on the skeletal graph. Joints are nodes, bones are edges, temporal convolutions along the frame dimension. POPW's OpenPose output feeds into ST-GCN-style processing for pose-based activity recognition."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/1801.07455
+title: St Gcn
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [1801.07455](https://arxiv.org/abs/1801.07455)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # ST-GCN: Spatial Temporal Graph Convolutional Networks

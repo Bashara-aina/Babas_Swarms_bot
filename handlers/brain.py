@@ -162,20 +162,11 @@ async def cmd_instincts(msg: Message) -> None:
 async def cmd_forget(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    arg = (msg.text or "").removeprefix("/forget").strip()
-    if not arg.isdigit():
-        await msg.answer("usage: <code>/forget &lt;instinct_id&gt;</code>", parse_mode="HTML")
-        return
-    try:
-        from tools.persistence import delete_instinct
-
-        ok = await delete_instinct(int(arg))
-        if ok:
-            await msg.answer(f"✅ Instinct #{arg} deleted.")
-        else:
-            await msg.answer(f"Instinct #{arg} not found.")
-    except Exception as e:
-        await msg.answer(f"error: <code>{html_mod.escape(str(e))}</code>", parse_mode="HTML")
+    await msg.answer(
+        "ℹ️ /forget now lives in /memory. Use:\n"
+        "  /forget <key>  — delete a core memory entry\n"
+        "  /forget <id>   — delete an instinct by number"
+    )
 
 
 # ── /self_review ───────────────────────────────────────────────────────────────

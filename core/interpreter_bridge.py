@@ -143,7 +143,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
             "Proactively falling back to Ollama to avoid delays.",
             provider, _RATE_LIMIT_COOLDOWN - cooldown_remaining
         )
-        model = "ollama_chat/qwen3.5:35b"
+        model = "ollama_chat/gemma4:e4b"
 
     if model.startswith("ollama_chat/"):
         interpreter.llm.model = model
@@ -188,12 +188,12 @@ def configure_interpreter(model: str, agent_key: str) -> str:
             logger.warning(
                 "No API key for provider '%s' — falling back to local Ollama", provider
             )
-            interpreter.llm.model = "ollama_chat/qwen3.5:35b"
+            interpreter.llm.model = "ollama_chat/gemma4:e4b"
             interpreter.llm.api_base = "http://localhost:11434"
             interpreter.llm.api_key = "ollama"
             interpreter.llm.context_window = 8192
             interpreter.offline = True
-            return "ollama_chat/qwen3.5:35b"
+            return "ollama_chat/gemma4:e4b"
         # Set both the attribute AND the env var so LiteLLM picks it up as BYOK
         interpreter.llm.api_key = api_key
         if env_var:
@@ -203,21 +203,20 @@ def configure_interpreter(model: str, agent_key: str) -> str:
 
     else:
         logger.warning("Unknown model prefix '%s' — falling back to local Ollama", model)
-        interpreter.llm.model = "ollama_chat/qwen3.5:35b"
+        interpreter.llm.model = "ollama_chat/gemma4:e4b"
         interpreter.llm.api_base = "http://localhost:11434"
         interpreter.llm.api_key = "ollama"
         interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
-        model = "ollama_chat/qwen3.5:35b"
+        model = "ollama_chat/gemma4:e4b"
         
     return model  # Return actual model being used
 
 async def _raw_run(model: str, task: str, agent_key: str) -> str:
     """Execute interpreter.chat in thread pool and format output."""
     actual_model = configure_interpreter(model, agent_key)
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
+    result = await asyncio.run_in_executor(
         None,
         lambda: interpreter.chat(task, display=False),
     )

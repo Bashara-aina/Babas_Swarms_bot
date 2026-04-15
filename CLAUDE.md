@@ -433,19 +433,8 @@ P1-3: ✅ Verify soul injection order — Done (test_soul_engine.py and test_sys
 P1-4: ✅ Add langchain-community>=0.3.0 to requirements.txt — Done (line 91: langchain-community>=0.3.0)
 P1-5: ✅ Pin browser-use to exact version — Done (line 100: browser-use==0.1.40)
 P2 — Quality (do after P0+P1 are solid)
-P2-1: Write minimum viable test suite Create tests/ files for the new v9 modules. Minimum required:
-tests/
-├── test_soul_engine.py          # soul loads, context builds, SOUL.md readable
-├── test_intent_router.py        # 23 intents classify correctly on fixture messages
-├── test_system_prompt_builder.py # soul is section 0, all layers present
-├── test_debate_engine.py        # builds debate block from beliefs.json
-└── test_memory_facade.py        # writes route through facade, not direct stores
-
-Use pytest-asyncio with @pytest.mark.asyncio. Add pytest.ini with asyncio_mode = auto.
-P2-2: Add /debate to bot command menu In main.py, update bot.set_my_commands([...]) to include:
-BotCommand("debate", "Debate a topic with Legion"),
-BotCommand("opinion", "Get Legion's honest opinion on something"),
-
+P2-1: ✅ Write minimum viable test suite — Done (tests/test_repo_tools.py: 11 tests for plandex, crawl4ai, nanobrowser, swe_agent_bridge, sandbox_executor, swarm_handoff; tests/test_intent_router.py passes with 28 tests)
+P2-2: ✅ Add /debate to bot command menu — Done (main.py has BotCommand("debate", ...) registered)
 P2-3: Add /budget command Add handlers/admin.py with a /budget command that shows current API spend vs. MAX_PROACTIVE_PER_DAY. This lets Bashara monitor costs without SSH.
 P2-4: Add /soul command Add a /soul handler that returns the current contents of SOUL.md as a Telegram message (chunked). This lets Bashara audit Legion's live identity from the phone.
 P2-5: Consolidate intent router (23 → 18) Merge these overlapping intents in core/intent_router.py:
@@ -514,6 +503,27 @@ RUFLO_PORT=7834
 # Multi-session worktree (set for Claude Code / OpenCode sessions)
 CLAUDE_REPO_ROOT=/home/newadmin/swarm-bot
 CLAUDE_WORKTREES_ROOT=/home/newadmin/.claude/worktrees
+
+# Plandex CLI (P1 — autonomous multi-file editing)
+PLANDEX_PATH=/usr/local/bin/plandex
+PLANDEX_PROJECT_DIR=/home/newadmin/projects
+
+# E2B cloud sandbox (P1 — secure code execution)
+LEGION_SANDBOX_ENABLED=false   # set true only when E2B_API_KEY is set and you want cloud sandboxes
+E2B_API_KEY=
+
+# A2A agent-to-agent protocol (P2 — FastAPI server on port 7842)
+LEGION_A2A_ENABLED=false
+LEGION_A2A_API_KEY=
+DOMAIN=                          # public domain for A2A agent card
+
+# SWE-agent (P1 — GitHub issue → fix → PR)
+SWE_AGENT_PATH=/home/newadmin/swe-agent
+AGENTS_TELEMETRY_ENDPOINT=
+
+# Zep memory graph (P3 — TemporalKnowledgeGraph replacement)
+ZEP_API_KEY=
+ZEP_SERVER_URL=
 
 # Feature flags (set to "true" to enable)
 LEGION_SOUL_ENABLED=true

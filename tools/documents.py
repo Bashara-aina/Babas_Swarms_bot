@@ -50,7 +50,7 @@ async def read_pdf(path: str, pages: str = "all", max_chars: int = 8000) -> str:
                 full = full[:max_chars] + f"\n\n[...truncated, {len(full)} total chars]"
             return f"PDF: {p.name} ({total_pages} pages)\n\n{full}"
 
-    return await asyncio.get_event_loop().run_in_executor(None, _extract)
+    return await asyncio.to_thread(_extract)
 
 
 async def pdf_extract_tables(path: str, pages: str = "all") -> str:
@@ -86,7 +86,7 @@ async def pdf_extract_tables(path: str, pages: str = "all") -> str:
                 return "No tables found in PDF."
             return "\n\n".join(tables_found)
 
-    return await asyncio.get_event_loop().run_in_executor(None, _extract)
+    return await asyncio.to_thread(_extract)
 
 
 # ── Excel ────────────────────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ async def read_excel(path: str, sheet: str = "", max_rows: int = 100) -> str:
         header = f"Excel: {p.name} | Sheet: {ws_name} | Sheets: {', '.join(sheet_names)}\n\n"
         return header + "\n".join(rows)
 
-    return await asyncio.get_event_loop().run_in_executor(None, _read)
+    return await asyncio.to_thread(_read)
 
 
 async def write_excel(
@@ -144,7 +144,7 @@ async def write_excel(
         wb.save(str(p))
         return f"wrote {len(data)} rows to {p}"
 
-    return await asyncio.get_event_loop().run_in_executor(None, _write)
+    return await asyncio.to_thread(_write)
 
 
 async def excel_update_cell(
@@ -167,7 +167,7 @@ async def excel_update_cell(
         wb.save(str(p))
         return f"updated {ws.title}!{cell} = '{value}'"
 
-    return await asyncio.get_event_loop().run_in_executor(None, _update)
+    return await asyncio.to_thread(_update)
 
 
 # ── OCR ──────────────────────────────────────────────────────────────────────
@@ -187,7 +187,7 @@ async def ocr_image(path: str, lang: str = "eng") -> str:
         text = pytesseract.image_to_string(img, lang=lang)
         return f"OCR result ({p.name}, lang={lang}):\n\n{text.strip()}"
 
-    return await asyncio.get_event_loop().run_in_executor(None, _ocr)
+    return await asyncio.to_thread(_ocr)
 
 
 async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
@@ -224,7 +224,7 @@ async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
             return "No text could be extracted from the PDF."
         return "\n\n".join(texts)
 
-    return await asyncio.get_event_loop().run_in_executor(None, _ocr_pdf)
+    return await asyncio.to_thread(_ocr_pdf)
 
 
 # ── Word documents ───────────────────────────────────────────────────────────
@@ -246,7 +246,7 @@ async def read_docx(path: str, max_chars: int = 8000) -> str:
             text = text[:max_chars] + f"\n\n[...truncated, {len(text)} total chars]"
         return f"Word: {p.name} ({len(paragraphs)} paragraphs)\n\n{text}"
 
-    return await asyncio.get_event_loop().run_in_executor(None, _read)
+    return await asyncio.to_thread(_read)
 
 
 # ── CSV ────────────────────────────────────────────────────────────────────
@@ -285,7 +285,7 @@ async def read_csv(path: str, max_rows: int = 200, delimiter: str = ",") -> str:
 
         return f"CSV: {p.name} ({len(rows)} rows)\n\n" + "\n".join(lines)
 
-    return await asyncio.get_event_loop().run_in_executor(None, _read)
+    return await asyncio.to_thread(_read)
 
 
 # ── PowerPoint (PPTX) ────────────────────────────────────────────────────────
@@ -320,7 +320,7 @@ async def read_pptx(path: str, max_slides: int = 50) -> str:
             result = result[:8000] + f"\n\n[...truncated, {len(result)} total chars]"
         return result
 
-    return await asyncio.get_event_loop().run_in_executor(None, _read)
+    return await asyncio.to_thread(_read)
 
 
 # ── EPUB ────────────────────────────────────────────────────────────────────
@@ -367,7 +367,7 @@ async def read_epub(path: str, max_chars: int = 8000) -> str:
             result = result[:max_chars] + f"\n\n[...truncated, {len(result)} total chars]"
         return result
 
-    return await asyncio.get_event_loop().run_in_executor(None, _read)
+    return await asyncio.to_thread(_read)
 
 
 # ── File management ──────────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ async def build_unified_memory_context(user_id: str, query: str) -> str:
         from core.memory.memory_manager import MemoryManager
 
         mm = MemoryManager()
-        base = mm.build_context_block()
+        base = await mm.build_context_block()
         if base:
             parts.append("[WORKING MEMORY]\n" + base)
     except Exception as e:

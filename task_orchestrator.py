@@ -55,6 +55,11 @@ class PendingConfirmation:
     description: str
     fn: Callable[..., Coroutine[Any, Any, str]]
     created_at: float = field(default_factory=time.time)
+    # Resumption checkpoint for execute_chain continuation
+    remaining_steps: tuple[TaskStep, ...] = ()
+    outputs: tuple[str, ...] = ()
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] = field(default=lambda _: asyncio.sleep(0))
+    confirm_fn: Callable[[str, str], Coroutine[Any, Any, None]] = field(default=lambda _,__: asyncio.sleep(0))
 
 
 @dataclass
@@ -90,7 +95,15 @@ async def execute_chain(
         await progress_fn(f"Step {i}/{len(steps)}: {step.description}")
 
         if step.requires_confirmation:
-            action_id = _queue_confirmation(step.description, step.fn)
+            remaining_steps = tuple(steps[i:])
+            action_id = _queue_confirmation(
+                step.description,
+                step.fn,
+                remaining_steps=remaining_steps,
+                outputs=tuple(outputs),
+                progress_fn=progress_fn,
+                confirm_fn=confirm_fn,
+            )
             await confirm_fn(action_id, step.description)
             outputs.append(f"[Step {i} paused — waiting for /confirm yes {action_id}]")
             return "\n\n".join(outputs)
@@ -109,12 +122,23 @@ async def execute_chain(
 
 # ── Confirmation Queue ─────────────────────────────────────────────────────────
 
-def _queue_confirmation(description: str, fn: Callable) -> str:
+def _queue_confirmation(
+    description: str,
+    fn: Callable,
+    remaining_steps: tuple[TaskStep, ...] = (),
+    outputs: tuple[str, ...] = (),
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] = None,
+    confirm_fn: Callable[[str, str], Coroutine[Any, Any, None]] = None,
+) -> str:
     action_id = str(uuid.uuid4())[:8]
     _pending[action_id] = PendingConfirmation(
         action_id=action_id,
         description=description,
         fn=fn,
+        remaining_steps=remaining_steps,
+        outputs=outputs,
+        progress_fn=progress_fn or (lambda _: asyncio.sleep(0)),
+        confirm_fn=confirm_fn or (lambda _,__: asyncio.sleep(0)),
     )
     logger.info("Queued confirmation %s: %s", action_id, description)
     return action_id
@@ -130,6 +154,41 @@ async def confirm_action(action_id: str) -> str:
     if pending is None:
         return f"No pending action '{action_id}' (may have expired after 5 min)"
     logger.info("Executing confirmed action %s: %s", action_id, pending.description)
+
+    # Resume chain if there are checkpointed remaining steps
+    if pending.remaining_steps:
+        try:
+            remaining = list(pending.remaining_steps)
+            outputs = list(pending.outputs)
+            progress_fn = pending.progress_fn
+            confirm_fn = pending.confirm_fn
+
+            for i, step in enumerate(remaining, start=len(outputs) + 1):
+                await progress_fn(f"Step {i}/{len(outputs) + len(remaining)}: {step.description}")
+
+                if step.requires_confirmation:
+                    action_id = _queue_confirmation(
+                        step.description,
+                        step.fn,
+                        remaining_steps=tuple(remaining[i - len(outputs):]),
+                        outputs=tuple(outputs),
+                        progress_fn=progress_fn,
+                        confirm_fn=confirm_fn,
+                    )
+                    await confirm_fn(action_id, step.description)
+                    outputs.append(f"[Step {i} paused — waiting for /confirm yes {action_id}]")
+                    return "\n\n".join(outputs)
+
+                result = await step.fn()
+                outputs.append(f"[Step {i}] {step.description}\n{result}")
+                logger.info("Chain step %d complete", i)
+
+            return "\n\n".join(outputs) if outputs else "Chain completed with no output."
+        except Exception as exc:
+            logger.exception("Chain continuation failed: %s", exc)
+            return f"Chain failed on step: {exc}"
+
+    # Standalone confirmation (pre-chain, no checkpoint)
     try:
         result = await pending.fn()
         return f"Confirmed: {pending.description}\n\n{result}"

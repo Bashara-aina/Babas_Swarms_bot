@@ -1,17 +1,19 @@
 ---
-title: "VL-Mamba: Multimodal LLM with SSM for Vision-Language Understanding"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [vl-mamba, multimodal-llm, vision-language, ssm, mamba, vlm, state-space, multimodal-fusion]
-authors: [Qiao et al.]
-type: research
-summary: "VL-Mamba (Qiao et al. 2024) adapts Mamba to vision-language tasks — first to show SSM can serve as the fusion backbone for multimodal LLM. Processes vision tokens (from CLIP-like encoder) + language tokens through bidirectional SSM. Relevance to POPW: demonstrates Mamba can fuse multimodal inputs (pose + activity + RGB) in a unified SSM framework."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[vision-mamba]]
-  - [[video-mamba]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2403.13600
+title: Vl Mamba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2403.13600](https://arxiv.org/abs/2403.13600)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # VL-Mamba: Multimodal LLM with SSM Fusion

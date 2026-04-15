@@ -16,34 +16,39 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import threading
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _composio_toolset = None
 _composio_init_attempted = False
+_composio_lock = threading.Lock()
 
 
 def _get_composio_toolset():
-    """Lazy-init Composio toolset. Cached after first call."""
+    """Lazy-init Composio toolset. Thread-safe singleton."""
     global _composio_toolset, _composio_init_attempted
     if _composio_init_attempted:
         return _composio_toolset
-    _composio_init_attempted = True
-    api_key = os.getenv("COMPOSIO_API_KEY", "")
-    if not api_key:
-        logger.info("[ComposioHub] COMPOSIO_API_KEY not set — Composio features disabled")
-        return None
-    try:
-        from composio_langchain import ComposioToolSet
+    with _composio_lock:
+        if _composio_init_attempted:  # Double-check after acquiring lock
+            return _composio_toolset
+        _composio_init_attempted = True
+        api_key = os.getenv("COMPOSIO_API_KEY", "")
+        if not api_key:
+            logger.info("[ComposioHub] COMPOSIO_API_KEY not set — Composio features disabled")
+            return None
+        try:
+            from composio_langchain import ComposioToolSet
 
-        _composio_toolset = ComposioToolSet(api_key=api_key)
-        logger.info("[ComposioHub] Composio toolset initialized")
-    except ImportError:
-        logger.warning("[ComposioHub] composio-langchain not installed — pip install composio-langchain")
-    except Exception as exc:
-        logger.warning("[ComposioHub] Composio init failed: %s", exc)
-    return _composio_toolset
+            _composio_toolset = ComposioToolSet(api_key=api_key)
+            logger.info("[ComposioHub] Composio toolset initialized")
+        except ImportError:
+            logger.warning("[ComposioHub] composio-langchain not installed — pip install composio-langchain")
+        except Exception as exc:
+            logger.warning("[ComposioHub] Composio init failed: %s", exc)
+        return _composio_toolset
 
 
 # ── Generic action executor ───────────────────────────────────────────────────

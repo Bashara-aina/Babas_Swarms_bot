@@ -1,19 +1,20 @@
 ---
-title: "Mamba & MMN for Pose-Aware Activity Recognition: Comprehensive Survey"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [mamba, mmn, pose-activity, bidirectional-communication, temporal-modeling, motion-modulation, survey, ssM, pose-conditioned, feature-modulation]
-authors: [Bashara]
-type: research
-summary: "Comprehensive survey of 20 papers covering Mamba SSM for video/pose modeling (8 papers) and Motion Modulation Networks for bidirectional pose↔activity communication (10 papers). Provides POPW v1/v2/v3 roadmap and architecture selection guide for POPW's temporal head upgrade path."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[vision-mamba]]
-  - [[video-mamba]]
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-aware-feature-bank]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
+title: Mamba Pose Activity Survey
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: 'This survey covers two complementary research threads for POPW''s temporal
+  modeling upgrade:'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Mamba & MMN for Pose-Aware Activity Recognition

@@ -120,8 +120,13 @@ async def _service_restart_handler(text: str) -> str:
 
 
 async def _run_shell_handler(text: str) -> str:
-    """Run a shell command in a sandboxed environment."""
+    """Run a shell command in a sandboxed environment.
+
+    Uses shell=False to prevent operator injection (;, |, $(), etc.)
+    after the allowlist prefix check. shlex.split() handles quoting.
+    """
     import re
+    import shlex
 
     # Extract command from text
     # Remove trigger keywords
@@ -132,27 +137,38 @@ async def _run_shell_handler(text: str) -> str:
     if not cmd:
         return "Please provide a shell command to run."
 
-    # Basic safety check - reject dangerous commands
+    # Basic safety check - reject dangerous full-command patterns
     dangerous = ["rm -rf /", "dd if=", "> /dev/sda", "mkfs", ":(){ :|:& };:", "curl | sh", "wget | sh"]
     for d in dangerous:
         if d in cmd:
             return f"❌ Blocked dangerous command pattern: {d}"
 
-    # Limit to safe, short-running commands
-    allowed_patterns = [
-        r"^(ls|ll|ps|df|du|free|top|htop|cat|head|tail|grep|find|echo|date|uptime|w|who|id|uname|hostname|pwd|cd )",
-        r"^(git |npm |pip |python |python3 |node )",
-        r"^(systemctl |journalctl |curl |wget )",
-    ]
+    # Parse into args (handles quoting) — must be done BEFORE shell=True check
+    try:
+        args = shlex.split(cmd)
+    except ValueError:
+        return f"⚠️ Could not parse command (unbalanced quotes?)."
 
-    is_allowed = any(re.match(p, cmd) for p in allowed_patterns)
-    if not is_allowed:
-        return f"⚠️ Command '{cmd}' is not in the allowed list for sandboxed execution."
+    if not args:
+        return "Please provide a shell command to run."
+
+    # Verify first token (command) against allowlist
+    allowed_first = {
+        "ls", "ll", "ps", "df", "du", "free", "top", "htop",
+        "cat", "head", "tail", "grep", "find", "echo", "date",
+        "uptime", "w", "who", "id", "uname", "hostname", "pwd",
+        "git", "npm", "pip", "python", "python3", "node",
+        "systemctl", "journalctl", "curl", "wget",
+    }
+    first = args[0]
+    if first not in allowed_first:
+        return f"⚠️ Command '{first}' is not in the allowed list."
 
     try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
+        result = await asyncio.to_thread(
+            subprocess.run,
+            args,
+            shell=False,  # Prevent shell operator injection
             capture_output=True,
             text=True,
             timeout=30,

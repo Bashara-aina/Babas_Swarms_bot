@@ -588,7 +588,7 @@ class SystemPromptBuilder:
         """Set the user message for GSA context classification."""
         self._last_user_msg = msg
 
-    def build(
+    async def build(
         self,
         task_context: str = "",
         mem0_memories: list[dict[str, Any]] | None = None,
@@ -597,7 +597,7 @@ class SystemPromptBuilder:
         semantic_memory_lines: list[str] | None = None,
         include_personality: bool = True,
     ) -> str:
-        """Assemble humanization stack for one LLM request (sync).
+        """Assemble humanization stack for one LLM request.
 
         Set include_personality=False when build_base_persona() has already
         been prepended (e.g. inside llm_client.chat()) to avoid duplication.
@@ -663,7 +663,7 @@ class SystemPromptBuilder:
             sections.append("\n".join(lines))
 
         try:
-            recent = self.memory.recall.get_recent(n=8)
+            recent = await self.memory.recall.get_recent(n=8)
             if recent:
                 rlines = ["[RECENT CONVERSATION — last exchanges]"]
                 for t in recent[-6:]:

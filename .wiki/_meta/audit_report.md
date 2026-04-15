@@ -1,3 +1,19 @@
+---
+title: Wiki Audit Report
+type: reference
+status: deprecated
+tags:
+- wiki
+- audit
+- meta
+- karpathy-kb
+created: '2026-04-13'
+updated: '2026-04-13'
+summary: Audit of .wiki/ directory identifying 1964 markdown files not following Karpathy LLM KB pattern. Provides directory structure mapping and migration guidance.
+wikilinks: []
+confidence: high
+source: research
+---
 # Wiki Audit Report
 > Generated: 2026-04-13
 > Phase: PHASE 0 — Karpathy LLM KB Wiki Master Restructure

@@ -15,28 +15,31 @@ def test_core_memory_set_get() -> None:
     assert cm.get("test_key") is None
 
 
-def test_archival_memory_store_and_search() -> None:
+@pytest.mark.asyncio
+async def test_archival_memory_store_and_search() -> None:
     from core.memory.tiers import ArchivalMemory
 
     am = ArchivalMemory()
-    am.store(
+    await am._init_db()
+    await am.store(
         "Legion loves working on pose estimation research",
         summary="Legion's interests",
         tags=["test"],
         importance=0.9,
     )
-    results = am.search("pose estimation")
+    results = await am.search("pose estimation")
     assert len(results) > 0
     assert any("pose" in str(item["content"]).lower() for item in results)
 
 
-def test_recall_memory_conversation_log() -> None:
+@pytest.mark.asyncio
+async def test_recall_memory_conversation_log() -> None:
     from core.memory.tiers import RecallMemory
 
     rm = RecallMemory()
-    rm.add("user", "What's the best optimizer for ResNet?", session_id="test_session")
-    rm.add("assistant", "AdamW is a solid baseline for ResNet.", session_id="test_session")
-    recent = rm.get_recent(n=10, session_id="test_session")
+    await rm.add("user", "What's the best optimizer for ResNet?", session_id="test_session")
+    await rm.add("assistant", "AdamW is a solid baseline for ResNet.", session_id="test_session")
+    recent = await rm.get_recent(n=10, session_id="test_session")
     assert len(recent) >= 2
 
 
@@ -59,11 +62,12 @@ async def test_memory_manager_save_and_search() -> None:
     assert len(results) > 0
 
 
-def test_memory_context_block_not_empty() -> None:
+@pytest.mark.asyncio
+async def test_memory_context_block_not_empty() -> None:
     from core.memory.memory_manager import MemoryManager
 
     mm = MemoryManager()
-    block = mm.build_context_block()
+    block = await mm.build_context_block()
     assert len(block) > 50
     assert "Bashara" in block
 
@@ -192,7 +196,8 @@ def test_router_confidence_range() -> None:
         assert 0.0 <= result.confidence <= 1.0
 
 
-def test_system_prompt_contains_all_sections() -> None:
+@pytest.mark.asyncio
+async def test_system_prompt_contains_all_sections() -> None:
     from core.memory.memory_manager import MemoryManager
     from core.memory.temporal_graph import TemporalKnowledgeGraph
     from core.personality.emotion_engine import EmotionEngine
@@ -206,7 +211,7 @@ def test_system_prompt_contains_all_sections() -> None:
     em = EmotionEngine()
     tg = TemporalKnowledgeGraph()
     builder = SystemPromptBuilder(mm, em, tg, MockReflection())
-    prompt = builder.build()
+    prompt = await builder.build()
 
     assert "Legion" in prompt
     assert "Bashara" in prompt

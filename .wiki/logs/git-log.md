@@ -352,3 +352,98 @@ Comprehensive survey:
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: 566c9f3
+- Date: Tue Apr 14 04:10:26 PM JST 2026
+- Message: feature: add Mamba SSM as BiGRU alternative in POPW paper skeleton
+---
+## Commit: 609189f
+- Date: Tue Apr 14 11:01:39 PM JST 2026
+- Message: fix: add tool configs to gitignore, add direct wiki_bridge call in opencode_bridge, remove session hooks
+---
+## Commit: 79d2c8f
+- Date: Thu Apr 16 12:09:09 AM JST 2026
+- Message: docs: add deep integration design for OpenCode ⇄ Claude Code ⇄ LegionBot
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 9679a70
+- Date: Thu Apr 16 12:30:22 AM JST 2026
+- Message: feat: document multi-session worktree system in SOUL.md, CLAUDE.md, and wiki
+
+SOUL.md: Added multi-session worktree system section explaining
+  the git-worktree isolation system Legion now knows about.
+
+CLAUDE.md: Added 2c (Multi-Session Worktree System) to architecture
+  map and CLAUDE_REPO_ROOT / CLAUDE_WORKTREES_ROOT env vars.
+
+.wiki/architecture/multi-session-worktrees.md: New article documenting
+  architecture, usage, and design rationale (advisory vs enforced locking).
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 1707b1c
+- Date: Thu Apr 16 12:31:43 AM JST 2026
+- Message: feat: add joint_memory facade for OpenCode/Claude Code/LegionBot
+---
+## Commit: 12bfb3b
+- Date: Thu Apr 16 12:33:22 AM JST 2026
+- Message: feat: add _claude_code_brain_layer() to unified prompt context
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 05b8f3c
+- Date: Thu Apr 16 12:34:16 AM JST 2026
+- Message: feat: add claude_code_write_session to wiki bridge
+---
+## Commit: e5b2e00
+- Date: Thu Apr 16 12:36:14 AM JST 2026
+- Message: feat: add claude_code_bridge bidirectional Claude Code↔OpenCode bridge
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 8172aa2
+- Date: Thu Apr 16 12:37:35 AM JST 2026
+- Message: feat: add legion_callback_bridge with recursive depth tracking
+---
+## Commit: a593fb4
+- Date: Thu Apr 16 12:39:25 AM JST 2026
+- Message: feat: add @legion/@claude directive parsing and cross-system callbacks
+---
+## Commit: c7ca3cf
+- Date: Thu Apr 16 01:38:58 AM JST 2026
+- Message: feat: add legiona shared agent definitions
+---
+## Commit: 701d84f
+- Date: Thu Apr 16 01:40:45 AM JST 2026
+- Message: feat: add legion-callback and claude-callback commands
+---
+## Commit: 9b17a8d
+- Date: Thu Apr 16 01:44:17 AM JST 2026
+- Message: feat: add claude_code session hooks to builtin_hooks
+---
+## Commit: bb4bbdf
+- Date: Thu Apr 16 01:45:41 AM JST 2026
+- Message: feat: add /codex handler for Claude Code bridge
+---
+## Commit: 7fb9285
+- Date: Thu Apr 16 01:48:05 AM JST 2026
+- Message: docs: add three-system integration architecture to CLAUDE.md
+---
+## Commit: 120222e
+- Date: Thu Apr 16 02:05:54 AM JST 2026
+- Message: fix: remove invalid kwargs from run_claude_task call
+---
+## Commit: 7c4a205
+- Date: Thu Apr 16 03:10:05 AM JST 2026
+- Message: feat(cekwajar): Stage 1 — project scaffold complete
+
+- Full shadcn/ui component library (button, input, label, select, card, dialog, toast, badge, tabs, progress, separator, sheet, skeleton, alert)
+- Cookie-based Supabase auth with @supabase/ssr middleware
+- Homepage with hero + 5 tool cards + how-it-works section
+- Mobile-first layout with GlobalNav (Sheet side panel) and Footer
+- .env.local with all API keys (Supabase, Google Vision, Midtrans)
+- TypeScript: zero errors (pnpm tsc --noEmit)
+- Dev server: HTTP 200 on localhost:3000
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---

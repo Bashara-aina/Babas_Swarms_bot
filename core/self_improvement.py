@@ -52,7 +52,7 @@ async def _run_self_review() -> None:
     if not SOUL_PATH.exists():
         return
 
-    soul_content = SOUL_PATH.read_text()
+    soul_content = await asyncio.to_thread(SOUL_PATH.read_text)
     recent_convs = _conversation_buffer[-20:]
     conv_text = "\n".join(f"User: {c['user']}\nLegion: {c['legion']}" for c in recent_convs)
 
@@ -101,12 +101,13 @@ Respond in JSON only:
 
         soul_updates = data.get("soul_updates", [])
         if soul_updates:
-            _apply_soul_updates(soul_content, soul_updates)
+            await _apply_soul_updates(soul_content, soul_updates)
 
         log = []
         if SELF_REVIEW_LOG.exists():
             try:
-                log = json.loads(SELF_REVIEW_LOG.read_text())
+                log_json = await asyncio.to_thread(SELF_REVIEW_LOG.read_text)
+                log = json.loads(log_json)
             except Exception:
                 pass
         log.append(
@@ -117,7 +118,9 @@ Respond in JSON only:
                 "data": data,
             }
         )
-        SELF_REVIEW_LOG.write_text(json.dumps(log[-20:], indent=2))
+        await asyncio.to_thread(
+            SELF_REVIEW_LOG.write_text, json.dumps(log[-20:], indent=2)
+        )
 
         if soul_updates:
             logger.info("Self-review: applied %d SOUL.md updates", len(soul_updates))
@@ -126,7 +129,7 @@ Respond in JSON only:
         logger.warning("Self-review LLM call failed: %s", e)
 
 
-def _apply_soul_updates(soul_content: str, updates: list[dict[str, str]]) -> None:
+async def _apply_soul_updates(soul_content: str, updates: list[dict[str, str]]) -> None:
     PROTECTED_SECTIONS = ["## Core Values", "## Identity", "## How Legion Grows"]
     modified = soul_content
 
@@ -152,4 +155,4 @@ def _apply_soul_updates(soul_content: str, updates: list[dict[str, str]]) -> Non
                 new_line = f"- {new_line}"
             modified = modified[:insert_pos] + f"\n{new_line}" + modified[insert_pos:]
 
-    SOUL_PATH.write_text(modified)
+    await asyncio.to_thread(SOUL_PATH.write_text, modified)

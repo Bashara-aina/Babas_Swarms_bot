@@ -128,37 +128,63 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
         "app/schemas",
         "tests",
     ]
+    if "auth" in features:
+        dirs.append("app/dependencies")
     for d in dirs:
         (project_path / d).mkdir(parents=True, exist_ok=True)
 
     # main.py
-    (project_path / "app" / "main.py").write_text(
+    main_py = (
         "from fastapi import FastAPI\n"
         "from fastapi.middleware.cors import CORSMiddleware\n\n"
-        'app = FastAPI(title="' + project_name + '")\n\n'
+        f'app = FastAPI(title="{project_name}")\n\n'
         "app.add_middleware(\n"
         "    CORSMiddleware,\n"
         '    allow_origins=["*"],\n'
         "    allow_credentials=True,\n"
         '    allow_methods=["*"],\n'
         '    allow_headers=["*"],\n'
-        ")\n\n\n"
+        ")\n\n"
+    )
+    if "auth" in features:
+        main_py += (
+            "from app.routes.auth import router as auth_router\n"
+            "from app.database import engine\n"
+            "from app.models.user import Base\n\n\n"
+            "@app.on_event('startup')\n"
+            "async def startup():\n"
+            "    async with engine.begin() as conn:\n"
+            "        await conn.run_sync(Base.metadata.create_all)\n\n\n"
+            "app.include_router(auth_router)\n"
+        )
+    main_py += (
         '@app.get("/health")\n'
         "async def health():\n"
         '    return {"status": "ok"}\n'
     )
+    (project_path / "app" / "main.py").write_text(main_py)
 
     # __init__.py files
-    for d in ["app", "app/routes", "app/models", "app/services", "app/schemas"]:
+    init_dirs = ["app", "app/routes", "app/models", "app/services", "app/schemas"]
+    if "auth" in features:
+        init_dirs.append("app/dependencies")
+    for d in init_dirs:
         (project_path / d / "__init__.py").write_text("")
 
     # requirements.txt
     reqs = ["fastapi>=0.110.0", "uvicorn[standard]>=0.27.0"]
     if "database" in features:
-        reqs.extend(["sqlalchemy>=2.0.0", "alembic>=1.13.0", "asyncpg>=0.29.0"])
+        reqs.extend(["sqlalchemy>=2.0.0", "alembic>=1.13.0", "asyncpg>=0.29.0", "psycopg2-binary>=2.9.9"])
     if "auth" in features:
-        reqs.extend(["python-jose[cryptography]>=3.3.0", "passlib[bcrypt]>=1.7.0"])
-    reqs.extend(["pytest>=8.0.0", "httpx>=0.27.0"])
+        reqs.extend([
+            "python-jose[cryptography]>=3.3.0",
+            "passlib[bcrypt]>=1.7.4",
+            "python-multipart>=0.0.9",
+            "pydantic[email]>=2.0.0",
+        ])
+        if "database" not in features:
+            features.append("database")
+    reqs.extend(["pytest>=8.0.0", "pytest-asyncio>=0.23.0", "httpx>=0.27.0"])
     (project_path / "requirements.txt").write_text("\n".join(reqs) + "\n")
 
     # Dockerfile
@@ -198,20 +224,241 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
             "        yield session\n"
         )
 
-    # Auth setup
     if "auth" in features:
-        (project_path / "app" / "auth.py").write_text(
+        auth_py = (
             "from datetime import datetime, timedelta, timezone\n"
-            "from jose import jwt\n"
+            "from jose import jwt, JWTError\n"
+            "from passlib.context import CryptContext\n"
             "import os\n\n"
             'SECRET_KEY = os.getenv("SECRET_KEY", "changeme")\n'
             'ALGORITHM = "HS256"\n'
-            "ACCESS_TOKEN_EXPIRE_MINUTES = 30\n\n\n"
+            "ACCESS_TOKEN_EXPIRE_MINUTES = 30\n\n"
+            'pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")\n\n\n'
+            "def verify_password(plain_password: str, hashed_password: str) -> bool:\n"
+            "    return pwd_context.verify(plain_password, hashed_password)\n\n\n"
+            "def get_password_hash(password: str) -> str:\n"
+            "    return pwd_context.hash(password)\n\n\n"
             "def create_access_token(data: dict) -> str:\n"
             "    to_encode = data.copy()\n"
             "    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)\n"
             '    to_encode.update({"exp": expire})\n'
-            "    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n"
+            "    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n\n\n"
+            "def decode_token(token: str) -> dict | None:\n"
+            "    try:\n"
+            "        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])\n"
+            "        return payload\n"
+            "    except JWTError:\n"
+            "        return None\n"
+        )
+        (project_path / "app" / "auth.py").write_text(auth_py)
+
+        schemas_auth = (
+            "from pydantic import BaseModel, EmailStr\n\n\n"
+            "class Token(BaseModel):\n"
+            "    access_token: str\n"
+            "    token_type: str\n\n\n"
+            "class TokenData(BaseModel):\n"
+            "    user_id: int | None = None\n\n\n"
+            "class UserCreate(BaseModel):\n"
+            "    email: EmailStr\n"
+            "    password: str\n\n\n"
+            "class UserResponse(BaseModel):\n"
+            "    id: int\n"
+            "    email: EmailStr\n\n\n"
+            "class LoginRequest(BaseModel):\n"
+            "    email: EmailStr\n"
+            "    password: str\n"
+        )
+        (project_path / "app" / "schemas" / "auth.py").write_text(schemas_auth)
+
+        user_model = (
+            "from sqlalchemy import Integer, String\n"
+            "from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column\n\n\n"
+            "class Base(DeclarativeBase):\n"
+            "    pass\n\n\n"
+            "class User(Base):\n"
+            '    __tablename__ = "users"\n\n'
+            "    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)\n"
+            "    email: Mapped[str] = mapped_column(String, unique=True, index=True)\n"
+            "    hashed_password: Mapped[str] = mapped_column(String)\n"
+        )
+        (project_path / "app" / "models" / "user.py").write_text(user_model)
+
+        deps_auth = (
+            "from fastapi import Depends, HTTPException, status\n"
+            "from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials\n"
+            "from sqlalchemy.ext.asyncio import AsyncSession\n"
+            "from sqlalchemy import select\n\n"
+            "from app.database import get_db\n"
+            "from app.models.user import User\n"
+            "from app.auth import decode_token\n\n\n"
+            "security = HTTPBearer()\n\n\n"
+            "async def get_current_user(\n"
+            "    credentials: HTTPAuthorizationCredentials = Depends(security),\n"
+            "    db: AsyncSession = Depends(get_db),\n"
+            ") -> User:\n"
+            "    token = credentials.credentials\n"
+            "    payload = decode_token(token)\n"
+            "    if payload is None:\n"
+            "        raise HTTPException(\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\n"
+            '            detail="Invalid or expired token",\n'
+            "        )\n"
+            "    user_id = payload.get(\"sub\")\n"
+            "    if user_id is None:\n"
+            "        raise HTTPException(\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\n"
+            '            detail="Invalid token payload",\n'
+            "        )\n"
+            "    result = await db.execute(select(User).where(User.id == int(user_id)))\n"
+            "    user = result.scalar_one_or_none()\n"
+            "    if user is None:\n"
+            "        raise HTTPException(\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\n"
+            '            detail="User not found",\n'
+            "        )\n"
+            "    return user\n"
+        )
+        (project_path / "app" / "dependencies" / "auth.py").write_text(deps_auth)
+
+        routes_auth = (
+            "from fastapi import APIRouter, Depends, HTTPException, status\n"
+            "from sqlalchemy.ext.asyncio import AsyncSession\n"
+            "from sqlalchemy import select\n\n"
+            "from app.database import get_db\n"
+            "from app.models.user import User\n"
+            "from app.schemas.auth import Token, UserCreate, UserResponse, LoginRequest\n"
+            "from app.auth import create_access_token, get_password_hash, verify_password\n\n\n"
+            "router = APIRouter(prefix=\"/auth\", tags=[\"auth\"])\n\n\n"
+            "@router.post(\"/register\", response_model=UserResponse)\n"
+            "async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):\n"
+            "    result = await db.execute(select(User).where(User.email == user_in.email))\n"
+            "    existing = result.scalar_one_or_none()\n"
+            "    if existing:\n"
+            "        raise HTTPException(\n"
+            "            status_code=status.HTTP_400_BAD_REQUEST,\n"
+            '            detail="Email already registered",\n'
+            "        )\n"
+            "    user = User(email=user_in.email, hashed_password=get_password_hash(user_in.password))\n"
+            "    db.add(user)\n"
+            "    await db.commit()\n"
+            "    await db.refresh(user)\n"
+            "    return user\n\n\n"
+            "@router.post(\"/login\", response_model=Token)\n"
+            "async def login(login_in: LoginRequest, db: AsyncSession = Depends(get_db)):\n"
+            "    result = await db.execute(select(User).where(User.email == login_in.email))\n"
+            "    user = result.scalar_one_or_none()\n"
+            "    if not user or not verify_password(login_in.password, user.hashed_password):\n"
+            "        raise HTTPException(\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\n"
+            '            detail="Incorrect email or password",\n'
+            "        )\n"
+            "    access_token = create_access_token(data={\"sub\": str(user.id)})\n"
+            "    return Token(access_token=access_token, token_type=\"bearer\")\n"
+        )
+        (project_path / "app" / "routes" / "auth.py").write_text(routes_auth)
+
+        (project_path / "app" / "schemas" / "auth.py").write_text(
+            "from pydantic import BaseModel, EmailStr\\n\\n\\n"
+            "class Token(BaseModel):\\n"
+            "    access_token: str\\n"
+            "    token_type: str\\n\\n\\n"
+            "class TokenData(BaseModel):\\n"
+            "    user_id: int | None = None\\n\\n\\n"
+            "class UserCreate(BaseModel):\\n"
+            "    email: EmailStr\\n"
+            "    password: str\\n\\n\\n"
+            "class UserResponse(BaseModel):\\n"
+            "    id: int\\n"
+            "    email: EmailStr\\n\\n\\n"
+            "class LoginRequest(BaseModel):\\n"
+            "    email: EmailStr\\n"
+            "    password: str\\n"
+        )
+
+        (project_path / "app" / "models" / "user.py").write_text(
+            "from sqlalchemy import Integer, String\\n"
+            "from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column\\n\\n\\n"
+            "class Base(DeclarativeBase):\\n"
+            "    pass\\n\\n\\n"
+            "class User(Base):\\n"
+            '    __tablename__ = "users"\\n\\n'
+            "    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)\\n"
+            "    email: Mapped[str] = mapped_column(String, unique=True, index=True)\\n"
+            "    hashed_password: Mapped[str] = mapped_column(String)\\n"
+        ")\\n"
+        )
+
+        (project_path / "app" / "dependencies" / "auth.py").write_text(
+            "from fastapi import Depends, HTTPException, status\\n"
+            "from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials\\n"
+            "from sqlalchemy.ext.asyncio import AsyncSession\\n"
+            "from sqlalchemy import select\\n\\n"
+            "from app.database import get_db\\n"
+            "from app.models.user import User\\n"
+            "from app.auth import decode_token\\n\\n\\n"
+            "security = HTTPBearer()\\n\\n\\n"
+            "async def get_current_user(\\n"
+            "    credentials: HTTPAuthorizationCredentials = Depends(security),\\n"
+            "    db: AsyncSession = Depends(get_db),\\n"
+            ") -> User:\\n"
+            "    token = credentials.credentials\\n"
+            "    payload = decode_token(token)\\n"
+            "    if payload is None:\\n"
+            "        raise HTTPException(\\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
+            '            detail="Invalid or expired token",\\n'
+            "        )\\n"
+            "    user_id = payload.get(\\"sub\\")\\n"
+            "    if user_id is None:\\n"
+            "        raise HTTPException(\\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
+            '            detail="Invalid token payload",\\n'
+            "        )\\n"
+            "    result = await db.execute(select(User).where(User.id == int(user_id)))\\n"
+            "    user = result.scalar_one_or_none()\\n"
+            "    if user is None:\\n"
+            "        raise HTTPException(\\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
+            '            detail="User not found",\\n'
+            "        )\\n"
+            "    return user\\n"
+        )
+
+        (project_path / "app" / "routes" / "auth.py").write_text(
+            "from fastapi import APIRouter, Depends, HTTPException, status\\n"
+            "from sqlalchemy.ext.asyncio import AsyncSession\\n"
+            "from sqlalchemy import select\\n\\n"
+            "from app.database import get_db\\n"
+            "from app.models.user import User\\n"
+            "from app.schemas.auth import Token, UserCreate, UserResponse, LoginRequest\\n"
+            "from app.auth import create_access_token, get_password_hash, verify_password\\n\\n\\n"
+            "router = APIRouter(prefix=\\"/auth\\", tags=\\".auth\\"])\\n\\n\\n"
+            "@router.post(\\"/register\\", response_model=UserResponse)\\n"
+            "async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):\\n"
+            "    result = await db.execute(select(User).where(User.email == user_in.email))\\n"
+            "    existing = result.scalar_one_or_none()\\n"
+            "    if existing:\\n"
+            "        raise HTTPException(\\n"
+            "            status_code=status.HTTP_400_BAD_REQUEST,\\n"
+            '            detail="Email already registered",\\n'
+            "        )\\n"
+            "    user = User(email=user_in.email, hashed_password=get_password_hash(user_in.password))\\n"
+            "    db.add(user)\\n"
+            "    await db.commit()\\n"
+            "    await db.refresh(user)\\n"
+            "    return user\\n\\n\\n"
+            "@router.post(\\"/login\\", response_model=Token)\\n"
+            "async def login(login_in: LoginRequest, db: AsyncSession = Depends(get_db)):\\n"
+            "    result = await db.execute(select(User).where(User.email == login_in.email))\\n"
+            "    user = result.scalar_one_or_none()\\n"
+            "    if not user or not verify_password(login_in.password, user.hashed_password):\\n"
+            "        raise HTTPException(\\n"
+            "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
+            '            detail="Incorrect email or password",\\n'
+            "        )\\n"
+            "    access_token = create_access_token(data={\\"sub\\": str(user.id)})\\n"
+            "    return Token(access_token=access_token, token_type=\\"bearer\\")\\n"
         )
 
     file_count = len(list(project_path.rglob("*")))

@@ -1,17 +1,19 @@
 ---
-title: "Mamba: Linear-Time Selective State Space Models"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [mamba, state-space-model, ssm, selective-scan, linear-time, sequence-modeling, foundation]
-authors: [Gu, Dao]
-type: research
-summary: "The foundational Mamba paper introducing selective state space models where SSM parameters (A, B, C, Δ) are functions of the input — enabling content-aware sequence modeling with linear-time inference and no attention or MLP blocks. Foundation for all subsequent Mamba video/pose applications."
-wikilinks:
-  - [[vision-mamba]]
-  - [[video-mamba]]
-  - [[mamba-motion-generation]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2312.00752
+title: Mamba Selective Ssm
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2312.00752](https://arxiv.org/abs/2312.00752)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Mamba: Linear-Time Sequence Modeling with Selective State Spaces

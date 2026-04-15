@@ -1,16 +1,19 @@
 ---
-title: "Vision Mamba (Vim): Bidirectional SSM for Visual Representation"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [vision-mamba, vim, ssbidirectional-ssm, vision-backbone, ss2d, visual-representation, mamba]
-authors: [Liang, Liao, Zhang, Wang, Liu, Wang]
-type: research
-summary: "Vim — first pure SSM-based vision backbone with no self-attention. Flattened image patches as sequential tokens → bidirectional Mamba blocks. Outperforms DeiT on ImageNet, COCO, ADE20k. Foundation for per-frame pose encoding in Mamba-based POPW extension."
-wikilinks:
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[mamba-pose-activity-survey]]
-source: https://arxiv.org/abs/2401.09417
+title: Vision Mamba
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2401.09417](https://arxiv.org/abs/2401.09417)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Vision Mamba (Vim): Efficient Visual Representation Learning with Bidirectional State Space Model

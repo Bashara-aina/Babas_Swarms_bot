@@ -104,14 +104,14 @@ async def _get_pending_candidates() -> list[dict[str, Any]]:
     if not pending_file.exists():
         return []
     candidates: list[dict[str, Any]] = []
-    with open(pending_file, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                try:
-                    candidates.append(json.loads(line))
-                except json.JSONDecodeError:
-                    pass
+    content = await asyncio.to_thread(pending_file.read_text, encoding="utf-8")
+    for line in content.splitlines():
+        line = line.strip()
+        if line:
+            try:
+                candidates.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
     return [c for c in candidates if not c.get("reviewed", False)]
 
 
@@ -128,25 +128,24 @@ async def _mark_reviewed(
     if not pending_file.exists():
         return False
 
-    pending = []
+    content = await asyncio.to_thread(pending_file.read_text, encoding="utf-8")
+    pending: list[dict[str, Any]] = []
     found = False
-    with open(pending_file, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            c = json.loads(line)
-            if c.get("candidate_id") == candidate_id:
-                c["decision"] = decision
-                c["reason"] = reason
-                c["reviewed"] = True
-                found = True
-            pending.append(c)
+    for line in content.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        c = json.loads(line)
+        if c.get("candidate_id") == candidate_id:
+            c["decision"] = decision
+            c["reason"] = reason
+            c["reviewed"] = True
+            found = True
+        pending.append(c)
 
     if found:
-        with open(pending_file, encoding="utf-8", mode="w") as f:
-            for c in pending:
-                f.write(json.dumps(c, ensure_ascii=False) + "\n")
+        new_content = "\n".join(json.dumps(c, ensure_ascii=False) for c in pending) + "\n"
+        await asyncio.to_thread(pending_file.write_text, new_content, encoding="utf-8")
 
     return found
 
@@ -162,7 +161,7 @@ async def _load_harvest_stats() -> dict[str, Any]:
         return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
 
     try:
-        content = log_file.read_text(encoding="utf-8")
+        content = await asyncio.to_thread(log_file.read_text, encoding="utf-8")
     except OSError:
         return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
 
@@ -328,25 +327,27 @@ async def _write_feedback_to_log(
         },
     }
 
-    with open(log_file, encoding="utf-8", mode="a") as f:
-        f.write(f"---\n")
-        f.write(f"title: harvest-review-{session_id}\n")
-        f.write("type: timeline\n")
-        f.write("status: active\n")
-        f.write("tags: [legion, harvester, harvest-review]\n")
-        f.write(f"created: {now.strftime('%Y-%m-%d')}\n")
-        f.write(f"updated: {now.strftime('%Y-%m-%d')}\n")
-        f.write(f"summary: Telegram review — {decision} / {reason}\n")
-        f.write("wikilinks: []\n")
-        f.write("confidence: high\n")
-        f.write("source: telegram-review\n")
-        f.write("---\n\n")
-        f.write(f"# Harvest Review Session\n\n")
-        f.write(f"**Date**: {now.strftime('%Y-%m-%d %H:%M')} UTC\n")
-        f.write(f"**Decision**: <b>{decision.upper()}</b> | **Reason**: <code>{reason}</code>\n\n")
-        f.write("```json\n")
-        f.write(json.dumps(entry, indent=2, ensure_ascii=False))
-        f.write("\n```\n\n")
+    block = (
+        f"---\n"
+        f"title: harvest-review-{session_id}\n"
+        f"type: timeline\n"
+        f"status: active\n"
+        f"tags: [legion, harvester, harvest-review]\n"
+        f"created: {now.strftime('%Y-%m-%d')}\n"
+        f"updated: {now.strftime('%Y-%m-%d')}\n"
+        f"summary: Telegram review — {decision} / {reason}\n"
+        f"wikilinks: []\n"
+        f"confidence: high\n"
+        f"source: telegram-review\n"
+        f"---\n\n"
+        f"# Harvest Review Session\n\n"
+        f"**Date**: {now.strftime('%Y-%m-%d %H:%M')} UTC\n"
+        f"**Decision**: <b>{decision.upper()}</b> | **Reason**: <code>{reason}</code>\n\n"
+        f"```json\n"
+        f"{json.dumps(entry, indent=2, ensure_ascii=False)}\n"
+        f"```\n\n"
+    )
+    await asyncio.to_thread(log_file.write_text, block, encoding="utf-8")
 
 
 async def _update_scorer_bias(decision: str, reason: str) -> None:

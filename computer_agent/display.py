@@ -52,7 +52,8 @@ async def detect_display() -> str:
         return env_display
 
     for d in [":0", ":1", ":2"]:
-        check = subprocess.run(
+        check = await asyncio.to_thread(
+            subprocess.run,
             ["bash", "-c", f"DISPLAY={d} xdpyinfo 2>/dev/null | head -1"],
             capture_output=True,
             timeout=3,
@@ -63,7 +64,9 @@ async def detect_display() -> str:
             return d
 
     try:
-        who_out = subprocess.check_output(["who"], text=True, timeout=3)
+        who_out = await asyncio.to_thread(
+            subprocess.check_output, ["who"], text=True, timeout=3
+        )
         m = re.search(r"\(:(\d+)\)", who_out)
         if m:
             _detected_display = f":{m.group(1)}"
@@ -105,23 +108,23 @@ async def take_screenshot() -> Optional[str]:
         home = os.environ.get("HOME", "")
         if home:
             candidate = Path(home) / ".Xauthority"
-            if candidate.exists():
+            if await asyncio.to_thread(candidate.exists):
                 xauthority = str(candidate)
 
-    def _resolve_bin(name: str) -> Optional[str]:
+    async def _resolve_bin(name: str) -> Optional[str]:
         path = shutil.which(name)
         if path:
             return path
         for candidate in (f"/usr/bin/{name}", f"/bin/{name}", f"/usr/local/bin/{name}"):
-            if Path(candidate).exists():
+            if await asyncio.to_thread(Path(candidate).exists):
                 return candidate
         return None
 
-    scrot_bin = _resolve_bin("scrot")
-    import_bin = _resolve_bin("import")
-    gs_bin = _resolve_bin("gnome-screenshot")
-    xwd_bin = _resolve_bin("xwd")
-    convert_bin = _resolve_bin("convert")
+    scrot_bin = await _resolve_bin("scrot")
+    import_bin = await _resolve_bin("import")
+    gs_bin = await _resolve_bin("gnome-screenshot")
+    xwd_bin = await _resolve_bin("xwd")
+    convert_bin = await _resolve_bin("convert")
 
     errors: list[str] = []
     for display in displays:
@@ -146,13 +149,13 @@ async def take_screenshot() -> Optional[str]:
 
         for cmd in methods:
             try:
-                if Path(path).exists():
-                    Path(path).unlink()
+                if await asyncio.to_thread(Path(path).exists):
+                    await asyncio.to_thread(Path(path).unlink)
             except Exception:
                 pass
             result = await _run_shell(cmd, timeout=12)
             for _ in range(12):
-                if Path(path).exists() and Path(path).stat().st_size > 1000:
+                if await asyncio.to_thread(Path(path).exists) and (await asyncio.to_thread(Path(path).stat)).st_size > 1000:
                     logger.info("Screenshot OK via display=%s method=%s", display, cmd.split()[1])
                     return path
                 await asyncio.sleep(0.1)
@@ -176,7 +179,7 @@ async def screenshot_region(x: int, y: int, w: int, h: int) -> Optional[str]:
     path = f"/tmp/legion_region_{ts}.png"
     cmd = f"DISPLAY={display} scrot -a {x},{y},{w},{h} '{path}'"
     await _run_shell(cmd, timeout=8)
-    return path if Path(path).exists() else None
+    return path if await asyncio.to_thread(Path(path).exists) else None
 
 
 async def get_screen_size() -> tuple[int, int]:
@@ -435,7 +438,7 @@ async def open_folder_gui(path: str = "~") -> str:
     from computer_agent.shell import run_shell as _run_shell
 
     display = await detect_display()
-    expanded = str(Path(path).expanduser())
+    expanded = str(await asyncio.to_thread(Path(path).expanduser))
     await _run_shell(f"DISPLAY={display} nautilus '{expanded}' &", timeout=3)
     return f"opened folder: {expanded}"
 
@@ -534,10 +537,10 @@ async def whatsapp_send_local(
 async def read_file(path: str, max_chars: int = 8000) -> str:
     """Read text file from disk."""
     try:
-        p = Path(path).expanduser()
-        if not p.exists():
+        p = await asyncio.to_thread(Path(path).expanduser)
+        if not await asyncio.to_thread(p.exists):
             return f"file not found: {path}"
-        content = p.read_text(encoding="utf-8", errors="replace")
+        content = await asyncio.to_thread(p.read_text, encoding="utf-8", errors="replace")
         if len(content) > max_chars:
             half = max_chars // 2
             return (
@@ -552,9 +555,9 @@ async def read_file(path: str, max_chars: int = 8000) -> str:
 async def write_file(path: str, content: str) -> str:
     """Write content to a file, creating directories as needed."""
     try:
-        p = Path(path).expanduser()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(content, encoding="utf-8")
+        p = await asyncio.to_thread(Path(path).expanduser)
+        await asyncio.to_thread(p.parent.mkdir, parents=True, exist_ok=True)
+        await asyncio.to_thread(p.write_text, content, encoding="utf-8")
         return f"wrote {len(content)} chars → {p}"
     except Exception as e:
         return f"write error: {e}"
@@ -563,9 +566,9 @@ async def write_file(path: str, content: str) -> str:
 async def append_file(path: str, content: str) -> str:
     """Append content to a file."""
     try:
-        p = Path(path).expanduser()
-        with open(p, "a", encoding="utf-8") as f:
-            f.write(content)
+        p = await asyncio.to_thread(Path(path).expanduser)
+        with await asyncio.to_thread(open, p, "a", encoding="utf-8") as f:
+            await asyncio.to_thread(f.write, content)
         return f"appended {len(content)} chars → {p}"
     except Exception as e:
         return f"append error: {e}"
@@ -575,5 +578,5 @@ async def list_directory(path: str = "~") -> str:
     """List directory contents."""
     from computer_agent.shell import run_shell as _run_shell
 
-    expanded = str(Path(path).expanduser())
+    expanded = str(await asyncio.to_thread(Path(path).expanduser))
     return await _run_shell(f"ls -la '{expanded}' 2>&1", timeout=10)

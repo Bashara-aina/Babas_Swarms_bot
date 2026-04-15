@@ -1,17 +1,19 @@
 ---
-title: "LSTA-Net: Long-term Spatial-Temporal Attention Network"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [lsta-net, spatial-temporal, attention, long-term, skeleton-action, pose-activity, temporal-modeling]
-authors: [Chen et al.]
-type: research
-summary: "LSTA-Net (Chen et al. 2021) introduces Long-term Spatial-Temporal Attention for skeleton action recognition. Captures long-range dependencies across the entire video sequence (not just local T=8 window). Spatial attention focuses on relevant body parts; temporal attention selects relevant frames. Relevant for POPW's long assembly phases."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[ms-temba]]
-  - [[mmn]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2111.00823
+title: Lsta Net
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2111.00823](https://arxiv.org/abs/2111.00823)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # LSTA-Net: Long-term Spatial-Temporal Attention Network

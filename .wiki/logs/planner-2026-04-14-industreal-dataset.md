@@ -1,3 +1,20 @@
+---
+title: Planner 2026 04 14 Industreal Dataset
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- logs
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **Source folders**:'
+wikilinks: []
+confidence: medium
+source: research
+---
 ## Plan: Prepare IndustReal Dataset
 Date: 2026-04-14
 Type: FILE_OPERATION

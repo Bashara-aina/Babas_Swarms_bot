@@ -64,14 +64,19 @@ async def _transcribe(ogg_path: str) -> str:
         except Exception as exc:
             logger.warning("Groq Whisper failed: %s", exc)
 
-    try:
-        import whisper  # pip install openai-whisper
+    # Cached whisper model — load once in thread executor, reuse across calls
+    import whisper  # pip install openai-whisper
 
-        model = whisper.load_model("base")
-        result = model.transcribe(ogg_path)
+    if not hasattr(_transcribe, "_whisper_model"):
+        _transcribe._whisper_model = await asyncio.to_thread(
+            whisper.load_model, "base"
+        )
+
+    def _do_transcribe() -> str:
+        result = _transcribe._whisper_model.transcribe(ogg_path)
         return result["text"]
-    except ImportError as exc:
-        raise RuntimeError("No Whisper available. Set GROQ_API_KEY or install openai-whisper") from exc
+
+    return await asyncio.to_thread(_do_transcribe)
 
 
 async def _reply_with_optional_tts(msg: Message, response: str) -> None:

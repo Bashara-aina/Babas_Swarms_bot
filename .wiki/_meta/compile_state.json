@@ -1,6 +1,6 @@
 {
-  "last_compiled": "2026-04-16T00:30:14.213703+09:00",
-  "articles": 1237,
+  "last_compiled": "2026-04-16T02:01:45.147520+09:00",
+  "articles": 2843,
   "stubs": 19,
   "enriched_today": 16,
   "created_today": 20,
@@ -22,5 +22,6 @@
   "harvest_session": "2026-04-13",
   "track_b_complete": true,
   "conversation_stubs": 0,
-  "conversation_stubs_processed": 24
+  "conversation_stubs_processed": 24,
+  "last_session": "claude-mem-integration-master-prompt"
 }

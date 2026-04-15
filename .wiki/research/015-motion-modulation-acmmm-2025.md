@@ -1,19 +1,19 @@
 ---
-title: "MMN: Motion Modulation Network for Skeleton-Based Action Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [mmn, motion-modulation, skeleton-action, pose-activity, bidirectional, msm, mtm, multimodal]
-authors: [Gu et al.]
-type: research
-summary: "MMN (Motion Modulation Network, Gu et al. ACM MM 2025) introduces Motion-guided Skeletal Modulation (MSM) and Motion-guided Temporal Modulation (MTM) for skeleton-based action recognition. Enables pose→activity AND activity→pose bidirectional communication. MSM modulates skeleton features using motion; MTM gates temporal context using activity state. Foundation for POPW's pose-conditioned temporal modeling."
-wikilinks:
-  - [[bigru-temporal-action-recognition]]
-  - [[pose-aware-feature-bank]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[mamba-selective-ssm]]
-  - [[video-mamba]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2507.21977
+title: Motion Modulation Acmmm 2025
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2507.21977](https://arxiv.org/abs/2507.21977)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # MMN: Motion Modulation Network

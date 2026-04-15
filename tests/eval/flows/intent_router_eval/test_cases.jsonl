@@ -1,0 +1,11 @@
+{"text": "write me a function to parse JSON", "intent": "coding"}
+{"text": "find papers about transformers", "intent": "research"}
+{"text": "open chrome and go to github", "intent": "browser"}
+{"text": "is AI going to take all programming jobs", "intent": "debate"}
+{"text": "take a screenshot", "intent": "computer"}
+{"text": "remember that I like dark mode", "intent": "memory"}
+{"text": "send an email to my professor", "intent": "communications"}
+{"text": "remind me to call mom at 3pm", "intent": "scheduling"}
+{"text": "write a haiku about autumn", "intent": "creative"}
+{"text": "analyze the sales data", "intent": "data_analysis"}
+{"text": "what is the weather today", "intent": "general"}

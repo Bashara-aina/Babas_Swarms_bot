@@ -188,6 +188,9 @@ def restart_bot(delay_seconds: float = 1.0) -> None:
     - Fresh Python interpreter
     - Reloads all modules (picks up new pip packages)
     - Bot reconnects to Telegram automatically
+
+    Note: time.sleep() is acceptable here because os.execv() replaces the process
+    and never returns — there is no async context to block. The delay is minimal (1s).
     """
     logger.info("Bot restarting via os.execv...")
     time.sleep(delay_seconds)

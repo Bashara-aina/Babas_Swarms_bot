@@ -1,17 +1,19 @@
 ---
-title: "Just Add π: Discovering Motion Prior for Action Recognition"
-created: 2026-04-14
-modified: 2026-04-14
-tags: [motion-prior, discovering, pose-prior, action-recognition, skeleton-prior, π-pi, pretraining, mtl]
-authors: [Reilly et al.]
-type: research
-summary: "Just Add π (Reilly et al. WACV 2024) discovers motion priors from unlabeled skeleton data — a pretrained motion encoder that captures typical pose transition patterns. The π (psi) prior modulates skeleton features using learned motion patterns. For POPW, this provides a learned motion prior that can enhance PoseFiLM's pose-conditioned features."
-wikilinks:
-  - [[mmn]]
-  - [[dmm-motion]]
-  - [[pose-conditioned-temporal-modeling]]
-  - [[projects/popw-multi-task-ikea]]
-source: https://arxiv.org/abs/2311.18840
+title: Just Add Pi
+type: concept
+status: active
+tags:
+- /
+- home
+- newadmin
+- swarm-bot
+- research
+created: '2026-04-14'
+updated: '2026-04-14'
+summary: '- **arXiv**: [2311.18840](https://arxiv.org/abs/2311.18840)'
+wikilinks: []
+confidence: medium
+source: research
 ---
 
 # Just Add π: Discovering Motion Prior for Action Recognition

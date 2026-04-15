@@ -663,7 +663,7 @@ vision_multimodal:
   agents:
     screenshot_analyzer:
       description: "Screenshot analysis, desktop UI interpretation, visual debugging (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [screenshot, screen, ui, desktop, visual, local]
       tools: []
@@ -671,7 +671,7 @@ vision_multimodal:
 
     diagram_interpreter:
       description: "Diagram/flowchart/architecture interpretation, technical visuals (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [diagram, flowchart, architecture, chart, interpretation, local]
       tools: []
@@ -679,7 +679,7 @@ vision_multimodal:
 
     ui_reviewer:
       description: "UI/UX review from screenshots, usability heuristics, design critique (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [ui-review, usability, heuristics, critique, interface, local]
       tools: []
@@ -687,7 +687,7 @@ vision_multimodal:
 
     image_descriptor:
       description: "Image description, alt-text generation, accessibility captions (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [image, photo, picture, alt-text, description, caption, local]
       tools: []
@@ -695,7 +695,7 @@ vision_multimodal:
 
     ocr_specialist:
       description: "OCR text extraction, document scanning, text recognition (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [ocr, extract, text, scanning, recognition, document, local]
       tools: []
@@ -703,7 +703,7 @@ vision_multimodal:
 
     video_frame_analyzer:
       description: "Video frame analysis, scene detection, temporal understanding (local)"
-      primary_model: gemma3-12b
+      primary_model: gemma4-local
       fallbacks: []
       capabilities: [video, frame, clip, scene, temporal, detection, local]
       tools: []
@@ -716,8 +716,8 @@ legacy:
   agents:
     vision:
       description: "Vision analysis via Ollama (local, private, RTX 3060)"
-      primary_model: gemma4:e4b
-      fallbacks: [llama3-70b, gemini-2.0-flash]
+      primary_model: gemma4-local
+      fallbacks: [llama3-70b, gemini-3.1-pro]
       capabilities: [screenshot, screen, layar, gambar, image, photo, ocr, visual, desktop, window, capture]
       tools: [ollama]
       complexity_tier: lightweight
@@ -725,7 +725,7 @@ legacy:
     coding:
       description: "Code generation, implementation, refactoring, debugging"
       primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-2.0-flash, qwen3-coder:free]
+      fallbacks: [qwen3-235b, gemini-3.1-pro, devstral]
       capabilities: [code, kode, function, script, implement, class, refactor, generate, endpoint, api, python, bash, write, tulis, buat file, build, create]
       tools: [interpreter]
       complexity_tier: heavyweight
@@ -733,7 +733,7 @@ legacy:
     debug:
       description: "Root cause analysis — tracebacks, exceptions, CUDA, PyTorch, OOM, NaN"
       primary_model: glm-4
-      fallbacks: [qwen-qwq-32b, llama3-70b, deepseek-r1:free]
+      fallbacks: [llama3-70b, qwen3-235b]
       capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch, torch, cuda]
       tools: [interpreter]
       complexity_tier: heavyweight
@@ -741,7 +741,7 @@ legacy:
     math:
       description: "Math — tensor operations, matrix calculus, gradient descent, backprop"
       primary_model: glm-4
-      fallbacks: [qwen-qwq-32b, llama3-70b, deepseek-r1:free]
+      fallbacks: [llama3-70b, qwen3-235b]
       capabilities: [tensor, matrix, gradient, derivative, integral, backprop, eigenvalue, softmax, calculate, hitung]
       tools: [interpreter]
       complexity_tier: heavyweight
@@ -749,7 +749,7 @@ legacy:
     architect:
       description: "System design, architecture, microservices, framework blueprints"
       primary_model: qwen3-235b
-      fallbacks: [gemini-2.0-flash, llama3-70b]
+      fallbacks: [gemini-3.1-pro, llama3-70b]
       capabilities: [design, architecture, plan, system, pipeline, struktur, rancang, overview, diagram, framework, strategy, strategi]
       tools: []
       complexity_tier: heavyweight
@@ -757,7 +757,7 @@ legacy:
     analyst:
       description: "Data analysis, visualization, CSV, pandas, GPU metrics, training trends"
       primary_model: kimi-k2
-      fallbacks: [gemini-2.0-flash, llama3-70b]
+      fallbacks: [gemini-3.1-pro, llama3-70b]
       capabilities: [analyze, analisis, plot, chart, csv, metrics, performance, gpu, training, trend, statistics, compare, nvidia-smi, visualize]
       tools: [interpreter]
       complexity_tier: heavyweight
@@ -765,15 +765,15 @@ legacy:
     computer:
       description: "Web browsing, email, Git, file ops, system monitoring, Excel/PDF docs"
       primary_model: llama3-70b
-      fallbacks: [glm-4, gemini-2.0-flash, llama3-70b-instruct:free, qwen3-235b]
+      fallbacks: [glm-4, gemini-3.1-pro, devstral, qwen3-235b]
       capabilities: [browse, search for, find online, look up, scrape, website, web page, pdf, excel, spreadsheet, word doc, docx, extract table, read document, email, inbox, send email, git status, git commit, git push, git pull, git diff, run tests, pytest, lint, find in code, grep, monitor, schedule, disk space, memory usage]
       tools: [playwright, interpreter]
       complexity_tier: heavyweight
 
     general:
       description: "Default fallback agent — general purpose conversation and tasks"
-      primary_model: gemma4:e4b
-      fallbacks: [llama3-70b, qwen3-235b, gemini-2.0-flash, llama3-70b-instruct:free]
+      primary_model: gemma4-local
+      fallbacks: [llama3-70b, qwen3-235b, gemini-3.1-pro]
       capabilities: [general, chat, talk, casual, help]
       tools: []
       complexity_tier: lightweight
@@ -789,7 +789,7 @@ legacy:
     marketer:
       description: "Marketing copy, campaigns, brand strategy, customer acquisition"
       primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
       capabilities: [marketing, ads, campaign, brand, positioning, messaging, customer, acquisition, growth, conversion, funnel, iklan]
       tools: []
       complexity_tier: midweight
@@ -797,7 +797,7 @@ legacy:
     devops:
       description: "CI/CD, Docker, Kubernetes, deployment pipelines, infrastructure"
       primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
       capabilities: [deploy, pipeline, ci cd, docker, k8s, kubernetes, monitoring, logs, alerts, infrastructure, cloud]
       tools: []
       complexity_tier: heavyweight
@@ -805,7 +805,7 @@ legacy:
     pm:
       description: "Project management, roadmaps, sprint planning, stakeholder coordination"
       primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-2.0-flash]
+      fallbacks: [llama3-70b, gemini-3.1-pro]
       capabilities: [project, roadmap, milestone, sprint, backlog, priority, stakeholder, timeline, scope, deliverable]
       tools: []
       complexity_tier: midweight
@@ -813,7 +813,7 @@ legacy:
     humanizer:
       description: "Convert text to casual, friendly, human-sounding tone"
       primary_model: llama3-70b
-      fallbacks: [gemini-2.0-flash, qwen3-235b]
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
       capabilities: [humanize, casual, friendly, tone, rewrite]
       tools: []
       complexity_tier: lightweight
@@ -821,15 +821,15 @@ legacy:
     reviewer:
       description: "Code review, quality audit, lint, best practices enforcement"
       primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-2.0-flash]
+      fallbacks: [qwen3-235b, gemini-3.1-pro]
       capabilities: [review, audit, check code, inspect, quality, code review, periksa, lint, scan]
       tools: []
       complexity_tier: midweight
 
     think:
       description: "Deep reasoning with QwQ-style chain-of-thought (RTX 3060 local)"
-      primary_model: qwen-3-32b
-      fallbacks: [qwen-qwq-32b, deepseek-r1:free, glm-4]
+      primary_model: qwen3-235b
+      fallbacks: [glm-4, llama3-70b]
       capabilities: [think, reasoning, deep, analysis, chain-of-thought, cot]
       tools: [interpreter]
       complexity_tier: heavyweight
@@ -837,7 +837,7 @@ legacy:
     owl:
       description: "OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)"
       primary_model: kimi-k2
-      fallbacks: [gemini-2.0-flash, qwen3-235b]
+      fallbacks: [gemini-3.1-pro, qwen3-235b]
       capabilities: [complex-tasks, research, gaia-benchmark, owl, difficult, multi-step]
       tools: [playwright, interpreter]
       complexity_tier: heavyweight
@@ -853,7 +853,7 @@ legacy:
     ag2_critic:
       description: "AG2 multi-agent debate — devil's advocate / critic role"
       primary_model: glm-4
-      fallbacks: [qwen-qwq-32b, qwen3-235b]
+      fallbacks: [qwen3-235b, llama3-70b]
       capabilities: [ag2, critic, debate, devil-advocate, challenge]
       tools: []
       complexity_tier: heavyweight
@@ -861,14 +861,14 @@ legacy:
     ag2_synthesizer:
       description: "AG2 multi-agent debate — synthesizer / judge role"
       primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-2.0-flash]
+      fallbacks: [llama3-70b, gemini-3.1-pro]
       capabilities: [ag2, synthesizer, judge, debate, synthesis, conclude]
       tools: []
       complexity_tier: heavyweight
 
     code_exec:
       description: "Safe code execution via smolagents (Python, bash)"
-      primary_model: qwen3-coder:free
+      primary_model: devstral
       fallbacks: [llama3-70b, qwen3-235b]
       capabilities: [code-execution, python, bash, run, execute, interpreter]
       tools: [interpreter]
@@ -884,8 +884,8 @@ legacy:
 
     claude_orchestrator:
       description: "Claude-Opus orchestration via Ruflo (requires ANTHROPIC_API_KEY)"
-      primary_model: claude-opus-4
-      fallbacks: [claude-3.5-sonnet, qwen3-235b]
+      primary_model: anthropic-claude
+      fallbacks: [anthropic-claude, qwen3-235b]
       capabilities: [claude, orchestrator, opus, ruflo, agentic]
       tools: []
       complexity_tier: heavyweight
@@ -894,7 +894,7 @@ legacy:
     debate:
       description: "Multi-agent debate orchestration — strategic discussion with personas"
       primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-2.0-flash]
+      fallbacks: [llama3-70b, gemini-3.1-pro]
       capabilities: [debate, discuss, opinion, argument, persona, multi-agent]
       tools: []
       complexity_tier: heavyweight

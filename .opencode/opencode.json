@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "watcher": {
+    "ignore": [
+      ".wiki/_quarantine/**",
+      ".wiki/templates/**",
+      "project/popw/working/**",
+      "cekwajar/**",
+      "logs/**",
+      "**/__pycache__/**"
+    ]
+  }
+}

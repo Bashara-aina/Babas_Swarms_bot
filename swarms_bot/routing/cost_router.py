@@ -18,6 +18,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
+# NOTE: cost_router.TaskComplexity uses numeric values (1-5).
+# swarms_bot.orchestrator.model_router.TaskComplexity uses string values ("trivial" etc.).
+# They are intentionally separate — cost_router does numeric comparisons (>=, <=)
+# which would break with string-valued enums. Do NOT import model_router.TaskComplexity here.
+
 
 class TaskComplexity(Enum):
     TRIVIAL = 1  # Simple classification, yes/no

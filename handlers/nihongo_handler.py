@@ -61,7 +61,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "- /nihongo story — belajar lewat cerita\n"
             "- /nihongo free — ngobrol bebas\n"
             "- Atau langsung ketik aja topik yang mau dipelajari!",
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -74,7 +74,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "Kecepatan: SLOW (75%) — cocok untuk N5.\n"
             "TTS: VoiceVox (neural) atau gTTS jika VoiceVox tidak tersedia.\n\n"
             "Coba kirim voice note dalam Bahasa Jepang — apapun yang kamu bisa!",
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -86,7 +86,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "🎯 Mulai drilling! Skor kamu: 0/0 | Streak: 0\n"
             "Level: N5 | Vocab flash cards + fill-in-the-blank\n\n"
             'Siap? Ketik "mulai" untuk soal pertama!',
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -98,7 +98,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "Bashara adalah protagonis dalam petualangan bahasa Jepang.\n"
             "Setiap scene butuh jawaban dalam Bahasa Jepang untuk lanjut.\n\n"
             'Siap? Ketik "mulai" untuk mulai cerita!',
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -110,7 +110,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "Sensei akan perbaiki kesalahanmu di akhir response.\n"
             "Tidak ada struktur lesson — santai aja!\n\n"
             "Mau bicara tentang apa?",
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -120,7 +120,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             "⛩ Nihongo Mode *OFF*.\n\n"
             "Legion kembali ke mode normal. またね！ (Mata ne! = Sampai jumpa!)\n"
             "Progress kamu tersimpan. Ketik /nihongo kapanpun untuk lanjut.",
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return True
 
@@ -184,7 +184,7 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
 ║  Mode: {session.sub_mode.value.upper():6} | Level: {session.jlpt_level} | Exchanges: {session.exchange_count}    ║
 ╚══════════════════════════════════════════════╝
 """
-        await update.message.reply_text(dashboard, parse_mode="Markdown")
+        await update.message.reply_text(dashboard, parse_mode="HTML")
         return True
 
     elif text.startswith("/nihonko level"):
@@ -194,44 +194,44 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
             await update.message.reply_text(
                 f"⛩ Level changed to *JLPT {level.upper()}*\n\n"
                 f"Mode难度: {'Pemula' if level.upper() == 'N5' else 'Menengah' if level.upper() == 'N4' else 'Lanjutan'}",
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
             return True
 
     elif text == "/furigana on":
         session = NihongoModeManager.get_session(user_id)
         session.show_furigana = True
-        await update.message.reply_text("⛩ Furigana: *ON* ✅", parse_mode="Markdown")
+        await update.message.reply_text("⛩ Furigana: *ON* ✅", parse_mode="HTML")
         return True
 
     elif text == "/furigana off":
         session = NihongoModeManager.get_session(user_id)
         session.show_furigana = False
-        await update.message.reply_text("⛩ Furigana: *OFF*", parse_mode="Markdown")
+        await update.message.reply_text("⛩ Furigana: *OFF*", parse_mode="HTML")
         return True
 
     elif text == "/romaji on":
         session = NihongoModeManager.get_session(user_id)
         session.show_romaji = True
-        await update.message.reply_text("⛩ Romaji: *ON* ✅", parse_mode="Markdown")
+        await update.message.reply_text("⛩ Romaji: *ON* ✅", parse_mode="HTML")
         return True
 
     elif text == "/romaji off":
         session = NihongoModeManager.get_session(user_id)
         session.show_romaji = False
-        await update.message.reply_text("⛩ Romaji: *OFF*", parse_mode="Markdown")
+        await update.message.reply_text("⛩ Romaji: *OFF*", parse_mode="HTML")
         return True
 
     elif text == "/slow on":
         session = NihongoModeManager.get_session(user_id)
         session.slow_speech = True
-        await update.message.reply_text("⛩ TTS Speed: *SLOW (75%)*", parse_mode="Markdown")
+        await update.message.reply_text("⛩ TTS Speed: *SLOW (75%)*", parse_mode="HTML")
         return True
 
     elif text == "/slow off":
         session = NihongoModeManager.get_session(user_id)
         session.slow_speech = False
-        await update.message.reply_text("⛩ TTS Speed: *Normal*", parse_mode="Markdown")
+        await update.message.reply_text("⛩ TTS Speed: *Normal*", parse_mode="HTML")
         return True
 
     return False
@@ -256,14 +256,18 @@ async def handle_nihongo_message(update: Update, context: ContextTypes.DEFAULT_T
 
     response_text = await _call_llm(system_prompt, user_text)
 
-    await update.message.reply_text(response_text, parse_mode="Markdown")
+    await update.message.reply_text(response_text, parse_mode="HTML")
 
     if session.voice_enabled:
         audio_bytes = await text_to_speech_japanese(response_text, slow_speech=session.slow_speech)
         if audio_bytes:
             await update.message.reply_voice(voice=audio_bytes)
 
-    asyncio.create_task(VocabTracker.track_from_response(user_id, response_text))
+    task = asyncio.create_task(VocabTracker.track_from_response(user_id, response_text))
+    task.add_done_callback(
+        lambda t: t.result() if not t.cancelled() and t.exception() is None
+        else logger.warning("VocabTracker.track_from_response failed: %s", t.exception())
+    )
 
 
 async def _handle_voice_input(update: Update, context: ContextTypes.DEFAULT_TYPE, session) -> None:
@@ -276,7 +280,7 @@ async def _handle_voice_input(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     await processing_msg.edit_text(
         f"🎙 *Kamu bilang:* {transcription}\n\n🤔 Sensei sedang memproses...",
-        parse_mode="Markdown",
+        parse_mode="HTML",
     )
 
     NihongoModeManager.increment_exchange(session.user_id)
@@ -285,7 +289,7 @@ async def _handle_voice_input(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     response_text = await _call_llm(system_prompt, f"[Voice input transcribed]: {transcription}")
 
-    await update.message.reply_text(response_text, parse_mode="Markdown")
+    await update.message.reply_text(response_text, parse_mode="HTML")
 
     audio_bytes = await text_to_speech_japanese(response_text, slow_speech=session.slow_speech)
     if audio_bytes:

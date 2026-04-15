@@ -56,7 +56,7 @@ async def cmd_draft(msg: Message) -> None:
             result = result[:4000] + "\n\n_[Output truncated]_"
 
         await status_msg.delete()
-        await msg.answer(result, parse_mode="Markdown")
+        await msg.answer(result, parse_mode="HTML")
     except Exception as e:
         logger.error(f"Dify draft error: {e}")
         await status_msg.edit_text(f"Draft error: {e}", parse_mode="HTML")
