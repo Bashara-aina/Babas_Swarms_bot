@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -25,7 +25,8 @@ const GoogleIcon = () => (
   </svg>
 )
 
-export default function LoginPage() {
+// Inner component that uses useSearchParams (must be inside Suspense)
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
@@ -71,6 +72,89 @@ export default function LoginPage() {
   }
 
   return (
+    <Card className="border-slate-200 shadow-sm">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold">Masuk ke cekwajar.id</CardTitle>
+        <CardDescription>
+          Gratis selamanya untuk fitur dasar.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Google OAuth */}
+        <Button
+          onClick={handleGoogleLogin}
+          variant="outline"
+          className="w-full gap-2 border-slate-300 hover:bg-slate-50"
+        >
+          <GoogleIcon />
+          Masuk dengan Google
+        </Button>
+
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-slate-400">atau</span>
+          </div>
+        </div>
+
+        {/* Magic link form */}
+        {magicLinkSent ? (
+          <Alert className="border-emerald-200 bg-emerald-50">
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
+            <AlertDescription className="text-emerald-700">
+              <strong>Cek inbox kamu!</strong> Link masuk dikirim ke <strong>{email}</strong>.
+              Klik link tersebut untuk masuk.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={handleMagicLink} className="space-y-3">
+            <div>
+              <Input
+                type="email"
+                placeholder="email@kamu.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11"
+                disabled={loading}
+              />
+            </div>
+            {error && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
+            <Button
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              disabled={loading}
+            >
+              {loading ? 'Mengirim...' : 'Kirim Link Masuk'}
+            </Button>
+          </form>
+        )}
+
+        {/* Privacy notice */}
+        <p className="text-center text-xs text-slate-400">
+          Dengan masuk, kamu setuju dengan{' '}
+          <Link href="/privacy" className="underline hover:text-slate-600">
+            Kebijakan Privasi
+          </Link>{' '}
+          dan{' '}
+          <Link href="/terms" className="underline hover:text-slate-600">
+            Syarat &amp; Ketentuan
+          </Link>
+          .
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
@@ -86,84 +170,15 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Masuk ke cekwajar.id</CardTitle>
-            <CardDescription>
-              Gratis selamanya untuk fitur dasar.
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {/* Google OAuth */}
-            <Button
-              onClick={handleGoogleLogin}
-              variant="outline"
-              className="w-full gap-2 border-slate-300 hover:bg-slate-50"
-            >
-              <GoogleIcon />
-              Masuk dengan Google
-            </Button>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-400">atau</span>
-              </div>
-            </div>
-
-            {/* Magic link form */}
-            {magicLinkSent ? (
-              <Alert className="border-emerald-200 bg-emerald-50">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-                <AlertDescription className="text-emerald-700">
-                  <strong>Cek inbox kamu!</strong> Link masuk dikirim ke <strong>{email}</strong>.
-                  Klik link tersebut untuk masuk.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <form onSubmit={handleMagicLink} className="space-y-3">
-                <div>
-                  <Input
-                    type="email"
-                    placeholder="email@kamu.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="h-11"
-                    disabled={loading}
-                  />
-                </div>
-                {error && (
-                  <p className="text-sm text-red-500">{error}</p>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  disabled={loading}
-                >
-                  {loading ? 'Mengirim...' : 'Kirim Link Masuk'}
-                </Button>
-              </form>
-            )}
-
-            {/* Privacy notice */}
-            <p className="text-center text-xs text-slate-400">
-              Dengan masuk, kamu setuju dengan{' '}
-              <Link href="/privacy" className="underline hover:text-slate-600">
-                Kebijakan Privasi
-              </Link>{' '}
-              dan{' '}
-              <Link href="/terms" className="underline hover:text-slate-600">
-                Syarat &amp; Ketentuan
-              </Link>
-              .
-            </p>
-          </CardContent>
-        </Card>
+        <Suspense fallback={
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="flex items-center justify-center py-12">
+              <p className="text-sm text-slate-400">Memuat...</p>
+            </CardContent>
+          </Card>
+        }>
+          <LoginForm />
+        </Suspense>
 
         {/* Sign up link */}
         <p className="text-center text-sm text-slate-500">

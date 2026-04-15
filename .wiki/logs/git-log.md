@@ -464,3 +464,19 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 - Fixed NEXT_PUBLIC_SUPABASE_ANON_KEY → NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   across server.ts, client.ts, and middleware.ts
 ---
+## Commit: 94b5938
+- Date: Thu Apr 16 03:28:15 AM JST 2026
+- Message: feat: stage 3 complete — auth, dashboard, subscription system
+
+- Add dashboard middleware protection (/dashboard → /auth/login)
+- Add PremiumGate component with blur overlay + upgrade CTA
+- Add upgrade/page.tsx with 3-tier pricing cards
+- Add pricing/page.tsx with feature comparison table + FAQ
+- Fix Tool type to include description field
+- Fix getCurrentUser return type to use Awaited<ReturnType<>>
+- Fix pricing page union type indexing with explicit type annotation
+- PremiumGate, SubscriptionBadge, GlobalNav all in place
+- Zero TypeScript errors (pnpm tsc --noEmit)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
