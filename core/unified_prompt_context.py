@@ -60,6 +60,25 @@ async def _opencode_brain_layer(query: str) -> str:
         return ""
 
 
+async def _claude_code_brain_layer(query: str, limit: int = 3) -> str:
+    """Query Claude Code session logs from joint brain."""
+    if not _env_on("LEGION_WIKI_ENABLED", "1"):
+        return ""
+    try:
+        from core.joint_memory import joint_search
+
+        results = await joint_search(query, sources=["claude-code"], limit=limit)
+        if not results:
+            return ""
+        block = "[CLAUDE CODE SESSIONS]\n"
+        for r in results:
+            block += f"— {r.get('summary', r.get('content', '')[:200])}\n"
+        return block
+    except Exception as exc:
+        logger.debug("unified claude code brain layer failed: %s", exc)
+        return ""
+
+
 async def _screenpipe_layer(query: str) -> str:
     if not _env_on("SCREENPIPE_ENABLED", "0"):
         return ""
@@ -171,13 +190,15 @@ async def gather_parallel_prompt_layers(
     rag_fut = _rag_layer(q)
     cal_fut = _calendar_layer()
     opencode_fut = _opencode_brain_layer(q)
+    cc_fut = _claude_code_brain_layer(q)
 
-    wiki_r, sp_r, rag_r, cal_r, oc_r, emo_r = await asyncio.gather(
+    wiki_r, sp_r, rag_r, cal_r, oc_r, cc_r, emo_r = await asyncio.gather(
         wiki_fut,
         sp_fut,
         rag_fut,
         cal_fut,
         opencode_fut,
+        cc_fut,
         emo_fut,
         return_exceptions=True,
     )
@@ -192,6 +213,7 @@ async def gather_parallel_prompt_layers(
         ("rag", rag_r),
         ("calendar", cal_r),
         ("opencode_brain", oc_r),
+        ("claude_code_brain", cc_r),
         ("emotion_pad", emo_r),
     ):
         if isinstance(res, BaseException):
