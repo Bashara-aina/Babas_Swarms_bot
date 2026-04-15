@@ -53,3 +53,27 @@ export interface AuditResult {
   bpjsMonthly: number
   bpjsEmployer: number
 }
+
+// --- Midtrans Snap Global ---------------------------------------------------
+
+export interface SnapPayOptions {
+  onSuccess?: (result: MidtransSnapResult) => void
+  onPending?: (result: MidtransSnapResult) => void
+  onError?: (result: MidtransSnapResult) => void
+  onClose?: () => void
+}
+
+export interface MidtransSnapResult {
+  transaction_id: string
+  order_id: string
+  transaction_status: string
+  payment_type?: string
+}
+
+declare global {
+  interface Window {
+    snap: {
+      pay: (snapToken: string, options: SnapPayOptions) => void
+    }
+  }
+}

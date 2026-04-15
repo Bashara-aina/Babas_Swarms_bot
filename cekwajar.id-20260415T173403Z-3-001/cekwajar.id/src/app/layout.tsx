@@ -4,6 +4,10 @@ import './globals.css'
 import { GlobalNav } from '@/components/layout/GlobalNav'
 import { Footer } from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/layout/CookieConsent'
+import { validateEnvVars } from '@/lib/config/validate'
+
+// Validate required env vars on every server component render
+validateEnvVars()
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

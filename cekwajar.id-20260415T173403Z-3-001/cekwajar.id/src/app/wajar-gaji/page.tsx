@@ -1,37 +1,942 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// cekwajar.id — Wajar Gaji (Stub)
-// Stage 6: Full implementation with salary benchmark + crowdsource
-// ══════════════════════════════════════════════════════════════════════════════
+'use client'
 
+// ==============================================================================
+// cekwajar.id — Wajar Gaji (Salary Benchmark)
+// Full implementation with autocomplete, Bayesian blending, crowdsource
+// ==============================================================================
+
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import {
+  Search, MapPin, Briefcase, Wallet, ChevronDown,
+  CheckCircle2, AlertCircle, Loader2, TrendingUp, TrendingDown,
+  Minus, Star, Lock, Info
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 
-export default function WajarGajiPage() {
+// --- Types --------------------------------------------------------------------
+
+type PageState = 'IDLE' | 'SEARCHING' | 'RESULT' | 'NO_DATA' | 'ERROR' | 'CANDIDATES'
+
+interface SearchResult {
+  matchedTitle: string
+  matchType: 'EXACT' | 'FUZZY'
+  matchConfidence: number
+  benchmark: {
+    cityP25: number | null
+    cityP50: number | null
+    cityP75: number | null
+    provinceP50: number | null
+    bpsPriorP50: number | null
+    sampleCount: number
+    dataTier: 'CITY_LEVEL' | 'CITY_LEVEL_LIMITED' | 'PROVINCE_LEVEL' | 'BPS_PRIOR' | 'NO_DATA'
+    isBlended: boolean
+    blendWeight: number | null
+    umk: number | null
+    experienceBucket: string
+  }
+  userSalary: {
+    value: number
+    position: 'above' | 'below' | 'within'
+    comparison: { diff: number; percentage: number }
+  } | null
+}
+
+interface Candidate {
+  id: string
+  title: string
+  similarity: number
+}
+
+interface SearchResponse {
+  success: boolean
+  data: {
+    matchType: 'EXACT' | 'FUZZY' | 'CANDIDATES' | 'NO_MATCH'
+    matchedTitle?: string
+    matchConfidence?: number
+    candidates?: Candidate[]
+    benchmark?: SearchResult['benchmark']
+    userSalary?: SearchResult['userSalary']
+    message?: string
+  }
+}
+
+interface City {
+  city: string
+  province: string
+}
+
+interface SubmitResponse {
+  success: boolean
+  data: {
+    accepted: boolean
+    isDuplicate: boolean
+    violatesOutlierRule: boolean
+    message: string
+  }
+}
+
+// --- Constants ----------------------------------------------------------------
+
+const EXPERIENCE_BUCKETS = [
+  { value: '0-2', label: '0-2 tahun' },
+  { value: '3-5', label: '3-5 tahun' },
+  { value: '6-10', label: '6-10 tahun' },
+  { value: '10+', label: '10+ tahun' },
+]
+
+// Indonesian cities with UMK
+const CITIES: City[] = [
+  { city: 'Jakarta', province: 'DKI Jakarta' },
+  { city: 'Jakarta Pusat', province: 'DKI Jakarta' },
+  { city: 'Jakarta Utara', province: 'DKI Jakarta' },
+  { city: 'Jakarta Selatan', province: 'DKI Jakarta' },
+  { city: 'Jakarta Timur', province: 'DKI Jakarta' },
+  { city: 'Jakarta Barat', province: 'DKI Jakarta' },
+  { city: 'Bekasi', province: 'Jawa Barat' },
+  { city: 'Depok', province: 'Jawa Barat' },
+  { city: 'Bogor', province: 'Jawa Barat' },
+  { city: 'Bandung', province: 'Jawa Barat' },
+  { city: 'Bandung', province: 'Jawa Barat' },
+  { city: 'Surabaya', province: 'Jawa Timur' },
+  { city: 'Sidoarjo', province: 'Jawa Timur' },
+  { city: 'Malang', province: 'Jawa Timur' },
+  { city: 'Semarang', province: 'Jawa Tengah' },
+  { city: 'Tangerang', province: 'Banten' },
+  { city: 'Tangerang Selatan', province: 'Banten' },
+  { city: 'Serang', province: 'Banten' },
+  { city: 'Medan', province: 'Sumatera Utara' },
+  { city: 'Palembang', province: 'Sumatera Selatan' },
+  { city: 'Makassar', province: 'Sulawesi Selatan' },
+  { city: 'Yogyakarta', province: 'DI Yogyakarta' },
+  { city: 'Denpasar', province: 'Bali' },
+  { city: 'Manado', province: 'Sulawesi Utara' },
+  { city: 'Balikpapan', province: 'Kalimantan Timur' },
+  { city: 'Samarinda', province: 'Kalimantan Timur' },
+  { city: 'Pontianak', province: 'Kalimantan Barat' },
+]
+
+// Dedupe cities by name
+const UNIQUE_CITIES = Array.from(new Map(CITIES.map(c => [c.city, c])).values())
+
+// --- Formatters ---------------------------------------------------------------
+
+function formatIDR(amount: number | null): string {
+  if (amount == null) return '-'
+  return `Rp ${amount.toLocaleString('id-ID')}`
+}
+
+function getProvince(cityName: string): string {
+  return CITIES.find(c => c.city === cityName)?.province ?? ''
+}
+
+// --- Components ---------------------------------------------------------------
+
+function ConfidenceBadge({ tier, sampleCount }: { tier: string; sampleCount: number }) {
+  if (tier === 'CITY_LEVEL' && sampleCount >= 30) {
+    return (
+      <Badge variant="success" className="bg-emerald-100 text-emerald-700">
+        <CheckCircle2 className="mr-1 h-3 w-3" />
+        Terverifikasi (n={sampleCount})
+      </Badge>
+    )
+  }
+  if (tier === 'CITY_LEVEL_LIMITED' || tier === 'PROVINCE_LEVEL') {
+    return (
+      <Badge variant="warning" className="bg-amber-100 text-amber-700">
+        <Info className="mr-1 h-3 w-3" />
+        Estimasi (n={sampleCount})
+      </Badge>
+    )
+  }
+  if (tier === 'BPS_PRIOR') {
+    return (
+      <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+        <Star className="mr-1 h-3 w-3" />
+        Prior BPS
+      </Badge>
+    )
+  }
+  return null
+}
+
+function SalaryRangeBar({
+  p25,
+  p50,
+  p75,
+  userSalary
+}: {
+  p25: number | null
+  p50: number | null
+  p75: number | null
+  userSalary: number | null
+}) {
+  if (!p50) return null
+
+  const range = p75 ? p75 - (p25 ?? p50 * 0.78) : p50 * 0.5
+  const min = p25 ?? Math.round(p50 * 0.78)
+
+  const userPosition = userSalary
+    ? Math.min(100, Math.max(0, ((userSalary - min) / range) * 100))
+    : null
+
+  const p50Position = ((p50 - min) / range) * 100
+
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md text-center">
-        <div className="mb-6 text-5xl">💰</div>
-        <h1 className="text-2xl font-bold text-slate-900">Wajar Gaji</h1>
-        <p className="mt-3 text-slate-500">
-          Benchmark gaji kamu dengan data 12.000+ karyawan Indonesia.
-          <br />
-          Tau apakah gajimu sudah wajar di pasaran.
+    <div className="relative">
+      <div className="flex justify-between text-xs text-slate-500 mb-1">
+        <span>{formatIDR(min)}</span>
+        <span className="font-medium text-slate-700">Median</span>
+        <span>{p75 ? formatIDR(p75) : formatIDR(p50 * 1.28)}</span>
+      </div>
+      <div className="h-6 bg-slate-100 rounded-full relative overflow-hidden">
+        {/* P50 marker */}
+        <div
+          className="absolute top-0 bottom-0 w-1 bg-emerald-500 z-10"
+          style={{ left: `${p50Position}%` }}
+        />
+        {/* User salary marker */}
+        {userPosition !== null && (
+          <div
+            className="absolute top-1 bottom-1 w-2 bg-blue-500 rounded-full z-20"
+            style={{ left: `${userPosition}%` }}
+            title={`Gaji kamu: ${formatIDR(userSalary)}`}
+          />
+        )}
+      </div>
+      {userSalary && (
+        <p className="text-xs text-center mt-1 text-slate-500">
+          Penanda biru = posisi gaji kamu
         </p>
-        <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-600">
-            ⏳ Sedang dibangun — Stage 6 dari 10
-          </p>
-          <p className="mt-1 text-xs text-slate-400">
-            Implementasi lengkap meliputi: API benchmark gaji, Bayesian blending
-            untuk dataset kecil, crowdsource submission, dan scraper BPS/JobStreet.
-          </p>
-        </div>
-        <Link
-          href="/"
-          className="mt-6 inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700"
-        >
-          ← Kembali ke Homepage
-        </Link>
+      )}
+    </div>
+  )
+}
+
+function UserSalaryComparison({
+  position,
+  percentage
+}: {
+  position: 'above' | 'below' | 'within'
+  percentage: number
+}) {
+  const isAbove = position === 'above'
+  const isBelow = position === 'below'
+
+  return (
+    <div className={`flex items-center gap-2 p-3 rounded-lg ${
+      isAbove ? 'bg-emerald-50 text-emerald-700' :
+      isBelow ? 'bg-red-50 text-red-700' :
+      'bg-amber-50 text-amber-700'
+    }`}>
+      {isAbove && <TrendingUp className="h-5 w-5" />}
+      {isBelow && <TrendingDown className="h-5 w-5" />}
+      {position === 'within' && <Minus className="h-5 w-5" />}
+      <div className="text-sm">
+        {isAbove && `Gaji kamu ${percentage}% di atas median`}
+        {isBelow && `Gaji kamu ${Math.abs(percentage)}% di bawah median`}
+        {position === 'within' && `Gaji kamu within 5% median`}
       </div>
     </div>
   )
+}
+
+// --- Main Component -----------------------------------------------------------
+
+export default function WajarGajiPage() {
+  const [state, setState] = useState<PageState>('IDLE')
+  const [jobTitleInput, setJobTitleInput] = useState('')
+  const [selectedCity, setSelectedCity] = useState('')
+  const [selectedExperience, setSelectedExperience] = useState('3-5')
+  const [userSalaryInput, setUserSalaryInput] = useState('')
+
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null)
+  const [candidates, setCandidates] = useState<Candidate[]>([])
+  const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null)
+
+  const [autocompleteResults, setAutocompleteResults] = useState<Array<{id: string; title: string; industry: string | null}>>([])
+  const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+
+  const [errorMessage, setErrorMessage] = useState('')
+
+  // Crowdsource form state
+  const [showCrowdsourceForm, setShowCrowdsourceForm] = useState(false)
+  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [submitMessage, setSubmitMessage] = useState('')
+
+  const [salaryInput, setSalaryInput] = useState('')
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Autocomplete search
+  const searchCategories = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
+      setAutocompleteResults([])
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/salary/benchmark-search?q=${encodeURIComponent(query)}`)
+      const json = await res.json()
+      if (json.success) {
+        setAutocompleteResults(json.data.results)
+        setShowAutocomplete(true)
+      }
+    } catch {
+      setAutocompleteResults([])
+    }
+  }, [])
+
+  const handleJobTitleChange = (value: string) => {
+    setJobTitleInput(value)
+    setSelectedCategoryId(null)
+    setSearchResults(null)
+    setCandidates([])
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    debounceRef.current = setTimeout(() => {
+      searchCategories(value)
+    }, 300)
+  }
+
+  const selectAutocompleteItem = (item: { id: string; title: string }) => {
+    setJobTitleInput(item.title)
+    setSelectedCategoryId(item.id)
+    setShowAutocomplete(false)
+    setAutocompleteResults([])
+  }
+
+  const handleSearch = async () => {
+    if (!selectedCategoryId || !selectedCity) {
+      setErrorMessage('Silakan pilih judul pekerjaan dan kota')
+      return
+    }
+
+    setState('SEARCHING')
+    setErrorMessage('')
+
+    try {
+      const province = getProvince(selectedCity)
+      const params = new URLSearchParams({
+        jobTitle: jobTitleInput,
+        city: selectedCity,
+        province,
+        experienceBucket: selectedExperience,
+        ...(userSalaryInput && { userSalary: userSalaryInput }),
+      })
+
+      const res = await fetch(`/api/salary/benchmark?${params}`)
+      const json: SearchResponse = await res.json()
+
+      if (!json.success) {
+        setState('ERROR')
+        setErrorMessage(json.data?.message ?? 'Terjadi kesalahan')
+        return
+      }
+
+      if (json.data.matchType === 'CANDIDATES') {
+        setState('CANDIDATES')
+        setCandidates(json.data.candidates ?? [])
+        return
+      }
+
+      if (json.data.matchType === 'NO_MATCH') {
+        setState('NO_DATA')
+        setErrorMessage(json.data.message ?? 'Judul tidak ditemukan')
+        return
+      }
+
+      setState('RESULT')
+      setSearchResults(json.data as SearchResult)
+    } catch (err) {
+      setState('ERROR')
+      setErrorMessage('Tidak dapat terhubung ke server')
+    }
+  }
+
+  const selectCandidate = async (candidateId: string) => {
+    setSelectedCandidate(candidateId)
+    const candidate = candidates.find(c => c.id === candidateId)
+    if (candidate) {
+      setJobTitleInput(candidate.title)
+      setSelectedCategoryId(candidateId)
+    }
+  }
+
+  const handleSubmitSalary = async () => {
+    if (!selectedCategoryId || !selectedCity || !salaryInput) {
+      setSubmitMessage('Silakan isi semua field')
+      setSubmitState('error')
+      return
+    }
+
+    const salary = parseInt(salaryInput.replace(/\D/g, ''), 10)
+    if (isNaN(salary) || salary <= 0) {
+      setSubmitMessage('Gaji tidak valid')
+      setSubmitState('error')
+      return
+    }
+
+    setSubmitState('submitting')
+
+    try {
+      const province = getProvince(selectedCity)
+      const res = await fetch('/api/salary/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobTitle: jobTitleInput,
+          city: selectedCity,
+          province,
+          grossSalary: salary,
+          experienceBucket: selectedExperience,
+        }),
+      })
+
+      const json: SubmitResponse = await res.json()
+
+      if (json.data.accepted) {
+        setSubmitState('success')
+        setSubmitMessage('Laporan gaji berhasil disimpan! Terima kasih.')
+        setSalaryInput('')
+      } else {
+        setSubmitState('error')
+        setSubmitMessage(json.data.message)
+      }
+    } catch {
+      setSubmitState('error')
+      setSubmitMessage('Tidak dapat terhubung ke server')
+    }
+  }
+
+  // Close autocomplete on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
+        setShowAutocomplete(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // --- Render IDLE / FORM ---
+
+  if (state === 'IDLE' || state === 'SEARCHING') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <div className="mb-8 text-center">
+            <div className="mb-4 text-5xl">💰</div>
+            <h1 className="text-2xl font-bold text-slate-900">Wajar Gaji</h1>
+            <p className="mt-2 text-slate-500">
+              Cek apakah gajimu sudah wajar dengan data 12.000+ karyawan Indonesia
+            </p>
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Job Title with Autocomplete */}
+                <div className="relative">
+                  <Label htmlFor="jobTitle">Judul Pekerjaan</Label>
+                  <div className="relative">
+                    <Input
+                      ref={inputRef}
+                      id="jobTitle"
+                      value={jobTitleInput}
+                      onChange={(e) => handleJobTitleChange(e.target.value)}
+                      placeholder="Ketik nama posisi, contoh: Software Engineer"
+                      className="pr-10"
+                      autoComplete="off"
+                    />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  </div>
+
+                  {/* Autocomplete Dropdown */}
+                  {showAutocomplete && autocompleteResults.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {autocompleteResults.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => selectAutocompleteItem(item)}
+                          className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center justify-between"
+                        >
+                          <span className="text-sm text-slate-700">{item.title}</span>
+                          {item.industry && (
+                            <span className="text-xs text-slate-400">{item.industry}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* City Select */}
+                <div>
+                  <Label htmlFor="city">Kota</Label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih kota" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIQUE_CITIES.map(({ city, province }) => (
+                        <SelectItem key={city} value={city}>
+                          {city}, {province}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Experience */}
+                <div>
+                  <Label htmlFor="experience">Pengalaman Kerja</Label>
+                  <Select value={selectedExperience} onValueChange={setSelectedExperience}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPERIENCE_BUCKETS.map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* User Salary (Optional) */}
+                <div>
+                  <Label htmlFor="salary">Gaji Kamu Saat Ini (Opsional)</Label>
+                  <Input
+                    id="salary"
+                    type="text"
+                    value={userSalaryInput}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '')
+                      setUserSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
+                    }}
+                    placeholder="Contoh: 10.000.000"
+                  />
+                  <p className="mt-1 text-xs text-slate-400">
+                    Untuk melihat posisi relatifmu terhadap median
+                  </p>
+                </div>
+
+                {errorMessage && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    {errorMessage}
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleSearch}
+                  disabled={state === 'SEARCHING' || !selectedCategoryId || !selectedCity}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {state === 'SEARCHING' ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Mencari...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Cek Benchmark
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Info Card */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div className="text-sm text-blue-700">
+                <p className="font-medium">Bagaimana ini bekerja?</p>
+                <p className="mt-1">
+                  Masukkan judul pekerjaan dan lokasimu. Kami akan mencocokkan dengan data
+                  crowdsource dari karyawan Indonesia dan memberikan estimasi gaji yang wajar.
+                  Data yang lebih sedikit akan menggunakan prior BPS untuk akurasi lebih baik.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Render CANDIDATES ---
+
+  if (state === 'CANDIDATES') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">
+                Pilih Judul Pekerjaan yang Sesuai
+              </h2>
+              <p className="text-sm text-slate-500 mb-4">
+                Apakah maksudmu salah satu dari ini?
+              </p>
+              <div className="space-y-2">
+                {candidates.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => selectCandidate(c.id)}
+                    className={`w-full p-3 text-left rounded-lg border transition-colors ${
+                      selectedCandidate === c.id
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-700">{c.title}</span>
+                      {selectedCandidate === c.id && (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-1">
+                      Kemiripan: {Math.round(c.similarity * 100)}%
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setState('IDLE')
+                    setCandidates([])
+                    setSelectedCandidate(null)
+                  }}
+                  className="flex-1"
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (selectedCandidate) {
+                      setState('SEARCHING')
+                      handleSearch()
+                    }
+                  }}
+                  disabled={!selectedCandidate}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Lanjutkan
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Render NO_DATA ---
+
+  if (state === 'NO_DATA') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-12 text-center">
+          <div className="text-5xl mb-4">🔍</div>
+          <h2 className="text-xl font-bold text-slate-900">Data Tidak Ditemukan</h2>
+          <p className="mt-2 text-slate-500">{errorMessage}</p>
+          <Button
+            onClick={() => {
+              setState('IDLE')
+              setSearchResults(null)
+              setErrorMessage('')
+            }}
+            className="mt-6 bg-emerald-600 hover:bg-emerald-700"
+          >
+            Coba Lagi
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Render ERROR ---
+
+  if (state === 'ERROR') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-12 text-center">
+          <div className="text-5xl mb-4">❌</div>
+          <h2 className="text-xl font-bold text-red-900">Terjadi Kesalahan</h2>
+          <p className="mt-2 text-red-600">{errorMessage}</p>
+          <Button
+            onClick={() => {
+              setState('IDLE')
+              setErrorMessage('')
+            }}
+            className="mt-6 bg-emerald-600 hover:bg-emerald-700"
+          >
+            Kembali
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Render RESULT ---
+
+  if (state === 'RESULT' && searchResults) {
+    const { benchmark, matchedTitle, matchType, userSalary } = searchResults
+
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-8">
+          {/* Back button */}
+          <button
+            onClick={() => {
+              setState('IDLE')
+              setSearchResults(null)
+            }}
+            className="flex items-center text-sm text-slate-500 hover:text-emerald-600 mb-4"
+          >
+            ← Cari Lagi
+          </button>
+
+          {/* Result Card */}
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              {/* Title and Match Badge */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">{matchedTitle}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    {matchType === 'EXACT' ? (
+                      <Badge className="bg-emerald-100 text-emerald-700">
+                        <CheckCircle2 className="mr-1 h-3 w-3" /> Exact Match
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-amber-100 text-amber-700">
+                        <Info className="mr-1 h-3 w-3" /> Fuzzy Match
+                      </Badge>
+                    )}
+                    <ConfidenceBadge tier={benchmark.dataTier} sampleCount={benchmark.sampleCount} />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-slate-500">{selectedCity}</div>
+                  <div className="text-sm text-slate-400">{selectedExperience} tahun</div>
+                </div>
+              </div>
+
+              {/* UMK Reference */}
+              {benchmark.umk && (
+                <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">UMK {selectedCity} 2026</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatIDR(benchmark.umk)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* City-Level Data (Premium) */}
+              {benchmark.cityP50 ? (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-slate-700 mb-3">
+                    Rentang Gaji di {selectedCity}
+                  </h3>
+                  <SalaryRangeBar
+                    p25={benchmark.cityP25}
+                    p50={benchmark.cityP50}
+                    p75={benchmark.cityP75}
+                    userSalary={userSalary?.value ?? null}
+                  />
+
+                  {/* User Salary Comparison */}
+                  {userSalary && userSalary.position && (
+                    <div className="mt-4">
+                      <UserSalaryComparison
+                        position={userSalary.position}
+                        percentage={userSalary.comparison.percentage}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Province-Level Data (Free) */
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-slate-700 mb-2">
+                    Median Gaji Provinsi
+                  </h3>
+                  <div className="p-4 bg-slate-50 rounded-lg text-center">
+                    <div className="text-3xl font-bold text-emerald-600">
+                      {formatIDR(benchmark.provinceP50 ?? benchmark.bpsPriorP50)}
+                    </div>
+                    <div className="text-sm text-slate-500 mt-1">
+                      Median provinsi
+                    </div>
+                  </div>
+
+                  {/* User Salary Comparison */}
+                  {userSalary && userSalary.position && (
+                    <div className="mt-4">
+                      <UserSalaryComparison
+                        position={userSalary.position}
+                        percentage={userSalary.comparison.percentage}
+                      />
+                    </div>
+                  )}
+
+                  {/* Premium Gate */}
+                  <div className="mt-4 p-4 border border-dashed border-slate-300 rounded-lg text-center">
+                    <Lock className="h-5 w-5 text-slate-400 mx-auto mb-2" />
+                    <p className="text-sm text-slate-600 font-medium">
+                      Upgrade ke Basic+ untuk data P25-P75 kota
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Termasuk analisis gaji personal dan prediksi bonus
+                    </p>
+                    <Button size="sm" className="mt-3 bg-emerald-600 hover:bg-emerald-700">
+                      Upgrade Sekarang
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Blending Explanation */}
+              {benchmark.isBlended && benchmark.blendWeight && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                  <Info className="h-4 w-4 inline mr-1" />
+                  Data digabung dengan prior BPS (bobot {benchmark.blendWeight}%) karena
+                  sampel kota terbatas.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Crowdsource Form */}
+          {!showCrowdsourceForm ? (
+            <Button
+              variant="outline"
+              onClick={() => setShowCrowdsourceForm(true)}
+              className="w-full"
+            >
+              <Star className="mr-2 h-4 w-4" />
+              Tambahkan Laporan Gaji Anonim
+            </Button>
+          ) : (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-slate-900 mb-4">
+                  Laporan Gaji Anonim
+                </h3>
+
+                {submitState === 'success' ? (
+                  <div className="text-center py-4">
+                    <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-2" />
+                    <p className="text-emerald-700 font-medium">{submitMessage}</p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowCrowdsourceForm(false)
+                        setSubmitState('idle')
+                      }}
+                      className="mt-4"
+                    >
+                      Tutup
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-slate-50 rounded-lg text-sm">
+                        <div className="text-slate-600">
+                          <strong>{jobTitleInput}</strong> di <strong>{selectedCity}</strong>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="submitSalary">Gaji Kotor per Bulan</Label>
+                        <Input
+                          id="submitSalary"
+                          type="text"
+                          value={salaryInput}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\D/g, '')
+                            setSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
+                          }}
+                          placeholder="Contoh: 10.000.000"
+                        />
+                      </div>
+
+                      <p className="text-xs text-slate-400">
+                        Data dikirim anonim. Tidak ada nama/email disimpan. Hanya IP hash
+                        untuk deduplikasi.
+                      </p>
+
+                      {submitState === 'error' && (
+                        <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                          {submitMessage}
+                        </div>
+                      )}
+
+                      <Button
+                        onClick={handleSubmitSalary}
+                        disabled={submitState === 'submitting' || !salaryInput}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        {submitState === 'submitting' ? (
+                          <div>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Mengirim...
+                          </div>
+                        ) : (
+                          <div>
+                            <span>Kirim Laporan</span>
+                          </div>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Back to Home */}
+          <div className="mt-6 text-center">
+            <Link
+              href="/"
+              className="text-sm text-slate-500 hover:text-emerald-600"
+            >
+              ← Kembali ke Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }

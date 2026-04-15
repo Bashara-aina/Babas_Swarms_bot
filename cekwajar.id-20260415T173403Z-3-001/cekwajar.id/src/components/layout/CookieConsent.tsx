@@ -1,14 +1,14 @@
 'use client'
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // cekwajar.id — Cookie Consent Banner
-// Shown on first visit; stores consent in localStorage
-// Full implementation in Stage 9
-// ══════════════════════════════════════════════════════════════════════════════
+// Shown on first visit; stores consent in localStorage + DB if logged in
+// ==============================================================================
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false)
@@ -20,16 +20,37 @@ export function CookieConsent() {
     }
   }, [])
 
+  async function recordConsent(status: 'accepted' | 'rejected') {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) return
+
+      await supabase.from('user_consents').insert({
+        user_id: user.id,
+        consent_type: 'cookie',
+        consent_status: status,
+        ip_address: null, // Not collecting IP for privacy
+        user_agent: navigator.userAgent,
+      })
+    } catch {
+      // Non-critical: consent still stored in localStorage
+    }
+  }
+
   if (!visible) return null
 
   function handleAccept() {
     localStorage.setItem('cookie_consent', 'accepted')
     setVisible(false)
+    recordConsent('accepted')
   }
 
   function handleDecline() {
     localStorage.setItem('cookie_consent', 'rejected')
     setVisible(false)
+    recordConsent('rejected')
   }
 
   return (

@@ -5,13 +5,15 @@
 
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { CheckCircle, XCircle, ArrowRight, Calculator, TrendingUp, MapPin, Globe } from 'lucide-react'
 import { SubscriptionBadge } from '@/components/shared/SubscriptionBadge'
+import { PaymentToast } from '@/components/shared/PaymentToast'
 import { TOOLS } from '@/lib/constants'
+import { ToastProvider } from '@/components/ui/toast'
 
 const TIER_FEATURES = {
   free: {
@@ -75,7 +77,9 @@ export default async function DashboardPage() {
   const tierConfig = TIER_FEATURES[tier]
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <ToastProvider>
+      <PaymentToast />
+      <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
         {/* Welcome header */}
         <div className="flex items-center justify-between">
@@ -194,6 +198,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </ToastProvider>
   )
 }
