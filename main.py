@@ -69,6 +69,10 @@ from core.wiki_scheduler import WikiQualityScheduler
 _harvester_scheduler: DailyHarvesterScheduler | None = None
 _wiki_scheduler: WikiQualityScheduler | None = None
 
+# ── Sidecar process handles (restart policy on crash) ───────────────────────
+_ruflo_process: subprocess.Popen[bytes] | None = None
+_opencode_process: subprocess.Popen[bytes] | None = None
+
 # ── Logging ────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
@@ -404,7 +408,35 @@ async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) 
     return False
 
 
-def _opencode_health_probe_sync(url: str = "http://127.0.0.1:4096/health") -> bool:
+async def _ruflo_restart_monitor(check_interval: float = 30.0) -> None:
+    """Background loop: restarts ruflo sidecar if it crashes.
+
+    Uses the global _ruflo_process handle to detect death,
+    then re-spawns it and verifies health.
+    """
+    import itertools
+    for attempt in itertools.count():
+        await asyncio.sleep(check_interval)
+        proc = _ruflo_process
+        if proc is None:
+            continue
+        if proc.poll() is not None:  # process has exited
+            logger.warning("ruflo sidecar died (pid=%d, exit=%d) — restarting in %ds",
+                           proc.pid, proc.returncode, check_interval)
+            try:
+                new_proc = subprocess.Popen(
+                    ["node", "tools/ruflo/server.js"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                _ruflo_process = new_proc
+                logger.info("ruflo sidecar restarted (new pid=%d)", new_proc.pid)
+                if await _wait_for_ruflo_health():
+                    logger.info("ruflo sidecar healthy after restart")
+                else:
+                    logger.warning("ruflo sidecar unhealthy after restart (non-fatal)")
+            except Exception as e:
+                logger.error("ruflo sidecar restart failed: %s", e)
     req = urlrequest.Request(url=url, method="GET")
     with urlrequest.urlopen(req, timeout=2) as response:
         body = response.read().decode("utf-8", errors="ignore")
@@ -468,7 +500,7 @@ async def _run_group_a_startup(bot: Bot) -> None:
             layer = init_humanization_layer()
             mem = layer.get("memory")
             emo = layer.get("emotion")
-            logger.info("[Legion v6] Memory: %s", mem.get_memory_stats() if mem else {})
+            logger.info("[Legion v6] Memory: %s", await mem.get_memory_stats() if mem else {})
             logger.info(
                 "[Legion v6] Emotion: %s",
                 getattr(getattr(emo, "state", None), "dominant_emotion", "loaded"),
@@ -864,7 +896,7 @@ async def on_startup(bot: Bot) -> None:
         from core.proactive_engine import register_sender, run_proactive_loop
 
         async def _legion_proactive_send(text: str) -> None:
-            await bot.send_message(chat_id=int(os.getenv("ALLOWED_USER_ID")), text=text, parse_mode="Markdown")
+            await bot.send_message(chat_id=int(os.getenv("ALLOWED_USER_ID")), text=text, parse_mode="HTML")
 
         register_sender(_legion_proactive_send)
         asyncio.create_task(run_proactive_loop()).add_done_callback(
@@ -896,14 +928,16 @@ async def on_startup(bot: Bot) -> None:
         logger.warning("Screenpipe bridge init failed (non-fatal): %s", e)
 
     # ruflo sidecar (synchronous launch + async health check)
+    global _ruflo_process
     if os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
         try:
-            subprocess.Popen(
+            proc = subprocess.Popen(
                 ["node", "tools/ruflo/server.js"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            logger.info("ruflo sidecar launched")
+            _ruflo_process = proc
+            logger.info("ruflo sidecar launched (pid=%d)", proc.pid)
         except Exception as e:
             logger.warning("ruflo sidecar launch failed (non-fatal): %s", e)
 
@@ -915,14 +949,19 @@ async def on_startup(bot: Bot) -> None:
         except Exception as e:
             logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
 
+        # Restart policy: monitor ruflo and restart if it dies
+        asyncio.create_task(_ruflo_restart_monitor())
+
     # opencode sidecar (synchronous launch + async health check)
+    global _opencode_process
     try:
-        subprocess.Popen(
+        proc = subprocess.Popen(
             ["opencode", "serve", "--port", "4096"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        logger.info("opencode sidecar launched")
+        _opencode_process = proc
+        logger.info("opencode sidecar launched (pid=%d)", proc.pid)
     except Exception as e:
         logger.warning("opencode sidecar launch failed (non-fatal): %s", e)
 
@@ -994,6 +1033,12 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="swarm_viz", description="Visualize agents/thoughts/communications"),
                 BotCommand(command="think", description="QwQ deep reasoning"),
                 BotCommand(command="cmd", description="Run shell command"),
+                BotCommand(command="code", description="Plan a coding task with Plandex"),
+                BotCommand(command="apply", description="Apply pending Plandex plan"),
+                BotCommand(command="abort", description="Abort pending Plandex plan"),
+                BotCommand(command="diff", description="Review pending Plandex diff"),
+                BotCommand(command="fix", description="Run SWE-agent on GitHub issue"),
+                BotCommand(command="fix_dry", description="SWE-agent dry-run (no PR)"),
                 # Research
                 BotCommand(command="paper", description="Search arXiv papers"),
                 BotCommand(command="ask_paper", description="Ask about a paper"),
@@ -1030,6 +1075,7 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="gpu", description="GPU health status"),
                 BotCommand(command="vuln_scan", description="Vulnerability scan"),
                 BotCommand(command="opencode", description="Route task to opencode CLI"),
+                BotCommand(command="codex", description="Route task to Claude Code"),
                 # Tasks
                 BotCommand(command="task_from", description="Extract tasks from text"),
                 BotCommand(command="tasks_due", description="Show pending tasks"),

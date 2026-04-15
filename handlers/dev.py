@@ -179,6 +179,62 @@ async def cmd_security_review(msg: Message) -> None:
 
 
 # ── /opencode ─────────────────────────────────────────────────────────────────
+# ── /codex ────────────────────────────────────────────────────────────────────
+@router.message(Command("codex"))
+async def cmd_codex(msg: Message) -> None:
+    """Route a task to Claude Code via the claude_code_bridge."""
+    if not is_allowed(msg):
+        return
+    task_text = (msg.text or "").removeprefix("/codex").strip()
+    if not task_text:
+        await msg.answer(
+            "usage: <code>/codex &lt;task description&gt;</code>\n\n"
+            "Routes task through Claude Code with Legion's review context.\n\n"
+            "Example:\n<code>/codex implement rate limiting middleware</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    status_msg = await msg.answer("🤖 Legion dispatching to Claude Code…")
+    typing_task = asyncio.create_task(_keep_typing(msg))
+
+    try:
+        from core.claude_code_bridge import run_claude_task
+
+        username = msg.from_user.username if msg.from_user else "unknown"
+        result = await run_claude_task(
+            prompt=task_text,
+            project_dir="/home/newadmin/swarm-bot",
+            user=username,
+            timeout=180,
+        )
+
+        await _cancel_task(typing_task)
+        if result.get("success") and result.get("output"):
+            await send_chunked(msg, result["output"])
+        else:
+            await status_msg.delete()
+            await msg.answer(
+                f"Claude Code error: {result.get('error', 'unknown')}",
+                parse_mode="HTML",
+            )
+    except Exception as e:
+        await _cancel_task(typing_task)
+        import html as html_mod
+
+        if "status_msg" in dir():
+            await status_msg.edit_text(
+                f"codex error: <code>{html_mod.escape(str(e)[:400])}</code>",
+                parse_mode="HTML",
+            )
+        else:
+            await msg.answer(
+                f"codex error: <code>{html_mod.escape(str(e)[:400])}</code>",
+                parse_mode="HTML",
+            )
+
+
+# ── /opencode ─────────────────────────────────────────────────────────────────
 @router.message(Command("opencode"))
 async def cmd_opencode(msg: Message) -> None:
     """Route a task to opencode CLI via the Legion bridge."""
