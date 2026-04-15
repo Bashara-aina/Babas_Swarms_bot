@@ -201,11 +201,8 @@ async def cmd_codex(msg: Message) -> None:
     try:
         from core.claude_code_bridge import run_claude_task
 
-        username = msg.from_user.username if msg.from_user else "unknown"
         result = await run_claude_task(
             prompt=task_text,
-            project_dir="/home/newadmin/swarm-bot",
-            user=username,
             timeout=180,
         )
 
