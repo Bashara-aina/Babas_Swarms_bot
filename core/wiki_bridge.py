@@ -107,6 +107,55 @@ _Last updated: {_now_jst()} by OpenCode_
     return str(session_file)
 
 
+async def claude_code_write_session(session_md: str, summary: str = "") -> str:
+    """
+    Write a Claude Code session to `.wiki/claude-code/sessions/<slug>.md`.
+
+    Called by Claude Code session hooks after each task.
+    Also writes to joint-brain cross-refs via joint_memory.
+    """
+    import aiofiles
+
+    if not _wiki_enabled():
+        return ""
+
+    import hashlib
+    slug = hashlib.md5(session_md[:80].encode()).hexdigest()[:12]
+    session_dir = WIKI_DIR / "claude-code" / "sessions"
+    session_dir.mkdir(parents=True, exist_ok=True)
+
+    content = f"""---
+tags: [claude-code-session, session]
+created: {_now_jst()}
+---
+
+# Claude Code Session
+
+## Summary
+{summary or session_md[:200]}
+
+## Session Log
+
+{session_md}
+"""
+    session_file = session_dir / f"{slug}.md"
+    try:
+        async with aiofiles.open(session_file, "w", encoding="utf-8") as f:
+            await f.write(content)
+        logger.info("Claude Code session written: %s", session_file)
+
+        # Also write via joint_memory for cross-system search
+        try:
+            from core.joint_memory import joint_save
+            await joint_save(session_md, "claude-code", tags=["claude-code", "session"], summary=summary)
+        except Exception as e:
+            logger.debug("joint_memory write failed (non-fatal): %s", e)
+    except Exception as exc:
+        logger.warning("Failed to write Claude Code session: %s", exc)
+
+    return str(session_file)
+
+
 async def opencode_write_decision(
     decision_id: str,
     title: str,
