@@ -84,6 +84,33 @@ The following were deleted in the April 2026 cleanup:
 core/memory_old/, core/orchestration_old/, core/reliability_old/, core/task_orchestrator_old.py
 If you see old code referenced anywhere, delete the reference. Do not fix old code.
 
+2c. MULTI-SESSION WORKTREE SYSTEM
+This project can run multiple Claude Code / OpenCode sessions simultaneously using git worktrees.
+~/.claude/
+├── lib/                              # Multi-session coordination library
+│   ├── worktree_manager.py             # Git worktree CRUD
+│   ├── session_registry.py            # Registry read/write/heartbeat
+│   ├── advisory_lock.py              # Advisory file locking
+│   ├── merge_coordinator.py          # Branch analysis + merge
+│   ├── cli.py                        # Unified CLI (11 subcommands)
+│   ├── awareness_prompt.py           # System prompt awareness block generator
+│   └── heartbeat.py                   # Background heartbeat daemon
+├── worktrees/                         # Worktree root (initialized)
+│   ├── registry.json                  # Shared coordination state
+│   └── main/                        # Shared trunk worktree
+└── .local/bin/
+    ├── cc                           # Claude Code launcher (auto worktree)
+    └── oc                           # OpenCode launcher (auto worktree)
+
+Usage:
+    cd ~/.claude/lib
+    python cli.py init --repo /home/newadmin/swarm-bot --root ~/.claude/worktrees
+    python cli.py create session-A --task "Implementing auth"
+    python cli.py list | locks | analyze | merge
+    python awareness_prompt.py --session session-A  # generates awareness block
+    python heartbeat.py session-A --registry ~/.claude/worktrees/registry.json &
+    ~/.local/bin/cc session-A  # launch Claude Code in worktree
+
 2b. WIKI GUARDIAN — Obsidian + Karpathy KB Protocol
 This .wiki/ is the Obsidian vault containing synthesized project knowledge. All sessions that touch .wiki/ must follow this protocol.
 
@@ -446,6 +473,10 @@ BUDGET_DAILY_LIMIT_USD=2.00  # hard cap across all background tasks
 
 # Ruflo
 RUFLO_PORT=7834
+
+# Multi-session worktree (set for Claude Code / OpenCode sessions)
+CLAUDE_REPO_ROOT=/home/newadmin/swarm-bot
+CLAUDE_WORKTREES_ROOT=/home/newadmin/.claude/worktrees
 
 # Feature flags (set to "true" to enable)
 LEGION_SOUL_ENABLED=true
