@@ -480,3 +480,38 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ---
+## Commit: a4e9636
+- Date: Thu Apr 16 03:39:13 AM JST 2026
+- Message: feat: stage 4 complete — wajar slip engine, UI, and violations
+
+- PPh21 TER engine (PMK 168/2023) with December progressive true-up
+- BPJS engine: JHT, JP (capped), JKK, JKM, Kesehatan (capped)
+- All 7 violation detectors (V01–V07) sorted by severity
+- POST /api/audit-payslip with Zod validation, rate limiting (5/IP/hr)
+- GET /api/cities for city dropdown with CDN caching
+- GET /api/auth/me for client-side tier detection
+- Full Client Component UI: state machine, manual form, verdict display
+- ViolationItem and UMKBadge components
+- PremiumGate wrapping on IDR amounts for free tier
+- Fixed Suspense boundary on login page (useSearchParams)
+- Fixed Zod v4: ZodError uses .issues not .errors
+- Split form schema (strings) from API schema (numbers) for react-hook-form compat
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+## Commit: 5dd87a3
+- Date: Thu Apr 16 03:50:38 AM JST 2026
+- Message: feat: stage 5 complete — OCR pipeline with Google Vision + Tesseract fallback
+
+- Added Google Vision API integration (server-side) for document text extraction
+- Added Tesseract.js client-side fallback when Vision quota (950/month) exceeded
+- Created field-extractor.ts with Indonesian payslip regex patterns (grossSalary, pph21, jhtEmployee, jpEmployee, kesehatanEmployee, takeHome)
+- Added IDR parsing with Indonesian thousands separator (dot) support
+- Implemented confidence scoring with routing decisions: AUTO_ACCEPT (>=0.92), SOFT_CHECK (>=0.80), MANUAL_REQUIRED
+- Created PayslipUploader component with drag-drop, progress states, and OCR confirmation UI
+- Integrated OCR uploader into wajar-slip page (pre-fills form on extraction)
+- Added ocr_quota_counter table management for monthly Vision usage tracking
+- Fixed Supabase client import and duplicate declaration issues
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
