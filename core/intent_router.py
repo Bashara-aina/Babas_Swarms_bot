@@ -490,7 +490,67 @@ async def classify_intent(message: str) -> IntentResult:
         except Exception:
             pass
 
+    # ── M2.7 TIER Skill Context Injection ────────────────────────────────
+    # After intent classification, load TIER-appropriate skills so the
+    # system prompt can include them. This runs regardless of confidence.
+    skill_context = _build_skill_context(result)
+    if skill_context:
+        logger.debug("[IntentRouter] Skill context loaded: %s", skill_context[:120])
+
     return result
+
+
+def _build_skill_context(result: IntentResult) -> str:
+    """Build M2.7 TIER skill context string from classified intent.
+
+    Uses harness.load_skills_for_task() to get the relevant TIER 1-4 skills,
+    then returns a formatted string for injection into system prompts.
+    """
+    try:
+        from core.skills.harness import load_skills_for_task, describe_active_skill_context
+
+        # Infer task type and domain from Intent enum
+        task_type, domain = _intent_to_task_type_domain(result.intent)
+        if not task_type and not domain:
+            return ""
+
+        skills = load_skills_for_task(task_type, domain)
+        if skills:
+            return describe_active_skill_context(task_type, domain)
+        return ""
+    except Exception:
+        return ""
+
+
+def _intent_to_task_type_domain(intent: Intent) -> tuple[str, str]:
+    """Map Intent enum to (task_type, domain) for skill harness."""
+    # Map Intent → M2.7 task type
+    task_type_map = {
+        Intent.CODE_GENERATION: "feature",
+        Intent.CODE_REVIEW: "security",
+        Intent.COMPUTER_CONTROL: "feature",
+        Intent.WEB_RESEARCH: "bugfix",
+        Intent.WEB_SCRAPE: "bugfix",
+        Intent.MEMORY_SEARCH: "bugfix",
+        Intent.MEMORY_STORE: "bugfix",
+        Intent.SCHEDULE_TASK: "feature",
+        Intent.EMAIL_READ: "frontend",
+        Intent.EMAIL_WRITE: "frontend",
+        Intent.SITE_ANALYSIS: "bugfix",
+        Intent.DATABASE_AUDIT: "backend",
+        Intent.WEATHER_QUERY: "bugfix",
+        Intent.LOCATION_QUERY: "bugfix",
+        Intent.TRANSLATION: "feature",
+        Intent.MATH_REASONING: "bugfix",
+        Intent.DEEP_REASONING: "refactor",
+        Intent.SELF_UPGRADE: "bugfix",
+        Intent.CREATIVE_WRITE: "feature",
+        Intent.DATA_ANALYSIS: "backend",
+        Intent.FILE_OPERATION: "frontend",
+        Intent.API_CALL: "backend",
+    }
+    task_type = task_type_map.get(intent, "")
+    return task_type, ""
 
 
 class IntentRouter:
