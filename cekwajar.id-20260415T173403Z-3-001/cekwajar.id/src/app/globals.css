@@ -212,3 +212,51 @@ textarea {
     font-size: 16px; /* prevents iOS zoom on focus */
   }
 }
+
+/* ─── Safe Area Padding (spec 06) ─── */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* ─── Bottom Nav Spacer (spec 06) ─── */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: 72px; /* height of bottom nav bar */
+  }
+
+  .pb-nav {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ─── Tap Highlight Disable (spec 06) ─── */
+a, button, [role="button"], [role="tab"], [role="option"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tap-highlight-transparent {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Smooth Scrolling ─── */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Mobile Active State Feedback (spec 06) ─── */
+@media (hover: none) and (pointer: coarse) {
+  /* Mobile: show press state */
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+
+  /* Card press state */
+  .card-interactive:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}

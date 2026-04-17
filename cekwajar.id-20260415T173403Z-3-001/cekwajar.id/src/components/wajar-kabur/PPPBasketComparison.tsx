@@ -70,7 +70,7 @@ export function PPPBasketComparison({
         </div>
 
         {/* Two Column Comparison */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           {/* Indonesia */}
           <div className="text-center p-3 bg-muted rounded-lg border border-border">
             <div className="text-xs text-muted-foreground mb-1">🇮🇩 Gaji di Indonesia</div>

@@ -33,7 +33,7 @@ export default function HomePage() {
         <BalanceScaleSVG className="absolute right-4 top-0 w-64 h-64 md:w-96 md:h-96 pointer-events-none" opacity={0.05} />
         <div className="mx-auto max-w-3xl text-center relative z-10">
           {/* Trust pill */}
-          <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 rounded-full px-4 py-1.5 text-sm text-emerald-700 dark:text-emerald-400 mb-6 shadow-sm">
+          <div className="inline-flex items-center gap-2 bg-card border border-emerald-200 dark:border-emerald-800 rounded-full px-4 py-1.5 text-sm text-emerald-700 dark:text-emerald-400 mb-6 shadow-sm">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Gratis · Berbasis PMK 168/2023 · Data Terenkripsi</span>
           </div>
@@ -107,9 +107,9 @@ export default function HomePage() {
               key={item.href}
               href={item.href}
               aria-label={item.ariaLabel}
-              className={`rounded-xl border p-4 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${item.bg}`}
+              className={`card-interactive rounded-xl border p-4 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${item.bg}`}
             >
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <p className="text-sm font-medium text-foreground/80 mb-1">
                 {item.icon} {item.question}
               </p>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{item.action}</p>
@@ -166,7 +166,7 @@ export default function HomePage() {
                 key={tool.href}
                 href={tool.href}
                 aria-label={tool.ariaLabel}
-                className={`group rounded-xl border p-4 hover:shadow-md hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${tool.badge}`}
+                className={`card-interactive group rounded-xl border p-4 hover:shadow-md hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${tool.badge}`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   {tool.icon}
@@ -182,7 +182,7 @@ export default function HomePage() {
           <Link
             href="/wajar-slip"
             aria-label="Wajar Slip — audit slip gaji PPh21 dan BPJS"
-            className="group flex flex-col gap-3 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-6 transition-all hover:border-emerald-300 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/20 hover:shadow-lg dark:border-emerald-800 dark:bg-emerald-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+            className="card-interactive group flex flex-col gap-3 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-6 transition-all hover:border-emerald-300 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/20 hover:shadow-lg dark:border-emerald-800 dark:bg-emerald-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-emerald-100 p-3 dark:bg-emerald-900/40">

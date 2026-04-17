@@ -83,7 +83,7 @@ export function ViolationItem({ violation, showAmount, reportedValue, calculated
 
       {/* IDR breakdown (paid tier only) */}
       {showAmount && (
-        <div className="mt-3 grid grid-cols-3 gap-2 rounded bg-muted p-3 text-sm">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 rounded bg-muted p-3 text-sm">
           <div>
             <p className="text-muted-foreground">Di Slip</p>
             <p className="font-medium text-foreground">

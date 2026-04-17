@@ -10,7 +10,7 @@ import { useReducer, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, CheckCircle2, X, AlertTriangle, Zap, Upload, Brain, ShieldCheck } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ChevronLeft, AlertTriangle, Zap, Upload, Brain, ShieldCheck } from 'lucide-react'
 import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { SampleResultTeaser } from '@/components/SampleResultTeaser'
@@ -32,6 +32,7 @@ import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
 import { UMKBadge } from '@/components/wajar-slip/UMKBadge'
 import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
 import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
+import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
 import type { SubscriptionTier, Violation } from '@/types'
 import type { ExtractedPayslipFields } from '@/lib/ocr/field-extractor'
 
@@ -334,13 +335,12 @@ export default function WajarSlipPage() {
     return (
       <div data-tool="wajar-slip" className="min-h-screen bg-amber-50">
         <div className="mx-auto max-w-2xl px-4 py-10 space-y-5">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">Cek Slip Gaji — Gratis</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik.
-            </p>
-          </div>
+          <PageHeader
+            icon={<ShieldCheck className="h-5 w-5" />}
+            title="Cek Slip Gaji — Gratis"
+            description="Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik."
+            className="text-center"
+          />
 
           {/* How It Works */}
           <HowItWorks
@@ -701,19 +701,19 @@ export default function WajarSlipPage() {
           />
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Cek Slip Gaji</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Cek Slip Gaji</h1>
             <p className="text-sm text-muted-foreground">
               {ocrSource !== 'manual' ? `Hasil OCR: ${ocrSource}` : 'Input data manual'}
             </p>
           </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            <X className="h-4 w-4" />
-            Batal
+            <ChevronLeft className="h-4 w-4" />
+            Cek lagi
           </button>
         </div>
 
@@ -722,7 +722,12 @@ export default function WajarSlipPage() {
           <DisclaimerBanner type="tax" />
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-5"
+          aria-busy={state.status === 'CALCULATING'}
+          aria-label="Form audit slip gaji"
+        >
 
           {/* ── STEP 1: Info Dasar ── */}
           {formStep === 1 && (
@@ -780,7 +785,7 @@ export default function WajarSlipPage() {
                   <CityCommandSelect
                     value={form.watch('city')}
                     onChange={(city) => form.setValue('city', city)}
-                    cities={cities}
+                    cities={cities.map((c) => c.city)}
                     className="mt-1"
                     placeholder="Pilih kota..."
                   />
@@ -791,7 +796,7 @@ export default function WajarSlipPage() {
               </div>
 
               {/* Month + Year + NPWP */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label>Bulan *</Label>
                   <Select

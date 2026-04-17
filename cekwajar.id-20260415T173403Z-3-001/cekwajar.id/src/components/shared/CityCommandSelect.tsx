@@ -1,218 +1,131 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// cekwajar.id — CityCommandSelect Component
-// Searchable command-palette city selector
-// Replaces standard dropdown with keyboard-navigable search
-// ══════════════════════════════════════════════════════════════════════════════
+// cekwajar.id — CityCommandSelect (spec 06)
+// Desktop searchable dropdown for city selection
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { MapPin, Search, X } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Search, Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 
 export interface CityOption {
-  city: string
-  province: string
-  umk: number
+  id?: string
+  label: string
+  city?: string
+  province?: string
+  umk?: number
 }
 
 interface CityCommandSelectProps {
+  cities: Array<string | CityOption>
   value: string
-  onChange: (city: string) => void
-  cities: CityOption[]
-  className?: string
+  onValueChange?: (city: string) => void
+  onChange?: (city: string) => void
   placeholder?: string
-}
-
-function formatUMK(umk: number): string {
-  if (umk >= 1_000_000) {
-    return `Rp ${(umk / 1_000_000).toFixed(1)}jt`
-  }
-  return `Rp ${umk.toLocaleString('id-ID')}`
+  className?: string
 }
 
 export function CityCommandSelect({
-  value,
-  onChange,
   cities,
+  value,
+  onValueChange,
+  onChange,
+  placeholder = 'Pilih kota kerja',
   className,
-  placeholder = 'Pilih kota...',
 }: CityCommandSelectProps) {
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
+  const [search, setSearch] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLDivElement>(null)
-  const [highlightedIndex, setHighlightedIndex] = useState(0)
-
-  const selectedCity = cities.find((c) => c.city === value)
-
-  const filtered = query.trim()
-    ? cities.filter(
-        (c) =>
-          c.city.toLowerCase().includes(query.toLowerCase()) ||
-          c.province.toLowerCase().includes(query.toLowerCase())
-      )
-    : cities.slice(0, 20) // Show top 20 by default
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (open) {
-      setQuery('')
-      setHighlightedIndex(0)
-      setTimeout(() => inputRef.current?.focus(), 50)
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
     }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 50)
   }, [open])
 
-  useEffect(() => {
-    setHighlightedIndex(0)
-  }, [query])
+  const normalizedCities = cities
+    .map((city) => {
+      if (typeof city === 'string') return city
+      return city.city ?? city.label ?? ''
+    })
+    .filter(Boolean)
 
-  const handleSelect = (cityName: string) => {
-    onChange(cityName)
+  const filtered = search
+    ? normalizedCities.filter((c) => c.toLowerCase().includes(search.toLowerCase())).slice(0, 50)
+    : normalizedCities.slice(0, 50)
+
+  const handleSelect = (city: string) => {
+    onValueChange?.(city)
+    onChange?.(city)
     setOpen(false)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        setOpen(true)
-      }
-      return
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setHighlightedIndex((i) => Math.min(i + 1, filtered.length - 1))
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setHighlightedIndex((i) => Math.max(i - 1, 0))
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (filtered[highlightedIndex]) {
-          handleSelect(filtered[highlightedIndex].city)
-        }
-        break
-      case 'Escape':
-        setOpen(false)
-        break
-    }
+    setSearch('')
   }
 
   return (
-    <div className={cn('relative', className)} onKeyDown={handleKeyDown}>
-      {/* Trigger button */}
+    <div ref={containerRef} className={cn('relative w-full', className)}>
       <button
         type="button"
-        aria-label="Pilih kota"
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((o) => !o)}
         className={cn(
-          'flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-sm',
-          'transition-colors hover:border-border focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1',
-          open && 'border-emerald-500 ring-2 ring-emerald-500',
-          !selectedCity && 'text-muted-foreground'
+          'w-full h-14 flex items-center justify-between px-4 rounded-xl border bg-background',
+          'text-left text-sm transition-colors',
+          'hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1',
+          open && 'ring-2 ring-emerald-500 ring-offset-1',
+          !value && 'text-muted-foreground'
         )}
-        style={{ borderColor: open ? 'var(--ring)' : undefined }}
       >
-        <span className="flex items-center gap-2 truncate">
-          {selectedCity ? (
-            <>
-              <MapPin className="h-4 w-4 shrink-0 text-emerald-600" />
-              <span>{selectedCity.city}</span>
-              <span className="text-muted-foreground text-xs">{selectedCity.province}</span>
-            </>
-          ) : (
-            <span>{placeholder}</span>
-          )}
-        </span>
-        {selectedCity && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              onChange('')
-            }}
-            className="ml-1 rounded-full p-0.5 hover:bg-muted"
-            aria-label="Hapus pilihan kota"
-          >
-            <X className="h-3 w-3 text-muted-foreground" />
-          </button>
-        )}
+        <span className="truncate">{value || placeholder}</span>
+        <ChevronDown className={cn('w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform', open && 'rotate-180')} />
       </button>
 
-      {/* Dropdown panel */}
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-xl border bg-popover shadow-lg overflow-hidden">
-          {/* Search input */}
-          <div className="flex items-center gap-2 border-b px-3 py-2">
-            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari kota atau provinsi..."
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              aria-label="Cari kota"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="rounded-full p-0.5 hover:bg-muted"
-                aria-label="Hapus pencarian"
-              >
-                <X className="h-3 w-3 text-muted-foreground" />
-              </button>
-            )}
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-background border border-border rounded-xl shadow-lg overflow-hidden">
+          <div className="p-2 border-b">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Cari kota..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm bg-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
           </div>
 
-          {/* City list */}
-          <div ref={listRef} role="listbox" className="max-h-64 overflow-y-auto py-1">
+          <div className="max-h-64 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+              <p className="text-center text-sm text-muted-foreground py-6">
                 Kota tidak ditemukan
-              </div>
+              </p>
             ) : (
-              filtered.map((city, index) => (
+              filtered.map((city) => (
                 <button
-                  key={`${city.city}-${city.province}`}
+                  key={city}
                   type="button"
-                  role="option"
-                  aria-selected={city.city === value}
-                  onClick={() => handleSelect(city.city)}
+                  onClick={() => handleSelect(city)}
                   className={cn(
-                    'flex w-full items-center justify-between px-3 py-2 text-sm transition-colors',
-                    index === highlightedIndex && 'bg-muted',
-                    city.city === value && 'bg-emerald-50 text-emerald-700'
+                    'w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors',
+                    value === city
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-medium'
+                      : 'hover:bg-muted/50 text-foreground'
                   )}
                 >
-                  <span className="flex items-center gap-2 truncate">
-                    <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span className="truncate">{city.city}</span>
-                    <span className="text-muted-foreground text-xs truncate">{city.province}</span>
-                  </span>
-                  <span className="ml-2 shrink-0 text-xs font-medium text-muted-foreground">
-                    UMK {formatUMK(city.umk)}
-                  </span>
+                  {city}
+                  {value === city && <Check className="w-4 h-4 text-emerald-600" />}
                 </button>
               ))
             )}
           </div>
-
-          {/* Footer hint */}
-          {filtered.length > 0 && (
-            <div className="border-t px-3 py-1.5 text-xs text-muted-foreground flex gap-3">
-              <span>↑↓ Navigasi</span>
-              <span>Enter Pilih</span>
-              <span>Esc Tutup</span>
-            </div>
-          )}
         </div>
       )}
     </div>
