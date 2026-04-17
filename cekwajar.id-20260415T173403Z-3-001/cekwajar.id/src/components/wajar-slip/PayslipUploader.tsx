@@ -10,17 +10,15 @@ import { useState, useCallback, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import {
   Upload, FileText, Camera, AlertCircle, CheckCircle2,
-  Loader2, RefreshCw, X, AlertTriangle, Eye
+  Loader2, RefreshCw, X, AlertTriangle, Eye, ChevronDown
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { extractWithTesseract } from '@/lib/ocr/tesseract-client'
-import type {
-  ExtractedPayslipFields,
-  FieldConfidences,
-} from '@/lib/ocr/field-extractor'
+import { COPY } from '@/lib/copy'
+import type { ExtractedPayslipFields, FieldConfidences } from '@/lib/ocr/field-extractor'
 
 // --- Types -------------------------------------------------------------------
 
@@ -83,14 +81,14 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
         body: formData,
       })
     } catch {
-      setState({ phase: 'ERROR', message: 'Tidak dapat terhubung ke server.' })
+      setState({ phase: 'ERROR', message: COPY.error.networkError })
       return
     }
 
     const json = await res.json()
 
     if (!res.ok || !json.success) {
-      setState({ phase: 'ERROR', message: json.error?.message ?? 'Upload gagal.' })
+      setState({ phase: 'ERROR', message: COPY.error.ocrFailed })
       return
     }
 
@@ -233,6 +231,43 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
           >
             Isi Manual Instead →
           </button>
+
+          {/* OCR Photo Guidance */}
+          <details className="mt-3 group w-full">
+            <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-1 transition-colors list-none">
+              <span>📷 Tips foto slip gaji yang baik</span>
+              <ChevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="mt-2 grid grid-cols-2 gap-3 text-xs">
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <div className="flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold mb-2">
+                  <CheckCircle2 className="w-3 h-3" /> Foto yang bagus
+                </div>
+                <ul className="space-y-1 text-green-700 dark:text-green-400">
+                  <li>✓ Pencahayaan cukup, tidak gelap</li>
+                  <li>✓ Teks terbaca jelas</li>
+                  <li>✓ Tidak ada bayangan di atas teks</li>
+                  <li>✓ Seluruh slip masuk frame</li>
+                  <li>✓ Tidak buram / blur</li>
+                </ul>
+              </div>
+              <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <div className="flex items-center gap-1 text-red-700 dark:text-red-400 font-semibold mb-2">
+                  <AlertCircle className="w-3 h-3" /> Hindari
+                </div>
+                <ul className="space-y-1 text-red-700 dark:text-red-400">
+                  <li>✗ Foto miring atau terpotong</li>
+                  <li>✗ Flash langsung ke kertas</li>
+                  <li>✗ Resolusi terlalu rendah</li>
+                  <li>✗ File PDF yang di-screenshot</li>
+                  <li>✗ Bayangan jari/tangan</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              💡 Kalau hasilnya tidak akurat, coba isi manual di bawah.
+            </p>
+          </details>
         </CardContent>
       </Card>
     )

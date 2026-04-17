@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { UPGRADE_COPY } from '@/lib/copy'
+import { COPY, UPGRADE_COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ export default function UpgradePage() {
 
       if (!response.ok) {
         const err = await response.json()
-        setError(err.error?.message ?? 'Gagal membuat transaksi.')
+        setError(err.error?.message ?? COPY.error.paymentFailed)
         setLoadingPlan(null)
         return
       }
@@ -174,7 +174,7 @@ export default function UpgradePage() {
         setLoadingPlan(null)
       }
     } catch {
-      setError('Tidak dapat terhubung ke server.')
+      setError(COPY.error.networkError)
       setLoadingPlan(null)
     }
   }

@@ -22,8 +22,10 @@ import { Badge } from '@/components/ui/badge'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
 import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
-import { CityCommandSelect, CityOption } from '@/components/shared/CityCommandSelect'
+import { CityCommandSelect } from '@/components/shared/CityCommandSelect'
 import { FormProgress } from '@/components/shared/FormProgress'
+import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
+import { COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
 
@@ -260,13 +262,21 @@ export default function WajarGajiPage() {
   const [selectedCity, setSelectedCity] = useState('')
   const [selectedExperience, setSelectedExperience] = useState('3-5')
   const [userSalaryInput, setUserSalaryInput] = useState('')
-  const [cities, setCities] = useState<CityOption[]>([])
+  const [cities, setCities] = useState<string[]>([])
 
   // Load cities on mount
   useEffect(() => {
     fetch('/api/cities')
       .then((r) => r.json())
-      .then((d) => setCities(d.cities ?? []))
+      .then((d) =>
+        setCities(
+          (d.cities ?? [])
+            .map((c: { city?: string; label?: string } | string) =>
+              typeof c === 'string' ? c : (c.city ?? c.label ?? '')
+            )
+            .filter(Boolean)
+        )
+      )
   }, [])
 
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null)
@@ -352,7 +362,7 @@ export default function WajarGajiPage() {
 
       if (!json.success) {
         setState('ERROR')
-        setErrorMessage(json.data?.message ?? 'Terjadi kesalahan')
+        setErrorMessage(json.data?.message ?? COPY.error.genericError)
         return
       }
 
@@ -372,7 +382,7 @@ export default function WajarGajiPage() {
       setSearchResults(json.data as SearchResult)
     } catch (err) {
       setState('ERROR')
-      setErrorMessage('Tidak dapat terhubung ke server')
+      setErrorMessage(COPY.error.networkError)
     }
   }
 
@@ -427,7 +437,7 @@ export default function WajarGajiPage() {
       }
     } catch {
       setSubmitState('error')
-      setSubmitMessage('Tidak dapat terhubung ke server')
+      setSubmitMessage(COPY.error.networkError)
     }
   }
 
@@ -464,11 +474,12 @@ export default function WajarGajiPage() {
     return (
       <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
-          <div className="mb-8 text-center">
-            <div className="mb-4"><Banknote className="h-12 w-12 text-emerald-600 mx-auto" /></div>
-            <h1 className="text-2xl font-bold text-foreground">Cek Wajar Gaji</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Benchmark gaji dengan 12.000+ data karyawan</p>
-          </div>
+          <PageHeader
+            icon={<Banknote className="h-5 w-5" />}
+            title="Cek Wajar Gaji"
+            description="Benchmark gaji dengan 12.000+ data karyawan"
+            className="text-center"
+          />
 
           <HowItWorks
             steps={[
@@ -660,7 +671,8 @@ export default function WajarGajiPage() {
                   }}
                   className="flex-1"
                 >
-                  Batal
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Cek lagi
                 </Button>
                 <Button
                   onClick={() => {
@@ -961,7 +973,7 @@ export default function WajarGajiPage() {
                         {submitState === 'submitting' ? (
                           <div className="flex items-center gap-2">
                             <Skeleton shimmer className="h-4 w-4 rounded-full" />
-                            Mengirim...
+                            Menyimpan...
                           </div>
                         ) : (
                           <div>

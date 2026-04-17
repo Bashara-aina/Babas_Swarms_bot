@@ -18,6 +18,8 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PremiumGate } from '@/components/shared/PremiumGate'
 import { COLComparisonChart } from '@/components/wajar-hidup/COLComparisonChart'
+import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
+import { ResultSkeleton } from '@/components/ResultSkeleton'
 import {
   Select,
   SelectContent,
@@ -25,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
 
@@ -142,7 +145,7 @@ export default function WajarHidupPage() {
 
       if (!json.success) {
         setPageState('ERROR')
-        setErrorMessage(json.error?.message ?? 'Terjadi kesalahan')
+        setErrorMessage(json.error?.message ?? COPY.error.genericError)
         return
       }
 
@@ -150,7 +153,7 @@ export default function WajarHidupPage() {
       setResult(json.data!)
     } catch {
       setPageState('ERROR')
-      setErrorMessage('Tidak dapat terhubung ke server')
+      setErrorMessage(COPY.error.networkError)
     }
   }
 
@@ -160,54 +163,38 @@ export default function WajarHidupPage() {
     setErrorMessage('')
   }
 
-  // === IDLE / LOADING ==========================================================
-
-  if (pageState === 'IDLE' || pageState === 'LOADING') {
+  // === LOADING ================================================================
+  if (pageState === 'LOADING') {
     return (
       <div data-tool="wajar-hidup" className="min-h-screen bg-teal-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
-          <div className="mb-8 text-center">
-            <div className="mb-4"><Building2 className="h-12 w-12 text-emerald-600 mx-auto" /></div>
-            <Skeleton shimmer className="mx-auto h-8 w-40 mb-2" />
-            <Skeleton shimmer className="mx-auto h-4 w-64" />
-          </div>
-
+          <PageHeader
+            icon={<Building2 className="h-5 w-5" />}
+            title="Wajar Hidup"
+            description="Hitung gaji setara saat pindah kota berdasarkan biaya hidup."
+            className="text-center"
+          />
           <Card>
             <CardContent className="p-6">
-              <div className="space-y-5">
-                {/* Two City Dropdowns */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Skeleton shimmer className="h-4 w-20 mb-2" />
-                    <Skeleton shimmer className="h-10 w-full" />
-                  </div>
-                  <div>
-                    <Skeleton shimmer className="h-4 w-16 mb-2" />
-                    <Skeleton shimmer className="h-10 w-full" />
-                  </div>
-                </div>
-
-                {/* Salary Input */}
-                <div>
-                  <Skeleton shimmer className="h-4 w-32 mb-2" />
-                  <Skeleton shimmer className="h-10 w-full" />
-                </div>
-
-                {/* Lifestyle Tier */}
-                <div>
-                  <Skeleton shimmer className="h-4 w-24 mb-2" />
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} shimmer className="h-16 rounded-lg" />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <Skeleton shimmer className="h-10 w-full rounded-lg" />
-              </div>
+              <ResultSkeleton />
             </CardContent>
           </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // === IDLE ===================================================================
+  if (pageState === 'IDLE') {
+    return (
+      <div data-tool="wajar-hidup" className="min-h-screen bg-teal-50">
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <PageHeader
+            icon={<Building2 className="h-5 w-5" />}
+            title="Wajar Hidup"
+            description="Hitung gaji setara saat pindah kota berdasarkan biaya hidup."
+            className="text-center"
+          />
 
           <HowItWorks
             steps={[
@@ -228,6 +215,96 @@ export default function WajarHidupPage() {
               },
             ]}
           />
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="fromCity">Kota Asal</Label>
+                    <Select value={fromCity} onValueChange={setFromCity}>
+                      <SelectTrigger id="fromCity" className="mt-1.5">
+                        <SelectValue placeholder="Pilih kota asal" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((city) => (
+                          <SelectItem key={city.city_code} value={city.city_name}>
+                            {city.city_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="toCity">Kota Tujuan</Label>
+                    <Select value={toCity} onValueChange={setToCity}>
+                      <SelectTrigger id="toCity" className="mt-1.5">
+                        <SelectValue placeholder="Pilih kota tujuan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((city) => (
+                          <SelectItem key={`to-${city.city_code}`} value={city.city_name}>
+                            {city.city_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="salary">Gaji Saat Ini (per bulan)</Label>
+                  <Input
+                    id="salary"
+                    type="text"
+                    value={salaryInput}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, '')
+                      setSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
+                    }}
+                    placeholder="Contoh: 8.500.000"
+                    className="mt-1.5"
+                  />
+                </div>
+
+                <div>
+                  <Label>Tingkat Gaya Hidup</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                    {LIFESTYLE_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setLifestyleTier(option.value)}
+                        className={`rounded-lg border p-3 text-left transition-colors ${
+                          lifestyleTier === option.value
+                            ? 'border-emerald-500 bg-emerald-50'
+                            : 'border-border bg-white hover:border-emerald-300'
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-foreground">{option.label}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{option.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {errorMessage && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                    <XCircle className="h-4 w-4 flex-shrink-0" />
+                    {errorMessage}
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleCompare}
+                  disabled={!fromCity || !toCity || !salaryInput}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Hitung Gaji Setara
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           <TrustBadges variant="grid" className="mt-6" />
         </div>
@@ -265,10 +342,10 @@ export default function WajarHidupPage() {
         <div className="mx-auto max-w-2xl px-4 py-8">
           <button
             onClick={resetState}
-            className="flex items-center text-sm text-muted-foreground hover:text-emerald-600 mb-4"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="h-4 w-4" />
-            Hitung lagi
+            Cek lagi
           </button>
 
           {/* Verdict Card */}

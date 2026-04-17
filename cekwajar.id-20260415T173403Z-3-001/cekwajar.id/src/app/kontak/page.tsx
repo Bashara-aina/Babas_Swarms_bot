@@ -63,16 +63,19 @@ export default function KontakPage() {
         {/* About Section */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Tentang cekwajar.id</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Kenapa cekwajar.id ada?</h2>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                cekwajar.id adalah platform konsultasi digital berbasis data untuk pekerja Indonesia.
-                Kami membantu kamu memahami hak-upah kamu melalui analisis slip gaji, benchmark,
-                dan perbandingan biaya hidup.
+              <p className="text-muted-foreground leading-relaxed">
+                Karena kebanyakan karyawan Indonesia tidak tahu apakah slip gaji mereka benar —
+                dan tidak ada tools yang mudah untuk mengeceknya.
               </p>
-              <p>
-                Semua kalkulasi bersifat indikatif dan tidak constitue nasihat hukum.
-                Untuk kepastian hak-hak kamu, selalu konsultasikan dengan HR departemen atau penasihat hukum.
+              <p className="text-muted-foreground leading-relaxed">
+                Saya bikin cekwajar.id karena pernah kena underpay BPJS hampir setahun penuh
+                sebelum sadar. Waktu itu saya tidak tahu harus cek ke mana, dan tidak ada tools
+                yang mudah dipakai orang biasa tanpa latar belakang pajak.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Sekarang kamu tidak perlu ngalamin hal yang sama.
               </p>
             </div>
 

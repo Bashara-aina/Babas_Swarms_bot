@@ -10,7 +10,7 @@ import { useReducer, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, CheckCircle2, ChevronLeft, AlertTriangle, Zap, Upload, Brain, ShieldCheck } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ChevronLeft, AlertTriangle, Upload, Brain, ShieldCheck } from 'lucide-react'
 import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { SampleResultTeaser } from '@/components/SampleResultTeaser'
@@ -26,7 +26,6 @@ import { ShareVerdictButton } from '@/components/shared/ShareVerdictButton'
 import { FormProgress } from '@/components/shared/FormProgress'
 import { CityCommandSelect } from '@/components/shared/CityCommandSelect'
 import { FieldTooltip, SLIP_TOOLTIPS } from '@/components/shared/FieldTooltip'
-import { Skeleton } from '@/components/ui/skeleton'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
 import { ConfettiEffect } from '@/components/ConfettiEffect'
 import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
@@ -35,6 +34,7 @@ import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
 import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
 import type { SubscriptionTier, Violation } from '@/types'
+import { COPY } from '@/lib/copy'
 import type { ExtractedPayslipFields } from '@/lib/ocr/field-extractor'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ export default function WajarSlipPage() {
       const json = await res.json()
 
       if (!res.ok) {
-        dispatch({ type: 'ERROR', message: json.message ?? 'Terjadi kesalahan' })
+        dispatch({ type: 'ERROR', message: json.message ?? COPY.error.genericError })
         return
       }
 
@@ -327,7 +327,7 @@ export default function WajarSlipPage() {
 
       dispatch({ type: 'SUCCESS', data: result })
     } catch {
-      dispatch({ type: 'ERROR', message: 'Tidak dapat terhubung ke server' })
+      dispatch({ type: 'ERROR', message: COPY.error.networkError })
     }
   }
 
@@ -444,14 +444,14 @@ export default function WajarSlipPage() {
               </div>
               {/* Verdict title */}
               <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
-                Slip Gaji Kamu SESUAI ✓
+                {COPY.verdict.sesuai.title}
               </h2>
               {/* Subtext */}
               <p className="text-emerald-700 dark:text-emerald-300 mb-1">
-                Semua komponen PPh21 dan BPJS sudah benar.
+                {COPY.verdict.sesuai.subtitle}
               </p>
               <p className="text-sm text-emerald-600/80 dark:text-emerald-400/80 mb-6">
-                HRD kamu taat regulasi bulan ini.
+                {COPY.verdict.sesuai.note}
               </p>
               {/* Share button */}
               <ShareVerdictButton
@@ -471,10 +471,10 @@ export default function WajarSlipPage() {
                 <AlertTriangle className="h-10 w-10 shrink-0 text-red-600" />
                 <div>
                   <h2 className="text-xl font-bold text-red-800 dark:text-red-400">
-                    Ada Pelanggaran pada Slip Gaji
+                    {COPY.verdict.pelanggaran.title(data.violationCount)}
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Ditemukan {data.violationCount} pelanggaran pada slip gaji kamu.
+                    {COPY.verdict.pelanggaran.subtitle}
                   </p>
                   <ShareVerdictButton
                     verdict={data.verdict}
@@ -995,6 +995,13 @@ export default function WajarSlipPage() {
                     {...form.register('takeHome')}
                     className="mt-1"
                   />
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
+                    onClick={() => form.setValue('takeHome', '0')}
+                  >
+                    Tidak ada / tidak tahu → gunakan nilai 0
+                  </button>
                 </div>
               </div>
 
@@ -1047,14 +1054,7 @@ export default function WajarSlipPage() {
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                   disabled={state.status === 'CALCULATING'}
                 >
-                  {state.status === 'CALCULATING' ? (
-                    <>
-                      <Skeleton shimmer className="mr-2 h-4 w-4 inline-block rounded-full" />
-                      Lagi ngitung PPh21... <Zap className="inline h-4 w-4 text-amber-500 ml-1" />
-                    </>
-                  ) : (
-                    'Cek Slip Gaji Sekarang'
-                  )}
+                  {state.status === 'CALCULATING' ? 'Lagi ngitung PPh21... ⚡' : 'Cek Slip Gaji Sekarang'}
                 </Button>
               </div>
             </div>

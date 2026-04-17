@@ -24,6 +24,8 @@ import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
 import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { PPPBasketComparison } from '@/components/wajar-kabur/PPPBasketComparison'
+import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
+import { COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
 
@@ -128,7 +130,7 @@ export default function WajarKaburPage() {
 
       if (!json.success) {
         setPageState('ERROR')
-        setErrorMessage(json.error?.message ?? 'Terjadi kesalahan')
+        setErrorMessage(json.error?.message ?? COPY.error.genericError)
         return
       }
 
@@ -143,7 +145,7 @@ export default function WajarKaburPage() {
       setResult(data)
     } catch {
       setPageState('ERROR')
-      setErrorMessage('Tidak dapat terhubung ke server')
+      setErrorMessage(COPY.error.networkError)
     }
   }
 
@@ -160,11 +162,12 @@ export default function WajarKaburPage() {
     return (
       <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
-          <div className="mb-8 text-center">
-            <div className="mb-4"><Plane className="h-12 w-12 text-emerald-600 mx-auto" /></div>
-            <Skeleton shimmer className="mx-auto h-8 w-40 mb-2" />
-            <Skeleton shimmer className="mx-auto h-4 w-72" />
-          </div>
+          <PageHeader
+            icon={<Plane className="h-5 w-5" />}
+            title="Wajar Kabur"
+            description="Bandingkan daya beli riil gaji Indonesia vs negara tujuan."
+            className="text-center"
+          />
 
           <Card>
             <CardContent className="p-6">
@@ -282,10 +285,10 @@ export default function WajarKaburPage() {
         <div className="mx-auto max-w-2xl px-4 py-8">
           <button
             onClick={resetState}
-            className="flex items-center text-sm text-muted-foreground hover:text-emerald-600 mb-4"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="h-4 w-4" />
-            Bandingkan lagi
+            Cek lagi
           </button>
 
           <Card className="mb-6">
