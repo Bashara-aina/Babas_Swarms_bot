@@ -211,6 +211,11 @@ textarea {
     min-height: 56px;
     font-size: 16px; /* prevents iOS zoom on focus */
   }
+
+  button[type="submit"],
+  button[type="button"] {
+    min-height: 52px;
+  }
 }
 
 /* ─── Safe Area Padding (spec 06) ─── */
@@ -218,14 +223,18 @@ textarea {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* ─── Bottom Nav Spacer (spec 06) ─── */
+/* ─── Bottom Nav Spacer (spec 11) ─── */
+/* Covers both main element pages and div.min-h-screen tool pages */
 @media (max-width: 767px) {
-  main {
-    padding-bottom: 72px; /* height of bottom nav bar */
+  main,
+  [data-tool],
+  .min-h-screen {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 4px)) !important;
   }
 
+  /* Additional safety for explicit pb-nav usage */
   .pb-nav {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 4px)) !important;
   }
 }
 

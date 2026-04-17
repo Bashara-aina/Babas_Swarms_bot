@@ -33,9 +33,9 @@ import { WordmarkLogo } from '@/components/WordmarkLogo'
 const TOOL_ACCENT: Record<string, string> = {
   'wajar-slip': 'bg-amber-500',
   'wajar-gaji': 'bg-blue-500',
-  'wajar-tanah': 'bg-amber-500',
+  'wajar-tanah': 'bg-stone-500',
   'wajar-kabur': 'bg-indigo-500',
-  'wajar-hidup': 'bg-rose-500',
+  'wajar-hidup': 'bg-teal-500',
 }
 
 export function GlobalNav() {
@@ -101,7 +101,7 @@ export function GlobalNav() {
   }
 
   return (
-    <header className="stick top-0 z-50 w-full border-b shadow-sm" style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
+    <header className="sticky top-0 z-50 w-full border-b shadow-sm" style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
       <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 lg:h-16 lg:px-6">
         {/* Logo */}
         <WordmarkLogo size="md" />
