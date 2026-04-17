@@ -7,10 +7,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Home, Info, ArrowRight, ChevronDown, ChevronLeft, Building2, MapPin, XCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Home, Info, ArrowRight, ChevronDown, ChevronLeft, Building2, MapPin, XCircle, TrendingUp, TrendingDown, Minus, ArrowLeftRight, PieChart } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { HowItWorks } from '@/components/HowItWorks'
+import { TrustBadges } from '@/components/shared/TrustBadges'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -207,16 +209,27 @@ export default function WajarHidupPage() {
             </CardContent>
           </Card>
 
-          {/* Info Skeleton */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Skeleton shimmer className="h-5 w-5 rounded" />
-              <div className="flex-1 space-y-2">
-                <Skeleton shimmer className="h-4 w-32" />
-                <Skeleton shimmer className="h-3 w-full" />
-              </div>
-            </div>
-          </div>
+          <HowItWorks
+            steps={[
+              {
+                icon: MapPin,
+                title: 'Pilih kota asal & tujuan',
+                description: 'Bandingkan dua kota di Indonesia',
+              },
+              {
+                icon: ArrowLeftRight,
+                title: 'AI kalkulasi perbedaan',
+                description: 'Sewa, makanan, transport, utilitas, hiburan',
+              },
+              {
+                icon: PieChart,
+                title: 'Lihat breakdown lengkap',
+                description: 'Selisih per kategori pengeluaran bulanan',
+              },
+            ]}
+          />
+
+          <TrustBadges variant="grid" className="mt-6" />
         </div>
       </div>
     )

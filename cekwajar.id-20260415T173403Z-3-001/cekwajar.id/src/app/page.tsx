@@ -6,17 +6,16 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, ShieldCheck, TrendingUp, MapPin, Plane, BarChart3 } from 'lucide-react'
+import { ArrowRight, ShieldCheck, TrendingUp, MapPin, Plane, BarChart3, Upload, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BalanceScaleSVG } from '@/components/BalanceScaleSVG'
 import { HowItWorks } from '@/components/HowItWorks'
 import { SampleResultTeaser } from '@/components/SampleResultTeaser'
-import { FirstVisitBanner } from '@/components/FirstVisitBanner'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { SamplePaidResultModal } from '@/components/shared/SamplePaidResultModal'
 import { FounderSection } from '@/components/FounderSection'
 import { TestimonialsSection } from '@/components/TestimonialsSection'
-import { AuditCounter } from '@/components/AuditCounter'
+import { AuditCounterBadge } from '@/components/AuditCounterBadge'
 import { useState } from 'react'
 
 export default function HomePage() {
@@ -24,8 +23,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col">
-      <FirstVisitBanner className="mx-4 mt-4 lg:mx-auto lg:max-w-3xl" />
-
       {/* Trust badges */}
       <div className="mt-6 px-4">
         <TrustBadges className="py-3" />
@@ -70,7 +67,7 @@ export default function HomePage() {
           {/* Social proof line */}
           <p className="mt-4 text-sm text-muted-foreground">
             Sudah{' '}
-            <AuditCounter />{' '}
+            <AuditCounterBadge />{' '}
             slip gaji dicek minggu ini
           </p>
         </div>
@@ -210,7 +207,25 @@ export default function HomePage() {
       {/* How it works */}
       <FounderSection className="bg-white" />
       <TestimonialsSection className="bg-white" />
-      <HowItWorks />
+      <HowItWorks
+        steps={[
+          {
+            icon: Upload,
+            title: 'Upload atau isi manual',
+            description: 'Foto slip gaji atau ketik angkanya langsung',
+          },
+          {
+            icon: Brain,
+            title: 'AI audit otomatis',
+            description: 'Hitung PPh21 TER, BPJS, dan cek UMK 2026',
+          },
+          {
+            icon: ShieldCheck,
+            title: 'Lihat hasil lengkap',
+            description: 'Temukan pelanggaran dengan penjelasan dan saran tindak lanjut',
+          },
+        ]}
+      />
 
       {/* Sample result teaser */}
       <section className="px-4 py-12 lg:py-16 bg-muted/50">
@@ -218,7 +233,7 @@ export default function HomePage() {
           <h2 className="text-center text-xl font-bold text-foreground sm:text-2xl mb-6">
             Contoh Hasil
           </h2>
-          <SampleResultTeaser onViewPremiumSample={() => setShowSampleModal(true)} />
+          <SampleResultTeaser />
         </div>
       </section>
 

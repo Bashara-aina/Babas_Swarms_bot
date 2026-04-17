@@ -10,7 +10,10 @@ import { useReducer, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, CheckCircle2, X, AlertTriangle, Zap } from 'lucide-react'
+import { AlertCircle, CheckCircle2, X, AlertTriangle, Zap, Upload, Brain, ShieldCheck } from 'lucide-react'
+import { HowItWorks } from '@/components/HowItWorks'
+import { TrustBadges } from '@/components/shared/TrustBadges'
+import { SampleResultTeaser } from '@/components/SampleResultTeaser'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -338,6 +341,32 @@ export default function WajarSlipPage() {
               Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik.
             </p>
           </div>
+
+          {/* How It Works */}
+          <HowItWorks
+            steps={[
+              {
+                icon: Upload,
+                title: 'Upload atau isi manual',
+                description: 'Foto slip gaji atau ketik angkanya langsung',
+              },
+              {
+                icon: Brain,
+                title: 'AI audit otomatis',
+                description: 'Hitung PPh21 TER, BPJS, dan cek UMK 2026',
+              },
+              {
+                icon: ShieldCheck,
+                title: 'Lihat hasil lengkap',
+                description: 'Temukan pelanggaran dengan penjelasan dan saran tindak lanjut',
+              },
+            ]}
+          />
+
+          <TrustBadges variant="grid" className="mt-6" />
+
+          {/* Sample Result Teaser */}
+          <SampleResultTeaser />
 
           {/* Disclaimer */}
           <DisclaimerBanner type="tax" />

@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Home, Trees, Building, Store, AlertCircle,
-  ChevronDown, ChevronLeft, Info, Lock, MapPin, XCircle
+  ChevronDown, ChevronLeft, Info, Lock, MapPin, XCircle, TrendingUp
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,8 @@ import { VerdictBadge } from '@/components/wajar-tanah/VerdictBadge'
 import { PropertyPriceBar } from '@/components/wajar-tanah/PropertyPriceBar'
 import { PropertyVerdict } from '@/app/api/property/benchmark/route'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { HowItWorks } from '@/components/HowItWorks'
+import { TrustBadges } from '@/components/shared/TrustBadges'
 
 // --- Provinces & Cities --------------------------------------------------------
 
@@ -299,16 +301,27 @@ export default function WajarTanahPage() {
             </CardContent>
           </Card>
 
-          {/* Info Skeleton */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Skeleton shimmer className="h-5 w-5 rounded" />
-              <div className="flex-1 space-y-2">
-                <Skeleton shimmer className="h-4 w-32" />
-                <Skeleton shimmer className="h-3 w-full" />
-              </div>
-            </div>
-          </div>
+          <HowItWorks
+            steps={[
+              {
+                icon: MapPin,
+                title: 'Pilih lokasi & tipe',
+                description: 'Provinsi, kota, kecamatan, dan tipe properti',
+              },
+              {
+                icon: TrendingUp,
+                title: 'AI analisis harga pasar',
+                description: 'IQR dari data listing 99.co dan Rumah123',
+              },
+              {
+                icon: Building,
+                title: 'Dapat verdict harga',
+                description: 'MURAH / WAJAR / MAHAL / SANGAT MAHAL berdasarkan data lokal',
+              },
+            ]}
+          />
+
+          <TrustBadges variant="grid" className="mt-6" />
         </div>
       </div>
     )

@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plane, Lock, Info, ArrowRight, ChevronDown, ChevronLeft, Globe, TrendingUp, TrendingDown, XCircle } from 'lucide-react'
+import { Plane, Lock, Info, ArrowRight, ChevronDown, ChevronLeft, Globe, TrendingUp, TrendingDown, XCircle, DollarSign, Calculator } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { HowItWorks } from '@/components/HowItWorks'
+import { TrustBadges } from '@/components/shared/TrustBadges'
 import { PPPBasketComparison } from '@/components/wajar-kabur/PPPBasketComparison'
 
 // --- Types --------------------------------------------------------------------
@@ -191,16 +193,27 @@ export default function WajarKaburPage() {
             </CardContent>
           </Card>
 
-          {/* Info Skeleton */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Skeleton shimmer className="h-5 w-5 rounded" />
-              <div className="flex-1 space-y-2">
-                <Skeleton shimmer className="h-4 w-32" />
-                <Skeleton shimmer className="h-3 w-full" />
-              </div>
-            </div>
-          </div>
+          <HowItWorks
+            steps={[
+              {
+                icon: DollarSign,
+                title: 'Masukkan gaji & negara',
+                description: 'Gaji IDR kamu dan negara/kota tujuan',
+              },
+              {
+                icon: Calculator,
+                title: 'Hitung PPP adjustment',
+                description: 'World Bank PPP data + kurs real-time Frankfurter',
+              },
+              {
+                icon: Globe,
+                title: 'Lihat daya beli riil',
+                description: 'Perbandingan nilai riil gaji setelah penyesuaian biaya hidup',
+              },
+            ]}
+          />
+
+          <TrustBadges variant="grid" className="mt-6" />
         </div>
       </div>
     )

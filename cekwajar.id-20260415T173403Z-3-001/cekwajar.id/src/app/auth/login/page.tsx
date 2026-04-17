@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Lock, ShieldCheck, UserX } from 'lucide-react'
 
 // Google SVG icon
 const GoogleIcon = () => (
@@ -148,6 +148,24 @@ function LoginForm() {
           </Link>
           .
         </p>
+
+        {/* Security indicators */}
+        <div className="mt-4 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Lock className="w-3 h-3" />
+            <span>Supabase Auth</span>
+          </div>
+          <span>·</span>
+          <div className="flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3" />
+            <span>OAuth 2.0</span>
+          </div>
+          <span>·</span>
+          <div className="flex items-center gap-1">
+            <UserX className="w-3 h-3" />
+            <span>Tanpa password</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

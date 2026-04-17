@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import { Mail, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { FounderSection } from '@/components/FounderSection'
 
 export const metadata: Metadata = {
   title: 'Kontak — cekwajar.id',
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function KontakPage() {
   return (
     <div className="min-h-screen bg-muted">
+      <FounderSection />
       <div className="mx-auto max-w-2xl px-4 py-12">
         <div className="text-center mb-10">
           <div className="mb-4"><Mail className="h-12 w-12 text-emerald-600 mx-auto" /></div>

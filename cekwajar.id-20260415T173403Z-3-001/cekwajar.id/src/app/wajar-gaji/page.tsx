@@ -20,6 +20,8 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { HowItWorks } from '@/components/HowItWorks'
+import { TrustBadges } from '@/components/shared/TrustBadges'
 import { CityCommandSelect, CityOption } from '@/components/shared/CityCommandSelect'
 import { FormProgress } from '@/components/shared/FormProgress'
 
@@ -468,6 +470,28 @@ export default function WajarGajiPage() {
             <p className="mt-1 text-sm text-muted-foreground">Benchmark gaji dengan 12.000+ data karyawan</p>
           </div>
 
+          <HowItWorks
+            steps={[
+              {
+                icon: Search,
+                title: 'Masukkan posisi & kota',
+                description: 'Ketik jabatan dan pilih kota tempat kamu bekerja',
+              },
+              {
+                icon: TrendingUp,
+                title: 'AI bandingkan data pasar',
+                description: 'Blending data crowdsourced + scraping job portal',
+              },
+              {
+                icon: Wallet,
+                title: 'Lihat posisi gajimu',
+                description: 'P25–P75 range dan di mana gajimu berdiri',
+              },
+            ]}
+          />
+
+          <TrustBadges variant="grid" className="mb-6" />
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -664,9 +688,19 @@ export default function WajarGajiPage() {
     return (
       <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="mb-4"><Search className="h-12 w-12 text-emerald-600 mx-auto" /></div>
-          <h2 className="text-xl font-bold text-foreground">Data Tidak Ditemukan</h2>
-          <p className="mt-2 text-muted-foreground">{errorMessage}</p>
+          <div className="text-center py-10 px-4 bg-blue-50 rounded-xl">
+            <Search className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <h3 className="font-semibold mb-1">Data belum tersedia</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Belum ada data gaji untuk posisi ini di kota tersebut. Coba kota terdekat atau jabatan yang lebih umum.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              💡 Kontribusi data gajimu:{' '}
+              <Link href="/wajar-gaji/kontribusi" className="text-emerald-600 underline">
+                Isi survey gaji anonim →
+              </Link>
+            </p>
+          </div>
           <Button
             onClick={() => {
               setState('IDLE')
@@ -677,6 +711,11 @@ export default function WajarGajiPage() {
           >
             Coba Lagi
           </Button>
+          <div className="mt-6">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="inline h-4 w-4" /> Kembali
+            </Link>
+          </div>
         </div>
       </div>
     )
