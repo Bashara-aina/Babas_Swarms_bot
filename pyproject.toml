@@ -77,3 +77,13 @@ python_version = "3.11"
 ignore_missing_imports = true
 warn_unused_configs = true
 strict = false
+exclude = [
+  "agents/_archive/",
+  "agents/_archive/\\{.*\\}",
+  "agents/research/",
+  "cekwajar\\.id/",
+  "\\.wiki/",
+  "\\.claude/",
+  "\\.opencode/",
+  "node_modules/",
+]
