@@ -131,7 +131,7 @@ function LoginForm() {
               className="w-full bg-emerald-600 hover:bg-emerald-700"
               disabled={loading}
             >
-              {loading ? 'Mengirim...' : 'Kirim Link Masuk'}
+              {loading ? 'Menyimpan...' : 'Kirim Link Masuk'}
             </Button>
           </form>
         )}
@@ -163,7 +163,7 @@ function LoginForm() {
           <span>·</span>
           <div className="flex items-center gap-1">
             <UserX className="w-3 h-3" />
-            <span>Tanpa password</span>
+            <span>Tidak ada password disimpan</span>
           </div>
         </div>
       </CardContent>
@@ -191,7 +191,7 @@ export default function LoginPage() {
         <Suspense fallback={
           <Card className="border-border shadow-sm">
             <CardContent className="flex items-center justify-center py-12">
-              <p className="text-sm text-muted-foreground">Memuat...</p>
+              <p className="text-sm text-muted-foreground">Mengambil data...</p>
             </CardContent>
           </Card>
         }>

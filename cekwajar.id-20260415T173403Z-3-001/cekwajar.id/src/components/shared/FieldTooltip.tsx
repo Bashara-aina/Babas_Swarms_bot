@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { FIELD_TOOLTIPS } from '@/lib/field-tooltips'
 
 interface FieldTooltipProps {
   content: string       // The explanatory text
@@ -59,38 +60,38 @@ export function FieldTooltip({ content, example, className, iconSize = 14 }: Fie
 
 export const SLIP_TOOLTIPS: Record<string, { content: string; example?: string }> = {
   grossSalary: {
-    content: 'Gaji bruto adalah total penghasilan sebelum potonganeberapa. Jumlah ini biasanya tertera di slip gaji bagian atas.',
+    content: FIELD_TOOLTIPS.gapok,
     example: 'Rp 8.500.000',
   },
   takeHome: {
-    content: 'Take home pay adalah jumlah yang benar-benar kamu terima setelah semua potongan. Ini biasanya angka paling besar di slip.',
+    content: FIELD_TOOLTIPS.take_home,
     example: 'Rp 6.800.000',
   },
   ptkpStatus: {
-    content: 'PTKP (Penghasilan Tidak Kena Pajak) ditentukan oleh status pernikahan dan jumlah tanggungan. Ini mempengaruhi besar kecilnya PPh21.',
+    content: FIELD_TOOLTIPS.ptkp,
     example: 'TK/0 = Tidak Kawin, 0 tanggungan',
   },
   city: {
-    content: 'Kota determines UMK (Upah Minimum Kabupaten/Kota) yang berlaku. Gaji di atas UMK belum tentu wajar jika cost of living tinggi.',
+    content: FIELD_TOOLTIPS.kota,
     example: 'Jakarta',
   },
   reportedPph21: {
-    content: 'PPh21 adalah pajak penghasilan Pasal 21. Jika angka ini 0 atau tidak ada di slip, kemungkinan ada pelanggaran.',
+    content: FIELD_TOOLTIPS.pph21,
     example: 'Rp 425.000',
   },
   reportedJht: {
-    content: 'JHT (Jaminan Hari Tua) adalah iuran untuk tabungan hari tua. Wajib 2% dari gaji, dibayar bersama oleh perusahaan (3.7%) dan karyawan (2%).',
+    content: FIELD_TOOLTIPS.jht_karyawan,
     example: 'Rp 170.000',
   },
   reportedJp: {
-    content: 'JP (Jaminan Pensiun) adalah iuran untuk pensiun. Wajib 1% dari gaji, dibayar bersama oleh perusahaan (2%) dan karyawan (1%).',
+    content: FIELD_TOOLTIPS.jp_karyawan,
     example: 'Rp 85.000',
   },
   reportedKesehatan: {
-    content: 'BPJS Kesehatan mandatory untuk semua karyawan. Biasanya 1% dari gaji (gigi minimum Rp 80.000/bulan untuk TK-grade 1).',
+    content: FIELD_TOOLTIPS.bpjs_kes_karyawan,
     example: 'Rp 150.000',
   },
   hasNPWP: {
-    content: 'NPWP (Nomor Pokok Wajib Pajak) diperlukan untuk pengurangan tarif PPh21. Tanpa NPWP, tarif 20% lebih tinggi.',
+    content: FIELD_TOOLTIPS.npwp,
   },
 }

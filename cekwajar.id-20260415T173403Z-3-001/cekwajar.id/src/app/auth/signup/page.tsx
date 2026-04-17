@@ -96,7 +96,7 @@ export default function SignupPage() {
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                   disabled={loading}
                 >
-                  {loading ? 'Mengirim...' : 'Daftar dengan Email'}
+                  {loading ? 'Menyimpan...' : 'Daftar dengan Email'}
                 </Button>
               </form>
             )}

@@ -4,6 +4,7 @@ import './globals.css'
 import { GlobalNav } from '@/components/layout/GlobalNav'
 import { Footer } from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/layout/CookieConsent'
+import { FirstVisitBanner } from '@/components/FirstVisitBanner'
 import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
 import { validateEnvVars } from '@/lib/config/validate'
 import { SettingsProvider } from '@/contexts/settings-context'
@@ -57,6 +58,7 @@ export default function RootLayout({
             <main id="main-content" className="flex-1">{children}</main>
             <MobileBottomNav />
             <Footer />
+            <FirstVisitBanner />
             <CookieConsent />
           </ClientProviders>
         </SettingsProvider>

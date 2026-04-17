@@ -1,131 +1,47 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // cekwajar.id — HowItWorks Component
-// 5-step visual flow for homepage
+// 3-step onboarding section for all tool pages
 // ══════════════════════════════════════════════════════════════════════════════
 
-import { Upload, FileText, BarChart3, Calculator, CheckCircle } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-const steps = [
-  {
-    number: 1,
-    icon: Upload,
-    title: 'Upload slip gaji',
-    description: 'Upload slip gaji kamu dalam format foto atau PDF',
-    color: 'bg-amber-100 text-amber-700',
-    iconColor: 'text-amber-600',
-  },
-  {
-    number: 2,
-    icon: FileText,
-    title: 'AI menganalisis',
-    description: 'AI mendeteksi 7 jenis pelanggaran umum dalam 30 detik',
-    color: 'bg-blue-100 text-blue-700',
-    iconColor: 'text-blue-600',
-  },
-  {
-    number: 3,
-    icon: BarChart3,
-    title: 'Verdict ditampilkan',
-    description: 'Lihat detail pelanggaran dengan jumlah kerugian kamu',
-    color: 'bg-purple-100 text-purple-700',
-    iconColor: 'text-purple-600',
-  },
-  {
-    number: 4,
-    icon: Calculator,
-    title: 'Hitung wajar',
-    description: 'Dapatkan perbandingan dengan standar UMR dan benchmark',
-    color: 'bg-emerald-100 text-emerald-700',
-    iconColor: 'text-emerald-600',
-  },
-  {
-    number: 5,
-    icon: CheckCircle,
-    title: 'Langkah selanjutnya',
-    description: 'Dapatkan panduan praktis untuk mengklaim hak kamu',
-    color: 'bg-teal-100 text-teal-700',
-    iconColor: 'text-teal-600',
-  },
-]
+interface Step {
+  icon: LucideIcon
+  title: string
+  description: string
+}
 
-export function HowItWorks() {
+interface HowItWorksProps {
+  steps: Step[]
+  className?: string
+}
+
+export function HowItWorks({ steps, className }: HowItWorksProps) {
   return (
-    <section className="px-4 py-12 lg:py-16 bg-white">
-      <div className="mx-auto max-w-3xl">
-        <h2 className="text-center text-xl font-bold text-foreground sm:text-2xl">
-          Cara Kerja
-        </h2>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          Audit slip gaji dalam 4 langkah sederhana
-        </p>
-
-        {/* Desktop: horizontal timeline */}
-        <div className="hidden md:block mt-10">
-          <div className="relative flex items-start justify-between">
-            {/* Connector line */}
-            <div className="absolute top-5 left-0 right-0 h-0.5 bg-muted" />
-            <div className="absolute top-5 left-0 right-0 flex justify-center px-8">
-              <div className="h-0.5 bg-gradient-to-r from-amber-200 via-blue-200 via-purple-200 via-emerald-200 to-teal-200 w-full max-w-xl" />
-            </div>
-
-            {steps.map((step) => {
-              const Icon = step.icon
-              return (
-                <div key={step.number} className="relative z-10 flex flex-col items-center" style={{ width: `${100 / steps.length}%` }}>
-                  {/* Icon circle */}
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${step.color} shadow-sm`}>
-                    <Icon className={`h-5 w-5 ${step.iconColor}`} />
-                  </div>
-                  {/* Step number */}
-                  <span className="mt-2 text-xs font-semibold text-muted-foreground">
-                    Langkah {step.number}
-                  </span>
-                  {/* Title */}
-                  <span className="mt-1 text-center text-sm font-semibold text-foreground leading-tight">
-                    {step.title}
-                  </span>
-                  {/* Description */}
-                  <span className="mt-1 text-center text-xs text-muted-foreground leading-tight px-2">
-                    {step.description}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Mobile: vertical list */}
-        <div className="mt-8 md:hidden space-y-4">
-          {steps.map((step, index) => {
-            const Icon = step.icon
-            return (
-              <div key={step.number} className="flex gap-4">
-                {/* Number column */}
-                <div className="flex flex-col items-center">
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${step.color}`}>
-                    <Icon className={`h-4 w-4 ${step.iconColor}`} />
-                  </div>
-                  {index < steps.length - 1 && (
-                    <div className="w-px flex-1 bg-muted my-1" />
-                  )}
-                </div>
-                {/* Content */}
-                <div className="pb-4">
-                  <div className="text-xs font-semibold text-muted-foreground">
-                    Langkah {step.number}
-                  </div>
-                  <div className="text-sm font-semibold text-foreground mt-0.5">
-                    {step.title}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {step.description}
-                  </div>
-                </div>
+    <div className={cn('mb-8', className)}>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center mb-5">
+        Cara kerjanya
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {steps.map((step, index) => {
+          const Icon = step.icon
+          return (
+            <div
+              key={index}
+              className="flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 sm:text-center"
+            >
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-            )
-          })}
-        </div>
+              <div>
+                <p className="font-semibold text-sm text-foreground">{step.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+              </div>
+            </div>
+          )
+        })}
       </div>
-    </section>
+    </div>
   )
 }

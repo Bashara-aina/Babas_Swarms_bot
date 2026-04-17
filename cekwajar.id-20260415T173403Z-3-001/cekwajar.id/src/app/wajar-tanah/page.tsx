@@ -9,11 +9,10 @@ import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Home, Trees, Building, Store, AlertCircle,
-  ChevronDown, ChevronLeft, Info, Lock, MapPin, XCircle, TrendingUp
+  ChevronDown, ChevronLeft, Info, Lock, MapPin, XCircle, TrendingUp, Trash2, FileCheck, ShieldCheck
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -32,6 +31,7 @@ import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
 import { ResultSkeleton } from '@/components/ResultSkeleton'
+import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 
 // --- Provinces & Cities --------------------------------------------------------
 
@@ -296,6 +296,18 @@ export default function WajarTanahPage() {
             ]}
           />
 
+          <TrustBadges
+            variant="grid"
+            className="mb-6"
+            badges={[
+              { icon: Lock, label: 'Enkripsi TLS 1.3', sublabel: 'Data aman saat transfer' },
+              { icon: Trash2, label: 'Hapus Otomatis', sublabel: '30 hari setelah audit' },
+              { icon: FileCheck, label: 'Data dari Listing Publik', sublabel: '99.co & Rumah123' },
+              { icon: ShieldCheck, label: 'IQR Statistical Method', sublabel: 'Outlier otomatis dibuang' },
+            ]}
+          />
+          <DisclaimerBanner type="property" />
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-5">
@@ -427,8 +439,6 @@ export default function WajarTanahPage() {
               </div>
             </CardContent>
           </Card>
-
-          <TrustBadges variant="grid" className="mt-6" />
         </div>
       </div>
     )
@@ -567,10 +577,12 @@ export default function WajarTanahPage() {
                 benchmark?.p50 && (
                   <div className="mt-6">
                     <PropertyPriceBar
-                      userPricePerSqm={askingPricePerSqm ?? 0}
-                      p25={benchmark.p25 ?? benchmark.p50 * 0.85}
-                      p50={benchmark.p50}
-                      p75={benchmark.p75 ?? benchmark.p50 * 1.2}
+                      userPrice={askingPricePerSqm ?? 0}
+                      fairPrice={benchmark.p50}
+                      lowerBound={benchmark.p25 ?? benchmark.p50 * 0.85}
+                      upperBound={benchmark.p75 ?? benchmark.p50 * 1.2}
+                      city={selectedCity}
+                      propertyType={selectedPropertyType}
                     />
                   </div>
                 )

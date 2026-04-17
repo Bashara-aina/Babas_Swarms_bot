@@ -65,11 +65,9 @@ export default function HomePage() {
           </div>
 
           {/* Social proof line */}
-          <p className="mt-4 text-sm text-muted-foreground">
-            Sudah{' '}
-            <AuditCounterBadge />{' '}
-            slip gaji dicek minggu ini
-          </p>
+          <div className="mt-4">
+            <AuditCounterBadge />
+          </div>
         </div>
       </section>
 

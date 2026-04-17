@@ -15,11 +15,11 @@ import { HowItWorks } from '@/components/HowItWorks'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
 import { PremiumGate } from '@/components/shared/PremiumGate'
 import { COLComparisonChart } from '@/components/wajar-hidup/COLComparisonChart'
 import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
 import { ResultSkeleton } from '@/components/ResultSkeleton'
+import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 import {
   Select,
   SelectContent,
@@ -216,6 +216,9 @@ export default function WajarHidupPage() {
             ]}
           />
 
+          <TrustBadges variant="grid" className="mb-6" />
+          <DisclaimerBanner type="col" />
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-5">
@@ -305,8 +308,6 @@ export default function WajarHidupPage() {
               </div>
             </CardContent>
           </Card>
-
-          <TrustBadges variant="grid" className="mt-6" />
         </div>
       </div>
     )

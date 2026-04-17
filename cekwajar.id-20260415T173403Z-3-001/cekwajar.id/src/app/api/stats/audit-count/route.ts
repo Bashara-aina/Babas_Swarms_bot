@@ -6,12 +6,24 @@ export const revalidate = 300 // cache 5 minutes
 export async function GET() {
   try {
     const supabase = await createClient()
-    const { count } = await supabase
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { count: slipCount } = await supabase
       .from('payslip_audits')
       .select('*', { count: 'exact', head: true })
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .gte('created_at', since)
 
-    return NextResponse.json({ count: count ?? 0 })
+    const { count: gajiCount } = await supabase
+      .from('salary_queries')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', since)
+
+    const total = (slipCount ?? 0) + (gajiCount ?? 0)
+
+    return NextResponse.json(
+      { count: total },
+      { headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=60' } }
+    )
   } catch {
     return NextResponse.json({ count: 0 })
   }

@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function WajarSlipLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return children
 }

@@ -14,7 +14,7 @@ export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
       <div
         className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-muted-foreground/20 border-t-emerald-600`}
         role="status"
-        aria-label="Memuat..."
+        aria-label="Mengambil data..."
       />
     </div>
   )

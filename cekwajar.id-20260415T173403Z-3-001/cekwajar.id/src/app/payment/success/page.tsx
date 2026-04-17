@@ -140,7 +140,7 @@ export default function PostPaymentSuccessPage() {
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <div className="h-12 w-12 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin" />
             <div>
-              <p className="font-semibold">Memuat...</p>
+              <p className="font-semibold">Mengambil data...</p>
             </div>
           </CardContent>
         </Card>

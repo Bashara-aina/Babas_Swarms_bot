@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Wajar Kabur — Bandingkan Daya Beli Gaji di LN | cekwajar.id',
+  title: 'Wajar Kabur — Perbandingan Daya Beli Internasional | cekwajar.id',
   description:
-    'Bandingkan daya beli gajimu dengan 30+ negara menggunakan PPP World Bank. Tau berapa nilai riil gajimu di SG, AU, US, dan lainnya.',
+    'Bandingkan daya beli gajimu dengan 30+ negara menggunakan PPP World Bank.',
 }
 
 export default function WajarKaburLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return children
 }

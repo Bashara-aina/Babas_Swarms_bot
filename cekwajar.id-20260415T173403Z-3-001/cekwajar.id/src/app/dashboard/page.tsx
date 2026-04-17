@@ -20,6 +20,7 @@ import {
   Sparkles,
   Shield,
   ChevronRight,
+  FileSearch,
 } from 'lucide-react'
 import { SubscriptionBadge } from '@/components/shared/SubscriptionBadge'
 import { PaymentToast } from '@/components/shared/PaymentToast'
@@ -160,7 +161,7 @@ export default async function DashboardPage() {
           {/* Welcome header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">
                 Halo, {displayName}!
               </h1>
               <p className="text-muted-foreground">
@@ -280,20 +281,17 @@ export default async function DashboardPage() {
                   <CardDescription>Analisis slip gaji terbaru kamu.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <div className="rounded-full bg-muted p-4 mb-3">
-                      <Calculator className="h-8 w-8 text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center py-16 px-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mx-auto mb-4">
+                      <FileSearch className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Belum ada audit slip gaji.
+                    <h3 className="font-semibold text-lg mb-2">Belum ada riwayat audit</h3>
+                    <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+                      Mulai cek slip gaji pertama kamu. Gratis, butuh 30 detik.
                     </p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Mulai analisis pertama kamu sekarang.
-                    </p>
-                    <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                    <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
                       <Link href="/wajar-slip">
-                        <Calculator className="mr-1 h-3.5 w-3.5" />
-                        Cek Slip Gaji
+                        Audit Slip Gaji Sekarang →
                       </Link>
                     </Button>
                   </div>
