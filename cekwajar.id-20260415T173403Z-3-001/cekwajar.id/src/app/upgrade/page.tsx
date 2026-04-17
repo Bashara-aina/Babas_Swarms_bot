@@ -154,11 +154,11 @@ export default function UpgradePage() {
         ;(window as Window & { snap?: { pay: (token: string, opts: object) => void } }).snap!.pay(data.snapToken, {
           onSuccess: () => {
             setLoadingPlan(null)
-            window.location.href = '/dashboard?upgraded=true'
+            window.location.href = `/upgrade/success?plan=${plan}`
           },
           onPending: () => {
             setLoadingPlan(null)
-            window.location.href = '/dashboard?payment=pending'
+            window.location.href = '/upgrade/success?payment=pending'
           },
           onError: () => {
             setLoadingPlan(null)
@@ -179,7 +179,7 @@ export default function UpgradePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Header */}
         <div className="text-center mb-10">
@@ -187,10 +187,10 @@ export default function UpgradePage() {
             <Sparkles className="h-4 w-4" />
             Tingkatkan paket kamu
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-3">
+          <h1 className="text-3xl font-bold text-foreground mb-3">
             Paket Berlangganan
           </h1>
-          <p className="text-slate-500 max-w-md mx-auto">
+          <p className="text-muted-foreground max-w-md mx-auto">
             Dapatkan akses ke fitur lengkap untuk audit slip gaji, benchmark,
             dan analisis properti.
           </p>
@@ -198,14 +198,14 @@ export default function UpgradePage() {
 
         {/* Billing Period Toggle */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center bg-slate-100 rounded-lg p-1 gap-1">
+          <div className="inline-flex items-center bg-muted rounded-lg p-1 gap-1">
             <button
               onClick={() => setBillingPeriod('monthly')}
               className={cn(
                 'px-5 py-2 rounded-md text-sm font-medium transition-all',
                 billingPeriod === 'monthly'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               Bulanan
@@ -215,8 +215,8 @@ export default function UpgradePage() {
               className={cn(
                 'px-5 py-2 rounded-md text-sm font-medium transition-all',
                 billingPeriod === 'annual'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               Tahunan
@@ -235,15 +235,15 @@ export default function UpgradePage() {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
-          <Card className="border-2 border-slate-200 relative overflow-hidden">
-            <CardHeader className="bg-slate-50 pb-4">
+          <Card className="border-2 border-border relative overflow-hidden">
+            <CardHeader className="bg-muted pb-4">
               <CardTitle className="text-xl">Gratis</CardTitle>
               <CardDescription className="mt-1">
                 Untuk coba fitur dasar cekwajar.id
               </CardDescription>
               <div className="mt-4">
-                <span className="text-3xl font-bold text-slate-900">Rp 0</span>
-                <span className="text-slate-500 text-sm ml-1">selamanya</span>
+                <span className="text-3xl font-bold text-foreground">Rp 0</span>
+                <span className="text-muted-foreground text-sm ml-1">selamanya</span>
               </div>
             </CardHeader>
             <CardContent className="pb-4">
@@ -260,9 +260,9 @@ export default function UpgradePage() {
                     {f.included ? (
                       <Check className="h-4 w-4 text-emerald-500 shrink-0" />
                     ) : (
-                      <X className="h-4 w-4 text-slate-300 shrink-0" />
+                      <X className="h-4 w-4 text-muted-foreground shrink-0" />
                     )}
-                    <span className={f.included ? 'text-slate-700' : 'text-slate-400'}>
+                    <span className={f.included ? 'text-foreground' : 'text-muted-foreground'}>
                       {f.label}
                     </span>
                   </li>
@@ -303,10 +303,10 @@ export default function UpgradePage() {
                   <CardTitle className="text-xl">{tier.name}</CardTitle>
                   <CardDescription className="mt-1">{tier.description}</CardDescription>
                   <div className="mt-4">
-                    <span className="text-3xl font-bold text-slate-900">
+                    <span className="text-3xl font-bold text-foreground">
                       {formatIDR(price)}
                     </span>
-                    <span className="text-slate-500 text-sm ml-1">
+                    <span className="text-muted-foreground text-sm ml-1">
                       /bulan
                     </span>
                     {billingPeriod === 'annual' && (
@@ -323,9 +323,9 @@ export default function UpgradePage() {
                         {f.included ? (
                           <Check className="h-4 w-4 text-emerald-500 shrink-0" />
                         ) : (
-                          <X className="h-4 w-4 text-slate-300 shrink-0" />
+                          <X className="h-4 w-4 text-muted-foreground shrink-0" />
                         )}
-                        <span className={f.included ? 'text-slate-700' : 'text-slate-400'}>
+                        <span className={f.included ? 'text-foreground' : 'text-muted-foreground'}>
                           {f.label}
                         </span>
                       </li>
@@ -357,13 +357,13 @@ export default function UpgradePage() {
         </div>
 
         {/* Trust Footer */}
-        <p className="text-center text-sm text-slate-400 mt-8">
+        <p className="text-center text-sm text-muted-foreground mt-8">
           Pembayaran aman melalui Midtrans. Batalkan kapan saja.
         </p>
 
         {/* Login prompt for unauthenticated users */}
         <div className="text-center mt-6">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Sudah punya akun?{' '}
             <Link href="/auth/login" className="text-emerald-600 hover:text-emerald-700 font-medium">
               Login di sini

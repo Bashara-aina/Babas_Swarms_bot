@@ -3,13 +3,20 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 import type { Tool } from '@/types'
+import {
+  FileText,
+  TrendingUp,
+  Home,
+  Plane,
+  Building2
+} from 'lucide-react'
 
 export const TOOLS: Tool[] = [
-  { id: 'wajar-slip', name: 'Wajar Slip', href: '/wajar-slip', emoji: '📋', description: 'Cek ketidakwajaran slip gaji' },
-  { id: 'wajar-gaji', name: 'Wajar Gaji', href: '/wajar-gaji', emoji: '💰', description: 'Benchmark gaji berdasarkan UMK' },
-  { id: 'wajar-tanah', name: 'Wajar Tanah', href: '/wajar-tanah', emoji: '🏠', description: 'Analisis harga properti' },
-  { id: 'wajar-kabur', name: 'Wajar Kabur', href: '/wajar-kabur', emoji: '✈️', description: 'Cost of living 20 negara' },
-  { id: 'wajar-hidup', name: 'Wajar Hidup', href: '/wajar-hidup', emoji: '🏙️', description: 'PPP dan kelayakan hidup' },
+  { id: 'wajar-slip', name: 'Wajar Slip', href: '/wajar-slip', Icon: FileText, description: 'Cek ketidakwajaran slip gaji' },
+  { id: 'wajar-gaji', name: 'Wajar Gaji', href: '/wajar-gaji', Icon: TrendingUp, description: 'Benchmark gaji berdasarkan UMK' },
+  { id: 'wajar-tanah', name: 'Wajar Tanah', href: '/wajar-tanah', Icon: Home, description: 'Analisis harga properti' },
+  { id: 'wajar-kabur', name: 'Wajar Kabur', href: '/wajar-kabur', Icon: Plane, description: 'Cost of living 20 negara' },
+  { id: 'wajar-hidup', name: 'Wajar Hidup', href: '/wajar-hidup', Icon: Building2, description: 'PPP dan kelayakan hidup' },
 ]
 
 export const SUBSCRIPTION_TIERS = {

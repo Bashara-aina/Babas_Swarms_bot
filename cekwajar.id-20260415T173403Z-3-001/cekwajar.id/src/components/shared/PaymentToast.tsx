@@ -20,7 +20,7 @@ export function PaymentToast() {
 
     if (upgraded === 'true') {
       toast({
-        title: '🎉 Selamat!',
+        title: 'Selamat!',
         description: 'Langganan kamu kini aktif. Selamat menggunakan fitur premium!',
         duration: 8000,
       })

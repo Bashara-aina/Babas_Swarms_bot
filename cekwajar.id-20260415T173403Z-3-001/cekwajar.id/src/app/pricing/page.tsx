@@ -57,8 +57,8 @@ const FAQ = [
     a: 'Ya, kamu bisa batalkan langganan kapan saja. Akses tetap aktif sampai akhir periode billing.',
   },
   {
-    q: 'Apa itu metode TER (PTKP Terlibat)?',
-    a: 'TER adalah metode perpajakan PPh21 sesuai PMK 168/2023 yang menghitung pajak berdasarkan PTKP yang 적용 untuk semua级别的 karyawan.',
+    q: 'Apa itu metode TER (PTKP)?',
+    a: 'TER adalah metode perpajakan PPh21 sesuai PMK 168/2023 yang menghitung pajak berdasarkan PTKP yang berlaku untuk semua level karyawan.',
   },
   {
     q: 'Apakah data slip gaji saya aman?',
@@ -68,17 +68,17 @@ const FAQ = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4 border-emerald-200 text-emerald-700 bg-emerald-50">
             Transparansi Harga
           </Badge>
-          <h1 className="text-3xl font-bold text-slate-900 mb-3">
+          <h1 className="text-3xl font-bold text-foreground mb-3">
             Harga yang Jujur, Tanpa Biaya Tersembunyi
           </h1>
-          <p className="text-slate-500 max-w-lg mx-auto">
+          <p className="text-muted-foreground max-w-lg mx-auto">
             Mulai gratis, upgrade kalau butuh lebih. Semua fitur PPh21 dan BPJS
             sudah termasuk di semua paket.
           </p>
@@ -89,27 +89,27 @@ export default function PricingPage() {
           <CardHeader>
             <CardTitle>Perbandingan Fitur</CardTitle>
           </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <CardContent className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="min-w-[600px] sm:min-w-0 sm:w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 pr-4 font-medium text-slate-500">Fitur</th>
-                  <th className="text-center py-3 px-4 font-medium text-slate-600 w-28">Gratis</th>
-                  <th className="text-center py-3 px-4 font-medium text-blue-700 w-28">Basic</th>
-                  <th className="text-center py-3 px-4 font-medium text-purple-700 w-28">Pro</th>
+                  <th className="text-left py-3 pr-4 font-medium text-muted-foreground">Fitur</th>
+                  <th className="text-center py-3 px-4 font-medium text-muted-foreground w-1/4">Gratis</th>
+                  <th className="text-center py-3 px-4 font-medium text-blue-700 dark:text-blue-400 w-1/4">Basic</th>
+                  <th className="text-center py-3 px-4 font-medium text-purple-700 dark:text-purple-400 w-1/4">Pro</th>
                 </tr>
               </thead>
               <tbody>
                 {FEATURES.map((cat) => (
                   <Fragment key={cat.category}>
-                    <tr className="bg-slate-50">
-                      <td colSpan={4} className="py-2 px-0 font-semibold text-slate-700 text-xs uppercase tracking-wide">
+                    <tr className="bg-muted">
+                      <td colSpan={4} className="py-2 px-0 font-semibold text-foreground text-xs uppercase tracking-wide">
                         {cat.category}
                       </td>
                     </tr>
                     {cat.items.map((item) => (
-                      <tr key={item.label} className="border-b border-slate-100">
-                        <td className="py-2.5 pr-4 text-slate-700">{item.label}</td>
+                      <tr key={item.label} className="border-b border-border">
+                        <td className="py-2.5 pr-4 text-foreground">{item.label}</td>
                         {(['free', 'basic', 'pro'] as const).map((tier) => {
                           const value = item[tier]
                           return (
@@ -118,10 +118,10 @@ export default function PricingPage() {
                                 value ? (
                                   <span className="text-emerald-500 font-medium">✓</span>
                                 ) : (
-                                  <span className="text-slate-300">—</span>
+                                  <span className="text-muted-foreground">—</span>
                                 )
                               ) : (
-                                <span className="text-slate-600 text-xs">{value}</span>
+                                <span className="text-muted-foreground text-xs">{value}</span>
                               )}
                             </td>
                           )
@@ -132,6 +132,9 @@ export default function PricingPage() {
                 ))}
               </tbody>
             </table>
+            <p className="text-xs text-center text-muted-foreground mt-2 sm:hidden">
+              ← Geser untuk lihat semua fitur →
+            </p>
           </CardContent>
         </Card>
 
@@ -159,20 +162,20 @@ export default function PricingPage() {
           ].map((tier) => (
             <Card key={tier.id} id={tier.id} className={`border-2 ${
               tier.color === 'blue' ? 'border-blue-300' :
-              tier.color === 'purple' ? 'border-purple-300' : 'border-slate-200'
+              tier.color === 'purple' ? 'border-purple-300' : 'border-border'
             }`}>
               <CardHeader>
                 <CardTitle className="text-xl">{tier.name}</CardTitle>
-                <p className="text-sm text-slate-500 mt-1">{tier.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">{tier.description}</p>
                 <div className="mt-3">
                   <span className="text-2xl font-bold">{tier.price}</span>
-                  <span className="text-slate-400 text-sm ml-1">{tier.period}</span>
+                  <span className="text-muted-foreground text-sm ml-1">{tier.period}</span>
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-1.5">
                   {tier.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                    <li key={f} className="flex items-center gap-2 text-sm text-foreground">
                       <span className="text-emerald-500">✓</span> {f}
                     </li>
                   ))}
@@ -180,7 +183,7 @@ export default function PricingPage() {
               </CardContent>
               <CardContent className="pt-0">
                 {tier.disabled ? (
-                  <button disabled className="w-full py-2 rounded-md border border-slate-200 text-slate-400 text-sm cursor-not-allowed">
+                  <button disabled className="w-full py-2 rounded-md border border-border text-muted-foreground text-sm cursor-not-allowed">
                     {tier.cta}
                   </button>
                 ) : (
@@ -206,8 +209,8 @@ export default function PricingPage() {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {FAQ.map((item) => (
               <div key={item.q}>
-                <p className="font-medium text-slate-800 mb-1">{item.q}</p>
-                <p className="text-sm text-slate-500">{item.a}</p>
+                <p className="font-medium text-foreground mb-1">{item.q}</p>
+                <p className="text-sm text-muted-foreground">{item.a}</p>
               </div>
             ))}
           </CardContent>

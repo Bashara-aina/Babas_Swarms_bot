@@ -10,7 +10,7 @@ import { useReducer, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertCircle, CheckCircle2, X, Loader2, AlertTriangle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, X, AlertTriangle, Zap } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,13 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { PremiumGate } from '@/components/shared/PremiumGate'
+import { ViolationSummaryBanner } from '@/components/shared/ViolationSummaryBanner'
+import { ShareVerdictButton } from '@/components/shared/ShareVerdictButton'
+import { FormProgress } from '@/components/shared/FormProgress'
+import { CityCommandSelect } from '@/components/shared/CityCommandSelect'
+import { FieldTooltip, SLIP_TOOLTIPS } from '@/components/shared/FieldTooltip'
+import { Skeleton } from '@/components/ui/skeleton'
+import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
 import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
 import { UMKBadge } from '@/components/wajar-slip/UMKBadge'
 import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
@@ -191,6 +198,7 @@ export default function WajarSlipPage() {
   const [cities, setCities] = useState<CityOption[]>([])
   const [userTier, setUserTier] = useState<SubscriptionTier>('free')
   const [ocrSource, setOcrSource] = useState<string>('manual')
+  const [formStep, setFormStep] = useState(1) // 1 | 2 | 3 — 3-step wizard
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
 
@@ -223,6 +231,11 @@ export default function WajarSlipPage() {
       takeHome: '',
     },
   })
+
+  const handleReset = () => {
+    setFormStep(1)
+    dispatch({ type: 'RESET' })
+  }
 
   // ─── OCR callback — pre-fill form with extracted fields ─────────────
 
@@ -316,12 +329,12 @@ export default function WajarSlipPage() {
   // ─── IDLE state — show OCR uploader ────────────────────────────────────
   if (state.status === 'IDLE') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-slip" className="min-h-screen bg-amber-50">
         <div className="mx-auto max-w-2xl px-4 py-10 space-y-5">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Cek Slip Gaji — Gratis</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="text-2xl font-bold text-foreground">Cek Slip Gaji — Gratis</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Pastikan PPh21 dan BPJS sudah dipotong dengan benar. Hanya butuh 30 detik.
             </p>
           </div>
@@ -336,10 +349,13 @@ export default function WajarSlipPage() {
           />
 
           {/* Manual mode link */}
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs text-muted-foreground">
             Atau{' '}
             <button
-              onClick={handleManualMode}
+              onClick={() => {
+                handleReset()
+                dispatch({ type: 'SHOW_FORM' })
+              }}
               className="underline hover:text-emerald-600"
             >
               isi form manual
@@ -358,8 +374,33 @@ export default function WajarSlipPage() {
     const monthLabel = MONTHS.find((m) => m.value === data.monthNumber)?.label ?? ''
 
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div
+        data-tool="wajar-slip"
+        className="min-h-screen bg-amber-50"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label="Hasil audit slip gaji"
+      >
         <div className="mx-auto max-w-2xl px-4 py-8">
+
+          {/* Step indicator */}
+          <div className="mb-6">
+            <FormProgress
+              steps={[
+                { label: 'Upload', description: 'Unggah slip gaji' },
+                { label: 'Konfirmasi', description: 'Pastikan datanya benar' },
+                { label: 'Hasil', description: 'Pelanggaran & detail' },
+              ]}
+              currentStep={2}
+            />
+          </div>
+
+          {/* Violation summary */}
+          <ViolationSummaryBanner
+            verdict={data.verdict}
+            violationCount={data.violationCount}
+            className="mb-4"
+          />
 
           {/* Verdict header */}
           <Card className={`mb-6 ${data.verdict === 'SESUAI' ? 'border-emerald-300 bg-emerald-50' : 'border-red-300 bg-red-50'}`}>
@@ -375,7 +416,7 @@ export default function WajarSlipPage() {
                     ? 'Slip Gaji Sesuai Regulasi'
                     : 'Ada Pelanggaran pada Slip Gaji'}
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {data.verdict === 'SESUAI'
                     ? `Tidak ada pelanggaran ditemukan. Gaji bruto Rp ${data.grossSalary.toLocaleString('id-ID')}/bulan, ${monthLabel} ${data.year}.`
                     : `Ditemukan ${data.violationCount} pelanggaran pada slip gaji kamu.`}
@@ -446,6 +487,7 @@ export default function WajarSlipPage() {
               userTier={userTier}
               requiredTier="basic"
               featureLabel="Detail selisih IDR dan panduan tindakan"
+              benefit="Lihat rincian PPh21, BPJS, JHT per komponen"
             >
               <Card className="mb-6">
                 <CardHeader>
@@ -454,14 +496,14 @@ export default function WajarSlipPage() {
                 <CardContent className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b text-slate-500">
+                      <tr className="border-b text-muted-foreground">
                         <th className="text-left py-2 pr-4">Komponen</th>
                         <th className="text-right py-2 px-2">Di Slip</th>
                         <th className="text-right py-2 px-2">Seharusnya</th>
                         <th className="text-right py-2 pl-2">Selisih</th>
                       </tr>
                     </thead>
-                    <tbody className="text-slate-700">
+                    <tbody className="text-foreground">
                       {[
                         {
                           label: 'PPh21',
@@ -486,9 +528,9 @@ export default function WajarSlipPage() {
                       ].map((row) => {
                         const diff = row.correct - row.slip
                         return (
-                          <tr key={row.label} className="border-b border-slate-100">
-                            <td className="py-2 pr-4 font-medium">{row.label}</td>
-                            <td className="py-2 px-2 text-right text-slate-500">
+                          <tr key={row.label} className="border-b border-border">
+                            <td className="py-2 pr-4 font-medium text-foreground">{row.label}</td>
+                            <td className="py-2 px-2 text-right text-muted-foreground">
                               Rp {row.slip.toLocaleString('id-ID')}
                             </td>
                             <td className="py-2 px-2 text-right">
@@ -520,26 +562,34 @@ export default function WajarSlipPage() {
           )}
 
           {/* Caveats */}
-          <p className="mb-6 text-xs text-slate-400">
+          <p className="mb-6 text-xs text-muted-foreground">
             Kalkulasi berdasarkan PMK 168/2023 (TER) dan peraturan BPJS yang berlaku.
             Alat ini tidak menggantikan konsultasi dengan konsultan pajak.
           </p>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <button
-              onClick={() => dispatch({ type: 'RESET' })}
-              className="flex-1 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              onClick={handleReset}
+              className="flex-1 rounded-lg border border-border bg-white py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
             >
               Cek Slip Lain
             </button>
             <button
-              onClick={() => dispatch({ type: 'SHOW_FORM' })}
+              onClick={handleReset}
               className="flex-1 rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
             >
               Hitung Ulang
             </button>
+            <ShareVerdictButton
+              verdict={data.verdict}
+              violationCount={data.violationCount}
+              city={data.city}
+              grossSalary={data.grossSalary}
+            />
           </div>
+
+          <CrossToolSuggestion fromTool="wajar-slip" className="mt-6" />
         </div>
       </div>
     )
@@ -548,7 +598,7 @@ export default function WajarSlipPage() {
   // ─── ERROR state ────────────────────────────────────────────────────────────
   if (state.status === 'ERROR') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div data-tool="wajar-slip" className="min-h-screen bg-amber-50 flex items-center justify-center">
         <Card className="mx-4 max-w-md border-red-200 bg-red-50">
           <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
             <AlertCircle className="h-10 w-10 text-red-500" />
@@ -557,7 +607,7 @@ export default function WajarSlipPage() {
               <p className="mt-1 text-sm text-red-600">{state.message}</p>
             </div>
             <button
-              onClick={() => dispatch({ type: 'RESET' })}
+              onClick={handleReset}
               className="mt-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
               Coba Lagi
@@ -568,20 +618,70 @@ export default function WajarSlipPage() {
     )
   }
 
-  // ─── MANUAL FORM (and OCR fields pre-filled) ───────────────────────────────
+  // ─── Step 1 fields (basic info) ───────────────────────────────
+  // grossSalary, ptkpStatus, city, monthNumber, year, hasNPWP
+
+  // Step 1 validation: check required fields before advancing
+  const canAdvanceToStep2 = !!form.watch('grossSalary') && !!form.watch('city')
+
+  // Step 3 summary values
+  const grossValue = form.watch('grossSalary')
+  const ptkpValue = form.watch('ptkpStatus')
+  const cityValue = form.watch('city')
+  const monthValue = form.watch('monthNumber')
+  const yearValue = form.watch('year')
+  const npwpValue = form.watch('hasNPWP')
+  const pphValue = form.watch('reportedPph21')
+  const jhtValue = form.watch('reportedJht')
+  const jpValue = form.watch('reportedJp')
+  const kesValue = form.watch('reportedKesehatan')
+  const thpValue = form.watch('takeHome')
+
+  const step3Fields = [
+    { label: 'Gaji Bruto', value: formatIDR(parseIDR(grossValue)) },
+    { label: 'Status PTKP', value: ptkpValue || '-' },
+    { label: 'Kota', value: cityValue || '-' },
+    { label: 'Periode', value: `${MONTHS.find(m => String(m.value) === monthValue)?.label ?? ''} ${yearValue}` },
+    { label: 'NPWP', value: npwpValue ? 'Punya NPWP' : 'Tidak punya' },
+    { label: 'PPh21 Dipotong', value: pphValue ? formatIDR(parseIDR(pphValue)) : '-' },
+    { label: 'JHT Karyawan', value: jhtValue ? formatIDR(parseIDR(jhtValue)) : '-' },
+    { label: 'JP Karyawan', value: jpValue ? formatIDR(parseIDR(jpValue)) : '-' },
+    { label: 'BPJS Kesehatan', value: kesValue ? formatIDR(parseIDR(kesValue)) : '-' },
+    { label: 'Take Home Pay', value: thpValue ? formatIDR(parseIDR(thpValue)) : '-' },
+  ]
+
+  function formatIDR(num: number): string {
+    return 'Rp ' + num.toLocaleString('id-ID')
+  }
+
+  // ─── MANUAL FORM (and OCR fields pre-filled) ────────────────────────────────
+  const isManualForm = state.status === 'MANUAL_FORM' || state.status === 'CALCULATING' || state.status === 'OCR_CONFIRM'
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div data-tool="wajar-slip" className="min-h-screen bg-amber-50">
       <div className="mx-auto max-w-xl px-4 py-8">
+        {/* Step indicator */}
+        <div className="mb-6">
+          <FormProgress
+            steps={[
+              { label: 'Info Dasar', description: 'Data pekerjaan' },
+              { label: 'Potongan', description: 'PPh21 & BPJS' },
+              { label: 'Review', description: 'Konfirmasi' },
+            ]}
+            currentStep={formStep - 1}
+          />
+        </div>
+
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Cek Slip Gaji</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl font-bold text-foreground">Cek Slip Gaji</h1>
+            <p className="text-sm text-muted-foreground">
               {ocrSource !== 'manual' ? `Hasil OCR: ${ocrSource}` : 'Input data manual'}
             </p>
           </div>
           <button
-            onClick={() => dispatch({ type: 'RESET' })}
-            className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-600"
+            onClick={handleReset}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4" />
             Batal
@@ -595,201 +695,314 @@ export default function WajarSlipPage() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
 
-          {/* Gross Salary */}
-          <div>
-            <Label htmlFor="grossSalary">Gaji Bruto /bulan *</Label>
-            <Input
-              id="grossSalary"
-              placeholder="7.500.000"
-              {...form.register('grossSalary')}
-              className="mt-1"
-            />
-            {form.formState.errors.grossSalary && (
-              <p className="mt-1 text-xs text-red-500">{form.formState.errors.grossSalary.message}</p>
-            )}
-          </div>
+          {/* ── STEP 1: Info Dasar ── */}
+          {formStep === 1 && (
+            <div className="space-y-5">
 
-          {/* PTKP + Kota row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Status PTKP *</Label>
-              <Select
-                onValueChange={(v) => form.setValue('ptkpStatus', v as FormValues['ptkpStatus'])}
-                defaultValue={form.getValues('ptkpStatus')}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(PTKP_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {value} — {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.ptkpStatus && (
-                <p className="mt-1 text-xs text-red-500">{form.formState.errors.ptkpStatus.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label>Kota *</Label>
-              <Select onValueChange={(v) => form.setValue('city', v)} defaultValue={form.getValues('city')}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Pilih kota..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.length === 0 ? (
-                    <SelectItem value="loading" disabled>Memuat kota...</SelectItem>
-                  ) : (
-                    cities.map((c) => (
-                      <SelectItem key={`${c.city}-${c.province}`} value={c.city}>
-                        {c.city} ({c.province})
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.city && (
-                <p className="mt-1 text-xs text-red-500">{form.formState.errors.city.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Month + Year + NPWP */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Bulan *</Label>
-              <Select
-                onValueChange={(v) => form.setValue('monthNumber', v)}
-                defaultValue={String(form.getValues('monthNumber'))}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map((m) => (
-                    <SelectItem key={m.value} value={String(m.value)}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Tahun *</Label>
-              <Input
-                type="number"
-                className="mt-1"
-                {...form.register('year', { valueAsNumber: true })}
-              />
-            </div>
-            <div>
-              <Label>Punya NPWP?</Label>
-              <div className="mt-1 flex items-center gap-3">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    checked={form.watch('hasNPWP') === true}
-                    onChange={() => form.setValue('hasNPWP', true)}
-                    className="accent-emerald-600"
-                  />
-                  Ya
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    checked={form.watch('hasNPWP') === false}
-                    onChange={() => form.setValue('hasNPWP', false)}
-                    className="accent-emerald-600"
-                  />
-                  Tidak
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Reported deductions */}
-          <div>
-            <p className="text-sm font-medium text-slate-700">Isian dari Slip Gaji</p>
-            <p className="text-xs text-slate-400 mb-3">Masukkan angka yang ada di slip gaji kamu</p>
-
-            <div className="space-y-3">
+              {/* Gross Salary */}
               <div>
-                <Label htmlFor="reportedPph21">PPh21 Dipotong</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label htmlFor="grossSalary">Gaji Bruto /bulan *</Label>
+                  <FieldTooltip content={SLIP_TOOLTIPS.grossSalary.content} example={SLIP_TOOLTIPS.grossSalary.example} />
+                </div>
                 <Input
-                  id="reportedPph21"
-                  placeholder="112.500"
-                  {...form.register('reportedPph21')}
+                  id="grossSalary"
+                  placeholder="7.500.000"
+                  {...form.register('grossSalary')}
                   className="mt-1"
                 />
+                {form.formState.errors.grossSalary && (
+                  <p className="mt-1 text-xs text-red-500">{form.formState.errors.grossSalary.message}</p>
+                )}
               </div>
 
+              {/* PTKP + Kota row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="reportedJht">JHT Karyawan</Label>
-                  <Input
-                    id="reportedJht"
-                    placeholder="150.000"
-                    {...form.register('reportedJht')}
+                  <div className="flex items-center justify-between mb-1">
+                    <Label>Status PTKP *</Label>
+                    <FieldTooltip content={SLIP_TOOLTIPS.ptkpStatus.content} example={SLIP_TOOLTIPS.ptkpStatus.example} />
+                  </div>
+                  <Select
+                    onValueChange={(v) => form.setValue('ptkpStatus', v as FormValues['ptkpStatus'])}
+                    defaultValue={form.getValues('ptkpStatus')}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(PTKP_LABELS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {value} — {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.ptkpStatus && (
+                    <p className="mt-1 text-xs text-red-500">{form.formState.errors.ptkpStatus.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label>Kota *</Label>
+                    <FieldTooltip content={SLIP_TOOLTIPS.city.content} example={SLIP_TOOLTIPS.city.example} />
+                  </div>
+                  <CityCommandSelect
+                    value={form.watch('city')}
+                    onChange={(city) => form.setValue('city', city)}
+                    cities={cities}
                     className="mt-1"
+                    placeholder="Pilih kota..."
                   />
+                  {form.formState.errors.city && (
+                    <p className="mt-1 text-xs text-red-500">{form.formState.errors.city.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Month + Year + NPWP */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Bulan *</Label>
+                  <Select
+                    onValueChange={(v) => form.setValue('monthNumber', v)}
+                    defaultValue={String(form.getValues('monthNumber'))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map((m) => (
+                        <SelectItem key={m.value} value={String(m.value)}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="reportedJp">JP Karyawan</Label>
+                  <Label>Tahun *</Label>
                   <Input
-                    id="reportedJp"
+                    type="number"
+                    className="mt-1"
+                    {...form.register('year', { valueAsNumber: true })}
+                  />
+                </div>
+                <fieldset className="border-0 p-0 m-0">
+                  <legend className="text-sm font-medium text-foreground mb-2 flex items-center gap-1">
+                    Punya NPWP?
+                  </legend>
+                  <FieldTooltip content={SLIP_TOOLTIPS.hasNPWP.content} className="inline-flex ml-1" />
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        checked={form.watch('hasNPWP') === true}
+                        onChange={() => form.setValue('hasNPWP', true)}
+                        className="accent-emerald-600"
+                        aria-describedby="npwp-hint"
+                      />
+                      Ya
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        checked={form.watch('hasNPWP') === false}
+                        onChange={() => form.setValue('hasNPWP', false)}
+                        className="accent-emerald-600"
+                      />
+                      Tidak
+                    </label>
+                  </div>
+                  <p id="npwp-hint" className="text-xs text-muted-foreground mt-1">
+                    Tanpa NPWP, tarif PPh21 lebih tinggi 20%.
+                  </p>
+                </fieldset>
+              </div>
+
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() => setFormStep(2)}
+                disabled={!canAdvanceToStep2}
+              >
+                Lanjut ke Potongan →
+              </Button>
+            </div>
+          )}
+
+          {/* ── STEP 2: Potongan ── */}
+          {formStep === 2 && (
+            <div className="space-y-5">
+              <p className="text-sm font-medium text-foreground">Isian dari Slip Gaji</p>
+              <p className="text-xs text-muted-foreground">Masukkan angka yang ada di slip gaji kamu</p>
+
+              <div className="space-y-3">
+                {/* PPh21 */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label htmlFor="reportedPph21">PPh21 Dipotong</Label>
+                    <FieldTooltip content={SLIP_TOOLTIPS.reportedPph21.content} example={SLIP_TOOLTIPS.reportedPph21.example} />
+                  </div>
+                  <Input
+                    id="reportedPph21"
+                    placeholder="112.500"
+                    {...form.register('reportedPph21')}
+                    className="mt-1"
+                  />
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
+                    onClick={() => form.setValue('reportedPph21', '0')}
+                  >
+                    Tidak tahu → isi 0
+                  </button>
+                </div>
+
+                {/* JHT + JP row */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label htmlFor="reportedJht">JHT Karyawan</Label>
+                      <FieldTooltip content={SLIP_TOOLTIPS.reportedJht.content} example={SLIP_TOOLTIPS.reportedJht.example} />
+                    </div>
+                    <Input
+                      id="reportedJht"
+                      placeholder="150.000"
+                      {...form.register('reportedJht')}
+                      className="mt-1"
+                    />
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
+                      onClick={() => form.setValue('reportedJht', '0')}
+                    >
+                      Tidak tahu → isi 0
+                    </button>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label htmlFor="reportedJp">JP Karyawan</Label>
+                      <FieldTooltip content={SLIP_TOOLTIPS.reportedJp.content} example={SLIP_TOOLTIPS.reportedJp.example} />
+                    </div>
+                    <Input
+                      id="reportedJp"
+                      placeholder="75.000"
+                      {...form.register('reportedJp')}
+                      className="mt-1"
+                    />
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
+                      onClick={() => form.setValue('reportedJp', '0')}
+                    >
+                      Tidak tahu → isi 0
+                    </button>
+                  </div>
+                </div>
+
+                {/* BPJS Kesehatan */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label htmlFor="reportedKesehatan">BPJS Kesehatan Karyawan</Label>
+                    <FieldTooltip content={SLIP_TOOLTIPS.reportedKesehatan.content} example={SLIP_TOOLTIPS.reportedKesehatan.example} />
+                  </div>
+                  <Input
+                    id="reportedKesehatan"
                     placeholder="75.000"
-                    {...form.register('reportedJp')}
+                    {...form.register('reportedKesehatan')}
+                    className="mt-1"
+                  />
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground mt-1 transition-colors"
+                    onClick={() => form.setValue('reportedKesehatan', '0')}
+                  >
+                    Tidak tahu → isi 0
+                  </button>
+                </div>
+
+                {/* Take Home */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <Label htmlFor="takeHome">Take Home Pay</Label>
+                    <FieldTooltip content={SLIP_TOOLTIPS.takeHome.content} example={SLIP_TOOLTIPS.takeHome.example} />
+                  </div>
+                  <Input
+                    id="takeHome"
+                    placeholder="7.000.000"
+                    {...form.register('takeHome')}
                     className="mt-1"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="reportedKesehatan">BPJS Kesehatan Karyawan</Label>
-                <Input
-                  id="reportedKesehatan"
-                  placeholder="75.000"
-                  {...form.register('reportedKesehatan')}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="takeHome">Take Home Pay</Label>
-                <Input
-                  id="takeHome"
-                  placeholder="7.000.000"
-                  {...form.register('takeHome')}
-                  className="mt-1"
-                />
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setFormStep(1)}
+                >
+                  ← Kembali
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1"
+                  onClick={() => setFormStep(3)}
+                >
+                  Review →
+                </Button>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            disabled={state.status === 'CALCULATING'}
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
-          >
-            {state.status === 'CALCULATING' ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Menghitung... ⚡
-              </>
-            ) : (
-              'Cek Slip Gaji →'
-            )}
-          </Button>
+          {/* ── STEP 3: Review ── */}
+          {formStep === 3 && (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm">Ringkasan Data Kamu</h3>
+
+              {/* Summary table */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
+                {step3Fields.map(field => (
+                  <div key={field.label} className="flex justify-between">
+                    <span className="text-muted-foreground">{field.label}</span>
+                    <span className="font-medium">{field.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setFormStep(2)}
+                >
+                  ← Edit
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={state.status === 'CALCULATING'}
+                >
+                  {state.status === 'CALCULATING' ? (
+                    <>
+                      <Skeleton shimmer className="mr-2 h-4 w-4 inline-block rounded-full" />
+                      Lagi ngitung PPh21... <Zap className="inline h-4 w-4 text-amber-500 ml-1" />
+                    </>
+                  ) : (
+                    'Cek Slip Gaji Sekarang'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </form>
 
         {/* Disclaimer */}
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           Kalkulasi berdasarkan PMK 168/2023 (TER). Hasil bukan pengganti konsultasi pajak resmi.
         </p>
       </div>

@@ -15,12 +15,12 @@ export const metadata: Metadata = {
 
 export default function KontakPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-2xl px-4 py-12">
         <div className="text-center mb-10">
-          <div className="text-5xl mb-4">📬</div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-3">Hubungi Kami</h1>
-          <p className="text-slate-500 max-w-md mx-auto">
+          <div className="mb-4"><Mail className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+          <h1 className="text-3xl font-bold text-foreground mb-3">Hubungi Kami</h1>
+          <p className="text-muted-foreground max-w-md mx-auto">
             Punya pertanyaan, masukan, atau ingin bekerja sama? Kami senang mendengar dari kamu.
           </p>
         </div>
@@ -34,9 +34,9 @@ export default function KontakPage() {
                   <Mail className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-900">Email</div>
-                  <div className="text-sm text-slate-500">support@cekwajar.id</div>
-                  <div className="text-xs text-slate-400 mt-1">Respon dalam 1-2 hari kerja</div>
+                  <div className="font-semibold text-foreground">Email</div>
+                  <div className="text-sm text-muted-foreground">support@cekwajar.id</div>
+                  <div className="text-xs text-muted-foreground mt-1">Respon dalam 1-2 hari kerja</div>
                 </div>
               </CardContent>
             </Card>
@@ -49,9 +49,9 @@ export default function KontakPage() {
                   <MessageCircle className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-900">WhatsApp</div>
-                  <div className="text-sm text-slate-500">+62 812 3456 7890</div>
-                  <div className="text-xs text-slate-400 mt-1">Chat only, bukan support resmi</div>
+                  <div className="font-semibold text-foreground">WhatsApp</div>
+                  <div className="text-sm text-muted-foreground">+62 812 3456 7890</div>
+                  <div className="text-xs text-muted-foreground mt-1">Chat only, bukan support resmi</div>
                 </div>
               </CardContent>
             </Card>
@@ -61,8 +61,8 @@ export default function KontakPage() {
         {/* About Section */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Tentang cekwajar.id</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Tentang cekwajar.id</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>
                 cekwajar.id adalah platform konsultasi digital berbasis data untuk pekerja Indonesia.
                 Kami membantu kamu memahami hak-upah kamu melalui analisis slip gaji, benchmark,
@@ -74,8 +74,8 @@ export default function KontakPage() {
               </p>
             </div>
 
-            <div className="mt-5 pt-5 border-t border-slate-100">
-              <p className="text-xs text-slate-400">
+            <div className="mt-5 pt-5 border-t border-border">
+              <p className="text-xs text-muted-foreground">
                 cekwajar.id bukan bagian dari pemerintah Indonesia. Data benchmark bersumber dari
                 Badan Pusat Statistik (BPS), World Bank, dan sumber publik lainnya.
               </p>
@@ -86,7 +86,7 @@ export default function KontakPage() {
         {/* FAQ */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Pertanyaan Umum</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Pertanyaan Umum</h2>
             <div className="space-y-4">
               {[
                 {
@@ -107,8 +107,8 @@ export default function KontakPage() {
                 },
               ].map((item, i) => (
                 <div key={i}>
-                  <p className="text-sm font-medium text-slate-800">{item.q}</p>
-                  <p className="text-sm text-slate-500 mt-1">{item.a}</p>
+                  <p className="text-sm font-medium text-foreground">{item.q}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{item.a}</p>
                 </div>
               ))}
             </div>
@@ -117,10 +117,10 @@ export default function KontakPage() {
 
         {/* Footer Links */}
         <div className="flex justify-center gap-6 mt-8">
-          <Link href="/privacy-policy" className="text-sm text-slate-500 hover:text-emerald-600">
+          <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-emerald-600">
             Kebijakan Privasi
           </Link>
-          <Link href="/terms" className="text-sm text-slate-500 hover:text-emerald-600">
+          <Link href="/terms" className="text-sm text-muted-foreground hover:text-emerald-600">
             Syarat & Ketentuan
           </Link>
         </div>

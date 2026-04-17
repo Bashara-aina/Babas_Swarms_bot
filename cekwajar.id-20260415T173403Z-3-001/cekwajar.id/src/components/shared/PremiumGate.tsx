@@ -2,18 +2,24 @@
 
 // ══════════════════════════════════════════════════════════════════════════════
 // cekwajar.id — PremiumGate
-// Blurs content and shows upgrade CTA when user tier is insufficient
+// Partial-reveal paywall: blurred masked amounts + personalized upgrade CTA
 // ══════════════════════════════════════════════════════════════════════════════
 
-import { Lock } from 'lucide-react'
+import { Lock, ArrowRight, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { SubscriptionTier } from '@/types'
+import { COPY, UPGRADE_COPY } from '@/lib/copy'
 
 interface PremiumGateProps {
   children: React.ReactNode
   userTier: SubscriptionTier
   requiredTier: 'basic' | 'pro'
+  /** Short label shown on the lock badge, e.g. "Detail IDR" */
   featureLabel: string
+  /** Benefit shown below label, e.g. "Cek berapa yang kurang dibayar" */
+  benefit: string
+  /** Optional: preview lines to render as masked (Rp ██.███) inside the blur zone */
+  maskedLines?: string[]
 }
 
 const TIER_RANK: Record<SubscriptionTier, number> = {
@@ -22,7 +28,14 @@ const TIER_RANK: Record<SubscriptionTier, number> = {
   pro: 2,
 }
 
-export function PremiumGate({ children, userTier, requiredTier, featureLabel }: PremiumGateProps) {
+export function PremiumGate({
+  children,
+  userTier,
+  requiredTier,
+  featureLabel,
+  benefit,
+  maskedLines,
+}: PremiumGateProps) {
   const hasAccess = TIER_RANK[userTier] >= TIER_RANK[requiredTier]
 
   if (hasAccess) {
@@ -30,32 +43,42 @@ export function PremiumGate({ children, userTier, requiredTier, featureLabel }: 
   }
 
   return (
-    <div className="relative">
-      {/* Blurred content */}
-      <div className="filter blur-sm pointer-events-none select-none opacity-50">
-        {children}
+    <div className="relative rounded-xl border border-amber-200 bg-amber-50/50 overflow-hidden">
+      {/* Partial blur zone — shows blurred table/rows, masked amounts */}
+      <div className="filter blur-[3px] pointer-events-none select-none opacity-60 p-4">
+        {maskedLines ? (
+          <div className="space-y-2">
+            {maskedLines.map((line, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="h-4 flex-1 rounded bg-amber-200" style={{ width: `${60 + (i * 17) % 30}%` }} />
+                <span className="font-mono text-amber-700">Rp ██.███</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          children
+        )}
       </div>
 
-      {/* Gate overlay */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 rounded-xl border bg-white p-6 text-center shadow-lg">
-          <div className="rounded-full bg-amber-100 p-3">
-            <Lock className="h-5 w-5 text-amber-600" />
+      {/* Gate overlay — centered, does NOT cover full height */}
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-center pb-4 px-4">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-amber-200 bg-white/95 p-4 text-center shadow-sm backdrop-blur-sm">
+          <div className="rounded-full bg-amber-100 p-2">
+            <Lock className="h-4 w-4 text-amber-600" />
           </div>
           <div>
-            <p className="font-semibold text-slate-800">Fitur Premium</p>
-            <p className="mt-1 text-sm text-slate-500">{featureLabel}</p>
-            <p className="mt-1 text-xs text-slate-400">
-              Upgrade ke Basic atau Pro untuk akses penuh.
-            </p>
+            <p className="text-sm font-semibold text-foreground">{featureLabel}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{benefit}</p>
           </div>
           <Button
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700"
-            onClick={() => window.location.href = '/upgrade'}
+            className="mt-1 bg-emerald-600 hover:bg-emerald-700 gap-1.5"
+            onClick={() => (window.location.href = '/upgrade')}
           >
-            Upgrade Sekarang
+            {COPY.ui.upgradeBtn}
+            <ArrowRight className="h-3 w-3" />
           </Button>
+          <p className="text-xs text-muted-foreground">{UPGRADE_COPY.cancelAnytime}</p>
         </div>
       </div>
     </div>

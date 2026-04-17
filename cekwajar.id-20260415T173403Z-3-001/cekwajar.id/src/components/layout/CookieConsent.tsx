@@ -54,9 +54,9 @@ export function CookieConsent() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white p-4 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background p-4 shadow-lg">
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted-foreground">
           Kami menggunakan cookie untuk meningkatkan pengalaman kamu.{' '}
           <Link href="/privacy-policy" className="underline hover:text-emerald-600">
             Baca Kebijakan Privasi kami

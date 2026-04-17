@@ -13,7 +13,7 @@ interface SubscriptionBadgeProps {
 const TIER_CONFIG: Record<SubscriptionTier, { label: string; className: string }> = {
   free: {
     label: 'Gratis',
-    className: 'bg-slate-100 text-slate-600',
+    className: 'bg-muted text-muted-foreground',
   },
   basic: {
     label: 'Basic',

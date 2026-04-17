@@ -72,7 +72,7 @@ function LoginForm() {
   }
 
   return (
-    <Card className="border-slate-200 shadow-sm">
+    <Card className="border-border shadow-sm">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Masuk ke cekwajar.id</CardTitle>
         <CardDescription>
@@ -85,7 +85,7 @@ function LoginForm() {
         <Button
           onClick={handleGoogleLogin}
           variant="outline"
-          className="w-full gap-2 border-slate-300 hover:bg-slate-50"
+          className="w-full gap-2 border-border hover:bg-muted"
         >
           <GoogleIcon />
           Masuk dengan Google
@@ -94,10 +94,10 @@ function LoginForm() {
         {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-slate-400">atau</span>
+            <span className="bg-white px-2 text-muted-foreground">atau</span>
           </div>
         </div>
 
@@ -137,13 +137,13 @@ function LoginForm() {
         )}
 
         {/* Privacy notice */}
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-muted-foreground">
           Dengan masuk, kamu setuju dengan{' '}
-          <Link href="/privacy" className="underline hover:text-slate-600">
+          <Link href="/privacy-policy" className="underline hover:text-emerald-600">
             Kebijakan Privasi
           </Link>{' '}
           dan{' '}
-          <Link href="/terms" className="underline hover:text-slate-600">
+          <Link href="/terms" className="underline hover:text-emerald-600">
             Syarat &amp; Ketentuan
           </Link>
           .
@@ -155,7 +155,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
@@ -171,9 +171,9 @@ export default function LoginPage() {
         </div>
 
         <Suspense fallback={
-          <Card className="border-slate-200 shadow-sm">
+          <Card className="border-border shadow-sm">
             <CardContent className="flex items-center justify-center py-12">
-              <p className="text-sm text-slate-400">Memuat...</p>
+              <p className="text-sm text-muted-foreground">Memuat...</p>
             </CardContent>
           </Card>
         }>
@@ -181,7 +181,7 @@ export default function LoginPage() {
         </Suspense>
 
         {/* Sign up link */}
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-muted-foreground">
           Belum punya akun?{' '}
           <Link href="/auth/signup" className="font-medium text-emerald-600 hover:underline">
             Daftar gratis

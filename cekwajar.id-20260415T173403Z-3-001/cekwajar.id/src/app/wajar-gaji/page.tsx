@@ -9,22 +9,19 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Search, MapPin, Briefcase, Wallet, ChevronDown,
-  CheckCircle2, AlertCircle, Loader2, TrendingUp, TrendingDown,
-  Minus, Star, Lock, Info
+  ChevronLeft,
+  CheckCircle2, AlertCircle, TrendingUp, TrendingDown,
+  Minus, Star, Lock, Info, Banknote, XCircle
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
+import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { CityCommandSelect, CityOption } from '@/components/shared/CityCommandSelect'
+import { FormProgress } from '@/components/shared/FormProgress'
 
 // --- Types --------------------------------------------------------------------
 
@@ -163,7 +160,7 @@ function ConfidenceBadge({ tier, sampleCount }: { tier: string; sampleCount: num
   }
   if (tier === 'BPS_PRIOR') {
     return (
-      <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+      <Badge variant="secondary" className="bg-muted text-muted-foreground">
         <Star className="mr-1 h-3 w-3" />
         Prior BPS
       </Badge>
@@ -196,12 +193,12 @@ function SalaryRangeBar({
 
   return (
     <div className="relative">
-      <div className="flex justify-between text-xs text-slate-500 mb-1">
+      <div className="flex justify-between text-xs text-muted-foreground mb-1">
         <span>{formatIDR(min)}</span>
-        <span className="font-medium text-slate-700">Median</span>
+        <span className="font-medium text-foreground">Median</span>
         <span>{p75 ? formatIDR(p75) : formatIDR(p50 * 1.28)}</span>
       </div>
-      <div className="h-6 bg-slate-100 rounded-full relative overflow-hidden">
+      <div className="h-6 bg-muted rounded-full relative overflow-hidden">
         {/* P50 marker */}
         <div
           className="absolute top-0 bottom-0 w-1 bg-emerald-500 z-10"
@@ -217,7 +214,7 @@ function SalaryRangeBar({
         )}
       </div>
       {userSalary && (
-        <p className="text-xs text-center mt-1 text-slate-500">
+        <p className="text-xs text-center mt-1 text-muted-foreground">
           Penanda biru = posisi gaji kamu
         </p>
       )}
@@ -261,6 +258,14 @@ export default function WajarGajiPage() {
   const [selectedCity, setSelectedCity] = useState('')
   const [selectedExperience, setSelectedExperience] = useState('3-5')
   const [userSalaryInput, setUserSalaryInput] = useState('')
+  const [cities, setCities] = useState<CityOption[]>([])
+
+  // Load cities on mount
+  useEffect(() => {
+    fetch('/api/cities')
+      .then((r) => r.json())
+      .then((d) => setCities(d.cities ?? []))
+  }, [])
 
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null)
   const [candidates, setCandidates] = useState<Candidate[]>([])
@@ -435,149 +440,147 @@ export default function WajarGajiPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // --- Render IDLE / FORM ---
-
-  if (state === 'IDLE' || state === 'SEARCHING') {
+  // --- Render SEARCHING (loading) ---
+  if (state === 'SEARCHING') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
+            <div className="h-12 w-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+            <div>
+              <p className="font-semibold">Mencari benchmark gaji...</p>
+              <p className="mt-1 text-sm text-muted-foreground">Mengecek data untuk {selectedCity}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // --- Render IDLE (form) ---
+  if (state === 'IDLE') {
+    return (
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
           <div className="mb-8 text-center">
-            <div className="mb-4 text-5xl">💰</div>
-            <h1 className="text-2xl font-bold text-slate-900">Wajar Gaji</h1>
-            <p className="mt-2 text-slate-500">
-              Cek apakah gajimu sudah wajar dengan data 12.000+ karyawan Indonesia
-            </p>
+            <div className="mb-4"><Banknote className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+            <h1 className="text-2xl font-bold text-foreground">Cek Wajar Gaji</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Benchmark gaji dengan 12.000+ data karyawan</p>
           </div>
 
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
                 {/* Job Title with Autocomplete */}
-                <div className="relative">
+                <div>
                   <Label htmlFor="jobTitle">Judul Pekerjaan</Label>
-                  <div className="relative">
+                  <div className="relative" ref={inputRef}>
                     <Input
-                      ref={inputRef}
                       id="jobTitle"
                       value={jobTitleInput}
                       onChange={(e) => handleJobTitleChange(e.target.value)}
-                      placeholder="Ketik nama posisi, contoh: Software Engineer"
+                      onFocus={() => jobTitleInput.length >= 2 && setShowAutocomplete(true)}
+                      placeholder="Contoh: Software Engineer"
                       className="pr-10"
-                      autoComplete="off"
                     />
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    {showAutocomplete && autocompleteResults.length > 0 && (
+                      <div className="absolute z-50 mt-1 w-full rounded-xl border bg-popover shadow-lg overflow-hidden">
+                        <div className="max-h-48 overflow-y-auto py-1">
+                          {autocompleteResults.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => selectAutocompleteItem(item)}
+                              className="flex w-full items-center px-3 py-2 text-sm text-left hover:bg-muted transition-colors"
+                            >
+                              <span className="truncate">{item.title}</span>
+                              {item.industry && (
+                                <span className="ml-2 text-xs text-muted-foreground truncate">{item.industry}</span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Autocomplete Dropdown */}
-                  {showAutocomplete && autocompleteResults.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                      {autocompleteResults.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => selectAutocompleteItem(item)}
-                          className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center justify-between"
-                        >
-                          <span className="text-sm text-slate-700">{item.title}</span>
-                          {item.industry && (
-                            <span className="text-xs text-slate-400">{item.industry}</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* City Select */}
+                {/* City */}
                 <div>
                   <Label htmlFor="city">Kota</Label>
-                  <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih kota" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIQUE_CITIES.map(({ city, province }) => (
-                        <SelectItem key={city} value={city}>
-                          {city}, {province}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="mt-1.5">
+                    <CityCommandSelect
+                      value={selectedCity}
+                      onChange={(city) => {
+                        setSelectedCity(city)
+                        setSearchResults(null)
+                      }}
+                      cities={cities}
+                      placeholder="Pilih kota..."
+                    />
+                  </div>
                 </div>
 
                 {/* Experience */}
                 <div>
                   <Label htmlFor="experience">Pengalaman Kerja</Label>
-                  <Select value={selectedExperience} onValueChange={setSelectedExperience}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {EXPERIENCE_BUCKETS.map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="experience"
+                    value={selectedExperience}
+                    onChange={(e) => setSelectedExperience(e.target.value)}
+                    className="flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm mt-1.5"
+                  >
+                    {EXPERIENCE_BUCKETS.map((bucket) => (
+                      <option key={bucket.value} value={bucket.value}>{bucket.label}</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* User Salary (Optional) */}
+                {/* User Salary (optional) */}
                 <div>
-                  <Label htmlFor="salary">Gaji Kamu Saat Ini (Opsional)</Label>
+                  <Label htmlFor="userSalary">Gaji Kamu (opsional)</Label>
                   <Input
-                    id="salary"
+                    id="userSalary"
                     type="text"
                     value={userSalaryInput}
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, '')
                       setUserSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
                     }}
-                    placeholder="Contoh: 10.000.000"
+                    placeholder="Contoh: 12.000.000"
+                    className="mt-1.5"
                   />
-                  <p className="mt-1 text-xs text-slate-400">
-                    Untuk melihat posisi relatifmu terhadap median
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Kosongkan jika hanya ingin lihat benchmark
                   </p>
                 </div>
 
+                {/* Submit */}
                 {errorMessage && (
                   <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
                     <AlertCircle className="h-4 w-4 flex-shrink-0" />
                     {errorMessage}
                   </div>
                 )}
-
                 <Button
                   onClick={handleSearch}
-                  disabled={state === 'SEARCHING' || !selectedCategoryId || !selectedCity}
+                  disabled={!selectedCategoryId || !selectedCity}
                   className="w-full bg-emerald-600 hover:bg-emerald-700"
                 >
-                  {state === 'SEARCHING' ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Mencari...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="mr-2 h-4 w-4" />
-                      Cek Benchmark
-                    </>
-                  )}
+                  <Search className="mr-2 h-4 w-4" />
+                  Cek Wajar Gaji
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Info Card */}
+          {/* Info */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+              <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
               <div className="text-sm text-blue-700">
-                <p className="font-medium">Bagaimana ini bekerja?</p>
-                <p className="mt-1">
-                  Masukkan judul pekerjaan dan lokasimu. Kami akan mencocokkan dengan data
-                  crowdsource dari karyawan Indonesia dan memberikan estimasi gaji yang wajar.
-                  Data yang lebih sedikit akan menggunakan prior BPS untuk akurasi lebih baik.
-                </p>
+                <p className="font-medium">Data benchmark dari siapa?</p>
+                <p className="mt-0.5 text-blue-600">200+ title pekerjaan, 50+ kota di Indonesia. Data digabung dari BPS dan laporan anonim.</p>
               </div>
             </div>
           </div>
@@ -590,14 +593,14 @@ export default function WajarGajiPage() {
 
   if (state === 'CANDIDATES') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Pilih Judul Pekerjaan yang Sesuai
               </h2>
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Apakah maksudmu salah satu dari ini?
               </p>
               <div className="space-y-2">
@@ -608,16 +611,16 @@ export default function WajarGajiPage() {
                     className={`w-full p-3 text-left rounded-lg border transition-colors ${
                       selectedCandidate === c.id
                         ? 'border-emerald-500 bg-emerald-50'
-                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
+                        : 'border-border hover:border-emerald-300 hover:bg-muted'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-700">{c.title}</span>
+                      <span className="font-medium text-foreground">{c.title}</span>
                       {selectedCandidate === c.id && (
                         <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                       )}
                     </div>
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       Kemiripan: {Math.round(c.similarity * 100)}%
                     </div>
                   </button>
@@ -659,11 +662,11 @@ export default function WajarGajiPage() {
 
   if (state === 'NO_DATA') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="text-5xl mb-4">🔍</div>
-          <h2 className="text-xl font-bold text-slate-900">Data Tidak Ditemukan</h2>
-          <p className="mt-2 text-slate-500">{errorMessage}</p>
+          <div className="mb-4"><Search className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+          <h2 className="text-xl font-bold text-foreground">Data Tidak Ditemukan</h2>
+          <p className="mt-2 text-muted-foreground">{errorMessage}</p>
           <Button
             onClick={() => {
               setState('IDLE')
@@ -683,9 +686,9 @@ export default function WajarGajiPage() {
 
   if (state === 'ERROR') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="text-5xl mb-4">❌</div>
+          <div className="mb-4"><XCircle className="h-12 w-12 text-red-500 mx-auto" /></div>
           <h2 className="text-xl font-bold text-red-900">Terjadi Kesalahan</h2>
           <p className="mt-2 text-red-600">{errorMessage}</p>
           <Button
@@ -707,8 +710,14 @@ export default function WajarGajiPage() {
   if (state === 'RESULT' && searchResults) {
     const { benchmark, matchedTitle, matchType, userSalary } = searchResults
 
+    const STEPS = [
+      { label: 'Cari' },
+      { label: 'Benchmark' },
+      { label: 'Hasil' },
+    ]
+
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
         <div className="mx-auto max-w-2xl px-4 py-8">
           {/* Back button */}
           <button
@@ -716,10 +725,14 @@ export default function WajarGajiPage() {
               setState('IDLE')
               setSearchResults(null)
             }}
-            className="flex items-center text-sm text-slate-500 hover:text-emerald-600 mb-4"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
-            ← Cari Lagi
+            <ChevronLeft className="h-4 w-4" />
+            Cek lagi
           </button>
+
+          {/* Form Progress */}
+          <FormProgress steps={STEPS} currentStep={2} className="mb-6" />
 
           {/* Result Card */}
           <Card className="mb-6">
@@ -727,7 +740,7 @@ export default function WajarGajiPage() {
               {/* Title and Match Badge */}
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">{matchedTitle}</h2>
+                  <h2 className="text-xl font-bold text-foreground">{matchedTitle}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     {matchType === 'EXACT' ? (
                       <Badge className="bg-emerald-100 text-emerald-700">
@@ -742,17 +755,17 @@ export default function WajarGajiPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-slate-500">{selectedCity}</div>
-                  <div className="text-sm text-slate-400">{selectedExperience} tahun</div>
+                  <div className="text-sm text-muted-foreground">{selectedCity}</div>
+                  <div className="text-sm text-muted-foreground">{selectedExperience} tahun</div>
                 </div>
               </div>
 
               {/* UMK Reference */}
               {benchmark.umk && (
-                <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+                <div className="mb-4 p-3 bg-muted rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">UMK {selectedCity} 2026</span>
-                    <span className="font-semibold text-slate-700">
+                    <span className="text-sm text-muted-foreground">UMK {selectedCity} 2026</span>
+                    <span className="font-semibold text-foreground">
                       {formatIDR(benchmark.umk)}
                     </span>
                   </div>
@@ -762,7 +775,7 @@ export default function WajarGajiPage() {
               {/* City-Level Data (Premium) */}
               {benchmark.cityP50 ? (
                 <div className="mb-6">
-                  <h3 className="text-sm font-medium text-slate-700 mb-3">
+                  <h3 className="text-sm font-medium text-foreground mb-3">
                     Rentang Gaji di {selectedCity}
                   </h3>
                   <SalaryRangeBar
@@ -785,14 +798,14 @@ export default function WajarGajiPage() {
               ) : (
                 /* Province-Level Data (Free) */
                 <div className="mb-6">
-                  <h3 className="text-sm font-medium text-slate-700 mb-2">
+                  <h3 className="text-sm font-medium text-foreground mb-2">
                     Median Gaji Provinsi
                   </h3>
-                  <div className="p-4 bg-slate-50 rounded-lg text-center">
+                  <div className="p-4 bg-muted rounded-lg text-center">
                     <div className="text-3xl font-bold text-emerald-600">
                       {formatIDR(benchmark.provinceP50 ?? benchmark.bpsPriorP50)}
                     </div>
-                    <div className="text-sm text-slate-500 mt-1">
+                    <div className="text-sm text-muted-foreground mt-1">
                       Median provinsi
                     </div>
                   </div>
@@ -808,12 +821,12 @@ export default function WajarGajiPage() {
                   )}
 
                   {/* Premium Gate */}
-                  <div className="mt-4 p-4 border border-dashed border-slate-300 rounded-lg text-center">
-                    <Lock className="h-5 w-5 text-slate-400 mx-auto mb-2" />
-                    <p className="text-sm text-slate-600 font-medium">
+                  <div className="mt-4 p-4 border border-dashed border-border rounded-lg text-center">
+                    <Lock className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground font-medium">
                       Upgrade ke Basic+ untuk data P25-P75 kota
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Termasuk analisis gaji personal dan prediksi bonus
                     </p>
                     <Button size="sm" className="mt-3 bg-emerald-600 hover:bg-emerald-700">
@@ -847,12 +860,12 @@ export default function WajarGajiPage() {
           ) : (
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">
+                <h3 className="font-semibold text-foreground mb-4">
                   Laporan Gaji Anonim
                 </h3>
 
                 {submitState === 'success' ? (
-                  <div className="text-center py-4">
+                  <div className="animate-fade-in-up text-center py-4">
                     <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-2" />
                     <p className="text-emerald-700 font-medium">{submitMessage}</p>
                     <Button
@@ -869,8 +882,8 @@ export default function WajarGajiPage() {
                 ) : (
                   <>
                     <div className="space-y-3">
-                      <div className="p-3 bg-slate-50 rounded-lg text-sm">
-                        <div className="text-slate-600">
+                      <div className="p-3 bg-muted rounded-lg text-sm">
+                        <div className="text-muted-foreground">
                           <strong>{jobTitleInput}</strong> di <strong>{selectedCity}</strong>
                         </div>
                       </div>
@@ -889,7 +902,7 @@ export default function WajarGajiPage() {
                         />
                       </div>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         Data dikirim anonim. Tidak ada nama/email disimpan. Hanya IP hash
                         untuk deduplikasi.
                       </p>
@@ -907,8 +920,8 @@ export default function WajarGajiPage() {
                         className="w-full bg-emerald-600 hover:bg-emerald-700"
                       >
                         {submitState === 'submitting' ? (
-                          <div>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <div className="flex items-center gap-2">
+                            <Skeleton shimmer className="h-4 w-4 rounded-full" />
                             Mengirim...
                           </div>
                         ) : (
@@ -928,11 +941,13 @@ export default function WajarGajiPage() {
           <div className="mt-6 text-center">
             <Link
               href="/"
-              className="text-sm text-slate-500 hover:text-emerald-600"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ← Kembali ke Homepage
+              <ChevronLeft className="inline h-4 w-4" /> Kembali
             </Link>
           </div>
+
+          <CrossToolSuggestion fromTool="wajar-gaji" className="mt-6" />
         </div>
       </div>
     )

@@ -25,10 +25,10 @@ export function UMKBadge({ city, umk, grossSalary }: UMKBadgeProps) {
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-            UMK {city} 2026
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            UMK/UMR {city} 2026
           </p>
-          <p className="mt-0.5 text-lg font-bold text-slate-800">
+          <p className="mt-0.5 text-lg font-bold text-foreground">
             Rp {umk.toLocaleString('id-ID')}
           </p>
         </div>

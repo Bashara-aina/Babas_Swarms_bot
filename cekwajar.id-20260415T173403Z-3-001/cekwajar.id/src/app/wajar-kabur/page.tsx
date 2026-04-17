@@ -7,11 +7,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plane, Loader2, Lock, Info, ArrowRight, ChevronDown } from 'lucide-react'
+import { Plane, Lock, Info, ArrowRight, ChevronDown, ChevronLeft, Globe, TrendingUp, TrendingDown, XCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -19,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { PPPBasketComparison } from '@/components/wajar-kabur/PPPBasketComparison'
 
 // --- Types --------------------------------------------------------------------
 
@@ -153,14 +156,12 @@ export default function WajarKaburPage() {
 
   if (pageState === 'IDLE' || pageState === 'LOADING') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
           <div className="mb-8 text-center">
-            <div className="mb-4 text-5xl">✈️</div>
-            <h1 className="text-2xl font-bold text-slate-900">Wajar Kabur</h1>
-            <p className="mt-2 text-slate-500">
-              Perbandingan gaji riil berdasarkan PPP (Purchasing Power Parity)
-            </p>
+            <div className="mb-4"><Plane className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+            <Skeleton shimmer className="mx-auto h-8 w-40 mb-2" />
+            <Skeleton shimmer className="mx-auto h-4 w-72" />
           </div>
 
           <Card>
@@ -168,97 +169,35 @@ export default function WajarKaburPage() {
               <div className="space-y-5">
                 {/* Salary Input */}
                 <div>
-                  <Label htmlFor="salary">Gaji Bulanan (IDR)</Label>
-                  <Input
-                    id="salary"
-                    type="text"
-                    value={salaryInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\D/g, '')
-                      setSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
-                    }}
-                    placeholder="Contoh: 15.000.000"
-                  />
+                  <Skeleton shimmer className="h-4 w-36 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
                 {/* Optional Offer */}
                 <div>
-                  <Label htmlFor="offer">Penawaran Gaji (mata uang asing, opsional)</Label>
-                  <Input
-                    id="offer"
-                    type="text"
-                    value={offerInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\D/g, '')
-                      setOfferInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
-                    }}
-                    placeholder="Kosongkan jika hanya ingin tahu nominal equivalent"
-                  />
-                  <p className="mt-1 text-xs text-slate-400">
-                    Masukkan jika kamu punya tawaran gaji dari negara tujuan
-                  </p>
+                  <Skeleton shimmer className="h-4 w-56 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
                 {/* Country Selector */}
                 <div>
-                  <Label>Negara Tujuan</Label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih negara" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((c) => (
-                        <SelectItem key={c.country_code} value={c.country_code}>
-                          <span className="flex items-center gap-2">
-                            <span>{c.flag_emoji}</span>
-                            <span>{c.country_name}</span>
-                            {!c.is_free_tier && <Lock className="h-3 w-3 text-slate-400" />}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Skeleton shimmer className="h-4 w-24 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
-                {errorMessage && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                    <Info className="h-4 w-4 flex-shrink-0" />
-                    {errorMessage}
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleCompare}
-                  disabled={pageState === 'LOADING' || !salaryInput || !selectedCountry}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                >
-                  {pageState === 'LOADING' ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Menghitung...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Plane className="h-4 w-4" />
-                      <span>Bandingkan</span>
-                    </div>
-                  )}
-                </Button>
+                {/* Submit Button */}
+                <Skeleton shimmer className="h-10 w-full rounded-lg" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Info */}
+          {/* Info Skeleton */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
-              <div className="text-sm text-blue-700">
-                <p className="font-medium">Bagaimana ini bekerja?</p>
-                <p className="mt-1">
-                  PPP (Purchasing Power Parity) mengukur nilai riil mata uang berdasarkan
-                  daya beli lokal. Perbandingan ini menunjukkan berapa gaji Indonesia
-                 mu worth dalam konteks biaya hidup negara tujuan.
-                </p>
+              <Skeleton shimmer className="h-5 w-5 rounded" />
+              <div className="flex-1 space-y-2">
+                <Skeleton shimmer className="h-4 w-32" />
+                <Skeleton shimmer className="h-3 w-full" />
               </div>
             </div>
           </div>
@@ -271,11 +210,11 @@ export default function WajarKaburPage() {
 
   if (pageState === 'GATED') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="text-5xl mb-4">🔒</div>
-          <h2 className="text-xl font-bold text-slate-900">Negara Ini Untuk Basic+</h2>
-          <p className="mt-2 text-slate-500">
+          <div className="mb-4"><Lock className="h-12 w-12 text-muted-foreground mx-auto" /></div>
+          <h2 className="text-xl font-bold text-foreground">Negara Ini Untuk Basic+</h2>
+          <p className="mt-2 text-muted-foreground">
             Data PPP untuk <strong>{gatedCountryName}</strong> tersedia untuk langganan
             Basic+ ke atas.
           </p>
@@ -291,8 +230,8 @@ export default function WajarKaburPage() {
             </Link>
           </div>
           <div className="mt-4">
-            <Link href="/" className="text-sm text-slate-500 hover:text-emerald-600">
-              ← Kembali ke Homepage
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="inline h-4 w-4" /> Kembali
             </Link>
           </div>
         </div>
@@ -304,9 +243,9 @@ export default function WajarKaburPage() {
 
   if (pageState === 'ERROR') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="text-5xl mb-4">❌</div>
+          <div className="mb-4"><XCircle className="h-12 w-12 text-red-500 mx-auto" /></div>
           <h2 className="text-xl font-bold text-red-900">Terjadi Kesalahan</h2>
           <p className="mt-2 text-red-600">{errorMessage}</p>
           <Button onClick={resetState} className="mt-6 bg-emerald-600 hover:bg-emerald-700">
@@ -326,88 +265,42 @@ export default function WajarKaburPage() {
       : null
 
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-8">
           <button
             onClick={resetState}
-            className="flex items-center text-sm text-slate-500 hover:text-emerald-600 mb-4"
+            className="flex items-center text-sm text-muted-foreground hover:text-emerald-600 mb-4"
           >
-            ← Bandingkan Lagi
+            <ChevronLeft className="h-4 w-4" />
+            Bandingkan lagi
           </button>
 
           <Card className="mb-6">
             <CardContent className="p-6">
               {/* Country Header */}
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">{flag}</div>
-                <div className="text-xl font-bold text-slate-800">{result.countryName}</div>
-                <div className="text-sm text-slate-500">
+                <div className="mb-2"><Globe className="h-10 w-10 text-emerald-600 mx-auto" /></div>
+                <div className="text-xl font-bold text-foreground">{result.countryName}</div>
+                <div className="text-sm text-muted-foreground">
                   1 {result.currencyCode} = {formatNumber(result.exchangeRate, 2)} IDR
                 </div>
               </div>
 
-              {/* Two Column Comparison */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                {/* Indonesia */}
-                <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xs text-slate-500 mb-1">🇮🇩 Gaji Kamu di Indonesia</div>
-                  <div className="text-lg font-bold text-slate-700">
-                    {formatIDR(result.idSalary)}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    = {formatNumber(result.userPowerIntlUSD, 0)} international $
-                  </div>
-                </div>
-
-                {/* Target Country */}
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-xs text-slate-500 mb-1">{flag} Nominal Setara</div>
-                  <div className="text-lg font-bold text-blue-700">
-                    {formatNumber(result.nominalEquivalent, 0)} {result.currencyCode}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    = {formatNumber(result.userPowerIntlUSD, 0)} international $
-                  </div>
-                </div>
-              </div>
-
-              {/* Big Ratio Banner */}
-              {result.realRatio !== null && result.offerSalary && (
-                <div
-                  className={`text-center p-4 rounded-xl mb-4 ${
-                    result.isPPPBetter
-                      ? 'bg-emerald-50 border-2 border-emerald-200'
-                      : 'bg-red-50 border-2 border-red-200'
-                  }`}
-                >
-                  {result.isPPPBetter ? (
-                    <div>
-                      <div className="text-2xl mb-1">🟢</div>
-                      <div className="text-lg font-bold text-emerald-700">
-                        Penawaran {ratioDisplay}× lebih besar secara daya beli
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="text-2xl mb-1">🔴</div>
-                      <div className="text-lg font-bold text-red-700">
-                        Penawaran hanya {ratioDisplay}× daya beli
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {!result.offerSalary && (
-                <div className="text-center p-3 bg-slate-50 rounded-lg text-sm text-slate-500 mb-4">
-                  Masukkan tawaran gaji untuk melihat perbandingan penuh
-                </div>
-              )}
-
-              {/* PPP Source */}
-              <div className="text-center text-xs text-slate-400 mb-2">
-                PPP sumber: World Bank {result.pppYear}
-              </div>
+              {/* PPP Basket Comparison */}
+              <PPPBasketComparison
+                countryName={result.countryName}
+                currencyCode={result.currencyCode}
+                exchangeRate={result.exchangeRate}
+                idSalary={result.idSalary}
+                nominalEquivalent={result.nominalEquivalent}
+                userPowerIntlUSD={result.userPowerIntlUSD}
+                offerSalary={result.offerSalary}
+                offerPowerIntlUSD={result.offerPowerIntlUSD}
+                realRatio={result.realRatio}
+                isPPPBetter={result.isPPPBetter}
+                pppYear={result.pppYear}
+                className="mb-4"
+              />
 
               {/* Disclaimer */}
               <div className="p-3 bg-amber-50 rounded-lg">
@@ -417,10 +310,12 @@ export default function WajarKaburPage() {
           </Card>
 
           <div className="text-center">
-            <Link href="/" className="text-sm text-slate-500 hover:text-emerald-600">
-              ← Kembali ke Homepage
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="inline h-4 w-4" /> Kembali
             </Link>
           </div>
+
+          <CrossToolSuggestion fromTool="wajar-kabur" className="mt-6" />
         </div>
       </div>
     )

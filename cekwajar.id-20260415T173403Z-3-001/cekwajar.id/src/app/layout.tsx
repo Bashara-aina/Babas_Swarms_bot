@@ -1,17 +1,21 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { GlobalNav } from '@/components/layout/GlobalNav'
 import { Footer } from '@/components/layout/Footer'
 import { CookieConsent } from '@/components/layout/CookieConsent'
+import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
 import { validateEnvVars } from '@/lib/config/validate'
+import { SettingsProvider } from '@/contexts/settings-context'
+import { ClientProviders } from '@/components/ClientProviders'
 
 // Validate required env vars on every server component render
 validateEnvVars()
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const jakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
 })
 
 const geistMono = Geist_Mono({
@@ -38,12 +42,24 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="id" className={`${jakartaSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
-        <GlobalNav />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CookieConsent />
+        {/* Skip to content — accessibility requirement */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-emerald-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
+        >
+          Langsung ke konten utama
+        </a>
+        <SettingsProvider>
+          <ClientProviders>
+            <GlobalNav />
+            <main id="main-content" className="flex-1">{children}</main>
+            <MobileBottomNav />
+            <Footer />
+            <CookieConsent />
+          </ClientProviders>
+        </SettingsProvider>
       </body>
     </html>
   )

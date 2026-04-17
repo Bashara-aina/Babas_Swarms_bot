@@ -44,7 +44,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
@@ -59,7 +59,7 @@ export default function SignupPage() {
           </Link>
         </div>
 
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Daftar Gratis</CardTitle>
             <CardDescription>
@@ -102,7 +102,7 @@ export default function SignupPage() {
             )}
 
             {/* Already have account */}
-            <p className="text-center text-sm text-slate-500">
+            <p className="text-center text-sm text-muted-foreground">
               Sudah punya akun?{' '}
               <Link href="/auth/login" className="font-medium text-emerald-600 hover:underline">
                 Masuk di sini
@@ -110,13 +110,13 @@ export default function SignupPage() {
             </p>
 
             {/* Terms notice */}
-            <p className="text-center text-xs text-slate-400">
+            <p className="text-center text-xs text-muted-foreground">
               Dengan mendaftar, kamu setuju dengan{' '}
-              <Link href="/privacy" className="underline hover:text-slate-600">
+              <Link href="/privacy-policy" className="underline hover:text-emerald-600">
                 Kebijakan Privasi
               </Link>{' '}
               dan{' '}
-              <Link href="/terms" className="underline hover:text-slate-600">
+              <Link href="/terms" className="underline hover:text-emerald-600">
                 Syarat &amp; Ketentuan
               </Link>
               .

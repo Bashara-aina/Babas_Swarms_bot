@@ -33,48 +33,48 @@ export function PropertyPriceBar({
   return (
     <div className="w-full">
       {/* Labels */}
-      <div className="flex justify-between text-xs text-slate-500 mb-1">
+      <div className="flex justify-between text-xs text-muted-foreground mb-1">
         <span>{formatIDR(Math.round(minPrice))}</span>
-        <span className="font-medium text-slate-700">Median</span>
+        <span className="font-medium text-foreground">Median</span>
         <span>{formatIDR(Math.round(maxPrice))}</span>
       </div>
 
       {/* Bar */}
-      <div className="h-8 bg-slate-100 rounded-full relative overflow-hidden">
+      <div className="h-8 bg-muted rounded-full relative overflow-hidden">
         {/* P25 marker */}
         <div
-          className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10"
-          style={{ left: `${p25Pos}%` }}
+          className="absolute top-0 bottom-0 w-0.5 opacity-50 z-10"
+          style={{ left: `${p25Pos}%`, backgroundColor: 'hsl(var(--muted-foreground))' }}
           title={`P25: ${formatIDR(p25)}`}
         />
         {/* P50 marker (median) */}
         <div
-          className="absolute top-0 bottom-0 w-1 bg-emerald-500 z-20"
-          style={{ left: `${p50Pos}%` }}
+          className="absolute top-0 bottom-0 w-1 z-20"
+          style={{ left: `${p50Pos}%`, backgroundColor: 'var(--tool-accent, hsl(var(--emerald-500)))' }}
           title={`Median: ${formatIDR(p50)}`}
         />
         {/* P75 marker */}
         <div
-          className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10"
-          style={{ left: `${p75Pos}%` }}
+          className="absolute top-0 bottom-0 w-0.5 opacity-50 z-10"
+          style={{ left: `${p75Pos}%`, backgroundColor: 'hsl(var(--muted-foreground))' }}
           title={`P75: ${formatIDR(p75)}`}
         />
         {/* User price marker */}
         <div
-          className="absolute top-1 bottom-1 w-2 bg-blue-500 rounded-full z-30"
-          style={{ left: `${userPos}%` }}
+          className="absolute top-1 bottom-1 w-2 rounded-full z-30"
+          style={{ left: `${userPos}%`, backgroundColor: 'hsl(var(--primary))' }}
           title={`Harga kamu: ${formatIDR(userPricePerSqm)}`}
         />
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-slate-500">
+      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--tool-accent, hsl(var(--emerald-500)))' }} />
           <span>Median (P50)</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-blue-500" />
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'hsl(var(--primary))' }} />
           <span>Harga kamu</span>
         </div>
       </div>

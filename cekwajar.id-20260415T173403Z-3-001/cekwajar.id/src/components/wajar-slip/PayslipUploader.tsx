@@ -193,7 +193,7 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
 
   if (state.phase === 'IDLE') {
     return (
-      <Card className="border-dashed border-2 border-slate-300 bg-slate-50">
+      <Card className="border-dashed border-2 border-border bg-muted">
         <CardContent className="flex flex-col items-center justify-center py-12 px-6">
           <div
             {...getRootProps()}
@@ -202,7 +202,7 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
               rounded-lg border-2 border-dashed p-8 text-center transition-colors
               ${isDragActive
                 ? 'border-emerald-400 bg-emerald-50'
-                : 'border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
+                : 'border-border hover:border-emerald-400 hover:bg-emerald-50'
               }
             `}
           >
@@ -210,26 +210,26 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
             <div className="mb-4 rounded-full bg-emerald-100 p-4">
               <Upload className="h-8 w-8 text-emerald-600" />
             </div>
-            <p className="mb-1 text-base font-semibold text-slate-700">
+            <p className="mb-1 text-base font-semibold text-foreground">
               Upload Foto atau PDF Slip Gaji
             </p>
-            <p className="mb-4 text-sm text-slate-400">
+            <p className="mb-4 text-sm text-muted-foreground">
               JPEG ? PNG ? PDF ? Maks 5MB
             </p>
             <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700">
               <Camera className="mr-2 h-4 w-4" />
               Pilih File
             </Button>
-            <div className="mt-5 flex w-full items-center gap-3 text-xs text-slate-400">
-              <div className="h-px flex-1 bg-slate-200" />
+            <div className="mt-5 flex w-full items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
               <span>atau</span>
-              <div className="h-px flex-1 bg-slate-200" />
+              <div className="h-px flex-1 bg-border" />
             </div>
           </div>
 
           <button
             onClick={onManualMode}
-            className="mt-4 text-sm text-slate-500 underline hover:text-emerald-600"
+            className="mt-4 text-sm text-muted-foreground underline hover:text-emerald-600"
           >
             Isi Manual Instead →
           </button>
@@ -242,11 +242,11 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
 
   if (state.phase === 'UPLOADING') {
     return (
-      <Card className="border-dashed border-2 border-slate-300 bg-slate-50">
+      <Card className="border-dashed border-2 border-border bg-muted">
         <CardContent className="flex flex-col items-center justify-center py-12 px-6">
           <Loader2 className="mb-3 h-8 w-8 animate-spin text-emerald-600" />
-          <p className="font-medium text-slate-700">Mengupload {state.fileName}...</p>
-          <p className="mt-1 text-sm text-slate-400">Menyimpan ke storage...</p>
+          <p className="font-medium text-foreground">Mengupload {state.fileName}...</p>
+          <p className="mt-1 text-sm text-muted-foreground">Menyimpan ke storage...</p>
         </CardContent>
       </Card>
     )
@@ -325,7 +325,7 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
               return (
                 <div key={field}>
                   <div className="mb-1 flex items-center justify-between">
-                    <Label className="text-xs font-medium text-slate-600 capitalize">
+                    <Label className="text-xs font-medium text-muted-foreground capitalize">
                       {field.replace(/([A-Z])/g, ' $1').trim()}
                     </Label>
                     {needsCheck && (
@@ -372,17 +372,17 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
 
           <button
             onClick={onManualMode}
-            className="mt-3 w-full text-center text-sm text-slate-500 underline hover:text-emerald-600"
+            className="mt-3 w-full text-center text-sm text-muted-foreground underline hover:text-emerald-600"
           >
             Isi Ulang Manual
           </button>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
             <span>
               Confidence: {Math.round(state.result.confidence * 100)}%
               {state.result.source === 'google_vision' ? ' ? Google Vision' : ' ? OCR Lokal'}
             </span>
-            <button onClick={handleReset} className="flex items-center gap-1 hover:text-slate-600">
+            <button onClick={handleReset} className="flex items-center gap-1 hover:text-foreground">
               <RefreshCw className="h-3 w-3" />
               Upload Ulang
             </button>
@@ -424,7 +424,7 @@ export function PayslipUploader({ onFieldsExtracted, onManualMode }: PayslipUplo
       <Card className="border-emerald-300 bg-emerald-50">
         <CardContent className="flex flex-col items-center py-8 px-6 text-center">
           <Loader2 className="mb-3 h-8 w-8 animate-spin text-emerald-600" />
-          <p className="font-semibold text-emerald-800">Otomatis Menghitung Hasil...</p>
+          <p className="font-semibold text-emerald-800">AI menganalisis slip gaji...</p>
           <p className="mt-1 text-sm text-emerald-600">
             Confidence tinggi ({Math.round(state.result.confidence * 100)}%) ? langsung proses.
           </p>

@@ -12,11 +12,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-slate-900 text-white hover:bg-slate-800',
+        default: 'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus-visible:ring-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:active:bg-emerald-800',
         destructive: 'bg-red-600 text-white hover:bg-red-700',
-        outline: 'border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900',
-        secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200',
-        ghost: 'hover:bg-slate-100 hover:text-slate-900',
+        outline: 'border border-border bg-background hover:bg-muted hover:text-foreground',
+        secondary: 'bg-muted text-foreground hover:bg-muted/80',
+        ghost: 'hover:bg-muted hover:text-foreground',
         link: 'text-emerald-600 underline-offset-4 hover:underline',
       },
       size: {

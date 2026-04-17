@@ -8,8 +8,15 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Menu, X, Calculator, User, LogOut, LayoutDashboard } from 'lucide-react'
+import { Menu, X, Calculator, User, LogOut, LayoutDashboard, Sun, Moon } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { TOOLS } from '@/lib/constants'
@@ -19,10 +26,22 @@ import { signOut } from '@/app/auth/actions'
 import { SubscriptionBadge } from '@/components/shared/SubscriptionBadge'
 import type { SubscriptionTier } from '@/types'
 import { useRouter } from 'next/navigation'
+import { useAppTheme } from '@/components/providers'
+import { WordmarkLogo } from '@/components/WordmarkLogo'
+
+// Tool accent colors — dot indicator per tool
+const TOOL_ACCENT: Record<string, string> = {
+  'wajar-slip': 'bg-amber-500',
+  'wajar-gaji': 'bg-blue-500',
+  'wajar-tanah': 'bg-amber-500',
+  'wajar-kabur': 'bg-indigo-500',
+  'wajar-hidup': 'bg-rose-500',
+}
 
 export function GlobalNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { resolvedTheme, toggleTheme } = useAppTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<{
     id: string
@@ -30,7 +49,6 @@ export function GlobalNav() {
     user_metadata?: { full_name?: string; avatar_url?: string }
   } | null>(null)
   const [tier, setTier] = useState<SubscriptionTier>('free')
-  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -79,18 +97,14 @@ export function GlobalNav() {
   }
 
   async function handleSignOut() {
-    setMenuOpen(false)
     await signOut()
   }
 
   return (
-    <header className="stick top-0 z-50 w-full border-b bg-white shadow-sm">
+    <header className="stick top-0 z-50 w-full border-b shadow-sm" style={{ backgroundColor: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
       <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 lg:h-16 lg:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Calculator className="h-6 w-6 text-emerald-600" />
-          <span className="text-lg font-bold text-emerald-700">cekwajar.id</span>
-        </Link>
+        <WordmarkLogo size="md" />
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-1 md:flex">
@@ -101,62 +115,76 @@ export function GlobalNav() {
               className={cn(
                 'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                 pathname === tool.href
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                  : 'hover:bg-[var(--nav-hover-bg)]'
               )}
+              style={{ color: pathname === tool.href ? undefined : 'var(--nav-text-muted)' }}
             >
-              {tool.emoji} {tool.name}
+              <span
+                className={cn('mr-1.5 inline-block h-1.5 w-1.5 rounded-full', TOOL_ACCENT[tool.id] ?? 'bg-emerald-500')}
+                aria-hidden="true"
+              />
+              <tool.Icon className="mr-1 h-4 w-4 inline-block" />
+              {tool.name}
             </Link>
           ))}
         </div>
 
-        {/* Desktop auth section */}
+        {/* Desktop auth + theme section */}
         <div className="hidden items-center gap-2 md:flex">
-          {user ? (
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-2 rounded-full p-1 hover:bg-slate-100"
-              >
-                <Avatar className="h-7 w-7">
-                  <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
-                    {getUserInitials(user.email)}
-                  </AvatarFallback>
-                </Avatar>
-                <SubscriptionBadge tier={tier} />
-              </button>
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="text-[var(--nav-text-muted)] hover:bg-[var(--nav-hover-bg)]"
+          >
+            {resolvedTheme === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
 
-              {/* Dropdown menu */}
-              {menuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border bg-white py-1 shadow-lg">
-                    <div className="border-b px-3 py-2">
-                      <p className="text-sm font-medium truncate">{user.user_metadata?.full_name ?? user.email}</p>
-                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                    </div>
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Keluar
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  aria-label="Menu pengguna"
+                  className="flex items-center gap-2 rounded-full p-1 hover:bg-[var(--nav-hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                >
+                  <Avatar className="h-7 w-7">
+                    <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                      {getUserInitials(user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <SubscriptionBadge tier={tier} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+                <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--card-foreground)' }}>{user.user_metadata?.full_name ?? user.email}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }}>{user.email}</p>
+                </div>
+                <DropdownMenuSeparator style={{ backgroundColor: 'var(--border)' }} />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer" style={{ color: 'var(--card-foreground)' }}>
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator style={{ backgroundColor: 'var(--border)' }} />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-red-600 cursor-pointer focus:text-red-600"
+                  style={{ color: 'var(--destructive)' }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Keluar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link href="/auth/login">
@@ -176,15 +204,29 @@ export function GlobalNav() {
         {/* Mobile hamburger */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" aria-label="Buka menu">
+            <Button variant="ghost" size="icon" aria-label="Buka menu navigasi">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-72">
+          <SheetContent side="right" className="w-72" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
             <div className="flex flex-col gap-4 pt-6">
-              <div className="flex items-center gap-2 border-b pb-4">
-                <Calculator className="h-5 w-5 text-emerald-600" />
-                <span className="font-bold text-emerald-700">cekwajar.id</span>
+              <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex items-center gap-2">
+                  <WordmarkLogo size="sm" />
+                </div>
+                {/* Theme toggle in mobile */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {resolvedTheme === 'dark' ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
               </div>
 
               {TOOLS.map((tool) => (
@@ -195,16 +237,17 @@ export function GlobalNav() {
                   className={cn(
                     'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium transition-colors',
                     pathname === tool.href
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                      : ''
                   )}
+                  style={{ color: pathname === tool.href ? undefined : 'var(--muted-foreground)' }}
                 >
-                  <span>{tool.emoji}</span>
+                  <tool.Icon className="h-5 w-5" />
                   {tool.name}
                 </Link>
               ))}
 
-              <div className="mt-4 flex flex-col gap-2 border-t pt-4">
+              <div className="mt-4 flex flex-col gap-2 border-t pt-4" style={{ borderColor: 'var(--border)' }}>
                 {user ? (
                   <>
                     <div className="flex items-center gap-2 px-3">
@@ -214,7 +257,7 @@ export function GlobalNav() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-medium truncate" style={{ color: 'var(--card-foreground)' }}>
                           {user.user_metadata?.full_name ?? user.email}
                         </p>
                         <SubscriptionBadge tier={tier} />
@@ -229,7 +272,8 @@ export function GlobalNav() {
                     <Button
                       variant="ghost"
                       onClick={handleSignOut}
-                      className="w-full text-red-600 hover:bg-red-50"
+                      className="w-full"
+                      style={{ color: 'var(--destructive)' }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Keluar

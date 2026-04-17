@@ -7,11 +7,15 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Home, Loader2, Info, ArrowRight, ChevronDown } from 'lucide-react'
+import { Home, Info, ArrowRight, ChevronDown, ChevronLeft, Building2, MapPin, XCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
+import { PremiumGate } from '@/components/shared/PremiumGate'
+import { COLComparisonChart } from '@/components/wajar-hidup/COLComparisonChart'
 import {
   Select,
   SelectContent,
@@ -65,10 +69,10 @@ function formatIDR(amount: number): string {
 
 // --- Lifestyle Options --------------------------------------------------------
 
-const LIFESTYLE_OPTIONS: { value: LifestyleTier; label: string; emoji: string; desc: string }[] = [
-  { value: 'HEMAT', label: 'Hemat', emoji: '🪙', desc: 'Prioritas tabungan, masak sendiri, transportasi umum' },
-  { value: 'STANDAR', label: 'Standar', emoji: '🏠', desc: 'Sesekali makan di luar, kendaraan pribadi' },
-  { value: 'NYAMAN', label: 'Nyaman', emoji: '✨', desc: 'Restoran, hiburan rutin, tabungan lebih banyak' },
+const LIFESTYLE_OPTIONS: { value: LifestyleTier; label: string; desc: string }[] = [
+  { value: 'HEMAT', label: 'Hemat', desc: 'Prioritas tabungan, masak sendiri, transportasi umum' },
+  { value: 'STANDAR', label: 'Standar', desc: 'Sesekali makan di luar, kendaraan pribadi' },
+  { value: 'NYAMAN', label: 'Nyaman', desc: 'Restoran, hiburan rutin, tabungan lebih banyak' },
 ]
 
 // --- Main Component ----------------------------------------------------------
@@ -82,6 +86,7 @@ export default function WajarHidupPage() {
   const [lifestyleTier, setLifestyleTier] = useState<LifestyleTier>('STANDAR')
   const [result, setResult] = useState<CompareResponse['data'] | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [userTier] = useState<'free' | 'basic' | 'pro'>('free')
 
   // Load cities on mount
   useEffect(() => {
@@ -157,14 +162,12 @@ export default function WajarHidupPage() {
 
   if (pageState === 'IDLE' || pageState === 'LOADING') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-hidup" className="min-h-screen bg-teal-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
           <div className="mb-8 text-center">
-            <div className="mb-4 text-5xl">🏙️</div>
-            <h1 className="text-2xl font-bold text-slate-900">Wajar Hidup</h1>
-            <p className="mt-2 text-slate-500">
-              Mau pindah kota? Hitung gaji setara berdasarkan biaya hidup
-            </p>
+            <div className="mb-4"><Building2 className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+            <Skeleton shimmer className="mx-auto h-8 w-40 mb-2" />
+            <Skeleton shimmer className="mx-auto h-4 w-64" />
           </div>
 
           <Card>
@@ -173,112 +176,44 @@ export default function WajarHidupPage() {
                 {/* Two City Dropdowns */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Dari Kota</Label>
-                    <Select value={fromCity} onValueChange={setFromCity}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih kota" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((c) => (
-                          <SelectItem key={c.city_code} value={c.city_code}>
-                            {c.city_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Skeleton shimmer className="h-4 w-20 mb-2" />
+                    <Skeleton shimmer className="h-10 w-full" />
                   </div>
                   <div>
-                    <Label>Ke Kota</Label>
-                    <Select value={toCity} onValueChange={setToCity}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih kota" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((c) => (
-                          <SelectItem key={c.city_code} value={c.city_code}>
-                            {c.city_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Skeleton shimmer className="h-4 w-16 mb-2" />
+                    <Skeleton shimmer className="h-10 w-full" />
                   </div>
                 </div>
 
                 {/* Salary Input */}
                 <div>
-                  <Label htmlFor="salary">Gaji Sekarang (IDR)</Label>
-                  <Input
-                    id="salary"
-                    type="text"
-                    value={salaryInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\D/g, '')
-                      setSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
-                    }}
-                    placeholder="Contoh: 12.000.000"
-                  />
+                  <Skeleton shimmer className="h-4 w-32 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
                 {/* Lifestyle Tier */}
                 <div>
-                  <Label>Gaya Hidup</Label>
+                  <Skeleton shimmer className="h-4 w-24 mb-2" />
                   <div className="grid grid-cols-3 gap-2 mt-2">
-                    {LIFESTYLE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setLifestyleTier(opt.value)}
-                        className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-colors ${
-                          lifestyleTier === opt.value
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                            : 'border-slate-200 hover:border-emerald-300 text-slate-600'
-                        }`}
-                      >
-                        <span className="text-xl">{opt.emoji}</span>
-                        <span className="text-xs font-medium">{opt.label}</span>
-                      </button>
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} shimmer className="h-16 rounded-lg" />
                     ))}
                   </div>
                 </div>
 
-                {errorMessage && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                    <Info className="h-4 w-4 flex-shrink-0" />
-                    {errorMessage}
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleCompare}
-                  disabled={pageState === 'LOADING' || !fromCity || !toCity || !salaryInput}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                >
-                  {pageState === 'LOADING' ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Menghitung...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Home className="h-4 w-4" />
-                      <span>Hitung</span>
-                    </div>
-                  )}
-                </Button>
+                {/* Submit Button */}
+                <Skeleton shimmer className="h-10 w-full rounded-lg" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Info */}
+          {/* Info Skeleton */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-500 mt-0.5" />
-              <div className="text-sm text-blue-700">
-                <p className="font-medium">Bagaimana ini bekerja?</p>
-                <p className="mt-1">
-                  COL Index (Cost of Living) mengukur perbedaan biaya hidup antar kota
-                  relatif terhadap Jakarta (baseline = 100). Gaya hidup menentukan
-                  sensitivitas adjustment — Hemat kurang sensitif, Nyaman lebih sensitif.
-                </p>
+              <Skeleton shimmer className="h-5 w-5 rounded" />
+              <div className="flex-1 space-y-2">
+                <Skeleton shimmer className="h-4 w-32" />
+                <Skeleton shimmer className="h-3 w-full" />
               </div>
             </div>
           </div>
@@ -291,9 +226,9 @@ export default function WajarHidupPage() {
 
   if (pageState === 'ERROR') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-hidup" className="min-h-screen bg-teal-50">
         <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <div className="text-5xl mb-4">❌</div>
+          <div className="mb-4"><XCircle className="h-12 w-12 text-red-500 mx-auto" /></div>
           <h2 className="text-xl font-bold text-red-900">Terjadi Kesalahan</h2>
           <p className="mt-2 text-red-600">{errorMessage}</p>
           <Button onClick={resetState} className="mt-6 bg-emerald-600 hover:bg-emerald-700">
@@ -309,25 +244,42 @@ export default function WajarHidupPage() {
   if (pageState === 'RESULT' && result) {
     const absPct = Math.abs(result.percentChange)
     const verdictIcon =
-      result.verdict === 'LEBIH_MURAH' ? '🟢' :
-      result.verdict === 'LEBIH_MAHAL' ? '🔴' : '🔵'
+      result.verdict === 'LEBIH_MURAH' ? 'LEBIH_MURAH' :
+      result.verdict === 'LEBIH_MAHAL' ? 'LEBIH_MAHAL' : 'SAMA'
 
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div data-tool="wajar-hidup" className="min-h-screen bg-teal-50">
         <div className="mx-auto max-w-2xl px-4 py-8">
           <button
             onClick={resetState}
-            className="flex items-center text-sm text-slate-500 hover:text-emerald-600 mb-4"
+            className="flex items-center text-sm text-muted-foreground hover:text-emerald-600 mb-4"
           >
-            ← Hitung Lagi
+            <ChevronLeft className="h-4 w-4" />
+            Hitung lagi
           </button>
 
           {/* Verdict Card */}
           <Card className="mb-6">
             <CardContent className="p-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-2">{verdictIcon}</div>
-                <div className="text-xl font-bold text-slate-800">
+                <div className="mb-2 mx-auto w-12 h-12 rounded-full flex items-center justify-center">
+                  {result.verdict === 'LEBIH_MURAH' && (
+                    <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                      <TrendingDown className="h-5 w-5 text-emerald-600" />
+                    </div>
+                  )}
+                  {result.verdict === 'LEBIH_MAHAL' && (
+                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                      <TrendingUp className="h-5 w-5 text-red-600" />
+                    </div>
+                  )}
+                  {result.verdict === 'SAMA' && (
+                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Minus className="h-5 w-5 text-blue-600" />
+                    </div>
+                  )}
+                </div>
+                <div className="text-xl font-bold text-foreground">
                   {result.verdict === 'LEBIH_MURAH'
                     ? `Lebih Murah di ${result.toCity}!`
                     : result.verdict === 'LEBIH_MAHAL'
@@ -335,7 +287,7 @@ export default function WajarHidupPage() {
                     : 'Biaya Hidup Setara'}
                 </div>
                 {result.verdict !== 'SAMA' && (
-                  <div className="text-lg font-medium text-slate-600 mt-1">
+                  <div className="text-lg font-medium text-muted-foreground mt-1">
                     {result.verdict === 'LEBIH_MURAH'
                       ? `Dengan gaji ${formatIDR(result.requiredSalary)}, kamu hemat ${formatIDR(Math.abs(result.salaryDifference))}/bulan`
                       : `Kamu butuh ${absPct}% lebih banyak untuk gaya hidup yang sama di ${result.toCity}`}
@@ -345,31 +297,31 @@ export default function WajarHidupPage() {
 
               {/* COL Index Display */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-4 bg-slate-50 rounded-lg">
-                  <div className="text-xs text-slate-500">📍 {result.fromCity}</div>
-                  <div className="text-2xl font-bold text-slate-700">
+                <div className="text-center p-4 bg-muted rounded-lg">
+                  <div className="text-xs text-muted-foreground">📍 {result.fromCity}</div>
+                  <div className="text-2xl font-bold text-foreground">
                     {result.fromCOLIndex.toFixed(1)}
                   </div>
-                  <div className="text-xs text-slate-400">COL Index</div>
+                  <div className="text-xs text-muted-foreground">COL Index</div>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-xs text-slate-500">📍 {result.toCity}</div>
+                  <div className="text-xs text-muted-foreground">📍 {result.toCity}</div>
                   <div className="text-2xl font-bold text-blue-700">
                     {result.toCOLIndex.toFixed(1)}
                   </div>
-                  <div className="text-xs text-slate-400">COL Index</div>
+                  <div className="text-xs text-muted-foreground">COL Index</div>
                 </div>
               </div>
 
               {/* Required Salary */}
               <div className="text-center p-4 bg-emerald-50 rounded-xl mb-4">
-                <div className="text-xs text-slate-500">Gaji Setara di {result.toCity}</div>
+                <div className="text-xs text-muted-foreground">Gaji Setara di {result.toCity}</div>
                 <div className="text-2xl font-bold text-emerald-700">
                   {formatIDR(result.requiredSalary)}
-                  <span className="text-sm font-normal text-slate-400">/bulan</span>
+                  <span className="text-sm font-normal text-muted-foreground">/bulan</span>
                 </div>
                 {result.salaryDifference !== 0 && (
-                  <div className="text-sm text-slate-500 mt-1">
+                  <div className="text-sm text-muted-foreground mt-1">
                     {result.salaryDifference < 0
                       ? `Hemat ${formatIDR(Math.abs(result.salaryDifference))}/bulan`
                       : `Butuh lebih ${formatIDR(result.salaryDifference)}/bulan`}
@@ -378,32 +330,52 @@ export default function WajarHidupPage() {
               </div>
 
               {/* Category Breakdown — Basic+ Gate */}
-              <div className="mt-4">
-                <div className="p-4 border border-dashed border-slate-300 rounded-lg text-center">
-                  <div className="text-sm font-medium text-slate-600">
+              {result.categoryBreakdown && result.categoryBreakdown.length > 0 ? (
+                <PremiumGate
+                  userTier={userTier}
+                  requiredTier="basic"
+                  featureLabel="Detail breakdown per kategori"
+                  benefit="Bandingkan biaya hidup per kategori"
+                >
+                  <COLComparisonChart
+                    categories={result.categoryBreakdown}
+                    fromCity={result.fromCity}
+                    toCity={result.toCity}
+                    className="mt-4"
+                  />
+                </PremiumGate>
+              ) : (
+                <div className="mt-4 p-4 border border-dashed border-border rounded-lg text-center">
+                  <div className="text-sm font-medium text-muted-foreground">
                     Detail breakdown per kategori (Basic+)
                   </div>
-                  <div className="text-xs text-slate-400 mt-1">
+                  <div className="text-xs text-muted-foreground mt-1">
                     Upgrade untuk lihat distribusi biaya di setiap kategori
                   </div>
-                  <Button size="sm" className="mt-3 bg-emerald-600 hover:bg-emerald-700">
+                  <Button
+                    size="sm"
+                    className="mt-3 bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => { window.location.href = '/upgrade' }}
+                  >
                     Upgrade Sekarang
                   </Button>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
           {/* COL Baseline Note */}
-          <div className="text-center text-xs text-slate-400 mb-4">
+          <div className="text-center text-xs text-muted-foreground mb-4">
             COL Index: Jakarta = 100 sebagai baseline
           </div>
 
           <div className="text-center">
-            <Link href="/" className="text-sm text-slate-500 hover:text-emerald-600">
-              ← Kembali ke Homepage
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="inline h-4 w-4" /> Kembali
             </Link>
           </div>
+
+          <CrossToolSuggestion fromTool="wajar-hidup" className="mt-6" />
         </div>
       </div>
     )

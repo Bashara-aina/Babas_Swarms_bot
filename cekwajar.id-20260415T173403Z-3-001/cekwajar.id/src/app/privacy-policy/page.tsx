@@ -12,19 +12,19 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Kebijakan Privasi</h1>
-          <p className="text-sm text-slate-500">Terakhir diperbarui: April 2026</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Kebijakan Privasi</h1>
+          <p className="text-sm text-muted-foreground">Terakhir diperbarui: April 2026</p>
         </div>
 
-        <div className="prose prose-slate max-w-none space-y-8">
+        <div className="prose max-w-none space-y-8">
 
           {/* Section 1 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">1. Data Apa yang Kami Kumpulkan</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">1. Data Apa yang Kami Kumpulkan</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Kami mengumpulkan data berikut untuk menyediakan layanan cekwajar.id:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Data slip gaji</strong> — Foto atau teks slip gaji yang kamu upload untuk dianalisis. Slip gaji diproses dan tidak disimpan lebih dari 30 hari.</li>
@@ -37,8 +37,8 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 2 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">2. Bagaimana Kami Menggunakan Data Kamu</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">2. Bagaimana Kami Menggunakan Data Kamu</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <ul className="list-disc pl-5 space-y-1">
                 <li>Menyediakan layanan audit slip gaji dan analisis benchmark.</li>
                 <li>Mengaktifkan dan mengelola langganan premium kamu.</li>
@@ -53,21 +53,21 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 3 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">3. Retensi dan Penghapusan Data</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">3. Retensi dan Penghapusan Data</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Kami menyimpan data dengan durasi berikut:</p>
               <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-2 font-semibold text-slate-700">Jenis Data</th>
-                    <th className="text-left py-2 font-semibold text-slate-700">Durasi Penyimpanan</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 font-semibold text-foreground">Jenis Data</th>
+                    <th className="text-left py-2 font-semibold text-foreground">Durasi Penyimpanan</th>
                   </tr>
                 </thead>
-                <tbody className="text-slate-600">
-                  <tr className="border-b border-slate-100"><td className="py-2">Foto slip gaji</td><td className="py-2">30 hari, otomatis dihapus</td></tr>
-                  <tr className="border-b border-slate-100"><td className="py-2">Data audit slip</td><td className="py-2">12 bulan</td></tr>
-                  <tr className="border-b border-slate-100"><td className="py-2">Submission gaji anonim</td><td className="py-2">24 bulan</td></tr>
-                  <tr className="border-b border-slate-100"><td className="py-2">Transaksi pembayaran</td><td className="py-2">3 tahun (kewajiban pajak)</td></tr>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b border-border"><td className="py-2">Foto slip gaji</td><td className="py-2">30 hari, otomatis dihapus</td></tr>
+                  <tr className="border-b border-border"><td className="py-2">Data audit slip</td><td className="py-2">12 bulan</td></tr>
+                  <tr className="border-b border-border"><td className="py-2">Submission gaji anonim</td><td className="py-2">24 bulan</td></tr>
+                  <tr className="border-b border-border"><td className="py-2">Transaksi pembayaran</td><td className="py-2">3 tahun (kewajiban pajak)</td></tr>
                   <tr><td className="py-2">Akun pengguna</td><td className="py-2">Sampai penghapusan diminta</td></tr>
                 </tbody>
               </table>
@@ -77,8 +77,8 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 4 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">4. Hak Kamu (UU PDP No. 27/2022)</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">4. Hak Kamu (UU PDP No. 27/2022)</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Berdasarkan Undang-Undang Perlindungan Data Pribadi (UU PDP) No. 27 Tahun 2022, kamu berhak:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Mengakses</strong> — Meminta salinan data pribadi yang kami miliki.</li>
@@ -93,8 +93,8 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 5 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">5. Keamanan Data</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">5. Keamanan Data</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Kami menggunakan langkah-langkah keamanan berikut:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Enkripsi TLS untuk semua komunikasi data.</li>
@@ -108,8 +108,8 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 6 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">6. Cookie</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">6. Cookie</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>cekwajar.id menggunakan cookie untuk:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Autentikasi</strong> — Mempertahankan sesi login kamu.</li>
@@ -121,21 +121,21 @@ export default function PrivacyPolicyPage() {
 
           {/* Section 7 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">7. Perubahan Kebijakan</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">7. Perubahan Kebijakan</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Kami dapat memperbarui kebijakan ini sewaktu-waktu. Perubahan signifikan akan diumumkan melalui email atau pemberitahuan di situs. Penggunaan berkelanjutan setelah perubahan berarti kamu menyetujui kebijakan yang diperbarui.</p>
             </div>
           </section>
 
           {/* Section 8 */}
           <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">8. Kontak</h2>
-            <div className="space-y-3 text-sm text-slate-600">
+            <h2 className="text-xl font-semibold text-foreground mb-3">8. Kontak</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>Untuk pertanyaan tentang kebijakan privasi ini:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Email: <a href="mailto:privacy@cekwajar.id" className="text-emerald-600 hover:underline">privacy@cekwajar.id</a></li>
               </ul>
-              <p className="mt-3 p-3 bg-slate-100 rounded-lg text-xs">
+              <p className="mt-3 p-3 bg-muted rounded-lg text-xs">
                 <strong>Pengendali Data:</strong> cekwajar.id. Data disimpan di infrastruktur Supabase (PT Supabase Indonesia).
               </p>
             </div>

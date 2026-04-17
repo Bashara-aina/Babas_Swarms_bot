@@ -38,7 +38,8 @@ export interface Tool {
   id: string
   name: string
   href: string
-  emoji: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Icon: React.ComponentType<any>
   description: string
 }
 
