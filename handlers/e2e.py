@@ -469,11 +469,12 @@ async def cmd_dbhealth(msg: Message) -> None:
             icon = "\u274c"
             status_str = health.get("error") or f"HTTP {health.get('status_code')}"
 
+        _svc_icon = "\u2705" if svc_set else "\u26a0\ufe0f"
         await msg.answer(
             f"{icon} <b>Supabase Health</b>\n"
             f"URL: <code>{html_mod.escape(url_str)}</code>\n"
             f"Status: <b>{html_mod.escape(str(status_str))}</b>\n"
-            f"Service Role Key: {'\u2705 set' if svc_set else '\u26a0\ufe0f not set (RLS bypass disabled)'}",
+            f"Service Role Key: {_svc_icon} {'set' if svc_set else 'not set (RLS bypass disabled)'}",
             parse_mode="HTML",
         )
     except Exception as e:

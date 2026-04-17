@@ -409,7 +409,7 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
             "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
             '            detail="Invalid or expired token",\\n'
             "        )\\n"
-            "    user_id = payload.get(\\"sub\\")\\n"
+            "    user_id = payload.get(\"sub\")\\n"
             "    if user_id is None:\\n"
             "        raise HTTPException(\\n"
             "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
@@ -433,8 +433,8 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
             "from app.models.user import User\\n"
             "from app.schemas.auth import Token, UserCreate, UserResponse, LoginRequest\\n"
             "from app.auth import create_access_token, get_password_hash, verify_password\\n\\n\\n"
-            "router = APIRouter(prefix=\\"/auth\\", tags=\\".auth\\"])\\n\\n\\n"
-            "@router.post(\\"/register\\", response_model=UserResponse)\\n"
+            "router = APIRouter(prefix=\"/auth\", tags=\".auth\"])\n\n\n"
+            "@router.post(\"/register\", response_model=UserResponse)\n"
             "async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):\\n"
             "    result = await db.execute(select(User).where(User.email == user_in.email))\\n"
             "    existing = result.scalar_one_or_none()\\n"
@@ -448,7 +448,7 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
             "    await db.commit()\\n"
             "    await db.refresh(user)\\n"
             "    return user\\n\\n\\n"
-            "@router.post(\\"/login\\", response_model=Token)\\n"
+            "@router.post(\"/login\", response_model=Token)\n"
             "async def login(login_in: LoginRequest, db: AsyncSession = Depends(get_db)):\\n"
             "    result = await db.execute(select(User).where(User.email == login_in.email))\\n"
             "    user = result.scalar_one_or_none()\\n"
@@ -457,8 +457,8 @@ async def scaffold_fastapi(project_name: str, features: list[str] | None = None)
             "            status_code=status.HTTP_401_UNAUTHORIZED,\\n"
             '            detail="Incorrect email or password",\\n'
             "        )\\n"
-            "    access_token = create_access_token(data={\\"sub\\": str(user.id)})\\n"
-            "    return Token(access_token=access_token, token_type=\\"bearer\\")\\n"
+            "    access_token = create_access_token(data={\"sub\": str(user.id)})\n"
+            "    return Token(access_token=access_token, token_type=\"bearer\")\n"
         )
 
     file_count = len(list(project_path.rglob("*")))
