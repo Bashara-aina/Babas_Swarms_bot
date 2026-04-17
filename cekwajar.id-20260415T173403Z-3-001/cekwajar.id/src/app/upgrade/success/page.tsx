@@ -12,6 +12,8 @@ import { CheckCircle2, Sparkles, ArrowRight, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { ConfettiEffect } from '@/components/ConfettiEffect'
+import { UPGRADE_COPY } from '@/lib/copy'
 
 const PLAN_LABELS: Record<string, string> = {
   basic: 'Basic',
@@ -39,33 +41,13 @@ function SuccessContent() {
   const isPending = searchParams.get('payment') === 'pending'
   const tier = plan as 'basic' | 'pro'
   const accesses = NEW_ACCESS[tier] ?? NEW_ACCESS.basic
+  const [showConfetti, setShowConfetti] = useState(false)
 
   useEffect(() => {
-    // Confetti burst — only if user has no reduced-motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: no-preference)')
-    if (!mediaQuery.matches) return
-
-    const loadConfetti = async () => {
-      try {
-        const confetti = (await import('canvas-confetti')).default
-        const count = 200
-        const defaults = { origin: { y: 0.7 }, colors: ['#10b981', '#059669', '#34d399', '#6ee7b7'] }
-
-        const fire = (particleRatio: number, opts: confetti.Options) =>
-          confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) })
-
-        fire(0.25, { spread: 26, startVelocity: 55 })
-        fire(0.2, { spread: 60 })
-        fire(0.35, { spread: 100, decay: 0.91 })
-        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92 })
-        fire(0.1, { spread: 120, startVelocity: 45 })
-      } catch {
-        // canvas-confetti not available — silent fallback
-      }
-    }
-
-    loadConfetti()
-  }, [])
+    if (isPending) return
+    const t = setTimeout(() => setShowConfetti(true), 300)
+    return () => clearTimeout(t)
+  }, [isPending])
 
   if (isPending) {
     return (
@@ -92,6 +74,7 @@ function SuccessContent() {
 
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center px-4 py-12">
+      <ConfettiEffect fire={showConfetti} />
       <div className="max-w-md w-full text-center space-y-6">
         {/* Success icon */}
         <div className="relative mx-auto w-fit">
@@ -111,7 +94,7 @@ function SuccessContent() {
             Kamu sekarang di paket {PLAN_LABELS[plan] ?? plan}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Acceso terbuka. Semua fitur {PLAN_LABELS[plan] ?? plan} aktif sekarang.
+            {plan === 'pro' ? 'Rp 79K' : 'Rp 29K'}/bulan · {UPGRADE_COPY.cancelAnytime}
           </p>
         </div>
 
@@ -161,7 +144,7 @@ export default function SuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-muted flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Memuat...</div>
+        <div className="animate-pulse text-muted-foreground">Mengambil data...</div>
       </div>
     }>
       <SuccessContent />

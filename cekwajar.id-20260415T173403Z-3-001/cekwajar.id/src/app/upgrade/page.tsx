@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { UPGRADE_COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
 
@@ -188,11 +189,11 @@ export default function UpgradePage() {
             Tingkatkan paket kamu
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-3">
-            Paket Berlangganan
+            Cari tahu persis<br />
+            <span className="text-emerald-600">berapa yang kurang dibayar perusahaanmu</span>
           </h1>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Dapatkan akses ke fitur lengkap untuk audit slip gaji, benchmark,
-            dan analisis properti.
+            {UPGRADE_COPY.valueFrame} — upgrade untuk akses angka lengkap.
           </p>
         </div>
 
@@ -244,6 +245,7 @@ export default function UpgradePage() {
               <div className="mt-4">
                 <span className="text-3xl font-bold text-foreground">Rp 0</span>
                 <span className="text-muted-foreground text-sm ml-1">selamanya</span>
+                <p className="text-xs text-muted-foreground mt-1">Gratis tanpa batas waktu</p>
               </div>
             </CardHeader>
             <CardContent className="pb-4">
@@ -309,12 +311,13 @@ export default function UpgradePage() {
                     <span className="text-muted-foreground text-sm ml-1">
                       /bulan
                     </span>
-                    {billingPeriod === 'annual' && (
-                      <div className="text-xs text-emerald-600 mt-1 font-medium">
-                        {formatIDR(tier.annualPrice)} / tahun
-                      </div>
-                    )}
                   </div>
+                  <p className="text-xs text-emerald-600 font-medium mt-1">{UPGRADE_COPY.valueFrame}</p>
+                  {billingPeriod === 'annual' && (
+                    <div className="text-xs text-emerald-600 mt-1 font-medium">
+                      {formatIDR(tier.annualPrice)} / tahun
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="pb-4">
                   <ul className="space-y-2">
@@ -358,7 +361,7 @@ export default function UpgradePage() {
 
         {/* Trust Footer */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Pembayaran aman melalui Midtrans. Batalkan kapan saja.
+          Pembayaran aman melalui Midtrans. {UPGRADE_COPY.cancelAnytime}.
         </p>
 
         {/* Login prompt for unauthenticated users */}
