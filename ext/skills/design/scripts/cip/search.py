@@ -11,7 +11,7 @@ from pathlib import Path
 
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent))
-from core import search, search_all, get_cip_brief, CSV_CONFIG
+from cip_core import search, search_all, get_cip_brief, CSV_CONFIG
 
 
 def format_results(results, domain):

@@ -17,7 +17,7 @@ from datetime import datetime
 
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent))
-from core import search, get_cip_brief
+from cip_core import search, get_cip_brief
 
 # Deliverable descriptions for presentation
 DELIVERABLE_INFO = {

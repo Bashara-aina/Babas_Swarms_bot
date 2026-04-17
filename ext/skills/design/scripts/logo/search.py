@@ -9,7 +9,7 @@ Domains: style, color, industry
 """
 
 import argparse
-from core import CSV_CONFIG, MAX_RESULTS, search, search_all
+from logo_core import CSV_CONFIG, MAX_RESULTS, search, search_all
 
 
 def format_output(result):

@@ -9,7 +9,7 @@ Corporate Identity Program design with 50+ deliverables, 20 styles, 20 industrie
 | `scripts/cip/search.py` | Search deliverables, styles, industries; generate CIP briefs |
 | `scripts/cip/generate.py` | Generate CIP mockups with Gemini (Flash/Pro) |
 | `scripts/cip/render-html.py` | Render HTML presentation from CIP mockups |
-| `scripts/cip/core.py` | BM25 search engine for CIP data |
+| `scripts/cip/cip_core.py` | BM25 search engine for CIP data |
 
 ## Commands
 

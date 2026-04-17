@@ -282,11 +282,11 @@ Load `references/social-photos-design.md` for sizes, templates, best practices.
 |--------|---------|
 | `scripts/logo/search.py` | Search logo styles, colors, industries |
 | `scripts/logo/generate.py` | Generate logos with Gemini AI |
-| `scripts/logo/core.py` | BM25 search engine for logo data |
+| `scripts/logo/logo_core.py` | BM25 search engine for logo data |
 | `scripts/cip/search.py` | Search CIP deliverables, styles, industries |
 | `scripts/cip/generate.py` | Generate CIP mockups with Gemini |
 | `scripts/cip/render-html.py` | Render HTML presentation from CIP mockups |
-| `scripts/cip/core.py` | BM25 search engine for CIP data |
+| `scripts/cip/cip_core.py` | BM25 search engine for CIP data |
 | `scripts/icon/generate.py` | Generate SVG icons with Gemini 3.1 Pro |
 
 ## Setup

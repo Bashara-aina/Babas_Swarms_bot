@@ -8,7 +8,7 @@ AI-powered logo design with 55+ styles, 30 color palettes, 25 industry guides. U
 |--------|---------|
 | `scripts/logo/search.py` | Search styles, colors, industries; generate design briefs |
 | `scripts/logo/generate.py` | Generate logos with Gemini Nano Banana |
-| `scripts/logo/core.py` | BM25 search engine for logo data |
+| `scripts/logo/logo_core.py` | BM25 search engine for logo data |
 
 ## Commands
 
