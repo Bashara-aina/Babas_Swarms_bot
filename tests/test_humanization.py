@@ -37,6 +37,7 @@ async def test_recall_memory_conversation_log() -> None:
     from core.memory.tiers import RecallMemory
 
     rm = RecallMemory()
+    await rm._init_db()
     await rm.add("user", "What's the best optimizer for ResNet?", session_id="test_session")
     await rm.add("assistant", "AdamW is a solid baseline for ResNet.", session_id="test_session")
     recent = await rm.get_recent(n=10, session_id="test_session")

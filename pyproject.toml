@@ -78,6 +78,7 @@ ignore_missing_imports = true
 warn_unused_configs = true
 strict = false
 exclude = [
+  "ext/",
   "agents/_archive/__broken_archive__/",
   "agents/_archive/",
   "agents/research/",

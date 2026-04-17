@@ -1,0 +1,131 @@
+{
+  "version": "5.0",
+  "source_facts": "/home/newadmin/swarm-bot/.claude/scripts/rumahlabuh-facts.md",
+  "rules": {
+    "brand_mention": {
+      "max_per_thread": 1,
+      "only_in_post": 6,
+      "max_per_post": 1,
+      "allowed": ["rumahlabuh.com"]
+    },
+    "pronouns": {
+      "informal": ["gue", "lo"],
+      "semi_formal": ["aku", "kamu"],
+      "no_mixing": true,
+      "no_kami_in_storytelling": true
+    },
+    "stats": {
+      "no_unsourced_percentages": true,
+      "allowed_phrases": ["banyak orang", "hampir semua yang gue tanya", "dari survei"]
+    },
+    "opening": {
+      "forbidden": [
+        "Hai yang lagi nyari kost",
+        "Untuk kamu yang sedang",
+        "Buat kamu yang mau",
+        "Kepada yang sedang",
+        "Berikut adalah",
+        "Ini yang perlu kamu ketahui",
+        "Pertanyaan untuk lo:",
+        "Halo semua!",
+        "Welcome back"
+      ]
+    },
+    "english_blocked": [
+      "neighbors",
+      "campus",
+      "experience",
+      "community",
+      "about (soal/tentang)",
+      "here (di sini)",
+      "based on (berdasarkan)",
+      "WIN (bagus)",
+      "Or maybe",
+      "raise your hand",
+      "No spam",
+      "just actual data",
+      "who stay there",
+      "twice think",
+      "owner (pakai pemilik)",
+      "proxy-kan",
+      "prioritize",
+      "sorpresa"
+    ],
+    "english_allowed": [
+      "review",
+      "filter",
+      "verified",
+      "deadline",
+      "scroll",
+      "feed",
+      "vibe",
+      "WiFi",
+      "AC",
+      "CCTV",
+      "smartlock",
+      "gecko"
+    ],
+    "punctuation": {
+      "no_em_dash": true,
+      "no_caps_for_drama": true,
+      "no_excessive_emoji": true
+    },
+    "structure": {
+      "exact_post_count": 6,
+      "post_numbering": "1/6 to 6/6",
+      "engagement_question_post_6": true,
+      "engagement_question_post_5_different": true
+    },
+    "tone": {
+      "no_menakut_takuti": [
+        "Jangan ulangi kesalahan mereka",
+        "Kamu pasti menyesal",
+        "Awas kalau nggak"
+      ],
+      "no_ai_formulas": [
+        "Berikut adalah",
+        "Ini yang perlu kamu ketahui",
+        "Pertanyaan untuk lo:",
+        "Hot take soal",
+        "diekspektasiin",
+        "tahun ajaran baru nanti"
+      ],
+      "natural_transitions_only": [
+        "nah ini yang menarik",
+        "yang bikin gue heran",
+        "ternyata",
+        "tapi",
+        "bukan"
+      ]
+    },
+    "character_encoding": {
+      "no_non_latin": true,
+      "no_kanji": true,
+      "no_arabic": true,
+      "no_hindi": true
+    },
+    "engagement": {
+      "post_5_has_question": true,
+      "post_6_has_question": true,
+      "questions_must_be_different": true
+    }
+  },
+  "viral_formula": {
+    "structure": "[HOOK] -> [MASALAH/RELATABLE] -> [INSIGHT/SOLUSI] -> [CTA]",
+    "hook_types": ["listicle", "story", "hot_take", "data", "fake_controversy"],
+    "engagement_triggers": [
+      "pertanyaan terbuka di akhir thread",
+      "konten yang bikin orang mau tag teman",
+      "informasi yang terasa baru atau jarang dibahas",
+      "pain point relatable"
+    ],
+    "human_writing_principles": [
+      "kalimat pendek dan berjeda",
+      "seperti ritme ngomong bukan ritme nulis",
+      "detail spesifik (nama jalan, harga nyata, situasi konkret)",
+      "ada satu lompatan atau detail yang sedikit tidak sempurna",
+      "tidak semua post harus sempurna strukturnya"
+    ]
+  },
+  "threads": []
+}
