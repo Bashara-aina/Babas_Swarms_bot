@@ -25,6 +25,9 @@ import { TrustBadges } from '@/components/shared/TrustBadges'
 import { CityCommandSelect } from '@/components/shared/CityCommandSelect'
 import { FormProgress } from '@/components/shared/FormProgress'
 import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
+import { ResultSkeleton } from '@/components/ResultSkeleton'
+import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
+import { PercentileBar } from '@/components/wajar-gaji/PercentileBar'
 import { COPY } from '@/lib/copy'
 
 // --- Types --------------------------------------------------------------------
@@ -173,58 +176,6 @@ function ConfidenceBadge({ tier, sampleCount }: { tier: string; sampleCount: num
   return null
 }
 
-function SalaryRangeBar({
-  p25,
-  p50,
-  p75,
-  userSalary
-}: {
-  p25: number | null
-  p50: number | null
-  p75: number | null
-  userSalary: number | null
-}) {
-  if (!p50) return null
-
-  const range = p75 ? p75 - (p25 ?? p50 * 0.78) : p50 * 0.5
-  const min = p25 ?? Math.round(p50 * 0.78)
-
-  const userPosition = userSalary
-    ? Math.min(100, Math.max(0, ((userSalary - min) / range) * 100))
-    : null
-
-  const p50Position = ((p50 - min) / range) * 100
-
-  return (
-    <div className="relative">
-      <div className="flex justify-between text-xs text-muted-foreground mb-1">
-        <span>{formatIDR(min)}</span>
-        <span className="font-medium text-foreground">Median</span>
-        <span>{p75 ? formatIDR(p75) : formatIDR(p50 * 1.28)}</span>
-      </div>
-      <div className="h-6 bg-muted rounded-full relative overflow-hidden">
-        {/* P50 marker */}
-        <div
-          className="absolute top-0 bottom-0 w-1 bg-emerald-500 z-10"
-          style={{ left: `${p50Position}%` }}
-        />
-        {/* User salary marker */}
-        {userPosition !== null && (
-          <div
-            className="absolute top-1 bottom-1 w-2 bg-blue-500 rounded-full z-20"
-            style={{ left: `${userPosition}%` }}
-            title={`Gaji kamu: ${formatIDR(userSalary)}`}
-          />
-        )}
-      </div>
-      {userSalary && (
-        <p className="text-xs text-center mt-1 text-muted-foreground">
-          Penanda biru = posisi gaji kamu
-        </p>
-      )}
-    </div>
-  )
-}
 
 function UserSalaryComparison({
   position,
@@ -455,16 +406,20 @@ export default function WajarGajiPage() {
   // --- Render SEARCHING (loading) ---
   if (state === 'SEARCHING') {
     return (
-      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50 flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4">
-          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <div className="h-12 w-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
-            <div>
-              <p className="font-semibold">Mencari benchmark gaji...</p>
-              <p className="mt-1 text-sm text-muted-foreground">Mengecek data untuk {selectedCity}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div data-tool="wajar-gaji" className="min-h-screen bg-blue-50">
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <PageHeader
+            icon={<Banknote className="h-5 w-5" />}
+            title="Cek Wajar Gaji"
+            description={`Mengecek benchmark untuk ${selectedCity}...`}
+            className="text-center"
+          />
+          <Card>
+            <CardContent className="p-6">
+              <ResultSkeleton />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -502,6 +457,7 @@ export default function WajarGajiPage() {
           />
 
           <TrustBadges variant="grid" className="mb-6" />
+          <DisclaimerBanner type="tax" />
 
           <Card>
             <CardContent className="p-6">
@@ -829,11 +785,13 @@ export default function WajarGajiPage() {
                   <h3 className="text-sm font-medium text-foreground mb-3">
                     Rentang Gaji di {selectedCity}
                   </h3>
-                  <SalaryRangeBar
+                  <PercentileBar
                     p25={benchmark.cityP25}
                     p50={benchmark.cityP50}
                     p75={benchmark.cityP75}
                     userSalary={userSalary?.value ?? null}
+                    city={selectedCity}
+                    jobTitle={matchedTitle}
                   />
 
                   {/* User Salary Comparison */}

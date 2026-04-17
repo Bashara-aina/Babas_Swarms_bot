@@ -31,6 +31,7 @@ import { ConfettiEffect } from '@/components/ConfettiEffect'
 import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
 import { UMKBadge } from '@/components/wajar-slip/UMKBadge'
 import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
+import { PayslipDiagram } from '@/components/wajar-slip/PayslipDiagram'
 import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
 import type { SubscriptionTier, Violation } from '@/types'
@@ -430,6 +431,28 @@ export default function WajarSlipPage() {
             verdict={data.verdict}
             violationCount={data.violationCount}
             criticalCount={data.violations.filter(v => v.severity === 'CRITICAL').length}
+            className="mb-4"
+          />
+
+          {/* Payslip Diagram */}
+          <PayslipDiagram
+            items={data.violations.map((v) => ({
+              label: v.titleID ?? v.code,
+              amount: Math.abs(v.differenceIDR ?? 0),
+              type: 'deduction' as const,
+              status: v.severity === 'CRITICAL' ? 'violation' : 'warning',
+              expected: undefined,
+              violationDetail: `${v.code}: selisih Rp ${(v.differenceIDR ?? 0).toLocaleString('id-ID')}`,
+            }))}
+            employerName={data.city}
+            period={`${monthLabel} ${data.year}`}
+            totalEarnings={data.grossSalary}
+            totalDeductions={(data.calculations?.correctPph21 ?? 0) + (data.calculations?.correctJht ?? 0) + (data.calculations?.correctJp ?? 0) + (data.calculations?.correctKesehatan ?? 0)}
+            totalTakeHome={data.grossSalary - (data.calculations?.correctPph21 ?? 0) - (data.calculations?.correctJht ?? 0) - (data.calculations?.correctJp ?? 0) - (data.calculations?.correctKesehatan ?? 0)}
+            violations={{
+              count: data.violationCount,
+              amount: data.violations.reduce((s, v) => s + Math.abs(v.differenceIDR ?? 0), 0),
+            }}
             className="mb-4"
           />
 
