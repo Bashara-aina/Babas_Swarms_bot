@@ -4,10 +4,13 @@
 // cekwajar.id — ViolationItem Component
 // Displays a single violation with severity badge, optional IDR amounts
 // Copy sourced from COPY.violations, with Violation type fields as fallback
+// V06 gets special critical treatment (illegal wage below UMK)
 // ══════════════════════════════════════════════════════════════════════════════
 
 import type { Violation } from '@/types'
 import { COPY } from '@/lib/copy'
+import { AlertTriangle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ViolationItemProps {
   violation: Violation
@@ -39,6 +42,7 @@ export function ViolationItem({ violation, showAmount, reportedValue, calculated
   const severity = SEVERITY_STYLES[violation.severity]
   const difference = calculatedValue - reportedValue
   const isUnderpaid = difference > 0
+  const isUMKViolation = violation.code === 'V06'
 
   // Prefer COPY.violations; fall back to violation type fields
   const copy = COPY.violations[violation.code as keyof typeof COPY.violations]
@@ -48,29 +52,38 @@ export function ViolationItem({ violation, showAmount, reportedValue, calculated
 
   return (
     <div className={cn(
-      'rounded-lg border p-4',
-      violation.code === 'V06'
-        ? 'border-red-300 bg-red-50/50'
-        : 'border-border bg-white'
+      'rounded-xl border p-4 mb-3 transition-all',
+      isUMKViolation
+        ? 'border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-950/30 animate-pulse-soft ring-2 ring-red-200 dark:ring-red-900'
+        : severity === SEVERITY_STYLES.CRITICAL
+        ? 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20'
+        : severity === SEVERITY_STYLES.HIGH
+        ? 'border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20'
+        : 'border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-950/20',
     )}>
+      {/* V06 special header */}
+      {isUMKViolation && (
+        <div className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg mb-3 flex items-center gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          PELANGGARAN HUKUM — UU Ketenagakerjaan Pasal 90
+        </div>
+      )}
+
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className={cn(
-            'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-xs font-bold',
+            'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-xs font-bold font-mono',
             severity.badge,
-            violation.code === 'V06' && 'bg-red-600 text-white animate-pulse'
+            isUMKViolation && 'bg-red-600 text-white'
           )}>
             {violation.code}
           </span>
           <div>
-            <p className="font-semibold text-foreground">
-              {violation.code === 'V06' && (
-                <span className="text-red-600 mr-1">PELANGGARAN HUKUM —</span>
-              )}
+            <p className="font-semibold text-sm text-foreground">
               {title}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{description}</p>
           </div>
         </div>
         <span className={cn(
@@ -113,8 +126,4 @@ export function ViolationItem({ violation, showAmount, reportedValue, calculated
       )}
     </div>
   )
-}
-
-function cn(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(' ')
 }

@@ -1,47 +1,67 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// cekwajar.id — ViolationSummaryBanner
+// cekwajar.id — ViolationSummaryBanner (spec 07)
 // Quick-glance violation summary at top of verdict screen
-// Shows verdict type + violation count in a single line
-// ══════════════════════════════════════════════════════════════════════════════
+// Shows total count + critical count in a prominent banner
 
-import { CheckCircle2, AlertTriangle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ViolationSummaryBannerProps {
   verdict: 'SESUAI' | 'ADA_PELANGGARAN'
   violationCount: number
+  criticalCount?: number
   className?: string
 }
 
 export function ViolationSummaryBanner({
   verdict,
   violationCount,
+  criticalCount = 0,
   className,
 }: ViolationSummaryBannerProps) {
-  const isSesuai = verdict === 'SESUAI'
+  if (verdict === 'SESUAI') return null
+
+  const isCritical = criticalCount > 0
 
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-xl border px-4 py-2.5',
-        isSesuai
-          ? 'border-emerald-200 bg-emerald-50'
-          : 'border-red-200 bg-red-50',
+        'rounded-xl p-5 mb-4 animate-scale-in',
+        isCritical
+          ? 'bg-red-50 dark:bg-red-950/30 border-2 border-red-300 dark:border-red-800'
+          : 'bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-800',
         className
       )}
-      role="status"
-      aria-live="polite"
     >
-      {isSesuai ? (
-        <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-      ) : (
-        <AlertTriangle className="h-5 w-5 shrink-0 text-red-600" />
-      )}
-      <span className={cn('text-sm font-semibold', isSesuai ? 'text-emerald-800' : 'text-red-800')}>
-        {isSesuai
-          ? 'Slip sesuai regulasi — tidak ada pelanggaran'
-          : `${violationCount} pelanggaran ditemukan`}
-      </span>
+      <div className="flex items-center gap-3">
+        <div
+          className={cn(
+            'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0',
+            isCritical ? 'bg-red-100 dark:bg-red-900' : 'bg-amber-100 dark:bg-amber-900'
+          )}
+        >
+          <AlertTriangle
+            className={cn(
+              'w-6 h-6',
+              isCritical ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
+            )}
+          />
+        </div>
+        <div>
+          <p
+            className={cn(
+              'text-2xl font-bold leading-none',
+              isCritical ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'
+            )}
+          >
+            {violationCount} Pelanggaran Ditemukan
+          </p>
+          <p className={cn('text-sm mt-1', isCritical ? 'text-red-600 dark:text-red-300' : 'text-amber-600 dark:text-amber-300')}>
+            {criticalCount > 0
+              ? `${criticalCount} bersifat KRITIS — perlu segera ditindaklanjuti`
+              : 'Cek detail di bawah untuk penjelasan dan saran'}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

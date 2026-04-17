@@ -28,6 +28,7 @@ import { CityCommandSelect } from '@/components/shared/CityCommandSelect'
 import { FieldTooltip, SLIP_TOOLTIPS } from '@/components/shared/FieldTooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
+import { ConfettiEffect } from '@/components/ConfettiEffect'
 import { ViolationItem } from '@/components/wajar-slip/ViolationItem'
 import { UMKBadge } from '@/components/wajar-slip/UMKBadge'
 import { PayslipUploader } from '@/components/wajar-slip/PayslipUploader'
@@ -428,31 +429,64 @@ export default function WajarSlipPage() {
           <ViolationSummaryBanner
             verdict={data.verdict}
             violationCount={data.violationCount}
+            criticalCount={data.violations.filter(v => v.severity === 'CRITICAL').length}
             className="mb-4"
           />
 
           {/* Verdict header */}
-          <Card className={`mb-6 ${data.verdict === 'SESUAI' ? 'border-emerald-300 bg-emerald-50' : 'border-red-300 bg-red-50'}`}>
-            <CardContent className="flex items-start gap-4 p-6">
-              {data.verdict === 'SESUAI' ? (
-                <CheckCircle2 className="h-10 w-10 shrink-0 text-emerald-600" />
-              ) : (
-                <AlertTriangle className="h-10 w-10 shrink-0 text-red-600" />
-              )}
-              <div>
-                <h2 className={`text-xl font-bold ${data.verdict === 'SESUAI' ? 'text-emerald-800' : 'text-red-800'}`}>
-                  {data.verdict === 'SESUAI'
-                    ? 'Slip Gaji Sesuai Regulasi'
-                    : 'Ada Pelanggaran pada Slip Gaji'}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {data.verdict === 'SESUAI'
-                    ? `Tidak ada pelanggaran ditemukan. Gaji bruto Rp ${data.grossSalary.toLocaleString('id-ID')}/bulan, ${monthLabel} ${data.year}.`
-                    : `Ditemukan ${data.violationCount} pelanggaran pada slip gaji kamu.`}
-                </p>
+          {data.verdict === 'SESUAI' ? (
+            /* SESUAI celebration card */
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl p-8 text-center mb-6 animate-scale-in">
+              <ConfettiEffect fire={data.verdict === 'SESUAI'} />
+              {/* Large checkmark */}
+              <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
               </div>
-            </CardContent>
-          </Card>
+              {/* Verdict title */}
+              <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 mb-2">
+                Slip Gaji Kamu SESUAI ✓
+              </h2>
+              {/* Subtext */}
+              <p className="text-emerald-700 dark:text-emerald-300 mb-1">
+                Semua komponen PPh21 dan BPJS sudah benar.
+              </p>
+              <p className="text-sm text-emerald-600/80 dark:text-emerald-400/80 mb-6">
+                HRD kamu taat regulasi bulan ini.
+              </p>
+              {/* Share button */}
+              <ShareVerdictButton
+                verdict={data.verdict}
+                violationCount={0}
+                className="justify-center"
+              />
+              {/* Cross-sell */}
+              <div className="mt-6 pt-6 border-t border-emerald-200 dark:border-emerald-800">
+                <CrossToolSuggestion fromTool="wajar-slip" />
+              </div>
+            </div>
+          ) : (
+            /* PELANGGARAN card */
+            <Card className="mb-6 border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/20 animate-scale-in">
+              <CardContent className="flex items-start gap-4 p-6">
+                <AlertTriangle className="h-10 w-10 shrink-0 text-red-600" />
+                <div>
+                  <h2 className="text-xl font-bold text-red-800 dark:text-red-400">
+                    Ada Pelanggaran pada Slip Gaji
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ditemukan {data.violationCount} pelanggaran pada slip gaji kamu.
+                  </p>
+                  <ShareVerdictButton
+                    verdict={data.verdict}
+                    violationCount={data.violationCount}
+                  />
+                  <div className="mt-4 pt-4 border-t border-red-200 dark:border-red-800">
+                    <CrossToolSuggestion fromTool="wajar-slip" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* UMK Badge */}
           {data.cityUMK > 0 && (
@@ -610,15 +644,7 @@ export default function WajarSlipPage() {
             >
               Hitung Ulang
             </button>
-            <ShareVerdictButton
-              verdict={data.verdict}
-              violationCount={data.violationCount}
-              city={data.city}
-              grossSalary={data.grossSalary}
-            />
           </div>
-
-          <CrossToolSuggestion fromTool="wajar-slip" className="mt-6" />
         </div>
       </div>
     )
