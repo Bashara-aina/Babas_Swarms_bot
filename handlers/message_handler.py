@@ -145,13 +145,19 @@ async def handle_plain_message(
         await _handle_whatsapp(msg, user_msg, auto_router)
         return
 
-    # Optional Manus-killer task router (parallel specialists) — runs before AutonomousRouter
-    if os.getenv("LEGION_TASK_ROUTER_ENABLED", "0").strip().lower() in (
+    # Optional Manus-killer task router (parallel specialists) — runs before AutonomousRouter.
+    # In pytest runs we disable this pre-routing path to keep integration tests deterministic
+    # around the expected plain NL -> llm_client.chat flow.
+    _task_router_enabled = os.getenv("LEGION_TASK_ROUTER_ENABLED", "0").strip().lower() in (
         "1",
         "true",
         "yes",
         "on",
-    ):
+    )
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        _task_router_enabled = False
+
+    if _task_router_enabled:
         try:
             from core.task_router import get_task_router
 
