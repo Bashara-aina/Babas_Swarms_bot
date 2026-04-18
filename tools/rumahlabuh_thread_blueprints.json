@@ -1,0 +1,206 @@
+{
+  "version": "1.0",
+  "pools": {
+    "pain_points": [
+      "foto listing beda jauh dari kondisi asli",
+      "harga awal keliatan murah tapi biaya tambahannya banyak",
+      "kost deket kampus tapi suasana malamnya berisik",
+      "pemilik susah dihubungi pas ada masalah"
+    ],
+    "pain_points_2": [
+      "aturan deposit baru kebaca setelah masuk",
+      "air dan listrik nggak sesuai ekspektasi",
+      "akses ke kampus ternyata makan waktu",
+      "fasilitas di foto nggak semuanya aktif"
+    ],
+    "insights": [
+      "yang bikin betah biasanya hal harian, bukan sekadar foto kamar",
+      "cek lingkungan itu sering lebih penting dari dekor kamar",
+      "pembanding terbaik itu review penghuni yang udah tinggal lebih lama",
+      "lokasi, harga, dan fasilitas harus dibaca bareng, bukan satu-satu"
+    ],
+    "checks": [
+      "cek kondisi kamar mandi di jam ramai",
+      "tanya aturan deposit dari awal",
+      "lihat akses jalan pas malam",
+      "cek sinyal internet sesuai provider yang dipakai"
+    ],
+    "checks_2": [
+      "bandingin harga dengan area sekitar",
+      "pastikan biaya listrik jelas",
+      "cek aturan tamu dan jam malam",
+      "lihat kondisi parkir saat jam pulang kerja"
+    ],
+    "checks_3": [
+      "minta foto terbaru, bukan foto lama",
+      "tanya penghuni lama soal kenyamanan",
+      "cek kebersihan area bersama",
+      "cek keamanan akses masuk"
+    ],
+    "landmarks": [
+      "UNS",
+      "UMS",
+      "Kentingan",
+      "Jebres",
+      "Banjarsari",
+      "Laweyan"
+    ],
+    "cta_soft": [
+      "bisa cek opsi yang lebih rapi di {brand}",
+      "opsi kost yang terstruktur bisa dicek di {brand}",
+      "buat shortlist yang lebih cepat, cek {brand}"
+    ],
+    "cta_soft_2": [
+      "tinggal bandingin lokasi, budget, dan fasilitas",
+      "biar nggak muter-muter survey random",
+      "semua bisa difilter sesuai kebutuhan"
+    ]
+  },
+  "techniques": [
+    {
+      "name": "edukasi",
+      "weight": 3,
+      "posts": {
+        "1": [
+          "1/6 {p2} pernah ngerasa udah cocok sama kost, tapi pas survey malah ragu?",
+          "1/6 {p1} baru sadar: nyari kost itu bukan soal cepat, tapi soal urutan ceknya."
+        ],
+        "2": [
+          "2/6 Banyak yang mulai dari foto. Padahal {pain_point}.",
+          "2/6 Kesalahan umum pas nyari kost: fokus ke satu hal doang, terus {pain_point_2}."
+        ],
+        "3": [
+          "3/6 Checklist sederhana yang sering kepake: {check_1}, {check_2}, lalu {check_3}.",
+          "3/6 Biar nggak zonk, {p1} biasanya urutkan ini: {check_1}, {check_2}, {check_3}."
+        ],
+        "4": [
+          "4/6 Insight penting: {insight}.",
+          "4/6 Yang sering bikin beda hasil akhirnya justru detail kecil yang dicek konsisten."
+        ],
+        "5": [
+          "5/6 Kalau {p2} lagi milih kost, mana yang paling sering {p2} skip pas survey?",
+          "5/6 Menurut {p2}, hal paling krusial sebelum tanda tangan itu apa?"
+        ],
+        "6": [
+          "6/6 Kalau lagi nyari kost di {city}, {cta_soft}. {cta_soft_2}. {p2} biasanya butuh berapa hari sampai yakin ambil kost?"
+        ]
+      }
+    },
+    {
+      "name": "relatable_story",
+      "weight": 3,
+      "posts": {
+        "1": [
+          "1/6 Cerita paling sering kejadian pas nyari kost di {city}: udah cocok di chat, bingung pas liat langsung.",
+          "1/6 {p1} pernah ngalamin momen ini: listing keliatan aman, realita bikin mikir ulang."
+        ],
+        "2": [
+          "2/6 Awalnya semua keliatan pas. Terus mulai kelihatan {pain_point}.",
+          "2/6 Bukan karena nggak ada pilihan. Tapi karena {pain_point_2}."
+        ],
+        "3": [
+          "3/6 Titik baliknya pas mulai tanya detail yang jarang ditanya orang: {check_2} sama {check_1}.",
+          "3/6 Setelah itu, {p1} nggak pernah lewatin {check_1} dan {check_3}."
+        ],
+        "4": [
+          "4/6 Dari situ baru kebaca: {insight}.",
+          "4/6 Ternyata yang keliatan sepele justru ngaruh ke kenyamanan harian."
+        ],
+        "5": [
+          "5/6 {p2} pernah dapet kost yang di chat meyakinkan tapi pas datang beda jauh?",
+          "5/6 Pengalaman paling bikin kapok pas survey kost versi {p2} apa?"
+        ],
+        "6": [
+          "6/6 Biar prosesnya lebih kebaca dari awal, {cta_soft} untuk area {area}. {cta_soft_2}. Ada pengalaman zonk yang paling {p2} inget?"
+        ]
+      }
+    },
+    {
+      "name": "hot_take",
+      "weight": 2,
+      "posts": {
+        "1": [
+          "1/6 Hot take: kost murah belum tentu bikin pengeluaran bulanan turun.",
+          "1/6 Hot take dikit: yang paling penting dari kost sering bukan kamarnya."
+        ],
+        "2": [
+          "2/6 Karena kalau {pain_point_2}, total biayanya bisa geser jauh.",
+          "2/6 Banyak kasus, masalahnya bukan harga awal. Masalahnya {pain_point}."
+        ],
+        "3": [
+          "3/6 Makanya sebelum deal, wajib cek {check_2} dan {check_1}.",
+          "3/6 {p1} lebih percaya hasil survey langsung dibanding foto yang terlalu rapi."
+        ],
+        "4": [
+          "4/6 Intinya: {insight}.",
+          "4/6 Fokus ke hal yang dipakai tiap hari, bukan cuma yang bagus buat difoto."
+        ],
+        "5": [
+          "5/6 Kalau disuruh pilih satu, {p2} lebih utamain harga, lokasi, atau kenyamanan lingkungan?",
+          "5/6 Menurut {p2}, red flag paling cepat kelihatan saat survey itu apa?"
+        ],
+        "6": [
+          "6/6 Biar bisa bandingin lebih objektif, {cta_soft}. {cta_soft_2}. Buat {p2}, berapa budget realistis per bulan di {city}?"
+        ]
+      }
+    },
+    {
+      "name": "fake_controversy",
+      "weight": 2,
+      "posts": {
+        "1": [
+          "1/6 Masih ada yang pilih kost cuma dari foto? Serius?",
+          "1/6 {p1} kira nanya detail kebanyakan itu lebay. Ternyata kebalik."
+        ],
+        "2": [
+          "2/6 Bukan nyalahin. Karena banyak orang baru sadar setelah ketemu {pain_point}.",
+          "2/6 Bukan soal siapa salah. Tapi karena {pain_point_2} sering baru kebaca belakangan."
+        ],
+        "3": [
+          "3/6 Setelah ngalamin itu, urutannya jadi jelas: {check_1}, {check_2}, {check_3}.",
+          "3/6 Yang paling ngaruh justru bagian yang jarang masuk highlight listing."
+        ],
+        "4": [
+          "4/6 Dan di titik itu baru kebukti: {insight}.",
+          "4/6 Twist-nya: yang keliatan ribet di awal sering bikin hidup lebih tenang."
+        ],
+        "5": [
+          "5/6 {p2} tim survey cepat lalu putuskan, atau tim cek detail dulu baru deal?",
+          "5/6 Hal apa yang paling sering bikin {p2} berubah pikiran pas survey?"
+        ],
+        "6": [
+          "6/6 Kalau mau proses yang lebih efisien, {cta_soft}. {cta_soft_2}. {p2} lebih sering pakai patokan apa duluan?"
+        ]
+      }
+    },
+    {
+      "name": "showcase_soft",
+      "weight": 1,
+      "posts": {
+        "1": [
+          "1/6 Lagi nyari kost di {area}, {city}? Ini pola cek cepat biar nggak buang waktu.",
+          "1/6 Bukan soal cari yang paling murah, tapi cari yang paling pas dipakai harian."
+        ],
+        "2": [
+          "2/6 Banyak yang mulai dari fasilitas. Padahal konteks lingkungannya juga harus kebaca.",
+          "2/6 Sering kejadian, listing rapi tapi pas survey ketemu {pain_point}."
+        ],
+        "3": [
+          "3/6 Patokan minimum buat {p1}: {facility_1}, {facility_2}, dan {facility_3} yang jelas kondisinya.",
+          "3/6 Biar aman, jangan skip {check_1} dan {check_3}."
+        ],
+        "4": [
+          "4/6 Harga mulai {price_min} bisa masuk akal kalau detail biaya tambahannya transparan.",
+          "4/6 Kalau semua detail kebuka di awal, keputusan jadi lebih tenang."
+        ],
+        "5": [
+          "5/6 Buat {p2}, fasilitas paling wajib yang nggak bisa ditawar apa?",
+          "5/6 Kalau budget mepet, {p2} biasanya kompromi di bagian mana?"
+        ],
+        "6": [
+          "6/6 Supaya shortlist lebih cepat, {cta_soft}. {cta_soft_2}. {p2} pengen area yang ramai atau yang lebih tenang?"
+        ]
+      }
+    }
+  ]
+}

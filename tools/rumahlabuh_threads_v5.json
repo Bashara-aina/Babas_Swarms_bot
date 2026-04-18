@@ -1,6 +1,49 @@
 {
-  "version": "5.0",
+  "version": "5.1",
   "source_facts": "/home/newadmin/swarm-bot/.claude/scripts/rumahlabuh-facts.md",
+  "identity": {
+    "brand_name": "rumahlabuh.com",
+    "niche": "pencarian kost dan akomodasi",
+    "target_audience": [
+      "Mahasiswa perantau di Solo (usia 18-25)",
+      "Karyawan baru pindah kota",
+      "Orang yang baru kerja atau kuliah jauh dari rumah"
+    ],
+    "tone_of_voice": "natural, relatable, tidak lebay, tidak sok asik",
+    "bahasa": "Bahasa Indonesia non-formal, campuran gaul ringan",
+    "platform_utama": ["Threads", "Twitter/X", "TikTok caption"]
+  },
+  "generator": {
+    "blueprint_file": "rumahlabuh_thread_blueprints.json",
+    "history_file": "rumahlabuh_thread_history.json",
+    "pronoun_informal_ratio": 0.85,
+    "max_attempts": 120,
+    "dedupe_window_days": 60,
+    "rotation": {
+      "enabled": true,
+      "avoid_repeat_days": 7
+    }
+  },
+  "language": {
+    "replacements": {
+      "about": "soal",
+      "here": "di sini",
+      "based on": "berdasarkan",
+      "or maybe": "atau mungkin",
+      "raise your hand": "",
+      "no spam": "",
+      "just actual data": "",
+      "twice think": "pikir dua kali",
+      "owner": "pemilik",
+      "proxy-kan": "dibayangin",
+      "prioritize": "utamakan",
+      "sorpresa": "kejutan",
+      "campus": "kampus",
+      "neighbors": "tetangga",
+      "experience": "pengalaman"
+    },
+    "allowed_acronyms": ["wifi", "ac", "cctv", "ums", "uns"]
+  },
   "rules": {
     "brand_mention": {
       "max_per_thread": 1,
@@ -36,17 +79,17 @@
       "campus",
       "experience",
       "community",
-      "about (soal/tentang)",
-      "here (di sini)",
-      "based on (berdasarkan)",
-      "WIN (bagus)",
-      "Or maybe",
+      "about",
+      "here",
+      "based on",
+      "win",
+      "or maybe",
       "raise your hand",
-      "No spam",
+      "no spam",
       "just actual data",
       "who stay there",
       "twice think",
-      "owner (pakai pemilik)",
+      "owner",
       "proxy-kan",
       "prioritize",
       "sorpresa"
@@ -73,6 +116,7 @@
     "structure": {
       "exact_post_count": 6,
       "post_numbering": "1/6 to 6/6",
+      "engagement_question_post_5": true,
       "engagement_question_post_6": true,
       "engagement_question_post_5_different": true
     },
@@ -108,6 +152,17 @@
       "post_5_has_question": true,
       "post_6_has_question": true,
       "questions_must_be_different": true
+    },
+    "validation": {
+      "no_duplicate_posts": true,
+      "max_hashtags_per_post": 3,
+      "max_numbered_list_items_per_post": 4,
+      "brand_name_must_be_exact": "rumahlabuh.com"
+    },
+    "algoritma_tips": {
+      "reply_sendiri_dalam_10_menit": true,
+      "warm_up_reply_awal": "2-3 reply di jam pertama",
+      "waktu_terbaik_wib": ["07.00-09.00", "19.00-21.00"]
     }
   },
   "viral_formula": {
