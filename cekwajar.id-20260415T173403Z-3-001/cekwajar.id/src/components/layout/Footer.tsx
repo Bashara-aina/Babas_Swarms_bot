@@ -7,76 +7,44 @@ import { WordmarkLogo } from '@/components/WordmarkLogo'
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted">
+    <footer className="border-t bg-background">
       <div className="mx-auto max-w-5xl px-4 py-8 lg:px-6">
-        <div className="grid gap-6 md:grid-cols-3">
-          {/* Brand */}
+        <div className="grid gap-8 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <WordmarkLogo size="sm" />
-            <p className="mt-2 text-xs text-muted-foreground">
-              5 alat gratis untuk karyawan Indonesia.<br />
-              Audit slip gaji, benchmark gaji, dan cek harga properti.
+            <p className="mt-3 max-w-xs text-xs leading-6 text-muted-foreground">
+              Transparansi keuangan untuk semua orang Indonesia.
             </p>
           </div>
 
-          {/* Tools */}
           <div>
-            <p className="text-sm font-semibold text-foreground">Alat</p>
-            <ul className="mt-2 space-y-1">
-              <li>
-                <Link href="/wajar-slip" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Wajar Slip — Audit PPh21 & BPJS
-                </Link>
-              </li>
-              <li>
-                <Link href="/wajar-gaji" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Wajar Gaji — Benchmark Gaji
-                </Link>
-              </li>
-              <li>
-                <Link href="/wajar-tanah" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Wajar Tanah — Cek Harga Properti
-                </Link>
-              </li>
-              <li>
-                <Link href="/wajar-kabur" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Wajar Kabur — Perbandingan LN
-                </Link>
-              </li>
-              <li>
-                <Link href="/wajar-hidup" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Wajar Hidup — Biaya Hidup Kota
-                </Link>
-              </li>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Alat</p>
+            <ul className="mt-2 space-y-1.5">
+              <li><Link href="/wajar-slip" className="text-sm text-muted-foreground hover:text-emerald-600">Wajar Slip</Link></li>
+              <li><Link href="/wajar-gaji" className="text-sm text-muted-foreground hover:text-emerald-600">Wajar Gaji</Link></li>
+              <li><Link href="/wajar-tanah" className="text-sm text-muted-foreground hover:text-emerald-600">Wajar Tanah</Link></li>
+              <li><Link href="/wajar-kabur" className="text-sm text-muted-foreground hover:text-emerald-600">Wajar Kabur</Link></li>
+              <li><Link href="/wajar-hidup" className="text-sm text-muted-foreground hover:text-emerald-600">Wajar Hidup</Link></li>
             </ul>
           </div>
 
-          {/* Legal */}
           <div>
-            <p className="text-sm font-semibold text-foreground">Legal</p>
-            <ul className="mt-2 space-y-1">
-              <li>
-                <Link href="/privacy-policy" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Kebijakan Privasi
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Syarat & Ketentuan
-                </Link>
-              </li>
-              <li>
-                <Link href="/kontak" className="text-xs text-muted-foreground hover:text-emerald-600">
-                  Hubungi Kami
-                </Link>
-              </li>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lainnya</p>
+            <ul className="mt-2 space-y-1.5">
+              <li><Link href="/pricing" className="text-sm text-muted-foreground hover:text-emerald-600">Pricing</Link></li>
+              <li><Link href="/kontak" className="text-sm text-muted-foreground hover:text-emerald-600">Kontak</Link></li>
+              <li><Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-emerald-600">Privacy</Link></li>
+              <li><Link href="/terms" className="text-sm text-muted-foreground hover:text-emerald-600">Terms</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-6 border-t border-border pt-4 text-center">
+        <div className="mt-8 flex flex-col gap-2 border-t border-border pt-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-xs font-mono text-muted-foreground">
+            Data dari BPS · Kemnaker · BPN · Diperbarui setiap hari
+          </p>
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} cekwajar.id — Hasil kalkulasi bersifat indikatif, bukan nasihat keuangan.
+            &copy; {new Date().getFullYear()} cekwajar.id
           </p>
         </div>
       </div>
