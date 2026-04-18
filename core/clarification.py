@@ -36,6 +36,7 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
     """
     try:
         normalized = message.lower().strip()
+        normalized_tokens = set(re.findall(r"\b\w+\b", normalized))
         word_count = len(message.split())
         is_short = word_count < SHORT_MESSAGE_THRESHOLD
         is_low_confidence = confidence < AMBIGUITY_THRESHOLD
@@ -59,7 +60,7 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
             "when",
             "where",
         }
-        if "?" in normalized and any(tok in normalized.split() for tok in direct_question_tokens):
+        if "?" in normalized and direct_question_tokens.intersection(normalized_tokens):
             return False
 
         NEVER_CLARIFY = {
