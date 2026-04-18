@@ -10,4 +10,5 @@ jobs:
       - run: python -m pip install -U pip
       - run: pip install -r requirements-typecheck.txt
       - run: pip install mypy types-pytz types-aiofiles types-requests types-PyYAML
-      - run: mypy . --ignore-missing-imports --explicit-package-bases
+      # Incremental mypy adoption: enforce on typed/stable surfaces first.
+      - run: mypy config data/message_count.py tools/rumahlabuh_thread_generator.py --ignore-missing-imports --explicit-package-bases

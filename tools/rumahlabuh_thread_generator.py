@@ -144,7 +144,7 @@ class HistoryStore:
     def _load_or_init(self) -> dict[str, Any]:
         if self.path.exists():
             return load_json(self.path)
-        data = {"items": []}
+        data: dict[str, Any] = {"items": []}
         dump_json(self.path, data)
         return data
 
