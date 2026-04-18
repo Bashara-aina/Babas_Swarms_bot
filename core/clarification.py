@@ -35,9 +35,32 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
     Does NOT trigger for greetings and common courtesies.
     """
     try:
+        normalized = message.lower().strip()
         word_count = len(message.split())
         is_short = word_count < SHORT_MESSAGE_THRESHOLD
         is_low_confidence = confidence < AMBIGUITY_THRESHOLD
+
+        # Clear direct questions should be answered, not bounced with clarification.
+        # This avoids over-triggering for short conversational prompts like
+        # "Hei Legion, lo siapa?" in integration flows.
+        direct_question_tokens = {
+            "siapa",
+            "apa",
+            "kenapa",
+            "mengapa",
+            "bagaimana",
+            "kapan",
+            "dimana",
+            "gimana",
+            "who",
+            "what",
+            "why",
+            "how",
+            "when",
+            "where",
+        }
+        if "?" in normalized and any(tok in normalized.split() for tok in direct_question_tokens):
+            return False
 
         NEVER_CLARIFY = {
             "hei",
@@ -65,7 +88,7 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
             "great",
             "nice",
         }
-        if message.lower().strip() in NEVER_CLARIFY:
+        if normalized in NEVER_CLARIFY:
             return False
 
         return is_short and is_low_confidence
