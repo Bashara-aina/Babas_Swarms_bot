@@ -89,7 +89,7 @@ def build_session_resume_block() -> str:
     """Build a context block for Legion to resume after restart."""
     current = get_current_task()
     recent = get_recent_episodes(5)
-    lines = ["[SESSION CONTINUITY — what Legion was doing before restart:]","
+    lines = ["[SESSION CONTINUITY — what Legion was doing before restart:]"]
     if current.get("task"):
         lines.append(f"⚡ Active task: {current['task']}")
         if current.get("context"):
