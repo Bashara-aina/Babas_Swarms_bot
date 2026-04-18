@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import warnings
 from typing import Any
 
 import httpx
@@ -11,6 +12,16 @@ import httpx
 from core.daily_harvester.types import SourceInfo, SourceType, TrustTier
 
 logger = logging.getLogger(__name__)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*duckduckgo_search.*renamed to `ddgs`.*",
+    category=RuntimeWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    module=r"duckduckgo_search.*",
+)
 
 FEATURE_WEB_SEARCH_ENABLED = True
 
@@ -81,10 +92,15 @@ async def search_sources(query: str, topic: str) -> list[SourceInfo]:
     # Primary: DuckDuckGo web search (run in thread to avoid blocking)
     def _ddg_search() -> list[SourceInfo]:
         try:
-            from duckduckgo_search import DDGS
+            try:
+                from ddgs import DDGS  # type: ignore[import-not-found]
+            except ImportError:
+                from duckduckgo_search import DDGS
 
-            with DDGS() as ddg:
-                results = list(ddg.text(query, max_results=10))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+                with DDGS() as ddg:
+                    results = list(ddg.text(query, max_results=10))
         except Exception as e:
             logger.warning("DuckDuckGo search failed: %s", e)
             return []

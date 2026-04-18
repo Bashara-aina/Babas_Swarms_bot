@@ -2,9 +2,20 @@
 
 import asyncio
 import logging
+import warnings
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*duckduckgo_search.*renamed to `ddgs`.*",
+    category=RuntimeWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    module=r"duckduckgo_search.*",
+)
 
 
 async def search_web(query: str, max_results: int = 5) -> str:
@@ -32,11 +43,16 @@ async def search_web(query: str, max_results: int = 5) -> str:
 async def _search_raw(query: str, max_results: int = 5) -> str:
     """Core search implementation (no circuit breaker wrapper)."""
     try:
-        from duckduckgo_search import DDGS
+        try:
+            from ddgs import DDGS  # type: ignore[import-not-found]
+        except ImportError:
+            from duckduckgo_search import DDGS
 
         def _sync_search(q: str) -> list[dict[str, Any]]:
-            with DDGS() as ddgs:
-                return list(ddgs.text(q, max_results=max_results))
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+                with DDGS() as ddgs:
+                    return list(ddgs.text(q, max_results=max_results))
 
         # Run sync search in thread pool to avoid blocking event loop
         results = await asyncio.wait_for(
@@ -63,11 +79,16 @@ async def _search_raw(query: str, max_results: int = 5) -> str:
         if simplified != query:
             logger.info("Search timeout, retrying with simplified query: %s", simplified)
             try:
-                from duckduckgo_search import DDGS
+                try:
+                    from ddgs import DDGS  # type: ignore[import-not-found]
+                except ImportError:
+                    from duckduckgo_search import DDGS
 
                 def _sync_search(q: str) -> list[dict[str, Any]]:
-                    with DDGS() as ddgs:
-                        return list(ddgs.text(q, max_results=max_results))
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", RuntimeWarning)
+                        with DDGS() as ddgs:
+                            return list(ddgs.text(q, max_results=max_results))
 
                 results = await asyncio.wait_for(
                     asyncio.to_thread(_sync_search, simplified),
@@ -90,7 +111,7 @@ async def _search_raw(query: str, max_results: int = 5) -> str:
                 return "[Search timeout dan retry gagal: server tidak merespon]"
         return "[Search timeout: server terlalu lambat, coba lagi nanti]"
     except ImportError:
-        logger.warning("duckduckgo-search not installed — web search unavailable")
-        return "[Web search tidak tersedia: install duckduckgo-search]"
+        logger.warning("DDGS not installed — web search unavailable")
+        return "[Web search tidak tersedia: install ddgs]"
     except Exception:
         return "[Search error: gagal mengambil hasil, coba lagi nanti]"

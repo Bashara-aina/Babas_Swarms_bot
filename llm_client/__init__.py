@@ -1547,6 +1547,8 @@ async def chat(
                             "agent_key": agent_key or "",
                         }
                     )
+                    if _is_pytest_run:
+                        await _me.episodic.close()
                 except Exception:
                     pass
 

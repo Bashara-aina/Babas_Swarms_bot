@@ -94,7 +94,7 @@ langchain-community>=0.3.0
 # === v8 Tier-3 — Screenpipe, MCP, LiveKit token helpers, search ===
 mcp>=1.2.0
 livekit-api>=0.8.0
-duckduckgo-search>=4.0.0
+ddgs>=8.1.0
 apscheduler>=3.10.0
 
 # === v9 Soul Transplant ===
