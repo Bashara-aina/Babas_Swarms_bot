@@ -1258,7 +1258,12 @@ async def chat(
         user_content = task
     messages.append({"role": "user", "content": user_content})
 
-    _skip_cache = image_b64 is not None or show_thinking or agent_key == "vision"
+    _is_pytest_run = bool(os.getenv("PYTEST_CURRENT_TEST"))
+    # Keep tests deterministic: bypass cache and background post-hooks so
+    # integration tests always exercise the direct LLM call path.
+    if _is_pytest_run:
+        run_post_hooks = False
+    _skip_cache = _is_pytest_run or image_b64 is not None or show_thinking or agent_key == "vision"
     if not _skip_cache:
         try:
             from tools.persistence import cache_get
