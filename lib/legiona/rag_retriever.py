@@ -9,7 +9,7 @@ from supabase import create_client
 from lib.legiona.rag_indexer import get_embedding
 
 
-def retrieve_context(query: str, top_k: int = 5) -> list[str]:
+def retrieve_context(query: str, top_k: int = 10) -> list[str]:
     """Embed query via MiniMax and return top-k matching chunks from Supabase."""
     supabase_url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
     supabase_key = (
@@ -24,7 +24,7 @@ def retrieve_context(query: str, top_k: int = 5) -> list[str]:
     query_embedding = get_embedding(query)
     response = client.rpc(
         "match_legiona_embeddings",
-        {"query_embedding": query_embedding, "match_count": top_k},
+        {"query_embedding": query_embedding, "match_count": top_k, "match_threshold": 0.72},
     ).execute()
     rows = response.data or []
     return [row.get("content", "") for row in rows if row.get("content")]

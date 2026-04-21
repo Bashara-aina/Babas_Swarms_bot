@@ -11,8 +11,8 @@ import httpx
 EMBED_MODEL = "embo-01"  # [VERIFY BEFORE USE: confirm MiniMax embedding model name]
 EMBED_DIM = 1536  # [VERIFY BEFORE USE: confirm MiniMax embo-01 output dimension]
 EMBED_URL = "https://api.minimax.chat/v1/embeddings"
-CHUNK_TOKENS = 500
-CHUNK_OVERLAP = 50
+CHUNK_TOKENS = 2000  # expanded for M2.7 large context window
+CHUNK_OVERLAP = 200  # 10% overlap ensures continuity
 SUPPORTED_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".sql", ".md"}
 
 

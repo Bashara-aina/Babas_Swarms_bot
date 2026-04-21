@@ -125,6 +125,19 @@ Items needing verification: [list or "none"]
 - Constraint: prefer idempotent agent actions
 - Deployment: Vercel (frontend), Supabase (backend/DB)
 
+## INTERLEAVED THINKING PROTOCOL (#6)
+
+Between every tool call:
+  <think>
+- What did the last tool return?
+- Does this match my expectation?
+- What is the single next action that moves me closer to the goal?
+- Is there any risk of repeating myself?
+  </think>
+
+This is mandatory, not optional. M2.7 performs best when it
+re-evaluates after each tool result rather than executing a pre-planned sequence.
+
 ## Guidelines
 
 - Cite sources with URLs and quotes

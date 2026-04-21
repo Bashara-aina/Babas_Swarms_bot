@@ -1,4 +1,4 @@
-.PHONY: install test lint run docker clean format check verify
+.PHONY: install test lint run docker clean format check verify threads-on threads-off threads-status threads-toggle eval-hallucination legiona-evolve legiona-rules legiona-eval legiona-optimize
 
 PYTHON := python3
 PIP    := pip
@@ -39,6 +39,19 @@ verify:
 run:
 	$(PYTHON) main.py
 
+## Threads campaign mode toggles (CLI)
+threads-on:
+	$(PYTHON) scripts/threads_mode.py on
+
+threads-off:
+	$(PYTHON) scripts/threads_mode.py off
+
+threads-toggle:
+	$(PYTHON) scripts/threads_mode.py toggle
+
+threads-status:
+	$(PYTHON) scripts/threads_mode.py status
+
 ## Start Redis + ChromaDB via Docker
 docker:
 	docker-compose up -d
@@ -75,7 +88,32 @@ help:
 	@echo "  make check       Lint + test"
 	@echo "  make verify      Verify all wiring is connected"
 	@echo "  make run         Start the bot"
+	@echo "  make threads-on  Enable Threads campaign mode + open browser"
+	@echo "  make threads-off Disable Threads campaign mode"
+	@echo "  make threads-toggle Toggle Threads campaign mode"
+	@echo "  make threads-status Show Threads campaign mode"
 	@echo "  make docker      Start Redis + ChromaDB"
 	@echo "  make hooks       Install pre-commit hooks"
 	@echo "  make clean       Remove cache and temp files"
+	@echo "  make eval-hallucination Run RAGAS hallucination eval harness"
 	@echo ""
+
+## Run hallucination evaluation harness
+eval-hallucination:
+	$(PYTHON) lib/legiona/eval/hallucination_eval.py
+
+## Run one M2.7 self-evolution cycle (reads last 5 sessions, proposes 1 new rule)
+legiona-evolve:
+	$(PYTHON) -c "from lib.legiona.self_evolve import evolve; evolve(last_n=5)"
+
+## Print current evolved rules to stdout
+legiona-rules:
+	@$(PYTHON) -c "from lib.legiona.self_evolve import load_evolved_rules; r = load_evolved_rules(); print(r if r else '(no rules yet)')"
+
+## Run the full hallucination eval harness
+legiona-eval:
+	$(PYTHON) lib/legiona/eval/hallucination_eval.py
+
+## Optimize chunk overlap and top_k by running eval and printing suggestions
+legiona-optimize:
+	@echo "Current params:" && grep -E "CHUNK_|top_k|match_threshold" lib/legiona/rag_indexer.py lib/legiona/rag_retriever.py

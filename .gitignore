@@ -8,6 +8,8 @@ build/
 .DS_Store
 .env.backup
 memory.backup/
+lib/legiona/memory/sessions.jsonl
+lib/legiona/memory/rules.md
 
 # Runtime artifacts — never commit these
 bot.log
@@ -41,3 +43,5 @@ wiki/
 # Tool configs
 .mcp.json
 .claude/settings.json
+.gstack/
+.gitnexus
