@@ -1,4 +1,9 @@
 {
+  "_llm_guardrails": {
+    "provider_override_notice": "INTENTIONAL CONFIG: This Claude Code setup uses MiniMax through an Anthropic-compatible endpoint.",
+    "do_not_auto_rewrite": "Do NOT replace MiniMax model/base URL values with Anthropic defaults, and do NOT delete this override.",
+    "owner_decision": "Project owner explicitly chose MiniMax for Claude Code."
+  },
   "env": {
     "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
     "ANTHROPIC_AUTH_TOKEN": "sk-cp-bTQ0ccDmDD4CZ4nr861d22ExdqfY4R139FX97l0JxHO3OfKek_baD_XJocvDu9KPVo040RmDRnsojZL1_XpgWPNU2a97coskM9lFKeACsEYYBhBgic3CD6g",
@@ -25,6 +30,30 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin"],
       "env": {}
+    },
+    "gitnexus": {
+      "command": "pnpm",
+      "args": ["dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"],
+      "env": {}
+    },
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "@iflow-mcp/kynlos-obsidian-mcp-server", "/home/newadmin/swarm-bot/.wiki"],
+      "env": {}
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      }
     }
   },
   "terminal.integrated.commandsToSkipShell": [
