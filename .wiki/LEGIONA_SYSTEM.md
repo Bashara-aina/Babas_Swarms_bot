@@ -123,7 +123,68 @@ UNKNOWN (requires verification):
 - LLM routing via `llm_client.py`
 - Core orchestration in `core/`
 
+## Memory Architecture
+
+### Global Memory (`lib/legiona/memory/global_memory.md`)
+Persists across ALL sessions. Updated by `evolve()` after each agent run. Contains:
+- **Project Facts** — architecture-level facts about swarm-bot
+- **Architecture Decisions** — MMX-CLI native tools, tool loop patterns
+- **Known Gotchas** — bugs, edge cases, workaround rules
+- **Self-Evolved Rules** — synced from `memory/rules.md`
+
+### Session Memory (`lib/legiona/memory/session_memory.py`)
+Per-session context preservation. Cleared on new session.
+
+### Evolve Function (`lib/legiona/evolve.py`)
+After each agent run, `evolve()` updates global memory with:
+- New architecture decisions discovered
+- Gotchas encountered
+- Self-evolved rules from agent behavior
+
+## Agent Structure
+
+### Departments (9 total)
+1. **Research** — web search, document analysis
+2. **Coding** — implementation, refactoring, debugging
+3. **Review** — code review, quality audit
+4. **Design** — UI/UX, architecture design
+5. **DevOps** — deployment, monitoring, logs
+6. **Security** — audit, vulnerability scanning
+7. **Data** — database, analytics, pipelines
+8. **Communication** — Telegram handlers, messaging
+9. **Meta** — self-improvement, evolve logic
+
+### Surface Agents
+| Surface | Agent Count | Primary File |
+|---------|-------------|--------------|
+| Claude Code | 3 | `.claude/skills/legiona/*.md` |
+| OpenCode | 3 | `.opencode/skills/*.md` |
+| Copilot | 1 | `.github/copilot-instructions.md` |
+| LegionBot | 76+ | `handlers/`, `agents/` |
+
+## Anti-Hallucination
+
+See [ANTI_HALLUCINATION.md](./ANTI_HALLUCINATION.md) for full documentation.
+
+Five-pillar system:
+1. **Evidence Hierarchy** — P1-P6 source confidence tagging
+2. **Chain-of-Verification (CoVe)** — verify each non-trivial claim
+3. **Anti-Fabrication Rules** — never make up facts, versions, signatures
+4. **Uncertainty Phrasing** — explicit `[INFERRED]` and `[VERIFY]` tags
+5. **Confidence Gate** — 85% threshold before irreversible actions
+
+## M2.7 Optimization
+
+See [M2_7_OPTIMIZATION.md](./M2_7_OPTIMIZATION.md) for full documentation.
+
+Key settings:
+- **Temperature**: 1.0 (default), 0.7 (deterministic tasks)
+- **reasoning_split**: always True for complex reasoning
+- **Max tokens**: 32,768 with 25% reserve buffer
+- **Token budget**: 196,608 context window
+
 ## Self-Audit Footer
+
 End non-trivial outputs with:
 ```text
 LEGIONA SELF-AUDIT
