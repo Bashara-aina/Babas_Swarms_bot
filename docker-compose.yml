@@ -149,6 +149,24 @@ services:
       - "3030:3030"
     restart: "no"
 
+  # Jaeger — local OTLP tracing dashboard
+  # Start: docker compose up -d jaeger
+  # UI: http://localhost:16686
+  # OTLP gRPC: localhost:4317 | OTLP HTTP: localhost:4318
+  jaeger:
+    image: jaegertracing/jaeger:latest
+    container_name: legiona-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"     # OTLP gRPC receiver
+      - "4318:4318"     # OTLP HTTP receiver
+      - "14269:14269"   # Health check
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_OTLP_GRPC_ENABLED=true
+      - COLLECTOR_OTLP_HTTP_ENABLED=true
+    restart: unless-stopped
+
 volumes:
   redis_data:
     driver: local
