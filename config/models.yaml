@@ -28,7 +28,7 @@ providers:
     daily_limit: 1000
 
   minimax:
-    base_url: "https://api.minimax.io/v1"
+    base_url: "https://api.minimax.chat/v1"
     api_key_env: "MINIMAX_API_KEY"
     daily_limit: null
 
@@ -54,7 +54,7 @@ models:
 
   qwen3-235b:
     provider: cerebras
-    model_id: "cerebras/qwen3-235b-a22b"
+    model_id: "minimax/MiniMax-Text-01"
     context_window: 131072
     strengths: [reasoning, speed, general]
     cost_per_1m_tokens: 0.0
@@ -63,7 +63,7 @@ models:
 
   glm-4:
     provider: zai
-    model_id: "zai/glm-4"
+    model_id: "minimax/MiniMax-Text-01"
     context_window: 128000
     strengths: [debug, math, reasoning]
     cost_per_1m_tokens: 0.0
@@ -72,7 +72,7 @@ models:
 
   kimi-k2:
     provider: groq
-    model_id: "groq/moonshotai/kimi-k2-instruct"
+    model_id: "minimax/MiniMax-Text-01"
     context_window: 200000
     strengths: [deep-reasoning, analysis, long-context]
     cost_per_1m_tokens: 0.0
@@ -81,7 +81,7 @@ models:
 
   gemini-3.1-pro:
     provider: gemini
-    model_id: "gemini/gemini-2.0-flash"
+    model_id: "minimax/MiniMax-Text-01"
     context_window: 1000000
     strengths: [teaching, general, long-context]
     cost_per_1m_tokens: 0.0

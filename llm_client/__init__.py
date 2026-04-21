@@ -1803,17 +1803,17 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
             logger.info("Screenshot analyzed locally via Ollama")
             return result, "ollama/gemma4:e4b \U0001f512 local"
         except Exception as e:
-            logger.warning("Ollama vision failed: %s \u2192 trying Groq", e)
+            logger.warning("Ollama vision failed: %s → trying MiniMax", e)
     else:
         logger.info("analyze_screenshot: using cloud directly (%s)", _skip_reason)
 
-    groq_key = os.getenv("GROQ_API_KEY", "")
-    if not groq_key:
-        raise RuntimeError("No GROQ_API_KEY and Ollama vision failed/skipped")
+    minimax_key = os.getenv("MINIMAX_API_KEY", "")
+    if not minimax_key:
+        raise RuntimeError("No MINIMAX_API_KEY and Ollama vision failed/skipped")
 
     try:
         resp = await acompletion(
-            model="groq/meta-llama/llama-4-scout-17b-16e-instruct",
+            model="minimax/MiniMax-Text-01",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["vision"]},
                 {
@@ -1824,12 +1824,14 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
                     ],
                 },
             ],
-            api_key=groq_key,
+            api_key=minimax_key,
+            base_url="https://api.minimax.chat/v1",
             max_tokens=1024,
         )
         result = (resp.choices[0].message.content or "").strip()
-        _cloud_label = "groq/llama-4-scout"
+        _cloud_label = "minimax/MiniMax-Text-01"
         if _skip_local and _skip_reason:
+            return result, f"{_cloud_label} (reason: {_skip_reason})"
             _cloud_label += f" \u2601\ufe0f (local bypassed: {_skip_reason[:60]})"
         logger.info("Screenshot analyzed via Groq cloud vision")
         return result, _cloud_label

@@ -11,8 +11,7 @@ Single source of truth for:
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
 
-Verified working models (live logs 2026-03-09):
-  groq/llama-3.3-70b-versatile                   ✓
+Verified working models (live logs 2026-03-09): minimax/MiniMax-Text-01                   ✓
   groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
     cerebras/qwen3-235b-a22b                        ✓
   zai/glm-4                                       ✓ (via openai-compat endpoint)
@@ -76,12 +75,12 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist": "cerebras/qwen3-235b-a22b",  # fast, large context
-    "devil_advocate": "groq/qwen-qwq-32b",  # adversarial reasoning
-    "researcher": "groq/moonshotai/kimi-k2-instruct",  # deep research
-    "pragmatist": "groq/llama-3.3-70b-versatile",  # practical, fast
-    "visionary": "cerebras/qwen3-235b-a22b",  # creative, fast
-    "critic": "zai/glm-4",  # precise, analytical
+    "strategist": minimax/MiniMax-Text-01,  # fast, large context
+    "devil_advocate": "minimax/MiniMax-Text-01",  # adversarial reasoning
+    "researcher": minimax/MiniMax-Text-01,  # deep research
+    "pragmatist": minimax/MiniMax-Text-01,  # practical, fast
+    "visionary": minimax/MiniMax-Text-01,  # creative, fast
+    "critic": minimax/MiniMax-Text-01,  # precise, analytical
 }
 
 DEBATE_ICONS = {
@@ -227,8 +226,8 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     # Vision/computer: gemma4:e4b local for screen analysis when cloud fails
     "vision": [
         "ollama_chat/gemma4:e4b",
-        "groq/meta-llama/llama-4-scout-17b-16e-instruct",
-        "gemini/gemini-2.0-flash",
+        "minimax/MiniMax-Text-01",
+        "minimax/M2.7",
     ],
     "computer": [
         "ollama_chat/gemma4:e4b",  # local only — MiniMax can't do screen reading
@@ -238,441 +237,441 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     # All other agents: free cloud only when MiniMax fails
     "coding": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "debug": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "math": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "general": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
     "researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "devops": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "humanizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "owl": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ag2_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ag2_critic": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "ag2_synthesizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "code_exec": [
         "gemini/gemini-2.0-flash-exp:free",
         "openrouter/qwen/qwen3-coder:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "predictor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "claude_orchestrator": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "reviewer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Engineering Department ─────────────────────────────────────────────────
     "senior_backend_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "senior_frontend_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "devops_sre": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "security_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ml_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "data_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "mobile_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "platform_infra": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "lead_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Design Department ──────────────────────────────────────────────────────
     "ux_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ui_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "interaction_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "design_systems_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "motion_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "user_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "accessibility_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "brand_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "design_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Research Department ────────────────────────────────────────────────────
     "literature_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "domain_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "data_scientist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "fact_checker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "trend_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "contrarian_scholar": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "synthesizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "methodology_critic": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "research_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Marketing Department ────────────────────────────────────────────────────
     "brand_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "growth_hacker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "content_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "seo_sem_specialist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "social_media_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "pr_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "email_marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "performance_marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "cmo": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Operations Department ────────────────────────────────────────────────────
     "process_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "supply_chain_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "finance_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "hr_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "legal_counsel": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "risk_manager": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "customer_success": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "support_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "coo": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Legal & Compliance Department ───────────────────────────────────────────
     "contract_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "privacy_gdpr_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ip_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "regulatory_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "compliance_officer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ethics_advisor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "employment_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "litigation_risk": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "general_counsel": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Product Department ──────────────────────────────────────────────────────
     "product_manager": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "ux_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "growth_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "b2b_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "b2c_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "platform_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "monetisation_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "roadmap_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "head_of_product": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Creative Department ─────────────────────────────────────────────────────
     "copywriter": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "storyteller": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "creative_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "art_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "video_producer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "meme_viral_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "editor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "tone_of_voice_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "creative_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": [
         "ollama_chat/gemma4:e4b",
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "multimodal_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Nexus Department ────────────────────────────────────────────────────────
     "nexus_coordinator": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "nexus_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     # ── Strategy Nexus Department ───────────────────────────────────────────────
     "corporate_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "venture_capitalist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "management_consultant": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "futurist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "economist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "geopolitical_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "first_principles_thinker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
     "chief_strategy_officer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "groq/llama-3.3-70b-versatile",
+        "minimax/MiniMax-Text-01",
     ],
 }
 
