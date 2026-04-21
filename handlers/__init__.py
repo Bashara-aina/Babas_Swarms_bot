@@ -21,6 +21,7 @@ from handlers import (
     harvest_review,
     hermes,
     legion_extras,
+    legiona_tools,
     business_handler,
     wiki_handler,
     runbook_handler,
@@ -46,6 +47,7 @@ from handlers import (
     swe_commands,
     system,
     tasks,
+    threads_mode,
     upgrade,
     voice,
     whatsapp_handler,
@@ -55,6 +57,7 @@ from handlers.wiki import router as wiki_router
 # ai.router must be last (NL catch-all).
 # overnight_handler before ai to avoid being intercepted.
 _ROUTER_ORDER = [
+    legiona_tools.router,  # /logs /ps /kill /sys /ls /find /grep /read /write /disk /window /screen /clipboard /type /key /service /tree
     computer.router,  # /do /screen /click /type /key /cmd /install
     plandex_commands.router,  # /code /diff /apply /abort
     swe_commands.router,  # /fix /fix_dry
@@ -73,6 +76,7 @@ _ROUTER_ORDER = [
     session_handler.router,  # /task /task_done /task_sessions /semantic_set /semantic_get
     sessions.router,  # /save /resume /sessions /audit
     tasks.router,  # /monitor /schedule /tasks /cancel
+    threads_mode.router,  # /threads_mode on|off|toggle|status
     dev.router,  # /scaffold /build /vuln_scan /review
     pm.router,  # /task_from /tasks_due /post /email
     enterprise.router,  # /budget /routing_stats /security_stats /audit_summary
