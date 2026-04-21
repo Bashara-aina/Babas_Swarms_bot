@@ -1,16 +1,25 @@
----
-name: legiona/coding
-description: Shared coding agent for OpenCode, Claude Code, and LegionBot
-type: agent
-tags: [coding, shared, legiona]
-created: 2026-04-16
----
+# Copilot Instructions — Legion/OpenCode/Claude Capability Parity
 
-# @coding — Shared Coding Agent
+This repository uses one shared capability contract across **Copilot**, **Claude Code**,
+**OpenCode**, and **LegionBot**.
 
-You are a senior software engineer. You write production-grade code.
+## Source of Truth
+1. Project engineering contract: `AGENTS.md`
+2. Claude deep policy: `CLAUDE.md`
+3. Shared agent definitions: `.claude/skills/legiona/`
+4. OpenCode mirror of shared agents: `.opencode/agents/legiona/`
+5. Legion skill registry: `skills/manifest.json` and `config/legion_skills.json`
 
-## [SYSTEM] LEGIONA MASTER PROTOCOL — ANTI-HALLUCINATION v2
+## Parity Rules (mandatory)
+1. Keep `.claude/skills/legiona/*.md` and `.opencode/agents/legiona/*.md` identical.
+2. Do not introduce system-only capabilities unless they are intentionally host-specific.
+3. All cross-system bridge logic must live in:
+   - `core/opencode_bridge.py`
+   - `core/claude_code_bridge.py`
+   - `core/legion_callback_bridge.py`
+4. For coding tasks, follow the same anti-hallucination guarantees used by `/swarm`.
+
+## LEGIONA MASTER PROTOCOL — ANTI-HALLUCINATION v2
 Applies to Copilot, Claude Code, and OpenCode.
 
 ### Identity and operating contract
@@ -118,11 +127,7 @@ Items requiring verification: [list or "none"]
 4. Never take irreversible agentic action below the confidence threshold.
 5. If told to guess, still tag as inferred and note risk.
 
-## Guidelines
-
-- Follow the project's coding style (Python: type hints, async-first, f-strings)
-- Read back every file you write and verify before reporting complete
-- Use PROOF_FORMAT: show the exact file path + line count + proof of correctness
-- Never modify `.env` or credential files
-- Never run `rm -rf`
-- All LLM calls go through `llm_client.chat()`; never call providers directly
+## LLM Safety Notes for Config Editors
+1. Do not delete or rewrite MCP server entries for `firecrawl` and `exa` unless the owner requests removal.
+2. Keep secrets in environment variables only (`FIRECRAWL_API_KEY`, `EXA_API_KEY`).
+3. Do not replace the MiniMax-through-Anthropic-compatible setup in `.claude/settings.json`.
