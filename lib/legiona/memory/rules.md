@@ -2,6 +2,8 @@
 name: legiona-rules
 description: Operational rules for Legiona agent — anti-hallucination, anti-loop, confidence gating
 type: rules
+version: 3.0
+updated: 2026-04-21
 ---
 
 # Legiona Operational Rules
@@ -56,3 +58,11 @@ Never respond with "I think it's X" without the above format.
 2. **Blocker detection**: If BLOCKER_IF condition is met, stop immediately and report
 3. **Phase verification**: After each phase, verify state with specified PROOF_FORMAT commands
 4. **No partial completion**: Contract is not complete until all DONE_WHEN criteria are met with evidence
+
+## Wiki Hygiene Rules (2026-04-21)
+
+1. **Quarantine management**: wiki/_quarantine/ contains 1057 orphaned files from migration
+2. **No active content**: Quarantine files are stale duplicates, not to be restored
+3. **compile_state.json**: Tracks orphan state for triage operations
+4. **ORPHAN_TRIAGE.md**: Classifies quarantine files by type and action required
+5. **Timestamp verification**: Memory files must show `version:` and `updated:` fields

@@ -28,7 +28,7 @@ Operating contract:
 ### LLM Configuration
 - **Model**: MiniMax M2.7 via Anthropic-compatible endpoint
 - **Temperature**: 1.0 (M2.7 optimal for reasoning tasks)
-- **Reasoning split**: Enabled (interleaved CoT for complex problems)
+- **Reasoning split**: Enabled (interleaved CoT for complex problems) — `reasoning_split=True`
 - **Max tokens**: 32,768 (196,608 context window)
 
 ### Reasoning Protocol
@@ -166,7 +166,19 @@ After each agent run, `evolve()` updates global memory with:
 
 See [ANTI_HALLUCINATION.md](./ANTI_HALLUCINATION.md) for full documentation.
 
-Five-pillar system:
+**Eight-Pillar System:**
+| Pillar | Name | Implementation |
+|--------|------|----------------|
+| 1 | Verify Before Assert | Source citation required: file:line or test output |
+| 2 | Source Attribution | Format: `KNOWN: [fact] @ [file:line]` |
+| 3 | Proof Format Mandatory | PROOF_FORMAT output = only proof of completion |
+| 4 | Anti-Loop Guard | 2 retries → escalate, 3 failed → blocker |
+| 5 | Confidence Gating | <0.7 confidence → explicit uncertainty format |
+| 6 | Uncertainty Protocol | `UNCERTAIN: [unknown] \| POSSIBLE: [A] \| [B] \| NEEDED:` |
+| 7 | Self-Evolution Recording | `record_failure()` + `evolve()` after 5+ failures |
+| 8 | Regression Gating | >5% score drop → auto-revert via `_compare_and_revert()` |
+
+Five-pillar legacy system (for backward compatibility):
 1. **Evidence Hierarchy** — P1-P6 source confidence tagging
 2. **Chain-of-Verification (CoVe)** — verify each non-trivial claim
 3. **Anti-Fabrication Rules** — never make up facts, versions, signatures

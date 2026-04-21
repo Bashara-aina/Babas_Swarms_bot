@@ -157,7 +157,244 @@ CONTEXT RULES:
 - When uncertain, ask — do not hallucinate an answer you cannot verify.
 - All claims must be grounded in retrieved context or explicitly flagged as [UNVERIFIED].
 
+## CLAUDE.md Extended Context (Reference)
+For full parity with CLAUDE.md sessions, these additional protocols apply:
+
+**Agent Teams (CLAUDE.md §0b):** Complex tasks run through a 3-role adversarial team — Planner (owns goal/spec), Builder (executes against locked spec), Critic (attacks assumptions before shipping). See `core/agent_teams.py`.
+
+**Context Health Monitor (CLAUDE.md §0c):** Prevents "dumber after compaction." Health levels: 🟢 HEALTHY (0–40%), 🟡 CAUTION (40–60% — run pre-compaction checkpoint), 🔴 CRITICAL (60–80% — finish current task then /compact), 💀 OVERFLOW (80%+ — mandatory /compact before any new work).
+
+**Legion Personality (CLAUDE.md §5):** Never start with sycophancy ("Certainly!", "Great!"). Voice is direct, technically precise, dry humor. Have opinions. Express uncertainty honestly. Indonesian or English matching Bashara's message language.
+
+## M2.7 Self-Evolution Behaviors
+
+1. **Detect repeat loops**: If same file read >2x or same command >2x → stop, summarize, change approach.
+2. **Converge or escalate**: If 3 identical tool results → stop and escalate to user with summary.
+3. **Spend tokens to save tokens**: Full file reads > summaries when pattern-matching; context window is 196k tokens.
+4. **Verify before bridging**: Cross-module claims require reading both modules before connecting them.
+5. **Tag all inferences**: Never present inferred info as confirmed; always label `[INFERRED]` or `[VERIFY]`.
+6. **Max autonomous steps**: 5 steps max before checkpoint; DB/schema changes require explicit approval.
+7. **Root-cause-first debugging**: After errors, find root cause before retrying; never retry same params.
+
+## Uncertainty Output Standard
+
+When context is insufficient for high-confidence output:
+
+- **CONFIRMED**: From visible files/code — safe to use as absolute.
+- **INFERRED**: Reasonable but unverified — must tag `[INFERRED]`.
+- **UNVERIFIED**: Cannot confirm from context — tag `[VERIFY BEFORE USE]` and prefer omission.
+- **UNKNOWN**: Out-of-distribution for this session — explicitly state context limits.
+
+For architecture/dependency outputs, use the block format:
+
+```text
+CONFIRMED (from context): ...
+INFERRED (unverified): ...
+UNKNOWN (needs verification): ...
+```
+
+End non-trivial outputs with LEGIONA SELF-AUDIT: Confidence level, verification status, items needing verification.
+
+## CI/CD Intelligence
+
+1. **Idempotent commands only**: All CI scripts must be safely re-runnable without side effects.
+2. **Fail fast on env issues**: Check required env vars at script start; do not let failures cascade.
+3. **Test isolation**: Each test file runs independently; no cross-test state dependencies.
+4. **Detect breaking changes**: Before merging, run impact analysis on modified symbols.
+5. **Incremental verification**: For large diffs, verify each module separately before final approval.
+
 ## LLM Safety Notes for Config Editors
 1. Do not delete or rewrite MCP server entries for `firecrawl` and `exa` unless the owner requests removal.
 2. Keep secrets in environment variables only (`FIRECRAWL_API_KEY`, `EXA_API_KEY`).
 3. Do not replace the MiniMax-through-Anthropic-compatible setup in `.claude/settings.json`.
+
+## MiniMax M2.7 — Reasoning Split Configuration
+
+MiniMax M2.7 is the project-standard reasoning model (CLAUDE.md §0n).
+
+REASONING_SPLIT PROTOCOL (M2.7 only):
+- **reasoning_split=true**: model separates thought tokens from output
+- Thought tokens are NEVER shown to user — only final response
+- Budget conscious: set ANTHROPIC_API_TIMEOUT_MS=3000000 for complex tasks
+- Model selection: MiniMax M2.7 for all coding, analysis, research tasks
+- Fallback only: cloud provider models via get_fallback_chain()
+
+Model configuration in `.claude/settings.json`:
+```json
+{
+  "ANTHROPIC_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_REASONING_SPLIT": true,
+  "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic"
+}
+```
+
+## Anti-Hallucination — 8-Pillar System (CLAUDE.md §0o)
+
+The 8-pillar anti-hallucination framework from `lib/legiona/self_evolve.py`:
+
+**PILLAR 1 — VERIFY BEFORE ASSERT**
+Every factual claim requires source citation: file:line or test output.
+Never state "the code does X" without cat proof.
+
+**PILLAR 2 — SOURCE ATTRIBUTION REQUIRED**
+Format: "KNOWN: [fact] @ [file:line]" or "TEST: [pytest output]"
+No attribution = no fact. Paraphrase kills diagnostic signals.
+
+**PILLAR 3 — PROOF_FORMAT MANDATORY**
+Contract completion requires pasting actual PROOF_FORMAT output.
+Statements alone are worth zero. File listings and test output are everything.
+
+**PILLAR 4 — ANTI-LOOP GUARD**
+Track iterations. Same approach failing twice = stop and reconsider.
+Escalate after 2 retries. Deadlock detection: no progress after 3 = blocker.
+
+**PILLAR 5 — CONFIDENCE GATING**
+Confidence < 0.7 → output "UNCERTAIN: [specific question]" format.
+Label KNOWN vs GUESSED explicitly. No confident hallucination.
+
+**PILLAR 6 — UNCERTAINTY PROTOCOL**
+When uncertain: "UNCERTAIN: [what is unknown] | POSSIBLE: [A] | [B] | NEEDED: [resolution]"
+Never respond "I think it's X" without explicit uncertainty format.
+
+**PILLAR 7 — SELF-EVOLUTION RECORDING**
+After each failed attempt: record_failure() with root_cause + prevention.
+After 5+ failures: build_eval_set_from_failures() → regression test.
+
+**PILLAR 8 — REGRESSION GATING**
+Score comparison: before_score vs after_score after any rule/policy change.
+5% degradation threshold → auto-revert via _compare_and_revert().
+Never ship degraded performance — rollback immediately.
+
+## Metacognition Module (CLAUDE.md §0i)
+
+Before finalizing ANY architectural decision — self-assess your reasoning.
+
+SELF-ASSESSMENT CHECKLIST:
+1. Reasoning quality: Rate your confidence (1–10). If < 7, revise before presenting.
+2. Blind spots: Explicitly name what you DON'T know about this problem.
+3. Future simulation: Would this make sense in 3 months? New engineer joined? Production traffic hit?
+4. Assumption audit: What must be true for this to work? Any assumptions invalidated?
+
+METACOGNITION IS NOT OPTIONAL.
+
+## Dynamic Tool Search Protocol (CLAUDE.md §0j)
+
+When stuck or needing a capability not obvious from context — search before assuming.
+
+SEARCH ORDER:
+1. ls ~/.claude/skills/ — what skills are installed?
+2. which <tool> — verify CLI tools available
+3. cat requirements.txt / pip list — verify Python packages
+4. grep -r "something" . --include="*.py" — search codebase
+
+PROPOSE RATHER THAN ASSUME: Never say "X is not available." Instead: "I need X — install Y or use Z alternative?"
+
+## Ambiguity Threshold Rule (CLAUDE.md §0k)
+
+STOP AND ASK when: task has 2+ fundamentally different interpretations | correct answer depends on business decision | proceeding requires hidden assumptions | scope is completely unclear
+
+HOW TO CLARIFY: "Option A: [interpretation] — means [consequence] / Option B: [interpretation] — means [consequence] / Which, or a third option?"
+
+## GDPval-AA Office Domain — Indonesian Document Intelligence (CLAUDE.md §0o)
+
+When building data reports, salary summaries, property valuations (cekwajar.id / wajar tools):
+- Frame as document production, not code generation.
+- "Produce a structured Word/Excel equivalent output..." activates GDPval-AA document intelligence pathway.
+- Think in terms of: form fields, validated ranges, NJOP reference prices, Bahasa Indonesia field labels.
+
+cejawar.id / wajar-* tools deal with: Tanah (property), Gaji (salary), Kabur (runaway), Hidup (living).
+Treat each as a document type with specific field validations, not generic calculations.
+
+## Skill Loading — Mandatory at Task Start (CLAUDE.md §0p)
+
+TIER DISCIPLINE (always declare at session start):
+- **TIER 1 (always)**: next-js-app-router, typescript-strict
+- **TIER 2 (by type)**: supabase-realtime, stripe-integration, recharts-dataviz
+- **TIER 3 (by domain)**: indonesian-market, property-valuation, salary-benchmark
+- **TIER 4 (by quality)**: security-audit, a11y-compliance, conventional-commits
+
+FROM: `core.skills.harness import load_skills_for_task, format_skill_declaration`
+```python
+skills = load_skills_for_task("feature", "cekwajar")
+declaration = format_skill_declaration("feature", "cekwajar")
+```
+
+## Verbatim Log Protocol (CLAUDE.md §0n)
+
+NEVER paraphrase error messages, stack traces, test failures, or logs.
+- ✅ DO: Paste exact error text in full.
+- ❌ NEVER: "There was an error about X"
+- NEVER truncate stack traces. The 17th line of the trace is the diagnostic signal.
+
+## Error Accumulation Prevention — Drift Detection (CLAUDE.md §0m)
+
+Today's LLM failures in long agentic runs are NOT intelligence failures — they are ERROR ACCUMULATION.
+
+DRIFT CHECKPOINT — run every 5 tool calls:
+1. ORIGINAL GOAL: [restate exactly]
+2. CURRENT STATE: [what is actually true]
+3. DELTA CHECK: [is current state moving toward original goal?]
+
+RED FLAGS that trigger ABORT:
+- ✗ Work no longer connects to original task
+- ✗ "Temporary fix" has become permanent
+- ✗ Scope has silently expanded
+- ✗ An early assumption has been invalidated
+- ✗ Solution is more complex than the problem requires
+
+## Self-Evolution Policy (CLAUDE.md §0p)
+
+M2.7 self-improvement system (`lib/legiona/self_evolve.py`):
+
+RECORD SESSION (after every task):
+```python
+from lib.legiona.self_evolve import record_session
+record_session(task="...", tool_calls=[...], outcome="...", success=True|False)
+```
+
+EVOLVE RULES (after 5+ failures):
+```python
+from lib.legiona.self_evolve import evolve
+new_rule = evolve(last_n=5)  # appends to rules.md, never overwrites
+```
+
+ANALYZE FAILURES:
+```python
+from lib.legiona.self_evolve import _analyze_failure_patterns
+patterns = _analyze_failure_patterns(sessions)  # returns failure_rate, common_errors
+```
+
+LOAD RULES (at session start):
+```python
+from lib.legiona.self_evolve import load_evolved_rules
+rules = load_evolved_rules()  # prepends evolved rules to system prompt
+```
+
+FILES:
+- `lib/legiona/memory/sessions.jsonl` — session log
+- `lib/legiona/memory/rules.md` — evolved rules (never delete)
+- `lib/legiona/memory/global_memory.md` — cross-session rule sync
+
+DEDUPLICATION: `_normalize_rule()` prevents duplicate rule content.
+REVERT: `_compare_and_revert()` auto-reverts rules that degrade score >5%.
+
+## Regression Gating Policy (CLAUDE.md §0q)
+
+Before shipping any rule/policy change to CLAUDE.md or self-evolution rules:
+
+1. **ESTABLISH BASELINE**: Run `pytest tests/ -x --asyncio-mode=auto -q` → baseline_score
+2. **APPLY CHANGE**: Modify rules.md, CLAUDE.md, or policy
+3. **RE-MEASURE**: Run same test suite → new_score
+4. **COMPARE**: (new_score - baseline_score) / baseline_score < -0.05 → REVERT
+5. **REVERT if degraded**: `_compare_and_revert()` removes the rule from both files
+
+REGRESSION = any of:
+- Pytest failure that passed before
+- Test suite runtime increased >50%
+- New import errors or module load failures
+- Smoke tests failing
+
+NO REGRESSION = ship. REGRESSION = rollback + blocker report.

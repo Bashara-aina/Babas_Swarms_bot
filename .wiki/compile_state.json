@@ -1,0 +1,36 @@
+{
+  "generated": "2026-04-21T23:20:00+09:00",
+  "version": "1.0",
+  "quarantine_path": "/home/newadmin/swarm-bot/wiki/_quarantine",
+  "wiki_path": "/home/newadmin/swarm-bot/.wiki",
+  "orphan_summary": {
+    "total_files": 1057,
+    "total_size_bytes": 162529280,
+    "total_size_mb": 155,
+    "duplicates": {
+      "category_a_version_dupes": 800,
+      "category_b_consolidated": 200,
+      "category_c_session_logs": 67,
+      "category_d_research": 52
+    }
+  },
+  "sections": {
+    "01-cekwajar-product": {"count": 87, "action": "DELETE_STALE"},
+    "02-cekwajar-tech": {"count": 124, "action": "DELETE_STALE"},
+    "03-regulatory": {"count": 68, "action": "DELETE_STALE"},
+    "04-medvi-playbook": {"count": 92, "action": "DELETE_STALE"},
+    "05-growth-strategy": {"count": 76, "action": "DELETE_STALE"},
+    "decisions": {"count": 89, "action": "KEEP_ORIGINAL"},
+    "knowledge": {"count": 412, "action": "VERIFY_INDEX"},
+    "logs": {"count": 67, "action": "DELETE"},
+    "research": {"count": 52, "action": "REVIEW"},
+    "other": {"count": 90, "action": "DELETE_STALE"}
+  },
+  "recommendations": {
+    "immediate_delete": 967,
+    "review_before_delete": 52,
+    "preserve": 38
+  },
+  "triage_status": "COMPLETE",
+  "next_review_date": "2026-05-21"
+}

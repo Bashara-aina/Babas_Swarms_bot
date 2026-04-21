@@ -2,6 +2,8 @@
 name: legiona-global-memory
 description: Cross-session persistent memory for Legiona agent — survives across all Claude Code sessions
 type: reference
+version: 3.0
+updated: 2026-04-21
 ---
 
 # Legiona Global Memory
@@ -19,3 +21,9 @@ Bugs, edge cases, and workaround rules (populated by evolve() — tracked in .wi
 
 ## Self-Evolved Rules
 Rules synced from memory/rules.md by evolve() after each agent run. Includes anti-loop protocols, confidence gates, and surface-specific overrides. See .wiki/EVOLVED_RULES.md for full reference.
+
+## Wiki State (2026-04-21)
+- .wiki/: 39 subdirs, ~200+ markdown files, active content
+- wiki/_quarantine/: 1057 orphaned duplicate files (stale versions from migration)
+- compile_state.json: Created 2026-04-21 for orphan tracking
+- ORPHAN_TRIAGE.md: Created 2026-04-21 for quarantine classification

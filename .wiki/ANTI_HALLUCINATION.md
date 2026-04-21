@@ -87,6 +87,87 @@ Before any irreversible action:
 
 ---
 
+## Pillar 6: Source Provenance Tracking
+
+Every factual claim carries its source lineage — where it came from, when it was learned, and how to re-verify it.
+
+**Provenance fields per claim:**
+- `source_type`: file | conversation | user_input | external_api | inferred | memory
+- `source_path`: file path, conversation ID, or external reference
+- `timestamp`: when the information was acquired (ISO 8601)
+- `confidence_weight`: 0.0–1.0 derived from evidence hierarchy
+- `re_verification_cost`: low | medium | high | unknown
+
+**Example provenance block:**
+```
+PROVENANCE: file:///home/newadmin/swarm-bot/core/memory/tiers.py:45
+  source_type: file
+  timestamp: 2026-04-21T14:23:00Z
+  confidence_weight: 0.95
+  re_verification_cost: low
+```
+
+**Rule:** When citing code, always include file path + line number. Never cite memory as hard fact — memory has drift (see Pillar 8).
+
+**Implementation:**
+- `lib/legiona/memory/rules.md` — source attribution required for every factual claim
+- `core/memory/tiers.py` — ArchivalMemory stores `source` field for every stored memory
+- `lib/legiona/memory/global_memory.md` — provenance-tagged project facts from evolve()
+- `observation_store.py` — captures provenance metadata with every observation
+
+---
+
+## Pillar 7: Consistency Verification
+
+Before acting on stored information, verify it is consistent with current context. Information that contradicts itself across memory tiers or against live filesystem state is flagged as unreliable.
+
+**Consistency check types:**
+1. **Cross-tier verification**: CoreMemory vs ArchivalMemory — contradictory facts trigger warning
+2. **Semantic drift detection**: Chroma semantic search vs mem0 records — when the two semantic stores diverge, surface the inconsistency
+3. **Temporal context check**: Conversation history vs current facts — verify if stored "facts" are still valid
+
+**Drift threshold:** 0.15 cosine similarity difference triggers `drift_detected` status
+
+**Implementation:**
+- `memory_manager.py::validate_consistency()` — runs semantic alignment check between mem0 and Chroma, reports `average_drift`, `max_drift` against `drift_threshold`
+- `build_context_block()` — reconstructs memory state from CoreMemory + profile + recent RecallMemory, allowing the agent to spot contradictions before acting
+- `progressive_search()` — Layer 1 (index) + Layer 2 (timeline) + Layer 3 (full) enables progressive consistency checking without token overflow
+
+**Rule:** If `validate_consistency()` returns `status: drift_detected`, treat stored facts as `UNCERTAIN` until re-verified against live context.
+
+---
+
+## Pillar 8: Temporal Decay Awareness
+
+Information has a half-life. Memory stores timestamps on every record. Facts older than system-relevant thresholds are treated as stale.
+
+**Decay tiers:**
+| Age | Classification | Action |
+|-----|----------------|--------|
+| < 24h | Fresh | Use directly, no caveats |
+| 1–7 days | Aging | Tag `[MEMORY_AGE: N days]` |
+| 1–4 weeks | Stale | Re-verify before confident use |
+| > 1 month | Historical | Only use with explicit `[VERIFY_AGAINST_CURRENT_CONTEXT]` tag |
+
+**Stale info markers:**
+- `created_at` field on every ArchivalMemory record
+- `last_accessed` + `access_count` tracking — frequently accessed memories are considered more current
+- `sessions.jsonl` records session context — old sessions are historical, not authoritative
+
+**Auto-decay rules:**
+- CoreMemory auto-trims to ~4000 chars (see `MAX_CHARS` in `tiers.py::CoreMemory`) — oldest/lowest-importance entries evicted first
+- Importance < 0.85 → CoreMemory only (not archived for quick context)
+- Importance ≥ 0.85 → promoted to CoreMemory key
+
+**Implementation:**
+- `ArchivalMemory` stores `created_at` and `last_accessed` on every record, indexed for time-based queries
+- `CoreMemory._save()` enforces 4000 char cap by trimming oldest entries
+- `auto_extract_and_save()` tags extracted facts with source + timestamp for future age judgment
+
+**Rule:** When using information from ArchivalMemory, include the age: "User prefers X (archived 3 weeks ago — re-verify if critical)"
+
+---
+
 ## Surface Application
 
 | Surface | Anti-Hallucination Status |

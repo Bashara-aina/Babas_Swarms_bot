@@ -33,7 +33,7 @@ import subprocess
 import sys
 import time
 from contextvars import copy_context
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 from urllib import error as urlerror
@@ -178,10 +178,7 @@ def _install_outbound_logging(bot: Bot) -> None:
         )
         return await original_send_photo(chat_id, photo, *args, **kwargs)
 
-    bot.send_message = send_message_logged  # type: ignore[assignment]
-    bot.edit_message_text = edit_message_text_logged  # type: ignore[assignment]
-    bot.send_photo = send_photo_logged  # type: ignore[assignment]
-    logger.info("Activity outbound logging hooks installed (send/edit/photo)")
+    
 
 
 # ── Graceful Shutdown ─────────────────────────────────────────────────────────
@@ -219,11 +216,27 @@ async def _probe_llm() -> tuple[bool, str]:
         import litellm
 
         primary = os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
-        result = await litellm.acompletion(
-            model=primary,
-            messages=[{"role": "user", "content": "ping"}],
-            max_tokens=2,
-        )
+        if primary.lower().startswith("minimax/"):
+            from lib.legiona.minimax_client import LegionaOutput, create_structured_completion
+
+            await create_structured_completion(
+                model=primary,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Return concise status in the provided response schema.",
+                    },
+                    {"role": "user", "content": "ping"},
+                ],
+                response_model=LegionaOutput,
+                max_tokens=120,
+            )
+        else:
+            await litellm.acompletion(
+                model=primary,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=2,
+            )
         return True, primary
     except Exception as e:
         return False, str(e)[:80]
@@ -381,7 +394,6 @@ _shared._start_time = time.time()
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 dp.message.middleware(ActivityLogMiddleware())
-_install_outbound_logging(bot)
 logger.info("Activity inbound logging middleware installed")
 
 # Register all handler routers
@@ -744,6 +756,14 @@ async def on_startup(bot: Bot) -> None:
     except Exception as e:
         logger.warning("Scheduler init failed (non-fatal): %s", e)
 
+    # Initialize Legiona autonomous maintenance scheduler (weekly evolve, friday eval, monthly dedup)
+    try:
+        from lib.legiona.scheduler import start_scheduler as start_legiona_scheduler
+        _shared._legiona_scheduler = start_legiona_scheduler(bot)
+        logger.info("Legiona scheduler initialized")
+    except Exception as e:
+        logger.warning("Legiona scheduler init failed (non-fatal): %s", e)
+
     # Initialize memory DB
     try:
         from tools.memory import init_memory_db
@@ -784,7 +804,7 @@ async def on_startup(bot: Bot) -> None:
     # Schedule daily briefing at 7:30 AM via tools/briefing.py
     # NOTE: ProactiveScheduler in core/proactive/scheduler.py ALSO fires a briefing at DAILY_BRIEFING_HOUR (default 8AM).
     # This creates duplicate briefings. For now, let ProactiveScheduler handle it (8AM) and disable this one.
-    # TODO: Consolidate into single briefing mechanism — see ADR-006
+    # Planned: consolidate into a single briefing mechanism (see ADR-006)
     FEATURE_BRIEFING_CONSOLIDATION_ENABLED = False  # Planned: v2.0
     if not FEATURE_BRIEFING_CONSOLIDATION_ENABLED:
         logger.info("Briefing consolidation is planned for v2.0 — not yet available.")
@@ -846,6 +866,47 @@ async def on_startup(bot: Bot) -> None:
         logger.info("Nightly memory consolidation scheduled for 02:00")
     except Exception as e:
         logger.warning("Memory consolidation schedule failed (non-fatal): %s", e)
+
+    # Schedule weekly memory consistency validation at 03:00 AM (Monday)
+    try:
+
+        async def _run_memory_consistency_weekly() -> None:
+            while True:
+                now = datetime.now().astimezone()
+                target = now.replace(hour=3, minute=0, second=0, microsecond=0)
+                days_ahead = (0 - target.weekday()) % 7  # Monday
+                target = target + timedelta(days=days_ahead)
+                if target <= now:
+                    target = target + timedelta(days=7)
+
+                await asyncio.sleep((target - now).total_seconds())
+                try:
+                    from core.memory.memory_manager import get_memory
+
+                    report = await get_memory().validate_consistency(user_id=str(ALLOWED_USER_ID))
+                    logger.info("Weekly memory consistency check: %s", report)
+
+                    if report.get("status") == "drift_detected":
+                        await bot.send_message(
+                            ALLOWED_USER_ID,
+                            "<b>⚠️ Memory Consistency Alert</b>\n"
+                            f"Average drift: <code>{float(report.get('average_drift', 0.0)):.4f}</code>\n"
+                            f"Max drift: <code>{float(report.get('max_drift', 0.0)):.4f}</code>\n"
+                            f"Threshold: <code>{float(report.get('threshold', 0.15)):.4f}</code>\n"
+                            f"Samples: <code>{int(report.get('sample_size', 0))}</code>",
+                            parse_mode="HTML",
+                        )
+                except Exception as check_exc:
+                    logger.warning("Memory consistency validation failed: %s", check_exc)
+
+                await asyncio.sleep(60)
+
+        asyncio.create_task(_run_memory_consistency_weekly()).add_done_callback(
+            lambda t: logger.error("Memory consistency weekly crashed: %s", t.exception()) if t.exception() else None
+        )
+        logger.info("Weekly memory consistency validation scheduled for Monday 03:00")
+    except Exception as e:
+        logger.warning("Memory consistency schedule failed (non-fatal): %s", e)
 
     # Schedule daily GitHub trending intelligence at 09:00 AM
     try:
@@ -1026,6 +1087,18 @@ async def on_startup(bot: Bot) -> None:
     except Exception as e:
         logger.warning("MCP manager init failed (non-fatal): %s", e)
 
+    # Optional: keep GitNexus graph index fresh for Claude/OpenCode/Legion prompt context
+    if os.getenv("LEGION_GITNEXUS_AUTO_ANALYZE", "0").strip().lower() in ("1", "true", "yes", "on"):
+        try:
+            from core.gitnexus_bridge import run_gitnexus_analyze
+
+            asyncio.create_task(run_gitnexus_analyze(with_skills=True)).add_done_callback(
+                lambda t: logger.warning("GitNexus auto-analyze failed: %s", t.exception()) if t.exception() else None
+            )
+            logger.info("GitNexus auto-analyze scheduled")
+        except Exception as e:
+            logger.warning("GitNexus auto-analyze init failed (non-fatal): %s", e)
+
     # fix: wrap set_my_commands in try/except — Telegram API slowness on startup
     # must not prevent the rest of the boot sequence from completing.
     try:
@@ -1092,6 +1165,7 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="tasks_due", description="Show pending tasks"),
                 # Content
                 BotCommand(command="post", description="Draft social media post"),
+                BotCommand(command="threads_mode", description="Toggle Threads campaign mode"),
                 BotCommand(command="brand_check", description="Monitor brand mentions"),
                 # Code Quality
                 BotCommand(command="review", description="AI code review"),
@@ -1130,6 +1204,7 @@ async def on_startup(bot: Bot) -> None:
                 BotCommand(command="loop_resume", description="Resume paused loop"),
                 BotCommand(command="multi_execute", description="Alias multi-agent compare"),
                 BotCommand(command="budget", description="Cost tracking dashboard"),
+                BotCommand(command="soul", description="Show current SOUL.md"),
                 BotCommand(command="capabilities", description="Honest capability status"),
                 BotCommand(command="self_report", description="24h activity summary"),
                 BotCommand(command="metrics", description="Performance metrics dashboard"),
@@ -1221,6 +1296,11 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
     try:
         if _harvester_scheduler:
             await _harvester_scheduler.stop()
+    except Exception:
+        pass
+    try:
+        if getattr(_shared, "_legiona_scheduler", None):
+            _shared._legiona_scheduler.shutdown(wait=False)
     except Exception:
         pass
     try:

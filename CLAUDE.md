@@ -137,6 +137,136 @@ If you can't state what changed and why in 2 sentences — the change is too com
 0m. ERROR ACCUMULATION PREVENTION — DRIFT DETECTION
 Today's LLM failures in long agentic runs are NOT intelligence failures — they are ERROR ACCUMULATION.
 
+0n. MiniMax M2.7 — DEFAULT MODEL CONFIGURATION
+MiniMax M2.7 is the project-standard reasoning model, configured via Claude Code settings:
+  ANTHROPIC_MODEL=MiniMax-M2.7
+  ANTHROPIC_REASONING_SPLIT=true          ← enabled: thinking token budgeting
+  ANTHROPIC_DEFAULT_SONNET_MODEL=MiniMax-M2.7
+  ANTHROPIC_DEFAULT_OPUS_MODEL=MiniMax-M2.7
+  ANTHROPIC_DEFAULT_HAIKU_MODEL=MiniMax-M2.7
+  ANTHROPIC_BASE_URL=https://api.minimax.io/anthropic
+
+REASONING_SPLIT PROTOCOL (M2.7 only):
+  - reasoning_split=true: model separates thought tokens from output
+  - Thought tokens are NEVER shown to user — only final response
+  - Budget conscious: set ANTHROPIC_API_TIMEOUT_MS=3000000 for complex tasks
+  - Model selection: MiniMax M2.7 for all coding, analysis, research tasks
+  - Fallback only: cloud provider models via get_fallback_chain()
+
+0o. Anti-Hallucination — 8-Pillar System
+The 8-pillar anti-hallucination framework (from lib/legiona/self_evolve.py):
+
+  PILLAR 1 — VERIFY BEFORE ASSERT
+    Every factual claim requires source citation: file:line or test output.
+    Never state "the code does X" without cat proof.
+
+  PILLAR 2 — SOURCE ATTRIBUTION REQUIRED
+    Format: "KNOWN: [fact] @ [file:line]" or "TEST: [pytest output]"
+    No attribution = no fact. Paraphrase kills diagnostic signals.
+
+  PILLAR 3 — PROOF_FORMAT MANDATORY
+    Contract completion requires pasting actual PROOF_FORMAT output.
+    Statements alone are worth zero. File listings and test output are everything.
+
+  PILLAR 4 — ANTI-LOOP GUARD
+    Track iterations. Same approach failing twice = stop and reconsider.
+    Escalate after 2 retries. Deadlock detection: no progress after 3 = blocker.
+
+  PILLAR 5 — CONFIDENCE GATING
+    Confidence < 0.7 → output "UNCERTAIN: [specific question]" format.
+    Label KNOWN vs GUESSED explicitly. No confident hallucination.
+
+  PILLAR 6 — UNCERTAINTY PROTOCOL
+    When uncertain: "UNCERTAIN: [what is unknown] | POSSIBLE: [A] | [B] | NEEDED: [resolution]"
+    Never respond "I think it's X" without explicit uncertainty format.
+
+  PILLAR 7 — SELF-EVOLUTION RECORDING
+    After each failed attempt: record_failure() with root_cause + prevention.
+    After 5+ failures: build_eval_set_from_failures() → regression test.
+
+  PILLAR 8 — REGRESSION GATING
+    Score comparison: before_score vs after_score after any rule/policy change.
+    5% degradation threshold → auto-revert via _compare_and_revert().
+    Never ship degraded performance — rollback immediately.
+
+0p. Self-Evolution Policy
+M2.7 self-improvement system (lib/legiona/self_evolve.py):
+
+  RECORD SESSION (after every task):
+    from lib.legiona.self_evolve import record_session
+    record_session(task="...", tool_calls=[...], outcome="...", success=True|False)
+
+  EVOLVE RULES (after 5+ failures):
+    from lib.legiona.self_evolve import evolve
+    new_rule = evolve(last_n=5)  # appends to rules.md, never overwrites
+
+  ANALYZE FAILURES:
+    from lib.legiona.self_evolve import _analyze_failure_patterns
+    patterns = _analyze_failure_patterns(sessions)  # returns failure_rate, common_errors
+
+  LOAD RULES (at session start):
+    from lib.legiona.self_evolve import load_evolved_rules
+    rules = load_evolved_rules()  # prepends evolved rules to system prompt
+
+  FILES:
+    lib/legiona/memory/sessions.jsonl  ← session log
+    lib/legiona/memory/rules.md         ← evolved rules (never delete)
+    lib/legiona/memory/global_memory.md ← cross-session rule sync
+
+  DEDUPLICATION: _normalize_rule() prevents duplicate rule content.
+  REVERT: _compare_and_revert() auto-reverts rules that degrade score >5%.
+
+0q. Regression Gating Policy
+Before shipping any rule/policy change to CLAUDE.md or self-evolution rules:
+
+  1. ESTABLISH BASELINE: Run pytest tests/ -x --asyncio-mode=auto -q → baseline_score
+  2. APPLY CHANGE: Modify rules.md, CLAUDE.md, or policy
+  3. RE-MEASURE: Run same test suite → new_score
+  4. COMPARE: (new_score - baseline_score) / baseline_score < -0.05 → REVERT
+  5. REVERT if degraded: _compare_and_revert() removes the rule from both files
+
+  REGRESSION = any of:
+    - Pytest failure that passed before
+    - Test suite runtime increased >50%
+    - New import errors or module load failures
+    - Smoke tests (Section 12) failing
+
+  NO REGRESSION = ship. REGRESSION = rollback + blocker report.
+
+0r. Context Health Policy (expanded from 0g)
+Context overflow causes "noticedly dumber after compaction" — prevent with monitoring:
+
+  HEALTH ASSESSMENT:
+    from core.context_health import get_context_monitor
+    monitor = get_context_monitor("/home/newadmin/swarm-bot")
+    health = monitor.assess(context_chars=85000)
+    print(monitor.format_health_report(health))
+
+  HEALTH LEVELS:
+    🟢 HEALTHY (0–40%): Normal operation
+    🟡 CAUTION (40–60%): Pre-compaction checkpoint required
+    🔴 CRITICAL (60–80%): Finish current task, then /compact
+    💀 OVERFLOW (80%+): MANDATORY /compact before ANY new work
+
+  MANDATORY ACTIONS BY LEVEL:
+    HEALTHY  → normal flow
+    CAUTION  → run wiki_health.py checkpoint, then continue
+    CRITICAL → finish current logical unit, then /compact
+    OVERFLOW → /compact immediately, reload .claude/memory_bootstrap.md before continuing
+
+  PRE-COMPACTION CHECKPOINT (mandatory before 60%):
+    python3 .claude/scripts/wiki_health.py
+    Writes: .claude/.checkpoint_index.json + .claude/memory_bootstrap.md
+
+  POST-COMPACTION RELOAD ORDER:
+    1. Read .claude/memory_bootstrap.md
+    2. Read DECISIONS.md
+    3. Read FAILURES.md
+    4. git log --oneline -10 && git status
+
+0m. ERROR ACCUMULATION PREVENTION — DRIFT DETECTION
+Today's LLM failures in long agentic runs are NOT intelligence failures — they are ERROR ACCUMULATION.
+
 DRIFT CHECKPOINT — run every 5 tool calls:
   1. ORIGINAL GOAL: [restate exactly]
   2. CURRENT STATE: [what is actually true]
