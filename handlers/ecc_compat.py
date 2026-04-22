@@ -29,8 +29,8 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-import router as agents
 import handlers.shared as _shared
+import router as agents
 from handlers.shared import _key_status, _user_thread, is_allowed, send_chunked
 from llm_client import chat
 
@@ -357,50 +357,22 @@ async def cmd_instinct_import(msg: Message) -> None:
 
 @router.message(Command("loop_start"))
 async def cmd_loop_start(msg: Message) -> None:
-    """ECC-style alias for /loop."""
+    """ECC-style alias for /loop — redirects to /loop."""
     if not is_allowed(msg):
         return
     goal = _extract_arg(msg.text or "", "loop_start")
     if not goal:
-        await msg.answer("usage: <code>/loop_start &lt;goal&gt;</code>", parse_mode="HTML")
+        await msg.answer(
+            "usage: <code>/loop_start &lt;goal&gt;</code>\n\n"
+            "This command is deprecated. Use <code>/loop &lt;goal&gt;</code> instead.",
+            parse_mode="HTML",
+        )
         return
-
-    from tools.autonomous_loop import LoopConfig, get_active_loop, run_autonomous_loop
-
-    if not msg.from_user:
-        return
-
-    if get_active_loop(msg.from_user.id):
-        await msg.answer("A loop is already running. Use /loop_stop first.")
-        return
-
-    thread_id = _user_thread.get(msg.from_user.id)
-    _bot = msg.bot
-    if not _bot:
-        await msg.answer("Internal error: bot context unavailable.")
-        return
-
     await msg.answer(
-        f"<b>🔁 Loop started</b>\n"
-        f"Goal: <code>{html_mod.escape(goal[:200])}</code>\n"
-        f"Stop anytime: <code>/loop_stop</code>",
+        "<code>/loop_start</code> is deprecated.\n"
+        "Use <code>/loop &lt;goal&gt;</code> instead.",
         parse_mode="HTML",
     )
-
-    async def notify(text: str) -> None:
-        try:
-            await _bot.send_message(msg.chat.id, text, parse_mode="HTML")
-        except Exception:
-            await _bot.send_message(msg.chat.id, html_mod.escape(text), parse_mode="HTML")
-
-    # Fire and forget — loop runs in background with notify_cb updates
-    asyncio.create_task(run_autonomous_loop(
-        user_id=msg.from_user.id,
-        goal=goal,
-        notify_cb=notify,
-        config=LoopConfig(),
-        thread_id=thread_id,
-    ))
 
 
 @router.message(Command("code_review"))

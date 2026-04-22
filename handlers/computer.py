@@ -6,6 +6,7 @@ import asyncio
 import html as html_mod
 import re
 from pathlib import Path
+from typing import Any
 
 from aiogram import F, Router
 from aiogram.filters import Command
@@ -56,14 +57,14 @@ def _is_complex_task(task: str) -> bool:
     multi_action = action_mentions >= 2
 
     # Ambiguous task indicators: vague words like "it", "them", "the thing"
-    has_ambiguity = any(w in task_lower for w in ["it", "them", "that thing", "whatever", "somewhere"])
+    # (used for future complexity scoring enhancement)
 
     return has_connectors or (long_task and multi_action) or (has_connectors and long_task)
 
 
 async def _plan_task(task: str, max_iterations: int = 3) -> dict[str, Any]:
     """Generate a plan for complex tasks using LLM-based planning.
-    
+
     Returns a dict with:
       - steps: list of step descriptions
       - expected_outcomes: what success looks like at each step
@@ -275,10 +276,6 @@ async def cmd_do(msg: Message) -> None:
                 return
 
             # Send final report
-            steps_summary = "\n".join(
-                f"  step {s.step_number}: {s.parsed_action.action_type.value}"
-                for s in result.steps
-            )
             summary = (
                 f"\u2705 <b>Task complete</b>\n\n"
                 f"Task: <i>{html_mod.escape(result.task[:80])}</i>\n"
@@ -380,10 +377,6 @@ async def cmd_autopilot(msg: Message) -> None:
             return
 
         # Send final report
-        steps_summary = "\n".join(
-            f"  step {s.step_number}: {s.parsed_action.action_type.value}"
-            for s in result.steps
-        )
         summary = (
             f"\u2705 <b>Autopilot complete</b>\n\n"
             f"Task: <i>{html_mod.escape(result.task[:80])}</i>\n"

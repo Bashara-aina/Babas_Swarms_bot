@@ -42,6 +42,11 @@ from core.relationship_memory import get_relationship_context
 from core.soul_engine import build_soul_context
 from core.system_prompt_builder import SystemPromptBuilder
 from tools.letta_personality import build_persona_block, get_persona_state, update_emotion
+from tools.memory import build_memory_context
+from tools.memoryos_client import mos_retrieve_context
+from tools.open_memory import build_om_context, om_search
+from tools.persistence import get_instinct_context
+from tools.skill_loader import get_skills_for_agent
 
 try:
     import computer_agent
@@ -755,7 +760,6 @@ async def _agent_loop_inner(
     model = chain[0]
     steps_taken: list[str] = []
     consecutive_failures = 0
-    total_tokens_used = 0
 
     def _advance_model() -> bool:
         nonlocal model, consecutive_failures

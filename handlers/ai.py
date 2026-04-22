@@ -8,18 +8,19 @@ import time
 
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import ContextTypes, Message
 
+import handlers.shared as _shared
 import router as agents
+
 from .shared import (
-    _user_thread,
-    _keep_typing,
     _execute_chat,
+    _keep_typing,
     _run_agent_loop,
+    _user_thread,
     is_allowed,
     send_chunked,
 )
-import handlers.shared as _shared
 
 router = Router()
 
@@ -133,8 +134,8 @@ async def cmd_swarm(msg: Message) -> None:
             except Exception:
                 topology = "sequential"
 
-        from core.swarm_topologies import run_topology
         from core.swarm_agent_selector import get_selector
+        from core.swarm_topologies import run_topology
 
         selector = get_selector()
         team = selector.select(task, top_k=5, min_score=0.8)
@@ -308,6 +309,7 @@ async def cmd_multi_execute(msg: Message) -> None:
 
     try:
         from llm_client import chat
+        from tools.capability_metrics import record_capability_run
         from tools.quality_guard import (
             analyze_answer_consistency,
             build_evidence_envelope,
@@ -315,7 +317,6 @@ async def cmd_multi_execute(msg: Message) -> None:
             is_research_like,
             verify_and_repair,
         )
-        from tools.capability_metrics import record_capability_run
 
         user_id = str(msg.from_user.id) if msg.from_user else "0"
 
@@ -485,13 +486,13 @@ async def cmd_multi_plan(msg: Message) -> None:
 
     try:
         from llm_client import chat
+        from tools.capability_metrics import record_capability_run
         from tools.quality_guard import (
             analyze_answer_consistency,
             build_evidence_envelope,
             enforce_grounded_answer,
             verify_and_repair,
         )
-        from tools.capability_metrics import record_capability_run
 
         await _phase("⚙️ [Act] running 3 planning agents in parallel")
         agent_keys = ["architect", "coding", "analyst"]
@@ -575,40 +576,20 @@ async def cmd_multi_plan(msg: Message) -> None:
         )
 
 
-# ── /orchestrate ──────────────────────────────────────────────────────────────
+# ── /orchestrate_legacy — DEPRECATED ─────────────────────────────────────────
 @router.message(Command("orchestrate_legacy"))
 async def cmd_orchestrate(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    task = (msg.text or "").removeprefix("/orchestrate").strip()
-    if not task:
-        await msg.answer("usage: <code>/orchestrate &lt;complex task&gt;</code>", parse_mode="HTML")
-        return
-    status_msg = await msg.answer("\U0001f3af decomposing task\u2026")
-
-    # FIX #1: progress_cb was a bare lambda (never awaited) — replaced with proper async def
-    async def _progress(s: str) -> None:
-        try:
-            await status_msg.edit_text(f"\u23f3 {s}", parse_mode="HTML")
-        except Exception:
-            pass
-
-    try:
-        from llm_client import chunk_output
-        from tools.orchestrate_engine import orchestrate_task
-
-        result = await orchestrate_task(task, progress_cb=_progress)
-
-        # FIX #10: Use chunk_output() to avoid cutting mid-HTML tag
-        chunks = chunk_output(result, max_length=4000)
-        await status_msg.edit_text(chunks[0], parse_mode="HTML")
-        for chunk in chunks[1:]:
-            await msg.answer(chunk, parse_mode="HTML")
-    except Exception as e:
-        await status_msg.edit_text(
-            f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
-            parse_mode="HTML",
-        )
+    """Deprecated: /orchestrate_legacy has been replaced."""
+    await msg.answer(
+        "⚠️ <b>Deprecated:</b> /orchestrate_legacy is no longer available.\n\n"
+        "替代方案 / Alternatives:\n"
+        "• <code>/swarm &lt;task&gt;</code> — multi-agent team execution (recommended)\n"
+        "• <code>/multi_execute &lt;task&gt;</code> — run same task with multiple agents\n"
+        "• <code>/multi_plan &lt;task&gt;</code> — generate 3 planning approaches in parallel\n"
+        "• <code>/loop &lt;goal&gt;</code> — autonomous plan→execute loop with safety bounds\n\n"
+        "For complex task decomposition, use <code>/swarm</code> with topology flag.",
+        parse_mode="HTML",
+    )
 
 
 # ── /loop — Autonomous plan-execute loop ─────────────────────────────────────
@@ -628,7 +609,7 @@ async def cmd_loop(msg: Message) -> None:
         )
         return
 
-    from tools.autonomous_loop import get_active_loop, run_autonomous_loop, LoopConfig
+    from tools.autonomous_loop import LoopConfig, get_active_loop, run_autonomous_loop
 
     if get_active_loop(msg.from_user.id):
         await msg.answer(
@@ -691,7 +672,7 @@ async def cmd_loop_status(msg: Message) -> None:
     """Show status of the current autonomous loop."""
     if not is_allowed(msg):
         return
-    from tools.autonomous_loop import get_loop_state, format_loop_status_html
+    from tools.autonomous_loop import format_loop_status_html, get_loop_state
 
     state = get_loop_state(msg.from_user.id)
     if not state:
@@ -767,13 +748,24 @@ async def handle_nl(msg: Message) -> None:
     if not task or task.startswith("/"):
         return
 
+    # Threads campaign mode intercept — routes free-text prompts to computer workflow.
+    try:
+        from handlers.threads_mode import handle_threads_mode_prompt, is_threads_mode_enabled
+
+        if await is_threads_mode_enabled():
+            handled = await handle_threads_mode_prompt(msg, task, _run_agent_loop)
+            if handled:
+                return
+    except Exception:
+        pass
+
     # ── PRIMARY PATH: Autonomous router (guaranteed attempt, not optional) ───
     # The autonomous router handles NL intelligently — it's the default, not a fallback.
     # Only drop to keyword matching below if the router module itself can't be imported.
     _router_handled = False
     try:
-        from llm_client import auto_router, init_humanization_layer
         from handlers.message_handler import handle_plain_message
+        from llm_client import auto_router, init_humanization_layer
 
         # Ensure router is initialized — try once if not ready
         if auto_router is None:
@@ -802,7 +794,7 @@ async def handle_nl(msg: Message) -> None:
 
     # Check OpenClaw delegation first
     try:
-        from tools.openclaw_bridge import should_delegate_to_openclaw, is_openclaw_running, delegate_to_openclaw
+        from tools.openclaw_bridge import delegate_to_openclaw, is_openclaw_running, should_delegate_to_openclaw
 
         if should_delegate_to_openclaw(task):
             if await is_openclaw_running():

@@ -38,12 +38,18 @@ async def cmd_task_from(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
     typing_task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
     try:
-        from tools.project_manager import transcript_to_tasks, save_tasks_local
+        from tools.project_manager import save_tasks_local, transcript_to_tasks
 
         tasks = await transcript_to_tasks(text)
         await save_tasks_local(tasks, "telegram")
         typing_task.cancel()
         await status_msg.delete()
+        # ── Structured output ───────────────────────────────────────────────
+        output = {
+            "success": True,
+            "data": {"tasks": tasks, "count": len(tasks)},
+            "error": None,
+        }
         lines = [f"<b>Extracted {len(tasks)} tasks:</b>\n"]
         priority_icons = {"high": "!!", "mid": "!", "low": ""}
         for t in tasks:
@@ -54,6 +60,7 @@ async def cmd_task_from(msg: Message) -> None:
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /tasks_due ────────────────────────────────────────────────────────────────
@@ -65,27 +72,23 @@ async def cmd_tasks_due(msg: Message) -> None:
         from tools.project_manager import check_deadlines
 
         result = await check_deadlines()
+        output = {"success": True, "data": result, "error": None}
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
+        output = {"success": False, "data": None, "error": str(e)}
         await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
 
 
-# ── /task_done ────────────────────────────────────────────────────────────────
+# ── /task_done — REDIRECTED to /mneme_done (canonical in session_handler.py) ───
 @router.message(Command("task_done"))
 async def cmd_task_done(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    task_id_str = (msg.text or "").removeprefix("/task_done").strip()
-    if not task_id_str:
-        await msg.answer("usage: <code>/task_done &lt;id&gt;</code>", parse_mode="HTML")
-        return
-    try:
-        from tools.project_manager import complete_task
-
-        result = await complete_task(int(task_id_str))
-        await msg.answer(result)
-    except Exception as e:
-        await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
+    await msg.answer(
+        "<code>/task_done</code> is deprecated.\n"
+        "Use <code>/mneme_done &lt;task_id&gt;</code> instead.",
+        parse_mode="HTML",
+    )
 
 
 # ── /delegate — OpenClaw delegation ───────────────────────────────────────────
@@ -105,8 +108,10 @@ async def cmd_delegate(msg: Message) -> None:
         from tools.openclaw_bridge import delegate_to_openclaw
 
         result = await delegate_to_openclaw(task)
+        output = {"success": True, "data": result, "error": None}
         await send_chunked(msg, result, model_used="openclaw")
     except Exception as e:
+        output = {"success": False, "data": None, "error": str(e)}
         await msg.answer(f"delegate error: <code>{e}</code>", parse_mode="HTML")
 
 
@@ -142,13 +147,16 @@ async def cmd_post(msg: Message) -> None:
         else:
             typing_task.cancel()
             await status_msg.edit_text("platforms: linkedin, tweet, thread")
+            output = {"success": False, "data": None, "error": "unknown platform"}
             return
         typing_task.cancel()
         await status_msg.delete()
+        output = {"success": True, "data": result, "error": None}
         await msg.answer(f"<b>{platform.upper()} draft:</b>\n\n{result}", parse_mode="HTML")
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /brand_check — brand monitoring ───────────────────────────────────────────
@@ -169,10 +177,15 @@ async def cmd_brand_check(msg: Message) -> None:
         result = await monitor_brand([keyword])
         typing_task.cancel()
         await status_msg.delete()
+        output = {"success": True, "data": result, "error": None}
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+        try:
+            await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+        except Exception:
+            pass
+        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /email — email management ────────────────────────────────────────────────
@@ -192,13 +205,18 @@ async def cmd_email(msg: Message) -> None:
             result = await check_inbox(limit=10, unread_only=True)
             typing_task.cancel()
             await status_msg.delete()
+            output = {"success": True, "data": result, "error": None}
             await msg.answer(
                 f"<pre>{result[:3800]}</pre>",
                 parse_mode="HTML",
             )
         except Exception as e:
             typing_task.cancel()
-            await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+            try:
+                await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+            except Exception:
+                pass
+            output = {"success": False, "data": None, "error": str(e)}
         return
 
     parts = text.split(maxsplit=1)
@@ -207,27 +225,51 @@ async def cmd_email(msg: Message) -> None:
 
     if subcmd == "check":
         status_msg = await msg.answer("📧 checking…")
-        from tools.email_client import check_inbox
+        try:
+            from tools.email_client import check_inbox
 
-        result = await check_inbox(limit=10, unread_only="unread" in arg or not arg)
-        await status_msg.delete()
-        await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+            result = await check_inbox(limit=10, unread_only="unread" in arg or not arg)
+            await status_msg.delete()
+            output = {"success": True, "data": result, "error": None}
+            await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+        except Exception as e:
+            try:
+                await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+            except Exception:
+                pass
+            output = {"success": False, "data": None, "error": str(e)}
 
     elif subcmd == "read" and arg:
         status_msg = await msg.answer("📧 reading…")
-        from tools.email_client import read_email
+        try:
+            from tools.email_client import read_email
 
-        result = await read_email(arg.strip())
-        await status_msg.delete()
-        await send_chunked(msg, result, model_used="email")
+            result = await read_email(arg.strip())
+            await status_msg.delete()
+            output = {"success": True, "data": result, "error": None}
+            await send_chunked(msg, result, model_used="email")
+        except Exception as e:
+            try:
+                await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+            except Exception:
+                pass
+            output = {"success": False, "data": None, "error": str(e)}
 
     elif subcmd == "search" and arg:
         status_msg = await msg.answer(f"🔍 searching: {arg}…")
-        from tools.email_client import search_emails
+        try:
+            from tools.email_client import search_emails
 
-        result = await search_emails(arg.strip())
-        await status_msg.delete()
-        await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+            result = await search_emails(arg.strip())
+            await status_msg.delete()
+            output = {"success": True, "data": result, "error": None}
+            await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
+        except Exception as e:
+            try:
+                await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
+            except Exception:
+                pass
+            output = {"success": False, "data": None, "error": str(e)}
 
     else:
         await msg.answer(

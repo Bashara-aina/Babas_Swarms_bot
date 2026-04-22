@@ -13,9 +13,10 @@ from aiogram.filters import Command
 from aiogram.types import FSInputFile, Message
 
 from llm_client import run_shell_command
+
 from .shared import (
-    _last_screenshot,
     _keep_typing,
+    _last_screenshot,
     is_allowed,
     send_chunked,
 )
@@ -44,7 +45,6 @@ async def cmd_scrape(msg: Message) -> None:
         result = await browse_url(url)
         typing_task.cancel()
         await status_msg.delete()
-
         title = result.get("title", "")
         text = result.get("text", "")[:3500]
         screenshot_path = result.get("screenshot_path", "")
@@ -56,12 +56,17 @@ async def cmd_scrape(msg: Message) -> None:
                 caption=f"🌐 {title[:100]}" if title else "🌐 page screenshot",
             )
 
+        output = {"success": True, "data": {"title": title, "text": text}, "error": None}
         await msg.answer(
             f"<b>🌐 {title}</b>\n\n<pre>{text}</pre>",
             parse_mode="HTML",
         )
-    except Exception as e:
+    except Exception:
         typing_task.cancel()
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
         output = await run_shell_command(
             f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
             'python3 -c "'
@@ -76,9 +81,9 @@ async def cmd_scrape(msg: Message) -> None:
             '"',
             timeout=25,
         )
-        await status_msg.delete()
+        output = {"success": True, "data": {"title": url, "text": output}, "error": None}
         await msg.answer(
-            f"<b>🌐 {url}</b>\n\n<pre>{output[:3500]}</pre>",
+            f"<b>🌐 {url}</b>\n\n<pre>{output['data']['text'][:3500]}</pre>",
             parse_mode="HTML",
         )
 
@@ -114,6 +119,7 @@ async def cmd_research(msg: Message) -> None:
                 topic,
                 user_id=str(msg.from_user.id) if msg.from_user else None,
             )
+            output = {"success": True, "data": out, "error": None}
         finally:
             typing_task.cancel()
         try:
@@ -131,10 +137,12 @@ async def cmd_research(msg: Message) -> None:
             typing_task.cancel()
             await status_msg.edit_text(f"🔬 GPT-Researcher: {topic[:40]}…", parse_mode="HTML")
             result = await gptr_execute(topic)
+            output = {"success": True, "data": result, "error": None}
             await send_chunked(msg, result)
             return
         except Exception as e:
             await msg.answer(f"GPT-Researcher error: {e}")
+            output = {"success": False, "data": None, "error": str(e)}
             return
 
     async def _phase(text: str) -> None:
@@ -147,8 +155,8 @@ async def cmd_research(msg: Message) -> None:
             pass
 
     try:
-        from llm_client import chat
         from agents.ag2_pipeline import ResearchSwarm
+        from llm_client import chat
         from tools.quality_guard import (
             build_evidence_envelope,
             format_verifier_block,
@@ -214,15 +222,20 @@ async def cmd_research(msg: Message) -> None:
 
         typing_task.cancel()
         await status_msg.delete()
+        output = {"success": True, "data": result, "error": None}
         await send_chunked(msg, result, model_used="deep-research/verified")
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(
-            f"research failed: <code>{e}</code>\n\n"
-            "make sure Playwright is installed:\n"
-            "<code>/install playwright</code> then <code>playwright install chromium</code>",
-            parse_mode="HTML",
-        )
+        try:
+            await status_msg.edit_text(
+                f"research failed: <code>{e}</code>\n\n"
+                "make sure Playwright is installed:\n"
+                "<code>/install playwright</code> then <code>playwright install chromium</code>",
+                parse_mode="HTML",
+            )
+        except Exception:
+            pass
+        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /paper — arXiv paper search ────────────────────────────────────────────────
@@ -252,6 +265,7 @@ async def cmd_paper(msg: Message) -> None:
         papers = await search_arxiv(query, max_results=3)
         typing_task.cancel()
         await status_msg.delete()
+        output = {"success": True, "data": {"papers": papers}, "error": None}
         if not papers:
             await msg.answer("No papers found.")
             return
@@ -269,7 +283,11 @@ async def cmd_paper(msg: Message) -> None:
                 await msg.answer(text)
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(f"arXiv error: <code>{e}</code>", parse_mode="HTML")
+        try:
+            await status_msg.edit_text(f"arXiv error: <code>{e}</code>", parse_mode="HTML")
+        except Exception:
+            pass
+        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /ask_paper — question about a specific paper ──────────────────────────────
@@ -295,7 +313,7 @@ async def cmd_ask_paper(msg: Message) -> None:
         lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
     )
     try:
-        from tools.arxiv import download_paper, extract_paper_text, analyze_paper
+        from tools.arxiv import analyze_paper, download_paper, extract_paper_text
 
         pdf_path = await download_paper(arxiv_id)
         await status_msg.edit_text("extracting text...")
@@ -304,6 +322,7 @@ async def cmd_ask_paper(msg: Message) -> None:
         analysis = await analyze_paper(paper_text, question)
         typing_task.cancel()
         await status_msg.delete()
+        output = {"success": True, "data": analysis, "error": None}
         await send_chunked(msg, analysis, model_used="debug/paper-analysis")
         try:
             from tools.memory import auto_save_research
@@ -313,53 +332,23 @@ async def cmd_ask_paper(msg: Message) -> None:
             pass
     except Exception as e:
         typing_task.cancel()
-        await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
-
-
-# ── /workernet_papers — analyze all 6 WorkerNet papers ────────────────────────
-@router.message(Command("workernet_papers"))
-async def cmd_workernet_papers(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    status_msg = await msg.answer("fetching 6 WorkerNet papers...")
-    typing_task = asyncio.create_task(_keep_typing(msg))
-    typing_task.add_done_callback(
-        lambda t: logging.getLogger(__name__).error("%s", t.exception()) if t.exception() else None
-    )
-    try:
-        from tools.arxiv import (
-            WORKERNET_PAPERS,
-            download_paper,
-            extract_paper_text,
-            analyze_paper,
-        )
-
-        for name, info in WORKERNET_PAPERS.items():
-            try:
-                await status_msg.edit_text(f"processing: {name}...")
-                pdf_path = await download_paper(info["arxiv_id"])
-                paper_text = extract_paper_text(pdf_path)
-                question = f"How does this paper relate to implementing: {', '.join(info['implements'])}? Key equation: {info['key_equation']}"
-                analysis = await analyze_paper(paper_text, question)
-                header = (
-                    f"<b>{name}</b> (arXiv:{info['arxiv_id']})\n"
-                    f"Implements: <code>{', '.join(info['implements'])}</code>\n"
-                    f"Key eq: <code>{info['key_equation']}</code>\n\n"
-                )
-                await send_chunked(msg, header + analysis, model_used="debug")
-                try:
-                    from tools.memory import auto_save_research
-
-                    await auto_save_research(header + analysis, info["arxiv_id"])
-                except Exception:
-                    pass
-            except Exception as e:
-                await msg.answer(f"{name}: error — {e}")
-        typing_task.cancel()
         try:
-            await status_msg.delete()
+            await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
         except Exception:
             pass
-    except Exception as e:
-        typing_task.cancel()
-        await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
+        output = {"success": False, "data": None, "error": str(e)}
+
+
+# ── /workernet_papers — DEPRECATED ────────────────────────────────────────────
+@router.message(Command("workernet_papers"))
+async def cmd_workernet_papers(msg: Message) -> None:
+    """Deprecated: /workernet_papers has been replaced."""
+    await msg.answer(
+        "⚠️ <b>Deprecated:</b> /workernet_papers is no longer available.\n\n"
+        "替代方案 / Alternatives:\n"
+        "• <code>/research &lt;topic&gt;</code> — deep multi-source research\n"
+        "• <code>/paper &lt;query&gt;</code> — search arXiv for specific papers\n"
+        "• <code>/ask_paper &lt;arxiv_id&gt; &lt;question&gt;</code> — analyze a specific paper\n\n"
+        "The 6 WorkerNet papers are now available via <code>/paper</code> individually.",
+        parse_mode="HTML",
+    )

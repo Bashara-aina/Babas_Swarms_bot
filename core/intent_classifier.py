@@ -235,6 +235,22 @@ _INTENT_RULES: list[tuple[list[str], AgentKey, float, str, list[str]]] = [
         "web_fetch",
         ["http_request", "html_parse"],
     ),
+    # System commands auto-route — 17 commands that map to computer_use_loop
+    (
+        [
+            "/logs", "/ps ", "/kill ", "/sys ", "/ls ", "/find ", "/grep ",
+            "/read ", "/write ", "/disk ", "/window ", "/screen ",
+            "/clipboard ", "/type ", "/key ", "/service ", "/tree ",
+            "tail log", "list processes", "kill process", "system stats",
+            "disk usage", "process tree", "list windows", "screenshot",
+            "clipboard", "type text", "key combo", "service status",
+            "search files", "grep log", "read file", "write file",
+        ],
+        "computer",
+        0.95,
+        "system_command",
+        ["computer_use_loop"],
+    ),
 ]
 
 _last_agent_key: dict[str, str] = {}

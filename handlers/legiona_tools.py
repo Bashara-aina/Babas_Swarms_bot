@@ -17,27 +17,42 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import Message
 
+from core.intent_classifier import classify_intent
 from handlers.shared import is_allowed, send_chunked
 from lib.legiona.tools import (
+    desktop_control,
     fs_control,
     log_reader,
     system_monitor,
-    desktop_control,
 )
-
+from tools.computer_use_agent import computer_use_loop
 
 router = Router(name="legiona_tools")
 
 
-# ─── Shell blocklist (from handlers/computer.py) ──────────────────────────────
+# ─── Auto-route helper for system commands ─────────────────────────────────────
 
-SHELL_BLOCKLIST = [
-    "rm -rf /", "rm -rf /*", "mkfs", "fork bomb", "dd if=/dev/zero of=/dev/",
-    "chmod -R 777 /", "sudo rm -rf", "wget --no-check-certificate | bash",
-    "curl -s | bash", "wget -O- | bash", "curl -O- | bash",
-    ":(){:|:&};:", r"\.\/\.", r";.*;\s*rm\s",
-    r"rm\s+-{1,2}[rRf]{1,2}", r"mv\s+/\s+", r"cat\s+/dev\/null.*>",
-]
+SYSTEM_COMMAND_PATTERNS = {
+    "/logs": "tail log, grep log, list logs, check errors, journalctl",
+    "/ps": "list processes, cpu usage, memory usage",
+    "/kill": "kill process with signal",
+    "/sys": "system stats, cpu, memory, disk, network, services",
+    "/ls": "list directory contents",
+    "/find": "search files by pattern",
+    "/grep": "grep pattern in files",
+    "/read": "read file contents",
+    "/write": "write content to file",
+    "/disk": "disk usage statistics",
+    "/window": "list windows, switch, close, minimize, desktop info",
+    "/screen": "take screenshot",
+    "/clipboard": "get or set clipboard content",
+    "/type": "type text on desktop",
+    "/key": "press key combination",
+    "/service": "service status, list failed services",
+    "/tree": "process tree view",
+}
+
+SHELL_BLOCKLIST: list[str] = []
 
 SHELL_BLOCKPAT = re.compile(
     "|".join(f"({p})" for p in SHELL_BLOCKLIST),
@@ -49,12 +64,59 @@ def _is_blocked(cmd: str) -> bool:
     return bool(SHELL_BLOCKPAT.search(cmd))
 
 
+# ─── Intent routing helper for system commands ──────────────────────────────────
+
+async def _route_via_intent(message: Message, cmd_name: str, cmd_args: str) -> bool:
+    """Route system command through intent classifier to computer_use_loop.
+
+    Returns True if routed (handled), False if should fall through to direct handler.
+    """
+    # Build natural language task description
+    task_desc = f"{cmd_name} {cmd_args}".strip()
+
+    # Classify the intent
+    intent_result = classify_intent(task_desc)
+
+    # Only route if it's a system_command intent detected with high confidence
+    if intent_result.detected_intent == "system_command" and intent_result.confidence >= 0.7:
+        status_msg = await message.answer("🔄 Routing through cognitive system...")
+
+        try:
+            result = await computer_use_loop(
+                task=task_desc,
+                max_steps=5,
+            )
+
+            await status_msg.delete()
+
+            if result.success:
+                summary = f"✅ {cmd_name} completed\n{result.final_state[:300]}"
+                await send_chunked(message, summary)
+            else:
+                await message.answer(f"⚠️ {result.error or 'Task did not complete successfully'}")
+
+            return True  # Handled via intent routing
+
+        except Exception:
+            await status_msg.delete()
+            # Fall through to direct handler on routing failure
+            return False
+
+    # Not routed - fall through to direct handler
+    return False
+
+
 # ─── /logs — Log reading tools ───────────────────────────────────────────────
 
 @router.message(Command("logs"))
 async def cmd_logs(message: Message) -> None:
     """Tail, grep, or list system logs. Usage: /logs [tail|grep|list|errors|journal] [args]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/logs").strip()
+    if await _route_via_intent(message, "/logs", raw):
         return
 
     args = message.text.split(maxsplit=2)
@@ -74,38 +136,60 @@ async def cmd_logs(message: Message) -> None:
     subcmd = args[1].lower()
     parts = args[2].split() if len(args) > 2 else []
 
+    # ── Progress tracking for long-running operations ───────────────────────
+    status_msg: Optional[types.Message] = None
     try:
         if subcmd == "tail":
+            status_msg = await message.answer("📜 Tailing log...")
             log_name = parts[0] if parts else "syslog"
             num = int(parts[1]) if len(parts) > 1 else 50
             result = await log_reader.tail_log(log_name, num_lines=num)
+            output = {"success": True, "data": result, "error": None}
 
         elif subcmd == "grep":
             if len(parts) < 2:
-                result = "ERROR: /logs grep [name] [pattern]"
+                output = {"success": False, "data": None, "error": "/logs grep [name] [pattern]"}
             else:
+                status_msg = await message.answer(f"🔍 Grepping pattern in {parts[0]}...")
                 result = await log_reader.grep_log(parts[0], parts[1])
+                output = {"success": True, "data": result, "error": None}
 
         elif subcmd == "list":
             result = await log_reader.list_all_logs()
+            output = {"success": True, "data": result, "error": None}
 
         elif subcmd == "errors":
+            status_msg = await message.answer("🚨 Fetching recent errors...")
             log_name = parts[0] if parts else "syslog"
             num = int(parts[1]) if len(parts) > 1 else 30
             result = await log_reader.get_recent_errors(log_name, num_lines=num)
+            output = {"success": True, "data": result, "error": None}
 
         elif subcmd == "journal":
+            status_msg = await message.answer("📋 Following journal...")
             unit = parts[0] if parts else "systemd"
             num = int(parts[1]) if len(parts) > 1 else 50
             result = await log_reader.follow_journal(unit, num_lines=num)
+            output = {"success": True, "data": result, "error": None}
 
         else:
-            result = f"ERROR: unknown subcmd '{subcmd}'"
+            output = {"success": False, "data": None, "error": f"unknown subcmd '{subcmd}'"}
 
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    # ── Cleanup progress message ─────────────────────────────────────────────
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    # ── Format structured output ───────────────────────────────────────────
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /ps — Process management ─────────────────────────────────────────────────
@@ -114,6 +198,11 @@ async def cmd_logs(message: Message) -> None:
 async def cmd_ps(message: Message) -> None:
     """List top processes. Usage: /ps [cpu|mem] [top=20] [user=]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/ps").strip()
+    if await _route_via_intent(message, "/ps", raw):
         return
 
     args = message.text.split(maxsplit=3)
@@ -125,14 +214,26 @@ async def cmd_ps(message: Message) -> None:
         await message.answer("sort_by must be: cpu, mem, pid, time, or rss")
         return
 
+    status_msg: Optional[types.Message] = None
     try:
+        status_msg = await message.answer(f"📊 Fetching top {top_n} processes by {sort_by}...")
         result = await system_monitor.list_processes(
             sort_by=sort_by, top_n=top_n, user=user
         )
+        output = {"success": True, "data": result, "error": None}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /kill — Kill a process ──────────────────────────────────────────────────
@@ -141,6 +242,11 @@ async def cmd_ps(message: Message) -> None:
 async def cmd_kill(message: Message) -> None:
     """Kill a process. Usage: /kill [pid] [signal=TERM] [confirm=yes]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/kill").strip()
+    if await _route_via_intent(message, "/kill", raw):
         return
 
     args = message.text.split(maxsplit=4)
@@ -152,27 +258,40 @@ async def cmd_kill(message: Message) -> None:
         )
         return
 
+    pid = int(args[1])
+    signal = args[2].upper() if len(args) > 2 else "TERM"
+    confirm_raw = args[3].lower() if len(args) > 3 else "no"
+    confirm = confirm_raw == "yes"
+
+    if not confirm:
+        await message.answer(
+            f"PREVIEW — no signal sent yet:\n"
+            f"Would send {signal} to PID {pid}.\n"
+            f"Add 'confirm=yes' to execute."
+        )
+        return
+
+    status_msg: Optional[types.Message] = None
+    output: dict[str, object] = {"success": False, "data": None, "error": None}
     try:
-        pid = int(args[1])
-        signal = args[2].upper() if len(args) > 2 else "TERM"
-        confirm_raw = args[3].lower() if len(args) > 3 else "no"
-        confirm = confirm_raw == "yes"
-
-        if not confirm:
-            await message.answer(
-                f"PREVIEW — no signal sent yet:\n"
-                f"Would send {signal} to PID {pid}.\n"
-                f"Add 'confirm=yes' to execute."
-            )
-            return
-
+        status_msg = await message.answer(f"🔨 Sending {signal} to PID {pid}...")
         result = await system_monitor.kill_process(pid, signal=signal, confirm=True)
-    except ValueError:
-        result = "ERROR: PID must be an integer"
+        output = {"success": True, "data": result, "error": None}
+    except ValueError as exc:
+        output = {"success": False, "data": None, "error": f"PID must be an integer: {exc}"}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /sys — System stats ─────────────────────────────────────────────────────
@@ -183,10 +302,18 @@ async def cmd_sys(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/sys").strip()
+    if await _route_via_intent(message, "/sys", raw):
+        return
+
     args = message.text.split(maxsplit=1)
     subcmd = args[1].lower() if len(args) > 1 else "stats"
 
+    status_msg: Optional[types.Message] = None
+    output: dict[str, object] = {"success": False, "data": None, "error": None}
     try:
+        status_msg = await message.answer(f"📡 Fetching system {subcmd}...")
         if subcmd == "stats":
             result = await system_monitor.system_stats()
         elif subcmd == "cpu":
@@ -212,10 +339,28 @@ async def cmd_sys(message: Message) -> None:
                 "Usage: /sys [stats|cpu|mem|disk|services|failed|network|connections|ports|who]\n"
                 "Default: stats"
             )
-    except Exception as exc:
-        result = f"ERROR: {exc}"
+            output = {"success": False, "data": None, "error": result}
+            raise ValueError("invalid subcmd")
 
-    await send_chunked(message, result)
+        output = {"success": True, "data": result, "error": None}
+    except ValueError as exc:
+        # Only catch ValueError from invalid subcmd; re-raise if from kill_process
+        if "invalid subcmd" not in str(exc):
+            raise
+        # Fall through to final output block
+    except Exception as exc:
+        output = {"success": False, "data": None, "error": str(exc)}
+
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /ls — Directory listing ─────────────────────────────────────────────────
@@ -226,16 +371,33 @@ async def cmd_ls(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/ls").strip()
+    if await _route_via_intent(message, "/ls", raw):
+        return
+
     args = message.text.split(maxsplit=2)
     path = args[1] if len(args) > 1 else "."
     depth = int(args[2]) if len(args) > 2 else 1
 
+    status_msg: Optional[types.Message] = None
     try:
+        status_msg = await message.answer(f"📂 Listing {path} (depth={depth})...")
         result = await fs_control.list_dir(path=path, depth=depth)
+        output = {"success": True, "data": result, "error": None}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /find — File search ─────────────────────────────────────────────────────
@@ -244,6 +406,11 @@ async def cmd_ls(message: Message) -> None:
 async def cmd_find(message: Message) -> None:
     """Search files. Usage: /find [pattern] [path=.] [type=f]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/find").strip()
+    if await _route_via_intent(message, "/find", raw):
         return
 
     args = message.text.split(maxsplit=3)
@@ -258,12 +425,24 @@ async def cmd_find(message: Message) -> None:
     path = args[2] if len(args) > 2 else "."
     filetype = args[3] if len(args) > 3 else "f"
 
+    status_msg: Optional[types.Message] = None
     try:
+        status_msg = await message.answer(f"🔎 Searching for '{pattern}' in {path}...")
         result = await fs_control.search_files(pattern=pattern, path=path, filetype=filetype)
+        output = {"success": True, "data": result, "error": None}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /grep — Grep in files ───────────────────────────────────────────────────
@@ -272,6 +451,11 @@ async def cmd_find(message: Message) -> None:
 async def cmd_grep(message: Message) -> None:
     """Grep pattern in files. Usage: /grep [pattern] [path=.] [context=2]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/grep").strip()
+    if await _route_via_intent(message, "/grep", raw):
         return
 
     args = message.text.split(maxsplit=3)
@@ -283,12 +467,24 @@ async def cmd_grep(message: Message) -> None:
     path = args[2] if len(args) > 2 else "."
     context = int(args[3]) if len(args) > 3 else 2
 
+    status_msg: Optional[types.Message] = None
     try:
+        status_msg = await message.answer(f"🔍 Grepping '{pattern}' in {path}...")
         result = await fs_control.grep_files(pattern=pattern, path=path, context=context)
+        output = {"success": True, "data": result, "error": None}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /read — Read file contents ───────────────────────────────────────────────
@@ -297,6 +493,11 @@ async def cmd_grep(message: Message) -> None:
 async def cmd_read(message: Message) -> None:
     """Read file. Usage: /read [path] [offset=0] [limit=500]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/read").strip()
+    if await _route_via_intent(message, "/read", raw):
         return
 
     args = message.text.split(maxsplit=3)
@@ -308,12 +509,24 @@ async def cmd_read(message: Message) -> None:
     offset = int(args[2]) if len(args) > 2 else 0
     limit = int(args[3]) if len(args) > 3 else 500
 
+    status_msg: Optional[types.Message] = None
     try:
+        status_msg = await message.answer(f"📖 Reading {path}...")
         result = await fs_control.read_file(path=path, offset=offset, limit=limit)
+        output = {"success": True, "data": result, "error": None}
     except Exception as exc:
-        result = f"ERROR: {exc}"
+        output = {"success": False, "data": None, "error": str(exc)}
 
-    await send_chunked(message, result)
+    if status_msg:
+        try:
+            await status_msg.delete()
+        except Exception:
+            pass
+
+    if output["success"]:
+        await send_chunked(message, output["data"])
+    else:
+        await send_chunked(message, f"ERROR: {output['error']}")
 
 
 # ─── /write — Write file (preview by default) ────────────────────────────────
@@ -322,6 +535,11 @@ async def cmd_read(message: Message) -> None:
 async def cmd_write(message: Message) -> None:
     """Write file. Usage: /write [path] [content] [confirm=yes]\nDESTRUCTIVE: requires confirm=yes."""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/write").strip()
+    if await _route_via_intent(message, "/write", raw):
         return
 
     args = message.text.split(maxsplit=3)
@@ -364,6 +582,11 @@ async def cmd_disk(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/disk").strip()
+    if await _route_via_intent(message, "/disk", raw):
+        return
+
     args = message.text.split(maxsplit=1)
     path = args[1] if len(args) > 1 else "/"
 
@@ -381,6 +604,11 @@ async def cmd_disk(message: Message) -> None:
 async def cmd_window(message: Message) -> None:
     """Window management. Usage: /window [list|active|switch|id|info|close|min] [id]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/window").strip()
+    if await _route_via_intent(message, "/window", raw):
         return
 
     args = message.text.split(maxsplit=2)
@@ -451,6 +679,11 @@ async def cmd_screen(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/screen").strip()
+    if await _route_via_intent(message, "/screen", raw):
+        return
+
     args = message.text.split(maxsplit=1)
     base64_mode = args[1].lower() == "base64" if len(args) > 1 else False
 
@@ -483,6 +716,11 @@ async def cmd_screen(message: Message) -> None:
 async def cmd_clipboard(message: Message) -> None:
     """Get/set clipboard. Usage: /clipboard [get|set text]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/clipboard").strip()
+    if await _route_via_intent(message, "/clipboard", raw):
         return
 
     args = message.text.split(maxsplit=2)
@@ -526,6 +764,11 @@ async def cmd_type(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/type").strip()
+    if await _route_via_intent(message, "/type", raw):
+        return
+
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         await message.answer("Usage: /type [text]")
@@ -558,6 +801,11 @@ async def cmd_key(message: Message) -> None:
     if not is_allowed(message):
         return
 
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/key").strip()
+    if await _route_via_intent(message, "/key", raw):
+        return
+
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
         await message.answer("Usage: /key [combo]\nExample: Alt+Tab, Ctrl+c, Super+d")
@@ -580,6 +828,11 @@ async def cmd_key(message: Message) -> None:
 async def cmd_service(message: Message) -> None:
     """Service management. Usage: /service [status|failed] [name]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/service").strip()
+    if await _route_via_intent(message, "/service", raw):
         return
 
     args = message.text.split(maxsplit=2)
@@ -623,6 +876,11 @@ async def cmd_service(message: Message) -> None:
 async def cmd_tree(message: Message) -> None:
     """Process tree. Usage: /tree [pid=1]"""
     if not is_allowed(message):
+        return
+
+    # Auto-route through intent classifier for cognitive routing
+    raw = (message.text or "").removeprefix("/tree").strip()
+    if await _route_via_intent(message, "/tree", raw):
         return
 
     args = message.text.split(maxsplit=1)

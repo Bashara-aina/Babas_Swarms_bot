@@ -1,6 +1,6 @@
 """
 Session continuity handler — mneme task tracking.
-Commands: /task, /task_done, /task_sessions, /semantic_set, /semantic_get
+Commands: /task, /mneme_done, /task_sessions, /semantic_set, /semantic_get
 
 NOTE: /sessions (save/resume) lives in handlers/sessions.py.
       This file handles the mneme task-tracking sessions (/task_sessions).
@@ -8,6 +8,7 @@ NOTE: /sessions (save/resume) lives in handlers/sessions.py.
 from __future__ import annotations
 
 import logging
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -37,9 +38,9 @@ async def cmd_task(message: Message) -> None:
     await message.answer(f"✅ Task set: {description}")
 
 
-@router.message(Command("task_done"))
-async def cmd_task_done(message: Message) -> None:
-    """Mark active task as complete. Usage: /task_done [result summary]"""
+@router.message(Command("mneme_done"))
+async def cmd_mneme_done(message: Message) -> None:
+    """Mark active mneme task as complete. Usage: /mneme_done [result summary]"""
     args = (message.text or "").split(maxsplit=1)
     summary = args[1].strip() if len(args) > 1 else "Completed"
     from tools.mneme_session import complete_current_task, get_current_task
