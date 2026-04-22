@@ -11,28 +11,26 @@ Router order matters:
 from aiogram import Dispatcher
 
 from handlers import (
-    ai,
     admin_handlers,
+    ai,
     artifact,
     brain,
-    communications,
-    debate_handlers,
-    gstack,
-    harvest_review,
-    hermes,
-    legion_extras,
-    legiona_tools,
     business_handler,
-    wiki_handler,
-    runbook_handler,
+    communications,
     computer,
-    ecc_compat,
+    debate_handlers,
     dev,
     draft,
     e2e,
+    ecc_compat,
     enterprise,
     github_intel_handler,
+    gstack,
+    harvest_review,
+    hermes,
     inline,
+    legion_extras,
+    legiona_tools,
     media_tools,
     memory_commands,
     orchestrate,
@@ -41,16 +39,17 @@ from handlers import (
     plandex_commands,
     pm,
     research,
+    runbook_handler,
     session_handler,
     sessions,
     skills,
     swe_commands,
     system,
     tasks,
-    threads_mode,
     upgrade,
     voice,
     whatsapp_handler,
+    wiki_handler,
 )
 from handlers.wiki import router as wiki_router
 
@@ -76,7 +75,6 @@ _ROUTER_ORDER = [
     session_handler.router,  # /task /task_done /task_sessions /semantic_set /semantic_get
     sessions.router,  # /save /resume /sessions /audit
     tasks.router,  # /monitor /schedule /tasks /cancel
-    threads_mode.router,  # /threads_mode on|off|toggle|status
     dev.router,  # /scaffold /build /vuln_scan /review
     pm.router,  # /task_from /tasks_due /post /email
     enterprise.router,  # /budget /routing_stats /security_stats /audit_summary
