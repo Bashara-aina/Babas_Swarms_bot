@@ -12,16 +12,17 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, FSInputFile, Message
 
 import computer_agent
-from llm_client import run_shell_command
 import llm_client
+from llm_client import run_shell_command
 from tools.computer_use_agent import (
     computer_use_loop,
-    get_pending_confirmations,
     confirm_command,
+    get_pending_confirmations,
 )
+
 from .shared import (
-    _last_screenshot,
     _keep_typing,
+    _last_screenshot,
     _run_agent_loop,
     allowed_cb,
     is_allowed,
@@ -33,6 +34,123 @@ router = Router()
 
 
 # ── /do — Agentic computer control ───────────────────────────────────────────
+
+# Complexity indicators for planning gate
+COMPLEXITY_CONNECTORS = [" and ", " then ", " after ", " before ", " also ", " plus ", ";", ", then", ", after"]
+COMPLEXITY_PATTERNS = ["open", "click", "type", "send", "search", "go to", "navigate", "check", "find", "wait", "repeat"]
+
+
+def _is_complex_task(task: str) -> bool:
+    """Detect if a task requires planning (multi-step or ambiguous)."""
+    task_lower = task.lower()
+    word_count = len(task.split())
+
+    # Multi-step detection: contains connectors indicating multiple actions
+    has_connectors = any(conn in task_lower for conn in COMPLEXITY_CONNECTORS)
+
+    # Length-based heuristic: longer tasks are more likely complex
+    long_task = word_count > 12
+
+    # Pattern-based: if it mentions multiple distinct action types
+    action_mentions = sum(1 for p in COMPLEXITY_PATTERNS if p in task_lower)
+    multi_action = action_mentions >= 2
+
+    # Ambiguous task indicators: vague words like "it", "them", "the thing"
+    has_ambiguity = any(w in task_lower for w in ["it", "them", "that thing", "whatever", "somewhere"])
+
+    return has_connectors or (long_task and multi_action) or (has_connectors and long_task)
+
+
+async def _plan_task(task: str, max_iterations: int = 3) -> dict[str, Any]:
+    """Generate a plan for complex tasks using LLM-based planning.
+    
+    Returns a dict with:
+      - steps: list of step descriptions
+      - expected_outcomes: what success looks like at each step
+      - self_check_criteria: how to verify each step succeeded
+      - iterations_used: number of planning iterations
+    """
+    from llm_client import chat
+
+    planning_prompt = (
+        "You are a task planning system. Create a structured plan for the following task.\n\n"
+        "Your plan MUST include:\n"
+        "1. STEP BREAKDOWN: Numbered steps (1, 2, 3...) the agent must execute in order\n"
+        "2. EXPECTED OUTCOMES: What should be true after each step completes\n"
+        "3. SELF-CHECK CRITERIA: How the agent should verify each step succeeded\n"
+        "4. AMBIGUITY FLAGS: Any parts of the task that need clarification during execution\n\n"
+        "Respond in this exact format (no other text):\n\n"
+        "STEPS:\n1. [action description]\n2. [action description]\n\n"
+        "OUTCOMES:\n1. [expected result after step 1]\n2. [expected result after step 2]\n\n"
+        "CHECKS:\n1. [verification criteria for step 1]\n2. [verification criteria for step 2]\n\n"
+        f"TASK: {task}"
+    )
+
+    iteration = 0
+    plan_text = ""
+
+    while iteration < max_iterations:
+        result, _ = await chat(planning_prompt, agent_key="architect", user_id="0")
+        plan_text = result.strip()
+
+        # Basic validation: plan should contain STEPS, OUTCOMES, CHECKS sections
+        has_all_sections = all(
+            section in plan_text.upper()
+            for section in ["STEPS:", "OUTCOMES:", "CHECKS:"]
+        )
+
+        if has_all_sections:
+            break
+
+        iteration += 1
+
+    # Parse the plan into structured format
+    steps = []
+    outcomes = []
+    checks = []
+
+    current_section = None
+    for line in plan_text.split("\n"):
+        line = line.strip()
+        if line.startswith("STEPS:", line.upper()) or line == "STEPS":
+            current_section = "steps"
+            continue
+        elif line.startswith("OUTCOMES:", line.upper()) or line == "OUTCOMES":
+            current_section = "outcomes"
+            continue
+        elif line.startswith("CHECKS:", line.upper()) or line == "CHECKS":
+            current_section = "checks"
+            continue
+        elif line.startswith("AMBIGUITY"):
+            current_section = "ambiguity"
+            continue
+
+        if current_section == "steps" and line:
+            # Extract step number and description
+            if line[0].isdigit() and "." in line[:3]:
+                steps.append(line.split(".", 1)[1].strip() if "." in line else line)
+            elif line.startswith("-"):
+                steps.append(line[1:].strip())
+        elif current_section == "outcomes" and line:
+            if line[0].isdigit() and "." in line[:3]:
+                outcomes.append(line.split(".", 1)[1].strip() if "." in line else line)
+            elif line.startswith("-"):
+                outcomes.append(line[1:].strip())
+        elif current_section == "checks" and line:
+            if line[0].isdigit() and "." in line[:3]:
+                checks.append(line.split(".", 1)[1].strip() if "." in line else line)
+            elif line.startswith("-"):
+                checks.append(line[1:].strip())
+
+    return {
+        "steps": steps,
+        "expected_outcomes": outcomes,
+        "self_check_criteria": checks,
+        "iterations_used": iteration + 1,
+        "raw_plan": plan_text,
+    }
+
+
 @router.message(Command("do"))
 async def cmd_do(msg: Message) -> None:
     if not is_allowed(msg):
@@ -53,14 +171,18 @@ async def cmd_do(msg: Message) -> None:
         )
         return
 
-    exec_keywords = ["run", "execute", "plot", "train", "test"]
-    if any(k in task.lower() for k in exec_keywords) and any(
-        k in task.lower() for k in ["code", "python", "script", "bash"]
-    ):
+    # Intent classification — replaces brute-force keyword matching
+    from core.intent_classifier import classify_intent
+
+    intent_result = classify_intent(task)
+    agent_key = intent_result.agent_key
+
+    # Route code/coding intent to run_code_agent
+    if agent_key == "coding":
         try:
             from agents.code_agent import run_code_agent
 
-            status = await msg.answer("⚙️ Detected code execution intent — routing to code_exec agent…")
+            status = await msg.answer("⚙️ Detected coding intent — routing to code_exec agent…")
             result = await run_code_agent(task)
             await status.delete()
             payload = (
@@ -72,8 +194,116 @@ async def cmd_do(msg: Message) -> None:
             await send_chunked(msg, payload, model_used="code_exec")
             return
         except Exception:
-            pass
+            pass  # Fall through to _run_agent_loop on error
 
+    # Planning gate for complex tasks
+    if _is_complex_task(task):
+        planning_msg = await msg.answer("📋 Analyzing task — creating execution plan…")
+
+        try:
+            plan = await _plan_task(task, max_iterations=3)
+            await planning_msg.delete()
+
+            # Display the plan to user
+            plan_display = "🗺️ <b>Execution Plan</b>\n\n"
+
+            for i, step in enumerate(plan["steps"][:10], 1):  # Cap at 10 steps
+                outcome = plan["expected_outcomes"][i-1] if i-1 < len(plan["expected_outcomes"]) else ""
+                check = plan["self_check_criteria"][i-1] if i-1 < len(plan["self_check_criteria"]) else ""
+
+                plan_display += f"<b>Step {i}:</b> {html_mod.escape(step)}\n"
+                if outcome:
+                    plan_display += f"  ✓ Expected: {html_mod.escape(outcome)}\n"
+                if check:
+                    plan_display += f"  ⚑ Check: {html_mod.escape(check)}\n"
+                plan_display += "\n"
+
+            plan_display += f"<i>Planning iterations used: {plan['iterations_used']}/3</i>"
+            await msg.answer(plan_display, parse_mode="HTML")
+
+        except Exception as e:
+            await planning_msg.edit_text(
+                f"⚠️ Planning failed, proceeding with direct execution:\n"
+                f"<code>{html_mod.escape(str(e)[:200])}</code>",
+                parse_mode="HTML",
+            )
+            # Fall through to direct execution on planning failure
+
+        # Execute complex task via computer_use_loop (vision-action-verify loop)
+        status_msg = await msg.answer("\U0001f916 executing plan…")
+        typing_task = asyncio.create_task(_keep_typing(msg))
+
+        async def on_progress(step_num: int, description: str) -> None:
+            try:
+                await status_msg.edit_text(
+                    f"<code>[{step_num}]</code> {html_mod.escape(description[:100])}",
+                    parse_mode="HTML",
+                )
+            except Exception:
+                pass
+
+        try:
+            result = await computer_use_loop(
+                task,
+                max_steps=20,
+                progress_callback=on_progress,
+            )
+            typing_task.cancel()
+
+            try:
+                await status_msg.delete()
+            except Exception:
+                pass
+
+            if get_pending_confirmations():
+                pending = get_pending_confirmations()[0]
+                await msg.answer(
+                    "\u26a0\ufe0f <b>Confirmation required</b>\n\n"
+                    f"Step {pending['step']}: dangerous action detected:\n"
+                    f"<code>{html_mod.escape(pending['command'] or pending['keys'] or '?')}</code>\n\n"
+                    f"Reason: {html_mod.escape(pending.get('reason', 'n/a'))}\n\n"
+                    "To confirm, reply: <code>/confirm</code>",
+                    parse_mode="HTML",
+                )
+                return
+
+            if not result.success and result.error:
+                await msg.answer(
+                    f"\u274c <b>Execution error</b>\n\n<code>{html_mod.escape(result.error)}</code>",
+                    parse_mode="HTML",
+                )
+                return
+
+            # Send final report
+            steps_summary = "\n".join(
+                f"  step {s.step_number}: {s.parsed_action.action_type.value}"
+                for s in result.steps
+            )
+            summary = (
+                f"\u2705 <b>Task complete</b>\n\n"
+                f"Task: <i>{html_mod.escape(result.task[:80])}</i>\n"
+                f"Steps taken: <code>{len(result.steps)}</code>\n"
+                f"Final state: {html_mod.escape(result.final_state[:200])}\n"
+            )
+            await send_chunked(msg, summary)
+
+        except Exception as e:
+            typing_task.cancel()
+            from core.error_humanizer import humanize_error_for_display
+            friendly = humanize_error_for_display(e, context="/do")
+            try:
+                await status_msg.edit_text(
+                    f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
+                    parse_mode="HTML",
+                )
+            except Exception:
+                await msg.answer(
+                    f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
+                    parse_mode="HTML",
+                )
+        return
+
+    # Simple task: direct to existing _run_agent_loop (backward compatible)
     await _run_agent_loop(msg, task)
 
 

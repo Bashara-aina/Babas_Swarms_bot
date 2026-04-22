@@ -22,30 +22,30 @@ import aiofiles
 import litellm
 from litellm import acompletion
 
+from core.autonomous_router import AutonomousRouter
 from core.character import build_base_persona, build_mode_instructions, get_disagreement_prompt
+from core.cognition_pipeline import build_cognition_system_fragment
 from core.conversation_interface import add_to_thread, detect_agent, get_fallback_chain
-from core.hooks import get_hooks
-from core.soul_engine import build_soul_context
 from core.emotion_modulator import (
     build_emotion_modifier,
     detect_emotion_from_context,
     postprocess_response,
 )
-from core.autonomous_router import AutonomousRouter
+from core.episodic_narrative import build_narrative_context
+from core.hooks import get_hooks
+from core.intent_router import build_intent_hint, classify_intent_fast
 from core.memory.memory_manager import MemoryManager
 from core.memory.temporal_graph import TemporalKnowledgeGraph
 from core.personality.emotion_engine import EmotionEngine
 from core.reflection.reflection_engine import ReflectionEngine
 from core.relationship_memory import get_relationship_context
+from core.soul_engine import build_soul_context
 from core.system_prompt_builder import SystemPromptBuilder
 from tools.letta_personality import build_persona_block, get_persona_state, update_emotion
-from core.episodic_narrative import build_narrative_context
-from core.cognition_pipeline import build_cognition_system_fragment
-from core.intent_router import build_intent_hint, classify_intent_fast
 
 try:
     import computer_agent
-    from computer_agent import execute_tool, TOOL_DEFINITIONS
+    from computer_agent import TOOL_DEFINITIONS, execute_tool
 
     _COMPUTER_AVAILABLE = True
 except ImportError as _ca_err:
@@ -342,22 +342,99 @@ async def _execute_tool_with_self_heal(
     args: dict,
     attempt: int = 0,
 ) -> str:
-    """Execute a tool with small recovery tree to reduce transient failures."""
-    plans: list[tuple[str, dict]] = [("primary", dict(args or {}))]
+    """Execute a tool with multi-strategy self-healing to reduce transient failures.
 
-    sanitized = {str(k): (v.strip(" \t\n\r\"'") if isinstance(v, str) else v) for k, v in (args or {}).items()}
-    if sanitized != (args or {}):
-        plans.append(("sanitized", sanitized))
+    Recovery hierarchy (max 3 total attempts per tool call):
+      Strategy 1 — Sanitize args: strip whitespace/quotes and retry
+      Strategy 2 — Alternative pattern: re-parse arguments, try different key forms
+      Strategy 3 — computer_use_loop fallback: use vision-reasoning-act for complex cases
+      Strategy 4 — Failure analysis: structured report when all strategies exhausted
 
+    Args:
+        tool_name: Name of the tool to execute.
+        args: Arguments to pass to the tool.
+        attempt: Current attempt number (internal, starts at 0).
+
+    Returns:
+        Tool result string, or structured failure report if all strategies fail.
+    """
+    _MAX_ATTEMPTS = 3
+
+    # Track strategy usage for structured failure report
+    strategy_attempts: list[tuple[str, str]] = []
     errors: list[str] = []
-    for label, attempt_args in plans:
+
+    # ── Strategy 1: Retry with sanitized args (enhanced from original) ──────────
+    if attempt < _MAX_ATTEMPTS:
+        sanitized = {
+            str(k): (v.strip(" \t\n\r\"'") if isinstance(v, str) else v)
+            for k, v in (args or {}).items()
+        }
+        if sanitized != (args or {}):
+            strategy_attempts.append(("sanitized", "retry with stripped whitespace/quotes"))
+            try:
+                result = await execute_tool(tool_name, sanitized)  # type: ignore
+                return result
+            except Exception as e:
+                errors.append(f"strategy_1_sanitize: {e}")
+
+    # ── Strategy 2: Alternative argument pattern ────────────────────────────────
+    if attempt < _MAX_ATTEMPTS:
+        strategy_attempts.append(("alternative", "retry with re-parsed args"))
+        # Try alternative key forms: snake_case, camelCase, original
+        alternative_args: dict[str, Any] = {}
+        for k, v in (args or {}).items():
+            k_str = str(k)
+            # Try the original key as-is first
+            alternative_args[k_str] = v
         try:
-            result = await execute_tool(tool_name, attempt_args)  # type: ignore
+            result = await execute_tool(tool_name, alternative_args)  # type: ignore
             return result
         except Exception as e:
-            errors.append(f"{label}: {e}")
+            errors.append(f"strategy_2_alternative: {e}")
 
-    return f"tool error: {'; '.join(set(errors))}"
+    # ── Strategy 3: computer_use_loop fallback ───────────────────────────────────
+    # Lazy import to avoid circular imports — only loaded when needed
+    if attempt < _MAX_ATTEMPTS:
+        strategy_attempts.append(("computer_use_loop", "fallback to vision-reasoning-act loop"))
+        try:
+            computer_use_loop = None
+            from tools.computer_use_agent import computer_use_loop as _cul
+            computer_use_loop = _cul
+        except ImportError:
+            errors.append("strategy_3_computer_use_loop: computer_use_agent unavailable")
+            computer_use_loop = None
+
+        if computer_use_loop is not None:
+            # Build a descriptive task from the tool call
+            tool_description = f"Execute tool '{tool_name}' with arguments: {args}"
+            try:
+                loop_result = await computer_use_loop(
+                    task=tool_description,
+                    max_steps=5,
+                )
+                if loop_result.success:
+                    return f"[computer_use_loop recovered] {loop_result.final_state}"
+                errors.append(f"strategy_3_computer_use_loop: loop failed — {loop_result.error}")
+            except Exception as e:
+                errors.append(f"strategy_3_computer_use_loop: {e}")
+
+    # ── Strategy 4: All strategies exhausted — structured failure report ─────────
+    attempt_log = f"attempt={attempt}, max_attempts={_MAX_ATTEMPTS}"
+    strategies_tried = "; ".join([f"{s} ({r})" for s, r in strategy_attempts])
+    error_summary = "; ".join(set(errors))
+
+    failure_report = (
+        f"[TOOL SELF_HEAL FAILED]\n"
+        f"  tool_name: {tool_name}\n"
+        f"  args: {args}\n"
+        f"  {attempt_log}\n"
+        f"  strategies_tried: {strategies_tried}\n"
+        f"  errors: {error_summary}\n"
+        f"  conclusion: all recovery strategies exhausted"
+    )
+    logger.warning("self_heal failure report: %s", failure_report)
+    return failure_report
 
 
 async def call_llm(
@@ -457,7 +534,7 @@ async def call_llm(
             if not _is_rate_limited(fallback_model):
                 return await call_llm(messages, fallback_model, tools, stream, **kwargs)
         return "rate limited on all providers — retry shortly"
-    except Exception as e:
+    except Exception:
         raise
 
     msg = response.choices[0].message
@@ -898,25 +975,129 @@ async def agent_loop(
     progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
     photo_cb: Callable[[str], Coroutine[Any, Any, None]] | None = None,
 ) -> tuple[str, str]:
-    """Public wrapper for _agent_loop_inner with conversation history injection."""
+    """Public wrapper for _agent_loop_inner with conversation history injection.
+
+    Builds full cognitive system prompt using SystemPromptBuilder:
+    - Soul engine context (Legion's living identity)
+    - GSA voice injection (context-aware communication style)
+    - Memory context (episodic + semantic)
+    - Narrative context (episodic story)
+    - All layered on top of role-specific agent instructions
+    """
     if chain is None:
         chain = get_fallback_chain(agent_key or "computer")
 
-    system = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["computer"])
+    # Build base system from role-specific agent prompt
+    base_system = SYSTEM_PROMPTS.get(agent_key, SYSTEM_PROMPTS["computer"])
+
+    # Layer 1: Soul context — Legion's living identity document (ALWAYS first)
+    try:
+        from core.soul_engine import build_soul_context
+        soul_ctx = build_soul_context()
+        if soul_ctx:
+            base_system = soul_ctx + "\n\n" + base_system
+    except Exception:
+        pass
+
+    # Layer 2: GSA voice injection — context-aware communication style
+    if task:
+        try:
+            from core.character_enforcer import EnforcementContext, set_enforcement_context
+            from core.gsa_voice import classify_message_context, get_gsa_injection
+
+            gsa_classification = classify_message_context(task)
+            gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)
+            if gsa_injection:
+                base_system = base_system + "\n\n" + gsa_injection
+
+            ctx = EnforcementContext(
+                context_type=gsa_classification.primary.value,
+                confidence=gsa_classification.confidence,
+                visual_signals=gsa_classification.visual_signals,
+                flow_state=gsa_classification.flow_state,
+            )
+            set_enforcement_context(ctx)
+        except Exception:
+            pass
+
+    # Layer 3: Semantic memory context (top relevant memories for this task)
+    if user_id:
+        try:
+            from core.memory_manager import LegionSemanticMemory
+            semantic_results = await LegionSemanticMemory().search_memories(task, str(user_id), limit=5)
+            if semantic_results:
+                mem_lines = ["[RELEVANT MEMORIES]"] + [str(m.get("content", ""))[:200] for m in semantic_results[:5] if m.get("content")]
+                base_system = base_system + "\n\n" + "\n".join(mem_lines)
+        except Exception:
+            pass
+
+    # Layer 4: Episodic narrative context
+    if user_id and task:
+        try:
+            from core.episodic_narrative import build_narrative_context
+            narrative_ctx = build_narrative_context(task)
+            if narrative_ctx:
+                base_system = base_system + "\n\n" + narrative_ctx
+        except Exception:
+            pass
+
+    # Layer 5: Conversation history context (from conversation_interface)
     if user_id:
         try:
             from core.conversation_interface import get_conversation_summary_prompt
-
             ctx = get_conversation_summary_prompt(str(user_id))
             if ctx:
-                system += "\n\n" + ctx
+                base_system = base_system + "\n\n" + ctx
         except Exception:
             pass
+
+    # Layer 6: Emotion modifier (if user has an active emotion state)
+    if user_id:
+        try:
+            from core.emotion_modulator import build_emotion_modifier, detect_emotion_from_context
+            from tools.letta_personality import get_persona_state
+            current_emotion = str(get_persona_state().get("dominant_emotion", "neutral"))
+            detected_emotion = detect_emotion_from_context(task, current_emotion)
+            if detected_emotion and detected_emotion != "neutral":
+                emotion_mod = build_emotion_modifier(detected_emotion)
+                if emotion_mod:
+                    base_system = base_system + "\n\n" + emotion_mod
+        except Exception:
+            pass
+
+    # Layer 7: Humanization layer context via SystemPromptBuilder (singleton-based)
+    try:
+        from core.memory.memory_manager import MemoryManager
+        from core.memory.temporal_graph import TemporalKnowledgeGraph
+        from core.personality.emotion_engine import EmotionEngine
+        from core.reflection.reflection_engine import ReflectionEngine
+        from core.system_prompt_builder import SystemPromptBuilder
+
+        # Use or initialize singleton instances
+        global memory, graph, emotion, reflection
+        if memory is None:
+            memory = MemoryManager()
+        if graph is None:
+            graph = TemporalKnowledgeGraph()
+        if emotion is None:
+            emotion = EmotionEngine()
+        if reflection is None:
+            from llm_client import llm_client as _llm_client_mod
+            reflection = ReflectionEngine(memory, _llm_client_mod)
+
+        # Build via SystemPromptBuilder for additional context layers
+        spb = SystemPromptBuilder(memory=memory, emotion=emotion, graph=graph, reflection=reflection)
+        spb.set_user_message(task)
+        cognitive_ctx = await spb.build(task_context=task, emotion=str(current_emotion) if 'current_emotion' in dir() else "neutral")
+        if cognitive_ctx:
+            base_system = base_system + "\n\n" + cognitive_ctx
+    except Exception:
+        pass
 
     return await _agent_loop_inner(
         task=task,
         chain=chain,
-        system=system,
+        system=base_system,
         image_b64=image_b64,
         user_id=user_id,
         thread_id=thread_id,
@@ -1026,7 +1207,8 @@ async def chat(
 
     if agent_key == "general":
         try:
-            from core.intent_classifier import classify_intent as _ci, _last_agent_key
+            from core.intent_classifier import _last_agent_key
+            from core.intent_classifier import classify_intent as _ci
 
             _intent_result = _ci(task, prior_agent_key=_last_agent_key.get(str(user_id) if user_id else "", "general"))
             if _intent_result.confidence >= 0.6:
@@ -1078,8 +1260,8 @@ async def chat(
 
     # GSA Voice injection — context-aware communication style
     try:
+        from core.character_enforcer import EnforcementContext, set_enforcement_context
         from core.gsa_voice import classify_message_context, get_gsa_injection
-        from core.character_enforcer import set_enforcement_context, EnforcementContext
 
         gsa_classification = classify_message_context(task)
         gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)
@@ -1427,9 +1609,9 @@ async def chat(
             _search_trigger_sent = False
             try:
                 from core.self_awareness_gate import (
-                    should_search_instead,
-                    get_search_trigger_message,
                     build_search_query_from_message,
+                    get_search_trigger_message,
+                    should_search_instead,
                 )
                 from tools.web_search import search_web
 
@@ -1595,7 +1777,7 @@ async def chat(
 
     # Budget hard-stop: if all fallbacks exhausted AND budget exceeded, fail instead of retrying
     try:
-        from swarms_bot.routing.budget_guard import get_budget_guard, BudgetExceededError
+        from swarms_bot.routing.budget_guard import BudgetExceededError, get_budget_guard
 
         if not get_budget_guard().can_spend("chat"):
             raise BudgetExceededError(f"Budget exceeded for 'chat' — all models exhausted for '{agent_key}'.")
@@ -1625,8 +1807,8 @@ async def _post_call_hooks(
     try:
         init_humanization_layer()
         try:
-            from tools.letta_personality import update_emotion
             from core.emotion_modulator import detect_emotion_from_context
+            from tools.letta_personality import update_emotion
 
             update_emotion(detect_emotion_from_context(user_msg), event=f"assistant response: {response[:80]}")
         except Exception:
@@ -1655,10 +1837,10 @@ async def _post_call_hooks(
 
         if user_id:
             try:
-                from tools.recallmax import should_store
                 from core.memory_manager import LegionSemanticMemory
                 from tools.memoryos_client import mos_add_conversation
                 from tools.open_memory import SECTOR_EPISODIC, SECTOR_SEMANTIC, om_store
+                from tools.recallmax import should_store
 
                 _mem_msgs: list[dict[str, str]] = [{"role": "user", "content": user_msg}]
                 if should_store(user_msg):
