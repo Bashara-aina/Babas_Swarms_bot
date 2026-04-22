@@ -11,7 +11,7 @@ import logging
 from typing import Tuple
 
 from aiogram import Bot
-from aiogram.types import Message, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 logger = logging.getLogger(__name__)
@@ -27,16 +27,16 @@ class LoadingManager:
         bot: Bot,
     ) -> Tuple[Message, asyncio.Event]:
         """Show animated loading indicator with cancel button.
-        
+
         Args:
             message: Original message from user
             task_name: Human-readable task description
             bot: Bot instance for sending messages
-            
+
         Returns:
             Tuple of (status_message, cancel_event)
             Call cancel_event.set() when task completes
-            
+
         Example:
             >>> status_msg, cancel = await LoadingManager.show_progress(
             ...     message, "Transcribing audio", bot
@@ -50,7 +50,7 @@ class LoadingManager:
             ...     await status_msg.edit_text(f"❌ Error: {e}")
         """
         cancel_event = asyncio.Event()
-        
+
         # Animation frames - hourglass effect
         frames = [
             f"⏳ {task_name}",
@@ -58,18 +58,18 @@ class LoadingManager:
             f"⏳ {task_name}..",
             f"⌛ {task_name}...",
         ]
-        
+
         # Create cancel button
         builder = InlineKeyboardBuilder()
         builder.button(text="❌ Cancel", callback_data="loading:cancel")
         keyboard = builder.as_markup()
-        
+
         # Send initial status message
         msg = await message.answer(
             frames[0],
             reply_markup=keyboard
         )
-        
+
         # Background animation task
         async def _animate():
             """Cycle through animation frames until cancelled."""
@@ -85,10 +85,10 @@ class LoadingManager:
                 except Exception as exc:
                     logger.debug("Animation frame update failed: %s", exc)
                     break
-        
+
         # Start animation in background
         asyncio.create_task(_animate())
-        
+
         return msg, cancel_event
 
     @staticmethod
@@ -98,20 +98,20 @@ class LoadingManager:
         bot: Bot,
     ) -> Message:
         """Show multi-step progress indicator.
-        
+
         Args:
             message: Original message
             steps: List of step descriptions
             bot: Bot instance
-            
+
         Returns:
             Status message that can be updated
-            
+
         Example:
             >>> status = await LoadingManager.show_steps(
             ...     message, [
             ...         "Downloading file",
-            ...         "Extracting text", 
+            ...         "Extracting text",
             ...         "Analyzing content",
             ...         "Generating summary",
             ...     ], bot
@@ -122,7 +122,7 @@ class LoadingManager:
         lines = ["📋 <b>Progress</b>\n"]
         for i, step in enumerate(steps, 1):
             lines.append(f"{i}️⃣ {step}... ⏳")
-        
+
         text = "\n".join(lines)
         return await message.answer(text, parse_mode="HTML")
 
@@ -134,7 +134,7 @@ class LoadingManager:
         steps: list[str] | None = None,
     ) -> None:
         """Update specific step status.
-        
+
         Args:
             status_msg: Status message from show_steps()
             step_index: 0-based index of step to update
@@ -144,7 +144,7 @@ class LoadingManager:
         if not steps:
             # Try to extract from existing message
             return
-        
+
         lines = ["📋 <b>Progress</b>\n"]
         for i, step in enumerate(steps):
             if i == step_index:
@@ -154,7 +154,7 @@ class LoadingManager:
             else:
                 icon = "⏳"
             lines.append(f"{i+1}️⃣ {step}... {icon}")
-        
+
         try:
             await status_msg.edit_text("\n".join(lines), parse_mode="HTML")
         except Exception as exc:

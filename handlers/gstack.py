@@ -20,7 +20,7 @@ from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from handlers.shared import is_allowed, send_chunked
 
@@ -176,19 +176,19 @@ async def cmd_review(msg: Message) -> None:
         f"{bold('🔍 /review — PR Review Report')}",
         f"Platform: {code(platform)} | Base: {code(base_branch)} | Branch: {code(branch)}",
         scope_msg,
-        f"",
+        "",
         f"Diff: +{lines_added.strip()} / -{lines_deleted.strip()} lines",
-        f"",
+        "",
     ]
 
     if issues:
         result.append(f"{bold('ISSUES FOUND:')}")
         for issue in issues[:10]:
             result.append(f"  {issue}")
-        result.append(f"")
+        result.append("")
     else:
-        result.append(f"✅ No obvious structural issues detected.")
-        result.append(f"")
+        result.append("✅ No obvious structural issues detected.")
+        result.append("")
         result.append(f"<i>Review passed. Consider running {code('/ship')} to deploy.</i>")
 
     await send_chunked(msg, "\n".join(result), parse_mode="HTML")
@@ -214,26 +214,26 @@ async def cmd_ship(msg: Message) -> None:
     merge_out, merge_err, merge_rc = run_sync(f"git merge origin/{base_branch} --no-edit 2>&1")
 
     if merge_rc != 0 and "conflict" in merge_err.lower():
-        status_lines.append(f"🔴 CONFLICTS — resolve before shipping")
+        status_lines.append("🔴 CONFLICTS — resolve before shipping")
         await msg.answer("\n".join(status_lines) + f"\n{code(merge_err[:500])}", parse_mode="HTML")
         return
 
-    status_lines.append(f"✅ BASE MERGE: success")
+    status_lines.append("✅ BASE MERGE: success")
 
     # Step 2: Test bootstrap
     test_out, _, test_rc = run_sync("python -c 'import pytest; print(\"pytest ok\")' 2>/dev/null || echo 'no pytest'")
     has_pytest = "pytest ok" in test_out
 
     if has_pytest:
-        await msg.answer("\n".join(status_lines) + f"\nRunning tests...", parse_mode="HTML")
+        await msg.answer("\n".join(status_lines) + "\nRunning tests...", parse_mode="HTML")
         pytest_out, _, pytest_rc = run_sync("pytest tests/ -x --asyncio-mode=auto -q 2>&1 | tail -20")
         if pytest_rc != 0:
             status_lines.append(f"🔴 TESTS: FAIL\n{code(pytest_out[-500:])}")
             await msg.answer("\n".join(status_lines), parse_mode="HTML")
             return
-        status_lines.append(f"✅ TESTS: PASS")
+        status_lines.append("✅ TESTS: PASS")
     else:
-        status_lines.append(f"⚠️ TESTS: pytest not available")
+        status_lines.append("⚠️ TESTS: pytest not available")
 
     # Step 3: Coverage
     if has_pytest:
@@ -241,21 +241,21 @@ async def cmd_ship(msg: Message) -> None:
         status_lines.append(f"Coverage check:\n{code(cov_out[-300:])}")
 
     # Step 4: Coverage audit (simplified)
-    status_lines.append(f"✅ COVERAGE: audit skipped (run manually)")
+    status_lines.append("✅ COVERAGE: audit skipped (run manually)")
 
     # Step 5: Diff stat for adversarial review
     diff_stat, _, _ = run_sync("git diff --stat | tail -1")
     diff_lines = int(diff_stat.strip().split()[0]) if diff_stat.strip().split()[0].isdigit() else 0
     if diff_lines > 200:
         status_lines.append(f"⚠️ DIFF: {diff_lines} lines — consider adversarial review")
-    status_lines.append(f"✅ ADVERSARIAL: review recommended for large diffs")
+    status_lines.append("✅ ADVERSARIAL: review recommended for large diffs")
 
     # Step 6: Version bump check
     version_out, _, _ = run_sync("grep -r 'version' pyproject.toml setup.py package.json 2>/dev/null | grep -v '__pycache__' | head -5 || echo ''")
     status_lines.append(f"\nCurrent version info:\n{code(version_out[:200] or 'not found')}")
 
     # Step 7: Push + PR
-    await msg.answer("\n".join(status_lines) + f"\nPushing...", parse_mode="HTML")
+    await msg.answer("\n".join(status_lines) + "\nPushing...", parse_mode="HTML")
 
     run_sync("git add -A 2>/dev/null")
     push_out, push_err, push_rc = run_sync("git push origin HEAD 2>&1")
@@ -263,17 +263,17 @@ async def cmd_ship(msg: Message) -> None:
     if push_rc != 0:
         status_lines.append(f"⚠️ PUSH: failed\n{code(push_err[:200])}")
     else:
-        status_lines.append(f"✅ PUSH: done")
+        status_lines.append("✅ PUSH: done")
 
     # PR creation (GitHub only)
     gh_out, gh_err, gh_rc = run_sync("gh pr create --fill 2>&1 || echo 'PR creation skipped'")
     if gh_rc == 0 and "http" in gh_out:
-        pr_url = [l for l in gh_out.split('\n') if 'http' in l]
+        pr_url = [ln for ln in gh_out.split('\n') if 'http' in ln]
         status_lines.append(f"PR: {pr_url[0] if pr_url else gh_out[:100]}")
     else:
         status_lines.append(f"PR: manual creation needed\n{code(gh_err[:200] or gh_out[:200])}")
 
-    status_lines.insert(1, f"BASE MERGE: ✅ SUCCESS")
+    status_lines.insert(1, "BASE MERGE: ✅ SUCCESS")
     status_lines.append(f"\n{bold('STATUS:')} ⚠️ READY FOR REVIEW — check diff before merge")
 
     await send_chunked(msg, "\n".join(status_lines), parse_mode="HTML")
@@ -305,18 +305,6 @@ async def cmd_officehours(msg: Message) -> None:
     )
 
     # Simple brainstorming framework
-    prompt = f"""You are a YC-style partner. Give sharp feedback on this startup idea:
-
-IDEA: {idea}
-
-Respond with:
-1. What problem does this solve, for whom, how often?
-2. Is the idea fundamentally sound? What's the biggest risk?
-3. What's the 1 thing that would make this a yes or a no?
-4. Rate clarity of idea: 1-10
-5. One sharp question the founder hasn't answered
-
-Be direct. No fluff. Sound like a YC partner who has seen 10,000 pitches."""
 
     # Use the general LLM path through Legion's existing system
     from handlers.ai import cmd_run
@@ -324,7 +312,7 @@ Be direct. No fluff. Sound like a YC partner who has seen 10,000 pitches."""
     response_lines = [
         f"{bold('🏛️ /officehours — Feedback')}\n",
         f"Idea: {escape(idea)}\n",
-        f"",
+        "",
         f"{bold('Stress test questions:')}\n",
         f"1. {bold('Who is the user?')} What specific person has this problem daily?",
         f"2. {bold('How often?')} Is it a real pain point or a nice-to-have?",
@@ -332,7 +320,7 @@ Be direct. No fluff. Sound like a YC partner who has seen 10,000 pitches."""
         f"4. {bold('How will users find out about it?')} Distribution is usually the hard part.",
         f"5. {bold('What is your unfair advantage?')} Why can't a big company copy this?\n",
         f"{bold('The 1 question that matters:')}\n",
-        f"If this works, why wouldn't it be obvious to a big company in 6 months?\n",
+        "If this works, why wouldn't it be obvious to a big company in 6 months?\n",
         f"<i>Consider: {code('/planreview <brief>')} for deeper analysis.</i>",
     ]
 
@@ -392,8 +380,8 @@ async def cmd_codex(msg: Message) -> None:
             parse_mode="HTML",
         )
         codex_out, codex_err, codex_rc = run_sync(
-            f"cd $(git rev-parse --show-toplevel) && "
-            f"codex exec \"Think like an attacker. What would break this code?\" -C $(git rev-parse --show-toplevel) -s read-only 2>&1",
+            "cd $(git rev-parse --show-toplevel) && "
+            "codex exec \"Think like an attacker. What would break this code?\" -C $(git rev-parse --show-toplevel) -s read-only 2>&1",
             timeout=300,
         )
     else:
@@ -418,7 +406,7 @@ async def cmd_codex(msg: Message) -> None:
     result = [
         f"{bold('🤖 /codex — Multi-Model Second Opinion')}",
         f"Mode: {code(mode)}",
-        f"",
+        "",
         f"{output}",
     ]
 
@@ -455,7 +443,6 @@ async def cmd_investigate(msg: Message) -> None:
     )
 
     # Run common diagnostics
-    diagnostics: list[str] = []
 
     # Check recent git history for the error pattern
     recent_commits, _, _ = run_sync("git log --oneline -10 2>/dev/null || echo ''")
@@ -477,9 +464,9 @@ async def cmd_investigate(msg: Message) -> None:
     result = [
         f"{bold('🔬 /investigate — Report')}\n",
         f"Error: {escape(error_spec[:200])}\n",
-        f"",
+        "",
         f"{bold('Recent commits:')}\n{code(recent_commits[:300] or 'none')}",
-        f"",
+        "",
         f"{bold('Code search:')}\n{code(search_out[:300] or 'not found')}",
     ]
 
@@ -546,7 +533,7 @@ async def cmd_qa(msg: Message) -> None:
     result = [
         f"{bold('🧪 /qa — Report')}\n",
         f"Target: {code(target)}",
-        f"",
+        "",
         f"{health_status} HTTP: {code(http_out.strip())}",
     ]
 
@@ -567,7 +554,7 @@ async def cmd_qa(msg: Message) -> None:
         result.append(f"\nSSL: {code(ssl_out[:200])}")
 
     result.append(f"\n{bold('OVERALL:')} ⚠️ MANUAL TESTING RECOMMENDED")
-    result.append(f"\n<i>Live site testing requires browser automation. For full QA, use /codex review after deployment.</i>")
+    result.append("\n<i>Live site testing requires browser automation. For full QA, use /codex review after deployment.</i>")
 
     await send_chunked(msg, "\n".join(result), parse_mode="HTML")
 
@@ -627,17 +614,17 @@ async def cmd_careful(msg: Message) -> None:
         f"{bold('🛡️ /careful — Analysis')}\n",
         f"Command: {code(operation[:200])}",
         f"Classification: {classification}",
-        f"",
+        "",
         f"Can be undone: {can_undo}",
     ]
 
     if is_destructive:
-        result.append(f"\n⚠️ This operation is IRREVERSIBLE.")
-        result.append(f"Before running, confirm:")
-        result.append(f"  1. You have a backup of affected data")
-        result.append(f"  2. No one else is affected by this change")
-        result.append(f"  3. You have the exact rollback command ready")
-        result.append(f"\nProceed only if all 3 are confirmed.")
+        result.append("\n⚠️ This operation is IRREVERSIBLE.")
+        result.append("Before running, confirm:")
+        result.append("  1. You have a backup of affected data")
+        result.append("  2. No one else is affected by this change")
+        result.append("  3. You have the exact rollback command ready")
+        result.append("\nProceed only if all 3 are confirmed.")
 
     await send_chunked(msg, "\n".join(result), parse_mode="HTML")
 
@@ -671,23 +658,23 @@ async def cmd_planreview(msg: Message) -> None:
     result = [
         f"{bold('📋 /planreview — CEO-Mode Review')}\n",
         f"Plan: {escape(plan_desc[:200])}\n",
-        f"",
+        "",
         f"{bold('Problem Framing:')}",
-        f"1. What problem does this solve, for whom, how often?",
-        f"2. Who is the user and what's their job-to-be-done?",
-        f"3. What's the simplest version that proves the concept?\n",
+        "1. What problem does this solve, for whom, how often?",
+        "2. Who is the user and what's their job-to-be-done?",
+        "3. What's the simplest version that proves the concept?\n",
         f"{bold('Scope Assessment:')}",
-        f"  Is this solving the RIGHT problem or just the EASY problem?\n",
+        "  Is this solving the RIGHT problem or just the EASY problem?\n",
         f"{bold('SCOPE MODE: SELECTIVE')}\n",
         f"{bold('Priority Hierarchy:')}",
-        f"  [MUST HAVE] — Core value, no workaround",
-        f"  [SHOULD HAVE] — Major improvement, workaround exists",
-        f"  [NICE TO HAVE] — Quality of life, can cut\n",
+        "  [MUST HAVE] — Core value, no workaround",
+        "  [SHOULD HAVE] — Major improvement, workaround exists",
+        "  [NICE TO HAVE] — Quality of life, can cut\n",
         f"{bold('Engineering Preferences:')}",
-        f"  Complexity: assess your approach",
-        f"  Reversibility: can you undo if wrong?",
-        f"  Scaling: NOW or LATER?\n",
-        f"<i>For deep CEO review with full framework, use /plan-ceo-review with a plan file.</i>",
+        "  Complexity: assess your approach",
+        "  Reversibility: can you undo if wrong?",
+        "  Scaling: NOW or LATER?\n",
+        "<i>For deep CEO review with full framework, use /plan-ceo-review with a plan file.</i>",
     ]
 
     await send_chunked(msg, "\n".join(result), parse_mode="HTML")

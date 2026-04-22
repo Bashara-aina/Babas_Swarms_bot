@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html as html_mod
 from datetime import datetime
 
 from aiogram import Router

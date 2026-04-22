@@ -18,11 +18,13 @@ Verified working models (live logs 2026-03-09): minimax/MiniMax-Text-01         
 """
 
 from __future__ import annotations
+
 import asyncio
 import logging
 import re
-import time
 import threading
+import time
+from collections.abc import Coroutine
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -75,12 +77,12 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist": minimax/MiniMax-Text-01,  # fast, large context
+    "strategist": "minimax/MiniMax-Text-01",  # fast, large context
     "devil_advocate": "minimax/MiniMax-Text-01",  # adversarial reasoning
-    "researcher": minimax/MiniMax-Text-01,  # deep research
-    "pragmatist": minimax/MiniMax-Text-01,  # practical, fast
-    "visionary": minimax/MiniMax-Text-01,  # creative, fast
-    "critic": minimax/MiniMax-Text-01,  # precise, analytical
+    "researcher": "minimax/MiniMax-Text-01",  # deep research
+    "pragmatist": "minimax/MiniMax-Text-01",  # practical, fast
+    "visionary": "minimax/MiniMax-Text-01",  # creative, fast
+    "critic": "minimax/MiniMax-Text-01",  # precise, analytical
 }
 
 DEBATE_ICONS = {
@@ -1800,7 +1802,7 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
         return f"{wrapper}\n\n{role_prompt}" if wrapper else role_prompt
 
 
-def build_system_prompt_async(role_prompt: str, user_id: str = "") -> Coroutine[str, str, str]:
+def build_system_prompt_async(role_prompt: str, user_id: str = "") -> Coroutine:
     """Async entry point — use this instead of build_system_prompt in async code."""
     from core.system_prompt_builder import build_system_prompt as _async_build
     return _async_build(user_id=user_id, query=role_prompt, extras={})

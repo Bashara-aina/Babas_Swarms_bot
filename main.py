@@ -44,7 +44,17 @@ from aiogram import BaseMiddleware, Bot, Dispatcher
 from aiogram.types import BotCommand, Message
 from dotenv import load_dotenv
 
+import agents as agents_registry
+import computer_agent
+import handlers
+import handlers.shared as _shared
+from core.daily_harvester.scheduler import DailyHarvesterScheduler
+from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
 from core.log_config import set_request_id
+from core.observability import init_observability
+from core.wiki_scheduler import WikiQualityScheduler
+from handlers import register_all_routers
+from llm_client import init_humanization_layer, verify_api_keys
 
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env")
@@ -53,17 +63,6 @@ _REQUIRED_KEYS = ["TELEGRAM_BOT_TOKEN", "ALLOWED_USER_ID"]
 _missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]
 if _missing:
     raise RuntimeError(f"Missing required env vars: {_missing}")
-
-import agents as agents_registry
-import computer_agent
-import handlers
-import handlers.shared as _shared
-from handlers import register_all_routers
-from llm_client import verify_api_keys, init_humanization_layer
-from core.daily_harvester.scheduler import DailyHarvesterScheduler
-from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
-from core.observability import init_observability
-from core.wiki_scheduler import WikiQualityScheduler
 
 # ── Global scheduler handles ─────────────────────────────────────────────────
 _harvester_scheduler: DailyHarvesterScheduler | None = None
@@ -106,8 +105,8 @@ class ActivityLogMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> Any:
         request_id = uuid4().hex[:8]
-        ctx = copy_context()
-        token = set_request_id(request_id)
+        copy_context()
+        set_request_id(request_id)
         try:
             user_id = event.from_user.id if event.from_user else None
             username = event.from_user.username if event.from_user else None
@@ -178,7 +177,7 @@ def _install_outbound_logging(bot: Bot) -> None:
         )
         return await original_send_photo(chat_id, photo, *args, **kwargs)
 
-    
+
 
 
 # ── Graceful Shutdown ─────────────────────────────────────────────────────────
@@ -408,6 +407,13 @@ def _ruflo_health_probe_sync(url: str = "http://127.0.0.1:7834/health") -> bool:
         return response.status == 200 and '"ok":true' in body.replace(" ", "")
 
 
+def _opencode_health_probe_sync(url: str = "http://127.0.0.1:4096/health") -> bool:
+    req = urlrequest.Request(url=url, method="GET")
+    with urlrequest.urlopen(req, timeout=2) as response:
+        body = response.read().decode("utf-8", errors="ignore")
+        return response.status == 200 and '"ok":true' in body.replace(" ", "")
+
+
 async def _wait_for_ruflo_health(attempts: int = 8, delay_seconds: float = 0.5) -> bool:
     for _ in range(attempts):
         try:
@@ -426,6 +432,7 @@ async def _ruflo_restart_monitor(check_interval: float = 30.0) -> None:
     Uses the global _ruflo_process handle to detect death,
     then re-spawns it and verifies health.
     """
+    global _ruflo_process
     import itertools
     for attempt in itertools.count():
         await asyncio.sleep(check_interval)
@@ -449,10 +456,6 @@ async def _ruflo_restart_monitor(check_interval: float = 30.0) -> None:
                     logger.warning("ruflo sidecar unhealthy after restart (non-fatal)")
             except Exception as e:
                 logger.error("ruflo sidecar restart failed: %s", e)
-    req = urlrequest.Request(url=url, method="GET")
-    with urlrequest.urlopen(req, timeout=2) as response:
-        body = response.read().decode("utf-8", errors="ignore")
-        return response.status == 200 and '"ok":true' in body.replace(" ", "")
 
 
 async def _wait_for_opencode_health(attempts: int = 8, delay_seconds: float = 0.5) -> bool:
@@ -939,7 +942,7 @@ async def on_startup(bot: Bot) -> None:
                         await bot.send_message(ALLOWED_USER_ID, text[:4000], parse_mode="HTML")
 
                     repos = await engine.fetch_trending(language="python")
-                    evals = await engine.evaluate_all(repos)
+                    await engine.evaluate_all(repos)
                     await engine.run_daily_scan(_notify)
                 except Exception as _ge:
                     logger.warning("GitHub intel daily scan failed: %s", _ge)
@@ -1126,7 +1129,7 @@ async def on_startup(bot: Bot) -> None:
                 # Research
                 BotCommand(command="paper", description="Search arXiv papers"),
                 BotCommand(command="ask_paper", description="Ask about a paper"),
-                BotCommand(command="workernet_papers", description="Analyze WorkerNet papers"),
+                # DEPRECATED: workernet_papers — removed from menu (handler still works for backward compat)
                 BotCommand(command="research", description="Deep web research"),
                 BotCommand(command="jarvis", description="Context bundle + plan (no auto-send)"),
                 BotCommand(command="scrape", description="Scrape a URL"),

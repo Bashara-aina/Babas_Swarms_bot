@@ -18,13 +18,14 @@ Auto-routing via SKILL_PATTERNS:
 
 from __future__ import annotations
 
-import aiofiles
+import asyncio
 import html as html_mod
 import logging
 import os
 import tempfile
 from typing import Optional
 
+import aiofiles
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile, Message, PhotoSize
@@ -405,8 +406,8 @@ async def handle_video(msg: Message) -> None:
         await msg.bot.download_file(file.file_path, destination=tmp_video_path)
 
         # Extract keyframes using ffmpeg (1 frame every 10 seconds, max 8 frames)
-        import subprocess
         import shutil
+        import subprocess
 
         tmp_frames_dir = tempfile.mkdtemp(prefix="video_frames_")
         frame_pattern = os.path.join(tmp_frames_dir, "frame_%03d.jpg")
@@ -476,7 +477,7 @@ async def handle_video(msg: Message) -> None:
                 logger.debug("Frame analysis failed: %s", exc)
 
         # Build response
-        lines = [f"🎬 <b>Video Analysis</b>", "", f"<i>Prompt: {_clean_html(prompt)}</i>", ""]
+        lines = ["🎬 <b>Video Analysis</b>", "", f"<i>Prompt: {_clean_html(prompt)}</i>", ""]
 
         if frame_results:
             lines.append("<b>Key frames:</b>")

@@ -8,7 +8,7 @@ import time
 
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import ContextTypes, Message
+from aiogram.types import Message
 
 import handlers.shared as _shared
 import router as agents
@@ -733,12 +733,12 @@ async def handle_nl(msg: Message) -> None:
         user_id = msg.from_user.id if msg.from_user else 0
 
         if msg.text and msg.text.strip().lower().startswith("/nihonko"):
-            handled = await handle_nihongo_command(msg, ContextTypes.DEFAULT_TYPE)
+            handled = await handle_nihongo_command(msg, None)
             if handled:
                 return
 
         if NihongoModeManager.is_active(user_id):
-            await handle_nihongo_message(msg, ContextTypes.DEFAULT_TYPE)
+            await handle_nihongo_message(msg, None)
             return
     except Exception:
         pass
