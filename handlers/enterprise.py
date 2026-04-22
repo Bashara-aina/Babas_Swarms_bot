@@ -71,14 +71,4 @@ async def cmd_security_stats(msg: Message) -> None:
     await msg.answer(text, parse_mode="HTML")
 
 
-# ── /audit_summary — REDIRECTED to /audit (canonical in sessions.py) ────────────
-@router.message(Command("audit_summary"))
-async def cmd_audit_summary(msg: Message) -> None:
-    """Show audit log summary for the last 24 hours — redirects to /audit."""
-    if not is_allowed(msg):
-        return
-    await msg.answer(
-        "<code>/audit_summary</code> is deprecated.\n"
-        "Use <code>/audit [hours]</code> instead.",
-        parse_mode="HTML",
-    )
+

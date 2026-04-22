@@ -355,26 +355,6 @@ async def cmd_instinct_import(msg: Message) -> None:
     await msg.answer(f"✅ Imported <b>{imported}</b> instincts.", parse_mode="HTML")
 
 
-@router.message(Command("loop_start"))
-async def cmd_loop_start(msg: Message) -> None:
-    """ECC-style alias for /loop — redirects to /loop."""
-    if not is_allowed(msg):
-        return
-    goal = _extract_arg(msg.text or "", "loop_start")
-    if not goal:
-        await msg.answer(
-            "usage: <code>/loop_start &lt;goal&gt;</code>\n\n"
-            "This command is deprecated. Use <code>/loop &lt;goal&gt;</code> instead.",
-            parse_mode="HTML",
-        )
-        return
-    await msg.answer(
-        "<code>/loop_start</code> is deprecated.\n"
-        "Use <code>/loop &lt;goal&gt;</code> instead.",
-        parse_mode="HTML",
-    )
-
-
 @router.message(Command("code_review"))
 async def cmd_code_review(msg: Message) -> None:
     """ECC alias for /review with file/code auto-detection."""

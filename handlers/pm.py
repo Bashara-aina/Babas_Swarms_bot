@@ -68,16 +68,7 @@ async def cmd_tasks_due(msg: Message) -> None:
         await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
 
 
-# ── /task_done — REDIRECTED to /mneme_done (canonical in session_handler.py) ───
-@router.message(Command("task_done"))
-async def cmd_task_done(msg: Message) -> None:
-    if not is_allowed(msg):
-        return
-    await msg.answer(
-        "<code>/task_done</code> is deprecated.\n"
-        "Use <code>/mneme_done &lt;task_id&gt;</code> instead.",
-        parse_mode="HTML",
-    )
+
 
 
 # ── /delegate — OpenClaw delegation ───────────────────────────────────────────

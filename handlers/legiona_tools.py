@@ -671,45 +671,6 @@ async def cmd_window(message: Message) -> None:
     await send_chunked(message, result)
 
 
-# ─── /screen — Screenshot ────────────────────────────────────────────────────
-
-@router.message(Command("screen"))
-async def cmd_screen(message: Message) -> None:
-    """Take a screenshot. Usage: /screen [base64=yes|no]"""
-    if not is_allowed(message):
-        return
-
-    # Auto-route through intent classifier for cognitive routing
-    raw = (message.text or "").removeprefix("/screen").strip()
-    if await _route_via_intent(message, "/screen", raw):
-        return
-
-    args = message.text.split(maxsplit=1)
-    base64_mode = args[1].lower() == "base64" if len(args) > 1 else False
-
-    try:
-        if base64_mode:
-            b64 = await desktop_control.take_screenshot_base64()
-            if b64.startswith("ERROR"):
-                await message.answer(b64)
-            else:
-                await message.answer(
-                    f"<code>{b64[:200]}</code>\n... (base64 PNG, {len(b64)} chars)",
-                    parse_mode="HTML",
-                )
-        else:
-            path = await desktop_control.take_screenshot()
-            if path.startswith("ERROR"):
-                await message.answer(path)
-            else:
-                await message.answer(
-                    f"Screenshot saved:\n<code>{html.escape(path)}</code>",
-                    parse_mode="HTML",
-                )
-    except Exception as exc:
-        await message.answer(f"ERROR: {exc}")
-
-
 # ─── /clipboard — Clipboard operations ──────────────────────────────────────
 
 @router.message(Command("clipboard"))
@@ -752,72 +713,6 @@ async def cmd_clipboard(message: Message) -> None:
         else:
             await message.answer("Usage:\n/clipboard get\n/clipboard set [text]")
 
-    except Exception as exc:
-        await message.answer(f"ERROR: {exc}")
-
-
-# ─── /type — Type text (desktop) ───────────────────────────────────────────
-
-@router.message(Command("type"))
-async def cmd_type(message: Message) -> None:
-    """Type text using xdotool. Usage: /type [text]\nWARNING: text visible in process args."""
-    if not is_allowed(message):
-        return
-
-    # Auto-route through intent classifier for cognitive routing
-    raw = (message.text or "").removeprefix("/type").strip()
-    if await _route_via_intent(message, "/type", raw):
-        return
-
-    args = message.text.split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: /type [text]")
-        return
-
-    text = args[1]
-    # Warning about sensitive text
-    if any(k in text.lower() for k in ["password", "secret", "token", "key", "api"]):
-        await message.answer(
-            "⚠️ Warning: text appears to contain sensitive data.\n"
-            "xdotool args are visible in process list.\n"
-            "Still executing as requested..."
-        )
-
-    try:
-        result = await desktop_control.type_text(text)
-        if result.startswith("ERROR"):
-            await message.answer(result)
-        else:
-            await message.answer(f"Typed: {html.escape(text[:100])}", parse_mode="HTML")
-    except Exception as exc:
-        await message.answer(f"ERROR: {exc}")
-
-
-# ─── /key — Press key combination ───────────────────────────────────────────
-
-@router.message(Command("key"))
-async def cmd_key(message: Message) -> None:
-    """Press a key combo. Usage: /key [combo]\nExample: /key Alt+Tab, Ctrl+c, Super+d"""
-    if not is_allowed(message):
-        return
-
-    # Auto-route through intent classifier for cognitive routing
-    raw = (message.text or "").removeprefix("/key").strip()
-    if await _route_via_intent(message, "/key", raw):
-        return
-
-    args = message.text.split(maxsplit=1)
-    if len(args) < 2:
-        await message.answer("Usage: /key [combo]\nExample: Alt+Tab, Ctrl+c, Super+d")
-        return
-
-    combo = args[1]
-    try:
-        result = await desktop_control.key_press(combo)
-        if result.startswith("ERROR"):
-            await message.answer(result)
-        else:
-            await message.answer(f"Pressed: {html.escape(combo)}", parse_mode="HTML")
     except Exception as exc:
         await message.answer(f"ERROR: {exc}")
 
