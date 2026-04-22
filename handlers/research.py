@@ -119,7 +119,6 @@ async def cmd_research(msg: Message) -> None:
                 topic,
                 user_id=str(msg.from_user.id) if msg.from_user else None,
             )
-            output = {"success": True, "data": out, "error": None}
         finally:
             typing_task.cancel()
         try:
@@ -137,12 +136,10 @@ async def cmd_research(msg: Message) -> None:
             typing_task.cancel()
             await status_msg.edit_text(f"🔬 GPT-Researcher: {topic[:40]}…", parse_mode="HTML")
             result = await gptr_execute(topic)
-            output = {"success": True, "data": result, "error": None}
             await send_chunked(msg, result)
             return
         except Exception as e:
             await msg.answer(f"GPT-Researcher error: {e}")
-            output = {"success": False, "data": None, "error": str(e)}
             return
 
     async def _phase(text: str) -> None:
@@ -222,7 +219,6 @@ async def cmd_research(msg: Message) -> None:
 
         typing_task.cancel()
         await status_msg.delete()
-        output = {"success": True, "data": result, "error": None}
         await send_chunked(msg, result, model_used="deep-research/verified")
     except Exception as e:
         typing_task.cancel()
@@ -235,7 +231,6 @@ async def cmd_research(msg: Message) -> None:
             )
         except Exception:
             pass
-        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /paper — arXiv paper search ────────────────────────────────────────────────
@@ -265,7 +260,6 @@ async def cmd_paper(msg: Message) -> None:
         papers = await search_arxiv(query, max_results=3)
         typing_task.cancel()
         await status_msg.delete()
-        output = {"success": True, "data": {"papers": papers}, "error": None}
         if not papers:
             await msg.answer("No papers found.")
             return
@@ -287,7 +281,6 @@ async def cmd_paper(msg: Message) -> None:
             await status_msg.edit_text(f"arXiv error: <code>{e}</code>", parse_mode="HTML")
         except Exception:
             pass
-        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /ask_paper — question about a specific paper ──────────────────────────────
@@ -322,7 +315,6 @@ async def cmd_ask_paper(msg: Message) -> None:
         analysis = await analyze_paper(paper_text, question)
         typing_task.cancel()
         await status_msg.delete()
-        output = {"success": True, "data": analysis, "error": None}
         await send_chunked(msg, analysis, model_used="debug/paper-analysis")
         try:
             from tools.memory import auto_save_research
@@ -336,7 +328,6 @@ async def cmd_ask_paper(msg: Message) -> None:
             await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
         except Exception:
             pass
-        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /workernet_papers — DEPRECATED ────────────────────────────────────────────

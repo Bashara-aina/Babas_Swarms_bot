@@ -44,12 +44,6 @@ async def cmd_task_from(msg: Message) -> None:
         await save_tasks_local(tasks, "telegram")
         typing_task.cancel()
         await status_msg.delete()
-        # ── Structured output ───────────────────────────────────────────────
-        output = {
-            "success": True,
-            "data": {"tasks": tasks, "count": len(tasks)},
-            "error": None,
-        }
         lines = [f"<b>Extracted {len(tasks)} tasks:</b>\n"]
         priority_icons = {"high": "!!", "mid": "!", "low": ""}
         for t in tasks:
@@ -60,9 +54,6 @@ async def cmd_task_from(msg: Message) -> None:
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
-        output = {"success": False, "data": None, "error": str(e)}
-
-
 # ── /tasks_due ────────────────────────────────────────────────────────────────
 @router.message(Command("tasks_due"))
 async def cmd_tasks_due(msg: Message) -> None:
@@ -72,10 +63,8 @@ async def cmd_tasks_due(msg: Message) -> None:
         from tools.project_manager import check_deadlines
 
         result = await check_deadlines()
-        output = {"success": True, "data": result, "error": None}
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
-        output = {"success": False, "data": None, "error": str(e)}
         await msg.answer(f"error: <code>{e}</code>", parse_mode="HTML")
 
 
@@ -108,10 +97,8 @@ async def cmd_delegate(msg: Message) -> None:
         from tools.openclaw_bridge import delegate_to_openclaw
 
         result = await delegate_to_openclaw(task)
-        output = {"success": True, "data": result, "error": None}
         await send_chunked(msg, result, model_used="openclaw")
     except Exception as e:
-        output = {"success": False, "data": None, "error": str(e)}
         await msg.answer(f"delegate error: <code>{e}</code>", parse_mode="HTML")
 
 
@@ -147,16 +134,13 @@ async def cmd_post(msg: Message) -> None:
         else:
             typing_task.cancel()
             await status_msg.edit_text("platforms: linkedin, tweet, thread")
-            output = {"success": False, "data": None, "error": "unknown platform"}
             return
         typing_task.cancel()
         await status_msg.delete()
-        output = {"success": True, "data": result, "error": None}
         await msg.answer(f"<b>{platform.upper()} draft:</b>\n\n{result}", parse_mode="HTML")
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
-        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /brand_check — brand monitoring ───────────────────────────────────────────
@@ -177,7 +161,6 @@ async def cmd_brand_check(msg: Message) -> None:
         result = await monitor_brand([keyword])
         typing_task.cancel()
         await status_msg.delete()
-        output = {"success": True, "data": result, "error": None}
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
         typing_task.cancel()
@@ -185,7 +168,6 @@ async def cmd_brand_check(msg: Message) -> None:
             await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
         except Exception:
             pass
-        output = {"success": False, "data": None, "error": str(e)}
 
 
 # ── /email — email management ────────────────────────────────────────────────
@@ -205,7 +187,6 @@ async def cmd_email(msg: Message) -> None:
             result = await check_inbox(limit=10, unread_only=True)
             typing_task.cancel()
             await status_msg.delete()
-            output = {"success": True, "data": result, "error": None}
             await msg.answer(
                 f"<pre>{result[:3800]}</pre>",
                 parse_mode="HTML",
@@ -216,7 +197,6 @@ async def cmd_email(msg: Message) -> None:
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
             except Exception:
                 pass
-            output = {"success": False, "data": None, "error": str(e)}
         return
 
     parts = text.split(maxsplit=1)
@@ -230,14 +210,12 @@ async def cmd_email(msg: Message) -> None:
 
             result = await check_inbox(limit=10, unread_only="unread" in arg or not arg)
             await status_msg.delete()
-            output = {"success": True, "data": result, "error": None}
             await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
         except Exception as e:
             try:
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
             except Exception:
                 pass
-            output = {"success": False, "data": None, "error": str(e)}
 
     elif subcmd == "read" and arg:
         status_msg = await msg.answer("📧 reading…")
@@ -246,14 +224,12 @@ async def cmd_email(msg: Message) -> None:
 
             result = await read_email(arg.strip())
             await status_msg.delete()
-            output = {"success": True, "data": result, "error": None}
             await send_chunked(msg, result, model_used="email")
         except Exception as e:
             try:
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
             except Exception:
                 pass
-            output = {"success": False, "data": None, "error": str(e)}
 
     elif subcmd == "search" and arg:
         status_msg = await msg.answer(f"🔍 searching: {arg}…")
@@ -262,14 +238,12 @@ async def cmd_email(msg: Message) -> None:
 
             result = await search_emails(arg.strip())
             await status_msg.delete()
-            output = {"success": True, "data": result, "error": None}
             await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
         except Exception as e:
             try:
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
             except Exception:
                 pass
-            output = {"success": False, "data": None, "error": str(e)}
 
     else:
         await msg.answer(
