@@ -1,524 +1,140 @@
+## Commit: 1824110
+- Date: Tue Apr 21 10:16:08 PM JST 2026
+- Message: feat(legiona): LEGIONA ULTIMATE INTELLIGENCE AUDIT v2.0 — M2.7 maximized
 ---
-title: Git Log
-type: concept
-status: active
-tags:
-- /
-- home
-- newadmin
-- swarm-bot
-- logs
-created: '2026-04-14'
-updated: '2026-04-14'
-summary: '- Date: Sat Apr 11 06:29:48 PM JST 2026'
-wikilinks: []
-confidence: medium
-source: research
----
-# git-log
+## Commit: 2d03f08
+- Date: Tue Apr 21 10:31:46 PM JST 2026
+- Message: fix(claude.md): compress to 27KB while preserving all essential sections
 
-## Commits
+Compression achieved:
+- 43,677 → 27,548 bytes (16,129 byte reduction)
+- Preserved: Safety Rules, Anti-Hallucination, Agent System, M2.7 Self-Evolution, Uncertainty Output
 
-## Commit: e9262e8
-- Date: Sat Apr 11 06:29:48 PM JST 2026
-- Message: chore: sync all local changes excluding env files
+Refs: swarm-2026-04-21-legiona-ultimate-audit-v2
 ---
-## Commit: 5fc27d2
-- Date: Sat Apr 11 07:31:27 PM JST 2026
-- Message: CHORE: pre-dead-file-purge checkpoint 2026-04-11
----
-## Commit: 8c78cdc
-- Date: Sat Apr 11 08:46:17 PM JST 2026
-- Message: feat(wiki): add complete Legion knowledge base — 13 files across 8 directories
----
-## Commit: 0ef8ad7
-- Date: Sat Apr 11 08:46:46 PM JST 2026
-- Message: feat(wiki): add complete Legion knowledge base — 13 files across 8 directories
----
-## Commit: 835e000
-- Date: Sun Apr 12 01:31:20 PM JST 2026
-- Message: add some
----
-## Commit: d36e8ec
-- Date: Sun Apr 12 01:31:35 PM JST 2026
-- Message: add some
----
-## Commit: 1a7294e
-- Date: Sun Apr 12 01:32:16 PM JST 2026
-- Message: add some
----
-## Commit: aa15f5e
-- Date: Sun Apr 12 05:23:14 PM JST 2026
-- Message: chore: wiring/wiki updates and module integration
----
-## Commit: a260dbe
-- Date: Sun Apr 12 05:25:52 PM JST 2026
-- Message: chore: add audit15 integration notes and test updates
----
-## Commit: f0df3b8
-- Date: Sun Apr 12 05:52:01 PM JST 2026
-- Message: chore: apply repository cleanup and wiring follow-ups
----
-## Commit: fca8599
-- Date: Sun Apr 12 07:40:35 PM JST 2026
-- Message: chore: finalize concerns fixes, audits, and orchestration updates
----
-## Commit: 052914b
-- Date: Sun Apr 12 07:49:13 PM JST 2026
-- Message: chore: finalize review/completion logs and wiki updates
----
-## Commit: d602f7f
-- Date: Sun Apr 12 07:49:30 PM JST 2026
-- Message: chore: update git log ledger
----
-## Commit: 317bf73
-- Date: Sun Apr 12 07:49:58 PM JST 2026
-- Message: chore: refresh git log after push sequence
----
-<<<<<<< Updated upstream
-## Commit: f335f99
-- Date: Sun Apr 12 07:53:22 PM JST 2026
-- Message: chore: refresh git log safely
----
-## Commit: cd8eb0d
-- Date: Mon Apr 13 12:44:30 PM JST 2026
-- Message: chore: sync audit quarantine and wiki restructuring
----
-## Commit: 911c695
-- Date: Mon Apr 13 12:56:39 PM JST 2026
-- Message: fix: surgical repair — frontmatter YAML, duplicate file resolved, broken wikilinks fixed
----
-## Commit: de05176
-- Date: Mon Apr 13 01:16:37 PM JST 2026
-- Message: audit: comprehensive implementation audit 2026-04-13 — full system verification
+## Commit: 7caf6f6
+- Date: Tue Apr 21 10:32:37 PM JST 2026
+- Message: docs: add swarm audit v2 log
 
-Findings: 8 critical, 8 warnings
-- CF-1: No OpenCode config file (all agents hardcoded model, no temperature)
-- CF-2: 303 broken wikilinks (wrong .md extension in links)
-- CF-3: Split-brain .wiki/ vs wiki/ with divergent content
-- CF-4: OpenCode agents write to .wiki/ not wiki/
-- CF-5: compile_state.json timestamp is fake midnight
-- CF-6: 8 command files are empty (0 lines)
-- CF-7: 29 stub articles below word minimums
-- CF-8: 69 YAML parsing failures (inline wikilink arrays)
+Pipelines executed:
+- explorer (3x): pre-flight, diff-analyzer (2x)
+- worker (4x): 10 contracts + 1 correction
+- reviewer (3x): final approval on 3rd attempt
 
-Karpathy compliance: 3/12 | /swarm compliance: 9/10
+Ref: swarm-2026-04-21-legiona-ultimate-audit-v2
+---
+## Commit: 4ae4b45
+- Date: Tue Apr 21 11:36:01 PM JST 2026
+- Message: feat: Legiona self-evolution + omega audit — 8-pillar anti-hallucination, M2.7 optimization, wiki hygiene
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+- Security: Removed monkey-patching in main.py, wildcard git permissions fixed
+- Anti-hallucination: Expanded from 5 to 8 pillars (Pillars 6-8 added)
+- CLAUDE.md: +5KB with sections 0n-0r (reasoning_split, 8-pillar, self-evolution, regression gating)
+- Copilot: Enhanced to 400 lines with LEGIONA v3 / M2.7 / 8-pillar guidance
+- Memory: global_memory.md v3.0, rules.md v3.0 with timestamps
+- Wiki hygiene: ORPHAN_TRIAGE.md created, compile_state.json updated
+- 10 new documentation artifacts created (OMEGA_BASELINE, OMEGA_UPGRADE_REPORT, etc.)
+- All verified by @Diff-Analyzer: 28/28 checks passed
 ---
-## Commit: 392d6cc
-- Date: Mon Apr 13 01:20:10 PM JST 2026
-- Message: feat: wiki enrichment — stub elimination, schema fixes, wikilink normalization
----
-## Commit: 5354db7
-- Date: Mon Apr 13 01:22:59 PM JST 2026
-- Message: fix: batch1 — wikilinks, YAML frontmatter, path wiring, opencode.json
----
-## Commit: 7cbc402
-- Date: Mon Apr 13 05:34:24 PM JST 2026
-- Message: wiki: ingest POPW research meetings 4th-14th — concepts, entities, timelines, decisions
+## Commit: f06744e
+- Date: Wed Apr 22 03:29:22 PM JST 2026
+- Message: feat: add intent classification, task planning, and cognitive context injection to /do command
 
-- concepts/: film-modulation, pose-derived-detection, kendall-loss, wise-iou, multi-task-learning
-- entities/: ikea-asm, assembly101, ha4m, industreal, ego-exo4d
-- timelines/: popw-meetings-nov-dec-2025, popw-meetings-jan-mar-2026, popw-meetings-mar-apr-2026
-- decisions/: adr-2026-01-film-over-attention, adr-2026-03-pdd-pivot, adr-2026-04-conference-submission-strategy
-- projects/: popw-research (updated)
+- Replaced fragile exec_keywords detection with classify_intent()
+- Added _plan_task() + _is_complex_task() for strategic planning
+- Complex tasks now use computer_use_loop (vision-action-verify)
+- agent_loop now injects soul, GSA, memory, narrative context
+- Multi-strategy self-healing: sanitized retry → re-parsed → computer_use_loop fallback
+- Hard cap at _MAX_ATTEMPTS=5 to prevent infinite loops
+- Backward compatible: simple tasks still go directly to _run_agent_loop
 ---
-## Commit: 3071c8d
-- Date: Mon Apr 13 05:36:04 PM JST 2026
-- Message: wiki: ingest POPW research meetings — concepts, entities, timelines, and decisions
----
-## Commit: ab54128
-- Date: Mon Apr 13 05:36:12 PM JST 2026
-- Message: fix: quote summary field in popw-meetings-mar-apr-2026 timeline
----
-## Commit: 7625978
-- Date: Mon Apr 13 05:37:57 PM JST 2026
-- Message: wiki: fix YAML frontmatter in 3 audit files
+## Commit: 7aff6c9
+- Date: Wed Apr 22 04:19:46 PM JST 2026
+- Message: feat: command compaction, /do optimization, OMEGA audit v4.0 — full legiona self-evolution
 
-Fixed WIRING_AUDIT_REPORT.md (bold metadata → proper YAML FM),
-legion/audit-2026-04-11-fixes.md, logs/worker-final-2026-04-11.md
-(prepend --- to fix malformed frontmatter blocks).
+Command compaction:
+- /task_done → /mneme_done (session_handler.py vs pm.py conflict resolved)
+- 17 thin-wrapper system commands auto-routed via intent classification
+- /workernet_papers, /orchestrate_legacy deprecated with redirects
+- /audit_summary → /audit, /loop_start → /loop
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: c9fec77
-- Date: Mon Apr 13 05:38:49 PM JST 2026
-- Message: wiki: update compile_state — merged vault, 2091 articles, 1688 proper FM (80.5%)
+/do optimization:
+- Intent classification replaces fragile exec_keywords
+- Complex tasks route to computer_use_loop (vision-action-verify)
+- Cognitive context injected into agent_loop (soul, GSA, memory, narrative)
+- Multi-strategy self-healing: sanitized retry → re-parse → computer_use_loop fallback
+- _MAX_ATTEMPTS=5 hard cap
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+OMEGA AUDIT v4.0:
+- Anti-hallucination: 5→8 pillars (P6-8 added)
+- CLAUDE.md: +5KB with reasoning_split, 8-pillar, self-evolution, regression gating
+- .claude/settings.json: ANTHROPIC_REASONING_SPLIT=true
+- Copilot instructions: 209→400 lines
+- Memory: global_memory.md v3.0, rules.md v3.0
+- Monkey-patching removed from main.py
+- 11 new OMEGA documentation artifacts created
+- Wiki hygiene: ORPHAN_TRIAGE.md, compile_state.json updated
+- 300+ orphaned wiki files quarantined
 ---
-## Commit: 99a1a65
-- Date: Mon Apr 13 05:55:34 PM JST 2026
-- Message: wiki: add POPW research articles + architectural diagram
+## Commit: 3b6b832
+- Date: Wed Apr 22 09:49:23 PM JST 2026
+- Message: audit: MCP cross-editor config parity findings
 
-- architecture/worker-net-architecture-diagram.md: Full pipeline diagram with embedded local image
-- architecture/worker-net-improved4.md: ResNet50-FPN + 3 heads + PoseFiLMModule
-- architecture/popw-training-pipeline.md: FP16 training, Kendall weighting, validation metrics
-- research/popw-film-literature-gap.md: Novelty argument — no prior pose→FiLM→action work
-- research/popw-model-comparison.md: improved4_film benchmark: mAP@0.5=0.600, PCK@0.1=99.9%
-- research/popw-v14-ground-truth.md: Source code audit — P3 shape [B,256,80,60] correction
+- Git: duplicate MCP servers (mseep vs modelcontextprotocol official)
+- Exa: remote vs local architecture mismatch
+- Obsidian: config/mcp_config.json references wrong disabled package
+- Firecrawl: CONSISTENT across all configs
+- Filesystem/GitNexus: CONSISTENT across all configs
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Audit complete per swarm pipeline
 ---
-## Commit: c1e4e37
-- Date: Mon Apr 13 06:01:20 PM JST 2026
-- Message: wiki: fix 100 YAML failures across research papers, decisions, wisdom
+## Commit: 3966a7c
+- Date: Wed Apr 22 10:59:51 PM JST 2026
+- Message: fix: remove dead output dict assignments in handlers/pm.py and handlers/research.py
 
-- Fix bold metadata in decisions (ADR files): **Key:** value → proper YAML
-- Fix research paper implementation fields with 3-value comma issues
-- Fix YAML list blank line in hoi-survey-2023-2024
-- Fix wikilinks in research: comma-separated → proper YAML list
-- Fix git-log.md wrongly had FM delimiters (working doc, no FM needed)
-- Fix ADR-001-api-key-fix.md unquoted backtick-heavy current_vision_chain
-- Compile state: 2098 articles, 0 yaml_fails, 0 broken_links
+Remove unused output = {...} dict assignments in exception/success handlers across 9 locations in pm.py and research.py. These were dead code since the error/success state was already communicated via message edits/answers.
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Fixes remaining F841 (local variable assigned but never used) lint errors.
 ---
-## Commit: e9a805e
-- Date: Mon Apr 13 06:09:11 PM JST 2026
-- Message: wiki: add PDF paths to FiLM/Kendall/IKEA ASM research articles
+## Commit: 8b0ffca
+- Date: Wed Apr 22 11:11:52 PM JST 2026
+- Message: fix: resolve all CI-blocking lint and import errors
 
-- Add pdf_path frontmatter to 003-film-perez-2018.md
-- Add pdf_path to 004-kendall-uncertainty-2018.md
-- Add pdf_path to 005-ikea-asm-dataset-2021.md
-- Fix broken wikilink in 028-amtl-yun-cho-2023.md
-- Archive duplicate Kendall/IKEA files to _archived_duplicates/
+- Quote minimax/MiniMax-Text-01 model IDs in DEBATE_PERSONA_MODELS (SyntaxError)
+- Remove ContextTypes import from handlers/ai.py (aiogram has no ContextTypes)
+- Add asyncio import to handlers/media_tools.py (F821)
+- Add html import to handlers/memory_commands.py (F821)
+- Remove stray urlrequest block from _ruflo_restart_monitor in main.py
+- Remove unnecessary f-strings and unused variables in handlers/gstack.py
+- Strip trailing whitespace in core/utils/error_formatter.py, feedback_animator.py, loading_manager.py (W293)
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Fixes: SyntaxError in agents/__init__.py, ImportError for ContextTypes in handlers/ai.py, and all F821/F541/W293 lint errors.
 ---
-## Commit: 8aa4d1d
-- Date: Mon Apr 13 06:41:07 PM JST 2026
-- Message: wiki: link 17 downloaded papers to pdf_path frontmatter
+## Commit: cafa735
+- Date: Wed Apr 22 11:21:21 PM JST 2026
+- Message: fix: remove threads_mode from handlers/__init__.py to resolve circular import
 
-Updated pdf_path for papers downloaded in previous session:
-- ResNet, FPN, FiLM, Kendall, IKEA ASM (already done)
-- Focal Loss, Mask R-CNN, Simple Baselines, GIoU, GradNorm
-- PCGrad, MGDA, Assembly101, I3D, TSM, DINOv2, YOLO, DETR, Attention
+threads_mode module is untracked and not in the repo, causing
+ImportError: cannot import name 'threads_mode' from partially initialized module 'handlers'
+during pytest collection and wiring verification.
+---
+## Commit: 35f811c
+- Date: Wed Apr 22 11:47:50 PM JST 2026
+- Message: fix: resolve 5 duplicate command pairs — /screen /type /key /loop_start /audit_summary /task_done
 
-Also archived 2 duplicate articles (004-multitask-kendall, 005-ikea-asm-benshabat)
-that were less POPW-specific than their canonical counterparts.
+- Remove /screen /type /key from legiona_tools.py (router order meant computer.py
+  versions were shadowed — /screen only returned file path, not photo)
+- computer.py now correctly handles /screen (photo + inline keyboard), /type, /key
+- Remove /loop_start redirect from ecc_compat.py (canonical /loop in ai.py)
+- Remove /audit_summary redirect from enterprise.py (canonical /audit in sessions.py)
+- Remove /task_done redirect from pm.py (canonical /mneme_done in session_handler.py)
+- All redirects already told users to use the canonical command
+---
+## Commit: 8351e3d
+- Date: Wed Apr 22 11:49:00 PM JST 2026
+- Message: chore: prune wiki quarantine revivals and stale research files
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Delete 300+ orphaned wiki files: old quarantine revivals, stale session logs,
+obsolete research artifacts, old .wiki/concepts/* and .wiki/issues/* files.
+These were generated during audit cycles and are no longer relevant.
 ---
-## Commit: aa2f895
-- Date: Mon Apr 13 06:55:14 PM JST 2026
-- Message: wiki: add 8 research articles for Assembly101 and IndustReal papers
-
-Added articles:
-- 075: ATTACH Dataset (two-handed assembly actions)
-- 076: Fusing Hand Body Skeleton + Object features
-- 077: Foundation Model Augmentation for Hand Pose
-- 078: ProMQA-Assembly multimodal procedural QA
-- 079: Object-Aware Egocentric Online Action Detection
-- 080: Procedure-Aware Pretraining for Instructional Video
-- 081: Prompt-Enhanced Hierarchical Transformer (CPR)
-- 082: MS-TCN for Action Segmentation
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 3738c7c
-- Date: Mon Apr 13 06:58:10 PM JST 2026
-- Message: refactor: fix 228 broken wikilinks across 54 wiki files
-
-- Add ./concepts/ prefix to bare concept links
-- Add ./entities/ prefix to bare entity links
-- Remove incorrect wiki/ prefixes
-- Remove trailing slashes from directory links
-- Add batch_fix_wikilinks.py script for future fixes
----
-## Commit: e03e5e4
-- Date: Mon Apr 13 06:58:15 PM JST 2026
-- Message: refactor: wikilink path corrections in wiki content
----
-## Commit: 3e9ca87
-- Date: Mon Apr 13 07:07:22 PM JST 2026
-- Message: refactor: remove split-brain wiki/ vault — .wiki/ is canonical
-
-Deleted wiki/ (2.1M, 242 files) — Obsidian vault at project root was
-duplicate of .wiki/. Both had .obsidian/ dirs and identical harvester
-output. .wiki/ is the canonical vault per CLAUDE.md Section 2b.
-
-main.py and all code already reference .wiki/ — no path updates needed.
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 9defd78
-- Date: Mon Apr 13 07:08:35 PM JST 2026
-- Message: chore: add scattered dirs to .gitignore, clean embedded repos
-
-- Add project/, cekwajar/, meeting/, popwadditional/, wiki/ to .gitignore
-- These are separate project directories, not part of swarm-bot
-- Remove embedded git repo reference for project/rumahlabuh
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: e966d49
-- Date: Mon Apr 13 07:09:27 PM JST 2026
-- Message: wiki: fix last YAML fail in contracts-batch4-wiki-wiring.md
-
-summary field had unquoted colon-containing value.
-Compile state: 2113 articles, 0 yaml_fails, 0 broken_links.
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 00d78d6
-- Date: Mon Apr 13 08:36:58 PM JST 2026
-- Message: wiki: add session_harvester.py — auto-capture Claude Code + OpenClaude + Legion sessions as draft stubs
----
-## Commit: 7af1e42
-- Date: Mon Apr 13 08:53:51 PM JST 2026
-- Message: wiki: add session_harvester.py + session_synthesizer.py — full auto-ingestion pipeline
-
-Pipeline:
-- session_harvester.py: captures Claude Code + OpenClaude + Legion bot sessions every 30min
-- session_synthesizer.py: synthesizes stubs into wiki articles (concepts/decisions) using Cerebras llama3.1-8b
-- stubs → .wiki/conversations/ (draft review)
-- synthesized → .wiki/concepts/ + .wiki/decisions/ (proper articles with frontmatter + wikilinks)
-- Cron: harvester */30min, synthesizer */35min
-- 24 stubs processed → 16 wiki articles in first run
----
-## Commit: 263adb9
-- Date: Mon Apr 13 11:05:11 PM JST 2026
-- Message: research: temporal attention alternatives for POPW BiGRU replacement
----
-## Commit: ee745fa
-- Date: Mon Apr 13 11:05:37 PM JST 2026
-- Message: research: log POPW architecture improvement swarm run (2026-04-13)
----
-## Commit: e1ca3e6
-- Date: Mon Apr 13 11:19:23 PM JST 2026
-- Message: fix: DNS-resilient HTTP client for rumahlabuh.com connectivity
----
-## Commit: 5b0386f
-- Date: Tue Apr 14 09:58:20 AM JST 2026
-- Message: research: add DEEP_AUDIT quarantine analysis (5 contracts, 7797 words)
----
-## Commit: 408d68d
-- Date: Tue Apr 14 10:07:41 AM JST 2026
-- Message: fix: productivity.py timer user_id fallback, rumahlabuh_crew draft_guest_reply call_llm — comprehensive audit fixes
----
-## Commit: 5c29b51
-- Date: Tue Apr 14 10:18:25 AM JST 2026
-- Message: wiki: revive quarantined files with score > 0.05
----
-## Commit: aaec6ae
-- Date: Tue Apr 14 10:32:53 AM JST 2026
-- Message: fix: tighten wiki quarantine threshold 0.15 → 0.05
----
-## Commit: 49286e8
-- Date: Tue Apr 14 12:00:24 PM JST 2026
-- Message: fix: unify wiki path from wiki/ to .wiki/ across core modules
----
-## Commit: af30503
-- Date: Tue Apr 14 12:58:12 PM JST 2026
-- Message: docs: add POPW temporal architecture diagram with BiGRU and Feature Bank
----
-## Commit: 8b25a33
-- Date: Tue Apr 14 01:12:11 PM JST 2026
-- Message: docs: add BiGRU temporal modeling to POPW architecture XML
----
-## Commit: 0d353aa
-- Date: Tue Apr 14 01:15:46 PM JST 2026
-- Message: wiki: add POPW temporal modeling research stack (BiGRU, feature bank, pose conditioning)
----
-## Commit: 108ca0b
-- Date: Tue Apr 14 01:17:11 PM JST 2026
-- Message: fix: remove OpenAI SDK from voice.py, migrate tiers.py to aiosqlite, add wiki batch fix scripts
----
-## Commit: 4109560
-- Date: Tue Apr 14 01:19:45 PM JST 2026
-- Message: wiki: fix 016 frontmatter, add 020 comprehensive survey
----
-## Commit: b432562
-- Date: Tue Apr 14 01:26:13 PM JST 2026
-- Message: research: BiGRU replacement comparison — Mamba recommended for POPW activity head
----
-## Commit: c6bf1b9
-- Date: Tue Apr 14 02:25:51 PM JST 2026
-- Message: wiki: add 20 Mamba + MMN papers for pose-aware activity recognition
-
-Mamba papers (8):
-- mamba-selective-ssm (foundation)
-- vision-mamba, video-mamba (backbone/temporal)
-- spikmamba, ms-temba, vl-mamba, mamba-track, mamba-motion-generation
-
-MMN/Motion papers (10):
-- 015-motion-modulation-acmmm-2025 (MMN foundation)
-- mans-tarm, psumnet, lsta-net, epam-net (temporal/attention)
-- dmm-motion, just-add-pi, pogars, posescript, st-gcn
-
-Comprehensive survey:
-- mamba-pose-activity-survey (full 18-paper synthesis)
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 566c9f3
-- Date: Tue Apr 14 04:10:26 PM JST 2026
-- Message: feature: add Mamba SSM as BiGRU alternative in POPW paper skeleton
----
-## Commit: 609189f
-- Date: Tue Apr 14 11:01:39 PM JST 2026
-- Message: fix: add tool configs to gitignore, add direct wiki_bridge call in opencode_bridge, remove session hooks
----
-## Commit: 79d2c8f
-- Date: Thu Apr 16 12:09:09 AM JST 2026
-- Message: docs: add deep integration design for OpenCode ⇄ Claude Code ⇄ LegionBot
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 9679a70
-- Date: Thu Apr 16 12:30:22 AM JST 2026
-- Message: feat: document multi-session worktree system in SOUL.md, CLAUDE.md, and wiki
-
-SOUL.md: Added multi-session worktree system section explaining
-  the git-worktree isolation system Legion now knows about.
-
-CLAUDE.md: Added 2c (Multi-Session Worktree System) to architecture
-  map and CLAUDE_REPO_ROOT / CLAUDE_WORKTREES_ROOT env vars.
-
-.wiki/architecture/multi-session-worktrees.md: New article documenting
-  architecture, usage, and design rationale (advisory vs enforced locking).
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 1707b1c
-- Date: Thu Apr 16 12:31:43 AM JST 2026
-- Message: feat: add joint_memory facade for OpenCode/Claude Code/LegionBot
----
-## Commit: 12bfb3b
-- Date: Thu Apr 16 12:33:22 AM JST 2026
-- Message: feat: add _claude_code_brain_layer() to unified prompt context
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 05b8f3c
-- Date: Thu Apr 16 12:34:16 AM JST 2026
-- Message: feat: add claude_code_write_session to wiki bridge
----
-## Commit: e5b2e00
-- Date: Thu Apr 16 12:36:14 AM JST 2026
-- Message: feat: add claude_code_bridge bidirectional Claude Code↔OpenCode bridge
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 8172aa2
-- Date: Thu Apr 16 12:37:35 AM JST 2026
-- Message: feat: add legion_callback_bridge with recursive depth tracking
----
-## Commit: a593fb4
-- Date: Thu Apr 16 12:39:25 AM JST 2026
-- Message: feat: add @legion/@claude directive parsing and cross-system callbacks
----
-## Commit: c7ca3cf
-- Date: Thu Apr 16 01:38:58 AM JST 2026
-- Message: feat: add legiona shared agent definitions
----
-## Commit: 701d84f
-- Date: Thu Apr 16 01:40:45 AM JST 2026
-- Message: feat: add legion-callback and claude-callback commands
----
-## Commit: 9b17a8d
-- Date: Thu Apr 16 01:44:17 AM JST 2026
-- Message: feat: add claude_code session hooks to builtin_hooks
----
-## Commit: bb4bbdf
-- Date: Thu Apr 16 01:45:41 AM JST 2026
-- Message: feat: add /codex handler for Claude Code bridge
----
-## Commit: 7fb9285
-- Date: Thu Apr 16 01:48:05 AM JST 2026
-- Message: docs: add three-system integration architecture to CLAUDE.md
----
-## Commit: 120222e
-- Date: Thu Apr 16 02:05:54 AM JST 2026
-- Message: fix: remove invalid kwargs from run_claude_task call
----
-## Commit: 7c4a205
-- Date: Thu Apr 16 03:10:05 AM JST 2026
-- Message: feat(cekwajar): Stage 1 — project scaffold complete
-
-- Full shadcn/ui component library (button, input, label, select, card, dialog, toast, badge, tabs, progress, separator, sheet, skeleton, alert)
-- Cookie-based Supabase auth with @supabase/ssr middleware
-- Homepage with hero + 5 tool cards + how-it-works section
-- Mobile-first layout with GlobalNav (Sheet side panel) and Footer
-- .env.local with all API keys (Supabase, Google Vision, Midtrans)
-- TypeScript: zero errors (pnpm tsc --noEmit)
-- Dev server: HTTP 200 on localhost:3000
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: cedc71b
-- Date: Thu Apr 16 03:18:50 AM JST 2026
-- Message: feat(cekwajar): Stage 2 — database schema, migrations, RLS, seed data, query helpers
-
-- 19 SQL migrations covering all tables (users, subscriptions, transactions,
-  payslip_audits, salary/property/col/ppp benchmarks, reference data)
-- Full RLS policies on all tables via migrations 004 and 011
-- pg_cron jobs for record purging and subscription expiry checks
-- TER A/B/C brackets (PMK 168/2023), BPJS rates, PTKP values, 48 city UMK
-- COL indices (20 cities), 15-country PPP reference, 10 COL categories
-- src/types/database.types.ts — fully typed TypeScript definitions
-- src/lib/db/queries.ts — typed helper functions (getUserTier, getUMKForCity,
-  getTERRate, getBPJSRates, getPTKPValue, incrementOCRCounter, COL/PPP/salary/
-  property helpers)
-- Fixed NEXT_PUBLIC_SUPABASE_ANON_KEY → NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  across server.ts, client.ts, and middleware.ts
----
-## Commit: 94b5938
-- Date: Thu Apr 16 03:28:15 AM JST 2026
-- Message: feat: stage 3 complete — auth, dashboard, subscription system
-
-- Add dashboard middleware protection (/dashboard → /auth/login)
-- Add PremiumGate component with blur overlay + upgrade CTA
-- Add upgrade/page.tsx with 3-tier pricing cards
-- Add pricing/page.tsx with feature comparison table + FAQ
-- Fix Tool type to include description field
-- Fix getCurrentUser return type to use Awaited<ReturnType<>>
-- Fix pricing page union type indexing with explicit type annotation
-- PremiumGate, SubscriptionBadge, GlobalNav all in place
-- Zero TypeScript errors (pnpm tsc --noEmit)
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: a4e9636
-- Date: Thu Apr 16 03:39:13 AM JST 2026
-- Message: feat: stage 4 complete — wajar slip engine, UI, and violations
-
-- PPh21 TER engine (PMK 168/2023) with December progressive true-up
-- BPJS engine: JHT, JP (capped), JKK, JKM, Kesehatan (capped)
-- All 7 violation detectors (V01–V07) sorted by severity
-- POST /api/audit-payslip with Zod validation, rate limiting (5/IP/hr)
-- GET /api/cities for city dropdown with CDN caching
-- GET /api/auth/me for client-side tier detection
-- Full Client Component UI: state machine, manual form, verdict display
-- ViolationItem and UMKBadge components
-- PremiumGate wrapping on IDR amounts for free tier
-- Fixed Suspense boundary on login page (useSearchParams)
-- Fixed Zod v4: ZodError uses .issues not .errors
-- Split form schema (strings) from API schema (numbers) for react-hook-form compat
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-## Commit: 5dd87a3
-- Date: Thu Apr 16 03:50:38 AM JST 2026
-- Message: feat: stage 5 complete — OCR pipeline with Google Vision + Tesseract fallback
-
-- Added Google Vision API integration (server-side) for document text extraction
-- Added Tesseract.js client-side fallback when Vision quota (950/month) exceeded
-- Created field-extractor.ts with Indonesian payslip regex patterns (grossSalary, pph21, jhtEmployee, jpEmployee, kesehatanEmployee, takeHome)
-- Added IDR parsing with Indonesian thousands separator (dot) support
-- Implemented confidence scoring with routing decisions: AUTO_ACCEPT (>=0.92), SOFT_CHECK (>=0.80), MANUAL_REQUIRED
-- Created PayslipUploader component with drag-drop, progress states, and OCR confirmation UI
-- Integrated OCR uploader into wajar-slip page (pre-fills form on extraction)
-- Added ocr_quota_counter table management for monthly Vision usage tracking
-- Fixed Supabase client import and duplicate declaration issues
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
----
-=======
-## Commit: ae9fd86
-- Date: Sun Apr 12 07:53:16 PM JST 2026
-- Message: chore: refresh git log safely
----
->>>>>>> Stashed changes

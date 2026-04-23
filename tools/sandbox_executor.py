@@ -84,7 +84,7 @@ class SandboxExecutor:
         proc = await sandbox.process.start(cmd_map[language])
 
         try:
-            result = await asyncio.wait_for(proc.finish(), timeout=timeout)
+            await asyncio.wait_for(proc.finish(), timeout=timeout)
         except asyncio.TimeoutError:
             await proc.kill()
             await sandbox.close()

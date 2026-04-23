@@ -4,6 +4,17 @@ from __future__ import annotations
 
 import pytest
 
+from core.daily_harvester.morning_report import MorningReport
+from core.daily_harvester.source_strategy import (
+    ContradictionResolver,
+    SourceInfo,
+    SourceType,
+    TrustTier,
+    get_trust_score,
+    get_trust_tier,
+)
+from core.daily_harvester.swarm_debate import run_debate, run_debate_batch
+from core.daily_harvester.topic_budget import detect_active_topics, normalize_budget
 from core.daily_harvester.types import (
     CandidateInfo,
     SourceType,
@@ -11,18 +22,6 @@ from core.daily_harvester.types import (
     VerdictDecision,
     WikiEntry,
 )
-from core.daily_harvester.topic_budget import detect_active_topics, normalize_budget
-from core.daily_harvester.swarm_debate import run_debate, run_debate_batch
-from core.daily_harvester.morning_report import MorningReport
-from core.daily_harvester.source_strategy import (
-    ContradictionResolver,
-    get_trust_score,
-    get_trust_tier,
-    SourceInfo,
-    SourceType,
-    TrustTier,
-)
-
 
 # ── test_weight_formula ──────────────────────────────────────────────────────
 

@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated,
-  multi-component language learning system while maintaining full backward compatibility
-  with existing commands and...
+ multi-component language learning system while maintaining full backward compatibility
+ with existing commands and...
 wikilinks: []
 confidence: medium
 source: research
@@ -20,31 +20,30 @@ source: research
 Upgrade Nihongo Mode from a basic Japanese teaching interface into a sophisticated, multi-component language learning system while maintaining full backward compatibility with existing commands and complete isolation from Legion's core.
 ---
 
-
 ## Current Architecture Summary
 
 ### Existing Components
 
 ```
 skills/nihongo/
-├── __init__.py           # Module exports
-├── constants.py          # N5_VOCAB_SAMPLE, N5_GRAMMAR_PATTERNS, LESSON_TEMPLATES
-├── sensei_prompt.py      # Static SENSEI_BASE + additions, build_sensei_system_prompt()
-├── mode_manager.py       # NihongoModeManager, NihongoSession, NihongoSubMode enum
-├── lesson_engine.py      # LessonEngine with N5_TOPICS
-├── quiz_engine.py        # QuizEngine with scoring
-├── voice_pipeline.py    # Whisper STT + VoiceVox/gTTS TTS
+├── __init__.py # Module exports
+├── constants.py # N5_VOCAB_SAMPLE, N5_GRAMMAR_PATTERNS, LESSON_TEMPLATES
+├── sensei_prompt.py # Static SENSEI_BASE + additions, build_sensei_system_prompt()
+├── mode_manager.py # NihongoModeManager, NihongoSession, NihongoSubMode enum
+├── lesson_engine.py # LessonEngine with N5_TOPICS
+├── quiz_engine.py # QuizEngine with scoring
+├── voice_pipeline.py # Whisper STT + VoiceVox/gTTS TTS
 ├── correction_engine.py # Grammar/vocab correction
-├── progress_store.py    # Supabase adapter (in-memory cache)
-├── vocab_tracker.py     # Tracks words seen/failed/mastered
-└── furigana.py          # pykakasi-based furigana + romaji
+├── progress_store.py # Supabase adapter (in-memory cache)
+├── vocab_tracker.py # Tracks words seen/failed/mastered
+└── furigana.py # pykakasi-based furigana + romaji
 
 handlers/
-└── nihongo_handler.py   # Telegram handler, all /nihonko commands
+└── nihongo_handler.py # Telegram handler, all /nihonko commands
 
 data/nihongo/
-├── n5_vocab.json        # 30 N5 vocabulary words
-├── n5_grammar.json     # 15 grammar patterns
+├── n5_vocab.json # 30 N5 vocabulary words
+├── n5_grammar.json # 15 grammar patterns
 └── lesson_templates.json # 8 lesson templates
 ```
 
@@ -74,41 +73,41 @@ User message → build_sensei_system_prompt(session) → LLM → response → us
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      NIHONGO MODE v2.0 STACK                         │
+│ NIHONGO MODE v2.0 STACK │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌───────────────┐     ┌────────────────┐     ┌───────────────┐ │
-│  │ SenseiSoul    │────▶│ ProactiveSensei│◀────│  ShadowEngine │ │
-│  │ (Dynamic soul)│     │ (Nudge engine) │     │ (Pronunciation│ │
-│  └───────────────┘     └────────────────┘     └───────────────┘ │
-│         │                      ▲                      │           │
-│         ▼                      │                      ▼           │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │              SenseiPromptBuilder (Dynamic)                   │ │
-│  │  .base() .with_soul() .with_mastery() .with_immersion()      │ │
-│  │  .with_srs() .with_culture() .with_sub_mode() .build()      │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                              │                                      │
-│                              ▼                                      │
-│  ┌───────────────┐  ┌───────────────┐  ┌───────────────────────┐ │
-│  │ MasteryGate   │  │  SRSEngine    │  │   ImmersionWorld      │ │
-│  │ (Bloom 2σ)    │  │   (SM-2)      │  │  (Narita scenarios)   │ │
-│  └───────────────┘  └───────────────┘  └───────────────────────┘ │
-│                                                                     │
-│  ┌───────────────┐  ┌───────────────┐                             │
-│  │ CulturalIntel │  │ VocabTracker  │                             │
-│  │ (Keigo/etc)   │  │   (existing)  │                             │
-│  └───────────────┘  └───────────────┘                             │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │              nihongo_handler.py (Telegram)                     │ │
-│  │   /nihonko* commands ──► mode_manager ──► LLM call            │ │
-│  └───────────────────────────────────────────────────────────────┘ │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐ │
-│  │              Legion Core (ISOLATED - NO CHANGES)              │ │
-│  │   SOUL.md, soul_engine.py, character_enforcer.py, LEGION_*.md │ │
-│  └───────────────────────────────────────────────────────────────┘ │
+│ │
+│ ┌───────────────┐ ┌────────────────┐ ┌───────────────┐ │
+│ │ SenseiSoul │────▶│ ProactiveSensei│◀────│ ShadowEngine │ │
+│ │ (Dynamic soul)│ │ (Nudge engine) │ │ (Pronunciation│ │
+│ └───────────────┘ └────────────────┘ └───────────────┘ │
+│ │ ▲ │ │
+│ ▼ │ ▼ │
+│ ┌───────────────────────────────────────────────────────────────┐ │
+│ │ SenseiPromptBuilder (Dynamic) │ │
+│ │ .base() .with_soul() .with_mastery() .with_immersion() │ │
+│ │ .with_srs() .with_culture() .with_sub_mode() .build() │ │
+│ └───────────────────────────────────────────────────────────────┘ │
+│ │ │
+│ ▼ │
+│ ┌───────────────┐ ┌───────────────┐ ┌───────────────────────┐ │
+│ │ MasteryGate │ │ SRSEngine │ │ ImmersionWorld │ │
+│ │ (Bloom 2σ) │ │ (SM-2) │ │ (Narita scenarios) │ │
+│ └───────────────┘ └───────────────┘ └───────────────────────┘ │
+│ │
+│ ┌───────────────┐ ┌───────────────┐ │
+│ │ CulturalIntel │ │ VocabTracker │ │
+│ │ (Keigo/etc) │ │ (existing) │ │
+│ └───────────────┘ └───────────────┘ │
+│ │
+│ ┌───────────────────────────────────────────────────────────────┐ │
+│ │ nihongo_handler.py (Telegram) │ │
+│ │ /nihonko* commands ──► mode_manager ──► LLM call │ │
+│ └───────────────────────────────────────────────────────────────┘ │
+│ │
+│ ┌───────────────────────────────────────────────────────────────┐ │
+│ │ Legion Core (ISOLATED - NO CHANGES) │ │
+│ │ SOUL.md, soul_engine.py, character_enforcer.py, LEGION_*.md │ │
+│ └───────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -171,13 +170,13 @@ SenseiPromptBuilder().base().with_soul(soul).with_mastery(gate, uid).build() →
 **SM-2 Formula**:
 ```
 if quality >= 3:
-    if repetitions == 0: interval = 1
-    elif repetitions == 1: interval = 6
-    else: interval = round(interval * ease_factor)
-    repetitions += 1
+ if repetitions == 0: interval = 1
+ elif repetitions == 1: interval = 6
+ else: interval = round(interval * ease_factor)
+ repetitions += 1
 else:
-    repetitions = 0
-    interval = 1
+ repetitions = 0
+ interval = 1
 
 ease_factor = max(1.3, ease_factor + (0.1 - (5-quality) * (0.08 + (5-quality) * 0.02)))
 ```
@@ -195,11 +194,11 @@ ease_factor = max(1.3, ease_factor + (0.1 - (5-quality) * (0.08 + (5-quality) * 
 **Bloom Levels for Nihongo**:
 | Level | Japanese Example |
 |-------|-----------------|
-| REMEMBER | "Apa arti 学生?" |
-| UNDERSTAND | "Jelaskan penggunaan は" |
-| APPLY | "Buat kalimat dengan を" |
-| ANALYZE | "Bandingkan は dan が" |
-| EVALUATE | "哪个更自然: A vs B?" |
+| REMEMBER | "Apa arti ?" |
+| UNDERSTAND | "Jelaskan penggunaan " |
+| APPLY | "Buat kalimat dengan " |
+| ANALYZE | "Bandingkan dan " |
+| EVALUATE | ": A vs B?" |
 | CREATE | "Buat dialog alami menggunakangrammar point ini" |
 
 ### 5. Narita-Specific Immersion
@@ -243,7 +242,7 @@ ease_factor = max(1.3, ease_factor + (0.1 - (5-quality) * (0.08 + (5-quality) * 
 
 **Rationale**:
 - Indonesian speakers have specific phonetic challenges with Japanese
-- Common problem phonemes: ら vs な, は vs ば,长短音, っ (gemination)
+- Common problem phonemes: vs , vs ,, (gemination)
 - Shadow speaking is evidence-based method for pronunciation improvement
 - Tracks per-phoneme accuracy over time
 

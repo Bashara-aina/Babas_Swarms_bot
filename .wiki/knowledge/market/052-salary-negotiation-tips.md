@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: Salary negotiation skills directly impact whether workers achieve "gaji wajar."
-  By providing negotiation guidance, cekwajar.id adds value beyond salary data - helping
-  users actually close the gap b...
+ By providing negotiation guidance, cekwajar.id adds value beyond salary data - helping
+ users actually close the gap b...
 wikilinks: []
 confidence: medium
 source: research
@@ -37,7 +37,7 @@ Salary negotiation skills directly impact whether workers achieve "gaji wajar." 
 **Cultural Factors**:
 - "Malu" (shame) culture can inhibit direct negotiation
 - Indirect approaches often more effective
-- Building relationships (信任/rapport) before negotiation
+- Building relationships (/rapport) before negotiation
 - Seniority respect in compensation discussions
 
 **When to Negotiate**:
@@ -81,30 +81,30 @@ Salary negotiation skills directly impact whether workers achieve "gaji wajar." 
 ## Exact Formulas / Numbers (if applicable)
 ```typescript
 interface NegotiationParams {
-  initialOffer: number;
-  marketRate: number;
-  targetSalary: number;
-  walkAwaySalary: number;
+ initialOffer: number;
+ marketRate: number;
+ targetSalary: number;
+ walkAwaySalary: number;
 }
 
 function calculateNegotiationRange(params: NegotiationParams): {
-  target: number;
-  strategy: 'accept' | 'counter' | 'walk';
+ target: number;
+ strategy: 'accept' | 'counter' | 'walk';
 } {
-  const { initialOffer, marketRate, targetSalary, walkAwaySalary } = params;
-  
-  if (initialOffer >= targetSalary) {
-    return { target: initialOffer, strategy: 'accept' };
-  } else if (initialOffer >= walkAwaySalary) {
-    return { target: targetSalary, strategy: 'counter' };
-  } else {
-    return { target: targetSalary, strategy: 'walk' };
-  }
+ const { initialOffer, marketRate, targetSalary, walkAwaySalary } = params;
+ 
+ if (initialOffer >= targetSalary) {
+ return { target: initialOffer, strategy: 'accept' };
+ } else if (initialOffer >= walkAwaySalary) {
+ return { target: targetSalary, strategy: 'counter' };
+ } else {
+ return { target: targetSalary, strategy: 'walk' };
+ }
 }
 
 function calculateCounterOffer(initialOffer: number, target: number): number {
-  // Strategic midpoint between offer and target
-  return Math.round((initialOffer + target) / 2);
+ // Strategic midpoint between offer and target
+ return Math.round((initialOffer + target) / 2);
 }
 ```
 

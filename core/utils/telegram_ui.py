@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import (
     InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
     KeyboardButton,
+    ReplyKeyboardMarkup,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 

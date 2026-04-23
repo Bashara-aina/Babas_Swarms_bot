@@ -1,19 +1,26 @@
 {
   "servers": [
     {
-      "name": "example-filesystem",
+      "name": "filesystem",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin/swarm-bot"],
       "env": {},
       "enabled": false
     },
     {
-      "name": "example-fetch",
+      "name": "gitnexus",
+      "command": "pnpm",
+      "args": ["dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"],
+      "env": {},
+      "enabled": true
+    },
+    {
+      "name": "obsidian",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "args": ["-y", "@modelcontextprotocol/server-obsidian", "/home/newadmin/swarm-bot/.wiki"],
       "env": {},
       "enabled": false
     }
   ],
-  "notes": "Set enabled true and install Node/npx for stdio servers. Bot uses core/mcp_client.py for status listing; full tool proxy is future work."
+  "notes": "GitNexus + Obsidian are configured for cross-agent graph+wiki context. Keep firecrawl/exa baseline in workspace-level editor configs."
 }

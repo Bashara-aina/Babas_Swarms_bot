@@ -63,6 +63,7 @@ class SpawnableAgent:
     ) -> tuple[str, float]:  # (result, cost_usd)
         """Execute task, auto-handling any sub-agent spawns."""
         import re
+
         from llm_client import chat
 
         if self.ctx.depth >= MAX_DEPTH:

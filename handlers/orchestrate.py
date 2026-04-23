@@ -9,8 +9,8 @@ Exposes the complete multi-agent orchestration to the Telegram user:
 from __future__ import annotations
 
 import asyncio
-import logging
 import html as html_mod
+import logging
 from typing import Dict, Optional
 
 from aiogram import Router
@@ -198,7 +198,8 @@ async def handle_plan_approval(cb: CallbackQuery) -> None:
     # Find the gate for this run_id
     user_id = cb.from_user.id
     run_data = _active_runs.get(user_id, {})
-    runner = run_data.get("runner")
+    # runner retrieved for future gate resolution
+    _ = run_data.get("runner")
 
     # The runner's gate resolves via the callback
     # We publish the decision by editing the message

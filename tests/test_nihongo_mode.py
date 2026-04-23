@@ -1,32 +1,33 @@
 """Tests for Nihongo Mode — isolated Japanese teacher plugin."""
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from skills.nihongo.constants import N5_GRAMMAR_PATTERNS, N5_VOCAB_SAMPLE
+from skills.nihongo.furigana import annotate_japanese, extract_japanese_only
 from skills.nihongo.mode_manager import NihongoModeManager, NihongoSubMode
 from skills.nihongo.sensei_prompt import build_sensei_system_prompt
-from skills.nihongo.furigana import annotate_japanese, extract_japanese_only
-from skills.nihongo.constants import N5_VOCAB_SAMPLE, N5_GRAMMAR_PATTERNS
 
 TEST_USER_ID = 99999
 
 
 def test_isolation_when_off():
     NihongoModeManager.deactivate(TEST_USER_ID)
-    assert NihongoModeManager.is_active(TEST_USER_ID) == False
+    assert not NihongoModeManager.is_active(TEST_USER_ID)
     print("✅ Isolation: mode OFF is clean")
 
 
 def test_activate_and_deactivate():
     session = NihongoModeManager.activate(TEST_USER_ID, NihongoSubMode.CHAT)
-    assert session.active == True
-    assert NihongoModeManager.is_active(TEST_USER_ID) == True
+    assert session.active
+    assert NihongoModeManager.is_active(TEST_USER_ID)
 
     NihongoModeManager.deactivate(TEST_USER_ID)
-    assert NihongoModeManager.is_active(TEST_USER_ID) == False
+    assert not NihongoModeManager.is_active(TEST_USER_ID)
     print("✅ Toggle ON/OFF works")
 
 
@@ -95,18 +96,18 @@ def test_n5_grammar_loaded():
 
 def test_mode_settings():
     session = NihongoModeManager.activate(TEST_USER_ID, NihongoSubMode.CHAT)
-    assert session.show_furigana == True
-    assert session.show_romaji == True
-    assert session.slow_speech == True
+    assert session.show_furigana
+    assert session.show_romaji
+    assert session.slow_speech
 
     NihongoModeManager.toggle_furigana(TEST_USER_ID)
-    assert session.show_furigana == False
+    assert not session.show_furigana
 
     NihongoModeManager.toggle_romaji(TEST_USER_ID)
-    assert session.show_romaji == False
+    assert not session.show_romaji
 
     NihongoModeManager.toggle_slow_speech(TEST_USER_ID)
-    assert session.slow_speech == False
+    assert not session.slow_speech
 
     print("✅ Mode settings (furigana, romaji, slow_speech) toggle correctly")
 
@@ -139,7 +140,7 @@ def test_sensei_soul_mood_tracking():
 
 def test_mastery_gate_bloom_classification():
     """Test MasteryGate Bloom level classification."""
-    from skills.nihongo.mastery_gate import MasteryGate, BloomLevel
+    from skills.nihongo.mastery_gate import BloomLevel, MasteryGate
 
     gate = MasteryGate()
 
@@ -193,7 +194,7 @@ def test_immersion_world_scenarios():
 
 def test_srs_engine_sm2_algorithm():
     """Test SRSEngine SM-2 algorithm implementation."""
-    from skills.nihongo.srs_engine import SRSEngine, SRSCard
+    from skills.nihongo.srs_engine import SRSCard, SRSEngine
 
     engine = SRSEngine()
 
@@ -310,8 +311,8 @@ def test_shadow_engine_phoneme_tracking():
 
 def test_sensei_prompt_builder():
     """Test SenseiPromptBuilder chainable interface."""
-    from skills.nihongo.sensei_prompt import SenseiPromptBuilder
     from skills.nihongo.mode_manager import NihongoModeManager
+    from skills.nihongo.sensei_prompt import SenseiPromptBuilder
 
     # Test old interface still works
     session = NihongoModeManager.activate(TEST_USER_ID)

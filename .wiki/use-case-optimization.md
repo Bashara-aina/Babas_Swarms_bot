@@ -64,14 +64,14 @@ source: research
 100x looks like:
 - "pusing" at 1AM → one warm sentence, no bullets, no advice, just acknowledgment
 - "skripsi gatau mau ngapain" → Socratic questions to help clarify: "chapter 3 kan mau bikin apa?"
-- "mantap" → brief celebration, context-aware response matching the兴奋
+- "mantap" → brief celebration, context-aware response matching the
 - Current gap: emotion_modulator works but no Indonesian-specific empathy patterns
 - Priority action: Indonesian emotional vocabulary expansion in soul_engine + emotion_engine
 
 ## EXAMPLES
 Bashara message: "pusing skripsi"
 Current: "I understand this is frustrating. Let's break it down..." (generic AI response)
-100x: "Chapter 3 ya? Lo udah sampai Fig 3.1没? Atau masih stuck di methodology?" (context-aware, Socratic, Indonesian)
+100x: "Chapter 3 ya? Lo udah sampai Fig 3.1? Atau masih stuck di methodology?" (context-aware, Socratic, Indonesian)
 
 Bashara message: "cek rumahlabuh ada inquiry baru ga"
 Current: Runs query, returns raw Supabase rows

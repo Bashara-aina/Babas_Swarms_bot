@@ -13,11 +13,12 @@ Designed for the /research command.
 """
 
 from __future__ import annotations
+
 import asyncio
+import json
 import logging
 import re
-import json
-from typing import Callable, Coroutine, Any
+from typing import Any, Callable, Coroutine
 
 logger = logging.getLogger(__name__)
 

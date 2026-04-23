@@ -22,7 +22,7 @@ def _configure_oi() -> None:
     """Configure Open Interpreter with Legion defaults."""
     if not _OI_AVAILABLE or oi is None:
         return
-    oi.llm.model = os.getenv("OI_MODEL", "groq/llama-3.3-70b-versatile")
+    oi.llm.model = os.getenv("OI_MODEL", "minimax/MiniMax-Text-01")
     oi.llm.api_key = os.getenv("GROQ_API_KEY", "")
     oi.auto_run = True
     oi.safe_mode = "off"

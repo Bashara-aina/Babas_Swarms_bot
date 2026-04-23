@@ -10,8 +10,7 @@ tags:
 - legion-instructions
 created: '2026-04-14'
 updated: '2026-04-14'
-summary: Repository architecture guide for SwarmBot development, organized by tier
-  and relevance.
+summary: Repository architecture guide for SwarmBot development, organized by tier and relevance.
 wikilinks: []
 confidence: medium
 source: research

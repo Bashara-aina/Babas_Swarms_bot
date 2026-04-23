@@ -12,8 +12,13 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL", "")
+SUPABASE_KEY = (
+    os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    or os.getenv("SUPABASE_SERVICE_KEY")
+    or os.getenv("SUPABASE_ANON_KEY")
+    or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
+)
 
 
 async def supabase_query(
@@ -61,7 +66,7 @@ async def get_business_summary() -> str:
             active_rooms = len(rooms) if isinstance(rooms, list) else 0
             total_bookings = len(bookings) if isinstance(bookings, list) else 0
             branch_count = len(branches) if isinstance(branches, list) else 0
-            lines.append(f"**rumahlabuh.com**")
+            lines.append("**rumahlabuh.com**")
             lines.append(f"  Active rooms: {active_rooms}")
             lines.append(f"  Confirmed bookings: {total_bookings}")
             lines.append(f"  Branches: {branch_count}")

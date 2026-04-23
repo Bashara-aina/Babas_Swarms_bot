@@ -11,16 +11,20 @@ Usage:
     rows = await db.query("bookings", select="id,status", eq={"user_id": uid})
 
 Env vars required:
-    SUPABASE_URL              e.g. https://xyzxyz.supabase.co
-    SUPABASE_ANON_KEY         public anon key
-    SUPABASE_SERVICE_ROLE_KEY service role key (bypasses RLS, for bot-internal ops)
+    SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) e.g. https://xyzxyz.supabase.co
+    SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY) public anon key
+    SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_KEY) service role key
+        (bypasses RLS, for bot-internal ops)
 """
 
 from __future__ import annotations
 
+import json as _json
 import logging
 import os
+import shlex
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 try:
@@ -33,6 +37,14 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 _INSTANCE: Optional["SupabaseClient"] = None
+
+
+def _env(*keys: str) -> str:
+    for key in keys:
+        value = os.getenv(key, "").strip()
+        if value:
+            return value
+    return ""
 
 
 class SupabaseClient:
@@ -400,8 +412,9 @@ class SupabaseClient:
         """
         import json as _json
         import re
-        from llm_client import call_llm
         from pathlib import Path
+
+        from llm_client import call_llm
 
         # Inject schema context from skill file if available
         skill_path = Path("skills/rumahlabuh-manager.md")
@@ -431,7 +444,7 @@ class SupabaseClient:
         try:
             raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 temperature=0.1,
                 max_tokens=300,
             )
@@ -536,9 +549,9 @@ def get_client(
     if _INSTANCE is not None and url is None:
         return _INSTANCE
 
-    _url = url or os.getenv("SUPABASE_URL", "")
-    _anon = anon_key or os.getenv("SUPABASE_ANON_KEY", "")
-    _svc = service_role_key or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    _url = url or _env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
+    _anon = anon_key or _env("SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    _svc = service_role_key or _env("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY")
 
     if not _url:
         raise ValueError(
@@ -554,4 +567,6 @@ def get_client(
 
 def is_configured() -> bool:
     """Return True if Supabase env vars are present."""
-    return bool(os.getenv("SUPABASE_URL")) and bool(os.getenv("SUPABASE_ANON_KEY"))
+    return bool(_env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")) and bool(
+        _env("SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    )

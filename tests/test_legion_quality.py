@@ -7,19 +7,19 @@ Tests cover all 4 guards plus integration scenarios.
 from __future__ import annotations
 
 import asyncio
+
 import pytest
 
 from legion.anti_slop.core import (
+    QualityResult,
+    get_slop_stats,
+    guard_critique,
     guard_format,
     guard_package,
-    guard_critique,
-    run_quality_gate,
     quarantine_response,
-    get_slop_stats,
     reset_slop_stats,
-    QualityResult,
+    run_quality_gate,
 )
-
 
 # ── Guard 1: FormatGuard tests ─────────────────────────────────────────────────
 

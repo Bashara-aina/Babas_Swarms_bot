@@ -1,0 +1,656 @@
+- generic [ref=e1]:
+  - generic [ref=e19]:
+    - generic:
+      - generic [ref=e122]:
+        - link "Threads" [ref=e124] [cursor=pointer]:
+          - /url: /
+          - img "Threads" [ref=e126]
+        - generic [ref=e128]:
+          - link "Home" [ref=e130] [cursor=pointer]:
+            - /url: /
+            - img "Home" [ref=e134]
+          - link "Search" [ref=e137] [cursor=pointer]:
+            - /url: /search
+            - img "Search" [ref=e141]
+          - button "Create" [ref=e144] [cursor=pointer]:
+            - img "Create" [ref=e148]
+          - link "Notifications" [ref=e151] [cursor=pointer]:
+            - /url: /activity
+            - img "Notifications" [ref=e4458]
+          - link "Profile" [ref=e158] [cursor=pointer]:
+            - /url: /@rumahlabuh
+            - img "Profile" [ref=e162]
+        - button "More More" [ref=e166] [cursor=pointer]:
+          - generic [ref=e167]:
+            - img "More" [ref=e169]
+            - img "More" [ref=e173]
+      - generic [ref=e181]:
+        - generic [ref=e184]:
+          - generic [ref=e194]:
+            - link [ref=e4461] [cursor=pointer]:
+              - /url: /for_you
+              - heading [level=1] [ref=e4462]:
+                - generic [ref=e197]: For you
+            - button [ref=e4463] [cursor=pointer]:
+              - button [ref=e4464]:
+                - img [ref=e4465]
+          - region [ref=e4466]:
+            - generic [ref=e208]:
+              - generic [ref=e210]:
+                - link [ref=e4467] [cursor=pointer]:
+                  - /url: /@rumahlabuh
+                  - img [ref=e4468]
+                - button [ref=e4469]:
+                  - generic [ref=e215]: What's new?
+                - button [ref=e4470] [cursor=pointer]:
+                  - generic [ref=e218]: Post
+              - separator [ref=e219]
+              - generic [ref=e221]:
+                - generic [ref=e227] [cursor=pointer]:
+                  - button [ref=e4471]:
+                    - img [ref=e4472]
+                    - button [ref=e4473]:
+                      - img [ref=e4474]
+                  - generic [ref=e239]:
+                    - generic [ref=e240]:
+                      - link [ref=e4475]:
+                        - /url: /@alzuchri
+                        - generic [ref=e247]: alzuchri
+                      - link [ref=e4476]:
+                        - /url: /@alzuchri/post/DXOu39ykc9i
+                        - time [ref=e252]:
+                          - generic [ref=e4477]: 1h
+                    - button [ref=e4478]:
+                      - img [ref=e4479]
+                  - generic [ref=e262]:
+                    - generic [ref=e265]: Ada gak sih sewa apart under 2,5 jt di daerah jaksel?
+                    - generic [ref=e267]:
+                      - button [ref=e4480]:
+                        - img [ref=e4481]
+                      - button [ref=e4482]:
+                        - generic [ref=e277]:
+                          - img [ref=e4483]
+                          - generic [ref=e282]: "4"
+                      - button [ref=e4484]:
+                        - img [ref=e4485]
+                      - button [ref=e4486]:
+                        - img [ref=e4487]
+                - generic [ref=e301] [cursor=pointer]:
+                  - button [ref=e4488]:
+                    - img [ref=e4489]
+                    - button [ref=e4490]:
+                      - img [ref=e4491]
+                  - generic [ref=e313]:
+                    - generic [ref=e314]:
+                      - link [ref=e4492]:
+                        - /url: /@mindylestari
+                        - generic [ref=e321]: mindylestari
+                      - link [ref=e4493]:
+                        - /url: /@mindylestari/post/DXOn3den1bb
+                        - time [ref=e326]:
+                          - generic [ref=e4494]: 2h
+                    - button [ref=e4495]:
+                      - img [ref=e4496]
+                  - generic [ref=e336]:
+                    - generic [ref=e337]:
+                      - generic [ref=e339]: Hai guys Aku lagi cari apartemen studio di Jakarta utara/Jakarta pusat
+                      - generic [ref=e341]: Budget dibawah 3 juta (incl IPL) Thank you 💛
+                    - generic [ref=e343]:
+                      - button [ref=e4497]:
+                        - img [ref=e4498]
+                      - button [ref=e4499]:
+                        - generic [ref=e353]:
+                          - img [ref=e4500]
+                          - generic [ref=e358]: "2"
+                      - button [ref=e4501]:
+                        - img [ref=e4502]
+                      - button [ref=e4503]:
+                        - img [ref=e4504]
+                - generic [ref=e377] [cursor=pointer]:
+                  - button [ref=e4505]:
+                    - img [ref=e4506]
+                    - button [ref=e4507]:
+                      - img [ref=e4508]
+                  - generic [ref=e389]:
+                    - generic [ref=e390]:
+                      - link [ref=e4509]:
+                        - /url: /@norumaa
+                        - generic [ref=e397]: norumaa
+                      - generic [ref=e398]:
+                        - generic [ref=e399]:
+                          - img [ref=e402]
+                          - link [ref=e4510]:
+                            - /url: /search?q=shopeeaffiliate&serp_type=tags&tag_id=18371230030077196
+                            - generic [ref=e408]: shopeeaffiliate
+                        - link [ref=e4511]:
+                          - /url: /@norumaa/post/DXMWs2nErZ6
+                          - time [ref=e412]:
+                            - generic [ref=e4512]: 1d
+                    - button [ref=e4513]:
+                      - img [ref=e4514]
+                  - generic [ref=e422]:
+                    - generic [ref=e425]:
+                      - text: Jumlah followers ternyata ga ngaruh ke traffic. Dan kayanya aku mulai paham deh cara bikin traffic bagus 🙂
+                      - button [ref=e4515]:
+                        - generic [ref=e428]: Translate
+                      - generic [ref=e430]:
+                        - generic [ref=e431]: "1"
+                        - generic [ref=e433]: /
+                        - generic [ref=e434]: "2"
+                    - link [ref=e4516]:
+                      - /url: /@norumaa/post/DXMWs2nErZ6/media
+                      - generic [ref=e441]:
+                        - img
+                    - generic [ref=e443]:
+                      - button [ref=e4517]:
+                        - generic [ref=e447]:
+                          - img [ref=e4518]
+                          - generic [ref=e4417]: "367"
+                      - button [ref=e4519]:
+                        - generic [ref=e456]:
+                          - img [ref=e4520]
+                          - generic [ref=e4419]: "118"
+                      - button [ref=e4521]:
+                        - generic [ref=e465]:
+                          - img [ref=e4522]
+                          - generic [ref=e471]: "50"
+                      - button [ref=e4523]:
+                        - generic [ref=e475]:
+                          - img [ref=e4524]
+                          - generic [ref=e3810]: "65"
+                - generic [ref=e483]:
+                  - generic [ref=e486] [cursor=pointer]:
+                    - button [ref=e4525]:
+                      - img [ref=e4526]
+                      - button [ref=e4527]:
+                        - img [ref=e4528]
+                    - generic [ref=e498]:
+                      - generic [ref=e499]:
+                        - generic [ref=e500]:
+                          - link [ref=e4529]:
+                            - /url: /@nexcarlos
+                            - generic [ref=e506]: nexcarlos
+                          - img [ref=e4530]
+                        - link [ref=e4531]:
+                          - /url: /@nexcarlos/post/DXMYjcPCTM3
+                          - time [ref=e514]:
+                            - generic [ref=e4532]: 23h
+                      - button [ref=e4533]:
+                        - img [ref=e4534]
+                    - generic [ref=e525]:
+                      - generic [ref=e528]:
+                        - text: Mobil 9 seater paling lega masih Hyundai Staria ya? Atau ada yang lebih lega? Atau bakalan ada yang baru nanti?
+                        - button [ref=e4535]:
+                          - generic [ref=e531]: Translate
+                      - generic [ref=e533]:
+                        - button [ref=e4536]:
+                          - generic [ref=e537]:
+                            - img [ref=e4537]
+                            - generic [ref=e4397]: "192"
+                        - button [ref=e4538]:
+                          - generic [ref=e546]:
+                            - img [ref=e4539]
+                            - generic [ref=e3636]: "161"
+                        - button [ref=e4540]:
+                          - generic [ref=e555]:
+                            - img [ref=e4541]
+                            - generic [ref=e561]: "2"
+                        - button [ref=e4542]:
+                          - generic [ref=e565]:
+                            - img [ref=e4543]
+                            - generic [ref=e570]: "4"
+                  - generic [ref=e573] [cursor=pointer]:
+                    - link [ref=e4544]:
+                      - /url: /@kenandgrat
+                      - img [ref=e4545]
+                    - generic [ref=e580]:
+                      - generic [ref=e581]:
+                        - generic [ref=e582]:
+                          - link [ref=e4546]:
+                            - /url: /@kenandgrat
+                            - generic [ref=e588]: kenandgrat
+                          - img [ref=e4547]
+                        - link [ref=e4548]:
+                          - /url: /@kenandgrat/post/DXMY1DLj-DL
+                          - time [ref=e596]:
+                            - generic [ref=e4549]: 23h
+                      - button [ref=e4550]:
+                        - img [ref=e4551]
+                    - generic [ref=e606]:
+                      - generic [ref=e609]: Hi ace yang premium ada ko
+                      - generic [ref=e611]:
+                        - button [ref=e4552]:
+                          - generic [ref=e615]:
+                            - img [ref=e4553]
+                            - generic [ref=e620]: "2"
+                        - button [ref=e4554]:
+                          - generic [ref=e624]:
+                            - img [ref=e4555]
+                            - generic [ref=e629]: "2"
+                        - button [ref=e4556]:
+                          - img [ref=e4557]
+                        - button [ref=e4558]:
+                          - img [ref=e4559]
+                - generic [ref=e670]:
+                  - generic [ref=e672]: Suggested for you
+                  - generic [ref=e675]:
+                    - generic [ref=e676]:
+                      - link [ref=e4560] [cursor=pointer]:
+                        - /url: /@boris_cherny
+                        - generic [ref=e678]:
+                          - img [ref=e4561]
+                          - img [ref=e4562]
+                        - generic [ref=e689]:
+                          - generic [ref=e692]: Boris Cherny
+                          - generic [ref=e695]: boris_cherny
+                        - button [ref=e4563]:
+                          - generic [ref=e697]: Follow
+                      - button [ref=e4564] [cursor=pointer]:
+                        - img [ref=e4565]
+                    - generic [ref=e703]:
+                      - link [ref=e4566] [cursor=pointer]:
+                        - /url: /@stuartcollin
+                        - generic [ref=e705]:
+                          - img [ref=e4567]
+                          - img [ref=e4568]
+                        - generic [ref=e716]:
+                          - generic [ref=e719]: スチュアート コリン
+                          - generic [ref=e722]: stuartcollin
+                        - button [ref=e4569]:
+                          - generic [ref=e724]: Follow
+                      - button [ref=e4570] [cursor=pointer]:
+                        - img [ref=e4571]
+                    - generic [ref=e730]:
+                      - link [ref=e4572] [cursor=pointer]:
+                        - /url: /@icreative.space
+                        - generic [ref=e732]:
+                          - img [ref=e4573]
+                          - img [ref=e4574]
+                        - generic [ref=e743]:
+                          - generic [ref=e746]: Adinagara | Social Media Marketing
+                          - generic [ref=e749]: icreative.space
+                        - button [ref=e4575]:
+                          - generic [ref=e751]: Follow
+                      - button [ref=e4576] [cursor=pointer]:
+                        - img [ref=e4577]
+                    - generic [ref=e757]:
+                      - link [ref=e4578] [cursor=pointer]:
+                        - /url: /@hanadianti
+                        - img [ref=e4579]
+                        - generic [ref=e765]:
+                          - generic [ref=e768]: Dianti Farhana Kamasela
+                          - generic [ref=e771]: hanadianti
+                        - button [ref=e4580]:
+                          - generic [ref=e773]: Follow
+                      - button [ref=e4581] [cursor=pointer]:
+                        - img [ref=e4582]
+                    - generic [ref=e779]:
+                      - link [ref=e4583] [cursor=pointer]:
+                        - /url: /@tasyuxdaily
+                        - img [ref=e4584]
+                        - generic [ref=e787]:
+                          - generic [ref=e790]: Tasya Naomi
+                          - generic [ref=e793]: tasyuxdaily
+                        - button [ref=e4585]:
+                          - generic [ref=e795]: Follow
+                      - button [ref=e4586] [cursor=pointer]:
+                        - img [ref=e4587]
+                    - generic [ref=e801]:
+                      - link [ref=e4588] [cursor=pointer]:
+                        - /url: /@_michaelyeoh
+                        - generic [ref=e803]:
+                          - img [ref=e4589]
+                          - img [ref=e4590]
+                        - generic [ref=e814]:
+                          - generic [ref=e817]: Michael Yeoh
+                          - generic [ref=e820]: _michaelyeoh
+                        - button [ref=e4591]:
+                          - generic [ref=e822]: Follow
+                      - button [ref=e4592] [cursor=pointer]:
+                        - img [ref=e4593]
+                    - generic [ref=e828]:
+                      - link [ref=e4594] [cursor=pointer]:
+                        - /url: /@mikedesignofficial
+                        - img [ref=e4595]
+                        - generic [ref=e836]:
+                          - generic [ref=e839]: Michael Nowak Design
+                          - generic [ref=e842]: mikedesignofficial
+                        - button [ref=e4596]:
+                          - generic [ref=e844]: Follow
+                      - button [ref=e4597] [cursor=pointer]:
+                        - img [ref=e4598]
+                    - generic [ref=e850]:
+                      - link [ref=e4599] [cursor=pointer]:
+                        - /url: /@kerjabarengdhanes
+                        - img [ref=e4600]
+                        - generic [ref=e858]:
+                          - generic [ref=e861]: Dhaneswara Intan P | Remote Work • Career
+                          - generic [ref=e864]: kerjabarengdhanes
+                        - button [ref=e4601]:
+                          - generic [ref=e866]: Follow
+                      - button [ref=e4602] [cursor=pointer]:
+                        - img [ref=e4603]
+                    - generic [ref=e872]:
+                      - link [ref=e4604] [cursor=pointer]:
+                        - /url: /@hebosto
+                        - generic [ref=e874]:
+                          - img [ref=e4605]
+                          - img [ref=e4606]
+                        - generic [ref=e885]:
+                          - generic [ref=e888]: Hebbie Agus Kurnia
+                          - generic [ref=e891]: hebosto
+                        - button [ref=e4607]:
+                          - generic [ref=e893]: Follow
+                      - button [ref=e4608] [cursor=pointer]:
+                        - img [ref=e4609]
+                    - generic [ref=e899]:
+                      - link [ref=e4610] [cursor=pointer]:
+                        - /url: /@nonavaniii
+                        - img [ref=e4611]
+                        - generic [ref=e907]:
+                          - generic [ref=e910]: Vani
+                          - generic [ref=e913]: nonavaniii
+                        - button [ref=e4612]:
+                          - generic [ref=e915]: Follow
+                      - button [ref=e4613] [cursor=pointer]:
+                        - img [ref=e4614]
+                    - generic [ref=e921]:
+                      - link [ref=e4615] [cursor=pointer]:
+                        - /url: /@julius_brussee
+                        - img [ref=e4616]
+                        - generic [ref=e929]:
+                          - generic [ref=e932]: Julius
+                          - generic [ref=e935]: julius_brussee
+                        - button [ref=e4617]:
+                          - generic [ref=e937]: Follow
+                      - button [ref=e4618] [cursor=pointer]:
+                        - img [ref=e4619]
+                    - generic [ref=e943]:
+                      - link [ref=e4620] [cursor=pointer]:
+                        - /url: /@jayasetiabudi
+                        - generic [ref=e945]:
+                          - img [ref=e4621]
+                          - img [ref=e4622]
+                        - generic [ref=e956]:
+                          - generic [ref=e959]: Jaya Setiabudi
+                          - generic [ref=e962]: jayasetiabudi
+                        - button [ref=e4623]:
+                          - generic [ref=e964]: Follow
+                      - button [ref=e4624] [cursor=pointer]:
+                        - img [ref=e4625]
+                    - generic [ref=e970]:
+                      - link [ref=e4626] [cursor=pointer]:
+                        - /url: /@nisawiradiredja
+                        - img [ref=e4627]
+                        - generic [ref=e978]:
+                          - generic [ref=e981]: Heycha
+                          - generic [ref=e984]: nisawiradiredja
+                        - button [ref=e4628]:
+                          - generic [ref=e986]: Follow
+                      - button [ref=e4629] [cursor=pointer]:
+                        - img [ref=e4630]
+                    - generic [ref=e992]:
+                      - link [ref=e4631] [cursor=pointer]:
+                        - /url: /@ibukrubah
+                        - img [ref=e4632]
+                        - generic [ref=e1000]:
+                          - generic [ref=e1003]: rdhanti
+                          - generic [ref=e1006]: ibukrubah
+                        - button [ref=e4633]:
+                          - generic [ref=e1008]: Follow
+                      - button [ref=e4634] [cursor=pointer]:
+                        - img [ref=e4635]
+                    - generic [ref=e1014]:
+                      - link [ref=e4636] [cursor=pointer]:
+                        - /url: /@vanessakhongg
+                        - generic [ref=e1016]:
+                          - img [ref=e4637]
+                          - img [ref=e4638]
+                        - generic [ref=e1027]:
+                          - generic [ref=e1030]: Vanessa Khong
+                          - generic [ref=e1033]: vanessakhongg
+                        - button [ref=e4639]:
+                          - generic [ref=e1035]: Follow
+                      - button [ref=e4640] [cursor=pointer]:
+                        - img [ref=e4641]
+                    - generic [ref=e1041]:
+                      - link [ref=e4642] [cursor=pointer]:
+                        - /url: /@yuannyan
+                        - img [ref=e4643]
+                        - generic [ref=e1049]:
+                          - generic [ref=e1052]: yuanda
+                          - generic [ref=e1055]: yuannyan
+                        - button [ref=e4644]:
+                          - generic [ref=e1057]: Follow
+                      - button [ref=e4645] [cursor=pointer]:
+                        - img [ref=e4646]
+                    - generic [ref=e1063]:
+                      - link [ref=e4647] [cursor=pointer]:
+                        - /url: /@michellihw
+                        - img [ref=e4648]
+                        - generic [ref=e1071]:
+                          - generic [ref=e1074]: michelli hoseana
+                          - generic [ref=e1077]: michellihw
+                        - button [ref=e4649]:
+                          - generic [ref=e1079]: Follow
+                      - button [ref=e4650] [cursor=pointer]:
+                        - img [ref=e4651]
+                    - generic [ref=e1085]:
+                      - link [ref=e4652] [cursor=pointer]:
+                        - /url: /@ceaecilia
+                        - img [ref=e4653]
+                        - generic [ref=e1093]:
+                          - generic [ref=e1096]: Caecilia S
+                          - generic [ref=e1099]: ceaecilia
+                        - button [ref=e4654]:
+                          - generic [ref=e1101]: Follow
+                      - button [ref=e4655] [cursor=pointer]:
+                        - img [ref=e4656]
+                    - generic [ref=e1107]:
+                      - link [ref=e4657] [cursor=pointer]:
+                        - /url: /@mas.explore.id
+                        - generic [ref=e1109]:
+                          - img [ref=e4658]
+                          - img [ref=e4659]
+                        - generic [ref=e1120]:
+                          - generic [ref=e1123]: Mahathir Al Afghani Zein
+                          - generic [ref=e1126]: mas.explore.id
+                        - button [ref=e4660]:
+                          - generic [ref=e1128]: Follow
+                      - button [ref=e4661] [cursor=pointer]:
+                        - img [ref=e4662]
+                    - generic [ref=e1134]:
+                      - link [ref=e4663] [cursor=pointer]:
+                        - /url: /@hendrycandra
+                        - img [ref=e4664]
+                        - generic [ref=e1142]:
+                          - generic [ref=e1145]: Hendry Candra
+                          - generic [ref=e1148]: hendrycandra
+                        - button [ref=e4665]:
+                          - generic [ref=e1150]: Follow
+                      - button [ref=e4666] [cursor=pointer]:
+                        - img [ref=e4667]
+                - generic [ref=e1158]:
+                  - generic [ref=e1161] [cursor=pointer]:
+                    - button [ref=e4668]:
+                      - img [ref=e4669]
+                      - button [ref=e4670]:
+                        - img [ref=e4671]
+                    - generic [ref=e1173]:
+                      - generic [ref=e1174]:
+                        - link [ref=e4672]:
+                          - /url: /@angelicaicaaa
+                          - generic [ref=e1181]: angelicaicaaa
+                        - link [ref=e4673]:
+                          - /url: /@angelicaicaaa/post/DXMN_3bExro
+                          - time [ref=e1186]:
+                            - generic [ref=e4674]: 1d
+                      - button [ref=e4675]:
+                        - img [ref=e4676]
+                    - generic [ref=e1197]:
+                      - generic [ref=e1200]: Gais ini yang seller shopee mau nanya deh Gue kan pemula ya Emang si baru star shopee gue jadi shopee seller Masa ia pembeli gue bayar Rp.570.000 Gue cuma dapet Rp.452.600 Ini ma balik modal juga engga Padahal pembeli gue juga kena pajak dan gue kena pajak Bener”deh:)POTONGANNYA RP.112.400 gile gede bgt keren
+                      - generic [ref=e1205]:
+                        - button [ref=e4677]:
+                          - generic [ref=e1211]:
+                            - img
+                        - button [ref=e4678]:
+                          - generic [ref=e1216]:
+                            - img
+                      - generic [ref=e1218]:
+                        - button [ref=e4679]:
+                          - generic [ref=e1222]:
+                            - img [ref=e4680]
+                            - generic [ref=e1227]: "801"
+                        - button [ref=e4681]:
+                          - generic [ref=e1231]:
+                            - img [ref=e4682]
+                            - generic [ref=e1236]: "329"
+                        - button [ref=e4683]:
+                          - generic [ref=e1240]:
+                            - img [ref=e4684]
+                            - generic [ref=e1246]: "94"
+                        - button [ref=e4685]:
+                          - generic [ref=e1250]:
+                            - img [ref=e4686]
+                            - generic [ref=e1255]: "149"
+                  - generic [ref=e1258] [cursor=pointer]:
+                    - button [ref=e4687]:
+                      - img [ref=e4688]
+                      - button [ref=e4689]:
+                        - img [ref=e4690]
+                    - generic [ref=e1270]:
+                      - generic [ref=e1271]:
+                        - link [ref=e4691]:
+                          - /url: /@_isyanaa_
+                          - generic [ref=e1278]: _isyanaa_
+                        - link [ref=e4692]:
+                          - /url: /@_isyanaa_/post/DXMX7pDjNQS
+                          - time [ref=e1283]:
+                            - generic [ref=e4693]: 23h
+                      - button [ref=e4694]:
+                        - img [ref=e4695]
+                    - generic [ref=e1293]:
+                      - generic [ref=e1294]:
+                        - generic [ref=e1296]: Aku rekomendasiin pake ini kak, udah nggak pusing-pusing lagi buat hitung harga jual akurat. Mau ngiklan juga jadi gampang karena tau di ROAS berapa profit mulai tergerus.
+                        - generic [ref=e1298]:
+                          - text: "Kepoin disini:"
+                          - link [ref=e4696]:
+                            - /url: https://l.threads.com/?u=https%3A%2F%2Flp-kalkulatorshopee.vercel.app%2F&e=AT7WW_pTn6fVjcGPbSAJlhq7mGu8lRMydmfZbJ6gXd-qcb9CMMiAgsJrnsL_QLbD3Y91ls5nGtLDMsX9n6tspnIijXwAVGHtRHIN88Zxn06Ctd-6cJK6VSXVkDRpGaM
+                            - text: lp-kalkulatorshopee.vercel.app
+                      - group [ref=e4697]:
+                        - button [ref=e4698]:
+                          - img [ref=e4699]
+                      - generic [ref=e1323]:
+                        - button [ref=e4700]:
+                          - generic [ref=e1327]:
+                            - img [ref=e4701]
+                            - generic [ref=e1332]: 1.8K
+                        - button [ref=e4702]:
+                          - generic [ref=e1336]:
+                            - img [ref=e4703]
+                            - generic [ref=e1341]: "22"
+                        - button [ref=e4704]:
+                          - generic [ref=e1345]:
+                            - img [ref=e4705]
+                            - generic [ref=e1351]: "323"
+                        - button [ref=e4706]:
+                          - generic [ref=e1355]:
+                            - img [ref=e4707]
+                            - generic [ref=e1360]: "480"
+                - status [ref=e4708]:
+                  - img [ref=e4709]
+        - button [ref=e4710] [cursor=pointer]:
+          - img [ref=e4711]
+      - button "Create" [ref=e662] [cursor=pointer]:
+        - img "Create" [ref=e663]
+    - dialog [ref=e4720]:
+      - generic [ref=e4725]:
+        - generic [ref=e4726]:
+          - button "Cancel" [ref=e4728] [cursor=pointer]:
+            - generic [ref=e4729]: Cancel
+          - heading "New thread" [level=1] [ref=e4731]:
+            - generic [ref=e4732]: New thread
+          - generic [ref=e4733]:
+            - button "Drafts" [ref=e4736] [cursor=pointer]:
+              - img "Drafts" [ref=e4738]
+            - button "More" [ref=e4741] [cursor=pointer]:
+              - img "More" [ref=e4743]
+        - generic [ref=e4748]:
+          - img "Beta · You’re sharing to the fediverse." [ref=e4750]
+          - generic [ref=e4755]: Beta · You’re sharing to the fediverse.
+          - button "Close" [ref=e4756] [cursor=pointer]:
+            - img "Close" [ref=e4757]
+        - generic [ref=e4759]:
+          - generic [ref=e4762]:
+            - img "rumahlabuh's profile picture" [ref=e4766]
+            - generic [ref=e4769]:
+              - generic [ref=e4772]:
+                - generic [ref=e4774]: rumahlabuh
+                - img [ref=e4776]
+                - generic [ref=e4782]:
+                  - img [ref=e4785]
+                  - searchbox "Add a topic" [ref=e4792]
+                - generic [ref=e4856]:
+                  - generic [ref=e4857]: "1"
+                  - generic [ref=e4859]: /
+                  - generic [ref=e4860]: "2"
+              - textbox "Empty text field. Type to compose a new post." [ref=e4794]:
+                - paragraph [ref=e4795]: Kost yang memperbolehkan hewan peliharaan itu bukan cuma soal aturan. Tapi soal komunitas.
+              - generic [ref=e4796]:
+                - button "Attach media" [ref=e4797] [cursor=pointer]:
+                  - img "Attach media" [ref=e4799]
+                - button "Add a GIF" [ref=e4802] [cursor=pointer]:
+                  - img "Add a GIF" [ref=e4804]
+                - button "Add an emoji" [ref=e4809] [cursor=pointer]:
+                  - img "Add an emoji" [ref=e4811]
+                - button "Add a poll" [ref=e4816] [cursor=pointer]:
+                  - img "Add a poll" [ref=e4818]
+                - button "Attach text" [ref=e4822] [cursor=pointer]:
+                  - img "Attach text" [ref=e4824]
+                - button "Add a location" [ref=e4829] [cursor=pointer]:
+                  - img "Add a location" [ref=e4831]
+          - generic [ref=e4862]:
+            - generic [ref=e4863]:
+              - img "rumahlabuh's profile picture" [ref=e4867]
+              - generic [ref=e4870]:
+                - generic [ref=e4872]:
+                  - generic [ref=e4873]:
+                    - generic [ref=e4875]: rumahlabuh
+                    - img [ref=e4877]
+                    - generic [ref=e4884]:
+                      - generic [ref=e4885]: "2"
+                      - generic [ref=e4887]: /
+                      - generic [ref=e4888]: "2"
+                  - button "Close" [ref=e4891] [cursor=pointer]:
+                    - img "Close" [ref=e4892]
+                - generic [ref=e4895]:
+                  - textbox "Empty text field. Type to compose a new post." [active] [ref=e4896]:
+                    - paragraph [ref=e4897]
+                  - generic:
+                    - generic: Say more...
+                - generic [ref=e4898]:
+                  - button "Attach media" [ref=e4899] [cursor=pointer]:
+                    - img "Attach media" [ref=e4901]
+                  - button "Add a GIF" [ref=e4904] [cursor=pointer]:
+                    - img "Add a GIF" [ref=e4906]
+                  - button "Add an emoji" [ref=e4911] [cursor=pointer]:
+                    - img "Add an emoji" [ref=e4913]
+                  - button "Add a poll" [ref=e4918] [cursor=pointer]:
+                    - img "Add a poll" [ref=e4920]
+                  - button "Attach text" [ref=e4924] [cursor=pointer]:
+                    - img "Attach text" [ref=e4926]
+                  - button "Add a location" [ref=e4931] [cursor=pointer]:
+                    - img "Add a location" [ref=e4933]
+            - generic [ref=e4936]:
+              - img "rumahlabuh's profile picture" [ref=e4939]
+              - button "Add to thread" [disabled] [ref=e4940]:
+                - generic [ref=e4941]: Add to thread
+        - generic [ref=e4841]:
+          - button "Post" [ref=e4843]:
+            - generic [ref=e4844]: Post
+          - button "Reply options" [ref=e4846] [cursor=pointer]:
+            - generic [ref=e4847]:
+              - img [ref=e4849]
+              - generic [ref=e4854]: Reply options
+  - generic:
+    - list

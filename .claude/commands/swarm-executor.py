@@ -320,7 +320,7 @@ def run_swarm(task: str, max_agents: int = 4, timeout_per_agent: int = 180) -> d
             "results": [],
         }
 
-    print(f"\n## Swarm Execution Plan")
+    print("\n## Swarm Execution Plan")
     print(f"**Task**: {task[:100]}{'...' if len(task) > 100 else ''}")
     print(f"**Selected Capabilities**: {', '.join(c for c, _ in capabilities)}")
     print(f"**Sub-agents to spawn**: ~{complexity}")
@@ -376,7 +376,7 @@ def run_swarm(task: str, max_agents: int = 4, timeout_per_agent: int = 180) -> d
 """
 
     if failed:
-        synthesis += f"\n## Failed Agents\n"
+        synthesis += "\n## Failed Agents\n"
         for r in failed:
             synthesis += f"- {r['capability']}: {r['output'][:200]}\n"
 

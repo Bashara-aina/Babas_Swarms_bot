@@ -147,7 +147,7 @@ async def _run_shell_handler(text: str) -> str:
     try:
         args = shlex.split(cmd)
     except ValueError:
-        return f"⚠️ Could not parse command (unbalanced quotes?)."
+        return "⚠️ Could not parse command (unbalanced quotes?)."
 
     if not args:
         return "Please provide a shell command to run."

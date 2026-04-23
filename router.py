@@ -4,15 +4,15 @@ agents.py is the single source of truth for model registry, keywords,
 fallback chains, and thread memory. This file re-exports everything
 for any legacy callers that import from router directly.
 
-Verified working models (from live logs 2026-03-09):
-  groq/llama-3.3-70b-versatile  ✓
+Verified working models (from live logs 2026-03-09): minimax/MiniMax-Text-01  ✓
   cerebras/qwen3-235b-a22b      ✓
   zai/glm-4                     ✓ (via openai-compat endpoint)
 """
 
 from __future__ import annotations
-import logging
+
 import importlib.util
+import logging
 import sys
 from pathlib import Path
 

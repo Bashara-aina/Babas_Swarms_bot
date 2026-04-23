@@ -15,6 +15,7 @@ from typing import Optional
 from aiogram.types import Message
 
 from core.autonomous_router import SKILL_PATTERNS, AutonomousRouter
+
 from .shared import _execute_chat, _run_agent_loop, is_allowed, send_chunked
 
 logger = logging.getLogger(__name__)
@@ -475,8 +476,8 @@ async def _handle_business(msg: Message, user_msg: str, router: AutonomousRouter
 async def _handle_location(msg: Message, user_msg: str, router: AutonomousRouter) -> None:
     """Location-aware recommendations using user profile location."""
     try:
-        from tools.location_advisor import LocationAdvisor
         from core.memory.user_profile import UserProfile
+        from tools.location_advisor import LocationAdvisor
 
         profile = UserProfile()
         location = profile.get("location", "Tokyo, Japan")

@@ -70,7 +70,7 @@ async def cmd_upgrade(msg: Message) -> None:
         try:
             # Show last 4 steps in the status message
             recent = step_log[-4:]
-            display = "\n".join(f"<code>[{i+1}]</code> {html_mod.escape(l)}" for i, l in enumerate(recent))
+            display = "\n".join(f"<code>[{i+1}]</code> {html_mod.escape(step)}" for i, step in enumerate(recent))
             await status_msg.edit_text(
                 f"🔄 <b>Upgrading…</b> (step {step_count})\n\n{display}",
                 parse_mode="HTML",

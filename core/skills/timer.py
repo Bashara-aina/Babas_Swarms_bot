@@ -10,7 +10,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from aiogram import Bot
 
 logger = logging.getLogger(__name__)
 

@@ -9,8 +9,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Optional
 
-from skills.nihongo.srs_engine import SRSEngine, SRSCard
-from skills.nihongo.mastery_gate import MasteryGate, BloomLevel
+from skills.nihongo.mastery_gate import BloomLevel, MasteryGate
+from skills.nihongo.srs_engine import SRSCard, SRSEngine
 
 
 class ProactiveSensei:
@@ -130,7 +130,7 @@ class ProactiveSensei:
 
         if weak_levels:
             # Suggest topic based on weakest level
-            weakest = min(weak_levels, key=lambda l: l.value)
+            weakest = min(weak_levels, key=lambda level: level.value)
             topic_map = {
                 BloomLevel.REMEMBER: "hiragana",
                 BloomLevel.UNDERSTAND: "greetings",

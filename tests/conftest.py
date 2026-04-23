@@ -1,6 +1,7 @@
 """Shared pytest fixtures for Legion test suite."""
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
 

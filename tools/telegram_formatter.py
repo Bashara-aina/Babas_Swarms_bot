@@ -6,6 +6,7 @@ long-message chunking, and emoji budgeting.
 """
 
 from __future__ import annotations
+
 import re
 from typing import Generator
 

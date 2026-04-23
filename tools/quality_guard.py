@@ -12,8 +12,8 @@ from __future__ import annotations
 import json
 import re
 import time
-from urllib.parse import urlparse
 from typing import Any
+from urllib.parse import urlparse
 
 RESEARCH_HINTS = (
     "research",

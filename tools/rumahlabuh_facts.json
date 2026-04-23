@@ -1,0 +1,56 @@
+{
+  "source": "rumahlabuh-facts.md",
+  "version": "April 2026",
+  "city": "Solo",
+  "area_default": "Kentingan",
+  "areas": ["Kentingan", "Jebres", "Banjarsari", "Laweyan", "Pabelan", "Mojosongo"],
+  "price_min": "Rp1.150.000",
+  "deposit": "Rp500.000",
+  "facilities_default": ["WiFi", "AC", "kamar mandi dalam", "parkir motor"],
+  "facilities": {
+    "all": ["AC", "Kamar mandi dalam", "Water heater", "WiFi 150 Mbps (mesh)", "Lemari", "Meja belajar", "Furnitur lengkap"],
+    "labuh_biru": ["Parkir 16 kendaraan", "Pet friendly", "Ruang santai joglo"],
+    "labuh_banyu": ["Dapur bersama", "Mesin cuci", "Parkir gratis"]
+  },
+  "security": ["CCTV 24 jam", "Smart key"],
+  "locations": {
+    "Labuh Biru": {
+      "address": "Jl. Joko Tingkir No.22, Pajang, Kec. Laweyan, Kota Surakarta, Jawa Tengah 57146",
+      "kamar_count": 24,
+      "tipe_count": 8,
+      "features": ["Pet friendly (satu-satunya di Laweyan)", "Parkir 16 kendaraan", "Ruang santai joglo"]
+    },
+    "Labuh Banyu": {
+      "address": "Jl. Sidomukti Tim. No.33, Pajang, Kec. Laweyan, Kota Surakarta, Jawa Tengah 57146",
+      "kamar_count": 9,
+      "tipe_count": 4,
+      "features": ["Lingkungan tenang", "Fully furnished"]
+    }
+  },
+  "rooms": {
+    "labuh_biru": {
+      "Iris": {"harian": "Rp150.000", "mingguan": "Rp550.000", "2_mingguan": "Rp800.000", "bulanan": "Rp1.250.000"},
+      "Zania": {"harian": "Rp150.000", "mingguan": "Rp500.000", "2_mingguan": "Rp750.000", "bulanan": "Rp1.250.000"},
+      "Aster": {"harian": "Rp160.000", "mingguan": "Rp600.000", "2_mingguan": "Rp900.000", "bulanan": "Rp1.400.000"},
+      "Freesia": {"harian": "Rp160.000", "mingguan": "Rp600.000", "2_mingguan": "Rp900.000", "bulanan": "Rp1.450.000"},
+      "Lotus": {"harian": "Rp170.000", "mingguan": "Rp650.000", "2_mingguan": "Rp1.000.000", "bulanan": "Rp1.600.000"},
+      "Sakura": {"harian": "Rp170.000", "mingguan": "Rp650.000", "2_mingguan": "Rp1.000.000", "bulanan": "Rp1.800.000", "note": "sudah termasuk listrik"}
+    },
+    "labuh_banyu": {
+      "Laguna": {"harian": "Rp150.000", "mingguan": "Rp550.000", "2_mingguan": "Rp800.000", "bulanan": "Rp1.250.000"},
+      "Tirta": {"harian": "Rp150.000", "mingguan": "Rp550.000", "2_mingguan": "Rp800.000", "bulanan": "Rp1.500.000"},
+      "Telaga": {"harian": "Rp150.000", "mingguan": "Rp550.000", "2_mingguan": "Rp800.000", "bulanan": "Rp1.400.000"},
+      "Embun": {"harian": "Rp150.000", "mingguan": "Rp550.000", "2_mingguan": "Rp800.000", "bulanan": "Rp1.400.000"}
+    }
+  },
+  "contact": {
+    "whatsapp": "0851-9001-9083",
+    "website": "rumahlabuh.com",
+    "booking": "bisa online langsung"
+  },
+  "tipe_penghuni": ["Campur (mixed)", "Syariat Islam", "Pet friendly"],
+  "jarak": "Dekat UMS dan pusat kota Solo (sekitar 5 menit, BUKAN UNS)",
+  "important_notes": {
+    "dekat_ums_vs_uns": "rumahlabuh.com deket UMS (Universitas Muhammadiyah Surakarta), BUKAN UNS (Universitas Sebelas Maret). UNS ada di Jebres, area berbeda."
+  }
+}

@@ -7,11 +7,12 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
+import handlers.shared as _shared
+
 from .shared import (
     _user_thread,
     is_allowed,
 )
-import handlers.shared as _shared
 
 router = Router()
 
@@ -49,6 +50,7 @@ async def cmd_save(msg: Message) -> None:
         # Fallback to legacy persistence
         import json as _json
         import uuid
+
         from agents import ACTIVE_THREADS
         from tools.persistence import save_session
         thread_id = f"tg_{msg.chat.id}"

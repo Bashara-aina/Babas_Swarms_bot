@@ -22,7 +22,7 @@ _PROVIDER_LIMITS: Dict[str, float] = {
     "groq": 30.0,           # Groq: high rate limit
     "gemini": 60.0,         # Gemini: very high rate limit
     "anthropic": 50.0,      # Claude: high tier
-    "openai": 60.0,         # OpenAI: high tier  
+    "openai": 60.0,         # OpenAI: high tier
     "ollama": 9999.0,       # Local: no limit
     "ollama_chat": 9999.0,  # Local: no limit
 }
@@ -40,10 +40,10 @@ class RequestThrottle:
     @staticmethod
     def _extract_provider(model: str) -> str:
         """Extract provider name from model string.
-        
+
         Args:
             model: Full model string (e.g., "openrouter/qwen/qwen3-coder:free")
-            
+
         Returns:
             Provider name (e.g., "openrouter")
         """
@@ -56,39 +56,39 @@ class RequestThrottle:
     @staticmethod
     async def acquire(model: str, timeout: float = 30.0) -> bool:
         """Acquire permission to make a request (async token bucket).
-        
+
         Args:
             model: Model string to extract provider from
             timeout: Maximum seconds to wait for token (default 30s)
-            
+
         Returns:
             True if token acquired, False if timeout
         """
         provider = RequestThrottle._extract_provider(model)
         rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)  # Default: 15 req/min (was 10)
-        
+
         # No throttling for local or high-limit providers (>=60 req/min)
         if rate_limit >= 60:
             logger.debug("No throttle needed for high-limit provider '%s'", provider)
             return True
-        
+
         bucket = _buckets[provider]
         tokens_per_second = rate_limit / 60.0
         max_tokens = 3.0  # Burst capacity (was 2.0) - allows 3 rapid requests
-        
+
         start_time = time.monotonic()
-        
+
         while True:
             now = time.monotonic()
             elapsed = now - bucket["last_update"]
-            
+
             # Refill tokens based on elapsed time
             bucket["tokens"] = min(
                 max_tokens,
                 bucket["tokens"] + (elapsed * tokens_per_second)
             )
             bucket["last_update"] = now
-            
+
             # Try to consume 1 token
             if bucket["tokens"] >= 1.0:
                 bucket["tokens"] -= 1.0
@@ -97,7 +97,7 @@ class RequestThrottle:
                     provider, bucket["tokens"]
                 )
                 return True
-            
+
             # Check timeout
             if now - start_time >= timeout:
                 logger.warning(
@@ -105,11 +105,11 @@ class RequestThrottle:
                     provider, timeout
                 )
                 return False
-            
+
             # Wait for next token to become available
             wait_time = (1.0 - bucket["tokens"]) / tokens_per_second
             wait_time = min(wait_time, 1.0)  # Cap at 1 second per iteration (was 2s)
-            
+
             logger.debug(
                 "Provider '%s' throttled, waiting %.1fs for token",
                 provider, wait_time
@@ -119,7 +119,7 @@ class RequestThrottle:
     @staticmethod
     def reset(provider: str) -> None:
         """Reset throttle state for a provider (admin intervention).
-        
+
         Args:
             provider: Provider name
         """
@@ -133,22 +133,22 @@ class RequestThrottle:
     @staticmethod
     def get_wait_time(model: str) -> float:
         """Get estimated wait time before next request is allowed.
-        
+
         Args:
             model: Model string
-            
+
         Returns:
             Estimated wait time in seconds (0 if ready immediately)
         """
         provider = RequestThrottle._extract_provider(model)
         rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)
-        
+
         if rate_limit >= 60:
             return 0.0
-        
+
         bucket = _buckets[provider]
         if bucket["tokens"] >= 1.0:
             return 0.0
-        
+
         tokens_per_second = rate_limit / 60.0
         return (1.0 - bucket["tokens"]) / tokens_per_second

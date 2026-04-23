@@ -72,7 +72,7 @@ async def understand_video_url(url: str) -> str:
         if proc.returncode != 0:
             err = stderr.decode("utf-8", errors="replace").strip()
             logger.warning("[video] yt-dlp failed for %s: %s", url, err[:200])
-            return f"Error: Could not extract video info (yt-dlp failed). The URL may be unsupported or private."
+            return "Error: Could not extract video info (yt-dlp failed). The URL may be unsupported or private."
 
         try:
             import json
@@ -127,7 +127,7 @@ async def understand_video_url(url: str) -> str:
             snippet = audio_transcript[:800]
             if len(audio_transcript) > 800:
                 snippet += "…"
-            lines.extend(["", f"📝 <b>Transcript:</b>", snippet])
+            lines.extend(["", "📝 <b>Transcript:</b>", snippet])
 
         return "\n".join(line for line in lines if line)
 

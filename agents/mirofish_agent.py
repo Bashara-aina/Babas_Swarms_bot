@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 
-from llm_client import chat
 from core.structured_outputs import MiroFishResult
+from llm_client import chat
 
 
 class MiroFishAgent:

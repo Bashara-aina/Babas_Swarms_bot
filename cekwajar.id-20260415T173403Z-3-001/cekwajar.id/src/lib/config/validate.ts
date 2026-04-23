@@ -13,6 +13,8 @@ const REQUIRED_ENV_VARS = [
 ]
 
 export function validateEnvVars(): void {
+  // Skip during next build static generation — env vars are injected at runtime
+  if (process.env.NEXT_PHASE === 'phase-production-build') return
   const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key])
   if (missing.length > 0) {
     throw new Error(

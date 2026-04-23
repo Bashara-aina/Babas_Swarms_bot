@@ -46,23 +46,23 @@ async def check_ruflo_health() -> bool:
 
 async def ruflo_health_monitor() -> None:
     """Background task that pings ruflo health every 5 minutes.
-    
+
     P0-3: Add health-check ping every 5 minutes.
     """
     interval_seconds = 300  # 5 minutes
-    
+
     while True:
         await asyncio.sleep(interval_seconds)
-        
+
         if _ruflo_process is None:
             logger.debug("Ruflo health check: no process handle stored")
             continue
-        
+
         # Check if process is still running
         if _ruflo_process.poll() is not None:
             logger.warning("Ruflo process has died (exit code: %s)", _ruflo_process.returncode)
             continue
-        
+
         # Ping health endpoint
         try:
             healthy = await check_ruflo_health()
@@ -76,7 +76,7 @@ async def ruflo_health_monitor() -> None:
 
 def start_health_monitor() -> asyncio.Task:
     """Start the ruflo health monitor background task.
-    
+
     Returns:
         The asyncio Task handle.
     """

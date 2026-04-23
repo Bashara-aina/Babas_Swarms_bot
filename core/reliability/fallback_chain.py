@@ -20,13 +20,13 @@ _FALLBACK_CHAINS = {
     # Coding tasks: prioritize speed and code quality
     "coding": [
         ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen Coder"),
-        ("groq/llama-3.3-70b-versatile", "Groq Llama 3.3 70B"),
+        ("minimax/MiniMax-Text-01", "Groq Llama 3.3 70B"),
         ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
         ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
     ],
     # General chat: prioritize speed
     "chat": [
-        ("groq/llama-3.3-70b-versatile", "Groq Llama 3.3 70B"),
+        ("minimax/MiniMax-Text-01", "Groq Llama 3.3 70B"),
         ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen"),
         ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
         ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
@@ -35,7 +35,7 @@ _FALLBACK_CHAINS = {
     "analysis": [
         ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen"),
         ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
-        ("groq/llama-3.3-70b-versatile", "Groq Llama 3.3 70B"),
+        ("minimax/MiniMax-Text-01", "Groq Llama 3.3 70B"),
         ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
     ],
 }
@@ -151,7 +151,7 @@ def get_fallback_chain(agent_key: str = "coding") -> list[str]:
 
     Example:
         >>> chain = get_fallback_chain("coding")
-        >>> # Returns ["openrouter/qwen/qwen3-coder:free", "groq/llama-3.3-70b-versatile", ...]
+        >>> # Returns ["openrouter/qwen/qwen3-coder:free", "minimax/MiniMax-Text-01", ...]
     """
     chain = FallbackChain.get_provider_chain(agent_key)
     return [model for model, _ in chain]
@@ -169,7 +169,7 @@ def get_best_provider(agent_key: str = "coding") -> str:
     Example:
         >>> model = get_best_provider("coding")
         >>> # Returns "openrouter/qwen/qwen3-coder:free" if healthy
-        >>> # Or "groq/llama-3.3-70b-versatile" if OpenRouter down
+        >>> # Or "minimax/MiniMax-Text-01" if OpenRouter down
         >>> # Or "ollama_chat/gemma4:e4b" if all cloud providers down (emergency only)
     """
     model, _ = FallbackChain.get_optimal_provider(agent_key)

@@ -21,10 +21,10 @@ Key improvements over v1/v2:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-import re
 from threading import Lock
 from typing import Optional
 

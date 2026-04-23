@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Optional
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ async def run_shell(cmd: str, timeout: int = 30, capture_stderr: bool = True) ->
     """Run a shell command asynchronously with sandbox protection. Returns stdout+stderr as string."""
     # Sandbox pre-flight check (U2)
     try:
-        from core.shell.sandbox import SandboxExecutor, DEFAULT_SANDBOX
+        from core.shell.sandbox import DEFAULT_SANDBOX, SandboxExecutor
 
         sandbox = SandboxExecutor(DEFAULT_SANDBOX)
         result = await sandbox.execute(cmd)

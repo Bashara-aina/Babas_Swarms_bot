@@ -11,7 +11,7 @@ async def maybe_tighten_response(text: str, task: str, agent_key: str) -> str:
 
     from llm_client import wiki_raw_completion
 
-    model = os.getenv("LEGION_RESPONSE_FILTER_MODEL", "groq/llama-3.1-8b-instant")
+    model = os.getenv("LEGION_RESPONSE_FILTER_MODEL", "minimax/MiniMax-Text-01")
     tightened = await wiki_raw_completion(
         f"""User task (for context only, do not repeat verbatim):
 {task[:1200]}

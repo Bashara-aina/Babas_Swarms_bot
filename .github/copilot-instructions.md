@@ -208,6 +208,42 @@ End non-trivial outputs with LEGIONA SELF-AUDIT: Confidence level, verification 
 2. Keep secrets in environment variables only (`FIRECRAWL_API_KEY`, `EXA_API_KEY`).
 3. Do not replace the MiniMax-through-Anthropic-compatible setup in `.claude/settings.json`.
 
+## Web Scraping Fallback Chain (MANDATORY)
+
+When `firecrawl_scrape` fails or credits are exhausted, follow this fallback order:
+
+### Fallback Order (mandatory sequence)
+1. **`firecrawl_scrape`** — Primary (if credits available)
+2. **`webfetch`** — Simple markdown extraction from URL
+3. **`exa_web_fetch_exa`** — Alternative extraction with search
+4. **`browse`** — Headless Chromium for JS-rendered pages (~100ms/command)
+
+### Automatic Exhaustion Detection
+Firecrawl exhaustion is detected by:
+- HTTP status `402` (Payment Required) or `429` (Rate Limited)
+- Response containing: "Insufficient credits", "credits exhausted", "blocked"
+
+### Browse Tool Usage
+```bash
+# Start (if not running)
+/home/newadmin/.claude/skills/gstack/browse/dist/browse status
+
+# Navigate and extract
+browse goto <url>
+browse text
+```
+
+### Exa as Fallback
+```
+firecrawl_extract(urls=["<url>"], prompt="extract full content")
+```
+
+### ALL Agents Must Know
+- Never skip fallback steps when Firecrawl fails
+- If one fallback fails, proceed to the next
+- If all fallbacks fail, say "I don't know" instead of fabricating
+- Document which tool succeeded in your response
+
 ## MiniMax M2.7 — Reasoning Split Configuration
 
 MiniMax M2.7 is the project-standard reasoning model (CLAUDE.md §0n).

@@ -11,7 +11,7 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: Where Legion still sounds like generic AI — corporate filler slips through,
-  opinions missing, tone flat.
+ opinions missing, tone flat.
 wikilinks: []
 confidence: medium
 source: research
@@ -46,7 +46,7 @@ Where Legion still sounds like generic AI — corporate filler slips through, op
 - Problem: Indonesian emotional expressions not recognized
 - Gap: "pusing", "malu", "seneng", "kesel" not mapped to emotions
 - Evidence: detect_emotion_from_context() has limited Indonesian
-- Fix: Add Indonesian emotional词典
+- Fix: Add Indonesian emotional
 
 ### 5. Late-Night Tone Not Distinctive
 - Problem: 1AM JST responses same as 9AM

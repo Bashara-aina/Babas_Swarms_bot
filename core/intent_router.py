@@ -507,7 +507,7 @@ def _build_skill_context(result: IntentResult) -> str:
     then returns a formatted string for injection into system prompts.
     """
     try:
-        from core.skills.harness import load_skills_for_task, describe_active_skill_context
+        from core.skills.harness import describe_active_skill_context, load_skills_for_task
 
         # Infer task type and domain from Intent enum
         task_type, domain = _intent_to_task_type_domain(result.intent)

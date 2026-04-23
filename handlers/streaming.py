@@ -46,10 +46,10 @@ async def stream_chat(
     model_used = key
 
     try:
-        from llm_client import call_llm
         from agents import AGENT_MODELS
+        from llm_client import call_llm
 
-        model = AGENT_MODELS.get(key, AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile"))
+        model = AGENT_MODELS.get(key, AGENT_MODELS.get("general", "minimax/MiniMax-Text-01"))
         messages = [{"role": "user", "content": task}]
 
         stream = await call_llm(

@@ -1,6 +1,8 @@
 """Tests for AgentMessageBus — pub/sub and message querying."""
 import asyncio
+
 import pytest
+
 from swarms_bot.orchestrator.agent_messaging import AgentMessageBus, MessageType
 
 

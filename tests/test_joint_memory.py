@@ -1,5 +1,9 @@
-import pytest, asyncio
-from core.joint_memory import joint_save, joint_search, joint_get_recent
+import asyncio
+
+import pytest
+
+from core.joint_memory import joint_get_recent, joint_save, joint_search
+
 
 @pytest.mark.asyncio
 async def test_joint_save_and_search():

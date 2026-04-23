@@ -52,7 +52,7 @@ class SharedWorkspace:
         existing = await self._read("status.md")
         lines = existing.splitlines()
         # Replace or append
-        updated = [l for l in lines if not l.startswith(f"- {node_id}:")]
+        updated = [line for line in lines if not line.startswith(f"- {node_id}:")]
         icon = {"pending": "⏳", "running": "🔄", "done": "✅", "failed": "❌", "skipped": "⏭"}.get(status, "❓")
         updated.append(f"- {node_id}: {icon} {status} — {detail[:120]}")
         await self._write("status.md", "\n".join(updated) + "\n")

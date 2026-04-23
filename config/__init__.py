@@ -8,9 +8,9 @@ from typing import Any
 
 
 def load_character_config() -> dict[str, Any]:
-	"""Load the Legion character card JSON."""
-	path = Path(__file__).resolve().parent / "legion_character.json"
-	return json.loads(path.read_text(encoding="utf-8"))
+    """Load the Legion character card JSON."""
+    path = Path(__file__).resolve().parent / "legion_character.json"
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 __all__ = ["load_character_config"]

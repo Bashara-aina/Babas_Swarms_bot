@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    from tools.github_intel import GitHubIntelEngine, TrendingRepo, RepoEvaluation
+    from tools.github_intel import GitHubIntelEngine, RepoEvaluation, TrendingRepo
 
     __all__ = ["GitHubBridge", "GitHubIntelEngine", "TrendingRepo", "RepoEvaluation"]
 except Exception as exc:  # noqa: BLE001

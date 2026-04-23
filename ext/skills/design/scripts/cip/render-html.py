@@ -8,16 +8,16 @@ with detailed descriptions, concepts, and brand guidelines.
 """
 
 import argparse
+import base64
 import json
 import os
 import sys
-import base64
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent))
-from cip_core import search, get_cip_brief
+from cip_core import get_cip_brief, search
 
 # Deliverable descriptions for presentation
 DELIVERABLE_INFO = {

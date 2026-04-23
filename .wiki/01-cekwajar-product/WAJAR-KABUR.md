@@ -10,13 +10,13 @@ tags:
 - cekwajar-product
 created: '2026-04-14'
 updated: '2026-04-14'
-summary: 'title: "Wajar Kabur — Abroad Salary & Life Quality Comparison — Full Spec"'
+summary: 'title: "Wajar Kabur — abroad Salary & Life Quality Comparison — Full Spec"'
 wikilinks: []
 confidence: medium
 source: research
 ---
 ***
-title: "Wajar Kabur — Abroad Salary & Life Quality Comparison — Full Spec"
+title: "Wajar Kabur — abroad Salary & Life Quality Comparison — Full Spec"
 ***
 
 # Wajar Kabur — Complete Technical Specification

@@ -22,7 +22,8 @@
     "rotation": {
       "enabled": true,
       "avoid_repeat_days": 7
-    }
+    },
+    "technique_weights": {}
   },
   "language": {
     "replacements": {

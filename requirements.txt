@@ -2,13 +2,14 @@
 # Install: python -m pip install -r requirements.txt
 
 # Core bot
-aiogram>=3.4.1,<4.0.0
+aiogram>=3.24.0,<4.0.0
 python-dotenv>=1.0.0
 litellm>=1.57.0
 
 # Async + HTTP
 aiohttp>=3.9.0
 httpx>=0.27.0
+httpx-sse>=0.4.0  # SSE streaming support for stream_handler
 aiofiles>=23.2.0
 
 # Persistence / system
@@ -54,6 +55,8 @@ networkx>=3.0
 knowledge-graph>=0.0.33
 swarms==9.0.4
 pytest-asyncio>=0.23.0
+instructor>=1.0.0
+ragas>=0.1.0
 
 # === v6 Humanization Layer ===
 mem0ai==1.0.11
@@ -96,6 +99,8 @@ mcp>=1.2.0
 livekit-api>=0.8.0
 ddgs>=8.1.0
 apscheduler>=3.10.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-otlp-proto-grpc>=1.20.0
 
 # === v9 Soul Transplant ===
 browser-use==0.1.40  # autonomous LLM-driven browsing (browse_task)

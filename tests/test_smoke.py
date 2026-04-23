@@ -74,7 +74,7 @@ class TestBotSmoke:
 
     async def test_admin_bypass_in_rate_limiter(self):
         """Admin users should bypass rate limits."""
-        from core.rate_limiter import RateLimiter, ADMIN_BYPASS
+        from core.rate_limiter import ADMIN_BYPASS, RateLimiter
 
         admin_id = 999999
         ADMIN_BYPASS.add(admin_id)
@@ -88,7 +88,7 @@ class TestBotSmoke:
 
     async def test_build_system_prompt_includes_personality_wrapper(self):
         """build_system_prompt must prepend the personality wrapper."""
-        from agents import build_system_prompt, PERSONALITY_WRAPPER
+        from agents import PERSONALITY_WRAPPER, build_system_prompt
 
         wrapper = PERSONALITY_WRAPPER.strip() if PERSONALITY_WRAPPER else ""
         prompt = build_system_prompt("Say hello.")
@@ -107,16 +107,18 @@ class TestBotSmoke:
 
     async def test_set_clipboard_shell_safety(self):
         """set_clipboard must use shlex.quote, not string replace."""
-        from computer_agent.display import set_clipboard
         import inspect
+
+        from computer_agent.display import set_clipboard
 
         src = inspect.getsource(set_clipboard)
         assert "shlex.quote" in src, "set_clipboard must use shlex.quote for shell safety"
 
     async def test_upgrade_from_git_no_hardcoded_path(self):
         """upgrade_from_git default path must NOT be hardcoded ~/swarm-bot."""
-        from computer_agent.shell import upgrade_from_git
         import inspect
+
+        from computer_agent.shell import upgrade_from_git
 
         src = inspect.getsource(upgrade_from_git)
         # Check that there's no literal "swarm-bot" as hardcoded path
@@ -217,9 +219,9 @@ class TestMultiUserIsolation:
         uid_b = 222222
 
         engine.set_user_id(uid_a)
-        ctx_a = await engine.get_context_window(str(uid_a))
+        await engine.get_context_window(str(uid_a))
         engine.set_user_id(uid_b)
-        ctx_b = await engine.get_context_window(str(uid_b))
+        await engine.get_context_window(str(uid_b))
 
         # Each user gets own context window
         assert uid_a != uid_b

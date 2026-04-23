@@ -8,8 +8,9 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from .shared import is_allowed
 import handlers.shared as _shared
+
+from .shared import is_allowed
 
 router = Router()
 
@@ -251,7 +252,7 @@ async def cmd_n8n(msg: Message) -> None:
     if not is_allowed(msg):
         return
     try:
-        from tools.n8n_bridge import n8n_status, ensure_n8n_running
+        from tools.n8n_bridge import ensure_n8n_running, n8n_status
 
         status = await n8n_status()
         if not status.get("healthy"):

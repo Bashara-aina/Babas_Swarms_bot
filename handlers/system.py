@@ -11,15 +11,16 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
+import handlers.shared as _shared
+
 from .shared import (
+    _key_status,
     _start_time,
     allowed_cb,
-    _key_status,
-    main_keyboard,
     is_allowed,
+    main_keyboard,
     send_chunked,
 )
-import handlers.shared as _shared
 
 router = Router()
 
@@ -311,8 +312,8 @@ async def cmd_visualize(msg: Message) -> None:
 
         # Try sending a rich PNG grid if overnight dashboard module has data.
         try:
-            from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
             from tools.dashboard import build_png_dashboard
+            from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
 
             job_id = get_active_job_id()
             job_tasks = get_job_tasks(job_id) if job_id else None
@@ -557,11 +558,11 @@ async def cmd_gpu(msg: Message) -> None:
         return
     status_msg = await msg.answer("\U0001f3ae checking GPU\u2026")
     try:
-        from tools.resource_monitor import get_resource_snapshot, format_resource_html
+        from tools.resource_monitor import format_resource_html, get_resource_snapshot
 
         snap = await get_resource_snapshot(force=True)
         await status_msg.edit_text(format_resource_html(snap), parse_mode="HTML")
-    except Exception as e:
+    except Exception:
         # Fallback to raw nvidia-smi
         try:
             from llm_client import run_shell_command
@@ -592,6 +593,7 @@ async def cmd_models(msg: Message) -> None:
     if not is_allowed(msg):
         return
     import os
+
     import router as agents
 
     registry = getattr(agents, "AGENT_REGISTRY", {}) or {}
@@ -632,7 +634,7 @@ async def cmd_resources(msg: Message) -> None:
         return
     status_msg = await msg.answer("\U0001f4ca reading system resources\u2026")
     try:
-        from tools.resource_monitor import get_resource_snapshot, format_resource_html
+        from tools.resource_monitor import format_resource_html, get_resource_snapshot
 
         # force=True to bypass cache and get a fresh reading
         snap = await get_resource_snapshot(force=True)
@@ -674,7 +676,7 @@ async def cmd_benchmark(msg: Message) -> None:
         return
     status_msg = await msg.answer("🏁 running capability benchmark suite…")
     try:
-        from tools.capability_benchmark import run_capability_suite, render_suite_report_html
+        from tools.capability_benchmark import render_suite_report_html, run_capability_suite
 
         report = await run_capability_suite(
             user_id=str(msg.from_user.id) if msg.from_user else "0",
@@ -698,7 +700,7 @@ async def cmd_redteam(msg: Message) -> None:
         return
     status_msg = await msg.answer("🛡 running red-team capability regression…")
     try:
-        from tools.capability_benchmark import run_capability_suite, render_suite_report_html
+        from tools.capability_benchmark import render_suite_report_html, run_capability_suite
 
         report = await run_capability_suite(
             user_id=str(msg.from_user.id) if msg.from_user else "0",

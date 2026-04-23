@@ -349,8 +349,13 @@ class ProactiveScheduler:
     async def _check_business_health(self) -> list[str]:
         """Check rumahlabuh.com Supabase for anomalies."""
         try:
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+            supabase_url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+            supabase_key = (
+                os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+                or os.getenv("SUPABASE_SERVICE_KEY")
+                or os.getenv("SUPABASE_ANON_KEY")
+                or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+            )
             if not supabase_url or not supabase_key:
                 return []
 

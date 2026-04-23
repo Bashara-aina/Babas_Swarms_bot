@@ -5,8 +5,8 @@ import tempfile
 import time
 from pathlib import Path
 
-from llm_client import chat
 from core.structured_outputs import CodeResult
+from llm_client import chat
 
 
 async def _run_python_safely(code: str, timeout: int = 30) -> CodeResult:

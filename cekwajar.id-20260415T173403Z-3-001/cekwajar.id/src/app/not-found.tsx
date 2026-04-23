@@ -9,7 +9,7 @@ export default function NotFound() {
         <div className="text-8xl font-black text-emerald-600 dark:text-emerald-400 mb-4">
           404
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
           Halaman tidak ditemukan
         </h1>
         <p className="text-muted-foreground mb-8">

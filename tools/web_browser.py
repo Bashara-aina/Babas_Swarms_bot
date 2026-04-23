@@ -345,7 +345,7 @@ async def fill_form(
             except Exception as e:
                 filled.append(f"submit failed: {e}")
 
-        return f"Form fill results:\n" + "\n".join(f"  {f}" for f in filled)
+        return "Form fill results:\n" + "\n".join(f"  {f}" for f in filled)
     except Exception as e:
         return f"Form fill error: {e}"
     finally:
@@ -380,7 +380,7 @@ async def get_page_links(
 
         if filter_pattern:
             pattern = re.compile(filter_pattern, re.IGNORECASE)
-            links = [l for l in links if pattern.search(l.get("href", "")) or pattern.search(l.get("text", ""))]
+            links = [link for link in links if pattern.search(link.get("href", "")) or pattern.search(link.get("text", ""))]
 
         return links[:max_links]
     except Exception as e:

@@ -1,11 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { GlobalNav } from '@/components/layout/GlobalNav'
 import { Footer } from '@/components/layout/Footer'
-import { CookieConsent } from '@/components/layout/CookieConsent'
-import { FirstVisitBanner } from '@/components/FirstVisitBanner'
-import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
 import { validateEnvVars } from '@/lib/config/validate'
 import { SettingsProvider } from '@/contexts/settings-context'
 import { ClientProviders } from '@/components/ClientProviders'
@@ -37,6 +34,15 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -56,10 +62,7 @@ export default function RootLayout({
           <ClientProviders>
             <GlobalNav />
             <main id="main-content" className="flex-1">{children}</main>
-            <MobileBottomNav />
             <Footer />
-            <FirstVisitBanner />
-            <CookieConsent />
           </ClientProviders>
         </SettingsProvider>
       </body>

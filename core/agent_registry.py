@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import signal
+import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
@@ -272,11 +275,7 @@ def semantic_search(query: str, top_k: int = 3) -> list[tuple[str, float]]:
         return []
 
 
-# ---------------------------------------------------------------------------
 # Legacy agent data (extracted from agents.py AGENT_MODELS + FALLBACK_CHAIN)
-# ---------------------------------------------------------------------------
-
-import re as _re
 
 # Primary model per legacy agent (22 agents from old agents.py AGENT_MODELS)
 _LEGACY_AGENT_MODELS: dict[str, str] = {
@@ -649,9 +648,6 @@ DEBATE_ICONS = _DEBATE_ICONS
 # Compatibility shims — keep existing main.py call-sites working
 # ---------------------------------------------------------------------------
 
-import time as _time
-from datetime import datetime as _datetime
-
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 
@@ -701,17 +697,17 @@ def detect_agent(task: str) -> str:
     task_lower = task.lower().strip()
 
     # High-confidence intent overrides to reduce keyword collision noise.
-    if _re.search(
+    if re.search(
         r"\b(gradient|derivative|integral|matrix|determinant|eigenvalue|tensor|backprop|softmax)\b", task_lower
     ):
         return "math"
-    if _re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
+    if re.search(r"\b(traceback|exception|stack trace|bug|debug|not working|error)\b", task_lower):
         return "debug"
-    if _re.search(
+    if re.search(
         r"\b(architecture|system design|microservice|structure|structur|framework diagram|blueprint)\b", task_lower
     ):
         return "architect"
-    if _re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
+    if re.search(r"\b(capital of|tell me a joke|joke)\b", task_lower):
         return "general"
 
     scores: dict[str, int] = {agent: 0 for agent in LEGACY_TASK_KEYWORDS}
@@ -720,9 +716,9 @@ def detect_agent(task: str) -> str:
             kw_norm = kw.strip().lower()
             if not kw_norm:
                 continue
-            if _re.search(r"[a-z0-9]", kw_norm):
-                pattern = rf"(?<![a-z0-9]){_re.escape(kw_norm)}(?![a-z0-9])"
-                if _re.search(pattern, task_lower):
+            if re.search(r"[a-z0-9]", kw_norm):
+                pattern = rf"(?<![a-z0-9]){re.escape(kw_norm)}(?![a-z0-9])"
+                if re.search(pattern, task_lower):
                     scores[agent] += 1
             elif kw_norm in task_lower:
                 scores[agent] += 1
@@ -786,7 +782,7 @@ def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
             "agent": agent,
             "task": task,
             "result": result[:500],
-            "timestamp": _time.time(),
+            "timestamp": time.time(),
         }
     )
     if len(ACTIVE_THREADS[thread_id]) > 10:
@@ -801,7 +797,7 @@ def get_thread_context(thread_id: str, last_n: int = 3) -> str:
     recent = turns[-last_n:]
     lines = ["Previous conversation in this thread:\n"]
     for turn in recent:
-        time_str = _datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
+        time_str = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
         lines.append(f"[{time_str}] {turn['agent'].upper()}: {turn['task'][:100]}…")
         lines.append(f"Response: {turn['result']}\n")
     return "\n".join(lines)
@@ -818,7 +814,7 @@ def list_threads() -> str:
         return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
     lines = ["<b>Active Threads</b>\n"]
     for tid, turns in ACTIVE_THREADS.items():
-        ts = _datetime.fromtimestamp(turns[-1]["timestamp"]).strftime("%m/%d %H:%M")
+        ts = datetime.fromtimestamp(turns[-1]["timestamp"]).strftime("%m/%d %H:%M")
         lines.append(f"📌 <b>{tid}</b> — {len(turns)} turns (last: {ts})")
     return "\n".join(lines)
 
@@ -873,7 +869,6 @@ async def select_team(
 
     # Diversity filtering: prefer agents from different departments
     selected: list[AgentDef] = []
-    seen_departments: set[str] = set()
 
     for name, _ in ranked:
         agent = get_agent(name)

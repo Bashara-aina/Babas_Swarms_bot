@@ -95,9 +95,9 @@ async def _gpu_training_status_handler(text: str) -> str:
             timeout=5,
         )
         training_procs = [
-            l
-            for l in result.stdout.split("\n")
-            if "python" in l and ("train" in l.lower() or "gpu" in l.lower() or "model" in l.lower())
+            line
+            for line in result.stdout.split("\n")
+            if "python" in line and ("train" in line.lower() or "gpu" in line.lower() or "model" in line.lower())
         ]
         if training_procs:
             lines = ["🚀 GPU Training - Active processes:\n"]

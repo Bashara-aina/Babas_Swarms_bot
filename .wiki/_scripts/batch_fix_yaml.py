@@ -196,7 +196,7 @@ def main():
 
     # Summary
     print(f"\n{'=' * 70}")
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"  Total files scanned: {total_files}")
     print(f"  Successfully parsed:  {success_count}")
     print(f"  Auto-fixed:           {fixed_count}")
@@ -216,7 +216,7 @@ def main():
             print(f"    Error: {f['error'][:100]}...")
 
     # Expected ~39 failures per contract
-    print(f"\n(Note: ~39 YAML failures expected per contract spec)")
+    print("\n(Note: ~39 YAML failures expected per contract spec)")
     print(f"Current failure count: {failure_count}")
 
     return 0 if failure_count < 100 else 1  # Exit 1 if too many failures to handle

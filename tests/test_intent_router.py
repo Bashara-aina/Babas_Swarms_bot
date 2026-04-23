@@ -1,7 +1,8 @@
 """Tests for core/intent_router.py — intent classification."""
 
 import pytest
-from core.intent_router import Intent, classify_intent_fast, IntentResult
+
+from core.intent_router import Intent, IntentResult, classify_intent_fast
 
 
 class TestClassifyIntentFast:

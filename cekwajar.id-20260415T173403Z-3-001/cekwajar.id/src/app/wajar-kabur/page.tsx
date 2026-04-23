@@ -7,11 +7,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plane, Lock, Info, ArrowRight, ChevronDown, ChevronLeft, Globe, TrendingUp, TrendingDown, XCircle, DollarSign, Calculator } from 'lucide-react'
+import { Plane, Lock, Info, ArrowRight, ChevronDown, ChevronLeft, Globe, TrendingUp, TrendingDown, XCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -20,13 +21,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CrossToolSuggestion } from '@/components/CrossToolSuggestion'
-import { HowItWorks } from '@/components/HowItWorks'
+import { ShareVerdictButton } from '@/components/shared/ShareVerdictButton'
 import { TrustBadges } from '@/components/shared/TrustBadges'
 import { PPPBasketComparison } from '@/components/wajar-kabur/PPPBasketComparison'
-import { PageHeader } from '@/components/shared/PageHeader/PageHeader'
-import { COPY } from '@/lib/copy'
-import { ResultSkeleton } from '@/components/ResultSkeleton'
-import { DisclaimerBanner } from '@/components/shared/DisclaimerBanner'
 
 // --- Types --------------------------------------------------------------------
 
@@ -131,7 +128,7 @@ export default function WajarKaburPage() {
 
       if (!json.success) {
         setPageState('ERROR')
-        setErrorMessage(json.error?.message ?? COPY.error.genericError)
+        setErrorMessage(json.error?.message ?? 'Terjadi kesalahan')
         return
       }
 
@@ -146,7 +143,7 @@ export default function WajarKaburPage() {
       setResult(data)
     } catch {
       setPageState('ERROR')
-      setErrorMessage(COPY.error.networkError)
+      setErrorMessage('Tidak dapat terhubung ke server')
     }
   }
 
@@ -157,138 +154,57 @@ export default function WajarKaburPage() {
     setErrorMessage('')
   }
 
-  // === LOADING ================================================================
-  if (pageState === 'LOADING') {
+  // === IDLE / LOADING ==========================================================
+
+  if (pageState === 'IDLE' || pageState === 'LOADING') {
     return (
       <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
         <div className="mx-auto max-w-2xl px-4 py-12">
-          <PageHeader
-            icon={<Plane className="h-5 w-5" />}
-            title="Wajar Kabur"
-            description="Bandingkan daya beli riil gaji Indonesia vs negara tujuan."
-            className="text-center"
-          />
-          <Card>
-            <CardContent className="p-6">
-              <ResultSkeleton />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+          <div className="mb-8 text-center">
+            <div className="mb-4"><Plane className="h-12 w-12 text-emerald-600 mx-auto" /></div>
+            <Skeleton shimmer className="mx-auto h-8 w-40 mb-2" />
+            <Skeleton shimmer className="mx-auto h-4 w-72" />
+          </div>
 
-  // === IDLE ===================================================================
-  if (pageState === 'IDLE') {
-    return (
-      <div data-tool="wajar-kabur" className="min-h-screen bg-indigo-50">
-        <div className="mx-auto max-w-2xl px-4 py-12">
-          <PageHeader
-            icon={<Plane className="h-5 w-5" />}
-            title="Wajar Kabur"
-            description="Bandingkan daya beli riil gaji Indonesia vs negara tujuan."
-            className="text-center"
-          />
-
-          <HowItWorks
-            steps={[
-              {
-                icon: DollarSign,
-                title: 'Masukkan gaji & negara',
-                description: 'Gaji IDR kamu dan negara/kota tujuan',
-              },
-              {
-                icon: Calculator,
-                title: 'Hitung PPP adjustment',
-                description: 'World Bank PPP data + kurs real-time Frankfurter',
-              },
-              {
-                icon: Globe,
-                title: 'Lihat daya beli riil',
-                description: 'Perbandingan nilai riil gaji setelah penyesuaian biaya hidup',
-              },
-            ]}
-          />
-
-          <TrustBadges variant="grid" className="mb-6" />
-          <DisclaimerBanner type="ppp" />
+          <TrustBadges className="mb-6" />
 
           <Card>
             <CardContent className="p-6">
               <div className="space-y-5">
+                {/* Salary Input */}
                 <div>
-                  <Label htmlFor="salaryIDR">Gaji di Indonesia (IDR/bulan)</Label>
-                  <Input
-                    id="salaryIDR"
-                    type="text"
-                    value={salaryInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\D/g, '')
-                      setSalaryInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
-                    }}
-                    placeholder="Contoh: 12.000.000"
-                    className="mt-1.5"
-                  />
+                  <Skeleton shimmer className="h-4 w-36 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
+                {/* Optional Offer */}
                 <div>
-                  <Label htmlFor="offerSalary">Offer di negara tujuan (opsional)</Label>
-                  <Input
-                    id="offerSalary"
-                    type="text"
-                    value={offerInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\D/g, '')
-                      setOfferInput(raw ? parseInt(raw, 10).toLocaleString('id-ID') : '')
-                    }}
-                    placeholder="Contoh: 3.500"
-                    className="mt-1.5"
-                  />
+                  <Skeleton shimmer className="h-4 w-56 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
+                {/* Country Selector */}
                 <div>
-                  <Label htmlFor="targetCountry">Negara Tujuan</Label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger id="targetCountry" className="mt-1.5">
-                      <SelectValue placeholder="Pilih negara tujuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country.country_code} value={country.country_code}>
-                          <span className="inline-flex items-center gap-2">
-                            <span>{country.flag_emoji}</span>
-                            <span>{country.country_name}</span>
-                            {!country.is_free_tier && <Lock className="h-3 w-3 text-amber-600" />}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Skeleton shimmer className="h-4 w-24 mb-2" />
+                  <Skeleton shimmer className="h-10 w-full" />
                 </div>
 
-                {isSelectedGated && (
-                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
-                    Negara ini tersedia untuk paket Basic+.
-                  </div>
-                )}
-
-                {errorMessage && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                    <XCircle className="h-4 w-4 flex-shrink-0" />
-                    {errorMessage}
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleCompare}
-                  disabled={!salaryInput || !selectedCountry}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                >
-                  Hitung Daya Beli Riil
-                </Button>
+                {/* Submit Button */}
+                <Skeleton shimmer className="h-10 w-full rounded-lg" />
               </div>
             </CardContent>
           </Card>
+
+          {/* Info Skeleton */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Skeleton shimmer className="h-5 w-5 rounded" />
+              <div className="flex-1 space-y-2">
+                <Skeleton shimmer className="h-4 w-32" />
+                <Skeleton shimmer className="h-3 w-full" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -397,7 +313,10 @@ export default function WajarKaburPage() {
             </CardContent>
           </Card>
 
-          <div className="text-center">
+          <div className="mt-4 flex flex-col items-center gap-4">
+            <ShareVerdictButton
+              text={`✈️ Perbandingan kerja di ${result.countryName}: ${ratioDisplay ? `daya beli ${ratioDisplay}x vs Indonesia` : 'cek detail di cekwajar.id'}. Sebelum kabur, cek dulu di cekwajar.id — gratis!`}
+            />
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ChevronLeft className="inline h-4 w-4" /> Kembali
             </Link>

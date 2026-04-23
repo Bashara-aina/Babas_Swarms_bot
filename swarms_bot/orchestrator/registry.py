@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
+
+if TYPE_CHECKING:
+    from swarms_bot.orchestrator.task import Task
 
 from swarms_bot.orchestrator.agent_base import Agent, AgentResponse
 

@@ -11,7 +11,6 @@ import re
 from pathlib import Path
 from typing import Optional
 
-
 # ─── Log registry ──────────────────────────────────────────────────────────────
 
 WATCHED_LOGS: dict[str, str] = {
@@ -88,7 +87,7 @@ async def tail_log(
     if pattern and not result.startswith("ERROR"):
         try:
             regex = re.compile(pattern, re.IGNORECASE)
-            lines = [l for l in result.splitlines() if regex.search(l)]
+            lines = [line for line in result.splitlines() if regex.search(line)]
             result = "\n".join(lines)
             if not result.strip():
                 result = "(no lines match pattern)"
@@ -113,7 +112,7 @@ async def grep_log(
         return f"ERROR: {path} does not exist (may need sudo)"
 
     try:
-        regex = re.compile(pattern, re.IGNORECASE)
+        re.compile(pattern, re.IGNORECASE)
     except re.error as exc:
         return f"ERROR: invalid regex: {exc}"
 

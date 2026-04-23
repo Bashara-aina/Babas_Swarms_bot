@@ -10,29 +10,9 @@ import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 import { calculateBPJS } from '@/lib/calculations/bpjs'
 import { calculatePPh21 } from '@/lib/calculations/pph21'
 import { detectViolations } from '@/lib/calculations/violations'
-import type { SubscriptionTier } from '@/types'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
-
-// ─── Rate Limiting (in-memory — replace with KV in Stage 10) ─────────────────
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 60 * 60 * 1000 // 1 hour
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(ip)
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
-    return true
-  }
-
-  if (entry.count >= RATE_LIMIT) return false
-  entry.count++
-  return true
-}
 
 // ─── Request Schema ────────────────────────────────────────────────────────────
 
@@ -87,13 +67,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ code: 'INVALID_JSON', message: 'Malformed JSON body' }, { status: 400 })
   }
 
-  // 2. Rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
-    ?? request.headers.get('x-real-ip') ?? 'unknown'
-  if (!checkRateLimit(ip)) {
+  // 2. Rate limiting — 5 audits/hour per IP
+  const limit = rateLimit(request, 'audit-payslip', {
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+  })
+  if (!limit.ok) {
+    const retryAfter = Math.max(
+      0,
+      Math.ceil((limit.resetAt - Date.now()) / 1000),
+    )
     return NextResponse.json(
-      { code: 'RATE_LIMITED', message: `Terlalu banyak request. Coba lagi dalam 1 jam.` },
-      { status: 429 }
+      {
+        code: 'RATE_LIMITED',
+        message: 'Terlalu banyak audit. Coba lagi dalam 1 jam.',
+      },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(retryAfter) },
+      },
     )
   }
 

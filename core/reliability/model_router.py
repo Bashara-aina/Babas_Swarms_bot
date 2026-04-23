@@ -21,15 +21,15 @@ logger = logging.getLogger(__name__)
 TIERS: dict[str, dict] = {
     "lightweight": {
         "models": [
-            "cerebras/qwen3-235b-a22b",       # Free, 1500 tok/s
-            "groq/moonshotai/kimi-k2-instruct", # Free, fast
+            "minimax/MiniMax-Text-01",       # Free, 1500 tok/s
+            "minimax/MiniMax-Text-01", # Free, fast
         ],
         "description": "Simple queries, fact retrieval, formatting",
         "max_task_len": 150,
     },
     "midweight": {
         "models": [
-            "zai/glm-4",                        # Free, strong reasoning
+            "minimax/MiniMax-Text-01",                        # Free, strong reasoning
             "openrouter/qwen/qwen3-coder:free", # Free coding
         ],
         "description": "Standard coding, debugging, math, explanation",
@@ -39,7 +39,7 @@ TIERS: dict[str, dict] = {
         "models": [
             "openrouter/qwen/qwen3-coder:free",          # QwQ-Coder free tier
             "gemini/gemini-3.1-pro",                     # 1M context
-            "cerebras/qwen3-235b-a22b",                  # Fast fallback
+            "minimax/MiniMax-Text-01",                  # Fast fallback
         ],
         "description": "Complex reasoning, multi-step, long-form",
         "max_task_len": None,  # No limit
@@ -114,7 +114,7 @@ def select_model(agent_key: str, task: str, force_tier: Optional[str] = None) ->
         force_tier: Override complexity detection with specific tier.
 
     Returns:
-        Model string to use (e.g. 'cerebras/qwen3-235b-a22b').
+        Model string to use (e.g. 'minimax/MiniMax-Text-01').
     """
     import core.agent_registry as ag
 

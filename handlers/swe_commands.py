@@ -15,8 +15,8 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from tools.swe_agent_bridge import SWEBridge
 from handlers.shared import is_allowed
+from tools.swe_agent_bridge import SWEBridge
 
 router = Router()
 _swe = SWEBridge()

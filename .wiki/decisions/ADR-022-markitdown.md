@@ -17,8 +17,8 @@ source: research
 ---
 # ADR-022: markitdown Document Parser Integration
 
-**Date**: 2026-04-12  
-**Status**: Accepted  
+**Date**: 2026-04-12 
+**Status**: Accepted 
 **Decider**: @planner → @worker
 
 ## Context
@@ -30,9 +30,9 @@ Legion needs to parse uploaded documents (PDF, DOCX, XLSX, PPTX, images) into ma
 ## Decision
 
 1. Create `core/skills/doc_parser.py` as a skill module with:
-   - `parse_file(path)` — synchronous file → markdown with fallback chain
-   - `parse_telegram_document(bot, file_id)` — download from Telegram then parse
-   - `SKILL_META` dict for registry wiring
+ - `parse_file(path)` — synchronous file → markdown with fallback chain
+ - `parse_telegram_document(bot, file_id)` — download from Telegram then parse
+ - `SKILL_META` dict for registry wiring
 
 2. Prefer `markitdown` when available; fall back to `pdfplumber` for PDFs; return error dict for unsupported types.
 
@@ -57,4 +57,4 @@ Legion needs to parse uploaded documents (PDF, DOCX, XLSX, PPTX, images) into ma
 
 - **pdfplumber only**: only handles PDFs, not DOCX/PPTX/images
 - **LangChain document loaders**: heavier dependency, more complex API
-- **Direct mammoth/openpyxl/pptx调用**: works but no unified interface, more code to maintain
+- **Direct mammoth/openpyxl/pptx**: works but no unified interface, more code to maintain

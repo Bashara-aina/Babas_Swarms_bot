@@ -79,7 +79,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
             </span>
           )}
           {optional && (
-            <span className="text-xs font-normal text-text-muted">(opsional)</span>
+            <span className="text-xs font-normal text-muted-foreground">(opsional)</span>
           )}
         </label>
 
@@ -176,7 +176,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xs text-text-muted dark:text-slate-400"
+              className="text-xs text-muted-foreground dark:text-slate-400"
             >
               {hint}
             </motion.p>

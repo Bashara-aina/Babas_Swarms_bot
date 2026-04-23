@@ -5,6 +5,7 @@ This is the single highest-impact UX change in the v3.0 upgrade.
 """
 
 from __future__ import annotations
+
 import re
 
 # ── Phrases that mark a response as robotic ─────────────────────────────────
@@ -61,7 +62,7 @@ def _strip_robotic_phrases(text: str) -> str:
     # Clean double spaces and leading/trailing whitespace per line
     lines = [re.sub(r' {2,}', ' ', line).strip() for line in text.splitlines()]
     # Remove lines that are now empty due to full phrase removal
-    lines = [l for l in lines if l]
+    lines = [line for line in lines if line]
     return '\n'.join(lines)
 
 

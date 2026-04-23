@@ -1,0 +1,538 @@
+{
+  "schedule_history": [
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888151.3772702,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "1462177edb7fdf62954a9f45bcc9816926520a72",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b",
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee",
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c",
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c"
+      ]
+    },
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888713.5360548,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c",
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee",
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16",
+        "1462177edb7fdf62954a9f45bcc9816926520a72"
+      ]
+    },
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888715.9735289,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c",
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee",
+        "1462177edb7fdf62954a9f45bcc9816926520a72",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b",
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16"
+      ]
+    },
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888716.244034,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c",
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "1462177edb7fdf62954a9f45bcc9816926520a72",
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b",
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee"
+      ]
+    },
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888895.773665,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "1462177edb7fdf62954a9f45bcc9816926520a72",
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16",
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee",
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c"
+      ]
+    },
+    {
+      "date_iso": "2026-04-24",
+      "saved_at": 1776888898.8461199,
+      "slots": [
+        {
+          "slot_index": 0,
+          "window_name": "morning",
+          "hour": 6,
+          "minute": 40,
+          "post_number": 1,
+          "thread_seed": "8e40b8d7db69"
+        },
+        {
+          "slot_index": 1,
+          "window_name": "morning",
+          "hour": 7,
+          "minute": 0,
+          "post_number": 2,
+          "thread_seed": "3ccb38623fb9"
+        },
+        {
+          "slot_index": 2,
+          "window_name": "morning",
+          "hour": 8,
+          "minute": 19,
+          "post_number": 3,
+          "thread_seed": "48485ee192bc"
+        },
+        {
+          "slot_index": 3,
+          "window_name": "afternoon",
+          "hour": 12,
+          "minute": 37,
+          "post_number": 4,
+          "thread_seed": "f3b8e8b3a703"
+        },
+        {
+          "slot_index": 4,
+          "window_name": "afternoon",
+          "hour": 13,
+          "minute": 52,
+          "post_number": 5,
+          "thread_seed": "faa2302ea46d"
+        },
+        {
+          "slot_index": 5,
+          "window_name": "afternoon",
+          "hour": 14,
+          "minute": 7,
+          "post_number": 6,
+          "thread_seed": "1ee7469e3a30"
+        },
+        {
+          "slot_index": 6,
+          "window_name": "afternoon",
+          "hour": 15,
+          "minute": 22,
+          "post_number": 1,
+          "thread_seed": "a80269e23ddd"
+        },
+        {
+          "slot_index": 7,
+          "window_name": "night",
+          "hour": 19,
+          "minute": 45,
+          "post_number": 2,
+          "thread_seed": "7f1b5c1c4636"
+        },
+        {
+          "slot_index": 8,
+          "window_name": "night",
+          "hour": 20,
+          "minute": 15,
+          "post_number": 3,
+          "thread_seed": "d64b5e58e4ab"
+        }
+      ],
+      "thread_signatures": [
+        "3ccb38623fb9db22d0e9546ac4925edf3e5d72ee",
+        "b0426127bca3ffddb6856de84b8c0c166dd3495c",
+        "8e40b8d7db699bfa385f6f7e034ba444a825bb16",
+        "1462177edb7fdf62954a9f45bcc9816926520a72",
+        "a80269e23ddd81bdc39af8aea37faee1979b875e",
+        "12ab7f0c6e978950a3bb63b8e69440c6dd058e9c",
+        "f0b4019b3ec82f26609338b67ed832a5483b95ab",
+        "416ef82245b2a1b63447cef1b9716289921944d4",
+        "48485ee192bcca8c6c053bc4cd9ef1d2a9007a4b"
+      ]
+    }
+  ]
+}

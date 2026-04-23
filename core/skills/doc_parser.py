@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import tempfile
 from pathlib import Path
 from typing import Union
@@ -75,7 +75,7 @@ async def parse_telegram_document(bot, file_id: str, save_dir: str = "/tmp/legio
         result = await parse_file(local_path)
         try:
             os.remove(local_path)
-        except:
+        except Exception:
             pass
         return result
     except Exception as e:

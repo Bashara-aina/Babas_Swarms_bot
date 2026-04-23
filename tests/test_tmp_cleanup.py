@@ -1,9 +1,11 @@
 """Tests for screenshot tmpfile cleanup."""
 import os
-import time
 import tempfile
-import pytest
+import time
 from unittest.mock import patch
+
+import pytest
+
 from core.tmp_cleanup import cleanup_screenshots
 
 

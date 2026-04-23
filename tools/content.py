@@ -117,8 +117,8 @@ async def monitor_brand(keywords: list[str], platforms: Optional[list[str]] = No
 
 async def rss_to_post(rss_url: str, platform: str = "linkedin") -> str:
     """Fetch latest RSS item, draft a platform-appropriate post."""
-    from tools.briefing import _fetch_rss
     from llm_client import chat
+    from tools.briefing import _fetch_rss
 
     items = await _fetch_rss(rss_url, max_items=1)
     if not items:

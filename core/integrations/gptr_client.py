@@ -1,6 +1,6 @@
-import os
 import asyncio
 import logging
+import os
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class GPTResearcherClient:
     def __init__(self):
         self.available = self._check_available()
         self.llm_provider = os.getenv("GPTR_LLM_PROVIDER", "openai")
-        self.llm_model = os.getenv("GPTR_LLM_MODEL", "openai/gpt-4o-mini")
+        self.llm_model = os.getenv("GPTR_LLM_MODEL", "minimax/MiniMax-Text-01")
         self.search_api = os.getenv("GPTR_SEARCH_API", "duckduckgo")
         if os.getenv("BRAVE_API_KEY"):
             self.search_api = "tavily"
@@ -33,7 +33,7 @@ class GPTResearcherClient:
     async def research(self, query: str, report_type: str = "research_report", max_sections: int = 5) -> dict:
         if not self.available:
             return {
-                "report": f"gpt-researcher not available. Install with: pip install gpt-researcher",
+                "report": "gpt-researcher not available. Install with: pip install gpt-researcher",
                 "sources": [],
                 "cost_estimate": 0.0,
             }

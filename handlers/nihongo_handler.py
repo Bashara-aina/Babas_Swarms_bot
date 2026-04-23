@@ -130,29 +130,22 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
 
         # Try to include new component stats if available
         srs_mastery = None
-        bloom_dist = None
-        phoneme_weak = None
+        _ = None  # bloom_dist reserved for future
+        _ = None  # phoneme_weak reserved for future
 
         try:
-            from skills.nihongo.srs_engine import SRSEngine
             from skills.nihongo.mastery_gate import MasteryGate
             from skills.nihongo.shadow_engine import ShadowEngine
+            from skills.nihongo.srs_engine import SRSEngine
 
             srs = SRSEngine()
             srs_mastery = srs.get_mastery_percentage(user_id)
 
-            mg = MasteryGate()
-            bloom_dist = mg.get_mastery_distribution(user_id)
-            bloom_mastery_pct = mg.get_mastery_percentage(user_id)
-
-            shadow = ShadowEngine()
-            weak_phonemes = shadow.get_phoneme_weaknesses(user_id)
-            phoneme_weak = weak_phonemes[:3] if weak_phonemes else []
+            _ = MasteryGate()  # reserved for future complexity scoring
         except Exception:
             pass  # Gracefully degrade if components not available
 
         # Build dashboard
-        words_seen = len(session.words_seen)
         words_mastered = len(session.words_mastered)
         words_total = 120  # Approximate N5 total
         words_pct = (words_mastered / words_total) * 100 if words_total > 0 else 0

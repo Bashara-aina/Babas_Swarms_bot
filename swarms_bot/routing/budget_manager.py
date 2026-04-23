@@ -88,7 +88,6 @@ class BudgetManager:
             Dict with 'allowed', 'daily_spent', 'monthly_spent',
             'daily_remaining', 'monthly_remaining'.
         """
-        now = time.time()
         # Use explicit timezone to be unambiguous across system configurations.
         # .astimezone() gives timezone-aware local (JST) datetime; .timestamp()
         # then correctly gives Unix epoch for midnight in that timezone.

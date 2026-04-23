@@ -12,7 +12,6 @@ import asyncio
 import shlex
 from typing import Optional
 
-
 SHELL_TIMEOUT = 30
 
 
@@ -258,7 +257,7 @@ async def listening_ports() -> str:
     lines = result.strip().splitlines()
     if not lines:
         return "(no listening ports found)"
-    return f"=== Listening Ports ===\n" + "\n".join(lines)
+    return "=== Listening Ports ===\n" + "\n".join(lines)
 
 
 async def who_is_logged_in() -> str:

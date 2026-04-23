@@ -10,6 +10,7 @@ import asyncio
 import html
 import logging
 import os
+from pathlib import Path as _Path
 from typing import Any
 
 import aiohttp
@@ -18,22 +19,20 @@ from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, Update
 
-from pathlib import Path as _Path
-
 from lib.legiona.bot.stream_handler import stream_to_telegram
+from lib.legiona.debate import debate, debate_simple, full_debate
 from lib.legiona.minimax_client import MINIMAX_MODEL, complete_with_tools, stream_complete
+from lib.legiona.observability.cost_log import monthly_projection_jpy, today_total_jpy
 from lib.legiona.self_evolve import (
+    GLOBAL_MEMORY_FILE,
     RULES_FILE,
+    _analyze_failure_patterns,
     evolve,
     load_evolved_rules,
-    GLOBAL_MEMORY_FILE,
     record_session,
-    _analyze_failure_patterns,
 )
-from lib.legiona.tools.registry import TOOL_SCHEMAS
 from lib.legiona.tools.mmx_tools import mmx_vision
-from lib.legiona.debate import debate, debate_simple, full_debate
-from lib.legiona.observability.cost_log import today_total_jpy, monthly_projection_jpy
+from lib.legiona.tools.registry import TOOL_SCHEMAS
 
 _logger = logging.getLogger(__name__)
 
@@ -118,7 +117,7 @@ async def cmd_run(message: Message, command: CommandObject, state: FSMContext) -
         tool_calls_summary = []  # populated from stream metadata if available
 
         # Uncertainty format for confidence expression
-        uncertainty_note = UNCERTAINTY_FORMAT.format(
+        UNCERTAINTY_FORMAT.format(
             level="MEDIUM",
             reason="Response generated via streaming M2.7",
             evidence="RAG grounding applied via stream_complete",
@@ -159,7 +158,6 @@ async def cmd_think(message: Message, command: CommandObject, state: FSMContext)
         return
 
     status_msg = await message.answer("🧠 Thinking...")
-    chat_id = message.chat.id
 
     messages = [
         {"role": "system", "content": "You are Legiona, Bashara's AI coworker."},
@@ -189,7 +187,7 @@ async def cmd_evolve(message: Message) -> None:
     sessions_data: list[dict] = []
     if SESSION_LOG.exists():
         raw = SESSION_LOG.read_text().strip().splitlines()[-10:]
-        sessions_data = [json.loads(l) for l in raw if l.strip()]
+        sessions_data = [json.loads(line) for line in raw if line.strip()]
 
     # Analyze failure patterns to inform evolution
     pattern_report = _analyze_failure_patterns(sessions_data) if sessions_data else {}
@@ -335,12 +333,13 @@ async def cmd_status(message: Message) -> None:
     # ── Context health + drift detection via _analyze_failure_patterns ───────
     try:
         # Read last 10 sessions for pattern analysis
-        from lib.legiona.self_evolve import SESSION_LOG
         import json
+
+        from lib.legiona.self_evolve import SESSION_LOG
         sessions_data: list[dict] = []
         if SESSION_LOG.exists():
             raw = SESSION_LOG.read_text().strip().splitlines()[-10:]
-            sessions_data = [json.loads(l) for l in raw if l.strip()]
+        sessions_data = [json.loads(line) for line in raw if line.strip()]
 
         pattern_stats = _analyze_failure_patterns(sessions_data) if sessions_data else {}
         total_sessions = pattern_stats.get("total_sessions", 0)
@@ -477,7 +476,6 @@ async def handle_vision_photo(message: Message, state: FSMContext) -> None:
         return
 
     status_msg = await message.answer("👁️ Analyzing image...")
-    chat_id = message.chat.id
     bot = message.bot
 
     try:

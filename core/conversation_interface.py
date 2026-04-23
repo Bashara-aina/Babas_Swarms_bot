@@ -124,7 +124,7 @@ async def _cleanup_old_turns() -> None:
         await _init_conv_db()
         cutoff = time.time() - (_HISTORY_TTL_DAYS * 86400)
         async with aiosqlite.connect(_CONV_DB_PATH) as db:
-            result = await db.execute("DELETE FROM conversation_turns WHERE ts < ?", (cutoff,))
+            await db.execute("DELETE FROM conversation_turns WHERE ts < ?", (cutoff,))
             await db.commit()
             logger.info("Cleaned up old conversation turns (cutoff: %d days)", _HISTORY_TTL_DAYS)
     except Exception as exc:

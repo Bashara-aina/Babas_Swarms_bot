@@ -259,7 +259,7 @@ Output ONLY the JSON.
 """
         resp = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             temperature=0.1,
             max_tokens=512,
         )
@@ -397,7 +397,7 @@ Rules:
 """
             response = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 temperature=0.1,
                 max_tokens=8192,
             )

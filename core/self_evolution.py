@@ -18,8 +18,8 @@ import datetime
 import hashlib
 import json
 import logging
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -143,8 +143,6 @@ class SelfEvolutionEngine:
             from core.optimization.feedback_learner import get_learner
 
             learner = get_learner()
-            # Infer agent from task hash — negative feedback
-            task_hash = hashlib.sha256(task.encode()).hexdigest()[:16]
             learner.record_by_agent(
                 agent=self._infer_agent_from_task(task),
                 task=task,

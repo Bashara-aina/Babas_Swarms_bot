@@ -36,7 +36,7 @@ def _init_prometheus() -> None:
     global _prometheus_available, _counters, _histograms, _gauges
 
     try:
-        from prometheus_client import Counter, Histogram, Gauge, start_http_server
+        from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
         _counters["requests"] = Counter(
             "swarm_requests_total",

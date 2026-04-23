@@ -7,14 +7,13 @@ import json
 import logging
 import math
 import os
+import subprocess
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
-
-# Planned feature flags
-FEATURE_GIT_LOG_ANALYSIS_ENABLED = False  # Planned: v2.0
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 WIKI_ROOT = REPO_ROOT / ".wiki" / "knowledge"
@@ -38,6 +37,35 @@ async def _load_topic_weights() -> dict[str, Any]:
         return {"topics": {}}
 
 
+@lru_cache(maxsize=8)
+def _recent_commit_subjects(days: int) -> tuple[str, ...]:
+    """Return recent git commit subjects (cached per day-window)."""
+    try:
+        proc = subprocess.run(
+            [
+                "git",
+                "--no-pager",
+                "log",
+                f"--since={days} days ago",
+                "--pretty=%s",
+                "--no-merges",
+            ],
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if proc.returncode != 0:
+            logger.debug("git log returned non-zero (%s): %s", proc.returncode, proc.stderr.strip())
+            return ()
+        lines = [line.strip().lower() for line in proc.stdout.splitlines() if line.strip()]
+        return tuple(lines)
+    except (OSError, subprocess.SubprocessError) as exc:
+        logger.debug("git log analysis unavailable: %s", exc)
+        return ()
+
+
 def _days_since(ts: str) -> float:
     """Days elapsed since an ISO timestamp string."""
     try:
@@ -49,13 +77,21 @@ def _days_since(ts: str) -> float:
 
 
 def _get_git_commit_count(topic: str, days: int = 3) -> int:
-    """Count git commits mentioning a topic in the last N days (mock/placeholder)."""
-    if not FEATURE_GIT_LOG_ANALYSIS_ENABLED:
-        logger.debug("Git log analysis feature is planned for v2.0 — not yet available.")
+    """Count recent commits that mention the topic slug or its tokens."""
+    subjects = _recent_commit_subjects(days)
+    if not subjects:
         return 0
-    # TODO: implement real git log analysis
-    # For now returns 0 (no real git integration yet)
-    return 0
+
+    normalized_topic = topic.lower().replace("-", "_").strip("_")
+    topic_tokens = [t for t in normalized_topic.split("_") if t]
+    count = 0
+    for subject in subjects:
+        if normalized_topic in subject:
+            count += 1
+            continue
+        if topic_tokens and all(token in subject for token in topic_tokens):
+            count += 1
+    return count
 
 
 async def detect_active_topics(
@@ -79,7 +115,7 @@ async def detect_active_topics(
     raw_scores: dict[str, float] = {}
 
     for topic, state in topics_state.items():
-        mention_count = 1  # placeholder — real Telegram API not yet connected
+        mention_count = int(state.get("mention_count", 1) or 1)
         commit_count = _get_git_commit_count(topic, git_days)
         days_since = _days_since(state.get("last_mentioned", "2026-01-01"))
         decay = state.get("decay_days", 14)

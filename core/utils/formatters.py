@@ -33,7 +33,7 @@ class ResponseFormatter:
                 for cb in code_blocks
             )
             return (
-                f"<b>💻 Generated Code</b>\n\n"
+                "<b>💻 Generated Code</b>\n\n"
                 + (f"{body}\n\n" if body else "")
                 + code_section
             )

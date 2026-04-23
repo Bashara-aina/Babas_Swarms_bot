@@ -128,7 +128,7 @@ async def _get_training_status() -> str:
         output = stdout.decode().strip()
         if output:
             # Get last few meaningful lines
-            lines = [l for l in output.split("\n") if l.strip()]
+            lines = [line for line in output.split("\n") if line.strip()]
             return "\n".join(lines[-5:])
         return "Log file empty or unreadable."
     except Exception as e:
@@ -206,7 +206,7 @@ async def _conversational_wrap(raw_data: str, now: datetime) -> str:
     try:
         return await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             temperature=0.7,
             max_tokens=600,
         )

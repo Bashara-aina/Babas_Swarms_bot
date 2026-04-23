@@ -1,7 +1,9 @@
 """Tests for DAGPlanner — goal decomposition and DAG structure."""
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from swarms_bot.orchestrator.dag_planner import DAGPlanner, TaskDAG, DAGNode
+
+from swarms_bot.orchestrator.dag_planner import DAGNode, DAGPlanner, TaskDAG
 
 
 class TestDAGNode:

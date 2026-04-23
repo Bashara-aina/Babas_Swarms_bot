@@ -203,6 +203,7 @@ async def understand_audio(audio_path: str) -> str:
     """
     try:
         import os
+
         from core.utils.multimodal_processor import transcribe_voice
 
         with open(audio_path, "rb") as f:

@@ -45,3 +45,4 @@ wiki/
 .claude/settings.json
 .gstack/
 .gitnexus
+lib/legiona/memory/cost_log.jsonl

@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getWorldBankPPP } from '@/lib/external/worldbank'
 import { getExchangeRate } from '@/lib/external/exchangerates'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -72,6 +73,27 @@ function calculatePPPComparison(
 // --- Handler ------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
+  const limit = rateLimit(request, 'abroad-compare', {
+    limit: 20,
+    windowMs: 60 * 1000,
+  })
+  if (!limit.ok) {
+    const retryAfter = Math.max(
+      0,
+      Math.ceil((limit.resetAt - Date.now()) / 1000),
+    )
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'RATE_LIMITED',
+          message: 'Terlalu banyak permintaan. Coba lagi sebentar lagi.',
+        },
+      },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
+
   const searchParams = request.nextUrl.searchParams
 
   const parsed = QuerySchema.safeParse({

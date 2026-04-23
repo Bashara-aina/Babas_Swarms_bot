@@ -19,14 +19,12 @@ logger = logging.getLogger(__name__)
 
 # Pricing per 1M tokens (input/output) in USD — 0.0 = free tier
 PRICING: dict[str, dict[str, float]] = {
+    "minimax/MiniMax-Text-01":                         {"input": 0.0, "output": 0.0},
     "ollama_chat/gemma3:12b":                           {"input": 0.0, "output": 0.0},
     "ollama_chat/qwen3.5:35b":                          {"input": 0.0, "output": 0.0},
     "ollama_chat/exaone-deep:32b":                      {"input": 0.0, "output": 0.0},
     "ollama_chat/phi4":                                 {"input": 0.0, "output": 0.0},
     "ollama_chat/llama3.3:70b":                         {"input": 0.0, "output": 0.0},
-    "zai/glm-4":                                        {"input": 0.0, "output": 0.0},
-    "cerebras/qwen3-235b-a22b":                         {"input": 0.0, "output": 0.0},
-    "groq/moonshotai/kimi-k2-instruct":                 {"input": 0.0, "output": 0.0},
     "openrouter/qwen/qwen3-coder:free":                 {"input": 0.0, "output": 0.0},
     "openrouter/openai/gpt-oss-120b:free":              {"input": 0.0, "output": 0.0},
     "gemini/gemini-3.1-pro":                            {"input": 0.035, "output": 0.105},
@@ -35,9 +33,7 @@ PRICING: dict[str, dict[str, float]] = {
 
 # Daily request limits (0 = unlimited)
 DAILY_LIMITS: dict[str, int] = {
-    "zai/glm-4": 1000,
-    "cerebras/qwen3-235b-a22b": 14400,
-    "groq/moonshotai/kimi-k2-instruct": 1000,
+    "minimax/MiniMax-Text-01": 14400,
 }
 
 ALERT_THRESHOLD = 0.80   # Alert at 80% of daily limit
@@ -57,8 +53,9 @@ class UsageTracker:
     def _init_redis(self) -> None:
         """Connect to Redis if available."""
         try:
-            import redis as redis_lib
             import os
+
+            import redis as redis_lib
             r = redis_lib.Redis(
                 host=os.getenv("REDIS_HOST", "localhost"),
                 port=int(os.getenv("REDIS_PORT", "6379")),
@@ -87,7 +84,7 @@ class UsageTracker:
         """Record token usage for a model.
 
         Args:
-            model: Model string (e.g. 'zai/glm-4').
+            model: Model string (e.g. 'minimax/MiniMax-Text-01').
             input_tokens: Number of input/prompt tokens.
             output_tokens: Number of output/completion tokens.
             requests: Number of requests (default 1).

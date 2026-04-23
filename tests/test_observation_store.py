@@ -9,10 +9,10 @@ import pytest
 
 from core.memory.observation_store import (
     ObservationStore,
-    _strip_private,
     _classify_type,
-    _should_skip_path,
     _escape_fts_query,
+    _should_skip_path,
+    _strip_private,
 )
 
 

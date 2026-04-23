@@ -14,7 +14,8 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-from lib.legiona.minimax_client import complete, LegionaOutput
+
+from lib.legiona.minimax_client import LegionaOutput, complete
 
 ADVOCATE_SYSTEM = """You are the ADVOCATE. Given a question, build the
 strongest possible case FOR the most promising approach.
@@ -77,13 +78,13 @@ async def debate_simple(question: str, context: str = "") -> LegionaOutput:
 async def full_debate(question: str, context: str = "") -> LegionaOutput:
     """
     Run 5-stage enhanced debate for maximum factual accuracy.
-    
+
     Stage 1: Extract claims — break question into factual claims
     Stage 2: Advocate — build strongest case FOR the approach
     Stage 3: Challenger — attack every flaw and edge case
     Stage 4: Verify — cross-reference claims against provided context
     Stage 5: Judge — synthesize all perspectives into final verdict
-    
+
     Returns judge's verdict as LegionaOutput with verification metadata.
     """
     user_msg = f"{context}\n\nQUESTION: {question}" if context else question
@@ -93,7 +94,7 @@ async def full_debate(question: str, context: str = "") -> LegionaOutput:
         {"role": "system", "content": EXTRACT_CLAIMS_SYSTEM},
         {"role": "user",   "content": user_msg},
     ], preset="research")
-    
+
     claims_text = claims_response.answer
 
     # Stage 2: Advocate + Challenger in parallel
@@ -143,7 +144,7 @@ FINAL VERDICT:
         confidence=verdict.confidence,
         verified_from_context=verify_response.verified_from_context,
         items_needing_verification=verdict.items_needing_verification,
-        reasoning_summary=f"5-stage debate: claims extracted, advocate/challenger debated, verified against context, judged.",
+        reasoning_summary="5-stage debate: claims extracted, advocate/challenger debated, verified against context, judged.",
     )
 
 

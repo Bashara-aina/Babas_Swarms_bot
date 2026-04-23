@@ -79,6 +79,18 @@ async def _claude_code_brain_layer(query: str, limit: int = 3) -> str:
         return ""
 
 
+async def _gitnexus_layer(query: str) -> str:
+    if not _env_on("LEGION_GITNEXUS_PROMPT_ENABLED", "1"):
+        return ""
+    try:
+        from core.gitnexus_bridge import build_gitnexus_prompt_context
+
+        return await build_gitnexus_prompt_context(query, max_chars=2200)
+    except Exception as exc:
+        logger.debug("unified gitnexus layer failed: %s", exc)
+        return ""
+
+
 async def _screenpipe_layer(query: str) -> str:
     if not _env_on("SCREENPIPE_ENABLED", "0"):
         return ""
@@ -191,14 +203,16 @@ async def gather_parallel_prompt_layers(
     cal_fut = _calendar_layer()
     opencode_fut = _opencode_brain_layer(q)
     cc_fut = _claude_code_brain_layer(q)
+    gitnexus_fut = _gitnexus_layer(q)
 
-    wiki_r, sp_r, rag_r, cal_r, oc_r, cc_r, emo_r = await asyncio.gather(
+    wiki_r, sp_r, rag_r, cal_r, oc_r, cc_r, gx_r, emo_r = await asyncio.gather(
         wiki_fut,
         sp_fut,
         rag_fut,
         cal_fut,
         opencode_fut,
         cc_fut,
+        gitnexus_fut,
         emo_fut,
         return_exceptions=True,
     )
@@ -214,6 +228,7 @@ async def gather_parallel_prompt_layers(
         ("calendar", cal_r),
         ("opencode_brain", oc_r),
         ("claude_code_brain", cc_r),
+        ("gitnexus", gx_r),
         ("emotion_pad", emo_r),
     ):
         if isinstance(res, BaseException):

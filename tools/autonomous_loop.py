@@ -158,7 +158,7 @@ async def run_autonomous_loop(
 
     Returns the final LoopState.
     """
-    from llm_client import chat, agent_loop
+    from llm_client import agent_loop, chat
 
     cfg = config or LoopConfig()
     state = LoopState(

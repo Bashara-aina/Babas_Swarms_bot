@@ -27,7 +27,7 @@ const TOP_CITIES = [
 
 export interface CityOption {
   id?: string
-  label: string
+  label?: string  // optional — component falls back to city field
   city?: string
   province?: string
   umk?: number

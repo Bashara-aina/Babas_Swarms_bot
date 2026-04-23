@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_bridge():
-    if not os.getenv("FEATURE_WHATSAPP_ENABLED", "0").strip().lower() in ("1", "true"):
+    if os.getenv("FEATURE_WHATSAPP_ENABLED", "0").strip().lower() not in ("1", "true"):
         return None
     from bridges.whatsapp_bridge import WhatsAppBridge
 
@@ -70,12 +70,13 @@ async def cmd_wa(msg: Message) -> None:
     lines = ["<b>Unread WhatsApp Messages</b>\n"]
     for m in messages[:10]:
         name = html.escape(str(m.get("name") or m.get("from", "?")))
-        body = html.escape(str(m.get("body", ""))[:200])
-        ts = m.get("timestamp", "")
+        body = html.escape(str(m.get("body", "")[:200]))
+        # timestamp retrieved for future use
+        _ = m.get("timestamp", "")
         group = " [group]" if m.get("isGroup") else ""
         lines.append(f"<b>{name}</b>{group}: {body}")
 
-    lines.append(f"\n<i>Use: <code>/wa_reply &lt;name_or_number&gt; &lt;message&gt;</code></i>")
+    lines.append("\n<i>Use: <code>/wa_reply &lt;name_or_number&gt; &lt;message&gt;</code></i>")
     await msg.answer("\n".join(lines), parse_mode="HTML")
 
 
@@ -194,7 +195,7 @@ async def cmd_wa_status(msg: Message) -> None:
     icon = status_icons.get(wa_status, "❓")
 
     lines = [
-        f"<b>WhatsApp Status</b>",
+        "<b>WhatsApp Status</b>",
         f"Status: {icon} <code>{html.escape(wa_status)}</code>",
         f"Buffered messages: {msg_count}",
     ]

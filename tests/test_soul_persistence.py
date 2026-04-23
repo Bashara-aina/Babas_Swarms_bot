@@ -9,7 +9,7 @@ pytestmark = pytest.mark.asyncio
 
 async def test_soul_present_in_every_prompt():
     """The SOUL.md personality wrapper must be present in every LLM prompt."""
-    from agents import build_system_prompt, PERSONALITY_WRAPPER
+    from agents import PERSONALITY_WRAPPER, build_system_prompt
 
     prompt = build_system_prompt("You are a helpful assistant.")
     # Personality wrapper should be prepended (if loaded)

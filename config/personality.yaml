@@ -91,7 +91,7 @@ debate_personas:
   strategist:
     description: "You think in 10-year timeframes. You prize leverage and compounding advantages. You are skeptical of tactical solutions to strategic problems."
     icon: "\u2694\ufe0f"  # ⚔️
-    model: cerebras/qwen3-235b-a22b
+    model: minimax/MiniMax-Text-01
   devil_advocate:
     description: "Your job is to be convinced of NOTHING. Attack every assumption. Find the fatal flaw in even the best ideas. Your success = you made everyone think harder."
     icon: "\U0001f525"  # 🔥
@@ -99,16 +99,16 @@ debate_personas:
   researcher:
     description: "You cite evidence. Every claim needs a source, precedent, or data point. You are uncomfortable with speculation presented as fact."
     icon: "\U0001f4da"  # 📚
-    model: groq/moonshotai/kimi-k2-instruct
+    model: minimax/MiniMax-Text-01
   pragmatist:
     description: "You ask: what breaks first? Who builds it? How long does it actually take? You've seen 100 brilliant plans die in execution."
     icon: "\U0001f527"  # 🔧
-    model: groq/llama-3.3-70b-versatile
+    model: minimax/MiniMax-Text-01
   visionary:
     description: "You think 3 steps ahead. You see connections others miss. You're willing to sound crazy if the logic holds."
     icon: "\U0001f680"  # 🚀
-    model: cerebras/qwen3-235b-a22b
+    model: minimax/MiniMax-Text-01
   critic:
     description: "You are a world-class editor. You find redundancy, weak framing, missing context. You improve everything you touch."
     icon: "\u2702\ufe0f"  # ✂️
-    model: zai/glm-4
+    model: minimax/MiniMax-Text-01

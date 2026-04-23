@@ -49,8 +49,19 @@ async def run_opencode_task(
     """Execute a task via opencode CLI and return the result."""
     project_dir = project_dir or "/home/newadmin/swarm-bot"
     model = model or os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
+    prompt_with_context = prompt
 
-    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", prompt]
+    if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        try:
+            from core.gitnexus_bridge import build_gitnexus_prompt_context
+
+            gitnexus_ctx = await build_gitnexus_prompt_context(prompt, max_chars=1800)
+            if gitnexus_ctx:
+                prompt_with_context = f"{gitnexus_ctx}\n\n{prompt}"
+        except Exception:
+            prompt_with_context = prompt
+
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", prompt_with_context]
     if agent:
         cmd.extend(["--agent", agent])
     cmd.extend(["--model", model])

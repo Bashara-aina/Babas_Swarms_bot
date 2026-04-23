@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import re
 import shutil
 from dataclasses import dataclass, field
@@ -96,8 +97,6 @@ class SandboxExecutor:
 
     def _validate_cwd(self, cwd: Optional[str]) -> Optional[str]:
         """Validate cwd is in allowed list. Returns resolved path or None."""
-        import os
-
         if cwd is None:
             return None
         resolved = os.path.realpath(os.path.expanduser(cwd))

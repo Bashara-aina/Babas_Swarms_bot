@@ -9,10 +9,10 @@ Destructive writes require explicit confirmation.
 from __future__ import annotations
 
 import asyncio
+import re
 import shlex
 from pathlib import Path
 from typing import Optional
-
 
 PROJECT_ROOT = Path("/home/newadmin/swarm-bot").resolve()
 SHELL_TIMEOUT = 30
@@ -179,7 +179,6 @@ async def grep_files(pattern: str, path: str = ".", context: int = 2) -> str:
         re.compile(pattern)
     except re.error as exc:
         return f"ERROR: invalid regex: {exc}"
-    import re as re_mod
     cmd = (
         f"grep -r -n -B {context} -A {context} "
         f"--include='*.py' --include='*.ts' --include='*.js' "
@@ -245,6 +244,6 @@ async def disk_usage(path: str = "/") -> str:
             lines.append(f"\n=== Directory Size ===\n{du_line}")
         return "\n".join(lines)
     except asyncio.TimeoutError:
-        return f"ERROR: disk usage timed out"
+        return "ERROR: disk usage timed out"
     except Exception as exc:
         return f"ERROR: {exc}"

@@ -206,6 +206,108 @@ class MemoryManager:
             **obs_stats,
         }
 
+    async def validate_consistency(
+        self,
+        user_id: str = "bashara",
+        sample_size: int = 10,
+        drift_threshold: float = 0.15,
+    ) -> dict[str, Any]:
+        """Validate mem0 and Chroma semantic alignment on recent memories.
+
+        Drift is measured as (1 - cosine_similarity_proxy), where similarity proxy
+        is derived from Chroma's L2 distance conversion used in long_term_memory.
+        """
+        from core.long_term_memory import _get_chroma_client, _get_embedder, _get_or_create_collection
+        from tools.mem0_client import mem0_get_all
+
+        memories = await mem0_get_all(user_id=str(user_id))
+        texts: list[str] = []
+        for item in memories:
+            text = str(item.get("memory") or item.get("content") or item.get("text") or "").strip()
+            if text:
+                texts.append(text)
+        if not texts:
+            return {
+                "status": "skipped",
+                "reason": "no_mem0_memories",
+                "sample_size": 0,
+                "threshold": drift_threshold,
+            }
+
+        sample = texts[-sample_size:]
+        embedder = await _get_embedder()
+        client = await _get_chroma_client()
+        if not embedder or not client:
+            return {
+                "status": "skipped",
+                "reason": "semantic_backend_unavailable",
+                "sample_size": len(sample),
+                "threshold": drift_threshold,
+            }
+
+        collection = await _get_or_create_collection(client)
+        if not collection:
+            return {
+                "status": "skipped",
+                "reason": "collection_unavailable",
+                "sample_size": len(sample),
+                "threshold": drift_threshold,
+            }
+
+        drifts: list[float] = []
+        for text in sample:
+            try:
+                embedding = await asyncio.to_thread(embedder.encode, text)
+                if hasattr(embedding, "tolist"):
+                    embedding = embedding.tolist()
+                query = collection.query(
+                    query_embeddings=[embedding],
+                    n_results=1,
+                    where={"user_id": str(user_id)},
+                )
+                distances = query.get("distances") or []
+                if not distances or not distances[0]:
+                    continue
+                distance = float(distances[0][0])
+                similarity = max(0.0, 1.0 - (distance / 2.0))
+                drifts.append(max(0.0, 1.0 - similarity))
+            except Exception as exc:
+                logger.debug("[Memory] validate_consistency sample query failed: %s", exc)
+
+        if not drifts:
+            return {
+                "status": "skipped",
+                "reason": "no_comparable_vectors",
+                "sample_size": len(sample),
+                "threshold": drift_threshold,
+            }
+
+        avg_drift = sum(drifts) / len(drifts)
+        max_drift = max(drifts)
+        drifted = avg_drift > drift_threshold
+        result = {
+            "status": "drift_detected" if drifted else "ok",
+            "average_drift": round(avg_drift, 4),
+            "max_drift": round(max_drift, 4),
+            "threshold": drift_threshold,
+            "sample_size": len(drifts),
+        }
+        if drifted:
+            logger.warning(
+                "[Memory] Consistency drift detected: avg=%.4f max=%.4f threshold=%.4f",
+                avg_drift,
+                max_drift,
+                drift_threshold,
+            )
+        else:
+            logger.info(
+                "[Memory] Consistency check ok: avg=%.4f max=%.4f threshold=%.4f",
+                avg_drift,
+                max_drift,
+                drift_threshold,
+            )
+        return result
+
     def close(self) -> None:
         """Close all SQLite connections held by this manager."""
         self.archival.close()

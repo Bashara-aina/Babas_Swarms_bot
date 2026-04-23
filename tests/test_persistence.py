@@ -1,10 +1,11 @@
 """Tests for tools/persistence.py — persistence operations."""
 
-import pytest
 import asyncio
 import time
 from pathlib import Path
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 @pytest.fixture

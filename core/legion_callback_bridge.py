@@ -1,6 +1,9 @@
 """Recursive bridge: LegionBot → OpenCode with depth tracking."""
 from __future__ import annotations
-import asyncio, re, time
+
+import asyncio
+import re
+import time
 from dataclasses import dataclass, field
 from typing import Any
 

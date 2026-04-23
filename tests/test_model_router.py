@@ -1,6 +1,8 @@
 """Tests for ModelRouter — per-task model selection."""
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from swarms_bot.orchestrator.model_router import ModelRouter, TaskComplexity
 
 
@@ -32,4 +34,4 @@ class TestModelRouter:
     def test_fallback_when_no_keys(self, router):
         with patch.dict("os.environ", {}, clear=True):
             model, candidate = router.select("general")
-        assert model == "groq/llama-3.3-70b-versatile"  # hardcoded fallback
+        assert model == "minimax/MiniMax-Text-01"  # hardcoded fallback

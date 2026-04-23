@@ -1,3 +1,44 @@
 {
-  "items": []
+  "items": [
+    {
+      "date": "2026-04-23",
+      "signature": "9f1dfd74f49677f98500dccd36bd5664947c4cca",
+      "technique": "showcase_soft"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "4f7ccf400b6ebfc9664e6cf9c154042ab0e5756f",
+      "technique": "edukasi"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "ed7ea07e36e21bb4f8497bce99b9e0b96c207695",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "5bb809afadb085f7a73eb9b8795d490ab6d861ba",
+      "technique": "hot_take"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "cb5a74bbdfbc91c8f11e0c3cc446e875afcc7b50",
+      "technique": "fake_controversy"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "29a8d8e27b95716cf8bbf37bb1f81b4f0d0c53ea",
+      "technique": "showcase_soft"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "25b78d825e4a766cf950e32d170ad1428899c252",
+      "technique": "showcase_soft"
+    },
+    {
+      "date": "2026-04-23",
+      "signature": "d9d5ba91ccae732ceae1d6dd0c9dba98e7241b93",
+      "technique": "showcase_soft"
+    }
+  ]
 }

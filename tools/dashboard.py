@@ -243,7 +243,7 @@ def _draw_agent_grid(ax, agent_status: dict, agents: list) -> None:
         prog   = info.get("progress", "")[:20]
         meta   = STATUS_META.get(status, STATUS_META["⚪ idle"])  # BUG FIX: fallback key updated
         color  = meta["color"]
-        icon   = AGENT_ICONS.get(agent, "🤖")
+        AGENT_ICONS.get(agent, "🤖")
         short  = meta["short"]
 
         ax.barh(i, 1.2, left=0, height=0.7, color=color, alpha=0.85)

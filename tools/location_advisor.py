@@ -141,7 +141,7 @@ class LocationAdvisor:
         try:
             return await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 temperature=0.5,
                 max_tokens=500,
             )

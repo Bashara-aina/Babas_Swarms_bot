@@ -206,7 +206,6 @@ def record_turn(
         return
 
     # Threads: substantive user turns
-    lower = um.lower()
     word_n = len(um.split())
     if "?" in um or word_n > 12 or len(um) > 80:
         line = um.replace("\n", " ").strip()[:_MAX_THREAD_LEN]

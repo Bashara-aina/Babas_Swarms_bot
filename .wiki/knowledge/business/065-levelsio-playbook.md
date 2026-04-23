@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: 'Pieter Levels is the proven playbook for Bashara''s operational model. His
-  $3-5M ARR portfolio built with zero employees demonstrates exactly how cekwajar.id
-  can scale: multiple niche SaaS products,...'
+ $3-5M ARR portfolio built with zero employees demonstrates exactly how cekwajar.id
+ can scale: multiple niche SaaS products,...'
 wikilinks: []
 confidence: medium
 source: research
@@ -34,14 +34,14 @@ Pieter Levels is the proven playbook for Bashara's operational model. His $3-5M 
 ### Key Principles from Pieter Levels
 1. **12 Startups in 12 Months**: Ship fast, validate before scaling
 2. **Portfolio Model**: Multiple products rather than betting on one
-3. **Building in Public**:透明度和社区建设
+3. **Building in Public**:
 4. **Remote-First**: Asynchronous work, global talent access
 5. **SEO Moat**: Long-term content strategy creates compounding traffic
 6. **Bootstrap over VC**: Profitability from day one
 
 ### Revenue Distribution Pattern
 - Nomad List (digital nomad city database): ~60% of revenue
-- Remote OK (remote job board): ~25% of revenue  
+- Remote OK (remote job board): ~25% of revenue 
 - Other projects (PhotoAI, Go Fucking Do It, etc.): ~15%
 
 ### The 10-Year Distribution Strategy
@@ -54,16 +54,16 @@ Pieter built SEO content assets from 2014-2024, accumulating organic traffic tha
 ```typescript
 // Pieter Levels Revenue Model
 interface SoloFounderMetrics {
-  products: number;           // Target: 3-5 active products
-  mrr: number;                // Target: $15K-50K per product
-  customers: number;           // Target: 1K-10K per product
-  churnRate: number;          // Target: <5% monthly
-  ltvCacRatio: number;        // Target: >3:1
+ products: number; // Target: 3-5 active products
+ mrr: number; // Target: $15K-50K per product
+ customers: number; // Target: 1K-10K per product
+ churnRate: number; // Target: <5% monthly
+ ltvCacRatio: number; // Target: >3:1
 }
 
 // Simplified revenue target calculator
 function calculateAnnualTarget(products: number, avgMrr: number): number {
-  return products * avgMrr * 12;
+ return products * avgMrr * 12;
 }
 
 // Example: 5 products × $25K MRR = $1.5M ARR

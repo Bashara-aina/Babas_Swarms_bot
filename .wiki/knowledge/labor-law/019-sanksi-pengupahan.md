@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: .cekwajar.id payroll system MUST prevent paying employees below minimum wage.
-  Violations carry CRIMINAL penalties including imprisonment and fines, not just administrative
-  sanctions. This is the hi...
+ Violations carry CRIMINAL penalties including imprisonment and fines, not just administrative
+ sanctions. This is the hi...
 wikilinks: []
 confidence: medium
 source: research
@@ -47,51 +47,51 @@ source: research
 
 ```typescript
 interface WageViolation {
-  employeeId: string;
-  companyId: string;
-  violationType: 'below_minimum' | 'late_payment' | 'non_payment';
-  period: { start: Date; end: Date };
-  amountUnderpaid: number;
-  numberOfEmployees: number;
+ employeeId: string;
+ companyId: string;
+ violationType: 'below_minimum' | 'late_payment' | 'non_payment';
+ period: { start: Date; end: Date };
+ amountUnderpaid: number;
+ numberOfEmployees: number;
 }
 
 interface ViolationPenalty {
-  imprisonmentYears: { min: number; max: number };
-  fineAmount: { min: number; max: number };
-  additionalSanctions: string[];
+ imprisonmentYears: { min: number; max: number };
+ fineAmount: { min: number; max: number };
+ additionalSanctions: string[];
 }
 
 function getPenaltiesForViolation(
-  violation: WageViolation
+ violation: WageViolation
 ): ViolationPenalty {
-  if (violation.violationType === 'below_minimum') {
-    return {
-      imprisonmentYears: { min: 1, max: 4 },
-      fineAmount: { min: 100000000, max: 400000000 },
-      additionalSanctions: [
-        'Sanksi administratif dari Kemenaker',
-        'Wajib bayar selisih upah + bunga',
-        'Dapat dicabut izin usaha'
-      ]
-    };
-  }
-  
-  if (violation.violationType === 'late_payment') {
-    return {
-      imprisonmentYears: { min: 0, max: 0 },
-      fineAmount: { min: 0, max: 0 },
-      additionalSanctions: [
-        'Bunga 1% per hari dari upah yang terlambat',
-        'Sanksi administratif'
-      ]
-    };
-  }
-  
-  return {
-    imprisonmentYears: { min: 1, max: 4 },
-    fineAmount: { min: 100000000, max: 400000000 },
-    additionalSanctions: ['Criminal prosecution']
-  };
+ if (violation.violationType === 'below_minimum') {
+ return {
+ imprisonmentYears: { min: 1, max: 4 },
+ fineAmount: { min: 100000000, max: 400000000 },
+ additionalSanctions: [
+ 'Sanksi administratif dari Kemenaker',
+ 'Wajib bayar selisih upah + bunga',
+ 'Dapat dicabut izin usaha'
+ ]
+ };
+ }
+ 
+ if (violation.violationType === 'late_payment') {
+ return {
+ imprisonmentYears: { min: 0, max: 0 },
+ fineAmount: { min: 0, max: 0 },
+ additionalSanctions: [
+ 'Bunga 1% per hari dari upah yang terlambat',
+ 'Sanksi administratif'
+ ]
+ };
+ }
+ 
+ return {
+ imprisonmentYears: { min: 1, max: 4 },
+ fineAmount: { min: 100000000, max: 400000000 },
+ additionalSanctions: ['Criminal prosecution']
+ };
 }
 ```
 
@@ -105,21 +105,21 @@ function getPenaltiesForViolation(
 
 ```typescript
 interface AdminPenalty {
-  severity: 'warning' | 'restriction' | 'suspension' | 'revocation';
-  description: string;
+ severity: 'warning' | 'restriction' | 'suspension' | 'revocation';
+ description: string;
 }
 
 function getAdminPenalties(violationCount: number): AdminPenalty[] {
-  if (violationCount === 1) {
-    return [{ severity: 'warning', description: 'Teguran tertulis' }];
-  }
-  if (violationCount === 2) {
-    return [{ severity: 'restriction', description: 'Pembatasan kegiatan usaha' }];
-  }
-  if (violationCount === 3) {
-    return [{ severity: 'suspension', description: 'Pembekuan kegiatan usaha' }];
-  }
-  return { severity: 'revocation', description: 'Pencabutan izin usaha' };
+ if (violationCount === 1) {
+ return [{ severity: 'warning', description: 'Teguran tertulis' }];
+ }
+ if (violationCount === 2) {
+ return [{ severity: 'restriction', description: 'Pembatasan kegiatan usaha' }];
+ }
+ if (violationCount === 3) {
+ return [{ severity: 'suspension', description: 'Pembekuan kegiatan usaha' }];
+ }
+ return { severity: 'revocation', description: 'Pencabutan izin usaha' };
 }
 ```
 
@@ -127,19 +127,19 @@ function getAdminPenalties(violationCount: number): AdminPenalty[] {
 
 ```typescript
 function hitungDendaKeterlambatan(
-  jumlahUpahTerlambat: number,
-  jumlahHariTerlambat: number
+ jumlahUpahTerlambat: number,
+ jumlahHariTerlambat: number
 ): number {
-  const bungaPerHari = 0.01; // 1% per hari
-  return jumlahUpahTerlambat * bungaPerHari * jumlahHariTerlambat;
+ const bungaPerHari = 0.01; // 1% per hari
+ return jumlahUpahTerlambat * bungaPerHari * jumlahHariTerlambat;
 }
 
 function hitungTotalTanggungJawab(
-  selisihUpah: number,
-  jumlahBulan: number,
-  bunga: number
+ selisihUpah: number,
+ jumlahBulan: number,
+ bunga: number
 ): number {
-  return selisihUpah * jumlahBulan + bunga;
+ return selisihUpah * jumlahBulan + bunga;
 }
 ```
 
@@ -148,77 +148,77 @@ function hitungTotalTanggungJawab(
 ### TypeScript Implementation
 ```typescript
 interface WageComplianceCheck {
-  employeeId: string;
-  locationCode: string;
-  basicSalary: number;
-  fixedAllowances: number;
-  umkRequired: number;
+ employeeId: string;
+ locationCode: string;
+ basicSalary: number;
+ fixedAllowances: number;
+ umkRequired: number;
 }
 
 interface ViolationResult {
-  isViolation: boolean;
-  violationType: 'BELOW_MIN' | 'LATE_PAYMENT' | 'COMPLIANT';
-  underpaymentAmount: number;
-  potentialPenalties: {
-    imprisonment: { min: number; max: number };
-    fines: { min: number; max: number };
-    adminSanctions: string[];
-  };
-  recommendedAction: string;
+ isViolation: boolean;
+ violationType: 'BELOW_MIN' | 'LATE_PAYMENT' | 'COMPLIANT';
+ underpaymentAmount: number;
+ potentialPenalties: {
+ imprisonment: { min: number; max: number };
+ fines: { min: number; max: number };
+ adminSanctions: string[];
+ };
+ recommendedAction: string;
 }
 
 function checkWageViolation(
-  employee: WageComplianceCheck
+ employee: WageComplianceCheck
 ): ViolationResult {
-  const totalCompensation = employee.basicSalary + employee.fixedAllowances;
-  
-  if (totalCompensation < employee.umkRequired) {
-    const underpayment = employee.umkRequired - totalCompensation;
-    
-    return {
-      isViolation: true,
-      violationType: 'BELOW_MIN',
-      underpaymentAmount: underpayment,
-      potentialPenalties: {
-        imprisonment: { min: 1, max: 4 },
-        fines: { min: 100000000, max: 400000000 },
-        adminSanctions: [
-          'Teguran tertulis',
-          'Pembatasan kegiatan usaha',
-          'Pembekuan kegiatan usaha'
-        ]
-      },
-      recommendedAction: 'SEGERA SESUAIKAN UPAH KE UMK. RISIKO PIDANA!'
-    };
-  }
-  
-  return {
-    isViolation: false,
-    violationType: 'COMPLIANT',
-    underpaymentAmount: 0,
-    potentialPenalties: {
-      imprisonment: { min: 0, max: 0 },
-      fines: { min: 0, max: 0 },
-      adminSanctions: []
-    },
-    recommendedAction: 'Compliant - no action required'
-  };
+ const totalCompensation = employee.basicSalary + employee.fixedAllowances;
+ 
+ if (totalCompensation < employee.umkRequired) {
+ const underpayment = employee.umkRequired - totalCompensation;
+ 
+ return {
+ isViolation: true,
+ violationType: 'BELOW_MIN',
+ underpaymentAmount: underpayment,
+ potentialPenalties: {
+ imprisonment: { min: 1, max: 4 },
+ fines: { min: 100000000, max: 400000000 },
+ adminSanctions: [
+ 'Teguran tertulis',
+ 'Pembatasan kegiatan usaha',
+ 'Pembekuan kegiatan usaha'
+ ]
+ },
+ recommendedAction: 'SEGERA SESUAIKAN UPAH KE UMK. RISIKO PIDANA!'
+ };
+ }
+ 
+ return {
+ isViolation: false,
+ violationType: 'COMPLIANT',
+ underpaymentAmount: 0,
+ potentialPenalties: {
+ imprisonment: { min: 0, max: 0 },
+ fines: { min: 0, max: 0 },
+ adminSanctions: []
+ },
+ recommendedAction: 'Compliant - no action required'
+ };
 }
 
 function generateComplianceAlert(
-  violations: ViolationResult[]
+ violations: ViolationResult[]
 ): string[] {
-  return violations
-    .filter(v => v.isViolation)
-    .map(v => 
-      `ALERT: ${v.violationType} - Potential fines up to Rp ${v.potentialPenalties.fines.max.toLocaleString()} and imprisonment ${v.potentialPenalties.imprisonment.min}-${v.potentialPenalties.imprisonment.max} years`
-    );
+ return violations
+ .filter(v => v.isViolation)
+ .map(v => 
+ `ALERT: ${v.violationType} - Potential fines up to Rp ${v.potentialPenalties.fines.max.toLocaleString()} and imprisonment ${v.potentialPenalties.imprisonment.min}-${v.potentialPenalties.imprisonment.max} years`
+ );
 }
 ```
 
 ## Edge Cases and Common Mistakes
 
-1. **Tunjangan tidak tetap tidak termasuk**: Jika classification salah, perusahaan bisa tertipu karena以为自己 compliant padahal tidak
+1. **Tunjangan tidak tetap tidak termasuk**: Jika classification salah, perusahaan bisa tertipu karena compliant padahal tidak
 2. **Upah termasuk tunjangan: TRUE** - total compensation (pokok + tetap) harus ≥ UMK
 3. **"Gross" agreement tapi below UMK**: Tetap violate - hukum adalah absolute
 4. **Pembayaran dengan cara "pinjaman"**: Jika employee terima kurang dari UMK, tetap violation

@@ -26,7 +26,7 @@ async def on_startup_resume() -> str:
 async def on_shutdown_checkpoint(summary: str = "Bot shutdown") -> None:
     """Called at bot shutdown — archives current session."""
     try:
-        from tools.mneme_session import get_current_task, complete_current_task
+        from tools.mneme_session import complete_current_task, get_current_task
         task = get_current_task()
         if task.get("task") and task.get("status") == "in_progress":
             complete_current_task(f"Interrupted at shutdown: {summary}")

@@ -2,10 +2,10 @@
 # This file re-exports all public symbols for backward compatibility
 
 from core.orchestrator import (
-    LegionSwarmOrchestrator,
-    LegionAgentDef,
-    SwarmReport,
     AgentResult,
+    LegionAgentDef,
+    LegionSwarmOrchestrator,
+    SwarmReport,
     run_legion_swarm,
 )
 

@@ -30,8 +30,9 @@ async def test_llm_retry_on_rate_limit():
 
 async def test_message_split_at_4096_chars():
     """Long messages must be split to respect Telegram's 4096 char limit."""
-    from handlers.shared import send_chunked
     from unittest.mock import AsyncMock, MagicMock
+
+    from handlers.shared import send_chunked
 
     msg = MagicMock()
     msg.answer = AsyncMock()

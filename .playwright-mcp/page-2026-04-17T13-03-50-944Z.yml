@@ -1,0 +1,549 @@
+- generic [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic [ref=e122]:
+            - link "Threads" [ref=e124] [cursor=pointer]:
+              - /url: /
+              - img "Threads" [ref=e126]
+            - generic [ref=e128]:
+              - link "Home" [ref=e130] [cursor=pointer]:
+                - /url: /
+                - img "Home" [ref=e5104]
+              - link "Search" [ref=e137] [cursor=pointer]:
+                - /url: /search
+                - img "Search" [ref=e141]
+              - button "Create" [ref=e144] [cursor=pointer]:
+                - img "Create" [ref=e148]
+              - link "Notifications" [ref=e151] [cursor=pointer]:
+                - /url: /activity
+                - img "Notifications" [ref=e5106]
+              - link "Profile" [ref=e158] [cursor=pointer]:
+                - /url: /@rumahlabuh
+                - img "Profile" [ref=e162]
+            - button "More More" [ref=e166] [cursor=pointer]:
+              - generic [ref=e167]:
+                - img "More" [ref=e169]
+                - img "More" [ref=e173]
+          - generic [ref=e5111]:
+            - generic [ref=e5119]:
+              - link [ref=e6301] [cursor=pointer]:
+                - /url: /@rumahlabuh
+                - heading [level=1] [ref=e6302]:
+                  - generic [ref=e5124]: Profile
+              - button [ref=e6303] [cursor=pointer]:
+                - img [ref=e6304]
+            - region [ref=e6305]:
+              - generic [ref=e5134]:
+                - generic [ref=e5135]:
+                  - generic [ref=e5136]:
+                    - generic [ref=e5137]:
+                      - heading [level=1] [ref=e6306]: Kost/Penginapan Solo/Surakarta Syariah Eksklusif | Pet Friendly
+                      - generic [ref=e5140]:
+                        - generic [ref=e5142]: rumahlabuh
+                        - button [ref=e6307] [cursor=pointer]:
+                          - img [ref=e5145]
+                    - button [ref=e6308] [cursor=pointer]:
+                      - img [ref=e6309]
+                  - generic [ref=e5157]: "We are pet friendly🐈 Everyone is welcomed Labuh Biru: Jl. Joko Tingkir No. 22, Surakarta Labuh Banyu: Jl. Sidomukti Tim. No.33, Surakarta"
+                  - button [ref=e6310] [cursor=pointer]:
+                    - generic [ref=e5163]: rumahlabuh.com
+                    - generic [ref=e5164]:
+                      - generic [ref=e5165]: "+1"
+                      - img [ref=e5167]
+                  - generic [ref=e5170]:
+                    - generic [ref=e5171]:
+                      - link [ref=e6311] [cursor=pointer]:
+                        - /url: /search?q=travel&serp_type=tags&tag_id=18395496496040489
+                        - generic [ref=e5175]: Travel
+                      - link [ref=e6312] [cursor=pointer]:
+                        - /url: /search?q=pets&serp_type=tags&tag_id=18397155742005994
+                        - generic [ref=e5177]:
+                          - img [ref=e5178]
+                          - generic [ref=e5183]: Pets
+                      - link [ref=e6313] [cursor=pointer]:
+                        - /url: /search?q=surakarta%20solo&serp_type=tags&tag_id=18496339873007198
+                        - generic [ref=e5187]: Surakarta Solo
+                      - link [ref=e6314] [cursor=pointer]:
+                        - /url: /search?q=solo&serp_type=tags&tag_id=18402572044021134
+                        - generic [ref=e5191]: solo
+                      - link [ref=e6315] [cursor=pointer]:
+                        - /url: /search?q=surakarta&serp_type=tags&tag_id=18398121997008634
+                        - generic [ref=e5195]: Surakarta
+                    - button [ref=e6316] [cursor=pointer]:
+                      - generic [ref=e5198]: + 5
+                  - generic [ref=e5199]:
+                    - button [ref=e6317] [cursor=pointer]:
+                      - generic [ref=e5202]:
+                        - generic [ref=e5204]:
+                          - img [ref=e6318]
+                          - img [ref=e6319]
+                          - img [ref=e6320]
+                        - generic [ref=e5214]: 44 followers
+                    - generic [ref=e5215]:
+                      - link [ref=e6321] [cursor=pointer]:
+                        - /url: /insights
+                        - img [ref=e6322]
+                      - link [ref=e6323] [cursor=pointer]:
+                        - /url: https://l.threads.com/?u=https%3A%2F%2Fwww.instagram.com%2Frumahlabuh%2F&e=AT7WW_pTn6fVjcGPbSAJlhq7mGu8lRMydmfZbJ6gXd-qcb9CMMiAgsJrnsL_QLbD3Y91ls5nGtLDMsX9n6tspnIijXwAVGHtRHIN88Zxn06Ctd-6cJK6VSXVkDRpGaM
+                        - img [ref=e6324]
+                - button [ref=e6325] [cursor=pointer]:
+                  - generic [ref=e5230]: Edit profile
+                - generic [ref=e5231]:
+                  - link [ref=e6326] [cursor=pointer]:
+                    - /url: /@rumahlabuh
+                    - generic [ref=e5237]: Threads
+                  - link [ref=e6327] [cursor=pointer]:
+                    - /url: /@rumahlabuh/replies
+                    - generic [ref=e5244]: Replies
+                  - link [ref=e6328] [cursor=pointer]:
+                    - /url: /@rumahlabuh/media
+                    - generic [ref=e5250]: Media
+                  - link [ref=e6329] [cursor=pointer]:
+                    - /url: /@rumahlabuh/reposts
+                    - generic [ref=e5256]: Reposts
+                - generic [ref=e5258]:
+                  - link [ref=e6330] [cursor=pointer]:
+                    - /url: /@rumahlabuh
+                    - img [ref=e6331]
+                  - button [ref=e6332]:
+                    - generic [ref=e5263]: What's new?
+                  - button [ref=e6333] [cursor=pointer]:
+                    - generic [ref=e5266]: Post
+                - separator [ref=e5267]
+                - generic [ref=e5269]:
+                  - generic [ref=e5272]:
+                    - generic [ref=e5275] [cursor=pointer]:
+                      - link [ref=e6334]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6335]
+                      - generic [ref=e5282]:
+                        - generic [ref=e5283]:
+                          - link [ref=e6336]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e5290]: rumahlabuh
+                          - button [ref=e6337]:
+                            - img [ref=e6338]
+                          - link [ref=e6339]:
+                            - /url: /@rumahlabuh/post/DXO79FcgTDG
+                            - time [ref=e5302]:
+                              - generic [ref=e6340]: 13m
+                        - button [ref=e6341]:
+                          - img [ref=e6342]
+                      - generic [ref=e5313]:
+                        - generic [ref=e5316]:
+                          - text: Kost deket kampus itu sering overrated.
+                          - generic [ref=e5318]:
+                            - generic [ref=e5319]: "1"
+                            - generic [ref=e5321]: /
+                            - generic [ref=e5322]: "6"
+                        - generic [ref=e5324]:
+                          - button [ref=e6343]:
+                            - generic [ref=e5328]:
+                              - img [ref=e6344]
+                              - generic [ref=e5333]: "1"
+                          - button [ref=e6345]:
+                            - generic [ref=e5337]:
+                              - img [ref=e6346]
+                              - generic [ref=e5342]: "5"
+                          - button [ref=e6347]:
+                            - img [ref=e6348]
+                          - button [ref=e6349]:
+                            - img [ref=e6350]
+                    - generic [ref=e5358] [cursor=pointer]:
+                      - link [ref=e6351]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6352]
+                      - generic [ref=e5365]:
+                        - generic [ref=e5366]:
+                          - link [ref=e6353]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e5373]: rumahlabuh
+                          - button [ref=e6354]:
+                            - img [ref=e6355]
+                          - link [ref=e6356]:
+                            - /url: /@rumahlabuh/post/DXO79c3gfv7
+                            - time [ref=e5385]:
+                              - generic [ref=e6357]: 13m
+                        - button [ref=e6358]:
+                          - img [ref=e6359]
+                      - generic [ref=e5396]:
+                        - generic [ref=e5399]:
+                          - text: Tapi bentar. Maksud gue bukan jelek kondisinya. Tapi kalau tiap malam berisik, jalan 5 menit pun tetep capek.
+                          - generic [ref=e5401]:
+                            - generic [ref=e5402]: "2"
+                            - generic [ref=e5404]: /
+                            - generic [ref=e5405]: "6"
+                        - generic [ref=e5407]:
+                          - button [ref=e6360]:
+                            - img [ref=e6361]
+                          - button [ref=e6362]:
+                            - generic [ref=e5417]:
+                              - img [ref=e6363]
+                              - generic [ref=e5422]: "1"
+                          - button [ref=e6364]:
+                            - img [ref=e6365]
+                          - button [ref=e6366]:
+                            - img [ref=e6367]
+                      - generic [ref=e5437]:
+                        - img [ref=e6368]
+                        - generic [ref=e5445]: View 4 more
+                  - generic [ref=e5448]:
+                    - generic [ref=e5451] [cursor=pointer]:
+                      - link [ref=e6369]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6370]
+                      - generic [ref=e5458]:
+                        - generic [ref=e5459]:
+                          - link [ref=e6371]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e5466]: rumahlabuh
+                          - button [ref=e6372]:
+                            - img [ref=e6373]
+                          - link [ref=e6374]:
+                            - /url: /@rumahlabuh/post/DXO6jNRga3O
+                            - time [ref=e5478]:
+                              - generic [ref=e6375]: 25m
+                        - button [ref=e6376]:
+                          - img [ref=e6377]
+                      - generic [ref=e5489]:
+                        - generic [ref=e5490]:
+                          - generic [ref=e5492]: Orang yang nawarin deposit 3 bulan itu artinya amanah?
+                          - generic [ref=e5494]:
+                            - text: Bentar. Maksud gue bukan gitu.
+                            - button [ref=e6378]:
+                              - generic [ref=e5497]: Translate
+                            - generic [ref=e5499]:
+                              - generic [ref=e5500]: "1"
+                              - generic [ref=e5502]: /
+                              - generic [ref=e5503]: "6"
+                        - generic [ref=e5505]:
+                          - button [ref=e6379]:
+                            - generic [ref=e5509]:
+                              - img [ref=e6380]
+                              - generic [ref=e5514]: "1"
+                          - button [ref=e6381]:
+                            - generic [ref=e5518]:
+                              - img [ref=e6382]
+                              - generic [ref=e5523]: "5"
+                          - button [ref=e6383]:
+                            - img [ref=e6384]
+                          - button [ref=e6385]:
+                            - img [ref=e6386]
+                    - generic [ref=e5539] [cursor=pointer]:
+                      - link [ref=e6387]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6388]
+                      - generic [ref=e5546]:
+                        - generic [ref=e5547]:
+                          - link [ref=e6389]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e5554]: rumahlabuh
+                          - button [ref=e6390]:
+                            - img [ref=e6391]
+                          - link [ref=e6392]:
+                            - /url: /@rumahlabuh/post/DXO6jgkAYaX
+                            - time [ref=e5566]:
+                              - generic [ref=e6393]: 25m
+                        - button [ref=e6394]:
+                          - img [ref=e6395]
+                      - generic [ref=e5577]:
+                        - generic [ref=e5580]:
+                          - text: Deposit besar itu justru bikin lo diam waktu kontrak mau habis. Takut uangnya ilang. Jadi lo males complain padahal ada masalah.
+                          - button [ref=e6396]:
+                            - generic [ref=e5583]: Translate
+                          - generic [ref=e5585]:
+                            - generic [ref=e5586]: "2"
+                            - generic [ref=e5588]: /
+                            - generic [ref=e5589]: "6"
+                        - generic [ref=e5591]:
+                          - button [ref=e6397]:
+                            - img [ref=e6398]
+                          - button [ref=e6399]:
+                            - generic [ref=e5601]:
+                              - img [ref=e6400]
+                              - generic [ref=e5606]: "1"
+                          - button [ref=e6401]:
+                            - img [ref=e6402]
+                          - button [ref=e6403]:
+                            - img [ref=e6404]
+                      - generic [ref=e5621]:
+                        - img [ref=e6405]
+                        - generic [ref=e5629]: View 4 more
+                  - generic [ref=e5635] [cursor=pointer]:
+                    - link [ref=e6406]:
+                      - /url: /@rumahlabuh
+                      - img [ref=e6407]
+                    - generic [ref=e5642]:
+                      - generic [ref=e5643]:
+                        - link [ref=e6408]:
+                          - /url: /@rumahlabuh
+                          - generic [ref=e5650]: rumahlabuh
+                        - button [ref=e6409]:
+                          - img [ref=e6410]
+                        - link [ref=e6411]:
+                          - /url: /@rumahlabuh/post/DXOkMtjAagv
+                          - time [ref=e5662]:
+                            - generic [ref=e6412]: 3h
+                      - button [ref=e6413]:
+                        - img [ref=e6414]
+                    - generic [ref=e5672]:
+                      - generic [ref=e5673]:
+                        - generic [ref=e5675]: Punya follower yang betah di kota tapi masih bingung cari kost yang nyaman itu rasanya kayak gimana sih? 😭
+                        - generic [ref=e5677]: Kayak udah cocok sama kotanya, eh kostnya yang bikin risih.
+                        - generic [ref=e5679]: Nah itu alasan yang bikin kita buka Labuh, biar lo bisa betah di Solo without the headache. Pet friendly, harga mahasiswa-friendly, lokasi strategis.
+                        - generic [ref=e5681]: Yang udah ngerasain, reply dong, kost lo ada dimana? 👇
+                      - generic [ref=e5683]:
+                        - button [ref=e6415]:
+                          - img [ref=e6416]
+                        - button [ref=e6417]:
+                          - img [ref=e6418]
+                        - button [ref=e6419]:
+                          - img [ref=e6420]
+                        - button [ref=e6421]:
+                          - img [ref=e6422]
+                  - generic [ref=e5714] [cursor=pointer]:
+                    - link [ref=e6423]:
+                      - /url: /@rumahlabuh
+                      - img [ref=e6424]
+                    - generic [ref=e5721]:
+                      - generic [ref=e5722]:
+                        - link [ref=e6425]:
+                          - /url: /@rumahlabuh
+                          - generic [ref=e5729]: rumahlabuh
+                        - button [ref=e6426]:
+                          - img [ref=e6427]
+                        - link [ref=e6428]:
+                          - /url: /@rumahlabuh/post/DXOQkKWDnAu
+                          - time [ref=e5741]:
+                            - generic [ref=e6429]: 6h
+                      - button [ref=e6430]:
+                        - img [ref=e6431]
+                    - generic [ref=e5751]:
+                      - generic [ref=e5754]:
+                        - text: Pengen cari kost yang nyaman?Tapi takut kemalingan atau masih ragu dengan keamanannya?🤔Kost Labuh Banyu solusinya dengan keamanan tanpa celah gerbang utama di lengkapi dengan gembok kode jadi orang luar tidak bisa masuk dan pintu utama di lengkapi dengan smartlock tentunya hanya bisa di akses oleh penghuni saja dan tanpa ketinggalan setiap sudut di pantau cctv 24 jam,jadi nunggu apa ayoo buruan kepoin di web
+                        - link [ref=e6432]:
+                          - /url: https://l.threads.com/?u=http%3A%2F%2Frumahlabuh.com%2F&e=AT7WW_pTn6fVjcGPbSAJlhq7mGu8lRMydmfZbJ6gXd-qcb9CMMiAgsJrnsL_QLbD3Y91ls5nGtLDMsX9n6tspnIijXwAVGHtRHIN88Zxn06Ctd-6cJK6VSXVkDRpGaM
+                          - text: rumahlabuh.com
+                        - button [ref=e6433]:
+                          - generic [ref=e5758]: Translate
+                      - group [ref=e6434]:
+                        - button [ref=e6435]:
+                          - img [ref=e6436]
+                      - generic [ref=e5782]:
+                        - button [ref=e6437]:
+                          - generic [ref=e5786]:
+                            - img [ref=e6438]
+                            - generic [ref=e5791]: "2"
+                        - button [ref=e6439]:
+                          - img [ref=e6440]
+                        - button [ref=e6441]:
+                          - img [ref=e6442]
+                        - button [ref=e6443]:
+                          - img [ref=e6444]
+                  - generic [ref=e5816] [cursor=pointer]:
+                    - link [ref=e6445]:
+                      - /url: /@rumahlabuh
+                      - img [ref=e6446]
+                    - generic [ref=e5823]:
+                      - generic [ref=e5824]:
+                        - link [ref=e6447]:
+                          - /url: /@rumahlabuh
+                          - generic [ref=e5831]: rumahlabuh
+                        - button [ref=e6448]:
+                          - img [ref=e6449]
+                        - link [ref=e6450]:
+                          - /url: /@rumahlabuh/post/DXMTpRpgQWE
+                          - time [ref=e5843]:
+                            - generic [ref=e6451]: 1d
+                      - button [ref=e6452]:
+                        - img [ref=e6453]
+                    - generic [ref=e5853]:
+                      - generic [ref=e5856]: Cari kost yang bernuansa estetik,tenang dan view alam? Cusss kepoin Kost Labuh Banyu😎😏
+                      - group [ref=e6454]:
+                        - button [ref=e6455]:
+                          - img [ref=e6456]
+                      - generic [ref=e5880]:
+                        - button [ref=e6457]:
+                          - img [ref=e6458]
+                        - button [ref=e6459]:
+                          - img [ref=e6460]
+                        - button [ref=e6461]:
+                          - img [ref=e6462]
+                        - button [ref=e6463]:
+                          - img [ref=e6464]
+                  - generic [ref=e5908]:
+                    - generic [ref=e5911] [cursor=pointer]:
+                      - link [ref=e6465]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6466]
+                      - generic [ref=e5918]:
+                        - generic [ref=e5919]:
+                          - link [ref=e6467]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e5926]: rumahlabuh
+                          - button [ref=e6468]:
+                            - img [ref=e6469]
+                          - link [ref=e6470]:
+                            - /url: /@rumahlabuh/post/DXJ9G4vAbyW
+                            - time [ref=e5938]:
+                              - generic [ref=e6471]: 1d
+                        - button [ref=e6472]:
+                          - img [ref=e6473]
+                      - generic [ref=e5949]:
+                        - generic [ref=e5950]:
+                          - generic [ref=e5952]: "tier list kota di Jawa buat ditinggali (versi jujur, bukan versi tourist):"
+                          - generic [ref=e5954]: "S tier: Solo 🥇 A tier: Jogja, Semarang B tier: Surabaya, Malang C tier: Bekasi (maaf) D tier: Maaf ga usah disebut"
+                          - generic [ref=e5956]:
+                            - text: yang keberatan boleh debat di bawah 👇
+                            - generic [ref=e5958]:
+                              - generic [ref=e5959]: "1"
+                              - generic [ref=e5961]: /
+                              - generic [ref=e5962]: "3"
+                        - generic [ref=e5964]:
+                          - button [ref=e6474]:
+                            - generic [ref=e5968]:
+                              - img [ref=e6475]
+                              - generic [ref=e5973]: "1"
+                          - button [ref=e6476]:
+                            - generic [ref=e5977]:
+                              - img [ref=e6477]
+                              - generic [ref=e5982]: "2"
+                          - button [ref=e6478]:
+                            - img [ref=e6479]
+                          - button [ref=e6480]:
+                            - img [ref=e6481]
+                    - generic [ref=e5998] [cursor=pointer]:
+                      - link [ref=e6482]:
+                        - /url: /@rumahlabuh
+                        - img [ref=e6483]
+                      - generic [ref=e6005]:
+                        - generic [ref=e6006]:
+                          - link [ref=e6484]:
+                            - /url: /@rumahlabuh
+                            - generic [ref=e6013]: rumahlabuh
+                          - button [ref=e6485]:
+                            - img [ref=e6486]
+                          - link [ref=e6487]:
+                            - /url: /@rumahlabuh/post/DXJ9HVuAd0E
+                            - time [ref=e6025]:
+                              - generic [ref=e6488]: 1d
+                        - button [ref=e6489]:
+                          - img [ref=e6490]
+                      - generic [ref=e6036]:
+                        - generic [ref=e6037]:
+                          - generic [ref=e6039]: kenapa Solo S tier?
+                          - generic [ref=e6041]: ✅ biaya hidup paling rendah se-Jawa ✅ orang-orangnya slow, ga rebut-rebutin antrian ✅ kuliner ENAK dan MURAH (tengkleng, soto triwindu, wedangan) ✅ macet masih bisa ditoleransi ✅ kost-an harian ada yang Rp 150rb-an tapi fasilitasnya beneran layak
+                          - generic [ref=e6043]:
+                            - text: Solo bukan cuma kota buat liburan — tapi kota buat BETAH. 😐
+                            - button [ref=e6491]:
+                              - generic [ref=e6046]: Translate
+                            - generic [ref=e6048]:
+                              - generic [ref=e6049]: "2"
+                              - generic [ref=e6051]: /
+                              - generic [ref=e6052]: "3"
+                        - generic [ref=e6054]:
+                          - button [ref=e6492]:
+                            - img [ref=e6493]
+                          - button [ref=e6494]:
+                            - generic [ref=e6064]:
+                              - img [ref=e6495]
+                              - generic [ref=e6069]: "1"
+                          - button [ref=e6496]:
+                            - img [ref=e6497]
+                          - button [ref=e6498]:
+                            - img [ref=e6499]
+                      - generic [ref=e6084]:
+                        - img [ref=e6500]
+                        - generic [ref=e6092]: View 1 more
+                  - status [ref=e6501]:
+                    - img [ref=e6502]
+          - button "Create" [ref=e662] [cursor=pointer]:
+            - img "Create" [ref=e663]
+  - generic:
+    - list
+  - dialog [ref=e6509]:
+    - generic [ref=e6514]:
+      - generic [ref=e6515]:
+        - button "Cancel" [ref=e6517] [cursor=pointer]:
+          - generic [ref=e6518]: Cancel
+        - heading "New thread" [level=1] [ref=e6520]:
+          - generic [ref=e6521]: New thread
+        - generic [ref=e6522]:
+          - button "Drafts" [ref=e6525] [cursor=pointer]:
+            - img "Drafts" [ref=e6527]
+          - button "More" [ref=e6530] [cursor=pointer]:
+            - img "More" [ref=e6532]
+      - generic [ref=e6537]:
+        - generic [ref=e6540]:
+          - img "rumahlabuh's profile picture" [ref=e6544]
+          - generic [ref=e6547]:
+            - generic [ref=e6550]:
+              - generic [ref=e6552]: rumahlabuh
+              - img [ref=e6554]
+              - generic [ref=e6560]:
+                - img [ref=e6563]
+                - searchbox "Add a topic" [ref=e6570]
+              - generic [ref=e6634]:
+                - generic [ref=e6635]: "1"
+                - generic [ref=e6637]: /
+                - generic [ref=e6638]: "2"
+            - textbox "Empty text field. Type to compose a new post." [ref=e6572]:
+              - paragraph [ref=e6573]: Orang yang nawarin deposit 3 bulan itu artinya amanah? Bentar. Maksud gue bukan gitu.
+            - generic [ref=e6574]:
+              - button "Attach media" [ref=e6575] [cursor=pointer]:
+                - img "Attach media" [ref=e6577]
+              - button "Add a GIF" [ref=e6580] [cursor=pointer]:
+                - img "Add a GIF" [ref=e6582]
+              - button "Add an emoji" [ref=e6587] [cursor=pointer]:
+                - img "Add an emoji" [ref=e6589]
+              - button "Add a poll" [ref=e6594] [cursor=pointer]:
+                - img "Add a poll" [ref=e6596]
+              - button "Attach text" [ref=e6600] [cursor=pointer]:
+                - img "Attach text" [ref=e6602]
+              - button "Add a location" [ref=e6607] [cursor=pointer]:
+                - img "Add a location" [ref=e6609]
+        - generic [ref=e6640]:
+          - generic [ref=e6641]:
+            - img "rumahlabuh's profile picture" [ref=e6645]
+            - generic [ref=e6648]:
+              - generic [ref=e6650]:
+                - generic [ref=e6651]:
+                  - generic [ref=e6653]: rumahlabuh
+                  - img [ref=e6655]
+                  - generic [ref=e6662]:
+                    - generic [ref=e6663]: "2"
+                    - generic [ref=e6665]: /
+                    - generic [ref=e6666]: "2"
+                - button "Close" [ref=e6669] [cursor=pointer]:
+                  - img "Close" [ref=e6670]
+              - generic [ref=e6673]:
+                - textbox "Empty text field. Type to compose a new post." [active] [ref=e6674]:
+                  - paragraph [ref=e6675]
+                - generic:
+                  - generic: Say more...
+              - generic [ref=e6676]:
+                - button "Attach media" [ref=e6677] [cursor=pointer]:
+                  - img "Attach media" [ref=e6679]
+                - button "Add a GIF" [ref=e6682] [cursor=pointer]:
+                  - img "Add a GIF" [ref=e6684]
+                - button "Add an emoji" [ref=e6689] [cursor=pointer]:
+                  - img "Add an emoji" [ref=e6691]
+                - button "Add a poll" [ref=e6696] [cursor=pointer]:
+                  - img "Add a poll" [ref=e6698]
+                - button "Attach text" [ref=e6702] [cursor=pointer]:
+                  - img "Attach text" [ref=e6704]
+                - button "Add a location" [ref=e6709] [cursor=pointer]:
+                  - img "Add a location" [ref=e6711]
+          - generic [ref=e6714]:
+            - img "rumahlabuh's profile picture" [ref=e6717]
+            - button "Add to thread" [disabled] [ref=e6718]:
+              - generic [ref=e6719]: Add to thread
+      - generic [ref=e6619]:
+        - button "Post" [ref=e6621]:
+          - generic [ref=e6622]: Post
+        - button "Reply options" [ref=e6624] [cursor=pointer]:
+          - generic [ref=e6625]:
+            - img [ref=e6627]
+            - generic [ref=e6632]: Reply options

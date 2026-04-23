@@ -152,8 +152,8 @@ async def cmd_upgrade_from(msg: Message) -> None:
     await msg.answer(f"Fetching README and planning upgrade from <code>{html.escape(url)}</code>...", parse_mode="HTML")
 
     try:
-        from tools.github_intel import GitHubIntelEngine
         from core.self_upgrade import SelfUpgradeEngine
+        from tools.github_intel import GitHubIntelEngine
 
         engine = GitHubIntelEngine()
         readme = await engine.fetch_readme(url)

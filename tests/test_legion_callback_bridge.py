@@ -1,5 +1,9 @@
-import pytest, asyncio
-from core.legion_callback_bridge import SpawnTracker, LegionCallbackBridge, LEGION_DIRECTIVE_RE
+import asyncio
+
+import pytest
+
+from core.legion_callback_bridge import LEGION_DIRECTIVE_RE, LegionCallbackBridge, SpawnTracker
+
 
 def test_spawn_tracker_depth_limit():
     tracker = SpawnTracker(max_depth=3)

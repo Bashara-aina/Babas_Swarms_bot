@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: UU Cipta Kerja merupakan "omnibus law" yang mengubah signifikan ketentuan
-  ketenagakerjaan, termasuk PKWT, pesangon, dan THR. Payroll system harus mengikuti
-  formula terbaru yang ditetapkan PP turuna...
+ ketenagakerjaan, termasuk PKWT, pesangon, dan THR. Payroll system harus mengikuti
+ formula terbaru yang ditetapkan PP turuna...
 wikilinks: []
 confidence: medium
 source: research
@@ -28,38 +28,38 @@ UU Cipta Kerja merupakan "omnibus law" yang mengubah signifikan ketentuan ketena
 ### 9 Perubahan Utama dalam UU Cipta Kerja Bidang Ketenagakerjaan
 
 1. **Perubahan PKWT (Perjanjian Kerja Waktu Tertentu)**
-   - Jangka waktu maksimal 5 tahun (dari 2 tahun + 1 perpanjangan)
-   - Perpanjangan PKWT wajib melewati masa tenggang 30 hari
-   - Tidak ada lagi konsep "perpanjangan kedua" - sekarang "perubahan"
+ - Jangka waktu maksimal 5 tahun (dari 2 tahun + 1 perpanjangan)
+ - Perpanjangan PKWT wajib melewati masa tenggang 30 hari
+ - Tidak ada lagi konsep "perpanjangan kedua" - sekarang "perubahan"
 
 2. **Alih Daya (Outsourcing)**
-   -Perubahan机理 pelaksanaan alih daya
-   - Perlindungan hak pekerja alih daya disamakan
+ -Perubahan pelaksanaan alih daya
+ - Perlindungan hak pekerja alih daya disamakan
 
 3. **Penggunaan Tenaga Kerja Asing (TKA)**
-   - Simplifikasi perizinan TKA
-   - Pengutamaan tenaga kerja lokal
+ - Simplifikasi perizinan TKA
+ - Pengutamaan tenaga kerja lokal
 
 4. **Mekanisme PHK**
-   - Perubahan rumus pesangon (dihitung dengan formula baru)
-   - Uang penggantian hak (UPH) yang harus dibayar
+ - Perubahan rumus pesangon (dihitung dengan formula baru)
+ - Uang penggantian hak (UPH) yang harus dibayar
 
 5. **Pengupahan**
-   -Kebijakan upah minimum berdasarkan formula PP 36/2021
-   - Struktur dan skala upah wajib dipublikasikan
+ -Kebijakan upah minimum berdasarkan formula PP 36/2021
+ - Struktur dan skala upah wajib dipublikasikan
 
 6. **Hubungan Industrial**
-   - Penyederhanaan prosedur perselisihan
-   - Peran mediator dan arbitrator
+ - Penyederhanaan prosedur perselisihan
+ - Peran mediator dan arbitrator
 
 7. **Jaminan Sosial**
-   -Integrasi dengan BPJS
+ -Integrasi dengan BPJS
 
 8. **Sanksi Administratif**
-   - Denda administratif untuk pelanggaran ketenagakerjaan
+ - Denda administratif untuk pelanggaran ketenagakerjaan
 
 9. **Ketenagakerjaan sektor tertentu**
-   - Pelaut, penerbangan, pertambangan memiliki aturan khusus
+ - Pelaut, penerbangan, pertambangan memiliki aturan khusus
 
 ### Status UU Cipta Kerja
 - UU 11/2020 ditetapkan 2 November 2020
@@ -71,39 +71,39 @@ UU Cipta Kerja merupakan "omnibus law" yang mengubah signifikan ketentuan ketena
 ### Perubahan Rumus Pesangon (Berdasarkan PP 35/2021)
 ```typescript
 interface PHKCompensation {
-  alasanPHK: string;
-  masaKerjaTahun: number;
-  UpahPokok: number;
-  tunjanganTetap: number;
+ alasanPHK: string;
+ masaKerjaTahun: number;
+ UpahPokok: number;
+ tunjanganTetap: number;
 }
 
 function hitungPesangonPP35({
-  masaKerjaTahun,
-  UpahPokok,
-  tunjanganTetap
+ masaKerjaTahun,
+ UpahPokok,
+ tunjanganTetap
 }: PHKCompensation): number {
-  const totalUpah = UpahPokok + tunjanganTetap;
-  
-  // Rumus berdasarkan masa kerja
-  if (masaKerjaTahun < 1) {
-    return totalUpah * 1; // 1 bulan upah
-  } else if (masaKerjaTahun < 2) {
-    return totalUpah * 2; // 2 bulan upah
-  } else if (masaKerjaTahun < 3) {
-    return totalUpah * 3; // 3 bulan upah
-  } else if (masaKerjaTahun < 4) {
-    return totalUpah * 4; // 4 bulan upah
-  } else if (masaKerjaTahun < 5) {
-    return totalUpah * 5; // 5 bulan upah
-  } else if (masaKerjaTahun < 6) {
-    return totalUpah * 6; // 6 bulan upah
-  } else if (masaKerjaTahun < 7) {
-    return totalUpah * 7; // 7 bulan upah
-  } else if (masaKerjaTahun < 8) {
-    return totalUpah * 8; // 8 bulan upah
-  } else {
-    return totalUpah * 10; // maksimal 10 bulan upah
-  }
+ const totalUpah = UpahPokok + tunjanganTetap;
+ 
+ // Rumus berdasarkan masa kerja
+ if (masaKerjaTahun < 1) {
+ return totalUpah * 1; // 1 bulan upah
+ } else if (masaKerjaTahun < 2) {
+ return totalUpah * 2; // 2 bulan upah
+ } else if (masaKerjaTahun < 3) {
+ return totalUpah * 3; // 3 bulan upah
+ } else if (masaKerjaTahun < 4) {
+ return totalUpah * 4; // 4 bulan upah
+ } else if (masaKerjaTahun < 5) {
+ return totalUpah * 5; // 5 bulan upah
+ } else if (masaKerjaTahun < 6) {
+ return totalUpah * 6; // 6 bulan upah
+ } else if (masaKerjaTahun < 7) {
+ return totalUpah * 7; // 7 bulan upah
+ } else if (masaKerjaTahun < 8) {
+ return totalUpah * 8; // 8 bulan upah
+ } else {
+ return totalUpah * 10; // maksimal 10 bulan upah
+ }
 }
 ```
 

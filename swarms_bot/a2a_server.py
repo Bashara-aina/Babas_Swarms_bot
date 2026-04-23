@@ -12,7 +12,7 @@ import os
 import uuid
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
 
@@ -89,12 +89,13 @@ async def agent_card() -> dict:
 
 
 @app.post("/a2a", response_model=A2AResponse)
-async def a2a_endpoint(message: A2AMessage) -> A2AResponse:
+async def a2a_endpoint(message: A2AMessage, x_legion_key: str | None = Header(default=None)) -> A2AResponse:
     """
     Main A2A endpoint. Routes incoming tasks to the appropriate agent.
     """
-    api_key = os.getenv("LEGION_A2A_API_KEY", "")
-    # TODO: Validate X-Legion-Key header against LEGION_A2A_API_KEY
+    api_key = os.getenv("LEGION_A2A_API_KEY", "").strip()
+    if api_key and x_legion_key != api_key:
+        raise HTTPException(status_code=401, detail="Invalid X-Legion-Key")
 
     try:
         skill_id = message.params.get("skill", "general")

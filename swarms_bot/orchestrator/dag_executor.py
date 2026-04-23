@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Callable, Coroutine, Dict, List, Optional, Any
+from typing import Any, Callable, Coroutine, Dict, List, Optional
 
 from swarms_bot.orchestrator.dag_planner import DAGNode, TaskDAG
 

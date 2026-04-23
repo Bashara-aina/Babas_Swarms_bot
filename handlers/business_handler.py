@@ -187,7 +187,7 @@ async def cmd_biz_summary(msg: Message) -> None:
         return
 
     status = await msg.answer("📊 Fetching business metrics...")
-    from tools.business_ops import get_business_summary, check_vercel_deployments
+    from tools.business_ops import check_vercel_deployments, get_business_summary
 
     summary = await get_business_summary()
     deployments = await check_vercel_deployments()

@@ -50,8 +50,13 @@ class EpisodicStore:
         self._load_local()
 
     def _init_supabase(self) -> None:
-        url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+        url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+        key = (
+            os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+            or os.getenv("SUPABASE_SERVICE_KEY")
+            or os.getenv("SUPABASE_ANON_KEY")
+            or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+        )
         if not url or not key:
             logger.info("[EpisodicStore] No Supabase env — using local JSON fallback")
             return

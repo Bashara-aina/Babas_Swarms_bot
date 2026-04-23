@@ -9,6 +9,7 @@ Usage in main.py on_startup:
 import asyncio
 import json
 import logging
+
 from aiohttp import web
 
 logger = logging.getLogger(__name__)

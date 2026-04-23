@@ -104,10 +104,11 @@ _KOKORO_VOICES_PATH = Path(__file__).parent.parent.parent / "models" / "voices.b
 
 def _tts_kokoro_sync(text: str) -> bytes:
     """Synthesise speech with kokoro-onnx (sync). Returns WAV bytes."""
-    from kokoro_onnx import Kokoro
-    import numpy as np
     import struct
     import wave
+
+    import numpy as np
+    from kokoro_onnx import Kokoro
 
     kokoro = Kokoro(str(_KOKORO_MODEL_PATH), str(_KOKORO_VOICES_PATH))
     samples, sample_rate = kokoro.create(text, _KOKORO_VOICE)

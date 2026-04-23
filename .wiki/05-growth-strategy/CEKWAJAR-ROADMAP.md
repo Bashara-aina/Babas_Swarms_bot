@@ -71,7 +71,7 @@ Each article = 1 keyword owned. 30 articles = 30 entry points.
 ### Week 2: TikTok Distribution (3 videos/week)
 Format: "60 second result" — show tool solving real problem
   - "Cek apakah gajimu wajar dalam 60 detik" (screen recording)
-  - "Cara hitung PPh 21 otomatis gratis" 
+  - "Cara hitung PPh 21 otomatis gratis"
   - "Slip gajumu salah? Cek di sini"
   - "Harga tanah ini wajar? Kami hitung dalam 30 detik"
   - "Pindah ke Singapura worth it? Cek dulu"
@@ -82,7 +82,7 @@ Target communities:
   - Facebook groups: Lowongan Kerja Jakarta, HRD Indonesia
   - LinkedIn HR Indonesia groups
   - Telegram groups: komunitas finance/accounting Indonesia
-  
+
 Approach: Share tool genuinely — "I built this, feedback welcome"
 NOT spam. Provide value, engage in comments.
 

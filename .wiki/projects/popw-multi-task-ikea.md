@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "popw (Papers of Papers Worker?) is a multi-task learning research project for IKEA assembly video understanding. Architecture: ResNet50-FPN backbone → 3 task heads (Detection + Pose + Activity) with Kendall uncertainty weighting. Dataset: 685,516 frames from 254 IKEA assembly videos with 3 label types. Critical finding: FiLM `.detach()` blocks activity→pose gradient flow. Target: Activity >60.46%, Detection 70-80% mAP@0.5, Pose 85-90% PCK@0.1."
 wikilinks:
-  - [[concepts/multi-agent-orchestration]]
-  - [[projects/cekwajar-id]]
-  - [[projects/rumahlabuh-com]]
+ - [[concepts/multi-agent-orchestration]]
+ - [[projects/cekwajar-id]]
+ - [[projects/rumahlabuh-com]]
 confidence: high
 source: research
 project: popw
@@ -71,34 +71,34 @@ popw is a multi-task deep learning research project for understanding IKEA furni
 
 ```
 Input: [B, 3, 640, 480]
-       ↓
+ ↓
 ResNet-50 backbone (ImageNet pretrained)
-       ↓
+ ↓
 Feature Pyramid Network (FPN)
-       ↓
-{C2, C3, C4, C5, P3, P4, P5, P6, P7}  ← multi-scale feature pyramid
+ ↓
+{C2, C3, C4, C5, P3, P4, P5, P6, P7} ← multi-scale feature pyramid
 ```
 
 ### 3.2 Task Heads
 
 ```
 P5 (2048 channels) ─────────────────┬─► DetectionHead (RetinaNet-style)
-                                   ├─► PoseHead (Heatmap regression, 17 keypoints)
-                                   └─► ActivityHead (GAP + FC → 33 classes)
-                                         ↑
-                          PoseFiLMModule ← pose (x,y,conf) conditions activity
+ ├─► PoseHead (Heatmap regression, 17 keypoints)
+ └─► ActivityHead (GAP + FC → 33 classes)
+ ↑
+ PoseFiLMModule ← pose (x,y,conf) conditions activity
 ```
 
 ### 3.3 PoseFiLMModule (Feature-wise Linear Modulation)
 
 ```python
 class PoseFiLMModule(nn.Module):
-    # pose_dim = 17 * 3 = 51  (x, y, confidence per keypoint)
-    # feat_channels = 2048
-    #
-    # gamma_net: 51 → 2048  (learns per-channel scale)
-    # beta_net:  51 → 2048  (learns per-channel bias)
-    # output: c5 * gamma + beta  ← element-wise modulation
+ # pose_dim = 17 * 3 = 51 (x, y, confidence per keypoint)
+ # feat_channels = 2048
+ #
+ # gamma_net: 51 → 2048 (learns per-channel scale)
+ # beta_net: 51 → 2048 (learns per-channel bias)
+ # output: c5 * gamma + beta ← element-wise modulation
 ```
 
 FiLM allows pose to modulate the spatial backbone features before activity classification.
@@ -118,13 +118,13 @@ FiLM allows pose to modulate the spatial backbone features before activity class
 
 ```python
 class MultiTaskLoss(nn.Module):
-    # L_total = 0.5 * exp(-log_var_det) * L_det
-    #           + 0.5 * exp(-log_var_pose) * L_pose
-    #           + 0.5 * exp(-log_var_act) * L_act
-    #           + log_var_det + log_var_pose + log_var_act
-    #
-    # Learned params: log_var_det, log_var_pose, log_var_act (one per task)
-    # These auto-balance task weights during training
+ # L_total = 0.5 * exp(-log_var_det) * L_det
+ # + 0.5 * exp(-log_var_pose) * L_pose
+ # + 0.5 * exp(-log_var_act) * L_act
+ # + log_var_det + log_var_pose + log_var_act
+ #
+ # Learned params: log_var_det, log_var_pose, log_var_act (one per task)
+ # These auto-balance task weights during training
 ```
 
 ### 4.2 Task-Specific Losses
@@ -138,7 +138,7 @@ class MultiTaskLoss(nn.Module):
 ### 4.3 CB-Focal Loss (Class-Balanced)
 
 ```python
-# Beta = 0.9999 (接近1 = minimal re-weighting for rare classes)
+# Beta = 0.9999 (1 = minimal re-weighting for rare classes)
 effective_samples = (1.0 - beta^counts) / (1.0 - beta)
 class_weights = 1.0 / effective_samples * num_classes
 focal_loss = class_weights[targets] * (1 - p_t)^gamma * ce
@@ -178,11 +178,11 @@ focal_loss = class_weights[targets] * (1 - p_t)^gamma * ce
 ```python
 # BEFORE (INCORRECT — blocks activity → pose gradient flow)
 if self.use_film:
-    with torch.no_grad():
-        confidence = ...
-    c5_mod = self.film(
-        c5, keypoints.detach(), confidence  # ← .detach() IS THE BUG
-    )
+ with torch.no_grad():
+ confidence = ...
+ c5_mod = self.film(
+ c5, keypoints.detach(), confidence # ← .detach() IS THE BUG
+ )
 ```
 
 **Impact**:
@@ -194,7 +194,7 @@ if self.use_film:
 ```python
 # AFTER (CORRECT)
 c5_mod = self.film(
-    c5, keypoints.nan_to_num(0.0), confidence  # ✅ no .detach()
+ c5, keypoints.nan_to_num(0.0), confidence # ✅ no .detach()
 )
 ```
 
@@ -253,14 +253,14 @@ Expected: +2-5% activity accuracy
 ### Priority 2: Residual ActivityHead (30 min)
 Replace `ActivityHead` class with residual bottleneck:
 ```
-2304 → 768 → 256 → 768 → 33  (+ residual skip)
+2304 → 768 → 256 → 768 → 33 (+ residual skip)
 ```
 Expected: +1-2% additional accuracy, especially for rare classes
 
 ### Priority 3: Object-Aware FiLM (1 hour, optional)
 Add top-K detected boxes to FiLM conditioning vector:
 ```
-pose_dim: 51  →  76  (pose 51 + top-5 boxes 25)
+pose_dim: 51 → 76 (pose 51 + top-5 boxes 25)
 ```
 Expected: +1-3% accuracy (objects provide task context)
 

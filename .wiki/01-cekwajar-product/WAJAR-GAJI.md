@@ -22,7 +22,7 @@ title: "Wajar Gaji — Salary Benchmark Engine — Full Spec"
 # Wajar Gaji — Complete Technical Specification
 
 ## Purpose
-Answers: "Berapa seharusnya gaji saya?" 
+Answers: "Berapa seharusnya gaji saya?"
 Compares reported salary against composite BPS + crowdsourced benchmark.
 
 ## Input Parameters
@@ -93,10 +93,10 @@ Dynamic BPS weight decay:
 
 | Condition | Verdict | Code |
 |-----------|---------|------|
-| Salary < P25 | Di Bawah Pasar 🔴 | BELOW_MARKET |
+| Salary < P25 | Di Bawah pasar 🔴 | BELOW_MARKET |
 | P25 ≤ Salary ≤ P75 | Wajar 🟡 | FAIR |
-| Salary > P75 | Di Atas Pasar 🟢 | ABOVE_MARKET |
-| UMR ≤ Salary < P25 | Wajar Hukum, Di Bawah Pasar 🟠 | LEGAL_BELOW_MARKET |
+| Salary > P75 | Di Atas pasar 🟢 | ABOVE_MARKET |
+| UMR ≤ Salary < P25 | Wajar Hukum, Di Bawah pasar 🟠 | LEGAL_BELOW_MARKET |
 | Salary < UMR | BAWAH UMR — POTENTIALLY ILLEGAL 🚨 | ILLEGAL |
 
 ## UMR Reference Values (2026)

@@ -48,10 +48,10 @@ class ModelCandidate:
 # Full model catalogue
 MODEL_CATALOGUE: List[ModelCandidate] = [
     ModelCandidate("cerebras/llama-3.3-70b",        "cerebras",   10, 7,  0.0,    128_000, "CEREBRAS_API_KEY",   ["speed", "general"]),
-    ModelCandidate("groq/llama-3.3-70b-versatile",  "groq",        9, 8,  0.0,    128_000, "GROQ_API_KEY",       ["coding", "debug", "general"]),
+    ModelCandidate("minimax/MiniMax-Text-01",  "groq",        9, 8,  0.0,    128_000, "GROQ_API_KEY",       ["coding", "debug", "general"]),
     ModelCandidate("groq/moonshard-r1-distill-70b", "groq",        8, 9,  0.0,    128_000, "GROQ_API_KEY",       ["math", "reasoning"]),
-    ModelCandidate("groq/llama-3.1-8b-instant",     "groq",       10, 6,  0.0,    128_000, "GROQ_API_KEY",       ["speed", "trivial"]),
-    ModelCandidate("gemini/gemini-2.0-flash",        "gemini",      8, 9,  0.0,  1_000_000, "GEMINI_API_KEY",     ["vision", "long_context", "research"]),
+    ModelCandidate("minimax/MiniMax-Text-01",     "groq",       10, 6,  0.0,    128_000, "GROQ_API_KEY",       ["speed", "trivial"]),
+    ModelCandidate("minimax/MiniMax-Text-01",        "gemini",      8, 9,  0.0,  1_000_000, "GEMINI_API_KEY",     ["vision", "long_context", "research"]),
     ModelCandidate("gemini/gemini-2.5-pro-preview", "gemini",      6, 10, 0.001,2_000_000, "GEMINI_API_KEY",     ["complex", "architect", "critical"]),
     ModelCandidate("openrouter/deepseek/deepseek-chat-v3-0324", "openrouter", 7, 9, 0.0, 64_000, "OPENROUTER_API_KEY", ["coding", "math"]),
     ModelCandidate("openrouter/meta-llama/llama-4-maverick", "openrouter",  7, 9, 0.0, 128_000, "OPENROUTER_API_KEY", ["general", "analyst"]),
@@ -90,7 +90,7 @@ class ModelRouter:
         available = [m for m in MODEL_CATALOGUE if m.is_available()]
 
         if not available:
-            return "groq/llama-3.3-70b-versatile", None
+            return "minimax/MiniMax-Text-01", None
 
         # Privacy: prefer local models
         if prefer_privacy:

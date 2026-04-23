@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: For a payroll SaaS like cekwajar.id, integrating with BPJS payment systems
-  is critical. Understanding EPS (Electronic Payment System), virtual accounts, and
-  payment channels enables accurate deduct...
+ is critical. Understanding EPS (Electronic Payment System), virtual accounts, and
+ payment channels enables accurate deduct...
 wikilinks: []
 confidence: medium
 source: research
@@ -59,7 +59,7 @@ Mandiri: 23996 + kode iuran
 ```
 
 ### Autodebit
-BPJS menyediakan layanan autodebit untuk方便:
+BPJS menyediakan layanan autodebit untuk:
 - Tanggal 1-28 setiap bulan
 - Melalui bank atau e-wallet
 - Minimal 1 bulan periode
@@ -75,61 +75,61 @@ For payroll integration, remittance data typically includes:
 ## Exact Formulas / Numbers (if applicable)
 ```typescript
 interface BpjsRemittanceData {
-  companyNpp: string;
-  period: string;  // YYYYMM format
-  employeeContributions: {
-    nik: string;
-    salary: number;
-    jhtEmployee: number;
-    jpEmployee: number;
-    totalEmployee: number;
-  }[];
-  employerContributions: {
-    nik: string;
-    jhtEmployer: number;
-    jkk: number;
-    jkm: number;
-    jpEmployer: number;
-    jkpFromJkk: number;
-    totalEmployer: number;
-  }[];
-  grandTotal: {
-    employee: number;
-    employer: number;
-    grand: number;
-  };
+ companyNpp: string;
+ period: string; // YYYYMM format
+ employeeContributions: {
+ nik: string;
+ salary: number;
+ jhtEmployee: number;
+ jpEmployee: number;
+ totalEmployee: number;
+ }[];
+ employerContributions: {
+ nik: string;
+ jhtEmployer: number;
+ jkk: number;
+ jkm: number;
+ jpEmployer: number;
+ jkpFromJkk: number;
+ totalEmployer: number;
+ }[];
+ grandTotal: {
+ employee: number;
+ employer: number;
+ grand: number;
+ };
 }
 
 function generateRemittanceBatch(employees: PayrollEmployee[]): BpjsRemittanceData {
-  const period = getCurrentPeriod(); // YYYYMM
-  
-  const employeeContributions = employees.map(emp => ({
-    nik: emp.nik,
-    salary: emp.monthlySalary,
-    jhtEmployee: Math.floor(emp.monthlySalary * 0.02),
-    jpEmployee: Math.floor(Math.min(emp.monthlySalary, JP_CAP) * 0.01),
-    totalEmployee: 0 // calculated below
-  }));
-  
-  // Calculate totals
-  employeeContributions.forEach(ec => {
-    ec.totalEmployee = ec.jhtEmployee + ec.jpEmployee;
-  });
-  
-  return {
-    companyNpp: COMPANY_NPP,
-    period,
-    employeeContributions,
-    employerContributions: [], // similar structure
-    grandTotal: calculateGrandTotal(employeeContributions, employerContributions)
-  };
+ const period = getCurrentPeriod(); // YYYYMM
+ 
+ const employeeContributions = employees.map(emp => ({
+ nik: emp.nik,
+ salary: emp.monthlySalary,
+ jhtEmployee: Math.floor(emp.monthlySalary * 0.02),
+ jpEmployee: Math.floor(Math.min(emp.monthlySalary, JP_CAP) * 0.01),
+ totalEmployee: 0 // calculated below
+ }));
+ 
+ // Calculate totals
+ employeeContributions.forEach(ec => {
+ ec.totalEmployee = ec.jhtEmployee + ec.jpEmployee;
+ });
+ 
+ return {
+ companyNpp: COMPANY_NPP,
+ period,
+ employeeContributions,
+ employerContributions: [], // similar structure
+ grandTotal: calculateGrandTotal(employeeContributions, employerContributions)
+ };
 }
 
 // Example remittance format for bank transfer
 const REMITTANCE_FORMAT = {
-  header: "REMITTANCE|BPJS-TK|{NPP}|{PERIOD}|{TOTAL_RECORD}",
-  detail: "REC|{NIK}|{SALARY}|{JHT_EMP}|{JP_EMP}|{JHT_EMP}|{JKK}|{JKM}|{JP_EMP}|{JKP}",
-  footer: "TOTAL|{TOTAL_EMPLOYEE}|{TOTAL_EMPLOYER}|{GRAND_TOTAL}"
+ header: "REMITTANCE|BPJS-TK|{NPP}|{PERIOD}|{TOTAL_RECORD}",
+ detail: "REC|{NIK}|{SALARY}|{JHT_EMP}|{JP_EMP}|{JHT_EMP}|{JKK}|{JKM}|{JP_EMP}|{JKP}",
+ footer: "TOTAL|{TOTAL_EMPLOYEE}|{TOTAL_EMPLOYER}|{GRAND_TOTAL}"
 };
 ```
 

@@ -318,7 +318,7 @@ def get_mood_momentum() -> str:
     """
     if len(_message_lengths) < 3:
         return "normal"
-    if all(l < 30 for l in _message_lengths):
+    if all(length < 30 for length in _message_lengths):
         return "direct"
     return "normal"
 

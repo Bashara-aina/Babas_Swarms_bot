@@ -1,7 +1,7 @@
 """Legion character enforcer — strip forbidden phrases, apply GSA voice, enforce soul.
 
 Reads config/legion_character.json once at import time.
-Used in llm_client.py after postprocess_response() to clean every response.
+Used in llm_client.py after postprocessresponse() to clean every response.
 
 Key improvements over v1:
 - Context-aware enforcement (emotional vs technical vs analytical)
@@ -22,16 +22,15 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # === CJK/Arabic/Cyrillic Language Detection ===
-import re as _re
 
 # Detect CJK characters (Chinese/Japanese/Korean)
-CJK_PATTERN = _re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\u3400-\u4dbf]")
+CJK_PATTERN = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\u3400-\u4dbf]")
 
 # Arabic script
-ARABIC_PATTERN = _re.compile(r"[\u0600-\u06ff]")
+ARABIC_PATTERN = re.compile(r"[\u0600-\u06ff]")
 
 # Cyrillic script (Russian, Ukrainian, etc.)
-CYRILLIC_PATTERN = _re.compile(r"[\u0400-\u04ff\u0500-\u052f\u2de0-\u2dff\ua640-\ua69f]")
+CYRILLIC_PATTERN = re.compile(r"[\u0400-\u04ff\u0500-\u052f\u2de0-\u2dff\ua640-\ua69f]")
 
 ALLOWED_SCRIPTS = [
     r"[a-zA-Z]",  # Latin (English)
@@ -79,8 +78,8 @@ def strip_non_allowed_script(text: str) -> str:
     text = CYRILLIC_PATTERN.sub("", text)
 
     # Clean up double spaces from removals
-    text = _re.sub(r"  +", " ", text)
-    text = _re.sub(r" ([,\.!?])", r"\1", text)
+    text = re.sub(r"  +", " ", text)
+    text = re.sub(r" ([,\.!?])", r"\1", text)
 
     return text.strip()
 
@@ -230,16 +229,16 @@ class GSAFeedbackTracker:
     def __init__(self):
         self._pattern_counts: dict[str, int] = {}
         self._pattern_last_seen: dict[str, float] = {}
-        self._recent_stripped: list[str] = []
+        self.recent_stripped: list[str] = []
         self._max_history = 100
 
     def record_stripped(self, pattern: str) -> None:
         """Record that a pattern was stripped."""
         self._pattern_counts[pattern] = self._pattern_counts.get(pattern, 0) + 1
         self._pattern_last_seen[pattern] = time.time()
-        self._recent_stripped.append(pattern)
-        if len(self._recent_stripped) > self._max_history:
-            self._recent_stripped.pop(0)
+        self.recent_stripped.append(pattern)
+        if len(self.recent_stripped) > self._max_history:
+            self.recent_stripped.pop(0)
 
     def get_hot_patterns(self, min_count: int = 3) -> list[str]:
         """Get patterns stripped multiple times recently."""
@@ -252,7 +251,7 @@ class GSAFeedbackTracker:
                     hot.append(pattern)
         return sorted(hot, key=lambda p: self._pattern_counts[p], reverse=True)
 
-    def get_pattern_report(self) -> str:
+    def get_patternreport(self) -> str:
         """Generate a report of enforcement patterns."""
         hot = self.get_hot_patterns(min_count=2)
         if not hot:
@@ -481,9 +480,9 @@ def enforce_character(response: str, agent_key: str = "general") -> str:
     cleaned = dynamic.apply_dynamic_filters(cleaned)
 
     # 12. Apply response quality scoring and learning
-    quality_result = _score_response_quality(response, cleaned, ctx)
-    if quality_result.was_corrected:
-        _record_quality_feedback(quality_result)
+    qualityresult = _scoreresponse_quality(response, cleaned, ctx)
+    if qualityresult.was_corrected:
+        record_quality_feedback(qualityresult)
 
     return cleaned.strip()
 
@@ -504,7 +503,7 @@ class ResponseQualityResult:
         self.was_corrected = was_corrected
 
 
-def _score_response_quality(original: str, cleaned: str, ctx: EnforcementContext) -> ResponseQualityResult:
+def _scoreresponse_quality(original: str, cleaned: str, ctx: EnforcementContext) -> ResponseQualityResult:
     """Score response quality and track corrections."""
     suggestions = []
     was_corrected = False
@@ -551,7 +550,7 @@ _quality_history: list[ResponseQualityResult] = []
 _MAX_QUALITY_HISTORY = 50
 
 
-def _record_quality_feedback(result: ResponseQualityResult) -> None:
+def record_quality_feedback(result: ResponseQualityResult) -> None:
     """Record quality feedback for learning."""
     global _quality_history
     _quality_history.append(result)
@@ -559,7 +558,7 @@ def _record_quality_feedback(result: ResponseQualityResult) -> None:
         _quality_history.pop(0)
 
 
-def get_quality_report() -> str:
+def get_qualityreport() -> str:
     """Generate a quality report of recent responses."""
     if not _quality_history:
         return "No quality data yet."

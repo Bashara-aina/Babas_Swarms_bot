@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: While cekwajar.id focuses on payroll calculations, understanding JHT claim
-  conditions is essential for HR modules. When employees leave (resign, laid off,
-  retire), they may claim JHT. Knowing the r...
+ conditions is essential for HR modules. When employees leave (resign, laid off,
+ retire), they may claim JHT. Knowing the r...
 wikilinks: []
 confidence: medium
 source: research
@@ -33,7 +33,7 @@ While cekwajar.id focuses on payroll calculations, understanding JHT claim condi
 - **Meninggal dunia** (ke ahli waris)
 - **Meninggalkan NKRI selamanya** (WNI atau WNA)
 - **PHK** (Pemutusan Hubungan Kerja)
-- **Mengundurkan diri** (这适用于特定条件)
+- **Mengundurkan diri** ()
 
 #### 2. Klaim Sebagian (Maksimal 30%)
 - **Persiapan pensiun**: Maksimal 10% dari saldo, harus punya masa kepesertaan min. 10 tahun
@@ -56,7 +56,7 @@ While cekwajar.id focuses on payroll calculations, understanding JHT claim condi
 - Formulir klaim JHT
 - KTP asli
 - Kartu BPJS Ketenagakerjaan
-- Surat keterangan akan买的 rumah /熔斯特拉克斯
+- Surat keterangan akan rumah /
 - Dokumen tambahan untuk validasi
 
 ### Mekanisme Perhitungan Saldo JHT
@@ -67,51 +67,51 @@ Pengembangan dilakukan oleh BPJS Investasi dengan bagi hasil tertentu.
 ## Exact Formulas / Numbers (if applicable)
 ```typescript
 interface JhtClaimRequest {
-  claimType: 'FULL' | 'PARTIAL_PENSION' | 'PARTIAL_HOUSE';
-  reason: 'RETIREMENT' | 'PHK' | 'DISABILITY' | 'DEATH' | 'OVERSEAS' | 'RESIGNATION';
-  employeeId: string;
-  monthsOfMembership: number;  // masa kepesertaan
-  partialPercentage?: number;  // untuk klaim sebagian (max 30)
+ claimType: 'FULL' | 'PARTIAL_PENSION' | 'PARTIAL_HOUSE';
+ reason: 'RETIREMENT' | 'PHK' | 'DISABILITY' | 'DEATH' | 'OVERSEAS' | 'RESIGNATION';
+ employeeId: string;
+ monthsOfMembership: number; // masa kepesertaan
+ partialPercentage?: number; // untuk klaim sebagian (max 30)
 }
 
 interface JhtBalance {
-  employeeContributions: number;  // 2% x bulan
-  employerContributions: number;  // 3.7% x bulan
-  developmentReturns: number;     // hasil pengembangan
-  totalBalance: number;
+ employeeContributions: number; // 2% x bulan
+ employerContributions: number; // 3.7% x bulan
+ developmentReturns: number; // hasil pengembangan
+ totalBalance: number;
 }
 
 function validateJhtClaim(request: JhtClaimRequest, balance: JhtBalance): {
-  eligible: boolean;
-  maxClaimable: number;
-  reason: string;
+ eligible: boolean;
+ maxClaimable: number;
+ reason: string;
 } {
-  // Cek kelayakan klaim
-  if (request.claimType === 'FULL') {
-    const eligibleReasons = ['RETIREMENT', 'PHK', 'DISABILITY', 'DEATH', 'OVERSEAS'];
-    if (!eligibleReasons.includes(request.reason)) {
-      return { eligible: false, maxClaimable: 0, reason: 'Reason not eligible for full claim' };
-    }
-    return { eligible: true, maxClaimable: balance.totalBalance, reason: 'Full claim approved' };
-  }
+ // Cek kelayakan klaim
+ if (request.claimType === 'FULL') {
+ const eligibleReasons = ['RETIREMENT', 'PHK', 'DISABILITY', 'DEATH', 'OVERSEAS'];
+ if (!eligibleReasons.includes(request.reason)) {
+ return { eligible: false, maxClaimable: 0, reason: 'Reason not eligible for full claim' };
+ }
+ return { eligible: true, maxClaimable: balance.totalBalance, reason: 'Full claim approved' };
+ }
 
-  if (request.claimType === 'PARTIAL_HOUSE') {
-    if (request.monthsOfMembership < 120) {  // 10 tahun
-      return { eligible: false, maxClaimable: 0, reason: 'Minimum 10 years membership required' };
-    }
-    const maxClaimable = balance.totalBalance * 0.30;
-    return { eligible: true, maxClaimable, reason: '30% for house purchase approved' };
-  }
+ if (request.claimType === 'PARTIAL_HOUSE') {
+ if (request.monthsOfMembership < 120) { // 10 tahun
+ return { eligible: false, maxClaimable: 0, reason: 'Minimum 10 years membership required' };
+ }
+ const maxClaimable = balance.totalBalance * 0.30;
+ return { eligible: true, maxClaimable, reason: '30% for house purchase approved' };
+ }
 
-  if (request.claimType === 'PARTIAL_PENSION') {
-    if (request.monthsOfMembership < 120) {
-      return { eligible: false, maxClaimable: 0, reason: 'Minimum 10 years membership required' };
-    }
-    const maxClaimable = balance.totalBalance * 0.10;
-    return { eligible: true, maxClaimable, reason: '10% for pension preparation approved' };
-  }
+ if (request.claimType === 'PARTIAL_PENSION') {
+ if (request.monthsOfMembership < 120) {
+ return { eligible: false, maxClaimable: 0, reason: 'Minimum 10 years membership required' };
+ }
+ const maxClaimable = balance.totalBalance * 0.10;
+ return { eligible: true, maxClaimable, reason: '10% for pension preparation approved' };
+ }
 
-  return { eligible: false, maxClaimable: 0, reason: 'Invalid claim type' };
+ return { eligible: false, maxClaimable: 0, reason: 'Invalid claim type' };
 }
 ```
 

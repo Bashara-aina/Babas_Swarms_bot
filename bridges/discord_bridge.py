@@ -44,7 +44,7 @@ async def start_discord_bridge() -> None:
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
-    auth = MultiUserAuth()
+    MultiUserAuth()
 
     # Map Discord user_id -> thread_id
     _discord_threads: dict[int, str] = {}

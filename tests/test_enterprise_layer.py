@@ -111,8 +111,8 @@ class TestChiefOfStaff(unittest.TestCase):
 
     def test_integration_setters(self):
         """Test that integration setters work without errors."""
-        from swarms_bot.routing.budget_manager import BudgetManager
         from swarms_bot.observability.cost_metrics import CostMetricsCollector
+        from swarms_bot.routing.budget_manager import BudgetManager
 
         bm = BudgetManager()
         cm = CostMetricsCollector()
@@ -133,7 +133,7 @@ class TestCostMetricsCollector(unittest.TestCase):
     def test_record_basic(self):
         alert = self.collector.record(
             agent_name="coding",
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             cost_usd=0.001,
             tokens_used=100,
             latency_ms=500,
@@ -147,7 +147,7 @@ class TestCostMetricsCollector(unittest.TestCase):
         for i in range(10):
             self.collector.record(
                 agent_name="coding" if i % 2 == 0 else "debug",
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 cost_usd=0.01,
                 tokens_used=200,
                 latency_ms=1000 + i * 100,
@@ -184,7 +184,7 @@ class TestCostMetricsCollector(unittest.TestCase):
     def test_format_dashboard(self):
         self.collector.record(
             agent_name="coding",
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             cost_usd=0.001,
             tokens_used=100,
             latency_ms=500,
@@ -231,7 +231,9 @@ class TestCostAwareRouter(unittest.TestCase):
 
     def setUp(self):
         from swarms_bot.routing.cost_router import (
-            CostAwareRouter, classify_complexity, TaskComplexity,
+            CostAwareRouter,
+            TaskComplexity,
+            classify_complexity,
         )
         self.router = CostAwareRouter()
         self.classify = classify_complexity
@@ -272,9 +274,10 @@ class TestSessionManager(unittest.TestCase):
     """Test SessionManager save/resume lifecycle."""
 
     def setUp(self):
-        from swarms_bot.sessions.session_manager import SessionManager
         import tempfile
         from pathlib import Path
+
+        from swarms_bot.sessions.session_manager import SessionManager
         self.tmp = tempfile.mkdtemp()
         self.sm = SessionManager(db_path=Path(self.tmp) / "test_sessions.db")
 
@@ -294,7 +297,7 @@ class TestSessionManager(unittest.TestCase):
         self.sm.track_task(
             user_id=1,
             agent_name="coding",
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             cost_usd=0.001,
             tokens=100,
         )
@@ -314,7 +317,7 @@ class TestSessionManager(unittest.TestCase):
         "aiosqlite not installed",
     )
     def test_save_and_list(self):
-        session = self.sm.get_or_create_session(user_id=1, chat_id=100)
+        self.sm.get_or_create_session(user_id=1, chat_id=100)
         self.sm.track_task(1, "coding", "groq/llama", 0.01, 500)
 
         # Save
@@ -332,7 +335,7 @@ class TestSessionManager(unittest.TestCase):
         "aiosqlite not installed",
     )
     def test_save_and_resume(self):
-        session = self.sm.get_or_create_session(
+        self.sm.get_or_create_session(
             user_id=1, chat_id=100, thread_id="thread_abc",
         )
         self.sm.track_task(1, "coding", "groq/llama", 0.05, 1000)
@@ -410,7 +413,10 @@ class TestAutonomousLoopControl(unittest.TestCase):
 
     def test_pause_resume_flow(self):
         from tools.autonomous_loop import (
-            LoopState, _active_loops, pause_loop, resume_loop,
+            LoopState,
+            _active_loops,
+            pause_loop,
+            resume_loop,
         )
         state = LoopState(goal="test", status="running")
         _active_loops[42] = state

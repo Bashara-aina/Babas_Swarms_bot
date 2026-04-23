@@ -26,9 +26,9 @@ from typing import Callable, Coroutine, TypeVar
 
 from legion.anti_slop.core import (
     QualityResult,
-    run_quality_gate,
-    quarantine_response,
     get_slop_stats,
+    quarantine_response,
+    run_quality_gate,
 )
 
 logger = logging.getLogger(__name__)

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import time
-from llm_client import chat
+
 from core.structured_outputs import ConversationResult, ConversationTurn
+from llm_client import chat
 
 
 async def run_ag2_conversation(task: str, max_turns: int = 10) -> ConversationResult:

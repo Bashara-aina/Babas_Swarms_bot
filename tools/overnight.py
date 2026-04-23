@@ -21,7 +21,7 @@ import json
 import logging
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Optional
@@ -374,7 +374,7 @@ async def _execute_single_task(
 
     agent_key = task.agent
     # BUG FIX: guard against unknown agent keys (e.g. typos from LLM planner)
-    model = AGENT_MODELS.get(agent_key) or AGENT_MODELS.get("general", "groq/llama-3.3-70b-versatile")
+    model = AGENT_MODELS.get(agent_key) or AGENT_MODELS.get("general", "minimax/MiniMax-Text-01")
     system = build_system_prompt(
         f"You are the {agent_key} specialist in an overnight autonomous job. "
         "Work carefully and thoroughly — there's no user to ask follow-up questions. "

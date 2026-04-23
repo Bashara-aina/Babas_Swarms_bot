@@ -9,7 +9,7 @@ from pathlib import Path
 # Add skills path
 sys.path.insert(0, str(Path(__file__).parent.parent / "skills"))
 
-from swarm import select_capabilities, estimate_complexity, get_capability_description, CAPABILITY_TOKENS
+from swarm import CAPABILITY_TOKENS, estimate_complexity, get_capability_description, select_capabilities
 
 
 def main():

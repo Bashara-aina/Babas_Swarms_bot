@@ -5,6 +5,7 @@ Supports: access/refresh tokens, password hashing, role-based access.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -13,7 +14,6 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-import os
 
 SECRET_KEY = os.getenv("SECRET_KEY", "changeme-in-production")
 ALGORITHM = "HS256"

@@ -7,19 +7,19 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "Decision to build cekwajar.id on Next.js 15 App Router, Supabase PostgreSQL with Row Level Security, Vercel deployment, and markitdown for document conversion. Rationale: Next.js 15 provides SSR+API routes in one framework; Supabase RLS enforces user data isolation; Vercel is native Next.js host with edge functions; markitdown handles PDF/DOCX conversion reliably. Individual Midtrans merchant account enables IDR 29K/79K/month subscription payments."
 wikilinks:
-  - [[projects/cekwajar-id]]
-  - [[entities/supabase]]
-  - [[entities/openrouter]]
-  - [[architecture/cekwajar-verdict-engine]]
+ - [[projects/cekwajar-id]]
+ - [[entities/supabase]]
+ - [[entities/openrouter]]
+ - [[architecture/cekwajar-verdict-engine]]
 confidence: high
 source: implementation
 ---
 
 # ADR-2026-04-13: cekwajar.id Tech Stack
 
-**Date**: 2026-04-13  
-**Status**: DECIDED  
-**Decider**: Founder  
+**Date**: 2026-04-13 
+**Status**: DECIDED 
+**Decider**: Founder 
 **Stack Components**: Next.js 15 + Supabase + Vercel + markitdown + Midtrans
 
 ---
@@ -54,7 +54,7 @@ As a solo founder with limited ops capacity, avoiding server management, Kuberne
 
 | Technology | Reason for Exclusion |
 |------------|---------------------|
-| AWS Lambda单独的 | Vercel edge functions sufficient; avoids AWS complexity |
+| AWS Lambda | Vercel edge functions sufficient; avoids AWS complexity |
 | Amazon Textract | Google Vision Document AI has better table/form handling for payslips |
 | Heroku | Deprecated pipeline; Vercel superior for Next.js |
 | DigitalOcean App Platform | Less Next.js native support than Vercel |
@@ -137,19 +137,19 @@ As a solo founder with limited ops capacity, avoiding server management, Kuberne
 ```sql
 -- Users can only read their own submissions
 CREATE POLICY "users_read_own_submissions" ON payslip_submissions
-    FOR SELECT USING (auth.uid() = user_id);
+ FOR SELECT USING (auth.uid() = user_id);
 
 -- Users can only insert their own submissions
 CREATE POLICY "users_insert_own" ON payslip_submissions
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+ FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Verdict is readable only by submission owner
 CREATE POLICY "users_read_own_verdicts" ON payslip_verdicts
-    FOR SELECT USING (auth.uid() = user_id);
+ FOR SELECT USING (auth.uid() = user_id);
 
 -- Anonymized benchmark data is publicly readable (no PII)
 CREATE POLICY "public_read_benchmarks" ON salary_benchmarks
-    FOR SELECT USING (true);
+ FOR SELECT USING (true);
 ```
 
 ### Vercel Deployment
@@ -165,8 +165,8 @@ CREATE POLICY "public_read_benchmarks" ON salary_benchmarks
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...    # Frontend only
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...       # Server-side only, NEVER exposed
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc... # Frontend only
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc... # Server-side only, NEVER exposed
 MIDTRANS_SERVER_KEY=xxx
 MIDTRANS_CLIENT_KEY=xxx
 GOOGLE_CLOUD_VISION_API_KEY=xxx
@@ -195,10 +195,10 @@ GOOGLE_CLOUD_VISION_API_KEY=xxx
 **Webhook Events to Handle**:
 ```typescript
 // Critical webhook events
-'payment.success'     → activate subscription
-'payment.failed'      → retry (Day 1, 3, 7), then downgrade to free  
-'payment.expired'     → downgrade to free, win-back email
-'subscription.cancel'  → log cancellation reason
+'payment.success' → activate subscription
+'payment.failed' → retry (Day 1, 3, 7), then downgrade to free 
+'payment.expired' → downgrade to free, win-back email
+'subscription.cancel' → log cancellation reason
 ```
 
 ---
@@ -218,12 +218,12 @@ Per UU PDP Pasal 28 (data retention), payslip files must be deleted when no long
 ```sql
 -- pg_cron job: delete payslip files older than 30 days
 SELECT cron.schedule(
-    'delete-old-payslips',
-    '0 2 * * *',  -- 2 AM every day
-    $$
-    DELETE FROM payslip_files 
-    WHERE created_at < NOW() - INTERVAL '30 days';
-    $$
+ 'delete-old-payslips',
+ '0 2 * * *', -- 2 AM every day
+ $$
+ DELETE FROM payslip_files 
+ WHERE created_at < NOW() - INTERVAL '30 days';
+ $$
 );
 ```
 
@@ -241,7 +241,7 @@ Company name → industry + size category (after 90 days). NIK (if on payslip) �
 - Vercel preview deployments enable Legion review workflow
 - Midtrans individual account enables fast payment launch
 
-### Negative  
+### Negative 
 - Vendor lock-in to Supabase + Vercel
 - Vercel cold starts on serverless functions (mitigate with edge caching)
 - markitdown may struggle with scanned PDFs (mitigate with Google Vision primary)

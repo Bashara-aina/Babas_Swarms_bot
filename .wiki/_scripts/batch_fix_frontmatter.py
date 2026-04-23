@@ -20,10 +20,11 @@ source: conversation | research | implementation | external
 
 import os
 import re
-import yaml
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 from typing import Optional
+
+import yaml
 
 WIKI_ROOT = Path("/home/newadmin/swarm-bot/.wiki")
 FRONTMATTER_REQUIRED = {"title", "type", "status", "tags", "created", "updated", "summary"}

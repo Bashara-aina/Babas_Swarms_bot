@@ -33,11 +33,11 @@ logger = logging.getLogger(__name__)
 
 # ── Optional Composio import (graceful if not installed) ─────────────────────
 try:
-    from composio_langchain import ComposioToolSet, App, Action
+    from composio_langchain import Action, App, ComposioToolSet
     _COMPOSIO_AVAILABLE = True
 except ImportError:
     try:
-        from composio import ComposioToolSet, App, Action  # type: ignore
+        from composio import Action, App, ComposioToolSet  # type: ignore
         _COMPOSIO_AVAILABLE = True
     except ImportError:
         _COMPOSIO_AVAILABLE = False
@@ -85,7 +85,7 @@ async def gmail_list_unread(max_results: int = 10) -> list[dict[str, Any]]:
         ts = get_toolset()
         if not ts:
             return []
-        tools = ts.get_tools(actions=[Action.GMAIL_LIST_THREADS])
+        ts.get_tools(actions=[Action.GMAIL_LIST_THREADS])
         # Execute via the tool directly
         result = ts.execute_action(
             action=Action.GMAIL_LIST_THREADS,

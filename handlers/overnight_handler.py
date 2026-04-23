@@ -18,8 +18,8 @@ import asyncio
 import logging
 
 from aiogram import Router
-from aiogram.types import Message, BufferedInputFile
 from aiogram.filters import Command
+from aiogram.types import BufferedInputFile, Message
 
 from handlers.shared import is_allowed
 
@@ -72,8 +72,8 @@ async def cmd_overnight(msg: Message) -> None:
 
     try:
         from llm_client import simple_llm_call
-        from tools.overnight import plan_job_with_llm, create_job, run_overnight_job, AGENT_STATUS
         from tools.dashboard import build_ascii_dashboard
+        from tools.overnight import AGENT_STATUS, create_job, plan_job_with_llm, run_overnight_job
 
         task_dicts = await plan_job_with_llm(goal, simple_llm_call)
 
@@ -144,8 +144,8 @@ async def cmd_overnight(msg: Message) -> None:
 async def cmd_overnight_status(msg: Message) -> None:
     if not _auth(msg):
         return
-    from tools.overnight import get_active_job_id, get_job_tasks, AGENT_STATUS
     from tools.dashboard import build_ascii_dashboard
+    from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
 
     job_id = get_active_job_id()
     if not job_id:
@@ -169,7 +169,7 @@ async def cmd_overnight_status(msg: Message) -> None:
 async def cmd_overnight_cancel(msg: Message) -> None:
     if not _auth(msg):
         return
-    from tools.overnight import get_active_job_id, cancel_job
+    from tools.overnight import cancel_job, get_active_job_id
 
     job_id = get_active_job_id()
     if not job_id:
@@ -227,8 +227,8 @@ async def cmd_overnight_jobs(msg: Message) -> None:
 async def cmd_dashboard(msg: Message) -> None:
     if not _auth(msg):
         return
-    from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
     from tools.dashboard import build_ascii_dashboard
+    from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
 
     job_id = get_active_job_id()
     tasks = get_job_tasks(job_id) if job_id else None
@@ -248,8 +248,8 @@ async def cmd_dashboard(msg: Message) -> None:
 async def cmd_dashboard_png(msg: Message) -> None:
     if not _auth(msg):
         return
+    from tools.dashboard import build_ascii_dashboard, build_png_dashboard
     from tools.overnight import AGENT_STATUS, get_active_job_id, get_job_tasks
-    from tools.dashboard import build_png_dashboard, build_ascii_dashboard
 
     thinking = await msg.answer("📊 Rendering dashboard chart...")
 

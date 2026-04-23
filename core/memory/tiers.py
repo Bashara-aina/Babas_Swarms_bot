@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import aiosqlite
 import json
 from pathlib import Path
 from typing import Any
+
+import aiosqlite
 
 MEMORY_ROOT = Path.home() / ".legionswarm" / "memory"
 MEMORY_ROOT.mkdir(parents=True, exist_ok=True)

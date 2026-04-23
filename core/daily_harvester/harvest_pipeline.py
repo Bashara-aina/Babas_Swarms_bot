@@ -179,7 +179,6 @@ class HarvestPipeline:
                 candidate_log["reason"] = "superseded"
                 candidate_log["reason_detail"] = verdict.get("reasoning", "")[:200]
             else:
-                reason = f"Verdict: {verdict['verdict']} — {verdict.get('reasoning', 'no reason')}"
                 candidate_log["_rejected"] = True
                 candidate_log["decision"] = "rejected"
                 candidate_log["reason"] = verdict["verdict"].value.lower()

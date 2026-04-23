@@ -261,10 +261,11 @@ async def _execute_action(
     if action.is_dangerous and not pending_confirmations:
         return f"[BLOCKED] Dangerous action requires user confirmation: {action.command}"
 
-    computer_agent = None
     try:
         from computer_agent import (
             display as _display_mod,
+        )
+        from computer_agent import (
             shell as _shell_mod,
         )
     except ImportError:

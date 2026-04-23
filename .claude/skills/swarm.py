@@ -95,7 +95,7 @@ async def run_swarm(task: str, max_agents: int = 4) -> dict[str, Any]:
     sub_agent_count = estimate_complexity(task)
 
     # Build execution plan
-    task_tokens = tokenize(task)
+    tokenize(task)
     plan = {
         "task": task,
         "selected_capabilities": capabilities,
@@ -144,7 +144,7 @@ async def execute(task: str) -> str:
     result = await run_swarm(task)
 
     lines = [
-        f"## Swarm Plan",
+        "## Swarm Plan",
         f"**Task**: {result['plan']['task'][:100]}...",
         f"**Selected Capabilities** ({len(result['plan']['selected_capabilities'])}):",
     ]

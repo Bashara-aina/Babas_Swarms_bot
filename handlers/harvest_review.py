@@ -7,12 +7,15 @@ one-tap accept/reject feedback. Feedback is written immediately to
 
 from __future__ import annotations
 
+import asyncio
 import html
+import json
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
@@ -153,7 +156,7 @@ async def _mark_reviewed(
 async def _load_harvest_stats() -> dict[str, Any]:
     """Compute harvest statistics from the harvest log."""
     import re
-    from datetime import datetime, timezone, timedelta
+    from datetime import datetime, timedelta, timezone
 
     wiki_root = Path(__file__).resolve().parent.parent.parent / ".wiki" / "legion" / "harvester"
     log_file = wiki_root / "harvest-log.md"
@@ -257,7 +260,7 @@ async def cmd_harvest_stats(message: Message) -> None:
     acceptance_rate = (accepted / total * 100) if total > 0 else 0
 
     lines = [
-        f"📊 <b>Harvest Stats</b> (last 30 days)\n",
+        "📊 <b>Harvest Stats</b> (last 30 days)\n",
         f"Total reviewed: {total} | ✅ {accepted} | ❌ {rejected} | "
         f"Accept rate: <b>{acceptance_rate:.0f}%</b>\n",
         "<b>By source:</b>",

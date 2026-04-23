@@ -145,7 +145,7 @@ class Scorer:
         to apply to the current bias vector.
         """
         import re
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
 
         if log_path is None:
             repo_root = Path(__file__).resolve().parent.parent.parent

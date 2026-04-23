@@ -18,30 +18,31 @@ Usage:
 
 from __future__ import annotations
 
-import aiosqlite
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import aiosqlite
+
 
 class TemporalKnowledgeGraph:
     """
     SQLite-backed temporal knowledge graph for fact storage and validation.
-    
+
     Facts are stored as (subject, predicate, object, timestamp) quadruples
     with an optional confidence score. This enables:
     - Query by subject/predicate/object pattern
     - Validation against stored facts
     - Temporal reasoning (facts have timestamps)
-    
+
     The graph uses SQLite for persistence and aiosqlite for async operations.
     """
 
     def __init__(self, db_path: str = "data/temporal_graph.db"):
         """
         Initialize the TemporalKnowledgeGraph.
-        
+
         Args:
             db_path: Path to SQLite database file. Use ":memory:" for RAM-only.
         """
@@ -53,15 +54,15 @@ class TemporalKnowledgeGraph:
         """Ensure database is initialized (create tables if needed)."""
         if self._init_done:
             return
-        
+
         # Ensure parent directory exists
         db_dir = Path(self.db_path).parent
         if db_dir != Path(".") and not db_dir.exists():
             db_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self._conn = await aiosqlite.connect(self.db_path)
         self._conn.row_factory = aiosqlite.Row
-        
+
         await self._conn.execute("""
             CREATE TABLE IF NOT EXISTS facts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,7 +76,7 @@ class TemporalKnowledgeGraph:
                 created_at TEXT NOT NULL
             )
         """)
-        
+
         await self._conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_facts_subject ON facts(subject)
         """)
@@ -85,7 +86,7 @@ class TemporalKnowledgeGraph:
         await self._conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_facts_timestamp ON facts(timestamp)
         """)
-        
+
         await self._conn.commit()
         self._init_done = True
 
@@ -107,7 +108,7 @@ class TemporalKnowledgeGraph:
     ) -> int:
         """
         Add a fact to the knowledge graph (async, returns coroutine).
-        
+
         Args:
             subject: The subject entity (e.g., "Bashara")
             predicate: The relationship (e.g., "lives_in")
@@ -116,7 +117,7 @@ class TemporalKnowledgeGraph:
             confidence: Confidence score 0.0-1.0 (default 1.0)
             source: Source document or agent that provided this fact
             metadata: Optional dict of additional properties
-        
+
         Returns:
             Coroutine that resolves to the row ID of the inserted fact
         """
@@ -125,7 +126,7 @@ class TemporalKnowledgeGraph:
             ts = timestamp or datetime.now(timezone.utc).isoformat()
             created = datetime.now(timezone.utc).isoformat()
             meta_json = json.dumps(metadata) if metadata else None
-            
+
             cursor = await conn.execute(
                 """
                 INSERT INTO facts (subject, predicate, object, timestamp, confidence, source, metadata, created_at)
@@ -135,7 +136,7 @@ class TemporalKnowledgeGraph:
             )
             await conn.commit()
             return cursor.lastrowid or 0
-        
+
         return _add()
 
     def query(
@@ -148,23 +149,23 @@ class TemporalKnowledgeGraph:
     ) -> list[dict[str, Any]]:
         """
         Query facts matching the given pattern (async, returns coroutine).
-        
+
         Args:
             subject: Filter by subject (None = any)
             predicate: Filter by predicate (None = any)
             object: Filter by object (None = any)
             since: Only return facts since this ISO timestamp
             limit: Maximum number of results (default 100)
-        
+
         Returns:
             Coroutine that resolves to list of fact dicts
         """
         async def _query() -> list[dict[str, Any]]:
             conn = await self._get_conn()
-            
+
             conditions = []
             params: list[Any] = []
-            
+
             if subject is not None:
                 conditions.append("subject = ?")
                 params.append(subject)
@@ -177,9 +178,9 @@ class TemporalKnowledgeGraph:
             if since is not None:
                 conditions.append("timestamp >= ?")
                 params.append(since)
-            
+
             where_clause = " AND ".join(conditions) if conditions else "1=1"
-            
+
             cursor = await conn.execute(
                 f"""
                 SELECT id, subject, predicate, object, timestamp, confidence, source, metadata, created_at
@@ -191,7 +192,7 @@ class TemporalKnowledgeGraph:
                 [*params, limit],
             )
             rows = await cursor.fetchall()
-            
+
             return [
                 {
                     "id": row["id"],
@@ -206,7 +207,7 @@ class TemporalKnowledgeGraph:
                 }
                 for row in rows
             ]
-        
+
         return _query()
 
     def validate_fact(
@@ -218,23 +219,23 @@ class TemporalKnowledgeGraph:
     ) -> tuple[bool, float]:
         """
         Validate whether a fact is stored in the KG with sufficient confidence.
-        
+
         Returns (is_valid, max_confidence) where:
         - is_valid: True if fact exists with confidence >= min_confidence
         - max_confidence: Highest confidence among matching facts
-        
+
         Args:
             subject: Subject to validate
             predicate: Predicate to validate
             object: Optional object to validate (None = check any object for this subject+predicate)
             min_confidence: Minimum confidence threshold (default 0.7)
-        
+
         Returns:
             Coroutine that resolves to (bool, float) tuple
         """
         async def _validate() -> tuple[bool, float]:
             conn = await self._get_conn()
-            
+
             if object is not None:
                 cursor = await conn.execute(
                     """
@@ -253,14 +254,14 @@ class TemporalKnowledgeGraph:
                     """,
                     (subject, predicate, min_confidence),
                 )
-            
+
             row = await cursor.fetchone()
             if row is None or row["max_conf"] is None:
                 return False, 0.0
-            
+
             max_conf = float(row["max_conf"])
             return max_conf >= min_confidence, max_conf
-        
+
         return _validate()
 
     async def close(self) -> None:

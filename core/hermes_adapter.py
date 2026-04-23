@@ -570,8 +570,8 @@ async def hermes_delegate(
     Returns:
         Subagent's final summary response
     """
-    from tools.delegate_tool import _build_child_system_prompt, check_delegate_requirements
     from model_tools import get_tool_definitions, handle_function_call
+    from tools.delegate_tool import _build_child_system_prompt, check_delegate_requirements
 
     toolsets = toolsets or ["terminal", "file", "web"]
 

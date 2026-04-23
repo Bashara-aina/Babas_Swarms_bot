@@ -61,26 +61,26 @@ import { Redis } from '@upstash/redis';
 
 // For Supabase Edge Functions or Serverless
 const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
-  analytics: true,
-  prefix: 'ratelimit:api',
+ redis: Redis.fromEnv(),
+ limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10 seconds
+ analytics: true,
+ prefix: 'ratelimit:api',
 });
 
 export async function checkRateLimit(identifier: string) {
-  const result = await ratelimit.limit(identifier);
-  
-  return {
-    success: result.success,
-    remaining: result.remaining,
-    reset: result.reset,
-    headers: {
-      'X-RateLimit-Limit': '10',
-      'X-RateLimit-Remaining': result.remaining.toString(),
-      'X-RateLimit-Reset': result.reset.toString(),
-      'Retry-After': result.retryAfter?.toString() || '0',
-    },
-  };
+ const result = await ratelimit.limit(identifier);
+ 
+ return {
+ success: result.success,
+ remaining: result.remaining,
+ reset: result.reset,
+ headers: {
+ 'X-RateLimit-Limit': '10',
+ 'X-RateLimit-Remaining': result.remaining.toString(),
+ 'X-RateLimit-Reset': result.reset.toString(),
+ 'Retry-After': result.retryAfter?.toString() || '0',
+ },
+ };
 }
 ```
 
@@ -94,37 +94,37 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
-  const ip = request.headers.get('x-forwarded-for') || 'anonymous';
-  
-  // Rate limit by IP for anonymous, by user ID for authenticated
-  const identifier = ip;
-  const { success, headers, remaining } = await checkRateLimit(identifier);
-  
-  if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers }
-    );
-  }
-  
-  // Continue with authenticated request
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-      },
-    }
-  );
-  
-  const { data: employees } = await supabase
-    .from('employees')
-    .select('*')
-    .order('created_at', { ascending: false });
-    
-  return NextResponse.json({ employees }, { headers });
+ const ip = request.headers.get('x-forwarded-for') || 'anonymous';
+ 
+ // Rate limit by IP for anonymous, by user ID for authenticated
+ const identifier = ip;
+ const { success, headers, remaining } = await checkRateLimit(identifier);
+ 
+ if (!success) {
+ return NextResponse.json(
+ { error: 'Too many requests' },
+ { status: 429, headers }
+ );
+ }
+ 
+ // Continue with authenticated request
+ const cookieStore = await cookies();
+ const supabase = createServerClient(
+ process.env.NEXT_PUBLIC_SUPABASE_URL!,
+ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+ {
+ cookies: {
+ getAll: () => cookieStore.getAll(),
+ },
+ }
+ );
+ 
+ const { data: employees } = await supabase
+ .from('employees')
+ .select('*')
+ .order('created_at', { ascending: false });
+ 
+ return NextResponse.json({ employees }, { headers });
 }
 ```
 
@@ -147,50 +147,50 @@ For Supabase, you can also implement rate limiting via database functions:
 ```sql
 -- Create rate limiting table
 CREATE TABLE IF NOT EXISTS api_usage (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id),
-  endpoint text not null,
-  request_count int default 1,
-  window_start timestamptz default now(),
-  unique(user_id, endpoint, window_start)
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid references auth.users(id),
+ endpoint text not null,
+ request_count int default 1,
+ window_start timestamptz default now(),
+ unique(user_id, endpoint, window_start)
 );
 
 -- Function to check and increment usage
 CREATE OR REPLACE FUNCTION check_api_limit(
-  p_user_id uuid,
-  p_endpoint text,
-  p_limit int DEFAULT 100,
-  p_window interval DEFAULT '1 hour'
+ p_user_id uuid,
+ p_endpoint text,
+ p_limit int DEFAULT 100,
+ p_window interval DEFAULT '1 hour'
 ) RETURNS boolean
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  current_count int;
+ current_count int;
 BEGIN
-  -- Get current count for user/endpoint in window
-  SELECT request_count INTO current_count
-  FROM api_usage
-  WHERE user_id = p_user_id
-    AND endpoint = p_endpoint
-    AND window_start > now() - p_window;
-  
-  IF current_count IS NULL THEN
-    -- First request in window
-    INSERT INTO api_usage (user_id, endpoint)
-    VALUES (p_user_id, p_endpoint);
-    RETURN TRUE;
-  ELSIF current_count < p_limit THEN
-    -- Increment count
-    UPDATE api_usage
-    SET request_count = request_count + 1
-    WHERE user_id = p_user_id
-      AND endpoint = p_endpoint
-      AND window_start > now() - p_window;
-    RETURN TRUE;
-  ELSE
-    -- Limit exceeded
-    RETURN FALSE;
-  END IF;
+ -- Get current count for user/endpoint in window
+ SELECT request_count INTO current_count
+ FROM api_usage
+ WHERE user_id = p_user_id
+ AND endpoint = p_endpoint
+ AND window_start > now() - p_window;
+ 
+ IF current_count IS NULL THEN
+ -- First request in window
+ INSERT INTO api_usage (user_id, endpoint)
+ VALUES (p_user_id, p_endpoint);
+ RETURN TRUE;
+ ELSIF current_count < p_limit THEN
+ -- Increment count
+ UPDATE api_usage
+ SET request_count = request_count + 1
+ WHERE user_id = p_user_id
+ AND endpoint = p_endpoint
+ AND window_start > now() - p_window;
+ RETURN TRUE;
+ ELSE
+ -- Limit exceeded
+ RETURN FALSE;
+ END IF;
 END;
 $$;
 
@@ -199,7 +199,7 @@ CREATE POLICY "Rate limited employee access"
 ON employees FOR SELECT
 TO authenticated
 USING (
-  check_api_limit(auth.uid(), 'employees', 100, '1 hour'::interval)
+ check_api_limit(auth.uid(), 'employees', 100, '1 hour'::interval)
 );
 ```
 
@@ -214,34 +214,34 @@ import type { NextRequest } from 'next/server';
 const ipRequests = new Map<string, { count: number; reset: number }>();
 
 export function middleware(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') || 'anonymous';
-  const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minute
-  const maxRequests = 60; // 60 per minute
-  
-  const record = ipRequests.get(ip);
-  
-  if (record) {
-    // Reset if window passed
-    if (now > record.reset) {
-      ipRequests.set(ip, { count: 1, reset: now + windowMs });
-    } else if (record.count >= maxRequests) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Too many requests' }),
-        { status: 429, headers: { 'Content-Type': 'application/json' } }
-      );
-    } else {
-      record.count++;
-    }
-  } else {
-    ipRequests.set(ip, { count: 1, reset: now + windowMs });
-  }
-  
-  return NextResponse.next();
+ const ip = request.headers.get('x-forwarded-for') || 'anonymous';
+ const now = Date.now();
+ const windowMs = 60 * 1000; // 1 minute
+ const maxRequests = 60; // 60 per minute
+ 
+ const record = ipRequests.get(ip);
+ 
+ if (record) {
+ // Reset if window passed
+ if (now > record.reset) {
+ ipRequests.set(ip, { count: 1, reset: now + windowMs });
+ } else if (record.count >= maxRequests) {
+ return new NextResponse(
+ JSON.stringify({ error: 'Too many requests' }),
+ { status: 429, headers: { 'Content-Type': 'application/json' } }
+ );
+ } else {
+ record.count++;
+ }
+ } else {
+ ipRequests.set(ip, { count: 1, reset: now + windowMs });
+ }
+ 
+ return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+ matcher: ['/api/:path*'],
 };
 ```
 
@@ -252,28 +252,28 @@ Always return proper 429 responses:
 ```typescript
 // Consistent error format
 function rateLimitExceeded(retryAfter: number) {
-  return NextResponse.json(
-    {
-      error: 'Too Many Requests',
-      message: 'API rate limit exceeded. Please slow down.',
-      retryAfter,
-    },
-    {
-      status: 429,
-      headers: {
-        'Retry-After': retryAfter.toString(),
-        'X-RateLimit-Limit': '60',
-        'X-RateLimit-Remaining': '0',
-      },
-    }
-  );
+ return NextResponse.json(
+ {
+ error: 'Too Many Requests',
+ message: 'API rate limit exceeded. Please slow down.',
+ retryAfter,
+ },
+ {
+ status: 429,
+ headers: {
+ 'Retry-After': retryAfter.toString(),
+ 'X-RateLimit-Limit': '60',
+ 'X-RateLimit-Remaining': '0',
+ },
+ }
+ );
 }
 ```
 
 ## Edge Cases and Common Mistakes
 
 ### Common Mistakes
-1. **No rate limiting on auth endpoints**: Login/signup是最常见的攻击面
+1. **No rate limiting on auth endpoints**: Login/signup
 2. **Rate limits too aggressive**: Users get locked out
 3. **Not returning 429**: Silently failing doesn't help clients
 4. **IP spoofing**: Don't trust x-forwarded-for without validation

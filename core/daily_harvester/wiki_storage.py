@@ -255,7 +255,6 @@ class WikiStorage:
 
         session_id = str(uuid.uuid4())[:8]
         candidates_reviewed = []
-        pending = []
 
         if candidates:
             for c in candidates:
@@ -284,7 +283,7 @@ class WikiStorage:
             f"title: harvest-session-{date}-{session_id}",
             "type: timeline",
             "status: active",
-            f"tags: [legion, harvester, harvest-session]",
+            "tags: [legion, harvester, harvest-session]",
             f"created: {date}",
             f"updated: {date}",
             f"summary: Harvest session — {accepted_count} accepted, {rejected_count} rejected, {pending_count} pending",

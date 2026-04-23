@@ -7,11 +7,11 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "cekwajar.id (meaning 'is it fair?' in Indonesian) is a wage fairness platform for Indonesian workers launching with Wajar Slip MVP: a payslip compliance auditor that verifies PPh21 TER, progressive tax, and 6-component BPJS deductions against regulatory formulas. Built with Next.js 15 App Router, Supabase PostgreSQL with Row Level Security, and Vercel deployment. Freemium model at IDR 29K Basic / IDR 79K Pro per month. Target: May 2026 launch with 136 engineering hours. Kill criteria: less than 0.5% conversion at Month 3 or any confirmed PPh21 calculation error."
 wikilinks:
-  - [[./entities/supabase]]
-  - [[architecture/cekwajar-tech-stack]]
-  - [[./concepts/freemium-gate]]
-  - [[architecture/cekwajar-verdict-engine]]
-  - [[projects/rumahlabuh-com]]
+ - [[./entities/supabase]]
+ - [[architecture/cekwajar-tech-stack]]
+ - [[./concepts/freemium-gate]]
+ - [[architecture/cekwajar-verdict-engine]]
+ - [[projects/rumahlabuh-com]]
 confidence: high
 source: implementation
 ---
@@ -96,35 +96,35 @@ cekWajar.id's long-term roadmap spans 5 distinct fairness tools, each addressing
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         USER (Mobile/Web)                        │
+│ USER (Mobile/Web) │
 └─────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼ HTTPS
+ │
+ ▼ HTTPS
 ┌─────────────────────────────────────────────────────────────────┐
-│                     VERCEL EDGE NETWORK                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │  Static/SSR  │  │  API Routes  │  │  Edge Fns   │          │
-│  │  (Landing)   │  │  (Verdict)   │  │  (OCR prep) │          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│ VERCEL EDGE NETWORK │
+│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+│ │ Static/SSR │ │ API Routes │ │ Edge Fns │ │
+│ │ (Landing) │ │ (Verdict) │ │ (OCR prep) │ │
+│ └──────────────┘ └──────────────┘ └──────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
-                    │                    │
-                    ▼                    ▼
-┌──────────────────────────┐  ┌──────────────────────────┐
-│     SUPABASE (ap-southeast-1) │  │   GOOGLE CLOUD VISION  │
-│  ┌──────────────────────┐  │  │   (OCR Processing)      │
-│  │  PostgreSQL + RLS    │  │  └──────────────────────────┘
-│  │  Auth + anon keys    │  │
-│  │  Storage (payslips)  │  │
-│  │  pg_cron (30-day     │  │
-│  │  auto-delete)        │  │
-│  └──────────────────────┘  │
+ │ │
+ ▼ ▼
+┌──────────────────────────┐ ┌──────────────────────────┐
+│ SUPABASE (ap-southeast-1) │ │ GOOGLE CLOUD VISION │
+│ ┌──────────────────────┐ │ │ (OCR Processing) │
+│ │ PostgreSQL + RLS │ │ └──────────────────────────┘
+│ │ Auth + anon keys │ │
+│ │ Storage (payslips) │ │
+│ │ pg_cron (30-day │ │
+│ │ auto-delete) │ │
+│ └──────────────────────┘ │
 └──────────────────────────────┘
-                    │
-                    ▼
+ │
+ ▼
 ┌──────────────────────────┐
-│       MIDTRANS           │
-│   (Payment Processing)   │
-│   IDR 29K/79K/month      │
+│ MIDTRANS │
+│ (Payment Processing) │
+│ IDR 29K/79K/month │
 └──────────────────────────┘
 ```
 
@@ -133,49 +133,49 @@ cekWajar.id's long-term roadmap spans 5 distinct fairness tools, each addressing
 ```sql
 -- Payslip submissions (anonymized after 90 days)
 CREATE TABLE payslip_submissions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id),
-    period TEXT NOT NULL,  -- "2026-04"
-    gaji_pokok BIGINT NOT NULL,
-    tunjangan JSONB DEFAULT '{}',
-    bpjs_extracted JSONB,
-    pph21_extracted BIGINT,
-    net_salary BIGINT NOT NULL,
-    city TEXT NOT NULL,
-    company_industry TEXT,
-    ocr_confidence FLOAT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ user_id UUID REFERENCES auth.users(id),
+ period TEXT NOT NULL, -- "2026-04"
+ gaji_pokok BIGINT NOT NULL,
+ tunjangan JSONB DEFAULT '{}',
+ bpjs_extracted JSONB,
+ pph21_extracted BIGINT,
+ net_salary BIGINT NOT NULL,
+ city TEXT NOT NULL,
+ company_industry TEXT,
+ ocr_confidence FLOAT,
+ created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Payslip verdicts (permanent, no raw image reference)
 CREATE TABLE payslip_verdicts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    submission_id UUID REFERENCES payslip_submissions(id),
-    user_id UUID REFERENCES auth.users(id),
-    calculation JSONB NOT NULL,  -- Full PPh21/BPJS calculations
-    violations JSONB DEFAULT '[]',
-    verdict_status TEXT NOT NULL,  -- COMPLIANT, VIOLATIONS_FOUND, BELOW_UMK
-    confidence_score INT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ submission_id UUID REFERENCES payslip_submissions(id),
+ user_id UUID REFERENCES auth.users(id),
+ calculation JSONB NOT NULL, -- Full PPh21/BPJS calculations
+ violations JSONB DEFAULT '[]',
+ verdict_status TEXT NOT NULL, -- COMPLIANT, VIOLATIONS_FOUND, BELOW_UMK
+ confidence_score INT,
+ created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Anonymized benchmark data (from payslip flywheel)
 CREATE TABLE salary_benchmarks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    province TEXT NOT NULL,
-    city TEXT,
-    job_category TEXT NOT NULL,
-    seniority_band TEXT DEFAULT 'mid',
-    salary_p50 BIGINT,
-    sample_size INT DEFAULT 0,
-    source TEXT DEFAULT 'payslip_flywheel',
-    created_at TIMESTAMPTZ DEFAULT NOW()
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ province TEXT NOT NULL,
+ city TEXT,
+ job_category TEXT NOT NULL,
+ seniority_band TEXT DEFAULT 'mid',
+ salary_p50 BIGINT,
+ sample_size INT DEFAULT 0,
+ source TEXT DEFAULT 'payslip_flywheel',
+ created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- RLS: Users can only read their own data
 ALTER TABLE payslip_submissions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users_own_submissions" ON payslip_submissions
-    FOR SELECT USING (auth.uid() = user_id);
+ FOR SELECT USING (auth.uid() = user_id);
 ```
 
 ---
@@ -312,7 +312,7 @@ Per ADR-2026-04-13-cekwajar-mvp-scope-lock, v1 excludes Wajar Gaji, Wajar Tanah,
 **Batch production**: Film 8-10 videos in one day per week. 12-15 hours/week total content time sustainable for solo founder.
 
 **Content pillars for Month 1-6**:
-1. **Salary reveal** (30%): "Gaji gue di [company类型] sekarang [amount] — wajar nggak?" — engagement bait, community building
+1. **Salary reveal** (30%): "Gaji gue di [company] sekarang [amount] — wajar nggak?" — engagement bait, community building
 2. **Violation proof** (20%): "Cek slip gue nemuin masalah [violation type] — ini cara gue nemuin" — trust building, conversion
 3. **Tutorial** (25%): "Step-by-step cek slip gajimu dalam 5 menit" — SEO value, trust, evergreen
 4. **Industry news** (15%): PPh21 regulation changes, UMK updates, BPJS cap changes — timely, shareable
@@ -483,14 +483,14 @@ Community strategy:
 
 ```
 Start (Bootstrap)
-  │
-  ├─► Month 6 revenue > IDR 50M/mo?
-  │     YES → Consider Angel (IDR 500M-1B for 10-15%)
-  │     NO  → Continue bootstrap
-  │
-  └─► Month 12 revenue > IDR 100M/mo?
-        YES → Consider Seed (IDR 3-5B for 15-20%)
-        NO  → Reassess or wind down
+ │
+ ├─► Month 6 revenue > IDR 50M/mo?
+ │ YES → Consider Angel (IDR 500M-1B for 10-15%)
+ │ NO → Continue bootstrap
+ │
+ └─► Month 12 revenue > IDR 100M/mo?
+ YES → Consider Seed (IDR 3-5B for 15-20%)
+ NO → Reassess or wind down
 ```
 
 ### Target Acquirers

@@ -1,7 +1,8 @@
 """Tests for swarms_bot/routing/cost_router.py — CostAwareRouter."""
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestCostAwareRouter:
@@ -71,7 +72,7 @@ class TestCostAwareRouter:
         from swarms_bot.routing.cost_router import CostAwareRouter
 
         router = CostAwareRouter()
-        cost = router.estimate_cost("test task", "groq/llama-3.3-70b-versatile")
+        cost = router.estimate_cost("test task", "minimax/MiniMax-Text-01")
         assert cost == 0.0
 
     def test_get_routing_stats_empty(self):
@@ -106,14 +107,14 @@ class TestClassifyComplexity:
 
     def test_classify_trivial(self):
         """Short non-technical phrases should be trivial."""
-        from swarms_bot.routing.cost_router import classify_complexity, TaskComplexity
+        from swarms_bot.routing.cost_router import TaskComplexity, classify_complexity
 
         result = classify_complexity("hi")
         assert result == TaskComplexity.TRIVIAL
 
     def test_classify_simple(self):
         """Basic questions should be simple or higher."""
-        from swarms_bot.routing.cost_router import classify_complexity, TaskComplexity
+        from swarms_bot.routing.cost_router import TaskComplexity, classify_complexity
 
         result = classify_complexity(
             "what is the difference between python and javascript in terms of "
@@ -123,14 +124,14 @@ class TestClassifyComplexity:
 
     def test_classify_complex_technical(self):
         """Multi-step technical tasks should be complex."""
-        from swarms_bot.routing.cost_router import classify_complexity, TaskComplexity
+        from swarms_bot.routing.cost_router import TaskComplexity, classify_complexity
 
         result = classify_complexity("first do X then Y then Z with docker and kubernetes deploy")
         assert result in (TaskComplexity.COMPLEX, TaskComplexity.EXPERT)
 
     def test_classify_expert_architecture(self):
         """Architecture + length should be expert."""
-        from swarms_bot.routing.cost_router import classify_complexity, TaskComplexity
+        from swarms_bot.routing.cost_router import TaskComplexity, classify_complexity
 
         result = classify_complexity(
             "design a comprehensive microservices architecture for a highly scalable distributed system "

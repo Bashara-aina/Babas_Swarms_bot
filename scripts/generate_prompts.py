@@ -6,6 +6,7 @@ Run from project root: python scripts/generate_prompts.py
 from __future__ import annotations
 
 from pathlib import Path
+
 import yaml
 
 STUB_TEMPLATE = """\

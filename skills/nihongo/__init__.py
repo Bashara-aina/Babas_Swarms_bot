@@ -1,14 +1,14 @@
 """Nihongo Mode — Isolated Japanese Teacher Plugin for Legion."""
 
-from skills.nihongo.mode_manager import NihongoModeManager, NihongoSession, NihongoSubMode
-from skills.nihongo.sensei_prompt import build_sensei_system_prompt, SenseiPromptBuilder
-from skills.nihongo.sensei_soul import SenseiSoul
-from skills.nihongo.srs_engine import SRSEngine, SRSCard
-from skills.nihongo.mastery_gate import MasteryGate, BloomLevel, MasteryRecord
-from skills.nihongo.immersion_world import ImmersionWorld, Location, Scenario
 from skills.nihongo.cultural_intel import CulturalIntel, CulturalNote, ImportanceLevel
+from skills.nihongo.immersion_world import ImmersionWorld, Location, Scenario
+from skills.nihongo.mastery_gate import BloomLevel, MasteryGate, MasteryRecord
+from skills.nihongo.mode_manager import NihongoModeManager, NihongoSession, NihongoSubMode
 from skills.nihongo.proactive_sensei import ProactiveSensei
-from skills.nihongo.shadow_engine import ShadowEngine, ShadowExercise, PhonemeRecord
+from skills.nihongo.sensei_prompt import SenseiPromptBuilder, build_sensei_system_prompt
+from skills.nihongo.sensei_soul import SenseiSoul
+from skills.nihongo.shadow_engine import PhonemeRecord, ShadowEngine, ShadowExercise
+from skills.nihongo.srs_engine import SRSCard, SRSEngine
 
 __all__ = [
     # Mode manager

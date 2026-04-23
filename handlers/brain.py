@@ -176,7 +176,7 @@ async def cmd_self_review(msg: Message) -> None:
         return
     await msg.answer("🧠 Running self-review now...")
     try:
-        from core.self_improvement import _run_self_review, _conversation_buffer
+        from core.self_improvement import _conversation_buffer, _run_self_review
 
         if not _conversation_buffer:
             await msg.answer("No conversations buffered yet for review.")

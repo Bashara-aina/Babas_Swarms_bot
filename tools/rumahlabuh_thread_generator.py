@@ -12,16 +12,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import random
 import re
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 CONFIG_PATH = Path(__file__).parent / "rumahlabuh_threads_v5.json"
-FACTS_PATH = Path(__file__).parent.parent / ".claude" / "scripts" / "rumahlabuh-facts.md"
+FACTS_JSON_PATH = Path(__file__).parent / "rumahlabuh_facts.json"
+FACTS_MD_PATH = Path(__file__).parent.parent / ".claude" / "scripts" / "rumahlabuh-facts.md"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -48,6 +50,161 @@ def _safe_choice(rng: random.Random, options: list[str], fallback: str) -> str:
     return rng.choice(options) if options else fallback
 
 
+@dataclass
+class ThreadFacts:
+    """Type-safe dataclass for rumahlabuh facts with lazy loading and mtime cache invalidation."""
+
+    price_min: str
+    city: str
+    area: str
+    facilities: list[str]
+    rooms: dict[str, dict[str, dict[str, str]]]
+    locations: dict[str, dict[str, Any]]
+    _cache_path: Path = field(default=FACTS_JSON_PATH, repr=False)
+    _cache_mtime: float | None = field(default=None, repr=False)
+    _facilities_data: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def load(cls, facts_path: Path = FACTS_JSON_PATH) -> "ThreadFacts":
+        """Load facts from JSON with mtime-based cache invalidation, fallback to .md."""
+        data: dict[str, Any] | None = None
+        current_mtime: float | None = None
+
+        # Try JSON first
+        if facts_path.exists():
+            current_mtime = facts_path.stat().st_mtime
+            try:
+                with open(facts_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                data = None
+
+        # Fallback to markdown
+        if data is None:
+            data = cls._load_from_md(FACTS_MD_PATH)
+            if data is not None:
+                current_mtime = FACTS_MD_PATH.stat().st_mtime if FACTS_MD_PATH.exists() else None
+
+        if data is None:
+            # Return defaults if everything fails
+            return cls(
+                price_min="Rp1.150.000",
+                city="Solo",
+                area="Kentingan",
+                facilities=["WiFi", "AC", "kamar mandi dalam", "parkir motor"],
+                rooms={},
+                locations={},
+            )
+
+        # Extract facilities - can be dict with "all" key or list
+        facilities_raw = data.get("facilities", {})
+        if isinstance(facilities_raw, dict):
+            facilities = facilities_raw.get("all", ["WiFi", "AC", "kamar mandi dalam", "parkir motor"])
+        elif isinstance(facilities_raw, list):
+            facilities = facilities_raw
+        else:
+            facilities = ["WiFi", "AC", "kamar mandi dalam", "parkir motor"]
+
+        return cls(
+            price_min=data.get("price_min", "Rp1.150.000"),
+            city=data.get("city", "Solo"),
+            area=data.get("area_default", "Kenting"),
+            facilities=facilities,
+            rooms=data.get("rooms", {}),
+            locations=data.get("locations", {}),
+            _facilities_data=facilities_raw if isinstance(facilities_raw, dict) else {},
+        )
+
+    @classmethod
+    def _load_from_md(cls, md_path: Path) -> dict[str, Any] | None:
+        """Parse facts from markdown fallback file."""
+        if not md_path.exists():
+            return None
+        try:
+            with open(md_path, "r", encoding="utf-8") as f:
+                text = f.read()
+            return cls._parse_md(text)
+        except (IOError, OSError):
+            return None
+
+    @classmethod
+    def _parse_md(cls, text: str) -> dict[str, Any]:
+        """Parse markdown content into structured facts dict."""
+        data: dict[str, Any] = {
+            "price_min": "Rp1.150.000",
+            "city": "Solo",
+            "area_default": "Kentingan",
+            "facilities": {"all": [], "labuh_biru": [], "labuh_banyu": []},
+            "rooms": {"labuh_biru": {}, "labuh_banyu": {}},
+            "locations": {},
+        }
+
+        current_section = ""
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                current_section = stripped[3:].strip().lower()
+            elif stripped.startswith("### "):
+                location_name = stripped[4:].strip()
+                if location_name in ("Labuh Biru", "Labuh Banyu"):
+                    key = "labuh_biru" if location_name == "Labuh Biru" else "labuh_banyu"
+                    data["locations"][location_name] = {"address": "", "kamar_count": 0, "tipe_count": 0, "features": []}
+            elif current_section == "harga" and "Bulanan mulai:" in stripped:
+                parts = stripped.split("Bulanan mulai:", 1)
+                if len(parts) > 1:
+                    data["price_min"] = parts[1].strip().split()[0]
+            elif stripped.startswith("-"):
+                facility = stripped.lstrip("-").strip()
+                if facility:
+                    if current_section == "fasilitas":
+                        if "semua kamar" in text[max(0, text.find(current_section) - 100):text.find(current_section)].lower():
+                            data["facilities"]["all"].append(facility)
+                        elif "labuh biru tambahan" in current_section:
+                            data["facilities"]["labuh_biru"].append(facility)
+                        elif "labuh banyu tambahan" in current_section:
+                            data["facilities"]["labuh_banyu"].append(facility)
+
+        if not data["facilities"]["all"]:
+            data["facilities"]["all"] = ["WiFi", "AC", "kamar mandi dalam", "parkir motor"]
+
+        return data
+
+    def get_room_price(self, room_name: str, duration: str) -> str:
+        """Get price for a room by name and duration (harian/mingguan/2_mingguan/bulanan)."""
+        for location_rooms in self.rooms.values():
+            if room_name in location_rooms:
+                prices = location_rooms[room_name]
+                # Normalize duration key
+                duration_key = duration.lower().replace("-", "_").replace(" ", "_")
+                if duration_key in prices:
+                    return prices[duration_key]
+                # Try direct match
+                if duration in prices:
+                    return prices[duration]
+        return "Rp1.250.000"
+
+    def get_location_facilities(self, location_name: str) -> list[str]:
+        """Get facilities for a specific location."""
+        location_lower = location_name.lower()
+        base_facilities = list(self.facilities)
+        for loc_key in self.locations.keys():
+            if loc_key.lower() == location_lower:
+                extra = self.locations.get(loc_key, {}).get("features", [])
+                return base_facilities + extra
+        return self.facilities
+
+    def reload_if_modified(self) -> "ThreadFacts":
+        """Reload facts if the file has been modified (mtime cache invalidation)."""
+        if not self._cache_path.exists():
+            return self
+
+        current_mtime = self._cache_path.stat().st_mtime
+        if self._cache_mtime is not None and current_mtime == self._cache_mtime:
+            return self  # Cache still valid
+
+        return ThreadFacts.load(self._cache_path)
+
+
 def _normalize(text: str) -> str:
     return " ".join(text.split()).strip()
 
@@ -55,7 +212,10 @@ def _normalize(text: str) -> str:
 def _first_question_text(post: str) -> str:
     if "?" not in post:
         return ""
-    return post.split("?", 1)[0].strip().lower()
+    text = post.split("?", 1)[0].strip().lower()
+    # Strip the "N/M " prefix from post numbering
+    text = re.sub(r"^\d+/\d+\s+", "", text)
+    return text
 
 
 def _count_numbered_items(post: str) -> int:
@@ -107,33 +267,28 @@ class GeneratorPaths:
 
 
 class FactsExtractor:
-    def __init__(self, facts_text: str):
-        self.text = facts_text
+    """Thin wrapper for backward compatibility - uses ThreadFacts internally."""
+
+    def __init__(self, facts_text: str = ""):
+        self._thread_facts = ThreadFacts.load()
 
     def get_price_min(self) -> str:
-        for line in self.text.splitlines():
-            if "Bulanan mulai" in line and ":" in line:
-                val = line.split(":", 1)[1].strip().split()[0]
-                return val.replace("**", "").replace("*", "")
-        return "Rp800rb"
+        return self._thread_facts.price_min
 
     def get_city(self) -> str:
-        return "Solo"
+        return self._thread_facts.city
 
     def get_area(self) -> str:
-        for candidate in ("Kentingan", "Jebres", "Banjarsari", "Laweyan", "Pabelan", "Mojosongo"):
-            if candidate.lower() in self.text.lower():
-                return candidate
-        return "Kentingan"
+        return self._thread_facts.area
 
     def get_facilities(self) -> list[str]:
-        facilities: list[str] = []
-        for line in self.text.splitlines():
-            if line.strip().startswith("-"):
-                val = line.strip().lstrip("-").strip()
-                if val:
-                    facilities.append(val)
-        return facilities[:10] if facilities else ["WiFi", "AC", "kamar mandi dalam", "parkir motor"]
+        return self._thread_facts.facilities
+
+    def get_room_price(self, room_name: str, duration: str) -> str:
+        return self._thread_facts.get_room_price(room_name, duration)
+
+    def get_location_facilities(self, location_name: str) -> list[str]:
+        return self._thread_facts.get_location_facilities(location_name)
 
 
 class HistoryStore:
@@ -182,12 +337,13 @@ class HistoryStore:
 
 
 class BlueprintGenerator:
-    def __init__(self, config: dict[str, Any], facts_text: str):
+    def __init__(self, config: dict[str, Any], facts_text: str = ""):
         self.config = config
         self.rules = config["rules"]
         self.language = config.get("language", {})
         self.generator_cfg = config.get("generator", {})
         self.facts = FactsExtractor(facts_text)
+        self.technique_weights = config.get("generator", {}).get("technique_weights", {})
 
         blueprint_path = Path(__file__).parent / self.generator_cfg.get("blueprint_file", "rumahlabuh_thread_blueprints.json")
         history_path = Path(__file__).parent / self.generator_cfg.get("history_file", "rumahlabuh_thread_history.json")
@@ -207,13 +363,23 @@ class BlueprintGenerator:
         pools = self.blueprint.get("pools", {})
         brand = self.rules["brand_mention"]["allowed"][0]
         def pick_and_render(key: str, fallback: str) -> str:
-            raw = _safe_choice(rng, pools.get(key, []), fallback)
+            options = pools.get(key, [])
+            if not options:
+                return _render_template(fallback, {"brand": brand})
+            raw = _safe_choice(rng, options, fallback)
             return _render_template(raw, {"brand": brand})
 
         facilities = self.facts.get_facilities()
         facility_1 = _safe_choice(rng, facilities, "WiFi")
         facility_2 = _safe_choice(rng, [x for x in facilities if x != facility_1], "AC")
         facility_3 = _safe_choice(rng, [x for x in facilities if x not in {facility_1, facility_2}], "kamar mandi dalam")
+
+        # Safe pool access with graceful fallback when pools are empty
+        def safe_pool_choice(pool_key: str, fallback: str) -> str:
+            options = pools.get(pool_key, [])
+            if options:
+                return _safe_choice(rng, options, fallback)
+            return fallback
 
         ctx = {
             "p1": p1,
@@ -225,13 +391,13 @@ class BlueprintGenerator:
             "facility_1": facility_1,
             "facility_2": facility_2,
             "facility_3": facility_3,
-            "pain_point": _safe_choice(rng, pools.get("pain_points", []), "foto listing beda dari realita"),
-            "pain_point_2": _safe_choice(rng, pools.get("pain_points_2", []), "biaya tambahan baru ketahuan belakangan"),
-            "insight": _safe_choice(rng, pools.get("insights", []), "yang bikin betah biasanya faktor harian, bukan cuma foto"),
-            "check_1": _safe_choice(rng, pools.get("checks", []), "cek kondisi kamar mandi"),
-            "check_2": _safe_choice(rng, pools.get("checks_2", []), "tanya aturan deposit"),
-            "check_3": _safe_choice(rng, pools.get("checks_3", []), "cek suasana jam malam"),
-            "landmark": _safe_choice(rng, pools.get("landmarks", []), "UNS"),
+            "pain_point": safe_pool_choice("pain_points", "foto listing beda dari realita"),
+            "pain_point_2": safe_pool_choice("pain_points_2", "biaya tambahan baru ketahuan belakangan"),
+            "insight": safe_pool_choice("insights", "yang bikin betah biasanya faktor harian, bukan cuma foto"),
+            "check_1": safe_pool_choice("checks", "cek kondisi kamar mandi"),
+            "check_2": safe_pool_choice("checks_2", "tanya aturan deposit"),
+            "check_3": safe_pool_choice("checks_3", "cek suasana jam malam"),
+            "landmark": safe_pool_choice("landmarks", "UNS"),
             "cta_soft": pick_and_render("cta_soft", "bisa cek opsi yang lebih rapi di {brand}"),
             "cta_soft_2": pick_and_render("cta_soft_2", "tinggal bandingin lokasi, budget, dan fasilitas"),
         }
@@ -250,31 +416,55 @@ class BlueprintGenerator:
             raise ValueError("No techniques found in blueprint")
 
         rotation = self.generator_cfg.get("rotation", {})
+
+        # Apply technique weight overrides from config if present
+        effective_techniques = []
+        for t in techniques:
+            t_copy = dict(t)
+            if t["name"] in self.technique_weights:
+                t_copy["weight"] = self.technique_weights[t["name"]]
+            effective_techniques.append(t_copy)
+
         if rotation.get("enabled", True):
-            names = [t["name"] for t in techniques]
+            names = [t["name"] for t in effective_techniques]
             base_idx = today.toordinal() % len(names)
             ordered = names[base_idx:] + names[:base_idx]
             recent = set(self.history.last_techniques(rotation.get("avoid_repeat_days", 7), today))
             candidate_name = next((n for n in ordered if n not in recent), ordered[0])
-            chosen = next(t for t in techniques if t["name"] == candidate_name)
+            chosen = next(t for t in effective_techniques if t["name"] == candidate_name)
             return chosen
 
-        total = sum(int(t.get("weight", 1)) for t in techniques)
+        # Weighted selection with overridden weights
+        total = sum(int(t.get("weight", 1)) for t in effective_techniques)
         pick = rng.randint(1, max(total, 1))
         acc = 0
-        for t in techniques:
+        for t in effective_techniques:
             acc += int(t.get("weight", 1))
             if pick <= acc:
                 return t
-        return techniques[0]
+        return effective_techniques[0]
 
-    def generate(self, today: date | None = None) -> dict[str, Any]:
+    def generate(self, seed: int | None = None, today: date | None = None) -> dict[str, Any]:
+        """Generate a thread with optional seed for reproducibility.
+
+        Args:
+            seed: Optional explicit seed for deterministic output. Same seed + date = same output.
+            today: Optional date for generation. Defaults to today.
+
+        Returns:
+            dict with success, thread, pronouns, technique, signature, date
+        """
         today = today or date.today()
         max_attempts = int(self.generator_cfg.get("max_attempts", 120))
         dedupe_window = int(self.generator_cfg.get("dedupe_window_days", 60))
 
         for attempt in range(max_attempts):
-            rng = random.Random(f"{today.isoformat()}:{attempt}")
+            # Use explicit seed if provided, otherwise fall back to date-based
+            if seed is not None:
+                rng = random.Random(seed + attempt)
+            else:
+                rng = random.Random(f"{today.isoformat()}:{attempt}")
+
             technique = self._select_technique(today, rng)
             p1, p2 = self._pick_pronouns(rng)
             ctx = self._build_context(rng, p1, p2)
@@ -486,17 +676,34 @@ def load_config() -> dict[str, Any]:
 
 
 def load_facts() -> str:
-    with open(FACTS_PATH, "r", encoding="utf-8") as f:
-        return f.read()
+    """Load facts text from markdown fallback file."""
+    if FACTS_MD_PATH.exists():
+        with open(FACTS_MD_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    return ""
 
 
-def generate_fresh_thread(save_history: bool = True) -> dict[str, Any]:
+def generate_fresh_thread(
+    seed: int | None = None,
+    today: date | None = None,
+    save_history: bool = True,
+) -> dict[str, Any]:
+    """Generate a fresh thread with optional seed and date.
+
+    Args:
+        seed: Optional explicit seed for deterministic output.
+        today: Optional date for generation. Defaults to today.
+        save_history: Whether to save to history.
+
+    Returns:
+        dict with success, thread, pronouns, technique, signature, date
+    """
     config = load_config()
     facts_text = load_facts()
     generator = BlueprintGenerator(config, facts_text)
     validator = ThreadValidator(config)
 
-    result = generator.generate()
+    result = generator.generate(seed=seed, today=today)
     if not result.get("success"):
         return result
 

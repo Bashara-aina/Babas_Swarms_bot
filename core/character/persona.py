@@ -72,7 +72,7 @@ def build_base_persona() -> str:
     # Layer 3: Lore (lived experience and history)
     lore = cfg.get("lore", [])
     if lore:
-        lore_text = "\n".join(f"- {l}" for l in lore)
+        lore_text = "\n".join(f"- {item}" for item in lore)
         sections.append(f"[MY LORE & HISTORY]\n{lore_text}")
 
     # Layer 4: Knowledge domains (what I know about Bashara and his world)

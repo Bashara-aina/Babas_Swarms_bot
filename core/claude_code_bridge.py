@@ -1,6 +1,10 @@
 """Bidirectional bridge between Claude Code and OpenCode/LegionBot."""
 from __future__ import annotations
-import asyncio, os, shutil, re
+
+import asyncio
+import os
+import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +19,15 @@ async def run_claude_task(
     """Run a task via Claude Code CLI and return result."""
     import time
     full_prompt = f"{prompt}\n\nRespond concisely. End with RESULT: <your answer>."
+    if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        try:
+            from core.gitnexus_bridge import build_gitnexus_prompt_context
+
+            gitnexus_ctx = await build_gitnexus_prompt_context(prompt, max_chars=1600)
+            if gitnexus_ctx:
+                full_prompt = f"{gitnexus_ctx}\n\n{full_prompt}"
+        except Exception:
+            full_prompt = f"{prompt}\n\nRespond concisely. End with RESULT: <your answer>."
     started = time.monotonic()
 
     try:

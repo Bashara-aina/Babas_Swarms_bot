@@ -107,7 +107,7 @@ def check_handler_wiring() -> bool:
 
     # Check that all handlers with routers are in _ROUTER_ORDER
     print("\n  Checking routers against _ROUTER_ORDER...")
-    routers_in_order = set(_ROUTER_ORDER)
+    set(_ROUTER_ORDER)
 
     for name, router in handlers_with_routers.items():
         if router not in _ROUTER_ORDER:
@@ -216,11 +216,11 @@ def check_llm_client() -> bool:
 
         # Check key functions exist
         from llm_client import (
-            chat,
             agent_loop,
+            chat,
+            chunk_output,
             verify_api_keys,
             wiki_raw_completion,
-            chunk_output,
         )
 
         ok("llm_client exports required functions")
@@ -337,9 +337,9 @@ def check_agents() -> bool:
         # Check key exports
         from agents import (
             AGENT_MODELS,
+            DEFAULT_AGENT,
             FALLBACK_CHAIN,
             TASK_KEYWORDS,
-            DEFAULT_AGENT,
             detect_agent,
             get_fallback_chain,
         )

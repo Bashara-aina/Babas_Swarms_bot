@@ -255,8 +255,8 @@ class TaskRouter:
 
     async def _run_browser(self, message: str, user_id: str, context: str) -> str:
         urls = _URL_RE.findall(message)
-        from tools.browser_tool import fetch_page_text
         from llm_client import chat
+        from tools.browser_tool import fetch_page_text
 
         parts: list[str] = []
         for url in urls[:3]:

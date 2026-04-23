@@ -5,6 +5,7 @@ Commands: /persona, /mood, /persona_reset, /persona_note
 from __future__ import annotations
 
 import logging
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -71,8 +72,9 @@ async def cmd_mood(message: Message) -> None:
 async def cmd_persona_reset(message: Message) -> None:
     """Reset persona to defaults."""
     try:
-        from tools.letta_personality import DEFAULT_PERSONA, save_persona
         import copy
+
+        from tools.letta_personality import DEFAULT_PERSONA, save_persona
         save_persona(copy.deepcopy(DEFAULT_PERSONA))
         await message.answer("✅ Persona reset to defaults.")
     except Exception as e:

@@ -4,7 +4,7 @@
 name: intent_router_eval
 inputs:
   test_cases_path: str
-  model: str = "groq/llama-3.3-70b-versatile"
+  model: str = "minimax/MiniMax-Text-01"
 outputs:
   precision: float
   recall: float

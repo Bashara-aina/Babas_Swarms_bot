@@ -41,8 +41,8 @@ async def annotate_screenshot(
         return image_path  # return original if supervision not installed
 
     import cv2
-    import supervision as sv
     import numpy as np
+    import supervision as sv
 
     image = cv2.imread(image_path)
     if image is None:
@@ -90,8 +90,8 @@ async def detect_objects_in_screenshot(
     if not _check_supervision():
         return []
 
-    import torch
     import supervision as sv
+    import torch
 
     model_obj = torch.hub.load("ultralytics/yolov8", model.replace(".pt", ""))
     result = model_obj(image_path)

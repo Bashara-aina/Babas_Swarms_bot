@@ -33,8 +33,13 @@
 
 ## Memory Files
 - [project/swarm-bot-architecture.md](project/swarm-bot-architecture.md) — full architecture map
+- [project/popw-benchmark-system.md](project/popw-benchmark-system.md) — POPW benchmark comparison system (IKEA ASM + IndustReal)
 - [user/bashara-identity.md](user/bashara-identity.md) — user identity and preferences
 - [feedback/opencode-tool-permissions.md](feedback/opencode-tool-permissions.md) — tool permission fixes applied
 
+- [feedback/agents-init-lint-fix.md](feedback/agents-init-lint-fix.md) — import sorting + Coroutine type fix
+- [feedback/ruff-f821-fix-session-status.md](feedback/ruff-f821-fix-session-status.md) — _update_state undefined name fix in session-status.py
+- [feedback/ruff-remaining-errors.md](feedback/ruff-remaining-errors.md) — remaining ruff F841/E741/invalid-syntax errors
+
 ## Last Updated
-2026-04-15
+2026-04-23

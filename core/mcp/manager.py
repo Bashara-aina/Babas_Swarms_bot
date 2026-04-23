@@ -27,6 +27,7 @@ class MCPManager:
             browser,
             filesystem,
             github,
+            gitnexus,
             obsidian,
             supabase,
         )
@@ -35,6 +36,7 @@ class MCPManager:
             ("brave", brave),
             ("github", github),
             ("filesystem", filesystem),
+            ("gitnexus", gitnexus),
             ("obsidian", obsidian),
             ("supabase", supabase),
             ("browser", browser),

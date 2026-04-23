@@ -5,6 +5,7 @@ Run from the project root: python scripts/fix_imports.py
 """
 
 from __future__ import annotations
+
 import re
 from pathlib import Path
 
@@ -76,7 +77,7 @@ def fix_file(filepath: Path) -> int:
         modified = pattern.sub(new, modified)
     if modified != original:
         filepath.write_text(modified, encoding="utf-8")
-        count = sum(
+        sum(
             len(re.findall(r"^" + re.escape(new), modified, re.MULTILINE))
             for new in IMPORT_MAPPINGS.values()
         )

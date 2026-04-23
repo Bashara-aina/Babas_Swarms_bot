@@ -11,7 +11,7 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: Indonesian shorthand and intent mapping — "pusing" = frustrated, "cek" =
-  check, "gw" = I.
+ check, "gw" = I.
 wikilinks: []
 confidence: medium
 source: research
@@ -34,7 +34,7 @@ Indonesian shorthand and intent mapping — "pusing" = frustrated, "cek" = check
 - "emang" = indeed/really
 - "bilang" = tell me / say
 - "coba" = try/let me try
-- "烂" / "ribet" = complicated/bothersome
+- "" / "ribet" = complicated/bothersome
 
 ## LEGION BEHAVIOR RULES
 1. When Bashara says "pusing", drop to one sentence and ask what's stuck

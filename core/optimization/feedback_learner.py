@@ -16,7 +16,7 @@ import json
 import logging
 import time
 from collections import defaultdict
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -54,8 +54,9 @@ class FeedbackLearner:
 
     def _init_redis(self) -> None:
         try:
-            import redis as redis_lib
             import os
+
+            import redis as redis_lib
             r = redis_lib.Redis(
                 host=os.getenv("REDIS_HOST", "localhost"),
                 port=int(os.getenv("REDIS_PORT", "6379")),
@@ -78,7 +79,9 @@ class FeedbackLearner:
         Call after every agent response so the user can rate it.
         Returns a 6-char alphanumeric ID.
         """
-        import hashlib, random, string
+        import hashlib
+        import random
+        import string
         fid = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self._pending[fid] = (agent, task)
         # expire after 10 minutes (cleaned up lazily)

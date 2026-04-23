@@ -11,13 +11,14 @@ Shared SQLite at data/observations.db — OpenCode, Claude Code, and LegionBot a
 
 from __future__ import annotations
 
-import aiosqlite
 import logging
 import re
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+import aiosqlite
 
 logger = logging.getLogger(__name__)
 

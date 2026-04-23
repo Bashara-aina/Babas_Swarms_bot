@@ -8,13 +8,12 @@ DNS servers, with graceful fallback to the system resolver.
 from __future__ import annotations
 
 import logging
+import socket
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
-import socket
-
-import aiohttp
 import aiodns
+import aiohttp
 
 logger = logging.getLogger(__name__)
 

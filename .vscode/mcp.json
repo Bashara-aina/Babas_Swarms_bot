@@ -16,6 +16,44 @@
         "--repository",
         "/home/newadmin/swarm-bot"
       ]
+    },
+    "gitnexus": {
+      "command": "pnpm",
+      "args": [
+        "dlx",
+        "--allow-build=kuzu",
+        "gitnexus@1.4.0",
+        "mcp"
+      ]
+    },
+    "obsidian": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@iflow-mcp/kynlos-obsidian-mcp-server",
+        "/home/newadmin/swarm-bot/.wiki"
+      ]
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-09da51dd5e5c46b5b73d7b1ca5cb4c74"
+      }
+    },
+    "exa": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "exa-mcp-server"
+      ],
+      "env": {
+        "EXA_API_KEY": "2f2f6644-9907-4444-bb6b-c507b32c4820"
+      }
     }
-  }
+  },
+  "inputs": []
 }

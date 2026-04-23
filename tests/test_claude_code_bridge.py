@@ -1,5 +1,14 @@
-import pytest, asyncio
-from core.claude_code_bridge import run_claude_task, CLAUDE_CODE_CLI, extract_claude_directive, spawn_claude_from_opencode
+import asyncio
+
+import pytest
+
+from core.claude_code_bridge import (
+    CLAUDE_CODE_CLI,
+    extract_claude_directive,
+    run_claude_task,
+    spawn_claude_from_opencode,
+)
+
 
 def test_cli_path():
     assert CLAUDE_CODE_CLI is not None

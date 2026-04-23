@@ -7,8 +7,8 @@ import logging
 import time
 from typing import Any
 
-from llm_client import chat
 from core.structured_outputs import SwarmResult
+from llm_client import chat
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +38,6 @@ async def _spawn_opencode_subagents(
 
     # The parent agent coordinates sub-agents via opencode
     # Sub-agents are spawned as concurrent opencode CLI calls
-    sub_prompts = [
-        f"""You are a sub-agent operating under {parent_agent}'s orchestration.
-Task context: {task_context}
-Main task: {task}
-
-Execute your portion of this task and return your findings/progress.
-Be precise. No fluff. End with what you accomplished."""
-    ]
 
     async def _spawn_one(prompt: str, idx: int) -> dict[str, Any]:
         started = time.perf_counter()
@@ -305,9 +297,6 @@ async def run_topology(
             final, traces = await _run_concurrent(task, agents)
         else:
             final, traces = await _run_sequential(task, agents)
-
-        # Count sub-agents spawned
-        total_subs = sum(len(t.get("sub_agents", [])) for t in traces)
 
         return SwarmResult(
             final_output=final,

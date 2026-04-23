@@ -53,11 +53,11 @@ class ModelTier:
 # Model pricing as of March 2026 — uses existing litellm model strings
 MODEL_TIERS: List[ModelTier] = [
     # Free tier (Cerebras, Groq free models)
-    ModelTier("Cerebras Qwen", "cerebras/qwen3-235b-a22b", "cerebras", 0.0, 0.0, "free", 131072),
-    ModelTier("Groq Llama 3.3", "groq/llama-3.3-70b-versatile", "groq", 0.0, 0.0, "free", 32768),
-    ModelTier("Groq Kimi K2", "groq/moonshotai/kimi-k2-instruct", "groq", 0.0, 0.0, "free", 131072),
+    ModelTier("Cerebras Qwen", "minimax/MiniMax-Text-01", "cerebras", 0.0, 0.0, "free", 131072),
+    ModelTier("Groq Llama 3.3", "minimax/MiniMax-Text-01", "groq", 0.0, 0.0, "free", 32768),
+    ModelTier("Groq Kimi K2", "minimax/MiniMax-Text-01", "groq", 0.0, 0.0, "free", 131072),
     # Budget tier
-    ModelTier("ZAI GLM-4", "zai/glm-4", "zai", 0.0, 0.0, "budget", 128000),
+    ModelTier("ZAI GLM-4", "minimax/MiniMax-Text-01", "zai", 0.0, 0.0, "budget", 128000),
     ModelTier("Gemini Flash", "gemini/gemini-2.0-flash-exp:free", "gemini", 0.0, 0.0, "budget", 1048576),
     # Standard tier
     ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free", "openrouter", 0.0, 0.0, "standard", 65536),
@@ -215,7 +215,7 @@ class CostAwareRouter:
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain(agent_key)
-        default_model = chain[0] if chain else "groq/llama-3.3-70b-versatile"
+        default_model = chain[0] if chain else "minimax/MiniMax-Text-01"
         return default_model, complexity, "fallback"
 
     def estimate_cost(self, task: str, model_id: str) -> float:

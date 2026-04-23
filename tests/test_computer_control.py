@@ -7,8 +7,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import asyncio
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 import core.tools.computer_control as computer_control
 

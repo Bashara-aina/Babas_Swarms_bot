@@ -177,7 +177,7 @@ class GitHubIntelEngine:
         try:
             raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 temperature=0.2,
                 max_tokens=300,
             )
@@ -309,9 +309,9 @@ class GitHubIntelEngine:
             "Include: when to use, how to import/call it, example code snippets, limitations."
         )
         try:
-            raw = await call_llm(
+            await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 temperature=0.3,
                 max_tokens=800,
             )

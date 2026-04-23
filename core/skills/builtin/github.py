@@ -70,7 +70,7 @@ async def _github_pr_status_handler(text: str) -> str:
             if resp.status == 200:
                 closed_prs = await resp.json()
                 if closed_prs:
-                    lines.append(f"\nRecently closed PRs:")
+                    lines.append("\nRecently closed PRs:")
                     for pr in closed_prs[:3]:
                         merged = "✅ merged" if pr.get("merged_at") else "❌ closed"
                         lines.append(f"• #{pr.get('number')}: {pr.get('title', '')} ({merged})")

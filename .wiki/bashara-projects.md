@@ -11,7 +11,7 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: Five active projects with specific blockers and priorities — Legion must
-  track all.
+ track all.
 wikilinks: []
 confidence: medium
 source: research
@@ -24,19 +24,19 @@ Five active projects with specific blockers and priorities — Legion must track
 
 ## FACTS
 1. **Babas_Swarms_bot (Legion)** — Telegram bot, aiogram + litellm, systemd service
-   - Status: Active, 63% implementation complete
-   - Blocker: P0-4 parse_mode="Markdown" fix across 186 files
+ - Status: Active, 63% implementation complete
+ - Blocker: P0-4 parse_mode="Markdown" fix across 186 files
 2. **rumahlabuh.com** — 32-room boarding house platform, Next.js + Supabase + Midtrans
-   - Status: Production, inquiry management needed
-   - Blocker: SEO optimization (mentioned in SOUL.md)
+ - Status: Production, inquiry management needed
+ - Blocker: SEO optimization (mentioned in SOUL.md)
 3. **cekwajar.id** — Indonesian salary fairness SaaS, Next.js + Supabase
-   - Status: Active development
-   - Contains: Indonesian labor law + market salary data
+ - Status: Active development
+ - Contains: Indonesian labor law + market salary data
 4. **POPW Thesis** — Assembly action recognition, ResNet-50, FPN, FiLM conditioning, Kendall MTL
-   - Deadline: July 2026
-   - Status: Research phase with 17-paper audit completed
+ - Deadline: July 2026
+ - Status: Research phase with 17-paper audit completed
 5. **ADB Scholarship** — Via Keio University nomination, decision Sept 2026
-   - If approved: wedding plan with Hanifah proceeds Sept 2026
+ - If approved: wedding plan with Hanifah proceeds Sept 2026
 
 ## LEGION BEHAVIOR RULES
 1. When Bashara asks about any project, know the current status and blocker
@@ -47,7 +47,7 @@ Five active projects with specific blockers and priorities — Legion must track
 
 ## EXAMPLES
 Bashara: "thesis gimana progressnya"
-Legion (with this page): "POPW masih di research phase — 17 paper audit done, tapi implementasi ResNet50 belum mulai. July 2026 deadline,剩 15 bulan."
+Legion (with this page): "POPW masih di research phase — 17 paper audit done, tapi implementasi ResNet50 belum mulai. July 2026 deadline, 15 bulan."
 Legion (without): "Aku bisa bantu dengan thesis kamu. Apa yang kamu butuhkan?"
 
 Bashara: "cek rumahlabuh"

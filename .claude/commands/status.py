@@ -36,8 +36,10 @@ def _write(state: dict) -> None:
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
 def _fmtdur(s: float) -> str:
-    if s < 60:   return f"{s:.0f}s"
-    if s < 3600: return f"{s/60:.1f}m"
+    if s < 60:
+        return f"{s:.0f}s"
+    if s < 3600:
+        return f"{s/60:.1f}m"
     return f"{s/3600:.1f}h"
 
 # ── commands ────────────────────────────────────────────────────────────────

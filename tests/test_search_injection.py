@@ -9,7 +9,7 @@ pytestmark = pytest.mark.asyncio
 
 async def test_search_result_in_llm_context():
     """Verify search results don't contain injection markers in soul engine."""
-    from core.soul_engine import build_soul_context, BANNED_PHRASES
+    from core.soul_engine import BANNED_PHRASES, build_soul_context
 
     ctx = build_soul_context()
     # Soul context should be a non-empty string

@@ -54,6 +54,35 @@ ruff check .
 pip install -r requirements.txt
 ```
 
+## 🌐 Web Scraping Fallback Chain
+
+When `firecrawl_scrape` fails or credits are exhausted, use this fallback order:
+
+1. **`firecrawl_scrape`** — Primary (if credits available)
+2. **`webfetch`** — Simple markdown extraction from URL
+3. **`exa_web_fetch_exa`** — Alternative extraction with search
+4. **`browse`** — Headless Chromium for JS-rendered pages
+
+### Automatic Detection
+Firecrawl exhaustion is detected by:
+- HTTP status `402` (Payment Required) or `429` (Rate Limited)
+- Response containing: "Insufficient credits", "credits exhausted", "blocked"
+
+### Using browse as fallback
+```bash
+# Start browser (if not running)
+/home/newadmin/.claude/skills/gstack/browse/dist/browse status
+
+# Navigate and extract
+browse goto <url>
+browse text
+```
+
+### Using exa as fallback
+```
+firecrawl_extract(urls=["<url>"], prompt="extract full content")
+```
+
 ## 📁 Directory Guide
 - **handlers/** — 45+ aiogram router files (one per feature domain)
 - **core/** — Agent orchestration, intent routing, memory, soul engine

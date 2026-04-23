@@ -67,7 +67,7 @@ async def _web_get_links(args: dict) -> str:
     )
     if not links:
         return "No links found."
-    lines = [f"[{i + 1}] {l.get('text', '(no text)')[:60]} → {l.get('href', '')}" for i, l in enumerate(links)]
+    lines = [f"[{i + 1}] {link.get('text', '(no text)')[:60]} → {link.get('href', '')}" for i, link in enumerate(links)]
     return "\n".join(lines)
 
 

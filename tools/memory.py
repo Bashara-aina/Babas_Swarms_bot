@@ -21,6 +21,7 @@ No threading — all async. Uses aiosqlite + openviking.
 """
 
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -38,7 +39,8 @@ logger = logging.getLogger(__name__)
 try:
     import aiosqlite
 except ImportError:
-    import subprocess, sys
+    import subprocess
+    import sys
 
     subprocess.run([sys.executable, "-m", "pip", "install", "aiosqlite", "-q"])
     import aiosqlite
@@ -236,7 +238,7 @@ async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = Non
 
     # ── Try OpenViking semantic search first ──────────────────────────────
     try:
-        from tools.viking_context import semantic_search, is_available
+        from tools.viking_context import is_available, semantic_search
 
         if is_available():
             hits = await semantic_search(query, user_id=user_id, top_k=top_k)
@@ -434,7 +436,7 @@ async def auto_save_interaction(
     # Also save to OpenViking L1 (session) and L2 (fact extraction)
     if user_id:
         try:
-            from tools.viking_context import save_interaction_to_l1, auto_extract_facts
+            from tools.viking_context import auto_extract_facts, save_interaction_to_l1
 
             await save_interaction_to_l1(user_id, user_message, assistant_reply)
             await auto_extract_facts(user_id, user_message, assistant_reply)

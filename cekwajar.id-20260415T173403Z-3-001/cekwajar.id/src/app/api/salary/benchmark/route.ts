@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -308,6 +309,26 @@ async function getBenchmarkData(
 // --- Main Handler -------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
+  const limit = rateLimit(request, 'salary-benchmark', {
+    limit: 30,
+    windowMs: 60 * 1000,
+  })
+  if (!limit.ok) {
+    const retryAfter = Math.max(
+      0,
+      Math.ceil((limit.resetAt - Date.now()) / 1000),
+    )
+    return NextResponse.json(
+      {
+        success: false,
+        data: {
+          message: 'Terlalu banyak permintaan. Coba lagi sebentar lagi.',
+        },
+      },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
+
   const searchParams = request.nextUrl.searchParams
 
   const parsed = QuerySchema.safeParse({

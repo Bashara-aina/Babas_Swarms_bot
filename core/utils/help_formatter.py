@@ -13,7 +13,7 @@ class HelpFormatter:
     @staticmethod
     def format_help_menu() -> str:
         """Main help screen with clear sections and examples.
-        
+
         Returns:
             Formatted help text with HTML markup
         """
@@ -52,7 +52,7 @@ class HelpFormatter:
     @staticmethod
     def format_command_list() -> str:
         """Organized command reference by category.
-        
+
         Returns:
             Formatted command list with HTML markup
         """
@@ -92,7 +92,7 @@ class HelpFormatter:
     @staticmethod
     def format_agent_roster() -> str:
         """Beautiful agent roster with descriptions.
-        
+
         Returns:
             Formatted agent list
         """
@@ -113,7 +113,7 @@ class HelpFormatter:
     @staticmethod
     def format_examples() -> str:
         """Show usage examples.
-        
+
         Returns:
             Formatted examples
         """

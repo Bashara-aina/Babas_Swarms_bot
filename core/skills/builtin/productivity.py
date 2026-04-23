@@ -138,8 +138,8 @@ async def _translate_handler(text: str) -> str:
 async def _timer_handler(text: str) -> str:
     """Set a timer with notification using the real timer skill."""
     try:
-        from core.skills.timer import handle_timer_message, set_bot
         import handlers.shared as _shared
+        from core.skills.timer import handle_timer_message, set_bot
 
         # Ensure bot is set for timer notifications
         if _shared._bot is not None:

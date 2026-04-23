@@ -64,7 +64,8 @@ interface PTKPSelectorProps {
 
 export function PTKPSelector({ value, onChange, error }: PTKPSelectorProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <fieldset className="flex flex-col gap-3">
+      <legend className="sr-only">Status PTKP (Penghasilan Tidak Kena Pajak)</legend>
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Status PTKP <span className="text-brand-danger" aria-hidden="true">•</span>
@@ -77,7 +78,7 @@ export function PTKPSelector({ value, onChange, error }: PTKPSelectorProps) {
       <div className="space-y-4">
         {GROUPS.map((group) => (
           <div key={group.title} className="space-y-2">
-            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted dark:text-slate-400">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-slate-400">
               <span>{group.emoji}</span> {group.title}
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -110,7 +111,7 @@ export function PTKPSelector({ value, onChange, error }: PTKPSelectorProps) {
                     <span
                       className={cn(
                         "mt-0.5 text-xs",
-                        isActive ? "text-blue-600 dark:text-blue-300" : "text-text-muted dark:text-slate-400"
+                        isActive ? "text-blue-600 dark:text-blue-300" : "text-muted-foreground dark:text-slate-400"
                       )}
                     >
                       {option.desc}
@@ -154,6 +155,6 @@ export function PTKPSelector({ value, onChange, error }: PTKPSelectorProps) {
           <span aria-hidden="true">⚠️</span> {error}
         </p>
       )}
-    </div>
+    </fieldset>
   )
 }

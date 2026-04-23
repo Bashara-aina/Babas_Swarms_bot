@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import math
+import re
+from collections import Counter
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-# Planned feature flags
-FEATURE_TOPIC_WEIGHTS_ENABLED = False  # Planned: v2.0
-
 _EXCEPTIONS_NEVER_BELOW_MIN = {"cekwajar", "popw", "babas_bot_ai"}
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+TOPIC_WEIGHTS_PATH = REPO_ROOT / ".wiki" / "knowledge" / "TOPIC_WEIGHTS.json"
 
 
 class TopicEvolution:
@@ -23,23 +26,35 @@ class TopicEvolution:
         Detect emerging topics from a list of mention strings.
         Returns new topics not currently in TOPIC_WEIGHTS.json.
         """
-        if not FEATURE_TOPIC_WEIGHTS_ENABLED:
-            logger.debug("Topic weights feature is planned for v2.0 — not yet available.")
-        # TODO: cross-reference with existing TOPIC_WEIGHTS.json
-        # For now, return empty — real implementation needs topic classifier
-        new_topics: list[str] = []
-        seen: set[str] = set()
+        _ = days_span
+        existing: set[str] = set()
+        try:
+            if TOPIC_WEIGHTS_PATH.exists():
+                payload = json.loads(TOPIC_WEIGHTS_PATH.read_text(encoding="utf-8"))
+                existing = {str(k).lower() for k in (payload.get("topics", {}) or {}).keys()}
+        except (OSError, ValueError) as exc:
+            logger.debug("Failed reading topic weights for cross-reference: %s", exc)
 
+        gram_counts: Counter[str] = Counter()
         for mention in mentions:
-            words = mention.lower().split()
-            # Very simple bigram/trigram extraction for candidate topics
+            words = re.findall(r"[a-z0-9]+", mention.lower())
+            if len(words) < 2:
+                continue
             for i in range(len(words) - 1):
                 bigram = f"{words[i]}_{words[i + 1]}"
-                if bigram not in seen and len(bigram) > 5:
-                    seen.add(bigram)
-                    new_topics.append(bigram)
+                if len(bigram) > 5:
+                    gram_counts[bigram] += 1
+            for i in range(len(words) - 2):
+                trigram = f"{words[i]}_{words[i + 1]}_{words[i + 2]}"
+                if len(trigram) > 8:
+                    gram_counts[trigram] += 1
 
-        return new_topics[:5]
+        discovered = [
+            gram
+            for gram, count in gram_counts.most_common()
+            if count >= 2 and gram not in existing
+        ]
+        return discovered[:5]
 
     @staticmethod
     def decay_topic_weight(topic: str, days_since_mention: int) -> float:

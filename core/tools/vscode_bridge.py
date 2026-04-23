@@ -299,5 +299,13 @@ def generate_mcp_config(workspace_path: str = str(WORKSPACE_ROOT)) -> dict:
                 "command": "npx",
                 "args": ["-y", "@modelcontextprotocol/server-git", "--repository", workspace_path],
             },
+            "gitnexus": {
+                "command": "pnpm",
+                "args": ["dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"],
+            },
+            "obsidian": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-obsidian", f"{workspace_path}/.wiki"],
+            },
         }
     }

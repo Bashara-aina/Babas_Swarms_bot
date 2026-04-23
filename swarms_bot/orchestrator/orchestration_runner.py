@@ -24,13 +24,13 @@ import time
 import uuid
 from typing import Any, Callable, Coroutine, Dict, Optional
 
-from swarms_bot.orchestrator.dag_planner import DAGPlanner
-from swarms_bot.orchestrator.dag_executor import DAGExecutor
 from swarms_bot.orchestrator.agent_messaging import AgentMessageBus, MessageType
-from swarms_bot.orchestrator.shared_workspace import SharedWorkspace
-from swarms_bot.orchestrator.nested_agents import SpawnableAgent, SpawnContext
+from swarms_bot.orchestrator.dag_executor import DAGExecutor
+from swarms_bot.orchestrator.dag_planner import DAGPlanner
 from swarms_bot.orchestrator.human_in_loop import HumanApprovalGate
 from swarms_bot.orchestrator.model_router import ModelRouter
+from swarms_bot.orchestrator.nested_agents import SpawnableAgent, SpawnContext
+from swarms_bot.orchestrator.shared_workspace import SharedWorkspace
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +198,7 @@ class OrchestrationRunner:
                 f"Produce a clear, complete, well-structured final answer that achieves the original goal."
             )
             response = await litellm.acompletion(
-                model="groq/llama-3.3-70b-versatile",
+                model="minimax/MiniMax-Text-01",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
                 max_tokens=4096,

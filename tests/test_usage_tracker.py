@@ -3,10 +3,12 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from collections import defaultdict
-from core.optimization.usage_tracker import UsageTracker, DAILY_LIMITS
+
+from core.optimization.usage_tracker import DAILY_LIMITS, UsageTracker
 
 
 def _tracker() -> UsageTracker:
@@ -36,12 +38,12 @@ def test_record_paid_model():
 
 def test_daily_limit_alert():
     t = _tracker()
-    model = "zai/glm-4"
+    model = "minimax/MiniMax-Text-01"
     limit = DAILY_LIMITS[model]
     # Simulate 85% usage
     t.record(model, requests=int(limit * 0.85))
-    stats = t.get_today(model)
-    alert = t.record(model, requests=0)   # just trigger check
+    t.get_today(model)
+    t.record(model, requests=0)   # just trigger check
     # The last record call that crosses 80% should return alert
     # Re-trigger by reaching 80%
     t2 = _tracker()
@@ -58,9 +60,9 @@ def test_daily_report_empty():
 
 def test_daily_report_with_usage():
     t = _tracker()
-    t.record("zai/glm-4", input_tokens=100, output_tokens=50, requests=5)
+    t.record("minimax/MiniMax-Text-01", input_tokens=100, output_tokens=50, requests=5)
     report = t.daily_report()
-    assert "glm-4" in report
+    assert "MiniMax-Text-01" in report
     assert "5" in report
 
 

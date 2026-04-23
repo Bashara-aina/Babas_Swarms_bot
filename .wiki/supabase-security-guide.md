@@ -52,8 +52,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 ### 1.2 Key Separation Principle
 
 ```
-ANON_KEY (public)  → RLS policies enforced → users can only see permitted rows
-SERVICE_ROLE_KEY   → bypasses RLS → bot-internal operations only
+ANON_KEY (public) → RLS policies enforced → users can only see permitted rows
+SERVICE_ROLE_KEY → bypasses RLS → bot-internal operations only
 ```
 
 The anon key is safe to expose in client-side code. The service role key **must never** reach the client.
@@ -97,8 +97,8 @@ Documented in `.wiki/architecture/block_02_database_schema.md`.
 
 ```
 Request → PostgREST API → checks RLS policies → returns filtered data
-                     ↓
-         service_role key bypasses RLS entirely
+ ↓
+ service_role key bypasses RLS entirely
 ```
 
 SupabaseClient defaults to `use_service_role=True` for all CRUD operations, meaning **RLS is bypassed by default**. This is appropriate for bot-internal operations but means the client is not testing RLS enforcement.
@@ -129,7 +129,7 @@ PostgREST uses **server-side parameterized queries**. The client builds filter e
 ```python
 # tools/supabase_client.py — filter building
 for col, val in (eq or {}).items():
-    p[col] = f"eq.{val}"  # PostgREST syntax, val is escaped server-side
+ p[col] = f"eq.{val}" # PostgREST syntax, val is escaped server-side
 
 # tools/business_ops.py — same pattern
 params[f"{k}"] = f"eq.{v}"
@@ -184,12 +184,12 @@ from tools.supabase_client import get_client, is_configured
 
 # Check configuration before use
 if is_configured():
-    db = get_client()
-    # Use service_role only for internal bot ops
-    rows = await db.query("internal_table", use_service_role=True)
+ db = get_client()
+ # Use service_role only for internal bot ops
+ rows = await db.query("internal_table", use_service_role=True)
 else:
-    # Graceful degradation
-    return "Supabase not configured"
+ # Graceful degradation
+ return "Supabase not configured"
 ```
 
 ### 5.2 Health Check Before Critical Ops
@@ -197,8 +197,8 @@ else:
 ```python
 health = await db.health_check()
 if not health["ok"]:
-    logger.error("Supabase unavailable: %s", health.get("error"))
-    # fallback to cached data or error response
+ logger.error("Supabase unavailable: %s", health.get("error"))
+ # fallback to cached data or error response
 ```
 
 ### 5.3 Rate Limiting
@@ -213,20 +213,20 @@ From `block_02_database_schema.md`:
 
 ```
 User Submission (encrypted)
-    ↓
+ ↓
 raw_salary_submissions / raw_land_submissions (private, never published)
-    ↓
+ ↓
 crowdsource_queue (pending AI validation)
-    ↓
+ ↓
 AI Agent Pipeline (Swarms agent validates data quality)
-    ↓
+ ↓
 benchmark_salary / benchmark_land_prices / benchmark_cost_of_living
-    (aggregated, k-anonymity ≥ 10)
-    ↓
+ (aggregated, k-anonymity ≥ 10)
+ ↓
 Users query via verdict_logs (anonymized, RLS-protected)
 ```
 
-**Key隐私 principles:**
+**Key principles:**
 - Raw submissions never touch published benchmarks
 - k-anonymity threshold: minimum 10 submissions per aggregation cell
 - B2B API rate limiting per client

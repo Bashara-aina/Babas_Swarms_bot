@@ -205,7 +205,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
       {/* Always show breakdown table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
         <div className="border-b border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-700/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted dark:text-slate-400">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-slate-400">
             Rincian Komponen
           </h3>
         </div>
@@ -214,7 +214,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
           {/* Header row */}
           <div className="grid grid-cols-4 gap-1 px-4 py-2">
             {["Komponen", "Seharusnya", "Di Slip", "Status"].map((h) => (
-              <span key={h} className="text-[11px] font-semibold uppercase tracking-wide text-text-muted dark:text-slate-400">
+              <span key={h} className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground dark:text-slate-400">
                 {h}
               </span>
             ))}
@@ -242,7 +242,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
                   {result.pph21.label}
                 </p>
                 {result.pph21.note && (
-                  <p className="mt-0.5 text-[10px] leading-tight text-text-muted dark:text-slate-400 line-clamp-2">
+                  <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground dark:text-slate-400 line-clamp-2">
                     {result.pph21.note}
                   </p>
                 )}
@@ -315,7 +315,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
                   {row.label}
                 </p>
                 {row.note && (
-                  <p className="mt-0.5 text-[10px] leading-tight text-text-muted dark:text-slate-400 line-clamp-2">
+                  <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground dark:text-slate-400 line-clamp-2">
                     {row.note}
                   </p>
                 )}
@@ -352,7 +352,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
         transition={{ delay: 0.4 }}
         className="rounded-2xl border border-slate-200 bg-white px-5 py-4 dark:border-slate-700 dark:bg-slate-800"
       >
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted dark:text-slate-400">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-slate-400">
           📋 Penjelasan
         </p>
         <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -410,6 +410,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
         <button
           type="button"
           onClick={handleScreenshot}
+          aria-label="Ambil screenshot hasil audit"
           className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-card transition-all hover:shadow-card-hover active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
         >
           📸 Screenshot Hasil
@@ -418,11 +419,12 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
         <button
           type="button"
           onClick={handleCopyShare}
+          aria-label={copied ? "Teks hasil sudah disalin" : "Salin dan bagikan ke TikTok"}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-card transition-all hover:shadow-card-hover active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
         >
           {copied ? (
             <>
-              <Check className="h-4 w-4 text-brand-accent" /> Tersalin!
+              <Check className="h-4 w-4 text-emerald-600" /> Tersalin!
             </>
           ) : (
             <>
@@ -434,6 +436,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
         <button
           type="button"
           onClick={onReset}
+          aria-label="Cek slip gaji lain"
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700 active:scale-95"
         >
           <RefreshCw className="h-4 w-4" /> Cek Slip Lain
@@ -510,7 +513,7 @@ export function VerdictCard({ result, onReset, resultRef }: VerdictCardProps) {
         </p>
       </details>
 
-      <p className="text-center text-xs text-text-muted dark:text-slate-400">
+      <p className="text-center text-xs text-muted-foreground dark:text-slate-400">
         Data tidak disimpan. Perhitungan berdasarkan{" "}
         <a
           href="https://djponline.pajak.go.id"

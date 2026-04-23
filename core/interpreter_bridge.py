@@ -1,11 +1,13 @@
 """Bridge between Telegram and Open Interpreter with multi-provider support."""
 
 from __future__ import annotations
+
 import asyncio
 import logging
 import os
 import time
 from typing import Optional
+
 from interpreter import interpreter
 
 logger = logging.getLogger(__name__)
@@ -71,19 +73,19 @@ SYSTEM_PROMPTS = {
 _CONTEXT_WINDOWS: dict[str, int] = {
     # ⭐ PRIORITY 1: YOUR FASTEST APIs FIRST (60+ req/min)
     "gemini/gemini-1.5-flash-latest":     1000000,  # ⭐ MOST GENEROUS
-    "groq/llama3-8b-8192":                 8192,    # Lightning fast  
+    "groq/llama3-8b-8192":                 8192,    # Lightning fast
     "cerebras/llama-3.1-8b":               131072,  # High quality
-    
+
     # PRIORITY 2: OpenRouter free tier
     "openrouter/qwen/qwen2.5:0.5b":        32768,
     "openrouter/meta-llama/llama-3.1-8b-instruct:free": 8192,
-    
+
     # PRIORITY 3: Current models (fallback)
     "openrouter/qwen/qwen3-coder:free":    131072,
     "cerebras/qwen3-coder:free":           131072,
     "gemini/gemini-1.5-flash":            1000000,
     "groq/moonshotai/llama3-8b-8192":     200000,
-    "zai/glm-4":                           128000,
+    "minimax/MiniMax-Text-01":                           128000,
     "openrouter/openai/gpt-oss-120b:free": 32768,
 }
 
@@ -118,23 +120,23 @@ def mark_provider_rate_limited(model: str) -> None:
 
 def configure_interpreter(model: str, agent_key: str) -> str:
     """Configure interpreter for the specified model and agent.
-    
+
     Implements proactive rate limit avoidance by checking recent rate limit history.
     Falls back to Ollama if the requested provider was recently rate-limited.
 
     Args:
         model: Full LiteLLM model string with provider prefix (e.g. "cerebras/qwen3-coder:free")
         agent_key: Agent identifier for system prompt selection
-        
+
     Returns:
         Actual model being used (may differ from requested if fallback occurred)
     """
     interpreter.auto_run = True
     interpreter.system_message = SYSTEM_PROMPTS.get(agent_key, "")
-    
+
     original_model = model
     provider = _get_provider_from_model(model)
-    
+
     # Proactive rate limit check - switch to Ollama if provider recently failed
     if _is_provider_rate_limited(provider):
         cooldown_remaining = _RATE_LIMIT_COOLDOWN - (time.time() - _RATE_LIMIT_TRACKER[provider])
@@ -210,12 +212,12 @@ def configure_interpreter(model: str, agent_key: str) -> str:
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
         model = "ollama_chat/gemma4:e4b"
-        
+
     return model  # Return actual model being used
 
 async def _raw_run(model: str, task: str, agent_key: str) -> str:
     """Execute interpreter.chat in thread pool and format output."""
-    actual_model = configure_interpreter(model, agent_key)
+    configure_interpreter(model, agent_key)
     result = await asyncio.run_in_executor(
         None,
         lambda: interpreter.chat(task, display=False),
@@ -259,7 +261,6 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
         Concatenated output from interpreter
     """
     # --- 1. Semantic cache check ---
-    cached_result: str | None = None
     try:
         from core.memory.semantic_cache import get_cache
         from core.observability.metrics import record_cache_event
@@ -287,8 +288,8 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
 
     result: str
     try:
-        from core.reliability.error_recovery import get_recovery
         from core.observability.metrics import trace_agent
+        from core.reliability.error_recovery import get_recovery
         async with trace_agent(agent_key):
             result = await get_recovery().execute(task, agent_key, _run_fn)
     except Exception as exc:
@@ -317,28 +318,28 @@ async def run_task(model: str, task: str, agent_key: str = "coding") -> str:
 
 def chunk_output(text: str, max_length: int = 4000) -> list[str]:
     """Split text into chunks safe for Telegram's message length limit.
-    
+
     Args:
         text: Full output text
         max_length: Maximum characters per chunk (default 4000 for safety)
-        
+
     Returns:
         List of text chunks
     """
     if len(text) <= max_length:
         return [text]
-    
+
     chunks = []
     current_chunk = ""
-    
+
     for line in text.split("\n"):
         if len(current_chunk) + len(line) + 1 > max_length:
             chunks.append(current_chunk)
             current_chunk = line + "\n"
         else:
             current_chunk += line + "\n"
-    
+
     if current_chunk:
         chunks.append(current_chunk)
-    
+
     return chunks

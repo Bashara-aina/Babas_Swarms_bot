@@ -1,58 +1,85 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // cekwajar.id — FirstVisitBanner Component
-// Bottom-right emerald banner for first-time visitors
-// Uses localStorage to show only once per visitor
+// Dismissible banner for new visitors using localStorage gate
 // ══════════════════════════════════════════════════════════════════════════════
 
 'use client'
 
-import { useEffect, useState } from 'react'
-import { X, Zap } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X } from 'lucide-react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
-export function FirstVisitBanner() {
+const STORAGE_KEY = 'cekwajar_first_visit_seen'
+const DISMISS_COOKIE = 'cekwajar_banner_dismissed'
+
+export function FirstVisitBanner({ className }: { className?: string }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     try {
-      const hasSeen = localStorage.getItem('cw_has_visited')
-      if (!hasSeen) {
+      const dismissed = localStorage.getItem(DISMISS_COOKIE)
+      if (dismissed) return
+
+      const seen = localStorage.getItem(STORAGE_KEY)
+      if (!seen) {
         setVisible(true)
-        localStorage.setItem('cw_has_visited', '1')
       }
     } catch {
-      // localStorage unavailable — don't show banner
+      // localStorage not available (SSR, private browsing, etc.)
+      setVisible(false)
     }
   }, [])
 
   if (!visible) return null
 
+  const handleDismiss = () => {
+    setVisible(false)
+    try {
+      localStorage.setItem(DISMISS_COOKIE, '1')
+    } catch {
+      // localStorage not available
+    }
+  }
+
   return (
-    <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50 animate-slide-in-bottom">
-      <div className="bg-emerald-600 dark:bg-emerald-700 text-white rounded-xl shadow-xl p-4 flex items-start gap-3">
-        <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-          <Zap className="w-4 h-4" />
+    <div
+      role="status"
+      aria-live="polite"
+      className={`rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 ${className}`}
+    >
+      <div className="flex items-start gap-3">
+        {/* Icon */}
+        <div className="shrink-0 mt-0.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+            <span className="text-base">🎁</span>
+          </div>
         </div>
+
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm">Baru di cekwajar.id? 👋</p>
-          <p className="text-xs text-emerald-100 mt-0.5">
-            Cek slip gaji butuh 30 detik. Gratis, tanpa daftar.
+          <p className="text-sm font-semibold text-amber-900">
+            Audite slip gaji pertama — gratis!
           </p>
-          <Link
-            href="/wajar-slip"
-            className="inline-block mt-2 text-xs font-semibold bg-white text-emerald-700 px-3 py-1 rounded-full hover:bg-emerald-50 transition-colors"
-            onClick={() => setVisible(false)}
-          >
-            Coba sekarang →
-          </Link>
+          <p className="mt-0.5 text-xs text-amber-700">
+            Deteksi PPh21, BPJS, dan 5 jenis pelanggaran lain dalam 30 detik.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <Link href="/wajar-slip">
+              <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-700 text-xs">
+                Mulai Gratis
+              </Button>
+            </Link>
+          </div>
         </div>
+
+        {/* Dismiss */}
         <button
-          type="button"
-          onClick={() => setVisible(false)}
-          className="flex-shrink-0 text-white/70 hover:text-white transition-colors"
-          aria-label="Tutup"
+          onClick={handleDismiss}
+          aria-label="Dismiss banner"
+          className="shrink-0 text-amber-400 hover:text-amber-600 transition-colors"
         >
-          <X className="w-4 h-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>

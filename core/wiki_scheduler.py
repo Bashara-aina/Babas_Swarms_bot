@@ -28,7 +28,7 @@ LLM_CALL_DELAY = 1.0  # seconds between deep_gate calls
 
 # Paths
 WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
-QUARANTINE_DIR = WIKI_DIR / "_quarantine"
+QUARANTINE_DIR = WIKI_DIR / "_archive" / "_quarantine"
 QUALITY_REPORT_PATH = WIKI_DIR / "_quality_report.md"
 
 
@@ -163,6 +163,8 @@ class WikiQualityScheduler:
                     elif result.verdict == "NEEDS_IMPROVEMENT" and result.score < 0.1:
                         # Score of 0.0-0.1 is likely a scoring bug (not genuinely bad content)
                         # Route to deep_gate before quarantining — only quarantine if deep_gate agrees
+                        from core.wiki_quality_gate import deep_gate
+
                         deep_result = await deep_gate(content_str, page_path)
                         if deep_result.verdict == "REJECT":
                             dest = await quarantine_content(

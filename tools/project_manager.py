@@ -55,7 +55,8 @@ async def save_tasks_local(tasks: list[dict], project_name: str) -> str:
     try:
         import aiosqlite
     except ImportError:
-        import subprocess, sys
+        import subprocess
+        import sys
         subprocess.run(
             [sys.executable, "-m", "pip", "install", "aiosqlite", "--break-system-packages", "-q"],
             check=False,

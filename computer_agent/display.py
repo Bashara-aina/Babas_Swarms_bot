@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import re
 import shutil
@@ -10,8 +11,6 @@ import subprocess
 import time
 from pathlib import Path
 from typing import Any, Optional
-
-import logging
 
 logger = logging.getLogger(__name__)
 

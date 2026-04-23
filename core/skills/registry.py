@@ -39,4 +39,6 @@ class SkillRegistry:
 
 
 SKILL_REGISTRY = SkillRegistry()
-get_skill_registry = lambda: SKILL_REGISTRY
+
+def get_skill_registry() -> SkillRegistry:
+    return SKILL_REGISTRY

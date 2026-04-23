@@ -1,184 +1,1303 @@
----
-title: "Wiki Quality Report"
-created: 2026-04-14
-type: article
-tags: [_quality_report]
-summary: "Comprehensive audit of wiki health using batch_fix scripts. Frontmatter and YAML are clean, wikilinks are intact, but orphan count is critically high at 804 uncited articles (69.9% of the index)."
----
+# Wiki Quality Report
 
-# Wiki Health Audit Report
-**Date**: 2026-04-14  
-**Auditor**: Worker Agent  
-**Scripts Used**: batch_fix_frontmatter.py, batch_fix_yaml.py, batch_fix_wikilinks.py
+Generated: 2026-04-19 10:28 JST
 
----
+## Summary
 
-## Executive Summary
+- Pages scanned: 1277
+- Average score: 0.563
+- Excellent (≥0.7): 306
+- Needs improvement (0.3–0.7): 920
+- Low quality (<0.3): 51
 
-The Swarm-Bot wiki contains **1,151 indexed articles** tracked by the wikilinks indexing system, with a total of **2,332 .md files** when including all variations. The wiki health is **severely degraded** with a **30.1% health score** driven primarily by a high orphan rate (804 uncited articles, 69.9% of the index).
+## Excellent
 
-**Critical finding**: While frontmatter, YAML, and wikilinks are all clean (0 failures), the content connectivity is extremely poor — nearly 70% of wiki articles are never referenced by any other article.
+| Page | Score | Reason |
+|------|-------|--------|
+| logs/AUDIT07_REPORT.md | 0.710 | no reason provided |
+| logs/smoke-results-bucket5.md | 0.710 | no reason provided |
+| decisions/ADR-022-markitdown.md | 0.710 | no reason provided |
+| knowledge/labor-law/005-ump-2025-provinsi.md | 0.710 | no reason provided |
+| knowledge/labor-law/014-tunjangan-wajib.md | 0.710 | no reason provided |
+| test-security-patterns.md | 0.720 | no reason provided |
+| gsa-voice-spec.md | 0.720 | no reason provided |
+| supabase-security-guide.md | 0.720 | no reason provided |
+| bashara-profile.md | 0.720 | no reason provided |
+| llm-cost-optimization.md | 0.720 | no reason provided |
+| context-window-map.md | 0.720 | no reason provided |
+| intent-routing-map.md | 0.720 | no reason provided |
+| github-security-patterns.md | 0.720 | no reason provided |
+| email-security-patterns.md | 0.720 | no reason provided |
+| legion-vision-2026.md | 0.720 | no reason provided |
+| github-integration-guide.md | 0.720 | no reason provided |
+| web-scraping-patterns.md | 0.720 | no reason provided |
+| LOOP_LOG.md | 0.720 | no reason provided |
+| intent-gaps.md | 0.720 | no reason provided |
+| bashara-quiet-hours.md | 0.720 | no reason provided |
+| rate-limit-strategy.md | 0.720 | no reason provided |
+| context-optimization.md | 0.720 | no reason provided |
+| 05-growth-strategy/CEKWAJAR-ROADMAP.md | 0.720 | no reason provided |
+| logs/worker-garbled-text-fix-brief.md | 0.720 | no reason provided |
+| logs/audit11-verify.md | 0.720 | no reason provided |
+| logs/image-analyzer-bug-investigation.md | 0.720 | no reason provided |
+| logs/reviewer-approved-2026-04-13-rumahlabuh-dns-fix.md | 0.720 | no reason provided |
+| logs/contracts-batch3-wiki-wiring.md | 0.720 | no reason provided |
+| logs/smoke-results-bucket4.md | 0.720 | no reason provided |
+| logs/worker-product-progress.md | 0.720 | no reason provided |
+| logs/swarm-2026-04-13-cekwajar-kb-synthesis.md | 0.720 | no reason provided |
+| logs/priority-1-worker-brief.md | 0.720 | no reason provided |
+| logs/worker-engineering-complete.md | 0.720 | no reason provided |
+| logs/audit08-plan.md | 0.720 | no reason provided |
+| logs/worker-cycle-11.md | 0.720 | no reason provided |
+| logs/2026-04-11-opencode-agents.md | 0.720 | no reason provided |
+| logs/swarm-2026-04-13-popw-architecture-improvement.md | 0.720 | no reason provided |
+| logs/contract2-novelty-assessment.md | 0.720 | no reason provided |
+| logs/planner-2026-04-14-deep-audit-contracts-batch2.md | 0.720 | no reason provided |
+| founder-mindset/09-solo-founder-leverage-model.md | 0.720 | no reason provided |
+| founder-mindset/03-100pct-ai-business-principles.md | 0.720 | no reason provided |
+| wisdom/19-network-effects-and-moats.md | 0.720 | no reason provided |
+| wisdom/13-systems-thinking.md | 0.720 | no reason provided |
+| 03-regulatory/INDONESIA-TAX-LABOR-LAW.md | 0.720 | no reason provided |
+| timelines/2026-04-12.md | 0.720 | no reason provided |
+| templates/claude-code.md | 0.720 | no reason provided |
+| concepts/tax-indonesia.md | 0.720 | no reason provided |
+| concepts/freemium-gate.md | 0.720 | no reason provided |
+| projects/popw-multi-task-ikea.md | 0.720 | no reason provided |
+| decisions/ADR-001-anti-slop-system.md | 0.720 | no reason provided |
+| decisions/adr-041-nihongo-v2.md | 0.720 | no reason provided |
+| issues/FINAL_REVIEW.md | 0.720 | no reason provided |
+| issues/audit-02-review.md | 0.720 | no reason provided |
+| issues/review-audit10-async-fixes.md | 0.720 | no reason provided |
+| issues/reviewer-findings.md | 0.720 | no reason provided |
+| research/060-pais-hu-2023.md | 0.720 | no reason provided |
+| research/069-tsm-lin-2019.md | 0.720 | no reason provided |
+| research/010-giou-rezatofighi-2019.md | 0.720 | no reason provided |
+| 00-meta/LEGION-MASTER-CONTEXT.md | 0.720 | no reason provided |
+| research/_archived_duplicates/005-ikea-asm-benshabat-2021.md | 0.720 | no reason provided |
+| research/popw-protocol/025-pcgrad-yu-2020.md | 0.720 | no reason provided |
+| wisdom/domains/10-leadership-management.md | 0.720 | no reason provided |
+| logs/audit-09/nihongo_sensei_soul_audit.md | 0.720 | no reason provided |
+| self-knowledge/legion/002-tool-definitions.md | 0.720 | no reason provided |
+| self-knowledge/rumahlabuh/002-api-structure-booking-flow.md | 0.720 | no reason provided |
+| knowledge/labor-law/017-aturan-wfh.md | 0.720 | no reason provided |
+| knowledge/labor-law/003-pp-pengupahan-36-2021.md | 0.720 | no reason provided |
+| knowledge/bpjs/034-jp-manfaat.md | 0.720 | no reason provided |
+| knowledge/market/048-gig-economy-income.md | 0.720 | no reason provided |
+| knowledge/engineering/087-midtrans-integration.md | 0.720 | no reason provided |
+| composio-calendar-guide.md | 0.730 | no reason provided |
+| logs/planner-2026-04-15-popw-contracts.md | 0.730 | no reason provided |
+| logs/setup-script.md | 0.730 | no reason provided |
+| logs/legion-upgrade-2026-04.md | 0.730 | no reason provided |
+| projects/cekwajar-id.md | 0.730 | no reason provided |
+| decisions/adr-2026-04-13-cekwajar-tech-stack.md | 0.730 | no reason provided |
+| research/059-soft-teacher-xu-2021.md | 0.730 | no reason provided |
+| logs/audit-09/manifest_coverage.md | 0.730 | no reason provided |
+| tool-output-formatting.md | 0.740 | no reason provided |
+| agent-topology-design.md | 0.740 | no reason provided |
+| bashara-vocabulary.md | 0.740 | no reason provided |
+| data-privacy-guide.md | 0.740 | no reason provided |
+| legion/refactoring-2026-04-11.md | 0.740 | no reason provided |
+| logs/smoke-results-bucket6.md | 0.740 | no reason provided |
+| raw/docs/contributing.md | 0.740 | no reason provided |
+| llm-context-strategy.md | 0.750 | no reason provided |
+| supabase-query-patterns.md | 0.750 | no reason provided |
+| SESSION_SUMMARY.md | 0.750 | no reason provided |
+| logs/worker-tax-progress.md | 0.750 | no reason provided |
+| logs/audit_13_subtask_a.md | 0.750 | no reason provided |
+| logs/worker-fix-flags-2026-04-12.md | 0.750 | no reason provided |
+| logs/worker-fix-2026-04-13.md | 0.750 | no reason provided |
+| decisions/ADR-046-context-injection-audit.md | 0.750 | no reason provided |
+| research/092-randaugment-cubuk-2019.md | 0.750 | no reason provided |
+| research/thesis-context.md | 0.750 | no reason provided |
+| research/track-b-rumahlabuh-ux.md | 0.750 | no reason provided |
+| emotional-vocabulary.md | 0.760 | no reason provided |
+| media-processing-guide.md | 0.760 | no reason provided |
+| deployment-architecture.md | 0.760 | no reason provided |
+| logs/worker-5-tier5-complete.md | 0.760 | no reason provided |
+| logs/planner-2026-04-12.md | 0.760 | no reason provided |
+| logs/worker-final-2026-04-11.md | 0.760 | no reason provided |
+| logs/audit11-subtask6.md | 0.760 | no reason provided |
+| logs/worker_concerns34.md | 0.760 | no reason provided |
+| wisdom/15-feynman-technique.md | 0.760 | no reason provided |
+| architecture/cekwajar-verdict-engine.md | 0.760 | no reason provided |
+| architecture/audit-2026-04-11-fixes.md | 0.760 | no reason provided |
+| issues/review-phase5-6.md | 0.760 | no reason provided |
+| profiles/bashara-perplexity-profile.md | 0.760 | no reason provided |
+| research/006-p3d-resnet-qiu-2017.md | 0.760 | no reason provided |
+| research/010-wing-loss-feng-2018.md | 0.760 | no reason provided |
+| research/018-adain-huang-2017.md | 0.760 | no reason provided |
+| logs/worker-labor-law-progress.md | 0.770 | no reason provided |
+| database-resilience.md | 0.780 | no reason provided |
+| debugging-guide.md | 0.780 | no reason provided |
+| self-upgrade-mechanism.md | 0.780 | no reason provided |
+| INDEX.md | 0.780 | no reason provided |
+| WIRING_AUDIT_REPORT.md | 0.780 | no reason provided |
+| n8n-bridge-guide.md | 0.780 | no reason provided |
+| use-case-optimization.md | 0.780 | no reason provided |
+| tools-inventory.md | 0.780 | no reason provided |
+| logs/worker-labor-law-complete.md | 0.780 | no reason provided |
+| logs/priority-3-self-improvement-complete.md | 0.780 | no reason provided |
+| logs/swarm-2026-04-13-fix-dns-resilient-connection.md | 0.780 | no reason provided |
+| logs/priority-2-worker-brief.md | 0.780 | no reason provided |
+| logs/planner-2026-04-13-hallucination-fix.md | 0.780 | no reason provided |
+| logs/planner-2026-04-14-audit-fixes.md | 0.780 | no reason provided |
+| logs/worker-6-tier6-complete.md | 0.780 | no reason provided |
+| logs/worker-subtask-3-gsa-wire-2026-04-12.md | 0.780 | no reason provided |
+| logs/session-2026-04-13.md | 0.780 | no reason provided |
+| logs/planner-2026-04-15-asm-alternatives.md | 0.780 | no reason provided |
+| logs/worker-2026-04-13.md | 0.780 | no reason provided |
+| logs/audit11-tasks.md | 0.780 | no reason provided |
+| logs/planner-start-4.md | 0.780 | no reason provided |
+| logs/smoke-results-bucket9.md | 0.780 | no reason provided |
+| logs/worker-fix-cif-scope.md | 0.780 | no reason provided |
+| logs/worker-fix-all-imports.md | 0.780 | no reason provided |
+| founder-mindset/10-distribution-over-product.md | 0.780 | no reason provided |
+| founder-mindset/05-vertical-niche-domination.md | 0.780 | no reason provided |
+| decisions/adr-2026-04-12-multi-agent-pipeline.md | 0.780 | no reason provided |
+| decisions/ADR-005-legion-wiki-loop-2026-04-12.md | 0.780 | no reason provided |
+| decisions/ADR-002-yaml-agent-verification.md | 0.780 | no reason provided |
+| entities/swarm-bot.md | 0.780 | no reason provided |
+| issues/review-2026-04-12-legion-wiring-audit.md | 0.780 | no reason provided |
+| issues/dead-purge-review-001.md | 0.780 | no reason provided |
+| issues/review-phase3-4.md | 0.780 | no reason provided |
+| research/005-ikea-asm-dataset-2021.md | 0.780 | no reason provided |
+| research/track-b-popw-agent-coordination.md | 0.780 | no reason provided |
+| research/009-deeppose-pck-toshev-2014.md | 0.780 | no reason provided |
+| raw/docs/readme.md | 0.780 | no reason provided |
+| raw/changelogs/cleanup-log.md | 0.780 | no reason provided |
+| raw/skills_ref/aiogram-patterns.md | 0.780 | no reason provided |
+| raw/skills_ref/AGENTS.md | 0.780 | no reason provided |
+| raw/skills_ref/security_checklist.md | 0.780 | no reason provided |
+| tools/openaugi/docs/plans/future-work.md | 0.780 | no reason provided |
+| voice-pipeline.md | 0.790 | no reason provided |
+| debate-system-guide.md | 0.790 | no reason provided |
+| entities/minimax-m2-7.md | 0.790 | no reason provided |
+| logs/audit-09/intent_mapping.md | 0.790 | no reason provided |
+| llm-routing-map.md | 0.820 | no reason provided |
+| error-patterns-catalog.md | 0.820 | no reason provided |
+| stability-map.md | 0.820 | no reason provided |
+| quality-gates-spec.md | 0.820 | no reason provided |
+| knowledge/INDEX.md | 0.820 | no reason provided |
+| logs/worker-pm-callbacks-2026-04-12.md | 0.820 | no reason provided |
+| logs/worker-garbled-russian-2026-04-13.md | 0.820 | no reason provided |
+| logs/contract-03-opencode-pipeline.md | 0.820 | no reason provided |
+| logs/tool1-gpt-researcher.md | 0.820 | no reason provided |
+| logs/reviewer-cycles-6-10-summary.md | 0.820 | no reason provided |
+| logs/worker-cycle-18.md | 0.820 | no reason provided |
+| logs/worker-fix-reviewer-issues-11-15.md | 0.820 | no reason provided |
+| logs/diagram-analysis.md | 0.820 | no reason provided |
+| logs/nihongo_upgrade_log.md | 0.820 | no reason provided |
+| logs/audit-04-context-injection-2026-04-12.md | 0.820 | no reason provided |
+| logs/planner-quarantine-revival-2026-04-14.md | 0.820 | no reason provided |
+| logs/worker-audit10-2026-04-12.md | 0.820 | no reason provided |
+| logs/audit-01-progress.md | 0.820 | no reason provided |
+| logs/planner-wiki-quarantine-analysis-2026-04-14.md | 0.820 | no reason provided |
+| logs/worker-cycle-12.md | 0.820 | no reason provided |
+| logs/planner-2026-04-13-hallucination-fix-contracts-batch2.md | 0.820 | no reason provided |
+| logs/smoke-results-bucket10.md | 0.820 | no reason provided |
+| logs/worker-fix-2026-04-11.md | 0.820 | no reason provided |
+| logs/contract-01-gitignore.md | 0.820 | no reason provided |
+| logs/reviewer-approved-2026-04-14-batch-fix-bug-fix.md | 0.820 | no reason provided |
+| logs/subtask-5-register-scheduler-main-complete.md | 0.820 | no reason provided |
+| logs/wiki-path-audit.md | 0.820 | no reason provided |
+| logs/worker-cycle-13.md | 0.820 | no reason provided |
+| logs/priority-5-clarification.md | 0.820 | no reason provided |
+| logs/audit11-subtask2.md | 0.820 | no reason provided |
+| logs/planner-wiki-quality-enforcement-2026-04-11.md | 0.820 | no reason provided |
+| logs/worker-8-tier8-complete.md | 0.820 | no reason provided |
+| logs/audit-05-completed.md | 0.820 | no reason provided |
+| logs/audit11-subtask3.md | 0.820 | no reason provided |
+| logs/worker_phase4.md | 0.820 | no reason provided |
+| logs/audit-06-2026-04-12.md | 0.820 | no reason provided |
+| logs/planner-2026-04-13-rumahlabuh-dns-fix.md | 0.820 | no reason provided |
+| logs/worker-cycle-15.md | 0.820 | no reason provided |
+| logs/subtask-3-wire-gate-complete.md | 0.820 | no reason provided |
+| logs/worker-cycle-20.md | 0.820 | no reason provided |
+| logs/planner-2026-04-14-deep-audit-contracts-batch1.md | 0.820 | no reason provided |
+| logs/priority-7-orchestrator.md | 0.820 | no reason provided |
+| logs/planner-decomposition.md | 0.820 | no reason provided |
+| logs/swarm-2026-04-13-hallucination-fix-wiki.md | 0.820 | no reason provided |
+| logs/image-analyzer-fix.md | 0.820 | no reason provided |
+| logs/worker-cleanup-redundant-import.md | 0.820 | no reason provided |
+| logs/planner-audit-14-2026-04-12.md | 0.820 | no reason provided |
+| wisdom/05-second-order-thinking.md | 0.820 | no reason provided |
+| tools/threads-fake-controversy-hook.md | 0.820 | no reason provided |
+| architecture/cekwajar-data-sources.md | 0.820 | no reason provided |
+| concepts/intent-routing.md | 0.820 | no reason provided |
+| decisions/ADR-WIRE-001-legion-wiring-audit-fixes.md | 0.820 | no reason provided |
+| decisions/adr-2026-04-13-cekwajar-mvp-scope-lock.md | 0.820 | no reason provided |
+| decisions/ADR-057-bugfix-get-relationship-context.md | 0.820 | no reason provided |
+| decisions/ADR-002-opencode-agents-autostart.md | 0.820 | no reason provided |
+| entities/gpt-researcher.md | 0.820 | no reason provided |
+| issues/review-2026-04-14-wiki-path-fix.md | 0.820 | no reason provided |
+| issues/review-2026-04-13-rumahlabuh-dns-fix.md | 0.820 | no reason provided |
+| issues/002-missing-task-keywords.md | 0.820 | no reason provided |
+| issues/audit15-review.md | 0.820 | no reason provided |
+| research/011-coco-keypoints-lin-2014.md | 0.820 | no reason provided |
+| research/046-ragusa-enigma-2024.md | 0.820 | no reason provided |
+| research/014-video-swin-transformer-liu-2022.md | 0.820 | no reason provided |
+| research/008-simple-baseline-xiao-2018.md | 0.820 | no reason provided |
+| tools/openaugi/docs/task-dispatch.md | 0.820 | no reason provided |
+| tools/openaugi/docs/plans/from-capture-to-jarvis.md | 0.820 | no reason provided |
+| wisdom/domains/10-stoicism-resilience.md | 0.820 | no reason provided |
+| logs/worker-2026-04-12-phase5-6.md | 0.830 | no reason provided |
+| research/039-thiyakesan-order-matters-2025.md | 0.830 | no reason provided |
+| tools-gaps.md | 0.850 | no reason provided |
+| supabase-schema-overview.md | 0.850 | no reason provided |
+| tts-setup.md | 0.850 | no reason provided |
+| soul-enforcement-map.md | 0.850 | no reason provided |
+| proactive-schedule.md | 0.850 | no reason provided |
+| logs/swarm-2026-04-14-deep-audit-opencode-claudecode-legionbot.md | 0.850 | no reason provided |
+| logs/planner-output.md | 0.850 | no reason provided |
+| logs/worker-2026-04-12.md | 0.850 | no reason provided |
+| logs/session-2026-04-12-phase2.md | 0.850 | no reason provided |
+| logs/worker-fix-get-relationship-context.md | 0.850 | no reason provided |
+| logs/planner-2026-04-13-popw-architecture-improvement.md | 0.850 | no reason provided |
+| wisdom/06-chain-of-thought-reasoning.md | 0.850 | no reason provided |
+| architecture/worker-net-architecture-diagram.md | 0.850 | no reason provided |
+| concepts/multi-agent-orchestration.md | 0.850 | no reason provided |
+| projects/rumahlabuh-com.md | 0.850 | no reason provided |
+| decisions/ADR-002-async-error-handling.md | 0.850 | no reason provided |
+| issues/review-2026-04-12-async-correctness.md | 0.850 | no reason provided |
+| issues/003-pre-existing-test-failure.md | 0.850 | no reason provided |
+| issues/reviewer-cycles-1-5.md | 0.850 | no reason provided |
+| profiles/BASHARA-MASTER-PROFILE.md | 0.850 | no reason provided |
+| security-audit.md | 0.860 | no reason provided |
+| logs/worker-phase7-8-2026-04-12.md | 0.860 | no reason provided |
+| logs/priority-1-reasoning-loop-complete.md | 0.860 | no reason provided |
+| briefing-format-spec.md | 0.870 | no reason provided |
+| proactive-gaps.md | 0.870 | no reason provided |
+| logs/nihongo_upgrade_tasks.md | 0.870 | no reason provided |
+| logs/planner-start-3.md | 0.870 | no reason provided |
+| logs/worker-fix-log.md | 0.870 | no reason provided |
+| logs/audit_13_subtask_c.md | 0.870 | no reason provided |
+| logs/smoke-results-bucket8.md | 0.870 | no reason provided |
+| logs/worker_concerns12.md | 0.870 | no reason provided |
+| logs/tool3-markitdown.md | 0.870 | no reason provided |
+| logs/audit12-worker-log.md | 0.870 | no reason provided |
+| logs/contract4-unified-table.md | 0.870 | no reason provided |
+| logs/fix3_self_awareness.md | 0.870 | no reason provided |
+| logs/swarm-2026-04-14-remaining-audit-fixes.md | 0.870 | no reason provided |
+| logs/subtask-4-wiki-scheduler-complete.md | 0.870 | no reason provided |
+| wisdom/12-decision-making-under-uncertainty.md | 0.870 | no reason provided |
+| architecture/cekwajar-ocr-pipeline.md | 0.870 | no reason provided |
+| entities/opencode.md | 0.870 | no reason provided |
+| issues/review-20260411-202729.md | 0.870 | no reason provided |
+| issues/review-2026-04-12-priority-10-budget-issues.md | 0.870 | no reason provided |
+| issues/ADR-060-review-audit.md | 0.870 | no reason provided |
+| issues/tool2-dify-review.md | 0.870 | no reason provided |
+| system-prompt-spec.md | 0.880 | no reason provided |
+| api-key-management.md | 0.880 | no reason provided |
+| bashara-projects.md | 0.880 | no reason provided |
+| webhook-patterns.md | 0.880 | no reason provided |
+| logs/swarm-2026-04-14-industreal-dataset-prep.md | 0.880 | no reason provided |
+| logs/planner-LEGION_FIX_IDENTITY_SEARCH-2026-04-12.md | 0.880 | no reason provided |
+| logs/reviewer-FINAL-2026-04-12-summary.md | 0.880 | no reason provided |
+| logs/worker-subtask-6-smoke-tests-2026-04-12.md | 0.880 | no reason provided |
+| logs/fix1_wiki_loader.md | 0.880 | no reason provided |
+| concepts/memory-architecture.md | 0.880 | no reason provided |
+| decisions/ADR-HARVESTER-001.md | 0.880 | no reason provided |
+| entities/obsidian.md | 0.880 | no reason provided |
+| issues/harvester-review-2026-04-11.md | 0.880 | no reason provided |
+| logs/worker-dead-purge-2026-04-11.md | 0.890 | no reason provided |
+| logs/priority-2-memory-unification-complete.md | 0.890 | no reason provided |
+| logs/worker-cycle-17.md | 0.890 | no reason provided |
+| concepts/pose-derived-detection.md | 0.890 | no reason provided |
+| decisions/AUDIT-01-handler-registration.md | 0.890 | no reason provided |
+| entities/cursor.md | 0.890 | no reason provided |
+| issues/review-cleanup-2026-04-12.md | 0.890 | no reason provided |
+| issues/review-2026-04-10-legion-upgrade-phases-5-10.md | 0.890 | no reason provided |
+| logs/legion-audit-2026-04-12.md | 0.910 | no reason provided |
+| decisions/adr-2026-04-13-intent-router-coverage.md | 0.910 | no reason provided |
+| logs/audit15-log.md | 0.920 | no reason provided |
+| logs/audit11-subtask1.md | 0.920 | no reason provided |
+| architecture/refactoring-2026-04-11.md | 0.920 | no reason provided |
+| logs/contracts-batch2-wiki-wiring.md | 0.930 | no reason provided |
+| logs/worker-subtask-1-gsa-enforcement-2026-04-12.md | 0.930 | no reason provided |
+| logs/planner-2026-04-14-bigru-comparison-analysis.md | 0.930 | no reason provided |
+| bashara-schedule.md | 0.940 | no reason provided |
+| logs/planner-garbled-text-fix.md | 0.940 | no reason provided |
+| architecture/worker-net-improved4.md | 0.940 | no reason provided |
+| decisions/adr-2026-04-12-opencode-over-cursor-for-backend.md | 0.940 | no reason provided |
+| tools/openaugi/docs/plans/done/zzz-instructions.md | 0.940 | no reason provided |
 
----
+## Needs Improvement
 
-## Metrics Summary
+| Page | Score | Reason |
+|------|-------|--------|
+| research/opencode/templates/README.template.md | 0.310 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/agent-configs/claude-code.md | 0.310 | no reason provided |
+| knowledge/business/066-solo-founder-ai-tools-2025.md | 0.310 | no reason provided |
+| logs/worker-bpjs-progress.md | 0.320 | no reason provided |
+| self-knowledge/popw/001-model-architecture.md | 0.320 | no reason provided |
+| logs/reviewer-approved-2026-04-13-wiki-restructure.md | 0.350 | no reason provided |
+| logs/worker-subtask-5-wiki-spec-2026-04-12.md | 0.350 | no reason provided |
+| logs/final-review-2026-04-11.md | 0.350 | no reason provided |
+| opencode/sessions/task-77a7b4da.md | 0.350 | no reason provided |
+| research/opencode/contributing.md | 0.350 | no reason provided |
+| conversations/processed/20260413-162657-claude-code-b0e82605.md | 0.350 | no reason provided |
+| logs/worker-engineering-progress.md | 0.380 | no reason provided |
+| decisions/adr-2026-04-12-circuit-breaker.md | 0.380 | no reason provided |
+| profiles/bashara-gemini-profile.md | 0.380 | no reason provided |
+| research/030-multinet-plusplus-chennupati-2019.md | 0.380 | no reason provided |
+| research/080-procedure-aware-video-understanding-2023.md | 0.380 | no reason provided |
+| logs/swarm-2026-04-14-batch-fix-bug-fix.md | 0.420 | no reason provided |
+| logs/worker-fix-reviewer-issues-16-20.md | 0.420 | no reason provided |
+| logs/audit11-subtask8.md | 0.420 | no reason provided |
+| concepts/efficient-swarm-bot-architecture.md | 0.420 | no reason provided |
+| entities/conda-environment.md | 0.420 | no reason provided |
+| research/037-aganian-semantic-volume-2025.md | 0.420 | no reason provided |
+| research/079-object-aware-egocentric-action-park-2024.md | 0.420 | no reason provided |
+| research/022-cones-2024.md | 0.420 | no reason provided |
+| architecture/popw-media/worker-net-architecture-diagram.md | 0.420 | no reason provided |
+| logs/planner-2026-04-14-deep-audit-opencode-claudecode-legionbot.md | 0.440 | no reason provided |
+| logs/planner-2026-04-14-industreal-dataset.md | 0.450 | no reason provided |
+| logs/worker-2026-04-11.md | 0.450 | no reason provided |
+| logs/2026-04-11-opencode-integration.md | 0.450 | no reason provided |
+| logs/priority-5-worker-brief.md | 0.450 | no reason provided |
+| issues/review-2026-04-10-final-state-verification.md | 0.450 | no reason provided |
+| issues/priority-7-orchestrator-issues.md | 0.450 | no reason provided |
+| research/028-amtl-yun-cho-2023.md | 0.450 | no reason provided |
+| research/opencode/docs/schema-design.md | 0.450 | no reason provided |
+| knowledge/business/067-a16z-one-person-unicorn.md | 0.450 | no reason provided |
+| logs/worker-business-complete.md | 0.470 | no reason provided |
+| issues/audit-05-issues.md | 0.470 | no reason provided |
+| research/block_05_monetization_pricing.md | 0.470 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/00 - Templates/Monthly_progress_template.md | 0.470 | no reason provided |
+| wisdom/domains/11-product-ux-design.md | 0.470 | no reason provided |
+| knowledge/business/072-affiliate-saas-referral.md | 0.470 | no reason provided |
+| logs/planner-progress.md | 0.480 | no reason provided |
+| logs/anti-slop-progress.md | 0.480 | no reason provided |
+| templates/cursor.md | 0.480 | no reason provided |
+| MASTER-INTELLIGENCE.md | 0.500 | no reason provided |
+| high-leverage-changes.md | 0.500 | no reason provided |
+| memory-injection-strategy.md | 0.500 | no reason provided |
+| personality-gaps.md | 0.500 | no reason provided |
+| circuit-breaker-design.md | 0.500 | deep_gate error: Expecting property name enclosed in double quotes: line 1 colum... |
+| 064-better-pseudo-labels.md | 0.500 | deep_gate error: Extra data: line 1 column 630 (char 629) |
+| logs/worker-fix-blockers-2026-04-12.md | 0.500 | could not parse LLM response: Verifikasi dulu sebelum nilai. Perlu cek source co... |
+| logs/swarm-2026-04-14-bigru-comparison.md | 0.500 | no reason provided |
+| logs/regulatory-content-quarantine-analysis.md | 0.500 | no reason provided |
+| logs/planner-2026-04-11.md | 0.500 | deep_gate error: Expecting ',' delimiter: line 4 column 264 (char 322) |
+| logs/api-health.md | 0.500 | no reason provided |
+| logs/harvester-implementation-2026-04-11.md | 0.500 | no reason provided |
+| logs/planner-gsa-voice-2026-04-12.md | 0.500 | no reason provided |
+| logs/concerns_fix_tasks.md | 0.500 | no reason provided |
+| logs/smoke-results-bucket3.md | 0.500 | no reason provided |
+| logs/DEEP_AUDIT_2026-04-14_quarantine-analysis.md | 0.500 | no reason provided |
+| logs/review-2026-04-11.md | 0.500 | no reason provided |
+| logs/pipeline-completion-2026-04-11.md | 0.500 | no reason provided |
+| logs/planner-cycles-1-5.md | 0.500 | no reason provided |
+| logs/audit_13_subtask_d.md | 0.500 | no reason provided |
+| logs/AUDIT07_PLAN.md | 0.500 | no reason provided |
+| logs/worker-audit-03-2026-04-12.md | 0.500 | no reason provided |
+| logs/planner-TODOs.md | 0.500 | no reason provided |
+| logs/session-2026-04-12.md | 0.500 | no reason provided |
+| logs/planner-2026-04-14-wiki-path-fix.md | 0.500 | no reason provided |
+| logs/FINAL_COMPLETION_REPORT.md | 0.500 | no reason provided |
+| logs/planner-swarm-upgrade-2026-04-13.md | 0.500 | no reason provided |
+| logs/worker-bpjs-complete.md | 0.500 | no reason provided |
+| logs/contracts-batch4-wiki-wiring.md | 0.500 | no reason provided |
+| logs/reviewer-cycles-16-20-summary.md | 0.500 | no reason provided |
+| logs/audit-05-plan.md | 0.500 | no reason provided |
+| logs/reviewer-cycles-11-15-summary.md | 0.500 | no reason provided |
+| logs/subtask-2-wiki-quality-gate-complete.md | 0.500 | no reason provided |
+| logs/worker-fix-whitespace-bug-2026-04-12.md | 0.500 | no reason provided |
+| logs/worker-9-tier9-complete.md | 0.500 | no reason provided |
+| logs/audit12-planner-log.md | 0.500 | no reason provided |
+| logs/planner-cycles-11-20.md | 0.500 | no reason provided |
+| logs/planner-start-2.md | 0.500 | no reason provided |
+| logs/fix2_character_enforcer.md | 0.500 | no reason provided |
+| logs/audit-04-llm-call-sites.md | 0.500 | no reason provided |
+| logs/audit-02-subtasks.md | 0.500 | no reason provided |
+| logs/reviewer-cycles-1-5-summary.md | 0.500 | no reason provided |
+| logs/planner-2026-04-14-bug-fix-wiki-health.md | 0.500 | no reason provided |
+| logs/wiki-wiring-audit-2026-04-13.md | 0.500 | no reason provided |
+| logs/planner-audit-06-2026-04-12.md | 0.500 | no reason provided |
+| logs/quarantined-vs-active-comparison.md | 0.500 | no reason provided |
+| logs/worker-wiring-audit-2026-04-12.md | 0.500 | no reason provided |
+| logs/worker-4-tier4-complete.md | 0.500 | no reason provided |
+| logs/worker-10-tier10-complete.md | 0.500 | no reason provided |
+| logs/audit-03-planner.md | 0.500 | no reason provided |
+| logs/git-log.md | 0.500 | no reason provided |
+| logs/task-log-2026-04-15.md | 0.500 | no reason provided |
+| logs/planner-wiki-wiring-2026-04-13.md | 0.500 | no reason provided |
+| logs/reviewer-approved-2026-04-13-temporal-attention-research.md | 0.500 | no reason provided |
+| logs/swarm-2026-04-14-quarantine-revival.md | 0.500 | no reason provided |
+| logs/LEGION_DEPTH_UPGRADE_COMPLETE.md | 0.500 | no reason provided |
+| logs/worker-2-tier2-complete.md | 0.500 | no reason provided |
+| logs/worker-cycle-16.md | 0.500 | no reason provided |
+| logs/swarm-2026-04-14-comprehensive-40-bug-audit-fix.md | 0.500 | no reason provided |
+| logs/worker-business-progress.md | 0.500 | no reason provided |
+| logs/dead-purge-plan.md | 0.500 | no reason provided |
+| logs/swarm-2026-04-14-mamba-implementation.md | 0.500 | no reason provided |
+| logs/planner-2026-04-14-popw-mamba.md | 0.500 | no reason provided |
+| logs/worker_concerns567.md | 0.500 | no reason provided |
+| logs/quarantine-content-analysis.md | 0.500 | no reason provided |
+| logs/legion-upgrade-tasks-2026-04-10.md | 0.500 | no reason provided |
+| logs/reviewer-approved-2026-04-13-cekwajar-synthesis.md | 0.500 | no reason provided |
+| logs/planner-2026-04-13-cekwajar-synthesis.md | 0.500 | no reason provided |
+| logs/audit_13_plan.md | 0.500 | no reason provided |
+| logs/planner-start.md | 0.500 | no reason provided |
+| logs/priority-6-quality-gate.md | 0.500 | no reason provided |
+| logs/worker-market-complete.md | 0.500 | no reason provided |
+| logs/2026-04-14-opencode-deep-audit.md | 0.500 | no reason provided |
+| logs/audit11-subtask4.md | 0.500 | no reason provided |
+| logs/planner-DEEP_AUDIT_2026-04-14.md | 0.500 | no reason provided |
+| logs/final-pass-2026-04-12.md | 0.500 | no reason provided |
+| logs/audit11-subtask7.md | 0.500 | no reason provided |
+| logs/worker-tax-complete.md | 0.500 | no reason provided |
+| logs/audit08-progress.md | 0.500 | no reason provided |
+| logs/worker-subtask-4-soul-update-2026-04-12.md | 0.500 | no reason provided |
+| logs/worker-subtask-2-gsa-voice-module-2026-04-12.md | 0.500 | no reason provided |
+| logs/fastgate-scoring-bias-analysis.md | 0.500 | no reason provided |
+| logs/priority-8-fake-skills.md | 0.500 | no reason provided |
+| logs/smoke-results-bucket2.md | 0.500 | no reason provided |
+| logs/worker-market-progress.md | 0.500 | no reason provided |
+| logs/worker-cycle-19.md | 0.500 | no reason provided |
+| people/andrej-karpathy.md | 0.500 | no reason provided |
+| founder-mindset/07-picks-shovels-ecosystem-model.md | 0.500 | no reason provided |
+| founder-mindset/01-glean-agentic-company-playbook.md | 0.500 | no reason provided |
+| founder-mindset/08-agentic-reliability-principles.md | 0.500 | no reason provided |
+| founder-mindset/04-flow-engineering-system2-mindset.md | 0.500 | no reason provided |
+| founder-mindset/06-compounding-knowledge-architecture.md | 0.500 | no reason provided |
+| wisdom/04-first-principles-thinking.md | 0.500 | no reason provided |
+| wisdom/harvest-log.md | 0.500 | no reason provided |
+| wisdom/07-theory-of-mind-social-reasoning.md | 0.500 | no reason provided |
+| wisdom/16-lean-startup-validated-learning.md | 0.500 | no reason provided |
+| wisdom/11-pareto-80-20-principle.md | 0.500 | no reason provided |
+| wisdom/03-paul-graham-founder-mode.md | 0.500 | no reason provided |
+| wisdom/02-taleb-antifragile.md | 0.500 | no reason provided |
+| wisdom/18-deep-work-focus-principles.md | 0.500 | no reason provided |
+| wisdom/10-epistemic-humility.md | 0.500 | no reason provided |
+| wisdom/09-pre-mortem-thinking.md | 0.500 | no reason provided |
+| wisdom/01-munger-latticework.md | 0.500 | no reason provided |
+| wisdom/17-skin-in-the-game-accountability.md | 0.500 | no reason provided |
+| wisdom/20-the-regret-minimization-why-test.md | 0.500 | no reason provided |
+| wisdom/14-stoic-operating-principles.md | 0.500 | no reason provided |
+| wisdom/08-steelmanning.md | 0.500 | no reason provided |
+| tools/MCP-SERVERS-AVAILABLE.md | 0.500 | no reason provided |
+| tools/MINIMAX-MCP-GUIDE.md | 0.500 | no reason provided |
+| tools/openaugi-usage.md | 0.500 | no reason provided |
+| tools/threads-viral-secret-sauce.md | 0.500 | no reason provided |
+| tools/threads-natural-language-guide.md | 0.500 | no reason provided |
+| timelines/popw-meetings-jan-mar-2026.md | 0.500 | no reason provided |
+| timelines/cekwajar-phase-log.md | 0.500 | no reason provided |
+| timelines/popw-meetings-nov-dec-2025.md | 0.500 | no reason provided |
+| timelines/2026-04-11.md | 0.500 | no reason provided |
+| timelines/2026-04-10.md | 0.500 | no reason provided |
+| timelines/popw-meetings-mar-apr-2026.md | 0.500 | no reason provided |
+| 04-medvi-playbook/GALLAGHER-FULL-STORY.md | 0.500 | no reason provided |
+| _meta/audit_report_2026-04-13.md | 0.500 | no reason provided |
+| _meta/MASTER_AUDIT_2026-04-13.md | 0.500 | no reason provided |
+| _meta/audit_report.md | 0.500 | no reason provided |
+| _meta/migration_report_2026-04-13.md | 0.500 | no reason provided |
+| _meta/obsidian-plugins.md | 0.500 | no reason provided |
+| templates/tooling.md | 0.500 | no reason provided |
+| templates/Home Page.md | 0.500 | no reason provided |
+| templates/SKILL.md | 0.500 | no reason provided |
+| templates/gemini.md | 0.500 | no reason provided |
+| templates/REQUIREMENTS.md | 0.500 | no reason provided |
+| templates/llm-wiki.md | 0.500 | no reason provided |
+| templates/README.md | 0.500 | no reason provided |
+| templates/codex.md | 0.500 | no reason provided |
+| templates/wiki-schema.md | 0.500 | no reason provided |
+| architecture/opencode-integration-2026-04-11.md | 0.500 | no reason provided |
+| architecture/popw-training-pipeline.md | 0.500 | no reason provided |
+| architecture/cekwajar-tech-stack.md | 0.500 | no reason provided |
+| architecture/PRODUCTION-AGENT-PATTERNS.md | 0.500 | no reason provided |
+| architecture/code_reviews.md | 0.500 | no reason provided |
+| architecture/orchestrator-comparison.md | 0.500 | no reason provided |
+| architecture/claude-mem-integration.md | 0.500 | no reason provided |
+| architecture/skill-execution-flow.md | 0.500 | no reason provided |
+| architecture/swarms-bot-routing.md | 0.500 | no reason provided |
+| architecture/legion-orchestrator-system.md | 0.500 | no reason provided |
+| architecture/memory-gaps-analysis.md | 0.500 | no reason provided |
+| architecture/memory-system-architecture.md | 0.500 | no reason provided |
+| architecture/multi-session-worktrees.md | 0.500 | no reason provided |
+| architecture/block_07_technical_architecture.md | 0.500 | no reason provided |
+| architecture/legion-module-map.md | 0.500 | no reason provided |
+| architecture/daily-harvester.md | 0.500 | no reason provided |
+| architecture/legion-daily-harvester.md | 0.500 | no reason provided |
+| architecture/block_02_database_schema.md | 0.500 | no reason provided |
+| concepts/karpathy-kb-pattern.md | 0.500 | no reason provided |
+| concepts/reasoning-loop.md | 0.500 | no reason provided |
+| concepts/llm-cost-routing.md | 0.500 | no reason provided |
+| concepts/connecting-to-github-mcp.md | 0.500 | no reason provided |
+| concepts/context-window-budget.md | 0.500 | no reason provided |
+| concepts/skill-registry.md | 0.500 | no reason provided |
+| concepts/labor-law-indonesia.md | 0.500 | no reason provided |
+| concepts/20260413-064612-legion-bot-no_sessi.md | 0.500 | no reason provided |
+| concepts/bayesian-blending.md | 0.500 | no reason provided |
+| concepts/kendall-loss.md | 0.500 | no reason provided |
+| concepts/wise-iou.md | 0.500 | no reason provided |
+| concepts/self-improvement-loop.md | 0.500 | no reason provided |
+| concepts/market-data-indonesia.md | 0.500 | no reason provided |
+| concepts/vector-search.md | 0.500 | no reason provided |
+| concepts/swarm-bot-architecture.md | 0.500 | no reason provided |
+| concepts/multi-task-learning.md | 0.500 | no reason provided |
+| concepts/film-modulation.md | 0.500 | no reason provided |
+| concepts/bpjs-reference.md | 0.500 | no reason provided |
+| concepts/20260413-101355-legion-bot-99999.md | 0.500 | no reason provided |
+| concepts/claude-code-session-synthesis.md | 0.500 | no reason provided |
+| concepts/optimizer-for-resnet.md | 0.500 | no reason provided |
+| concepts/20260413-101345-legion-bot-test_ses.md | 0.500 | no reason provided |
+| concepts/swarm-bot-project-overview.md | 0.500 | no reason provided |
+| concepts/quantum-entanglement.md | 0.500 | no reason provided |
+| concepts/business-research.md | 0.500 | no reason provided |
+| 06-legion-instructions/README.md | 0.500 | no reason provided |
+| 06-legion-instructions/CODING-REFERENCES.md | 0.500 | no reason provided |
+| 01-cekwajar-product/PLATFORM-OVERVIEW.md | 0.500 | no reason provided |
+| 01-cekwajar-product/WAJAR-KABUR.md | 0.500 | no reason provided |
+| 01-cekwajar-product/WAJAR-GAJI.md | 0.500 | no reason provided |
+| 01-cekwajar-product/WAJAR-TANAH.md | 0.500 | no reason provided |
+| 01-cekwajar-product/WAJAR-SLIP.md | 0.500 | no reason provided |
+| 01-cekwajar-product/WAJAR-HIDUP.md | 0.500 | no reason provided |
+| projects/cekwajar-master-audit-prompt.md | 0.500 | no reason provided |
+| projects/rumahlabuh-architecture.md | 0.500 | no reason provided |
+| projects/legion-bot.md | 0.500 | no reason provided |
+| projects/cekwajar-roadmap.md | 0.500 | no reason provided |
+| projects/cekwajar-architecture.md | 0.500 | no reason provided |
+| projects/harvest-system.md | 0.500 | no reason provided |
+| projects/legion-roadmap.md | 0.500 | no reason provided |
+| projects/popw-research.md | 0.500 | no reason provided |
+| decisions/ADR-001-minimax-over-claude.md | 0.500 | no reason provided |
+| decisions/ADR-055-audit-05-final-confirmation.md | 0.500 | no reason provided |
+| decisions/ADR-090-garbled-text-context-injection.md | 0.500 | no reason provided |
+| decisions/ADR-003-main-py-orphaned-except.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-12-legion-wiki-loop.md | 0.500 | no reason provided |
+| decisions/ADR-021-dify.md | 0.500 | no reason provided |
+| decisions/ADR-007-wiki-loop-fixes.md | 0.500 | deep_gate error: Invalid \escape: line 7 column 51 (char 165) |
+| decisions/ADR-001-api-key-fix.md | 0.500 | no reason provided |
+| decisions/ADR-060-cleanup-redundant-import.md | 0.500 | no reason provided |
+| decisions/ADR-044-router-layer-audit.md | 0.500 | no reason provided |
+| decisions/ADR-055-dual-skill-registration.md | 0.500 | no reason provided |
+| decisions/ADR-045-fix-web-search-result-injection.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-13-daily-harvester-search.md | 0.500 | no reason provided |
+| decisions/adr-2026-01-film-over-attention.md | 0.500 | no reason provided |
+| decisions/ADR-089-legion-concerns-fix.md | 0.500 | no reason provided |
+| decisions/ADR-042-wisdom-sources-1000.md | 0.500 | no reason provided |
+| decisions/ADR-089-repository-cleanup-2026-04-12.md | 0.500 | no reason provided |
+| decisions/ADR-047-async-correctness-audit-10.md | 0.500 | no reason provided |
+| decisions/ADR-014.md | 0.500 | no reason provided |
+| decisions/ADR-007_HANDLERS_AUDIT.md | 0.500 | no reason provided |
+| decisions/ADR-001-LEGION_FIX_IDENTITY_SEARCH.md | 0.500 | no reason provided |
+| decisions/ADR-018.md | 0.500 | deep_gate error: Extra data: line 3 column 1 (char 4) |
+| decisions/ADR-002-phase2.md | 0.500 | no reason provided |
+| decisions/mcp-server-authentication.md | 0.500 | no reason provided |
+| decisions/ADR-003-pipeline-complete.md | 0.500 | no reason provided |
+| decisions/ADR-005-package-split-computer-agent-llm-client.md | 0.500 | no reason provided |
+| decisions/20260413-100521-legion-bot-57553939.md | 0.500 | no reason provided |
+| decisions/ADR-006-legion-wiki-loop-2026-04-12-pt2.md | 0.500 | no reason provided |
+| decisions/ADR-004-review.md | 0.500 | no reason provided |
+| decisions/ADR-015.md | 0.500 | no reason provided |
+| decisions/ADR-002-wiki-review-complete.md | 0.500 | no reason provided |
+| decisions/ADR-007-popw-wiki-pipeline.md | 0.500 | no reason provided |
+| decisions/audit12-planner-decision.md | 0.500 | no reason provided |
+| decisions/ADR-091-weather-handler-session-bug.md | 0.500 | no reason provided |
+| decisions/ADR-013-feature-flags.md | 0.500 | no reason provided |
+| decisions/ADR-016.md | 0.500 | no reason provided |
+| decisions/ADR-001-coding-references-pipeline.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-13-async-blocking-audit.md | 0.500 | no reason provided |
+| decisions/ADR-017.md | 0.500 | no reason provided |
+| decisions/adr-dead-purge-001.md | 0.500 | no reason provided |
+| decisions/ADR-SELF-KNOWLEDGE-001.md | 0.500 | no reason provided |
+| decisions/ADR-052-core-subpackages-init.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-conference-submission-strategy.md | 0.500 | no reason provided |
+| decisions/legion-bot-audit-and-integration.md | 0.500 | no reason provided |
+| decisions/audit12-reviewer-decision.md | 0.500 | no reason provided |
+| decisions/ADR-001-archive-cekwajar-planning.md | 0.500 | no reason provided |
+| decisions/ADR-019.md | 0.500 | no reason provided |
+| decisions/ADR-002-consolidate-agent-registries.md | 0.500 | no reason provided |
+| decisions/ADR-053-orphan-modules-audit-05.md | 0.500 | no reason provided |
+| decisions/ADR-001-opencode-integration.md | 0.500 | no reason provided |
+| decisions/adr-010-reasoning-loop.md | 0.500 | no reason provided |
+| decisions/ADR-048-fix-pre-existing-async-issues.md | 0.500 | no reason provided |
+| decisions/ADR-058-fix-all-missing-imports.md | 0.500 | no reason provided |
+| decisions/ADR-002-smoke-test-plan.md | 0.500 | no reason provided |
+| decisions/ADR-088-audit-15-integration-test.md | 0.500 | no reason provided |
+| decisions/ADR-051-core-reliability-init.md | 0.500 | no reason provided |
+| decisions/ADR-059-fix-cif-scope-architecture.md | 0.500 | no reason provided |
+| decisions/2026-04-12-opencode-over-cursor.md | 0.500 | no reason provided |
+| decisions/ADR-050-bridges-init.md | 0.500 | no reason provided |
+| decisions/adr-2026-03-pdd-pivot.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-13-budget-guard-fix.md | 0.500 | no reason provided |
+| decisions/ADR-003-import-resilience.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-13-ecc-integration.md | 0.500 | no reason provided |
+| decisions/ADR-002-smoke-test-results.md | 0.500 | no reason provided |
+| decisions/ADR-003-phase3-p2p3.md | 0.500 | no reason provided |
+| decisions/ADR-047-llm-client-audit-06.md | 0.500 | no reason provided |
+| decisions/ADR-020-gptr.md | 0.500 | no reason provided |
+| decisions/disable-serena-alternative.md | 0.500 | no reason provided |
+| decisions/fix-kb-duplicate-link-2026-04-13.md | 0.500 | no reason provided |
+| decisions/ADR-056-fix-nonfatal-warnings.md | 0.500 | no reason provided |
+| decisions/ADR-003-fix-smoke-test-issues.md | 0.500 | no reason provided |
+| decisions/adr-002-gsa-voice-implementation.md | 0.500 | no reason provided |
+| decisions/adr-2026-04-11-opencode-integration.md | 0.500 | no reason provided |
+| decisions/ADR-006-wiki-quality-gate.md | 0.500 | no reason provided |
+| decisions/wiki-sync-and-cleanup.md | 0.500 | no reason provided |
+| decisions/ADR-043-minimax-multimodal-mcp.md | 0.500 | no reason provided |
+| decisions/ADR-001-wiki-build-strategy.md | 0.500 | no reason provided |
+| decisions/ADR-054-export-cleanup-audit-05.md | 0.500 | no reason provided |
+| decisions/ADR-001-circuit-breaker.md | 0.500 | no reason provided |
+| decisions/ADR-044-understand-audio-bug.md | 0.500 | no reason provided |
+| decisions/sync-project-info-to-obsidian.md | 0.500 | no reason provided |
+| entities/dify.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 190) |
+| entities/assembly101.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 1067) |
+| entities/ikea-asm.md | 0.500 | no reason provided |
+| entities/openrouter.md | 0.500 | no reason provided |
+| entities/litellm.md | 0.500 | no reason provided |
+| entities/supabase.md | 0.500 | no reason provided |
+| entities/claude-code.md | 0.500 | no reason provided |
+| entities/industreal.md | 0.500 | no reason provided |
+| entities/markitdown.md | 0.500 | no reason provided |
+| entities/ego-exo4d.md | 0.500 | no reason provided |
+| entities/chromadb.md | 0.500 | no reason provided |
+| entities/claude-code-ui-ux-enhancement.md | 0.500 | no reason provided |
+| entities/popw-additional.md | 0.500 | no reason provided |
+| entities/ha4m.md | 0.500 | no reason provided |
+| workflows/n8n-documentation.md | 0.500 | no reason provided |
+| issues/review-phase2-2026-04-12.md | 0.500 | no reason provided |
+| issues/reviewer-FINAL-2026-04-12.md | 0.500 | no reason provided |
+| issues/final-verification-2026-04-12.md | 0.500 | no reason provided |
+| issues/concerns_fix_review.md | 0.500 | no reason provided |
+| issues/review-audit06-2026-04-12-llm-client.md | 0.500 | no reason provided |
+| issues/000-review-summary.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-final-session.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-garbled-text-fix.md | 0.500 | no reason provided |
+| issues/review-2026-04-13-cekwajar-synthesis.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-legion-audit-04-context-injection.md | 0.500 | no reason provided |
+| issues/REVIEWER-FINDINGS.md | 0.500 | no reason provided |
+| issues/ADR-057-review-audit.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-POPW-BiGRU-Architecture.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-audit11-final.md | 0.500 | no reason provided |
+| issues/audit-14-review-2026-04-12.md | 0.500 | no reason provided |
+| issues/priority-10-budget-issues.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-threshold-fix.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-async-correctness-sweep.md | 0.500 | no reason provided |
+| issues/AUDIT07_REVIEW.md | 0.500 | no reason provided |
+| issues/review-2026-04-11-progress-cb-fix.md | 0.500 | no reason provided |
+| issues/review-2026-04-10-legion-phases-2-3.md | 0.500 | no reason provided |
+| issues/001-legacy-agent-count-mismatch.md | 0.500 | no reason provided |
+| issues/audit08-issues.md | 0.500 | no reason provided |
+| issues/review-2026-04-11-CODING-REFERENCES.md | 0.500 | no reason provided |
+| issues/anti-slop-review.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-popw-mamba-integration.md | 0.500 | no reason provided |
+| issues/image-analyzer-fix-review.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-deep-audit-quarantine-analysis.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-batch-fix-bug-fix.md | 0.500 | no reason provided |
+| issues/review-2026-04-13-wiki-restructure.md | 0.500 | no reason provided |
+| issues/SELF-KNOWLEDGE-REVIEW.md | 0.500 | no reason provided |
+| issues/review-2026-04-11.md | 0.500 | no reason provided |
+| issues/review-2026-04-10-circular-import-fix.md | 0.500 | no reason provided |
+| issues/ADR-059-review-audit.md | 0.500 | no reason provided |
+| issues/reviewer-cycles-11-15.md | 0.500 | no reason provided |
+| issues/wiki-quality-review-findings.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 1086) |
+| issues/reviewer-final-2026-04-12.md | 0.500 | no reason provided |
+| issues/review-2026-04-11-archive-cekwajar-planning.md | 0.500 | no reason provided |
+| issues/review-fix-2026-04-13.md | 0.500 | no reason provided |
+| issues/ADR-058-review-audit.md | 0.500 | no reason provided |
+| issues/review-phase1-2.md | 0.500 | no reason provided |
+| issues/tool1-gptr-review.md | 0.500 | no reason provided |
+| issues/tool3-markitdown-review.md | 0.500 | no reason provided |
+| issues/priority-9-commands-issues.md | 0.500 | no reason provided |
+| issues/review-2026-04-10-tasks-2-4-5.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-phase1.md | 0.500 | no reason provided |
+| issues/review-2026-04-13-wiki-obsidian-restructure.md | 0.500 | no reason provided |
+| issues/nihongo_v2_review.md | 0.500 | no reason provided |
+| issues/priority-5-clarification-issues.md | 0.500 | no reason provided |
+| issues/review-2026-04-12-weather-handler-unresponsiveness.md | 0.500 | no reason provided |
+| issues/review-phase3-2026-04-13.md | 0.500 | no reason provided |
+| issues/REVIEW-LEGION_FIX_IDENTITY_SEARCH.md | 0.500 | no reason provided |
+| issues/gsa-voice-review-2026-04-12.md | 0.500 | no reason provided |
+| issues/review-2026-04-13-temporal-attention-research.md | 0.500 | no reason provided |
+| issues/review-2026-04-14-comprehensive-40-bug-audit-fix.md | 0.500 | no reason provided |
+| issues/audit12-issues.md | 0.500 | no reason provided |
+| issues/review-2026-04-10-legion-upgrade.md | 0.500 | no reason provided |
+| issues/reviewer-cycles-6-10.md | 0.500 | no reason provided |
+| profiles/legion-soul.md | 0.500 | no reason provided |
+| profiles/bashara-technical.md | 0.500 | no reason provided |
+| profiles/bashara-claude-profile.md | 0.500 | no reason provided |
+| profiles/bashara-aina.md | 0.500 | no reason provided |
+| research/056-smote-chawla-2002.md | 0.500 | no reason provided |
+| research/dmm-motion.md | 0.500 | no reason provided |
+| research/032-cagrad-liu-2021.md | 0.500 | no reason provided |
+| research/054-remix-chou-2020.md | 0.500 | no reason provided |
+| research/094-caruana-mtl-1997.md | 0.500 | no reason provided |
+| research/050-bbn-zhou-2020.md | 0.500 | no reason provided |
+| research/062-s4m-yoon-2025.md | 0.500 | no reason provided |
+| research/025-pcgrad-yu-2020.md | 0.500 | no reason provided |
+| research/040-ponbagavathi-probing-foundation-2024.md | 0.500 | no reason provided |
+| research/temporal-attention-alternatives.md | 0.500 | no reason provided |
+| research/opencode-vs-claudecode-audit.md | 0.500 | no reason provided |
+| research/011-poseconv3d-duan-2022.md | 0.500 | no reason provided |
+| research/TIER3-INDEX.md | 0.500 | no reason provided |
+| research/087-gradient-checkpointing-chen-2016.md | 0.500 | no reason provided |
+| research/082-udp-huang-2020.md | 0.500 | no reason provided |
+| research/bigru_contract4.md | 0.500 | no reason provided |
+| research/064-better-pseudo-labels-porcher-2024.md | 0.500 | no reason provided |
+| research/045-industreal-dataset-2024.md | 0.500 | no reason provided |
+| research/popw-feature-bank-alternatives-attention.md | 0.500 | no reason provided |
+| research/async_memory_audit.md | 0.500 | no reason provided |
+| research/008-class-balanced-loss-cui-2019.md | 0.500 | no reason provided |
+| research/093-gradcam-selvaraju-2016.md | 0.500 | no reason provided |
+| research/017-bigru-activity-recognition.md | 0.500 | no reason provided |
+| research/popw-model-comparison.md | 0.500 | no reason provided |
+| research/033-uncertainty-regularized-meshgi-2022.md | 0.500 | no reason provided |
+| research/psumnet.md | 0.500 | no reason provided |
+| research/075-attach-dataset-kong-2023.md | 0.500 | no reason provided |
+| research/043-benshabat-3dinaction-2023.md | 0.500 | no reason provided |
+| research/temp_contract2.md | 0.500 | no reason provided |
+| research/bigru-comparison-analysis.md | 0.500 | no reason provided |
+| research/070-video-swin-transformer-liu-2022.md | 0.500 | no reason provided |
+| research/038-ponbagavathi-frame2freq-2026.md | 0.500 | no reason provided |
+| research/013-featurewise-dumoulin-2018.md | 0.500 | no reason provided |
+| research/042-kwon-casa-2022.md | 0.500 | no reason provided |
+| research/012-imagenet-russakovsky-2015.md | 0.500 | no reason provided |
+| research/block_08_competitive_intelligence.md | 0.500 | no reason provided |
+| research/065-pl-dc-lin-2025.md | 0.500 | no reason provided |
+| research/099-learning-by-watching-xiong-2021.md | 0.500 | no reason provided |
+| research/075-potion-choutas-2018.md | 0.500 | no reason provided |
+| research/100-synthesis-open-frontier.md | 0.500 | no reason provided |
+| research/pogars.md | 0.500 | no reason provided |
+| research/072-temporal-action-segmentation-survey-ding-2022.md | 0.500 | no reason provided |
+| research/089-sgdr-loshchilov-2016.md | 0.500 | no reason provided |
+| research/096-detr-carion-2020.md | 0.500 | no reason provided |
+| research/051-decoupling-kang-2020.md | 0.500 | no reason provided |
+| research/016-bigru-temporal-action-recognition.md | 0.500 | no reason provided |
+| research/codebase-health-audit.md | 0.500 | no reason provided |
+| research/084-poseconv3d-ntu-benchmark-2022.md | 0.500 | no reason provided |
+| research/036-aganian-objects-2023.md | 0.500 | no reason provided |
+| research/021-video-seg-modulation-yang-2018.md | 0.500 | no reason provided |
+| research/076-fusing-skeleton-object-assembly-2023.md | 0.500 | no reason provided |
+| research/074-asformer-yi-2021.md | 0.500 | no reason provided |
+| research/temp_contract1.md | 0.500 | no reason provided |
+| research/071-slowfast-feichtenhofer-2019.md | 0.500 | no reason provided |
+| research/068-i3d-carreira-2017.md | 0.500 | no reason provided |
+| research/026-imtl-liu-2021.md | 0.500 | no reason provided |
+| research/spikmamba.md | 0.500 | no reason provided |
+| research/066-pointrend-kirillov-2020.md | 0.500 | no reason provided |
+| research/lsta-net.md | 0.500 | no reason provided |
+| research/015-simple-baselines-pose-xiao-2018.md | 0.500 | no reason provided |
+| research/085-openpose-cao-2017.md | 0.500 | no reason provided |
+| research/024-gradnorm-chen-2018.md | 0.500 | no reason provided |
+| research/081-prompt-enhanced-temporal-action-2023.md | 0.500 | no reason provided |
+| research/097-attention-vaswani-2017.md | 0.500 | no reason provided |
+| research/003-film-perez-2018.md | 0.500 | no reason provided |
+| research/block_04_legal_compliance.md | 0.500 | no reason provided |
+| research/bigru_contract3.md | 0.500 | no reason provided |
+| research/001-resnet-he-2016.md | 0.500 | no reason provided |
+| research/bigru_contract1.md | 0.500 | no reason provided |
+| research/mamba-track.md | 0.500 | no reason provided |
+| research/st-gcn.md | 0.500 | no reason provided |
+| research/088-adamw-loshchilov-2017.md | 0.500 | no reason provided |
+| research/020-bigru-survey-20-papers.md | 0.500 | no reason provided |
+| research/popw-film-literature-gap.md | 0.500 | no reason provided |
+| research/block_06_gtm_execution.md | 0.500 | no reason provided |
+| research/block_03_pph21_bpjs_engine.md | 0.500 | no reason provided |
+| research/vision-mamba.md | 0.500 | no reason provided |
+| research/057-square-loss-hui-2021.md | 0.500 | no reason provided |
+| research/078-videomae2-wang-2023.md | 0.500 | no reason provided |
+| research/temp_contract4.md | 0.500 | no reason provided |
+| research/063-unbiased-teacher-liu-2021.md | 0.500 | no reason provided |
+| research/popw-temporal-model-comparison-table.md | 0.500 | no reason provided |
+| research/073-ms-tcn-li-2021.md | 0.500 | no reason provided |
+| research/034-mtgib-unet-li-2025.md | 0.500 | no reason provided |
+| research/posescript.md | 0.500 | no reason provided |
+| research/INDEX.md | 0.500 | no reason provided |
+| research/mamba-selective-ssm.md | 0.500 | no reason provided |
+| research/004-kendall-uncertainty-2018.md | 0.500 | no reason provided |
+| research/017-conditional-bn-devries-2017.md | 0.500 | no reason provided |
+| research/061-pointly-supervised-cheng-2022.md | 0.500 | no reason provided |
+| research/086-fp16-micikevicius-2017.md | 0.500 | no reason provided |
+| research/block_10_premortem_kill_criteria.md | 0.500 | no reason provided |
+| research/vl-mamba.md | 0.500 | no reason provided |
+| research/016-tfilm-birnbaum-2019.md | 0.500 | no reason provided |
+| research/mamba-motion-generation.md | 0.500 | no reason provided |
+| research/079-pose-survey-zheng-2020.md | 0.500 | no reason provided |
+| research/mans-tarm.md | 0.500 | no reason provided |
+| research/litellm_budget_audit_contract4.md | 0.500 | no reason provided |
+| research/091-cutmix-yun-2019.md | 0.500 | no reason provided |
+| research/076-dino-caron-2021.md | 0.500 | no reason provided |
+| research/053-mislas-zhong-2021.md | 0.500 | no reason provided |
+| research/015-motion-modulation-acmmm-2025.md | 0.500 | no reason provided |
+| research/098-hoi-survey-2023-2024.md | 0.500 | no reason provided |
+| research/078-promqa-assembly-hasegawa-2025.md | 0.500 | no reason provided |
+| research/095-yolo-redmon-2016.md | 0.500 | no reason provided |
+| research/090-bag-of-tricks-he-2018.md | 0.500 | no reason provided |
+| research/asm-alternatives-final.md | 0.500 | no reason provided |
+| research/077-dinov2-oquab-2024.md | 0.500 | no reason provided |
+| research/popw-better-alternatives-final.md | 0.500 | no reason provided |
+| research/epam-net.md | 0.500 | no reason provided |
+| research/006-focal-lin-2017.md | 0.500 | no reason provided |
+| research/044-ha4m-dataset-2022.md | 0.500 | no reason provided |
+| research/080-higherhrnet-cheng-2020.md | 0.500 | no reason provided |
+| research/035-robust-mtl-2024.md | 0.500 | no reason provided |
+| research/007-focal-loss-lin-2017.md | 0.500 | no reason provided |
+| research/018-pose-aware-feature-bank.md | 0.500 | no reason provided |
+| research/055-logit-adjustment-menon-2021.md | 0.500 | no reason provided |
+| research/083-livepose-stier-2023.md | 0.500 | no reason provided |
+| research/just-add-pi.md | 0.500 | no reason provided |
+| research/asm-alternatives-sota-research.md | 0.500 | no reason provided |
+| research/029-uw-so-kirchdorfer-2024.md | 0.500 | no reason provided |
+| research/readme.md | 0.500 | no reason provided |
+| research/012-multi-task-learning-ruder-2017.md | 0.500 | no reason provided |
+| research/bigru_contract2.md | 0.500 | no reason provided |
+| research/asm-alternatives-dataset-comparison.md | 0.500 | no reason provided |
+| research/video-mamba.md | 0.500 | no reason provided |
+| research/019-pose-conditioned-temporal-modeling.md | 0.500 | no reason provided |
+| research/067-sam-kirillov-2023.md | 0.500 | no reason provided |
+| research/mamba-pose-activity-survey.md | 0.500 | no reason provided |
+| research/048-manufacturing-survey-2024.md | 0.500 | no reason provided |
+| research/007-maskrcnn-he-2017.md | 0.500 | deep_gate error: Expecting ',' delimiter: line 4 column 1 (char 404) |
+| research/014-gnn-film-brockschmidt-2020.md | 0.500 | no reason provided |
+| research/ms-temba.md | 0.500 | no reason provided |
+| research/013-gradient-surgery-pcgrad-yu-2020.md | 0.500 | no reason provided |
+| research/031-negative-transfer-xin-2022.md | 0.500 | no reason provided |
+| research/vc_evaluation_cekwajar.md | 0.500 | no reason provided |
+| research/popw-temporal-convolution-alternatives.md | 0.500 | no reason provided |
+| research/052-class-balanced-cui-2019.md | 0.500 | no reason provided |
+| research/EXTERNAL-RESEARCH-FINDINGS.md | 0.500 | no reason provided |
+| research/027-mgda-sener-2018.md | 0.500 | no reason provided |
+| research/002-fpn-lin-2017.md | 0.500 | no reason provided |
+| research/049-ldam-cao-2019.md | 0.500 | no reason provided |
+| research/popw-v14-ground-truth.md | 0.500 | no reason provided |
+| research/041-sener-assembly101-2022.md | 0.500 | no reason provided |
+| research/020-flexloc-2024.md | 0.500 | no reason provided |
+| indexes/wisdom-index.md | 0.500 | no reason provided |
+| indexes/context-engineering-index.md | 0.500 | no reason provided |
+| indexes/ai-dev-patterns-index.md | 0.500 | no reason provided |
+| indexes/founder-mindset-index.md | 0.500 | no reason provided |
+| indexes/opencode-index.md | 0.500 | no reason provided |
+| indexes/ai-agents-index.md | 0.500 | no reason provided |
+| candidate/video-url-pipeline.md | 0.500 | no reason provided |
+| candidate/browser-agent-architecture.md | 0.500 | no reason provided |
+| candidate/web-scraping-patterns.md | 0.500 | no reason provided |
+| opencode/sessions/task-0335a140.md | 0.500 | no reason provided |
+| opencode/sessions/task-353ef2bf.md | 0.500 | no reason provided |
+| opencode/sessions/task-e6e51cb2.md | 0.500 | no reason provided |
+| opencode/sessions/task-5741cef3.md | 0.500 | no reason provided |
+| opencode/sessions/task-9b42ebf0.md | 0.500 | no reason provided |
+| research/context-engineering/README.md | 0.500 | no reason provided |
+| research/context-engineering/README_CN.md | 0.500 | no reason provided |
+| research/_archived_duplicates/004-multitask-kendall-2018.md | 0.500 | no reason provided |
+| research/thesis/thesis-context.md | 0.500 | no reason provided |
+| research/ai-dev-patterns/README_JA.md | 0.500 | no reason provided |
+| research/ai-dev-patterns/CONTRIBUTING.md | 0.500 | no reason provided |
+| research/ai-dev-patterns/README.md | 0.500 | no reason provided |
+| research/agent-intelligence/CONTEXT-ENGINEERING-GUIDE.md | 0.500 | no reason provided |
+| research/agent-intelligence/MEMORY-ARCHITECTURE-GUIDE.md | 0.500 | no reason provided |
+| research/agent-intelligence/AGENT-CAPABILITIES-REFERENCE.md | 0.500 | no reason provided |
+| research/ai-agents/CONTRIBUTING.md | 0.500 | no reason provided |
+| research/ai-agents/README.md | 0.500 | no reason provided |
+| research/popw-protocol/030-multinet-plusplus-chennupati-2019.md | 0.500 | no reason provided |
+| research/popw-protocol/026-imtl-liu-2021.md | 0.500 | no reason provided |
+| research/popw-protocol/024-gradnorm-chen-2018.md | 0.500 | deep_gate error: Invalid \escape: line 1 column 327 (char 326) |
+| research/popw-protocol/029-uw-so-kirchdorfer-2024.md | 0.500 | no reason provided |
+| research/popw-protocol/027-mgda-sener-2018.md | 0.500 | no reason provided |
+| research/opencode/code-of-conduct.md | 0.500 | no reason provided |
+| research/opencode/README.md | 0.500 | no reason provided |
+| research/opencode/data/examples/README.md | 0.500 | no reason provided |
+| research/ai-dev-patterns/.github/pull_request_template.md | 0.500 | no reason provided |
+| research/context-engineering/docs/claudecode/effective-context-engineering-for-ai-agents.md | 0.500 | no reason provided |
+| research/context-engineering/docs/claudecode/claude-code-best-practices.md | 0.500 | no reason provided |
+| research/context-engineering/docs/claudecode/claude-code-best-practices-zh.md | 0.500 | no reason provided |
+| research/context-engineering/docs/dbreunig/how-contexts-fail-and-how-to-fix-them.md | 0.500 | no reason provided |
+| research/context-engineering/docs/dbreunig/长上下文的失效原理及解决方案.md | 0.500 | no reason provided |
+| research/context-engineering/docs/dbreunig/上下文修复的实用指南.md | 0.500 | no reason provided |
+| research/context-engineering/docs/langchain/智能体的Context工程-中文版.md | 0.500 | no reason provided |
+| research/context-engineering/docs/langchain/context-engineering-for-agents.md | 0.500 | no reason provided |
+| raw/docs/swarmbot-agents.md | 0.500 | no reason provided |
+| raw/docs/implementation-status.md | 0.500 | no reason provided |
+| raw/docs/legion-production-hardening.md | 0.500 | no reason provided |
+| raw/docs/self-upgrade.md | 0.500 | no reason provided |
+| raw/docs/agents-overview.md | 0.500 | no reason provided |
+| raw/docs/cekwajar-prd-2026.md | 0.500 | no reason provided |
+| raw/docs/rate-limit-resilience.md | 0.500 | no reason provided |
+| raw/docs/testing.md | 0.500 | no reason provided |
+| raw/docs/swarm-wiring.md | 0.500 | no reason provided |
+| raw/docs/migration.md | 0.500 | no reason provided |
+| raw/docs/api-reliability-guide.md | 0.500 | deep_gate error: Expecting ',' delimiter: line 3 column 132 (char 148) |
+| raw/docs/deployment.md | 0.500 | no reason provided |
+| raw/docs/legion-master.md | 0.500 | no reason provided |
+| raw/docs/soul-engine.md | 0.500 | no reason provided |
+| raw/docs/architecture-v5.md | 0.500 | no reason provided |
+| raw/prompts/legion-master-prompt.md | 0.500 | no reason provided |
+| raw/prompts/claude-deep-audit.md | 0.500 | no reason provided |
+| raw/prompts/legion-concerns.md | 0.500 | no reason provided |
+| raw/prompts/opencode-depth-upgrade.md | 0.500 | no reason provided |
+| raw/prompts/opencode-external-tools.md | 0.500 | no reason provided |
+| raw/changelogs/changelog.md | 0.500 | no reason provided |
+| raw/changelogs/wiring-verified-2026-04-12.md | 0.500 | no reason provided |
+| raw/changelogs/upgrade-log-v7.md | 0.500 | no reason provided |
+| raw/audits/deep-audit-2026-04-12.md | 0.500 | no reason provided |
+| raw/skills_ref/recallmax.md | 0.500 | no reason provided |
+| raw/skills_ref/testing_patterns.md | 0.500 | no reason provided |
+| raw/skills_ref/payroll-indonesia.md | 0.500 | no reason provided |
+| raw/skills_ref/location-advisor.md | 0.500 | no reason provided |
+| raw/skills_ref/nextjs-engineer.md | 0.500 | no reason provided |
+| raw/skills_ref/prompt-engineer.md | 0.500 | no reason provided |
+| raw/skills_ref/supabase-engineer.md | 0.500 | no reason provided |
+| raw/skills_ref/e2e-tester.md | 0.500 | no reason provided |
+| raw/skills_ref/brainstorming.md | 0.500 | no reason provided |
+| raw/skills_ref/debugging.md | 0.500 | no reason provided |
+| raw/skills_ref/security-auditor.md | 0.500 | no reason provided |
+| raw/skills_ref/rag-engineer.md | 0.500 | no reason provided |
+| raw/skills_ref/tool-use-guardian.md | 0.500 | no reason provided |
+| raw/skills_ref/api-cost-optimizer.md | 0.500 | no reason provided |
+| raw/skills_ref/python_patterns.md | 0.500 | no reason provided |
+| raw/changelogs/hotfixes/EMERGENCY_FIX.md | 0.500 | no reason provided |
+| raw/changelogs/hotfixes/HOTFIX_2026-03-08.md | 0.500 | no reason provided |
+| output/health/lint_2026-04-13.md | 0.500 | no reason provided |
+| output/health/karpathy-compliance-2026-04-13.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 871) |
+| templates/developer-vault/README.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/01 - PROJECTS/Project.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/00 - HOME/Home Page.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/06 - DAILY TO YEAR/Year - 2024/Yearly_Overview/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/07 - ARCHIVES/01 - PROJECTS/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/07 - ARCHIVES/02 - AREAS/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/07 - ARCHIVES/NOTION/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/07 - ARCHIVES/APPLE NOTES/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/Preloaded Classes/Notebook CSS classes lists.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/Preloaded Classes/General CSS classes lists.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/00 - Templates/Starter_template.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/00 - Templates/Yearly_goals_template.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/00 - Templates/Daily_notes_template.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/.obsidian/plugins/obsidian-advanced-slides/plugin/customcontrols/README.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/.obsidian/plugins/obsidian-advanced-slides/plugin/menu/CONTRIBUTING.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/.obsidian/plugins/obsidian-advanced-slides/plugin/menu/README.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/.obsidian/plugins/obsidian-advanced-slides/plugin/chart/README.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 810) |
+| templates/developer-vault/CipherVault/.obsidian/plugins/obsidian-advanced-slides/plugin/chalkboard/README.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/03 - RESOURCES/Courses/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Startup Plan/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Job Search/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Networking/Community/Discord/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Networking/Build In Public/TwitterX/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/Frontend/Demo.md | 0.500 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/Data Structure & Algorithm/Demo.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/README.md | 0.500 | no reason provided |
+| tools/openaugi/CLAUDE.md | 0.500 | no reason provided |
+| tools/openaugi/ARCHITECTURE.md | 0.500 | no reason provided |
+| tools/openaugi/docs/MCP_SERVER.md | 0.500 | no reason provided |
+| tools/openaugi/docs/GETTING_STARTED.md | 0.500 | no reason provided |
+| tools/openaugi/docs/taxonomy.md | 0.500 | no reason provided |
+| tools/openaugi/docs/data-model.md | 0.500 | no reason provided |
+| tools/openaugi/docs/enrichment.md | 0.500 | no reason provided |
+| tools/openaugi/.github/ISSUE_TEMPLATE/bug_report.md | 0.500 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/no-dates-no-h3.md | 0.500 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/daily-2024-03-15.md | 0.500 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/empty-note.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/m2-feature-roadmap.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/phase3-adapters.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/capture-tag-stream-loop.md | 0.500 | no reason provided |
+| tools/openaugi/docs/vision/values.md | 0.500 | no reason provided |
+| tools/openaugi/docs/skills/save-thread/SKILL.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/done/m0.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/done/heartbeat.md | 0.500 | no reason provided |
+| tools/openaugi/docs/plans/done/m1.md | 0.500 | no reason provided |
+| tools/openaugi/src/openaugi/templates/heartbeat-skill.md | 0.500 | no reason provided |
+| tools/openaugi/src/openaugi/templates/task-template.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/docs/REQUIREMENTS.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/docs/llm-wiki.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/SKILL.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain-ingest/SKILL.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain-lint/SKILL.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/tooling.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/wiki-schema.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/agent-configs/gemini.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/agent-configs/codex.md | 0.500 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain/references/agent-configs/cursor.md | 0.500 | no reason provided |
+| conversations/processed/20260413-202819-claude-code-4ed33397.md | 0.500 | no reason provided |
+| conversations/processed/20260413-131529-claude-code-e8ef999d.md | 0.500 | no reason provided |
+| conversations/processed/20260413-203024-claude-code-4a782c6a.md | 0.500 | no reason provided |
+| conversations/processed/20260413-100521-legion-bot-57553939.md | 0.500 | no reason provided |
+| conversations/processed/20260413-140321-claude-code-2e145f43.md | 0.500 | no reason provided |
+| conversations/processed/20260413-190634-claude-code-5fc01d78.md | 0.500 | no reason provided |
+| conversations/processed/20260413-165622-claude-code-ee3772f3.md | 0.500 | no reason provided |
+| conversations/processed/20260413-180100-claude-code-ca91a620.md | 0.500 | no reason provided |
+| conversations/processed/20260413-180337-claude-code-114c8012.md | 0.500 | no reason provided |
+| conversations/processed/20260413-162337-claude-code-dfd9d9ea.md | 0.500 | no reason provided |
+| conversations/processed/20260413-101355-legion-bot-99999.md | 0.500 | no reason provided |
+| conversations/processed/20260413-143640-claude-code-8b425697.md | 0.500 | no reason provided |
+| conversations/processed/20260413-190615-claude-code-1942c2da.md | 0.500 | no reason provided |
+| conversations/processed/20260413-153822-claude-code-c1991715.md | 0.500 | no reason provided |
+| wisdom/domains/18-creativity-innovation.md | 0.500 | no reason provided |
+| wisdom/domains/15-history-patterns.md | 0.500 | no reason provided |
+| wisdom/domains/16-mathematics-information-computation.md | 0.500 | no reason provided |
+| wisdom/domains/08-psychology-motivation.md | 0.500 | no reason provided |
+| wisdom/domains/01-epistemology-rationality.md | 0.500 | no reason provided |
+| wisdom/domains/14-ethics-ai-safety.md | 0.500 | no reason provided |
+| wisdom/domains/02-systems-complexity.md | 0.500 | no reason provided |
+| wisdom/domains/19-leadership-management.md | 0.500 | no reason provided |
+| wisdom/domains/09-communication-rhetoric.md | 0.500 | no reason provided |
+| wisdom/domains/05-mathematics-quantitative.md | 0.500 | no reason provided |
+| wisdom/domains/16-computation-information.md | 0.500 | no reason provided |
+| wisdom/domains/17-creativity-innovation.md | 0.500 | no reason provided |
+| wisdom/domains/07-biology-evolution.md | 0.500 | no reason provided |
+| wisdom/domains/12-economics-markets.md | 0.500 | no reason provided |
+| wisdom/domains/01-philosophy-mind-epistemology.md | 0.500 | no reason provided |
+| wisdom/domains/13-neuroscience-learning.md | 0.500 | no reason provided |
+| wisdom/domains/15-history-pattern-recognition.md | 0.500 | no reason provided |
+| wisdom/domains/19-resilience-anti-fragility.md | 0.500 | no reason provided |
+| wisdom/domains/04-strategy-competitive-dynamics.md | 0.500 | no reason provided |
+| wisdom/domains/04-strategy-moats.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 937) |
+| wisdom/domains/18-communication-writing.md | 0.500 | no reason provided |
+| wisdom/domains/05-mathematics-quantitative-thinking.md | 0.500 | no reason provided |
+| wisdom/domains/20-ai-agent-wisdom.md | 0.500 | no reason provided |
+| wisdom/domains/TOP10-SOURCES.md | 0.500 | no reason provided |
+| wisdom/domains/02-systems-thinking-complexity.md | 0.500 | no reason provided |
+| wisdom/domains/20-ai-agent-design.md | 0.500 | no reason provided |
+| wisdom/domains/06-physics-first-principles.md | 0.500 | no reason provided |
+| wisdom/domains/17-eastern-philosophy-wisdom.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 951) |
+| wisdom/domains/09-eastern-philosophy-strategy.md | 0.500 | deep_gate error: Extra data: line 2 column 1 (char 1274) |
+| logs/audit-09/skill_registry_findings.md | 0.500 | no reason provided |
+| logs/audit-09/test_results.md | 0.500 | no reason provided |
+| logs/audit-09/web_search_audit.md | 0.500 | no reason provided |
+| logs/audit-09/skill_registry_duality.md | 0.500 | no reason provided |
+| logs/audit-09/autonomous_mapping.md | 0.500 | no reason provided |
+| logs/audit-09/COMPLETION_REPORT.md | 0.500 | no reason provided |
+| logs/audit-09/skills_inventory.md | 0.500 | no reason provided |
+| logs/audit-09/web_search_findings.md | 0.500 | no reason provided |
+| self-knowledge/legion/003-git-history.md | 0.500 | no reason provided |
+| self-knowledge/legion/001-bot-commands-agent-architecture.md | 0.500 | no reason provided |
+| self-knowledge/legion/004-configuration.md | 0.500 | no reason provided |
+| self-knowledge/cekwajar/003-database-schema.md | 0.500 | no reason provided |
+| self-knowledge/cekwajar/004-env-variables.md | 0.500 | no reason provided |
+| self-knowledge/cekwajar/005-constants.md | 0.500 | no reason provided |
+| self-knowledge/cekwajar/001-formulas-from-code.md | 0.500 | no reason provided |
+| self-knowledge/cekwajar/007-prompt-files-inventory.md | 0.500 | no reason provided |
+| self-knowledge/shared/001-cross-repo-patterns.md | 0.500 | no reason provided |
+| self-knowledge/rumahlabuh/001-design-system-components.md | 0.500 | no reason provided |
+| self-knowledge/popw/002-experiment-results.md | 0.500 | no reason provided |
+| knowledge/product/064-saas-pricing-psychology-indonesia.md | 0.500 | no reason provided |
+| knowledge/product/060-linkedin-indonesia-premium.md | 0.500 | no reason provided |
+| knowledge/product/055-glassdoor-teardown.md | 0.500 | no reason provided |
+| knowledge/product/058-mekari-talenta-indonesia.md | 0.500 | no reason provided |
+| knowledge/product/062-verihubs-privy-identity.md | 0.500 | no reason provided |
+| knowledge/product/057-payscale-methodology.md | 0.500 | no reason provided |
+| knowledge/product/061-indonesian-fintech-monetization.md | 0.500 | no reason provided |
+| knowledge/product/059-karir-kompas-indonesia.md | 0.500 | no reason provided |
+| knowledge/tax/028-spt-tahunan-pph-orang-pribadi.md | 0.500 | no reason provided |
+| knowledge/tax/025-pph21-karyawan-tidak-tetap-harian-lepas.md | 0.500 | no reason provided |
+| knowledge/tax/021-ptkp-2024-pmk101-2016.md | 0.500 | no reason provided |
+| knowledge/tax/020-pph21-ter-pmk168-2023.md | 0.500 | no reason provided |
+| knowledge/tax/027-natura-kenikmatan-pmk66-2023.md | 0.500 | no reason provided |
+| knowledge/tax/023-biaya-jabatan-pph21-5-persen.md | 0.500 | no reason provided |
+| knowledge/tax/026-npwp-wajib-pajak-sanksi-tidak-punya.md | 0.500 | no reason provided |
+| knowledge/tax/022-pph17-pasal-17-progresif.md | 0.500 | no reason provided |
+| knowledge/tax/029-pph21-direksi-komisaris-tidak-tetap.md | 0.500 | no reason provided |
+| knowledge/tax/024-pph21-bonus-thr-penghasilan-tidak-teratur.md | 0.500 | no reason provided |
+| knowledge/labor-law/013-pkwt-pkwtt-kontrak.md | 0.500 | no reason provided |
+| knowledge/labor-law/011-permenaker-thr.md | 0.500 | no reason provided |
+| knowledge/labor-law/008-uu-sjsn-40-2004.md | 0.500 | no reason provided |
+| knowledge/labor-law/009-kepmenaker-upah-lembur.md | 0.500 | no reason provided |
+| knowledge/labor-law/004-pp-pengupahan-51-2023.md | 0.500 | no reason provided |
+| knowledge/labor-law/016-umsp-umsk.md | 0.500 | no reason provided |
+| knowledge/labor-law/001-uu-ketenagakerjaan-13-2003.md | 0.500 | no reason provided |
+| knowledge/labor-law/019-sanksi-pengupahan.md | 0.500 | no reason provided |
+| knowledge/labor-law/007-permenaker-struktur-skala-upah.md | 0.500 | no reason provided |
+| knowledge/labor-law/015-uu-pph-36-2008-ptkp.md | 0.500 | no reason provided |
+| knowledge/labor-law/002-uu-cipta-kerja-11-2020.md | 0.500 | no reason provided |
+| knowledge/labor-law/012-aturan-cuti.md | 0.500 | no reason provided |
+| knowledge/labor-law/018-gaji-tka.md | 0.500 | no reason provided |
+| knowledge/business/073-salary-data-monetization-hr.md | 0.500 | no reason provided |
+| knowledge/business/071-ppn-saas-indonesia-vat.md | 0.500 | no reason provided |
+| knowledge/business/068-indonesia-saas-acquisition.md | 0.500 | no reason provided |
+| knowledge/business/065-levelsio-playbook.md | 0.500 | no reason provided |
+| knowledge/business/074-uu-pdp-indonesia-privacy.md | 0.500 | no reason provided |
+| knowledge/business/070-pt-pma-indonesia-startup.md | 0.500 | no reason provided |
+| knowledge/bpjs/035-bpu.md | 0.500 | no reason provided |
+| knowledge/bpjs/032-batas-upah.md | 0.500 | no reason provided |
+| knowledge/bpjs/033-jht-klaim.md | 0.500 | no reason provided |
+| knowledge/bpjs/030-bpjs-kesehatan.md | 0.500 | no reason provided |
+| knowledge/bpjs/038-kelas-rawat.md | 0.500 | no reason provided |
+| knowledge/bpjs/036-sanksi.md | 0.500 | no reason provided |
+| knowledge/bpjs/031-bpjs-ketenagakerjaan-iuran.md | 0.500 | no reason provided |
+| knowledge/bpjs/039-kris.md | 0.500 | no reason provided |
+| knowledge/bpjs/037-integrasi-payroll.md | 0.500 | no reason provided |
+| knowledge/market/044-linkedin-salary-insights.md | 0.500 | no reason provided |
+| knowledge/market/049-remote-work-premium.md | 0.500 | no reason provided |
+| knowledge/market/046-banking-finance-fmcg-salaries.md | 0.500 | no reason provided |
+| knowledge/market/047-gender-pay-gap.md | 0.500 | no reason provided |
+| knowledge/market/054-inflation-real-wage.md | 0.500 | no reason provided |
+| knowledge/market/043-glints-salary-insights.md | 0.500 | no reason provided |
+| knowledge/market/045-bps-rata-rata-upah.md | 0.500 | no reason provided |
+| knowledge/market/052-salary-negotiation-tips.md | 0.500 | no reason provided |
+| knowledge/market/051-executive-remuneration.md | 0.500 | no reason provided |
+| knowledge/market/053-cost-of-living-comparison.md | 0.500 | no reason provided |
+| knowledge/market/042-jobstreet-salary-report.md | 0.500 | no reason provided |
+| knowledge/market/050-salary-growth-projection.md | 0.500 | no reason provided |
+| knowledge/market/040-tech-salaries-2025.md | 0.500 | no reason provided |
+| knowledge/engineering/088-vercel-zero-downtime.md | 0.500 | no reason provided |
+| knowledge/engineering/091-api-rate-limiting.md | 0.500 | no reason provided |
+| knowledge/engineering/089-typescript-money-precision.md | 0.500 | no reason provided |
+| knowledge/engineering/086-nextjs14-app-router-saas.md | 0.500 | no reason provided |
+| knowledge/engineering/090-postgresql-performance.md | 0.500 | no reason provided |
+| knowledge/ai-tools/models/INDEX.md | 0.500 | no reason provided |
+| knowledge/ai-tools/opencode/INDEX.md | 0.500 | no reason provided |
+| knowledge/personal/japan-life/INDEX.md | 0.500 | no reason provided |
+| knowledge/personal/finance/INDEX.md | 0.500 | no reason provided |
+| knowledge/popw/research/INDEX.md | 0.500 | no reason provided |
+| knowledge/popw/roadmap/INDEX.md | 0.500 | no reason provided |
+| knowledge/cekwajar/labor-law/INDEX.md | 0.500 | no reason provided |
+| knowledge/cekwajar/business/INDEX.md | 0.500 | no reason provided |
+| knowledge/cekwajar/bpjs/INDEX.md | 0.500 | no reason provided |
+| knowledge/cekwajar/market/INDEX.md | 0.500 | no reason provided |
+| knowledge/cekwajar/engineering/INDEX.md | 0.500 | no reason provided |
+| legion/audit/legion-bot-ecosystem-audit-2026-04-17.md | 0.500 | no reason provided |
+| legion/harvester/harvest-system.md | 0.500 | no reason provided |
+| logs/smoke-results-bucket1.md | 0.520 | no reason provided |
+| logs/planner-2026-04-13.md | 0.520 | no reason provided |
+| logs/planner-2026-04-13-wiki-enrichment.md | 0.520 | no reason provided |
+| logs/reviewer-approved-2026-04-14-deep-audit-quarantine-analysis.md | 0.520 | no reason provided |
+| issues/reviewer-cycles-16-20.md | 0.520 | no reason provided |
+| tools/openaugi/CONTRIBUTING.md | 0.520 | no reason provided |
+| conversations/processed/20260413-064612-legion-bot-no_sessi.md | 0.520 | no reason provided |
+| logs/subtask-1-adr-006-complete.md | 0.540 | no reason provided |
+| logs/planner-wiki-restructure-2026-04-13.md | 0.540 | no reason provided |
+| README.md | 0.550 | no reason provided |
+| logs/active-tasks.md | 0.550 | no reason provided |
+| logs/self-knowledge-extraction-plan.md | 0.550 | no reason provided |
+| logs/swarm-2026-04-13-wiki-wiring-fix.md | 0.550 | no reason provided |
+| logs/contract-02-verification.md | 0.550 | no reason provided |
+| logs/worker-cleanup-2026-04-12.md | 0.550 | no reason provided |
+| issues/final-review-2026-04-11.md | 0.550 | no reason provided |
+| issues/review-2026-04-14-quarantine-revival.md | 0.550 | no reason provided |
+| research/081-dekr-geng-2021.md | 0.550 | no reason provided |
+| research/temp_contract3.md | 0.550 | no reason provided |
+| research/019-dit-peebles-2023.md | 0.550 | no reason provided |
+| tools/openaugi/README.md | 0.550 | no reason provided |
+| wisdom/domains/03-decision-science-biases.md | 0.550 | no reason provided |
+| self-knowledge/cekwajar/006-git-history.md | 0.550 | no reason provided |
+| test-patterns-guide.md | 0.580 | no reason provided |
+| logs/contract1-architecture-fit.md | 0.580 | no reason provided |
+| logs/audit_13_review.md | 0.580 | no reason provided |
+| logs/planner-2026-04-13-temporal-attention-research.md | 0.580 | no reason provided |
+| logs/planner-2026-04-13-hallucination-fix-contracts-batch1.md | 0.580 | no reason provided |
+| logs/priority-10-budget.md | 0.580 | no reason provided |
+| logs/audit11-subtask5.md | 0.580 | no reason provided |
+| logs/worker-anti-slop-stage0.md | 0.580 | no reason provided |
+| logs/swarm-2026-04-14-quarantine-analysis.md | 0.580 | no reason provided |
+| decisions/popw-research-material-migration.md | 0.580 | no reason provided |
+| decisions/ADR-001-dual-router-conflict.md | 0.580 | no reason provided |
+| research/082-ms-tcn-action-segmentation-2021.md | 0.580 | no reason provided |
+| research/context-engineering/docs/dbreunig/how-to-fix-your-context.md | 0.580 | no reason provided |
+| research/context-engineering/docs/manus/AI智能体的Context工程：构建Manus的经验教训.md | 0.580 | no reason provided |
+| knowledge/product/063-salary-transparency-laws.md | 0.580 | no reason provided |
+| knowledge/labor-law/006-umk-2025-kabupaten-kota.md | 0.580 | no reason provided |
+| knowledge/business/069-saas-metrics-benchmarks.md | 0.580 | no reason provided |
+| logs/contracts-batch1-wiki-wiring.md | 0.590 | no reason provided |
+| logs/swarm-upgrade-2026-04-13.md | 0.610 | no reason provided |
+| knowledge/market/041-mercer-salary-survey.md | 0.610 | no reason provided |
+| observability-stack.md | 0.620 | no reason provided |
+| SCHEMA.md | 0.620 | no reason provided |
+| memory-architecture.md | 0.620 | no reason provided |
+| ci-cd-pipeline.md | 0.620 | no reason provided |
+| legion/audit-2026-04-11-fixes.md | 0.620 | no reason provided |
+| self-knowledge/INDEX.md | 0.620 | no reason provided |
+| agents/planner.md | 0.620 | no reason provided |
+| logs/swarm-2026-04-13-temporal-attention-alternatives.md | 0.620 | no reason provided |
+| logs/smoke-results-bucket7.md | 0.620 | no reason provided |
+| issues/review-2026-04-13-verify.md | 0.620 | no reason provided |
+| research/context-engineering/docs/manus/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus.md | 0.620 | no reason provided |
+| research/047-zhao-compositional-2022.md | 0.640 | no reason provided |
+| wisdom/domains/20-religion-meaning-purpose.md | 0.640 | no reason provided |
+| knowledge/product/056-levels-fyi-teardown.md | 0.640 | no reason provided |
+| multi-intent-strategy.md | 0.650 | no reason provided |
+| video-url-pipeline.md | 0.650 | no reason provided |
+| self-knowledge/EXTRACTION_LOG.md | 0.650 | no reason provided |
+| logs/subtask-6-wiki-handler-commands-complete.md | 0.650 | no reason provided |
+| logs/concerns_fix_log.md | 0.650 | no reason provided |
+| logs/TASK-LEGION_FIX_IDENTITY_SEARCH.md | 0.650 | no reason provided |
+| logs/contract-02-frontmatter.md | 0.650 | no reason provided |
+| logs/reviewer-final-2026-04-11.md | 0.650 | no reason provided |
+| 02-cekwajar-tech/ARCHITECTURE.md | 0.650 | no reason provided |
+| issues/AUDIT-01-review.md | 0.650 | no reason provided |
+| research/opencode/.github/PULL_REQUEST_TEMPLATE.md | 0.650 | no reason provided |
+| tools/karpathy-wiki/skills/second-brain-query/SKILL.md | 0.650 | no reason provided |
+| wisdom/domains/08-psychology-human-behavior.md | 0.650 | no reason provided |
+| logs/audit15_tasks.md | 0.670 | no reason provided |
+| composio-email-setup.md | 0.680 | no reason provided |
+| memory-gaps.md | 0.680 | no reason provided |
+| logging-strategy.md | 0.680 | no reason provided |
+| logs/priority-9-commands.md | 0.680 | no reason provided |
+| logs/tool2-dify.md | 0.680 | no reason provided |
+| logs/audit_13_subtask_b.md | 0.680 | no reason provided |
+| logs/worker-cycle-14.md | 0.680 | no reason provided |
+| logs/contract3-rtx3060-analysis.md | 0.680 | no reason provided |
+| logs/worker-product-complete.md | 0.680 | no reason provided |
+| logs/audit11-review.md | 0.680 | no reason provided |
+| founder-mindset/02-solo-founder-swarm-marketing.md | 0.680 | no reason provided |
+| timelines/legion-version-history.md | 0.680 | no reason provided |
+| decisions/bigru-vs-bilstm.md | 0.680 | no reason provided |
+| decisions/ADR-004-dynamic-revalidation.md | 0.680 | no reason provided |
+| decisions/debate-candidate-evaluation.md | 0.680 | no reason provided |
+| issues/review-final.md | 0.680 | no reason provided |
+| research/block_01_verdict_algorithm.md | 0.680 | no reason provided |
+| research/023-mtl-overview-ruder-2017.md | 0.680 | no reason provided |
+| research/058-longtail-video-perrett-2023.md | 0.680 | no reason provided |
+| research/009-hrnet-wang-2020.md | 0.680 | no reason provided |
+| research/popw-mamba-alternatives-linear-models.md | 0.680 | no reason provided |
+| knowledge/engineering/085-supabase-rls-patterns.md | 0.680 | no reason provided |
+| browser-agent-architecture.md | 0.690 | no reason provided |
+| logs/audit11-plan.md | 0.690 | no reason provided |
+| logs/anti-slop-tasks.md | 0.690 | no reason provided |
+| logs/planner-audit-10-2026-04-12.md | 0.690 | no reason provided |
+| research/block_09_financial_model.md | 0.690 | no reason provided |
+| research/popw-activity-head-temporal-alternatives-2026-04-14.md | 0.690 | no reason provided |
 
-| Metric | Value | Status |
-|--------|-------|--------|
-| Total wiki articles (FILE_INDEX) | 1,151 | ✅ |
-| Total .md files on disk | 2,332 | ✅ |
-| Missing frontmatter count | 0 | ✅ |
-| YAML failure count | 0 | ✅ |
-| Broken wikilinks count | 0 (clean run) | ✅ |
-| Orphan count (uncited articles) | 804 | ❌ |
-| Health score | 30.1% | ❌ |
+## Low Quality
 
----
-
-## Frontmatter Health
-
-**Script**: `.wiki/_scripts/batch_fix_frontmatter.py` (277 lines)  
-**Result**: All 2,332 scanned files have valid Legion frontmatter.
-
-```
-============================================================
-batch_fix_frontmatter.py — Legion Wiki Frontmatter Fixer
-============================================================
-Found 2332 .md files in /home/newadmin/swarm-bot/.wiki
-
-------------------------------------------------------------
-SUMMARY: 0 fixed, 2332 skipped (valid frontmatter), 0 errors
-------------------------------------------------------------
-```
-
-The frontmatter fixer has already been run in prior sessions (logged in `.wiki/logs/swarm-2026-04-14-remaining-audit-fixes.md` — 2288 files fixed in prior session). The current state shows zero remaining issues. Every .md file in the wiki has a complete Legion frontmatter block with the required fields: `title`, `type`, `status`, `tags`, `created`, `updated`, `summary`.
-
-The frontmatter schema requires: `title`, `type`, `status`, `tags`, `created`, `updated`, `summary`. Optional fields include: `wikilinks`, `confidence`, `source`. Directories skipped by the fixer: `_scripts`, `_meta`, `_quality_report.md`.
-
----
-
-## YAML Syntax Validation
-
-**Script**: `.wiki/_scripts/batch_fix_yaml.py` (226 lines)  
-**Result**: Zero YAML failures across all 2,332 scanned files.
-
-```
-Scanning 2332 markdown files in /home/newadmin/swarm-bot/.wiki...
-======================================================================
-SUMMARY:
-  Total files scanned: 2332
-  Successfully parsed:  2332
-  Auto-fixed:           0
-  YAML failures:        0
-```
-
-All YAML frontmatter blocks parse cleanly with `yaml.safe_load()`. No unclosed quotes, no tabs-in-values, no bare yes/no booleans. The previously expected ~39 YAML failures from the contract spec have already been auto-fixed in prior sessions.
-
----
-
-## Wikilinks Integrity
-
-**Script**: `.wiki/_scripts/batch_fix_wikilinks.py` (197 lines)  
-**Result**: Zero broken wikilinks on current clean run.
-
-```
-Wiki file index contains 1150 entries
-=== SUMMARY ===
-Files changed: 0
-Total wikilinks fixed: 0
-```
-
-The wikilinks fixer has already been run in prior sessions (logged in `.wiki/logs/swarm-2026-04-14-remaining-audit-fixes.md` — 320 broken wikilinks fixed across 109 files in prior run). The current run shows a clean slate: the file index has 1,150 entries and no remaining wikilinks require correction.
-
-**Wikilink auto-detection logic**: The script builds a `FILE_INDEX` mapping of slug → relative path for all non-underscore-prefixed .md files. It fixes:
-- Missing `./concepts/` prefix for 22 known concept slugs
-- Wrong `wiki/` and `.wiki/` prefixes (removes them)
-- Trailing `/` on directory-style links (agents/, architecture/, decisions/, etc.)
-- Missing `./entities/` prefix for 11 known entity slugs
-- Auto-detects bare `[[slug]]` patterns and rewrites to relative paths
-
----
-
-## Orphan Articles (Critical Issue)
-
-**Definition**: An orphan is a wiki article that is tracked in the FILE_INDEX but never referenced by any other article's wikilink (neither slug nor path form appears in any `[[...]]` reference in the wiki).
-
-**Result**: **804 orphans** out of 1,151 indexed articles — **69.9% of the wiki is uncited**.
-
-| Metric | Value |
-|--------|-------|
-| FILE_INDEX entries | 1,151 |
-| Referenced articles | 347 |
-| Orphan count | 804 |
-| Orphan ratio | 69.9% |
-
-**Orphan distribution**: The orphans appear to be distributed across all directories, with heavy concentration in root-level files and the research/, decisions/, logs/ directories. The numeric prefix pattern (001-, 002-, etc.) in many orphan filenames suggests imported content from an automated documentation system that was not fully integrated into the wiki's cross-referencing structure.
-
-**Sample orphan articles** (first 20 of 804):
-- `001-bot-commands-agent-architecture`
-- `001-cross-repo-patterns`
-- `001-design-system-components`
-- `001-formulas-from-code`
-- `001-model-architecture`
-- `001-uu-ketenagakerjaan-13-2003`
-- `002-api-routes`
-- `002-api-structure-booking-flow`
-- `002-experiment-results`
-- `002-tool-definitions`
-- `002-uu-cipta-kerja-11-2020`
-- `003-database-schema`
-- `003-git-history`
-- `003-pp-pengupahan-36-2021`
-- `004-configuration`
-- `004-env-variables`
-- `004-multitask-kendall-2018`
-- `004-pp-pengupahan-51-2023`
-- `005-constants`
-- `005-ikea-asm-benshabat-2021`
-
----
-
-## Health Score Calculation
-
-```
-Health Score = (Referenced Articles / Total Articles) × 100
-             = (347 / 1,151) × 100
-             = 30.1%
-```
-
-**Grade**: F (Severely Degraded)  
-**Primary Issue**: 804 orphan articles that nothing references and which may not reference anything else.
-
----
-
-## File Index vs. Disk Discrepancy
-
-The FILE_INDEX contains 1,151 entries but 2,332 .md files exist on disk. This discrepancy of 1,181 files warrants investigation. Possible causes:
-- Files with underscore prefix are intentionally excluded from indexing
-- Some subdirectories may be excluded from indexing
-- Path resolution issues on nested directory structures
-
----
-
-## Recommendations
-
-1. **Investigate orphan source** — The numeric prefix pattern (001-, 002-, etc.) suggests imported content. Determine if these should be integrated into the wiki's cross-reference structure or pruned.
-
-2. **Run wikilinks re-index** — The FILE_INDEX discrepancy suggests many .md files may not be getting indexed. Investigate the indexing logic in batch_fix_wikilinks.py.
-
-3. **Content audit** — With 804 orphans, some may contain valuable information that simply needs wikilinks added. Consider a prioritized review of high-value orphan content.
-
-4. **Prevent future orphans** — Consider adding a pre-commit hook or CI check that validates every new wiki article is linked from at least one existing article.
-
-5. **Address index-disk gap** — Investigate why 1,181 .md files on disk are not in the FILE_INDEX.
-
----
-
-## Sources
-
-- `.wiki/_scripts/batch_fix_frontmatter.py` — 277 lines, frontmatter validation logic (SKIP_DIRS: `_scripts`, `_meta`, `_quality_report.md`)
-- `.wiki/_scripts/batch_fix_yaml.py` — 226 lines, YAML parsing and auto-fix (yaml.safe_load)
-- `.wiki/_scripts/batch_fix_wikilinks.py` — 197 lines, wikilinks index and auto-fix (FILE_INDEX of 1150 entries)
-- `.wiki/logs/swarm-2026-04-14-remaining-audit-fixes.md` — prior fix session record (2288 frontmatter fixes, 0 YAML failures, 320 wikilinks fixed)
-- `.wiki/logs/reviewer-approved-2026-04-14-batch-fix-bug-fix.md` — batch fix approval record
-- `.wiki/_quality_report.md` — prior quality report (502 pages scanned, avg score 0.608)
+| Page | Score | Reason |
+|------|-------|--------|
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/Backend/Backend.md | 0.000 | Empty template — metadata only, no actual Backend content |
+| knowledge/general/technology/INDEX.md | 0.000 | no reason provided |
+| decisions/session-outcome.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/06 - DAILY TO YEAR/Year - 2024/Daily_Log/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Mental Health/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Networking/Build In Public/Linkedin/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Networking/Build In Public/Blogs/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/Computers fundamentals/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/Programming Languages/Demo.md | 0.050 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Computer Science/AI Engineering/AI Engineering.md | 0.050 | no reason provided |
+| knowledge/personal/relationships/INDEX.md | 0.050 | no reason provided |
+| knowledge/popw/experiments/INDEX.md | 0.050 | no reason provided |
+| knowledge/cekwajar/tax/INDEX.md | 0.050 | no reason provided |
+| harvest_rejected.md | 0.070 | no reason provided |
+| prompts.md | 0.080 | no reason provided |
+| 07-gallagher-empire-model/README.md | 0.080 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Self Improvement/Demo.md | 0.080 | no reason provided |
+| agents.md | 0.090 | no reason provided |
+| harvest_log.md | 0.090 | no reason provided |
+| templates/developer-vault/CipherVault/02 - AREAS/Networking/Community/Events/Demo.md | 0.090 | no reason provided |
+| logs/worker-1-tier1-complete.md | 0.120 | no reason provided |
+| decisions/20260413-103051-legion-bot-smoke_te.md | 0.120 | no reason provided |
+| conversations/processed/20260413-145050-claude-code-00b4dd24.md | 0.120 | no reason provided |
+| opencode/sessions/task-6cce97d1.md | 0.150 | no reason provided |
+| templates/developer-vault/CipherVault/06 - DAILY TO YEAR/Year - 2024/Weekly_Review/Demo.md | 0.150 | no reason provided |
+| templates/developer-vault/CipherVault/99 - META/00 - Templates/Projects_template.md | 0.150 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/subdir/nested-note.md | 0.150 | no reason provided |
+| conversations/processed/20260413-103051-legion-bot-smoke_te.md | 0.150 | no reason provided |
+| conversations/processed/20260413-135619-claude-code-07981ac0.md | 0.150 | no reason provided |
+| knowledge/ai-tools/swarms/INDEX.md | 0.150 | This is a bare index page with zero entries. The 'Entries' section literally say... |
+| knowledge/general/economy/INDEX.md | 0.150 | no reason provided |
+| legion/harvester/harvest-log.md | 0.150 | Wiki would be cluttered with operational noise — 5 sessions, 0 candidates total,... |
+| raw/skills_ref/debugging-strategies.md | 0.180 | no reason provided |
+| conversations/processed/20260413-101345-legion-bot-test_ses.md | 0.190 | Generic ML blog noise. AdamW for ResNet is textbook-level info — no specificity ... |
+| logs/planner-DEEP_AUDIT_2026-04-14-contracts.md | 0.220 | no reason provided |
+| conversations/processed/20260413-145003-claude-code-571b3a5f.md | 0.220 | no reason provided |
+| conversations/processed/20260413-135617-claude-code-80c18196.md | 0.220 | no reason provided |
+| self-knowledge/cekwajar/002-api-routes.md | 0.220 | no reason provided |
+| logs/2026-04-11-coding-references.md | 0.240 | no reason provided |
+| research/077-foundation-model-hand-pose-2024.md | 0.240 | no reason provided |
+| tools/openaugi/.github/pull_request_template.md | 0.250 | no reason provided |
+| tools/openaugi/.github/ISSUE_TEMPLATE/feature_request.md | 0.250 | no reason provided |
+| knowledge/labor-law/010-pp-pesangon-35-2021.md | 0.250 | no reason provided |
+| concepts/swarm-bot-project.md | 0.260 | no reason provided |
+| logs/reviewer-approved-2026-04-14-quarantine-revival.md | 0.280 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/Team Meetings.md | 0.290 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/2024-01-15 Book Notes.md | 0.290 | no reason provided |
+| tools/openaugi/tests/fixtures/vault/Project Alpha.md | 0.290 | no reason provided |
+| conversations/processed/20260413-163638-claude-code-e42b5449.md | 0.290 | no reason provided |
+| conversations/processed/20260413-144943-claude-code-3436e6d0.md | 0.290 | Raw terminal log with 5 truncated messages and missing assistant responses. 'Pas... |
+| wisdom/domains/14-ethics-moral-philosophy.md | 0.290 | no reason provided |

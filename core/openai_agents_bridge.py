@@ -4,8 +4,8 @@ import logging
 import time
 from typing import Any
 
-from llm_client import chat
 from core.structured_outputs import AgentResponse, SwarmResult
+from llm_client import chat
 
 logger = logging.getLogger(__name__)
 

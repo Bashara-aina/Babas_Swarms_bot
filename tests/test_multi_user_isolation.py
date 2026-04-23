@@ -33,9 +33,9 @@ async def test_memory_isolated_per_user():
     uid_b = 222222
 
     engine.set_user_id(uid_a)
-    ctx_a = await engine.get_context_window(str(uid_a))
+    await engine.get_context_window(str(uid_a))
     engine.set_user_id(uid_b)
-    ctx_b = await engine.get_context_window(str(uid_b))
+    await engine.get_context_window(str(uid_b))
 
     # Context switching should be isolated per user
     assert uid_a != uid_b

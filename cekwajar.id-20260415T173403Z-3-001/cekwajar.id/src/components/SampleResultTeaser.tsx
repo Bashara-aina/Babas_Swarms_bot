@@ -8,7 +8,11 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 
-export function SampleResultTeaser() {
+interface SampleResultTeaserProps {
+  onViewPremiumSample?: () => void
+}
+
+export function SampleResultTeaser({ onViewPremiumSample }: SampleResultTeaserProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -83,6 +87,16 @@ export function SampleResultTeaser() {
           <p className="text-xs text-center text-muted-foreground">
             Hasil nyata bergantung pada data slip gaji kamu
           </p>
+
+          {onViewPremiumSample && (
+            <button
+              type="button"
+              onClick={onViewPremiumSample}
+              className="mt-3 w-full rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400"
+            >
+              Lihat contoh premium
+            </button>
+          )}
         </div>
       )}
     </div>

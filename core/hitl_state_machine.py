@@ -83,7 +83,7 @@ class HITLWorkflow:
 
         task = workflow["task"]
         draft = await chat(
-            model="groq/llama-3.3-70b-versatile",
+            model="minimax/MiniMax-Text-01",
             prompt=(
                 f"Write a professional email for the following task:\n{task}\n\n"
                 "Keep it concise, clear, and action-oriented."

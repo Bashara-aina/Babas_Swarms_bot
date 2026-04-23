@@ -72,7 +72,7 @@ class MindBusRouter:
         # Step 2: Retrieve relevant memories
         memory_ctx = ""
         try:
-            from tools.mem0_client import mem0_search, build_mem0_context
+            from tools.mem0_client import build_mem0_context, mem0_search
             memories = await mem0_search(user_id=user_id, query=message, limit=5)
             memory_ctx = build_mem0_context(memories, query=message, max_chars=800)
         except Exception as e:
@@ -99,10 +99,11 @@ Respond as JSON: {{"skill": "<skill>", "confidence": <0.0-1.0>, "reasoning": "<o
 
         try:
             import json
+
             import litellm
             resp = await asyncio.to_thread(
                 litellm.completion,
-                model=os.getenv("ROUTING_MODEL", "groq/llama-3.3-70b-versatile"),
+                model=os.getenv("ROUTING_MODEL", "minimax/MiniMax-Text-01"),
                 messages=[{"role": "user", "content": routing_prompt}],
                 max_tokens=120,
                 temperature=0.0,

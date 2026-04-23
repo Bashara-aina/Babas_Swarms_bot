@@ -14,8 +14,8 @@ from __future__ import annotations
 import asyncio
 import json
 import re
-import subprocess
 import sqlite3
+import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -179,7 +179,7 @@ def synthesize_with_keywords(stub_text: str, source: str, slug_hint: str = "") -
     keyword, art_type, title_pref, tags = best_match
 
     # Extract a title from the first meaningful user message
-    lines = [l.strip() for l in stub_text.split("\n") if l.strip() and l.strip().startswith("- **USER")]
+    lines = [line.strip() for line in stub_text.split("\n") if line.strip() and line.strip().startswith("- **USER")]
     first_msg = lines[0] if lines else ""
     title_content = re.sub(r"^- \*\*USER\*\*:\s*", "", first_msg)[:50] if first_msg else "session note"
     title = f"{title_pref}: {title_content}"
@@ -329,7 +329,7 @@ def main() -> None:
 
         # Extract frontmatter + body
         parts = content.split("---", 3)
-        frontmatter_raw = parts[1] if len(parts) > 2 else ""
+        parts[1] if len(parts) > 2 else ""
         body = parts[2] if len(parts) > 2 else content
 
         # Try LLM synthesis first

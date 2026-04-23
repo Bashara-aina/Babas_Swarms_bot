@@ -13,10 +13,11 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-logger = logging.getLogger(__name__)
-router = Router()
-
 from handlers.shared import ALLOWED_USER_ID, is_allowed
+
+logger = logging.getLogger(__name__)
+
+router = Router()
 
 
 async def _split_and_send(message: Message, text: str) -> None:

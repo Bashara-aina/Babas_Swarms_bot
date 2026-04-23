@@ -29,13 +29,13 @@ logger = logging.getLogger(__name__)
 
 # ── Optional CrewAI import ────────────────────────────────────────────────────
 try:
-    from crewai import Agent, Task, Crew, Process
+    from crewai import Agent, Crew, Process, Task
     from crewai.tools import BaseTool
 
     _CREWAI_AVAILABLE = True
 except ImportError:
     try:
-        from crewai import Agent, Task, Crew, Process  # type: ignore
+        from crewai import Agent, Crew, Process, Task  # type: ignore
 
         _CREWAI_AVAILABLE = True
     except ImportError:
@@ -51,7 +51,7 @@ _crew_instance: Any | None = None
 async def _query_supabase(query_description: str) -> str:
     """Delegate Supabase queries to the existing supabase_client tool."""
     try:
-        from tools.supabase_client import query_table, get_client
+        from tools.supabase_client import get_client, query_table
 
         client = get_client()
         if not client:
@@ -150,7 +150,7 @@ Draft:"""
 
         response = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
+            model=os.getenv("DEFAULT_MODEL", "minimax/MiniMax-Text-01"),
             max_tokens=300,
             temperature=0.7,
         )
@@ -170,8 +170,9 @@ async def check_booking_alerts() -> list[str]:
     """
     alerts: list[str] = []
     try:
-        from tools.supabase_client import get_client
         import datetime
+
+        from tools.supabase_client import get_client
 
         client = get_client()
         if not client:
@@ -283,7 +284,7 @@ def build_rumahlabuh_crew() -> Any | None:
         return None
 
     try:
-        llm_model = os.getenv("CREWAI_MODEL", "groq/llama-3.3-70b-versatile")
+        llm_model = os.getenv("CREWAI_MODEL", "minimax/MiniMax-Text-01")
 
         booking_agent = Agent(
             role="Booking Monitor",
@@ -373,7 +374,7 @@ async def run_crew_task(task_description: str) -> str:
         try:
             from crewai import Task
 
-            task = Task(
+            Task(
                 description=task_description,
                 expected_output="A clear, actionable response to the business request",
                 agent=crew.agents[0],

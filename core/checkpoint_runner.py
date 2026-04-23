@@ -13,8 +13,8 @@ from __future__ import annotations
 import datetime
 import json
 import os
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 MEMORY_BOOTSTRAP = Path.home() / ".claude" / "memory_bootstrap.md"

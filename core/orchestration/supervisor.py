@@ -128,7 +128,8 @@ async def _llm_decompose(task: str, run_fn) -> list[SubTask]:
     Returns:
         List of SubTasks from LLM decomposition.
     """
-    from core.agent_registry import get_model as _get_model, AGENT_REGISTRY as _AGENT_REGISTRY
+    from core.agent_registry import AGENT_REGISTRY as _AGENT_REGISTRY
+    from core.agent_registry import get_model as _get_model
 
     prompt = f"""Break this task into 2-5 atomic steps for AI agents.
 

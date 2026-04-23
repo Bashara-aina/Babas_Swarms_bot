@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: THR adalah tunjangan wajib yang harus dibayar setiap tahun keagamaan. Kesalahan
-  perhitungan THR (misalnya tidak proporsional untuk karyawan baru) adalah dispute
-  umum yang harus dihindari.
+ perhitungan THR (misalnya tidak proporsional untuk karyawan baru) adalah dispute
+ umum yang harus dihindari.
 wikilinks: []
 confidence: medium
 source: research
@@ -52,38 +52,38 @@ Upah yang menjadi dasar perhitungan THR:
 
 ```typescript
 interface THRData {
-  masaKerjaBulan: number;
-  upahPokok: number;
-  tunjanganTetap: number;
-  tunjanganTidakTetap: number;
+ masaKerjaBulan: number;
+ upahPokok: number;
+ tunjanganTetap: number;
+ tunjanganTidakTetap: number;
 }
 
 function hitungTHR(data: THRData): {
-  thr: number;
-  dasarPerhitungan: number;
-  masaKerjaFaktor: number;
+ thr: number;
+ dasarPerhitungan: number;
+ masaKerjaFaktor: number;
 } {
-  const { masaKerjaBulan, upahPokok, tunjanganTetap } = data;
-  
-  // THR dihitung dari upah pokok + tunjangan tetap
-  const dasarPerhitungan = upahPokok + tunjanganTetap;
-  
-  let thr: number;
-  let masaKerjaFaktor: number;
-  
-  if (masaKerjaBulan >= 12) {
-    thr = dasarPerhitungan; // 1 bulan penuh
-    masaKerjaFaktor = 1;
-  } else {
-    masaKerjaFaktor = masaKerjaBulan / 12;
-    thr = dasarPerhitungan * masaKerjaFaktor;
-  }
-  
-  return {
-    thr: Math.round(thr),
-    dasarPerhitungan,
-    masaKerjaFaktor: Math.round(masaKerjaFaktor * 1000000) / 1000000
-  };
+ const { masaKerjaBulan, upahPokok, tunjanganTetap } = data;
+ 
+ // THR dihitung dari upah pokok + tunjangan tetap
+ const dasarPerhitungan = upahPokok + tunjanganTetap;
+ 
+ let thr: number;
+ let masaKerjaFaktor: number;
+ 
+ if (masaKerjaBulan >= 12) {
+ thr = dasarPerhitungan; // 1 bulan penuh
+ masaKerjaFaktor = 1;
+ } else {
+ masaKerjaFaktor = masaKerjaBulan / 12;
+ thr = dasarPerhitungan * masaKerjaFaktor;
+ }
+ 
+ return {
+ thr: Math.round(thr),
+ dasarPerhitungan,
+ masaKerjaFaktor: Math.round(masaKerjaFaktor * 1000000) / 1000000
+ };
 }
 ```
 
@@ -92,65 +92,65 @@ function hitungTHR(data: THRData): {
 ### TypeScript Implementation
 ```typescript
 interface Employee {
-  id: string;
-  hireDate: Date;
-  basicSalary: number;
-  fixedAllowance: number;
-  nonFixedAllowance: number;
+ id: string;
+ hireDate: Date;
+ basicSalary: number;
+ fixedAllowance: number;
+ nonFixedAllowance: number;
 }
 
 interface THRCalculation {
-  employeeId: string;
-  thrAmount: number;
-  calculationBasis: number;
-  monthsWorked: number;
-  proportionFactor: number;
-  isEligible: boolean;
+ employeeId: string;
+ thrAmount: number;
+ calculationBasis: number;
+ monthsWorked: number;
+ proportionFactor: number;
+ isEligible: boolean;
 }
 
 function calculateTHR(
-  employee: Employee,
-  holidayDate: Date,
-  paymentDate: Date = new Date()
+ employee: Employee,
+ holidayDate: Date,
+ paymentDate: Date = new Date()
 ): THRCalculation {
-  // Hitung masa kerja hingga hari raya
-  const masaKerjaBulan = hitungMasaKerja(employee.hireDate, holidayDate);
-  
-  // Dasar perhitungan THR
-  const calculationBasis = employee.basicSalary + employee.fixedAllowance;
-  
-  // Cek kelayakan
-  const isEligible = masaKerjaBulan >= 1; // Minimum 1 bulan kerja
-  
-  let thrAmount = 0;
-  let proportionFactor = 0;
-  
-  if (isEligible) {
-    if (masaKerjaBulan >= 12) {
-      thrAmount = calculationBasis;
-      proportionFactor = 1;
-    } else {
-      proportionFactor = masaKerjaBulan / 12;
-      thrAmount = calculationBasis * proportionFactor;
-    }
-  }
-  
-  return {
-    employeeId: employee.id,
-    thrAmount: Math.round(thrAmount),
-    calculationBasis,
-    monthsWorked: masaKerjaBulan,
-    proportionFactor: Math.round(proportionFactor * 1000000) / 1000000,
-    isEligible
-  };
+ // Hitung masa kerja hingga hari raya
+ const masaKerjaBulan = hitungMasaKerja(employee.hireDate, holidayDate);
+ 
+ // Dasar perhitungan THR
+ const calculationBasis = employee.basicSalary + employee.fixedAllowance;
+ 
+ // Cek kelayakan
+ const isEligible = masaKerjaBulan >= 1; // Minimum 1 bulan kerja
+ 
+ let thrAmount = 0;
+ let proportionFactor = 0;
+ 
+ if (isEligible) {
+ if (masaKerjaBulan >= 12) {
+ thrAmount = calculationBasis;
+ proportionFactor = 1;
+ } else {
+ proportionFactor = masaKerjaBulan / 12;
+ thrAmount = calculationBasis * proportionFactor;
+ }
+ }
+ 
+ return {
+ employeeId: employee.id,
+ thrAmount: Math.round(thrAmount),
+ calculationBasis,
+ monthsWorked: masaKerjaBulan,
+ proportionFactor: Math.round(proportionFactor * 1000000) / 1000000,
+ isEligible
+ };
 }
 
 function hitungMasaKerja(tanggalMasuk: Date, tanggalAkhir: Date): number {
-  const tahun = tanggalAkhir.getFullYear() - tanggalMasuk.getFullYear();
-  const bulan = tanggalAkhir.getMonth() - tanggalMasuk.getMonth();
-  const hari = tanggalAkhir.getDate() - tanggalMasuk.getDate();
-  
-  return tahun * 12 + bulan + (hari >= 0 ? 0 : -1);
+ const tahun = tanggalAkhir.getFullYear() - tanggalMasuk.getFullYear();
+ const bulan = tanggalAkhir.getMonth() - tanggalMasuk.getMonth();
+ const hari = tanggalAkhir.getDate() - tanggalMasuk.getDate();
+ 
+ return tahun * 12 + bulan + (hari >= 0 ? 0 : -1);
 }
 ```
 
@@ -166,7 +166,7 @@ function hitungMasaKerja(tanggalMasuk: Date, tanggalAkhir: Date): number {
 1. **Masa kerja dihitung keliru**: Pastikan menggunakan tanggal masuk yang sebenarnya
 2. **Tunjangan tidak tetap termasuk dasar perhitungan**: Salah - hanya tetap yang dihitung
 3. **THR dibayar tidak tepat waktu**: Denda 5% dari THR harus dibayar jika telat
-4. **Karyawan resign tidak dapat THR**: Jika sudah bekerja minimal 1 bulan secara terus-t连续
+4. **Karyawan resign tidak dapat THR**: Jika sudah bekerja minimal 1 bulan secara terus-t
 
 ## cekwajar.id Implementation Notes
 

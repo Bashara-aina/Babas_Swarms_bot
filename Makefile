@@ -1,4 +1,4 @@
-.PHONY: install test lint run docker clean format check verify threads-on threads-off threads-status threads-toggle eval-hallucination legiona-evolve legiona-rules legiona-eval legiona-optimize
+.PHONY: install test lint run docker clean format check verify threads-on threads-off threads-status threads-toggle eval-hallucination legiona-evolve legiona-rules legiona-eval legiona-optimize legiona-debate
 
 PYTHON := python3
 PIP    := pip
@@ -96,6 +96,9 @@ help:
 	@echo "  make hooks       Install pre-commit hooks"
 	@echo "  make clean       Remove cache and temp files"
 	@echo "  make eval-hallucination Run RAGAS hallucination eval harness"
+	@echo "  make legiona-eval    Run the full hallucination eval harness"
+	@echo "  make legiona-optimize Show RAG chunk/top_k params"
+	@echo "  make legiona-debate  Interactive 3-agent debate via CLI"
 	@echo ""
 
 ## Run hallucination evaluation harness
@@ -117,3 +120,9 @@ legiona-eval:
 ## Optimize chunk overlap and top_k by running eval and printing suggestions
 legiona-optimize:
 	@echo "Current params:" && grep -E "CHUNK_|top_k|match_threshold" lib/legiona/rag_indexer.py lib/legiona/rag_retriever.py
+
+## Interactive 3-agent debate via CLI
+legiona-debate:
+	@read -p "Question: " q; python -c \
+	  "from lib.legiona.debate import debate_sync; \
+	   r = debate_sync('$$q'); print('=== VERDICT ==='); print(r.answer)"

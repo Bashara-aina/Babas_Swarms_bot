@@ -21,7 +21,7 @@ import asyncio
 import logging
 import os
 import time
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -163,12 +163,6 @@ async def _check_sleep_pattern(get_last_user_ts: Callable[[], float]) -> str | N
         if silence_h > 504:  # > 3 weeks — something is wrong with timestamps
             silence_h = 0
             return None
-        if silence_h > 72:
-            display = f"a few days ({silence_h // 24} days)"
-        elif silence_h > 24:
-            display = f"{silence_h // 24} days"
-        else:
-            display = f"{silence_h} hours"
 
         # U4: use CHECKIN_POOL for message variety
         import random

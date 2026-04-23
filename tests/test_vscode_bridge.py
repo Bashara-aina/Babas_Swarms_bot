@@ -2,11 +2,12 @@
 """Tests for vscode_bridge.py — run with: pytest tests/test_vscode_bridge.py"""
 
 import sys
-import tempfile
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
+
 import core.tools.vscode_bridge as vscode_bridge
 
 
@@ -43,3 +44,11 @@ def test_run_command_timeout():
 def test_run_command_nonzero_exit():
     output = vscode_bridge._run_command_sync("exit 1", timeout=5)
     assert "exit 1" in output or output  # just shouldn't raise
+
+
+def test_generate_mcp_config_includes_gitnexus_and_obsidian():
+    cfg = vscode_bridge.generate_mcp_config("/tmp/workspace")
+    servers = cfg.get("mcpServers", {})
+    assert "gitnexus" in servers
+    assert "obsidian" in servers
+    assert servers["obsidian"]["args"][-1] == "/tmp/workspace/.wiki"

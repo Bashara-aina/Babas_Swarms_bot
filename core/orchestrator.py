@@ -299,7 +299,7 @@ class SwarmDebateOrchestrator:
         logger.info("[SwarmDebate] %s", msg)
 
     async def _call_agent(self, agent_name: str, task: str, context: str = "") -> str:
-        from agents import DEBATE_PERSONAS, DEBATE_PERSONA_MODELS, AGENT_MODELS, build_system_prompt
+        from agents import AGENT_MODELS, DEBATE_PERSONA_MODELS, DEBATE_PERSONAS, build_system_prompt
 
         persona = DEBATE_PERSONAS.get(agent_name, "You are a brilliant expert.")
         system = build_system_prompt(
@@ -653,7 +653,7 @@ async def compose_jarvis_response(bundle: dict[str, Any]) -> str:
 
     from llm_client import wiki_raw_completion
 
-    model = os.getenv("LEGION_JARVIS_MODEL", "groq/llama-3.3-70b-versatile")
+    model = os.getenv("LEGION_JARVIS_MODEL", "minimax/MiniMax-Text-01")
     prompt = f"""User goal (Bashara):
 {goal}
 
@@ -724,7 +724,7 @@ class NexusOrchestrator:
 
     async def route_to_dept(self, dept: str, task: str) -> RoutingDecision:
         """Skip all routing layers; use the department's default agent."""
-        from core.agent_registry import get_agent, get_department_default, agents_by_department
+        from core.agent_registry import agents_by_department, get_agent, get_department_default
 
         agent = get_department_default(dept)
         if not agent:
@@ -950,7 +950,7 @@ class NexusOrchestrator:
 
     def _fallback_agent(self) -> Any:
         """Absolute last-resort agent (first engineering agent)."""
-        from core.agent_registry import agents_by_department, AGENT_REGISTRY
+        from core.agent_registry import AGENT_REGISTRY, agents_by_department
 
         eng = agents_by_department("engineering")
         if eng:
@@ -1243,8 +1243,6 @@ class LegionOrchestrator:
 
         context_block = "\n\n".join(context_parts)
         enriched_task = f"{task}\n\n[Context]\n{context_block}" if context_block else task
-
-        messages = [{"role": "user", "content": f"[{agent.name}] {enriched_task}"}]
 
         try:
             result, _ = await chat(

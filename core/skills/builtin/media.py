@@ -31,7 +31,6 @@ async def _screenshot_handler(text: str) -> str:
 
     for tool_cmd in tools_to_try:
         try:
-            tool = tool_cmd[0]
             result = subprocess.run(
                 tool_cmd,
                 capture_output=True,

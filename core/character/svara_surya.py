@@ -67,7 +67,6 @@ SVARA_TRIGGERS: dict[str, float] = {
     # Negotiation triggers
     "nego": 1.0,
     "negosiasi": 1.0,
-    "negosiasi": 1.0,
     "deal": 0.8,
     "terms": 0.7,
     "term sheet": 1.0,
@@ -305,7 +304,6 @@ def classify_svara_domain(text: str) -> SvaraDomain:
     career_kw = {"career", "karir", "thesis", "tesis", "pendidikan", "research", "gaji", "tabungan"}
     political_kw = {"regulasi", "kebijakan", "bumn", "pemerintah", "inflasi", " suku bunga"}
 
-    text_words = set(text_lower.split())
     for kw in negotiation_kw:
         if kw in text_lower:
             domain_signals[SvaraDomain.NEGOTIATION] += 1.0

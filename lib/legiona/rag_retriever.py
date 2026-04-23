@@ -5,9 +5,8 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-from supabase import create_client
-
 from lib.legiona.rag_indexer import get_embedding
+from supabase import create_client
 
 
 def retrieve_context(query: str, top_k: int = 10) -> list[str]:
@@ -49,17 +48,17 @@ def retrieve_context_as_messages(query: str, top_k: int = 10) -> list[dict]:
 def retrieve(query: str, top_k: int = 10) -> list[dict]:
     """
     Retrieve top-k chunks and return structured format with metadata.
-    
+
     Returns list of dicts with keys:
         content (str): The chunk text
         source (str): Source document/path
         score (float): Similarity score from vector search
         retrieved_at (str): ISO timestamp of retrieval
-    
+
     Args:
         query: Natural language query to embed and search
         top_k: Number of top results to return (default 10)
-    
+
     Returns:
         List of dicts: [{content, source, score, retrieved_at}, ...]
     """
@@ -79,7 +78,7 @@ def retrieve(query: str, top_k: int = 10) -> list[dict]:
         {"query_embedding": query_embedding, "match_count": top_k, "match_threshold": 0.72},
     ).execute()
     rows = response.data or []
-    
+
     now = datetime.now(timezone.utc).isoformat()
     results = []
     for row in rows:
@@ -91,5 +90,5 @@ def retrieve(query: str, top_k: int = 10) -> list[dict]:
             "score": row.get("similarity", row.get("score", 0.0)),
             "retrieved_at": now,
         })
-    
+
     return results

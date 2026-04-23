@@ -58,7 +58,7 @@ IF userData.verdictsUsedThisMonth >= userData.verdictsQuota THEN
   RETURN 429 Too Many Requests
 END IF;
 
-UPDATE users 
+UPDATE users
 SET verdictsUsedThisMonth = verdictsUsedThisMonth + 1
 WHERE id = userId;
 ```

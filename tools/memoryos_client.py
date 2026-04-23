@@ -114,8 +114,9 @@ _external_mos: Any = None  # external memoryos.MemoryOS instance if available
 def _try_init_external(user_id: str) -> Any:
     """Try to initialise the external memoryos package. Returns instance or None."""
     try:
-        import memoryos  # type: ignore[import]
         import os
+
+        import memoryos  # type: ignore[import]
         openai_key = os.getenv("OPENAI_API_KEY", "")
         if not openai_key:
             raise RuntimeError("OPENAI_API_KEY required for external memoryos")

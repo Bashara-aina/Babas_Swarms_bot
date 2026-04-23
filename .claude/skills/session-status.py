@@ -73,6 +73,13 @@ def record_files_accessed(files: list[str]) -> None:
     _write_state(state)
 
 
+def _update_state(updates: dict[str, Any]) -> None:
+    """Merge updates into current state and persist."""
+    state = _read_state()
+    state.update(updates)
+    _write_state(state)
+
+
 def _read_state() -> dict[str, Any]:
     if STATE_FILE.exists():
         try:
@@ -104,7 +111,7 @@ def build_status_report() -> str:
     lines = ["## Claude Code Session Status\n"]
 
     # Session info
-    jst = datetime.now(timezone.utc).astimezone().tzname()
+    datetime.now(timezone.utc).astimezone().tzname()
     lines.append(f"**Session duration**: {_format_duration(elapsed)}")
     lines.append(f"**Started**: {datetime.fromtimestamp(session_start, tz=timezone.utc).strftime('%H:%M:%S UTC')}")
 

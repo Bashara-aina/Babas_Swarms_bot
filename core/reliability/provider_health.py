@@ -25,7 +25,7 @@ ProviderStatus = Literal["healthy", "degraded", "unavailable"]
 
 def record_rate_limit(provider: str) -> None:
     """Record a rate limit event for a provider.
-    
+
     Args:
         provider: Provider name (e.g., "openrouter", "cerebras")
     """
@@ -42,10 +42,10 @@ def record_rate_limit(provider: str) -> None:
 
 def check_provider_health(provider: str) -> ProviderStatus:
     """Check if a provider is healthy enough to use.
-    
+
     Args:
         provider: Provider name
-        
+
     Returns:
         "healthy" if provider is safe to use
         "degraded" if recently rate-limited but cooldown expired
@@ -53,12 +53,12 @@ def check_provider_health(provider: str) -> ProviderStatus:
     """
     if provider not in _provider_health:
         return "healthy"
-    
+
     health = _provider_health[provider]
     now = time.monotonic()
     last_rate_limit = health.get("last_rate_limit", 0.0)
     time_since_limit = now - last_rate_limit
-    
+
     # Circuit breaker still open — completely block this provider
     if time_since_limit < _CIRCUIT_OPEN_DURATION:
         remaining = int(_CIRCUIT_OPEN_DURATION - time_since_limit)
@@ -67,12 +67,12 @@ def check_provider_health(provider: str) -> ProviderStatus:
             provider, remaining
         )
         return "unavailable"
-    
+
     # Cooldown period — provider usable but considered degraded
     if time_since_limit < (_CIRCUIT_OPEN_DURATION + _RATE_LIMIT_COOLDOWN):
         logger.debug("Provider '%s' in cooldown (degraded)", provider)
         return "degraded"
-    
+
     # Full recovery — clear health record
     logger.debug("Provider '%s' fully recovered", provider)
     del _provider_health[provider]
@@ -81,16 +81,16 @@ def check_provider_health(provider: str) -> ProviderStatus:
 
 def get_healthy_provider(preferred: str, fallback: str = "ollama") -> str:
     """Get the best available provider, considering health status.
-    
+
     Args:
         preferred: Preferred provider (e.g., "openrouter")
         fallback: Fallback provider if preferred is unavailable
-        
+
     Returns:
         Provider name to use
     """
     status = check_provider_health(preferred)
-    
+
     if status == "healthy":
         logger.debug("Using preferred provider: %s", preferred)
         return preferred
@@ -110,7 +110,7 @@ def get_healthy_provider(preferred: str, fallback: str = "ollama") -> str:
 
 def reset_provider_health(provider: str) -> None:
     """Manually reset provider health (for testing or admin intervention).
-    
+
     Args:
         provider: Provider name
     """
@@ -121,7 +121,7 @@ def reset_provider_health(provider: str) -> None:
 
 def get_all_provider_status() -> dict[str, ProviderStatus]:
     """Get health status for all tracked providers.
-    
+
     Returns:
         Dict mapping provider names to their current status
     """

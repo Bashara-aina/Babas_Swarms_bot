@@ -12,15 +12,19 @@ Methods implemented:
 
 from __future__ import annotations
 
+import asyncio as _asyncio
 import json as _json
 import logging as _logging
 import os
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, TypeVar
+from typing import Annotated, Any, Literal, TypeVar
 
 import httpx
 from openai import AsyncOpenAI
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field
+
+from lib.legiona.tools.registry import get_tool_function, get_tool_schema
 
 _logger = _logging.getLogger(__name__)
 
@@ -78,7 +82,8 @@ def _load_image_as_base64(image_path: str) -> str:
     if not p.exists():
         raise FileNotFoundError(f"Image not found: {image_path}")
 
-    import base64, imghdr
+    import base64
+    import imghdr
 
     raw = p.read_bytes()
     ext = p.suffix.lower().lstrip(".")
@@ -203,13 +208,13 @@ def _validate_structured_output(data: dict, expected_model: type[BaseModel]) -> 
     """
     Validate that a dict matches the expected Pydantic model schema.
     Returns (is_valid, error_message).
-    
+
     Anti-hallucination pillar #4: ensures LLM JSON output conforms to schema.
-    
+
     Args:
         data: Parsed JSON dict from LLM response
         expected_model: Pydantic model class to validate against
-    
+
     Returns:
         (True, "") if valid, (False, error_message) if invalid
     """
@@ -352,7 +357,6 @@ def complete(
     # Lazy import to avoid circular: self_evolve → minimax_client.complete
     from lib.legiona.self_evolve import load_evolved_rules
     evolved = load_evolved_rules()
-    system_content = evolved or ""
 
     # Inject cache-controlled system message
     msgs = list(messages)
@@ -563,16 +567,6 @@ def get_embedding(text: str) -> list[float]:
 
 
 # ── Tool calling loop ─────────────────────────────────────────────────────────
-import asyncio as _asyncio
-import logging as _logging
-from dataclasses import dataclass, field
-from typing import Annotated, Any
-
-from pydantic import AfterValidator
-
-from lib.legiona.tools.registry import get_tool_function, get_tool_schema
-
-_logger = _logging.getLogger(__name__)
 
 
 @dataclass
@@ -608,6 +602,7 @@ async def create_completion_with_tools(
     model: str | None = None,
     verbose: bool = True,
     image_paths: list[str] | None = None,
+    reasoning_split: bool = True,
 ) -> ToolResult:
     """
     M2.7 native tool-calling loop with per-round reasoning trace.
@@ -728,7 +723,7 @@ async def create_completion_with_tools(
                 try:
                     from lib.legiona.observability.tracer import trace_call
                     with trace_call("legiona.tool_call", tool=tool_name, round=result.rounds):
-                        loop = _asyncio.get_event_loop()
+                        _asyncio.get_event_loop()
                         if _asyncio.iscoroutinefunction(fn):
                             tool_result_str = await fn(**args)
                         else:
@@ -775,7 +770,7 @@ def complete_with_tools(
     Prefer the async version in async contexts.
     """
     try:
-        loop = _asyncio.get_running_loop()
+        _asyncio.get_running_loop()
         # Already in async context — create a task
         import concurrent.futures
         with concurrent.futures.ThreadPoolExecutor() as pool:

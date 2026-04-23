@@ -200,7 +200,7 @@ async def debate(
             model = ag_get_model(agent_key) or ag_get_model("coding")
             try:
                 refined = await run_fn(model, review_prompt, agent_key)
-            except Exception as exc:
+            except Exception:
                 refined = proposals[agent_key]   # Keep original on failure
             return agent_key, refined
 

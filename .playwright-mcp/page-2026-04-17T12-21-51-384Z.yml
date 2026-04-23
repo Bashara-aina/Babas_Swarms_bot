@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - img [ref=e3]
+    - img [ref=e5]
+  - generic [ref=e20]:
+    - generic [ref=e21]:
+      - link "Threads" [ref=e23] [cursor=pointer]:
+        - /url: /
+        - img "Threads" [ref=e25]
+      - generic [ref=e27]:
+        - link "Home" [ref=e29] [cursor=pointer]:
+          - /url: /
+          - img "Home" [ref=e33]
+        - link "Search" [ref=e36] [cursor=pointer]:
+          - /url: /search
+          - img "Search" [ref=e40]
+        - button "Create" [ref=e43] [cursor=pointer]:
+          - img "Create" [ref=e47]
+        - link "Notifications" [ref=e50] [cursor=pointer]:
+          - /url: /activity
+          - img "Notifications" [ref=e54]
+        - link "Profile" [ref=e57] [cursor=pointer]:
+          - /url: /@rumahlabuh
+          - img "Profile" [ref=e61]
+      - button "More More" [ref=e65] [cursor=pointer]:
+        - generic [ref=e66]:
+          - img "More" [ref=e68]
+          - img "More" [ref=e72]
+    - generic [ref=e80]:
+      - generic [ref=e83]:
+        - link "Column title" [ref=e94] [cursor=pointer]:
+          - /url: "#"
+          - heading "Loading..." [level=1] [ref=e95]:
+            - generic [ref=e96]: Loading...
+        - region "Column body" [ref=e99]:
+          - status "Loading..." [ref=e102]:
+            - img "Loading..." [ref=e103]
+      - button "Add a column" [ref=e114] [cursor=pointer]:
+        - img "Add a column" [ref=e115]
+    - button "Create" [ref=e118] [cursor=pointer]:
+      - img "Create" [ref=e119]

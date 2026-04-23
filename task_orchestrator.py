@@ -334,7 +334,7 @@ class SwarmDebateOrchestrator:
         logger.info("[SwarmDebate] %s", msg)
 
     async def _call_agent(self, agent_name: str, task: str, context: str = "") -> str:
-        from agents import DEBATE_PERSONAS, DEBATE_PERSONA_MODELS, AGENT_MODELS, build_system_prompt
+        from agents import AGENT_MODELS, DEBATE_PERSONA_MODELS, DEBATE_PERSONAS, build_system_prompt
         persona = DEBATE_PERSONAS.get(agent_name, "You are a brilliant expert.")
         system = build_system_prompt(
             f"Your debate role: {persona}\n\n"

@@ -1,6 +1,8 @@
 """Tests for log redaction — ensures API keys never appear in logs."""
 import logging
+
 import pytest
+
 from core.log_config import RedactingFormatter
 
 

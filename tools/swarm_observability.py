@@ -17,7 +17,6 @@ from typing import Any
 
 import yaml
 
-
 _TRACE_STORE: dict[int, dict[str, Any]] = {}
 
 

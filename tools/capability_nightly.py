@@ -23,7 +23,7 @@ def _seconds_until(hour: int, minute: int) -> float:
 
 async def run_nightly_capability_once(bot, user_id: int) -> None:
     """Execute one full nightly capability suite and send report."""
-    from tools.capability_benchmark import run_capability_suite, render_suite_report_html
+    from tools.capability_benchmark import render_suite_report_html, run_capability_suite
     from tools.capability_metrics import render_capability_summary_html
 
     report = await run_capability_suite(user_id=str(user_id), include_redteam=True)

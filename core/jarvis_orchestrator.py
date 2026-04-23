@@ -2,8 +2,8 @@
 # This file re-exports all public symbols for backward compatibility
 
 from core.orchestrator import (
-    gather_jarvis_bundle,
     compose_jarvis_response,
+    gather_jarvis_bundle,
 )
 
 __all__ = [

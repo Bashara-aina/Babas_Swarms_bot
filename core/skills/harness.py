@@ -189,7 +189,7 @@ def describe_active_skill_context(task_type: str = "", domain: str = "") -> str:
                 sections.append("")
             except Exception:
                 sections.append(f"--- {skill_name.upper()} ---")
-                sections.append(f"(could not read skill file)")
+                sections.append("(could not read skill file)")
                 sections.append("")
         else:
             # Skill referenced but not found — still note it

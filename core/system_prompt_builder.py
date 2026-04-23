@@ -27,7 +27,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from core.character.svara_surya import get_svara_injection, should_activate
-from core.gsa_voice import classify_message_context, get_gsa_injection, ContextClassification
+from core.gsa_voice import ContextClassification, classify_message_context, get_gsa_injection
 from core.personality.personality import LEGION_PERSONALITY
 
 if TYPE_CHECKING:
@@ -436,8 +436,8 @@ def build_full_system_prompt(
     # Also sets enforcement context for character_enforcer
     if user_msg:
         try:
+            from core.character_enforcer import EnforcementContext, set_enforcement_context
             from core.gsa_voice import classify_message_context, get_gsa_injection
-            from core.character_enforcer import set_enforcement_context, EnforcementContext
 
             gsa_classification = classify_message_context(user_msg)
             gsa_injection = get_gsa_injection(gsa_classification.primary, gsa_classification)

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # ── Directory constants ────────────────────────────────────────────────────────
 
 WIKI_DIR = Path("/home/newadmin/swarm-bot/.wiki")
-QUARANTINE_DIR = WIKI_DIR / "_quarantine"
+QUARANTINE_DIR = WIKI_DIR / "_archive" / "_quarantine"
 _REJECTIONS_LOG = Path.home() / ".legion" / "wiki_rejections.json"
 REJECTION_LOG = _REJECTIONS_LOG  # public alias
 
@@ -78,44 +78,27 @@ _FILLER_PHRASES = frozenset(
     ]
 )
 
-# ── fast_gate ─────────────────────────────────────────────────────────────────
+
+def _strip_frontmatter(content: str) -> str:
+    """Strip YAML frontmatter if present, returning only the markdown body."""
+    if content.startswith("---"):
+        end = content.find("\n---\n")
+        if end != -1:
+            return content[end + 5 :]
+    return content
 
 
-def fast_gate(content: str, path: str) -> EvaluationResult:
-    """Heuristic wiki quality check — runs in <5ms, no I/O."""
-    t0 = time.perf_counter()
+def _is_table_separator(line: str) -> bool:
+    """Return True if line is a markdown table separator (e.g., |---|)."""
+    stripped = line.strip()
+    if not stripped.startswith("|"):
+        return False
+    inner = stripped[1:-1] if stripped.endswith("|") else stripped[1:]
+    return all(c in " |-" for c in inner) and inner.count("-") >= 3
 
-    # Always pass for essential meta files (whitelist)
-    _ESSENTIAL_FILES = frozenset(
-        [
-            "readme",
-            "changelog",
-            "license",
-            "contributing",
-            "master-intelligence",
-            "legion-knowledge",
-        ]
-    )
-    stem_lower = Path(path).stem.lower().replace("_", "-")
-    if stem_lower in _ESSENTIAL_FILES:
-        return _result("PASS", 0.75, "whitelisted essential file", "fast", t0)
 
-    # Hard REJECT rules
-    if len(content) < 50:
-        return _result("REJECT", 0.0, "content too short (<50 chars)", "fast", t0)
-
-    if "../" in path:
-        return _result("REJECT", 0.0, "path traversal attempt detected", "fast", t0)
-
-    # Spam detection
-    caps_ratio = sum(1 for c in content if c.isupper()) / max(len(content), 1)
-    if caps_ratio > 0.70:
-        return _result("REJECT", 0.0, f"spam: {caps_ratio:.0%} caps (>70%)", "fast", t0)
-
-    if re.search(r"(.)\1{10,}", content):
-        return _result("REJECT", 0.0, "spam: >10 consecutive same chars", "fast", t0)
-
-    # Score contributions
+def _score_content(content: str) -> tuple[float, list[str]]:
+    """Compute heuristic quality score. Returns (score, reasons)."""
     score = 0.0
     reasons: list[str] = []
 
@@ -140,13 +123,15 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
         score += 0.10
         reasons.append("has_applied_to")
 
-    # Structure bonuses (markdown quality indicators)
     if re.search(r"^#{1,3}\s+\S", content, re.MULTILINE):
         score += 0.10
         reasons.append("has_headers")
     if re.search(r"^[-*]\s+\S", content, re.MULTILINE):
         score += 0.05
         reasons.append("has_bullets")
+    if re.search(r"\|[^|\n]+\|[^|\n]*\|", content):
+        score += 0.05
+        reasons.append("has_table")
     if re.search(r"\[[\.\w\s/-]+\]", content):
         score += 0.05
         reasons.append("has_wiki_links")
@@ -154,7 +139,6 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
         score += 0.05
         reasons.append("has_markdown_links")
 
-    # Length bonus — substantial content (not just a stub)
     if len(words) > 50:
         score += 0.10
         reasons.append("substantial_content")
@@ -162,7 +146,6 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
         score += 0.05
         reasons.append("extended_content")
 
-    # Deductions
     content_lower = content.lower()
     for phrase in _FILLER_PHRASES:
         if phrase in content_lower:
@@ -177,15 +160,56 @@ def fast_gate(content: str, path: str) -> EvaluationResult:
         score -= 0.05
         reasons.append("vague_it_depends")
 
-    # Clamp score
-    score = max(0.0, min(1.0, score))
+    return max(0.0, min(1.0, score)), reasons
 
-    # Verdict
+# ── fast_gate ─────────────────────────────────────────────────────────────────
+
+
+def fast_gate(content: str, path: str) -> EvaluationResult:
+    """Heuristic wiki quality check — runs in <5ms, no I/O."""
+    t0 = time.perf_counter()
+
+    _ESSENTIAL_FILES = frozenset(
+        [
+            "readme",
+            "changelog",
+            "license",
+            "contributing",
+            "master-intelligence",
+            "legion-knowledge",
+        ]
+    )
+    stem_lower = Path(path).stem.lower().replace("_", "-")
+    if stem_lower in _ESSENTIAL_FILES:
+        return _result("PASS", 0.75, "whitelisted essential file", "fast", t0)
+
+    body = _strip_frontmatter(content)
+
+    if "../" in path:
+        return _result("REJECT", 0.0, "path traversal attempt detected", "fast", t0)
+
+    if len(body.strip()) < 50:
+        return _result("REJECT", 0.0, "content too short (<50 chars)", "fast", t0)
+
+    caps_ratio = sum(1 for c in body if c.isupper()) / max(len(body), 1)
+    if caps_ratio > 0.80:
+        return _result("REJECT", 0.0, f"spam: {caps_ratio:.0%} caps (>80%)", "fast", t0)
+
+    spam_char_lines = [
+        line for line in body.splitlines()
+        if not _is_table_separator(line)
+        and re.search(r"(?!\s)(.)\1{10,}", line)
+    ]
+    if spam_char_lines:
+        return _result("REJECT", 0.0, f"spam: consecutive chars on {len(spam_char_lines)} non-table line(s)", "fast", t0)
+
+    score, reasons = _score_content(body)
+
     if score >= 0.7:
         verdict: Verdict = "PASS"
         reason = f"PASS (score={score:.2f}): {', '.join(reasons)}"
-    elif score < 0.05:  # Strict threshold — score ≤ 0.05 gets quarantined
-        verdict = "REJECT"  # Quarantine
+    elif score < 0.05:
+        verdict = "REJECT"
         reason = f"REJECT (score={score:.2f}): {', '.join(reasons)}"
     else:
         verdict = "NEEDS_IMPROVEMENT"

@@ -1,0 +1,75 @@
+name: Legiona M2.7 Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: "0 9 * * 0"   # Every Sunday 9AM UTC (6PM JST)
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  legiona-eval:
+    name: Hallucination Eval + Self-Evolve
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Legiona hallucination eval
+        run: python lib/legiona/eval/hallucination_eval.py
+        continue-on-error: true
+
+      - name: Upload eval results
+        uses: actions/upload-artifact@v4
+        with:
+          name: legiona-eval-results
+          path: lib/legiona/eval/results/latest.json
+
+      - name: Post eval summary to PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RESULT=$(cat lib/legiona/eval/results/latest.json 2>/dev/null || echo '{"error":"no results"}')
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "## 🤖 Legiona M2.7 Eval\n\`\`\`json\n${RESULT}\n\`\`\`"
+
+  legiona-weekly-evolve:
+    name: Weekly Self-Evolution
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run self-evolution
+        run: python -c "from lib.legiona.self_evolve import evolve; result = evolve(); print(result)"
+
+      - name: Commit evolved rules if changed
+        run: |
+          git config user.name  "legiona-bot[bot]"
+          git config user.email "legiona-bot@users.noreply.github.com"
+          git add lib/legiona/memory/rules.md lib/legiona/memory/global_memory.md || true
+          git diff --staged --quiet || git commit -m "chore(legiona): weekly self-evolution [skip ci]"
+          git push origin HEAD

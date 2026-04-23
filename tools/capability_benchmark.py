@@ -10,7 +10,6 @@ import html
 import time
 from typing import Any
 
-
 BENCHMARK_TASKS: list[dict[str, str]] = [
     {
         "category": "coding",

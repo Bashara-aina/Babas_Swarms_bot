@@ -110,15 +110,15 @@ Per customer per month:
   Medication:          ~$60–80
   Pharmacy fee:        ~$15–20
   Shipping:            ~$8–12
-  Doctor (CareVal):    ~$15–25
-  Stripe (2.9%):       ~$8.60
+  Doctor (CareVal):   ~$15–25
+  Stripe (2.9%):      ~$8.60
   Platform/hosting:    ~$0.50
   AI tools (per user): ~$0.001
   Total COGS:          ~$120–145
-  
+
   Gross Margin:        ~51–60%
   Net Margin:          16.2% = ~$48/customer/month
-  
+
   At 250,000 customers:
     Monthly net:  $12M
     Annual net:   $144M

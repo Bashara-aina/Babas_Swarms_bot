@@ -33,7 +33,7 @@ def _build_mem0_config() -> dict[str, Any]:
         "llm": {
             "provider": "litellm",
             "config": {
-                "model": os.getenv("MEM0_LLM_MODEL", "groq/llama-3.3-70b-versatile"),
+                "model": os.getenv("MEM0_LLM_MODEL", "minimax/MiniMax-Text-01"),
                 "api_key": os.getenv("GROQ_API_KEY", ""),
                 "temperature": 0.1,
                 "max_tokens": 2000,

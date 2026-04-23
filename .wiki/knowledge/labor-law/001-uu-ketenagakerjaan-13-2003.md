@@ -11,8 +11,8 @@ tags:
 created: '2026-04-14'
 updated: '2026-04-14'
 summary: This is the foundational labor law in Indonesia that establishes the core
-  rights and obligations of workers and employers. All payroll calculations, PPh 21
-  computations, and employee benefits must ...
+ rights and obligations of workers and employers. All payroll calculations, PPh 21
+ computations, and employee benefits must ...
 wikilinks: []
 confidence: medium
 source: research
@@ -65,28 +65,28 @@ Undang-Undang Nomor 13 Tahun 2003 tentang Ketenagakerjaan merupakan undang-undan
 ### Perhitungan Masa Kerja
 ```typescript
 interface MasaKerja {
-  tanggalMasuk: Date;
-  tanggalAkhir: Date;
-  tahun: number;
-  bulan: number;
-  hari: number;
+ tanggalMasuk: Date;
+ tanggalAkhir: Date;
+ tahun: number;
+ bulan: number;
+ hari: number;
 }
 
 function hitungMasaKerja(masuk: Date, akhir: Date): MasaKerja {
-  const diffMs = akhir.getTime() - masuk.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const tahun = Math.floor(diffDays / 365);
-  const sisaHari = diffDays % 365;
-  const bulan = Math.floor(sisaHari / 30);
-  const hari = sisaHari % 30;
-  
-  return { tahun, bulan, hari };
+ const diffMs = akhir.getTime() - masuk.getTime();
+ const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+ const tahun = Math.floor(diffDays / 365);
+ const sisaHari = diffDays % 365;
+ const bulan = Math.floor(sisaHari / 30);
+ const hari = sisaHari % 30;
+ 
+ return { tahun, bulan, hari };
 }
 ```
 
 ## Edge Cases and Common Mistakes
 
-1. **Masa percobaan PKWT**:UU 13/2003 Pasal 59 ayat (1)明确规定 PKWT tidak boleh memiliki masa percobaan. Jika ada clause probation, bisa dianggap sebagai pelanggaran.
+1. **Masa percobaan PKWT**:UU 13/2003 Pasal 59 ayat (1) PKWT tidak boleh memiliki masa percobaan. Jika ada clause probation, bisa dianggap sebagai pelanggaran.
 2. **Kontrak diperpanjang berkali-kali**: Sebelum UU Cipta Kerja, perpanjangan PKWT maksimal 2x. Sekarang setelah PP 35/2021, bisa maksimal 5 tahun total.
 3. **Upah di bawah UMK**: Tetap bayar meskipun perjanjian kerja menyebut lebih rendah - ketentuan UMK bersifat imperative.
 4. **THR tidak termasuk upah**: THR adalah tunjangan wajib terpisah dari perhitungan upah pokok untuk pesangon.

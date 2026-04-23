@@ -1,7 +1,8 @@
 """Tests for the health HTTP endpoint."""
-import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 class TestHealthHandler:
@@ -9,6 +10,7 @@ class TestHealthHandler:
     async def test_health_returns_200(self):
         try:
             from aiohttp.test_utils import make_mocked_request
+
             from core.health import _health_handler
             request = make_mocked_request("GET", "/health")
             response = await _health_handler(request)
@@ -20,7 +22,9 @@ class TestHealthHandler:
     async def test_health_response_body(self):
         try:
             import json
+
             from aiohttp.test_utils import make_mocked_request
+
             from core.health import _health_handler
             request = make_mocked_request("GET", "/health")
             response = await _health_handler(request)

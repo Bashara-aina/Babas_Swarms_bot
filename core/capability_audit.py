@@ -90,7 +90,7 @@ class CapabilityAudit:
         coverage_pct = round(len(present) / len(_CAPABILITY_BENCHMARK) * 100, 1)
 
         report_lines: list[str] = [
-            f"🛡️ <b>Legion Capability Audit</b>",
+            "🛡️ <b>Legion Capability Audit</b>",
             f"📅 {timestamp}",
             f"📊 Coverage: <b>{coverage_pct}%</b> ({len(present)}/{len(_CAPABILITY_BENCHMARK)})",
             "",
@@ -159,7 +159,7 @@ class CapabilityAudit:
         try:
             content = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
+                model=os.getenv("DEFAULT_MODEL", "minimax/MiniMax-Text-01"),
                 temperature=0.3,
                 max_tokens=512,
             )

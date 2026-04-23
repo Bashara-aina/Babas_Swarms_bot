@@ -252,7 +252,7 @@ def format_resource_html(snap: ResourceSnapshot) -> str:
         )
         lines.append(
             f"   free: <b>{snap.vram_free_gb:.1f} GB</b> ({free_pct:.0f}% free) "
-            + ("\u2705" if vram_ok else f"\u26a0\ufe0f below threshold")
+            + ("\u2705" if vram_ok else "\u26a0\ufe0f below threshold")
         )
         if snap.gpu_util_pct is not None:
             lines.append(f"   compute util: <b>{snap.gpu_util_pct:.0f}%</b>")
