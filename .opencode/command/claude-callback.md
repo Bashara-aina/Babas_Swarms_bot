@@ -1,16 +1,35 @@
 ---
-name: claude-callback
-description: Spawn Claude Code as sub-agent from OpenCode
-type: command
-tags: [callback, claude, bridge]
-created: 2026-04-16
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <prompt>
+description: "Invoke Claude (claude -1 --prompt) with a specific prompt. Returns full output."
 ---
 
-# Claude Callback Command
+# /claude-callback — Invoke Claude CLI
 
-After task completion, if `@claude` directive was found:
+Run a prompt through the Claude CLI and return the full output.
 
-1. Parse the directive via `extract_claude_directive(result_text)`
-2. Call `spawn_claude_from_opencode(result_text, depth=N)`
-3. Write Claude Code result to `.wiki/claude-code/sessions/`
-4. Return combined result to the parent pipeline
+## Usage
+```
+/claude-callback Explain the difference between async iterators and async generators in Python
+/claude-callback Write a context manager for database connections
+```
+
+## Requirements
+- `claude` CLI must be installed and authenticated
+- `CLAUDE_API_KEY` env var or `claude auth` configured
+
+## What it does
+1. Runs `claude -1 --prompt "<prompt>"`
+2. Streams and returns full output
+3. May be verbose — use for deep dives
+
+## Swarm-Bot Use Cases
+- Complex Python logic questions
+- Architectural decision help
+- Code review deep dives
+- Research synthesis
+
+## Limitations
+- Cannot access current file context automatically
+- Cannot run code or tests
+- Returns text only

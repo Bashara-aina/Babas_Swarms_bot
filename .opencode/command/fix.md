@@ -1,20 +1,57 @@
-# /fix — Targeted Bug Fix
+---
+allowed-tools: Read,Bash,Grep,Glob,Edit,Write
+argument-hint: <error-description>
+description: "Diagnose and fix a bug. Runs tests, inspects error, proposes and applies fixes."
+---
 
-Fix the specific bug described below. Do not fix anything else.
+# /fix — Diagnose and fix a bug
 
-## Steps
-1. Read the error message or failure description carefully
-2. Identify the exact file(s) involved: grep -r "[error text]" . --include="*.py" | head -5
-3. Read the file: cat [file] | head -80
-4. Identify the root cause — do not guess
-5. Fix ONLY the identified root cause — no scope creep
-6. Verify fix:
-   - For code: python3 -m py_compile [file] → must exit 0
-   - For logic: run the failing test → must pass
-   - Paste actual test/compile output
-7. Smoke test: python3 -c "from [module] import [thing]; print('ok')"
+Investigate a bug and implement a fix.
 
-Report: FIX STATUS: ✅ RESOLVED | ❌ STILL FAILING
-Evidence: paste test/compile output
+## Usage
+```
+/fix bot not responding to /help
+/fix tests failing in test_memory.py
+/fix LLM calls timing out
+```
 
-Bug to fix:
+## Workflow
+```
+1. Reproduce — get exact error or behavior
+2. Locate — find the relevant code
+3. Understand — trace the root cause
+4. Fix — implement the solution
+5. Verify — run tests to confirm fix
+```
+
+## Bug Report Template
+```
+## SYMPTOM
+<exact error message or unexpected behavior>
+
+## LOCATION
+<file:line where issue manifests>
+
+## ROOT_CAUSE
+<why this is happening>
+
+## FIX
+<what was changed>
+
+## VERIFICATION
+<test output proving fix>
+```
+
+## Swarm-Bot Testing
+```bash
+# Run specific test
+pytest tests/test_memory.py -x -v
+
+# Run all tests
+pytest tests/ -x --asyncio-mode=auto -q
+```
+
+## Constraints
+- Always write a test that reproduces the bug
+- Fix must not break other tests
+- Document the root cause in the commit

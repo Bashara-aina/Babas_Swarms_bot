@@ -1,22 +1,73 @@
-# /wiki — Knowledge Base Writer
+---
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <topic>
+description: "Generate or update wiki documentation. Saves to .wiki/. Usage: /wiki <topic>"
+---
 
-Write or update a wiki article for the task described below.
-Always read .wiki/SCHEMA.md before writing any wiki article.
+# /wiki — Wiki documentation
 
-## Mandatory Pre-Write Steps
-1. Run: cat .wiki/SCHEMA.md | head -80 → understand the frontmatter spec
-2. Run: cat .wiki/INDEX.md | head -40 → check if article already exists
-3. Run: find .wiki/ -name "*[keyword]*" | sort → find related articles
+Generate or update wiki documentation in the .wiki/ directory.
 
-## Write the Article
-Create or update .wiki/[type]/[slug].md following SCHEMA.md article structure.
-Frontmatter must have ALL required fields: title, type, status, tags, created, updated, summary, wikilinks, confidence, source.
+## Usage
+```
+/wiki intent routing
+/wiki LLM fallback strategy
+/wiki memory system architecture
+/wiki decisions ADR-055
+```
 
-## After Writing
-1. cat [new file] | head -20 → verify frontmatter present
-2. wc -w [new file] → must exceed minimum (concept: 200w, entity: 150w, project: 400w)
-3. python3 -c "import yaml; yaml.safe_load(open('[file]').read().split('---')[1]); print('YAML VALID')"
-4. Update .wiki/INDEX.md with a link to the new article
-5. Update .wiki/_meta/compile_state.json article count
+## Wiki Structure
+```
+.wiki/
+├── decisions/     # ADRs
+├── logs/         # Session logs
+├── architecture/ # System docs
+├── projects/     # Project docs
+├── research/     # Research notes
+└── knowledge/    # General knowledge
+```
 
-Task to execute:
+## ADR Format (Architecture Decision Records)
+```markdown
+# ADR-055: Use mem0ai for Memory
+
+## Status
+Accepted — 2024-04-20
+
+## Context
+We needed a memory system for agent context.
+
+## Decision
+Use mem0ai for episodic + semantic memory.
+
+## Consequences
++ Fast vector search
++ Managed service
+- Vendor lock-in
+- Cost at scale
+```
+
+## Session Log Format
+```markdown
+# Session: 2024-04-25 — Implement LLM Fallbacks
+
+## Goal
+Implement fallback chain for LLM calls.
+
+## What was done
+- Added groq → cerebras → claud fallback
+- Updated llm_client.py
+
+## Key decisions
+- Fallback order: groq > cerebras > claude
+
+## Next steps
+- Add tests for fallback scenarios
+- Monitor error rates
+```
+
+## Constraints
+- Saves to .wiki/ directory
+- Does not commit automatically
+- File name: kebab-case, descriptive
+- Include frontmatter (title, date, tags)

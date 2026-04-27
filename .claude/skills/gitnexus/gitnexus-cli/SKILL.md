@@ -7,6 +7,11 @@ description: "Use when the user needs to run GitNexus CLI commands like analyze/
 
 All commands work via `npx` — no global install required.
 
+## Swarm-Bot Project Context
+
+GitNexus MCP is available in this project. Run `npx gitnexus --help` to see available commands.
+The GitNexus index lives in `.gitnexus/` directory.
+
 ## Commands
 
 ### analyze — Build or refresh the index
@@ -20,9 +25,9 @@ Run from the project root. This parses all source files, builds the knowledge gr
 | Flag           | Effect                                                           |
 | -------------- | ---------------------------------------------------------------- |
 | `--force`      | Force full re-index even if up to date                           |
-| `--embeddings` | Enable embedding generation for semantic search (off by default) |
+| `--embeddings` | Enable embedding generation for semantic search (off by default)  |
 
-**When to run:** First time in a project, after major code changes, or when `gitnexus://repo/{name}/context` reports the index is stale. In Claude Code, a PostToolUse hook runs `analyze` automatically after `git commit` and `git merge`, preserving embeddings if previously generated.
+**When to run:** First time in a project, after major code changes, or when `gitnexus://repo/{name}/context` reports the index is stale.
 
 ### status — Check index freshness
 

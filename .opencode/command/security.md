@@ -1,56 +1,72 @@
 ---
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: [scope] | full | api | secrets | dependencies
-description: Security audit — check for exposed secrets, vulnerable dependencies, and OWASP Top 10 issues
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <topic>
+description: "Security audit. Check for vulnerabilities, secret leaks, input validation, injection risks."
 ---
 
-# /security — Security Audit Command
+# /security — Security audit
 
-## STEP 1 — Secrets Detection
+Audit code for security vulnerabilities and best practices.
 
-Scan for hardcoded secrets:
-```bash
-grep -rn "TELEGRAM_BOT_TOKEN\|API_KEY\|SECRET\|PASSWORD" --include="*.py" --include="*.md" --include="*.yaml" --include="*.json" . | grep -v ".env.example\|os.getenv\|getenv" | grep -v "# hardcoded\|# fake\|# test" | head -20
+## Usage
+```
+/security
+/security handlers/user_input.py
+/security llm_client.py
 ```
 
-Check .env is properly configured:
-```bash
-grep -E "^[A-Z]" .env.example | sort > /tmp/expected_vars.txt
-grep -E "^[A-Z]" .env 2>/dev/null | sort > /tmp/actual_vars.txt
-diff /tmp/expected_vars.txt /tmp/actual_vars.txt || true
+## Security Checklist
+
+### Secrets Management
+- [ ] No hardcoded API keys in code
+- [ ] Secrets in .env files not committed
+- [ ] os.getenv() used for all secrets
+- [ ] No credentials in logs
+
+### Input Validation
+- [ ] User input validated before use
+- [ ] SQL injection prevented (use parameterized queries)
+- [ ] Command injection prevented (no shell injection)
+- [ ] File path traversal prevented
+
+### LLM Security
+- [ ] Prompt injection defenses
+- [ ] Output sanitization
+- [ ] Rate limiting on LLM calls
+
+### Telegram Security
+- [ ] Bot token protected
+- [ ] User data handled appropriately
+- [ ] No sensitive data in messages
+
+## Swarm-Bot Security Patterns
+```python
+# GOOD
+api_key = os.getenv("TELEGRAM_BOT_TOKEN")
+user_input = html.escape(user_text)
+
+# BAD
+api_key = "123456:ABC-DEF"  # hardcoded
+user_input = user_text  # no escaping
 ```
 
-## STEP 2 — Dependency Audit
+## Output Format
+```
+## SECURITY_AUDIT
+<scope of audit>
 
-```bash
-pip-audit 2>/dev/null || pip list --format=freeze | grep -iE "vuln|exploit" || echo "pip-audit not available"
+## VULNERABILITIES
+- [CRITICAL] description — file:line
+- [HIGH] description — file:line
+
+## RECOMMENDATIONS
+<fixes for each issue>
+
+## COMPLIANCE
+- OWASP Top 10 coverage
+- GDPR considerations
 ```
 
-## STEP 3 — OWASP Top 10 Checks
-
-For scope=full or api:
-```bash
-# Injection (SQL, Command)
-grep -rn "execute\|eval\|exec\|cursor.execute" --include="*.py" . | grep -v "safe\|sanitize" | head -10
-
-# Broken Authentication
-grep -rn "ALLOWED_USER_ID\|require_owner" --include="*.py" handlers/ | head -5
-```
-
-## STEP 4 — Report
-
-Format:
-```
-SECURITY AUDIT: [scope]
-
-✅ PASSED:
-- [check that passed]
-
-⚠️ WARNINGS:
-- [potential issue, low severity]
-
-🔴 FAILED:
-- [critical issue requiring immediate fix]
-```
-
-Reference: OWASP Top 10 2021 — A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection
+## Constraints
+- Do not commit while vulnerabilities exist
+- Escalate critical issues immediately

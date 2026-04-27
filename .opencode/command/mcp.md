@@ -1,106 +1,49 @@
 ---
-description: >-
-  MongoDB, Pinecone, and other MCP tool operations. Query databases,
-  manage vector search indexes, perform aggregations, and handle data operations.
-mode: primary
-model: minimax-coding-plan/MiniMax-M2.7
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <mcp-server-name>
+description: "Discover and use MCP tools. Lists available servers, their tools, and usage patterns."
 ---
-# /mcp — Database & MCP Tool Operations
 
-## WHEN TO USE
+# /mcp — MCP server management
 
-Use `/mcp` when:
-- Need to query or update MongoDB
-- Need to perform vector search (Pinecone)
-- Need to connect to external MCP services
-- Need to run database aggregations
-- Need to manage index schemas
+Discover and query Model Context Protocol servers.
 
-## AVAILABLE SERVICES
-
-### MongoDB (mongodb-mcp)
-- CRUD operations on collections
-- Aggregation pipelines
-- Index management
-- Schema analysis
-
-### Pinecone (pinecone-mcp)
-- Vector similarity search
-- Index management
-- Cascading multi-index search
-- Reranking
-
-### GitHub (github-mcp via github-agent)
-- PR creation and review
-- Issue management
-- Repository operations
-
-### AWS (via aws-agent)
-- SAM/CloudFormation operations
-- Cost analysis
-
-## USAGE
-
+## Usage
 ```
-/mcp mongo [database] [collection] [operation]
-/mcp pinecone [index] [operation]
 /mcp list
-/mcp status [service]
+/mcp gitnexus
+/mcp fetch
 ```
 
-## EXAMPLES
+## Subcommands
 
-### MongoDB operations
-```
-/mcp mongo mydb users find '{"status": "active"}'
-/mcp mongo mydb users aggregate '[{"$match": {"age": {"$gt": 18}}}]'
-/mcp mongo mydb users insert '[{"name": "test", "email": "test@test.com"}]'
+### list — Show all available MCP servers
+```bash
+# Lists: gitnexus, fetch, Filesystem, Obsidian, etc.
 ```
 
-### Pinecone operations
+### <server-name> — Show tools for a specific server
 ```
-/mcp pinecone my-index search '{"text": "query text"}'
-/mcp pinecone my-index list
-/mcp pinecone my-index describe
-```
-
-### Status check
-```
-/mcp status mongodb
-/mcp status pinecone
+/mcp gitnexus
+→ gitnexus_query, gitnexus_context, gitnexus_impact,
+  gitnexus_detect_changes, gitnexus_rename, gitnexus_cypher
 ```
 
-## CONNECTION PATTERNS
-
-### MongoDB
+### query — Run a query against an MCP server
 ```
-1. Check connection: /mcp status mongodb
-2. List databases: mongo_show_databases()
-3. List collections: mongo_list_collections(database)
-4. Query: mongo_find(database, collection, filter)
+/mcp fetch https://api.github.com/repos/owner/repo
 ```
 
-### Pinecone
-```
-1. Check connection: /mcp status pinecone
-2. List indexes: pinecone__list_indexes()
-3. Describe index: pinecone__describe_index(name)
-4. Search: pinecone__search_records(name, namespace, query)
-```
+## Swarm-Bot MCP Servers
 
-## ANTI-HALLUCINATION RULES
+| Server | Tools | Purpose |
+|--------|-------|---------|
+| gitnexus | query, context, impact | Code intelligence |
+| fetch | url, prompt | Web scraping |
+| filesystem | (native tools) | File operations |
+| claude_code | (native tools) | Claude Code bridge |
 
-1. **Verify connection** — check status before operations
-2. **Show actual results** — paste query output
-3. **Cite document counts** — don't estimate, show count
-4. **Verify schema** — check schema before writing
-5. **Confirm destructive ops** — upsert/delete need confirmation
-
-## STATUS
-```
-MCP STATUS: ✅ [operation] | ❌ FAILED | 🔌 NOT CONNECTED
-Service: [service]
-Database/Index: [name]
-Operation: [what was done]
-Result: [actual output]
-```
+## Constraints
+- MCP servers depend on .mcp.json configuration
+- Some servers require API keys
+- Rate limits may apply to external services

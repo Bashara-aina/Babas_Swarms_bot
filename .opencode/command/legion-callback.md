@@ -1,17 +1,36 @@
 ---
-name: legion-callback
-description: Call back to LegionBot after task completion
-type: command
-tags: [callback, legion, bridge]
-created: 2026-04-16
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <prompt>
+description: "Invoke LegionBot with a prompt. Returns full output. Use for Legion-specific tasks."
 ---
 
-# Legion Callback Command
+# /legion-callback — Invoke LegionBot
 
-After task completion, if `@legion` directive was found:
+Run a prompt through the LegionBot agent system.
 
-1. Read the task result from `.wiki/opencode/sessions/`
-2. Call `LegionCallbackBridge().handle_legion_callback(result_text)`
-3. Pass the callback result to the Telegram response builder
+## Usage
+```
+/legion-callback Analyze the current agent dispatch performance
+/legion-callback Review memory usage patterns this week
+```
 
-This avoids a Telegram round-trip for internal callbacks.
+## Requirements
+- LegionBot must be running and accessible
+- May require authentication
+
+## What it does
+1. Sends prompt to LegionBot
+2. Returns full response
+3. May be slower than local commands
+
+## Differences from /claude-callback
+| | /claude-callback | /legion-callback |
+|--|-----------------|-----------------|
+| Engine | Claude CLI | LegionBot agent |
+| Context | Limited | Full session context |
+| Speed | Fast | Slower |
+
+## Swarm-Bot Use Cases
+- Legion-specific agent orchestration questions
+- Session memory analysis
+- Multi-agent coordination issues

@@ -1,73 +1,59 @@
 ---
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: [target-env] [--rollback] | production | staging | --rollback
-description: Deploy the bot to production or staging with health verification and rollback capability
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [files-or-subdirectory]
+description: "Deploy to production. Restart swarm-bot systemd service, verify logs, confirm bot responds."
 ---
 
-# /deploy — Deployment with Health Verification
+# /deploy — Deploy to production
 
-## STEP 1 — Pre-Deployment Checks
+Deploy code changes to the running swarm-bot service.
 
-Run these before any deployment:
+## Usage
 ```
-git status
-git log --oneline -3
-```
-
-Verify no uncommitted changes that should be included:
-```
-pytest tests/ -x --asyncio-mode=auto -q 2>/dev/null || echo "Tests skipped"
+/deploy
+/deploy handlers/
+/deploy core/
 ```
 
-Check service status:
+## Pre-deployment Checklist
 ```
-systemctl status swarm-bot --no-pager
+- [ ] Tests pass: pytest tests/ -x --asyncio-mode=auto -q
+- [ ] No .env or secrets in diff
+- [ ] Code looks correct in diff
+- [ ] Announce maintenance window if needed
 ```
 
-## STEP 2 — Deploy to TARGET
+## Deployment Steps
+1. Stage and commit changes (or confirm already committed)
+2. Pull latest on server
+3. Restart systemd service
+4. Verify clean startup in logs
+5. Confirm bot responds
 
-If TARGET = staging:
+## Commands Run
 ```bash
-cd /home/newadmin/swarm-bot
-git pull origin main
-systemctl restart swarm-bot
-sleep 5
-systemctl status swarm-bot --no-pager
+# Pull latest
+git pull
+
+# Restart service
+sudo systemctl restart swarm-bot
+
+# Check logs
+journalctl -u swarm-bot -n 50 --no-pager
+
+# Verify status
+sudo systemctl status swarm-bot
 ```
 
-If TARGET = production:
-- **ALWAYS get user confirmation before proceeding**
-- Create a backup tag first:
+## Rollback
 ```bash
-git tag "backup-$(date +%Y%m%d-%H%M%S)"
-git push origin --tags
-```
-- Then restart:
-```bash
-systemctl restart swarm-bot
-sleep 5
-systemctl status swarm-bot --no-pager
+sudo systemctl stop swarm-bot
+git revert HEAD  # or git checkout <prev>
+sudo systemctl start swarm-bot
 ```
 
-If --rollback:
-```bash
-git checkout <previous-tag>
-git pull origin <previous-tag>
-systemctl restart swarm-bot
-```
-
-## STEP 3 — Health Verification
-
-Run health checks:
-```
-# Check bot responds
-python -c "from core.soul_engine import build_soul_context; print('soul ok')"
-python -c "from core.intent_router import IntentRouter; print('router ok')"
-
-# Check service logs
-journalctl -u swarm-bot --since "5 minutes ago" --no-pager | tail -20
-```
-
-## STEP 4 — Report
-
-Report deployment status with timestamp and any issues.
+## Constraints
+- Only deploy from main branch
+- Always verify tests before deploying
+- Check logs after restart
+- Never deploy with uncommitted changes

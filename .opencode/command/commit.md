@@ -1,17 +1,43 @@
-# /commit — Structured Git Commit
+---
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [files...]
+description: "Stage and commit with structured message. Auto-generates conventional commit. Usage: /commit or /commit <files...>"
+---
 
-Create a well-structured git commit for current changes.
+# /commit — Stage and commit
 
-## Steps
-1. Run: git status → paste output
-2. Run: git diff --stat → paste output
-3. Determine commit type: feat | fix | refactor | docs | test | chore
-4. Write commit message following: [type]: [short description]
-   Body: what changed and why (if non-obvious)
-5. Stage: git add [specific files — NOT git add -A unless all changes are intentional]
-6. Commit: git commit -m "[type]: [message]"
-7. Paste git commit output as proof
+Stage files and create a conventional commit message.
 
-DO NOT commit: .env files, API keys, _old directories, >200 line changes without review.
+## Usage
+```
+/commit
+/commit file1.py file2.py
+/commit --all
+```
 
-Changes to commit:
+## Workflow
+1. Shows staged changes
+2. Auto-generates commit message (conventional format)
+3. Reports commit SHA
+
+## Conventional Commit Format
+```
+<type>(<scope>): <subject>
+
+<body>
+
+Closes #<issue>
+```
+
+Types: feat, fix, docs, style, refactor, test, chore, perf
+
+## Pre-commit Checks
+Before committing, always verify:
+- Tests pass: `pytest tests/ -x --asyncio-mode=auto -q`
+- No secrets committed: check .env, credentials
+- Diff looks correct: `git diff --staged --stat`
+
+## Swarm-Bot Constraints
+- Never commit .env, secrets.json, credentials
+- Config files: use os.getenv(), not hardcoded values
+- Test files should accompany code changes

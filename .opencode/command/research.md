@@ -1,17 +1,66 @@
-# /research — Research and Document
+---
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <topic>
+description: "Research a topic. Web search, code analysis, documentation review. Returns comprehensive report."
+---
 
-Research the topic below and write a wiki article with findings.
+# /research — Deep technical research
 
-## Steps
-1. Check if already researched: grep -r "[topic]" .wiki/ --include="*.md" -l
-   If found: read existing article, update if new info → do not duplicate
-2. Read .wiki/raw/ for any relevant source files: find .wiki/raw/ -name "*[topic]*"
-3. Research the topic using available code, configs, and raw/ sources
-4. Write findings to .wiki/[type]/[slug].md following SCHEMA.md
-5. Minimum: 300 words for research articles
-6. Add to .wiki/INDEX.md under correct section
+Conduct thorough research on a technical topic.
 
-Verify: wc -w .wiki/[type]/[slug].md → must be >300
-Verify: python3 -c "import yaml; yaml.safe_load(open('.wiki/[file]').read().split('---')[1]); print('YAML VALID')"
+## Usage
+```
+/research best LLM fallback strategies 2024
+/research aiogram 3.x middleware patterns
+/research mem0ai vs llamaindex for agent memory
+/research firecrawl vs crawl4ai for web scraping
+```
 
-Topic to research:
+## Research Workflow
+```
+1. Check existing wiki/docs for prior knowledge
+2. Web search for latest information
+3. Analyze code in codebase for existing patterns
+4. Synthesize findings
+5. Provide recommendations
+```
+
+## Web Research Tools
+- firecrawl_search — primary web search
+- firecrawl_scrape — extract from specific pages
+- exa_web_search_exa — alternative search
+- browser-use_browse_task — JS-rendered pages
+
+## Output Format
+```
+## RESEARCH_QUESTION
+<precise question>
+
+## EXECUTIVE_SUMMARY
+<2-3 sentence answer>
+
+## DETAILED_FINDINGS
+<comprehensive analysis>
+
+## SWARM_BOT_RELEVANCE
+<how this applies to this codebase>
+
+## RECOMMENDATIONS
+<actionable next steps>
+
+## SOURCES
+- source1: URL or file
+- source2: URL or file
+```
+
+## Swarm-Bot Research Priorities
+- LLM provider capabilities and pricing
+- Telegram Bot API updates
+- Python async patterns
+- Memory system best practices
+- Security hardening
+
+## Constraints
+- Cite all sources
+- Separate verified facts from opinions
+- Include both positive and negative findings

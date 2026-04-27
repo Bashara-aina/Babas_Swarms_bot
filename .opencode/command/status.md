@@ -1,22 +1,72 @@
-# /status — Project Status Report
+---
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [scope]
+description: "Show current project status. Without args: overview. With scope: detailed status."
+---
 
-Generate a current status report for the Legion bot project.
+# /status — Project status
 
-## Gather Status
-1. git log --oneline -10 → recent commits
-2. python3 -c "import json; print(json.dumps(json.load(open('.wiki/_meta/compile_state.json')), indent=2))"
-3. systemctl status swarm-bot.service 2>/dev/null | head -10 || echo "Service status unavailable"
-4. find .wiki/decisions/ -name "*.md" | sort -r | head -5 → recent decisions
-5. python3 smoke tests from CLAUDE.md §12
-6. cat .wiki/_meta/audit_report_2026-04-13.md 2>/dev/null | head -30
+Show current project state, recent changes, and health metrics.
 
-## Output Format
-### Legion Status — [date]
-Bot service: ✅/❌
-Wiki: [N articles, last compiled: date]
-Recent work: [last 5 commits]
-Open P-tasks: [which P2/P3 remain from CLAUDE.md §9]
-Next priority: [what to do next]
+## Usage
+```
+/status
+/status handlers/
+/status tests/
+/status --verbose
+```
 
-Write status to: .wiki/output/health/status-[YYYY-MM-DD].md
-Verify: ls -la .wiki/output/health/status-[date].md
+## Status Overview
+```
+## PROJECT
+swarm-bot — Python Telegram bot with aiogram 3.x
+
+## GIT
+- Branch: main
+- Last commit: <hash> <message>
+- Changes: N files changed
+
+## RECENT_CHANGES
+<last 3 commits>
+
+## TEST_HEALTH
+- Last run: <timestamp>
+- Passed: N / Failed: N
+- Coverage: <X>%
+
+## SERVICE_STATUS
+- swarm-bot: running
+- Last restart: <timestamp>
+```
+
+## Detailed Status (handlers)
+```
+## HANDLERS
+Total: 45 handlers
+By category:
+- AI: handlers/ai.py
+- Dev: handlers/dev.py
+- Research: handlers/research.py
+...
+
+## RECENT_MODIFICATIONS
+- handlers/ai.py — 2 days ago
+- core/intent_router.py — 5 days ago
+```
+
+## Swarm-Bot Health Checks
+```bash
+# Service status
+sudo systemctl status swarm-bot
+
+# Recent logs
+journalctl -u swarm-bot -n 20 --no-pager
+
+# Test health
+pytest tests/ -x --asyncio-mode=auto -q --tb=short
+```
+
+## Output
+- Clean, scannable format
+- Color-coded status indicators
+- Actionable next steps if issues found

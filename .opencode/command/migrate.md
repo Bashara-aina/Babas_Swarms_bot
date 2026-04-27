@@ -1,57 +1,49 @@
 ---
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: [direction] | up | down | status
-description: Run database migrations for episodic_store, graphiti, or mem0. NEVER run on production without backup.
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: <from-system> <to-system>
+description: "Migrate code from one pattern or system to another. Args: source, target."
 ---
 
-# /migrate — Database Migration Command
+# /migrate — Pattern migration
 
-## STEP 1 — Identify Migration System
+Migrate code from one pattern or system to another in swarm-bot.
 
-Check which stores need migration:
-```bash
-ls core/memory/
-grep -r "aiosqlite\|sqlite" --include="*.py" core/memory/ | head -5
+## Usage
+```
+/migrate print-based-logging to structlog
+/migrate legacy-handler to aiogram-3
+/migrate callback-based-async to await-async
 ```
 
-## STEP 2 — Run Migration
+## Migration Types
 
-For direction=up:
-```bash
-# Check current schema version
-python -c "import sqlite3; c=sqlite3.connect('data/episodic.db'); print(c.execute('SELECT name FROM sqlite_master WHERE type=\"table\"').fetchall())" 2>/dev/null
+### Handler Pattern Migration
+Old: callback-based Telegram handlers
+New: aiogram 3.x router decorators
 
-# Run any pending migrations
-python -c "
-import asyncio, aiosqlite
-async def migrate():
-    async with aiosqlite.connect('data/episodic.db') as db:
-        # Add migration logic here
-        pass
-asyncio.run(migrate())
-"
+### Logging Migration
+Old: `print()` statements
+New: `structlog` with structured context
+
+### Async Pattern Migration
+Old: `asyncio.coroutine` + `@asyncio.coroutine`
+New: `async def` + `await`
+
+### LLM Pattern Migration
+Old: direct openai calls
+New: llm_client.py with fallback chain
+
+## Workflow
+```
+1. Identify migration scope
+2. Find all occurrences
+3. Create migration map
+4. Apply changes file by file
+5. Verify tests still pass
 ```
 
-For direction=down:
-- **NEVER run down migrations on production without explicit user confirmation**
-
-For direction=status:
-```bash
-python -c "import sqlite3; c=sqlite3.connect('data/episodic.db'); print([r[0] for r in c.execute('SELECT name FROM sqlite_master WHERE type=\"table\"').fetchall()])"
-```
-
-## STEP 3 — Verify
-
-After migration:
-```bash
-python -c "from core.memory.episodic_store import EpisodicStore; print('episodic_store ok')"
-python -c "from core.memory.memory_manager import LegionMemoryFacade; print('memory_facade ok')"
-```
-
-## STEP 4 — Backup Before Production
-
-On production:
-```bash
-cp data/episodic.db "data/episodic.db.backup-$(date +%Y%m%d-%H%M%S)"
-cp data/beliefs.json "data/beliefs.json.backup-$(date +%Y%m%d-%H%M%S)"
-```
+## Constraints
+- Always run tests after migration
+- Migrate incrementally, not all at once
+- Preserve existing test coverage
+- Update wiki if architecture changes

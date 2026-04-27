@@ -1,46 +1,80 @@
 ---
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: [module-or-path] [--coverage] | core/agents | handlers/ | --coverage
-description: Run tests for a specific module or full test suite with optional coverage report
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [module-or-path] [--coverage]
+description: "Run tests. Without args: all tests. With path: tests for specific module."
 ---
 
-# /test — Test Execution Command
+# /test — Run tests
 
-## STEP 1 — Detect Test Framework
+Execute the test suite.
 
-Check project for test framework:
-```bash
-ls tests/ 2>/dev/null | head -10
-grep -r "pytest\|unittest\|asyncio" pyproject.toml requirements.txt 2>/dev/null | head -5
+## Usage
+```
+/test
+/test handlers/ai.py
+/test core/intent_router.py --coverage
+/test test_memory.py -v
 ```
 
-## STEP 2 — Run Tests
+## Test Framework
+- **Framework**: pytest + pytest-asyncio
+- **Mode**: auto (async detection)
+- **Flags**: -x (stop on first failure), -v (verbose), -q (quiet)
 
-For a specific module:
+## Commands
 ```bash
-pytest tests/test_intent_router.py -v --asyncio-mode=auto 2>/dev/null
-pytest tests/ -k "test_name" -v 2>/dev/null
-```
-
-For full suite:
-```bash
+# All tests
 pytest tests/ -x --asyncio-mode=auto -q
+
+# With verbose output
+pytest tests/ -x --asyncio-mode=auto -v
+
+# With coverage
+pytest tests/ --cov=. --cov-report=term
+
+# Specific test file
+pytest tests/test_memory.py -x -v
+
+# Specific test function
+pytest tests/test_memory.py::test_recall -x -v
+
+# Pattern match
+pytest tests/ -k "memory" -x -v
 ```
 
-With coverage:
-```bash
-pytest tests/ --cov=. --cov-report=term-missing --asyncio-mode=auto -q
+## Swarm-Bot Test Conventions
+```
+tests/
+├── handlers/
+│   └── test_ai.py
+├── core/
+│   └── test_intent_router.py
+│   └── test_soul_engine.py
+├── agents/
+│   └── test_agents.py
+├── tools/
+│   └── test_browser_tool.py
+└── test_legion_callback_bridge.py
 ```
 
-## STEP 3 — Report Results
+## Async Test Pattern
+```python
+import pytest
 
-Report:
-- Tests run / passed / failed
-- Any failures with full traceback
-- Coverage % if requested
+@pytest.mark.asyncio
+async def test_memory_recall():
+    result = await memory_manager.recall("query")
+    assert result is not None
+```
 
-## Special Rules
+## Output Format
+```
+## TEST_RESULTS
+<N> passed, <M> failed
 
-- If no tests exist for the module: report "No tests found for [module]"
-- If tests fail: do NOT proceed with any contract that requires this module's tests to pass
-- BUG_FIX contracts must include test output showing before/after state
+## FAILURES
+- test_file.py::test_name — AssertionError: expected X, got Y
+
+## VERIFICATION
+<final status>
+```

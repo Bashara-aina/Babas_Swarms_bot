@@ -1,268 +1,51 @@
-# /swarm — Intelligent Multi-Agent Pipeline
-# Version: 3.0 | Memory + Collaboration + Exploration | Anti-hallucination enforced
-
-## BEFORE STARTING — READ THIS ENTIRE FILE
-
-You are orchestrating a multi-agent pipeline. The pipeline has these agents:
-- @explorer  — investigates codebase before planning
-- @memory    — checks cross-session memory before planning
-- @planner   — decomposes task into CONTRACTS (not prose)
-- @worker    — executes one contract at a time, PROVES completion
-- @Diff-Analyzer  — checks proof BEFORE @reviewer sees anything
-- @reviewer  — approves or triggers retry loop
-- @collaborator — pauses for user input on ambiguous/destructive decisions
-
-The pipeline NEVER ends with a ❌ from @reviewer.
-If @reviewer rejects: @worker must fix the specific failures and re-submit.
-Max retry loops: 3. If still failing after 3 loops: STOP and report to user.
-
+---
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [task]
+description: "Swarm mode: coordinate multiple agents on a complex task with different roles."
 ---
 
-## STEP 0 — CONTEXT GATHERING
+# /swarm — Multi-agent orchestration
 
-Before ANYTHING else, gather context:
+Orchestrate multiple specialized agents to work on different aspects of a complex task.
 
-### 0.1 — Check Memory
+## Usage
 ```
-@memory
-OPERATION: read
-TOPIC: [what this task relates to — e.g. "memory system", "handlers", "agents"]
-```
-
-Read `.opencode/memory/MEMORY.md` to see if relevant memory exists.
-If memory exists: incorporate it into planning.
-If memory is stale (old date): update it after task.
-
-### 0.2 — Explore (for complex tasks)
-For RESEARCH, FEATURE, or REFACTOR tasks:
-```
-@explorer
-TASK: [what you need to understand before planning]
-FOCUS: [specific module/file/pattern to investigate]
+/swarm implement new agent type
+/swarm debug LLM reliability issue
+/swarm optimize memory recall latency
 ```
 
-Run this BEFORE @planner for any task touching unknown code.
+## Swarm Roles
+| Role | Specialization |
+|------|---------------|
+| planner | Decompose task, coordinate |
+| worker | Implement code changes |
+| reviewer | Quality assurance |
+| researcher | Investigation, web search |
 
-### 0.3 — Collaborator Pause (if needed)
-For DEPLOYMENT or potentially destructive tasks:
-```
-@collaborator
-TYPE: confirmation
-ACTION: [what will happen]
-IMPACT: [what changes irreversibly]
-```
+## How /swarm Works
+1. **Planner** decomposes task into subtasks
+2. **Worker** agents execute subtasks in parallel
+3. **Reviewer** checks each subtask
+4. **Planner** synthesizes and integrates
 
-Wait for user confirmation before proceeding.
+## Swarm-Bot Agent System
+- **@planner** — task decomposition, never edits files
+- **@worker** — executes code changes
+- **@reviewer** — reviews before commit
+- **@wikibot** — writes session summaries
 
----
+## Coordination
+- Agents communicate via shared context
+- Planner tracks progress
+- Reviewer approves before next step
 
-## STEP 1 — DETECT TASK TYPE
+## Constraints
+- Task must be complex enough to warrant multiple agents
+- Clear role separation required
+- Planner stays in control
 
-Before calling @planner, classify the task:
-
-```
-If task contains: "write", "create file", "copy", "migrate", "move", "wiki"
-  → TYPE: FILE_OPERATION
-  → Worker must use read-back verification on every file write
-  → Proof = file listing (find/ls output)
-
-If task contains: "fix", "debug", "patch", "error", "broken"
-  → TYPE: BUG_FIX
-  → Worker must run tests after every change
-  → Proof = test output (pytest/jest output, not "tests pass")
-
-If task contains: "implement", "add feature", "build", "integrate"
-  → TYPE: FEATURE
-  → Worker must run tests + show diff
-  → Proof = git diff output + test output
-
-If task contains: "refactor", "rename", "restructure", "clean"
-  → TYPE: REFACTOR
-  → Worker must prove no broken imports
-  → Proof = import check + test output
-
-If task contains: "research", "analyze", "audit", "review"
-  → TYPE: RESEARCH
-  → Worker must write output to file, not just respond
-  → Proof = file exists with >200 words
-
-If task contains: "deploy", "release", "push", "ship"
-  → TYPE: DEPLOYMENT
-  → Requires user confirmation before @worker executes
-  → Proof = deployment log file
-```
-
-Write the detected TYPE to the task log before proceeding.
-
----
-
-## ANTI-HALLUCINATION RULES
-
-These rules are non-negotiable and apply to ALL agents:
-
-1. After every file write: immediately READ the file back and confirm content
-2. After every bash command: show actual stdout/stderr, not a description of it
-3. Do NOT report contract complete until PROOF_FORMAT output is visible
-4. If PROOF_FORMAT is a file listing: run the actual ls/find command and paste output
-5. If PROOF_FORMAT is test output: paste actual terminal output, not "tests passed"
-6. If anything goes wrong: STOP, write failure details, do not attempt workaround
-7. Do not proceed to next contract if this one has unresolved issues
-8. Never report ✅ without PROOF_FORMAT output pasted in your response
-9. Never modify files outside the CONTRACT.FILES.WRITE list
-10. Never touch `.env`, `.env.*`, or files containing real credentials
-11. Never run `rm -rf` or any destructive command
-12. Never retry a failed step more than twice without reporting failure
-13. Never assume a file exists — always verify with `ls` or `cat` first
-
----
-
-## STEP 1 — CALL @planner
-
-Pass the task AND the detected TYPE to @planner:
-
-```
-@planner
-TASK TYPE: [detected type]
-TASK: [full task text]
-
-Decompose into CONTRACT-format subtasks.
-Each contract must specify:
-  - WHAT: exact action in one imperative sentence
-  - FILES: exact file paths to read/write/run
-  - DONE_WHEN: measurable acceptance criteria (not "looks good")
-  - PROOF_FORMAT: what output proves completion (file listing / test output / git diff)
-  - BLOCKER_IF: conditions that should stop execution and report to user
-
-No contract may say "implement X" without specifying which files.
-No contract may say "verify X" without specifying what output proves it.
-```
-
----
-
-## STEP 2 — WORKER EXECUTION LOOP
-
-For each contract from @planner, call @worker with the FULL contract:
-
-```
-@worker
-CONTRACT #[N] of [total]
-TASK TYPE: [type]
-
-WHAT: [exact action]
-FILES: [exact paths]
-DONE_WHEN: [acceptance criteria]
-PROOF_FORMAT: [required proof]
-BLOCKER_IF: [stop conditions]
-
-ANTI-HALLUCINATION RULES (non-negotiable):
-1. After every file write: immediately READ the file back and confirm content
-2. After every bash command: show actual stdout/stderr, not a description of it
-3. Do NOT report contract complete until PROOF_FORMAT output is visible
-4. If PROOF_FORMAT is a file listing: run the actual ls/find command and paste output
-5. If PROOF_FORMAT is test output: paste actual terminal output, not "tests passed"
-6. If anything goes wrong: STOP, write failure details, do not attempt workaround
-7. Do not proceed to next contract if this one has unresolved issues
-
-Report back: CONTRACT #[N] STATUS: ✅ COMPLETE | ❌ FAILED | ⚠️ BLOCKED
-Include: [proof output pasted here]
-```
-
-Wait for @worker CONTRACT STATUS before proceeding to next contract.
-If STATUS = ❌ FAILED: trigger retry (max 2 retries per contract).
-If STATUS = ⚠️ BLOCKED: stop pipeline, report BLOCKER to user immediately.
-
----
-
-## STEP 3 — CALL @Diff-Analyzer
-
-After all contracts are ✅ COMPLETE, call @Diff-Analyzer:
-
-```
-@Diff-Analyzer
-All contracts claimed complete. Verify the actual state before @reviewer.
-
-For each contract, run the PROOF_FORMAT verification independently.
-Do NOT trust @worker's report. Read the files yourself.
-
-Output:
-### Verification Report
-| Contract | Expected | Actual | Status |
-|----------|----------|--------|--------|
-| #1       | [criteria] | [what you found] | ✅/❌ |
-| ...      | ...      | ...    | ...    |
-
-Overall: VERIFIED ✅ | FAILED ❌ [list failed contracts]
-```
-
-If @Diff-Analyzer returns FAILED:
-→ Send only the failed contracts back to @worker for correction
-→ Re-run @Diff-Analyzer after correction
-→ Only proceed to @reviewer when @Diff-Analyzer returns VERIFIED ✅
-
----
-
-## STEP 4 — CALL @reviewer
-
-Only call @reviewer after @Diff-Analyzer returns VERIFIED ✅.
-
-```
-@reviewer
-Verification passed. Please conduct full quality review.
-
-Verification report: [paste @Diff-Analyzer output]
-Files changed: [list all files touched]
-Task type: [type]
-
-Review against your full checklist.
-If ❌ Blockers found: output the EXACT fix required for each blocker
-in this format so @worker can act directly:
-  FIX #1: [exact file] line [N]: [exact change required]
-  FIX #2: ...
-```
-
-If @reviewer returns ❌:
-→ Extract each FIX item
-→ Send as new contracts to @worker
-→ Loop back to STEP 3 (re-verify) then STEP 4 (re-review)
-→ Max 3 loops total. After 3: escalate to user.
-
----
-
-## STEP 5 — COMPLETION
-
-Only report success when ALL of:
-- [ ] All contracts ✅ COMPLETE per @worker
-- [ ] @Diff-Analyzer returns VERIFIED ✅
-- [ ] @reviewer returns APPROVED ✅ (no ❌ blockers)
-
-Write final summary to `.wiki/logs/swarm-[YYYY-MM-DD]-[task-slug].md`:
-```
-## Swarm Run: [task]
-Date: [date]
-Type: [task type]
-Contracts: [N total, N succeeded, N retried, N failed]
-Loops: [N review loops]
-Agents used: [list]
-Files changed: [list with sizes]
-Final status: COMPLETE ✅
-```
-
-Commit all changes:
-`git add -A && git commit -m "[type]: [task summary] — swarm pipeline"`
-
----
-
-## EMERGENCY STOP CONDITIONS
-
-Halt the entire pipeline immediately if:
-- Any agent modifies `.env`, `.env.*`, or any file containing real API keys
-- Any agent runs `rm -rf` or destructive commands without explicit user approval
-- Any contract fails 3 times in a row
-- @Diff-Analyzer finds a file that @worker claimed to write but doesn't exist
-- Task type = DEPLOYMENT and user has not confirmed
-
-On emergency stop: write incident to `.wiki/issues/emergency-[date].md` and halt.
-
----
-
-Task to execute:
+## When NOT to Use /swarm
+- Simple, single-file changes
+- Tasks under 30 minutes
+- When a single agent can handle it

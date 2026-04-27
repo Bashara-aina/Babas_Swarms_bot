@@ -1,74 +1,51 @@
 ---
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
-argument-hint: [target] [--watch] | module-name | api | architecture
-description: Generate or update documentation for a module, API, or architecture. Follows wiki SCHEMA.md format.
+allowed-tools: Read,Bash,Grep,Glob
+argument-hint: [module-or-path]
+description: "Generate or update documentation. Without args: update all docs. With path: docs for specific module."
 ---
 
-# /docs — Documentation Generation
+# /docs — Documentation generator
 
-## STEP 1 — Determine Scope
+Generate or update documentation for code, modules, or architecture.
 
-If target = module-name:
-```bash
-ls core/[module-name]/
-ls handlers/[module-name]/
+## Usage
+```
+/docs
+/docs handlers/ai.py
+/docs core/intent_router.py
 ```
 
-If target = api:
-```bash
-grep -rn "async def\|def " --include="*.py" handlers/ | grep -v "__\|test\|#" | head -30
+## What it generates
+- Module docstrings
+- README files
+- Architecture diagrams (ASCII)
+- API documentation
+- Decision records (ADR)
+
+## Swarm-Bot Documentation Locations
+| Type | Location |
+|------|----------|
+| Module docs | docstrings in .py files |
+| Architecture | .wiki/architecture/ |
+| Decisions | .wiki/decisions/ADR-*.md |
+| Research | .wiki/research/ |
+| Logs | .wiki/logs/ |
+
+## Docstring Convention
+```python
+def function(param: type) -> return_type:
+    """Short description.
+
+    Args:
+        param: description
+
+    Returns:
+        description
+
+    Raises:
+        ExceptionType: when this happens
+    """
 ```
 
-If target = architecture:
-```bash
-cat .wiki/SCHEMA.md | head -50
-cat .wiki/architecture/legion-module-map.md 2>/dev/null | head -30
-```
-
-## STEP 2 — Generate Documentation
-
-For modules, create a wiki article at `.wiki/[category]/[module-name].md`:
-
-Required frontmatter (from .wiki/SCHEMA.md):
-```yaml
----
-title: [Module Name]
-created: 2026-04-13
-tags: [legion, python, module]
-summary: [2-3 sentence description]
-wikilinks:
-  - [[concepts/legion-architecture]]
-  - [[core/agent-registry]]
----
-
-## Overview
-[What this module does]
-
-## Key Functions
-[Function list with purpose]
-
-## Usage Example
-[Real code example with actual paths]
-
-## Current Status
-[Active | Stable | Experimental]
-```
-
-## STEP 3 — Verify
-
-```bash
-# Check frontmatter validity
-python -c "import yaml; yaml.safe_load(open('.wiki/[category]/[module-name].md').read().split('---')[1])"
-
-# Check wikilinks resolve
-python3 << 'EOF'
-import glob, re
-f = '.wiki/[category]/[module-name].md'
-links = re.findall(r'\[\[([^\]]+)\]\]', open(f).read())
-print(f"Links found: {len(links)}")
-EOF
-```
-
-## STEP 4 — Update SCHEMA.md if needed
-
-If new category: add to .wiki/SCHEMA.md category list
+## Output
+Saves documentation to the appropriate location and reports where.
