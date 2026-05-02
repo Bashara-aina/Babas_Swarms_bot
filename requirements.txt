@@ -35,6 +35,7 @@ python-docx>=1.1.0
 PyMuPDF>=1.23.0
 pdfminer.six>=20221105
 markitdown[all]>=0.1.0
+chandra-ocr>=0.2.0  # State-of-the-art OCR for complex docs, tables, handwriting
 
 # Email
 aioimaplib>=1.1.0
