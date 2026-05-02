@@ -2,20 +2,6 @@
 name: browser-automation
 department: browser
 model: minimax/MiniMax-M2.7
-tools:
-  - browser_open
-  - browser_click
-  - browser_fill
-  - browser_scroll
-  - browser_wait
-  - browser_screenshot
-  - browser_get_text
-  - browser_get_html
-  - browser_close
-  - browser_run_task
-  - crawl4ai_crawl
-  - exa_web_search_exa
-  - sequential_thinking
 description: >
   Autonomous browser agent. Performs web automation tasks using browser-use
   (MiniMax-powered) via MCP. Routes to crawl4ai for static tasks. Saves screenshots

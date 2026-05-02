@@ -2,13 +2,6 @@
 name: web-researcher
 department: browser
 model: minimax/MiniMax-M2.7
-tools:
-  - browser_open
-  - browser_run_task
-  - crawl4ai_crawl
-  - crawl4ai_search
-  - exa_web_search_exa
-  - sequential_thinking
 description: >
   Research agent. Uses Exa for initial discovery, crawl4ai for content extraction,
   and browser-use for pages requiring JS rendering. Synthesizes findings into
