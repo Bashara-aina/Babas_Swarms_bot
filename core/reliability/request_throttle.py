@@ -1,7 +1,9 @@
 """Client-side request throttling to prevent hitting upstream rate limits.
 
 Implements per-provider token bucket rate limiting to space out requests
-and avoid overwhelming free-tier API endpoints.
+and avoid overwhelming free-tier API endpoints. Includes a per-provider
+circuit breaker that opens after consecutive failures and recovers
+automatically.
 """
 
 from __future__ import annotations
@@ -13,6 +15,9 @@ from collections import defaultdict
 from typing import Dict
 
 logger = logging.getLogger(__name__)
+
+FAILURE_THRESHOLD = 5
+FAILURE_RESET_TIMEOUT = 60.0
 
 # Per-provider rate limits (requests per minute)
 # Tuned based on observed API behavior
@@ -29,9 +34,12 @@ _PROVIDER_LIMITS: Dict[str, float] = {
 
 # Token bucket state per provider
 _buckets: Dict[str, Dict[str, float]] = defaultdict(lambda: {
-    "tokens": 2.0,           # Start with burst capacity (was 1.0)
+    "tokens": 2.0,
     "last_update": time.monotonic(),
 })
+
+_circuit_failures: Dict[str, int] = defaultdict(int)
+_circuit_open_since: Dict[str, float] = {}
 
 
 class RequestThrottle:
@@ -65,16 +73,24 @@ class RequestThrottle:
             True if token acquired, False if timeout
         """
         provider = RequestThrottle._extract_provider(model)
-        rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)  # Default: 15 req/min (was 10)
+        rate_limit = _PROVIDER_LIMITS.get(provider, 15.0)
 
-        # No throttling for local or high-limit providers (>=60 req/min)
         if rate_limit >= 60:
-            logger.debug("No throttle needed for high-limit provider '%s'", provider)
             return True
+
+        if provider in _circuit_open_since:
+            elapsed = time.monotonic() - _circuit_open_since[provider]
+            if elapsed < FAILURE_RESET_TIMEOUT:
+                if _circuit_failures[provider] >= FAILURE_THRESHOLD:
+                    logger.warning("Circuit OPEN for provider '%s' (failed %d times, %.0fs until reset)",
+                        provider, _circuit_failures[provider], FAILURE_RESET_TIMEOUT - elapsed)
+                    return False
+            else:
+                logger.info("Circuit HALF-OPEN for provider '%s' — allowing one probe", provider)
 
         bucket = _buckets[provider]
         tokens_per_second = rate_limit / 60.0
-        max_tokens = 3.0  # Burst capacity (was 2.0) - allows 3 rapid requests
+        max_tokens = 3.0
 
         start_time = time.monotonic()
 
@@ -82,53 +98,59 @@ class RequestThrottle:
             now = time.monotonic()
             elapsed = now - bucket["last_update"]
 
-            # Refill tokens based on elapsed time
             bucket["tokens"] = min(
                 max_tokens,
                 bucket["tokens"] + (elapsed * tokens_per_second)
             )
             bucket["last_update"] = now
 
-            # Try to consume 1 token
             if bucket["tokens"] >= 1.0:
                 bucket["tokens"] -= 1.0
+                if provider in _circuit_open_since:
+                    _circuit_failures.pop(provider, None)
+                    _circuit_open_since.pop(provider, None)
+                    logger.info("Circuit CLOSED for provider '%s' — recovered", provider)
                 logger.debug(
                     "Token acquired for provider '%s' (%.2f tokens remaining)",
-                    provider, bucket["tokens"]
+                    provider, bucket["tokens"],
                 )
                 return True
 
-            # Check timeout
             if now - start_time >= timeout:
-                logger.warning(
-                    "Request throttle timeout for provider '%s' after %.1fs",
-                    provider, timeout
-                )
+                _circuit_failures[provider] = _circuit_failures.get(provider, 0) + 1
+                if _circuit_failures[provider] >= FAILURE_THRESHOLD:
+                    _circuit_open_since[provider] = time.monotonic()
+                    logger.error(
+                        "Circuit OPENED for provider '%s' after %d consecutive failures",
+                        provider, _circuit_failures[provider],
+                    )
+                else:
+                    logger.warning(
+                        "Request throttle timeout for provider '%s' after %.1fs (failures: %d/%d)",
+                        provider, timeout, _circuit_failures[provider], FAILURE_THRESHOLD,
+                    )
                 return False
 
-            # Wait for next token to become available
             wait_time = (1.0 - bucket["tokens"]) / tokens_per_second
-            wait_time = min(wait_time, 1.0)  # Cap at 1 second per iteration (was 2s)
+            wait_time = min(wait_time, 1.0)
 
             logger.debug(
                 "Provider '%s' throttled, waiting %.1fs for token",
-                provider, wait_time
+                provider, wait_time,
             )
             await asyncio.sleep(wait_time)
 
     @staticmethod
     def reset(provider: str) -> None:
-        """Reset throttle state for a provider (admin intervention).
-
-        Args:
-            provider: Provider name
-        """
+        """Reset throttle and circuit breaker state for a provider (admin intervention)."""
         if provider in _buckets:
             _buckets[provider] = {
-                "tokens": 3.0,  # Reset with full burst capacity
+                "tokens": 3.0,
                 "last_update": time.monotonic(),
             }
-            logger.info("Request throttle reset for provider '%s'", provider)
+        _circuit_failures.pop(provider, None)
+        _circuit_open_since.pop(provider, None)
+        logger.info("Request throttle and circuit breaker reset for provider '%s'", provider)
 
     @staticmethod
     def get_wait_time(model: str) -> float:

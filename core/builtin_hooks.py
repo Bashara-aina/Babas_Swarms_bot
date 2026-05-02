@@ -136,6 +136,36 @@ async def claude_code_session_end_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     return ctx
 
 
+async def _post_compact_reset_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """GAP-08: Clear incremental summary after compaction to start fresh."""
+    try:
+        from core.incremental_summary import reset as reset_incremental_summary
+        reset_incremental_summary()
+    except Exception:
+        pass
+    return ctx
+
+
+async def _compaction_event_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """GAP-15: Log compaction events to event-store-lite for session replay."""
+    try:
+        from core.session_snapshots import append_compaction_event
+
+        event_type = ctx.get("event", "unknown")
+        session_id = ctx.get("user_id", "default")
+        append_compaction_event(
+            event_type=event_type,
+            session_id=session_id,
+            details={
+                "message_count": len(ctx.get("messages", [])),
+                "compaction_reason": ctx.get("reason", ""),
+            }
+        )
+    except Exception:
+        pass
+    return ctx
+
+
 def register_builtin_hooks() -> None:
     """Register all built-in hooks on the global HookSystem."""
     from core.hooks import get_hooks
@@ -145,9 +175,15 @@ def register_builtin_hooks() -> None:
     hooks.register("post_llm_call", audit_logger_hook, name="audit_logger")
     hooks.register("command_received", command_audit_hook, name="command_audit")
     hooks.register("post_llm_call", opencode_decision_hook, name="opencode_decision")
-    # Claude Code session lifecycle hooks
     hooks.register("pre_llm_call", claude_code_session_start_hook, name="cc_session_start")
     hooks.register("post_llm_call", claude_code_session_end_hook, name="cc_session_end")
+
+    from core.incremental_summary import incremental_summary_pre_compact_hook
+
+    hooks.register("pre_compact", incremental_summary_pre_compact_hook, name="incremental_summary_pre_compact")
+    hooks.register("post_compact", _post_compact_reset_hook, name="incremental_summary_reset")
+    hooks.register("pre_compact", _compaction_event_hook, name="compaction_event_pre")
+    hooks.register("post_compact", _compaction_event_hook, name="compaction_event_post")
 
     _ensure_opencode_dirs()
     logger.info("Built-in hooks registered")

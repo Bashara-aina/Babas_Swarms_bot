@@ -50,7 +50,7 @@ class CacheEntry:
 class SemanticCache:
     """Semantic similarity cache for LLM responses.
 
-    Uses sentence-transformers (all-MiniLM-L6-v2, ~80MB) for embeddings.
+    Uses sentence-transformers (all-mpnet-base-v2, 768-dim) for embeddings.
     Model is loaded lazily on first use.
     """
 
@@ -67,7 +67,7 @@ class SemanticCache:
             return
         try:
             from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer("all-MiniLM-L6-v2")
+            self._model = SentenceTransformer("all-mpnet-base-v2")
             logger.info("Semantic cache: sentence-transformers model loaded")
         except ImportError:
             logger.warning(

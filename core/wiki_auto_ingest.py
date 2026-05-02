@@ -51,12 +51,12 @@ A: {a}
 def is_worthy_turn(q: str, a: str) -> tuple[bool, str]:
     """Lightweight blocking check — avoid LLM call on every message."""
     short_q = len(q.strip()) < 10
-    short_a = len(a.strip()) < 40
+    short_a = len(a.strip()) < 15
     if short_q or short_a:
         return False, "too short"
 
     code_block_count = a.count("```")
-    if code_block_count >= 4 and len(a) > 2000:
+    if code_block_count >= 4:
         return True, "code-heavy solution worth preserving"
 
     cmd_patterns = ("pip ", "npm ", "git ", "python", "bash", "sudo", "export ", "source ")

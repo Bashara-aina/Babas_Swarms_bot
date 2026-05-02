@@ -18,17 +18,35 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # Pricing per 1M tokens (input/output) in USD — 0.0 = free tier
+# Covers all models used in LEGACY_FALLBACK_CHAIN + agent_registry fallback chains
 PRICING: dict[str, dict[str, float]] = {
-    "minimax/MiniMax-Text-01":                         {"input": 0.0, "output": 0.0},
-    "ollama_chat/gemma3:12b":                           {"input": 0.0, "output": 0.0},
-    "ollama_chat/qwen3.5:35b":                          {"input": 0.0, "output": 0.0},
-    "ollama_chat/exaone-deep:32b":                      {"input": 0.0, "output": 0.0},
-    "ollama_chat/phi4":                                 {"input": 0.0, "output": 0.0},
-    "ollama_chat/llama3.3:70b":                         {"input": 0.0, "output": 0.0},
-    "openrouter/qwen/qwen3-coder:free":                 {"input": 0.0, "output": 0.0},
-    "openrouter/openai/gpt-oss-120b:free":              {"input": 0.0, "output": 0.0},
-    "gemini/gemini-3.1-pro":                            {"input": 0.035, "output": 0.105},
-    "gemini/gemma-3-27b-it":                            {"input": 0.0, "output": 0.0},
+    # MiniMax stack
+    "minimax/MiniMax-Text-01":                        {"input": 0.0, "output": 0.0},
+    "minimax/MiniMax-M2.7":                           {"input": 0.0, "output": 0.0},
+    "minimax-coding-plan/MiniMax-M2.7":               {"input": 0.0, "output": 0.0},
+    # Ollama local
+    "ollama_chat/gemma3:12b":                         {"input": 0.0, "output": 0.0},
+    "ollama_chat/qwen3.5:35b":                        {"input": 0.0, "output": 0.0},
+    "ollama_chat/exaone-deep:32b":                    {"input": 0.0, "output": 0.0},
+    "ollama_chat/phi4":                               {"input": 0.0, "output": 0.0},
+    "ollama_chat/llama3.3:70b":                       {"input": 0.0, "output": 0.0},
+    "ollama_chat/gemma4:e4b":                         {"input": 0.0, "output": 0.0},
+    # OpenRouter free
+    "openrouter/qwen/qwen3-coder:free":               {"input": 0.0, "output": 0.0},
+    "openrouter/openai/gpt-oss-120b:free":            {"input": 0.0, "output": 0.0},
+    "openrouter/deepseek/deepseek-r1:free":           {"input": 0.0, "output": 0.0},
+    "openrouter/meta-llama/llama-3.3-70b-instruct:free": {"input": 0.0, "output": 0.0},
+    "openrouter/anthropic/claude-opus-4":             {"input": 0.0, "output": 0.0},
+    # Gemini
+    "gemini/gemini-3.1-pro":                           {"input": 0.035, "output": 0.105},
+    "gemini/gemini-2.0-flash-exp:free":               {"input": 0.0, "output": 0.0},
+    "gemini/gemma-3-27b-it":                           {"input": 0.0, "output": 0.0},
+    # Cerebras
+    "cerebras/qwen-3-32b":                            {"input": 0.0, "output": 0.0},
+    # Anthropic
+    "anthropic/claude-sonnet-4-20250514":             {"input": 0.0, "output": 0.0},
+    # Vision
+    "vision":                                         {"input": 0.0, "output": 0.0},  # alias for ollama/gemma4:e4b
 }
 
 # Daily request limits (0 = unlimited)
@@ -179,6 +197,68 @@ class UsageTracker:
 
         lines.append(f"\n<b>Total:</b> {total_requests} requests, ${total_cost:.4f}")
         return "\n".join(lines)
+
+    def can_make_llm_call(self, model: str, estimated_tokens: int) -> tuple[bool, str]:
+        """Check BEFORE making an API call whether it would exceed daily/monthly budget.
+
+        Args:
+            model: Model string (e.g. 'minimax/MiniMax-M2.7').
+            estimated_tokens: Estimated total tokens for this call (input + output).
+
+        Returns:
+            Tuple of (allowed: bool, reason: str).
+            allowed=True means the call can proceed.
+            allowed=False means the call should be skipped; reason explains why.
+        """
+        today = self._today()
+
+        # ── Daily request limit check ───────────────────────────────────────
+        limit = DAILY_LIMITS.get(model, 0)
+        if limit:
+            today_stats = self.get_today(model)
+            current_requests = int(today_stats.get("requests", 0))
+            if current_requests >= limit:
+                return False, f"Daily request limit reached ({current_requests}/{limit})"
+
+        # ── Daily token budget check ───────────────────────────────────────
+        # Use a conservative estimate of output tokens = 50% of input (rounds up)
+        est_output = (estimated_tokens + 1) // 2
+        est_input = estimated_tokens - est_output
+        pricing = PRICING.get(model, {"input": 0.0, "output": 0.0})
+
+        daily_token_limit = 1_000_000  # 1M tokens/day default
+        daily_cost_limit = 10.0        # $10/day default
+
+        if self._redis:
+            key = self._redis_key(model)
+            raw = self._redis.hgetall(key)
+            used_input = float(raw.get("input_tokens", 0)) if raw else 0.0
+            used_output = float(raw.get("output_tokens", 0)) if raw else 0.0
+            used_cost = float(raw.get("cost_usd", 0.0)) if raw else 0.0
+        else:
+            key = f"{model}:{today}"
+            used_input = self._memory.get(key, {}).get("input_tokens", 0.0)
+            used_output = self._memory.get(key, {}).get("output_tokens", 0.0)
+            used_cost = self._memory.get(key, {}).get("cost_usd", 0.0)
+
+        remaining_budget_tokens = daily_token_limit - (used_input + used_output)
+        remaining_cost = daily_cost_limit - used_cost
+
+        if est_input + est_output > remaining_budget_tokens:
+            return False, (
+                f"Daily token budget exceeded for {model} "
+                f"({int(used_input + used_output + est_input + est_output):,} tokens would exceed "
+                f"{daily_token_limit:,} limit)"
+            )
+
+        call_cost = (est_input / 1_000_000) * pricing["input"] + (est_output / 1_000_000) * pricing["output"]
+        if call_cost > remaining_cost:
+            return False, (
+                f"Daily cost budget exceeded for {model} "
+                f"(${used_cost + call_cost:.4f} would exceed ${daily_cost_limit:.2f} limit)"
+            )
+
+        return True, "ok"
 
 
 # Singleton

@@ -1,0 +1,161 @@
+"""Session teardown for the Autonomy Layer.
+
+Implements Part X of the Autonomy Layer master prompt v2:
+  - Auto-detect session end signals
+  - Run teardown sequence silently
+  - Announce with one line only
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import os
+import re
+from datetime import datetime
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+ruflo_available = True
+_mcp_client = None
+
+try:
+    from core.mcp_client import MCPClient
+    _mcp_client = MCPClient()
+except Exception:
+    ruflo_available = False
+
+GOODBYE_SIGNALS = [
+    "done", "bye", "that's all", "thanks", "selesai", "makasih",
+    "ok done", "goodbye", "exit", "quit", "stop",
+]
+
+
+async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
+    if not ruflo_available or _mcp_client is None:
+        return {}
+    try:
+        result = await _mcp_client.call_tool("ruflo", tool, args or {})
+        if isinstance(result, list) and len(result) > 0:
+            import json
+            return json.loads(result[0].text)
+        return {}
+    except Exception as e:
+        logger.debug("ruflo %s failed: %s", tool, e)
+        return {}
+
+
+def detect_goodbye(message: str) -> bool:
+    """Check if message is a goodbye signal."""
+    msg_lower = message.lower().strip().rstrip("!?.")
+    return any(signal == msg_lower for signal in GOODBYE_SIGNALS)
+
+
+async def run_teardown_sequence(
+    session_summary: str,
+    task_count: int,
+    detected_projects: list[str],
+    has_code_changes: bool = False,
+    uncommitted_files: list[str] | None = None,
+) -> str:
+    """Run the full teardown sequence silently (< 10 seconds).
+
+    Returns the one-line announcement message.
+    """
+    start = asyncio.get_event_loop().time()
+    ts = datetime.now().strftime("%Y%m%d-%H%M")
+
+    # STEP 1: Save ruflo session
+    await _call_ruflo("session_save", {
+        "name": f"auto-{ts}",
+        "include_memory": True,
+    })
+
+    # STEP 2: Export session backup
+    await _call_ruflo("session_export", {
+        "name": f"auto-{ts}",
+        "format": "json",
+        "destination": "~/.legion/sessions/",
+    })
+
+    # STEP 3: Write obsidian daily note
+    try:
+        from core.mcp_client import MCPClient
+        client = MCPClient()
+        today = datetime.now().strftime("%Y-%m-%d")
+        time_str = datetime.now().strftime("%H:%M")
+        content = (
+            f"## Session {time_str}\n"
+            f"Tasks: {task_count}\n"
+            f"Summary: {session_summary}\n"
+            f"Projects: {', '.join(detected_projects)}\n"
+        )
+        await client.call_tool("obsidian", "append_to_note", {
+            "filename": f"Sessions/{today}.md",
+            "content": content,
+        })
+    except Exception as e:
+        logger.debug("obsidian daily note write failed: %s", e)
+
+    # STEP 4: mem0 add
+    try:
+        from tools.mem0_client import mem0_add
+        meta = {
+            "type": "session",
+            "date": today,
+            "projects": detected_projects,
+        }
+        await mem0_add("bashara", session_summary, meta)
+    except Exception as e:
+        logger.debug("mem0 add failed: %s", e)
+
+    # STEP 5: Memory consolidation worker
+    await _call_ruflo("worker_dispatch", {
+        "worker_name": "memory_consolidate",
+        "trigger": "immediate",
+    })
+
+    # STEP 6: Git status (only if code changes)
+    uncommitted = []
+    if has_code_changes:
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd="/home/newadmin/swarm-bot",
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.stdout.strip():
+                uncommitted = result.stdout.strip().split("\n")[:10]
+        except Exception:
+            pass
+
+    elapsed = asyncio.get_event_loop().time() - start
+    logger.info("Teardown complete in %.1fs, uncommitted=%s", elapsed, len(uncommitted))
+
+    # Build announcement
+    announcement = f"Session saved. {task_count} tasks completed. See you next time, Bashara."
+
+    if uncommitted:
+        files_str = ", ".join(u[:50] for u in uncommitted[:3])
+        announcement += f" You have uncommitted changes: {files_str}."
+
+    return announcement
+
+
+async def check_git_status() -> tuple[bool, list[str]]:
+    """Check if there are uncommitted changes."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd="/home/newadmin/swarm-bot",
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.stdout.strip():
+            files = [l[3:] for l in result.stdout.strip().split("\n") if l.strip()]
+            return True, files
+    except Exception:
+        pass
+    return False, []

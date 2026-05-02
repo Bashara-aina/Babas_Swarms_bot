@@ -28,8 +28,8 @@ class SpawnTracker:
 class LegionCallbackBridge:
     """Bridge for LegionBot to spawn OpenCode sub-tasks without Telegram round-trip."""
 
-    def __init__(self, tracker: SpawnTracker | None = None):
-        self.tracker = tracker or SpawnTracker()
+    def __init__(self):
+        self._tracker = SpawnTracker()
 
     def parse_callback_directive(self, text: str) -> str | None:
         """Extract @legion directive from text."""
@@ -43,10 +43,10 @@ class LegionCallbackBridge:
         timeout: int = 120,
     ) -> dict[str, Any]:
         """Spawn OpenCode from LegionBot task without Telegram round-trip."""
-        if not self.tracker.can_spawn(depth):
-            return {"spawned": False, "reason": f"max depth {self.tracker.max_depth} reached"}
+        if not self._tracker.can_spawn(depth):
+            return {"spawned": False, "reason": f"max depth {self._tracker.max_depth} reached"}
 
-        self.tracker.record_spawn(task_prompt[:50], depth)
+        self._tracker.record_spawn(task_prompt[:50], depth)
 
         try:
             from core.opencode_bridge import run_opencode_task

@@ -14,6 +14,18 @@ logger = logging.getLogger(__name__)
 
 # Global ruflo process handle
 _ruflo_process: Optional[subprocess.Popen] = None
+_ruflo_monitor_task: Optional[asyncio.Task] = None
+
+
+def _restart_health_monitor() -> None:
+    """Restart the ruflo health monitor if it has died."""
+    global _ruflo_monitor_task
+    if _ruflo_monitor_task is None or _ruflo_monitor_task.done():
+        _ruflo_monitor_task = asyncio.create_task(ruflo_health_monitor())
+        _ruflo_monitor_task.add_done_callback(
+            lambda t: logger.error("Ruflo health monitor died: %s", t.exception()) if not t.cancelled() and t.exception() else None
+        )
+        logger.info("Ruflo health monitor restarted")
 
 
 def set_ruflo_process(proc: subprocess.Popen) -> None:
@@ -80,6 +92,15 @@ def start_health_monitor() -> asyncio.Task:
     Returns:
         The asyncio Task handle.
     """
-    task = asyncio.create_task(ruflo_health_monitor())
+    global _ruflo_monitor_task
+    if _ruflo_monitor_task is not None and not _ruflo_monitor_task.done():
+        return _ruflo_monitor_task
+    _ruflo_monitor_task = asyncio.create_task(ruflo_health_monitor())
+    _ruflo_monitor_task.add_done_callback(
+        lambda t: (
+            logger.error("Ruflo health monitor died: %s", t.exception())
+            if not t.cancelled() and t.exception() else None
+        )
+    )
     logger.info("Ruflo health monitor started (5-minute interval)")
-    return task
+    return _ruflo_monitor_task

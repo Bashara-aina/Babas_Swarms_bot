@@ -407,3 +407,95 @@ def _ensure_opencode_dirs() -> None:
     """Ensure OpenCode wiki subdirs exist. Call once at startup."""
     OPENCODE_SESSION_DIR.mkdir(parents=True, exist_ok=True)
     OPENCODE_DECISIONS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# ── GAP-13: wiki-based cross-session compaction cache ──────────────────────────────────
+
+
+def write_note(filename: str, content: str, folder: str | None = None) -> bool:
+    """Write a note to the wiki.
+
+    Args:
+        filename: Name of the note (e.g. 'my-key' or 'sessions/snap-abc123')
+        content: Markdown content to write
+        folder: Optional subfolder under WIKI_DIR (e.g. 'compaction-cache', 'session-snapshots')
+                If None, writes directly to WIKI_DIR
+    Returns:
+        True if written successfully, False otherwise.
+    """
+    if not _wiki_enabled():
+        return False
+    try:
+        if folder:
+            dir_path = WIKI_DIR / folder
+        else:
+            dir_path = WIKI_DIR
+        dir_path.mkdir(parents=True, exist_ok=True)
+        # Always add .md extension
+        if not filename.endswith(".md"):
+            filename += ".md"
+        file_path = dir_path / filename
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        logger.debug("write_note: wrote %s", file_path)
+        return True
+    except Exception as exc:
+        logger.warning("write_note failed for %s: %s", filename, exc)
+        return False
+
+
+def read_note(filename: str, folder: str | None = None) -> str:
+    """Read a note from the wiki.
+
+    Args:
+        filename: Name of the note (e.g. 'compaction-cache/my-key' or 'sessions/snap-abc123')
+        folder: Optional subfolder under WIKI_DIR
+    Returns:
+        Content of the note, or empty string if not found.
+    """
+    if not _wiki_enabled():
+        return ""
+    try:
+        if folder:
+            dir_path = WIKI_DIR / folder
+        else:
+            dir_path = WIKI_DIR
+        if not filename.endswith(".md"):
+            filename += ".md"
+        file_path = dir_path / filename
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return ""
+
+
+def list_notes(folder: str | None = None) -> list[dict[str, str]]:
+    """List all notes in a wiki folder.
+
+    Args:
+        folder: Optional subfolder under WIKI_DIR (e.g. 'compaction-cache', 'session-snapshots')
+                If None, lists WIKI_DIR root.
+    Returns:
+        List of dicts with 'filename' and 'modified' keys.
+    """
+    if not _wiki_enabled():
+        return []
+    try:
+        if folder:
+            dir_path = WIKI_DIR / folder
+        else:
+            dir_path = WIKI_DIR
+        if not dir_path.is_dir():
+            return []
+        notes = []
+        for f in dir_path.iterdir():
+            if f.is_file() and f.suffix == ".md":
+                stat = f.stat()
+                notes.append({
+                    "filename": f"{folder}/{f.name}" if folder else f.name,
+                    "modified": str(stat.st_mtime),
+                })
+        return notes
+    except Exception as exc:
+        logger.warning("list_notes failed for folder %s: %s", folder, exc)
+        return []

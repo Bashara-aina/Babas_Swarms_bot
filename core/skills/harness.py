@@ -17,10 +17,13 @@ Reference: M2.7 Full Capability Activation — Skill Harness (Section F1)
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 SKILLS_DIR = Path.home() / ".claude" / "skills"
 
@@ -108,6 +111,16 @@ def _list_available_skills() -> list[str]:
     ]
 
 
+def _suggest_similar_skill(name: str, available: list[str]) -> str:
+    """Suggest a similar skill name if a close match exists."""
+    from difflib import get_close_matches
+
+    matches = get_close_matches(name, available, n=1, cutoff=0.6)
+    if matches:
+        return f". Did you mean '{matches[0]}'?"
+    return ""
+
+
 def load_skills_for_task(task_type: str, domain: str = "") -> list[str]:
     """Return ordered list of skill names to load for this task.
 
@@ -122,30 +135,51 @@ def load_skills_for_task(task_type: str, domain: str = "") -> list[str]:
         skills = load_skills_for_task("feature", "cekwajar")
         # Returns: ["typescript-strict", "next-js-app-router", "supabase-realtime", ...]
     """
+    available = _list_available_skills()
     loaded: list[str] = []
 
     # TIER 1 — always
     for skill in TIER_1:
-        if skill in _list_available_skills():
+        if skill in available:
             loaded.append(skill)
+        else:
+            logger.warning(
+                f"TIER-1 skill not found: '{skill}' — {TIER_1[skill]}"
+                f"{_suggest_similar_skill(skill, available)}"
+            )
 
     # TIER 2 — by task type
     tier2_skills = TIER_2.get(task_type.lower(), [])
     for skill in tier2_skills:
-        if skill in _list_available_skills() and skill not in loaded:
+        if skill in available and skill not in loaded:
             loaded.append(skill)
+        else:
+            logger.warning(
+                f"TIER-2 skill not found: '{skill}' for task type '{task_type}'"
+                f"{_suggest_similar_skill(skill, available)}"
+            )
 
     # TIER 3 — by domain
     if domain:
         tier3_skills = TIER_3.get(domain.lower(), [])
         for skill in tier3_skills:
-            if skill in _list_available_skills() and skill not in loaded:
+            if skill in available and skill not in loaded:
                 loaded.append(skill)
+            else:
+                logger.warning(
+                    f"TIER-3 skill not found: '{skill}' for domain '{domain}'"
+                    f"{_suggest_similar_skill(skill, available)}"
+                )
 
     # TIER 4 — wildcard always included
     for skill in ALWAYS_TIER_4:
-        if skill in _list_available_skills() and skill not in loaded:
+        if skill in available and skill not in loaded:
             loaded.append(skill)
+        else:
+            logger.warning(
+                f"TIER-4 (wildcard) skill not found: '{skill}'"
+                f"{_suggest_similar_skill(skill, available)}"
+            )
 
     return loaded
 

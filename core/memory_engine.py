@@ -45,7 +45,7 @@ CHROMA_DIR = DATA_DIR / "legion_chroma"
 
 WORKING_MAX = 20  # Last 20 exchanges before auto-summarize
 TOKEN_THRESHOLD = 15_000  # Auto-summarize when tokens > this
-EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"  # Light, fast
+EMBED_MODEL = "sentence-transformers/all-mpnet-base-v2"  # Unified with agent_registry
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────

@@ -34,6 +34,8 @@ EVENTS = frozenset({
     "command_received",
     "response_sent",
     "error_occurred",
+    "pre_compact",   # Before message compaction (GAP-14)
+    "post_compact",  # After message compaction (GAP-14 + GAP-20)
 })
 
 

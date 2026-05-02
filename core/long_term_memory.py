@@ -37,7 +37,7 @@ class MemoryHit:
 
 # ── Embedding Model ────────────────────────────────────────────────────────────
 
-_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+_EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 _embedder_cache: Optional[object] = None
 
 

@@ -7,6 +7,7 @@ Loaded once at startup via load_registry(); all lookups are cached.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
@@ -43,6 +44,7 @@ class AgentDef:
     prompt_template: str = ""  # path to Jinja2 .j2 file (auto-set)
     primary_model_id: str = ""  # resolved litellm model_id (set by load_registry)
     fallback_model_ids: list[str] = field(default_factory=list)  # resolved
+    version: str = "1.0.0"  # agent version for tracking
 
     def __post_init__(self) -> None:
         if not self.prompt_template:
@@ -120,6 +122,7 @@ def load_registry(
                 complexity_tier=acfg.get("complexity_tier", "midweight"),
                 primary_model_id=MODEL_LOOKUP.get(primary_key, primary_key),
                 fallback_model_ids=[MODEL_LOOKUP.get(k, k) for k in fallback_keys],
+                version=acfg.get("version", "1.0.0"),
             )
 
             AGENT_REGISTRY[agent_name] = agent
@@ -135,29 +138,50 @@ def load_registry(
     depts = len(DEPARTMENT_INDEX)
     logger.info(f"✓ Loaded {total} agents across {depts} departments")
 
-    # ── Precompute semantic embeddings ──────────────────────────────────────
-    _precompute_embeddings()
+    # ── Precompute semantic embeddings (async — doesn't block startup) ─────
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running event loop at startup → call synchronously
+        _precompute_embeddings_sync()
+    else:
+        # Running loop exists → fire to thread pool so startup isn't blocked
+        loop.run_in_executor(None, _precompute_embeddings_sync)
+
+
+def _precompute_embeddings_sync() -> None:
+    """Encode all agents' description+capabilities with sentence-transformers (sync entrypoint)."""
+    from sentence_transformers import SentenceTransformer  # type: ignore
+
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer("all-mpnet-base-v2")
+
+    for name, agent in AGENT_REGISTRY.items():
+        text = agent.description + " " + " ".join(agent.capabilities)
+        CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)
+
+    logger.info(f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents")
+
+
+async def _precompute_embeddings_async() -> None:
+    """Async wrapper — runs embedding computation in a thread pool so it doesn't block startup."""
+    try:
+        await asyncio.to_thread(_precompute_embeddings_sync)
+    except Exception as exc:
+        logger.warning(f"Embedding precomputation failed: {exc}")
 
 
 def _precompute_embeddings() -> None:
-    """Encode all agents' description+capabilities with sentence-transformers."""
-    global _embedding_model, CAPABILITY_EMBEDDINGS
-
+    """Sync wrapper — fires off async precomputation without blocking the caller."""
     try:
-        from sentence_transformers import SentenceTransformer  # type: ignore
-
-        if _embedding_model is None:
-            _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-        for name, agent in AGENT_REGISTRY.items():
-            text = agent.description + " " + " ".join(agent.capabilities)
-            CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)
-
-        logger.info(f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents")
-    except ImportError:
-        logger.warning("sentence-transformers not installed — semantic routing (Layer 2) disabled")
-    except Exception as exc:
-        logger.warning(f"Embedding precomputation failed: {exc}")
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop → use blocking call directly (module load time)
+        _precompute_embeddings_sync()
+        return
+    # Running loop exists → fire-and-forget via executor so startup isn't blocked
+    loop.run_in_executor(None, _precompute_embeddings_sync)
 
 
 # ---------------------------------------------------------------------------
@@ -168,9 +192,15 @@ def _precompute_embeddings() -> None:
 def reload_from_yaml() -> None:
     """Reload all agents from YAML without restarting the bot."""
     logger.info("Reloading agent registry from YAML…")
+    prev_count = len(AGENT_REGISTRY)
     get_agent.cache_clear()
     load_registry()
-    logger.info("✓ Registry reloaded")
+    new_count = len(AGENT_REGISTRY)
+    logger.info(
+        "✓ Registry reloaded — %d agents (was %d)",
+        new_count,
+        prev_count,
+    )
 
 
 def _sighup_handler(signum: int, frame: object) -> None:  # noqa: ARG001
@@ -293,83 +323,46 @@ _LEGACY_AGENT_MODELS: dict[str, str] = {
     "pm": "minimax/MiniMax-Text-01",
     "humanizer": "minimax/MiniMax-Text-01",
     "reviewer": "minimax/MiniMax-Text-01",
-    "think": "cerebras/qwen-3-32b",
+    "think": "minimax/MiniMax-M2.7",
     "owl": "minimax/MiniMax-Text-01",
     "ag2_researcher": "minimax/MiniMax-Text-01",
     "ag2_critic": "minimax/MiniMax-Text-01",
     "ag2_synthesizer": "minimax/MiniMax-Text-01",
-    "code_exec": "openrouter/qwen/qwen3-coder:free",
-    "predictor": "minimax/MiniMax-Text-01",
-    "claude_orchestrator": "openrouter/anthropic/claude-opus-4",
+    "code_exec": "minimax/MiniMax-M2.7",
+    "predictor": "minimax/MiniMax-M2.7",
+    "claude_orchestrator": "minimax/MiniMax-M2.7",
     "debate": "minimax/MiniMax-Text-01",
 }
 
-# Fallback chain per legacy agent (from old agents.py FALLBACK_CHAIN)
-# Strategy: MiniMax-M2.7 primary for everything. Free cloud fallbacks when MiniMax fails.
+# Fallback chain — MiniMax-M2.7 primary, MiniMax-Text-01 for 429 rate-limit only.
+# NO other models. NO free tier. NO exceptions.
 # Local Ollama gemma4:e4b (9.6GB VRAM) ONLY for vision/computer screen reading.
-# RTX 3060: NO llama3.3:70b, NO qwen3.5:35b — these need too much VRAM.
-# NO paid fallbacks (cerebras is pay-per-token) — free tier only.
 LEGACY_FALLBACK_CHAIN: dict[str, list[str]] = {
     # Vision/computer: local gemma4:e4b for screen reading (MiniMax can't do vision)
     "vision": ["minimax/MiniMax-M2.7", "ollama_chat/gemma4:e4b"],
     "computer": ["minimax/MiniMax-M2.7", "ollama_chat/gemma4:e4b"],
-    # All other agents: MiniMax primary → free cloud fallbacks
-    "coding": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
-    ],
-    "debug": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
-    ],
-    "math": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
-    ],
-    "architect": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "analyst": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "general": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-    ],
-    "researcher": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "marketer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "devops": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "pm": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "humanizer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "reviewer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "think": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "owl": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "ag2_researcher": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "ag2_critic": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
-    ],
-    "ag2_synthesizer": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "code_exec": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "openrouter/qwen/qwen3-coder:free",
-        "minimax/MiniMax-Text-01",
-    ],
-    "predictor": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
-    "claude_orchestrator": [
-        "minimax/MiniMax-M2.7",
-        "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
-    ],
-    "debate": ["minimax/MiniMax-M2.7", "gemini/gemini-2.0-flash-exp:free", "minimax/MiniMax-Text-01"],
+    # All other agents: MiniMax primary only
+    "coding": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "debug": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "math": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "architect": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "analyst": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "general": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "researcher": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "marketer": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "devops": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "pm": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "humanizer": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "reviewer": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "think": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "owl": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "ag2_researcher": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "ag2_critic": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "ag2_synthesizer": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "code_exec": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "predictor": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "claude_orchestrator": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
+    "debate": ["minimax/MiniMax-M2.7", "minimax/MiniMax-Text-01"],
 }
 
 # Task keywords for legacy agent detection (from old agents.py TASK_KEYWORDS)

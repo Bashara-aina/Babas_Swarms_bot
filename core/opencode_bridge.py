@@ -1,12 +1,12 @@
 """core/opencode_bridge.py — Telegram → OpenCode bridge."""
 
 import asyncio
+import json
 import logging
 import os
 import re
 import uuid
-from datetime import datetime
-from typing import Any
+from typing import Any, AsyncGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -18,37 +18,16 @@ def extract_directives(text: str) -> list[tuple[str, str]]:
     return [(m.group(1).lower(), m.group(2).strip()) for m in DIRECTIVES_RE.finditer(text)]
 
 
-def build_opencode_prompt(telegram_msg: str, project: str, user: str) -> str:
-    """Construct the full prompt passed to opencode CLI."""
-    return f"""
-You are Legion, Bashara's autonomous coding agent.
-Triggered by Telegram message from: {user}
-Target project: {project}
-Time: {datetime.now().isoformat()}
-
-INSTRUCTION FROM BASHARA:
-{telegram_msg}
-
-EXECUTE:
-Follow the full LEGION MASTER PROMPT pipeline:
-STAGE 0 (Understand) → STAGE 1 (Plan) → STAGE 2 (Implement) →
-STAGE 3 (Verify) → STAGE 4 (Commit) → STAGE 5 (Report)
-
-End your response with the REPORT FORMAT exactly as specified.
-The report will be forwarded to Bashara's Telegram.
-"""
-
-
 async def run_opencode_task(
     prompt: str,
     project_dir: str | None = None,
     agent: str | None = None,
-    model: str | None = None,
     timeout: int = 1800,
+    task_desc: str | None = None,
 ) -> str:
     """Execute a task via opencode CLI and return the result."""
     project_dir = project_dir or "/home/newadmin/swarm-bot"
-    model = model or os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
+    model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     prompt_with_context = prompt
 
     if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
@@ -86,7 +65,8 @@ async def run_opencode_task(
 
     if process.returncode != 0:
         await process.wait()
-        return f"⛔ opencode error:\n{stderr.decode()[:2000]}"
+        err_text = ANSI_RE.sub("", stderr.decode())
+        return f"⛔ opencode error:\n{err_text[:2000]}"
 
     # Direct write of session summary after subprocess completes
     try:
@@ -94,12 +74,27 @@ async def run_opencode_task(
 
         await opencode_write_session_summary(
             session_id=f"task-{uuid.uuid4().hex[:8]}",
-            task_description="opencode-task",
+            task_description=task_desc or prompt[:200],
             actions_taken="",
             outcome=stdout.decode()[:2000],
         )
     except Exception:
         pass  # wiki bridge may be unavailable
+
+    # GAP-12 FIX: Integrate ContextHealthMonitor into OpenCode flow
+    # Run checkpoint after long-running opencode tasks to maintain session continuity
+    try:
+        if int(os.getenv("LEGION_CONTEXT_HEALTH_ENABLED", "1")):
+            from core.context_health import get_context_monitor
+            monitor = get_context_monitor("/home/newadmin/swarm-bot")
+            health = monitor.assess()
+            if monitor.should_checkpoint(health):
+                await monitor.run_checkpoint(
+                    session_description=f"opencode: {task_desc or prompt[:100]}",
+                    task=f"OpenCode task: {prompt[:200]}",
+                )
+    except Exception:
+        pass  # non-fatal, checkpoint is advisory
 
     # Check for cross-system directives
     output = stdout.decode()
@@ -114,14 +109,143 @@ async def run_opencode_task(
     return output
 
 
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+
+
 def extract_report(opencode_output: str) -> str:
-    """Extract the LEGION TASK COMPLETE block from opencode output."""
-    marker = "━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    if marker in opencode_output:
-        idx = opencode_output.rfind(marker)
-        report = opencode_output[idx - 500 :] if idx > 500 else opencode_output
-        return report[:4000]
-    return opencode_output[-2000:] if len(opencode_output) > 2000 else opencode_output
+    """Extract the final report section from opencode output.
+
+    Strips ANSI color codes first, then looks for markdown report headers
+    near the end of output. Falls back to the tail if no markers found.
+    """
+    text = ANSI_RE.sub("", opencode_output)
+    lines = text.split("\n")
+
+    if len(text) < 500:
+        return text[:4000]
+
+    report_indicators = [
+        "## REPORT",
+        "## Summary",
+        "## Result",
+        "## Findings",
+        "## Output",
+        "## Conclusion",
+        "## Recommendation",
+        "## Next Steps",
+        "LEGION TASK COMPLETE",
+    ]
+
+    report_start = -1
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if i >= len(lines) - 40 and any(stripped.startswith(ind) for ind in report_indicators):
+            report_start = i
+            break
+
+    if report_start >= 0:
+        report_section = "\n".join(lines[report_start:])
+        return report_section[:4000]
+
+    return text[-1500:] if len(text) > 1500 else text
+
+
+SSE_DATA_RE = re.compile(r"^data: (.+)$")
+SSE_EVENT_RE = re.compile(r"^event: (.+)$")
+
+
+async def stream_opencode_task(
+    prompt: str,
+    project_dir: str | None = None,
+    agent: str | None = None,
+    timeout: int = 1800,
+) -> AsyncGenerator[dict[str, Any], None]:
+    """Stream OpenCode output as SSE events.
+
+    Yields dicts with keys: type (event|data|error|done), content, raw.
+    type="done" marks final output with full stdout.
+    """
+    project_dir = project_dir or "/home/newadmin/swarm-bot"
+    model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
+    prompt_with_context = prompt
+
+    if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        try:
+            from core.gitnexus_bridge import build_gitnexus_prompt_context
+
+            gitnexus_ctx = await build_gitnexus_prompt_context(prompt, max_chars=1800)
+            if gitnexus_ctx:
+                prompt_with_context = f"{gitnexus_ctx}\n\n{prompt}"
+        except Exception:
+            prompt_with_context = prompt
+
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", "--stream", prompt_with_context]
+    if agent:
+        cmd.extend(["--agent", agent])
+    cmd.extend(["--model", model])
+
+    process = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        cwd=project_dir,
+        env={
+            **os.environ,
+            "OPENCODE_DISABLE_AUTOUPDATE": "true",
+        },
+    )
+
+    stderr_text = ""
+    buffer = ""
+
+    try:
+        while True:
+            try:
+                chunk = await asyncio.wait_for(
+                    process.stdout.read(1024),
+                    timeout=timeout,
+                )
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+                yield {"type": "error", "content": f"opencode stream timed out after {timeout}s", "raw": ""}
+                return
+
+            if not chunk:
+                break
+
+            buffer += chunk.decode("utf-8", errors="replace")
+
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                line = line.rstrip("\r")
+
+                sse_data = SSE_DATA_RE.match(line)
+                sse_event = SSE_EVENT_RE.match(line)
+
+                if sse_data:
+                    raw = sse_data.group(1)
+                    try:
+                        content = json.loads(raw)
+                    except (json.JSONDecodeError, TypeError):
+                        content = raw
+                    yield {"type": "data", "content": content, "raw": raw}
+                elif sse_event:
+                    yield {"type": "event", "content": sse_event.group(1), "raw": line}
+
+        returncode = await process.wait()
+
+        if returncode != 0:
+            stderr_bytes = await asyncio.wait_for(process.stderr.read(), timeout=5)
+            stderr_text = ANSI_RE.sub("", stderr_bytes.decode())
+            yield {"type": "error", "content": f"opencode exited {returncode}: {stderr_text[:500]}", "raw": stderr_text}
+        else:
+            yield {"type": "done", "content": None, "raw": ""}
+
+    except Exception as exc:
+        process.kill()
+        await process.wait()
+        yield {"type": "error", "content": str(exc), "raw": ""}
 
 
 async def handle_cross_system_callbacks(

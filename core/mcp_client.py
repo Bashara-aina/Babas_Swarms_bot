@@ -1,10 +1,12 @@
-"""MCP — config loading, status, stdio tool calls, and convenience wrappers."""
+"""MCP — config loading, status, stdio tool calls, connection pooling, and health checks."""
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -223,6 +225,276 @@ class MCPClient:
         return ""
 
 
+class MCPClientPool:
+    """Connection pool — one persistent stdio session per server.
+
+    Falls back to single-call mode on any connection error so callers don't
+    need to handle pool failures explicitly.
+    """
+
+    def __init__(self) -> None:
+        self._cfg = load_mcp_config()
+        self._sessions: dict[str, Any] = {}  # server_name -> active ClientSession
+        self._readers: dict[str, Any] = {}   # server_name -> read stream
+        self._writers: dict[str, Any] = {}  # server_name -> write stream
+        self._locks: dict[str, asyncio.Lock] = {}  # per-server reentrant guard
+        self._failed: set[str] = set()  # servers that have temporarily failed
+        self._failed_expiry: dict[str, float] = {}  # server_name -> timestamp when marked failed
+        self.FAILED_RESET_TIMEOUT: float = 30.0  # seconds before allowing retry
+
+    def _lock(self, server_name: str) -> asyncio.Lock:
+        if server_name not in self._locks:
+            self._locks[server_name] = asyncio.Lock()
+        return self._locks[server_name]
+
+    def _server_params(self, srv: dict[str, Any]) -> Any:
+        """Build StdioServerParameters from a server config dict."""
+        from mcp import StdioServerParameters  # type: ignore
+        return StdioServerParameters(
+            command=str(srv.get("command", "")),
+            args=list(srv.get("args") or []),
+            env={**os.environ, **(srv.get("env") or {})},
+        )
+
+    async def _ensure_session(self, server_name: str) -> bool:
+        """Establish or re-establish a persistent session for server_name.
+
+        Returns True if a session is live, False if we should fall back to
+        single-call mode.
+        """
+        from mcp import ClientSession  # type: ignore
+        from mcp.client.stdio import stdio_client  # type: ignore
+
+        if server_name in self._failed:
+            # Half-open: allow a retry if the reset timeout has elapsed
+            if server_name in self._failed_expiry:
+                if time.monotonic() - self._failed_expiry[server_name] > self.FAILED_RESET_TIMEOUT:
+                    logger.info(
+                        "MCP pool: %s retrying after %.0fs timeout",
+                        server_name,
+                        time.monotonic() - self._failed_expiry[server_name],
+                    )
+                    self._failed.discard(server_name)
+                    self._failed_expiry.pop(server_name, None)
+                else:
+                    return False
+            else:
+                return False
+
+        srv = self._find_server(server_name)
+        if not srv or not srv.get("enabled"):
+            return False
+
+        cmd = srv.get("command")
+        if not cmd:
+            return False
+
+        # If already live, we're good
+        if server_name in self._sessions:
+            return True
+
+        params = self._server_params(srv)
+        try:
+            read, write = await stdio_client(params).__aenter__()
+            session = await ClientSession(read, write).__aenter__()
+            await session.initialize()
+            self._sessions[server_name] = session
+            self._readers[server_name] = read
+            self._writers[server_name] = write
+            logger.info("MCP pool: persistent session established for %s", server_name)
+            return True
+        except Exception as exc:
+            logger.warning("MCP pool: failed to open session for %s: %s", server_name, exc)
+            self._failed.add(server_name)
+            self._failed_expiry[server_name] = time.monotonic()
+            await self._cleanup(server_name)
+            return False
+
+    async def _cleanup(self, server_name: str) -> None:
+        """Clean up all resources for a server."""
+        session = self._sessions.pop(server_name, None)
+        reader = self._readers.pop(server_name, None)
+        writer = self._writers.pop(server_name, None)
+        if session:
+            try:
+                await session.__aexit__(None, None, None)
+            except Exception:
+                pass
+        if reader:
+            try:
+                reader.close()
+                if hasattr(reader, 'wait_closed'):
+                    await asyncio.wait_for(reader.wait_closed(), timeout=2.0)
+            except Exception:
+                pass
+        if writer:
+            try:
+                writer.close()
+            except Exception:
+                pass
+
+    async def call_tool(
+        self, server_name: str, tool_name: str, arguments: dict[str, Any]
+    ) -> str:
+        """Call a tool, using the persistent pool if available, falling back to
+        single-call mode on any pool error."""
+
+        async with self._lock(server_name):
+            if await self._ensure_session(server_name):
+                session = self._sessions.get(server_name)
+                if session is None:
+                    pass  # Cleanup raced — fall through to single-call
+                else:
+                    try:
+                        result = await session.call_tool(tool_name, arguments)
+                        if server_name in self._failed:
+                            self._failed.discard(server_name)
+                            self._failed_expiry.pop(server_name, None)
+                            logger.info("MCP pool: %s recovered from failed state", server_name)
+                        return _tool_result_to_text(result)[:12000] or "(empty tool result)"
+                    except asyncio.CancelledError:
+                        raise
+                    except KeyError:
+                        pass  # Another coroutine cleaned up the session — fall through
+                    except Exception as exc:
+                        logger.warning(
+                            "MCP pool call_tool %s/%s failed, falling back: %s",
+                            server_name, tool_name, exc,
+                        )
+                        self._failed.add(server_name)
+                        self._failed_expiry[server_name] = time.monotonic()
+                        await self._cleanup(server_name)
+
+        # Single-call fallback (outside the lock to avoid blocking other servers)
+        return await self._call_tool_single(server_name, tool_name, arguments)
+
+    async def _call_tool_single(
+        self, server_name: str, tool_name: str, arguments: dict[str, Any]
+    ) -> str:
+        srv = self._find_server(server_name)
+        if not srv:
+            return f"Error: MCP server '{server_name}' not in config."
+        if not srv.get("enabled"):
+            return f"Error: MCP server '{server_name}' is disabled in config."
+
+        try:
+            from mcp import ClientSession, StdioServerParameters  # type: ignore
+            from mcp.client.stdio import stdio_client  # type: ignore
+        except Exception as exc:
+            logger.warning("mcp SDK not installed: %s", exc)
+            return "Error: MCP Python SDK not installed (pip install mcp)."
+
+        cmd = srv.get("command")
+        if not cmd:
+            return f"Error: MCP server '{server_name}' has no command configured."
+
+        params = self._server_params(srv)
+        last_exc: Exception | None = None
+        for attempt in range(2):
+            try:
+                async with stdio_client(params) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        result = await session.call_tool(tool_name, arguments)
+                        # Success — remove from failed set if present
+                        if server_name in self._failed:
+                            self._failed.discard(server_name)
+                            self._failed_expiry.pop(server_name, None)
+                            logger.info(
+                                "MCP pool: %s recovered from failed state (single-call)",
+                                server_name,
+                            )
+                        return _tool_result_to_text(result)[:12000] or "(empty tool result)"
+            except Exception as exc:
+                last_exc = exc
+                if attempt == 0:
+                    logger.warning(
+                        "MCP call_tool (single-call fallback) %s/%s attempt %d failed: %s — retrying in 0.5s",
+                        server_name, tool_name, attempt + 1, exc,
+                    )
+                    await asyncio.sleep(0.5)
+                else:
+                    logger.error(
+                        "MCP call_tool (single-call fallback) %s/%s attempt %d failed: %s",
+                        server_name, tool_name, attempt + 1, exc,
+                    )
+        return f"Error: MCP error ({server_name}/{tool_name}): {last_exc}"
+
+    async def close(self) -> None:
+        """Close all pooled sessions."""
+        for server_name in list(self._sessions.keys()):
+            await self._cleanup(server_name)
+        self._sessions.clear()
+        self._readers.clear()
+        self._writers.clear()
+        self._failed.clear()
+        self._failed_expiry.clear()
+        logger.info("MCP pool: all sessions closed")
+
+    # ---- passthrough helpers so existing callers don't need refactoring ----
+
+    def _find_server(self, server_name: str) -> dict[str, Any] | None:
+        for s in self._cfg.get("servers") or []:
+            if isinstance(s, dict) and s.get("name") == server_name:
+                return s
+        return None
+
+    async def list_tools(self, server_name: str) -> list[dict[str, str]]:
+        """List tools via pooled session or single-call fallback."""
+        async with self._lock(server_name):
+            if await self._ensure_session(server_name):
+                session = self._sessions[server_name]
+                try:
+                    listed = await session.list_tools()
+                    out: list[dict[str, str]] = []
+                    for t in getattr(listed, "tools", None) or []:
+                        name = getattr(t, "name", None) or ""
+                        desc = getattr(t, "description", None) or ""
+                        if name:
+                            out.append({"name": str(name), "description": str(desc)[:500]})
+                    return out
+                except Exception as exc:
+                    logger.warning(
+                        "MCP pool list_tools %s failed, falling back: %s",
+                        server_name, exc,
+                    )
+                    self._failed.add(server_name)
+                    self._failed_expiry[server_name] = time.monotonic()
+                    await self._cleanup(server_name)
+
+        # Single-call fallback
+        return await self._list_tools_single(server_name)
+
+    async def _list_tools_single(self, server_name: str) -> list[dict[str, str]]:
+        srv = self._find_server(server_name)
+        if not srv or not srv.get("enabled"):
+            return []
+        try:
+            from mcp import ClientSession, StdioServerParameters  # type: ignore
+            from mcp.client.stdio import stdio_client  # type: ignore
+        except Exception:
+            return []
+
+        cmd = srv.get("command")
+        if not cmd:
+            return []
+        params = self._server_params(srv)
+        out: list[dict[str, str]] = []
+        try:
+            async with stdio_client(params) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    listed = await session.list_tools()
+                    for t in getattr(listed, "tools", None) or []:
+                        name = getattr(t, "name", None) or ""
+                        desc = getattr(t, "description", None) or ""
+                        if name:
+                            out.append({"name": str(name), "description": str(desc)[:500]})
+        except Exception as exc:
+            logger.debug("MCP list_tools (single-call fallback) failed: %s", exc)
+        return out
+
+
 async def try_list_tools_stdio(server: dict[str, Any]) -> list[str]:
     """Best-effort: connect using inline server dict (for /mcp_status diagnostics)."""
     try:
@@ -250,3 +522,33 @@ async def try_list_tools_stdio(server: dict[str, Any]) -> list[str]:
     except Exception as exc:
         logger.debug("MCP list_tools failed for %s: %s", server.get("name"), exc)
     return names
+
+
+async def check_server_health() -> dict[str, bool]:
+    """Run try_list_tools_stdio on each configured server at startup.
+
+    Logs which servers are reachable vs not and returns a dict
+    suitable for injecting into bot startup telemetry.
+
+    Call this once early in main.py or bot init.
+    """
+    cfg = load_mcp_config()
+    servers = cfg.get("servers") or []
+    results: dict[str, bool] = {}
+    for srv in servers:
+        if not isinstance(srv, dict):
+            continue
+        name = srv.get("name", "?")
+        enabled = srv.get("enabled", False)
+        if not enabled:
+            logger.info("MCP health: %s [disabled]", name)
+            results[name] = False
+            continue
+        tools = await try_list_tools_stdio(srv)
+        reachable = len(tools) > 0
+        results[name] = reachable
+        if reachable:
+            logger.info("MCP health: %s ✓ (%d tools)", name, len(tools))
+        else:
+            logger.warning("MCP health: %s ✗ (no tools returned)", name)
+    return results
