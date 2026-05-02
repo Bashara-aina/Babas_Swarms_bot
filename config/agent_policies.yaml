@@ -1,0 +1,97 @@
+# Phase 5: Agent Safety Policies for Legion
+# Invariant enforces these BEFORE tool execution
+
+policies:
+
+  filesystem:
+    allow:
+      - read: "/home/newadmin/swarm-bot/**"
+      - write: "/home/newadmin/swarm-bot/**"
+      - read: "/home/newadmin/.wiki/**"
+      - write: "/home/newadmin/.wiki/**"
+    deny:
+      - write: "/home/newadmin/.ssh/**"
+      - write: "/home/newadmin/.env"
+      - delete: "/home/newadmin/swarm-bot/.wiki/**"
+      - write: "/home/newadmin/.config/**"
+      - read: "/home/newadmin/.config/**"
+
+  git:
+    allow:
+      - read: "*"
+      - commit: "*"
+      - branch_create: "*"
+    deny:
+      - push_force: "*"
+      - delete_branch: "main"
+      - delete_branch: "master"
+
+  ruflo:
+    allow:
+      - task_create: "*"
+      - task_status: "*"
+      - memory_store: "*"
+      - system_status: "*"
+      - agent_metrics: "*"
+    require_review:
+      - federation_init: "*"
+      - swarm_topology: "*"
+
+  obsidian:
+    deny:
+      - delete_note: ".wiki/architecture/**"
+      - delete_note: "CLAUDE.md"
+      - delete_note: "AGENTS.md"
+    allow:
+      - "*": "*"
+
+  exa:
+    allow:
+      - exa_web_search_exa: "*"
+      - exa_web_fetch_exa: "*"
+    rate_limit:
+      - exa_web_search_exa: 20/hour
+
+  crawl4ai:
+    deny:
+      - crawl4ai_crawl: "*.onion"
+      - crawl4ai_crawl: "localhost*"
+    allow:
+      - "*": "*"
+
+  global:
+    pii_detection: true
+    max_tool_calls_per_turn: 30
+    require_human_approval:
+      - actions: ["deploy", "push_to_main", "delete_database"]
+
+  network:
+    deny_domains:
+      - "*.onion"
+      - "localhost"
+      - "127.0.0.1"
+      - "0.0.0.0"
+    allow_domains:
+      - "api.minimax.io"
+      - "api.openai.com"
+      - "api.anthropic.com"
+      - "openrouter.ai"
+      - "github.com"
+      - "gitlab.com"
+      - "arxiv.org"
+
+  shell:
+    deny:
+      - pattern: "rm\\s+-rf\\s+/\\s*($|\\|)"
+      - pattern: "dd\\s+if="
+      - pattern: ":\\(\\)\\{:\\|:\\&\\};:"
+      - pattern: "mkfs"
+      - pattern: ">\\s*/dev/sd"
+      - pattern: "\\|\\s*sh\\s*;\\s*sh"
+      - pattern: "curl\\s+.*\\|\\s*bash"
+      - pattern: "wget\\s+.*\\|\\s*bash"
+      - pattern: "python\\s+.*\\|\\s*sh"
+    allow:
+      - pattern: "rm\\s+-rf\\s+/tmp"
+      - pattern: "rm\\s+-rf\\s+/home/newadmin/swarm-bot/.*"
+      - pattern: "rm\\s+-rf\\s+/home/newadmin/.claude"

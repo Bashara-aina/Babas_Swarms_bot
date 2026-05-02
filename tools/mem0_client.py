@@ -33,7 +33,7 @@ def _build_mem0_config() -> dict[str, Any]:
         "llm": {
             "provider": "litellm",
             "config": {
-                "model": os.getenv("MEM0_LLM_MODEL", "minimax/MiniMax-Text-01"),
+                "model": os.getenv("MEM0_LLM_MODEL", "minimax/MiniMax-Text-01").split("/", 1)[-1],
                 "api_key": os.getenv("GROQ_API_KEY", ""),
                 "temperature": 0.1,
                 "max_tokens": 2000,

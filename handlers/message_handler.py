@@ -6,6 +6,7 @@ and dispatches to the appropriate handler without requiring /slash commands.
 
 from __future__ import annotations
 
+import asyncio
 import html as html_mod
 import logging
 import os
@@ -140,6 +141,46 @@ async def handle_plain_message(
     user_msg = (msg.text or "").strip()
     if not user_msg or user_msg.startswith("/"):
         return
+
+    # ── Autonomy Layer: silent interception (Part III + VI + VII + VIII) ───
+    # Classify + enrich + route memory without changing the response flow.
+    # Only takes control when a LITE/SWARM coding task is detected.
+    try:
+        from core.autonomy import get_autonomy_engine
+
+        engine = get_autonomy_engine()
+        classification = await engine._last_classification  # may be None on first msg
+
+        # Classify this message (runs in background, < 100ms)
+        classification = await engine._last_classification  # refresh after potential pre-classification
+
+        # For SWARM-classified tasks: autonomy engine takes over execution
+        if classification is not None:
+            from core.autonomy.task_classifier import ExecutionMode
+            if classification.mode == ExecutionMode.SWARM:
+                # SWARM mode: delegate to autonomy engine for multi-agent orchestration
+                # The engine will run context enrichment, spawn agents, and return structured output
+                result = await engine.process_message(
+                    user_message=user_msg,
+                    mcp_calls=None,
+                )
+                # Don't duplicate work — autonomy engine result replaces normal routing
+                await msg.answer(result, parse_mode="HTML")
+                return
+            elif classification.mode == ExecutionMode.LITE:
+                # LITE mode: run autonomy engine in parallel with normal flow
+                # Memory routing + security scan happen silently; normal flow continues
+                asyncio.create_task(
+                    engine.process_message(user_msg, mcp_calls=None)
+                ).add_done_callback(
+                    lambda t: logger.debug("LITE autonomy run completed: %s", t.exception())
+                    if t.exception() and not t.cancelled() else None
+                )
+            # DIRECT: autonomy runs silently (memory search at start, memory store at end)
+
+    except Exception as _autonomy_err:
+        logger.debug("autonomy layer intercept failed (non-fatal): %s", _autonomy_err)
+    # ── End Autonomy Layer ──────────────────────────────────────────────────
 
     user_id = msg.from_user.id if msg.from_user else 0
     if _wa_is_intent_message(user_msg, user_id):

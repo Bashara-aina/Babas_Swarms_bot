@@ -1,0 +1,55 @@
+model_list:
+  - model_name: minimax-primary
+    litellm_params:
+      model: minimax/MiniMax-M2.7
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+
+  - model_name: fallback-gemini
+    litellm_params:
+      model: gemini/gemini-2.0-flash-exp:free
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: fallback-minimax-text
+    litellm_params:
+      model: minimax/MiniMax-Text-01
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+
+router_settings:
+  routing_strategy: latency-based-routing
+  fallbacks:
+    - minimax-primary:
+        - fallback-gemini
+        - fallback-minimax-text
+  retry_policy:
+    BadRequestErrorRetries: 0
+    RateLimitErrorRetries: 3
+    TimeoutErrorRetries: 2
+
+litellm_settings:
+  cache: true
+  cache_params:
+    type: redis
+    host: localhost
+    port: 6379
+    ttl: 3600
+  set_verbose: false
+  drop_params: true
+
+general_settings:
+  master_key: "legion-proxy-key"
+
+budget_manager:
+  planner:
+    max_budget: 0.20
+    budget_duration: "1d"
+  worker:
+    max_budget: 0.50
+    budget_duration: "1d"
+  reviewer:
+    max_budget: 0.10
+    budget_duration: "1d"
+  wikibot:
+    max_budget: 0.05
+    budget_duration: "1d"

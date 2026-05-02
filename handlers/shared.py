@@ -182,12 +182,18 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
 
 # ── Helper: typing indicator ──────────────────────────────────────────────────
 async def _keep_typing(msg: Message) -> None:
+    """Send typing indicator every 4s until cancelled. Stops on persistent errors."""
+    consecutive_errors = 0
     while True:
         try:
             if msg.bot is not None:
                 await msg.bot.send_chat_action(msg.chat.id, "typing")
-        except Exception:
-            pass
+            consecutive_errors = 0
+        except Exception as e:
+            consecutive_errors += 1
+            if consecutive_errors >= 3:
+                logger.debug("keep_typing stopped after %d errors: %s", consecutive_errors, e)
+                break
         await asyncio.sleep(4)
 
 
@@ -199,8 +205,8 @@ async def _cancel_task(task: Optional[asyncio.Task]) -> None:
         await task
     except asyncio.CancelledError:
         pass
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Task cancelled with error: %s", e)
 
 
 # ── Helper: key status string ─────────────────────────────────────────────────

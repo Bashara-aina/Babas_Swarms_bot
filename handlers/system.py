@@ -182,9 +182,192 @@ async def _render_panel(msg: Message, panel: str) -> tuple[str, str]:
 async def cmd_start(msg: Message) -> None:
     if not is_allowed(msg):
         return
+
+    # Onboarding keyboard — first-time / deep-dive options
+    onboarding_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="📖 Learn More", callback_data="onb:learn"),
+                InlineKeyboardButton(text="🚀 Get Started", callback_data="onb:start"),
+            ],
+            [
+                InlineKeyboardButton(text="⚙️ Settings", callback_data="onb:settings"),
+                InlineKeyboardButton(text="💡 Shortcuts", callback_data="onb:shortcuts"),
+            ],
+            [
+                InlineKeyboardButton(text="📊 Dashboard", callback_data="ui:visual"),
+                InlineKeyboardButton(text="🤖 Agents", callback_data="ui:agents"),
+            ],
+        ]
+    )
+
     panel, text = await _render_panel(msg, "home")
     await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
-    await msg.answer("Use the control center buttons:", reply_markup=_ui_keyboard(panel))
+    await msg.answer(
+        "<b>👋 Welcome to Legion!</b>\n\n"
+        "<i>What would you like to do?</i>",
+        parse_mode="HTML",
+        reply_markup=onboarding_kb,
+    )
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("onb:"))
+async def cb_onboarding(cb: CallbackQuery) -> None:
+    if not allowed_cb(cb) or not cb.data:
+        return
+
+    action = cb.data.split(":", 1)[1] if ":" in cb.data else ""
+
+    if action == "learn":
+        text = (
+            "<b>📖 Legion — What is this?</b>\n\n"
+            "Legion is an <b>AI-powered agent system</b> that lives inside Telegram. "
+            "It wraps a multi-agent orchestrator with computer control, "
+            "web research, memory, and more.\n\n"
+            "<b>Core concepts:</b>\n"
+            "• <code>/run &lt;task&gt;</code> — chat-only response\n"
+            "• <code>/do &lt;task&gt;</code> — computer agent (clicks, types, screenshots)\n"
+            "• <code>/swarm &lt;task&gt;</code> — multi-agent team tackling complex goals\n"
+            "• <code>/research &lt;topic&gt;</code> — deep web search with citations\n"
+            "• <code>/jarvis &lt;goal&gt;</code> — bundle memory + screen → execution plan\n"
+            "• <code>/budget</code> — live API cost tracking\n"
+            "• <code>/soul</code> — view Legion's identity file (SOUL.md)\n\n"
+            "Tap <b>🚀 Get Started</b> below to run your first task."
+        )
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🚀 Get Started", callback_data="onb:start"),
+                    InlineKeyboardButton(text="💡 Shortcuts", callback_data="onb:shortcuts"),
+                ],
+                [
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await cb.message.edit_text(text, parse_mode="HTML", reply_markup=kb)
+        await cb.answer("📖 Learn More")
+
+    elif action == "start":
+        text = (
+            "<b>🚀 Get Started</b>\n\n"
+            "Try one of these to see Legion in action:\n\n"
+            "<b>1.</b> <code>/do Count files in home directory</code>\n"
+            "<i>Legion will open a terminal and count files.</i>\n\n"
+            "<b>2.</b> <code>/research Latest AI developments 2025</code>\n"
+            "<i>Legion will search the web and summarize findings.</i>\n\n"
+            "<b>3.</b> <code>/debate AI will replace programmers by 2030</code>\n"
+            "<i>Legion will argue both sides with evidence.</i>\n\n"
+            "<b>4.</b> <code>/run Write a Python quicksort</code>\n"
+            "<i>Legion writes and explains code in chat.</i>"
+        )
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="📖 Learn More", callback_data="onb:learn"),
+                    InlineKeyboardButton(text="💡 Shortcuts", callback_data="onb:shortcuts"),
+                ],
+                [
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await cb.message.edit_text(text, parse_mode="HTML", reply_markup=kb)
+        await cb.answer("🚀 Get Started")
+
+    elif action == "settings":
+        text = (
+            "<b>⚙️ Settings</b>\n\n"
+            "<b>Model routing:</b> Legion automatically picks the best model for each task. "
+            "Use <code>/models</code> to see what's configured.\n\n"
+            "<b>API keys:</b> Use <code>/keys</code> to check which providers are active.\n\n"
+            "<b>Cost tracking:</b> <code>/budget</code> shows your daily/monthly spend.\n\n"
+            "<b>Memory:</b> <code>/memory</code> shows your conversation context. "
+            "Legion forgets after 7 days of inactivity.\n\n"
+            "All settings are per-user and persist across sessions."
+        )
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔑 API Keys", callback_data="cmd:keys"),
+                    InlineKeyboardButton(text="💰 Budget", callback_data="cmd:budget"),
+                ],
+                [
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await cb.message.edit_text(text, parse_mode="HTML", reply_markup=kb)
+        await cb.answer("⚙️ Settings")
+
+    elif action == "shortcuts":
+        from handlers.shortcuts import get_shortcuts_text
+
+        text = get_shortcuts_text()
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="📖 Learn More", callback_data="onb:learn"),
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await cb.message.edit_text(text, parse_mode="HTML", reply_markup=kb)
+        await cb.answer("💡 Shortcuts")
+
+    else:
+        await cb.answer("unknown onboarding action")
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("cmd:"))
+async def cb_cmd_redirect(cb: CallbackQuery) -> None:
+    """Handle cmd:xxx callback data by forwarding to the message handler."""
+    if not allowed_cb(cb) or not cb.data or not cb.message:
+        return
+
+    action = cb.data.split(":", 1)[1] if ":" in cb.data else ""
+
+    if action == "keys":
+        await cb.message.edit_text(_key_status(), parse_mode="HTML")
+        await cb.answer("🔑 API Keys")
+    elif action == "budget":
+        # Forward to budget handler by simulating a message
+        if not is_allowed(cb.message):
+            return
+        try:
+            if _shared._budget_manager:
+                budget_status = _shared._budget_manager.check_budget()
+                day_breakdown = _shared._budget_manager.get_cost_breakdown("day")
+                import os
+
+                proactive_cap = int(os.getenv("MAX_PROACTIVE_PER_DAY", "3"))
+                daily_spent = float(budget_status.get("daily_spent", 0.0))
+                daily_limit = float(budget_status.get("daily_limit", 0.0))
+                daily_pct = (daily_spent / daily_limit * 100.0) if daily_limit > 0 else 0.0
+
+                lines = [
+                    "<b>💰 Budget Dashboard</b>",
+                    f"<b>Daily:</b> ${daily_spent:.4f} / ${daily_limit:.2f} ({daily_pct:.1f}%)",
+                    f"<b>Daily remaining:</b> ${float(budget_status.get('daily_remaining', 0.0)):.4f}",
+                    f"<b>Monthly:</b> ${float(budget_status.get('monthly_spent', 0.0)):.4f} / "
+                    f"${float(budget_status.get('monthly_limit', 0.0)):.2f}",
+                    f"<b>Proactive cap:</b> {proactive_cap}",
+                    f"<b>Requests today:</b> {int(day_breakdown.get('total_requests', 0))}",
+                    f"<b>Tokens today:</b> {int(day_breakdown.get('total_tokens', 0)):,}",
+                ]
+                await cb.message.edit_text("\n".join(lines), parse_mode="HTML")
+            else:
+                await cb.message.edit_text("<b>Budget manager not initialized.</b>", parse_mode="HTML")
+        except Exception as e:
+            import html as html_mod
+
+            await cb.message.edit_text(
+                f"<b>Budget error:</b> <code>{html_mod.escape(str(e)[:200])}</code>",
+                parse_mode="HTML",
+            )
+        await cb.answer("💰 Budget")
+    else:
+        await cb.answer("unknown command")
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("ui:"))
@@ -626,6 +809,13 @@ async def cmd_metrics(msg: Message) -> None:
         await msg.answer(f"metrics unavailable: <code>{html_mod.escape(str(e)[:250])}</code>", parse_mode="HTML")
 
 
+@router.message(Command("ping"))
+async def cmd_ping(msg: Message) -> None:
+    if not is_allowed(msg):
+        return
+    await msg.answer("🏓 Pong! Legion is alive.")
+
+
 # ── /resources — live RAM + GPU + local model policy ──────────────────────────
 @router.message(Command("resources"))
 async def cmd_resources(msg: Message) -> None:
@@ -688,6 +878,147 @@ async def cmd_benchmark(msg: Message) -> None:
     except Exception as e:
         await status_msg.edit_text(
             f"benchmark failed: <code>{html_mod.escape(str(e)[:350])}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("compact"))
+async def cmd_compact(msg: Message) -> None:
+    """Manually compact conversation history to free context space."""
+    if not is_allowed(msg):
+        return
+    try:
+        from core.conversation_interface import (
+            add_to_conversation,
+            clear_conversation,
+            get_conversation_history,
+        )
+        from llm_client import _compact_messages
+
+        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        history = get_conversation_history(user_id, last_n=100)
+        original = len(history)
+        if original < 10:
+            await msg.answer("Conversation is already short — no compaction needed.")
+            return
+
+        try:
+            from core.hooks import get_hooks
+
+            get_hooks().emit("pre_compact", {
+                "user_id": user_id,
+                "messages": list(history),
+            })
+        except Exception:
+            pass
+
+        compacted = _compact_messages(history, keep_recent=6)
+        clear_conversation(user_id)
+        for m in compacted[1:]:
+            role = m.get("role", "user")
+            content = m.get("content", "")
+            if role in ("user", "assistant") and content:
+                add_to_conversation(user_id, role, content)
+
+        try:
+            from core.hooks import get_hooks
+            get_hooks().emit("post_compact", {
+                "user_id": user_id,
+                "original_count": original,
+                "compacted_count": len(compacted),
+                "reduction": original - len(compacted),
+            })
+        except Exception:
+            pass
+        await msg.answer(
+            f"✅ Compacted {original} → {len(compacted)} messages. "
+            f"Reduced by {original - len(compacted)} turns.",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(
+            f"❌ Compaction failed: <code>{html_mod.escape(str(e)[:200])}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("snapshot"))
+async def cmd_snapshot(msg: Message) -> None:
+    """Save a named snapshot of current conversation to wiki. GAP-17."""
+    if not is_allowed(msg):
+        return
+    label = (msg.text or "").removeprefix("/snapshot").strip() or "manual snapshot"
+    user_id = str(msg.from_user.id) if msg.from_user else "0"
+
+    try:
+        from core.session_snapshots import create_snapshot
+        import html_mod
+
+        snapshot_id = await create_snapshot(user_id, label=label)
+        await msg.answer(
+            f"📸 Snapshot saved: <code>{html_mod.escape(snapshot_id)}</code>\n"
+            f"Label: {html_mod.escape(label)}\n"
+            f"Restored with: /restore {snapshot_id}",
+            parse_mode="HTML",
+        )
+    except Exception as e:
+        await msg.answer(
+            f"❌ Snapshot failed: <code>{html_mod.escape(str(e)[:200])}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("restore"))
+async def cmd_restore(msg: Message) -> None:
+    """Restore a conversation from a wiki snapshot. GAP-17."""
+    if not is_allowed(msg):
+        return
+    parts = (msg.text or "").removeprefix("/restore").strip().split()
+    snapshot_id = parts[0] if parts else ""
+    if not snapshot_id:
+        await msg.answer("Usage: /restore <snapshot_id>")
+        return
+
+    user_id = str(msg.from_user.id) if msg.from_user else "0"
+    try:
+        from core.session_snapshots import restore_snapshot
+
+        success = await restore_snapshot(snapshot_id, user_id)
+        if success:
+            await msg.answer(f"✅ Restored snapshot <code>{html_mod.escape(snapshot_id)}</code>")
+        else:
+            await msg.answer("❌ Could not restore snapshot — not found or error")
+    except Exception as e:
+        await msg.answer(
+            f"❌ Restore failed: <code>{html_mod.escape(str(e)[:200])}</code>",
+            parse_mode="HTML",
+        )
+
+
+@router.message(Command("snapshots"))
+async def cmd_snapshots(msg: Message) -> None:
+    """List all available session snapshots. GAP-17."""
+    if not is_allowed(msg):
+        return
+    try:
+        from core.session_snapshots import list_snapshots
+        import html_mod
+
+        snaps = list_snapshots()
+        if not snaps:
+            await msg.answer("No snapshots available.")
+            return
+
+        lines = ["📸 Available snapshots:"]
+        for s in snaps[:10]:
+            fid = html_mod.escape(s["snapshot_id"])
+            mod = html_mod.escape(s.get("modified", ""))
+            lines.append(f"- <code>{fid}</code> ({mod})")
+
+        await msg.answer("\n".join(lines), parse_mode="HTML")
+    except Exception as e:
+        await msg.answer(
+            f"❌ List failed: <code>{html_mod.escape(str(e)[:200])}</code>",
             parse_mode="HTML",
         )
 

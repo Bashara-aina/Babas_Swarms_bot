@@ -16,7 +16,7 @@ from pathlib import Path
 
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 import handlers.shared as _shared
 from handlers.shared import is_allowed
@@ -77,7 +77,19 @@ async def cmd_budget(message: Message) -> None:
                 safe_task = html.escape(str(task_type or "unspecified"))
                 lines.append(f"• <code>{safe_task}</code>: ${float(amount):.4f}")
 
-        await message.answer("\n".join(lines), parse_mode="HTML")
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔄 Refresh", callback_data="budget:refresh"),
+                    InlineKeyboardButton(text="📊 Details", callback_data="budget:details"),
+                ],
+                [
+                    InlineKeyboardButton(text="💰 Full Report", callback_data="cmd:budget"),
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await message.answer("\n".join(lines), parse_mode="HTML", reply_markup=kb)
     except Exception as exc:
         logger.exception("Budget command error: %s", exc)
         safe_err = html.escape(str(exc)[:200])
@@ -114,6 +126,16 @@ async def cmd_soul(message: Message) -> None:
         chunk_size = 3500
         for i in range(0, len(content), chunk_size):
             await message.answer(f"<pre>{html.escape(content[i:i + chunk_size])}</pre>", parse_mode="HTML")
+
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🧠 Edit SOUL", callback_data="soul:edit"),
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await message.answer("Use /soul to reload or tap Home to return.", parse_mode="HTML", reply_markup=kb)
 
     except Exception as exc:
         logger.exception("Soul read error: %s", exc)

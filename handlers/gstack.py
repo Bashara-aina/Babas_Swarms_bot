@@ -1,28 +1,29 @@
 """handlers/gstack.py — gstack skill commands for LegionBot.
 
 Commands:
-/review              — Pre-landing PR review (diff against base branch)
+/review              — PR review (git diff vs base branch). For file code review use /code_review.
 /ship               — Deployment pipeline (merge, test, coverage, adversarial, changelog, PR)
-/officehours        — YC-style product brainstorming
-/codex              — Multi-model second opinion via OpenAI Codex CLI
-/investigate        — Root cause analysis for bugs/errors
-/qa                 — QA testing workflow
+/officehours        — YC-style product brainstorming (delegates to opencode office-hours)
+/investigate        — Root cause analysis for bugs/errors (delegates to opencode investigate)
+/qa                 — QA testing workflow (delegates to opencode qa)
 /careful            — Safety guard for destructive operations
-/planreview         — CEO/founder-mode plan review
+/planreview         — CEO/founder-mode plan review (delegates to opencode plan-ceo-review)
+
+Note: /code_review (file code review) lives in dev.py. /codex lives in dev.py (dev.router wins).
 """
 from __future__ import annotations
 
 import asyncio
 import html as html_mod
+import os
 import re
 import subprocess
-from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import Message
 
-from handlers.shared import is_allowed, send_chunked
+from handlers.shared import _cancel_task, _keep_typing, is_allowed, send_chunked
 
 router = Router()
 
@@ -42,13 +43,18 @@ def run_sync(cmd: str, timeout: int = 30) -> tuple[str, str, int]:
         return "", str(e), 1
 
 
-async def run_async(cmd: str, timeout: int = 30) -> tuple[str, str, int]:
-    """Run a shell command asynchronously."""
+async def run_opencode_cmd(
+    cmd: list[str],
+    timeout: int = 120,
+) -> tuple[str, str, int]:
+    """Run an opencode command safely using subprocess_exec (no shell injection)."""
     try:
-        p = await asyncio.create_subprocess_shell(
-            cmd,
+        p = await asyncio.create_subprocess_exec(
+            *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
+            cwd="/home/newadmin/swarm-bot",
+            env={**os.environ, "OPENCODE_DISABLE_AUTOUPDATE": "true"},
         )
         stdout, stderr = await asyncio.wait_for(p.communicate(), timeout=timeout)
         return (
@@ -78,7 +84,11 @@ def bold(text: str) -> str:
 
 @router.message(Command("review"))
 async def cmd_review(msg: Message) -> None:
-    """Pre-landing PR review — analyze diff against base branch."""
+    """Pre-landing PR review — analyze diff against base branch (gstack pipeline).
+
+    NOTE: This is PR review (git diff analysis). For code review of a specific file,
+    use /code_review instead.
+    """
     if not is_allowed(msg):
         return
 
@@ -283,7 +293,7 @@ async def cmd_ship(msg: Message) -> None:
 
 @router.message(Command("officehours"))
 async def cmd_officehours(msg: Message) -> None:
-    """YC-style product brainstorming session."""
+    """YC-style product brainstorming session via opencode."""
     if not is_allowed(msg):
         return
 
@@ -297,131 +307,40 @@ async def cmd_officehours(msg: Message) -> None:
         )
         return
 
-    await msg.answer(
+    status_msg = await msg.answer(
         f"{bold('🏛️ /officehours — Brainstorming')}\n\n"
         f"Idea: {escape(idea)}\n\n"
-        f"{bold('Let me stress-test this...')}",
+        f"{bold('Running office hours...')}",
         parse_mode="HTML",
     )
+    typing_task = asyncio.create_task(_keep_typing(msg))
 
-    # Simple brainstorming framework
-
-    # Use the general LLM path through Legion's existing system
-    from handlers.ai import cmd_run
-    # Fallback: give structured guidance directly
-    response_lines = [
-        f"{bold('🏛️ /officehours — Feedback')}\n",
-        f"Idea: {escape(idea)}\n",
-        "",
-        f"{bold('Stress test questions:')}\n",
-        f"1. {bold('Who is the user?')} What specific person has this problem daily?",
-        f"2. {bold('How often?')} Is it a real pain point or a nice-to-have?",
-        f"3. {bold('What is the simplest version?')} Can you build it in 1 week?",
-        f"4. {bold('How will users find out about it?')} Distribution is usually the hard part.",
-        f"5. {bold('What is your unfair advantage?')} Why can't a big company copy this?\n",
-        f"{bold('The 1 question that matters:')}\n",
-        "If this works, why wouldn't it be obvious to a big company in 6 months?\n",
-        f"<i>Consider: {code('/planreview <brief>')} for deeper analysis.</i>",
-    ]
-
-    await send_chunked(msg, "\n".join(response_lines), parse_mode="HTML")
-
-
-# ─── /codex ─────────────────────────────────────────────────────────────────────
-
-@router.message(Command("codex"))
-async def cmd_codex(msg: Message) -> None:
-    """Multi-model second opinion via OpenAI Codex CLI."""
-    if not is_allowed(msg):
-        return
-
-    arg = (msg.text or "").removeprefix("/codex").strip()
-    if not arg:
-        arg = "review"
-
-    mode = "review"
-    if arg.startswith("challenge"):
-        mode = "challenge"
-    elif arg.startswith("consult"):
-        mode = "consult"
-
-    # Check if codex is available
-    codex_check, _, _ = run_sync("which codex 2>/dev/null || echo 'NOT_INSTALLED'")
-    if "NOT_INSTALLED" in codex_check:
+    try:
+        stdout, stderr, rc = await run_opencode_cmd(
+            ["/home/newadmin/.opencode/bin/opencode", "run",
+             "--command", "office-hours", "--", idea],
+            timeout=120,
+        )
+        await _cancel_task(typing_task)
+        output = stdout if rc == 0 else (stderr or stdout)
+        from core.opencode_bridge import extract_report
+        report = extract_report(output)
+        await status_msg.delete()
+        await send_chunked(msg, report)
+    except Exception as e:
+        await _cancel_task(typing_task)
+        await status_msg.delete()
         await msg.answer(
-            f"{bold('🤖 /codex — Multi-Model Second Opinion')}\n\n"
-            f"🔴 Codex CLI not installed.\n\n"
-            f"Install with:\n"
-            f"{code('npm install -g @openai/codex')}\n\n"
-            f"Then authenticate:\n"
-            f"{code('codex auth')}",
+            f"officehours error: <code>{escape(str(e)[:400])}</code>",
             parse_mode="HTML",
         )
-        return
-
-    base_branch, _, _ = run_sync("git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || echo 'main'")
-    base_branch = base_branch.strip() or "main"
-
-    if mode == "review":
-        await msg.answer(
-            f"{bold('🤖 /codex review')}\n\n"
-            f"Running independent diff review against {code(base_branch)}...",
-            parse_mode="HTML",
-        )
-        codex_out, codex_err, codex_rc = run_sync(
-            f"cd $(git rev-parse --show-toplevel) && "
-            f"codex review --base {base_branch} -c 'model_reasoning_effort=\"high\"' 2>&1",
-            timeout=300,
-        )
-    elif mode == "challenge":
-        await msg.answer(
-            f"{bold('🤖 /codex challenge')}\n\n"
-            f"Adversarial mode — trying to break your code...",
-            parse_mode="HTML",
-        )
-        codex_out, codex_err, codex_rc = run_sync(
-            "cd $(git rev-parse --show-toplevel) && "
-            "codex exec \"Think like an attacker. What would break this code?\" -C $(git rev-parse --show-toplevel) -s read-only 2>&1",
-            timeout=300,
-        )
-    else:
-        question = arg[8:].strip() if len(arg) > 8 else "What does this codebase do?"
-        await msg.answer(
-            f"{bold('🤖 /codex consult')}\n\n"
-            f"Question: {escape(question)}\n\n"
-            f"Running...",
-            parse_mode="HTML",
-        )
-        codex_out, codex_err, codex_rc = run_sync(
-            f"cd $(git rev-parse --show-toplevel) && "
-            f"codex exec \"{escape(question)}\" -C $(git rev-parse --show-toplevel) -s read-only 2>&1",
-            timeout=300,
-        )
-
-    if codex_err and not codex_out:
-        await msg.answer(f"{bold('🔴 Codex error:')}\n{code(codex_err[:500])}", parse_mode="HTML")
-        return
-
-    output = (codex_out or codex_err or "No output")[:3500]
-    result = [
-        f"{bold('🤖 /codex — Multi-Model Second Opinion')}",
-        f"Mode: {code(mode)}",
-        "",
-        f"{output}",
-    ]
-
-    # Gate logic for P1 issues
-    if "[P1]" in output or "P1:" in output:
-        result.append(f"\n⚠️ {bold('P1 issues found — investigate before proceeding')}")
-
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
 
 
 # ─── /investigate ──────────────────────────────────────────────────────────────
 
 @router.message(Command("investigate"))
 async def cmd_investigate(msg: Message) -> None:
-    """Root cause analysis for bugs/errors."""
+    """Root cause analysis for bugs/errors via opencode."""
     if not is_allowed(msg):
         return
 
@@ -435,128 +354,80 @@ async def cmd_investigate(msg: Message) -> None:
         )
         return
 
-    await msg.answer(
+    status_msg = await msg.answer(
         f"{bold('🔬 /investigate — Root Cause Analysis')}\n\n"
         f"Error: {code(error_spec[:200])}\n\n"
         f"{bold('Investigating...')}",
         parse_mode="HTML",
     )
+    typing_task = asyncio.create_task(_keep_typing(msg))
 
-    # Run common diagnostics
-
-    # Check recent git history for the error pattern
-    recent_commits, _, _ = run_sync("git log --oneline -10 2>/dev/null || echo ''")
-
-    # Check for the error string in code
-    search_out, _, _ = run_sync(
-        f"grep -rn '{error_spec[:50].replace(chr(39), chr(39)+chr(39))}' "
-        f". --include='*.py' 2>/dev/null | head -10 || echo 'not found in code'"
-    )
-
-    # Check logs
-    log_out, _, _ = run_sync(
-        "find . -name '*.log' -mmin -60 2>/dev/null | head -5 | "
-        "xargs grep -l 'error\\|exception\\|failed' 2>/dev/null | "
-        "head -3 | xargs tail -20 2>/dev/null || echo 'no recent logs'",
-        timeout=15,
-    )
-
-    result = [
-        f"{bold('🔬 /investigate — Report')}\n",
-        f"Error: {escape(error_spec[:200])}\n",
-        "",
-        f"{bold('Recent commits:')}\n{code(recent_commits[:300] or 'none')}",
-        "",
-        f"{bold('Code search:')}\n{code(search_out[:300] or 'not found')}",
-    ]
-
-    if log_out.strip() and "no recent" not in log_out:
-        result.append(f"\n{bold('Recent logs:')}\n{code(log_out[:500])}")
-
-    # Hypothesis
-    error_keywords = error_spec.lower()
-    if "import" in error_keywords or "modulenotfound" in error_keywords:
-        result.append(f"\n{bold('Hypothesis:')} Missing dependency — check requirements.txt or pyproject.toml")
-    elif "attributeerror" in error_keywords or "'none'" in error_keywords:
-        result.append(f"\n{bold('Hypothesis:')} Object is None — add null check before accessing attribute")
-    elif "timeout" in error_keywords:
-        result.append(f"\n{bold('Hypothesis:')} Operation timed out — check network or increase timeout value")
-    elif "permission" in error_keywords:
-        result.append(f"\n{bold('Hypothesis:')} Permission denied — check file/directory permissions")
-    else:
-        result.append(f"\n{bold('Hypothesis:')} Unable to determine — check traceback for exact line number")
-
-    result.append(f"\n<i>For deeper analysis: {code('/investigate <full error>')}</i>")
-
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
+    try:
+        stdout, stderr, rc = await run_opencode_cmd(
+            ["/home/newadmin/.opencode/bin/opencode", "run",
+             "--command", "investigate", "--", error_spec],
+            timeout=120,
+        )
+        await _cancel_task(typing_task)
+        output = stdout if rc == 0 else (stderr or stdout)
+        from core.opencode_bridge import extract_report
+        report = extract_report(output)
+        await status_msg.delete()
+        await send_chunked(msg, report)
+    except Exception as e:
+        await _cancel_task(typing_task)
+        await status_msg.delete()
+        await msg.answer(
+            f"investigate error: <code>{escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
 
 
 # ─── /qa ──────────────────────────────────────────────────────────────────────
 
 @router.message(Command("qa"))
 async def cmd_qa(msg: Message) -> None:
-    """QA testing workflow for web applications."""
+    """QA testing workflow for web applications via opencode."""
     if not is_allowed(msg):
         return
 
     target = (msg.text or "").removeprefix("/qa").strip()
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ I have a URL", callback_data="qa_url_yes"),
-            InlineKeyboardButton(text="❌ No URL", callback_data="qa_url_no"),
-        ]
-    ])
-
     if not target:
         await msg.answer(
             f"{bold('🧪 /qa — Quality Assurance Testing')}\n\n"
             f"Usage: {code('/qa <URL to test>')}\n\n"
-            f"Do you have a URL to test?",
-            reply_markup=keyboard,
+            f"Example:\n<code>/qa https://example.com</code>",
             parse_mode="HTML",
         )
         return
 
-    await msg.answer(
+    status_msg = await msg.answer(
         f"{bold('🧪 /qa — Testing')}\n\n"
         f"Target: {code(target)}\n\n"
-        f"Running health checks...",
+        f"Running QA checks...",
         parse_mode="HTML",
     )
+    typing_task = asyncio.create_task(_keep_typing(msg))
 
-    # Basic health check
-    http_out, _, http_rc = run_sync(f"curl -s -o /dev/null -w '%{{http_code}}' {target} 2>/dev/null || echo '000'")
-
-    health_status = "✅" if http_rc == 0 and http_out.strip() in ["200", "301", "302"] else "⚠️"
-
-    result = [
-        f"{bold('🧪 /qa — Report')}\n",
-        f"Target: {code(target)}",
-        "",
-        f"{health_status} HTTP: {code(http_out.strip())}",
-    ]
-
-    # Check for broken links (simple check)
-    links_out, _, _ = run_sync(
-        f"curl -s {target} 2>/dev/null | grep -oE 'href=\"[^\"]+\"' | head -10 || echo ''"
-    )
-    if links_out.strip():
-        result.append(f"\n{bold('Links found on page:')}\n{code(links_out.strip()[:300])}")
-
-    # SSL check for HTTPS
-    if target.startswith("https://"):
-        ssl_out, _, _ = run_sync(
-            f"echo | openssl s_client -connect "
-            f"$(echo {target} | sed 's|https://||' | cut -d/ -f1):443 2>/dev/null | "
-            f"head -3 || echo 'SSL check skipped'"
+    try:
+        stdout, stderr, rc = await run_opencode_cmd(
+            ["/home/newadmin/.opencode/bin/opencode", "run",
+             "--command", "qa", "--", target],
+            timeout=180,
         )
-        result.append(f"\nSSL: {code(ssl_out[:200])}")
-
-    result.append(f"\n{bold('OVERALL:')} ⚠️ MANUAL TESTING RECOMMENDED")
-    result.append("\n<i>Live site testing requires browser automation. For full QA, use /codex review after deployment.</i>")
-
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
+        await _cancel_task(typing_task)
+        output = stdout if rc == 0 else (stderr or stdout)
+        from core.opencode_bridge import extract_report
+        report = extract_report(output)
+        await status_msg.delete()
+        await send_chunked(msg, report)
+    except Exception as e:
+        await _cancel_task(typing_task)
+        await status_msg.delete()
+        await msg.answer(
+            f"qa error: <code>{escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )
 
 
 # ─── /careful ──────────────────────────────────────────────────────────────────
@@ -633,7 +504,7 @@ async def cmd_careful(msg: Message) -> None:
 
 @router.message(Command("planreview"))
 async def cmd_planreview(msg: Message) -> None:
-    """CEO/founder-mode plan review."""
+    """CEO/founder-mode plan review via opencode."""
     if not is_allowed(msg):
         return
 
@@ -647,34 +518,30 @@ async def cmd_planreview(msg: Message) -> None:
         )
         return
 
-    await msg.answer(
+    status_msg = await msg.answer(
         f"{bold('📋 /planreview — CEO-Mode Review')}\n\n"
         f"Plan: {escape(plan_desc[:200])}\n\n"
         f"Analyzing...",
         parse_mode="HTML",
     )
+    typing_task = asyncio.create_task(_keep_typing(msg))
 
-    # CEO review framework
-    result = [
-        f"{bold('📋 /planreview — CEO-Mode Review')}\n",
-        f"Plan: {escape(plan_desc[:200])}\n",
-        "",
-        f"{bold('Problem Framing:')}",
-        "1. What problem does this solve, for whom, how often?",
-        "2. Who is the user and what's their job-to-be-done?",
-        "3. What's the simplest version that proves the concept?\n",
-        f"{bold('Scope Assessment:')}",
-        "  Is this solving the RIGHT problem or just the EASY problem?\n",
-        f"{bold('SCOPE MODE: SELECTIVE')}\n",
-        f"{bold('Priority Hierarchy:')}",
-        "  [MUST HAVE] — Core value, no workaround",
-        "  [SHOULD HAVE] — Major improvement, workaround exists",
-        "  [NICE TO HAVE] — Quality of life, can cut\n",
-        f"{bold('Engineering Preferences:')}",
-        "  Complexity: assess your approach",
-        "  Reversibility: can you undo if wrong?",
-        "  Scaling: NOW or LATER?\n",
-        "<i>For deep CEO review with full framework, use /plan-ceo-review with a plan file.</i>",
-    ]
-
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
+    try:
+        stdout, stderr, rc = await run_opencode_cmd(
+            ["/home/newadmin/.opencode/bin/opencode", "run",
+             "--command", "plan-ceo-review", "--", plan_desc],
+            timeout=120,
+        )
+        await _cancel_task(typing_task)
+        output = stdout if rc == 0 else (stderr or stdout)
+        from core.opencode_bridge import extract_report
+        report = extract_report(output)
+        await status_msg.delete()
+        await send_chunked(msg, report)
+    except Exception as e:
+        await _cancel_task(typing_task)
+        await status_msg.delete()
+        await msg.answer(
+            f"planreview error: <code>{escape(str(e)[:400])}</code>",
+            parse_mode="HTML",
+        )

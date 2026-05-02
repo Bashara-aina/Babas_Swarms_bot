@@ -1,40 +1,11 @@
-# config/models.yaml — Free-tier model registry
+# config/models.yaml — MiniMax-M2.7 ONLY
 # All model IDs use litellm prefix convention
+# Last updated: v3.1 lock (Claude)
 
 providers:
-  openrouter:
-    base_url: "https://openrouter.ai/api/v1"
-    api_key_env: "OPENROUTER_API_KEY"
-    daily_limit: 1000
-
-  cerebras:
-    base_url: "https://api.cerebras.ai/v1"
-    api_key_env: "CEREBRAS_API_KEY"
-    daily_limit: 14400
-
-  zai:
-    base_url: "https://open.bigmodel.cn/api/paas/v4"
-    api_key_env: "ZAI_API_KEY"
-    daily_limit: null
-
-  groq:
-    base_url: "https://api.groq.com/openai/v1"
-    api_key_env: "GROQ_API_KEY"
-    daily_limit: 1000
-
-  gemini:
-    base_url: "https://generativelanguage.googleapis.com/v1beta"
-    api_key_env: "GEMINI_API_KEY"
-    daily_limit: 1000
-
   minimax:
     base_url: "https://api.minimax.chat/v1"
     api_key_env: "MINIMAX_API_KEY"
-    daily_limit: null
-
-  anthropic:
-    base_url: "https://api.minimax.io/anthropic"
-    api_key_env: "ANTHROPIC_API_KEY"
     daily_limit: null
 
   ollama:
@@ -43,56 +14,39 @@ providers:
     daily_limit: null
 
 models:
-  devstral:
-    provider: openrouter
-    model_id: "openrouter/qwen/qwen3-coder:free"
-    context_window: 131072
-    strengths: [coding, multi-file, swe-bench]
+  # PRIMARY — all tasks use this
+  minimax-m2-7:
+    provider: minimax
+    model_id: "minimax-coding-plan/MiniMax-M2.7"
+    context_window: 204800
+    max_tokens: 8192
+    temperature_conversation: 0.2
+    temperature_code: 0.1
+    strengths: [coding, reasoning, conversation, general]
     cost_per_1m_tokens: 0.0
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-  qwen3-235b:
-    provider: cerebras
-    model_id: "minimax/MiniMax-Text-01"
-    context_window: 131072
-    strengths: [reasoning, speed, general]
+  # Rate-limit fallback ONLY — 429 from M2.7 triggers this
+  minimax-text-01:
+    provider: minimax
+    model_id: "minimax-coding-plan/MiniMax-Text-01"
+    context_window: 245760
+    max_tokens: 8192
+    temperature_conversation: 0.2
+    temperature_code: 0.1
+    strengths: [long-context, reasoning, general]
     cost_per_1m_tokens: 0.0
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-  glm-4:
-    provider: zai
-    model_id: "minimax/MiniMax-Text-01"
-    context_window: 128000
-    strengths: [debug, math, reasoning]
-    cost_per_1m_tokens: 0.0
-    daily_limit_warning_threshold: 0.8
-    avg_latency_ms: null
-
-  kimi-k2:
-    provider: groq
-    model_id: "minimax/MiniMax-Text-01"
-    context_window: 200000
-    strengths: [deep-reasoning, analysis, long-context]
-    cost_per_1m_tokens: 0.0
-    daily_limit_warning_threshold: 0.8
-    avg_latency_ms: null
-
-  gemini-3.1-pro:
-    provider: gemini
-    model_id: "minimax/MiniMax-Text-01"
-    context_window: 1000000
-    strengths: [teaching, general, long-context]
-    cost_per_1m_tokens: 0.0
-    daily_limit_warning_threshold: 0.8
-    avg_latency_ms: null
-
+  # Vision ONLY — image/multimodal inputs via RTX 3060
   gemma4-local:
     provider: ollama
     model_id: "ollama_chat/gemma4:e4b"
-    context_window: 131072
-    strengths: [vision, local, privacy, agentic, function-calling, audio]
+    context_window: 8192
+    max_tokens: 2048
+    strengths: [vision, local, privacy]
     cost_per_1m_tokens: 0.0
     daily_limit: null
     vram_required_gb: 6
@@ -100,55 +54,23 @@ models:
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-  llama3-70b:
+  # Embeddings ONLY — not for chat, ChromaDB/mem0 only
+  nomic-embed-text:
     provider: ollama
-    model_id: "ollama_chat/llama3.3:70b"
-    context_window: 32768
-    strengths: [general, local, fallback]
+    model_id: "ollama_chat/nomic-embed-text"
+    context_window: 8192
+    max_tokens: 2048
+    strengths: [embeddings, local, privacy]
     cost_per_1m_tokens: 0.0
+    daily_limit: null
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-  minimax-m2-7:
-    provider: minimax
-    model_id: "minimax-coding-plan/MiniMax-M2.7"
-    context_window: 16384
-    max_tokens: 16384
-    temperature_conversation: 0.7
-    temperature_code: 0.1
-    strengths: [coding, reasoning, conversation, general]
-    cost_per_1m_tokens: 0.0
-    daily_limit_warning_threshold: 0.8
-    avg_latency_ms: null
+# Wildcard catch-all: any unmatched model request → M2.7
+wildcard_fallback: minimax-m2-7
 
-  anthropic-claude:
-    provider: anthropic
-    model_id: "anthropic/claude-sonnet-4-20250514"
-    context_window: 200000
-    strengths: [reasoning, coding, analysis]
-    cost_per_1m_tokens: 0.0
-    daily_limit_warning_threshold: 0.8
-    avg_latency_ms: null
-
-# Complexity tier → preferred provider order (first available wins)
+# Complexity tiers — all route to minimax only
 complexity_tiers:
-  lightweight:
-    - minimax
-    - cerebras
-    - groq
-    - ollama
-
-  midweight:
-    - minimax
-    - zai
-    - gemini
-    - cerebras
-    - groq
-
-  heavyweight:
-    - minimax
-    - openrouter
-    - gemini
-    - zai
-    - cerebras
-    - ollama
+  lightweight:    [minimax]
+  midweight:      [minimax]
+  heavyweight:   [minimax]

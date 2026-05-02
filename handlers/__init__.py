@@ -42,6 +42,7 @@ from handlers import (
     runbook_handler,
     session_handler,
     sessions,
+    shortcuts,
     skills,
     swe_commands,
     system,
@@ -94,6 +95,7 @@ _ROUTER_ORDER = [
     legion_extras.router,  # /simulate /screenpipe_status /mcp_status /voice_room /websearch /quickscrape
     wiki_router,  # /wiki_audit /wiki_flush /wiki_restore /wiki_scan /wiki_stats
     harvest_review.router,  # /harvest_review
+    shortcuts.router,  # /shortcuts
     admin_handlers.router,  # /budget /soul (owner-only)
     ai.router,  # /run /think /agent /swarm + NL catch-all (LAST)
 ]

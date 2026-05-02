@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import html as html_mod
+import os
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -118,15 +120,15 @@ async def cmd_vuln_scan(msg: Message) -> None:
         await status_msg.edit_text(f"scan error: <code>{e}</code>", parse_mode="HTML")
 
 
-# ── /review ───────────────────────────────────────────────────────────────────
-@router.message(Command("review"))
-async def cmd_review(msg: Message) -> None:
+# ── /code_review ─────────────────────────────────────────────────────────────────
+@router.message(Command("code_review"))
+async def cmd_code_review(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    arg = (msg.text or "").removeprefix("/review").strip()
+    arg = (msg.text or "").removeprefix("/code_review").strip()
     if not arg:
         await msg.answer(
-            "usage: <code>/review &lt;file_path&gt;</code>\nor reply to a code message with /review",
+            "usage: <code>/code_review &lt;file_path&gt;</code>\nor reply to a code message with /code_review",
             parse_mode="HTML",
         )
         return
@@ -140,12 +142,8 @@ async def cmd_review(msg: Message) -> None:
             result = await review_file(arg)
         else:
             result = await review_code(arg, language="python")
-        import html as html_mod
-
         await status_msg.edit_text(result[:4000], parse_mode="HTML")
     except Exception as e:
-        import html as html_mod
-
         await status_msg.edit_text(
             f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",
@@ -166,12 +164,8 @@ async def cmd_security_review(msg: Message) -> None:
         from tools.code_reviewer import review_file
 
         result = await review_file(arg, review_type="security")
-        import html as html_mod
-
         await status_msg.edit_text(result[:4000], parse_mode="HTML")
     except Exception as e:
-        import html as html_mod
-
         await msg.answer(
             f"review error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",
@@ -217,8 +211,6 @@ async def cmd_codex(msg: Message) -> None:
             )
     except Exception as e:
         await _cancel_task(typing_task)
-        import html as html_mod
-
         if "status_msg" in dir():
             await status_msg.edit_text(
                 f"codex error: <code>{html_mod.escape(str(e)[:400])}</code>",
@@ -231,19 +223,32 @@ async def cmd_codex(msg: Message) -> None:
             )
 
 
+OPENCODE_COMMANDS = {
+    "review", "ship", "investigate", "qa", "office-hours",
+    "careful", "plan-ceo-review", "parallel",
+}
+
 # ── /opencode ─────────────────────────────────────────────────────────────────
 @router.message(Command("opencode"))
 async def cmd_opencode(msg: Message) -> None:
-    """Route a task to opencode CLI via the Legion bridge."""
+    """Route a task to opencode CLI via the Legion bridge.
+
+    Uses --command routing when the first word is a known opencode command,
+    otherwise falls back to freeform prompt with Legion system context.
+    """
     if not is_allowed(msg):
         return
     task_text = (msg.text or "").removeprefix("/opencode").strip()
     if not task_text:
+        cmds_sample = ", ".join(sorted(OPENCODE_COMMANDS)[:8])
         await msg.answer(
-            "usage: <code>/opencode &lt;task description&gt;</code>\n\n"
-            "Routes task through opencode with Legion's full pipeline:\n"
-            "PLAN → IMPLEMENT → REVIEW → TEST → COMMIT → REPORT\n\n"
-            "Example:\n<code>/opencode add user authentication to the API</code>",
+            "<code>/opencode &lt;task description&gt;</code>\n\n"
+            "Routes task through opencode with Legion's full pipeline.\n"
+            f"Known commands: <code>{cmds_sample}</code>...\n\n"
+            "Examples:\n"
+            "<code>/opencode add user authentication</code>\n"
+            "<code>/opencode review handlers/ai.py</code>\n"
+            "<code>/opencode investigate TypeError at line 42</code>",
             parse_mode="HTML",
         )
         return
@@ -252,20 +257,84 @@ async def cmd_opencode(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     try:
-        from core.opencode_bridge import build_opencode_prompt, extract_report, run_opencode_task
+        first_word = task_text.split()[0].lower() if task_text.split() else ""
+        use_command = first_word in OPENCODE_COMMANDS
 
-        username = msg.from_user.username if msg.from_user else "unknown"
-        prompt = build_opencode_prompt(task_text, project="/home/newadmin/swarm-bot", user=username)
-        result = await run_opencode_task(prompt, project_dir="/home/newadmin/swarm-bot")
-        report = extract_report(result)
+        if use_command:
+            cmd_parts = [
+                "/home/newadmin/.opencode/bin/opencode", "run",
+                "--command", first_word,
+                "--", task_text[len(first_word):].strip(),
+            ]
+            proc = await asyncio.create_subprocess_exec(
+                *cmd_parts,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd="/home/newadmin/swarm-bot",
+                env={**os.environ, "OPENCODE_DISABLE_AUTOUPDATE": "true"},
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=300)
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                await _cancel_task(typing_task)
+                await status_msg.edit_text("⛔ opencode command timed out after 300s")
+                return
+            raw_result = stdout.decode() if proc.returncode == 0 else (stderr.decode() or stdout.decode())
+            from core.opencode_bridge import extract_report
+            report = extract_report(raw_result)
+            await _cancel_task(typing_task)
+            await send_chunked(msg, report)
+        else:
+            if int(os.getenv("LEGION_OPENCODE_STREAM", "0")):
+                from core.opencode_bridge import stream_opencode_task
+                status_msg = await status_msg.edit_text("🤖 Legion streaming opencode output…")
 
+                accumulated = ""
+                async for event in stream_opencode_task(
+                    task_text,
+                    project_dir="/home/newadmin/swarm-bot",
+                    task_desc=task_text,
+                ):
+                    if event["type"] == "error":
+                        await msg.answer(f"⛔ opencode stream error: {event['content'][:500]}")
+                        break
+                    elif event["type"] == "data":
+                        content = event.get("content", "")
+                        if isinstance(content, str) and content.strip():
+                            accumulated += content
+                            await msg.answer(content[:4000])
+                    elif event["type"] == "done":
+                        break
+
+                if accumulated:
+                    from core.opencode_bridge import extract_report
+                    report = extract_report(accumulated)
+                    if len(accumulated) > 4000:
+                        await msg.answer(f"[stream complete — {len(accumulated)} chars total]")
+            else:
+                from core.opencode_bridge import run_opencode_task
+
+                raw_result = await run_opencode_task(
+                    task_text,
+                    project_dir="/home/newadmin/swarm-bot",
+                    task_desc=task_text,
+                )
+
+                from core.opencode_bridge import extract_report
+                report = extract_report(raw_result)
+                await _cancel_task(typing_task)
+                await send_chunked(msg, report)
+    except (FileNotFoundError, PermissionError) as e:
         await _cancel_task(typing_task)
-        await status_msg.delete()
-        await send_chunked(msg, report)
+        await status_msg.edit_text(
+            f"opencode not found or not executable: <code>{html_mod.escape(str(e)[:400])}</code>\n"
+            f"Install: <code>curl -fsSL https://opencode.ai/install.sh | sh</code>",
+            parse_mode="HTML",
+        )
     except Exception as e:
         await _cancel_task(typing_task)
-        import html as html_mod
-
         await status_msg.edit_text(
             f"opencode error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",

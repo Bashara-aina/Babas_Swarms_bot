@@ -46,7 +46,7 @@ async def _search_raw(query: str, max_results: int = 5) -> str:
         try:
             from ddgs import DDGS  # type: ignore[import-not-found]
         except ImportError:
-            from duckduckgo_search import DDGS
+            from ddgs import DDGS
 
         def _sync_search(q: str) -> list[dict[str, Any]]:
             with warnings.catch_warnings():
@@ -82,7 +82,7 @@ async def _search_raw(query: str, max_results: int = 5) -> str:
                 try:
                     from ddgs import DDGS  # type: ignore[import-not-found]
                 except ImportError:
-                    from duckduckgo_search import DDGS
+                    from ddgs import DDGS
 
                 def _sync_search(q: str) -> list[dict[str, Any]]:
                     with warnings.catch_warnings():

@@ -1,26 +1,42 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "servers": [
     {
-      "name": "filesystem",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin/swarm-bot"],
-      "env": {},
-      "enabled": false
-    },
-    {
       "name": "gitnexus",
-      "command": "pnpm",
-      "args": ["dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"],
-      "env": {},
-      "enabled": true
+      "command": "/tmp/gitnexus-mcp-wrapper.sh",
+      "args": [],
+      "enabled": true,
+      "description": "GitNexus code intelligence"
     },
     {
-      "name": "obsidian",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-obsidian", "/home/newadmin/swarm-bot/.wiki"],
-      "env": {},
-      "enabled": false
+      "name": "latex",
+      "command": "python3",
+      "args": ["-m", "mcp_servers.texlab_bridge"],
+      "enabled": true,
+      "description": "LaTeX/TeXlab editing"
+    },
+    {
+      "name": "ruflo",
+      "command": "python3",
+      "args": ["-m", "mcp_servers.ruflo_mcp_server"],
+      "enabled": true,
+      "description": "Ruflo enterprise AI agent orchestration - 39 tools for multi-agent swarms, vector memory, neural training"
+    },
+    {
+      "name": "symphony",
+      "command": "python3",
+      "args": ["-m", "mcp_servers.symphony_server"],
+      "enabled": true,
+      "description": "Symphony Linear issue orchestration"
+    },
+    {
+      "name": "crawl4ai",
+      "command": "python3",
+      "args": ["/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"],
+      "enabled": true,
+      "description": "AI-friendly web crawler"
     }
   ],
-  "notes": "GitNexus + Obsidian are configured for cross-agent graph+wiki context. Keep firecrawl/exa baseline in workspace-level editor configs."
+  "mcpServers": {},
+  "_note": "Legacy format uses servers[]. Additional servers (gmail, whatsapp, github, calendar) are referenced by LEGION_MCP_* env vars but are invoked via direct API wrappers (not stdio MCP)."
 }

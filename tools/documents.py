@@ -170,11 +170,10 @@ async def excel_update_cell(
     return await asyncio.to_thread(_update)
 
 
-# ── OCR ──────────────────────────────────────────────────────────────────────
-
+# ── OCR (pytesseract fallback) ───────────────────────────────────────────────
 
 async def ocr_image(path: str, lang: str = "eng") -> str:
-    """OCR an image file using Tesseract."""
+    """OCR an image file using Tesseract (fallback when Chandra unavailable)."""
     p = Path(path).expanduser()
     if not p.exists():
         return f"file not found: {path}"
@@ -208,12 +207,10 @@ async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
             for i in page_nums:
                 if 0 <= i < total:
                     page = pdf.pages[i]
-                    # Try text extraction first
                     text = page.extract_text()
                     if text and text.strip():
                         texts.append(f"--- Page {i + 1} (text) ---\n{text}")
                     else:
-                        # Fall back to OCR on page image
                         img = page.to_image(resolution=200)
                         pil_img = img.original
                         ocr_text = pytesseract.image_to_string(pil_img, lang=lang)
@@ -225,6 +222,45 @@ async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
         return "\n\n".join(texts)
 
     return await asyncio.to_thread(_ocr_pdf)
+
+
+# ── OCR (Chandra OCR 2 — primary) ─────────────────────────────────────────────
+
+
+async def chandra_ocr_image(path: str, method: str = "vllm", lang: str = "eng+ind") -> str:
+    """OCR an image file using Chandra OCR 2.
+
+    method: 'vllm' (default, recommended) or 'hf' (HuggingFace) or 'tesseract' (fallback)
+    lang: Tesseract fallback language (default: eng+ind for Indonesian payslip support)
+    """
+    try:
+        from core.utils.chandra_client import chandra_ocr_image as _chandra
+        result = await _chandra(path, method=method, lang=lang)
+        if result.error:
+            return f"Chandra OCR error: {result.error_message}"
+        return f"Chandra OCR ({result.source}, {result.page_count} page{'s' if result.page_count != 1 else ''}, {result.token_count} tokens):\n\n{result.markdown}"
+    except ImportError:
+        return "Chandra OCR not installed. Run: pip install chandra-ocr"
+    except Exception as exc:
+        return f"Chandra OCR failed: {exc}"
+
+
+async def chandra_ocr_pdf(path: str, pages: str = "all", method: str = "vllm", lang: str = "eng+ind") -> str:
+    """OCR a PDF using Chandra OCR 2 (handles scanned/image-based PDFs).
+
+    method: 'vllm' (default) or 'hf' or 'tesseract'
+    pages: Page range string (e.g. 'all', '1-5', '1,3,5')
+    """
+    try:
+        from core.utils.chandra_client import chandra_ocr_pdf as _chandra_pdf
+        result = await _chandra_pdf(path, pages=pages, method=method, lang=lang)
+        if result.error:
+            return f"Chandra OCR error: {result.error_message}"
+        return f"Chandra OCR ({result.source}, {result.page_count} pages, {result.token_count} tokens):\n\n{result.markdown}"
+    except ImportError:
+        return "Chandra OCR not installed. Run: pip install chandra-ocr"
+    except Exception as exc:
+        return f"Chandra OCR PDF failed: {exc}"
 
 
 # ── Word documents ───────────────────────────────────────────────────────────

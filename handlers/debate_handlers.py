@@ -11,7 +11,7 @@ import logging
 
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from handlers.shared import ALLOWED_USER_ID, is_allowed
 
@@ -83,6 +83,19 @@ async def cmd_debate(message: Message) -> None:
 
         await thinking.delete()
         await _split_and_send(message, response)
+
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔄 Debate Again", callback_data="debate:again"),
+                    InlineKeyboardButton(text="💭 Opinion", callback_data="debate:opinion"),
+                ],
+                [
+                    InlineKeyboardButton(text="🏠 Home", callback_data="ui:home"),
+                ],
+            ]
+        )
+        await message.answer("Run /debate &lt;topic&gt; to debate another topic.", parse_mode="HTML", reply_markup=kb)
 
     except Exception as exc:
         logger.exception("Debate handler error: %s", exc)
