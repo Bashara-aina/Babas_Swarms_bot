@@ -1,32 +1,146 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "minimax-coding-plan/MiniMax-M2.7",
+  "small_model": "minimax-coding-plan/MiniMax-M2.7",
+  "snapshot": false,
+  "compaction": {
+    "reserved": 8192,
+    "threshold": 0.98,
+    "maxContext": 204800
+  },
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "bash": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "question": "allow",
+    "todowrite": "allow",
+    "skill": "allow",
+    "lsp": "allow",
+    "external_directory": {
+      "/home/newadmin/**": "allow"
+    }
+  },
+  "agent": {
+    "build": {
+      "steps": 60
+    },
+    "summary": {
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "websearch": "allow"
+      }
+    }
+  },
   "mcp": {
     "gitnexus": {
       "type": "local",
-      "command": ["pnpm", "dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"]
+      "command": [
+        "/home/newadmin/.local/node18/bin/gitnexus",
+        "mcp"
+      ]
     },
     "obsidian": {
       "type": "local",
-      "command": ["npx", "-y", "@iflow-mcp/kynlos-obsidian-mcp-server", "/home/newadmin/swarm-bot/.wiki"]
+      "command": [
+        "/home/newadmin/.local/node18/bin/npx",
+        "-y",
+        "@iflow-mcp/kynlos-obsidian-mcp-server",
+        "/home/newadmin/swarm-bot/.wiki"
+      ]
     },
     "git": {
       "type": "local",
-      "command": ["npx", "-y", "@mseep/git-mcp-server"]
+      "command": [
+        "/home/newadmin/.local/node18/bin/npx",
+        "-y",
+        "@mseep/git-mcp-server"
+      ]
     },
     "filesystem": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin"]
-    },
-    "firecrawl": {
-      "type": "local",
-      "command": ["npx", "-y", "firecrawl-mcp"],
-      "environment": {
-        "FIRECRAWL_API_KEY": "fc-09da51dd5e5c46b5b73d7b1ca5cb4c74"
-      }
+      "command": [
+        "/home/newadmin/.local/node18/bin/npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/newadmin"
+      ]
     },
     "exa": {
       "type": "remote",
-      "url": "https://mcp.exa.ai/mcp?exaApiKey=2f2f6644-9907-4444-bb6b-c507b32c4820"
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "crawl4ai": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/python3",
+        "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
+      ]
+    },
+    "symphony": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "mcp_servers.symphony_server"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    "latex": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "mcp_servers.latex_mcp_server"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    "ruflo": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "mcp_servers.ruflo_mcp_server"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/.local/node18/bin/npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "hermes": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/hermes",
+        "mcp",
+        "serve"
+      ],
+      "description": "Hermes messaging bridge \u2014 list conversations, read history, send messages, poll events across Telegram/Discord/gateways"
+    },
+    "browser-use": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "tools.mcpServers.browser_use_mcp.server"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "description": "MiniMax-native browser automation via browser-use \u2014 open, click, fill, scroll, wait, screenshot, get_text, get_html, close, run_task"
     }
   },
   "watcher": {
@@ -34,9 +148,13 @@
       ".wiki/_quarantine/**",
       ".wiki/templates/**",
       "project/popw/working/**",
+      "/media/newadmin/master/**",
       "cekwajar/**",
       "logs/**",
-      "**/__pycache__/**"
+      "**/__pycache__/**",
+      ".opencode/agents/**",
+      ".claude/skills/generated/**",
+      "node_modules/**"
     ]
   }
 }

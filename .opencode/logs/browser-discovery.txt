@@ -1,0 +1,11 @@
+/bin/bash: line 1: rg: command not found
+browser-use                                  0.12.6
+browser-use-sdk                              2.0.15
+Crawl4AI                                     0.8.6
+litellm                                      1.82.6
+litellm-enterprise                           0.1.35
+litellm-proxy-extras                         0.4.70
+openinference-instrumentation-litellm        0.1.30
+playwright                                   1.58.0
+playwright-stealth                           2.0.3
+unclecode-litellm                            1.81.13

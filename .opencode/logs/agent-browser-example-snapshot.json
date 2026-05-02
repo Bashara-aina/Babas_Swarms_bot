@@ -1,0 +1,1 @@
+{"_boundary":{"nonce":"ec335636145a70c104c07dd9afeeda0d","origin":"https://example.com/"},"data":{"origin":"https://example.com/","refs":{"e1":{"name":"Example Domain","role":"heading"},"e2":{"name":"Learn more","role":"link"}},"snapshot":"- heading \"Example Domain\" [level=1, ref=e1]\n- link \"Learn more\" [ref=e2]"},"error":null,"success":true}

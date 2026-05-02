@@ -1,0 +1,111 @@
+=== LINT SWEEP ===
+warning: The top-level linter settings are deprecated in favour of their counterparts in the `lint` section. Please update the following options in `.ruff.toml`:
+  - 'ignore' -> 'lint.ignore'
+  - 'select' -> 'lint.select'
+I001 [*] Import block is un-sorted or un-formatted
+  --> tools/browser_task_router.py:6:1
+   |
+ 4 |   MiniMax-only. Used by ruflo task routing and direct API calls.
+ 5 |   """
+ 6 | / from __future__ import annotations
+ 7 | |
+ 8 | | import json
+ 9 | | import os
+10 | | import subprocess
+11 | | import sys
+12 | | from pathlib import Path
+   | |________________________^
+   |
+help: Organize imports
+
+F401 [*] `os` imported but unused
+  --> tools/browser_task_router.py:9:8
+   |
+ 8 | import json
+ 9 | import os
+   |        ^^
+10 | import subprocess
+11 | import sys
+   |
+help: Remove unused import: `os`
+
+F401 [*] `pathlib.Path` imported but unused
+  --> tools/browser_task_router.py:12:21
+   |
+10 | import subprocess
+11 | import sys
+12 | from pathlib import Path
+   |                     ^^^^
+   |
+help: Remove unused import: `pathlib.Path`
+
+B033 [*] Sets should not contain duplicate item `"click"`
+  --> tools/browser_task_router.py:16:5
+   |
+15 | _INTERACTIVE_SIGNALS = {
+16 |     "click", "fill", "login", "sign in", "form", "submit",
+   |     ------- Previous occurrence here
+17 |     "scroll", "type", "wait", "interactive", "session", "auth",
+18 |     "click", "type", "select", "dropdown", "checkbox", "radio",
+   |     ^^^^^^^
+19 |     "mouse", "hover", "drag", "upload",
+20 | }
+   |
+help: Remove duplicate item
+
+B033 [*] Sets should not contain duplicate item `"type"`
+  --> tools/browser_task_router.py:17:15
+   |
+15 | _INTERACTIVE_SIGNALS = {
+16 |     "click", "fill", "login", "sign in", "form", "submit",
+17 |     "scroll", "type", "wait", "interactive", "session", "auth",
+   |               ------ Previous occurrence here
+18 |     "click", "type", "select", "dropdown", "checkbox", "radio",
+   |              ^^^^^^
+19 |     "mouse", "hover", "drag", "upload",
+20 | }
+   |
+help: Remove duplicate item
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tools/browser_task_router.py:56:9
+   |
+54 |       """Run task via browser-use runner."""
+55 |       try:
+56 | /         from scripts.browser_use_runner import run_browser_task
+57 | |         import asyncio
+   | |______________________^
+58 |           result = asyncio.run(run_browser_task(
+59 |               task=f"Navigate to {url}. {task}",
+   |
+help: Organize imports
+
+Found 6 errors.
+[*] 6 fixable with the `--fix` option.
+/bin/bash: line 12: /home/newadmin/miniconda3/bin/black: No such file or directory
+/bin/bash: line 16: shellcheck: command not found
+/bin/bash: line 17: shellcheck: command not found
+browser-use.json: valid JSON
+opencode.json: valid JSON
+=== LINT SWEEP COMPLETE ===
+=== VERIFICATION SUITE ===
+=== VERIFICATION SUITE ===
+browser-use import: PASS
+playwright: PASS
+MiniMax guard: PASS (correctly blocked forbidden model)
+agent-browser 0.26.0
+agent-browser CLI: PASS
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{"experimental":{},"tools":{"listChanged":false}},"serverInfo":{"name":"browser-use-mcp","version":"1.26.0"}}}
+browser-use MCP server: PASS
+opencode.json: PASS — browser-use registered
+browser_task_router: PASS — strategy routing works
+/bin/bash: line 5: scripts/agent_browser_safe.sh: No such file or directory
+/bin/bash: line 6: scripts/agent_browser_safe.sh: No such file or directory
+/bin/bash: line 7: scripts/agent_browser_safe.sh: No such file or directory
+smoke browse test: DONE
+✓ Example Domain
+  https://example.com/
+{"_boundary":{"nonce":"ca905976a9d6eb988a3463528a650a65","origin":"https://example.com/"},"data":{"origin":"https://example.com/","refs":{"e1":{"name":"Example Domain","role":"heading"},"e2":{"name":"Learn more","role":"link"}},"snapshot":"- heading \"Example Domain\" [level=1, ref=e1]\n- link \"Learn more\" [ref=e2]"},"error":null,"success":true}
+⚠ --ignore-https-errors ignored: daemon already running. Use 'agent-browser close' first to restart with new options.
+✓ Screenshot saved to /home/newadmin/.agent-browser/tmp/screenshots/screenshot-1777727068744.png
+smoke browse test: DONE

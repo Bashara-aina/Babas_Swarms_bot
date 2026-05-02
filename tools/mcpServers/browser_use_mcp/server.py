@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
 import sys
@@ -161,10 +162,8 @@ class BrowserSessionWrapper:
 
     async def close(self) -> dict[str, Any]:
         if self._session:
-            try:
+            with contextlib.suppress(Exception):
                 await self._session.close_page()
-            except Exception:
-                pass
             self._session = None
         self._initialized = False
         return {"success": True, "session": self.name}
@@ -350,7 +349,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
 # ── Main ────────────────────────────────────────────────────────────────────
 
 async def main():
-    await server.run(stdio_server())
+    options = server.create_initialization_options()
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream, options)
 
 
 if __name__ == "__main__":
