@@ -57,7 +57,7 @@ from handlers import register_all_routers
 from llm_client import init_humanization_layer, verify_api_keys
 
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
-load_dotenv(Path(__file__).parent / ".env")
+load_dotenv(Path(__file__).parent / ".env", override=True)
 
 _REQUIRED_KEYS = ["TELEGRAM_BOT_TOKEN", "ALLOWED_USER_ID"]
 _missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]
@@ -216,19 +216,15 @@ async def _probe_llm() -> tuple[bool, str]:
 
         primary = os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
         if primary.lower().startswith("minimax/"):
-            from lib.legiona.minimax_client import LegionaOutput, create_structured_completion
-
-            await create_structured_completion(
-                model=primary,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "Return concise status in the provided response schema.",
-                    },
-                    {"role": "user", "content": "ping"},
-                ],
-                response_model=LegionaOutput,
-                max_tokens=120,
+            from openai import AsyncOpenAI
+            api_key = os.getenv("MINIMAX_API_KEY", "")
+            base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
+            model_name = primary.replace("minimax/", "").replace("minimax-", "MiniMax-")
+            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+            await client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": "ping"}],
+                max_tokens=5,
             )
         else:
             await litellm.acompletion(
@@ -295,7 +291,7 @@ async def _probe_voicevox() -> tuple[bool, str]:
 async def _probe_duckduckgo() -> tuple[bool, str]:
     """Test DuckDuckGo search returns actual content."""
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
 
         result = await asyncio.wait_for(
             asyncio.to_thread(lambda: list(DDGS().text("test", max_results=1))),
@@ -1024,8 +1020,34 @@ async def on_startup(bot: Bot) -> None:
         except Exception as e:
             logger.warning("ruflo sidecar health probe errored (non-fatal): %s", e)
 
+        # Ruflo Autonomy Layer boot (silent, < 7s) — runs in background after ruflo is healthy
+        async def _boot_autonomy_layer() -> None:
+            try:
+                from core.autonomy import get_autonomy_engine
+                engine = get_autonomy_engine()
+                result = await engine.boot()
+                if result.healthy:
+                    logger.info(
+                        "Autonomy Layer booted: workers=%d, hooks=%d",
+                        result.workers_dispatched,
+                        result.hooks_registered,
+                    )
+                else:
+                    logger.warning("Autonomy Layer degraded: %s", result.error_message)
+            except Exception as e:
+                logger.warning("Autonomy Layer boot failed (non-fatal): %s", e)
+
+        asyncio.create_task(_boot_autonomy_layer()).add_done_callback(
+            lambda t: logger.error("Autonomy Layer boot crashed: %s", t.exception())
+            if not t.cancelled() and t.exception() else None
+        )
+
         # Restart policy: monitor ruflo and restart if it dies
-        asyncio.create_task(_ruflo_restart_monitor())
+        task = asyncio.create_task(_ruflo_restart_monitor())
+        task.add_done_callback(
+            lambda t: logger.error("Ruflo restart monitor died: %s", t.exception())
+            if not t.cancelled() and t.exception() else None
+        )
 
     # opencode sidecar (synchronous launch + async health check)
     global _opencode_process
@@ -1332,18 +1354,27 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
     except Exception:
         pass
 
-    # 5. Flush and stop observation queue
-    logger.info("Shutdown step 5/6: stopping observation queue")
+    # 5a. Autonomy Layer teardown (Part X — silent session save + memory flush)
+    logger.info("Shutdown step 5a/7: Autonomy Layer session teardown")
+    try:
+        from core.autonomy import get_autonomy_engine
+        engine = get_autonomy_engine()
+        if engine.is_healthy or engine.task_count > 0:
+            await engine.shutdown()
+    except Exception:
+        pass
+
+    # 5b. Flush and stop observation queue
+    logger.info("Shutdown step 5b/7: stopping observation queue")
     try:
         from core.memory.observation_queue import get_observation_queue
-
         queue = get_observation_queue()
         await queue.stop()
     except Exception:
         pass
 
     # 6. Log shutdown
-    logger.info("Shutdown step 6/6: shutdown complete")
+    logger.info("Shutdown step 6/7: shutdown complete")
     logger.info("Legion shutdown complete — exiting cleanly")
 
 
