@@ -1,0 +1,5 @@
+ggshield 1.49.0 requires rich~=12.5.1, but you have rich 14.3.1 which is incompatible.
+ggshield 1.49.0 requires typing-extensions~=4.12.2, but you have typing-extensions 4.15.0 which is incompatible.
+
+[notice] A new release of pip is available: 26.0.1 -> 26.1
+[notice] To update, run: pip install --upgrade pip

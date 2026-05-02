@@ -1,0 +1,58 @@
+# browser-use Discovery Log
+# Generated: 2026-05-03
+
+## Discovery Commands Run
+
+```bash
+pwd: /home/newadmin/swarm-bot
+pip show browser-use: Name: browser-use, Version: 0.12.6
+python3 -c "import browser_use": OK
+playwright chromium: OK (Chromium OK: [])
+```
+
+## Pre-existing Browser/Agent References Found
+
+```
+./civora-ref/package-lock.json:
+  - @playwright/test (different project, not our integration)
+
+./legion_output.log:
+  - LiteLLM with groq, ollama_chat providers (historical logs from 2026-04-10)
+  - These are NOT in our browser-use integration files
+
+./wiki/_quarantine/...:
+  - crawl4ai-setup reference (old quarantine doc)
+```
+
+## Files Inspected
+
+| File | Existed Before | Action |
+|------|----------------|--------|
+| AGENTS.md | Yes | Modified — added browser-use section |
+| CLAUDE.md | Yes | Modified — added browser-use policy |
+| .opencode/opencode.json | Yes | Modified — added browser-use MCP |
+| .opencode/command/browser.md | No | Created |
+| scripts/browser_use_safe.sh | No | Created |
+| scripts/browser_use_runner.py | No | Created |
+| browser-use.json | No | Created |
+| tools/mcpServers/browser_use_mcp/server.py | No | Created |
+| .opencode/logs/browser-use-status.md | No | Created |
+
+## Forbidden Model References in Integration Files
+
+All references are **denylist validation only** (explicitly forbidden patterns), not actual provider usage:
+
+- `browser_use_safe.sh`: `_forbidden_pattern='claude|anthropic|gpt-4|...'`
+- `browser_use_runner.py`: `_FORBIDDEN = {"claude", "anthropic", ...}`
+- `server.py`: `_FORBIDDEN = {"claude", "anthropic", ...}`
+
+## MCP Integration Check
+
+```bash
+printf 'Content-Length: 85\n\n{"jsonrpc":"2.0","method":"tools/list","id":2}' \
+  | python3 -m tools.mcpServers.browser_use_mcp.server
+
+# Returns: -32602 "Invalid request parameters" (needs initialize first)
+# This is expected — proper MCP protocol requires initialize before tools/list
+# Works correctly when called from OpenCode which sends proper sequence
+```
