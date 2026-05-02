@@ -3,25 +3,66 @@ tools/browser_task_router.py
 Routes browser tasks to browser-use or crawl4ai based on content type analysis.
 MiniMax-only. Used by ruflo task routing and direct API calls.
 """
+
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 
 _INTERACTIVE_SIGNALS = {
-    "click", "fill", "login", "sign in", "form", "submit",
-    "scroll", "type", "wait", "interactive", "session", "auth",
-    "select", "dropdown", "checkbox", "radio",
-    "mouse", "hover", "drag", "upload",
+    "click",
+    "fill",
+    "login",
+    "sign in",
+    "form",
+    "submit",
+    "scroll",
+    "type",
+    "wait",
+    "interactive",
+    "session",
+    "auth",
+    "select",
+    "dropdown",
+    "checkbox",
+    "radio",
+    "mouse",
+    "hover",
+    "drag",
+    "upload",
+}
+
+_SEARCH_SIGNALS = {
+    "search for",
+    "look up",
+    "find information",
+    "research",
+    "google ",
+    "duckduckgo",
+    "bing ",
+    "search the web",
+    "find on ",
+    "get info",
+    "get details",
+    "get contact",
+    "list of",
+    "all results",
+    "what is",
+    "who is",
+    "site:",
+    "domain:",
+    "linkedin.com",
+    "instagram.com",
 }
 
 
 def decide_strategy(task: str) -> str:
-    """Return 'browser-use' or 'crawl4ai' based on task complexity."""
+    """Return 'browser-use' or 'crawl4ai' based on task signals."""
     task_lower = task.lower()
     if any(s in task_lower for s in _INTERACTIVE_SIGNALS):
         return "browser-use"
+    if any(s in task_lower for s in _SEARCH_SIGNALS):
+        return "crawl4ai"
     return "crawl4ai"
 
 
@@ -44,7 +85,11 @@ def route(url: str, task: str, force: str | None = None) -> dict:
     elif strategy == "crawl4ai":
         return _run_crawl4ai(url, task)
 
-    return {"success": False, "strategy": strategy, "error": f"Unknown strategy: {strategy}"}
+    return {
+        "success": False,
+        "strategy": strategy,
+        "error": f"Unknown strategy: {strategy}",
+    }
 
 
 def _run_browser_use(url: str, task: str) -> dict:
@@ -53,12 +98,15 @@ def _run_browser_use(url: str, task: str) -> dict:
         import asyncio
 
         from scripts.browser_use_runner import run_browser_task
-        result = asyncio.run(run_browser_task(
-            task=f"Navigate to {url}. {task}",
-            max_steps=20,
-            headless=True,
-            save_screenshot=True,
-        ))
+
+        result = asyncio.run(
+            run_browser_task(
+                task=f"Navigate to {url}. {task}",
+                max_steps=20,
+                headless=True,
+                save_screenshot=True,
+            )
+        )
         return {
             "success": result.get("success", False),
             "strategy": "browser-use",
@@ -76,29 +124,29 @@ def _run_browser_use(url: str, task: str) -> dict:
 
 
 def _run_crawl4ai(url: str, task: str) -> dict:
-    """Run task via crawl4ai."""
+    """Run task via crawl4ai using in-process async."""
     try:
-        result = subprocess.run(
-            [
-                "/home/newadmin/miniconda3/bin/python3", "-c",
-                f"import asyncio; from crawl4ai import AsyncWebCrawler; "
-                f"async def m(): async with AsyncWebCrawler() as c: r = await c.arun(url='{url}'); print(r.markdown[:5000]); "
-                f"asyncio.run(m())"
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        if result.returncode == 0:
-            return {
-                "success": True,
-                "strategy": "crawl4ai",
-                "result": result.stdout,
-            }
+        import asyncio
+
+        from crawl4ai import AsyncWebCrawler
+
+        async def _crawl():
+            async with AsyncWebCrawler(verbose=False) as c:
+                r = await c.arun(url=url)
+                links = [
+                    (lnk.get("href", ""), lnk.get("text", ""))
+                    for lnk in (
+                        r.links.get("external", []) if isinstance(r.links, dict) else []
+                    )[:15]
+                ]
+                return (r.markdown[:8000] if r.markdown else ""), links
+
+        markdown, links = asyncio.run(_crawl())
         return {
-            "success": False,
+            "success": True,
             "strategy": "crawl4ai",
-            "error": result.stderr[:500] if result.stderr else "Unknown error",
+            "result": markdown,
+            "links": links,
         }
     except Exception as e:
         return {
@@ -112,6 +160,7 @@ def remember_task(task: str, result: dict, user_id: str = "legion") -> None:
     """Store browser task outcome in mem0ai for cross-session recall."""
     try:
         from mem0 import Memory
+
         m = Memory()
         summary = (
             f"Browser task: '{task}' | "
