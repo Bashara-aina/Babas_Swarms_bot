@@ -1,6 +1,11 @@
+---
+name: browser-use
+description: "Use when the user wants to browse websites, interact with web pages, click buttons, fill forms, login, scroll, take screenshots, extract content from dynamic pages, test user flows, automate multi-step browser tasks, or do anything requiring an autonomous AI browser agent. Examples: \"Open example.com\", \"Click the login button\", \"Fill out the form\", \"Take a screenshot\", \"Test the checkout flow\", \"Automate browser task\", \"Browse to URL and extract data\", \"scroll down\", \"wait for page to load\", \"login to site\", \"submit form\". This skill is MiniMax-native with automatic retry and fallback handling. Auto-routes search queries to crawl4ai and interactive tasks to browser-use."
+---
+
 # browser-use
 
-Python library for autonomous browser agents powered by LLMs. In this stack, all browser LLM calls are routed through MiniMax via the LiteLLM proxy at `http://localhost:4000`.
+Python library for autonomous browser agents powered by LLMs. In this stack, all browser LLM calls route directly to the MiniMax API at `https://api.minimax.io/v1`.
 
 ## Quick start
 
@@ -18,6 +23,7 @@ result = run_browser_task(
 ## Using the Agent class directly
 
 ```python
+import os
 from browser_use.agent import Agent
 from browser_use.llm.litellm import ChatLiteLLM
 from browser_use.controller import Controller
@@ -25,9 +31,9 @@ from browser_use.browser import BrowserProfile, BrowserSession
 
 llm = ChatLiteLLM(
     model="minimax/MiniMax-M2.7",
-    api_key="dummy",
-    api_base="http://localhost:4000",
-    temperature=0.0,
+    api_key=os.environ.get("AI_GATEWAY_API_KEY", "your-api-key"),
+    api_base="https://api.minimax.io/v1",
+    temperature=0.3,
     max_tokens=4096,
 )
 
@@ -52,9 +58,9 @@ print(history[-1].result)
 
 `ChatLiteLLM(model, api_key, api_base, temperature, max_tokens, max_retries, metadata)`
 
-- `api_key` is always `"dummy"` — LiteLLM reads the actual key from `OPENAI_API_KEY` or `AI_GATEWAY_API_KEY` env
-- `api_base` is always `"http://localhost:4000"`
-- `model` is always `"minimax/MiniMax-M2.7"` — no exceptions
+- `api_key` is `os.environ.get("AI_GATEWAY_API_KEY", "your-api-key")`
+- `api_base` is `"https://api.minimax.io/v1"` (direct, not via LiteLLM proxy)
+- `model` is `"minimax/MiniMax-M2.7"`
 
 ## Decision matrix
 
@@ -67,7 +73,7 @@ print(history[-1].result)
 
 ## Policy
 
-- **MiniMax only** — All browser LLM calls must use `minimax/MiniMax-M2.7` via `http://localhost:4000`
+- **MiniMax only** — All browser LLM calls must use `minimax/MiniMax-M2.7` via `https://api.minimax.io/v1`
 - **Forbidden models**: claude, anthropic, gpt-4, openai, gemini, groq, together — any invocation is a violation
 - `scripts/browser_use_safe.sh` enforces this at the shell level for CLI usage
 - `tools/browser_task_router.py` enforces this in Python code
