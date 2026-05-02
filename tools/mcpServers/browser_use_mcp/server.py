@@ -5,11 +5,13 @@ browser-use MCP Server — MiniMax-native browser automation via browser-use.
 Exposes stable browser operations to OpenCode's MCP layer:
   open, click, fill, scroll, wait, screenshot, get_text, get_html, close, run_task
 
-All LLM calls route through ChatLiteLLM (browser-use native) → LiteLLM proxy → minimax/MiniMax-M2.7 only.
+All LLM calls route directly to MiniMax API (https://api.minimax.io/v1).
+The LiteLLM proxy is NOT used due to a known SDK-to-proxy "No connected db" bug.
 Forbidden models (Claude, OpenAI, Gemini, etc.) are rejected at startup.
 
 Usage:
     python -m tools.mcpServers.browser_use_mcp.server
+    python tools/mcpServers/browser_use_mcp/server.py
 """
 
 from __future__ import annotations
@@ -17,27 +19,30 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import logging
 import os
 import sys
 from typing import Any
 
+logging.getLogger("browser_use").setLevel(logging.ERROR)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("mcp").setLevel(logging.WARNING)
+logging.getLogger("LiteLLM").setLevel(logging.ERROR)
+logging.getLogger("liteLLM").setLevel(logging.ERROR)
+
 try:
-    from mcp.server import Server
-    from mcp.server.stdio import stdio_server
-    from mcp.types import TextContent, Tool
+    from mcp.server import FastMCP
 except ImportError:
     print("ERROR: mcp package not installed. Run: pip install mcp", file=sys.stderr)
     sys.exit(1)
 
 APP_NAME = "browser-use-mcp"
-VERSION = "1.0.0"
-server = Server(APP_NAME)
+VERSION = "1.26.0"
 
-# ── MiniMax-only LLM enforcement ────────────────────────────────────────────
-
-LITELLM_PROXY = os.environ.get("AI_GATEWAY_URL", "http://localhost:4000")
-LITELLM_KEY = os.environ.get("AI_GATEWAY_API_KEY", "legion-proxy-key")
-MINIMAX_MODEL = os.environ.get("AI_GATEWAY_MODEL", "minimax-primary")
+MINIMAX_API_BASE = os.environ.get("MINIMAX_API_BASE", "https://api.minimax.io/v1")
+MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
+MINIMAX_MODEL = "minimax/MiniMax-M2.7"
 
 _FORBIDDEN = {"claude", "anthropic", "gpt-4", "gpt-5", "openai", "gemini", "groq", "together"}
 if any(k in MINIMAX_MODEL.lower() for k in _FORBIDDEN):
@@ -46,23 +51,167 @@ if any(k in MINIMAX_MODEL.lower() for k in _FORBIDDEN):
         "This MCP server is locked to MiniMax only. Aborting."
     )
 
+mcp = FastMCP(
+    name=APP_NAME,
+    instructions="MiniMax-native browser automation via browser-use. "
+    "Open URLs, click elements, fill forms, scroll, screenshot, and run autonomous browser tasks. "
+    "All LLM calls use minimax/MiniMax-M2.7 exclusively.",
+)
 
-def _make_llm():
+
+def _patch_litellm_for_minimax():
     from browser_use.llm.litellm import ChatLiteLLM
 
-    return ChatLiteLLM(
+    async def ainvoke_patched(self, messages, output_format=None, **kwargs):
+        from browser_use.llm.exceptions import ModelProviderError, ModelRateLimitError
+        from browser_use.llm.litellm.serializer import LiteLLMMessageSerializer
+        from browser_use.llm.schema import SchemaOptimizer
+        from browser_use.llm.views import ChatInvokeCompletion
+        from litellm import acompletion
+        from litellm.exceptions import APIConnectionError, APIError, RateLimitError, Timeout
+        from litellm.types.utils import ModelResponse
+
+        litellm_messages = LiteLLMMessageSerializer.serialize(messages)
+        params: dict[str, Any] = {
+            "model": self.model,
+            "messages": litellm_messages,
+            "num_retries": self.max_retries,
+        }
+        if self.temperature is not None:
+            params["temperature"] = self.temperature
+        if self.max_tokens is not None:
+            params["max_tokens"] = self.max_tokens
+        if self.api_key:
+            params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+        if self.metadata:
+            params["metadata"] = self.metadata
+        if output_format is not None:
+            schema = SchemaOptimizer.create_optimized_json_schema(output_format)
+            params["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "agent_output",
+                    "strict": True,
+                    "schema": schema,
+                },
+            }
+        try:
+            raw_response = await acompletion(**params)
+        except RateLimitError as e:
+            raise ModelRateLimitError(message=str(e), model=self.name) from e
+        except Timeout as e:
+            raise ModelProviderError(message=f"Request timed out: {e}", model=self.name) from e
+        except APIConnectionError as e:
+            raise ModelProviderError(message=str(e), model=self.name) from e
+        except APIError as e:
+            status = getattr(e, "status_code", 502) or 502
+            raise ModelProviderError(message=str(e), status_code=status, model=self.name) from e
+        except ModelProviderError:
+            raise
+        except Exception as e:
+            raise ModelProviderError(message=str(e), model=self.name) from e
+
+        assert isinstance(raw_response, ModelResponse)
+        response: ModelResponse = raw_response
+        choice = response.choices[0] if response.choices else None
+        if choice is None:
+            raise ModelProviderError(
+                message="Empty response: no choices returned by the model",
+                status_code=502,
+                model=self.name,
+            )
+        content = choice.message.content or ""
+        usage = self._parse_usage(response)
+        stop_reason = choice.finish_reason
+        thinking: str | None = None
+        reasoning = getattr(choice.message, "reasoning_content", None)
+        if reasoning:
+            thinking = str(reasoning)
+        if output_format is not None:
+            if not content:
+                raise ModelProviderError(
+                    message="Empty response for structured output",
+                    status_code=500,
+                    model=self.name,
+                )
+            try:
+                parsed = output_format.model_validate_json(content)
+                return ChatInvokeCompletion(
+                    completion=parsed,
+                    thinking=thinking,
+                    usage=usage,
+                    stop_reason=stop_reason,
+                )
+            except Exception:
+                pass
+            retry_params = dict(params)
+            retry_params.pop("response_format", None)
+            raw_response2 = await acompletion(**retry_params)
+            assert isinstance(raw_response2, ModelResponse)
+            choice2 = raw_response2.choices[0] if raw_response2.choices else None
+            if choice2 is None:
+                raise ModelProviderError(message="Empty response on retry", status_code=502, model=self.name)
+            content2 = choice2.message.content or ""
+            if not content2:
+                raise ModelProviderError(message="Empty content on retry", status_code=500, model=self.name)
+            try:
+                parsed2 = output_format.model_validate_json(content2)
+                return ChatInvokeCompletion(
+                    completion=parsed2,
+                    thinking=thinking,
+                    usage=usage,
+                    stop_reason=stop_reason,
+                )
+            except Exception:
+                pass
+            import json as _json
+            import re as _re
+            json_match = _re.search(r"\{[\s\S]*\}", content2)
+            if json_match:
+                try:
+                    data = _json.loads(json_match.group())
+                    parsed3 = output_format.model_validate(data)
+                    return ChatInvokeCompletion(
+                        completion=parsed3,
+                        thinking=thinking,
+                        usage=usage,
+                        stop_reason=stop_reason,
+                    )
+                except Exception:
+                    pass
+            raise ModelProviderError(
+                message=f"MiniMax output incompatible with AgentOutput schema: {content2[:300]}",
+                status_code=500,
+                model=self.name,
+            )
+        return ChatInvokeCompletion(
+            completion=content,
+            thinking=thinking,
+            usage=usage,
+            stop_reason=stop_reason,
+        )
+
+    ChatLiteLLM.ainvoke = ainvoke_patched
+
+
+def _make_llm():
+    _patch_litellm_for_minimax()
+    from browser_use.llm.litellm import ChatLiteLLM
+
+    llm = ChatLiteLLM(
         model=MINIMAX_MODEL,
-        api_key=LITELLM_KEY,
-        api_base=LITELLM_PROXY,
-        temperature=0.0,
+        api_key=MINIMAX_API_KEY,
+        api_base=MINIMAX_API_BASE,
+        temperature=0.3,
+        max_retries=3,
     )
+    object.__setattr__(llm, "_provider_name", "browser-use")
+    return llm
 
-
-# ── BrowserSession wrapper (thin layer on browser_use BrowserSession) ─────
 
 class BrowserSessionWrapper:
-    """Thin wrapper around browser-use's BrowserSession for MCP tool exposure."""
-
     def __init__(self, name: str = "default", headless: bool = True):
         self.name = name
         self.headless = headless
@@ -93,41 +242,57 @@ class BrowserSessionWrapper:
             llm=llm,
             browser=self._session,
             max_actions_per_step=5,
-            enable_planning=True,
-            use_thinking=True,
+            enable_planning=False,
+            use_thinking=False,
             max_failures=3,
         )
         self._initialized = True
 
     async def open(self, url: str) -> dict[str, Any]:
         await self._ensure()
-        await self._session.connect()
+        await self._session.start()
         page = await self._session.new_page()
-        await page.goto(url, wait_until="domcontentloaded", timeout=15000)
-        return {"url": page.url, "title": await page.title()}
+        await page.goto(url)
+        await asyncio.sleep(0.3)
+        return {"url": await page.get_url(), "title": await page.get_title()}
+
+    async def _get_page(self):
+        page = await self._session.get_current_page()
+        if not page:
+            return None
+        return page
 
     async def click(self, selector: str) -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        await page.click(selector, timeout=5000)
+        escaped = selector.replace("'", "\\'")
+        js = f"() => {{ const el = document.querySelector('{escaped}'); if (!el) return 'not_found'; el.click(); return 'clicked'; }}"
+        result = await page.evaluate(js)
+        if result == "not_found":
+            return {"error": f"Element not found: {selector}"}
         return {"success": True, "selector": selector}
 
     async def fill(self, selector: str, value: str) -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        await page.fill(selector, value)
+        escaped_sel = selector.replace("'", "\\'")
+        escaped_val = value.replace("'", "\\'").replace("\n", "\\n")
+        js = f"() => {{ const el = document.querySelector('{escaped_sel}'); if (!el) return 'not_found'; el.value = '{escaped_val}'; el.dispatchEvent(new Event('input', {{bubbles: true}})); return 'filled'; }}"
+        result = await page.evaluate(js)
+        if result == "not_found":
+            return {"error": f"Element not found: {selector}"}
         return {"success": True, "selector": selector, "value": value}
 
     async def scroll(self, pixels: int = 300) -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        await page.evaluate(f"window.scrollBy(0, {pixels})")
+        await page.evaluate(f"() => window.scrollBy(0, {pixels})")
         return {"success": True, "pixels": pixels}
 
     async def wait(self, seconds: float = 1.0) -> dict[str, Any]:
@@ -136,34 +301,41 @@ class BrowserSessionWrapper:
 
     async def screenshot(self, path: str) -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        await page.screenshot(path=path)
+        import base64
+        img_data = await page.screenshot()
+        if isinstance(img_data, str):
+            img_data = base64.b64decode(img_data)
+        with open(path, "wb") as f:
+            f.write(img_data)
         return {"success": True, "path": path}
 
     async def get_text(self, selector: str = "body") -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        el = page.query_selector(selector)
-        text = await el.text_content() if el else ""
+        escaped = selector.replace("'", "\\'")
+        js = f"() => document.querySelector('{escaped}')?.innerText || ''"
+        text = await page.evaluate(js)
         return {"text": text, "selector": selector}
 
     async def get_html(self, selector: str = "body") -> dict[str, Any]:
         await self._ensure()
-        page = self._session.get_current_page()
+        page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        el = page.query_selector(selector)
-        html = await el.inner_html() if el else ""
+        escaped = selector.replace("'", "\\'")
+        js = f"() => document.querySelector('{escaped}')?.innerHTML || ''"
+        html = await page.evaluate(js)
         return {"html": html, "selector": selector}
 
     async def close(self) -> dict[str, Any]:
         if self._session:
             with contextlib.suppress(Exception):
-                await self._session.close_page()
+                await self._session.kill()
             self._session = None
         self._initialized = False
         return {"success": True, "session": self.name}
@@ -176,8 +348,6 @@ class BrowserSessionWrapper:
         return {"success": True, "result": fr or "Task completed", "steps": max_steps}
 
 
-# ── Session registry ───────────────────────────────────────────────────────
-
 _sessions: dict[str, BrowserSessionWrapper] = {}
 
 
@@ -187,172 +357,75 @@ def _get_session(name: str = "default") -> BrowserSessionWrapper:
     return _sessions[name]
 
 
-# ── MCP Tools ───────────────────────────────────────────────────────────────
-
-@server.list_tools()
-async def list_tools() -> list[Tool]:
-    return [
-        Tool(
-            name="browser_open",
-            description="Open a URL in the browser",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "url": {"type": "string"},
-                    "session": {"type": "string", "default": "default"},
-                },
-                "required": ["url"],
-            },
-        ),
-        Tool(
-            name="browser_click",
-            description="Click an element by CSS selector",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "selector": {"type": "string"},
-                    "session": {"type": "string", "default": "default"},
-                },
-                "required": ["selector"],
-            },
-        ),
-        Tool(
-            name="browser_fill",
-            description="Fill an input field by CSS selector",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "selector": {"type": "string"},
-                    "value": {"type": "string"},
-                    "session": {"type": "string", "default": "default"},
-                },
-                "required": ["selector", "value"],
-            },
-        ),
-        Tool(
-            name="browser_scroll",
-            description="Scroll the page by pixels",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "pixels": {"type": "integer", "default": 300},
-                    "session": {"type": "string", "default": "default"},
-                },
-            },
-        ),
-        Tool(
-            name="browser_wait",
-            description="Wait for seconds",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "seconds": {"type": "number", "default": 1.0},
-                    "session": {"type": "string", "default": "default"},
-                },
-            },
-        ),
-        Tool(
-            name="browser_screenshot",
-            description="Take a screenshot and save to path",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string"},
-                    "session": {"type": "string", "default": "default"},
-                },
-                "required": ["path"],
-            },
-        ),
-        Tool(
-            name="browser_get_text",
-            description="Get text from element or body",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "selector": {"type": "string", "default": "body"},
-                    "session": {"type": "string", "default": "default"},
-                },
-            },
-        ),
-        Tool(
-            name="browser_get_html",
-            description="Get inner HTML from element or body",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "selector": {"type": "string", "default": "body"},
-                    "session": {"type": "string", "default": "default"},
-                },
-            },
-        ),
-        Tool(
-            name="browser_close",
-            description="Close the browser session",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "session": {"type": "string", "default": "default"},
-                },
-            },
-        ),
-        Tool(
-            name="browser_run_task",
-            description="Run autonomous browser task powered by MiniMax",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "task": {"type": "string"},
-                    "max_steps": {"type": "integer", "default": 20},
-                    "session": {"type": "string", "default": "default"},
-                },
-                "required": ["task"],
-            },
-        ),
-    ]
+@mcp.tool()
+async def browser_open(url: str, session: str = "default") -> str:
+    """Open a URL in the browser."""
+    result = await _get_session(session).open(url)
+    return json.dumps(result, indent=2)
 
 
-@server.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
-    session_name = arguments.pop("session", "default")
-    session = _get_session(session_name)
-
-    try:
-        if name == "browser_open":
-            result = await session.open(arguments["url"])
-        elif name == "browser_click":
-            result = await session.click(arguments["selector"])
-        elif name == "browser_fill":
-            result = await session.fill(arguments["selector"], arguments["value"])
-        elif name == "browser_scroll":
-            result = await session.scroll(arguments.get("pixels", 300))
-        elif name == "browser_wait":
-            result = await session.wait(arguments.get("seconds", 1.0))
-        elif name == "browser_screenshot":
-            result = await session.screenshot(arguments["path"])
-        elif name == "browser_get_text":
-            result = await session.get_text(arguments.get("selector", "body"))
-        elif name == "browser_get_html":
-            result = await session.get_html(arguments.get("selector", "body"))
-        elif name == "browser_close":
-            result = await session.close()
-        elif name == "browser_run_task":
-            result = await session.run_task(arguments["task"], arguments.get("max_steps", 20))
-        else:
-            result = {"error": f"Unknown tool: {name}"}
-
-        return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-    except Exception as exc:
-        return [TextContent(type="text", text=json.dumps({"error": str(exc)}))]
+@mcp.tool()
+async def browser_click(selector: str, session: str = "default") -> str:
+    """Click an element by CSS selector."""
+    result = await _get_session(session).click(selector)
+    return json.dumps(result, indent=2)
 
 
-# ── Main ────────────────────────────────────────────────────────────────────
+@mcp.tool()
+async def browser_fill(selector: str, value: str, session: str = "default") -> str:
+    """Fill an input field by CSS selector."""
+    result = await _get_session(session).fill(selector, value)
+    return json.dumps(result, indent=2)
 
-async def main():
-    options = server.create_initialization_options()
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(read_stream, write_stream, options)
+
+@mcp.tool()
+async def browser_scroll(pixels: int = 300, session: str = "default") -> str:
+    """Scroll the page by pixels."""
+    result = await _get_session(session).scroll(pixels)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_wait(seconds: float = 1.0, session: str = "default") -> str:
+    """Wait for seconds."""
+    result = await _get_session(session).wait(seconds)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_screenshot(path: str, session: str = "default") -> str:
+    """Take a screenshot and save to path."""
+    result = await _get_session(session).screenshot(path)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_get_text(selector: str = "body", session: str = "default") -> str:
+    """Get text from element or body."""
+    result = await _get_session(session).get_text(selector)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_get_html(selector: str = "body", session: str = "default") -> str:
+    """Get inner HTML from element or body."""
+    result = await _get_session(session).get_html(selector)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_close(session: str = "default") -> str:
+    """Close the browser session."""
+    result = await _get_session(session).close()
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+async def browser_run_task(task: str, max_steps: int = 20, session: str = "default") -> str:
+    """Run autonomous browser task powered by MiniMax."""
+    result = await _get_session(session).run_task(task, max_steps)
+    return json.dumps(result, indent=2)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    mcp.run(transport="stdio")

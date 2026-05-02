@@ -27,16 +27,17 @@ from browser_use.llm.litellm import ChatLiteLLM
 
 
 def get_minimax_llm() -> ChatLiteLLM:
+    import os
     model = "minimax/MiniMax-M2.7"
-    api_key = "dummy"  # liteLLM reads from OPENAI_API_KEY or AI_GATEWAY_API_KEY env
-    api_base = "http://localhost:4000"
+    api_key = os.environ.get("MINIMAX_API_KEY", "")
+    api_base = "https://api.minimax.io/v1"
     return ChatLiteLLM(
         model=model,
         api_key=api_key,
         api_base=api_base,
-        temperature=0.0,
+        temperature=0.3,
         max_tokens=4096,
-        max_retries=2,
+        max_retries=3,
     )
 
 
