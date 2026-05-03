@@ -18,9 +18,10 @@ import os
 import re
 import time
 import uuid
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any
 
 import yaml
 
@@ -126,6 +127,19 @@ async def execute_chain(
             logger.info("Chain step %d complete", i)
         except Exception as exc:
             logger.exception("Chain step %d failed: %s", i, exc)
+            try:
+                from core.self_evolution import get_self_evolution_engine
+                engine = get_self_evolution_engine()
+                await engine.record_failure(
+                    task=step.description,
+                    approach="execute_chain step",
+                    failure_mode=f"{type(exc).__name__}: {exc}",
+                    root_cause="Exception in chain step execution",
+                    fix_applied="Chain halted at failed step",
+                    prevention="Validate step inputs before execution; wrap async calls with timeouts",
+                )
+            except Exception:
+                pass
             outputs.append(f"[Step {i} ERROR] {step.description}\nError: {exc}")
             break
 
@@ -201,7 +215,7 @@ async def start_monitor(
     interval_sec: int,
     fn: Callable[..., Coroutine[Any, Any, str]],
     notify_fn: Callable[[str], Coroutine[Any, Any, None]],
-    alert_if: Optional[Callable[[str], bool]] = None,
+    alert_if: Callable[[str], bool] | None = None,
 ) -> str:
     task_id = str(uuid.uuid4())[:8]
     monitor = MonitorTask(
@@ -220,7 +234,7 @@ async def start_monitor(
 
 async def _monitor_loop(
     monitor: MonitorTask,
-    alert_if: Optional[Callable[[str], bool]],
+    alert_if: Callable[[str], bool] | None,
 ) -> None:
     while monitor.running:
         try:
@@ -230,6 +244,19 @@ async def _monitor_loop(
                 await monitor.notify_fn(f"Monitor <b>{monitor.description}</b>\n\n<pre>{result[:2000]}</pre>")
         except Exception as exc:
             logger.exception("Monitor %s error: %s", monitor.task_id, exc)
+            try:
+                from core.self_evolution import get_self_evolution_engine
+                engine = get_self_evolution_engine()
+                await engine.record_failure(
+                    task=monitor.description,
+                    approach=f"monitor loop(task_id={monitor.task_id})",
+                    failure_mode=f"{type(exc).__name__}: {exc}",
+                    root_cause="Exception in monitor task loop",
+                    fix_applied="Error logged; monitor continues running",
+                    prevention="Wrap monitor function with timeouts; ensure monitor fn handles its own exceptions",
+                )
+            except Exception:
+                pass
             await monitor.notify_fn(f"Monitor <b>{monitor.description}</b> error: {exc}")
         await asyncio.sleep(monitor.interval_sec)
 
@@ -332,7 +359,7 @@ class SwarmDebateOrchestrator:
         round1_tasks = [self._call_agent(agent, task) for agent in self.AGENTS]
         round1_results_raw = await asyncio.gather(*round1_tasks, return_exceptions=True)
         round1: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, round1_results_raw):
+        for agent, result in zip(self.AGENTS, round1_results_raw, strict=False):
             round1[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 2: Cross-Examination ───────────────────────────────────────
@@ -354,7 +381,7 @@ class SwarmDebateOrchestrator:
         ]
         round2_results_raw = await asyncio.gather(*round2_tasks, return_exceptions=True)
         round2: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, round2_results_raw):
+        for agent, result in zip(self.AGENTS, round2_results_raw, strict=False):
             round2[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 3: Judge Synthesis ─────────────────────────────────────────
@@ -414,7 +441,7 @@ class SwarmDebateOrchestrator:
         ]
         confidence_raw = await asyncio.gather(*confidence_tasks, return_exceptions=True)
         confidence_scores: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, confidence_raw):
+        for agent, result in zip(self.AGENTS, confidence_raw, strict=False):
             confidence_scores[agent] = "?/10" if isinstance(result, Exception) else result[:150]
 
         return {
@@ -653,7 +680,7 @@ async def compose_jarvis_response(bundle: dict[str, Any]) -> str:
 
     from llm_client import wiki_raw_completion
 
-    model = os.getenv("LEGION_JARVIS_MODEL", "minimax/MiniMax-Text-01")
+    os.getenv("LEGION_JARVIS_MODEL", "minimax/MiniMax-Text-01")
     prompt = f"""User goal (Bashara):
 {goal}
 
@@ -676,7 +703,7 @@ State explicitly: **No messages were sent.** WhatsApp/email sends require Bashar
 
 Keep total under ~3500 characters. No markdown code blocks."""
 
-    body = await wiki_raw_completion(prompt, model=model, max_tokens=1200, temperature=0.35)
+    body = await wiki_raw_completion(prompt, system_prompt="You are a concise summarizer. Keep under 3500 chars. No markdown code blocks.", temperature=0.35)
     if not (body or "").strip():
         return (
             "Jarvis bundle was gathered but the synthesis model returned empty. "
@@ -724,7 +751,7 @@ class NexusOrchestrator:
 
     async def route_to_dept(self, dept: str, task: str) -> RoutingDecision:
         """Skip all routing layers; use the department's default agent."""
-        from core.agent_registry import agents_by_department, get_agent, get_department_default
+        from core.agent_registry import agents_by_department, get_department_default
 
         agent = get_department_default(dept)
         if not agent:
@@ -745,13 +772,12 @@ class NexusOrchestrator:
         stream: bool = True,
     ) -> str:
         """Execute task with the selected agent, using full fallback chain."""
-        from core.agent_registry import AgentDef
 
         system_prompt = self._build_system_prompt(decision.agent, task)
 
-        model_ids = [decision.agent.primary_model_id] + decision.agent.fallback_model_ids
+        model_ids = [decision.agent.primary_model_id, *decision.agent.fallback_model_ids]
 
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for model_id in model_ids:
             if not model_id:
                 continue
@@ -778,7 +804,7 @@ class NexusOrchestrator:
             logger.error("Swarm execution failed: %s", exc)
             return f"❌ Swarm error: {exc}"
 
-    async def _layer1_keyword(self, task: str) -> Optional[RoutingDecision]:
+    async def _layer1_keyword(self, task: str) -> RoutingDecision | None:
         """Keyword matching using routing_keywords.yaml."""
         if not self._keyword_map:
             return None
@@ -811,7 +837,7 @@ class NexusOrchestrator:
             reasoning=f"Matched keywords: {', '.join(found_keywords[:5])}",
         )
 
-    async def _layer2_semantic(self, task: str) -> Optional[RoutingDecision]:
+    async def _layer2_semantic(self, task: str) -> RoutingDecision | None:
         """Sentence-transformer semantic similarity search."""
         from core.agent_registry import get_agent, semantic_search
 
@@ -838,7 +864,6 @@ class NexusOrchestrator:
         """Ask local Gemma3:12b which department should handle the task."""
         from core.agent_registry import (
             AGENT_REGISTRY,
-            get_agent,
             get_department_default,
             list_all_departments,
         )
@@ -870,7 +895,6 @@ class NexusOrchestrator:
 
     def _build_system_prompt(self, agent: Any, task: str) -> str:
         """Load Jinja2 template or return a default system prompt."""
-        from core.agent_registry import AgentDef
 
         tmpl_path = Path(agent.prompt_template)
         try:
@@ -945,7 +969,7 @@ class NexusOrchestrator:
                 return f"[{agent.name} error: {exc}]"
 
         responses = await asyncio.gather(*[_run(a) for a in top_agents])
-        parts = [f"**{a.name}** ({a.department}):\n{r}" for a, r in zip(top_agents, responses)]
+        parts = [f"**{a.name}** ({a.department}):\n{r}" for a, r in zip(top_agents, responses, strict=False)]
         return "\n\n---\n\n".join(parts)
 
     def _fallback_agent(self) -> Any:
@@ -1061,7 +1085,7 @@ class LegionSwarmOrchestrator:
         phase1_tasks = [_run_with_sem(agent_def) for agent_def in team_defs]
         phase1_results = await asyncio.gather(*phase1_tasks, return_exceptions=True)
 
-        for agent_def, result in zip(team_defs, phase1_results):
+        for agent_def, result in zip(team_defs, phase1_results, strict=False):
             if isinstance(result, Exception):
                 phase1_outputs[agent_def.key] = f"[Error: {result}]"
             else:
@@ -1090,10 +1114,10 @@ class LegionSwarmOrchestrator:
                     "Keep what's strong, fix what's weak. Respond with your refined position."
                 )
 
-            round_tasks = [_run_with_sem(agent_def, ctx) for agent_def, ctx in zip(team_defs, debate_contexts)]
+            round_tasks = [_run_with_sem(agent_def, ctx) for agent_def, ctx in zip(team_defs, debate_contexts, strict=False)]
             round_results = await asyncio.gather(*round_tasks, return_exceptions=True)
 
-            for agent_def, result in zip(team_defs, round_results):
+            for agent_def, result in zip(team_defs, round_results, strict=False):
                 if isinstance(result, Exception):
                     current_proposals[agent_def.key] = current_proposals.get(agent_def.key, "")
                 else:
@@ -1248,11 +1272,24 @@ class LegionOrchestrator:
             result, _ = await chat(
                 enriched_task,
                 agent_key=agent.name,
-                system_prompt=self._build_agent_system_prompt(agent),
+                task_context=self._build_agent_system_prompt(agent),
             )
             return result
         except Exception as exc:
             logger.error("Single agent run failed: %s", exc)
+            try:
+                from core.self_evolution import get_self_evolution_engine
+                engine = get_self_evolution_engine()
+                await engine.record_failure(
+                    task=task[:100],
+                    approach=f"LegionOrchestrator._run_single(agent={agent.name})",
+                    failure_mode=f"{type(exc).__name__}: {exc}",
+                    root_cause="Exception in single-agent orchestration",
+                    fix_applied="Error returned to caller",
+                    prevention="Validate agent and task before calling _run_single; wrap chat() call",
+                )
+            except Exception:
+                pass
             return f"Error: {exc}"
 
     async def _run_debate(
@@ -1266,7 +1303,7 @@ class LegionOrchestrator:
         from llm_client import chat
 
         async def llm_call(model: str, system: str, user: str) -> str:
-            result, _ = await chat(user, agent_key="general", system_prompt=system)
+            result, _ = await chat(user, agent_key="general", task_context=system)
             return result
 
         swarm = LegionSwarmOrchestrator(llm_call=llm_call)

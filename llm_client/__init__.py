@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import hashlib
 import json
 import logging
@@ -15,8 +16,9 @@ import os
 import random
 import re
 import time
+from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 import aiofiles
 import litellm
@@ -65,10 +67,35 @@ except ImportError as _ca_err:
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
 
+
+async def _safe_record_failure(
+    task: str,
+    approach: str,
+    failure_mode: str,
+    root_cause: str,
+    fix_applied: str,
+    prevention: str,
+) -> None:
+    """Call record_failure() without letting it raise — evolution must never block execution."""
+    try:
+        from core.self_evolution import get_self_evolution_engine
+
+        engine = get_self_evolution_engine()
+        await engine.record_failure(
+            task=task,
+            approach=approach,
+            failure_mode=failure_mode,
+            root_cause=root_cause,
+            fix_applied=fix_applied,
+            prevention_rule=prevention,
+        )
+    except Exception:
+        pass
+
 __all__ = [
+    "agent_loop",
     "call_llm",
     "chat",
-    "agent_loop",
     "wiki_raw_completion",
 ]
 
@@ -129,16 +156,6 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "9. Minimal complexity — but never skip critical edge cases\n"
         "Code quality: type hints on all functions, docstrings on public methods, "
         "explicit error handling (specific exception types, not bare except)."
-    ),
-    "debug": (
-        f"{_PERSONA}\n\n"
-        "DEBUG MODE:\n"
-        "1. Root cause — ONE sentence\n"
-        "2. What went wrong — ONE sentence\n"
-        "3. How to fix — concrete steps\n"
-        "4. Verification — how to confirm fix\n"
-        "Always reproduce the error before reporting. "
-        "Show exact error messages. Never guess."
     ),
     "math": (
         f"{_PERSONA}\n\n"
@@ -204,7 +221,39 @@ SYSTEM_PROMPTS: dict[str, str] = {
         "6. End with the most important insight or takeaway.\n"
         "Never start with hollow agreement. Opinions are mandatory."
     ),
+    "build": (
+        f"{_PERSONA}\n\n"
+        "BUILD MODE — Incremental implementation with verification.\n"
+        "1. Make one change at a time — small, self-contained, testable.\n"
+        "2. Run tests immediately after each change.\n"
+        "3. Verify with actual command output, not assumptions.\n"
+        "4. If test fails: read the error, fix the error, re-test.\n"
+        "5. Commit after each verified successful change.\n"
+        "Never batch multiple changes without verification."
+    ),
+    "debug": (
+        f"{_PERSONA}\n\n"
+        "DEBUG MODE — Systematic root-cause analysis.\n"
+        "1. Root cause — ONE sentence.\n"
+        "2. What went wrong — ONE sentence.\n"
+        "3. How to fix — concrete steps.\n"
+        "4. Verification — how to confirm fix.\n"
+        "Always reproduce the error before reporting. "
+        "Show exact error messages. Never guess."
+    ),
+    "react": (
+        f"{_PERSONA}\n\n"
+        "REACT MODE — Fast reactive fixes.\n"
+        "1. Identify the minimal change that fixes the issue.\n"
+        "2. Apply it directly — no refactoring, no tests unless required.\n"
+        "3. Verify it works.\n"
+        "Ship the fix. Move on."
+    ),
 }
+
+_MODE_SYSTEM_INJECT = """
+CURRENT MODE: {{mode}}. Follow the mode-specific instructions above.
+MODE SWITCH: If you need to switch mode, say MODE: <mode> at the start of your next response."""
 
 
 # ── Humanization layer singletons ───────────────────────────────────────────
@@ -272,7 +321,7 @@ def _next_chain_cooldown_wait(chain: list[str]) -> int:
     return max(wait_times) if wait_times else 0
 
 
-def _get_api_key(model: str) -> Optional[str]:
+def _get_api_key(model: str) -> str | None:
     """Return API key for a model provider."""
     provider = model.split("/")[0].lower()
     key_map = {
@@ -365,6 +414,23 @@ async def _execute_tool_with_self_heal(
     """
     _MAX_ATTEMPTS = 3
 
+    # ── SAFETY GATE: intercept ALL tool calls before execution ─────────────────
+    # GAP-04 FIX: LegionSafetyGuard was UNWIRED — any agent could call any tool
+    # including destructive commands (rm -rf, DROP TABLE, force push).
+    # Fixed: wire check_tool_call() into every tool invocation here.
+    try:
+        from core.safety.invariant_guard import get_safety_guard
+
+        guard = get_safety_guard()
+        check = guard.check_tool_call(tool_name, args, agent="legion")
+        if not check["allowed"]:
+            blocked_msg = f"TOOL CALL BLOCKED by LegionSafetyGuard\n  tool: {tool_name}\n  args: {args}\n  reason: {check['reason']}\n  suggestion: {check.get('suggestion', 'n/a')}"
+            logger.warning("safety gate blocked: %s", blocked_msg)
+            return blocked_msg
+        args = check.get("modified_args", args)
+    except Exception:
+        pass  # Safety guard errors must NOT block tool execution
+
     # Track strategy usage for structured failure report
     strategy_attempts: list[tuple[str, str]] = []
     errors: list[str] = []
@@ -444,8 +510,8 @@ async def _execute_tool_with_self_heal(
 
 async def call_llm(
     messages: list[dict],
-    model: str = None,
-    tools: list = None,
+    model: str | None = None,
+    tools: list | None = None,
     stream: bool = False,
     **kwargs,
 ) -> str | dict:
@@ -530,8 +596,29 @@ async def call_llm(
     if stream:
         return acompletion(**api_kwargs)
 
+    # Phoenix tracing — time the call and track token usage
+    _start_time = time.perf_counter()
+    _prompt_tokens = 0
+    _completion_tokens = 0
+
     try:
         response = await acompletion(**api_kwargs)
+        _latency_ms = (time.perf_counter() - _start_time) * 1000
+
+        # Extract token usage from litellm response
+        _usage = getattr(response, "usage", None)
+        if _usage is not None:
+            _prompt_tokens = getattr(_usage, "prompt_tokens", 0) or 0
+            _completion_tokens = getattr(_usage, "completion_tokens", 0) or 0
+
+        # Record to global token tracker
+        try:
+            from core.integrations.phoenix_observability import get_token_tracker
+            _tracker = get_token_tracker()
+            _tracker.record_run(model, _prompt_tokens, _completion_tokens, _latency_ms)
+        except Exception:
+            pass  # Tracing is non-critical
+
     except litellm.RateLimitError:
         _mark_rate_limited(model)
         chain = get_fallback_chain(provider)
@@ -577,7 +664,7 @@ async def _call_model(
     chain = _fallback_chain or [model]
     _is_pytest_run = bool(os.getenv("PYTEST_CURRENT_TEST"))
 
-    for attempt_idx, model_name in enumerate(chain):
+    for _attempt_idx, model_name in enumerate(chain):
         provider = model_name.split("/")[0].lower()
 
         kwargs: dict[str, Any] = {
@@ -635,10 +722,11 @@ async def _call_model(
             try:
                 # AUDIT04: Log every actual acompletion call
                 logger.debug(
-                    f"[AUDIT04] acompletion call: model={model_name}, messages={len(messages)}, roles={[m.get('role') for m in messages]}"
+                    f"[AUDIT04] acompletion call: model={model_name}, messages={len(messages)}, "
+                    f"roles={[m.get('role') for m in messages]}"
                 )
                 return await asyncio.wait_for(acompletion(**kwargs), timeout=_timeout)
-            except (litellm.RateLimitError, litellm.APIConnectionError, asyncio.TimeoutError) as exc:
+            except (TimeoutError, litellm.RateLimitError, litellm.APIConnectionError) as exc:
                 if retry_attempt < 2:
                     wait = (2**retry_attempt) + random.uniform(0, 1)
                     logger.warning(
@@ -679,6 +767,46 @@ async def wiki_raw_completion(
     except Exception as e:
         logger.warning("wiki_raw_completion failed: %s", e)
         return f"[wiki completion error: {e}]"
+
+
+# ── Microcompact — lightweight pruning at 70% fill to prevent full compaction ───
+
+def _microcompact_messages(messages: list[dict]) -> list[dict]:
+    """GAP-07: Light pruning pass at 70% fill — truncate long tool results, keep structure.
+
+    This is NOT a full compaction (no LLM summarization). It prunes tool result content
+    to keep context at ~55% fill and prevent reaching 96% where full compaction fires.
+    Called automatically inside _agent_loop_inner when total_size > 90000 chars.
+    """
+    if len(messages) <= 4:
+        return messages
+
+    system_msg = messages[0] if messages and messages[0].get("role") == "system" else None
+    result: list[dict] = []
+
+    if system_msg:
+        result.append(system_msg)
+
+    for m in messages[1:]:
+        if m.get("role") == "system":
+            result.append(m)
+            continue
+
+        content = m.get("content", "")
+        role = m.get("role", "")
+
+        if role == "tool":
+            truncated = content[:400] + "\u2026" if len(content) > 400 else content
+            result.append({**m, "content": truncated})
+        elif role == "assistant" and m.get("tool_calls"):
+            result.append(m)
+        elif role in ("user", "assistant"):
+            truncated = content[:300] + "\u2026" if len(content) > 300 else content
+            result.append({**m, "content": truncated})
+        else:
+            result.append(m)
+
+    return result
 
 
 # ── Context compaction ────────────────────────────────────────────────────────────
@@ -742,8 +870,13 @@ async def _agent_loop_inner(
     thread_id: str | None = None,
     progress_cb: Callable[[str], Coroutine[Any, Any, None]] | None = None,
     photo_cb: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    mode: str = "coding",
 ) -> tuple[str, str]:
     """Inner loop for agentic /do command — handles tool_calls from LLM."""
+    # GAP-27: Inject mode into system prompt for mode-specific behavior
+    mode_inject = _MODE_SYSTEM_INJECT.replace("{{mode}}", mode)
+    system = system + "\n" + mode_inject if system else mode_inject
+
     messages: list[dict] = [
         {"role": "system", "content": system},
         {"role": "user", "content": task},
@@ -775,7 +908,8 @@ async def _agent_loop_inner(
         try:
             # AUDIT04: Log agent loop LLM calls
             logger.debug(
-                f"[AUDIT04] agent_loop LLM call: iter={iteration}, messages={len(messages)}, roles={[m.get('role') for m in messages]}"
+                f"[AUDIT04] agent_loop LLM call: iter={iteration}, messages={len(messages)}, "
+                f"roles={[m.get('role') for m in messages]}"
             )
             response = await _call_model(
                 model,
@@ -814,6 +948,14 @@ async def _agent_loop_inner(
                     if parsed:
                         tool_name, args = parsed
                         logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
+
+                # GAP-07: Microcompact auto-trigger — prevent 96% fill compactions
+                # Check if messages are getting large; if >70% of context window, prune tool result lengths
+                if len(messages) > 12:
+                    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+                    # Rough estimate: MiniMax M2.7 ~128K context, trigger microcompact at 90K (70%)
+                    if total_size > 90000:
+                        messages = _microcompact_messages(messages)
 
                 if progress_cb:
                     await progress_cb(_tool_label(tool_name, args))
@@ -892,6 +1034,14 @@ async def _agent_loop_inner(
 
         except Exception as e:
             logger.exception("agent_loop error: %s", e)
+            await _safe_record_failure(
+                task=task,
+                approach=f"agent_loop(model={model})",
+                failure_mode=f"{type(e).__name__}: {e}",
+                root_cause="LLM call or tool execution failed in agent_loop",
+                fix_applied="model advanced to next fallback or returned error",
+                prevention="Ensure fallback chain covers API errors; tool errors should be handled by _execute_tool_with_self_heal",
+            )
             if _advance_model():
                 continue
             if thread_id:
@@ -978,6 +1128,7 @@ async def agent_loop(
     show_thinking: bool = False,
     progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
     photo_cb: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    mode: str | None = None,
 ) -> tuple[str, str]:
     """Public wrapper for _agent_loop_inner with conversation history injection.
 
@@ -1030,7 +1181,10 @@ async def agent_loop(
             from core.memory_manager import LegionSemanticMemory
             semantic_results = await LegionSemanticMemory().search_memories(task, str(user_id), limit=5)
             if semantic_results:
-                mem_lines = ["[RELEVANT MEMORIES]"] + [str(m.get("content", ""))[:200] for m in semantic_results[:5] if m.get("content")]
+                mem_lines = (
+                    ["[RELEVANT MEMORIES]"]
+                    + [str(m.get("content", ""))[:200] for m in semantic_results[:5] if m.get("content")]
+                )
                 base_system = base_system + "\n\n" + "\n".join(mem_lines)
         except Exception:
             pass
@@ -1092,7 +1246,8 @@ async def agent_loop(
         # Build via SystemPromptBuilder for additional context layers
         spb = SystemPromptBuilder(memory=memory, emotion=emotion, graph=graph, reflection=reflection)
         spb.set_user_message(task)
-        cognitive_ctx = await spb.build(task_context=task, emotion=str(current_emotion) if 'current_emotion' in dir() else "neutral")
+        emotion_str = str(current_emotion) if "current_emotion" in dir() else "neutral"
+        cognitive_ctx = await spb.build(task_context=task, emotion=emotion_str)
         if cognitive_ctx:
             base_system = base_system + "\n\n" + cognitive_ctx
     except Exception:
@@ -1107,6 +1262,7 @@ async def agent_loop(
         thread_id=thread_id,
         progress_cb=progress_fn,
         photo_cb=photo_cb,
+        mode=mode or agent_key or "coding",
     )
 
 
@@ -1148,6 +1304,10 @@ def _tool_label(name: str, args: dict) -> str:
         "excel_update_cell": lambda a: f"\U0001f4d7 updating {a.get('cell', '')} in {a.get('path', '')}",
         "ocr_image": lambda a: f"\U0001f524 OCR on {a.get('path', '')}",
         "ocr_pdf": lambda a: f"\U0001f524 OCR PDF {a.get('path', '')}",
+        "chandra_ocr_image": (
+            lambda a: f"\U0001f525 Chandra OCR 2 on {a.get('path', '')} method={a.get('method', 'vllm')}"
+        ),
+        "chandra_ocr_pdf": lambda a: f"\U0001f525 Chandra OCR 2 PDF {a.get('path', '')} pages={a.get('pages', 'all')}",
         "read_docx": lambda a: f"\U0001f4dd reading Word {a.get('path', '')}",
         "organize_files": lambda a: f"\U0001f4c2 organizing {a.get('directory', '')}",
         "find_files": lambda a: f"\U0001f50e finding {a.get('pattern', '')} in {a.get('directory', '')}",
@@ -1359,26 +1519,21 @@ async def chat(
         pass
 
     for _ctx_name, _ctx_builder in [
-        (
-            "memoryos",
-            lambda: (
-                f"[Long-term conversation context from MemoryOS:]\n{mos_retrieve_context(query=task, user_id=str(user_id))}"
-                if (mos_retrieve_context(query=task, user_id=str(user_id)))
-                else ""
-            ),
-        ),
-        ("open_memory", lambda: build_om_context(om_search(user_id=str(user_id), query=task, limit=8))),
-        ("legacy_memory", lambda: build_memory_context(task, top_k=3, user_id=str(user_id))),
-        ("instinct", lambda: get_instinct_context(max_tokens=300)),
-        ("skills", lambda: get_skills_for_agent(agent_key, max_chars=6000)),
-        ("mode_instructions", lambda: build_mode_instructions(agent_key)),
-    ]:
-        try:
-            _ctx = _ctx_builder()
-            if _ctx:
-                _audit_messages.append({"role": "system", "content": _ctx})
-        except Exception:
-            pass
+            ("memoryos", None),  # removed — async, not awaitable in sync lambda
+            ("open_memory", None),  # removed — om_search is async
+            ("legacy_memory", None),  # removed — build_memory_context is async
+            ("instinct", None),  # removed — get_instinct_context is async
+            ("skills", lambda: get_skills_for_agent(agent_key, max_chars=6000)),
+            ("mode_instructions", lambda: build_mode_instructions(agent_key)),
+        ]:
+            try:
+                if _ctx_builder is None:
+                    continue
+                _ctx = _ctx_builder()
+                if _ctx:
+                    _audit_messages.append({"role": "system", "content": _ctx})
+            except Exception:
+                pass
 
     try:
         from core.research_policy import maybe_attach_research_context
@@ -1391,7 +1546,12 @@ async def chat(
 
     if agent_key not in ("computer", "vision"):
         try:
-            from core.character_voice import get_debate_trigger, get_humor_nudge, get_opinion_on, get_proactive_check
+            from core.character_voice import (
+                get_debate_trigger,
+                get_humor_nudge,
+                get_opinion_on,
+                get_proactive_check,
+            )
 
             proactive_nudge = get_proactive_check(task)
             if proactive_nudge:
@@ -1598,10 +1758,8 @@ async def chat(
                     pass
 
             logger.info("Success: %s", model)
-            try:
+            with contextlib.suppress(Exception):
                 result = postprocess_response(result, _current_emotion, task)
-            except Exception:
-                pass
             try:
                 from core.character_enforcer import enforce_character
 
@@ -1701,10 +1859,36 @@ async def chat(
                 try:
                     from core.wiki_auto_ingest import on_conversation_turn
 
+                    def _log_err(t):
+                        if t.exception():
+                            logger.error("on_conversation_turn failed: %s", t.exception())
+
                     _task = asyncio.create_task(on_conversation_turn(str(user_id), task, result))
-                    _task.add_done_callback(lambda t: logger.error("%s", t.exception()) if t.exception() else None)
-                except Exception:
-                    pass
+                    _task.add_done_callback(_log_err)
+                    asyncio.wait_for(_task, timeout=5.0)
+                except TimeoutError:
+                    logger.warning("on_conversation_turn timed out after 5s")
+                except Exception as e:
+                    logger.debug("on_conversation_turn outer error: %s", e)
+
+            # ── Session-level deep ingest (fires every turn, thresholds internally) ──
+            if user_id and os.getenv("LEGION_WIKI_AUTO_INGEST", "1").strip().lower() not in ("0", "false", "no", "off"):
+                try:
+                    from core.conversation_interface import get_conversation_history
+                    from core.wiki_auto_ingest import on_session_end
+
+                    conversation = get_conversation_history(str(user_id), last_n=20)
+                    def _log_session_err(t):
+                        if t.exception():
+                            logger.error("on_session_end failed: %s", t.exception())
+
+                    _session_task = asyncio.create_task(on_session_end(str(user_id), conversation))
+                    _session_task.add_done_callback(_log_session_err)
+                    asyncio.wait_for(_session_task, timeout=10.0)
+                except TimeoutError:
+                    logger.warning("on_session_end timed out after 10s")
+                except Exception as e:
+                    logger.debug("on_session_end outer error: %s", e)
 
             if user_id:
                 try:
