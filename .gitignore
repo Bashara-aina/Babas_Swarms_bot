@@ -56,3 +56,4 @@ bot_check*.pdf
 bot_tmp.pdf
 RandAugment_*.pdf
 BagOfTricks_*.pdf
+node_modules/
