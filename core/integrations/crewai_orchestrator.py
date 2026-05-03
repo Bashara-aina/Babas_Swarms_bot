@@ -100,7 +100,7 @@ class SwarmBotCrew:
                 tasks=[task_obj],
                 verbose=self.verbose,
             )
-            result = crew.kickoff()
+            result = await crew.kickoff_async()
             if hasattr(result, "raw"):
                 return result.raw
             return str(result)
