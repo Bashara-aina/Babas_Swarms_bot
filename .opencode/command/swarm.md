@@ -37,6 +37,15 @@ ruflo_agent_pool_status     # confirm worker pool available
 ruflo_system_status         # confirm overall system healthy
 ```
 
+## Pre-Swarm Hermes Check
+
+MANDATORY — verify Hermes messaging bridge is available:
+```bash
+hermes_gateway_status       # confirm Hermes MCP server running
+```
+If Hermes is down, swarms can still proceed but channel-based messaging
+(Telegram/Discord) will be unavailable until Hermes recovers.
+
 ## Swarm Roles
 | Role | Specialization |
 |------|---------------|
