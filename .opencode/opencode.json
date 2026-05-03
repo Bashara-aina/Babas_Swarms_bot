@@ -154,7 +154,12 @@
       "**/__pycache__/**",
       ".opencode/agents/**",
       ".claude/skills/generated/**",
-      "node_modules/**"
+      "node_modules/**",
+      "**/.venv/**",
+      "*.flatpak",
+      "*.pdf",
+      "*.zip",
+      "skill_labels.zip"
     ]
   }
 }

@@ -1322,3 +1322,8 @@ bash scripts/browser_use_safe.sh python -m scripts.browser_use_runner \
 | Complex 3-role navigation with validation | nanobrowser_agent |
 | Fast static extraction / bulk scraping | crawl4ai |
 | Site health / smoke test | check_site_health() (Playwright) |
+
+---
+
+<!-- @opencode -->
+<!-- Reference: OPENCODE_ULTIMATE_MASTER.md — Legion Stack operating procedures (Phase 0-15) -->

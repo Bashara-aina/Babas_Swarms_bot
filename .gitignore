@@ -46,3 +46,13 @@ wiki/
 .gstack/
 .gitnexus
 lib/legiona/memory/cost_log.jsonl
+
+# Binary blobs — not for version control
+*.flatpak
+skill_labels.zip
+*.pdf
+cekwajar.id-*.zip
+bot_check*.pdf
+bot_tmp.pdf
+RandAugment_*.pdf
+BagOfTricks_*.pdf
