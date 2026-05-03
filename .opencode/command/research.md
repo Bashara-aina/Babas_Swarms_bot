@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read,Bash,Grep,Glob
+allowed-tools: Read,Bash,Grep,Glob,exa_web_search_exa,exa_web_fetch_exa,query_wiki_graph,gitnexus_query
 argument-hint: <topic>
 description: "Research a topic. Web search, code analysis, documentation review. Returns comprehensive report."
 ---
@@ -8,28 +8,60 @@ description: "Research a topic. Web search, code analysis, documentation review.
 
 Conduct thorough research on a technical topic.
 
-## Usage
+## MANDATORY SEQUENCE (run in order)
+
+### Step 0 — GraphRAG Wiki Query (ALWAYS run first)
+Before ANY web search, query the knowledge graph:
+```python
+result = await query_wiki_graph(
+    question="<research_topic>",
+    mode="global",
+    vault_path="/home/newadmin/swarm-bot/.wiki/"
+)
 ```
-/research best LLM fallback strategies 2024
-/research aiogram 3.x middleware patterns
-/research mem0ai vs llamaindex for agent memory
-/research firecrawl vs crawl4ai for web scraping
+If GraphRAG returns relevant content → use it, cite it, skip to synthesis.
+Only call exa_web_search_exa if GraphRAG returns no useful result.
+
+### Step 1 — Web Search (only if GraphRAG had no result)
+```python
+results = await exa_web_search_exa(
+    num_results=10,
+    query="<precise research question>"
+)
 ```
+
+### Step 2 — Content Fetch
+For each promising result:
+```python
+content = await exa_web_fetch_exa(urls=[<urls>])
+```
+
+### Step 3 — Codebase Analysis
+Check existing patterns:
+```bash
+gitnexus_query(query="<topic> related code")  # or grep
+```
+
+### Step 4 — Synthesis
+Write comprehensive report.
 
 ## Research Workflow
 ```
-1. Check existing wiki/docs for prior knowledge
-2. Web search for latest information
-3. Analyze code in codebase for existing patterns
-4. Synthesize findings
-5. Provide recommendations
+0. query_wiki_graph(vault_path=.wiki/) → if relevant, use it
+1. exa_web_search_exa → latest information
+2. exa_web_fetch_exa → extract content from URLs
+3. analyze code in codebase for existing patterns
+4. synthesize findings
+5. provide recommendations
 ```
 
 ## Web Research Tools
-- firecrawl_search — primary web search
-- firecrawl_scrape — extract from specific pages
-- exa_web_search_exa — alternative search
-- browser-use_browse_task — JS-rendered pages
+- `query_wiki_graph` — query GraphRAG knowledge graph (ALWAYS first)
+- `gitnexus_query` — code intelligence (find existing implementations)
+- `webfetch` — simple markdown extraction from URL
+- `exa_web_search_exa` — search the web
+- `exa_web_fetch_exa` — extract content from URLs
+- `browse` — headless Chromium for JS-rendered pages
 
 ## Output Format
 ```
@@ -38,6 +70,9 @@ Conduct thorough research on a technical topic.
 
 ## EXECUTIVE_SUMMARY
 <2-3 sentence answer>
+
+## FROM_WIKI
+<GraphRAG results if found>
 
 ## DETAILED_FINDINGS
 <comprehensive analysis>
@@ -64,3 +99,4 @@ Conduct thorough research on a technical topic.
 - Cite all sources
 - Separate verified facts from opinions
 - Include both positive and negative findings
+- Wiki first → web only if wiki has no answer

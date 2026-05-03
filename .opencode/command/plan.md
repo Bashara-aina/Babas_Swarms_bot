@@ -15,6 +15,37 @@ Create a structured implementation plan for a task.
 /plan optimize LLM fallback chain
 ```
 
+## Planning Workflow — MANDATORY SEQUENCE
+
+### Step 0 — Sequential Thinking (MANDATORY — do FIRST)
+Before generating ANY plan, call the sequentialthinking tool:
+```
+Call sequentialthinking with:
+  - thought: restate the planning goal in your own words
+  - nextThoughtNeeded: true
+Continue until nextThoughtNeeded: false.
+This step prevents shallow decomposition — SKIP AT YOUR OWN RISK.
+```
+
+### Step 1 — Memory Search
+Search mem0 for relevant past sessions:
+```
+mem0_search(user_id="bashara", query=<task_description>, limit=5)
+build_mem0_context(memories, query=<task_description>)
+Prepend context_block to your planning prompt.
+```
+
+### Step 2 — Read Context
+Read AGENTS.md, .wiki/INDEX.md, recent git log, existing decisions.
+
+### Step 3 — Write Task Log
+```
+touch .wiki/logs/planner-[YYYY-MM-DD]-[task-slug].md
+```
+
+### Step 4 — Generate Plan
+Write CONTRACTS following the CONTRACT format.
+
 ## Planning Output
 ```
 ## TASK
