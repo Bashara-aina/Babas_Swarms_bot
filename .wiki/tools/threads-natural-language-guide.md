@@ -6,9 +6,9 @@ tags: [social-media, viral, threads, indonesia, copywriting, natural-language, b
 created: 2026-04-17
 sources:
  - type: community-research
- note: "Log output bot terbaru — mengidentifikasi sisa gejala AI yang masih muncul"
+   note: "Log output bot terbaru — mengidentifikasi sisa gejala AI yang masih muncul"
  - type: copywriting-principles
- note: "Studi thread viral Indonesia — pola code-switching natural vs dipaksakan"
+   note: "Studi thread viral Indonesia — pola code-switching natural vs dipaksakan"
 wikilinks:
  - [[tools/threads-viral-secret-sauce]]
  - [[entities/rumahlabuh-com]]

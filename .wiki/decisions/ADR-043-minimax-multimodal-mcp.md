@@ -24,7 +24,7 @@ core/autonomous_router.py    ← MODIFY — add SKILL_PATTERNS entries for media
 handlers/__init__.py         ← MODIFY — register media_tools.router
 ```
 
-The MiniMax tools are invoked as **function calls** inside the LLM's tool-use loop. A new `MiniMaxMedia` class in `tools/minimax_media.py` will expose `understand_image`, `web_search`, `generate_image`, `generate_speech` — each calling the respective function tool.
+The MiniMax tools are invoked as **function calls** inside the LLM's tool-use loop. A new `MiniMaxMedia` class in `tools/minimax_media.py` will expose `understand_image`, `web_search`, `generate_image`, `generate_speech` — each calling the respective function tool. Additionally, `understand_audio` was added (ADR-044) to support audio transcription, delegating to `transcribe_voice` in `core.utils.multimodal_processor`.
 ---
 
 
@@ -32,13 +32,14 @@ The MiniMax tools are invoked as **function calls** inside the LLM's tool-use lo
 
 ### 1. `tools/minimax_media.py` (NEW)
 
-Thin async wrappers around the 4 MiniMax function tools:
+Thin async wrappers around the 5 MiniMax function tools:
 
 ```python
 # understand_image(prompt, image_source)  → str description
-# web_search(query)                       → str results  
+# web_search(query)                       → str results
 # generate_image(prompt, aspect_ratio)    → str image_path/URL
 # generate_speech(text, voice_id, speed)  → str audio_path/URL
+# understand_audio(audio_path)            → str transcript (delegates to transcribe_voice)
 ```
 
 Each wrapper:
@@ -57,6 +58,7 @@ Aiogram router with these handlers:
 | `cmd_speak` | `/speak <text>` | Generate speech, send as voice |
 | `handle_photo` | `F.photo` | Understand image, describe it |
 | `cmd_mcp_status` | `/mcp_status` | Show MiniMax MCP tool status |
+| `handle_voice` | `F.voice` | Understand audio, transcribe it (delegates to `transcribe_voice`) |
 
 All handlers check `is_allowed(msg)` first.
 
@@ -143,8 +145,15 @@ Add route branches in `handle_plain_message()` for `media_photo`, `media_imagine
 
 | File | Action |
 |------|--------|
-| `tools/minimax_media.py` | **CREATE** — MiniMax tool wrappers |
+| `tools/minimax_media.py` | **CREATE** — MiniMax tool wrappers (5 functions: understand_image, web_search, generate_image, generate_speech, understand_audio) |
 | `handlers/media_tools.py` | **CREATE** — aiogram router with 5 handlers |
 | `handlers/__init__.py` | **MODIFY** — add media_tools.router to _ROUTER_ORDER |
 | `core/autonomous_router.py` | **MODIFY** — add 4 SKILL_PATTERNS entries |
 | `handlers/message_handler.py` | **MODIFY** — add 4 media route branches |
+
+---
+
+## Related ADRs
+
+- **ADR-044** (`ADR-044-router-layer-audit.md`) — Router layer audit confirming all routing connections
+- **ADR-044** (`ADR-044-understand-audio-bug.md`) — Bug analysis: `understand_audio` was missing from `minimax_media.py` (ADR-043 did not plan it). Subsequently implemented, delegating to `transcribe_voice` in `core.utils.multimodal_processor`

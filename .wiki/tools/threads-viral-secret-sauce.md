@@ -6,15 +6,15 @@ tags: [social-media, viral, threads, indonesia, copywriting, marketing]
 created: 2026-04-17
 sources:
  - type: copywriting-principles
- note: "Viral hook formula AIDA + PAS diterapkan di setiap tweet"
+   note: "Viral hook formula AIDA + PAS diterapkan di setiap tweet"
  - type: market-insight
- note: "Cultural intelligence untuk Gen Z dan Milenial Indonesia urban"
+   note: "Cultural intelligence untuk Gen Z dan Milenial Indonesia urban"
  - type: community-research
- note: "Riset Reddit r/ThreadsApp, X Creator Community, forum kreator konten 2025-2026"
+   note: "Riset Reddit r/ThreadsApp, X Creator Community, forum kreator konten 2025-2026"
  - type: algorithm-insight
- note: "Threads algorithm + X Twitter engagement mechanics 2025-2026"
+   note: "Threads algorithm + X Twitter engagement mechanics 2025-2026"
  - type: indonesia-market
- note: "Pain point, konten, dan anti-pattern untuk pasar Indonesia"
+   note: "Pain point, konten, dan anti-pattern untuk pasar Indonesia"
 wikilinks:
  - [[tools/content-prompt-templates]]
  - [[entities/social-media-algorithm]]

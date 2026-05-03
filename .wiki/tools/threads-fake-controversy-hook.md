@@ -6,7 +6,7 @@ tags: [social-media, viral, threads, indonesia, copywriting, hook, kontroversi-s
 created: 2026-04-17
 sources:
  - type: community-research
- note: "Studi pola hook viral Indonesia — teknik twist positif tanpa toxic"
+   note: "Studi pola hook viral Indonesia — teknik twist positif tanpa toxic"
 wikilinks:
  - [[tools/threads-viral-secret-sauce]]
  - [[tools/threads-natural-language-guide]]
