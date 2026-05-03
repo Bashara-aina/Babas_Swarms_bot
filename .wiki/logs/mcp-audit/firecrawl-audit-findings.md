@@ -1,3 +1,12 @@
+---
+title: Firecrawl Audit Findings
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Firecrawl MCP Server Configuration Audit
 
 **Date:** 2026-04-22  

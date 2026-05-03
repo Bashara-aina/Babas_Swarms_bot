@@ -10,12 +10,11 @@ Parses frontmatter with yaml.safe_load(), reports failures, auto-fixes common is
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
 
-def extract_frontmatter(content: str) -> tuple[Optional[str], int]:
+def extract_frontmatter(content: str) -> tuple[str | None, int]:
     """Extract YAML frontmatter block. Returns (frontmatter_str, end_offset)."""
     match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
     if match:
@@ -23,7 +22,7 @@ def extract_frontmatter(content: str) -> tuple[Optional[str], int]:
     return None, 0
 
 
-def try_parse_yaml(frontmatter: str) -> tuple[bool, Optional[dict], str]:
+def try_parse_yaml(frontmatter: str) -> tuple[bool, dict | None, str]:
     """Attempt to parse YAML. Returns (success, data, error_msg)."""
     try:
         data = yaml.safe_load(frontmatter)

@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 23 Rumahlabuh Thread Refactor
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Swarm Run: Rumahlabuh Thread System Refactor
 Date: 2026-04-23
 Type: FEATURE + REFACTOR

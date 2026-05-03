@@ -1,3 +1,12 @@
+---
+title: Cekwajar Master Audit Prompt
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # CEKWUJAR.ID — MASTER AUDIT PROMPT
 **For: Opus 4.7 via Claude Code**
 **Date: 2026-04-17**

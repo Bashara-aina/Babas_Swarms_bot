@@ -1,3 +1,12 @@
+---
+title: Planner Mcp Audit 2026 04 22
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Plan: MCP Tools Audit
 Date: 2026-04-22
 Type: RESEARCH/AUDIT

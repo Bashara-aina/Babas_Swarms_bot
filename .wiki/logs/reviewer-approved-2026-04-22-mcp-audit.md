@@ -1,3 +1,12 @@
+---
+title: Reviewer Approved 2026 04 22 Mcp Audit
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Reviewer Approval: MCP Cross-Editor Configuration Audit
 
 **Task:** MCP server cross-editor (opencode vs vscode) configuration audit

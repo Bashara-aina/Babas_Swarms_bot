@@ -1,3 +1,12 @@
+---
+title: Adr 2026 04 24 Looping Commands Hours
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # ADR-091 — Looping / Swarm Commands with Time Bounds
 
 **Date:** 2026-04-24

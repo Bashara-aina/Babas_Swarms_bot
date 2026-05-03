@@ -1,3 +1,12 @@
+---
+title: Project Switching Manifest
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # PROJECT SWITCHING MANIFEST
 # ===========================
 # Legion works on 3 projects. This file documents the active projects,

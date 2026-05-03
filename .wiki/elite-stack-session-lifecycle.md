@@ -1,3 +1,12 @@
+---
+title: Elite Stack Session Lifecycle
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Elite Stack Session Lifecycle
 
 ## SESSION START (Every Session)

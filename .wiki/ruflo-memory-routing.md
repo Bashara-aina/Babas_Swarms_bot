@@ -1,3 +1,12 @@
+---
+title: Ruflo Memory Routing
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Ruflo Memory Routing Guide
 
 ## The 4 Memory Systems — When to Use Each

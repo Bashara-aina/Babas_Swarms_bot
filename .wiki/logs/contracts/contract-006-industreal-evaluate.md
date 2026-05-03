@@ -1,3 +1,12 @@
+---
+title: Contract 006 Industreal Evaluate
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ### CONTRACT #6: Create IndustReal evaluate.py
 
 WHAT:

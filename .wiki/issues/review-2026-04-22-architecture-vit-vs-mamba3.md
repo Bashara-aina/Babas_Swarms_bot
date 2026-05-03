@@ -1,3 +1,12 @@
+---
+title: Review 2026 04 22 Architecture Vit Vs Mamba3
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Review: Architecture Analysis: ViT vs. Mamba-3 for POPW Multi-Task Industrial Dataset
 Date: 2026-04-22
 Reviewer: @reviewer

@@ -1,3 +1,12 @@
+---
+title: Review 2026 04 22 Mcp Audit
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Review: MCP Cross-Editor Configuration Audit
 Date: 2026-04-22
 Reviewer: @reviewer

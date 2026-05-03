@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 21 Legiona Ultimate Audit V2
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Swarm Run: LEGIONA ULTIMATE INTELLIGENCE AUDIT v2.0
 
 Date: 2026-04-21

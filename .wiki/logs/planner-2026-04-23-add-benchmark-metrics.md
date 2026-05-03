@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 23 Add Benchmark Metrics
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Plan: Add Missing Benchmark Metrics to IKEA and IndustReal
 Date: 2026-04-23
 Type: FEATURE

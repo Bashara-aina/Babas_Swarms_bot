@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 22 Do Optimization
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Plan: /do Optimization — Smart Task Decomposition + Intent Routing + Cognitive Injection
 
 **Date:** 2026-04-22

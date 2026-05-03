@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 23 Popw Benchmark Setup
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Swarm Run: benchmark metric system setup
 
 **Date:** 2026-04-23

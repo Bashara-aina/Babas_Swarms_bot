@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 23 Popw Benchmark Alignment
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Execution Order
 Serial (must run in sequence):
   1. Contract #1 — Fix PSR POS in IndustReal evaluate.py

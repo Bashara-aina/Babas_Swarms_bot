@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 23 Rumahlabuh Thread Refactor
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## CONTRACT ARCHITECTURE — Rumahlabuh Thread System Refactor
 
 All contracts use this format:

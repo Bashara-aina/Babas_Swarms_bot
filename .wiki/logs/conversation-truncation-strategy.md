@@ -1,3 +1,12 @@
+---
+title: Conversation Truncation Strategy
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Conversation Truncation Strategy — Review & Recommendations
 
 > Status: PARTIALLY IMPLEMENTED — gaps remain for semantic context compaction

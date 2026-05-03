@@ -14,8 +14,6 @@ from __future__ import annotations
 import asyncio
 import json
 import re
-import sqlite3
-import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -209,7 +207,7 @@ _Synthesized via session_synthesizer.py keyword fallback (LLM unavailable)_
         "title": title,
         "slug": slug,
         "summary": f"{source} session note: {title_content}",
-        "tags": tags + [source],
+        "tags": [*tags, source],
         "wikilinks": ["[[INDEX]]"],
         "confidence": "low",
         "body": body,

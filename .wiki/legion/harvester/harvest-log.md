@@ -2217,3 +2217,498 @@ source: legion-harvester
 }
 ```
 
+---
+title: harvest-session-2026-04-28-487af9c5
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: 487af9c5
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "487af9c5",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-f277a46b
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 3 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: f277a46b
+**Accepted**: 0 | **Rejected**: 3 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "f277a46b",
+  "candidates_reviewed": [
+    {
+      "candidate_id": "indonesia_economy_https://voyageforum.com/forum/",
+      "source": "duckduckgo/indonesi",
+      "title": "302 Found - VoyageForum",
+      "url": "duckduckgo/indonesi",
+      "score": 0.5,
+      "decision": "rejected",
+      "reason": "auto_scored",
+      "reason_detail": "",
+      "tags": [
+        "indonesia_economy"
+      ]
+    },
+    {
+      "candidate_id": "indonesia_economy_https://voyageforum.com/forum/",
+      "source": "duckduckgo/indonesi",
+      "title": "301 Moved Permanently",
+      "url": "duckduckgo/indonesi",
+      "score": 0.5,
+      "decision": "rejected",
+      "reason": "auto_scored",
+      "reason_detail": "",
+      "tags": [
+        "indonesia_economy"
+      ]
+    },
+    {
+      "candidate_id": "indonesia_economy_https://voyageforum.com/forum/",
+      "source": "duckduckgo/indonesi",
+      "title": "Finlande: circuit entre Helsinki et Rovaniemi avec InterRail ...",
+      "url": "duckduckgo/indonesi",
+      "score": 0.5,
+      "decision": "rejected",
+      "reason": "auto_scored",
+      "reason_detail": "",
+      "tags": [
+        "indonesia_economy"
+      ]
+    }
+  ],
+  "metadata": {
+    "candidates_found": 3,
+    "candidates_reviewed": 3,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-0b0369f9
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: 0b0369f9
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "0b0369f9",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-892b63a3
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: 892b63a3
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "892b63a3",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-fddc1520
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: fddc1520
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "fddc1520",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-de8dbe8b
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: de8dbe8b
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "de8dbe8b",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-7ec28379
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: 7ec28379
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "7ec28379",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-28-e5335bd1
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-28
+updated: 2026-04-28
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-28
+**Session ID**: e5335bd1
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-28",
+  "session_id": "e5335bd1",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-29-15696407
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-29
+updated: 2026-04-29
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-29
+**Session ID**: 15696407
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-29",
+  "session_id": "15696407",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-29-2426ccf7
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-29
+updated: 2026-04-29
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-29
+**Session ID**: 2426ccf7
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-29",
+  "session_id": "2426ccf7",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-29-9931b5a3
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-29
+updated: 2026-04-29
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-29
+**Session ID**: 9931b5a3
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-29",
+  "session_id": "9931b5a3",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-29-e17279ea
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-29
+updated: 2026-04-29
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-29
+**Session ID**: e17279ea
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-29",
+  "session_id": "e17279ea",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-04-29-a856aade
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-04-29
+updated: 2026-04-29
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-04-29
+**Session ID**: a856aade
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-04-29",
+  "session_id": "a856aade",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+

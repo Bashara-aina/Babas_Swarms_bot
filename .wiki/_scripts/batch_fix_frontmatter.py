@@ -18,11 +18,9 @@ source: conversation | research | implementation | external
 ---
 """
 
-import os
 import re
 from datetime import date
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
@@ -47,9 +45,7 @@ def has_legion_frontmatter(content: str) -> bool:
         if not isinstance(data, dict):
             return False
         # Check required fields exist
-        if not FRONTMATTER_REQUIRED.issubset(data.keys()):
-            return False
-        return True
+        return FRONTMATTER_REQUIRED.issubset(data.keys())
     except yaml.YAMLError:
         return False
 

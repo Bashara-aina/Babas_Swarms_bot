@@ -1,3 +1,12 @@
+---
+title: Contract 001 Industreal Config
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ### CONTRACT #1: Create IndustReal config.py
 
 WHAT:

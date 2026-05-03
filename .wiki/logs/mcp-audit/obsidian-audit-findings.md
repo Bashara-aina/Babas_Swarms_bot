@@ -1,3 +1,12 @@
+---
+title: Obsidian Audit Findings
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Obsidian MCP Server Audit Findings
 
 **Audit Date:** 2026-04-22

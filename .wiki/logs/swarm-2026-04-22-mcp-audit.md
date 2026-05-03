@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 22 Mcp Audit
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Swarm Run: MCP Tools Audit
 Date: 2026-04-22
 Type: RESEARCH/AUDIT

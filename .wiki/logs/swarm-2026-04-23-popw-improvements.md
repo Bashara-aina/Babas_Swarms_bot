@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 23 Popw Improvements
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Swarm Run: POPW & IndustReal Model Improvements
 
 **Date:** 2026-04-23

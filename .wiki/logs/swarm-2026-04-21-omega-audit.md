@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 21 Omega Audit
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Swarm Run: LEGIONA OMEGA AUDIT v4.0
 Date: 2026-04-21
 Type: RESEARCH + IMPLEMENTATION AUDIT

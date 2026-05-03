@@ -1,3 +1,12 @@
+---
+title:  Quality Report
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Wiki Quality Report
 
 Generated: 2026-04-19 10:28 JST

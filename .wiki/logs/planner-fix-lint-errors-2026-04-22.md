@@ -1,3 +1,12 @@
+---
+title: Planner Fix Lint Errors 2026 04 22
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Plan: Fix All Remaining Lint Errors
 Date: 2026-04-22
 Type: BUG_FIX

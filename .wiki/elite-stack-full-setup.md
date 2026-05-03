@@ -1,3 +1,12 @@
+---
+title: Elite Stack Full Setup
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # Elite Stack Full Setup Complete — 2026-05-02
 
 ## Swarm Summary

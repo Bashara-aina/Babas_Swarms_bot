@@ -1,3 +1,12 @@
+---
+title: Auto Ingest
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## [2026-04-29 20:00 JST] auto-ingest | score=0.80 | learned something
 
 - pages: test.md

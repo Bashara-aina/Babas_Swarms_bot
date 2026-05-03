@@ -1,3 +1,12 @@
+---
+title: Swarm 2026 04 23 Popw Deep Analysis
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # POPW Deep Model Analysis & Upgrade Roadmap
 
 **Date:** 2026-04-23

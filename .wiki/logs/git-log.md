@@ -1,3 +1,12 @@
+---
+title: Git Log
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Commit: 1824110
 - Date: Tue Apr 21 10:16:08 PM JST 2026
 - Message: feat(legiona): LEGIONA ULTIMATE INTELLIGENCE AUDIT v2.0 — M2.7 maximized
@@ -137,4 +146,257 @@ during pytest collection and wiring verification.
 Delete 300+ orphaned wiki files: old quarantine revivals, stale session logs,
 obsolete research artifacts, old .wiki/concepts/* and .wiki/issues/* files.
 These were generated during audit cycles and are no longer relevant.
+---
+## Commit: 8d3e0ae1
+- Date: Mon Apr 27 10:11:50 PM JST 2026
+- Message: test
+---
+## Commit: c41ced95
+- Date: Mon Apr 27 10:12:09 PM JST 2026
+- Message: opencode skill files updated
+---
+## Commit: 83906757
+- Date: Sat May  2 09:27:06 PM JST 2026
+- Message: chore: sync AGENTS.md
+---
+## Commit: cc4222b5
+- Date: Sat May  2 09:27:41 PM JST 2026
+- Message: chore: sync main.py
+---
+## Commit: 56a57d02
+- Date: Sat May  2 09:28:00 PM JST 2026
+- Message: chore: sync CLAUDE.md
+---
+## Commit: e2bdf39c
+- Date: Sat May  2 09:28:09 PM JST 2026
+- Message: chore: sync requirements.txt
+---
+## Commit: 9034a470
+- Date: Sat May  2 09:28:18 PM JST 2026
+- Message: chore: sync core/
+---
+## Commit: 4a842026
+- Date: Sat May  2 09:28:24 PM JST 2026
+- Message: chore: sync handlers, tools, config
+---
+## Commit: f1d78514
+- Date: Sat May  2 10:07:32 PM JST 2026
+- Message: feat(browser): add browser-use + agent-browser routing layer (MiniMax-only)
+
+- browser-use MCP server already present (browser_open, browser_click, etc.)
+- Added browser_task_router.py with crawl4ai vs browser-use auto-routing
+- Added /browse slash command (quick navigation alias)
+- Added browser department agents (browser-automation, web-researcher)
+- Added WORKFLOW.md for symphony orchestration
+- Added .wiki/architecture/browser-stack.md documentation
+- Updated .env with AI_GATEWAY_* vars for MiniMax-only enforcement
+- Added browser-use.json config validation
+- E2E verification: import, guard, MCP handshake, smoke test all PASS
+- steel-browser skipped (Docker unavailable on this host)
+- Agent-browser 0.26.0 already installed
+---
+## Commit: 63619461
+- Date: Sat May  2 11:51:52 PM JST 2026
+- Message: feat(browser): add browser-use runner, agent_browser_safe shell wrapper, and browser-use skill
+
+- tools/browser_runner.py: run_browser_task() using browser-use Agent + MiniMax LLM
+- scripts/agent_browser_safe.sh: MiniMax-only guard wrapper for agent-browser CLI
+- .opencode/skills/browser-use.md: skill reference for browser-use library
+---
+## Commit: 4f3ff94f
+- Date: Sun May  3 12:35:10 AM JST 2026
+- Message: fix(agents): remove invalid tools array from browser agent frontmatter
+
+The tools field was causing 'Expected object | undefined' validation error
+in web-researcher.md. Removed tools field from both browser agents to match
+planner.md pattern (no tools key = all tools allowed).
+---
+## Commit: 51ebcfa8
+- Date: Sun May  3 08:21:03 AM JST 2026
+- Message: fix(browser): lint fix — remove unused subprocess import, fix ambiguous variable name
+---
+## Commit: 1913e000
+- Date: Sun May  3 08:25:51 AM JST 2026
+- Message: feat(browser): add /browser slash command
+---
+## Commit: 37288041
+- Date: Sun May  3 08:28:13 AM JST 2026
+- Message: feat(browser): add browser-use safe wrapper with MiniMax guard
+---
+## Commit: e3e3383d
+- Date: Sun May  3 08:28:19 AM JST 2026
+- Message: feat(browser): add browser and browse slash commands, browser-use and agent-browser skills, browser automation agents
+---
+## Commit: a886fae1
+- Date: Sun May  3 08:37:14 AM JST 2026
+- Message: feat(browser): update browser runner with actual API key env, improve retry/temp settings
+---
+## Commit: 79d745fb
+- Date: Sun May  3 08:37:44 AM JST 2026
+- Message: feat(browser): add browser-use and agent-browser project configs, runner scripts
+---
+## Commit: d77eeb5e
+- Date: Sun May  3 08:38:12 AM JST 2026
+- Message: docs(browser): add browser-use discovery and install logs
+---
+## Commit: 8af5d8a2
+- Date: Sun May  3 09:09:27 AM JST 2026
+- Message: wiring(opencode): add Ultimate Internal Master Prompt v3 with all 15 phases
+
+What changed:
+- Created OPENCODE_ULTIMATE_MASTER.md (524-line reference doc covering all 15 phases)
+- Created .opencode/scripts/health-check.sh (executable, Phase 10 health dashboard)
+- Created 6 slash commands: health, lint, preflight, hermes-status, agents, skill
+- Fixed compaction.md and title.md agent files (added Role/Behavior Rules/Output Contract)
+- Updated watcher ignore list in opencode.json (.venv, flatpak, pdf, zip patterns)
+- Updated .gitignore with binary blob patterns
+- Appended @OPENCODE_ULTIMATE_MASTER.md reference to CLAUDE.md
+
+Why:
+- Phase 0: Pre-flight ensures clean environment at every session start
+- Phase 7: Agent file quality standard prevents routing failures
+- Phase 10: Health dashboard provides single-command stack verification
+- Phase 15: Binary blobs (68MB+ flatpak/pdf/zip) removed from git tracking
+
+Files affected: .opencode/, OPENCODE_ULTIMATE_MASTER.md, CLAUDE.md, .gitignore
+---
+## Commit: de687eb2
+- Date: Sun May  3 09:26:19 AM JST 2026
+- Message: refactor(opencode): add Phase 7 sections to all 15 flat agent files
+
+What changed:
+- Added ## Role, ## Behavior Rules, ## Tool Usage, ## Output Contract to all 15 flat agents
+- Agents: hermes-agent, hermes-coder, hermes-researcher, planner, worker, reviewer, verifier, focused-implementer, diff-analyzer, wikibot, research-agent, deployment-engineer, paper-wiki-writer
+
+Why:
+- Phase 7 (Agent File Quality Standard) requires all 5 sections for routing integrity
+- Consistent structure enables mechanical validation via health-check.sh
+- Tool Usage and Output Contract sections provide explicit contract for agent behavior
+
+Files affected: .opencode/agents/*.md (13 files, +622/-23)
+---
+## Commit: 8828598f
+- Date: Sun May  3 09:43:13 AM JST 2026
+- Message: feat(opencode): enhance plan/research/swarm slash commands with mandatory sequences
+
+What changed:
+- plan.md: Added mandatory sequential thinking + memory search before planning
+- research.md: Added GraphRAG wiki query first, web search fallback, Exa integration
+- swarm.md: Added boot sequence, ruflo orchestration tools, session persistence
+
+Why:
+- Phase 0 (pre-flight) and Phase 2 (routing) require these commands to follow structured sequences
+- research.md now queries wiki graph before web search (avoid redundant research)
+- swarm.md now properly initializes ruflo swarm with task tracking
+
+Files affected: .opencode/command/plan.md, research.md, swarm.md (+185/-24)
+---
+## Commit: 5b0c19b5
+- Date: Sun May  3 10:37:53 AM JST 2026
+- Message: fix(agents): convert tools lists to maps in hermes-researcher and hermes-coder
+
+hermes-researcher.md and hermes-coder.md had tools as YAML lists
+but OpenCode requires tools as a map {tool_name: boolean}.
+Fixed: web_search, web_extract, session_search, browser_navigate,
+delegate_task, terminal, read_file, write_file, patch, search_files,
+execute_code now all specified as tools: {name}: true.
+---
+## Commit: 43184f9e
+- Date: Sun May  3 01:21:49 PM JST 2026
+- Message: feat(docs): wire LEGION cognitive architecture into OpenCode agent system
+
+Phase 16 appended to OPENCODE_ULTIMATE_MASTER.md — cognitive flow,
+4-phase reasoning loop, 5-tier memory pyramid, agent dispatch matrix,
+compaction protocol, session lifecycle, project switching manifest.
+
+New docs:
+- LEGION_MASTER_PROMPT.md (12 sections, boot through metacognition)
+- LEGION_SYSTEM.md (companion reference doc)
+- elite-stack-*.md (session lifecycle + initialization docs)
+- ruflo-memory-routing.md, project-switching-manifest.md
+- research/056-smote-chawla-2002.md, 091-cutmix-yun-2019.md
+
+Wiki YAML fixes (6 files):
+- tools/: threads-*.md — multiline sources: blocks → valid YAML nested format
+- _archive/: popw-*.md — unclosed summary: quotes fixed
+- detectron2/: 4 dead symlinks removed
+
+New scripts:
+- .claude/scripts/wiki_health.py (wiki linter)
+- scripts/ingest_wiki_to_graphiti.py
+- tests/test_wiki_auto_ingest.py
+
+Scope: wiki health + new master prompt infrastructure only.
+No agent behavior changes — gap was orchestration documentation.
+---
+## Commit: 76e1a72f
+- Date: Sun May  3 03:05:39 PM JST 2026
+- Message: feat(legion): implement cognitive orchestration infrastructure
+
+New Python modules for OpenCode session lifecycle:
+- core/legion_state.py: /tmp/ shared state bus (12 state files)
+- core/legion_session.py: session lifecycle, context health, task classification
+- core/legion_compaction.py: 9-section mandatory compaction format
+- core/legion_skill_indexer.py: auto-generates /tmp/legion_available_skills.txt
+
+Updated agent files with Phase 16 cognitive wiring:
+- planner.md: 4-phase loop + 6 swarm dispatch patterns
+- worker.md: Phase D mandatory persistence
+- hermes-agent.md: 5-tier memory pyramid + write_skill protocol
+- reviewer.md: P0-P3 severity findings format
+- compaction.md: 9-section mandatory format
+- CLAUDE.md: Python infrastructure + emergency procedures
+---
+## Commit: 4600cbf1
+- Date: Sun May  3 03:14:30 PM JST 2026
+- Message: feat(legion): implement cognitive boot + 5-tier memory pyramid + missing agents
+
+New infrastructure:
+- core/cognition_boot.py: OpenCode cognitive boot (STEP 1-4 identity/memory/health/task)
+- core/TIER.py: 5-tier memory pyramid constants, write routing table, file paths
+- .claude/memory_bootstrap.md: session-start memory cache template
+
+4 missing agents created:
+- .opencode/agent/explorer.md: codebase discovery + architecture audit
+- .opencode/agent/lsp-reader.md: type-aware analysis via LSP
+- .opencode/agent/collaborator.md: parallel workstream coordination
+- .opencode/agent/memory.md: cross-session knowledge synthesis
+
+CLAUDE.md Section 0 rewritten:
+- Boot sequence (1-7 steps at session start)
+- 5-tier memory pyramid table
+- Cognition boot + TIER references
+
+CLAUDE.md Section 15j-k added:
+- 15j: Metacognition layer (self-check, ambiguity threshold, loop detection)
+- 15k: Definition of a perfect session
+
+SOUL.md: cognitive architecture awareness added to identity
+---
+## Commit: f028cb1d
+- Date: Sun May  3 03:52:20 PM JST 2026
+- Message: audit: system audit 2026-05-03 — 103/150 ⚠️ GOOD
+
+P0: no hooks in opencode.json, 3785 ruff errors
+P1: LiteLLM no_db, Supabase down, systemd inactive, 650 wiki stubs
+P2: 3593 broken wikilinks, 80 pyright errors
+
+Fixed:
+- SOUL.md: added Projects known section
+- docs/review/security/wiki/plan-ceo-review: added steps sections
+- deploy/swarm-bot.service: systemd unit file created
+- .wiki/health/audit-2026-05-03.md: full scorecard
+
+Score: 103/150 ⚠️ GOOD
+---
+## Commit: 4ef0baa8
+- Date: Sun May  3 04:23:43 PM JST 2026
+- Message: fix: pyright errors, hermes skill integration, liteLLM config, hooks, wiki stubs
+
+- handlers/shared.py: narrow msg.from_user None guard, fix int→str for user_id
+- core/wiki_auto_ingest.py: replace undefined complete/get_model_for_task with chat()
+- core/utils/streaming_response.py: guard interpreter.chat() None iterable
+- core/self_evolution.py: add _write_hermes_skill() + integrate into record_failure/record_decision
+- config/litellm_proxy_config.yaml: add store_model_results: false + no-cache + disable_constraints for no_db fix
+- .opencode/opencode.json: add hooks section (session:start/end, task:complete)
 ---

@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 21 Industreal Adaptation
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Plan: Adapt POPW code for IndustReal dataset
 Date: 2026-04-21
 Type: FEATURE (code adaptation)

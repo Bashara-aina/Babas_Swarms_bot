@@ -1200,3 +1200,102 @@ bash scripts/browser_use_safe.sh python -m scripts.browser_use_runner \
 - Fallback chain: browser-use → nanobrowser_agent → crawl4ai → Playwright direct
 - Screenshots saved to `./output/`, traces to `./output/browser_trace.txt`
 - Safe wrapper `browser_use_safe.sh` fails fast if a forbidden model is configured
+## MCP TOOL ASSIGNMENT BY AGENT ROLE
+
+### @planner
+- ALWAYS call `sequentialthinking` first on any plan
+- Call `obsidian.search_notes` to pre-load relevant wiki context
+- Call `gitnexus_query` to understand codebase structure before planning
+
+### @worker
+- ALWAYS call `gitnexus_impact` before editing any existing file
+- ALWAYS call `gitnexus_context` before editing any function/class
+- Use `filesystem` for all file I/O (never raw bash cat/echo for code)
+- Use `git` for all version control operations
+- Use `browser-use` for any web interaction (MiniMax-M2.7 only)
+
+### @reviewer
+- ALWAYS call `gitnexus_detect_changes` to understand blast radius
+- Call `git diff` via git MCP to see all changes
+- Call `sequential-thinking` to structure the review
+
+### @wikibot
+- ALWAYS use `obsidian.create_note` or `obsidian.update_note`
+- NEVER write to .wiki/ with raw filesystem tools
+- Structure notes with frontmatter: title, date, tags, project
+
+### @hermes (new role)
+- Activated for: research tasks, multi-step data gathering, anything
+  requiring persistent skill memory across sessions
+- Always call `hermes_search_memory` first before running a new task
+- After success: call `hermes_write_skill` to persist the solution
+
+
+
+## ══ MCP ROLE ASSIGNMENTS (GENERATED) ══
+## Every agent role maps to specific MCP tools.
+## These are not optional — they are the implementation contract.
+
+### @planner
+MUST call (in order, before producing any plan):
+1. `sequentialthinking` — structure the plan
+2. `obsidian.search_notes(keyword)` — load relevant wiki context
+3. `gitnexus_query(concept)` — understand existing codebase
+4. `hermes_search_memory(task)` — check if skill exists
+NEVER writes files. NEVER runs code. Plans only.
+
+### @worker
+MUST call (in order, before editing any file):
+1. `gitnexus_impact(file_path)` — understand blast radius
+2. `gitnexus_context(symbol)` — understand the symbol
+3. `filesystem.read_file(path)` — read before writing
+After editing:
+4. `git.diff` — verify changes look correct
+5. `git.status` — track all modified files
+Uses `filesystem` for all file I/O (never raw bash cat/echo for code).
+Uses `git` MCP for all version control (never raw bash git).
+
+### @reviewer
+MUST call (in order):
+1. `gitnexus_detect_changes` — blast radius of current diff
+2. `git.diff` — full change view
+3. `sequentialthinking` — structure review finding
+4. `obsidian.search_notes` — check if decision was documented
+Read-only. Never writes code. Issues P0-P3 severity findings.
+
+### @wikibot
+MUST ONLY use obsidian MCP for .wiki/ writes:
+- `obsidian.create_note` — new articles
+- `obsidian.update_note` — update existing
+- `obsidian.add_tags` — tag management
+- `obsidian.update_frontmatter_field` — metadata
+NEVER write to .wiki/ via filesystem MCP.
+Always include valid YAML frontmatter, TL;DR, at least 1 wikilink.
+
+### @hermes (agentic research role)
+Activated for: multi-source research, data gathering, regulation lookup,
+Indonesian law/salary/property data, anything requiring persistence.
+Protocol:
+1. `hermes_search_memory(task)` — check existing skills first
+2. `hermes_run(task)` — run agentic loop
+3. `hermes_write_skill(name, content)` — persist after success
+4. `obsidian.create_note` — write to wiki knowledge base
+
+### @browser-agent
+Activated for: interactive pages, login-gated content, SPAs, form fill.
+Protocol:
+1. `browser_health()` — verify setup
+2. `browser_run_task(task)` — primary tool
+3. `browser_screenshot(url)` — visual verification
+HARD POLICY: MiniMax-M2.7 ONLY. Use `scripts/browser_use_safe.sh`.
+
+### Tool Assignment Summary
+
+| Agent | Primary MCPs | Never Use |
+|-------|-------------|-----------|
+| @planner | sequential-thinking, obsidian, gitnexus, hermes | filesystem write, git |
+| @worker | gitnexus, filesystem, git, browser-use | direct API calls |
+| @reviewer | gitnexus, git (read), sequential-thinking | anything write |
+| @wikibot | obsidian (exclusively) | filesystem for .wiki/ |
+| @hermes | hermes, obsidian, exa, crawl4ai | direct model calls |
+| @browser | browser-use, crawl4ai | any cloud LLM |

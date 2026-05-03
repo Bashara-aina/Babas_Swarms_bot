@@ -1,3 +1,12 @@
+---
+title: Contract 002 Industreal Model
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ### CONTRACT #2: Create IndustReal model.py
 
 WHAT:

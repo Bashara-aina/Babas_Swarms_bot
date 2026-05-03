@@ -1,3 +1,12 @@
+---
+title: Contract 003 Industreal Dataset
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ### CONTRACT #3: Create IndustReal dataset loader
 
 WHAT:

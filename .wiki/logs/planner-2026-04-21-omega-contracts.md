@@ -1,3 +1,12 @@
+---
+title: Planner 2026 04 21 Omega Contracts
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 # LEGIONA OMEGA AUDIT v4.0 — CONTRACT PLAN
 **Date:** 2026-04-21 | **Phase:** 0 Discovery Complete → Contracts Released
 

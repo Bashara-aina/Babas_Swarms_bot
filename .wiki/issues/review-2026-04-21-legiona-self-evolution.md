@@ -1,3 +1,12 @@
+---
+title: Review 2026 04 21 Legiona Self Evolution
+type: concept
+status: active
+tags: [/]
+created: 2026-05-03
+updated: 2026-05-03
+---
+
 ## Review: Legiona Self-Evolution + Omega Audit
 Date: 2026-04-21
 Reviewer: @reviewer
