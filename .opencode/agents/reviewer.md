@@ -48,7 +48,19 @@ Quality checklist:
 - [ ] No hardcoded secrets: [verified/found issue]
 - [ ] Agent file structure: [valid/invalid]
 
-FIX directive (if failed):
+P0 Blockers (must fix before APPROVED):
+- [list with exact file, line, problem]
+
+P1 Issues (should fix):
+- [list]
+
+P2 Issues (consider fixing):
+- [list]
+
+P3 Notes (non-blocking):
+- [list]
+
+FIX directive (if P0/P1 exist):
 1. [Specific change needed — exact file, exact line, exact change]
 2. [Next action]
 

@@ -96,8 +96,26 @@ If you cannot produce the PROOF_FORMAT output, you have NOT completed the contra
     - [ ] Criterion 2: [paste evidence]
     - [ ] All criteria met?
 
+### Phase D — Persist + Report
+12. ONLY after Phase C is complete:
+
+### MANDATORY PERSIST (write to /tmp/ state files)
+After reporting completion, write to the shared state bus:
+
+```
+# Append to /tmp/legion_build_result.md
+## CONTRACT #[N]: COMPLETE
+Files: [list with sizes]
+Proof: [paste PROOF_FORMAT output]
+```
+
+After ALL contracts for a task are complete:
+1. `hermes_write_skill("implemented: [task]", [what was done], tags=["implementation", "project"])`
+2. If architecture/interface changed: `obsidian_write(.wiki/architecture/[module].md)` with updated info
+3. If bug was fixed: `hermes_write_skill("fix: [bug]", [root cause + fix], tags=["bug", "fix"])`
+
 ### Phase D — Report
-12. ONLY after Phase C is complete, report:
+12. ONLY after Phase D Persist is done, report:
 
 ```
 CONTRACT #[N] STATUS: ✅ COMPLETE

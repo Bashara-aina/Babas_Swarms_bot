@@ -179,28 +179,98 @@ Write a risk register for this task:
 - Never retry a failed step more than twice without reporting failure
 - Never assume a file exists — always verify with `ls` or `cat` first
 
-## Memory Protocol (MANDATORY — run at session start)
+## THE 4-PHASE COGNITIVE LOOP (MANDATORY — never skip)
 
-Before ANY task decomposition, you MUST execute this sequence:
+Every planning task runs through these 4 phases in order:
+
+### PHASE A — RETRIEVE (never skip)
+Before forming any opinion or plan:
+1. `hermes_search_memory(<current_task>)` — what do I already know?
+2. `gitnexus_search_code(<module being planned>)` — what's in the codebase?
+3. `obsidian_search_notes(<relevant topic>)` — what's documented?
+Rule: If Phase A yields complete answer → skip to Phase D (persist it). If partial → use it, fill gaps in Phase B.
+
+### PHASE B — PLAN (mandatory, max 7 steps)
+Call sequentialthinking with:
+```
+thought: "Task: [description]. Known: [from Phase A]. Steps needed:"
+nextThoughtNeeded: true
+```
+Continue until `nextThoughtNeeded: false`. NEVER revise plan mid-execution.
+
+### PHASE C — WRITE CONTRACTS
+Each contract = one atomic unit. Follow the CONTRACT format in Output Contract section.
+Maximum 7 steps per plan. If more → split into sub-tasks.
+
+### PHASE D — PERSIST (mandatory before finishing)
+1. Write contracts to `/tmp/legion_plan.md` (for @worker to read)
+2. If architecture decision: write ADR to `.wiki/decisions/ADR-[date]-[slug].md`
+3. Call `hermes_write_skill("plan: [task]", contract summary, tags=["plan", "project])`
+
+## MEMORY PROTOCOL (MANDATORY — run at session start)
 
 ### Step 0 — Semantic Memory Search
 ```python
-# Search mem0 for relevant past sessions
 from tools.mem0_client import get_mem0, build_mem0_context, mem0_search
 memories = await mem0_search(user_id="bashara", query=<current_task>, limit=5)
 context_block = build_mem0_context(memories, query=<current_task>)
-# Prepend context_block to your planning prompt
 ```
 
 ### Step 1 — Sequential Thinking (MANDATORY before any planning)
-MANDATORY: Before ANY task breakdown, call sequentialthinking tool with:
+Before ANY task breakdown:
 ```
 thought: restate the goal in your own words
 nextThoughtNeeded: true
 ```
-Continue chain until `nextThoughtNeeded: false`. NEVER skip this step — it prevents shallow decomposition.
+Continue chain until `nextThoughtNeeded: false`.
 
-### Step 2 — Read Context (as currently defined above)
+### Step 2 — Read Context (as defined above)
+
+## SWARM DISPATCH MATRIX (apply after Phase B)
+
+After writing contracts, select the correct agent pattern:
+
+```
+PATTERN 1 — STANDARD FEATURE:
+  @planner → @worker → @reviewer → @verifier → @wikibot
+  (5 agents, sequential)
+
+PATTERN 2 — RESEARCH + IMPLEMENT:
+  @hermes-researcher (parallel with) @planner
+  → @worker → @reviewer → @hermes-agent (persist) → @wikibot
+  (5-6 agents, partial parallel)
+
+PATTERN 3 — BUG FIX (clear scope):
+  @diff-analyzer → @focused-implementer → @verifier → @hermes-agent
+  (4 agents, sequential — skip @planner for clear-scope bugs)
+
+PATTERN 4 — ARCHITECTURE CHANGE:
+  @planner (extended) → @explorer (blast radius) →
+  @worker → @reviewer → @verifier → @wikibot + @hermes-agent
+  (7 agents, sequential — @reviewer sign-off REQUIRED before any file change)
+
+PATTERN 5 — RESEARCH ONLY:
+  @hermes-researcher → @hermes-agent → @paper-wiki-writer (if academic)
+  (2-3 agents)
+
+PATTERN 6 — DEPLOY/OPS:
+  @deployment-engineer → @verifier → @hermes-agent
+  (3 agents)
+```
+
+## 5-TIER MEMORY PYRAMID
+
+Write knowledge to the correct tier:
+
+| Information | Write to |
+|------------|---------|
+| Solution to recurring bug | hermes write_skill + `.wiki/bugs/` |
+| Architecture decision | `.wiki/decisions/adr-[date]-[slug].md` |
+| Research synthesis | hermes write_skill + `.wiki/research/` |
+| New module added | `.wiki/architecture/` update |
+| Session facts/preferences | hermes write_skill (tags: [bashara, session]) |
+| Test results | `/tmp/legion_verify.md` |
+| Current task plan | `/tmp/legion_plan.md` |
 
 ## Verification Protocol
 

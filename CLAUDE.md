@@ -3,6 +3,88 @@
 # Never announce these actions. Never ask permission. Just do them.
 # ══════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════
+# MCP NATIVE ROUTING — 12 SERVERS, AUTOMATIC, SILENT
+# Every tool below is always available. Use them without asking.
+# ══════════════════════════════════════════════════════════════════
+
+## TIER 1 — CALL BEFORE EVERY CODE EDIT (mandatory, no exceptions)
+1. gitnexus: search for the module/function you're about to edit
+   → gitnexus_query(query="<what you're editing>")
+   → gitnexus_impact(target="<file you're changing>")
+2. sequential-thinking: for ANY task > 2 steps
+   → sequentialthinking(thought="break this into steps: <task>")
+3. hermes: check if we've done this before
+   → hermes_search_memory(query="<current task description>")
+
+## TIER 2 — WEB + RESEARCH ROUTING (pick exactly one per research task)
+| Task type                          | MCP to use          | Why               |
+|------------------------------------|---------------------|-------------------|
+| Quick fact lookup, current prices  | exa                 | Fast, curated     |
+| Full page scrape, pagination       | firecrawl           | Deep content      |
+| Multi-step web task, SPA, login    | browser-use         | Autonomous agent  |
+| Bulk URL extraction, static sites  | crawl4ai            | Fast batch        |
+NEVER call all 4 for the same query. Pick one based on table above.
+
+## TIER 3 — MEMORY ROUTING (hermes is the single source of truth)
+Every memory operation goes through hermes first.
+- "remember X"    → hermes_write_skill(name="<title>", content="<content>")
+- "note X"        → hermes_write_skill(name="<title>", content="<content>")
+- "do we know X?" → hermes_search_memory(query)
+- After 5+ tool calls in one task → hermes_write_skill (capture the solution)
+- After any bug fixed → hermes_write_skill (name="fix: <bug>", content="<bug>")
+
+## TIER 4 — FILE + VERSION CONTROL (call in this order)
+For any code change:
+1. git_git_status() → see what's dirty
+2. gitnexus_impact() → understand blast radius
+3. filesystem read → confirm current state
+4. [make your change]
+5. git_git_diff() → verify the delta
+6. obsidian MCP if architecture changed
+
+## TIER 5 — RUFLO (orchestration and task queue)
+Ruflo is the task runner sidecar. Use it for:
+- Spawning background jobs that outlive the conversation
+- Running shell commands with output capture
+- Chaining multi-step automation workflows
+Auto-call ruflo for:
+- Any task starting with "run in background"
+- Any task that needs to survive terminal close
+- Any multi-step pipeline with >3 sequential shell commands
+
+## TIER 6 — OBSIDIAN (wiki is the project brain)
+obsidian MCP is mandatory after:
+- Adding a new module to the architecture
+- Fixing a P1+ bug (write under .wiki/bugs/)
+- Making an architecture decision (write under .wiki/decisions/)
+- Completing a research task (write under .wiki/research/)
+NEVER write to .wiki/ via filesystem MCP — always obsidian MCP.
+
+## TIER 7 — LATEX (document generation)
+Use only for: generating PDF reports, academic papers, formatted documents.
+NEVER use for: regular code output, README files, or web content.
+
+## TIER 8 — SYMPHONY (multi-agent orchestration)
+Use symphony when:
+- A task requires coordination between 3+ specialized sub-agents
+- An AG2 group_chat is not enough (symphony provides richer channels)
+- Bashara explicitly requests a multi-agent workflow
+
+## ANTI-PATTERNS (NEVER do these)
+- NEVER skip gitnexus before editing code — even for "tiny" changes
+- NEVER call browser-use AND crawl4ai for the same URL
+- NEVER write to obsidian via filesystem MCP
+- NEVER use hermes for code execution — hermes is knowledge/messaging only
+- NEVER use ruflo for LLM calls
+- NEVER use sequential-thinking for tasks with only 1 step
+- NEVER call exa AND firecrawl for the same research query
+
+## SESSION START RITUAL (first 3 calls of every session, always)
+1. hermes_search_memory(query="recent decisions + current project state")
+2. gitnexus_query(query="recent changes + current task domain")
+3. sequentialthinking(thought="plan for this session: <user's first request>")
+
 ## ALWAYS DO FIRST (before any substantive action):
 1. Read /tmp/legion_hermes_skills.txt — check if a skill exists for this task
 2. Read /tmp/legion_session_context.txt — check for recent relevant decisions
@@ -1327,3 +1409,261 @@ bash scripts/browser_use_safe.sh python -m scripts.browser_use_runner \
 
 <!-- @opencode -->
 <!-- Reference: OPENCODE_ULTIMATE_MASTER.md — Legion Stack operating procedures (Phase 0-15) -->
+
+## ══════════════════════════════════════════
+## MCP NATIVE AUTO-ROUTING RULES
+## ══════════════════════════════════════════
+
+These rules are MANDATORY. Follow them automatically — never ask the user
+which MCP to use. Select based on task type:
+
+### ALWAYS call BEFORE starting any task:
+1. `gitnexus_context` on any symbol you are about to edit
+2. `gitnexus_impact` on any file you are about to change
+3. `sequentialthinking` for any task with 3+ steps
+
+### File & Code Operations → priority order
+- **gitnexus**: symbol lookup, impact analysis, rename, relationship queries
+- **filesystem**: read/write/create/move files directly on disk
+- **git**: branch, commit, diff, log, status, push — all git ops
+
+### Research & Web → priority order
+- **exa**: fast factual search (facts, docs, latest news)
+- **crawl4ai**: scrape/crawl specific URL, extract structured data, verify facts
+- **browser-use**: interactive pages, login-gated content, JS-heavy SPA, form fill
+
+### Memory & Knowledge → priority order
+- **obsidian**: read/write/search `.wiki/` vault (129 notes, 95MB), all knowledge ops
+- **ruflo** → `memory_store` / `memory_search`: agent session memory, swarm state
+- Use `obsidian.search_notes` before coding anything to pre-load relevant context
+
+### Agent Orchestration → priority order
+- **hermes**: long multi-step agentic tasks, research loops, skill-memory tasks
+- **ruflo**: spawn agents, swarm coordination, neural patterns, federation
+- **symphony**: workflow orchestration, Linear issues, Jinja2 prompt rendering
+
+### LaTeX & Docs
+- **latex**: any `.tex` file hover, definition, diagnostics, completion
+
+### Reasoning
+- **sequential-thinking**: multi-step planning, root-cause analysis,
+  architecture decisions — call this FIRST for any task > 10 min effort
+
+### MCP Call Minimums Per Task Type
+
+| Task | Minimum MCPs to call |
+|------|---------------------|
+| Code edit | gitnexus_context + gitnexus_impact + filesystem |
+| Bug fix | sequential-thinking + gitnexus_context + git diff |
+| Research | exa OR crawl4ai + obsidian.search_notes |
+| New feature | sequential-thinking + gitnexus + obsidian + git |
+| Browser scrape | browser-use (MiniMax-M2.7 ONLY — no fallback) |
+| Agent task | hermes OR ruflo + obsidian memory pre-load |
+| Git commit | git status + git diff + gitnexus_detect_changes |
+| Write wiki | obsidian.create_note OR obsidian.update_note |
+
+### MODEL POLICY (ABSOLUTE — NEVER OVERRIDE)
+- Primary: `minimax/MiniMax-M2.7` via LiteLLM at `http://localhost:4000`
+- Fallback chain: `gemini/gemini-2.0-flash-exp:free` → `minimax/MiniMax-Text-01`
+- browser-use: MiniMax-M2.7 ONLY — never Claude, OpenAI, Gemini cloud
+- hermes: MiniMax-M2.7 via cli-config.yaml → LiteLLM proxy
+
+---
+
+## ══════════════════════════════════════════════════════════════════════════
+## SECTION 15: LEGION v11 COGNITIVE OPERATING SYSTEM
+## 4-Phase Reasoning Loop + Swarm Dispatch + Shared State
+## ══════════════════════════════════════════════════════════════════════════
+
+### 15a. THE 4-PHASE REASONING LOOP
+
+Every non-trivial task follows this sequence — never skip RETRIEVE, never skip PERSIST.
+
+**PHASE A — RETRIEVE** (never skip)
+Before forming any opinion or plan:
+1. Read /tmp/legion_hermes_skills.txt — skills I've built before
+2. Read /tmp/legion_session_context.txt — mem0 memories about Bashara
+3. hermes_search_memory(query) via MCP — what do I already know?
+4. gitnexus_search_code(query) — what's already in the codebase?
+5. obsidian_read(relevant topic) — what's documented?
+Rule: If PHASE A yields complete answer → skip to PHASE C.
+
+**PHASE B — PLAN** (tasks > 2 steps only)
+Call sequentialthinking with: "Task: [X]. Known: [from A]. Steps needed:"
+Output: numbered step list, max 7 steps. Plan is LOCKED after Phase B.
+
+**PHASE C — EXECUTE** (agent-dispatched per step)
+Execute steps sequentially unless explicitly parallelizable.
+Verify output matches success criteria after each step.
+If a step fails twice → STOP, report blocker, propose alternative.
+
+**PHASE D — PERSIST** (never skip at end of any complex task)
+1. hermes_write_skill() — save what was learned
+2. obsidian_write(.wiki/...) — if architecture/wiki changed
+3. git_commit() — if code changed
+4. Write /tmp/legion_session_summary.txt
+
+### 15b. SWARM DISPATCH MATRIX
+
+**PATTERN 1 — STANDARD FEATURE** (most common)
+@planner → @worker → @reviewer → @verifier → @wikibot
+Use for: new features, refactors, multi-file changes.
+
+**PATTERN 2 — RESEARCH + IMPLEMENT**
+@hermes-researcher (parallel with) @planner → @worker → @reviewer → @hermes-agent → @wikibot
+
+**PATTERN 3 — BUG FIX** (skip @planner for clear scope)
+@diff-analyzer → @focused-implementer → @verifier → @hermes-agent
+
+**PATTERN 4 — ARCHITECTURE CHANGE** (always use @reviewer)
+@planner → @explorer → @worker → @reviewer → @verifier → @wikibot + @hermes-agent
+
+**PATTERN 5 — RESEARCH ONLY**
+@hermes-researcher → @hermes-agent → @paper-wiki-writer (if academic)
+
+**PATTERN 6 — DEPLOY / OPS**
+@deployment-engineer → @verifier → @hermes-agent
+
+### 15c. INTER-AGENT SHARED STATE FILES
+
+Agents communicate via /tmp/ shared files:
+
+| File | Written By | Read By |
+|------|-----------|---------|
+| /tmp/legion_plan.md | @planner | @worker, @reviewer |
+| /tmp/legion_build_result.md | @worker | @reviewer, @verifier |
+| /tmp/legion_review.md | @reviewer | @worker, @planner |
+| /tmp/legion_verify.md | @verifier | @planner |
+| /tmp/legion_research.md | @hermes-researcher | @planner, @wikibot |
+| /tmp/legion_session_summary.txt | auto (session end) | next session boot |
+
+ROLE DISCIPLINE:
+- @planner writing code → STOP, hand off to @worker
+- @worker inventing architecture → STOP, return to @planner
+- @reviewer approving with no critique found → INVALID (must find P1+)
+- @verifier marking pass without running tests → INVALID
+
+### 15d. HERMES WRITE_SKILL PROTOCOL
+
+Every hermes_write_skill follows this EXACT structure:
+
+```
+title: "[verb] [subject]" — e.g., "fix: litellm rate limit fallback"
+content: |
+  ## Problem
+  [what was happening]
+  ## Root Cause
+  [why it was happening]
+  ## Solution
+  [exact code/command/approach]
+  ## Prevention
+  [what to check next time]
+tags: [relevant, searchable, lowercase]
+
+SKILL WRITE TRIGGERS (automatic):
+- Any task with 5+ tool calls → write_skill on completion
+- Any bug requiring >2 attempts → write_skill with "fix:" prefix
+- Any research task → write_skill with "research:" prefix
+- Any architecture decision → write_skill with "arch:" prefix
+- Session end → write_skill with "session:" prefix
+```
+
+### 15e. PROJECT SWITCHING PROTOCOL
+
+Legion works on 3 projects. Detect from: cwd + first message + files referenced.
+
+**swarm-bot** → /home/newadmin/swarm-bot
+Primary agents: legiona/, hermes-agent, deployment-engineer
+Key MCPs: hermes, gitnexus, ruflo, filesystem, obsidian
+
+**cekwajar** → /home/newadmin/cekwajar.id
+Primary agents: frontend/, backend/, db/
+Key MCPs: gitnexus, filesystem, git, exa
+
+**popw** → /home/newadmin/swarm-bot/project/popw
+Primary agents: paper-wiki-writer, research-agent, hermes-researcher
+Key MCPs: exa, crawl4ai, obsidian, latex
+
+**Switch protocol:**
+1. Write current project session summary to hermes + /tmp/
+2. hermes_search_memory("[new project] recent state decisions")
+3. git log --oneline -10 && git status (in new project)
+4. Announce: "Switching to [project]. Last I knew: [2-sentence state]."
+
+### 15f. SELF-EVOLUTION RECORD_FAILURE WIRING
+
+After every bug/attempt failure, run:
+```python
+from core.self_evolution import get_self_evolution_engine
+engine = get_self_evolution_engine("/home/newadmin/swarm-bot")
+await engine.record_failure(
+    task="[what was being built]",
+    approach="[what was tried]",
+    failure_mode="[how it failed]",
+    root_cause="[why it failed]",
+    fix="[what worked]",
+    prevention="[check X next time]"
+)
+```
+
+After 5+ failures: engine.build_eval_set_from_failures()
+After architecture decision: engine.record_decision(title=..., context=..., decision=..., rationale=..., alternatives=[...], consequences={...})
+
+### 15g. CONTEXT HEALTH — THE 4 LEVELS
+
+| Level | Context | Action |
+|-------|---------|--------|
+| 🟢 HEALTHY | 0–40% | Normal operation |
+| 🟡 CAUTION | 40–60% | Run pre-compaction checkpoint |
+| 🔴 CRITICAL | 60–80% | Finish current task, then /compact |
+| 💀 OVERFLOW | 80%+ | MANDATORY /compact before ANY new work |
+
+MANDATORY before 60%: python3 .claude/scripts/wiki_health.py
+MANDATORY after /compact: Read .claude/memory_bootstrap.md + SOUL.md + git log --oneline -10
+
+### 15h. PYTHON INFRASTRUCTURE — LEGION_STATE, LEGION_SESSION, LEGION_COMPACTION
+
+**core/legion_state.py** — shared /tmp/ state file manager:
+```
+from core.legion_state import (
+    write_state, read_state,         # raw /tmp/legion_*.txt I/O
+    write_plan, write_build_result,  # structured writes for swarm agents
+    write_precompact_checkpoint,     # 9-section checkpoint format
+    write_session_summary,           # end-of-session summary
+    get_session_metrics,            # track tool calls + files changed
+)
+```
+
+**core/legion_session.py** — session lifecycle manager:
+```
+from core.legion_session import (
+    session_boot,           # async boot: hydrate memory, assess health
+    detect_goodbye,        # detect session-end signals
+    detect_task_type,      # fast keyword classification
+    get_session_metrics,   # SessionMetrics() for tracking
+    assess_context_health,  # 🟢🟡🔴💀 from context chars
+    should_compact,         # (bool, reason) tuple
+)
+```
+
+**core/legion_compaction.py** — 9-section compaction generator:
+```
+python3 -m core.legion_compaction --context-chars 12000 --output /tmp/precompact.md
+```
+Or import: `from core.legion_compaction import generate_compaction_summary`
+
+**core/legion_skill_indexer.py** — auto-generate skill index:
+```
+from core.legion_skill_indexer import index_skills, load_skills, get_top_skills
+```
+
+### 15i. EMERGENCY PROCEDURES
+
+| Emergency | Action |
+|----------|--------|
+| HERMES DOWN | Continue session. Write skills to `/tmp/legion_pending_skills.jsonl`. |
+| LITELLM DOWN (port 4000) | BLOCKER. `sudo systemctl restart litellm`. `curl http://localhost:4000/health` |
+| GITNEXUS FAILING | Fall back to `filesystem_read` + `grep`. Be extra conservative. |
+| CONTEXT >80% | /compact IMMEDIATELY. Pre-compaction checkpoint first. |
+| OBSIDIAN NOT RESPONDING | Write wiki to `/tmp/wiki_pending/*.md`. Sync next session. |
+| BOT BROKEN | `systemctl status swarm-bot.service` + `journalctl -u swarm-bot.service -n 50` |

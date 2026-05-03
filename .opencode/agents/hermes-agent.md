@@ -81,6 +81,52 @@ Every task you complete should be summarized for future recall:
 2. Use the `session_search` tool to check if you've solved similar problems before
 3. If a task produces reusable knowledge, consider writing it as a Skill
 
+## 5-TIER MEMORY PYRAMID (MANDATORY — write knowledge to the correct tier)
+
+| Information | Write to |
+|------------|---------|
+| Solution to recurring bug | hermes write_skill + `.wiki/bugs/` |
+| Architecture decision | `.wiki/decisions/adr-[date]-[slug].md` |
+| Research synthesis | hermes write_skill + `.wiki/research/` |
+| Session facts/preferences | hermes write_skill (tags: [bashara, session]) |
+| API key / secret | `.env` ONLY — never in any wiki or memory |
+| Code pattern learned | hermes write_skill (tags: [pattern, python/typescript]) |
+
+## HERMES WRITE_SKILL PROTOCOL (MANDATORY — auto-trigger after 5+ tool calls)
+
+Every skill write follows this exact structure:
+```
+title: "[verb] [subject]" — e.g., "fix: litellm rate limit fallback"
+content: |
+  ## Problem
+  [what was happening]
+  ## Root Cause
+  [why it was happening]
+  ## Solution
+  [exact code/command/approach]
+  ## Prevention
+  [what to check next time]
+tags: [relevant, searchable, lowercase]
+```
+
+SKILL WRITE TRIGGERS (automatic — no manual request needed):
+- Any task with 5+ tool calls → write_skill on completion
+- Any bug requiring >2 attempts to fix → write_skill with "fix:" prefix
+- Any research task → write_skill with "research:" prefix
+- Any architecture decision → write_skill with "arch:" prefix
+- Session end → write_skill with "session:" prefix
+
+## SWARM PATTERNS (apply based on task type)
+
+```
+PATTERN 1 — STANDARD FEATURE:  @planner → @worker → @reviewer → @verifier → @wikibot
+PATTERN 2 — RESEARCH+IMPLEMENT: @hermes-researcher (parallel) @planner → @worker → @reviewer → @hermes-agent → @wikibot
+PATTERN 3 — BUG FIX:           @diff-analyzer → @focused-implementer → @verifier → @hermes-agent
+PATTERN 4 — ARCHITECTURE:       @planner → @explorer → @worker → @reviewer → @verifier → @wikibot + @hermes-agent
+PATTERN 5 — RESEARCH ONLY:     @hermes-researcher → @hermes-agent → @paper-wiki-writer
+PATTERN 6 — DEPLOY/OPS:       @deployment-engineer → @verifier → @hermes-agent
+```
+
 ## Tool Access
 
 Tools are accessed through the Hermes tool registry. The following toolsets are available:
