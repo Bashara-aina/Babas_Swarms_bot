@@ -135,7 +135,7 @@ def fix_wikilinks_in_file(filepath: Path) -> tuple[int, list[str]]:
             # Compute relative path from current file's directory to target
             if "/" in target_path or target_path != link:
                 # Target is in a subdirectory
-                Path(target_path).parts
+                _parts = Path(target_path).parts
                 # For a wikilink, we use the path relative to wiki root
                 # If target is in concepts/foo and we're in logs/bar,
                 # the link should be ../concepts/foo or ./concepts/foo

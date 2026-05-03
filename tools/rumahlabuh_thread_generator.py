@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import random
 import re
 import unicodedata
@@ -27,7 +26,7 @@ FACTS_MD_PATH = Path(__file__).parent.parent / ".claude" / "scripts" / "rumahlab
 
 
 def load_json(path: Path) -> dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -65,25 +64,24 @@ class ThreadFacts:
     _facilities_data: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def load(cls, facts_path: Path = FACTS_JSON_PATH) -> "ThreadFacts":
+    def load(cls, facts_path: Path = FACTS_JSON_PATH) -> ThreadFacts:
         """Load facts from JSON with mtime-based cache invalidation, fallback to .md."""
         data: dict[str, Any] | None = None
-        current_mtime: float | None = None
 
         # Try JSON first
         if facts_path.exists():
-            current_mtime = facts_path.stat().st_mtime
+            _mtime = facts_path.stat().st_mtime
             try:
-                with open(facts_path, "r", encoding="utf-8") as f:
+                with open(facts_path, encoding="utf-8") as f:
                     data = json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 data = None
 
         # Fallback to markdown
         if data is None:
             data = cls._load_from_md(FACTS_MD_PATH)
             if data is not None:
-                current_mtime = FACTS_MD_PATH.stat().st_mtime if FACTS_MD_PATH.exists() else None
+                _md_mtime = FACTS_MD_PATH.stat().st_mtime if FACTS_MD_PATH.exists() else None
 
         if data is None:
             # Return defaults if everything fails
@@ -121,10 +119,10 @@ class ThreadFacts:
         if not md_path.exists():
             return None
         try:
-            with open(md_path, "r", encoding="utf-8") as f:
+            with open(md_path, encoding="utf-8") as f:
                 text = f.read()
             return cls._parse_md(text)
-        except (IOError, OSError):
+        except OSError:
             return None
 
     @classmethod
@@ -147,7 +145,6 @@ class ThreadFacts:
             elif stripped.startswith("### "):
                 location_name = stripped[4:].strip()
                 if location_name in ("Labuh Biru", "Labuh Banyu"):
-                    key = "labuh_biru" if location_name == "Labuh Biru" else "labuh_banyu"
                     data["locations"][location_name] = {"address": "", "kamar_count": 0, "tipe_count": 0, "features": []}
             elif current_section == "harga" and "Bulanan mulai:" in stripped:
                 parts = stripped.split("Bulanan mulai:", 1)
@@ -187,13 +184,13 @@ class ThreadFacts:
         """Get facilities for a specific location."""
         location_lower = location_name.lower()
         base_facilities = list(self.facilities)
-        for loc_key in self.locations.keys():
+        for loc_key in self.locations:
             if loc_key.lower() == location_lower:
                 extra = self.locations.get(loc_key, {}).get("features", [])
                 return base_facilities + extra
         return self.facilities
 
-    def reload_if_modified(self) -> "ThreadFacts":
+    def reload_if_modified(self) -> ThreadFacts:
         """Reload facts if the file has been modified (mtime cache invalidation)."""
         if not self._cache_path.exists():
             return self
@@ -618,7 +615,7 @@ class ThreadValidator:
             for idx, post in enumerate(thread, start=1):
                 bad = next((ch for ch in post if _is_disallowed_script_char(ch)), None)
                 if bad is not None:
-                    errors.append(f"Post {idx} has disallowed script char {repr(bad)}")
+                    errors.append(f"Post {idx} has disallowed script char {bad!r}")
 
         # tone gate
         for phrase in tone.get("no_menakut_takuti", []):
@@ -678,7 +675,7 @@ def load_config() -> dict[str, Any]:
 def load_facts() -> str:
     """Load facts text from markdown fallback file."""
     if FACTS_MD_PATH.exists():
-        with open(FACTS_MD_PATH, "r", encoding="utf-8") as f:
+        with open(FACTS_MD_PATH, encoding="utf-8") as f:
             return f.read()
     return ""
 
