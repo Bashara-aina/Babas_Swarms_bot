@@ -15,7 +15,6 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ SELF_REVIEW_LOG = Path(os.path.expanduser("~/.legion/self_review_log.json"))
 SELF_REVIEW_LOG.parent.mkdir(parents=True, exist_ok=True)
 
 _conversation_buffer: list[dict[str, str]] = []
-_REVIEW_EVERY_N = 50
+_REVIEW_EVERY_N = 5  # TEMP for testing — revert to 50 after validating self-review loop works
 
 
 def buffer_conversation(user_msg: str, legion_response: str) -> None:
@@ -86,10 +85,7 @@ Respond in JSON only:
         result = await chat(
             task=review_prompt,
             agent_key="general",
-            skip_memory=True,
-            skip_wiki=True,
-            max_tokens=800,
-            temperature=0.3,
+            task_context="You are a strict code reviewer. Skip memory and wiki lookups. Be concise.",
         )
 
         import re

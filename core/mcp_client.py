@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import os
@@ -316,10 +317,8 @@ class MCPClientPool:
         reader = self._readers.pop(server_name, None)
         writer = self._writers.pop(server_name, None)
         if session:
-            try:
+            with contextlib.suppress(Exception):
                 await session.__aexit__(None, None, None)
-            except Exception:
-                pass
         if reader:
             try:
                 reader.close()
@@ -328,10 +327,8 @@ class MCPClientPool:
             except Exception:
                 pass
         if writer:
-            try:
+            with contextlib.suppress(Exception):
                 writer.close()
-            except Exception:
-                pass
 
     async def call_tool(
         self, server_name: str, tool_name: str, arguments: dict[str, Any]
@@ -378,7 +375,7 @@ class MCPClientPool:
             return f"Error: MCP server '{server_name}' is disabled in config."
 
         try:
-            from mcp import ClientSession, StdioServerParameters  # type: ignore
+            from mcp import ClientSession  # type: ignore
             from mcp.client.stdio import stdio_client  # type: ignore
         except Exception as exc:
             logger.warning("mcp SDK not installed: %s", exc)
@@ -404,7 +401,15 @@ class MCPClientPool:
                                 "MCP pool: %s recovered from failed state (single-call)",
                                 server_name,
                             )
-                        return _tool_result_to_text(result)[:12000] or "(empty tool result)"
+                        text_result = _tool_result_to_text(result)[:12000] or "(empty tool result)"
+                        try:
+                            from core.hooks import get_hook_system
+                            hs = get_hook_system()
+                            if hs:
+                                hs.emit("post_tool_use", server=server_name, tool=tool_name, args=arguments, result=text_result)
+                        except Exception:
+                            pass
+                        return text_result
             except Exception as exc:
                 last_exc = exc
                 if attempt == 0:
@@ -470,7 +475,7 @@ class MCPClientPool:
         if not srv or not srv.get("enabled"):
             return []
         try:
-            from mcp import ClientSession, StdioServerParameters  # type: ignore
+            from mcp import ClientSession  # type: ignore
             from mcp.client.stdio import stdio_client  # type: ignore
         except Exception:
             return []

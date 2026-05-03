@@ -12,11 +12,9 @@ Expected impact:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 
@@ -62,9 +60,22 @@ class SemanticCache:
         self._total_hits = 0
 
     def _load_model(self) -> None:
-        """Lazy-load sentence-transformers model."""
+        """Lazy-load embedding model — prefers Ollama, falls back to sentence-transformers."""
         if self._model is not None:
             return
+        try:
+            import httpx
+            resp = httpx.post(
+                "http://localhost:11434/api/embeddings",
+                json={"model": "nomic-embed-text:latest", "prompt": "test"},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                self._model = "ollama"
+                logger.info("Semantic cache: Ollama nomic-embed-text loaded")
+                return
+        except Exception:
+            pass
         try:
             from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer("all-mpnet-base-v2")
@@ -75,7 +86,7 @@ class SemanticCache:
                 "Install: pip install sentence-transformers"
             )
 
-    def _embed(self, text: str) -> Optional[np.ndarray]:
+    def _embed(self, text: str) -> np.ndarray | None:
         """Generate embedding for a text string.
 
         Args:
@@ -88,8 +99,19 @@ class SemanticCache:
         if self._model is None:
             return None
         try:
-            emb = self._model.encode(text, normalize_embeddings=True)
-            return np.array(emb, dtype=np.float32)
+            if self._model == "ollama":
+                import httpx
+                resp = httpx.post(
+                    "http://localhost:11434/api/embeddings",
+                    json={"model": "nomic-embed-text:latest", "prompt": text},
+                    timeout=10,
+                )
+                resp.raise_for_status()
+                emb = resp.json()["embedding"]
+                return np.array(emb, dtype=np.float32)
+            else:
+                emb = self._model.encode(text, normalize_embeddings=True)
+                return np.array(emb, dtype=np.float32)
         except Exception as exc:
             logger.warning("Embedding failed: %s", exc)
             return None
@@ -120,7 +142,7 @@ class SemanticCache:
         self._entries = self._entries[removed:]
         logger.debug("Cache evicted %d old entries", removed)
 
-    def get(self, query: str, agent: str) -> Optional[str]:
+    def get(self, query: str, agent: str) -> str | None:
         """Check if a semantically similar query was cached.
 
         Args:
@@ -137,7 +159,7 @@ class SemanticCache:
             return None
 
         best_score = 0.0
-        best_entry: Optional[CacheEntry] = None
+        best_entry: CacheEntry | None = None
 
         for entry in self._entries:
             if entry.agent != agent:

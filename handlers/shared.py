@@ -88,7 +88,16 @@ _cost_metrics = None
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 def is_allowed(msg: Message) -> bool:
-    return msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID
+    if msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID:
+        try:
+            from core.hooks import get_hook_system
+            hs = get_hook_system()
+            if hs:
+                hs.emit("command_received", msg=msg)
+        except Exception:
+            pass
+        return True
+    return False
 
 
 def allowed_cb(cb: CallbackQuery) -> bool:
