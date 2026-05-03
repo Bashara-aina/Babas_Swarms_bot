@@ -126,11 +126,15 @@
     "hermes": {
       "type": "local",
       "command": [
-        "/home/newadmin/miniconda3/bin/hermes",
-        "mcp",
-        "serve"
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "mcp_servers.hermes_mcp_server"
       ],
-      "description": "Hermes messaging bridge \u2014 list conversations, read history, send messages, poll events across Telegram/Discord/gateways"
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "env": {
+        "HERMES_CLI_CONFIG": "/home/newadmin/swarm-bot/ext/hermes-agent/cli-config.yaml",
+        "LITELLM_BASE_URL": "http://localhost:4000"
+      }
     },
     "browser-use": {
       "type": "local",
@@ -140,7 +144,10 @@
         "tools.mcpServers.browser_use_mcp.server"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot",
-      "description": "MiniMax-native browser automation via browser-use \u2014 open, click, fill, scroll, wait, screenshot, get_text, get_html, close, run_task"
+      "env": {
+        "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
+        "LITELLM_BASE_URL": "http://localhost:4000"
+      }
     }
   },
   "watcher": {
@@ -160,6 +167,20 @@
       "*.pdf",
       "*.zip",
       "skill_labels.zip"
-    ]
+     ]
+   },
+  "hooks": {
+    "session:start": {
+      "command": ["bash", "-c", "cat /tmp/legion_session_context.txt /tmp/legion_temporal_context.txt 2>/dev/null"],
+      "description": "Load session hot memory on start"
+    },
+    "session:end": {
+      "command": ["bash", "-c", "cat > /tmp/legion_session_summary.txt << 'EOF'\nLast session summary auto-generated\nEOF"],
+      "description": "Save session summary to hot memory on end"
+    },
+    "task:complete": {
+      "command": ["bash", "-c", "echo 'task complete' >> /tmp/legion_task_log.txt"],
+      "description": "Log task completion to hot memory"
+    }
   }
 }

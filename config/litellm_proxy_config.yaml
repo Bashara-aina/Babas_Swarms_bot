@@ -5,6 +5,12 @@ model_list:
       api_base: https://api.minimax.io/v1
       api_key: os.environ/MINIMAX_API_KEY
 
+  - model_name: minimax/MiniMax-M2.7
+    litellm_params:
+      model: minimax/MiniMax-M2.7
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+
   - model_name: fallback-gemini
     litellm_params:
       model: gemini/gemini-2.0-flash-exp:free
@@ -17,7 +23,7 @@ model_list:
       api_key: os.environ/MINIMAX_API_KEY
 
 router_settings:
-  routing_strategy: latency-based-routing
+  routing_strategy: simple-shuffle
   fallbacks:
     - minimax-primary:
         - fallback-gemini
@@ -28,14 +34,11 @@ router_settings:
     TimeoutErrorRetries: 2
 
 litellm_settings:
-  cache: true
-  cache_params:
-    type: redis
-    host: localhost
-    port: 6379
-    ttl: 3600
   set_verbose: false
   drop_params: true
+  store_model_results: false
+  disable_constraints: true
+  no-cache: true
 
 general_settings:
   master_key: "legion-proxy-key"

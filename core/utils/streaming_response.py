@@ -187,7 +187,7 @@ class StreamingResponseManager:
                 from interpreter import interpreter
 
                 # FIXED: Pass display=False AND disable markdown display function
-                for chunk in interpreter.chat(task, stream=True, display=False):
+                for chunk in (interpreter.chat(task, stream=True, display=False) or []):
                     chunk_type = chunk.get("type", "")
                     content = chunk.get("content", "")
                     if not isinstance(content, str) or not content:
@@ -278,7 +278,7 @@ class StreamingResponseManager:
                         interpreter_bridge.configure_interpreter(current_model, agent_key)
                         from interpreter import interpreter
 
-                        for chunk in interpreter.chat(task, stream=True, display=False):
+                        for chunk in (interpreter.chat(task, stream=True, display=False) or []):
                             chunk_type = chunk.get("type", "")
                             content = chunk.get("content", "")
                             if not isinstance(content, str) or not content:
@@ -361,7 +361,7 @@ class StreamingResponseManager:
         while True:
             try:
                 chunk = await asyncio.wait_for(queue.get(), timeout=2.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # Still waiting for chunks — update "thinking" indicator
                 dots = "." * (int(time.monotonic()) % 4)
                 await self._safe_edit(msg, f"{label}\n\n{buffer or _THINKING}{dots}")

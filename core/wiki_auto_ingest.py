@@ -11,12 +11,10 @@ All wiki writes go through WikiManager to keep INDEX.md in sync.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
-import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -73,12 +71,10 @@ def is_worthy_turn(q: str, a: str) -> tuple[bool, str]:
 async def _llm_quality_check(q: str, a: str) -> tuple[bool, float]:
     """Call LLM to score quality. Returns (worthy, score)."""
     try:
-        from llm_client import complete as llm_complete
-        from llm_client import get_model_for_task
+        from llm_client import chat
 
-        model = get_model_for_task("general")
         prompt = QUALITY_CHECK_PROMPT.format(q=q[:300], a=a[:500])
-        raw = await llm_complete(prompt, model=model, max_tokens=200)
+        raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax/MiniMax-M2.7")
         data = json.loads(raw)
         return bool(data.get("worthy", False)), float(data.get("score", 0.0))
     except Exception as exc:
@@ -173,11 +169,9 @@ async def on_session_end(
 
     try:
         if llm_client is None:
-            from llm_client import complete as lc
-            from llm_client import get_model_for_task
+            from llm_client import chat
 
-            model = get_model_for_task("general")
-            raw = await lc(prompt, model=model, max_tokens=1500)
+            raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax/MiniMax-M2.7")
         else:
             raw = await llm_client.complete(prompt)
 

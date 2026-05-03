@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import logging
 import re
 import time
-from pathlib import Path
-from typing import Optional
 
 from aiogram.types import (
     CallbackQuery,
@@ -20,8 +19,6 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-import llm_client
-import router as agents
 from llm_client import agent_loop, chat, chunk_output, verify_api_keys
 
 logger = logging.getLogger(__name__)
@@ -155,15 +152,13 @@ async def send_chunked(msg: Message, text: str, model_used: str = "") -> None:
     if not text:
         return
     text = _format_for_telegram_html(text)
-    try:
+    with contextlib.suppress(Exception):
         logger.info(
             "[BOT_RESPONSE][chat=%s][model=%s] %s",
             msg.chat.id if msg.chat else None,
             model_used or "unknown",
             (text[:1200] + ("…" if len(text) > 1200 else "")).replace("\n", "\\n"),
         )
-    except Exception:
-        pass
     chunks = chunk_output(text, max_length=4000)
     for i, chunk in enumerate(chunks):
         is_last = i == len(chunks) - 1
@@ -197,7 +192,7 @@ async def _keep_typing(msg: Message) -> None:
         await asyncio.sleep(4)
 
 
-async def _cancel_task(task: Optional[asyncio.Task]) -> None:
+async def _cancel_task(task: asyncio.Task | None) -> None:
     if task is None:
         return
     task.cancel()
@@ -233,21 +228,19 @@ def _key_status() -> str:
 # ── Core: agentic loop handler ────────────────────────────────────────────────
 async def _run_agent_loop(msg: Message, task: str) -> None:
     """Run the agentic computer-use loop with live progress updates."""
-    # FIX #5: Guard against msg.from_user being None (aiogram 3.x can send None for system messages)
     if not msg.from_user:
         return
 
-    thread_id = _user_thread.get(msg.from_user.id)
+    from_user_id = msg.from_user.id
+    thread_id = _user_thread.get(from_user_id)
 
-    try:
+    with contextlib.suppress(Exception):
         logger.info(
             "[USER_CHAT][mode=agent_loop][chat=%s][user=%s] %s",
             msg.chat.id,
-            msg.from_user.id,
+            from_user_id,
             (task[:1200] + ("…" if len(task) > 1200 else "")).replace("\n", "\\n"),
         )
-    except Exception:
-        pass
 
     status_msg = await msg.answer("\U0001f916 on it\u2026")
     step_count = 0
@@ -260,14 +253,14 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
                 logger.info(
                     "[BOT_THOUGHT][chat=%s][user=%s] %s",
                     msg.chat.id,
-                    msg.from_user.id,
+                    from_user_id,
                     (step_text[:1200] + ("…" if len(step_text) > 1200 else "")).replace("\n", "\\n"),
                 )
             else:
                 logger.info(
                     "[BOT_PROGRESS][chat=%s][user=%s][step=%s] %s",
                     msg.chat.id,
-                    msg.from_user.id,
+                    from_user_id,
                     step_count,
                     (step_text[:1200] + ("…" if len(step_text) > 1200 else "")).replace("\n", "\\n"),
                 )
@@ -275,7 +268,6 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
             pass
         try:
             if step_text.startswith("\U0001f4ad"):
-                # Bot thought — send as a separate italic message so it persists
                 await msg.answer(
                     f"<i>{html_mod.escape(step_text)}</i>",
                     parse_mode="HTML",
@@ -296,7 +288,7 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
                 caption="\U0001f4f8 current screen",
                 reply_markup=screenshot_keyboard(),
             )
-            _last_screenshot[msg.from_user.id] = path
+            _last_screenshot[from_user_id] = path
         except Exception as e:
             import logging
 
@@ -310,13 +302,11 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
             progress_fn=on_progress,
             photo_cb=on_photo,
             thread_id=thread_id,
-            user_id=msg.from_user.id,
+            user_id=str(msg.from_user.id) if msg.from_user else None,
         )
         await _cancel_task(typing_task)
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         await send_chunked(msg, response, model_used=model_used)
 
     except Exception as e:
@@ -342,9 +332,9 @@ async def _run_agent_loop(msg: Message, task: str) -> None:
 async def _execute_chat(
     msg: Message,
     task: str,
-    forced_agent: Optional[str] = None,
+    forced_agent: str | None = None,
     show_thinking: bool = True,
-    routing_hint: Optional[str] = None,
+    routing_hint: str | None = None,
 ) -> None:
     """Single-turn LLM chat with typing indicator and chunked output."""
     # FIX #5: Guard against msg.from_user being None
@@ -353,7 +343,7 @@ async def _execute_chat(
 
     selected_agent = forced_agent or "general"
 
-    try:
+    with contextlib.suppress(Exception):
         logger.info(
             "[USER_CHAT][mode=chat][chat=%s][user=%s][agent=%s] %s",
             msg.chat.id,
@@ -361,8 +351,6 @@ async def _execute_chat(
             selected_agent,
             (task[:1200] + ("…" if len(task) > 1200 else "")).replace("\n", "\\n"),
         )
-    except Exception:
-        pass
 
     # Use chat.id as thread_id so conversation history is tracked per-chat
     thread_id = str(msg.chat.id) if msg.chat else str(msg.from_user.id)

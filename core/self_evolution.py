@@ -15,12 +15,9 @@ Reference: M2.7 Full Capability Activation — Self-Evolution System (Section D1
 from __future__ import annotations
 
 import datetime
-import hashlib
-import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +80,25 @@ class SelfEvolutionEngine:
         self.failures_file = self.project_root / self.FAILURES_FILE
         self.decisions_file = self.project_root / self.DECISIONS_FILE
         self.eval_set_file = self.project_root / self.EVAL_SET_FILE
+        self._hermes_skills_dir = (
+            self.project_root / "ext" / "hermes-agent" / "skills"
+        )
+
+    # ---------------------------------------------------------------------------
+    # Hermes skill writing
+    # ---------------------------------------------------------------------------
+
+    def _write_hermes_skill(self, name: str, content: str) -> None:
+        """Write a skill to Hermes skills directory for cross-session memory."""
+        try:
+            skills_dir = self._hermes_skills_dir
+            skills_dir.mkdir(parents=True, exist_ok=True)
+            safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in name)
+            fpath = skills_dir / f"{safe_name}.md"
+            fpath.write_text(content, encoding="utf-8")
+            logger.debug("[SelfEvolution] Wrote Hermes skill: %s", fpath.name)
+        except Exception as e:
+            logger.warning("[SelfEvolution] Failed to write Hermes skill: %s", e)
 
     # ---------------------------------------------------------------------------
     # Failure recording
@@ -96,8 +112,8 @@ class SelfEvolutionEngine:
         root_cause: str,
         fix_applied: str,
         prevention_rule: str,
-        title: Optional[str] = None,
-        tags: Optional[list[str]] = None,
+        title: str | None = None,
+        tags: list[str] | None = None,
     ) -> None:
         """Append a failure record to FAILURES.md.
 
@@ -134,8 +150,11 @@ class SelfEvolutionEngine:
         except Exception as e:
             logger.error("[SelfEvolution] Failed to write FAILURES.md: %s", e)
 
-        # Also notify FeedbackLearner if it exists
         self._notify_feedback_learner(task, "failure")
+        self._write_hermes_skill(
+            name=f"failure-{title_str[:40].replace(' ', '-').replace('/', '-')}",
+            content=f"# Failure: {title_str}\n\nTask: {task}\nApproach: {approach}\nFailure mode: {failure_mode}\nRoot cause: {root_cause}\nFix applied: {fix_applied}\nPrevention: {prevention_rule}\nTags: {tags_str}\n",
+        )
 
     def _notify_feedback_learner(self, task: str, outcome: str) -> None:
         """Notify FeedbackLearner of failure for agent weight adjustment."""
@@ -215,10 +234,7 @@ class SelfEvolutionEngine:
         # Group by root cause category
         categories: dict[str, list[FailureRecord]] = {}
         for f in failures:
-            if f.tags:
-                primary_tag = f.tags[0]
-            else:
-                primary_tag = "general"
+            primary_tag = f.tags[0] if f.tags else "general"
             categories.setdefault(primary_tag, []).append(f)
 
         # Generate test cases from categories
@@ -399,8 +415,8 @@ class SelfEvolutionEngine:
         context: str,
         decision: str,
         rationale: str,
-        alternatives: Optional[list[str]] = None,
-        consequences: Optional[dict[str, str]] = None,
+        alternatives: list[str] | None = None,
+        consequences: dict[str, str] | None = None,
     ) -> None:
         """Record an architecture decision to DECISIONS.md."""
         now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
@@ -449,16 +465,21 @@ class SelfEvolutionEngine:
         except Exception as e:
             logger.error("[SelfEvolution] Failed to write DECISIONS.md: %s", e)
 
+        self._write_hermes_skill(
+            name=f"adr-{adr_num:03d}-{title[:40].replace(' ', '-').replace('/', '-')}",
+            content=f"# ADR-{adr_num}: {title}\n\nContext: {context}\nDecision: {decision}\nRationale: {rationale}\n",
+        )
+
 
 # ---------------------------------------------------------------------------
 # Convenience singleton
 # ---------------------------------------------------------------------------
 
-_engine: Optional[SelfEvolutionEngine] = None
+_engine: SelfEvolutionEngine | None = None
 
 
 def get_self_evolution_engine(
-    project_root: Optional[str] = None,
+    project_root: str | None = None,
 ) -> SelfEvolutionEngine:
     """Return global SelfEvolutionEngine singleton."""
     global _engine
