@@ -10,11 +10,13 @@ permissions:
   edit: allow
   bash: allow
 tools:
-  - web_search
-  - web_extract
-  - session_search
-  - browser_navigate
-  - delegate_task
+  web_search: true
+  web_extract: true
+  session_search: true
+  browser_navigate: true
+  delegate_task: true
+  read_file: true
+  write_file: true
 ---
 
 ## Role

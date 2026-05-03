@@ -11,13 +11,13 @@ permissions:
   edit: allow
   bash: allow
 tools:
-  - terminal
-  - read_file
-  - write_file
-  - patch
-  - search_files
-  - execute_code
-  - delegate_task
+  terminal: true
+  read_file: true
+  write_file: true
+  patch: true
+  search_files: true
+  execute_code: true
+  delegate_task: true
 ---
 
 ## Role
