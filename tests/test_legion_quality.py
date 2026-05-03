@@ -6,8 +6,6 @@ Tests cover all 4 guards plus integration scenarios.
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from legion.anti_slop.core import (
@@ -35,7 +33,7 @@ def test_filler_phrase_rejection() -> None:
 def test_filler_phrase_case_insensitive() -> None:
     """Guard 1 should be case insensitive."""
     content = "IT GOES WITHOUT SAYING that this is important."
-    rejected, reason = guard_format(content)
+    rejected, _reason = guard_format(content)
     assert rejected is True
 
 
@@ -69,7 +67,7 @@ def test_personal_insult_rejection() -> None:
 def test_clean_content_package_pass() -> None:
     """Guard 2 should pass clean content."""
     content = "I understand your concern. Let me help you solve this step by step."
-    rejected, reason = guard_package(content)
+    rejected, _reason = guard_package(content)
     assert rejected is False
 
 
@@ -105,7 +103,7 @@ def test_clean_content_critique_pass() -> None:
     content = (
         "The solution involves three steps: first, check the logs; second, identify the error; third, apply the fix."
     )
-    rejected, reason = guard_critique(content)
+    rejected, _reason = guard_critique(content)
     assert rejected is False
 
 
@@ -178,7 +176,6 @@ def test_quality_result_score_validation() -> None:
 @pytest.mark.asyncio
 async def test_quarantine_response(tmp_path: pytest.Fixture) -> None:
     """Quarantine should write content with metadata frontmatter."""
-    from pathlib import Path
 
     # Override quarantine dir for testing
     import legion.anti_slop.core as core_module

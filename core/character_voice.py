@@ -14,9 +14,7 @@ All functions are synchronous, lightweight, and never raise.
 from __future__ import annotations
 
 import logging
-import re
 from functools import lru_cache
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +117,7 @@ def _load_character() -> dict:
         return {}
 
 
-def get_opinion_on(topic: str) -> Optional[str]:
+def get_opinion_on(topic: str) -> str | None:
     """Return a prompt snippet if Legion has a stated opinion relevant to topic.
 
     Scans the opinion map for keyword overlap. Returns None if no match.
@@ -143,7 +141,7 @@ def get_opinion_on(topic: str) -> Optional[str]:
     return None
 
 
-def get_debate_trigger(user_message: str) -> Optional[str]:
+def get_debate_trigger(user_message: str) -> str | None:
     """Return a debate prompt if the user asserts something Legion disagrees with.
 
     Detects counter-claim phrases that contradict Legion's stated positions.
@@ -172,7 +170,7 @@ def get_debate_trigger(user_message: str) -> Optional[str]:
     return None
 
 
-def get_humor_nudge(user_message: str) -> Optional[str]:
+def get_humor_nudge(user_message: str) -> str | None:
     """Return a gentle humor nudge for casual, short, non-technical messages.
 
     Only triggers when:
@@ -215,7 +213,7 @@ def get_humor_nudge(user_message: str) -> Optional[str]:
     )
 
 
-def get_proactive_check(user_message: str) -> Optional[str]:
+def get_proactive_check(user_message: str) -> str | None:
     """Return a proactive check prompt for messages that hint at struggle or stress.
 
     Detects emotional cues (frustration, tiredness, being stuck) and returns

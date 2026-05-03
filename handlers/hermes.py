@@ -14,9 +14,8 @@ from __future__ import annotations
 import asyncio
 import html as html_mod
 import logging
-import os
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -44,7 +43,7 @@ def _format_hermes_result(result: Any) -> str:
             return str(final)
         # Fallback: dump non-empty fields
         for key in ("response", "output", "result", "message"):
-            if key in result and result[key]:
+            if result.get(key):
                 return str(result[key])
         return str(result)
     return str(result) if result else "(empty response)"
@@ -306,7 +305,7 @@ async def cmd_hermes_tools(msg: Message) -> None:
         definitions = get_hermes_tool_definitions(quiet_mode=True)
 
         # Group tools by toolset
-        toolset_tools: Dict[str, List[str]] = {}
+        toolset_tools: dict[str, list[str]] = {}
         for ts_name, ts_meta in HERMES_LEGION_TOOLSETS.items():
             toolset_tools[ts_name] = list(ts_meta.get("tools", []))
 

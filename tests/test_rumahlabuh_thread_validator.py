@@ -1,6 +1,7 @@
 """Regression tests for rumahlabuh thread validator rule enforcement."""
 
 import pytest
+
 from tools.rumahlabuh_thread_generator import ThreadValidator, load_config
 
 

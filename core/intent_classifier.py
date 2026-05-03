@@ -6,7 +6,6 @@ without requiring slash commands. Runs in <1ms.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Literal
 

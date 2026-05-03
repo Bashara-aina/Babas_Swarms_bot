@@ -1,6 +1,7 @@
 """Regression tests for rumahlabuh question-difference checks in posts 5 and 6."""
 
 import pytest
+
 from tools.rumahlabuh_thread_generator import ThreadValidator, load_config
 
 

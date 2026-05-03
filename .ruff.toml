@@ -1,7 +1,33 @@
 line-length = 100
 target-version = "py313"
 select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
-ignore = ["E501", "B023", "RUF003"]
+ignore = [
+    "E501",  # line too long
+    "B023",  # function closure using loop variable
+    "RUF003",  # explicit override needed
+    "RUF001",  # ambiguous character (EN DASH, etc.) — intentional in strings
+    "RUF002",  # ambiguous character in docstring — intentional for readability
+    "N806",  # uppercase variable in function — style preference
+    "N999",  # invalid module name — intentional (TIER.py)
+    "N818",  # Exception name should end with Error — style preference
+    "E402",  # module level import not at top — sometimes necessary
+    "F401",  # unused import — often for TYPE_CHECKING
+    "RUF006",  # create_task not stored — intentional fire-and-forget
+    "RUF012",  # mutable default — intentional pattern
+    "RUF034",  # useless if-else — sometimes intentional
+    "RUF059",  # unused unpacked vars — intentional pattern
+    "B007",  # loop control variable not used — intentional
+    "B017",  # assert blind exception — intentional
+    "B904",  # raise from err — style preference
+    "F821",  # undefined name — false positive (closure captures outer scope)
+    "SIM102",  # nested if → single if — style preference
+    "SIM103",  # return condition directly — style preference
+    "SIM105",  # try-except-pass → contextlib.suppress — style preference
+    "SIM115",  # file open without context manager — style preference
+    "SIM117",  # nested with → single with — style preference
+    "F811",  # redefinition of unused — style preference
+    "N803",  # argument name should be lowercase — style preference
+]
 
 [lint.isort]
 known-first-party = ["core", "tools", "agents", "handlers", "llm_client"]

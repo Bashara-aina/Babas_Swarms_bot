@@ -23,10 +23,9 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from threading import Lock
-from typing import Optional
 
 
 class MessageContext(Enum):
@@ -46,7 +45,7 @@ class ContextClassification:
 
     primary: MessageContext
     confidence: float
-    secondary: Optional[MessageContext] = None
+    secondary: MessageContext | None = None
     secondary_confidence: float = 0.0
     visual_signals: list[str] = field(default_factory=list)
     flow_state: str = "new"
@@ -60,7 +59,7 @@ class ConversationState:
     """Tracks conversation state for multi-turn awareness."""
 
     context_history: list[MessageContext] = field(default_factory=list)
-    last_context: Optional[MessageContext] = None
+    last_context: MessageContext | None = None
     topic_stack: list[str] = field(default_factory=list)
     turn_count: int = 0
     last_update: datetime = field(default_factory=datetime.now)
@@ -72,10 +71,9 @@ class ConversationState:
         self.last_context = context
         if self.context_history[-1:] != [context]:
             self.context_history.append(context)
-        if topic:
-            if not self.topic_stack or self.topic_stack[-1] != topic:
-                self.topic_stack.append(topic)
-        self.last_update = datetime.now(timezone.utc)
+        if topic and (not self.topic_stack or self.topic_stack[-1] != topic):
+            self.topic_stack.append(topic)
+        self.last_update = datetime.now(UTC)
 
     def detect_arc_completion(self) -> bool:
         if len(self.context_history) >= 3:
@@ -88,7 +86,7 @@ class ConversationState:
 class GSAConversationManager:
     """Manages conversation state across turns with thread safety."""
 
-    _instance: Optional["GSAConversationManager"] = None
+    _instance: GSAConversationManager | None = None
     _lock = Lock()
 
     def __init__(self):
@@ -96,7 +94,7 @@ class GSAConversationManager:
         self.turn_timers: dict[str, datetime] = {}
 
     @classmethod
-    def get_instance(cls) -> "GSAConversationManager":
+    def get_instance(cls) -> GSAConversationManager:
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -114,7 +112,7 @@ class GSAConversationManager:
         state.record_turn(context, topic)
 
     def cleanup_stale_states(self, max_age_seconds: int = 3600) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         with self._lock:
             stale = [
                 uid for uid, state in self.states.items() if (now - state.last_update).total_seconds() > max_age_seconds
@@ -123,7 +121,7 @@ class GSAConversationManager:
                 del self.states[uid]
 
 
-_conversation_manager: Optional[GSAConversationManager] = None
+_conversation_manager: GSAConversationManager | None = None
 
 
 def get_conversation_manager() -> GSAConversationManager:
@@ -146,21 +144,21 @@ class DynamicPattern:
 
     def update(self) -> None:
         self.count += 1
-        self.last_seen = datetime.now(timezone.utc)
+        self.last_seen = datetime.now(UTC)
         self.confidence = min(0.95, 0.3 + (self.count * 0.1))
 
 
 class GSADynamicPatterns:
     """Learn and apply dynamic patterns from user corrections."""
 
-    _instance: Optional["GSADynamicPatterns"] = None
+    _instance: GSADynamicPatterns | None = None
 
     def __init__(self):
         self._patterns: dict[str, DynamicPattern] = {}
         self._lock = Lock()
 
     @classmethod
-    def get_instance(cls) -> "GSADynamicPatterns":
+    def get_instance(cls) -> GSADynamicPatterns:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -196,7 +194,7 @@ class GSADynamicPatterns:
                 self.add_pattern(match.group(1).strip(), "opener")
 
 
-_dynamic_patterns: Optional[GSADynamicPatterns] = None
+_dynamic_patterns: GSADynamicPatterns | None = None
 
 
 def get_dynamic_patterns() -> GSADynamicPatterns:
@@ -328,7 +326,7 @@ def _detect_visual_signals(text: str) -> list[str]:
     return signals
 
 
-def _detect_flow_state(text: str, prev_context: Optional[MessageContext] = None) -> str:
+def _detect_flow_state(text: str, prev_context: MessageContext | None = None) -> str:
     text_lower = text.lower()
     for marker in FLOW_MARKERS["pivot"]:
         if marker in text_lower:
@@ -336,14 +334,13 @@ def _detect_flow_state(text: str, prev_context: Optional[MessageContext] = None)
     for marker in FLOW_MARKERS["closing"]:
         if marker in text_lower:
             return "closing"
-    if prev_context is not None:
-        if any(marker in text_lower for marker in FLOW_MARKERS["follow_up"]):
+    if prev_context is not None and any(marker in text_lower for marker in FLOW_MARKERS["follow_up"]):
             return "follow_up"
     return "new"
 
 
 def _get_jst_energy_mode() -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     jst_hour = (now.hour + 9) % 24
     for mode, (start, end) in JST_HOURS_ENERGY.items():
         if start <= end:
@@ -403,8 +400,8 @@ def _score_context(text: str, context: MessageContext) -> float:
 
 def classify_message_context(
     text: str,
-    user_id: Optional[str] = None,
-    prev_context: Optional[MessageContext] = None,
+    user_id: str | None = None,
+    prev_context: MessageContext | None = None,
 ) -> ContextClassification:
     text_lower = text.lower()
 
@@ -466,7 +463,7 @@ def classify_message_context(
     )
 
 
-async def classify_with_llm_fallback(text: str, user_id: Optional[str] = None) -> ContextClassification:
+async def classify_with_llm_fallback(text: str, user_id: str | None = None) -> ContextClassification:
     """Classify message with LLM fallback for ambiguous cases."""
     result = classify_message_context(text, user_id)
     if result.needs_llm_fallback:
@@ -522,8 +519,8 @@ Absolute rules — never violate:
 
 def get_gsa_injection(
     context: MessageContext,
-    classification: Optional[ContextClassification] = None,
-    user_id: Optional[str] = None,
+    classification: ContextClassification | None = None,
+    user_id: str | None = None,
 ) -> str:
     templates: dict[MessageContext, str] = {
         MessageContext.EMOTIONAL: (

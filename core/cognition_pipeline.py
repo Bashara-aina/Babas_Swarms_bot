@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Optional
 
 _FACUAL_HINTS = re.compile(
     r"\b(restaurant|hotel|flight|harga|price|cuaca|weather|terbaru|latest|news|"
@@ -75,7 +74,7 @@ def classify_intent_line(user_message: str) -> str:
 def build_cognition_system_fragment(
     _user_id: str,
     user_message: str,
-    routing_hint: Optional[str] = None,
+    routing_hint: str | None = None,
 ) -> str:
     """Return a system-prompt fragment (may be empty)."""
     if os.getenv("LEGION_COGNITION_PIPELINE", "1").strip().lower() in (

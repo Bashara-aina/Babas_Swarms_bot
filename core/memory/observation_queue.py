@@ -13,10 +13,10 @@ but uses an in-process async queue instead (no network hop needed within a singl
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
 from .observation_store import get_observation_store
 
@@ -39,7 +39,7 @@ class Observation:
     files_read: list[str] = field(default_factory=list)
     files_modified: list[str] = field(default_factory=list)
     created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds")
+        default_factory=lambda: datetime.now(UTC).isoformat(timespec="seconds")
     )
 
 
@@ -73,10 +73,8 @@ class ObservationQueue:
         self._running = False
         if self._worker_task:
             self._worker_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._worker_task
-            except asyncio.CancelledError:
-                pass
             self._worker_task = None
         # Final drain
         await self._flush()
@@ -109,7 +107,7 @@ class ObservationQueue:
                 try:
                     obs = await asyncio.wait_for(self._queue.get(), timeout=self.FLUSH_INTERVAL)
                     batch.append(obs)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
 
                 now = asyncio.get_event_loop().time()

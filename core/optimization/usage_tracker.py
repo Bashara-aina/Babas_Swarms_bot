@@ -8,12 +8,9 @@ Emits alerts when approaching daily rate limits.
 
 from __future__ import annotations
 
-import json
 import logging
-import time
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +95,7 @@ class UsageTracker:
         input_tokens: int = 0,
         output_tokens: int = 0,
         requests: int = 1,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Record token usage for a model.
 
         Args:

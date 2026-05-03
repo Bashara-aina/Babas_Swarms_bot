@@ -8,10 +8,9 @@ Exposes the complete multi-agent orchestration to the Telegram user:
 """
 from __future__ import annotations
 
-import asyncio
+import contextlib
 import html as html_mod
 import logging
-from typing import Dict, Optional
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 # Track active runs per user
-_active_runs: Dict[int, dict] = {}
+_active_runs: dict[int, dict] = {}
 
 
 @router.message(Command("orchestrate"))
@@ -72,20 +71,16 @@ async def cmd_orchestrate(msg: Message) -> None:
                     parse_mode="HTML",
                 )
         except Exception:
-            try:
+            with contextlib.suppress(Exception):
                 await msg.answer(html_mod.escape(text), parse_mode="HTML")
-            except Exception:
-                pass
 
     async def send_fn(text: str, markup=None) -> None:
-        try:
+        with contextlib.suppress(Exception):
             await msg.answer(
                 html_mod.escape(text) if markup is None else text,
                 reply_markup=markup,
                 parse_mode="HTML",
             )
-        except Exception:
-            pass
 
     try:
         complexity_score = 5
@@ -148,10 +143,8 @@ async def cmd_orchestrate(msg: Message) -> None:
 
         await progress_cb("✅ [Finalize] sending verified orchestration result")
 
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         await send_chunked(msg, final_result, model_used="orchestrate/verified")
 
     except Exception as e:
@@ -188,11 +181,10 @@ async def cmd_orchestrate_cancel(msg: Message) -> None:
 @router.callback_query(lambda c: c.data and c.data.startswith("plan_"))
 async def handle_plan_approval(cb: CallbackQuery) -> None:
     """Handle plan approve/reject inline button callbacks."""
-    from swarms_bot.orchestrator.human_in_loop import HumanApprovalGate
     if not allowed_cb(cb) or not cb.from_user or not cb.data or not cb.message:
         await cb.answer("not authorized")
         return
-    action, run_id = cb.data.split(":", 1)
+    action, _run_id = cb.data.split(":", 1)
     approved = action == "plan_approve"
 
     # Find the gate for this run_id
@@ -204,11 +196,9 @@ async def handle_plan_approval(cb: CallbackQuery) -> None:
     # The runner's gate resolves via the callback
     # We publish the decision by editing the message
     icon = "✅ Approved" if approved else "❌ Rejected"
-    try:
+    with contextlib.suppress(Exception):
         await cb.message.edit_text(
             f"{cb.message.text}\n\n{icon} by you.",
             parse_mode="HTML",
         )
-    except Exception:
-        pass
     await cb.answer(icon)

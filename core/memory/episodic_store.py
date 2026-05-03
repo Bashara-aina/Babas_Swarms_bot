@@ -18,7 +18,6 @@ import time
 import uuid
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +176,7 @@ class EpisodicStore:
                     "metadata": json.dumps({"entry_count": len(old_entries), "source": "auto_consolidation"}),
                 }
                 # Keep last 2000 + 1 summary entry
-                self._local = [summary_entry] + self._local[-2000:]
+                self._local = [summary_entry, *self._local[-2000:]]
                 logger.warning(
                     "[EpisodicStore] Consolidating %d old memories into summary "
                     "(limit=%d) to prevent data loss. Last summary: %s...",

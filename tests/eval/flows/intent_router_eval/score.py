@@ -9,7 +9,7 @@ def score(predictions: list[str], ground_truth: list[dict]) -> dict[str, Any]:
         return {"precision": 0.0, "recall": 0.0, "f1": 0.0, "accuracy": 0.0}
 
     tp = sum(
-        1 for pred, gt in zip(predictions, ground_truth) if pred.strip().lower() == gt["intent"].lower()
+        1 for pred, gt in zip(predictions, ground_truth, strict=False) if pred.strip().lower() == gt["intent"].lower()
     )
     total = len(predictions)
     correct = tp

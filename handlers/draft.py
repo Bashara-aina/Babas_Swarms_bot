@@ -7,7 +7,6 @@ legal document generation, and structured analysis.
 from __future__ import annotations
 
 import logging
-import os
 
 from aiogram import Router
 from aiogram.filters import Command

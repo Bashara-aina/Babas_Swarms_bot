@@ -19,10 +19,9 @@ from __future__ import annotations
 
 import datetime
 import json
-from dataclasses import dataclass, field
-from enum import Enum
+from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 
 MEMORY_BOOTSTRAP = Path(__file__).parent.parent / ".claude" / "memory_bootstrap.md"
 
@@ -32,7 +31,7 @@ MEMORY_BOOTSTRAP = Path(__file__).parent.parent / ".claude" / "memory_bootstrap.
 # ---------------------------------------------------------------------------
 
 
-class HealthLevel(str, Enum):
+class HealthLevel(StrEnum):
     HEALTHY = "HEALTHY"
     CAUTION = "CAUTION"
     CRITICAL = "CRITICAL"
@@ -86,7 +85,7 @@ class ContextHealthMonitor:
         self.checkpoint_file = self.project_root / ".claude" / ".context_checkpoints.json"
 
         self._checkpoints: list[Checkpoint] = []
-        self._last_checkpoint_at: Optional[str] = None
+        self._last_checkpoint_at: str | None = None
         self._load_checkpoints()
 
     # ---------------------------------------------------------------------------
@@ -159,7 +158,7 @@ class ContextHealthMonitor:
         else:
             return HealthLevel.OVERFLOW
 
-    def should_checkpoint(self, current_health: Optional[HealthLevel] = None) -> bool:
+    def should_checkpoint(self, current_health: HealthLevel | None = None) -> bool:
         """Return True if a pre-compaction checkpoint should run.
 
         Triggers when:
@@ -277,7 +276,7 @@ class ContextHealthMonitor:
         except Exception:
             pass  # Non-critical — checkpoint JSON is authoritative
 
-    def load_latest_checkpoint(self) -> Optional[Checkpoint]:
+    def load_latest_checkpoint(self) -> Checkpoint | None:
         """Load most recent checkpoint (for post-compaction recovery)."""
         return self._checkpoints[-1] if self._checkpoints else None
 
@@ -285,7 +284,7 @@ class ContextHealthMonitor:
         """Load last N checkpoints."""
         return self._checkpoints[-limit:]
 
-    def format_health_report(self, current_health: Optional[HealthLevel] = None) -> str:
+    def format_health_report(self, current_health: HealthLevel | None = None) -> str:
         """Format a human-readable health status report."""
         if current_health is None:
             current_health = self.assess()
@@ -313,10 +312,10 @@ class ContextHealthMonitor:
 # Convenience singleton
 # ---------------------------------------------------------------------------
 
-_monitor: Optional[ContextHealthMonitor] = None
+_monitor: ContextHealthMonitor | None = None
 
 
-def get_context_monitor(project_root: Optional[str] = None) -> ContextHealthMonitor:
+def get_context_monitor(project_root: str | None = None) -> ContextHealthMonitor:
     """Return global ContextHealthMonitor singleton."""
     global _monitor
     if _monitor is None:

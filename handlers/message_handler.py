@@ -7,11 +7,11 @@ and dispatches to the appropriate handler without requiring /slash commands.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import logging
 import os
 import re
-from typing import Optional
 
 from aiogram.types import Message
 
@@ -67,8 +67,8 @@ def _wa_is_confirm(text: str) -> bool:
 
 
 def _wa_extract_contact_message(
-    text: str, fallback_contact: Optional[str] = None
-) -> tuple[Optional[str], Optional[str]]:
+    text: str, fallback_contact: str | None = None
+) -> tuple[str | None, str | None]:
     raw = _wa_normalize(text)
     lower = raw.lower()
 
@@ -212,10 +212,8 @@ async def handle_plain_message(
             ):
 
                 async def _tr_stream(t: str) -> None:
-                    try:
+                    with contextlib.suppress(Exception):
                         await msg.answer(t[:3800], parse_mode="HTML")
-                    except Exception:
-                        pass
 
                 stream_cb = _tr_stream
 
@@ -465,7 +463,11 @@ async def _handle_email(msg: Message, user_msg: str, router: AutonomousRouter) -
 async def _handle_runbook(msg: Message, user_msg: str, router: AutonomousRouter) -> None:
     """Run config/runbooks.json maintenance flows from natural language or explicit id."""
     try:
-        from tools.runbook_engine import execute_runbook, list_runbook_summaries, match_runbook_from_text
+        from tools.runbook_engine import (
+            execute_runbook,
+            list_runbook_summaries,
+            match_runbook_from_text,
+        )
 
         rid = match_runbook_from_text(user_msg)
         if not rid:

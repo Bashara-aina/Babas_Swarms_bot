@@ -7,7 +7,8 @@ This wraps :mod:`tools.mem0_client`. Tiered FTS/archival memory lives in
 from __future__ import annotations
 
 import logging
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

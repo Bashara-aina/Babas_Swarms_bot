@@ -1764,7 +1764,6 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
     async function directly — this shim exists only for the rare sync-code
     path (e.g. ``__repr__`` of an agent object) that genuinely cannot yield.
     """
-    import asyncio
 
     from core.system_prompt_builder import build_system_prompt as _async_build
 

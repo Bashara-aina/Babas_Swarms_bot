@@ -123,7 +123,7 @@ def extract_structural_snippet(file_path: str) -> str:
     For Python files: top-level def, class, import, from statements.
     """
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             source = f.read()
     except Exception:
         return ""
@@ -132,7 +132,6 @@ def extract_structural_snippet(file_path: str) -> str:
     lines = source.split("\n")
 
     # Track indentation to detect top-level definitions
-    prev_indent = 0
     for line in lines:
         stripped = line.lstrip()
         if not stripped or stripped.startswith("#"):

@@ -23,9 +23,9 @@ Usage:
 from __future__ import annotations
 
 import logging
-import os
+from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ def agent_task(
             name=name or fn.__name__,
             retries=retries,
             timeout_seconds=timeout_seconds,
-            cache_key_fn=lambda ctx, call_args: f"{name}:{str(call_args)}",
+            cache_key_fn=lambda ctx, call_args: f"{name}:{call_args!s}",
             cache_expiration=cache_policy_seconds,
         )
         async def prefect_task(*args, **kwargs):

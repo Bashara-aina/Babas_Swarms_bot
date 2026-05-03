@@ -12,12 +12,12 @@ Key improvements over v1:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import re
 import time
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def strip_non_allowed_script(text: str) -> str:
     otherwise remove the character.
     """
     # Common Chinese leaks and their Indonesian equivalents
-    CJK_REPLACEMENTS = {
+    cjk_replacements = {
         "好奇": "penasaran",
         "很好": "bagus",
         "谢谢": "terima kasih",
@@ -69,7 +69,7 @@ def strip_non_allowed_script(text: str) -> str:
         "哦": "oh",
     }
 
-    for cjk, replacement in CJK_REPLACEMENTS.items():
+    for cjk, replacement in cjk_replacements.items():
         text = text.replace(cjk, replacement)
 
     # Strip any remaining CJK/Arabic/Cyrillic
@@ -175,7 +175,7 @@ class EnforcementContext:
         self,
         context_type: str = "general",
         confidence: float = 0.5,
-        visual_signals: Optional[list[str]] = None,
+        visual_signals: list[str] | None = None,
         flow_state: str = "new",
     ):
         self.context_type = context_type
@@ -200,7 +200,7 @@ class EnforcementContext:
         return self.confidence >= 0.7
 
 
-_enforcement_context: Optional[EnforcementContext] = None
+_enforcement_context: EnforcementContext | None = None
 
 
 def set_enforcement_context(context: EnforcementContext) -> None:
@@ -314,7 +314,7 @@ def _should_strip_because(context: EnforcementContext, pattern_type: str) -> boo
     return True
 
 
-def enforce_gsa_structure(text: str, context: Optional[EnforcementContext] = None) -> str:
+def enforce_gsa_structure(text: str, context: EnforcementContext | None = None) -> str:
     """Strip banned openers and closers from GSA-style responses.
 
     Args:
@@ -428,10 +428,8 @@ def enforce_character(response: str, agent_key: str = "general") -> str:
         find = rule.get("find", "")
         replace = rule.get("replace", "")
         if find:
-            try:
+            with contextlib.suppress(re.error):
                 cleaned = re.sub(find, replace, cleaned, flags=re.IGNORECASE)
-            except re.error:
-                pass
 
     # 5. Strip corporate opener patterns
     _opener_patterns = [

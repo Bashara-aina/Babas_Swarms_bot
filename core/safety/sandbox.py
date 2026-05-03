@@ -88,7 +88,7 @@ async def run_sandboxed_bash(
     try:
         stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=timeout)
         return proc.returncode, stdout_b.decode(), stderr_b.decode()
-    except asyncio.TimeoutError:
+    except TimeoutError:
         proc.kill()
         await proc.wait()
         return -1, "", f"Command timed out after {timeout}s"
@@ -115,7 +115,7 @@ async def _run_direct_bash(
     try:
         stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=timeout)
         return proc.returncode, stdout_b.decode(), stderr_b.decode()
-    except asyncio.TimeoutError:
+    except TimeoutError:
         proc.kill()
         await proc.wait()
         return -1, "", f"Command timed out after {timeout}s"

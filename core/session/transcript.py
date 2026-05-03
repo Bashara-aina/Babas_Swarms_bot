@@ -21,12 +21,11 @@ import asyncio
 import logging
 import os
 from datetime import datetime
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 _DB_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "session_transcripts.db")
-_STORE: Optional["SessionTranscriptStore"] = None
+_STORE: SessionTranscriptStore | None = None
 _init_lock = asyncio.Lock()
 
 
@@ -75,11 +74,11 @@ class SessionTranscriptStore:
 
     async def save_turn(
         self,
-        thread_id: Optional[str],
+        thread_id: str | None,
         user_id: str,
         role: str,
         content: str,
-        model_used: Optional[str] = None,
+        model_used: str | None = None,
     ) -> None:
         """Persist a single conversation turn. Idempotent — errors are logged, not raised."""
         if not self._initialized:
@@ -111,18 +110,17 @@ class SessionTranscriptStore:
         try:
             import aiosqlite
 
-            async with aiosqlite.connect(self._db_path) as db:
-                async with db.execute(
-                    """
+            async with aiosqlite.connect(self._db_path) as db, db.execute(
+                """
                     SELECT thread_id, user_id, role, content, model_used, timestamp
                     FROM session_transcripts
                     WHERE thread_id = ?
                     ORDER BY timestamp ASC
                     LIMIT ?
                     """,
-                    (thread_id, limit),
-                ) as cursor:
-                    rows = await cursor.fetchall()
+                (thread_id, limit),
+            ) as cursor:
+                rows = await cursor.fetchall()
             return [
                 {
                     "thread_id": r[0],
@@ -145,18 +143,17 @@ class SessionTranscriptStore:
         try:
             import aiosqlite
 
-            async with aiosqlite.connect(self._db_path) as db:
-                async with db.execute(
-                    """
+            async with aiosqlite.connect(self._db_path) as db, db.execute(
+                """
                     SELECT thread_id, user_id, role, content, model_used, timestamp
                     FROM session_transcripts
                     WHERE user_id = ?
                     ORDER BY timestamp DESC
                     LIMIT ?
                     """,
-                    (user_id, limit),
-                ) as cursor:
-                    rows = await cursor.fetchall()
+                (user_id, limit),
+            ) as cursor:
+                rows = await cursor.fetchall()
             return list(
                 reversed(
                     [

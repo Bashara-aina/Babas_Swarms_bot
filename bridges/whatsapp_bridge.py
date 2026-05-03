@@ -87,12 +87,11 @@ class WhatsAppBridge:
         """Return True if the sidecar HTTP API is responding."""
         try:
             import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self._base}/health",
-                    timeout=aiohttp.ClientTimeout(total=3),
-                ) as resp:
-                    return resp.status == 200
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self._base}/health",
+                timeout=aiohttp.ClientTimeout(total=3),
+            ) as resp:
+                return resp.status == 200
         except Exception:
             return False
 
@@ -100,12 +99,11 @@ class WhatsAppBridge:
         """Return {status: ready|qr_pending|initialising, message_count: N}."""
         try:
             import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self._base}/health",
-                    timeout=aiohttp.ClientTimeout(total=5),
-                ) as resp:
-                    return await resp.json()
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self._base}/health",
+                timeout=aiohttp.ClientTimeout(total=5),
+            ) as resp:
+                return await resp.json()
         except Exception as exc:
             return {"status": "offline", "error": str(exc)}
 
@@ -115,14 +113,13 @@ class WhatsAppBridge:
         """Return PNG QR code bytes, or None if already authenticated."""
         try:
             import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self._base}/qr",
-                    timeout=aiohttp.ClientTimeout(total=10),
-                ) as resp:
-                    if resp.status == 200 and resp.content_type == "image/png":
-                        return await resp.read()
-                    return None
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self._base}/qr",
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as resp:
+                if resp.status == 200 and resp.content_type == "image/png":
+                    return await resp.read()
+                return None
         except Exception as exc:
             logger.warning("[WA Bridge] get_qr_code failed: %s", exc)
             return None
@@ -133,15 +130,14 @@ class WhatsAppBridge:
         """Return up to `limit` unread messages from the ring buffer."""
         try:
             import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self._base}/messages",
-                    params={"limit": limit},
-                    timeout=aiohttp.ClientTimeout(total=10),
-                ) as resp:
-                    if resp.status == 200:
-                        return await resp.json()
-                    return []
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self._base}/messages",
+                params={"limit": limit},
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                return []
         except Exception as exc:
             logger.warning("[WA Bridge] get_unread failed: %s", exc)
             return []
@@ -150,16 +146,15 @@ class WhatsAppBridge:
         """Send a WhatsApp message. Returns True on success."""
         try:
             import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    f"{self._base}/send",
-                    json={"chatId": chat_id, "body": body},
-                    timeout=aiohttp.ClientTimeout(total=15),
-                ) as resp:
-                    data = await resp.json()
-                    if not data.get("ok"):
-                        logger.warning("[WA Bridge] send failed: %s", data.get("error"))
-                    return bool(data.get("ok"))
+            async with aiohttp.ClientSession() as session, session.post(
+                f"{self._base}/send",
+                json={"chatId": chat_id, "body": body},
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as resp:
+                data = await resp.json()
+                if not data.get("ok"):
+                    logger.warning("[WA Bridge] send failed: %s", data.get("error"))
+                return bool(data.get("ok"))
         except Exception as exc:
             logger.warning("[WA Bridge] send_message failed: %s", exc)
             return False

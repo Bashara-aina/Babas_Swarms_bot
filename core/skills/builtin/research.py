@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-from typing import Any
 
 from core.skills.registry import SKILL_REGISTRY, Skill
 
@@ -30,16 +29,15 @@ async def _web_search_handler(text: str) -> str:
 
         headers = {"X-Subscription-Token": api_key}
         params = {"q": query, "count": "10"}
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://api.search.brave.com/res/v1/web/search",
-                headers=headers,
-                params=params,
-                timeout=aiohttp.ClientTimeout(total=15),
-            ) as resp:
-                if resp.status != 200:
-                    return f"❌ Brave Search API error: {resp.status}"
-                data = await resp.json()
+        async with aiohttp.ClientSession() as session, session.get(
+            "https://api.search.brave.com/res/v1/web/search",
+            headers=headers,
+            params=params,
+            timeout=aiohttp.ClientTimeout(total=15),
+        ) as resp:
+            if resp.status != 200:
+                return f"❌ Brave Search API error: {resp.status}"
+            data = await resp.json()
 
         results = data.get("web", {}).get("results", [])
         if not results:
@@ -134,14 +132,13 @@ async def _hacker_news_handler(text: str) -> str:
     try:
         import aiohttp
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://hacker-news.firebaseio.com/v0/topstories.json",
-                timeout=aiohttp.ClientTimeout(total=10),
-            ) as resp:
-                if resp.status != 200:
-                    return f"❌ Hacker News API error: {resp.status}"
-                ids = await resp.json()
+        async with aiohttp.ClientSession() as session, session.get(
+            "https://hacker-news.firebaseio.com/v0/topstories.json",
+            timeout=aiohttp.ClientTimeout(total=10),
+        ) as resp:
+            if resp.status != 200:
+                return f"❌ Hacker News API error: {resp.status}"
+            ids = await resp.json()
 
         top_ids = ids[:10]
         stories = []

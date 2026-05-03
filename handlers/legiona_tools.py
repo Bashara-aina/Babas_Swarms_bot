@@ -7,11 +7,9 @@ SECURITY: File operations restricted to project directory. Destructive ops need 
 
 from __future__ import annotations
 
-import asyncio
+import contextlib
 import html
 import re
-import shlex
-from typing import Optional
 
 from aiogram import Router, types
 from aiogram.filters import Command
@@ -137,7 +135,7 @@ async def cmd_logs(message: Message) -> None:
     parts = args[2].split() if len(args) > 2 else []
 
     # ── Progress tracking for long-running operations ───────────────────────
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         if subcmd == "tail":
             status_msg = await message.answer("📜 Tailing log...")
@@ -180,10 +178,8 @@ async def cmd_logs(message: Message) -> None:
 
     # ── Cleanup progress message ─────────────────────────────────────────────
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     # ── Format structured output ───────────────────────────────────────────
     if output["success"]:
@@ -214,7 +210,7 @@ async def cmd_ps(message: Message) -> None:
         await message.answer("sort_by must be: cpu, mem, pid, time, or rss")
         return
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         status_msg = await message.answer(f"📊 Fetching top {top_n} processes by {sort_by}...")
         result = await system_monitor.list_processes(
@@ -225,10 +221,8 @@ async def cmd_ps(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -271,7 +265,7 @@ async def cmd_kill(message: Message) -> None:
         )
         return
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     output: dict[str, object] = {"success": False, "data": None, "error": None}
     try:
         status_msg = await message.answer(f"🔨 Sending {signal} to PID {pid}...")
@@ -283,10 +277,8 @@ async def cmd_kill(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -310,7 +302,7 @@ async def cmd_sys(message: Message) -> None:
     args = message.text.split(maxsplit=1)
     subcmd = args[1].lower() if len(args) > 1 else "stats"
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     output: dict[str, object] = {"success": False, "data": None, "error": None}
     try:
         status_msg = await message.answer(f"📡 Fetching system {subcmd}...")
@@ -352,10 +344,8 @@ async def cmd_sys(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -380,7 +370,7 @@ async def cmd_ls(message: Message) -> None:
     path = args[1] if len(args) > 1 else "."
     depth = int(args[2]) if len(args) > 2 else 1
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         status_msg = await message.answer(f"📂 Listing {path} (depth={depth})...")
         result = await fs_control.list_dir(path=path, depth=depth)
@@ -389,10 +379,8 @@ async def cmd_ls(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -425,7 +413,7 @@ async def cmd_find(message: Message) -> None:
     path = args[2] if len(args) > 2 else "."
     filetype = args[3] if len(args) > 3 else "f"
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         status_msg = await message.answer(f"🔎 Searching for '{pattern}' in {path}...")
         result = await fs_control.search_files(pattern=pattern, path=path, filetype=filetype)
@@ -434,10 +422,8 @@ async def cmd_find(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -467,7 +453,7 @@ async def cmd_grep(message: Message) -> None:
     path = args[2] if len(args) > 2 else "."
     context = int(args[3]) if len(args) > 3 else 2
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         status_msg = await message.answer(f"🔍 Grepping '{pattern}' in {path}...")
         result = await fs_control.grep_files(pattern=pattern, path=path, context=context)
@@ -476,10 +462,8 @@ async def cmd_grep(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])
@@ -509,7 +493,7 @@ async def cmd_read(message: Message) -> None:
     offset = int(args[2]) if len(args) > 2 else 0
     limit = int(args[3]) if len(args) > 3 else 500
 
-    status_msg: Optional[types.Message] = None
+    status_msg: types.Message | None = None
     try:
         status_msg = await message.answer(f"📖 Reading {path}...")
         result = await fs_control.read_file(path=path, offset=offset, limit=limit)
@@ -518,10 +502,8 @@ async def cmd_read(message: Message) -> None:
         output = {"success": False, "data": None, "error": str(exc)}
 
     if status_msg:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     if output["success"]:
         await send_chunked(message, output["data"])

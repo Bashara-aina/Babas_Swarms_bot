@@ -33,21 +33,20 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 # ---------------------------------------------------------------------------
 # Layer definitions
 # ---------------------------------------------------------------------------
 
 
-class ReasonLayer(str, Enum):
+class ReasonLayer(StrEnum):
     MACRO = "MACRO"      # Layer 1: strategic, goal-level
     MICRO = "MICRO"     # Layer 2: file-level technical
     EXEC = "EXEC"       # Layer 3: line-level code
 
 
-class RevisitFlag(str, Enum):
+class RevisitFlag(StrEnum):
     """Flags raised when lower-layer reasoning challenges upper-layer assumptions."""
     NONE = "NONE"
     GOAL_CHALLENGED = "GOAL_CHALLENGED"        # L3 → L1: execution reveals goal flaw
@@ -244,7 +243,7 @@ class HierarchicalReasoner:
         self,
         task: str,
         original_request: str,
-        context: Optional[str] = None,
+        context: str | None = None,
         context_chars: int = 0,
     ) -> HierarchicalReasoningResult:
         """Run full 3-layer hierarchical reasoning.
@@ -906,11 +905,11 @@ class HierarchicalReasoner:
 # Convenience singleton
 # ---------------------------------------------------------------------------
 
-_reasoner: Optional[HierarchicalReasoner] = None
+_reasoner: HierarchicalReasoner | None = None
 
 
 def get_hierarchical_reasoner(
-    project_root: Optional[str] = None,
+    project_root: str | None = None,
 ) -> HierarchicalReasoner:
     """Return global HierarchicalReasoner singleton."""
     global _reasoner

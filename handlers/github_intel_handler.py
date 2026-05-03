@@ -8,9 +8,9 @@ Commands:
 
 from __future__ import annotations
 
+import contextlib
 import html
 import logging
-import os
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -55,10 +55,8 @@ async def cmd_github_intel(msg: Message) -> None:
             )
 
             async def _notify(text: str) -> None:
-                try:
+                with contextlib.suppress(Exception):
                     await msg.answer(text[:4000], parse_mode="HTML")
-                except Exception:
-                    pass
 
             for ev in high_value[:2]:
                 task = asyncio.create_task(engine._discover_skill(ev, _notify))
@@ -162,10 +160,8 @@ async def cmd_upgrade_from(msg: Message) -> None:
             return
 
         async def _notify(text: str) -> None:
-            try:
+            with contextlib.suppress(Exception):
                 await msg.answer(text[:4000], parse_mode="HTML")
-            except Exception:
-                pass
 
         upgrade_engine = SelfUpgradeEngine(notify_cb=_notify)
         request = (

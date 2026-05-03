@@ -64,10 +64,7 @@ def _find_relevant_belief_keys(user_msg: str, beliefs: dict[str, Any]) -> list[s
 def _is_assertive(user_msg: str) -> bool:
     """Return True if the user message makes an assertion worth engaging with."""
     msg_lower = user_msg.lower()
-    for pattern in _ASSERTION_TRIGGERS:
-        if re.search(pattern, msg_lower):
-            return True
-    return False
+    return any(re.search(pattern, msg_lower) for pattern in _ASSERTION_TRIGGERS)
 
 
 def should_consider_debate(

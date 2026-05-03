@@ -2,16 +2,15 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import os
-import signal
 import socket
 import sys
 import time
 import urllib.request
 from collections import deque
 from pathlib import Path
-from typing import Optional
 
 from tools.browser_harness.cdp_client import CDPClient
 
@@ -70,10 +69,8 @@ def log(msg: str) -> None:
 
 
 async def _silent(coro) -> None:
-    try:
+    with contextlib.suppress(Exception):
         await coro
-    except Exception:
-        pass
 
 
 def get_ws_url() -> str:
@@ -159,12 +156,12 @@ def is_real_page(t: dict) -> bool:
 
 class Daemon:
     def __init__(self) -> None:
-        self.cdp: Optional[CDPClient] = None
-        self.session: Optional[str] = None
-        self._browser_session: Optional[str] = None
+        self.cdp: CDPClient | None = None
+        self.session: str | None = None
+        self._browser_session: str | None = None
         self.events = deque(maxlen=BUF)
-        self.dialog: Optional[dict] = None
-        self.stop: Optional[asyncio.Event] = None
+        self.dialog: dict | None = None
+        self.stop: asyncio.Event | None = None
 
     async def attach_first_page(self):
         if "/page/" in self.cdp.ws_url:
@@ -217,7 +214,7 @@ class Daemon:
         await self.attach_first_page()
         mark_js = "if(!document.title.startsWith('\U0001F7E2'))document.title='\U0001F7E2 '+document.title"
 
-        def on_event(method: str, params: dict, session_id: Optional[str]) -> None:
+        def on_event(method: str, params: dict, session_id: str | None) -> None:
             self.events.append({"method": method, "params": params, "session_id": session_id})
             if method == "Page.javascriptDialogOpening":
                 self.dialog = params
@@ -329,7 +326,7 @@ def already_running() -> bool:
         s.connect(SOCK)
         s.close()
         return True
-    except (FileNotFoundError, ConnectionRefusedError, socket.timeout):
+    except (TimeoutError, FileNotFoundError, ConnectionRefusedError):
         return False
 
 
@@ -348,7 +345,5 @@ if __name__ == "__main__":
         sys.exit(1)
     finally:
         stop_remote()
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.unlink(PID)
-        except FileNotFoundError:
-            pass

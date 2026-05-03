@@ -11,9 +11,6 @@ Usage:
 
 from __future__ import annotations
 
-import re
-from typing import Any
-
 
 def humanize_error(exc: Exception, context: str = "") -> str | None:
     """Convert a raw exception into a human-readable message.
@@ -100,9 +97,7 @@ def humanize_error(exc: Exception, context: str = "") -> str | None:
         return "Lagi dapat response kosong — retry dulu ya…"
 
     # ── Unknown or suppressed ──────────────────────────────────────────────────
-    if context:
-        # Generic fallback with context hint — never expose raw exception
-        if any(kw in msg_lower for kw in ("error", "exception", "failed", "failed")):
+    if context and any(kw in msg_lower for kw in ("error", "exception", "failed", "failed")):
             # Check for known safe-to-ignore patterns
             if any(kw in msg_lower for kw in ("suppress", "internal", "traceback")):
                 return None

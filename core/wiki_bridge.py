@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +37,8 @@ async def opencode_write_session_summary(
     task_description: str,
     actions_taken: str,
     outcome: str,
-    files_modified: Optional[list[str]] = None,
-    decisions: Optional[list[str]] = None,
+    files_modified: list[str] | None = None,
+    decisions: list[str] | None = None,
     auto_ingest: bool = True,
 ) -> str:
     """
@@ -49,7 +47,6 @@ async def opencode_write_session_summary(
     OpenCode calls this after each task (via a hook or post-task callback).
     Optionally triggers wiki ingest so the content propagates to related pages.
     """
-    import asyncio
 
     import aiofiles
 
@@ -161,7 +158,7 @@ async def opencode_write_decision(
     title: str,
     context: str,
     rationale: str,
-    alternatives_considered: Optional[list[str]] = None,
+    alternatives_considered: list[str] | None = None,
     auto_ingest: bool = True,
 ) -> str:
     """
@@ -269,7 +266,6 @@ async def opencode_query_wiki(
 
 async def _query_sessions(query: str, top_k: int = 2) -> str:
     """Return relevant OpenCode session summaries."""
-    import re
 
     import aiofiles
 
@@ -289,7 +285,7 @@ async def _query_sessions(query: str, top_k: int = 2) -> str:
     scored: list[tuple[float, Path]] = []
     for sf in session_files[:50]:
         try:
-            async with aiofiles.open(sf, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(sf, encoding="utf-8") as f:
                 text = await f.read()
             score = sum(1 for kw in q_lower.split() if kw in text.lower())
             if score > 0:
@@ -303,7 +299,7 @@ async def _query_sessions(query: str, top_k: int = 2) -> str:
     blocks: list[str] = []
     for _, sf in selected:
         try:
-            async with aiofiles.open(sf, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(sf, encoding="utf-8") as f:
                 content = await f.read()
             preview = content[:800]
             blocks.append(f"### From {sf.name}:\n{preview}")
@@ -333,7 +329,7 @@ async def _query_decisions(query: str, top_k: int = 2) -> str:
     scored: list[tuple[float, Path]] = []
     for adrf in adr_files[:30]:
         try:
-            async with aiofiles.open(adrf, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(adrf, encoding="utf-8") as f:
                 text = await f.read()
             score = sum(1 for kw in q_lower.split() if kw in text.lower())
             if score > 0:
@@ -347,7 +343,7 @@ async def _query_decisions(query: str, top_k: int = 2) -> str:
     blocks: list[str] = []
     for _, adrf in selected:
         try:
-            async with aiofiles.open(adrf, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(adrf, encoding="utf-8") as f:
                 content = await f.read()
             preview = content[:600]
             blocks.append(f"### From {adrf.name}:\n{preview}")
@@ -426,10 +422,7 @@ def write_note(filename: str, content: str, folder: str | None = None) -> bool:
     if not _wiki_enabled():
         return False
     try:
-        if folder:
-            dir_path = WIKI_DIR / folder
-        else:
-            dir_path = WIKI_DIR
+        dir_path = WIKI_DIR / folder if folder else WIKI_DIR
         dir_path.mkdir(parents=True, exist_ok=True)
         # Always add .md extension
         if not filename.endswith(".md"):
@@ -456,14 +449,11 @@ def read_note(filename: str, folder: str | None = None) -> str:
     if not _wiki_enabled():
         return ""
     try:
-        if folder:
-            dir_path = WIKI_DIR / folder
-        else:
-            dir_path = WIKI_DIR
+        dir_path = WIKI_DIR / folder if folder else WIKI_DIR
         if not filename.endswith(".md"):
             filename += ".md"
         file_path = dir_path / filename
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read()
     except Exception:
         return ""
@@ -481,10 +471,7 @@ def list_notes(folder: str | None = None) -> list[dict[str, str]]:
     if not _wiki_enabled():
         return []
     try:
-        if folder:
-            dir_path = WIKI_DIR / folder
-        else:
-            dir_path = WIKI_DIR
+        dir_path = WIKI_DIR / folder if folder else WIKI_DIR
         if not dir_path.is_dir():
             return []
         notes = []

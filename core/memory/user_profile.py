@@ -14,6 +14,7 @@ Profile keys (built-in defaults for Bashara, overridable at runtime):
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -127,10 +128,8 @@ class UserProfileStore:
                 logger.warning("[UserProfile] Supabase load failed: %s", e)
 
         if not loaded and _FALLBACK_PATH.exists():
-            try:
+            with contextlib.suppress(Exception):
                 loaded = json.loads(_FALLBACK_PATH.read_text(encoding="utf-8"))
-            except Exception:
-                pass
 
         # Merge with defaults (defaults fill in any missing keys)
         self._profile = {**_DEFAULT_PROFILE, **(loaded or {})}

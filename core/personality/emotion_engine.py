@@ -43,7 +43,7 @@ class EmotionalState:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "EmotionalState":
+    def from_dict(cls, data: dict) -> EmotionalState:
         values = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}
         return cls(**values)
 

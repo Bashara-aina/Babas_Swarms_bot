@@ -26,7 +26,6 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -101,16 +100,16 @@ class TeamSession:
     """Full adversarial session log."""
 
     task: str
-    spec: Optional[Spec] = None
-    build: Optional[BuildResult] = None
-    critic: Optional[CriticReport] = None
+    spec: Spec | None = None
+    build: BuildResult | None = None
+    critic: CriticReport | None = None
     iterations: int = 0
     started_at: str = field(
         default_factory=lambda: datetime.datetime.now(
             datetime.timezone(datetime.timedelta(hours=9))
         ).isoformat()
     )
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -435,7 +434,7 @@ class Builder:
         files_created: list[str],
         implementation_summary: str,
         spec_compliant: bool = True,
-        deviation_notes: Optional[list[str]] = None,
+        deviation_notes: list[str] | None = None,
     ) -> BuildResult:
         """Builder reports implementation results.
 
@@ -469,7 +468,7 @@ class AgentTeam:
         self.planner = Planner()
         self.builder = Builder()
         self.critic = Critic()
-        self._session: Optional[TeamSession] = None
+        self._session: TeamSession | None = None
 
     async def run(self, task: str, max_iterations: int = 3) -> TeamSession:
         """Run full adversarial loop: Planner → Builder → Critic → resolve → final.
@@ -571,7 +570,7 @@ class AgentTeam:
 # Convenience factory
 # ---------------------------------------------------------------------------
 
-_agent_team: Optional[AgentTeam] = None
+_agent_team: AgentTeam | None = None
 
 
 def get_agent_team() -> AgentTeam:

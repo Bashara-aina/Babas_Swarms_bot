@@ -8,20 +8,15 @@ from pathlib import Path
 # Add tools directory to path so imports work
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from tools.browser_harness import helpers  # noqa: F401  — pre-import helpers into globals
+from tools.browser_harness import helpers
 from tools.browser_harness.admin import (
     _version,
     ensure_daemon,
-    list_cloud_profiles,
-    list_local_profiles,
     print_update_banner,
     restart_daemon,
     run_doctor,
     run_setup,
     run_update,
-    start_remote_daemon,
-    stop_remote_daemon,
-    sync_local_profile,
 )
 
 HELP = """Browser Harness
@@ -68,7 +63,7 @@ def main() -> None:
         sys.exit("Usage: browser-harness -c \"print(page_info())\"")
     print_update_banner()
     ensure_daemon()
-    exec(args[1], {"__name__": "__main__", **vars(helpers)})  # noqa: S307 — user-provided code
+    exec(args[1], {"__name__": "__main__", **vars(helpers)})
 
 
 if __name__ == "__main__":

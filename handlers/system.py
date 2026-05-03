@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
-import asyncio
+import contextlib
 import html as html_mod
 import platform
 import time
 
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import BufferedInputFile, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import (
+    BufferedInputFile,
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
 
 import handlers.shared as _shared
 
@@ -201,7 +207,7 @@ async def cmd_start(msg: Message) -> None:
         ]
     )
 
-    panel, text = await _render_panel(msg, "home")
+    _panel, text = await _render_panel(msg, "home")
     await msg.answer(text, parse_mode="HTML", reply_markup=main_keyboard())
     await msg.answer(
         "<b>👋 Welcome to Legion!</b>\n\n"
@@ -389,18 +395,16 @@ async def cb_ui_panel(cb: CallbackQuery) -> None:
         await cb.answer(f"Opened {panel_name}")
     except Exception as e:
         await cb.answer("panel error")
-        try:
+        with contextlib.suppress(Exception):
             await cb.message.answer(
                 f"ui panel error: <code>{html_mod.escape(str(e)[:300])}</code>",
                 parse_mode="HTML",
             )
-        except Exception:
-            pass
 
 
 def _bar(pct: float, width: int = 16) -> str:
     pct_clamped = max(0.0, min(100.0, pct))
-    filled = int(round(width * pct_clamped / 100.0))
+    filled = round(width * pct_clamped / 100.0)
     return "[" + ("█" * filled) + ("░" * (width - filled)) + f"] {int(pct_clamped)}%"
 
 
@@ -573,12 +577,9 @@ def _feature_flags_block() -> str:
     lines.append(f"{icon_vv} <code>VOICEVOX</code> — {vv_status}")
 
     _has_chromadb = False
-    try:
-        import chromadb
+    with contextlib.suppress(Exception):
 
         _has_chromadb = True
-    except Exception:
-        pass
     icon_cdb = "✅" if _has_chromadb else "⚠️"
     cdb_status = "connected" if _has_chromadb else "not connected"
     lines.append(f"{icon_cdb} <code>CHROMADB</code> — {cdb_status}")
@@ -951,8 +952,9 @@ async def cmd_snapshot(msg: Message) -> None:
     user_id = str(msg.from_user.id) if msg.from_user else "0"
 
     try:
-        from core.session_snapshots import create_snapshot
         import html_mod
+
+        from core.session_snapshots import create_snapshot
 
         snapshot_id = await create_snapshot(user_id, label=label)
         await msg.answer(
@@ -1001,8 +1003,9 @@ async def cmd_snapshots(msg: Message) -> None:
     if not is_allowed(msg):
         return
     try:
-        from core.session_snapshots import list_snapshots
         import html_mod
+
+        from core.session_snapshots import list_snapshots
 
         snaps = list_snapshots()
         if not snaps:

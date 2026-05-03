@@ -8,7 +8,6 @@ import math
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class TopicEvolution:
         try:
             if TOPIC_WEIGHTS_PATH.exists():
                 payload = json.loads(TOPIC_WEIGHTS_PATH.read_text(encoding="utf-8"))
-                existing = {str(k).lower() for k in (payload.get("topics", {}) or {}).keys()}
+                existing = {str(k).lower() for k in (payload.get("topics", {}) or {})}
         except (OSError, ValueError) as exc:
             logger.debug("Failed reading topic weights for cross-reference: %s", exc)
 
@@ -98,8 +97,4 @@ class TopicEvolution:
             return False
 
         # Check exceptions
-        for exc in _EXCEPTIONS_NEVER_BELOW_MIN:
-            if exc in topic.lower():
-                return False
-
-        return True
+        return all(exc not in topic.lower() for exc in _EXCEPTIONS_NEVER_BELOW_MIN)

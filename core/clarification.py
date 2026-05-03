@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
         if "?" in normalized and direct_question_tokens.intersection(normalized_tokens):
             return False
 
-        NEVER_CLARIFY = {
+        never_clarify = {
             "hei",
             "hai",
             "hi",
@@ -89,7 +88,7 @@ async def should_clarify(message: str, intent: str, confidence: float) -> bool:
             "great",
             "nice",
         }
-        if normalized in NEVER_CLARIFY:
+        if normalized in never_clarify:
             return False
 
         return is_short and is_low_confidence
@@ -179,7 +178,7 @@ async def ask_if_needed(
     message: str,
     intent: str,
     confidence: float,
-) -> Optional[str]:
+) -> str | None:
     """Main wiring entry point for message_handler.py.
 
     Returns the clarifying question string if clarification is needed,

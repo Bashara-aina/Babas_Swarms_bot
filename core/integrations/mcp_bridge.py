@@ -93,8 +93,7 @@ class MCPBridge:
         )
 
         try:
-            async with stdio_client(params) as (read, write):
-                async with ClientSession(read, write) as session:
+            async with stdio_client(params) as (read, write), ClientSession(read, write) as session:
                     await session.initialize()
                     result = await session.call_tool(tool_name, arguments)
                     return self._result_to_text(result)
@@ -139,8 +138,7 @@ class MCPBridge:
         )
         out = []
         try:
-            async with stdio_client(params) as (read, write):
-                async with ClientSession(read, write) as session:
+            async with stdio_client(params) as (read, write), ClientSession(read, write) as session:
                     await session.initialize()
                     tools = await session.list_tools()
                     for t in getattr(tools, "tools", None) or []:

@@ -10,9 +10,9 @@ from core.orchestrator import (
 )
 
 __all__ = [
-    "LegionSwarmOrchestrator",
-    "LegionAgentDef",
-    "SwarmReport",
     "AgentResult",
+    "LegionAgentDef",
+    "LegionSwarmOrchestrator",
+    "SwarmReport",
     "run_legion_swarm",
 ]

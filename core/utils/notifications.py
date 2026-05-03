@@ -13,14 +13,12 @@ never raise to the caller.
 from __future__ import annotations
 
 import logging
-import os
-from typing import Optional
 
 from aiogram import Bot
 
 logger = logging.getLogger(__name__)
 
-_bot: Optional[Bot] = None
+_bot: Bot | None = None
 _user_id: int = 0
 
 

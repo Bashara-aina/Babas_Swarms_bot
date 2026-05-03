@@ -14,7 +14,6 @@ import logging
 import os
 import time
 from datetime import datetime
-from typing import Optional
 
 from core.agent_registry import detect_agent as _detect_agent
 from core.agent_registry import get_fallback_chain as _get_fallback_chain
@@ -79,12 +78,11 @@ async def _load_history_from_db(user_id: str) -> None:
         import aiosqlite
 
         await _init_conv_db()
-        async with aiosqlite.connect(_CONV_DB_PATH) as db:
-            async with db.execute(
-                "SELECT role, content, ts FROM conversation_turns WHERE user_id = ? ORDER BY ts DESC LIMIT ?",
-                (user_id, MAX_HISTORY_TURNS * 2),
-            ) as cursor:
-                rows = await cursor.fetchall()
+        async with aiosqlite.connect(_CONV_DB_PATH) as db, db.execute(
+            "SELECT role, content, ts FROM conversation_turns WHERE user_id = ? ORDER BY ts DESC LIMIT ?",
+            (user_id, MAX_HISTORY_TURNS * 2),
+        ) as cursor:
+            rows = await cursor.fetchall()
         if rows:
             turns = [{"role": r[0], "content": r[1], "ts": r[2]} for r in reversed(rows)]
             if user_id not in CONVERSATION_HISTORY:
@@ -284,17 +282,17 @@ def get_last_message_timestamp(user_id: str) -> float:
 
 
 __all__ = [
-    "detect_agent",
-    "get_fallback_chain",
     "ACTIVE_THREADS",
     "CONVERSATION_HISTORY",
+    "add_to_conversation",
     "add_to_thread",
+    "clear_conversation",
+    "clear_thread",
+    "detect_agent",
+    "get_conversation_history",
+    "get_conversation_summary_prompt",
+    "get_fallback_chain",
     "get_thread_context",
     "list_threads",
     "list_threads_raw",
-    "clear_thread",
-    "add_to_conversation",
-    "get_conversation_history",
-    "clear_conversation",
-    "get_conversation_summary_prompt",
 ]

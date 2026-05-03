@@ -6,8 +6,10 @@ handles Chrome's origin requirements for CDP connections.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import websockets
 
@@ -15,12 +17,12 @@ import websockets
 class CDPClient:
     def __init__(self, ws_url: str) -> None:
         self.ws_url = ws_url
-        self._ws: Optional[Any] = None
-        self._reader_task: Optional[asyncio.Task] = None
+        self._ws: Any | None = None
+        self._reader_task: asyncio.Task | None = None
         self._pending: dict[int, asyncio.Future] = {}
-        self._event_callback: Optional[Callable[[str, dict, Optional[str]], None]] = None
+        self._event_callback: Callable[[str, dict, str | None], None] | None = None
         self._next_id = 1
-        self._lock: Optional[asyncio.Lock] = None
+        self._lock: asyncio.Lock | None = None
 
     async def start(self, timeout: float = 10.0) -> None:
         self._lock = asyncio.Lock()
@@ -28,7 +30,7 @@ class CDPClient:
             self._ws = await asyncio.wait_for(
                 websockets.connect(self.ws_url, ping_interval=None, origin=None), timeout=timeout
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise RuntimeError(f"CDP WS connection timed out after {timeout}s to {self.ws_url}")
         self._reader_task = asyncio.create_task(self._read_loop())
 
@@ -55,8 +57,8 @@ class CDPClient:
     async def send_raw(
         self,
         method: str,
-        params: Optional[dict] = None,
-        session_id: Optional[str] = None,
+        params: dict | None = None,
+        session_id: str | None = None,
     ) -> dict:
         if self._lock is None:
             self._lock = asyncio.Lock()
@@ -77,7 +79,7 @@ class CDPClient:
                 if isinstance(result, dict) and "result" in result:
                     return result["result"]
                 return result
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._pending.pop(msg_id, None)
                 raise RuntimeError(f"CDP timeout: {method}")
         finally:
@@ -85,16 +87,14 @@ class CDPClient:
 
     def set_event_callback(
         self,
-        cb: Callable[[str, dict, Optional[str]], None],
+        cb: Callable[[str, dict, str | None], None],
     ) -> None:
         self._event_callback = cb
 
     async def close(self) -> None:
         if self._reader_task:
             self._reader_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._reader_task
-            except asyncio.CancelledError:
-                pass
         if self._ws:
             await self._ws.close()

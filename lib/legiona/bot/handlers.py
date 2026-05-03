@@ -7,28 +7,27 @@ Wires /run and /think commands to stream_response().
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html
 import logging
 import os
 from pathlib import Path as _Path
 from typing import Any
 
-import aiohttp
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, Update
+from aiogram.types import Message
 
 from lib.legiona.bot.stream_handler import stream_to_telegram
-from lib.legiona.debate import debate, debate_simple, full_debate
-from lib.legiona.minimax_client import MINIMAX_MODEL, complete_with_tools, stream_complete
+from lib.legiona.debate import debate
+from lib.legiona.minimax_client import complete_with_tools
 from lib.legiona.observability.cost_log import monthly_projection_jpy, today_total_jpy
 from lib.legiona.self_evolve import (
     GLOBAL_MEMORY_FILE,
     RULES_FILE,
     _analyze_failure_patterns,
     evolve,
-    load_evolved_rules,
     record_session,
 )
 from lib.legiona.tools.mmx_tools import mmx_vision
@@ -498,10 +497,8 @@ async def handle_vision_photo(message: Message, state: FSMContext) -> None:
         vision_result = mmx_vision(tmp_path, prompt)
 
         # Clean up temp file
-        try:
+        with contextlib.suppress(OSError):
             os.unlink(tmp_path)
-        except OSError:
-            pass
 
         if vision_result.startswith("ERROR"):
             await status_msg.edit_text(f"Vision failed: {vision_result}")

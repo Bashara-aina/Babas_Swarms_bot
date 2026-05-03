@@ -46,7 +46,7 @@ class TaskPlan(BaseModel):
     recommended_topology: str = "auto"
 
     @model_validator(mode="after")
-    def _normalize(self) -> "TaskPlan":
+    def _normalize(self) -> TaskPlan:
         self.estimated_complexity = max(1, min(10, int(self.estimated_complexity)))
         return self
 

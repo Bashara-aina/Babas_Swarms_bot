@@ -14,9 +14,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import re
-import subprocess
 import time
 from pathlib import Path
 
@@ -104,7 +102,7 @@ def _analyze_conversation(content: str) -> dict:
 
     file_pattern = re.compile(r"[\w/\-\.]+\.(py|md|yaml|json|ts|tsx|js|jsx|txt)", re.IGNORECASE)
     found_files = set(file_pattern.findall(content))
-    code_files = {f for f in found_files if any(f.endswith(ext) for ext in [".py", ".md"])}
+    {f for f in found_files if any(f.endswith(ext) for ext in [".py", ".md"])}
 
     active_kw = ["in progress", "currently working on", "editing", "modifying", "working on"]
     for kw in active_kw:
@@ -159,7 +157,7 @@ def _load_available_skills() -> list[str]:
     try:
         path = Path("/tmp/legion_available_skills.txt")
         if path.exists():
-            return [l.strip() for l in path.read_text().splitlines() if l.strip()]
+            return [line.strip() for line in path.read_text().splitlines() if line.strip()]
     except Exception:
         pass
     return []
@@ -174,10 +172,7 @@ def run_compaction_cli() -> None:
 
     try:
         input_path = Path(args.input)
-        if input_path.exists():
-            content = input_path.read_text()
-        else:
-            content = ""
+        content = input_path.read_text() if input_path.exists() else ""
     except Exception:
         content = ""
 

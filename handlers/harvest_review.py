@@ -8,10 +8,11 @@ one-tap accept/reject feedback. Feedback is written immediately to
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html
 import json
 import logging
-import os
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -111,10 +112,8 @@ async def _get_pending_candidates() -> list[dict[str, Any]]:
     for line in content.splitlines():
         line = line.strip()
         if line:
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 candidates.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
     return [c for c in candidates if not c.get("reviewed", False)]
 
 
@@ -156,7 +155,7 @@ async def _mark_reviewed(
 async def _load_harvest_stats() -> dict[str, Any]:
     """Compute harvest statistics from the harvest log."""
     import re
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     wiki_root = Path(__file__).resolve().parent.parent.parent / ".wiki" / "legion" / "harvester"
     log_file = wiki_root / "harvest-log.md"
@@ -168,7 +167,7 @@ async def _load_harvest_stats() -> dict[str, Any]:
     except OSError:
         return {"total": 0, "by_source": {}, "top_reasons": [], "bias": {}}
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    cutoff = datetime.now(UTC) - timedelta(days=30)
     total = 0
     accepted = 0
     rejected = 0
@@ -187,7 +186,7 @@ async def _load_harvest_stats() -> dict[str, Any]:
 
         entry_date_str = entry.get("date", "")
         try:
-            entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=timezone.utc)
+            entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=UTC)
         except (ValueError, TypeError):
             continue
 
@@ -296,14 +295,14 @@ async def _write_feedback_to_log(
 ) -> None:
     """Append feedback entry to the harvest-log.md."""
     import json
-    from datetime import datetime, timezone
+    from datetime import datetime
     from pathlib import Path
 
     wiki_root = Path(__file__).resolve().parent.parent.parent / ".wiki" / "legion" / "harvester"
     wiki_root.mkdir(parents=True, exist_ok=True)
     log_file = wiki_root / "harvest-log.md"
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     session_id = now.strftime("%Y%m%d%H%M%S")
 
     entry = {

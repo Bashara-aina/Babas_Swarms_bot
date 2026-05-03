@@ -19,7 +19,6 @@ import os
 import re
 import shutil
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -88,14 +87,14 @@ class SandboxExecutor:
         self.config = config
         self._blocked_patterns = [re.compile(p, re.IGNORECASE) for p in config.blocked_cmds]
 
-    def _is_blocked(self, cmd: str) -> Optional[str]:
+    def _is_blocked(self, cmd: str) -> str | None:
         """Check if command matches any blocked pattern. Returns reason if blocked, None if ok."""
         for pattern in self._blocked_patterns:
             if pattern.search(cmd):
                 return f"blocked pattern: {pattern.pattern}"
         return None
 
-    def _validate_cwd(self, cwd: Optional[str]) -> Optional[str]:
+    def _validate_cwd(self, cwd: str | None) -> str | None:
         """Validate cwd is in allowed list. Returns resolved path or None."""
         if cwd is None:
             return None
@@ -106,7 +105,7 @@ class SandboxExecutor:
                 return resolved
         return None
 
-    async def execute(self, cmd: str, cwd: Optional[str] = None) -> ShellResult:
+    async def execute(self, cmd: str, cwd: str | None = None) -> ShellResult:
         """Execute a shell command in the sandbox.
 
         Args:
@@ -171,7 +170,7 @@ class SandboxExecutor:
                 stdout_bytes, stderr_bytes = await asyncio.wait_for(
                     proc.communicate(), timeout=self.config.timeout_secs
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 try:
                     proc.kill()
                     await proc.communicate()

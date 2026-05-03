@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import logging
 import os
@@ -63,10 +64,8 @@ async def cmd_scrape(msg: Message) -> None:
         )
     except Exception:
         typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         output = await run_shell_command(
             f"curl -sL --max-time 15 --user-agent 'Mozilla/5.0' '{url}' | "
             'python3 -c "'
@@ -121,10 +120,8 @@ async def cmd_research(msg: Message) -> None:
             )
         finally:
             typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         await send_chunked(msg, out or "(empty)")
         return
 
@@ -222,15 +219,13 @@ async def cmd_research(msg: Message) -> None:
         await send_chunked(msg, result, model_used="deep-research/verified")
     except Exception as e:
         typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(
                 f"research failed: <code>{e}</code>\n\n"
                 "make sure Playwright is installed:\n"
                 "<code>/install playwright</code> then <code>playwright install chromium</code>",
                 parse_mode="HTML",
             )
-        except Exception:
-            pass
 
 
 # ── /paper — arXiv paper search ────────────────────────────────────────────────
@@ -277,10 +272,8 @@ async def cmd_paper(msg: Message) -> None:
                 await msg.answer(text)
     except Exception as e:
         typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(f"arXiv error: <code>{e}</code>", parse_mode="HTML")
-        except Exception:
-            pass
 
 
 # ── /ask_paper — question about a specific paper ──────────────────────────────
@@ -324,10 +317,8 @@ async def cmd_ask_paper(msg: Message) -> None:
             pass
     except Exception as e:
         typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
-        except Exception:
-            pass
 
 
 # ── /workernet_papers — DEPRECATED ────────────────────────────────────────────

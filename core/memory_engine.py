@@ -17,17 +17,14 @@ All methods are async. Use MemoryEngine() as the single interface.
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
-import os
 import re
 import time
 from collections import deque
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 import chromadb
@@ -155,7 +152,7 @@ class EpisodicMemory:
     def __init__(self, db_path: Path = MEMORY_DB) -> None:
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._init_done = False
 
     async def _ensure_init(self) -> None:
@@ -175,11 +172,11 @@ class EpisodicMemory:
     async def store(
         self,
         content: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
         sentiment: str = "neutral",
         importance: int = 5,
-        tags: Optional[list[str]] = None,
-        timestamp: Optional[str] = None,
+        tags: list[str] | None = None,
+        timestamp: str | None = None,
     ) -> int:
         """Store an episode. Returns row id."""
         await self._ensure_init()
@@ -195,9 +192,9 @@ class EpisodicMemory:
 
     async def search(
         self,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        tags: Optional[list[str]] = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        tags: list[str] | None = None,
         limit: int = 10,
     ) -> list[dict[str, Any]]:
         """Search episodes by time range and/or tags."""
@@ -213,7 +210,7 @@ class EpisodicMemory:
                 cursor = await conn.execute(self.SEARCH_SQL, (start, end, limit))
             rows = await cursor.fetchall()
             cols = [desc[0] for desc in cursor.description or []]
-            return [dict(zip(cols, row)) for row in rows]
+            return [dict(zip(cols, row, strict=False)) for row in rows]
 
     async def get_recent(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
         """Get recent episodes for a specific user."""
@@ -230,7 +227,7 @@ class EpisodicMemory:
             )
             rows = await cursor.fetchall()
             cols = [desc[0] for desc in cursor.description or []]
-            return [dict(zip(cols, row)) for row in rows]
+            return [dict(zip(cols, row, strict=False)) for row in rows]
 
     async def close(self) -> None:
         if self._conn:
@@ -257,8 +254,8 @@ class PermanentMemory:
     def __init__(self, persist_dir: Path = CHROMA_DIR) -> None:
         self.persist_dir = persist_dir
         self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self._client: Optional[chromadb.PersistentClient] = None
-        self._collection: Optional[chromadb.Collection] = None
+        self._client: chromadb.PersistentClient | None = None
+        self._collection: chromadb.Collection | None = None
 
     def _get_collection(self) -> chromadb.Collection:
         if self._collection is None:
@@ -276,7 +273,7 @@ class PermanentMemory:
         self,
         fact: str,
         user_id: str = "bashara",
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Store a fact about Bashara in vector store."""
         collection = self._get_collection()
@@ -328,9 +325,7 @@ class PermanentMemory:
         sentences = re.split(r"[.!?]+", text)
         for sent in sentences:
             sent = sent.strip()
-            if len(sent) > 20 and len(sent) < 500:
-                # Basic filter: looks like a fact
-                if any(keyword in sent.lower() for keyword in ["i ", "i'm ", "i am ", "my ", "i've ", "i'll "]):
+            if len(sent) > 20 and len(sent) < 500 and any(keyword in sent.lower() for keyword in ["i ", "i'm ", "i am ", "my ", "i've ", "i'll "]):
                     await self.store_fact(
                         sent,
                         user_id=user_id,

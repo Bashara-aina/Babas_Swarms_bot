@@ -7,20 +7,18 @@ import pytest
 from core.daily_harvester.morning_report import MorningReport
 from core.daily_harvester.source_strategy import (
     ContradictionResolver,
-    SourceInfo,
     SourceType,
     TrustTier,
     get_trust_score,
     get_trust_tier,
 )
-from core.daily_harvester.swarm_debate import run_debate, run_debate_batch
-from core.daily_harvester.topic_budget import detect_active_topics, normalize_budget
+from core.daily_harvester.swarm_debate import run_debate
+from core.daily_harvester.topic_budget import detect_active_topics
 from core.daily_harvester.types import (
     CandidateInfo,
     SourceType,
     SwarmVerdict,
     VerdictDecision,
-    WikiEntry,
 )
 
 # ── test_weight_formula ──────────────────────────────────────────────────────
@@ -176,7 +174,7 @@ def test_contradiction_resolver_newer_wins() -> None:
         "source_type": SourceType.ACADEMIC,
     }
 
-    decision, reason = resolver.resolve(new_entry, existing_entry)
+    decision, _reason = resolver.resolve(new_entry, existing_entry)
     assert decision == "SUPERSEDE", f"Expected SUPERSEDE (newer), got {decision}"
 
 

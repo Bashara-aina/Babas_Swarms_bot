@@ -233,7 +233,6 @@ class LegionTemporalMemory:
 
 
 if __name__ == "__main__":
-    import sys
 
     async def test():
         print("Testing Graphiti temporal integration...")

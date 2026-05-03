@@ -16,8 +16,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from collections.abc import Awaitable
 from enum import Enum
-from typing import Any, Awaitable, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ class CircuitBreaker:
             self._state = CircuitState.OPEN
             logger.warning("[CircuitBreaker][%s] half-open call failed — re-open", self.name)
 
-    async def __aenter__(self) -> "CircuitBreaker":
+    async def __aenter__(self) -> CircuitBreaker:
         async with self._lock:
             if self._state == CircuitState.OPEN:
                 if self._should_attempt_recovery():
@@ -131,7 +132,7 @@ def circuit(name: str) -> CircuitBreaker:
     return _circuit_breakers[name]
 
 
-async def with_circuit(
+async def with_circuit[T](
     name: str,
     coro: Awaitable[T],
     failure_threshold: int = 5,

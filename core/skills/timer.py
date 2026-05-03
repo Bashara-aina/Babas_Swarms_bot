@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Global bot reference (set from main.py on_startup)
-_bot_instance: Optional["Bot"] = None
+_bot_instance: Bot | None = None
 
 
-def set_bot(bot: "Bot") -> None:
+def set_bot(bot: Bot) -> None:
     """Called by main.py on_startup to provide bot access."""
     global _bot_instance
     _bot_instance = bot
@@ -116,10 +116,7 @@ def parse_timer_request(text: str) -> tuple[int, str]:
         text,
         re.IGNORECASE,
     )
-    if label_match:
-        label = label_match.group(1).strip().strip("'\"")
-    else:
-        label = "Timer"
+    label = label_match.group(1).strip().strip("'\"") if label_match else "Timer"
 
     return total_seconds, label
 

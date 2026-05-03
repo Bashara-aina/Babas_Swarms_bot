@@ -51,7 +51,7 @@ async def cmd_fix(message: Message) -> None:
 
     try:
         result = await asyncio.wait_for(_swe.fix_issue(url), timeout=600)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         result = "Timed out after 10 minutes. Check logs."
 
     if "PR opened" in result or "github.com" in result:
@@ -86,7 +86,7 @@ async def cmd_fix_dry(message: Message) -> None:
 
     try:
         result = await asyncio.wait_for(_swe.dry_run(url), timeout=300)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         result = "Timed out after 5 minutes."
 
     await message.answer(

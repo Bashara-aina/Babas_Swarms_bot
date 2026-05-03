@@ -20,7 +20,6 @@ import asyncio
 import os
 import time
 from collections import defaultdict, deque
-from typing import Deque, Dict
 
 # ── Default limits ─────────────────────────────────────────────────────────────
 DEFAULT_MESSAGE_LIMIT = 30  # messages per minute
@@ -42,7 +41,7 @@ class RateLimiter:
     def __init__(self, max_requests: int = 10, window_seconds: int = WINDOW_SECONDS):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._windows: Dict[int, Deque[float]] = defaultdict(deque)
+        self._windows: dict[int, deque[float]] = defaultdict(deque)
         self._lock = asyncio.Lock()
 
     def _is_admin(self, user_id: int) -> bool:
@@ -88,7 +87,7 @@ class MultiLimiter:
         voice_limit: int = DEFAULT_VOICE_LIMIT,
         tool_limit: int = DEFAULT_TOOL_LIMIT,
     ):
-        self._limiters: Dict[str, RateLimiter] = {
+        self._limiters: dict[str, RateLimiter] = {
             "message": RateLimiter(max_requests=message_limit),
             "voice": RateLimiter(max_requests=voice_limit),
             "tool": RateLimiter(max_requests=tool_limit),

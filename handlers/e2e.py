@@ -10,13 +10,13 @@ Commands:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import json
 import os
 import re
 import textwrap
 from pathlib import Path
-from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -54,7 +54,7 @@ async def _run_shell(cmd: str, timeout: int = 60) -> str:
         )
         stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
         return (stdout or b"").decode(errors="replace")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"[TIMEOUT after {timeout}s]"
     except Exception as e:
         return f"[shell error: {e}]"
@@ -222,10 +222,8 @@ async def cmd_e2etest(msg: Message) -> None:
             f"<pre>{html_mod.escape(code_snippet)}</pre>"
         )
 
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
         await send_chunked(msg, final)
 
@@ -273,23 +271,19 @@ async def cmd_e2eplan(msg: Message) -> None:
             "data requirements, and a skeleton test file. "
             "Format with clear markdown headers."
         )
-        result, model = await chat(prompt, agent_key="reviewer", user_id=user_id)
-        try:
+        result, _model = await chat(prompt, agent_key="reviewer", user_id=user_id)
+        with contextlib.suppress(Exception):
             await wait.delete()
-        except Exception:
-            pass
         await send_chunked(
             msg,
             f"<b>\U0001f4cb E2E Plan — {html_mod.escape(url)}</b>\n\n{html_mod.escape(result)}",
         )
     except Exception as e:
-        try:
+        with contextlib.suppress(Exception):
             await wait.edit_text(
                 f"\u274c {html_mod.escape(str(e)[:200])}",
                 parse_mode="HTML",
             )
-        except Exception:
-            pass
 
 
 # =========================================================================== #
@@ -334,10 +328,8 @@ async def cmd_dbquery(msg: Message) -> None:
         user_id = str(msg.from_user.id) if msg.from_user else "0"
         result = await _nl_db_query(query_text, user_id)
 
-    try:
+    with contextlib.suppress(Exception):
         await wait.delete()
-    except Exception:
-        pass
     await send_chunked(msg, result)
 
 

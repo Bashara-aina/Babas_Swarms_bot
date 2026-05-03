@@ -3,8 +3,6 @@
 import os
 import sys
 
-import pytest
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from skills.nihongo.constants import N5_GRAMMAR_PATTERNS, N5_VOCAB_SAMPLE
@@ -76,7 +74,7 @@ def test_sub_modes():
 
 def test_exchange_counter():
     NihongoModeManager.activate(TEST_USER_ID)
-    for i in range(5):
+    for _i in range(5):
         count = NihongoModeManager.increment_exchange(TEST_USER_ID)
     assert count == 5
     print("✅ Exchange counter works")
@@ -194,7 +192,7 @@ def test_immersion_world_scenarios():
 
 def test_srs_engine_sm2_algorithm():
     """Test SRSEngine SM-2 algorithm implementation."""
-    from skills.nihongo.srs_engine import SRSCard, SRSEngine
+    from skills.nihongo.srs_engine import SRSEngine
 
     engine = SRSEngine()
 

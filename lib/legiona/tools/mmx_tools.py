@@ -7,8 +7,6 @@ Requires: mmx-cli (npm install -g mmx-cli)
 
 from __future__ import annotations
 
-import asyncio
-import json
 import os
 import subprocess
 from pathlib import Path
@@ -21,7 +19,7 @@ def _run_mmx(args: list[str], timeout: int = MMX_TIMEOUT) -> str:
     """Run mmx CLI and return stdout."""
     try:
         result = subprocess.run(
-            ["mmx"] + args,
+            ["mmx", *args],
             capture_output=True,
             text=True,
             timeout=timeout,

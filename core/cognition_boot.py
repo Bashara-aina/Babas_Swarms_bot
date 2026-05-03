@@ -169,7 +169,7 @@ async def _hydrate_memory() -> dict[str, Any]:
     if is_stale(AVAILABLE_SKILLS):
         try:
             from core.legion_skill_indexer import index_skills
-            count = await index_skills()
+            await index_skills()
             results["skills_index_refreshed"] = True
         except Exception as e:
             logger.debug("skill index refresh failed: %s", e)
@@ -289,7 +289,7 @@ async def cognition_boot(first_message: str = "") -> CognitionBootResult:
     result = CognitionBootResult()
 
     # STEP 1 — Identity Load (fast, cached)
-    soul_content, claude0 = _load_identity()
+    soul_content, _claude0 = _load_identity()
     result.identity_loaded = bool(soul_content)
     result.soul_content = soul_content[:500]  # first 500 chars for context
 

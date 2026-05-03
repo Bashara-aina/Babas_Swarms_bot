@@ -111,14 +111,14 @@ class WikiManager:
     async def read_index(self) -> str:
         if not self.index_path.exists():
             return "# Legion Wiki Index\n\nNo pages yet. Legion adds entries as it learns. See SCHEMA.md for rules.\n"
-        async with aiofiles.open(self.index_path, encoding="utf-8", mode="r") as f:
+        async with aiofiles.open(self.index_path, encoding="utf-8") as f:
             return await f.read()
 
     async def read_page(self, page_path: str) -> str:
         resolved = self._resolve(page_path)
         if resolved is None or not resolved.is_file():
             return f"Page {page_path} does not exist yet."
-        async with aiofiles.open(resolved, encoding="utf-8", mode="r") as f:
+        async with aiofiles.open(resolved, encoding="utf-8") as f:
             return await f.read()
 
     async def write_page(
@@ -161,7 +161,7 @@ class WikiManager:
         index_content = await self.read_index()
         schema_text = ""
         if self.schema_path.exists():
-            async with aiofiles.open(self.schema_path, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(self.schema_path, encoding="utf-8") as f:
                 schema_text = await f.read()
 
         prompt = f"""You are maintaining INDEX.md for Legion's wiki.
@@ -198,7 +198,7 @@ Return ONLY the full updated INDEX.md markdown, nothing else."""
         index = await self.read_index()
         schema = ""
         if self.schema_path.exists():
-            async with aiofiles.open(self.schema_path, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(self.schema_path, encoding="utf-8") as f:
                 schema = await f.read()
 
         planning_prompt = f"""You are Legion's wiki manager.
@@ -370,7 +370,7 @@ Be specific; name files."""
         adr_block = ""
         for adrf in adr_files[:10]:
             try:
-                async with aiofiles.open(adrf, encoding="utf-8", mode="r") as f:
+                async with aiofiles.open(adrf, encoding="utf-8") as f:
                     content = await f.read()
                 lines = content.splitlines()
                 title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), adrf.stem)
@@ -382,7 +382,7 @@ Be specific; name files."""
         session_block = ""
         for sf in session_files[:5]:
             try:
-                async with aiofiles.open(sf, encoding="utf-8", mode="r") as f:
+                async with aiofiles.open(sf, encoding="utf-8") as f:
                     content = await f.read()
                 lines = content.splitlines()
                 task = next((ln.replace("## Task", "").strip() for ln in lines if ln.startswith("## Task")), sf.stem)
@@ -403,7 +403,7 @@ Be specific; name files."""
 
         schema = ""
         if self.schema_path.exists():
-            async with aiofiles.open(self.schema_path, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(self.schema_path, encoding="utf-8") as f:
                 schema = await f.read()
 
         sync_prompt = f"""You are regenerating AGENTS.md for the SwarmBot project.

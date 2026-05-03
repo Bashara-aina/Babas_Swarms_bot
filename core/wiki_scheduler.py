@@ -4,11 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
-import sys
+from collections.abc import Callable, Coroutine
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Coroutine
 
 import pytz
 

@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 class MemoryManager:
     """Singleton manager over core, archival, recall, and profile memory."""
 
-    _instance: "MemoryManager | None" = None
+    _instance: MemoryManager | None = None
 
-    def __new__(cls) -> "MemoryManager":
+    def __new__(cls) -> MemoryManager:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
@@ -217,7 +217,11 @@ class MemoryManager:
         Drift is measured as (1 - cosine_similarity_proxy), where similarity proxy
         is derived from Chroma's L2 distance conversion used in long_term_memory.
         """
-        from core.long_term_memory import _get_chroma_client, _get_embedder, _get_or_create_collection
+        from core.long_term_memory import (
+            _get_chroma_client,
+            _get_embedder,
+            _get_or_create_collection,
+        )
         from tools.mem0_client import mem0_get_all
 
         memories = await mem0_get_all(user_id=str(user_id))

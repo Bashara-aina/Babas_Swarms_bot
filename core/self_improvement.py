@@ -126,7 +126,7 @@ Respond in JSON only:
 
 
 async def _apply_soul_updates(soul_content: str, updates: list[dict[str, str]]) -> None:
-    PROTECTED_SECTIONS = ["## Core Values", "## Identity", "## How Legion Grows"]
+    protected_sections = ["## Core Values", "## Identity", "## How Legion Grows"]
     modified = soul_content
 
     for update in updates:
@@ -136,7 +136,7 @@ async def _apply_soul_updates(soul_content: str, updates: list[dict[str, str]]) 
         if not new_line or not section:
             continue
 
-        if any(protected in section for protected in PROTECTED_SECTIONS):
+        if any(protected in section for protected in protected_sections):
             logger.warning("Self-review tried to modify protected section: %s", section)
             continue
 

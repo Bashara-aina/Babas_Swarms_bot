@@ -6,15 +6,13 @@ Stores the ruflo subprocess handle and runs periodic health checks.
 import asyncio
 import logging
 import subprocess
-from typing import Optional
-from urllib import error as urlerror
 from urllib import request as urlrequest
 
 logger = logging.getLogger(__name__)
 
 # Global ruflo process handle
-_ruflo_process: Optional[subprocess.Popen] = None
-_ruflo_monitor_task: Optional[asyncio.Task] = None
+_ruflo_process: subprocess.Popen | None = None
+_ruflo_monitor_task: asyncio.Task | None = None
 
 
 def _restart_health_monitor() -> None:
@@ -35,7 +33,7 @@ def set_ruflo_process(proc: subprocess.Popen) -> None:
     logger.info("Ruflo process handle stored (PID: %s)", proc.pid)
 
 
-def get_ruflo_process() -> Optional[subprocess.Popen]:
+def get_ruflo_process() -> subprocess.Popen | None:
     """Get the current ruflo process handle."""
     return _ruflo_process
 

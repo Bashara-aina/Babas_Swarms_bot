@@ -15,42 +15,43 @@ Plus: Part IX observability, Part XI communication rules, Part XII self-healing.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import time
-from typing import Any, Callable, Awaitable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from core.autonomy.boot_sequence import BootResult, run_boot_sequence
-from core.autonomy.task_classifier import ExecutionMode, classify_task, Classification
-from core.autonomy.mode_executors import (
-    execute_direct,
-    execute_lite,
-    execute_swarm,
-    lookup_swarm_config,
-)
 from core.autonomy.context_enricher import enrich_context
-from core.autonomy.security_layer import (
-    pre_git_commit_scan,
-    pre_api_endpoint_scan,
-    pre_pii_data_scan,
-    detect_secrets_in_pasted_code,
-)
 from core.autonomy.memory_router import (
     route_direct_task,
     route_lite_task,
     route_swarm_task,
 )
+from core.autonomy.mode_executors import (
+    execute_direct,
+    execute_lite,
+    execute_swarm,
+)
+from core.autonomy.security_layer import (
+    detect_secrets_in_pasted_code,
+    pre_api_endpoint_scan,
+    pre_git_commit_scan,
+    pre_pii_data_scan,
+)
 from core.autonomy.session_teardown import (
+    check_git_status,
     detect_goodbye,
     run_teardown_sequence,
-    check_git_status,
 )
+from core.autonomy.task_classifier import Classification, ExecutionMode, classify_task
 
 logger = logging.getLogger(__name__)
 
-_autonomy_engine: "AutonomyEngine | None" = None
+_autonomy_engine: AutonomyEngine | None = None
 
 
-def get_autonomy_engine() -> "AutonomyEngine":
+def get_autonomy_engine() -> AutonomyEngine:
     global _autonomy_engine
     if _autonomy_engine is None:
         _autonomy_engine = AutonomyEngine()
@@ -256,10 +257,8 @@ class AutonomyEngine:
         self._task_count += 1
 
         # Wait for enrichment to finish (don't block response)
-        try:
+        with contextlib.suppress(asyncio.TimeoutError):
             await asyncio.wait_for(enrich_task, timeout=1.0)
-        except asyncio.TimeoutError:
-            pass
 
         return format_user_output(result, classification.mode)
 
@@ -356,7 +355,6 @@ class AutonomyEngine:
     async def _record_swarm_metrics(self, result: Any):
         """Record swarm performance metrics (Part IX)."""
         try:
-            import time
             from core.mcp_client import MCPClient
             client = MCPClient()
             swarm_id = getattr(result, "swarm_id", "unknown")

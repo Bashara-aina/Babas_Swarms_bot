@@ -11,7 +11,8 @@ import asyncio
 import logging
 import os
 import time
-from typing import Any, AsyncIterator, Callable
+from collections.abc import Callable
+from typing import Any
 
 import httpx
 
@@ -21,7 +22,6 @@ from lib.legiona.minimax_client import (
     PRESET_CODING,
     PRESET_CREATIVE,
     PRESET_RESEARCH,
-    _build_minimax_client,
 )
 from lib.legiona.observability.cost_log import log_usage
 
@@ -82,46 +82,45 @@ async def stream_response(
     full_response = ""
     captured_usage: dict[str, Any] | None = None
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        async with client.stream(
-            "POST", f"{MINIMAX_BASE_URL}/chat/completions", json=payload, headers=headers
-        ) as resp:
-            if resp.status_code != 200:
-                body = await resp.aread()
-                raise RuntimeError(f"MiniMax streaming error {resp.status_code}: {body.decode()}")
+    async with httpx.AsyncClient(timeout=120.0) as client, client.stream(
+        "POST", f"{MINIMAX_BASE_URL}/chat/completions", json=payload, headers=headers
+    ) as resp:
+        if resp.status_code != 200:
+            body = await resp.aread()
+            raise RuntimeError(f"MiniMax streaming error {resp.status_code}: {body.decode()}")
 
-            async for line in resp.aiter_lines():
-                if not line.startswith("data: "):
-                    continue
-                data = line[6:].strip()
-                if data == "[DONE]":
-                    break
+        async for line in resp.aiter_lines():
+            if not line.startswith("data: "):
+                continue
+            data = line[6:].strip()
+            if data == "[DONE]":
+                break
 
-                try:
-                    import json as _json
+            try:
+                import json as _json
 
-                    event = _json.loads(data)
-                except Exception:
-                    continue
+                event = _json.loads(data)
+            except Exception:
+                continue
 
-                # Capture usage from the final event before [DONE]
-                if (usage := event.get("usage")) and isinstance(usage, dict):
-                    captured_usage = usage
+            # Capture usage from the final event before [DONE]
+            if (usage := event.get("usage")) and isinstance(usage, dict):
+                captured_usage = usage
 
-                choice = event.get("choices", [{}])[0]
-                delta = choice.get("delta", {})
-                content_delta = delta.get("content", "")
-                reasoning_delta = delta.get("reasoning", "") or delta.get("thinking", "")
+            choice = event.get("choices", [{}])[0]
+            delta = choice.get("delta", {})
+            content_delta = delta.get("content", "")
+            reasoning_delta = delta.get("reasoning", "") or delta.get("thinking", "")
 
-                if content_delta:
-                    accumulated += content_delta
-                    full_response += content_delta
-                    if len(accumulated) >= STREAMING_CHUNK_SIZE:
-                        on_chunk(accumulated)
-                        accumulated = ""
+            if content_delta:
+                accumulated += content_delta
+                full_response += content_delta
+                if len(accumulated) >= STREAMING_CHUNK_SIZE:
+                    on_chunk(accumulated)
+                    accumulated = ""
 
-                if reasoning_delta and verbose:
-                    _logger.debug("[legiona:stream] reasoning: %s", reasoning_delta[:120])
+            if reasoning_delta and verbose:
+                _logger.debug("[legiona:stream] reasoning: %s", reasoning_delta[:120])
 
     if accumulated:
         on_chunk(accumulated)
@@ -177,7 +176,6 @@ class _TelegramSenderImpl:
         parse_mode: str = "HTML",
     ):
         from aiogram import Bot
-        from aiogram.methods import SendMessage
 
         self.bot = Bot(token=bot_token)
         self.chat_id = chat_id
@@ -199,7 +197,6 @@ class _TelegramSenderImpl:
 
     def _sync_call(self, method: Any) -> Any:
         """Execute a Telegram API method synchronously."""
-        import asyncio
 
         return asyncio.run(self.bot.session.execute(method))
 

@@ -1,6 +1,7 @@
 """Admin: daemon lifecycle, remote browsers, profile sync, doctor."""
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
@@ -11,7 +12,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 def _load_env():
@@ -35,12 +36,12 @@ VERSION_CACHE = Path("/tmp/bu-version-cache.json")
 VERSION_CACHE_TTL = 24 * 3600
 
 
-def _paths(name: Optional[str] = None):
+def _paths(name: str | None = None):
     n = name or NAME
     return f"/tmp/bu-{n}.sock", f"/tmp/bu-{n}.pid"
 
 
-def _log_tail(name: Optional[str] = None) -> Optional[str]:
+def _log_tail(name: str | None = None) -> str | None:
     p = f"/tmp/bu-{name or NAME}.log"
     try:
         return Path(p).read_text().strip().splitlines()[-1]
@@ -48,7 +49,7 @@ def _log_tail(name: Optional[str] = None) -> Optional[str]:
         return None
 
 
-def _needs_chrome_remote_debugging_prompt(msg: Optional[str]) -> bool:
+def _needs_chrome_remote_debugging_prompt(msg: str | None) -> bool:
     lower = (msg or "").lower()
     return (
         "devtoolsactiveport not found" in lower
@@ -66,22 +67,22 @@ def _needs_chrome_remote_debugging_prompt(msg: Optional[str]) -> bool:
     )
 
 
-def _is_local_chrome_mode(env: Optional[dict] = None) -> bool:
+def _is_local_chrome_mode(env: dict | None = None) -> bool:
     return not (env or {}).get("BU_CDP_WS") and not os.environ.get("BU_CDP_WS")
 
 
-def daemon_alive(name: Optional[str] = None) -> bool:
+def daemon_alive(name: str | None = None) -> bool:
     try:
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         s.settimeout(1)
         s.connect(_paths(name)[0])
         s.close()
         return True
-    except (FileNotFoundError, ConnectionRefusedError, socket.timeout):
+    except (TimeoutError, FileNotFoundError, ConnectionRefusedError):
         return False
 
 
-def _probe_cdp_ws() -> Optional[str]:
+def _probe_cdp_ws() -> str | None:
     for port in (9222, 9223):
         try:
             with urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=2) as r:
@@ -98,7 +99,7 @@ def _probe_cdp_ws() -> Optional[str]:
     return None
 
 
-def ensure_daemon(wait: float = 60.0, name: Optional[str] = None, env: Optional[dict] = None) -> None:
+def ensure_daemon(wait: float = 60.0, name: str | None = None, env: dict | None = None) -> None:
     if daemon_alive(name):
         try:
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -157,7 +158,7 @@ def stop_remote_daemon(name: str = "remote") -> None:
     restart_daemon(name)
 
 
-def restart_daemon(name: Optional[str] = None) -> None:
+def restart_daemon(name: str | None = None) -> None:
     import signal
 
     sock, pid_path = _paths(name)
@@ -182,18 +183,14 @@ def restart_daemon(name: Optional[str] = None) -> None:
             except ProcessLookupError:
                 break
         else:
-            try:
+            with contextlib.suppress(ProcessLookupError):
                 os.kill(pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
     for f in (sock, pid_path):
-        try:
+        with contextlib.suppress(FileNotFoundError):
             os.unlink(f)
-        except FileNotFoundError:
-            pass
 
 
-def _browser_use(path: str, method: str, body: Optional[dict] = None) -> dict:
+def _browser_use(path: str, method: str, body: dict | None = None) -> dict:
     key = os.environ.get("BROWSER_USE_API_KEY")
     if not key:
         raise RuntimeError("BROWSER_USE_API_KEY missing -- see .env.example")
@@ -220,7 +217,7 @@ def _has_local_gui() -> bool:
     return False
 
 
-def _show_live_url(url: Optional[str]) -> None:
+def _show_live_url(url: str | None) -> None:
     import webbrowser
 
     if not url:
@@ -269,7 +266,7 @@ def _resolve_profile_name(profile_name: str) -> str:
 
 def start_remote_daemon(
     name: str = "remote",
-    profileName: Optional[str] = None,
+    profileName: str | None = None,
     **create_kwargs: Any,
 ) -> dict:
     if daemon_alive(name):
@@ -302,10 +299,10 @@ def list_local_profiles() -> list[dict]:
 
 def sync_local_profile(
     profile_name: str,
-    browser: Optional[str] = None,
-    cloud_profile_id: Optional[str] = None,
-    include_domains: Optional[list[str]] = None,
-    exclude_domains: Optional[list[str]] = None,
+    browser: str | None = None,
+    cloud_profile_id: str | None = None,
+    include_domains: list[str] | None = None,
+    exclude_domains: list[str] | None = None,
 ) -> str:
     if not shutil.which("profile-use"):
         raise RuntimeError(
@@ -348,7 +345,7 @@ def _version() -> str:
         return ""
 
 
-def _repo_dir() -> Optional[Path]:
+def _repo_dir() -> Path | None:
     p = Path(__file__).resolve().parent
     return p if (p / ".git").is_dir() else None
 
@@ -367,13 +364,11 @@ def _cache_read() -> dict:
 
 
 def _cache_write(data: dict) -> None:
-    try:
+    with contextlib.suppress(OSError):
         VERSION_CACHE.write_text(json.dumps(data))
-    except OSError:
-        pass
 
 
-def _latest_release_tag(force: bool = False) -> Optional[str]:
+def _latest_release_tag(force: bool = False) -> str | None:
     cache = _cache_read()
     now = time.time()
     if not force and cache.get("tag") and now - cache.get("fetched_at", 0) < VERSION_CACHE_TTL:
@@ -401,7 +396,7 @@ def _version_tuple(v: str) -> tuple[int, ...]:
     return tuple(parts)
 
 
-def check_for_update() -> tuple[str, Optional[str], bool]:
+def check_for_update() -> tuple[str, str | None, bool]:
     cur = _version()
     latest = _latest_release_tag()
     newer = bool(cur and latest and _version_tuple(latest) > _version_tuple(cur))
@@ -594,7 +589,7 @@ def run_update(yes: bool = False) -> int:
         if status.stdout.strip():
             print(f"refusing to update: uncommitted changes in {repo}", file=sys.stderr)
             print(
-                "commit or stash them first, or run `git -C %s pull` yourself." % repo,
+                f"commit or stash them first, or run `git -C {repo} pull` yourself.",
                 file=sys.stderr,
             )
             return 1

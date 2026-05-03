@@ -18,13 +18,13 @@ import logging as _logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Annotated, Any, Literal, TypeVar
+from typing import Any, Literal, TypeVar
 
 import httpx
 from openai import AsyncOpenAI
-from pydantic import AfterValidator, BaseModel, Field
+from pydantic import BaseModel, Field
 
-from lib.legiona.tools.registry import get_tool_function, get_tool_schema
+from lib.legiona.tools.registry import get_tool_function
 
 _logger = _logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def _load_image_as_base64(image_path: str) -> str:
         raise FileNotFoundError(f"Image not found: {image_path}")
 
     import base64
-    import imghdr
+
 
     raw = p.read_bytes()
     ext = p.suffix.lower().lstrip(".")
@@ -264,7 +264,7 @@ def get_client(fallback: bool = False) -> AsyncOpenAI:
 
 
 # ── Smart async completion wrapper (#2: reasoning_split, #3: optimal params) ─
-async def create_structured_completion(
+async def create_structured_completion[T: BaseModel](
     *,
     messages: list[dict[str, Any]],
     response_model: type[T] = LegionaOutput,
@@ -336,7 +336,7 @@ async def create_structured_completion(
 
 
 # ── Sync completion (for non-async contexts) ────────────────────────────────
-def complete(
+def complete[T: BaseModel](
     messages: list[dict[str, Any]],
     preset: str = "coding",
     profile: str | None = None,
@@ -497,7 +497,7 @@ def _dict_from_obj(obj: Any) -> dict[str, Any]:
     }
 
 
-async def stream_structured_completion(
+async def stream_structured_completion[T: BaseModel](
     *,
     messages: list[dict[str, Any]],
     response_model: type[T] = LegionaOutput,

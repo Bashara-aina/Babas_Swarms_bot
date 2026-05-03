@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
     import autogen
-    from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
+    from autogen import AssistantAgent, GroupChat, GroupChatManager, UserProxyAgent
 except ImportError as e:
     print(f"ERROR: autogen/ag2 not available: {e}")
     raise

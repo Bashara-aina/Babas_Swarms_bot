@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import math
-import os
 import subprocess
 from datetime import datetime
 from functools import lru_cache
@@ -29,7 +27,7 @@ async def _load_topic_weights() -> dict[str, Any]:
     try:
         import aiofiles
 
-        async with aiofiles.open(TOPIC_WEIGHTS_PATH, "r", encoding="utf-8") as f:
+        async with aiofiles.open(TOPIC_WEIGHTS_PATH, encoding="utf-8") as f:
             content = await f.read()
         return json.loads(content)
     except Exception as e:

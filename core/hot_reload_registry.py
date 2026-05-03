@@ -15,7 +15,6 @@ import importlib.util
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +24,8 @@ class HotReloadRegistry:
 
     def __init__(self, dp=None):  # dp: aiogram.Dispatcher
         self._dp = dp
-        self._loaded: Dict[str, object] = {}   # module_name -> Router
-        self._module_paths: Dict[str, str] = {}  # module_name -> file path
+        self._loaded: dict[str, object] = {}   # module_name -> Router
+        self._module_paths: dict[str, str] = {}  # module_name -> file path
 
     def set_dispatcher(self, dp) -> None:
         self._dp = dp
@@ -71,7 +70,7 @@ class HotReloadRegistry:
             logger.error("Failed to load handler %s: %s", module_name, e)
             return False
 
-    def get_loaded_modules(self) -> Dict[str, str]:
+    def get_loaded_modules(self) -> dict[str, str]:
         """Return {module_name: file_path} for all dynamically loaded modules."""
         return dict(self._module_paths)
 

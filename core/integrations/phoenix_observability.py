@@ -26,6 +26,7 @@ Usage:
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import time
@@ -53,7 +54,7 @@ class PhoenixLauncher:
     _instance = None
 
     @classmethod
-    def get_instance(cls) -> "PhoenixLauncher":
+    def get_instance(cls) -> PhoenixLauncher:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -84,10 +85,8 @@ class PhoenixLauncher:
     def close(self) -> None:
         """Close the Phoenix server."""
         if self._server is not None:
-            try:
+            with contextlib.suppress(Exception):
                 _phoenix.close_app()
-            except Exception:
-                pass
             self._server = None
             self._url = None
 
@@ -174,7 +173,7 @@ class PhoenixTracer:
 
         self._ensure_launched()
 
-        try:
+        with contextlib.suppress(Exception):
             logger.info(
                 "Phoenix agent trace: task=%s model=%s steps=%d duration=%.1fms",
                 task[:50] if task else "",
@@ -182,8 +181,6 @@ class PhoenixTracer:
                 len(steps),
                 duration_ms,
             )
-        except Exception:
-            pass
 
     async def trace_tool_call(
         self,
@@ -199,15 +196,13 @@ class PhoenixTracer:
 
         self._ensure_launched()
 
-        try:
+        with contextlib.suppress(Exception):
             logger.debug(
                 "Phoenix tool trace: tool=%s duration=%.1fms success=%s",
                 tool_name,
                 duration_ms,
                 success,
             )
-        except Exception:
-            pass
 
     def instrument_litellm(self) -> None:
         """Instrument litellm with Phoenix OpenInference tracing.

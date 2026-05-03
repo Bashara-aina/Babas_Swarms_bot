@@ -321,7 +321,6 @@ def classify_intent_fast(message: str) -> IntentResult:
     Returns highest-confidence match or CASUAL_CHAT as fallback.
     """
     # URL auto-detection: check for video URLs first
-    import re
 
     url_match = re.search(r'https?://[^\s\'"<>\)]+', message)
     if url_match:

@@ -174,7 +174,7 @@ async def cmd_wiki_scan(message: Message) -> None:
 
         if low:
             lines.append("\n<b>Low quality pages:</b>")
-            for page, score, verdict in sorted(low, key=lambda x: x[1])[:5]:
+            for page, score, _verdict in sorted(low, key=lambda x: x[1])[:5]:
                 lines.append(f"  • {Path(page).name} ({score:.3f})")
 
         await message.answer("\n".join(lines), parse_mode="HTML")

@@ -1,8 +1,8 @@
 """Regression tests for rumahlabuh technique rotation behavior and seed reproducibility."""
 
-import pytest
 from datetime import date
-from unittest.mock import patch
+
+import pytest
 
 from tools.rumahlabuh_thread_generator import BlueprintGenerator, load_config
 

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
-import os
-from datetime import datetime, timezone
-from typing import Callable, Coroutine
+from collections.abc import Callable, Coroutine
+from datetime import datetime
 
 import pytz
 
@@ -52,10 +52,8 @@ class DailyHarvesterScheduler:
         self._running = False
         if self._pipeline_task:
             self._pipeline_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._pipeline_task
-            except asyncio.CancelledError:
-                pass
         logger.info("DailyHarvesterScheduler stopped")
 
     async def _run_loop(self) -> None:

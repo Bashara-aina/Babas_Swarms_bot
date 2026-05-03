@@ -14,15 +14,15 @@ import json
 import logging
 import os
 import re
-from enum import Enum
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from enum import StrEnum
 
 logger = logging.getLogger(__name__)
 
 _URL_RE = re.compile(r"https?://[^\s<>\"']+")
 
 
-class TaskType(str, Enum):
+class TaskType(StrEnum):
     SIMPLE_CHAT = "simple_chat"
     RESEARCH = "research"
     CODE = "code"
@@ -122,7 +122,7 @@ KEYWORD_ROUTES: list[tuple[TaskType, tuple[str, ...]]] = [
 ]
 
 
-def keyword_task_type(message: str) -> Optional[TaskType]:
+def keyword_task_type(message: str) -> TaskType | None:
     """Fast keyword-only classification; ``None`` if no strong signal."""
     low = (message or "").lower()
     for ttype, kws in KEYWORD_ROUTES:
@@ -146,8 +146,8 @@ class TaskRouter:
         *,
         context: str = "",
         user_id: str = "0",
-        stream_callback: Optional[Callable[[str], Awaitable[None]]] = None,
-    ) -> Optional[str]:
+        stream_callback: Callable[[str], Awaitable[None]] | None = None,
+    ) -> str | None:
         t = await self.classify(message)
         logger.info("[TaskRouter] classified as %s", t.value)
 
@@ -436,7 +436,7 @@ class TaskRouter:
         return {"subtasks": [{"agent": "research", "task": message}]}
 
 
-_task_router: Optional[TaskRouter] = None
+_task_router: TaskRouter | None = None
 
 
 def get_task_router() -> TaskRouter:

@@ -12,8 +12,6 @@ Expected savings: 60-80% cost reduction by routing simple tasks to free fast mod
 from __future__ import annotations
 
 import logging
-import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +84,7 @@ def classify_complexity(task: str) -> str:
         or code_blocks >= 2
         or (technical_count >= 3 and has_traceback)
         or "architecture" in t
-        or "design" in t and length > 200
+        or ("design" in t and length > 200)
     ):
         return "heavyweight"
 
@@ -102,7 +100,7 @@ def classify_complexity(task: str) -> str:
     return "midweight"
 
 
-def select_model(agent_key: str, task: str, force_tier: Optional[str] = None) -> str:
+def select_model(agent_key: str, task: str, force_tier: str | None = None) -> str:
     """Select optimal model for the given agent and task.
 
     Primary agent model is used for heavyweight tier.

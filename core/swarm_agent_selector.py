@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import re
 from typing import TypedDict
 
@@ -51,7 +52,7 @@ class AgentSelector:
         tokens = set(re.findall(r"[a-z][a-z0-9]{1,}", text))
         # bigrams for multi-word concepts
         words = text.split()
-        bigrams = {f"{a}_{b}" for a, b in zip(words, words[1:])}
+        bigrams = {f"{a}_{b}" for a, b in itertools.pairwise(words)}
         return tokens | bigrams
 
     def score_agent(self, agent: AgentProfile, task_tokens: set[str]) -> float:
@@ -77,7 +78,7 @@ class AgentSelector:
         task_tokens = self._tokenize(task)
 
         all_scores: list[tuple[float, AgentProfile]] = []
-        for dept, agents in self._registry.items():
+        for _dept, agents in self._registry.items():
             for agent in agents:
                 score = self.score_agent(agent, task_tokens)
                 if score >= min_score:

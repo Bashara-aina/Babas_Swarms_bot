@@ -23,17 +23,14 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
-
-from core.context_health import HealthLevel
+from enum import StrEnum
 
 # ---------------------------------------------------------------------------
 # Drift report
 # ---------------------------------------------------------------------------
 
 
-class DriftStatus(str, Enum):
+class DriftStatus(StrEnum):
     OK = "OK"           # On track
     DRIFTING = "DRIFTING"  # Some concern
     ABORT = "ABORT"     # Critical drift — stop
@@ -81,10 +78,10 @@ class DriftDetector:
     """
 
     def __init__(self) -> None:
-        self.original_goal: Optional[str] = None
+        self.original_goal: str | None = None
         self.accumulated_state: list[str] = []
         self.tool_call_count: int = 0
-        self.last_check_at: Optional[str] = None
+        self.last_check_at: str | None = None
         self._aborted: bool = False
 
     def set_goal(self, goal: str) -> None:
@@ -200,10 +197,7 @@ class DriftDetector:
                     for kw in ["no longer connects", "temporary fix", "scope expansion"]
                 )
             )
-            if critical_count >= 2:
-                status = DriftStatus.ABORT
-            else:
-                status = DriftStatus.DRIFTING
+            status = DriftStatus.ABORT if critical_count >= 2 else DriftStatus.DRIFTING
         else:
             status = DriftStatus.OK
 

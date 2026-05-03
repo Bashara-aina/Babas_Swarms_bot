@@ -1,4 +1,3 @@
-import asyncio
 
 import pytest
 
@@ -6,7 +5,6 @@ from core.claude_code_bridge import (
     CLAUDE_CODE_CLI,
     extract_claude_directive,
     run_claude_task,
-    spawn_claude_from_opencode,
 )
 
 

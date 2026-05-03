@@ -14,7 +14,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from handlers.shared import is_allowed, send_chunked
+from handlers.shared import is_allowed
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -76,7 +76,7 @@ async def start_artifact_server() -> None:
             if not os.path.exists(full_path):
                 full_path = os.path.join(tmp_dir, "index.html")
 
-            async with aiofiles.open(full_path, "r", encoding="utf-8") as f:
+            async with aiofiles.open(full_path, encoding="utf-8") as f:
                 content = await f.read()
 
             content_type = "text/html"

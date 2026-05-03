@@ -84,12 +84,11 @@ class VoiceVoxBridge:
     async def _check_voicevox(self) -> bool:
         """Ping VoiceVox speakers endpoint to check availability."""
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{_VOICEVOX_HOST}/speakers",
-                    timeout=aiohttp.ClientTimeout(total=3),
-                ) as resp:
-                    return resp.status == 200
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{_VOICEVOX_HOST}/speakers",
+                timeout=aiohttp.ClientTimeout(total=3),
+            ) as resp:
+                return resp.status == 200
         except (aiohttp.ClientError, ConnectionRefusedError):
             return False
 

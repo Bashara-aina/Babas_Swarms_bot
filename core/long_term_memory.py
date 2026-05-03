@@ -18,7 +18,6 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class MemoryHit:
 # ── Embedding Model ────────────────────────────────────────────────────────────
 
 _EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
-_embedder_cache: Optional[object] = None
+_embedder_cache: object | None = None
 
 
 async def _get_embedder():
@@ -63,7 +62,7 @@ async def _get_embedder():
 
 # ── ChromaDB Client ───────────────────────────────────────────────────────────
 
-_chroma_client: Optional[object] = None
+_chroma_client: object | None = None
 
 
 async def _get_chroma_client():
@@ -132,7 +131,6 @@ async def _semantic_search(query: str, user_id: str, limit: int = 5) -> list[Mem
             return results
 
         # Embed the query
-        import numpy as np
 
         query_embedding = embedder.encode(query).tolist()
 
@@ -147,7 +145,7 @@ async def _semantic_search(query: str, user_id: str, limit: int = 5) -> list[Mem
             for doc, metadata, distance in zip(
                 search_results["documents"][0],
                 search_results.get("metadatas", [[{}]])[0],
-                search_results.get("distances", [1.0])[0],
+                search_results.get("distances", [1.0])[0], strict=False,
             ):
                 # ChromaDB returns L2 distance; convert to similarity (0-1, higher = better)
                 similarity = max(0.0, 1.0 - (distance / 2.0)) if distance else 0.0
@@ -320,7 +318,6 @@ async def store_long_term_memory(
         if not coll:
             return False
 
-        import numpy as np
 
         embedding = embedder.encode(text).tolist()
         meta = {

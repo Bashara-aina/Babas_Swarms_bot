@@ -16,9 +16,9 @@ from tools.browser_harness.admin import (
 )
 
 __all__ = [
-    "helpers",
     "daemon_alive",
     "ensure_daemon",
+    "helpers",
     "list_cloud_profiles",
     "list_local_profiles",
     "restart_daemon",

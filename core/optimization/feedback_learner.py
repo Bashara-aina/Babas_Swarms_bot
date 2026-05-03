@@ -17,7 +17,6 @@ import logging
 import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,6 @@ class FeedbackLearner:
         Call after every agent response so the user can rate it.
         Returns a 6-char alphanumeric ID.
         """
-        import hashlib
         import random
         import string
         fid = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -92,7 +90,7 @@ class FeedbackLearner:
         fid: str,
         rating: int,
         comment: str = "",
-    ) -> Optional[str]:
+    ) -> str | None:
         """Record a rating for a pending feedback ID.
 
         Args:

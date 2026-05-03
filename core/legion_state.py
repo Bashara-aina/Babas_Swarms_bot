@@ -199,7 +199,7 @@ def write_research_findings(topic: str, synthesis: str, sources: list[str]) -> N
     """Write @hermes-researcher findings to /tmp/legion_research.md."""
     entry = f"\n# RESEARCH: {topic}\n"
     entry += f"Synthesis:\n{synthesis}\n"
-    entry += f"\nSources:\n"
+    entry += "\nSources:\n"
     for s in sources:
         entry += f"- {s}\n"
     existing = read_state("research")

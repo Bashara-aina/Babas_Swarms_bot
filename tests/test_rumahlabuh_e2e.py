@@ -7,13 +7,13 @@ Tests the full flow:
 4. Fresh generation via generate_fresh_thread()
 """
 
+
 import pytest
-from pathlib import Path
 
 from tools.rumahlabuh_thread_generator import (
     BlueprintGenerator,
-    ThreadValidator,
     HistoryStore,
+    ThreadValidator,
     generate_fresh_thread,
     load_config,
     load_facts,
@@ -103,7 +103,7 @@ class TestGeneratorAndValidatorIntegration:
         assert result.get("success") is True
 
         sig = result["signature"]
-        technique = result.get("technique", "unknown")
+        result.get("technique", "unknown")
 
         # Verify it was added to used list
         generator.mark_used(result)

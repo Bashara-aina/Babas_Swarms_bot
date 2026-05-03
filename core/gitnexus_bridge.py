@@ -64,7 +64,7 @@ async def run_gitnexus_analyze(
     )
     try:
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         proc.kill()
         await proc.wait()
         return f"GitNexus analyze timed out after {timeout}s"

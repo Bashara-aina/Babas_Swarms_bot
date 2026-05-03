@@ -13,17 +13,15 @@ Original paper: "Self-Consistency Improves Chain of Thought Reasoning in Languag
 from __future__ import annotations
 
 import datetime
-import hashlib
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 # ---------------------------------------------------------------------------
 # Data models
 # ---------------------------------------------------------------------------
 
 
-class ApproachStrength(str, Enum):
+class ApproachStrength(StrEnum):
     WEAK = "WEAK"
     MODERATE = "MODERATE"
     STRONG = "STRONG"
@@ -64,7 +62,7 @@ class SelfConsistencyVerdict:
 
     decision_topic: str
     approaches: list[ScoredApproach]
-    winner: Optional[ScoredApproach]
+    winner: ScoredApproach | None
     confidence: float           # 0.0–1.0: how sure should we be?
     consensus_strength: float    # 0.0–1.0: how much did approaches agree?
     should_proceed: bool         # True if confidence >= 0.80
@@ -76,7 +74,7 @@ class SelfConsistencyVerdict:
         ).isoformat()
     )
 
-    def winning_approach_id(self) -> Optional[str]:
+    def winning_approach_id(self) -> str | None:
         return self.winner.approach_id if self.winner else None
 
 
@@ -165,9 +163,9 @@ class SelfConsistencyVerifier:
         self,
         topic: str,
         context: str,
-        categories: Optional[list[str]] = None,
-        existing_files: Optional[list[str]] = None,
-        approaches: Optional[list[tuple[str, str]]] = None,
+        categories: list[str] | None = None,
+        existing_files: list[str] | None = None,
+        approaches: list[tuple[str, str]] | None = None,
     ) -> SelfConsistencyVerdict:
         """Run self-consistency check on a high-stakes decision.
 
@@ -258,9 +256,8 @@ class SelfConsistencyVerifier:
 
         # Check topic keywords
         topic_lower = topic.lower()
-        if any(k in topic_lower for k in ["database", "sqlite", "aiosqlite", "db"]):
-            if "async" in _APPROACH_GENERATORS:
-                return _APPROACH_GENERATORS["async"](topic, context)
+        if any(k in topic_lower for k in ["database", "sqlite", "aiosqlite", "db"]) and "async" in _APPROACH_GENERATORS:
+            return _APPROACH_GENERATORS["async"](topic, context)
 
         return _default_3_approaches(topic, context)
 
@@ -336,10 +333,9 @@ class SelfConsistencyVerifier:
             reasoning.append("Includes validation — correctness boosted")
 
         # Correctness penalties
-        if any(k in combined for k in ["drop", "replace all", "rip out", "full rewrite"]):
-            if "full rewrite" in combined or "replace all" in combined:
-                score -= 0.15
-                reasoning.append("Full replacement is high-risk for correctness")
+        if any(k in combined for k in ["drop", "replace all", "rip out", "full rewrite"]) and ("full rewrite" in combined or "replace all" in combined):
+            score -= 0.15
+            reasoning.append("Full replacement is high-risk for correctness")
         if "quick" in combined or "hack" in combined or "workaround" in combined:
             score -= 0.1
             reasoning.append("Quick fix signals correctness risk")
@@ -544,11 +540,11 @@ class SelfConsistencyVerifier:
 # Convenience singleton
 # ---------------------------------------------------------------------------
 
-_verifier: Optional[SelfConsistencyVerifier] = None
+_verifier: SelfConsistencyVerifier | None = None
 
 
 def get_self_consistency_verifier(
-    project_root: Optional[str] = None,
+    project_root: str | None = None,
 ) -> SelfConsistencyVerifier:
     """Return global SelfConsistencyVerifier singleton."""
     global _verifier

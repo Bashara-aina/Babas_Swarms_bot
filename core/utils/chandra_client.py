@@ -16,12 +16,10 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import io
 import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +36,7 @@ class ChandraResult:
     page_count: int
     source: str  # "chandra_vllm" | "chandra_hf" | "pytesseract"
     error: bool
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,9 +54,9 @@ def _check_chandra_available() -> bool:
         return _chandra_available
     try:
         from chandra.input import load_file
-        from chandra.model.vllm import generate_vllm
         from chandra.model.hf import load_model as hf_load_model
-        from chandra.output import parse_markdown, parse_html
+        from chandra.model.vllm import generate_vllm
+        from chandra.output import parse_html, parse_markdown
         _chandra_available = True
     except ImportError:
         _chandra_available = False
@@ -81,9 +79,9 @@ def _get_hf_model():
 def _ocr_sync_vllm(image_paths: list[str], output_format: str = "markdown") -> ChandraResult:
     """Run Chandra OCR via vLLM (sync). Returns markdown + HTML + raw."""
     from chandra.input import load_file
-    from chandra.model.vllm import generate_vllm
     from chandra.model.schema import BatchInputItem
-    from chandra.output import parse_markdown, parse_html, extract_images
+    from chandra.model.vllm import generate_vllm
+    from chandra.output import extract_images, parse_html, parse_markdown
 
     batch: list[BatchInputItem] = []
     pil_images: list = []
@@ -115,7 +113,7 @@ def _ocr_sync_vllm(image_paths: list[str], output_format: str = "markdown") -> C
     total_tokens = 0
     images: dict = {}
 
-    for res, pil_img in zip(results, pil_images):
+    for res, pil_img in zip(results, pil_images, strict=False):
         if res.error:
             continue
         raw = res.raw or ""
@@ -149,7 +147,7 @@ def _ocr_sync_hf(image_paths: list[str]) -> ChandraResult:
     from chandra.input import load_file
     from chandra.model.hf import generate_hf
     from chandra.model.schema import BatchInputItem
-    from chandra.output import parse_markdown, parse_html, extract_images
+    from chandra.output import extract_images, parse_html, parse_markdown
 
     model = _get_hf_model()
     batch: list[BatchInputItem] = []
@@ -174,7 +172,7 @@ def _ocr_sync_hf(image_paths: list[str]) -> ChandraResult:
     total_tokens = 0
     images: dict = {}
 
-    for res, pil_img in zip(results, pil_images):
+    for res, pil_img in zip(results, pil_images, strict=False):
         if res.error:
             continue
         raw = res.raw or ""
@@ -200,9 +198,9 @@ def _ocr_sync_hf(image_paths: list[str]) -> ChandraResult:
 
 def _ocr_sync_pytesseract(image_paths: list[str], lang: str = "eng+ind") -> ChandraResult:
     """Fallback to pytesseract when Chandra is unavailable."""
+    import filetype
     import pytesseract
     from PIL import Image
-    import filetype
 
     parts: list[str] = []
     total_tokens = 0
@@ -338,7 +336,8 @@ async def chandra_ocr_pdf(
 
         if method == "tesseract":
             # Use pytesseract directly for PDF pages
-            import pytesseract, pypdfium2
+            import pypdfium2
+            import pytesseract
 
             doc = pypdfium2.PdfDocument(str(p))
             doc.init_forms()
@@ -376,11 +375,7 @@ async def chandra_ocr_pdf(
             )
 
         try:
-            from chandra.input import load_pdf_images, parse_range_str
-            from chandra.model.vllm import generate_vllm
-            from chandra.model.hf import generate_hf
-            from chandra.model.schema import BatchInputItem
-            from chandra.output import parse_markdown, parse_html, extract_images
+            from chandra.input import load_pdf_images
 
             pil_images = load_pdf_images(str(p), page_nums if page_nums else None)
 
@@ -391,7 +386,8 @@ async def chandra_ocr_pdf(
                 )
 
             # Save to temp PNG files for Chandra
-            import tempfile, os as _os
+            import os as _os
+            import tempfile
             temp_files: list[str] = []
             for img in pil_images:
                 tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -438,7 +434,8 @@ async def chandra_ocr_bytes(
     Returns:
         ChandraResult
     """
-    import tempfile, os as _os
+    import os as _os
+    import tempfile
 
     # Write bytes to temp file
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -459,8 +456,8 @@ async def chandra_ocr_bytes(
 def is_vllm_server_available() -> bool:
     """Check if a vLLM server is reachable at the configured address."""
     try:
-        from chandra.settings import settings
         import requests
+        from chandra.settings import settings
         resp = requests.get(
             f"{settings.VLLM_API_BASE}/models",
             timeout=5,

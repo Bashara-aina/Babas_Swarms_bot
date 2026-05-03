@@ -1,8 +1,6 @@
 """Tests for core/agent_registry.py — detect_agent(), get_fallback_chain(), search_by_capability()."""
 
-from unittest.mock import MagicMock, patch
 
-import pytest
 
 
 class TestDetectAgent:

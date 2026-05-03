@@ -22,7 +22,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 # ---------------------------------------------------------------------------
 # Enums and models
@@ -184,8 +183,8 @@ class SoTEngine:
         name: str,
         component_type: ComponentType,
         responsibility: str,
-        props_or_args: Optional[dict[str, tuple[str, str]]] = None,
-        existing_files: Optional[list[str]] = None,
+        props_or_args: dict[str, tuple[str, str]] | None = None,
+        existing_files: list[str] | None = None,
     ) -> ComponentSkeleton:
         """Generate a complete skeleton for any component.
 
@@ -237,7 +236,7 @@ class SoTEngine:
         name: str,
         args: dict[str, tuple[str, str]],
         return_type: str,
-        raises: Optional[list[str]] = None,
+        raises: list[str] | None = None,
         is_async: bool = True,
     ) -> ComponentSkeleton:
         """Specialized skeleton for Python functions.
@@ -591,7 +590,7 @@ class SoTEngine:
         ]
 
         # Add per-arg edge cases
-        for arg_name in args.keys():
+        for arg_name in args:
             cases.append(f"Argument '{arg_name}' = None → defined behavior?")
             cases.append(f"Argument '{arg_name}' = unexpected type → TypeError prevention?")
 
@@ -621,7 +620,7 @@ class SoTEngine:
 # Convenience singleton
 # ---------------------------------------------------------------------------
 
-_sot_engine: Optional[SoTEngine] = None
+_sot_engine: SoTEngine | None = None
 
 
 def get_sot_engine() -> SoTEngine:

@@ -1,6 +1,4 @@
 """Tests for the health HTTP endpoint."""
-import asyncio
-from unittest.mock import AsyncMock, patch
 
 import pytest
 

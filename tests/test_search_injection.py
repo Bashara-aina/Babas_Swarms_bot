@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+
 import pytest
 
 pytestmark = pytest.mark.asyncio
@@ -26,12 +28,10 @@ async def test_search_timeout_handled_gracefully():
 
     async def mock_timeout_search():
         await asyncio.sleep(0.01)
-        raise asyncio.TimeoutError("search timed out")
+        raise TimeoutError("search timed out")
 
-    try:
-        await mock_timeout_search()
-    except asyncio.TimeoutError:
-        pass  # Expected — callers should catch and return fallback message
+    with contextlib.suppress(TimeoutError):
+        await mock_timeout_search()  # Expected — callers should catch and return fallback message
 
 
 async def test_search_empty_result_returns_message():

@@ -16,8 +16,7 @@ Pipeline:
 from __future__ import annotations
 
 import json
-import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from lib.legiona.minimax_client import complete
@@ -32,7 +31,7 @@ SESSION_LOG = MEMORY_DIR / "sessions.jsonl"
 def record_session(task: str, tool_calls: list[dict], outcome: str, success: bool) -> None:
     """Append a session record for later self-evaluation."""
     record = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "task": task,
         "tool_call_count": len(tool_calls),
         "tool_calls_summary": [t.get("function", {}).get("name") for t in tool_calls],
@@ -151,7 +150,7 @@ def evolve(last_n: int = 5) -> str | None:
         print(f"[evolve] Rule already exists (deduplicated): {new_rule[:80]}...")
         return None
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     rule_entry = f"\n<!-- evolved: {timestamp} -->\n{new_rule}\n"
     with open(RULES_FILE, "a") as f:
         f.write(rule_entry)

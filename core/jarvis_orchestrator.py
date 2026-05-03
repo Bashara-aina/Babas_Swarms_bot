@@ -7,6 +7,6 @@ from core.orchestrator import (
 )
 
 __all__ = [
-    "gather_jarvis_bundle",
     "compose_jarvis_response",
+    "gather_jarvis_bundle",
 ]

@@ -243,7 +243,7 @@ async def _run_concurrent(task: str, agent_names: list[str]) -> tuple[str, list[
     traces: list[dict[str, Any]] = []
     outputs: list[str] = []
 
-    for agent, item in zip(agent_names, calls):
+    for agent, item in zip(agent_names, calls, strict=False):
         if isinstance(item, Exception):
             logger.warning("concurrent step failed for %s: %s", agent, item)
             continue

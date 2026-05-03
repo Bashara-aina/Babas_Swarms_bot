@@ -7,53 +7,53 @@ import logging
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    # LangGraph
-    "LangGraphAgent",
-    "run_langgraph_task",
-    "run_langgraph_plan",
-    # pydantic-ai
-    "run_pydantic_ai_agent",
-    # crewAI
-    "SwarmBotCrew",
-    "run_crewai_task",
-    "RumahLabuhCrew",
-    # MCP bridge
-    "MCPBridge",
-    "mcp_bridge_call",
-    # Phoenix / observability
-    "PhoenixTracer",
-    "TokenUsageTracker",
     # browser-use
     "BrowserUseAgent",
-    "browse_web_async",
-    # langmem
-    "SwarmBotMemoryManager",
-    "get_langmem_searcher",
-    "get_langmem_manager",
-    "create_manage_memory_tool",
-    "wrap_langmem_context",
-    # graphrag
-    "SwarmBotGraphRAG",
-    "index_wiki_knowledge_graph",
-    "query_wiki_graph",
-    # prefect
-    "swarmbot_flow",
-    "agent_task",
-    "run_with_prefect",
+    # LangGraph
+    "LangGraphAgent",
+    # MCP bridge
+    "MCPBridge",
+    # Phoenix / observability
+    "PhoenixTracer",
     "PrefectPipeline",
-    "create_swarmbot_deployment",
+    "RumahLabuhCrew",
     # ruvector (placeholder)
     "RuvectorCognitionKernel",
-    "get_ruvector_kernel",
     # second-brain (placeholder)
     "SecondBrainIndexer",
-    "pre_feed_context",
+    # crewAI
+    "SwarmBotCrew",
+    # graphrag
+    "SwarmBotGraphRAG",
+    # langmem
+    "SwarmBotMemoryManager",
+    "TokenUsageTracker",
+    "agent_task",
+    "browse_web_async",
+    "create_manage_memory_tool",
+    "create_swarmbot_deployment",
+    "create_tdd_enforcer",
     "create_wiki_memory_pipeline",
     # superpowers / TDD enforcement
     "enforce_tdd",
+    "get_langmem_manager",
+    "get_langmem_searcher",
+    "get_ruvector_kernel",
+    "index_wiki_knowledge_graph",
+    "mcp_bridge_call",
+    "pre_feed_context",
+    "query_wiki_graph",
+    "run_crewai_task",
+    "run_langgraph_plan",
+    "run_langgraph_task",
+    # pydantic-ai
+    "run_pydantic_ai_agent",
     "run_tdd_check",
+    "run_with_prefect",
+    # prefect
+    "swarmbot_flow",
     "validate_agent_code",
-    "create_tdd_enforcer",
+    "wrap_langmem_context",
 ]
 
 

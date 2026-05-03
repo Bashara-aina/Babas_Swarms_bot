@@ -10,7 +10,6 @@ import asyncio
 import base64
 import shlex
 from pathlib import Path
-from typing import Optional
 
 
 async def _run(cmd: str, timeout: int = 30) -> str:
@@ -28,7 +27,7 @@ async def _run(cmd: str, timeout: int = 30) -> str:
         if proc.returncode != 0:
             return f"ERROR: {stderr.decode().strip() or 'command failed'}"
         return stdout.decode().strip() or "OK"
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"ERROR: timeout after {timeout}s"
     except Exception as exc:
         return f"ERROR: {exc}"
@@ -36,7 +35,7 @@ async def _run(cmd: str, timeout: int = 30) -> str:
 
 # ─── Screenshot ────────────────────────────────────────────────────────────────
 
-async def take_screenshot(output_path: Optional[str] = None) -> str:
+async def take_screenshot(output_path: str | None = None) -> str:
     """
     Take a screenshot using scrot.
     Returns the path to the screenshot or an error message.

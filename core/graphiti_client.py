@@ -135,7 +135,7 @@ class GraphitiClient:
             )
             logger.debug(f"Stored episode for agent {agent_id}: {episode_name}")
             return True
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"Graphiti add_episode timed out for {agent_id}")
             return False
         except Exception as e:
@@ -192,7 +192,7 @@ class GraphitiClient:
                 )
             return episodes
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(f"Graphiti search timed out for query '{query}'")
             return []
         except Exception as e:

@@ -215,7 +215,6 @@ def get_compaction_cache(file_path: str) -> str | None:
     """GAP-13: Get cached file context from previous sessions via wiki."""
     try:
         cache_key = file_path.replace("/", "-").replace(".", "_")
-        filename = f"compaction-cache/{cache_key}"
         from core.wiki_bridge import read_note
         return read_note(cache_key, folder="compaction-cache") or None
     except Exception:

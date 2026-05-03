@@ -12,13 +12,12 @@ import asyncio
 import re
 import shlex
 from pathlib import Path
-from typing import Optional
 
 PROJECT_ROOT = Path("/home/newadmin/swarm-bot").resolve()
 SHELL_TIMEOUT = 30
 
 
-def _safe_path(path: str) -> Optional[Path]:
+def _safe_path(path: str) -> Path | None:
     """Resolve and validate path stays within project directory."""
     try:
         p = Path(path).resolve()
@@ -154,12 +153,12 @@ async def search_files(pattern: str, path: str = ".", filetype: str = "f") -> st
             ),
             timeout=SHELL_TIMEOUT,
         )
-        stdout, stderr = await proc.communicate()
+        stdout, _stderr = await proc.communicate()
         out = stdout.decode(errors="replace").strip()
         if not out:
             return f"(no files matching '{pattern}' in '{path}')"
         return out
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"ERROR: search timed out after {SHELL_TIMEOUT}s"
     except Exception as exc:
         return f"ERROR: {exc}"
@@ -198,12 +197,12 @@ async def grep_files(pattern: str, path: str = ".", context: int = 2) -> str:
             ),
             timeout=SHELL_TIMEOUT,
         )
-        stdout, stderr = await proc.communicate()
+        stdout, _stderr = await proc.communicate()
         out = stdout.decode(errors="replace").strip()
         if not out:
             return f"(no matches for '{pattern}' in '{path}')"
         return out
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"ERROR: grep timed out after {SHELL_TIMEOUT}s"
     except Exception as exc:
         return f"ERROR: {exc}"
@@ -243,7 +242,7 @@ async def disk_usage(path: str = "/") -> str:
         if du_line and not du_line.startswith("du:"):
             lines.append(f"\n=== Directory Size ===\n{du_line}")
         return "\n".join(lines)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return "ERROR: disk usage timed out"
     except Exception as exc:
         return f"ERROR: {exc}"

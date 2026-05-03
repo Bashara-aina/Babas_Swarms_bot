@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import TypedDict
 
 
-class VerdictDecision(str, Enum):
+class VerdictDecision(StrEnum):
     """Swarm debate verdict decisions."""
 
     ACCEPT = "ACCEPT"
@@ -16,7 +16,7 @@ class VerdictDecision(str, Enum):
     NEEDS_MORE_RESEARCH = "NEEDS_MORE_RESEARCH"
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     """Source type classification."""
 
     GOV = "GOV"
@@ -26,7 +26,7 @@ class SourceType(str, Enum):
     SOCIAL = "SOCIAL"
 
 
-class TrustTier(str, Enum):
+class TrustTier(StrEnum):
     """Trust tier levels for source validation."""
 
     TIER_1_GOV = "TIER_1_GOV"  # Score 10
@@ -97,7 +97,7 @@ class WikiEntry(TypedDict):
     superseded_ids: list[str]  # file_ids this entry supersedes
 
 
-class FeedbackReason(str, Enum):
+class FeedbackReason(StrEnum):
     """Reason codes for harvest candidate feedback."""
 
     TOPIC_DRIFT = "topic_drift"

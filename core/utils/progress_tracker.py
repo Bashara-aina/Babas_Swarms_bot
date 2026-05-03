@@ -7,11 +7,10 @@ so the user always knows what's happening during multi-step workflows.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
@@ -60,7 +59,7 @@ class TaskProgressTracker:
 
     # ── Context manager ────────────────────────────────────────────────────────
 
-    async def __aenter__(self) -> "TaskProgressTracker":
+    async def __aenter__(self) -> TaskProgressTracker:
         self._msg = await self.bot.send_message(
             self.chat_id,
             self._render(0, "Starting…"),

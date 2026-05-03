@@ -14,11 +14,10 @@ async def run_mastra_workflow(task: str, agents: list[str], endpoint: str = "htt
     target = os.getenv("MASTRA_SIDECAR_URL", endpoint)
     payload: dict[str, Any] = {"task": task, "agents": agents}
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(target, json=payload, timeout=45) as resp:
-                data = await resp.json()
-                if data.get("success"):
-                    return str(data.get("output", ""))
-                return f"mastra error: {data.get('error', 'unknown error')}"
+        async with aiohttp.ClientSession() as session, session.post(target, json=payload, timeout=45) as resp:
+            data = await resp.json()
+            if data.get("success"):
+                return str(data.get("output", ""))
+            return f"mastra error: {data.get('error', 'unknown error')}"
     except Exception as exc:
         return f"mastra bridge unavailable: {exc}"

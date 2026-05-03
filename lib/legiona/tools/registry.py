@@ -10,9 +10,9 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from lib.legiona.tools import desktop_control as _deskctl
 from lib.legiona.tools import fs_control as _fsctl
@@ -82,7 +82,7 @@ def _shell_exec(command: str, timeout: int = 30) -> str:
         )
         try:
             stdout, stderr = asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             return f"ERROR: Command timed out after {timeout}s"
         result_parts = []

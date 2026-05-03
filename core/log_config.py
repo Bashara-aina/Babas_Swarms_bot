@@ -11,9 +11,8 @@ import logging.handlers
 import os
 import re
 import sys
-import time
 from contextvars import ContextVar
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 # ── Request ID context var (propagated across async tasks) ────────────────────
@@ -57,7 +56,7 @@ class _JsonFormatter(logging.Formatter):
     """
 
     def format(self, record: logging.LogRecord) -> str:
-        ts = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+        ts = datetime.now(UTC).isoformat(timespec="milliseconds")
         request_id = _request_id_var.get() or ""
         duration_ms = getattr(record, "duration_ms", None)
 

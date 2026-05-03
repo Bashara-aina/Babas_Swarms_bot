@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from core.integrations.gptr_client import GPTResearcherClient

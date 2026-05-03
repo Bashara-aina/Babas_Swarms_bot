@@ -6,6 +6,7 @@ Routes: /debate <topic>  → Legion debates the topic with evidence
 
 from __future__ import annotations
 
+import contextlib
 import html
 import logging
 
@@ -13,7 +14,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from handlers.shared import ALLOWED_USER_ID, is_allowed
+from handlers.shared import is_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +101,8 @@ async def cmd_debate(message: Message) -> None:
     except Exception as exc:
         logger.exception("Debate handler error: %s", exc)
         safe_err = html.escape(str(exc)[:200])
-        try:
+        with contextlib.suppress(Exception):
             await thinking.delete()
-        except Exception:
-            pass
         await message.answer(f"<b>Debate error:</b> <code>{safe_err}</code>", parse_mode="HTML")
 
 
@@ -148,8 +147,6 @@ async def cmd_opinion(message: Message) -> None:
     except Exception as exc:
         logger.exception("Opinion handler error: %s", exc)
         safe_err = html.escape(str(exc)[:200])
-        try:
+        with contextlib.suppress(Exception):
             await thinking.delete()
-        except Exception:
-            pass
         await message.answer(f"<b>Opinion error:</b> <code>{safe_err}</code>", parse_mode="HTML")

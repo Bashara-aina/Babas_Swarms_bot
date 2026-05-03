@@ -18,8 +18,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
-from typing import Any, Callable, Coroutine
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class HookSystem:
                 result = await asyncio.wait_for(fn(ctx), timeout=5.0)
                 if isinstance(result, dict):
                     ctx = result
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("Hook %s:%s timed out (5s)", event, label)
             except Exception:
                 logger.exception("Hook %s:%s raised", event, label)

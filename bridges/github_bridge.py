@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 try:
     from tools.github_intel import GitHubIntelEngine, RepoEvaluation, TrendingRepo
 
-    __all__ = ["GitHubBridge", "GitHubIntelEngine", "TrendingRepo", "RepoEvaluation"]
-except Exception as exc:  # noqa: BLE001
+    __all__ = ["GitHubBridge", "GitHubIntelEngine", "RepoEvaluation", "TrendingRepo"]
+except Exception as exc:
     logger.warning("[bridges] github_bridge unavailable: %s", exc)
     GitHubBridge = None  # type: ignore[assignment, misc]
     GitHubIntelEngine = None  # type: ignore[assignment, misc]

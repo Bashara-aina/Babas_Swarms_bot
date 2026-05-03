@@ -15,7 +15,6 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +113,7 @@ def _list_files_sync(directory: str = ".", pattern: str = "**/*") -> str:
     return result
 
 
-def _run_command_sync(cmd: str, cwd: Optional[str] = None, timeout: int = 30) -> str:
+def _run_command_sync(cmd: str, cwd: str | None = None, timeout: int = 30) -> str:
     """Run a shell command and return combined stdout+stderr (sync).
 
     Args:
@@ -239,7 +238,7 @@ async def list_files(directory: str = ".", pattern: str = "**/*") -> str:
     return await loop.run_in_executor(None, _list_files_sync, directory, pattern)
 
 
-async def run_command(cmd: str, cwd: Optional[str] = None, timeout: int = 30) -> str:
+async def run_command(cmd: str, cwd: str | None = None, timeout: int = 30) -> str:
     """Async: run a shell command in the workspace.
 
     Args:

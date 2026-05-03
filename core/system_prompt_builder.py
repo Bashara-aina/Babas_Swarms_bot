@@ -27,7 +27,6 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from core.character.svara_surya import get_svara_injection, should_activate
-from core.gsa_voice import ContextClassification, classify_message_context, get_gsa_injection
 from core.personality.personality import LEGION_PERSONALITY
 
 if TYPE_CHECKING:
@@ -573,10 +572,10 @@ class SystemPromptBuilder:
 
     def __init__(
         self,
-        memory: "MemoryManager",
-        emotion: "EmotionEngine",
-        graph: "TemporalKnowledgeGraph",
-        reflection: "ReflectionEngine",
+        memory: MemoryManager,
+        emotion: EmotionEngine,
+        graph: TemporalKnowledgeGraph,
+        reflection: ReflectionEngine,
     ) -> None:
         self.memory = memory
         self.emotion = emotion

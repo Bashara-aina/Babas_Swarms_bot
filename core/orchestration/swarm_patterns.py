@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +227,7 @@ async def debate(
     return consensus
 
 
-def select_pattern(task: str) -> Optional[str]:
+def select_pattern(task: str) -> str | None:
     """Heuristically choose the best swarm pattern for a task.
 
     Args:

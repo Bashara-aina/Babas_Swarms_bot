@@ -1,8 +1,6 @@
 """Tests for swarms_bot/routing/cost_router.py — CostAwareRouter."""
 
-from unittest.mock import patch
 
-import pytest
 
 
 class TestCostAwareRouter:
@@ -24,7 +22,7 @@ class TestCostAwareRouter:
         result = router.select_model("general", "hello world")
         assert isinstance(result, tuple)
         assert len(result) == 3
-        model_id, complexity, tier = result
+        model_id, _complexity, tier = result
         assert isinstance(model_id, str)
         assert tier in ("free", "budget", "standard", "premium", "fallback", "local")
 
@@ -33,7 +31,7 @@ class TestCostAwareRouter:
         from swarms_bot.routing.cost_router import CostAwareRouter
 
         router = CostAwareRouter()
-        model_id, complexity, tier = router.select_model("vision", "analyze this screenshot")
+        model_id, _complexity, tier = router.select_model("vision", "analyze this screenshot")
         assert model_id == "ollama_chat/gemma4:e4b"
         assert tier == "local"
 
@@ -42,7 +40,7 @@ class TestCostAwareRouter:
         from swarms_bot.routing.cost_router import CostAwareRouter, TaskComplexity
 
         router = CostAwareRouter()
-        model_id, complexity, tier = router.select_model(
+        _model_id, complexity, _tier = router.select_model(
             "coding",
             "implement a distributed training pipeline with gradient checkpointing "
             "and mixed precision for a transformer model using PyTorch DDP. "
@@ -55,7 +53,7 @@ class TestCostAwareRouter:
         from swarms_bot.routing.cost_router import CostAwareRouter, TaskComplexity
 
         router = CostAwareRouter()
-        model_id, complexity, tier = router.select_model("general", "hi")
+        _model_id, complexity, _tier = router.select_model("general", "hi")
         assert complexity == TaskComplexity.TRIVIAL
 
     def test_estimate_cost(self):

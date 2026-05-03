@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -256,7 +255,7 @@ def is_actionable(message: str, min_confidence: float = 0.6) -> bool:
     return result.confidence >= min_confidence and result.intent != "casual_chat"
 
 
-def get_action(message: str) -> Optional[NaturalCommand]:
+def get_action(message: str) -> NaturalCommand | None:
     """Get the parsed action for a message, or None if not actionable."""
     result = parse_natural_command(message)
     if result.confidence < 0.6 or result.intent == "casual_chat":

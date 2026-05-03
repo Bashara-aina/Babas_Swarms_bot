@@ -12,7 +12,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from handlers.shared import is_allowed, send_chunked
+from handlers.shared import is_allowed
 
 router = Router()
 logger = logging.getLogger(__name__)

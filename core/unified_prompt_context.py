@@ -134,7 +134,7 @@ async def _calendar_layer() -> str:
         if not (raw or "").strip():
             return ""
         return f"## UPCOMING CALENDAR (MCP)\n{raw.strip()[:2000]}"
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.debug("MCP calendar fetch timed out")
         return ""
     except Exception as exc:

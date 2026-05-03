@@ -2,9 +2,7 @@
 
 import asyncio
 import logging
-import os
 
-import litellm
 from litellm import acompletion
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -135,7 +133,6 @@ async def handle_nihongo_command(update: Update, context: ContextTypes.DEFAULT_T
 
         try:
             from skills.nihongo.mastery_gate import MasteryGate
-            from skills.nihongo.shadow_engine import ShadowEngine
             from skills.nihongo.srs_engine import SRSEngine
 
             srs = SRSEngine()

@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 import re
 from datetime import datetime
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +93,8 @@ async def _obsidian_create_session_note(title: str, content: str) -> bool:
     try:
         from core.mcp_client import MCPClient
         client = MCPClient()
-        date_str = datetime.now().strftime("%Y%m%d-%H%M")
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower())[:40]
-        filename = f".wiki/sessions/{date_str}-{slug}.md"
+        datetime.now().strftime("%Y%m%d-%H%M")
+        re.sub(r'[^a-z0-9]+', '-', title.lower())[:40]
         await client.call_tool("obsidian", "create_daily_note", {
             "template_content": f"# Session: {title}\n\n{content}",
         })

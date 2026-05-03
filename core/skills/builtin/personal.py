@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
-from datetime import datetime
 
 from core.skills.registry import SKILL_REGISTRY, Skill
 
@@ -36,7 +34,7 @@ async def _thesis_status_handler(text: str) -> str:
     checkpoint_path = os.path.expanduser("~/.swarm-bot/thesis_checkpoint.md")
     if os.path.exists(checkpoint_path):
         try:
-            with open(checkpoint_path, "r") as f:
+            with open(checkpoint_path) as f:
                 content = f.read()
             return f"📚 Thesis Progress:\n\n{content[:500]}"
         except Exception:
@@ -77,7 +75,7 @@ async def _gpu_training_status_handler(text: str) -> str:
     for log_path in log_paths:
         if os.path.exists(log_path):
             try:
-                with open(log_path, "r") as f:
+                with open(log_path) as f:
                     lines = f.readlines()
                     recent = "".join(lines[-50:])
                 return f"🚀 GPU Training Status\n\n{recent[-1000:]}"

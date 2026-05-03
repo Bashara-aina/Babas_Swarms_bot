@@ -10,10 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
-import re
 from datetime import datetime
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +151,7 @@ async def check_git_status() -> tuple[bool, list[str]]:
             capture_output=True, text=True, timeout=5,
         )
         if result.stdout.strip():
-            files = [l[3:] for l in result.stdout.strip().split("\n") if l.strip()]
+            files = [line[3:] for line in result.stdout.strip().split("\n") if line.strip()]
             return True, files
     except Exception:
         pass

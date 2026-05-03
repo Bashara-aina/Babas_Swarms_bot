@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ async def run_boot_sequence() -> BootResult:
             failed = [c["name"] for c in checks if c.get("status") != "pass"]
             logger.warning("Ruflo health checks failed: %s", failed)
     else:
-        failed_check = True
+        pass
 
     result.healthy = bool(status_data)
 

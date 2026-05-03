@@ -274,9 +274,7 @@ async def deep_gate(content: str, path: str) -> EvaluationResult:
     verdict: Verdict = verdict_str  # type: ignore
 
     # Apply thresholds
-    if verdict == "PASS" and score < 0.7:
-        verdict = "NEEDS_IMPROVEMENT"
-    elif verdict == "REJECT" and score >= 0.3:
+    if (verdict == "PASS" and score < 0.7) or (verdict == "REJECT" and score >= 0.3):
         verdict = "NEEDS_IMPROVEMENT"
     elif verdict not in ("PASS", "REJECT") and score >= 0.7:
         verdict = "PASS"

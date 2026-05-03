@@ -22,16 +22,16 @@ class TestModelRouter:
 
     def test_select_returns_string(self, router):
         with patch.dict("os.environ", {"GROQ_API_KEY": "test"}):
-            model, candidate = router.select("coding", TaskComplexity.MEDIUM)
+            model, _candidate = router.select("coding", TaskComplexity.MEDIUM)
         assert isinstance(model, str)
         assert len(model) > 0
 
     def test_prefers_local_for_privacy(self, router):
         with patch.dict("os.environ", {"OLLAMA_BASE_URL": "http://localhost:11434"}):
-            model, candidate = router.select("coding", prefer_privacy=True)
+            model, _candidate = router.select("coding", prefer_privacy=True)
         assert "ollama" in model
 
     def test_fallback_when_no_keys(self, router):
         with patch.dict("os.environ", {}, clear=True):
-            model, candidate = router.select("general")
+            model, _candidate = router.select("general")
         assert model == "minimax/MiniMax-Text-01"  # hardcoded fallback

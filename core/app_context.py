@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AppContext:
     """Holds all shared enterprise singletons."""
-    chief_of_staff: Optional[Any] = field(default=None)
-    cost_router: Optional[Any] = field(default=None)
-    budget_manager: Optional[Any] = field(default=None)
-    security_guard: Optional[Any] = field(default=None)
-    audit_logger: Optional[Any] = field(default=None)
-    metrics_collector: Optional[Any] = field(default=None)
-    session_manager: Optional[Any] = field(default=None)
-    scheduler: Optional[Any] = field(default=None)
+    chief_of_staff: Any | None = field(default=None)
+    cost_router: Any | None = field(default=None)
+    budget_manager: Any | None = field(default=None)
+    security_guard: Any | None = field(default=None)
+    audit_logger: Any | None = field(default=None)
+    metrics_collector: Any | None = field(default=None)
+    session_manager: Any | None = field(default=None)
+    scheduler: Any | None = field(default=None)
 
     def is_ready(self) -> bool:
         """Returns True if at minimum the ChiefOfStaff is initialised."""
@@ -37,7 +37,7 @@ class AppContext:
         return f"✅ Loaded: {loaded}\n⚠️ Missing: {missing}"
 
 
-_ctx: Optional[AppContext] = None
+_ctx: AppContext | None = None
 
 
 def init_context(**kwargs) -> AppContext:

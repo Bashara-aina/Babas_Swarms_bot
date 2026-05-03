@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import html
 import logging
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -18,10 +18,7 @@ from tools.threads_mode_control import (
     toggle,
 )
 from tools.viral_thread_playbook import (
-    ContentPillar,
-    HookPattern,
     PricingRule,
-    ThreadStyle,
     build_viral_thread_context,
 )
 

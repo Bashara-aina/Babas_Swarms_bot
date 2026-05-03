@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from lib.legiona.rag_indexer import get_embedding
 from supabase import create_client
@@ -79,7 +79,7 @@ def retrieve(query: str, top_k: int = 10) -> list[dict]:
     ).execute()
     rows = response.data or []
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     results = []
     for row in rows:
         if not row.get("content"):

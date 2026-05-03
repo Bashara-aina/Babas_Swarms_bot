@@ -97,7 +97,7 @@ async def run_pydantic_ai_agent(
     try:
         result = await asyncio.wait_for(agent.run(prompt), timeout=timeout)
         return result.data if hasattr(result, "data") else result
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"[pydantic-ai timeout after {timeout}s]"
     except Exception as exc:
         logger.error("pydantic-ai run failed: %s", exc)
@@ -146,6 +146,6 @@ def build_result_schema(fields: dict[str, tuple[type, str]]) -> type:
             "age": (int, "Age in years"),
         })
     """
-    from pydantic import BaseModel, Field
+    from pydantic import BaseModel
 
     return BaseModel  # placeholder — real impl uses type: ignore

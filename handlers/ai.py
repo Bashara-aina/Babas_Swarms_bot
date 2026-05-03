@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import time
 
@@ -385,7 +386,7 @@ async def cmd_multi_execute(msg: Message) -> None:
                 return_exceptions=True,
             )
             lines = ["<b>Multi-Execute Comparison</b>\n"]
-            for agent_key, res in zip(agent_keys, results):
+            for agent_key, res in zip(agent_keys, results, strict=False):
                 if isinstance(res, Exception):
                     lines.append(f"\n\u274c <b>{agent_key}</b>: {html_mod.escape(str(res)[:200])}\n")
                 else:
@@ -449,10 +450,8 @@ async def cmd_multi_execute(msg: Message) -> None:
 
         await _phase("✅ [Finalize] sending verified result")
         await send_chunked(msg, final_report, model_used="multi_execute/verified")
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
     except Exception as e:
         await status_msg.edit_text(
@@ -502,7 +501,7 @@ async def cmd_multi_plan(msg: Message) -> None:
             return_exceptions=True,
         )
         lines = ["<b>Multi-Plan Comparison</b>\n"]
-        for agent_key, res in zip(agent_keys, results):
+        for agent_key, res in zip(agent_keys, results, strict=False):
             if isinstance(res, Exception):
                 lines.append(f"\n<b>\u26a0\ufe0f {agent_key}</b>: error — {html_mod.escape(str(res)[:200])}\n")
             else:
@@ -565,10 +564,8 @@ async def cmd_multi_plan(msg: Message) -> None:
         await _phase("✅ [Finalize] sending verified plan")
         await send_chunked(msg, final_report, model_used="multi_plan/verified")
 
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
     except Exception as e:
         await status_msg.edit_text(
             f"error: <code>{html_mod.escape(str(e)[:400])}</code>",
@@ -794,13 +791,16 @@ async def handle_nl(msg: Message) -> None:
 
     # Check OpenClaw delegation first
     try:
-        from tools.openclaw_bridge import delegate_to_openclaw, is_openclaw_running, should_delegate_to_openclaw
+        from tools.openclaw_bridge import (
+            delegate_to_openclaw,
+            is_openclaw_running,
+            should_delegate_to_openclaw,
+        )
 
-        if should_delegate_to_openclaw(task):
-            if await is_openclaw_running():
-                result = await delegate_to_openclaw(task)
-                await send_chunked(msg, result, model_used="openclaw")
-                return
+        if should_delegate_to_openclaw(task) and await is_openclaw_running():
+            result = await delegate_to_openclaw(task)
+            await send_chunked(msg, result, model_used="openclaw")
+            return
     except Exception:
         pass
 

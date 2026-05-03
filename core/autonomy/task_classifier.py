@@ -157,9 +157,8 @@ async def classify_task(user_message: str) -> Classification:
     if neural_confidence > 0.75 and has_memory_hit:
         if neural_confidence >= 0.9:
             mode = ExecutionMode.SWARM
-        elif neural_confidence >= 0.8:
-            if mode == ExecutionMode.DIRECT:
-                mode = ExecutionMode.LITE
+        elif neural_confidence >= 0.8 and mode == ExecutionMode.DIRECT:
+            mode = ExecutionMode.LITE
 
     reason = (
         f"files={file_count}, domains={domain_count}, phases={phase_count}, "

@@ -1,9 +1,6 @@
 """Tests for tools/persistence.py — persistence operations."""
 
-import asyncio
-import time
-from pathlib import Path
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -36,7 +33,6 @@ async def test_init_db(mock_db_path):
 @pytest.mark.asyncio
 async def test_add_and_get_scheduled_task(mock_db_path):
     """Should add and retrieve a scheduled task."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -61,7 +57,6 @@ async def test_add_and_get_scheduled_task(mock_db_path):
 @pytest.mark.asyncio
 async def test_update_task_status(mock_db_path):
     """Should update task status."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -84,7 +79,6 @@ async def test_update_task_status(mock_db_path):
 @pytest.mark.asyncio
 async def test_conversation_memory_operations(mock_db_path):
     """Should store and retrieve conversation memory."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -105,7 +99,6 @@ async def test_conversation_memory_operations(mock_db_path):
 @pytest.mark.asyncio
 async def test_key_value_store(mock_db_path):
     """Should store and retrieve key-value pairs."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -120,7 +113,6 @@ async def test_key_value_store(mock_db_path):
 @pytest.mark.asyncio
 async def test_kv_get_nonexistent(mock_db_path):
     """Should return None for nonexistent keys."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -134,7 +126,6 @@ async def test_kv_get_nonexistent(mock_db_path):
 @pytest.mark.asyncio
 async def test_add_audit_log(mock_db_path):
     """Should add an audit log entry."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence
@@ -158,7 +149,6 @@ async def test_add_audit_log(mock_db_path):
 @pytest.mark.asyncio
 async def test_cleanup_old_conversation_memory(mock_db_path):
     """Should cleanup old conversation memory entries."""
-    import aiosqlite
 
     with patch("tools.persistence.DB_PATH", mock_db_path):
         from tools import persistence

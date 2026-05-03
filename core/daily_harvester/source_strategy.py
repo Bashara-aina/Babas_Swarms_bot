@@ -227,8 +227,7 @@ class ContradictionResolver:
             return ("EXISTING_WINS", "Government source already on record")
 
         # Rule 2: newer date wins for regulations/policies
-        if new_date and existing_date and new_date > existing_date:
-            if new_type in (SourceType.GOV, SourceType.ACADEMIC):
+        if new_date and existing_date and new_date > existing_date and new_type in (SourceType.GOV, SourceType.ACADEMIC):
                 return ("SUPERSEDE", f"Newer regulation ({new_date}) supersedes older ({existing_date})")
 
         # Rule 3: higher veracity/citations wins for research

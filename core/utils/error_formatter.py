@@ -7,7 +7,6 @@ contextual recovery actions and helpful guidance.
 from __future__ import annotations
 
 import logging
-from typing import Optional, Tuple
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -56,7 +55,7 @@ class ErrorFormatter:
         error: Exception,
         context: str,
         recovery_actions: list[tuple[str, str]] | None = None,
-    ) -> Tuple[str, Optional[InlineKeyboardMarkup]]:
+    ) -> tuple[str, InlineKeyboardMarkup | None]:
         """Format error with context and recovery options.
 
         Args:

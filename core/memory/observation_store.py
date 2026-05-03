@@ -13,8 +13,7 @@ from __future__ import annotations
 
 import logging
 import re
-import unicodedata
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -230,7 +229,7 @@ class ObservationStore:
         if obs_type not in OBSERVATION_TYPES:
             obs_type = "discovery"
 
-        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        now = datetime.now(UTC).isoformat(timespec="seconds")
 
         cur = await conn.execute(
             """
@@ -268,7 +267,7 @@ class ObservationStore:
     ) -> int:
         """Store or replace (UPSERT) a session summary."""
         conn = await self._ensure_connection()
-        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        now = datetime.now(UTC).isoformat(timespec="seconds")
 
         cur = await conn.execute(
             """
@@ -348,7 +347,7 @@ class ObservationStore:
         Shows chronological context around matches. ~200-300 tokens/result."""
         conn = await self._ensure_connection()
 
-        cutoff = datetime.now(timezone.utc)
+        cutoff = datetime.now(UTC)
         from datetime import timedelta
         cutoff -= timedelta(hours=window_hours)
         cutoff_str = cutoff.isoformat(timespec="seconds")

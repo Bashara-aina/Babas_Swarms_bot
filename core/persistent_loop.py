@@ -14,9 +14,10 @@ import asyncio
 import json
 import logging
 import time
+from collections.abc import Callable, Coroutine
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -29,7 +30,7 @@ DB_DEFAULT = "data/loops.db"
 class LoopState:
     user_id: int
     goal: str
-    thread_id: Optional[str]
+    thread_id: str | None
     iteration: int = 0
     max_iterations: int = 100
     cost_ceiling: float = 5.0
@@ -68,15 +69,14 @@ class PersistentLoop:
             )
             await db.commit()
 
-    async def load(self, user_id: int) -> Optional[LoopState]:
+    async def load(self, user_id: int) -> LoopState | None:
         await self._init_db()
-        async with aiosqlite.connect(self.db_path) as db:
-            async with db.execute(
-                "SELECT state_json FROM loops WHERE user_id = ?", (user_id,)
-            ) as cur:
-                row = await cur.fetchone()
-                if row:
-                    return LoopState(**json.loads(row[0]))
+        async with aiosqlite.connect(self.db_path) as db, db.execute(
+            "SELECT state_json FROM loops WHERE user_id = ?", (user_id,)
+        ) as cur:
+            row = await cur.fetchone()
+            if row:
+                return LoopState(**json.loads(row[0]))
         return None
 
     async def delete(self, user_id: int) -> None:
@@ -87,19 +87,18 @@ class PersistentLoop:
     async def list_running(self) -> list[LoopState]:
         await self._init_db()
         states = []
-        async with aiosqlite.connect(self.db_path) as db:
-            async with db.execute(
-                "SELECT state_json FROM loops WHERE state_json LIKE '%\"running\"%'"
-            ) as cur:
-                async for row in cur:
-                    states.append(LoopState(**json.loads(row[0])))
+        async with aiosqlite.connect(self.db_path) as db, db.execute(
+            "SELECT state_json FROM loops WHERE state_json LIKE '%\"running\"%'"
+        ) as cur:
+            async for row in cur:
+                states.append(LoopState(**json.loads(row[0])))
         return states
 
     async def run(
         self,
         state: LoopState,
         step_fn: Callable[[str, LoopState], Coroutine[Any, Any, tuple[str, float]]],
-        notify_fn: Optional[Callable[[str], Coroutine[Any, Any, None]]] = None,
+        notify_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
     ) -> LoopState:
         """
         Execute the loop. step_fn(goal, state) -> (result_text, cost_this_step).

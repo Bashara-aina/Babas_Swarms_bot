@@ -15,6 +15,7 @@ Handles:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import tempfile
@@ -200,10 +201,8 @@ async def handle_voice(msg: Message) -> None:
         await status.edit_text(f"❌ Voice error: {str(exc)[:200]}")
     finally:
         if tmp_path:
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(tmp_path)
-            except Exception:
-                pass
 
 
 @router.message(F.audio)
@@ -237,7 +236,5 @@ async def handle_audio(msg: Message) -> None:
         await status.edit_text(f"❌ Audio error: {str(exc)[:200]}")
     finally:
         if tmp_path:
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(tmp_path)
-            except Exception:
-                pass

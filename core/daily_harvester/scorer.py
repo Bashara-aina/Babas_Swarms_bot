@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import aiofiles
@@ -145,7 +145,7 @@ class Scorer:
         to apply to the current bias vector.
         """
         import re
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         if log_path is None:
             repo_root = Path(__file__).resolve().parent.parent.parent
@@ -163,7 +163,7 @@ class Scorer:
 
         # Split into individual entries separated by --- markers
         # Each entry starts with --- then YAML frontmatter then JSON block
-        cutoff = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+        cutoff = datetime.now(UTC) - timedelta(days=lookback_days)
         topic_scores: dict[str, float] = {}  # topic → cumulative delta
         topic_counts: dict[str, int] = {}    # topic → count for weighting
 
@@ -181,7 +181,7 @@ class Scorer:
             # Parse date from frontmatter or entry
             entry_date_str = entry.get("date", "")
             try:
-                entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=timezone.utc)
+                entry_date = datetime.fromisoformat(entry_date_str).replace(tzinfo=UTC)
             except (ValueError, TypeError):
                 continue
 
@@ -241,7 +241,7 @@ class Scorer:
         """Append a scoring update entry to scores_history.jsonl."""
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         history_file = DATA_DIR / "scores_history.jsonl"
-        entry["timestamp"] = datetime.now(timezone.utc).timestamp()
+        entry["timestamp"] = datetime.now(UTC).timestamp()
         async with aiofiles.open(history_file, encoding="utf-8", mode="a") as f:
             await f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 

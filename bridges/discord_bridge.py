@@ -83,7 +83,7 @@ async def start_discord_bridge() -> None:
         async with message.channel.typing():
             try:
                 thread_id = _discord_threads.get(message.author.id)
-                response, model_used = await llm_client.chat(
+                response, _model_used = await llm_client.chat(
                     content,
                     agent_key="general",
                     thread_id=thread_id,
@@ -99,6 +99,6 @@ async def start_discord_bridge() -> None:
 
     try:
         await asyncio.wait_for(client.start(token), timeout=30.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error("Discord bridge failed to connect within 30s timeout")
         return

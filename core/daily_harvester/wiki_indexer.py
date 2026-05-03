@@ -43,7 +43,7 @@ class WikiIndexer:
         for f in sorted(dir_path.glob("*.md")):
             if f.name == "INDEX.md":
                 continue
-            async with aiofiles.open(f, encoding="utf-8", mode="r") as fh:
+            async with aiofiles.open(f, encoding="utf-8") as fh:
                 text = await fh.read()
             lines = text.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), f.stem)
@@ -87,7 +87,7 @@ class WikiIndexer:
         for f in sorted(dir_path.glob("*.md")):
             if f.name == "INDEX.md":
                 continue
-            async with aiofiles.open(f, encoding="utf-8", mode="r") as fh:
+            async with aiofiles.open(f, encoding="utf-8") as fh:
                 text = await fh.read()
             lines = text.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), f.stem)
@@ -136,7 +136,7 @@ class WikiIndexer:
             if md_file.name == "INDEX.md" or md_file.name.startswith("_"):
                 continue
 
-            async with aiofiles.open(md_file, encoding="utf-8", mode="r") as fh:
+            async with aiofiles.open(md_file, encoding="utf-8") as fh:
                 text = await fh.read()
 
             # Check tags section
@@ -200,7 +200,7 @@ class WikiIndexer:
             if mtime < cutoff:
                 continue
 
-            async with aiofiles.open(md_file, encoding="utf-8", mode="r") as fh:
+            async with aiofiles.open(md_file, encoding="utf-8") as fh:
                 text = await fh.read()
 
             lines = text.splitlines()

@@ -12,7 +12,6 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ FAILURE_RESET_TIMEOUT = 60.0
 
 # Per-provider rate limits (requests per minute)
 # Tuned based on observed API behavior
-_PROVIDER_LIMITS: Dict[str, float] = {
+_PROVIDER_LIMITS: dict[str, float] = {
     "openrouter": 12.0,     # OpenRouter free tier: conservative 12 req/min (was 6)
     "cerebras": 20.0,       # Cerebras: generous
     "groq": 30.0,           # Groq: high rate limit
@@ -33,13 +32,13 @@ _PROVIDER_LIMITS: Dict[str, float] = {
 }
 
 # Token bucket state per provider
-_buckets: Dict[str, Dict[str, float]] = defaultdict(lambda: {
+_buckets: dict[str, dict[str, float]] = defaultdict(lambda: {
     "tokens": 2.0,
     "last_update": time.monotonic(),
 })
 
-_circuit_failures: Dict[str, int] = defaultdict(int)
-_circuit_open_since: Dict[str, float] = {}
+_circuit_failures: dict[str, int] = defaultdict(int)
+_circuit_open_since: dict[str, float] = {}
 
 
 class RequestThrottle:

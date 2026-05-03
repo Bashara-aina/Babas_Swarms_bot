@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-from typing import Any
 
 from core.skills.registry import SKILL_REGISTRY, Skill
 
@@ -99,18 +98,17 @@ async def _github_commit_log_handler(text: str) -> str:
     try:
         import aiohttp
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://api.github.com/repos/{full_repo}/commits",
-                headers=headers,
-                params={"sha": branch, "per_page": 15},
-                timeout=aiohttp.ClientTimeout(total=15),
-            ) as resp:
-                if resp.status == 404:
-                    return f"❌ Repository not found: {full_repo}"
-                if resp.status != 200:
-                    return f"❌ GitHub API error: {resp.status}"
-                commits = await resp.json()
+        async with aiohttp.ClientSession() as session, session.get(
+            f"https://api.github.com/repos/{full_repo}/commits",
+            headers=headers,
+            params={"sha": branch, "per_page": 15},
+            timeout=aiohttp.ClientTimeout(total=15),
+        ) as resp:
+            if resp.status == 404:
+                return f"❌ Repository not found: {full_repo}"
+            if resp.status != 200:
+                return f"❌ GitHub API error: {resp.status}"
+            commits = await resp.json()
 
         if not commits:
             return f"No commits found for {full_repo} on branch {branch}."

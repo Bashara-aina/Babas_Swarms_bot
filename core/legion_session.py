@@ -14,20 +14,16 @@ Handles:
 from __future__ import annotations
 
 import time
-from pathlib import Path
 
 from core.legion_state import (
-    append_state,
-    clear_all,
-    read_state,
-    write_precompact_checkpoint,
-    write_session_summary,
-    write_state,
     AVAILABLE_SKILLS,
     HERMES_SKILLS,
     SESSION_CONTEXT,
     SESSION_SUMMARY,
     TEMPORAL_CONTEXT,
+    append_state,
+    write_session_summary,
+    write_state,
 )
 from core.self_evolution import get_self_evolution_engine
 
@@ -101,7 +97,7 @@ async def session_boot() -> dict:
 
 def _refresh_stale_memory_files() -> None:
     """Refresh stale /tmp/legion_*.txt files from hermes if needed."""
-    from tools.mem0_client import get_mem0, mem0_search
+    from tools.mem0_client import get_mem0
 
     if _stale_memory():
         mem = get_mem0()

@@ -19,6 +19,8 @@ from core.character.svara_surya import (
 )
 
 __all__ = [
+    "SvaraActivation",
+    "SvaraDomain",
     "build_base_persona",
     "build_debate_pre_prompt",
     "build_mode_instructions",
@@ -29,6 +31,4 @@ __all__ = [
     "load_character_config",
     "should_activate",
     "should_trigger_debate",
-    "SvaraActivation",
-    "SvaraDomain",
 ]

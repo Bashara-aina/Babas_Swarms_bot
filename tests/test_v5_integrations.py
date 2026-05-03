@@ -79,7 +79,7 @@ async def test_mirofish_complexity_score_range() -> None:
 def test_models_yaml_gemma4_entry() -> None:
     import yaml
 
-    with open("config/models.yaml", "r", encoding="utf-8") as f:
+    with open("config/models.yaml", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     gemma = cfg["models"]["gemma4-local"]
     assert int(gemma["context_window"]) == 131072

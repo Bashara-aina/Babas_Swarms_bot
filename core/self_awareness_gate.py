@@ -1,7 +1,6 @@
 """Self-Awareness Gate — intercepts 'I don't know' responses and triggers search."""
 
 import re
-from typing import Optional
 
 IGNORANCE_SIGNALS = [
     "gak punya info",
@@ -63,10 +62,7 @@ def should_search_instead(response_draft: str, original_query: str) -> bool:
         "review",
         "opinion about",
     ]
-    if any(kw in query_lower for kw in search_intent_keywords):
-        return True
-
-    return False
+    return bool(any(kw in query_lower for kw in search_intent_keywords))
 
 
 def get_search_trigger_message(original_query: str) -> str:

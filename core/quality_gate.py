@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +66,8 @@ class QualityGate:
 
         # Issue 2: Explicit uncertainty without search trigger
         response_lower = response.lower()
-        if any(signal.lower() in response_lower for signal in self.UNCERTAINTY_SIGNALS):
-            # Only flag if there's no indication a search was already attempted
-            if "search" not in response_lower and "web" not in response_lower:
-                issues.append("UNCERTAIN: response contains uncertainty without search")
+        if any(signal.lower() in response_lower for signal in self.UNCERTAINTY_SIGNALS) and "search" not in response_lower and "web" not in response_lower:
+            issues.append("UNCERTAIN: response contains uncertainty without search")
 
         # Issue 3: Forbidden LLM artifacts
         if any(artifact.lower() in response_lower for artifact in self.FORBIDDEN_ARTIFACTS):
@@ -85,7 +82,7 @@ class QualityGate:
             + ", ".join(issues)
             + ". Fix them. Be concrete, specific and stay in Legion's voice."
         )
-        retry_messages = messages + [{"role": "user", "content": retry_instruction}]
+        retry_messages = [*messages, {"role": "user", "content": retry_instruction}]
         from llm_client import call_llm
 
         return await call_llm(messages=retry_messages)

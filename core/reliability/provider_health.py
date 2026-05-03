@@ -127,5 +127,5 @@ def get_all_provider_status() -> dict[str, ProviderStatus]:
     """
     return {
         provider: check_provider_health(provider)
-        for provider in _provider_health.keys()
+        for provider in _provider_health
     }

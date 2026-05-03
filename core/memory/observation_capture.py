@@ -71,9 +71,8 @@ def _extract_files_from_tool(ctx: dict[str, Any]) -> tuple[list[str], list[str]]
             files_read.append(str(args["path"]))
 
     # Write operations
-    if tool_name in ("Write", "Edit", "NotebookEdit"):
-        if "file_path" in args:
-            files_modified.append(str(args["file_path"]))
+    if tool_name in ("Write", "Edit", "NotebookEdit") and "file_path" in args:
+        files_modified.append(str(args["file_path"]))
 
     # Bash operations that create/modify files
     if tool_name == "Bash":
@@ -91,8 +90,7 @@ def _extract_files_from_tool(ctx: dict[str, Any]) -> tuple[list[str], list[str]]
         # Look for file paths in output (common patterns)
         path_pattern = re.findall(r"[\w\-\./]+(?:\.[a-zA-Z0-9]+)", result)
         for p in path_pattern:
-            if any(p.endswith(ext) for ext in _CODE_EXTENSIONS):
-                if p not in files_modified:
+            if any(p.endswith(ext) for ext in _CODE_EXTENSIONS) and p not in files_modified:
                     files_modified.append(p)
 
     # Filter noise

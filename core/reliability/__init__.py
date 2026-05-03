@@ -37,13 +37,13 @@ except ImportError as exc:
 
 __all__ = [
     "FallbackChain",
-    "get_fallback_chain",
-    "select_model",
-    "classify_complexity",
-    "check_provider_health",
-    "record_rate_limit",
-    "get_all_provider_status",
-    "reset_provider_health",
-    "get_recovery",
     "RequestThrottle",
+    "check_provider_health",
+    "classify_complexity",
+    "get_all_provider_status",
+    "get_fallback_chain",
+    "get_recovery",
+    "record_rate_limit",
+    "reset_provider_health",
+    "select_model",
 ]

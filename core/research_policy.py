@@ -44,10 +44,8 @@ def needs_live_research(text: str) -> bool:
         return False
     if any(k in t for k in _TRIGGERS):
         return True
-    # Questions about external world (who/what/when/where + length)
-    if "?" in text and len(t.split()) >= 6:
-        if re.search(r"\b(who|what|when|where|which|why|how much|how many)\b", t):
-            return True
+    if "?" in text and len(t.split()) >= 6 and re.search(r"\b(who|what|when|where|which|why|how much|how many)\b", t):
+        return True
     return False
 
 
@@ -83,7 +81,7 @@ async def build_quick_evidence_block(topic: str, user_id: str) -> str:
 
     try:
         return await asyncio.wait_for(_run(), timeout=timeout)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.warning("[research_policy] quick evidence timed out")
         return (
             "[LIVE RESEARCH — timeout]\n"

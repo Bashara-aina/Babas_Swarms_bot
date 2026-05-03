@@ -21,7 +21,6 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +181,7 @@ class ComputerController:
 
     # ── Screenshots ────────────────────────────────────────────────────────
 
-    def screenshot(self, region: Optional[tuple[int, int, int, int]] = None) -> bytes:
+    def screenshot(self, region: tuple[int, int, int, int] | None = None) -> bytes:
         """Take a screenshot of the full desktop or a region.
 
         Args:
@@ -208,7 +207,7 @@ class ComputerController:
         logger.info("Screenshot taken (region=%s)", region)
         return buf.getvalue()
 
-    def screenshot_to_file(self, path: str | Path, region: Optional[tuple] = None) -> Path:
+    def screenshot_to_file(self, path: str | Path, region: tuple | None = None) -> Path:
         """Save screenshot to a file and return its path.
 
         Args:
@@ -223,7 +222,7 @@ class ComputerController:
         out.write_bytes(png_bytes)
         return out
 
-    def screenshot_base64(self, region: Optional[tuple] = None) -> str:
+    def screenshot_base64(self, region: tuple | None = None) -> str:
         """Return screenshot as base64 string (for vision model input).
 
         Args:
@@ -236,7 +235,7 @@ class ComputerController:
 
     # ── OCR ────────────────────────────────────────────────────────────────
 
-    def read_screen_text(self, region: Optional[tuple] = None) -> str:
+    def read_screen_text(self, region: tuple | None = None) -> str:
         """OCR text from the desktop or a region.
 
         Args:
@@ -278,7 +277,7 @@ class ComputerController:
 
     # ── Element Finding ────────────────────────────────────────────────────
 
-    def find_element(self, text: str) -> Optional[tuple[int, int]]:
+    def find_element(self, text: str) -> tuple[int, int] | None:
         """Find a UI element by its visible text using OCR + bounding boxes.
 
         Args:
@@ -432,7 +431,7 @@ class ComputerController:
     def analyze_screen_sync(
         self,
         question: str,
-        region: Optional[tuple] = None,
+        region: tuple | None = None,
     ) -> str:
         """Use vision agent (Ollama Gemma3) to answer a question about the screen.
 
@@ -477,7 +476,7 @@ class ComputerController:
 
 # Lazy singleton - only instantiate when first used
 # Prevents X11 connection attempt during module import in headless mode
-_controller: Optional[ComputerController] = None
+_controller: ComputerController | None = None
 
 
 def _get_controller() -> ComputerController:
@@ -495,7 +494,7 @@ def _get_controller() -> ComputerController:
     return _controller
 
 
-async def desktop_screenshot(region: Optional[tuple] = None) -> bytes:
+async def desktop_screenshot(region: tuple | None = None) -> bytes:
     """Async wrapper: take desktop screenshot.
 
     Args:
@@ -511,7 +510,7 @@ async def desktop_screenshot(region: Optional[tuple] = None) -> bytes:
     return await loop.run_in_executor(None, _get_controller().screenshot, region)
 
 
-async def read_screen(region: Optional[tuple] = None) -> str:
+async def read_screen(region: tuple | None = None) -> str:
     """Async wrapper: OCR the desktop screen.
 
     Args:
@@ -527,7 +526,7 @@ async def read_screen(region: Optional[tuple] = None) -> str:
     return await loop.run_in_executor(None, _get_controller().read_screen_text, region)
 
 
-async def analyze_screen(question: str, region: Optional[tuple] = None) -> str:
+async def analyze_screen(question: str, region: tuple | None = None) -> str:
     """Async wrapper: ask vision model about the screen.
 
     Args:

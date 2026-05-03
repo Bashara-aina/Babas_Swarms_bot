@@ -8,15 +8,12 @@ Usage in any handler:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import logging
 import os
-from typing import Optional
 
 from aiogram.types import Message
-
-import llm_client
-import router as agents
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +24,8 @@ _STREAM_ENABLED = os.getenv("STREAM_RESPONSES", "true").lower() == "true"
 async def stream_chat(
     msg: Message,
     task: str,
-    agent_key: Optional[str] = None,
-    thread_id: Optional[str] = None,
+    agent_key: str | None = None,
+    thread_id: str | None = None,
 ) -> None:
     """Stream a single-turn LLM response, editing the message as tokens arrive."""
     if not _STREAM_ENABLED:
@@ -88,10 +85,8 @@ async def stream_chat(
     except Exception as e:
         logger.error("Streaming error: %s", e)
         # Fall back gracefully
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         from handlers.shared import _execute_chat
 
         await _execute_chat(msg, task, forced_agent=key)

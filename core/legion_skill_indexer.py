@@ -10,6 +10,7 @@ Format per line:
 
 from __future__ import annotations
 
+import contextlib
 import re
 from pathlib import Path
 
@@ -100,10 +101,8 @@ def parse_hermes_list_output(output: str) -> list[dict]:
                 if p.startswith("TAGS:"):
                     tags = [t.strip() for t in p.replace("TAGS:", "").split(",")]
                 if p.startswith("RELEVANCE:"):
-                    try:
+                    with contextlib.suppress(ValueError):
                         rel = float(p.replace("RELEVANCE:", "").strip())
-                    except ValueError:
-                        pass
             skills.append({"title": title, "tags": tags, "relevance": rel})
     return skills
 

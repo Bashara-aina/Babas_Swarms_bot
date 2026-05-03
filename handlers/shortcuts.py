@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import html as html_mod
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message

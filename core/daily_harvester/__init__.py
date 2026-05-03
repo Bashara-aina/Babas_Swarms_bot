@@ -31,20 +31,22 @@ from core.daily_harvester.wiki_storage import WikiStorage
 __all__ = [
     # Types
     "CandidateInfo",
-    "SourceInfo",
-    "SourceType",
-    "SwarmVerdict",
-    "TopicBudget",
-    "TrustTier",
-    "VerdictDecision",
-    "WikiEntry",
+    "ContradictionResolver",
     # Core classes
     "DailyHarvester",
     "DailyHarvesterScheduler",
     "HarvestPipeline",
     "MorningReport",
+    "SourceInfo",
+    "SourceType",
     "SwarmDebate",
+    "SwarmVerdict",
+    "TopicBudget",
     "TopicBudgetEngine",
+    "TopicEvolution",
+    "TrustTier",
+    "VerdictDecision",
+    "WikiEntry",
     "WikiStorage",
     # Functions
     "detect_active_topics",
@@ -54,8 +56,6 @@ __all__ = [
     "run_debate",
     "run_debate_batch",
     "search_sources",
-    "ContradictionResolver",
-    "TopicEvolution",
 ]
 
 

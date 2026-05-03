@@ -15,7 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 
 from handlers.shared import is_allowed
-from tools.plandex_agent import PLANDEX_PROJECT_DIR, PlandexAgent
+from tools.plandex_agent import PlandexAgent
 
 router = Router()
 

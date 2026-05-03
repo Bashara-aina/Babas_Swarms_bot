@@ -1,7 +1,6 @@
 """Task/scheduler handlers: /monitor /schedule /tasks /cancel /alert /watch_training."""
 from __future__ import annotations
 
-import asyncio
 import time
 
 from aiogram import Router

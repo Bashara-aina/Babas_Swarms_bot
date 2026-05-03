@@ -18,10 +18,7 @@ Reference: M2.7 Full Capability Activation — Skill Harness (Section F1)
 from __future__ import annotations
 
 import logging
-import os
-import re
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +231,7 @@ def describe_active_skill_context(task_type: str = "", domain: str = "") -> str:
     return "\n".join(sections)
 
 
-def get_skill_path(skill_name: str) -> Optional[Path]:
+def get_skill_path(skill_name: str) -> Path | None:
     """Return Path to a skill file if it exists."""
     candidates = [
         SKILLS_DIR / f"{skill_name}.md",

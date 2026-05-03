@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import re
 from pathlib import Path
@@ -235,13 +236,11 @@ async def cmd_do(msg: Message) -> None:
         typing_task = asyncio.create_task(_keep_typing(msg))
 
         async def on_progress(step_num: int, description: str) -> None:
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.edit_text(
                     f"<code>[{step_num}]</code> {html_mod.escape(description[:100])}",
                     parse_mode="HTML",
                 )
-            except Exception:
-                pass
 
         try:
             result = await computer_use_loop(
@@ -251,10 +250,8 @@ async def cmd_do(msg: Message) -> None:
             )
             typing_task.cancel()
 
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.delete()
-            except Exception:
-                pass
 
             if get_pending_confirmations():
                 pending = get_pending_confirmations()[0]
@@ -336,13 +333,11 @@ async def cmd_autopilot(msg: Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     async def on_progress(step_num: int, description: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(
                 f"<code>[{step_num}]</code> {html_mod.escape(description[:100])}",
                 parse_mode="HTML",
             )
-        except Exception:
-            pass
 
     try:
         result = await computer_use_loop(
@@ -352,10 +347,8 @@ async def cmd_autopilot(msg: Message) -> None:
         )
         typing_task.cancel()
 
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
 
         if get_pending_confirmations():
             pending = get_pending_confirmations()[0]
@@ -876,10 +869,8 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
         await status_msg.delete()
         await send_chunked(cb.message, analysis, model_used=model_used)
 
-        try:
+        with contextlib.suppress(Exception):
             Path(path).unlink(missing_ok=True)
-        except Exception:
-            pass
     except Exception as e:
         typing_task.cancel()
         await status_msg.edit_text(

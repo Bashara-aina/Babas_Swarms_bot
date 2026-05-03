@@ -10,10 +10,10 @@ from core.mcp.servers.supabase import is_available as supabase_available
 
 __all__ = [
     "brave_available",
-    "github_available",
+    "browser_available",
     "filesystem_available",
+    "github_available",
     "gitnexus_available",
     "obsidian_available",
     "supabase_available",
-    "browser_available",
 ]

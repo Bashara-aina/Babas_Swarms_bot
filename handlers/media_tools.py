@@ -19,11 +19,11 @@ Auto-routing via SKILL_PATTERNS:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 import logging
 import os
 import tempfile
-from typing import Optional
 
 import aiofiles
 from aiogram import F, Router
@@ -52,7 +52,7 @@ def _clean_html(text: str) -> str:
     return html_mod.escape(text or "")
 
 
-async def _download_photo(msg: Message) -> Optional[str]:
+async def _download_photo(msg: Message) -> str | None:
     """Download photo to a temp file, return path or None."""
     photo: PhotoSize | None = None
     for p in msg.photo:
@@ -77,10 +77,8 @@ async def _download_photo(msg: Message) -> Optional[str]:
     except Exception as exc:
         logger.error("Failed to download photo: %s", exc)
         if tmp_path:
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(tmp_path)
-            except Exception:
-                pass
         return None
 
 
@@ -152,10 +150,8 @@ async def cmd_imagine(msg: Message) -> None:
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
     finally:
         if result and not result.startswith("Error:") and os.path.exists(result):
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(result)
-            except Exception:
-                pass
 
 
 # ── /search ───────────────────────────────────────────────────────────────────
@@ -295,10 +291,8 @@ async def cmd_speak(msg: Message) -> None:
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
     finally:
         if result and not result.startswith("Error:") and os.path.exists(result):
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(result)
-            except Exception:
-                pass
 
 
 # ── Photo handling ────────────────────────────────────────────────────────────
@@ -361,10 +355,8 @@ async def handle_photo(msg: Message) -> None:
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
     finally:
         if tmp_path and os.path.exists(tmp_path):
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(tmp_path)
-            except Exception:
-                pass
 
 
 # ── Video handling (F.video) ─────────────────────────────────────────────────
@@ -407,7 +399,6 @@ async def handle_video(msg: Message) -> None:
 
         # Extract keyframes using ffmpeg (1 frame every 10 seconds, max 8 frames)
         import shutil
-        import subprocess
 
         tmp_frames_dir = tempfile.mkdtemp(prefix="video_frames_")
         frame_pattern = os.path.join(tmp_frames_dir, "frame_%03d.jpg")
@@ -452,10 +443,8 @@ async def handle_video(msg: Message) -> None:
             )
             await conv_proc.communicate()
             audio_transcript = await understand_audio(audio_tmp)
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(audio_tmp)
-            except Exception:
-                pass
         except Exception as exc:
             logger.debug("Audio transcription skipped: %s", exc)
 
@@ -499,15 +488,11 @@ async def handle_video(msg: Message) -> None:
         await status.edit_text(f"❌ Error analyzing video: {str(exc)[:200]}")
     finally:
         if tmp_video_path and os.path.exists(tmp_video_path):
-            try:
+            with contextlib.suppress(Exception):
                 os.unlink(tmp_video_path)
-            except Exception:
-                pass
         if tmp_frames_dir and os.path.exists(tmp_frames_dir):
-            try:
+            with contextlib.suppress(Exception):
                 shutil.rmtree(tmp_frames_dir)
-            except Exception:
-                pass
 
 
 # ── /mcp_status ───────────────────────────────────────────────────────────────

@@ -14,7 +14,6 @@ Actions that always trigger HITL:
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 # Burr is optional
@@ -25,7 +24,7 @@ def _check_burr() -> bool:
     global _burr_installed
     if _burr_installed is None:
         try:
-            import burr.core  # noqa: F401
+            import burr.core
 
             _burr_installed = True
         except ImportError:

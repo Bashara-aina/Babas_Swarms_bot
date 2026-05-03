@@ -6,11 +6,12 @@ handlers and chat share continuity without slash commands.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -32,10 +33,8 @@ _HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
 def _path_for(user_id: str) -> Path:
-    try:
+    with contextlib.suppress(OSError):
         _ROOT.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        pass
     safe = re.sub(r"[^\w\-]", "_", str(user_id))[:64] or "default"
     return _ROOT / f"{safe}.json"
 
@@ -88,7 +87,7 @@ def load_state(user_id: str) -> dict[str, Any]:
 
 
 def _save_state(user_id: str, state: dict[str, Any]) -> None:
-    state["updated_at"] = datetime.now(timezone.utc).isoformat()
+    state["updated_at"] = datetime.now(UTC).isoformat()
     try:
         p = _path_for(user_id)
         p.parent.mkdir(parents=True, exist_ok=True)

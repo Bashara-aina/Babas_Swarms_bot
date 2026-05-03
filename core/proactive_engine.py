@@ -13,9 +13,8 @@ import asyncio
 import logging
 import os
 import time
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Any, Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -57,14 +56,13 @@ async def _send(text: str) -> None:
 async def check_late_night() -> None:
     global _last_late_night_warning
     now = _jst_now()
-    if 1 <= now.hour < 3:
-        if time.time() - _last_late_night_warning > 3600 * 20:
-            _last_late_night_warning = time.time()
-            await _send(
-                f"⏰ yo it's {now.strftime('%H:%M')} JST. "
-                f"you're still up. thesis won't write itself but "
-                f"neither will a sleep-deprived brain. your call."
-            )
+    if 1 <= now.hour < 3 and time.time() - _last_late_night_warning > 3600 * 20:
+        _last_late_night_warning = time.time()
+        await _send(
+            f"⏰ yo it's {now.strftime('%H:%M')} JST. "
+            f"you're still up. thesis won't write itself but "
+            f"neither will a sleep-deprived brain. your call."
+        )
 
 
 async def check_site_health() -> None:
@@ -177,7 +175,7 @@ async def check_system_health() -> None:
             if result.returncode == 0:
                 parts = result.stdout.strip().split(", ")
                 if len(parts) >= 3:
-                    temp, vram_used, vram_total = parts
+                    temp, _vram_used, _vram_total = parts
                     if int(temp) > 83:
                         alerts.append(f"🔴 GPU temp: {temp}°C")
         except Exception:

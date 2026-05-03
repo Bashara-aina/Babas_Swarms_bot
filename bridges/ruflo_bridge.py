@@ -12,11 +12,10 @@ async def run_ruflo_workflow(task: str, agents: list[str], model: str = "openrou
 
     payload: dict[str, Any] = {"task": task, "agents": agents, "model": model}
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post("http://127.0.0.1:7834/run", json=payload, timeout=60) as resp:
-                data = await resp.json()
-                if data.get("success"):
-                    return str(data.get("output", ""))
-                return f"ruflo error: {data.get('error', 'unknown error')}"
+        async with aiohttp.ClientSession() as session, session.post("http://127.0.0.1:7834/run", json=payload, timeout=60) as resp:
+            data = await resp.json()
+            if data.get("success"):
+                return str(data.get("output", ""))
+            return f"ruflo error: {data.get('error', 'unknown error')}"
     except Exception as exc:
         return f"ruflo bridge unavailable: {exc}"

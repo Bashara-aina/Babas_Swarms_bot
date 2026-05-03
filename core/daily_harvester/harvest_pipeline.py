@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from core.daily_harvester.morning_report import MorningReport
 from core.daily_harvester.swarm_debate import run_debate_batch
 from core.daily_harvester.topic_budget import detect_active_topics
-from core.daily_harvester.types import CandidateInfo, SwarmVerdict, TopicBudget, WikiEntry
+from core.daily_harvester.types import CandidateInfo, SwarmVerdict, WikiEntry
 from core.daily_harvester.wiki_storage import WikiStorage
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ class HarvestPipeline:
                         content=src.get("snippet", ""),
                         url=src["url"],
                         source_type=src["source_type"],
-                        discovered_at=datetime.now(timezone.utc).isoformat(),
+                        discovered_at=datetime.now(UTC).isoformat(),
                         tags=[topic],
                         relevance_score=0.5,
                         citations=0,
@@ -189,7 +189,7 @@ class HarvestPipeline:
             pending.append(candidate_log)
 
         # Write structured harvest log
-        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         await self.wiki_storage.append_harvest_log(
             len(accepted), rejected_count, date_str, candidates=pending
         )
@@ -230,7 +230,7 @@ class HarvestPipeline:
         Returns a HarvestResult dict with keys:
         - date, accepted_count, rejected_count, written_files, report, duration_s
         """
-        t0 = datetime.now(timezone.utc)
+        t0 = datetime.now(UTC)
         logger.info("Harvest pipeline START at %s", t0.isoformat())
 
         # Step 1: load topic budget
@@ -254,7 +254,7 @@ class HarvestPipeline:
         verdicts = await self._swarm_debate(candidates)
 
         # Step 4: write to wiki
-        written_files, pending_candidates = await self._write_to_wiki(candidates, verdicts)
+        written_files, _pending_candidates = await self._write_to_wiki(candidates, verdicts)
 
         # Step 5: generate report
         accepted = [
@@ -272,7 +272,7 @@ class HarvestPipeline:
         # Step 6: send Telegram report
         await self._send_telegram_report(report)
 
-        duration = (datetime.now(timezone.utc) - t0).total_seconds()
+        duration = (datetime.now(UTC) - t0).total_seconds()
 
         result = {
             "date": t0.strftime("%Y-%m-%d"),

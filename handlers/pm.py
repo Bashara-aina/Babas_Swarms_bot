@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 
 from aiogram import Router
@@ -155,10 +156,8 @@ async def cmd_brand_check(msg: Message) -> None:
         await msg.answer(result, parse_mode="HTML")
     except Exception as e:
         typing_task.cancel()
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(f"error: <code>{e}</code>", parse_mode="HTML")
-        except Exception:
-            pass
 
 
 # ── /email — email management ────────────────────────────────────────────────
@@ -184,10 +183,8 @@ async def cmd_email(msg: Message) -> None:
             )
         except Exception as e:
             typing_task.cancel()
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
-            except Exception:
-                pass
         return
 
     parts = text.split(maxsplit=1)
@@ -203,10 +200,8 @@ async def cmd_email(msg: Message) -> None:
             await status_msg.delete()
             await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
         except Exception as e:
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
-            except Exception:
-                pass
 
     elif subcmd == "read" and arg:
         status_msg = await msg.answer("📧 reading…")
@@ -217,10 +212,8 @@ async def cmd_email(msg: Message) -> None:
             await status_msg.delete()
             await send_chunked(msg, result, model_used="email")
         except Exception as e:
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
-            except Exception:
-                pass
 
     elif subcmd == "search" and arg:
         status_msg = await msg.answer(f"🔍 searching: {arg}…")
@@ -231,10 +224,8 @@ async def cmd_email(msg: Message) -> None:
             await status_msg.delete()
             await msg.answer(f"<pre>{result[:3800]}</pre>", parse_mode="HTML")
         except Exception as e:
-            try:
+            with contextlib.suppress(Exception):
                 await status_msg.edit_text(f"email error: <code>{e}</code>", parse_mode="HTML")
-            except Exception:
-                pass
 
     else:
         await msg.answer(

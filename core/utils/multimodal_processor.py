@@ -17,7 +17,6 @@ import io
 import logging
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -104,7 +103,6 @@ _KOKORO_VOICES_PATH = Path(__file__).parent.parent.parent / "models" / "voices.b
 
 def _tts_kokoro_sync(text: str) -> bytes:
     """Synthesise speech with kokoro-onnx (sync). Returns WAV bytes."""
-    import struct
     import wave
 
     import numpy as np

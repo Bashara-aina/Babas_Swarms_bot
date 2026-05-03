@@ -16,7 +16,6 @@ Reference: MiniMax M2.5/M2.7 research — forcing M2.7 to skip spec-writing degr
 from __future__ import annotations
 
 import os
-from typing import Optional
 
 # ── M2.7 Performance Activation Prompt ──────────────────────────────────────────
 # Inject as a system message layer for ALL MiniMax calls involving:
@@ -224,10 +223,7 @@ def should_use_m2_activation(task: str, agent_key: str | None = None) -> bool:
         return True
 
     # Very complex non-code task
-    if word_count > 40:
-        return True
-
-    return False
+    return word_count > 40
 
 
 def build_m2_system_fragment(

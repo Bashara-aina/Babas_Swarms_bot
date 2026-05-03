@@ -1,8 +1,7 @@
+import contextlib
 import logging
 import os
-import tempfile
 from pathlib import Path
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ def _check_markitdown() -> bool:
 MARKITDOWN_AVAILABLE = _check_markitdown()
 
 
-async def parse_file(file_path: Union[str, Path], use_llm_for_images: bool = False) -> dict:
+async def parse_file(file_path: str | Path, use_llm_for_images: bool = False) -> dict:
     file_path = Path(file_path)
     if not file_path.exists():
         return {"markdown": "", "title": "", "file_type": "", "char_count": 0, "error": f"File not found: {file_path}"}
@@ -73,10 +72,8 @@ async def parse_telegram_document(bot, file_id: str, save_dir: str = "/tmp/legio
         await file.download_to_drive(local_path)
         logger.info(f"Downloaded Telegram file: {filename}")
         result = await parse_file(local_path)
-        try:
+        with contextlib.suppress(Exception):
             os.remove(local_path)
-        except Exception:
-            pass
         return result
     except Exception as e:
         logger.error(f"Failed to download/parse Telegram file: {e}")

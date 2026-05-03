@@ -13,7 +13,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +238,7 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
     })
 
     # Store memory
-    files_changed = [str(a.get("path", "")) for a in mcp_args if isinstance(a, dict)]
+    [str(a.get("path", "")) for a in mcp_args if isinstance(a, dict)]
     await _call_ruflo("memory_store", {
         "namespace": "project/unknown",
         "key": f"lite-{int(asyncio.get_event_loop().time())}",
@@ -298,7 +297,7 @@ async def execute_swarm(
             "task": f"{task} — {role} responsibility",
             "model": RUFLO_MODEL,
         }))
-    spawn_results = await asyncio.gather(*spawn_tasks, return_exceptions=True)
+    await asyncio.gather(*spawn_tasks, return_exceptions=True)
 
     # TASK TRACKING
     task_result = await _call_ruflo("task_create", {

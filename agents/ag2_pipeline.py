@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import time
 
 from core.structured_outputs import ConversationResult, ConversationTurn

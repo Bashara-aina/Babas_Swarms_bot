@@ -18,19 +18,18 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import contextlib
 import importlib
 import importlib.util
 import json
 import logging
 import os
 import re
-import shutil
-import subprocess
 import sys
 import time
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Coroutine, Dict, List, Optional, Tuple
 
 from llm_client import call_llm
 
@@ -57,8 +56,8 @@ class RepoEvaluation:
     repo_name: str
     description: str
     stars: int
-    pros: List[str]
-    cons: List[str]
+    pros: list[str]
+    cons: list[str]
     effort_estimate: str  # low | medium | high
     risk_level: str  # low | medium | high
     relevance_score: float  # 0.0 - 1.0
@@ -70,11 +69,11 @@ class RepoEvaluation:
 class UpgradeResult:
     success: bool
     feature_name: str
-    files_written: List[str] = field(default_factory=list)
-    deps_installed: List[str] = field(default_factory=list)
+    files_written: list[str] = field(default_factory=list)
+    deps_installed: list[str] = field(default_factory=list)
     reload_method: str = ""
     error: str = ""
-    rollback_files: Dict[str, str] = field(default_factory=dict)
+    rollback_files: dict[str, str] = field(default_factory=dict)
 
 
 class SelfUpgradeEngine:
@@ -83,7 +82,7 @@ class SelfUpgradeEngine:
     def __init__(
         self,
         bot_root: Path = Path("."),
-        notify_cb: Optional[Callable[[str], Coroutine]] = None,
+        notify_cb: Callable[[str], Coroutine] | None = None,
     ):
         self.root = bot_root.resolve()
         self.notify = notify_cb
@@ -158,7 +157,7 @@ class SelfUpgradeEngine:
         self,
         topic: str = "ai-agent",
         limit: int = 10,
-    ) -> List[RepoEvaluation]:
+    ) -> list[RepoEvaluation]:
         """Fetch trending GitHub repos and evaluate each with LLM pros/cons analysis.
 
         Returns a list of RepoEvaluation sorted by relevance_score DESC.
@@ -171,7 +170,7 @@ class SelfUpgradeEngine:
             return []
 
         await self._notify(f"📦 Found {len(repos)} repos — running LLM evaluation...")
-        evaluations: List[RepoEvaluation] = []
+        evaluations: list[RepoEvaluation] = []
 
         for repo in repos:
             try:
@@ -183,7 +182,7 @@ class SelfUpgradeEngine:
         evaluations.sort(key=lambda x: x.relevance_score, reverse=True)
         return evaluations
 
-    async def _fetch_trending_repos(self, topic: str, limit: int) -> List[dict]:
+    async def _fetch_trending_repos(self, topic: str, limit: int) -> list[dict]:
         """Fetch trending repos from GitHub API."""
         try:
             import aiohttp
@@ -196,8 +195,7 @@ class SelfUpgradeEngine:
             query = f"topic:{topic} stars:>100"
             url = f"https://api.github.com/search/repositories?q={query}&sort=stars&order=desc&per_page={limit}"
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+            async with aiohttp.ClientSession() as session, session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
                         logger.warning("[SelfUpgrade] GitHub API returned %d", resp.status)
                         return []
@@ -220,7 +218,6 @@ class SelfUpgradeEngine:
 
     async def _llm_evaluate_repo(self, repo: dict) -> RepoEvaluation:
         """Use LLM to evaluate a repo with structured pros/cons/risk/effort."""
-        import litellm
 
         structure = self._get_project_structure()
         prompt = f"""
@@ -281,7 +278,7 @@ Output ONLY the JSON.
             integration_summary=parsed.get("integration_summary", ""),
         )
 
-    def format_evaluations_for_telegram(self, evals: List[RepoEvaluation]) -> str:
+    def format_evaluations_for_telegram(self, evals: list[RepoEvaluation]) -> str:
         """Format repo evaluations as a Telegram HTML message."""
         if not evals:
             return "No evaluations available."
@@ -354,7 +351,6 @@ Output ONLY the JSON.
 
     async def _plan_upgrade(self, request: str) -> dict:
         try:
-            import litellm
 
             structure = self._get_project_structure()
             prompt = f"""
@@ -435,7 +431,7 @@ Rules:
 
     # ── Validation ──────────────────────────────────────────────────
 
-    def _validate_code(self, code: str, path: str) -> Tuple[bool, str]:
+    def _validate_code(self, code: str, path: str) -> tuple[bool, str]:
         try:
             ast.parse(code)
         except SyntaxError as e:
@@ -449,21 +445,21 @@ Rules:
 
     # ── Dependency Installation ───────────────────────────────────────
 
-    async def _install_deps(self, deps: List[str]) -> Tuple[bool, str]:
+    async def _install_deps(self, deps: list[str]) -> tuple[bool, str]:
         safe_deps = []
         for dep in deps:
             if re.match(r"^[a-zA-Z0-9_\-\.\[\]>=<~!]+$", dep):
                 safe_deps.append(dep)
             else:
                 return False, f"Unsafe dependency name: {dep}"
-        cmd = [sys.executable, "-m", "pip", "install", "--quiet"] + safe_deps
+        cmd = [sys.executable, "-m", "pip", "install", "--quiet", *safe_deps]
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+            _stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
             if proc.returncode != 0:
                 return False, stderr.decode()[:500]
             req_path = self.root / "requirements.txt"
@@ -474,14 +470,14 @@ Rules:
                     with open(req_path, "a") as f:
                         f.write("\n" + "\n".join(new_deps) + "\n")
             return True, ""
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return False, "pip install timed out (120s)"
         except Exception as e:
             return False, str(e)
 
     # ── Hot-reload / Restart ───────────────────────────────────────────
 
-    async def _reload_or_restart(self, files: List[dict]) -> Tuple[bool, str]:
+    async def _reload_or_restart(self, files: list[dict]) -> tuple[bool, str]:
         reload_errors = []
         for file_plan in files:
             path = file_plan["path"]
@@ -519,8 +515,6 @@ Rules:
 
     async def _notify(self, text: str) -> None:
         if self.notify:
-            try:
+            with contextlib.suppress(Exception):
                 await self.notify(text)
-            except Exception:
-                pass
         logger.info("[upgrade] %s", text)

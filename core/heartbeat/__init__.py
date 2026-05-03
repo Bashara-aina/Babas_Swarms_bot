@@ -2,4 +2,4 @@
 
 from core.heartbeat.daemon import HeartbeatDaemon, _heartbeat
 
-__all__ = ["_heartbeat", "HeartbeatDaemon"]
+__all__ = ["HeartbeatDaemon", "_heartbeat"]

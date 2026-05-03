@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+import contextlib
 import gzip
 import json
 import os
@@ -10,7 +11,7 @@ import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 
@@ -50,7 +51,7 @@ def _send(req: dict) -> dict:
     return r
 
 
-def cdp(method: str, session_id: Optional[str] = None, **params: Any) -> dict:
+def cdp(method: str, session_id: str | None = None, **params: Any) -> dict:
     return _send({"method": method, "params": params, "session_id": session_id}).get("result", {})
 
 
@@ -169,9 +170,10 @@ def scroll(x: float, y: float, dy: float = -300, dx: float = 0) -> None:
 
 
 # --- visual ---
-def capture_screenshot(path: str = "/tmp/shot.png", full: bool = False, max_dim: Optional[int] = None) -> str:
+def capture_screenshot(path: str = "/tmp/shot.png", full: bool = False, max_dim: int | None = None) -> str:
     r = cdp("Page.captureScreenshot", format="png", captureBeyondViewport=full)
-    open(path, "wb").write(base64.b64decode(r["data"]))
+    with open(path, "wb") as f:
+        f.write(base64.b64decode(r["data"]))
     if max_dim:
         from PIL import Image  # type: ignore
 
@@ -219,16 +221,14 @@ def current_tab() -> dict:
 
 
 def _mark_tab() -> None:
-    try:
+    with contextlib.suppress(Exception):
         cdp(
             "Runtime.evaluate",
             expression="if(!document.title.startsWith('\U0001F7E2'))document.title='\U0001F7E2 '+document.title",
         )
-    except Exception:
-        pass
 
 
-def _get_browser_session() -> Optional[str]:
+def _get_browser_session() -> str | None:
     return _send({"meta": "browser_session"}).get("session_id")
 
 
@@ -236,13 +236,11 @@ def switch_tab(target: Any) -> str:
     target_id = target.get("targetId") if isinstance(target, dict) else target
     browser_sid = _get_browser_session()
     if browser_sid:
-        try:
+        with contextlib.suppress(Exception):
             cdp(
                 "Runtime.evaluate",
                 expression="if(document.title.startsWith('\U0001F7E2 '))document.title=document.title.slice(2)",
             )
-        except Exception:
-            pass
         cdp("Target.activateTarget", targetId=target_id, session_id=browser_sid)
         sid = cdp("Target.attachToTarget", targetId=target_id, flatten=True, session_id=browser_sid)["sessionId"]
         _send({"meta": "set_session", "session_id": sid})
@@ -290,7 +288,7 @@ def new_tab(url: str = "about:blank") -> str:
     return ""
 
 
-def ensure_real_tab() -> Optional[dict]:
+def ensure_real_tab() -> dict | None:
     tabs = list_tabs(include_chrome=False)
     if not tabs:
         return None
@@ -304,7 +302,7 @@ def ensure_real_tab() -> Optional[dict]:
     return tabs[0]
 
 
-def iframe_target(url_substr: str) -> Optional[str]:
+def iframe_target(url_substr: str) -> str | None:
     for base in (9222, 9223):
         try:
             import urllib.request
@@ -334,7 +332,7 @@ def wait_for_load(timeout: float = 15.0) -> bool:
     return False
 
 
-def js(expression: str, target_id: Optional[str] = None) -> Any:
+def js(expression: str, target_id: str | None = None) -> Any:
     sid = (
         cdp("Target.attachToTarget", targetId=target_id, flatten=True)["sessionId"]
         if target_id
@@ -386,7 +384,7 @@ def upload_file(selector: str, path: Any) -> None:
     )
 
 
-def http_get(url: str, headers: Optional[dict] = None, timeout: float = 20.0) -> str:
+def http_get(url: str, headers: dict | None = None, timeout: float = 20.0) -> str:
     if os.environ.get("BROWSER_USE_API_KEY"):
         try:
             from fetch_use import fetch_sync  # type: ignore

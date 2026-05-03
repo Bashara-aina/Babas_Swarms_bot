@@ -1,9 +1,9 @@
 """Regression tests for rumahlabuh duplicate prevention via HistoryStore."""
 
-import pytest
 import json
-from pathlib import Path
-from datetime import date, timedelta
+from datetime import date
+
+import pytest
 
 from tools.rumahlabuh_thread_generator import HistoryStore
 
@@ -70,7 +70,7 @@ class TestAppend:
         history_store.append(sig, technique, today)
 
         # Reload from disk to verify persistence
-        with open(temp_history_path, "r") as f:
+        with open(temp_history_path) as f:
             data = json.load(f)
 
         items = data.get("items", [])

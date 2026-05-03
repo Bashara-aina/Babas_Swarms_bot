@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import asyncio
+import contextlib
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -103,10 +103,8 @@ def _next_seq(dir_path: Path, prefix: str) -> int:
         # Pattern: PREFIX-NNN-slug
         m = re.match(rf"^{re.escape(prefix)}(\d+)", name)
         if m:
-            try:
+            with contextlib.suppress(ValueError):
                 existing.append(int(m.group(1)))
-            except ValueError:
-                pass
     return max(existing, default=0) + 1
 
 
@@ -137,7 +135,7 @@ class WikiStorage:
         """Write a wiki entry. Returns the file_id (filename without .md)."""
         topic = entry.get("topic", "general")
         title = entry.get("title", "Untitled")
-        date = entry.get("created_at", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        date = entry.get("created_at", datetime.now(UTC).strftime("%Y-%m-%d"))
         if len(date) > 10:
             date = date[:10]  # just YYYY-MM-DD
 
@@ -185,7 +183,7 @@ class WikiStorage:
         file_id_clean = file_id.rstrip(".md")
         # Search for the file
         for md_file in self.wiki_root.rglob(f"{file_id_clean}.md"):
-            async with aiofiles.open(md_file, encoding="utf-8", mode="r") as f:
+            async with aiofiles.open(md_file, encoding="utf-8") as f:
                 content = await f.read()
             lines = content.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), file_id_clean)
@@ -207,14 +205,14 @@ class WikiStorage:
         for f in sorted(dir_path.glob("*.md")):
             if f.name == "INDEX.md":
                 continue
-            async with aiofiles.open(f, encoding="utf-8", mode="r") as fh:
+            async with aiofiles.open(f, encoding="utf-8") as fh:
                 text = await fh.read()
             lines = text.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), f.stem)
             preview = " ".join(text.replace("\n", " ").split())[:100]
             entries.append({"file": f.name, "title": title, "preview": preview})
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        now = datetime.now(UTC).strftime("%Y-%m-%d")
         lines_out = [
             f"# {dir_path.name.replace('-', ' ').title()} — INDEX",
             "",
@@ -346,14 +344,12 @@ class WikiStorage:
         if not self.pending_file.exists():
             return []
         candidates: list[dict[str, Any]] = []
-        async with aiofiles.open(self.pending_file, encoding="utf-8", mode="r") as f:
+        async with aiofiles.open(self.pending_file, encoding="utf-8") as f:
             async for line in f:
                 line = line.strip()
                 if line:
-                    try:
+                    with contextlib.suppress(json.JSONDecodeError):
                         candidates.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        pass
         return candidates
 
     async def append_pending_candidate(self, candidate: dict[str, Any]) -> None:
@@ -366,7 +362,6 @@ class WikiStorage:
 
     async def mark_candidate_reviewed(self, candidate_id: str, decision: str, reason: str) -> bool:
         """Mark a candidate as reviewed in pending_candidates.jsonl. Returns True if found."""
-        import json
 
         pending = await self.read_pending_candidates()
         updated: list[dict[str, Any]] = []
@@ -402,8 +397,8 @@ class WikiStorage:
         if not self.scores_history.exists():
             return []
         history: list[dict[str, Any]] = []
-        cutoff = datetime.now(timezone.utc).timestamp() - (days * 86400)
-        async with aiofiles.open(self.scores_history, encoding="utf-8", mode="r") as f:
+        cutoff = datetime.now(UTC).timestamp() - (days * 86400)
+        async with aiofiles.open(self.scores_history, encoding="utf-8") as f:
             async for line in f:
                 line = line.strip()
                 if line:

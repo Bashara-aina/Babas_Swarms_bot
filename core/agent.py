@@ -7,6 +7,7 @@ extracted to allow better separation of concerns and easier testing.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import html as html_mod
 from typing import TYPE_CHECKING
 
@@ -48,16 +49,12 @@ async def cmd_think_impl(
     query_tokens: list[str] = []
     for token in tokens:
         if token.startswith("--depth="):
-            try:
+            with contextlib.suppress(Exception):
                 depth = max(2, min(6, int(token.split("=", 1)[1])))
-            except Exception:
-                pass
             continue
         if token.startswith("--branches="):
-            try:
+            with contextlib.suppress(Exception):
                 branches = max(3, min(8, int(token.split("=", 1)[1])))
-            except Exception:
-                pass
             continue
         query_tokens.append(token)
 
@@ -77,13 +74,10 @@ async def cmd_think_impl(
 
     async def _progress(text: str) -> None:
         safe = html_mod.escape(text)
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.edit_text(safe, parse_mode="HTML")
-        except Exception:
-            try:
+            with contextlib.suppress(Exception):
                 await msg.answer(f"<i>{safe}</i>", parse_mode="HTML")
-            except Exception:
-                pass
 
     try:
         from llm_client import _call_model
@@ -105,10 +99,8 @@ async def cmd_think_impl(
             branches=branches,
         )
         rendered = format_think_result(result)
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         await send_chunked_fn(msg, rendered, model_used=f"think/deep:d{depth}:b{branches}")
     except Exception as e:
         await status_msg.edit_text(

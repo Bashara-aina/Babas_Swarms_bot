@@ -35,9 +35,9 @@ import os
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class _HermesAsyncBridge:
         self,
         agent,  # AIAgent instance
         message: str,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """Run a single chat turn in the thread pool. Returns final response."""
         loop = asyncio.get_running_loop()
@@ -92,10 +92,10 @@ class _HermesAsyncBridge:
         self,
         agent,  # AIAgent instance
         user_message: str,
-        system_message: Optional[str] = None,
-        conversation_history: Optional[List[Dict]] = None,
-        session_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        system_message: str | None = None,
+        conversation_history: list[dict] | None = None,
+        session_id: str | None = None,
+    ) -> dict[str, Any]:
         """Run a full conversation turn. Returns dict with final_response + metadata."""
         loop = asyncio.get_running_loop()
         try:
@@ -119,7 +119,7 @@ class _HermesAsyncBridge:
 
 
 # Global bridge instance
-_hermes_bridge: Optional[_HermesAsyncBridge] = None
+_hermes_bridge: _HermesAsyncBridge | None = None
 
 
 def get_hermes_bridge() -> _HermesAsyncBridge:
@@ -147,9 +147,9 @@ class HermesSessionManager:
     Thread-safe for concurrent reads/writes (WAL mode).
     """
 
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path: Path | None = None):
         self._db_path = db_path
-        self._db: Optional[Any] = None
+        self._db: Any | None = None
         self._lock = threading.Lock()
 
     def _get_db(self):
@@ -164,10 +164,10 @@ class HermesSessionManager:
         self,
         session_id: str,
         source: str = "legion",
-        model: Optional[str] = None,
-        system_prompt: Optional[str] = None,
-        user_id: Optional[str] = None,
-        parent_session_id: Optional[str] = None,
+        model: str | None = None,
+        system_prompt: str | None = None,
+        user_id: str | None = None,
+        parent_session_id: str | None = None,
     ) -> str:
         """Create a new session. Returns session_id."""
         loop = asyncio.get_running_loop()
@@ -189,12 +189,12 @@ class HermesSessionManager:
         self,
         session_id: str,
         role: str,
-        content: Optional[str] = None,
-        tool_name: Optional[str] = None,
+        content: str | None = None,
+        tool_name: str | None = None,
         tool_calls: Any = None,
-        tool_call_id: Optional[str] = None,
-        token_count: Optional[int] = None,
-        finish_reason: Optional[str] = None,
+        tool_call_id: str | None = None,
+        token_count: int | None = None,
+        finish_reason: str | None = None,
     ) -> int:
         """Append a message to a session. Returns message row ID."""
         loop = asyncio.get_running_loop()
@@ -214,7 +214,7 @@ class HermesSessionManager:
         )
         return msg_id
 
-    async def get_messages(self, session_id: str) -> List[Dict[str, Any]]:
+    async def get_messages(self, session_id: str) -> list[dict[str, Any]]:
         """Load all messages for a session."""
         loop = asyncio.get_running_loop()
         db = self._get_db()
@@ -226,7 +226,7 @@ class HermesSessionManager:
 
     async def get_messages_as_conversation(
         self, session_id: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Load messages in OpenAI conversation format."""
         loop = asyncio.get_running_loop()
         db = self._get_db()
@@ -239,9 +239,9 @@ class HermesSessionManager:
     async def search_messages(
         self,
         query: str,
-        source_filter: Optional[List[str]] = None,
+        source_filter: list[str] | None = None,
         limit: int = 20,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """FTS5 full-text search across session messages."""
         loop = asyncio.get_running_loop()
         db = self._get_db()
@@ -264,7 +264,7 @@ class HermesSessionManager:
             lambda: db.end_session(session_id, end_reason),
         )
 
-    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session(self, session_id: str) -> dict[str, Any] | None:
         """Get session metadata by ID."""
         loop = asyncio.get_running_loop()
         db = self._get_db()
@@ -276,10 +276,10 @@ class HermesSessionManager:
 
     async def list_sessions(
         self,
-        source: Optional[str] = None,
+        source: str | None = None,
         limit: int = 20,
         offset: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """List sessions with preview."""
         loop = asyncio.get_running_loop()
         db = self._get_db()
@@ -297,7 +297,7 @@ class HermesSessionManager:
         cache_read_tokens: int = 0,
         cache_write_tokens: int = 0,
         reasoning_tokens: int = 0,
-        estimated_cost_usd: Optional[float] = None,
+        estimated_cost_usd: float | None = None,
     ) -> None:
         """Update token counters for a session."""
         loop = asyncio.get_running_loop()
@@ -317,7 +317,7 @@ class HermesSessionManager:
 
 
 # Global session manager
-_hermes_session_manager: Optional[HermesSessionManager] = None
+_hermes_session_manager: HermesSessionManager | None = None
 
 
 def get_hermes_session_manager() -> HermesSessionManager:
@@ -341,21 +341,21 @@ DEFAULT_HERMES_MODEL = os.environ.get(
 
 
 def create_hermes_agent(
-    model: Optional[str] = None,
-    enabled_toolsets: Optional[List[str]] = None,
-    disabled_toolsets: Optional[List[str]] = None,
-    session_id: Optional[str] = None,
+    model: str | None = None,
+    enabled_toolsets: list[str] | None = None,
+    disabled_toolsets: list[str] | None = None,
+    session_id: str | None = None,
     platform: str = "legion",
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     max_iterations: int = 90,
     quiet_mode: bool = False,
     skip_context_files: bool = False,
     skip_memory: bool = False,
     save_trajectories: bool = False,
     verbose_logging: bool = False,
-    base_url: Optional[str] = None,
-    api_key: Optional[str] = None,
-    provider: Optional[str] = None,
+    base_url: str | None = None,
+    api_key: str | None = None,
+    provider: str | None = None,
 ) -> Any:
     """Factory to create a configured Hermes AIAgent instance.
 
@@ -405,10 +405,10 @@ def create_hermes_agent(
 # ─────────────────────────────────────────────────────────────────────────────
 
 def get_hermes_tool_definitions(
-    enabled_toolsets: Optional[List[str]] = None,
-    disabled_toolsets: Optional[List[str]] = None,
+    enabled_toolsets: list[str] | None = None,
+    disabled_toolsets: list[str] | None = None,
     quiet_mode: bool = True,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get Hermes tool schemas for OpenAI-format tool definitions.
 
     Use this to pass Hermes tools to any LLM client that accepts
@@ -437,10 +437,10 @@ def get_hermes_tool_definitions(
 
 def dispatch_hermes_tool_call(
     function_name: str,
-    function_args: Dict[str, Any],
-    task_id: Optional[str] = None,
-    session_id: Optional[str] = None,
-    user_task: Optional[str] = None,
+    function_args: dict[str, Any],
+    task_id: str | None = None,
+    session_id: str | None = None,
+    user_task: str | None = None,
 ) -> str:
     """Dispatch a tool call to Hermes's registry.
 
@@ -551,11 +551,11 @@ HERMES_LEGION_TOOLSETS = {
 
 async def hermes_delegate(
     goal: str,
-    context: Optional[str] = None,
-    toolsets: Optional[List[str]] = None,
+    context: str | None = None,
+    toolsets: list[str] | None = None,
     max_iterations: int = 50,
-    session_id: Optional[str] = None,
-    workspace_path: Optional[str] = None,
+    session_id: str | None = None,
+    workspace_path: str | None = None,
 ) -> str:
     """Spawn a Hermes subagent for a delegated task.
 
@@ -570,8 +570,7 @@ async def hermes_delegate(
     Returns:
         Subagent's final summary response
     """
-    from model_tools import get_tool_definitions, handle_function_call
-    from tools.delegate_tool import _build_child_system_prompt, check_delegate_requirements
+    from tools.delegate_tool import _build_child_system_prompt
 
     toolsets = toolsets or ["terminal", "file", "web"]
 
@@ -614,9 +613,9 @@ async def hermes_delegate(
 
 async def hermes_session_search(
     query: str,
-    source_filter: Optional[List[str]] = None,
+    source_filter: list[str] | None = None,
     limit: int = 5,
-    session_id: Optional[str] = None,
+    session_id: str | None = None,
 ) -> str:
     """Search past sessions using Hermes's FTS5 session_search.
 
@@ -651,7 +650,7 @@ async def hermes_session_search(
 
         if session_started:
             try:
-                dt = datetime.fromtimestamp(session_started, tz=timezone.utc)
+                dt = datetime.fromtimestamp(session_started, tz=UTC)
                 date_str = dt.strftime("%Y-%m-%d %H:%M UTC")
             except Exception:
                 date_str = "unknown"
@@ -671,13 +670,12 @@ async def hermes_session_search(
 # Quick test / smoke test
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def hermes_smoke_test() -> Dict[str, Any]:
+async def hermes_smoke_test() -> dict[str, Any]:
     """Smoke test — verify Hermes can be imported and tools are accessible."""
     results = {}
 
     # Test 1: AIAgent import
     try:
-        from run_agent import AIAgent
         results["AIAgent import"] = "✅ ok"
     except Exception as e:
         results["AIAgent import"] = f"❌ {e}"

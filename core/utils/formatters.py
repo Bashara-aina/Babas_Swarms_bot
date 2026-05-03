@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import html
 import re
-from typing import Optional
 
 
 def _esc(text: str) -> str:
@@ -125,7 +124,7 @@ class ResponseFormatter:
     def supervisor_summary(steps: list[str], results: list[str]) -> str:
         """Collapsible summary of multi-step orchestration."""
         lines = ["<b>✅ Multi-Step Task Complete</b>\n"]
-        for i, (step, res) in enumerate(zip(steps, results), 1):
+        for i, (step, res) in enumerate(zip(steps, results, strict=False), 1):
             snippet = res.strip()[:120].replace("\n", " ")
             lines.append(f"<b>{i}.</b> {_esc(step)}\n   <i>{_esc(snippet)}…</i>")
         return "\n\n".join(lines)

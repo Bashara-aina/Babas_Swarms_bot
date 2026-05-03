@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import re
 from pathlib import Path
-from typing import Optional
 
 # ─── Log registry ──────────────────────────────────────────────────────────────
 
@@ -34,7 +33,7 @@ WATCHED_LOGS: dict[str, str] = {
 PROJECT_LOG_DIR = Path("/home/newadmin/swarm-bot/logs")
 
 
-def _resolve_path(name_or_path: str) -> Optional[Path]:
+def _resolve_path(name_or_path: str) -> Path | None:
     """Resolve a log name or path to a real file path."""
     if name_or_path in WATCHED_LOGS:
         return Path(WATCHED_LOGS[name_or_path])
@@ -70,7 +69,7 @@ def shlex_quote(s: str) -> str:
 async def tail_log(
     log_name: str,
     num_lines: int = 50,
-    pattern: Optional[str] = None,
+    pattern: str | None = None,
 ) -> str:
     """
     Tail the last N lines from a named log.
@@ -127,7 +126,7 @@ async def grep_log(
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await proc.communicate()
+        stdout, _stderr = await proc.communicate()
         if not stdout:
             return f"(no matches for '{pattern}' in {path.name})"
         return stdout.decode(errors="replace")
@@ -191,7 +190,7 @@ async def list_all_logs() -> str:
 
 async def watch_log_live(
     log_name: str,
-    pattern: Optional[str] = None,
+    pattern: str | None = None,
     duration_seconds: int = 10,
 ) -> str:
     """
@@ -216,7 +215,7 @@ async def watch_log_live(
         )
         try:
             await asyncio.wait_for(proc.communicate(), timeout=duration_seconds)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.terminate()
             _, _ = await proc.communicate()
             return "(stream ended after timeout)"

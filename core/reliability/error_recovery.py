@@ -16,9 +16,8 @@ import hashlib
 import logging
 import time
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +166,7 @@ class ErrorRecoveryManager:
             Last exception if all retries exhausted.
         """
         circuit = self._get_circuit(agent)
-        last_exc: Optional[Exception] = None
+        last_exc: Exception | None = None
 
         for attempt in range(MAX_RETRIES):
             if not circuit.is_available():

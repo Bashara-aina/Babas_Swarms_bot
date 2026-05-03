@@ -39,7 +39,7 @@ async def run_claude_task(
         )
         try:
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             await proc.wait()
             return {"output": "", "error": f"timeout after {timeout}s", "latency_ms": 0, "success": False}

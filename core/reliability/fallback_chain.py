@@ -7,7 +7,6 @@ Provides 99.9% uptime by having 4 cloud backup options before local fallback.
 from __future__ import annotations
 
 import logging
-from typing import List, Tuple
 
 from core.reliability.provider_health import check_provider_health
 
@@ -45,7 +44,7 @@ class FallbackChain:
     """Manages multi-provider fallback for maximum availability."""
 
     @staticmethod
-    def get_provider_chain(agent_key: str = "coding") -> List[Tuple[str, str]]:
+    def get_provider_chain(agent_key: str = "coding") -> list[tuple[str, str]]:
         """Get the fallback chain for an agent type.
 
         Args:
@@ -61,7 +60,7 @@ class FallbackChain:
     def get_next_available_provider(
         agent_key: str = "coding",
         skip_providers: set[str] | None = None,
-    ) -> Tuple[str, str, int]:
+    ) -> tuple[str, str, int]:
         """Get the next healthy provider from the fallback chain.
 
         Args:
@@ -105,7 +104,7 @@ class FallbackChain:
         return "ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b (Emergency Fallback)", len(chain) - 1
 
     @staticmethod
-    def get_optimal_provider(agent_key: str = "coding") -> Tuple[str, str]:
+    def get_optimal_provider(agent_key: str = "coding") -> tuple[str, str]:
         """Get the optimal (first healthy) provider from chain.
 
         This is the main entry point for normal usage.

@@ -9,6 +9,10 @@ from core.skills.registry import SKILL_REGISTRY, get_skill_registry
 
 __all__ = [
     "SKILL_REGISTRY",
+    "code_review",
+    "deep_research",
+    "dify_analysis",
+    "doc_parser",
     "get_skill_registry",
     "github",
     "media",
@@ -17,10 +21,6 @@ __all__ = [
     "productivity",
     "research",
     "system",
-    "web",
-    "code_review",
     "timer",
-    "deep_research",
-    "dify_analysis",
-    "doc_parser",
+    "web",
 ]

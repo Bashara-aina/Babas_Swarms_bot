@@ -27,10 +27,10 @@ class HeartbeatDaemon:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await proc.communicate()
+        stdout, _stderr = await proc.communicate()
         result = stdout.decode().strip()
         if result != "active":
-            logger.warning(f"Service health check failed: {repr(result)}")
+            logger.warning(f"Service health check failed: {result!r}")
 
     async def start(self, bot, user_id: int) -> None:
         self._running = True

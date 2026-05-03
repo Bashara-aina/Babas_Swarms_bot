@@ -6,7 +6,8 @@ import logging
 import os
 import re
 import uuid
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ async def run_opencode_task(
 
     try:
         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         process.kill()
         await process.wait()
         return f"⛔ opencode task timed out after {timeout}s"
@@ -159,7 +160,7 @@ async def stream_opencode_task(
     project_dir: str | None = None,
     agent: str | None = None,
     timeout: int = 1800,
-) -> AsyncGenerator[dict[str, Any], None]:
+) -> AsyncGenerator[dict[str, Any]]:
     """Stream OpenCode output as SSE events.
 
     Yields dicts with keys: type (event|data|error|done), content, raw.
@@ -205,7 +206,7 @@ async def stream_opencode_task(
                     process.stdout.read(1024),
                     timeout=timeout,
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 await process.wait()
                 yield {"type": "error", "content": f"opencode stream timed out after {timeout}s", "raw": ""}
@@ -257,7 +258,7 @@ async def handle_cross_system_callbacks(
     results = []
     directives = extract_directives(text)
 
-    for directive_type, directive_value in directives:
+    for directive_type, _directive_value in directives:
         if directive_type == "claude":
             try:
                 from core.claude_code_bridge import spawn_claude_from_opencode

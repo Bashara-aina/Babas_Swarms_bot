@@ -8,10 +8,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Tuple
 
 from aiogram import Bot
-from aiogram.types import InlineKeyboardMarkup, Message
+from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ class LoadingManager:
         message: Message,
         task_name: str,
         bot: Bot,
-    ) -> Tuple[Message, asyncio.Event]:
+    ) -> tuple[Message, asyncio.Event]:
         """Show animated loading indicator with cancel button.
 
         Args:

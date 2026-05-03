@@ -12,12 +12,12 @@ from core.skills.builtin import (
 )
 
 __all__ = [
-    "web",
-    "research",
     "github",
-    "system",
-    "memory",
-    "productivity",
-    "personal",
     "media",
+    "memory",
+    "personal",
+    "productivity",
+    "research",
+    "system",
+    "web",
 ]

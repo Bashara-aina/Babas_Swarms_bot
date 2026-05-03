@@ -6,7 +6,7 @@ Simple ¥ cost logger. Appends to memory/cost_log.jsonl.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 COST_LOG = Path("lib/legiona/memory/cost_log.jsonl")
@@ -22,7 +22,7 @@ def log_usage(prompt_tokens: int, completion_tokens: int, cached_tokens: int = 0
     input_jpy = (prompt_tokens / 1000) * _IN_JPY_PER_1K
     output_jpy = (completion_tokens / 1000) * _OUT_JPY_PER_1K
     record = {
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "ts": datetime.now(UTC).isoformat(),
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,
         "cached_tokens": cached_tokens,
@@ -41,7 +41,7 @@ def today_total_jpy() -> float:
     """Return today's total M2.7 cost in ¥ from cost_log.jsonl."""
     if not COST_LOG.exists():
         return 0.0
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now(UTC).date().isoformat()
     total = 0.0
     for line in COST_LOG.read_text().splitlines():
         try:
@@ -57,7 +57,7 @@ def current_month_total_jpy() -> float:
     """Return the current calendar month's total M2.7 cost in ¥."""
     if not COST_LOG.exists():
         return 0.0
-    month_prefix = datetime.now(timezone.utc).strftime("%Y-%m")
+    month_prefix = datetime.now(UTC).strftime("%Y-%m")
     total = 0.0
     for line in COST_LOG.read_text().splitlines():
         try:
@@ -75,7 +75,7 @@ def monthly_projection_jpy() -> tuple[float, int, float]:
     Returns (month_total_jpy, days_elapsed, projected_monthly_jpy).
     """
     import calendar
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     month_total = current_month_total_jpy()
     day_of_month = now.day
     days_in_month = calendar.monthrange(now.year, now.month)[1]

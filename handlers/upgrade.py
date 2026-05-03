@@ -17,13 +17,12 @@ import html as html_mod
 import logging
 import time
 from pathlib import Path
-from typing import Optional
 
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from handlers.shared import is_allowed, send_chunked
+from handlers.shared import is_allowed
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -155,7 +154,7 @@ async def cmd_upgrade_history(msg: Message) -> None:
         await msg.answer("No upgrade history yet.")
         return
     lines = ["<b>📜 Upgrade History</b>\n"]
-    for i, entry in enumerate(reversed(_upgrade_history[-10:]), 1):
+    for _i, entry in enumerate(reversed(_upgrade_history[-10:]), 1):
         ts = time.strftime("%m/%d %H:%M", time.localtime(entry["ts"]))
         icon = "✅" if entry["success"] else "❌"
         lines.append(

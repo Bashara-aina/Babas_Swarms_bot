@@ -12,9 +12,7 @@ All functions are async. All calls are wrapped in try/except. Logger used throug
 from __future__ import annotations
 
 import logging
-import os
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +265,7 @@ async def reason_before_responding(
     message: str,
     intent: str,
     confidence: float,
-) -> Optional[ReasoningContext]:
+) -> ReasoningContext | None:
     """Main entry point — the pre-response reasoning loop.
 
     For messages >20 words OR confidence <0.7:
@@ -384,7 +382,7 @@ async def run_reasoning_loop_if_needed(
     message: str,
     intent: str,
     confidence: float,
-) -> Optional[str]:
+) -> str | None:
     """Run the reasoning loop and return a formatted prompt block.
 
     Returns None if reasoning is skipped (simple question).

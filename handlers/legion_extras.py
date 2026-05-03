@@ -73,7 +73,6 @@ async def cmd_simulate(msg: Message) -> None:
 async def cmd_screenpipe_status(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    import os
 
     from tools.screenpipe_tool import get_screenpipe_tool
 

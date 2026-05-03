@@ -23,7 +23,7 @@ import time
 from collections import deque
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import pytz
 
@@ -357,7 +357,7 @@ def get_banned_phrases_reminder() -> str:
 
 def build_enhanced_soul_context(
     conversation_turns: int = 0,
-    recent_message_lengths: Optional[list[int]] = None,
+    recent_message_lengths: list[int] | None = None,
 ) -> str:
     """
     Build the enhanced soul + beliefs block for system prompt injection.

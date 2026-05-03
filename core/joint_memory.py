@@ -24,7 +24,7 @@ def _ensure_dirs() -> None:
     global _ensure_dirs_done
     if _ensure_dirs_done:
         return
-    for d in list(SESSION_DIRS.values()) + [CROSS_REFS_DIR]:
+    for d in [*list(SESSION_DIRS.values()), CROSS_REFS_DIR]:
         d.mkdir(parents=True, exist_ok=True)
     _ensure_dirs_done = True
 
@@ -90,7 +90,7 @@ async def joint_search(
     if sources:
         search_dirs = {k: SESSION_DIRS[k] for k in sources if k in SESSION_DIRS}
 
-    for src, directory in search_dirs.items():
+    for _src, directory in search_dirs.items():
         for file in directory.glob("*.json"):
             try:
                 with open(file) as f:
@@ -122,7 +122,7 @@ async def joint_get_recent(
     if sources:
         search_dirs = {k: SESSION_DIRS[k] for k in sources if k in SESSION_DIRS}
 
-    for src, directory in search_dirs.items():
+    for _src, directory in search_dirs.items():
         for file in directory.glob("*.json"):
             try:
                 with open(file) as f:

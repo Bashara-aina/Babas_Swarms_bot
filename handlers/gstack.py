@@ -62,7 +62,7 @@ async def run_opencode_cmd(
             stderr.decode() if stderr else "",
             p.returncode,
         )
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return "", "Command timed out", 124
     except Exception as e:
         return "", str(e), 1
@@ -95,7 +95,7 @@ async def cmd_review(msg: Message) -> None:
     await msg.answer(f"{bold('🔍 Running /review...')}\n\nDetecting platform...", parse_mode="HTML")
 
     # Step 0: Detect platform
-    remote_out, _, rc = run_sync("git remote get-url origin 2>/dev/null")
+    remote_out, _, _rc = run_sync("git remote get-url origin 2>/dev/null")
     remote_url = remote_out.strip()
 
     if "github.com" in remote_url:
@@ -147,7 +147,7 @@ async def cmd_review(msg: Message) -> None:
         return
 
     # Step 1.5: Scope check (simplified)
-    todo_lines, _, _ = run_sync("cat TODOS.md 2>/dev/null | head -30 || echo ''")
+    _todo_lines, _, _ = run_sync("cat TODOS.md 2>/dev/null | head -30 || echo ''")
     commit_lines, _, _ = run_sync(f"git log origin/{base_branch}..HEAD --oneline 2>/dev/null | head -10")
     pr_body, _, _ = run_sync("gh pr view --json body -q .body 2>/dev/null || echo ''")
 
@@ -215,13 +215,13 @@ async def cmd_ship(msg: Message) -> None:
     status_lines = [f"{bold('🚀 /ship — Deployment Pipeline')}\n"]
 
     # Step 1: Merge base branch
-    base_out, _, rc = run_sync("git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || echo 'main'")
+    base_out, _, _rc = run_sync("git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || echo 'main'")
     base_branch = base_out.strip() or "main"
 
     await msg.answer("\n".join(status_lines) + f"\nMerging {code(base_branch)}...", parse_mode="HTML")
 
     run_sync(f"git fetch origin {base_branch} --quiet 2>/dev/null")
-    merge_out, merge_err, merge_rc = run_sync(f"git merge origin/{base_branch} --no-edit 2>&1")
+    _merge_out, merge_err, merge_rc = run_sync(f"git merge origin/{base_branch} --no-edit 2>&1")
 
     if merge_rc != 0 and "conflict" in merge_err.lower():
         status_lines.append("🔴 CONFLICTS — resolve before shipping")
@@ -231,7 +231,7 @@ async def cmd_ship(msg: Message) -> None:
     status_lines.append("✅ BASE MERGE: success")
 
     # Step 2: Test bootstrap
-    test_out, _, test_rc = run_sync("python -c 'import pytest; print(\"pytest ok\")' 2>/dev/null || echo 'no pytest'")
+    test_out, _, _test_rc = run_sync("python -c 'import pytest; print(\"pytest ok\")' 2>/dev/null || echo 'no pytest'")
     has_pytest = "pytest ok" in test_out
 
     if has_pytest:
@@ -247,7 +247,7 @@ async def cmd_ship(msg: Message) -> None:
 
     # Step 3: Coverage
     if has_pytest:
-        cov_out, _, cov_rc = run_sync("pytest tests/ --cov=. --cov-report=term-missing --asyncio-mode=auto -q 2>&1 | tail -15")
+        cov_out, _, _cov_rc = run_sync("pytest tests/ --cov=. --cov-report=term-missing --asyncio-mode=auto -q 2>&1 | tail -15")
         status_lines.append(f"Coverage check:\n{code(cov_out[-300:])}")
 
     # Step 4: Coverage audit (simplified)
@@ -268,7 +268,7 @@ async def cmd_ship(msg: Message) -> None:
     await msg.answer("\n".join(status_lines) + "\nPushing...", parse_mode="HTML")
 
     run_sync("git add -A 2>/dev/null")
-    push_out, push_err, push_rc = run_sync("git push origin HEAD 2>&1")
+    _push_out, push_err, push_rc = run_sync("git push origin HEAD 2>&1")
 
     if push_rc != 0:
         status_lines.append(f"⚠️ PUSH: failed\n{code(push_err[:200])}")

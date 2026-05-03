@@ -48,6 +48,6 @@ def test_process_document_unsupported():
 
 def test_max_context_chars_truncation():
     huge = b"A" * (multimodal_processor.MAX_CONTEXT_CHARS + 1000)
-    text, label = run(multimodal_processor.process_document(huge, "text/plain", "big.txt"))
+    text, _label = run(multimodal_processor.process_document(huge, "text/plain", "big.txt"))
     assert len(text) <= multimodal_processor.MAX_CONTEXT_CHARS + 50  # small buffer for truncation msg
     assert "truncated" in text

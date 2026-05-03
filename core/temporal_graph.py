@@ -19,7 +19,7 @@ Usage:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -123,8 +123,8 @@ class TemporalKnowledgeGraph:
         """
         async def _add() -> int:
             conn = await self._get_conn()
-            ts = timestamp or datetime.now(timezone.utc).isoformat()
-            created = datetime.now(timezone.utc).isoformat()
+            ts = timestamp or datetime.now(UTC).isoformat()
+            created = datetime.now(UTC).isoformat()
             meta_json = json.dumps(metadata) if metadata else None
 
             cursor = await conn.execute(

@@ -17,7 +17,7 @@ Commands added (Telegram-safe underscore style):
 
 from __future__ import annotations
 
-import asyncio
+import contextlib
 import html as html_mod
 import json
 import time
@@ -152,10 +152,8 @@ async def _run_quality_gate(msg: Message, task: str) -> None:
 
         final = grounded + build_evidence_envelope(draft, grounded) + verifier_block + gate_block + consistency_block
 
-        try:
+        with contextlib.suppress(Exception):
             await status_msg.delete()
-        except Exception:
-            pass
         await send_chunked(msg, final, model_used=f"quality_gate/{model_used}")
     except Exception as e:
         await status_msg.edit_text(

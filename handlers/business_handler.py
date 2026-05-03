@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import html
 import logging
-import os
 
 from aiogram import Router
 from aiogram.filters import Command

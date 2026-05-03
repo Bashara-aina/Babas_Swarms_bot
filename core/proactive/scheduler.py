@@ -14,8 +14,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+from collections.abc import Callable, Coroutine
 from datetime import datetime
-from typing import Callable, Coroutine, Optional
 
 import pytz
 
@@ -39,7 +39,7 @@ class ProactiveScheduler:
         self,
         user_id: str,
         notify_cb: Callable[[str], Coroutine],
-        telegram_chat_id: Optional[int] = None,
+        telegram_chat_id: int | None = None,
     ) -> None:
         self.user_id = user_id
         self.notify = notify_cb
@@ -386,22 +386,21 @@ class ProactiveScheduler:
             import aiohttp
 
             headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    "https://api.github.com/notifications",
-                    headers=headers,
-                    timeout=aiohttp.ClientTimeout(total=10),
-                ) as resp:
-                    if resp.status != 200:
-                        return []
-                    data = await resp.json()
-                    unread = [n for n in data if n.get("unread")]
-                    if not unread:
-                        return []
-                    return [
-                        f"🐙 <b>GitHub</b>: {len(unread)} unread notification(s) — "
-                        f"including '{unread[0].get('subject', {}).get('title', '?')[:60]}'"
-                    ]
+            async with aiohttp.ClientSession() as session, session.get(
+                "https://api.github.com/notifications",
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as resp:
+                if resp.status != 200:
+                    return []
+                data = await resp.json()
+                unread = [n for n in data if n.get("unread")]
+                if not unread:
+                    return []
+                return [
+                    f"🐙 <b>GitHub</b>: {len(unread)} unread notification(s) — "
+                    f"including '{unread[0].get('subject', {}).get('title', '?')[:60]}'"
+                ]
         except Exception as e:
             logger.debug("[Proactive] GitHub check failed: %s", e)
             return []
@@ -414,7 +413,7 @@ _scheduler: ProactiveScheduler | None = None
 def get_scheduler(
     user_id: str,
     notify_cb: Callable[[str], Coroutine],
-    telegram_chat_id: Optional[int] = None,
+    telegram_chat_id: int | None = None,
 ) -> ProactiveScheduler:
     global _scheduler
     if _scheduler is None:

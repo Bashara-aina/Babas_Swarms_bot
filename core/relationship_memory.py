@@ -19,9 +19,8 @@ import logging
 import os
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +122,7 @@ def record_interaction(user_message: str, response_length: int = 0) -> None:
     - First interaction date
     """
     data = _load()
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
 
     # First interaction date
     if "first_interaction" not in data:
@@ -161,7 +160,7 @@ def record_interaction(user_message: str, response_length: int = 0) -> None:
     _save(data)
 
 
-def get_relationship_context() -> Optional[str]:
+def get_relationship_context() -> str | None:
     """Build a concise relationship context block for injection into the system prompt.
 
     Returns None if no relationship data exists yet (first ever interaction).
@@ -178,7 +177,7 @@ def get_relationship_context() -> Optional[str]:
     if first_str:
         try:
             first_dt = datetime.fromisoformat(first_str)
-            now_dt = datetime.now(timezone.utc)
+            now_dt = datetime.now(UTC)
             delta = now_dt - first_dt
             days = delta.days
             if days == 0:

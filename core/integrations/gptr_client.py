@@ -1,7 +1,5 @@
-import asyncio
 import logging
 import os
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +51,7 @@ class GPTResearcherClient:
             return {"report": report, "sources": sources, "cost_estimate": self._estimate_cost(report)}
         except Exception as e:
             logger.error(f"GPT-Researcher error: {e}")
-            return {"report": f"Research failed: {str(e)}", "sources": [], "cost_estimate": 0.0}
+            return {"report": f"Research failed: {e!s}", "sources": [], "cost_estimate": 0.0}
 
     def _estimate_cost(self, report: str) -> float:
         tokens = len(report.split()) * 1.3

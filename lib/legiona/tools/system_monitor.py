@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import shlex
-from typing import Optional
 
 SHELL_TIMEOUT = 30
 
@@ -30,7 +29,7 @@ async def _run(cmd: str, timeout: int = 30) -> str:
         if proc.returncode != 0:
             return f"ERROR: {stderr.decode(errors='replace').strip() or 'command failed'}"
         return stdout.decode(errors="replace") or "OK"
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return f"ERROR: timeout after {timeout}s"
     except Exception as exc:
         return f"ERROR: {exc}"
@@ -41,7 +40,7 @@ async def _run(cmd: str, timeout: int = 30) -> str:
 async def list_processes(
     sort_by: str = "cpu",
     top_n: int = 20,
-    user: Optional[str] = None,
+    user: str | None = None,
 ) -> str:
     """
     List top processes by CPU or memory usage.

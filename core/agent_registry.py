@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 import re
 import signal
 import time
@@ -17,7 +16,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import yaml
@@ -203,7 +201,7 @@ def reload_from_yaml() -> None:
     )
 
 
-def _sighup_handler(signum: int, frame: object) -> None:  # noqa: ARG001
+def _sighup_handler(signum: int, frame: object) -> None:
     reload_from_yaml()
 
 
@@ -216,7 +214,7 @@ signal.signal(signal.SIGHUP, _sighup_handler)
 
 
 @lru_cache(maxsize=512)
-def get_agent(name: str) -> Optional[AgentDef]:
+def get_agent(name: str) -> AgentDef | None:
     """Return agent by name (cached). Returns None if not found."""
     return AGENT_REGISTRY.get(name)
 
@@ -226,7 +224,7 @@ def agents_by_department(dept: str) -> list[AgentDef]:
     return [AGENT_REGISTRY[n] for n in DEPARTMENT_INDEX.get(dept, [])]
 
 
-def get_department_default(dept: str) -> Optional[AgentDef]:
+def get_department_default(dept: str) -> AgentDef | None:
     """Return the declared default agent for a department."""
     dept_file = Path("config/departments.yaml")
     if not dept_file.exists():
@@ -236,7 +234,7 @@ def get_department_default(dept: str) -> Optional[AgentDef]:
     with dept_file.open() as f:
         depts = yaml.safe_load(f)
 
-    default_name: Optional[str] = depts.get(dept, {}).get("default_agent")
+    default_name: str | None = depts.get(dept, {}).get("default_agent")
     if default_name:
         return get_agent(default_name)
 
@@ -644,7 +642,7 @@ DEBATE_ICONS = _DEBATE_ICONS
 ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 
-def get_model(agent_key: str, use_fallback: bool = False) -> Optional[str]:
+def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
     """Return litellm model_id for an agent key.
 
     Supports both legacy 22-agent keys and new 76-agent slug names.

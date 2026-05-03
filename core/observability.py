@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import time
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from functools import wraps
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +84,7 @@ def track_agent(agent_name: str) -> Callable[[Callable[..., Awaitable[Any]]], Ca
                 latency_ms = (time.perf_counter() - started) * 1000.0
                 _update_local(provider, tokens, latency_ms, success)
                 if agentops is not None:
-                    try:
+                    with contextlib.suppress(Exception):
                         agentops.record(
                             "agent_call",
                             {
@@ -93,8 +95,6 @@ def track_agent(agent_name: str) -> Callable[[Callable[..., Awaitable[Any]]], Ca
                                 "success": success,
                             },
                         )
-                    except Exception:
-                        pass
 
         return wrapper
 

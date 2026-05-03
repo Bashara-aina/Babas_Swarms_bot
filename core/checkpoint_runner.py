@@ -12,10 +12,8 @@ from __future__ import annotations
 
 import datetime
 import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 MEMORY_BOOTSTRAP = Path.home() / ".claude" / "memory_bootstrap.md"
 CHECKPOINT_INDEX = Path(__file__).parent.parent / ".claude" / ".checkpoint_index.json"
@@ -55,7 +53,7 @@ async def run_pre_compaction_checkpoint(
     blockers: list[str],
     next_steps: list[str],
     anti_patterns: list[str],
-    session_tag: Optional[str] = None,
+    session_tag: str | None = None,
     context_percent: float = 0.0,
 ) -> Checkpoint:
     """Run pre-compaction checkpoint — the M2.7 mandatory ritual before /compact.
@@ -189,7 +187,7 @@ def _append_to_memory_bootstrap(checkpoint: Checkpoint) -> None:
 # ---------------------------------------------------------------------------
 
 
-def load_latest_checkpoint() -> Optional[Checkpoint]:
+def load_latest_checkpoint() -> Checkpoint | None:
     """Load most recent checkpoint for post-compaction recovery."""
     if not CHECKPOINT_INDEX.exists():
         return None
