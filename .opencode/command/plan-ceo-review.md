@@ -8,6 +8,16 @@ description: "CEO review: analyze business logic, architecture decisions, and co
 
 Review a technical decision from a business perspective: cost, benefit, risk, and strategic fit.
 
+## Steps
+
+1. Identify the decision or change being proposed from the argument
+2. Analyze cost: API costs, infra costs, development time, maintenance burden
+3. Analyze benefit: user value, developer productivity, strategic positioning
+4. Analyze risk: failure modes, vendor lock-in, complexity, timeline
+5. Check if similar decisions were made before: search `.wiki/decisions/`
+6. Produce a structured recommendation: GO / NO-GO / CONDITIONAL with specific criteria
+7. Include: cost estimate, timeline, rollback plan, success metrics
+
 ## Usage
 ```
 /plan-ceo-review migrate to new LLM provider

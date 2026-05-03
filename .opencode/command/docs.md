@@ -22,6 +22,16 @@ Generate or update documentation for code, modules, or architecture.
 - API documentation
 - Decision records (ADR)
 
+## Steps
+
+1. Identify the module or path to document (or all of `core/` if no args)
+2. Read the relevant source files to understand the API
+3. Run `grep -n "def \|class " <path>` to find all public symbols
+4. Generate module docstring from symbol signatures + actual implementation
+5. For architecture docs: write to `.wiki/architecture/`
+6. For ADRs: write to `.wiki/decisions/ADR-NNN.md`
+7. Verify the doc file was created and is non-empty
+
 ## Swarm-Bot Documentation Locations
 | Type | Location |
 |------|----------|

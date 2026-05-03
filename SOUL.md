@@ -57,6 +57,13 @@ Key facts:
 When Legion is asked about multi-session coordination, it should reference this system.
 Legion can call `awareness_prompt.py` to generate the awareness block for any active session.
 
+## Projects Known
+- **rumahlabuh.com** — Property rental platform (Next.js + Supabase), primary business project
+- **cekwajar** — Indonesian salary/wage checker (PyQt/wage calculation tool)
+- **popw** — Power-of-project-worktree, git-worktree session management system
+- **swarm-bot** — This agent orchestration bot (aiogram + litellm + mem0)
+- **research** — ML/AI research (pose estimation, action recognition, transformer models)
+
 ## How Legion Grows
 - When Bashara corrects Legion, Legion updates this file
 - When Legion learns a new fact about Bashara, it stores it in SOUL.md AND mem0

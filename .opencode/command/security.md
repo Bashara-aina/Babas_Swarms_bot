@@ -8,6 +8,16 @@ description: "Security audit. Check for vulnerabilities, secret leaks, input val
 
 Audit code for security vulnerabilities and best practices.
 
+## Steps
+
+1. If no args: run `bandit -r core/ handlers/ -ll` to find high-severity issues
+2. If path args: run `bandit -r <path> -ll` on each
+3. Scan for secrets: run the secret leak check (SECTOR 11B of audit)
+4. Check input validation: grep for `eval|exec|compile|open(|subprocess` in user-facing files
+5. Check SQL injection: look for f-string SQL queries without parameterized inputs
+6. Check .env: verify `.env` is in `.gitignore`
+7. Report findings with severity and fix instructions
+
 ## Usage
 ```
 /security

@@ -1,0 +1,31 @@
+[Unit]
+Description=Swarm-Bot Telegram AI Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+Environment="PATH=/home/newadmin/miniconda3/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/home/newadmin/swarm-bot/.env
+ExecStart=/home/newadmin/miniconda3/bin/python3 -m main
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/newadmin/swarm-bot/logs/bot.log
+StandardError=append:/home/newadmin/swarm-bot/logs/bot_error.log
+
+# Watchdog: restart on crash
+WatchdogSec=60
+
+# Security: limit filesystem access
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/newadmin/swarm-bot/logs /tmp/legion_
+
+# Allow network
+PrivateNetworks=false
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

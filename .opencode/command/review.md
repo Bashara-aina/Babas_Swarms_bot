@@ -8,6 +8,16 @@ description: "Code review. Reviews changes, identifies issues, suggests improvem
 
 Review code changes for quality, correctness, and best practices.
 
+## Steps
+
+1. If no args: run `git diff --staged` to see staged changes
+2. If args provided: read each file listed
+3. Run the review checklist against each changed file
+4. Check for: correctness, edge cases, async correctness, type hints, docstrings
+5. Run `ruff check <file>` and `pyright <file>` on each changed file
+6. Report findings grouped by severity (P0/P1/P2)
+7. If critical issues found: `git diff --staged | gitnexus_detect_changes` to check blast radius
+
 ## Usage
 ```
 /review

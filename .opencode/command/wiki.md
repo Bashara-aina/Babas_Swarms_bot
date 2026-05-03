@@ -8,6 +8,17 @@ description: "Generate or update wiki documentation. Saves to .wiki/. Usage: /wi
 
 Generate or update wiki documentation in the .wiki/ directory.
 
+## Steps
+
+1. Parse the topic argument to determine wiki subdirectory and filename
+2. Check if the wiki page already exists: `ls .wiki/<subdir>/`
+3. If existing: read current content to understand what's already covered
+4. Research the topic using available tools (grep, read, web search if needed)
+5. Write new content to `.wiki/<subdir>/<topic>.md` with YAML frontmatter
+6. Frontmatter must include: `title:`, `date:`, `tags:`, `created_by:` fields
+7. Use Obsidian wikilinks `[[...]]` for internal references
+8. Run `obsidian.update_note` or `obsidian.create_note` to persist
+
 ## Usage
 ```
 /wiki intent routing
