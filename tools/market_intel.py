@@ -108,7 +108,11 @@ async def _fetch_news(queries: list[str], max_results: int = 10) -> list[dict]:
 
 
 async def _call_mirofish_api(endpoint: str, payload: dict) -> dict:
-    """Call MiroFish REST API. Returns dict; falls back to LLM if API unavailable."""
+    """
+    Call MiroFish REST API on port 5001.
+    Returns dict on success OR when API returns an error with success=false.
+    Falls back to LLM simulation when API is unreachable or returns 4xx with no project.
+    """
     try:
         import httpx
         async with httpx.AsyncClient(timeout=120) as client:
@@ -116,12 +120,15 @@ async def _call_mirofish_api(endpoint: str, payload: dict) -> dict:
             if resp.status_code >= 500:
                 resp.raise_for_status()
             resp_json = resp.json()
-            if resp_json.get("success", True) is not False:
+            if resp_json.get("success") is False:
+                error_msg = resp_json.get("error", "")
+                if any(key in error_msg.lower() for key in ("project", "graph", "not found", "require")):
+                    return {"error": error_msg, "_fallback": True}
                 return resp_json
             return resp_json
     except Exception as http_err:
-        logger.warning(f"MiroFish API error ({http_err}), trying direct import...")
-        return await _call_mirofish_direct(endpoint, payload)
+        logger.warning(f"MiroFish API error ({http_err}), trying LLM fallback...")
+        return {"error": str(http_err), "_fallback": True}
 
 
 async def _call_mirofish_direct(endpoint: str, payload: dict) -> dict:
@@ -290,12 +297,14 @@ async def market_brief(tickers: list[str] | None = None, mode: str = "standard")
     signals = _generate_signals(prices, sentiment)
 
     if mode == "deep":
-        sim_payload = {
-            "tickers": tickers,
-            "news": news[:20],
+        topic = f"Market analysis for {', '.join(tickers[:4])}"
+        sim_result = await _call_mirofish_api("/api/simulation/create", {
+            "project_id": "legion_market",
+            "topic": topic,
             "rounds": 10,
-        }
-        sim_result = await _call_mirofish_api("/api/simulate", sim_payload)
+        })
+        if sim_result.get("_fallback") or sim_result.get("error"):
+            sim_result = await _llm_market_simulation(topic, 10)
     else:
         sim_result = {}
 
@@ -360,7 +369,7 @@ async def run_full_simulation(topic: str, rounds: int = 10) -> dict:
         }
     }
     result = await _call_mirofish_api("/api/simulation/create", payload)
-    if result.get("error") and "project" in result["error"].lower():
+    if result.get("_fallback") or (result.get("error") and "project" in result["error"].lower()):
         result = await _llm_market_simulation(topic, rounds)
     return result
 
@@ -389,8 +398,11 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                 )
             }
         ]
-        result = await create_structured_completion(
-            messages=messages, preset="research", response_model=LegionaOutput
+        result = await asyncio.wait_for(
+            create_structured_completion(
+                messages=messages, preset="research", response_model=LegionaOutput
+            ),
+            timeout=45.0,
         )
         return {
             "narrative": result.answer,
@@ -398,6 +410,10 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
             "source": "minimax-simulation",
             "topic": topic,
         }
+    except TimeoutError:
+        err_str = "LLM simulation timed out after 45s (API may be slow or rate-limited)"
+        logger.warning(err_str)
+        return {"error": err_str}
     except (json.JSONDecodeError, Exception) as e:
         err_str = str(e)
         if not err_str or len(err_str) < 3:
