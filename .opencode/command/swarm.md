@@ -137,6 +137,13 @@ MANDATORY for research tasks:
 - **@reviewer** — reviews before commit
 - **@wikibot** — writes session summaries to .wiki/ and mem0
 
+## sequential.thinking Integration
+For deep reasoning tasks within the swarm, invoke the `sequential.thinking` MCP:
+```
+sequentialthinking(query=<reasoning_step>, depth=5)
+```
+Planner may use sequential.thinking to work through complex decomposition before dispatching contracts.
+
 ## Coordination
 - Agents communicate via shared context
 - Planner tracks progress via ruflo_task_status

@@ -25,6 +25,14 @@ Generates short, descriptive session titles for conversation tracking.
 ## Context
 Used internally by OpenCode to name sessions. No external tool dependencies.
 
+## Trigger
+
+When to use: Session start, session naming, or when a title is needed for tracking.
+
+## Tools
+
+All tools available.
+
 ## Behavior Rules
 1. Generate titles that are 3-8 words max
 2. Use lowercase except for proper nouns
