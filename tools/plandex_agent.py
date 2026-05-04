@@ -15,8 +15,8 @@ from __future__ import annotations
 import asyncio
 import os
 import shutil
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator
 
 PLANDEX_CLI = shutil.which("plandex") or os.getenv("PLANDEX_PATH", "plandex")
 PLANDEX_PROJECT_DIR = os.getenv(
@@ -32,7 +32,7 @@ class PlandexAgent:
 
     async def plan(
         self, prompt: str, *, project_path: str | None = None
-    ) -> AsyncGenerator[str, None]:
+    ) -> AsyncGenerator[str]:
         """
         Create a plan for the given prompt. Streams output lines.
         Yields decoded stdout lines from plandex.

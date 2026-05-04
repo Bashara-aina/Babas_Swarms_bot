@@ -46,12 +46,12 @@ class ResourceSnapshot:
     ram_percent:     float = 0.0   # % used
 
     # GPU VRAM (None if no GPU / nvidia-smi unavailable)
-    gpu_name:        Optional[str]   = None
-    vram_total_gb:   Optional[float] = None
-    vram_used_gb:    Optional[float] = None
-    vram_free_gb:    Optional[float] = None
-    vram_percent:    Optional[float] = None   # % used
-    gpu_util_pct:    Optional[float] = None   # GPU compute utilisation %
+    gpu_name:        str | None   = None
+    vram_total_gb:   float | None = None
+    vram_used_gb:    float | None = None
+    vram_free_gb:    float | None = None
+    vram_percent:    float | None = None   # % used
+    gpu_util_pct:    float | None = None   # GPU compute utilisation %
 
     # Decision
     local_allowed:   bool = True
@@ -64,7 +64,7 @@ class ResourceSnapshot:
 
 
 # ── Cache ─────────────────────────────────────────────────────────────────────
-_cache: Optional[ResourceSnapshot] = None
+_cache: ResourceSnapshot | None = None
 _cache_lock = asyncio.Lock()
 
 
@@ -83,7 +83,7 @@ def _read_ram() -> tuple[float, float, float, float]:
         return 0.0, 0.0, 0.0, 0.0
 
 
-def _read_gpu() -> tuple[Optional[str], Optional[float], Optional[float], Optional[float], Optional[float], Optional[float]]:
+def _read_gpu() -> tuple[str | None, float | None, float | None, float | None, float | None, float | None]:
     """
     Returns (name, total_gb, used_gb, free_gb, vram_pct_used, gpu_util_pct).
     Tries pynvml first (faster, no subprocess), falls back to nvidia-smi subprocess.

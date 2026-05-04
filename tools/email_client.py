@@ -205,7 +205,7 @@ async def send_email(
     to: str,
     subject: str,
     body: str,
-    attachments: Optional[list[str]] = None,
+    attachments: list[str] | None = None,
 ) -> str:
     """Send an email via SMTP."""
     err = _check_config()

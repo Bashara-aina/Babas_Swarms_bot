@@ -22,7 +22,7 @@ def _check_e2b() -> bool:
     global _e2b_installed
     if _e2b_installed is None:
         try:
-            import e2b  # noqa: F401
+            import e2b
 
             _e2b_installed = True
         except ImportError:
@@ -85,7 +85,7 @@ class SandboxExecutor:
 
         try:
             await asyncio.wait_for(proc.finish(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await proc.kill()
             await sandbox.close()
             return f"Timed out after {timeout}s"
@@ -127,7 +127,7 @@ class SandboxExecutor:
 
         try:
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await proc.kill()
             return f"Timed out after {timeout}s"
         finally:

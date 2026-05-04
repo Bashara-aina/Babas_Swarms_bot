@@ -3,9 +3,13 @@ Context Maximizer for Elite OpenCode Stack
 Token budget tracking + heuristic compression.
 Ollama integration: phi model via Ollama when available, else MiniMax API, else heuristic.
 """
-import json, os, time, re
+import json
+import os
+import re
+import time
 from pathlib import Path
 from typing import Optional
+
 
 # ── Token counter (tiktoken-style approximation) ──────────────────
 def count_tokens(text: str) -> int:
@@ -55,7 +59,7 @@ class ContextBudget:
         self.log = []
         self.pruned_chars = 0
 
-    def add(self, label: str, content: str, compress_ratio: Optional[float] = None):
+    def add(self, label: str, content: str, compress_ratio: float | None = None):
         pruned_content, chars_removed = prune_text(content)
         self.pruned_chars += chars_removed
 
@@ -103,9 +107,9 @@ def patch_opencode_config(config_path: str = "/home/newadmin/swarm-bot/.opencode
 
     path.write_text(json.dumps(config, indent=2))
     print(f"✅ Patched {config_path}")
-    print(f"   compaction.threshold: 0.98")
-    print(f"   compaction.reserved: 8,192")
-    print(f"   compaction.maxContext: 204,800")
+    print("   compaction.threshold: 0.98")
+    print("   compaction.reserved: 8,192")
+    print("   compaction.maxContext: 204,800")
 
 # ── Backend detection for compression ───────────────────────────
 _compressor = None
@@ -160,8 +164,8 @@ def compress(text: str, ratio: float = 0.5, instruction: str = "",
     if backend.startswith("ollama/"):
         # Ollama phi compression via LLMLingua
         try:
-            from llmlingua import PromptCompressor
             import requests
+            from llmlingua import PromptCompressor
 
             model_name = backend.replace("ollama/", "")
             compressor = PromptCompressor(

@@ -73,7 +73,7 @@ async def _search_raw(query: str, max_results: int = 5) -> str:
 
         return "## WEB SEARCH\n" + "\n\n".join(formatted)
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         # Try once more with simplified query
         simplified = " ".join(query.split()[:5])
         if simplified != query:

@@ -213,7 +213,7 @@ def bh_switch_tab(target: Any) -> str:
     return sid
 
 
-def bh_ensure_real_tab() -> Optional[dict]:
+def bh_ensure_real_tab() -> dict | None:
     """Switch to first non-internal tab. Returns tab dict or None."""
     tabs = bh_list_tabs(include_chrome=False)
     if not tabs:
@@ -231,7 +231,7 @@ def bh_ensure_real_tab() -> Optional[dict]:
 # ── JS / DOM ──────────────────────────────────────────────────────────────────
 
 
-def bh_evaluate(expression: str, target_id: Optional[str] = None) -> Any:
+def bh_evaluate(expression: str, target_id: str | None = None) -> Any:
     """Run JavaScript in the current tab (or iframe target). Returns value."""
     _ensure_daemon()
     sid = None
@@ -277,7 +277,7 @@ def bh_upload_file(selector: str, path: Any) -> None:
 # ── HTTP ───────────────────────────────────────────────────────────────────────
 
 
-def bh_http_get(url: str, headers: Optional[dict] = None, timeout: float = 20.0) -> str:
+def bh_http_get(url: str, headers: dict | None = None, timeout: float = 20.0) -> str:
     """Pure HTTP GET — no browser. For static pages and APIs."""
     import gzip
     h = {"User-Agent": "LegionSwarmBot/1.0", "Accept-Encoding": "gzip"}

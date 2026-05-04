@@ -17,6 +17,7 @@ import asyncio
 import logging
 import os
 import threading
+from datetime import UTC
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -143,8 +144,8 @@ async def get_calendar_events(days_ahead: int = 7) -> list[dict[str, Any]]:
         pass
     from datetime import datetime, timedelta, timezone
 
-    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    future = (datetime.now(timezone.utc) + timedelta(days=days_ahead)).isoformat().replace("+00:00", "Z")
+    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    future = (datetime.now(UTC) + timedelta(days=days_ahead)).isoformat().replace("+00:00", "Z")
     result = await composio_action(
         "GOOGLECALENDAR_LIST_EVENTS",
         {

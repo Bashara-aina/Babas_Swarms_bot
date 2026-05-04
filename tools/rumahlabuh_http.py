@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import logging
 import socket
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 import aiodns
 import aiohttp

@@ -16,7 +16,7 @@ import asyncio
 import logging
 import os
 import random
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ _last_sent: float = 0.0  # epoch seconds of last proactive message
 
 def _is_quiet_hours() -> bool:
     """Return True if it's 01:00–07:00 JST (Bashara is likely asleep)."""
-    jst_hour = (datetime.now(timezone.utc).hour + 9) % 24
+    jst_hour = (datetime.now(UTC).hour + 9) % 24
     return 1 <= jst_hour < 7
 
 
@@ -92,7 +92,7 @@ def _pick_trigger(user_id: int) -> str | None:
 
 async def _build_message(trigger: str, user_id: int | None = None) -> str:
     """Generate a context-appropriate proactive message."""
-    jst_hour = (datetime.now(timezone.utc).hour + 9) % 24
+    jst_hour = (datetime.now(UTC).hour + 9) % 24
 
     if trigger == "check_in":
         greetings = [
@@ -104,7 +104,7 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
         ]
         if 7 <= jst_hour < 12:
             greetings += ["Pagi! Ada agenda hari ini yang bisa gw bantu prep?"]
-        elif 20 <= jst_hour or jst_hour < 1:
+        elif jst_hour >= 20 or jst_hour < 1:
             greetings += ["Malam. Lo masih kerja? Kasih tau kalau butuh gw."]
         return random.choice(greetings)
 
@@ -185,7 +185,7 @@ async def _build_message(trigger: str, user_id: int | None = None) -> str:
     return "Gw masih di sini kalau lo butuh sesuatu."
 
 
-async def start_proactive_initiator(bot: "Bot", user_id: int) -> None:
+async def start_proactive_initiator(bot: Bot, user_id: int) -> None:
     """Main loop — runs forever as a background task."""
     import time
 

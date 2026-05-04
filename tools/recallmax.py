@@ -55,7 +55,7 @@ def compress_history(
         "content": f"[SUMMARY turns 1-{len(to_compress)}]: {summary_text}",
     }
 
-    compressed = system_msgs + [summary_msg] + to_keep
+    compressed = [*system_msgs, summary_msg, *to_keep]
     logger.debug(
         "[recallmax] compressed %d → %d messages (kept last %d)",
         len(messages), len(compressed), keep_last,

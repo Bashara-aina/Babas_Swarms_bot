@@ -43,7 +43,7 @@ _SKIP_DIRS = {
 }
 
 
-def _resolve_project_dir(project_dir: Optional[str] = None) -> Optional[Path]:
+def _resolve_project_dir(project_dir: str | None = None) -> Path | None:
     """Find the project directory to search."""
     if project_dir:
         p = Path(os.path.expanduser(project_dir)).resolve()
@@ -156,7 +156,7 @@ def _build_structure_map(root: Path, max_depth: int = 3) -> str:
 
 async def explain_codebase(
     query: str,
-    project_dir: Optional[str] = None,
+    project_dir: str | None = None,
     max_files_to_read: int = 5,
     max_chars_per_file: int = 2000,
 ) -> str:
@@ -248,7 +248,7 @@ async def explain_codebase(
 
 async def find_in_code(
     query: str,
-    project_dir: Optional[str] = None,
+    project_dir: str | None = None,
 ) -> str:
     """Find where a symbol (function, class, variable) is defined in the codebase.
 
@@ -307,7 +307,7 @@ async def find_in_code(
     return "\n\n".join(sections)
 
 
-async def get_project_overview(project_dir: Optional[str] = None) -> str:
+async def get_project_overview(project_dir: str | None = None) -> str:
     """Return a high-level overview of the project structure and key files."""
     root = _resolve_project_dir(project_dir)
     if root is None:

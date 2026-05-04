@@ -80,7 +80,7 @@ async def transcribe_voice(audio_bytes: bytes, file_ext: str = "ogg") -> str:
             pass
 
 
-async def synthesize_speech(text: str, voice: Optional[str] = None) -> Optional[bytes]:
+async def synthesize_speech(text: str, voice: str | None = None) -> bytes | None:
     """Synthesize text → WAV bytes using Kokoro TTS."""
     pipeline = _load_kokoro()
     if pipeline is None:

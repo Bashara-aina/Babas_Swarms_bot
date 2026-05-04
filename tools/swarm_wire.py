@@ -23,7 +23,8 @@ import html
 import logging
 import os
 import re
-from typing import Any, Callable, Coroutine, Optional
+from collections.abc import Callable, Coroutine
+from typing import Any, Optional
 
 from agents import AGENT_MODELS, DEBATE_ICONS, build_system_prompt
 from llm_client import call_llm
@@ -289,7 +290,7 @@ async def _run_department(
     dept_name: str,
     dept_config: dict,
     task: str,
-    progress_fn: Optional[Callable[[str], Coroutine[Any, Any, None]]] = None,
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
 ) -> tuple[str, str]:
     """Run all agents in a department in parallel, then synthesize via the lead.
 
@@ -323,7 +324,7 @@ async def _run_department(
     agent_results_raw = await asyncio.gather(*agent_tasks, return_exceptions=True)
 
     agent_outputs: list[str] = []
-    for (name, _), result in zip(agents, agent_results_raw):
+    for (name, _), result in zip(agents, agent_results_raw, strict=False):
         if isinstance(result, Exception):
             logger.warning("Agent %s in dept %s failed: %s", name, dept_name, result)
             agent_outputs.append(f"{name}: [error — skipped]")
@@ -356,8 +357,8 @@ async def _run_department(
 
 async def run_swarm_debate(
     task: str,
-    progress_fn: Optional[Callable[[str], Coroutine[Any, Any, None]]] = None,
-    departments: Optional[list[str]] = None,
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    departments: list[str] | None = None,
     skip_departments: bool = False,
 ) -> list[str]:
     """Full swarm pipeline.

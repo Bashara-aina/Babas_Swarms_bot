@@ -38,7 +38,7 @@ async def is_openclaw_running() -> bool:
         return False
 
 
-async def delegate_to_openclaw(task: str, context: Optional[str] = None) -> str:
+async def delegate_to_openclaw(task: str, context: str | None = None) -> str:
     """Send task to OpenClaw's API, return result."""
     payload = {"task": task}
     if context:

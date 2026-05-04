@@ -265,7 +265,7 @@ async def kv_set(key: str, value: str) -> None:
         await db.commit()
 
 
-async def kv_get(key: str) -> Optional[str]:
+async def kv_get(key: str) -> str | None:
     """Get a value by key."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT value FROM key_value_store WHERE key = ?", (key,)) as cursor:
@@ -360,7 +360,7 @@ async def save_session(
         await db.commit()
 
 
-async def resume_session(name_or_id: str) -> Optional[dict[str, Any]]:
+async def resume_session(name_or_id: str) -> dict[str, Any] | None:
     """Load a session by name or ID. Returns None if not found."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -414,7 +414,7 @@ async def add_instinct(category: str, content: str, source: str = "manual") -> i
         return cur.lastrowid  # type: ignore[return-value]
 
 
-async def get_instincts(category: Optional[str] = None, limit: int = 30) -> list[dict[str, Any]]:
+async def get_instincts(category: str | None = None, limit: int = 30) -> list[dict[str, Any]]:
     """Fetch instincts, optionally filtered by category."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
@@ -472,7 +472,7 @@ async def get_instinct_context(max_tokens: int = 300) -> str:
 # ── Response cache ─────────────────────────────────────────────────────────────
 
 
-async def cache_get(cache_key: str) -> Optional[str]:
+async def cache_get(cache_key: str) -> str | None:
     """Return cached response if it exists and hasn't expired."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
@@ -675,34 +675,34 @@ class Persistence:
 
 
 __all__ = [
-    "init_db",
-    "add_scheduled_task",
-    "get_active_tasks",
-    "update_task_status",
-    "record_task_execution",
-    "get_task_history",
-    "get_all_tasks",
-    "store_conversation",
-    "get_conversation_history",
-    "get_all_threads",
-    "kv_set",
-    "kv_get",
-    "kv_delete",
-    "log_audit",
-    "get_audit_summary",
-    "get_audit_log",
-    "save_session",
-    "resume_session",
-    "list_sessions",
-    "delete_session",
+    "Persistence",
     "add_instinct",
-    "get_instincts",
+    "add_scheduled_task",
     "bump_instinct_use",
-    "delete_instinct",
-    "get_instinct_context",
+    "cache_cleanup",
     "cache_get",
     "cache_set",
     "cache_stats",
-    "cache_cleanup",
-    "Persistence",
+    "delete_instinct",
+    "delete_session",
+    "get_active_tasks",
+    "get_all_tasks",
+    "get_all_threads",
+    "get_audit_log",
+    "get_audit_summary",
+    "get_conversation_history",
+    "get_instinct_context",
+    "get_instincts",
+    "get_task_history",
+    "init_db",
+    "kv_delete",
+    "kv_get",
+    "kv_set",
+    "list_sessions",
+    "log_audit",
+    "record_task_execution",
+    "resume_session",
+    "save_session",
+    "store_conversation",
+    "update_task_status",
 ]

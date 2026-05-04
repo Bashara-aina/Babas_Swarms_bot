@@ -9,15 +9,16 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from enum import Enum
-from typing import Any, Callable, Coroutine, TypeVar
+from collections.abc import Callable, Coroutine
+from enum import Enum, StrEnum
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
 
-class FailureType(str, Enum):
+class FailureType(StrEnum):
     TRANSIENT = "TRANSIENT"       # network, rate-limit → retry
     INVALID_INPUT = "INVALID_INPUT"  # bad params → fix + retry
     PERMISSION = "PERMISSION"     # 401/403 → escalate
@@ -47,7 +48,7 @@ SAFE_RETRYABLE = {FailureType.TRANSIENT, FailureType.INVALID_INPUT}
 _BACKOFF = [0, 1.0, 4.0, 16.0]  # seconds before each attempt
 
 
-async def guarded_call(
+async def guarded_call[T](
     fn: Callable[..., Coroutine[Any, Any, T]],
     *args: Any,
     tool_name: str = "unknown",

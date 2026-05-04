@@ -31,7 +31,7 @@ class PriceValidationResult:
     location: str
     check_in: str
     check_out: str
-    price_displayed: Optional[float] = None
+    price_displayed: float | None = None
     currency: str = "IDR"
     raw_price_text: str = ""
     page_url: str = ""
@@ -67,7 +67,7 @@ def _click_element(selector: str) -> bool:
     """Click element by selector using coordinate-based click."""
     pos = bh.js(
         f"(function(){{"
-        f"const el=document.querySelector({repr(selector)});"
+        f"const el=document.querySelector({selector!r});"
         f"if(!el)return null;"
         f"const r=el.getBoundingClientRect();"
         f"return {{x:r.left+r.width/2,y:r.top+r.height/2}};"
@@ -89,7 +89,7 @@ def _get_page_url() -> str:
 
 def _get_element_text(selector: str) -> str:
     return bh.js(
-        f"(function(){{const el=document.querySelector({repr(selector)});return el?el.innerText:'';}})()"
+        f"(function(){{const el=document.querySelector({selector!r});return el?el.innerText:'';}})()"
     ) or ""
 
 
@@ -254,7 +254,7 @@ async def _http_fallback_validate(result: PriceValidationResult) -> PriceValidat
     return result
 
 
-def _parse_price(price_text: str) -> Optional[float]:
+def _parse_price(price_text: str) -> float | None:
     """Parse price string to float.
 
     Examples:

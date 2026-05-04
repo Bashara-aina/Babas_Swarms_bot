@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Any
 
 import aiohttp
@@ -44,7 +44,7 @@ class ScreenpipeTool:
     ) -> str:
         if not self.is_configured():
             return ""
-        start_time = (datetime.now(timezone.utc) - timedelta(hours=hours_back)).isoformat().replace("+00:00", "Z")
+        start_time = (datetime.now(UTC) - timedelta(hours=hours_back)).isoformat().replace("+00:00", "Z")
         params: dict[str, Any] = {
             "q": query,
             "limit": limit,

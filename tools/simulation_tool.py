@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from agents.mirofish_agent import MiroFishResult
 
 
-async def run_simulation(question: str) -> "MiroFishResult":
+async def run_simulation(question: str) -> MiroFishResult:
     from agents.mirofish_agent import MiroFishAgent
 
     agent = MiroFishAgent()

@@ -56,10 +56,7 @@ _PRIVATE_IP_PATTERNS = [
 
 def _is_private_ip(host: str) -> bool:
     """Check if host is a private/internal IP."""
-    for pattern in _PRIVATE_IP_PATTERNS:
-        if pattern.match(host):
-            return True
-    return False
+    return any(pattern.match(host) for pattern in _PRIVATE_IP_PATTERNS)
 
 
 def validate_url(url: str) -> tuple[bool, str]:

@@ -38,8 +38,8 @@ def init_agentops() -> bool:
 def record_action(
     action_type: str,
     inputs: dict[str, Any],
-    outputs: Optional[dict[str, Any]] = None,
-    cost: Optional[float] = None,
+    outputs: dict[str, Any] | None = None,
+    cost: float | None = None,
 ) -> None:
     """Record an LLM action/tool call to AgentOps."""
     if not _initialized:

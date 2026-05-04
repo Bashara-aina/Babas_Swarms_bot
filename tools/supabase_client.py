@@ -36,7 +36,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-_INSTANCE: Optional["SupabaseClient"] = None
+_INSTANCE: SupabaseClient | None = None
 
 
 def _env(*keys: str) -> str:
@@ -73,10 +73,10 @@ class SupabaseClient:
     def _headers(
         self,
         use_service_role: bool = False,
-        extra: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, str]:
+        extra: dict[str, str] | None = None,
+    ) -> dict[str, str]:
         key = self.service_role_key if use_service_role else self.anon_key
-        h: Dict[str, str] = {
+        h: dict[str, str] = {
             "apikey": key,
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
@@ -115,10 +115,10 @@ class SupabaseClient:
 
     @staticmethod
     def _build_filters(
-        params: Dict[str, Any],
-        eq: Optional[Dict[str, Any]],
-        filters: Optional[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        params: dict[str, Any],
+        eq: dict[str, Any] | None,
+        filters: dict[str, str] | None,
+    ) -> dict[str, Any]:
         """Merge eq shortcuts and raw filter params into query params."""
         p = dict(params)
         for col, val in (eq or {}).items():
@@ -135,15 +135,15 @@ class SupabaseClient:
         self,
         table: str,
         select: str = "*",
-        eq: Optional[Dict[str, Any]] = None,
-        filters: Optional[Dict[str, str]] = None,
-        order: Optional[str] = None,
+        eq: dict[str, Any] | None = None,
+        filters: dict[str, str] | None = None,
+        order: str | None = None,
         limit: int = 100,
         offset: int = 0,
         use_service_role: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """SELECT rows from a table."""
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "select": select,
             "limit": limit,
             "offset": offset,
@@ -167,10 +167,10 @@ class SupabaseClient:
         upsert: bool = False,
         on_conflict: str = "",
         use_service_role: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """INSERT (or UPSERT) rows."""
         prefer = "resolution=merge-duplicates,return=representation" if upsert else "return=representation"
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         if upsert and on_conflict:
             params["on_conflict"] = on_conflict
         resp = await self._http.post(
@@ -185,10 +185,10 @@ class SupabaseClient:
     async def update(
         self,
         table: str,
-        data: Dict[str, Any],
-        eq: Dict[str, Any],
+        data: dict[str, Any],
+        eq: dict[str, Any],
         use_service_role: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """UPDATE rows matching eq filter."""
         params = {col: f"eq.{val}" for col, val in eq.items()}
         resp = await self._http.patch(
@@ -203,9 +203,9 @@ class SupabaseClient:
     async def delete(
         self,
         table: str,
-        eq: Dict[str, Any],
+        eq: dict[str, Any],
         use_service_role: bool = True,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """DELETE rows matching eq filter."""
         params = {col: f"eq.{val}" for col, val in eq.items()}
         resp = await self._http.delete(
@@ -223,7 +223,7 @@ class SupabaseClient:
     async def rpc(
         self,
         function_name: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         use_service_role: bool = True,
     ) -> Any:
         """Call a Postgres function via PostgREST /rpc/<name>."""
@@ -243,7 +243,7 @@ class SupabaseClient:
         self,
         email: str,
         password: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Sign in a user with email+password. Returns session dict."""
         resp = await self._http.post(
             f"{self.url}/auth/v1/token?grant_type=password",
@@ -257,8 +257,8 @@ class SupabaseClient:
         self,
         email: str,
         password: str,
-        user_metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        user_metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Create a user via the admin API (service_role only)."""
         resp = await self._http.post(
             f"{self.url}/auth/v1/admin/users",
@@ -282,7 +282,7 @@ class SupabaseClient:
         bucket: str,
         prefix: str = "",
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """List objects in a storage bucket."""
         resp = await self._http.post(
             f"{self.url}/storage/v1/object/list/{bucket}",
@@ -299,7 +299,7 @@ class SupabaseClient:
         content: bytes,
         content_type: str = "application/octet-stream",
         upsert: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Upload a file to Supabase Storage."""
         resp = await self._http.post(
             f"{self.url}/storage/v1/object/{bucket}/{path}",
@@ -325,7 +325,7 @@ class SupabaseClient:
     # Schema introspection (one-time bootstrap for rumahlabuh skill)
     # ------------------------------------------------------------------ #
 
-    async def introspect_schema(self) -> Dict[str, List[Dict[str, Any]]]:
+    async def introspect_schema(self) -> dict[str, list[dict[str, Any]]]:
         """Read table/column definitions from PostgREST OpenAPI spec.
 
         Returns: {table_name: [{column, type, nullable}]}
@@ -340,14 +340,14 @@ class SupabaseClient:
         spec = resp.json()
 
         definitions = spec.get("definitions", {}) if isinstance(spec, dict) else {}
-        schema: Dict[str, List[Dict[str, Any]]] = {}
+        schema: dict[str, list[dict[str, Any]]] = {}
 
         for table_name, defn in definitions.items():
             if not isinstance(defn, dict):
                 continue
             props = defn.get("properties", {})
             required = defn.get("required", [])
-            columns: List[Dict[str, Any]] = []
+            columns: list[dict[str, Any]] = []
             for col, col_def in props.items():
                 columns.append(
                     {
@@ -485,7 +485,7 @@ class SupabaseClient:
             lines.append(f"  ... and {len(rows) - 10} more")
         return "\n".join(lines)
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check Supabase project health. Returns dict with ok/latency_ms."""
         t0 = time.monotonic()
         try:
@@ -500,7 +500,7 @@ class SupabaseClient:
         latency = round((time.monotonic() - t0) * 1000)
         return {"ok": ok, "status_code": resp.status_code, "latency_ms": latency}
 
-    async def list_accessible_tables(self) -> List[str]:
+    async def list_accessible_tables(self) -> list[str]:
         """List table-like resources visible via PostgREST OpenAPI.
 
         Works with anon key and does not require service_role or custom RPC.
@@ -514,8 +514,8 @@ class SupabaseClient:
 
         payload = resp.json()
         paths = payload.get("paths", {}) if isinstance(payload, dict) else {}
-        out: List[str] = []
-        for raw in paths.keys():
+        out: list[str] = []
+        for raw in paths:
             if not isinstance(raw, str):
                 continue
             name = raw.lstrip("/")
@@ -537,10 +537,10 @@ class SupabaseClient:
 
 
 def get_client(
-    url: Optional[str] = None,
-    anon_key: Optional[str] = None,
-    service_role_key: Optional[str] = None,
-) -> "SupabaseClient":
+    url: str | None = None,
+    anon_key: str | None = None,
+    service_role_key: str | None = None,
+) -> SupabaseClient:
     """Return a shared SupabaseClient instance, reading from env if not provided.
 
     Raises ValueError if SUPABASE_URL or SUPABASE_ANON_KEY are not set.

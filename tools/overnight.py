@@ -21,10 +21,11 @@ import json
 import logging
 import time
 import uuid
+from collections.abc import Callable, Coroutine
 from dataclasses import asdict, dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ CHECKPOINT_PATH = Path.home() / ".legion_overnight_checkpoint.json"
 # ── Status & Models ────────────────────────────────────────────────────────────
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     DONE = "done"
@@ -78,7 +79,7 @@ class OvernightTask:
 
 # Map: job_id → list of OvernightTask
 _jobs: dict[str, list] = {}
-_active_job: Optional[str] = None  # currently running job id
+_active_job: str | None = None  # currently running job id
 _job_cancelled: dict[str, bool] = {}
 _job_paused: dict[str, bool] = {}
 
@@ -125,7 +126,7 @@ def _save_checkpoint(job_id: str, tasks: list) -> None:
         logger.warning("Checkpoint save failed: %s", e)
 
 
-def load_checkpoint() -> Optional[tuple]:
+def load_checkpoint() -> tuple | None:
     if not CHECKPOINT_PATH.exists():
         return None
     try:
@@ -238,7 +239,7 @@ async def run_overnight_job(
     tasks: list,
     llm_call: Callable,
     notify_fn: Callable,
-    update_dashboard_fn: Optional[Callable] = None,
+    update_dashboard_fn: Callable | None = None,
 ) -> dict:
     """
     Execute all tasks in the job.
@@ -368,7 +369,7 @@ async def _execute_single_task(
     job_id: str,
     llm_call: Callable,
     notify_fn: Callable,
-    update_dashboard_fn: Optional[Callable],
+    update_dashboard_fn: Callable | None,
 ) -> None:
     from agents import AGENT_MODELS, build_system_prompt
 
@@ -505,7 +506,7 @@ def resume_job(job_id: str) -> str:
     return f"▶️ Job {job_id} resumed."
 
 
-def get_active_job_id() -> Optional[str]:
+def get_active_job_id() -> str | None:
     return _active_job
 
 

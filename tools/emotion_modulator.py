@@ -60,7 +60,7 @@ def _apply_mood_subs(text: str, mood: str) -> str:
     return text
 
 
-def modulate(response: str, mood: Optional[str] = None) -> str:
+def modulate(response: str, mood: str | None = None) -> str:
     """
     Full emotion modulation pipeline:
     1. Strip corporate filler phrases

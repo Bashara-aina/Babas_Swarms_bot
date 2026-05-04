@@ -39,7 +39,7 @@ VIKING_DIR = Path(os.environ.get(
 # ── Lazy singleton client ──────────────────────────────────────────────────
 _client = None
 _client_lock = asyncio.Lock()
-_available: Optional[bool] = None   # None = not yet probed
+_available: bool | None = None   # None = not yet probed
 
 
 def _get_client_sync():
@@ -125,7 +125,7 @@ async def save_interaction_to_l1(
     user_id: str,
     user_message: str,
     assistant_reply: str,
-    session_id: Optional[str] = None,
+    session_id: str | None = None,
 ) -> None:
     """
     Persist a conversation turn into the L1 per-user session context.
@@ -191,7 +191,7 @@ async def auto_extract_facts(
 
 async def semantic_search(
     query: str,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     top_k: int = 5,
     score_threshold: float = 0.15,
 ) -> list[dict]:
@@ -226,7 +226,7 @@ async def semantic_search(
 
 async def build_viking_context(
     query: str,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     include_l0: bool = True,
     include_l1: bool = True,
     include_l2: bool = True,

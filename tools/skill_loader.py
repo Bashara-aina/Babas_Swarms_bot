@@ -169,7 +169,7 @@ def get_skills_for_agent(agent_key: str, max_chars: int = 6000) -> str:
     return header + "\n\n---\n\n".join(parts) + "\n"
 
 
-def list_skills() -> List[str]:
+def list_skills() -> list[str]:
     """Return all available skill names (for /skills command)."""
     if not SKILLS_DIR.exists():
         return []

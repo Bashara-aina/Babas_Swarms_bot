@@ -11,8 +11,9 @@ import json
 import logging
 import re
 import time
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 

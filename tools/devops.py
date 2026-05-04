@@ -10,8 +10,9 @@ import asyncio
 import logging
 import os
 import re
+from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Callable, Coroutine, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +106,7 @@ async def check_gpu_health() -> str:
 
 async def watch_training_log(
     log_path: str,
-    callback: Optional[Callable[[str], Coroutine]] = None,
+    callback: Callable[[str], Coroutine] | None = None,
     check_interval: int = 30,
     max_checks: int = 0,  # 0 = infinite
 ) -> str:
@@ -138,7 +139,7 @@ async def watch_training_log(
             continue
 
         # Read new content
-        with open(path, "r", errors="replace") as f:
+        with open(path, errors="replace") as f:
             f.seek(last_size)
             new_content = f.read()
         last_size = current_size

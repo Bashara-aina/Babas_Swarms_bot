@@ -61,7 +61,7 @@ async def draft_tweet(topic: str, thread: bool = False) -> str:
     return result
 
 
-async def monitor_brand(keywords: list[str], platforms: Optional[list[str]] = None) -> str:
+async def monitor_brand(keywords: list[str], platforms: list[str] | None = None) -> str:
     """Search Reddit and HN for keyword mentions."""
     platforms = platforms or ["reddit", "hackernews"]
     results = []

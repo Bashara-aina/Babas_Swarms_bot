@@ -78,7 +78,7 @@ class ParsedAction:
 @dataclass
 class LoopStep:
     step_number: int
-    screenshot_path: Optional[str]
+    screenshot_path: str | None
     vision_response: str
     parsed_action: ParsedAction
     execution_result: str
@@ -91,7 +91,7 @@ class LoopResult:
     task: str
     steps: list[LoopStep]
     final_state: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 # ── Safety confirmation queue ────────────────────────────────────────────────
@@ -321,7 +321,7 @@ async def _verify_step(
         return False
 
 
-async def _take_screenshot_safe() -> Optional[str]:
+async def _take_screenshot_safe() -> str | None:
     """Take screenshot with graceful fallback."""
     try:
         from computer_agent import take_screenshot as _take_screenshot
@@ -342,7 +342,7 @@ async def computer_use_loop(
     task: str,
     max_steps: int = 20,
     progress_callback: StepCallback = None,
-    confirmed_commands: Optional[set[str]] = None,
+    confirmed_commands: set[str] | None = None,
 ) -> LoopResult:
     """Run the vision-action loop until task completion or max steps.
 
@@ -361,7 +361,7 @@ async def computer_use_loop(
     steps: list[LoopStep] = []
     pending_confirmations = get_pending_confirmations()
     final_state = ""
-    error: Optional[str] = None
+    error: str | None = None
 
     for step_num in range(1, max_steps + 1):
         # Step 1: Take screenshot
@@ -477,14 +477,14 @@ def dismiss_confirmation(command: str) -> None:
 # ── Re-exports for convenience ────────────────────────────────────────────────
 
 __all__ = [
-    "computer_use_loop",
-    "get_pending_confirmations",
-    "clear_confirmations",
-    "confirm_command",
-    "dismiss_confirmation",
-    "is_dangerous_command",
+    "ActionType",
     "LoopResult",
     "LoopStep",
     "ParsedAction",
-    "ActionType",
+    "clear_confirmations",
+    "computer_use_loop",
+    "confirm_command",
+    "dismiss_confirmation",
+    "get_pending_confirmations",
+    "is_dangerous_command",
 ]

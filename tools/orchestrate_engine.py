@@ -12,8 +12,9 @@ import html
 import json
 import logging
 import time
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +108,7 @@ async def _execute_subtask(
 
 async def orchestrate_task(
     task: str,
-    progress_cb: Optional[Callable[[str], Coroutine]] = None,
+    progress_cb: Callable[[str], Coroutine] | None = None,
 ) -> str:
     """Decompose and execute a complex task.
 

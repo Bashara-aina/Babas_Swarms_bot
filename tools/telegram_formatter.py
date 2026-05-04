@@ -8,7 +8,7 @@ long-message chunking, and emoji budgeting.
 from __future__ import annotations
 
 import re
-from typing import Generator
+from collections.abc import Generator
 
 MAX_MESSAGE_LEN = 4096
 TLDR_THRESHOLD = 2000
@@ -96,7 +96,7 @@ def format_for_telegram(text: str, inject_tldr: bool = True) -> str:
     return text.strip()
 
 
-def chunk_message(text: str, max_len: int = MAX_MESSAGE_LEN) -> Generator[str, None, None]:
+def chunk_message(text: str, max_len: int = MAX_MESSAGE_LEN) -> Generator[str]:
     """Split a long message into Telegram-safe chunks.
 
     Splits at paragraph boundaries when possible.

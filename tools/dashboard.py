@@ -57,8 +57,8 @@ AGENT_ICONS = {
 
 def build_ascii_dashboard(
     agent_status: dict,
-    job_id: Optional[str] = None,
-    job_tasks: Optional[list] = None,
+    job_id: str | None = None,
+    job_tasks: list | None = None,
     title: str = "Legion Dashboard",
 ) -> str:
     """
@@ -141,9 +141,9 @@ def _now_str() -> str:
 
 async def build_png_dashboard(
     agent_status: dict,
-    job_id: Optional[str] = None,
-    job_tasks: Optional[list] = None,
-) -> Optional[bytes]:
+    job_id: str | None = None,
+    job_tasks: list | None = None,
+) -> bytes | None:
     """
     Render a PNG dashboard image using matplotlib.
     Returns PNG bytes or None if matplotlib unavailable.
@@ -187,7 +187,7 @@ async def build_png_dashboard(
     return buf.read()
 
 
-def _draw_job_progress(ax, tasks: list, job_id: Optional[str]) -> None:
+def _draw_job_progress(ax, tasks: list, job_id: str | None) -> None:
     total = len(tasks)
     if total == 0:
         return

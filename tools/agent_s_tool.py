@@ -23,7 +23,7 @@ class AgentSTool:
         self.engine_type = os.getenv("AGENT_S_ENGINE", "anthropic")
         self.model = os.getenv("AGENT_S_MODEL", "claude-sonnet-4-20250514")
 
-    def _blocked(self, task: str) -> Optional[str]:
+    def _blocked(self, task: str) -> str | None:
         low = task.lower()
         if any(k in low for k in _DANGEROUS):
             return (
@@ -32,7 +32,7 @@ class AgentSTool:
             )
         return None
 
-    async def execute_task(self, task: str, context: Optional[str] = None) -> str:
+    async def execute_task(self, task: str, context: str | None = None) -> str:
         b = self._blocked(task)
         if b:
             return b

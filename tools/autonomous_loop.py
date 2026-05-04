@@ -16,8 +16,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 import litellm
 
@@ -55,14 +56,14 @@ class LoopState:
 _active_loops: dict[int, LoopState] = {}
 
 
-def get_active_loop(user_id: int) -> Optional[LoopState]:
+def get_active_loop(user_id: int) -> LoopState | None:
     state = _active_loops.get(user_id)
     if state and state.status == "running":
         return state
     return None
 
 
-def get_loop_state(user_id: int) -> Optional[LoopState]:
+def get_loop_state(user_id: int) -> LoopState | None:
     """Get loop state regardless of status (for status queries)."""
     return _active_loops.get(user_id)
 
@@ -145,7 +146,7 @@ async def run_autonomous_loop(
     goal: str,
     notify_cb: NotifyCb,
     config: LoopConfig | None = None,
-    thread_id: Optional[str] = None,
+    thread_id: str | None = None,
 ) -> LoopState:
     """Run an autonomous plan-execute loop until the goal is done or bounds hit.
 

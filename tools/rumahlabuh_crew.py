@@ -104,7 +104,7 @@ async def check_website_uptime(url: str = "https://rumahlabuh.com") -> dict[str,
                     if resp.status < 400
                     else f"⚠️ Status {resp.status} in {elapsed}ms",
                 }
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {"url": url, "ok": False, "message": "⛔ Timeout (>10s) — site may be down"}
     except Exception as e:
         return {"url": url, "ok": False, "message": f"⛔ Error: {e}"}
@@ -178,7 +178,7 @@ async def check_booking_alerts() -> list[str]:
         if not client:
             return ["⚠️ Supabase client not available"]
 
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         thirty_min_ago = (now - datetime.timedelta(minutes=30)).isoformat()
 
         # New bookings since last check (last 30 min)

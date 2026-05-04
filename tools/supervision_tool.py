@@ -17,7 +17,7 @@ def _check_supervision() -> bool:
     global _supervision_installed
     if _supervision_installed is None:
         try:
-            import supervision as sv  # noqa: F401
+            import supervision as sv
 
             _supervision_installed = True
         except ImportError:

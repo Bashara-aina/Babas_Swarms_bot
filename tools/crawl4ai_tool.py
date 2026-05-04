@@ -20,7 +20,7 @@ def _check_crawl4ai() -> bool:
     global _crawl4ai_installed
     if _crawl4ai_installed is None:
         try:
-            import crawl4ai  # noqa: F401
+            import crawl4ai
 
             _crawl4ai_installed = True
         except ImportError:

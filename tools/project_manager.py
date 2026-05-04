@@ -144,7 +144,7 @@ async def complete_task(task_id: int) -> str:
     return f"Task {task_id} marked as completed."
 
 
-async def add_to_todoist(task: dict, api_key: Optional[str] = None) -> str:
+async def add_to_todoist(task: dict, api_key: str | None = None) -> str:
     """Create a task in Todoist via REST API."""
     api_key = api_key or os.getenv("TODOIST_API_KEY", "")
     if not api_key:
@@ -173,7 +173,7 @@ async def add_to_todoist(task: dict, api_key: Optional[str] = None) -> str:
             return f"Todoist error: HTTP {resp.status}"
 
 
-async def add_to_linear(task: dict, api_key: Optional[str] = None) -> str:
+async def add_to_linear(task: dict, api_key: str | None = None) -> str:
     """Create an issue in Linear via GraphQL API."""
     api_key = api_key or os.getenv("LINEAR_API_KEY", "")
     if not api_key:

@@ -25,7 +25,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
-from tools.persistence import init_db, add_scheduled_task, get_active_tasks, record_task_execution
+from tools.persistence import add_scheduled_task, get_active_tasks, init_db, record_task_execution
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ BLUEPRINTS_PATH = TOOLS_DIR / "rumahlabuh_thread_blueprints.json"
 def _load_json(path: Path) -> dict[str, Any]:
     if path.exists():
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, OSError):
             pass
@@ -283,7 +283,7 @@ class SurveyAnalyzer:
         )
 
         # Compute a simple engagement rate
-        total_interactions = likes + replies + saves
+        likes + replies + saves
         fyp_likelihood: float = 0.0
 
         if likes > 50:
@@ -425,7 +425,7 @@ class SeededThreadGenerator:
         rng = random.Random(seed_int)
         blueprints = self._load_blueprints()
 
-        pools = blueprints.get("pools", {})
+        blueprints.get("pools", {})
         techniques = blueprints.get("techniques", [])
 
         if not techniques:
@@ -536,9 +536,9 @@ class Scheduler:
         post_number, thread_seed, generated_at
         """
         try:
-            day_date = datetime.strptime(date_iso, "%Y-%m-%d").date()
+            datetime.strptime(date_iso, "%Y-%m-%d").date()
         except ValueError:
-            day_date = date.today()
+            date.today()
 
         slots: list[PostSlot] = []
         slot_index = 0

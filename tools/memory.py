@@ -210,7 +210,7 @@ async def add_memory(
     return memory_id
 
 
-async def search_memory(query: str, top_k: int = 5, user_id: Optional[str] = None) -> list[dict]:
+async def search_memory(query: str, top_k: int = 5, user_id: str | None = None) -> list[dict]:
     """
     Semantic search via OpenViking (primary) or TF-IDF cosine (fallback).
     Returns list of dicts: {id, text, tags, source, score, created}
@@ -341,7 +341,7 @@ async def count_memories() -> int:
 
 
 # ── Context injection helper ──────────────────────────────────────────────────
-async def build_memory_context(query: str, top_k: int = 3, user_id: Optional[str] = None) -> str:
+async def build_memory_context(query: str, top_k: int = 3, user_id: str | None = None) -> str:
     """
     Build a context block to inject into a system prompt.
 
@@ -399,7 +399,7 @@ async def auto_save_interaction(
     user_message: str,
     assistant_reply: str,
     source: str = "conversation",
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
 ) -> None:
     """
     Decide if the interaction is worth remembering, then save it.
@@ -608,18 +608,18 @@ class Memory:
 
 
 __all__ = [
+    "Memory",
     "add_memory",
-    "search_memory",
-    "get_recent",
-    "delete_memory",
-    "count_memories",
-    "build_memory_context",
     "auto_save_interaction",
+    "build_memory_context",
+    "close_memory_db",
+    "count_memories",
+    "delete_memory",
     "export_to_obsidian",
     "format_memory_result",
+    "get_recent",
     "init_memory_db",
-    "close_memory_db",
-    "store_memory",
     "search_memories",
-    "Memory",
+    "search_memory",
+    "store_memory",
 ]

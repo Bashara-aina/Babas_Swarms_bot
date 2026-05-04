@@ -60,7 +60,7 @@ def load_departments() -> dict[str, list[str]]:
             continue
         agents = dept_data.get("agents", {}) or {}
         if isinstance(agents, dict):
-            departments[str(dept_name)] = sorted(str(a) for a in agents.keys())
+            departments[str(dept_name)] = sorted(str(a) for a in agents)
     return departments
 
 
@@ -242,7 +242,7 @@ def build_swarm_viz_html(user_id: int) -> str:
     lines.extend(["", "<b>📈 Flow Diagram (Mermaid)</b>", "<pre>graph TD"])
     for row in subtasks:
         sid = row.get("id", "?")
-        label = f"T{sid}:{str(row.get('agent', 'general'))}".replace('"', "")
+        label = f"T{sid}:{row.get('agent', 'general')!s}".replace('"', "")
         lines.append(f"T{sid}[\"{html.escape(label)}\"]")
     for row in subtasks:
         sid = row.get("id", "?")

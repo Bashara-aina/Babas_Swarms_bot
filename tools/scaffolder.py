@@ -19,7 +19,7 @@ PROJECTS_DIR = Path.home() / "projects"
 PROJECTS_DIR.mkdir(exist_ok=True)
 
 
-async def _run(cmd: str, cwd: Optional[str] = None, timeout: int = 120) -> str:
+async def _run(cmd: str, cwd: str | None = None, timeout: int = 120) -> str:
     """Run a shell command and return output."""
     proc = await asyncio.create_subprocess_shell(
         cmd,

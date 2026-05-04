@@ -233,7 +233,7 @@ async def analyze_codebase_vs_paper(
 
 async def monitor_benchmark(
     dataset_name: str = "IKEA ASM",
-    your_metrics: Optional[dict[str, float]] = None,
+    your_metrics: dict[str, float] | None = None,
 ) -> str:
     """Search arXiv for new papers citing the dataset, compare metrics."""
     if your_metrics is None:

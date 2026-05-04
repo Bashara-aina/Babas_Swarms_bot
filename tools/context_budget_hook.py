@@ -2,7 +2,9 @@
 Ruflo hook: auto-compress context before large tasks.
 Triggered via: ruflo hooks_trigger pre_task_large
 """
-import sys, json
+import json
+import sys
+
 sys.path.insert(0, "/home/newadmin/swarm-bot/tools")
 from context_maximizer import compress, count_tokens, prune_text
 
