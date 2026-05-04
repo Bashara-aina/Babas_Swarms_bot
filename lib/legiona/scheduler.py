@@ -99,7 +99,7 @@ async def _morning_market_brief(bot=None):
 
 async def _afternoon_market_brief(bot=None):
     """16:30 WIB — after IDX closes at 15:30. Quick IDX summary."""
-    from tools.market_intel import market_brief, DEFAULT_TICKERS
+    from tools.market_intel import DEFAULT_TICKERS, market_brief
     try:
         report = await market_brief(DEFAULT_TICKERS["IDX"], mode="standard")
     except Exception as exc:

@@ -327,7 +327,7 @@ async def cmd_market(message: Message, command: CommandObject) -> None:
     /market idx                — IDX default watchlist
     /market us                 — US markets + commodities
     """
-    from tools.market_intel import market_brief, DEFAULT_TICKERS
+    from tools.market_intel import DEFAULT_TICKERS, market_brief
 
     args = (command.args or "").strip().split()
     if not args:
