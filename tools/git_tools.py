@@ -66,7 +66,7 @@ async def git_branch(
     name: str = "",
     checkout: bool = False,
 ) -> str:
-    """List branches, create, or checkout a branch."""
+    """branches, create, or checkout a branch."""
     if not name:
         return await _git("branch -a", repo_path)
     if checkout:

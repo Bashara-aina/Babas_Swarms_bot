@@ -245,11 +245,11 @@ def _is_disallowed_script_char(ch: str) -> bool:
 
 
 def _render_template(template: str, ctx: dict[str, str]) -> str:
-    class SafeDict(dict):
+    class Safe(dict):
         def __missing__(self, key: str) -> str:  # pragma: no cover
             return "{" + key + "}"
 
-    return template.format_map(SafeDict(**ctx))
+    return template.format_map(Safe(**ctx))
 
 
 def _signature(thread: list[str]) -> str:

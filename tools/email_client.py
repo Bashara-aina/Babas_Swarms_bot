@@ -96,7 +96,7 @@ async def check_inbox(
     limit: int = 10,
     unread_only: bool = True,
 ) -> str:
-    """List recent emails. Returns formatted text."""
+    """recent emails. Returns formatted text."""
     err = _check_config()
     if err:
         return err
@@ -177,7 +177,7 @@ async def read_email(uid: str) -> str:
         date = msg.get("Date", "")
         body = _extract_body(msg)
 
-        # List attachments
+        # attachments
         attachments = []
         if msg.is_multipart():
             for part in msg.walk():

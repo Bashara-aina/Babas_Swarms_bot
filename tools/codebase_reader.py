@@ -257,7 +257,7 @@ async def find_in_code(
         project_dir: Project root path.
 
     Returns:
-        List of locations with file path and line number.
+        of locations with file path and line number.
     """
     root = _resolve_project_dir(project_dir)
     if root is None:

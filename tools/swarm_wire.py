@@ -377,7 +377,7 @@ async def run_swarm_debate(
         skip_departments: If True, skip Phase 1 and go straight to debate.
 
     Returns:
-        List of Telegram-ready HTML message strings (each <= 4000 chars).
+        of Telegram-ready HTML message strings (each <= 4000 chars).
     """
     selected_depts = departments or list(DEPARTMENTS.keys())
 

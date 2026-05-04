@@ -77,7 +77,7 @@ def is_available() -> bool:
 # ── Gmail ─────────────────────────────────────────────────────────────────────
 
 async def gmail_list_unread(max_results: int = 10) -> list[dict[str, Any]]:
-    """List unread Gmail messages. Returns list of {id, subject, from, snippet, date}."""
+    """unread Gmail messages. Returns list of {id, subject, from, snippet, date}."""
     if not is_available():
         return [{"error": "Composio not configured. Set COMPOSIO_API_KEY and run: composio add gmail"}]
 
@@ -151,7 +151,7 @@ async def gmail_search(query: str, max_results: int = 5) -> list[dict[str, Any]]
 # ── Google Calendar ───────────────────────────────────────────────────────────
 
 async def calendar_list_upcoming(max_results: int = 10) -> list[dict[str, Any]]:
-    """List upcoming Google Calendar events. Returns events sorted by start time."""
+    """upcoming Google Calendar events. Returns events sorted by start time."""
     if not is_available():
         return [{"error": "Composio not configured. Run: composio add google-calendar"}]
 

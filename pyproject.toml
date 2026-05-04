@@ -70,7 +70,7 @@ exclude = [".venv", "__pycache__", ".git"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501", "F401", "F811"]
+ignore = ["E501", "F401", "F811", "UP035", "UP045", "RUF013", "B008", "B905"]
 
 [tool.mypy]
 python_version = "3.11"

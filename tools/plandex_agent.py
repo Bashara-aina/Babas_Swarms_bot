@@ -106,7 +106,7 @@ class PlandexAgent:
     async def list_plans(
         self, *, project_path: str | None = None
     ) -> list[dict]:
-        """List recent plans for the project."""
+        """recent plans for the project."""
         proj = project_path or self.project_dir
         cmd = [PLANDEX_CLI, "ls", "--project-dir", proj, "--json"]
         proc = await asyncio.create_subprocess_exec(

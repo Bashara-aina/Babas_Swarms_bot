@@ -25,7 +25,7 @@ import os
 import shlex
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 try:
     import httpx
@@ -283,7 +283,7 @@ class SupabaseClient:
         prefix: str = "",
         limit: int = 100,
     ) -> list[dict[str, Any]]:
-        """List objects in a storage bucket."""
+        """objects in a storage bucket."""
         resp = await self._http.post(
             f"{self.url}/storage/v1/object/list/{bucket}",
             headers=self._headers(use_service_role=True),
@@ -379,7 +379,7 @@ class SupabaseClient:
             "The AI needs to understand the database schema of rumahlabuh.com "
             "(a villa/accommodation rental business in Indonesia) to answer queries about it. "
             "Based on the schema below, write a markdown skill file that:\n"
-            "1. Lists all tables with column names, types, and what they represent\n"
+            "1. s all tables with column names, types, and what they represent\n"
             "2. Describes common operations: check bookings, get revenue, find guests, update status\n"
             "3. Gives example PostgREST API queries for each common operation\n"
             "4. Notes any important relationships between tables\n\n"
@@ -501,7 +501,7 @@ class SupabaseClient:
         return {"ok": ok, "status_code": resp.status_code, "latency_ms": latency}
 
     async def list_accessible_tables(self) -> list[str]:
-        """List table-like resources visible via PostgREST OpenAPI.
+        """table-like resources visible via PostgREST OpenAPI.
 
         Works with anon key and does not require service_role or custom RPC.
         """

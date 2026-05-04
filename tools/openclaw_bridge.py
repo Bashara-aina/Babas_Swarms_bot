@@ -66,7 +66,7 @@ async def delegate_to_openclaw(task: str, context: str | None = None) -> str:
 
 
 async def openclaw_integrations() -> str:
-    """List all installed OpenClaw skills/integrations."""
+    """all installed OpenClaw skills/integrations."""
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(

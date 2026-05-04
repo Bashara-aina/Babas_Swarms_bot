@@ -99,7 +99,7 @@ async def scaffold_nextjs(project_name: str, features: list[str] | None = None) 
         )
         result_lines.append("Supabase: created src/lib/supabase.ts")
 
-    # List files
+    # files
     files = list(project_path.rglob("*"))
     file_count = len([f for f in files if f.is_file()])
     result_lines.append(f"\nTotal files created: {file_count}")

@@ -375,7 +375,7 @@ async def resume_session(name_or_id: str) -> dict[str, Any] | None:
 
 
 async def list_sessions(limit: int = 20) -> list[dict[str, Any]]:
-    """List all sessions ordered by last activity."""
+    """all sessions ordered by last activity."""
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute(

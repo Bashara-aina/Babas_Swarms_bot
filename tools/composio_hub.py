@@ -64,7 +64,7 @@ async def composio_action(action_name: str, params: dict[str, Any] | None = None
         params: Optional dict of parameters for the action
 
     Returns:
-        Dict with result or {"error": "..."} on failure
+        with result or {"error": "..."} on failure
     """
 
     def _execute() -> dict[str, Any]:
