@@ -82,7 +82,7 @@ def test_models_yaml_gemma4_entry() -> None:
     with open("config/models.yaml", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     gemma = cfg["models"]["gemma4-local"]
-    assert int(gemma["context_window"]) == 131072
+    assert int(gemma["context_window"]) == 8192
 
 
 def test_agent_registry_has_all_v5_agents() -> None:

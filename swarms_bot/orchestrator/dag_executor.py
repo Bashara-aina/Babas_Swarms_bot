@@ -11,7 +11,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Any, Callable, Coroutine, Dict, List, Optional
+from collections.abc import Callable, Coroutine
+from typing import Any, Optional
 
 from swarms_bot.orchestrator.dag_planner import DAGNode, TaskDAG
 
@@ -23,7 +24,7 @@ class DAGExecutor:
 
     def __init__(
         self,
-        agent_registry: Dict[str, Any],  # agent_key -> Agent
+        agent_registry: dict[str, Any],  # agent_key -> Agent
         max_parallel: int = 4,
     ):
         self.registry = agent_registry
@@ -32,8 +33,8 @@ class DAGExecutor:
     async def execute(
         self,
         dag: TaskDAG,
-        progress_cb: Optional[Callable[[str], Coroutine]] = None,
-        approval_cb: Optional[Callable[[str], Coroutine[Any, Any, bool]]] = None,
+        progress_cb: Callable[[str], Coroutine] | None = None,
+        approval_cb: Callable[[str], Coroutine[Any, Any, bool]] | None = None,
     ) -> TaskDAG:
         """
         Execute the DAG.
@@ -76,7 +77,26 @@ class DAGExecutor:
             # Execute batch in parallel (respect max_parallel cap)
             semaphore = asyncio.Semaphore(self.max_parallel)
             tasks = [self._run_node(node, dag, semaphore) for node in ready]
-            await asyncio.gather(*tasks, return_exceptions=True)
+            try:
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+            except TimeoutError:
+                for node in ready:
+                    if node.status == "pending":
+                        node.status = "failed"
+                        node.error = "Node execution timed out"
+                        for other in dag.nodes.values():
+                            if node.id in other.depends_on and other.status == "pending":
+                                other.status = "skipped"
+                                other.error = f"Upstream node {node.id} timed out"
+                continue
+            for node, result in zip(ready, results, strict=True):
+                if isinstance(result, TimeoutError):
+                    node.status = "failed"
+                    node.error = "Node execution timed out"
+                    for other in dag.nodes.values():
+                        if node.id in other.depends_on and other.status == "pending":
+                            other.status = "skipped"
+                            other.error = f"Upstream node {node.id} timed out"
 
             # Report batch results
             if progress_cb:

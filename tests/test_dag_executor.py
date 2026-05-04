@@ -153,10 +153,15 @@ class TestDAGExecutorTimeout:
 
         executor = DAGExecutor(registry_with_slow, max_parallel=4)
 
-# Run with a very short timeout — patch asyncio.wait_for to raise TimeoutError
-        with patch.object(executor, "_run_node", wraps=executor._run_node):
-            with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError):
-                result = await executor.execute(dag)
+        original_run_node = executor._run_node
+
+        async def timeout_run_node(node, dag, semaphore):
+            if node.id == "t1":
+                raise TimeoutError("Node t1 timed out")
+            return await original_run_node(node, dag, semaphore)
+
+        with patch.object(executor, "_run_node", side_effect=timeout_run_node):
+            result = await executor.execute(dag)
 
         # All nodes should have attempted execution
         # At least one should have a timeout error set

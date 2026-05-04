@@ -27,8 +27,8 @@ class SpawnTracker:
 class LegionCallbackBridge:
     """Bridge for LegionBot to spawn OpenCode sub-tasks without Telegram round-trip."""
 
-    def __init__(self):
-        self._tracker = SpawnTracker()
+    def __init__(self, tracker: SpawnTracker | None = None):
+        self._tracker = tracker if tracker is not None else SpawnTracker()
 
     def parse_callback_directive(self, text: str) -> str | None:
         """Extract @legion directive from text."""
