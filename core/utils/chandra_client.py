@@ -214,7 +214,7 @@ def _ocr_sync_pytesseract(image_paths: list[str], lang: str = "eng+ind") -> Chan
             doc.init_forms()
             for page_idx in range(len(doc)):
                 page_obj = doc[page_idx]
-                scale = 200 / 72
+                scale = int(200 / 72)
                 pil_img = page_obj.render(scale=scale).to_pil().convert("RGB")
                 page_count += 1
                 text = pytesseract.image_to_string(pil_img, lang=lang)
@@ -332,16 +332,14 @@ async def chandra_ocr_pdf(
         return result
 
     def run():
-        page_nums = _parse_page_range(pages, len(pil_images)) if pages != "all" else []
-
+        page_nums: list[int] | None = None
         if method == "tesseract":
-            # Use pytesseract directly for PDF pages
             import pypdfium2
             import pytesseract
-
             doc = pypdfium2.PdfDocument(str(p))
             doc.init_forms()
             total = len(doc)
+            page_nums = _parse_page_range(pages, total) if pages != "all" else []
             page_nums_used = page_nums if page_nums else list(range(total))
             parts: list[str] = []
             total_tokens = 0
@@ -350,7 +348,7 @@ async def chandra_ocr_pdf(
                 if i >= total:
                     continue
                 page_obj = doc[i]
-                scale = 200 / 72
+                scale = int(200 / 72)
                 pil_img = page_obj.render(scale=scale).to_pil().convert("RGB")
                 text = pytesseract.image_to_string(pil_img, lang=lang)
                 parts.append(f"--- Page {i + 1} (OCR) ---\n{text.strip()}")
@@ -377,7 +375,7 @@ async def chandra_ocr_pdf(
         try:
             from chandra.input import load_pdf_images
 
-            pil_images = load_pdf_images(str(p), page_nums if page_nums else None)
+            pil_images = load_pdf_images(str(p), page_nums)
 
             if not pil_images:
                 return ChandraResult(
