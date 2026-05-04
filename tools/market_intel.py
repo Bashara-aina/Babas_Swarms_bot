@@ -82,7 +82,7 @@ async def _fetch_prices(tickers: list[str]) -> dict:
 async def _fetch_news(queries: list[str], max_results: int = 10) -> list[dict]:
     """Fetch news via DDGS."""
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
         all_news = []
         with DDGS() as ddgs:
             for query in queries[:3]:
