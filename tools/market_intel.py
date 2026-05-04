@@ -402,7 +402,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
         )
 
         async def _call() -> dict:
-            async with httpx.AsyncClient(timeout=120.0) as client:
+            async with httpx.AsyncClient(timeout=180.0) as client:
                 resp = await client.post(
                     f"{base_url}/chat/completions",
                     headers={
@@ -415,7 +415,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_msg},
                         ],
-                        "max_tokens": 1800,
+                        "max_tokens": 3500,
                         "temperature": 1.0,
                         "top_p": 0.95,
                     },
@@ -457,7 +457,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                 # Fallback: return cleaned text
                 return {"answer": cleaned[:500], "confidence": "MEDIUM"}
 
-        result = await asyncio.wait_for(_call(), timeout=120.0)
+        result = await asyncio.wait_for(_call(), timeout=180.0)
         return {
             "narrative": result["answer"],
             "confidence": result["confidence"],
