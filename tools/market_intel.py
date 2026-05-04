@@ -108,15 +108,19 @@ async def _fetch_news(queries: list[str], max_results: int = 10) -> list[dict]:
 
 
 async def _call_mirofish_api(endpoint: str, payload: dict) -> dict:
-    """Call MiroFish REST API."""
+    """Call MiroFish REST API. Returns dict; falls back to LLM if API unavailable."""
     try:
         import httpx
         async with httpx.AsyncClient(timeout=120) as client:
             resp = await client.post(f"{MIROFISH_API}{endpoint}", json=payload)
-            resp.raise_for_status()
-            return resp.json()
+            if resp.status_code >= 500:
+                resp.raise_for_status()
+            resp_json = resp.json()
+            if not resp_json.get("success", True) is False:
+                return resp_json
+            return resp_json
     except Exception as http_err:
-        logger.warning(f"MiroFish HTTP call failed ({http_err}), trying direct import...")
+        logger.warning(f"MiroFish API error ({http_err}), trying direct import...")
         return await _call_mirofish_direct(endpoint, payload)
 
 
@@ -344,6 +348,7 @@ async def market_signal(ticker: str) -> dict:
 async def run_full_simulation(topic: str, rounds: int = 10) -> dict:
     """
     Run a full MiroFish OASIS simulation on a financial topic.
+    Falls back to MiniMax LLM analysis when MiroFish server/project not configured.
     """
     payload = {
         "topic": topic,
@@ -354,8 +359,46 @@ async def run_full_simulation(topic: str, rounds: int = 10) -> dict:
             "date": datetime.now().isoformat(),
         }
     }
-    result = await _call_mirofish_api("/api/simulate", payload)
+    result = await _call_mirofish_api("/api/simulation/create", payload)
+    if result.get("error") and "project" in result["error"].lower():
+        result = await _llm_market_simulation(topic, rounds)
     return result
+
+
+async def _llm_market_simulation(topic: str, rounds: int) -> dict:
+    """Fallback: use MiniMax LLM to generate simulation-style analysis."""
+    try:
+        from lib.legiona.minimax_client import complete, LegionaOutput
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a senior financial analyst running a social simulation. "
+                    "Generate a structured market analysis for the given topic, "
+                    "covering: key entities, sentiment, price projections, risk factors, "
+                    "and actionable signals. Format as a clear narrative."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Run a simulated market analysis on: {topic}\n\n"
+                    f"Consider {rounds} discussion rounds among simulated participants: "
+                    "bullish investors, bearish analysts, macro traders, and retail observers. "
+                    "Synthesize their debate into a final market narrative with signals."
+                )
+            }
+        ]
+        result = complete(messages, preset="research", response_model=LegionaOutput)
+        return {
+            "narrative": result.answer,
+            "confidence": result.confidence,
+            "source": "minimax-simulation",
+            "topic": topic,
+        }
+    except Exception as e:
+        logger.error(f"LLM simulation failed: {e}")
+        return {"error": f"Simulation unavailable: {e}"}
 
 
 async def market_overnight_report() -> str:

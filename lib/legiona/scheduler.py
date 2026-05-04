@@ -82,6 +82,34 @@ async def _monthly_dedup(bot=None):
         )
 
 
+# ── Market Intelligence ────────────────────────────────────────────────────────
+
+async def _morning_market_brief(bot=None):
+    """06:30 WIB — before IDX opens at 9:00 AM. Full overnight report."""
+    from tools.market_intel import market_overnight_report
+    try:
+        report = await market_overnight_report()
+    except Exception as exc:
+        report = f"❌ Morning brief failed: {exc}"
+    if bot and TELEGRAM_NOTIFY_CHAT_ID:
+        if len(report) > 4096:
+            report = report[:4090] + "\n...(truncated)"
+        await bot.send_message(TELEGRAM_NOTIFY_CHAT_ID, report, parse_mode="Markdown")
+
+
+async def _afternoon_market_brief(bot=None):
+    """16:30 WIB — after IDX closes at 15:30. Quick IDX summary."""
+    from tools.market_intel import market_brief, DEFAULT_TICKERS
+    try:
+        report = await market_brief(DEFAULT_TICKERS["IDX"], mode="standard")
+    except Exception as exc:
+        report = f"❌ Afternoon brief failed: {exc}"
+    if bot and TELEGRAM_NOTIFY_CHAT_ID:
+        if len(report) > 4096:
+            report = report[:4090] + "\n...(truncated)"
+        await bot.send_message(TELEGRAM_NOTIFY_CHAT_ID, report, parse_mode="Markdown")
+
+
 def start_scheduler(bot=None) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone="UTC")
 
@@ -99,6 +127,16 @@ def start_scheduler(bot=None) -> AsyncIOScheduler:
         lambda: asyncio.create_task(_monthly_dedup(bot)),
         CronTrigger(day=1, hour=jst_to_utc(2), minute=0),
         id="monthly_dedup",
+    )
+    scheduler.add_job(
+        lambda: asyncio.create_task(_morning_market_brief(bot)),
+        CronTrigger(hour=6, minute=30, timezone="Asia/Jakarta"),
+        id="morning_market_brief",
+    )
+    scheduler.add_job(
+        lambda: asyncio.create_task(_afternoon_market_brief(bot)),
+        CronTrigger(hour=16, minute=30, timezone="Asia/Jakarta"),
+        id="afternoon_market_brief",
     )
     scheduler.start()
     return scheduler

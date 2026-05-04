@@ -317,6 +317,115 @@ async def cmd_debate(message: Message, command: CommandObject) -> None:
         await message.answer(f"[ERROR] {type(exc).__name__}: {exc}")
 
 
+@router.message(F.text & Command("market"))
+@_require_owner
+async def cmd_market(message: Message, command: CommandObject) -> None:
+    """
+    /market                    — brief for default watchlist
+    /market BBCA.JK TLKM.JK   — brief for specific tickers
+    /market deep               — deep mode with MiroFish simulation
+    /market idx                — IDX default watchlist
+    /market us                 — US markets + commodities
+    """
+    from tools.market_intel import market_brief, DEFAULT_TICKERS
+
+    args = (command.args or "").strip().split()
+    if not args:
+        result = await market_brief()
+    elif args[0].lower() == "deep":
+        result = await market_brief(mode="deep")
+    elif args[0].lower() == "idx":
+        result = await market_brief(DEFAULT_TICKERS["IDX"])
+    elif args[0].lower() == "us":
+        result = await market_brief(DEFAULT_TICKERS["US"] + DEFAULT_TICKERS["COMMODITY"])
+    else:
+        tickers = [a.upper() for a in args]
+        result = await market_brief(tickers)
+
+    if len(result) > 4096:
+        result = result[:4090] + "\n...(truncated)"
+    await message.answer(result, parse_mode="Markdown")
+
+
+@router.message(F.text & Command("signal"))
+@_require_owner
+async def cmd_signal(message: Message, command: CommandObject) -> None:
+    """
+    /signal BBCA.JK            — deep signal for single ticker
+    /signal BTC-USD
+    """
+    from tools.market_intel import market_signal
+
+    ticker = (command.args or "").strip().upper()
+    if not ticker:
+        await message.answer("Usage: /signal TICKER\nExample: /signal BBCA.JK")
+        return
+
+    await message.answer(f"⏳ Analyzing {ticker}...")
+    result = await market_signal(ticker)
+
+    sig = result.get("signal_data", {})
+    price = result.get("price_data", {})
+
+    emoji = {
+        "BUY": "🟢", "ACCUMULATE": "🔵", "HOLD": "⚪",
+        "WATCH": "🟡", "AVOID": "🔴", "ERROR": "❌"
+    }.get(sig.get("signal", "HOLD"), "⚪")
+
+    price_val = price.get("price")
+    price_str = f"{price_val:,.4f}" if price_val else "N/A"
+
+    text = (
+        f"{emoji} *{ticker}* Signal Report\n"
+        f"Signal: *{sig.get('signal', 'N/A')}*\n"
+        f"Price: {price_str}\n"
+        f"Change: {price.get('change_pct', 0):+.2f}%\n"
+        f"Sentiment: {sig.get('sentiment_score', 0):+.3f}\n"
+        f"News analyzed: {result.get('news_count', 0)}\n\n"
+        f"*Top Headlines:*\n"
+    )
+    for h in result.get("top_headlines", [])[:3]:
+        text += f"• {h[:80]}\n"
+
+    if len(text) > 4096:
+        text = text[:4090] + "\n...(truncated)"
+    await message.answer(text, parse_mode="Markdown")
+
+
+@router.message(F.text & Command("simulate"))
+@_require_owner
+async def cmd_simulate(message: Message, command: CommandObject) -> None:
+    """
+    /simulate Indonesia rate cut banking stocks
+    Run a full MiroFish OASIS social simulation on a financial topic.
+    """
+    from tools.market_intel import run_full_simulation
+
+    topic = (command.args or "").strip()
+    if not topic:
+        await message.answer(
+            "Usage: /simulate <topic>\n"
+            "Example: /simulate Indonesia inflation impact on BBRI"
+        )
+        return
+
+    await message.answer(f"🧠 Running MiroFish simulation on:\n_{topic}_", parse_mode="Markdown")
+    result = await run_full_simulation(topic)
+
+    if result.get("error"):
+        await message.answer(f"❌ Simulation error: {result.get('error')}")
+        return
+
+    narrative = result.get("narrative", result.get("summary", ""))
+    if not narrative:
+        narrative = str(result)[:1000]
+
+    if len(narrative) > 1500:
+        narrative = narrative[:1490] + "\n...\n_(truncated)_"
+
+    await message.answer(f"🎯 *Simulation Complete*\n\n{narrative}", parse_mode="Markdown")
+
+
 @router.message(F.text & Command("status"))
 @_require_owner
 async def cmd_status(message: Message) -> None:
