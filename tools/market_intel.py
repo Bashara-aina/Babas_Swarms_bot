@@ -116,7 +116,7 @@ async def _call_mirofish_api(endpoint: str, payload: dict) -> dict:
             if resp.status_code >= 500:
                 resp.raise_for_status()
             resp_json = resp.json()
-            if not resp_json.get("success", True) is False:
+            if resp_json.get("success", True) is not False:
                 return resp_json
             return resp_json
     except Exception as http_err:
@@ -368,7 +368,7 @@ async def run_full_simulation(topic: str, rounds: int = 10) -> dict:
 async def _llm_market_simulation(topic: str, rounds: int) -> dict:
     """Fallback: use MiniMax LLM to generate simulation-style analysis."""
     try:
-        from lib.legiona.minimax_client import complete, LegionaOutput
+        from lib.legiona.minimax_client import LegionaOutput, create_structured_completion
         messages = [
             {
                 "role": "system",
@@ -389,16 +389,21 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                 )
             }
         ]
-        result = complete(messages, preset="research", response_model=LegionaOutput)
+        result = await create_structured_completion(
+            messages=messages, preset="research", response_model=LegionaOutput
+        )
         return {
             "narrative": result.answer,
             "confidence": result.confidence,
             "source": "minimax-simulation",
             "topic": topic,
         }
-    except Exception as e:
-        logger.error(f"LLM simulation failed: {e}")
-        return {"error": f"Simulation unavailable: {e}"}
+    except (json.JSONDecodeError, Exception) as e:
+        err_str = str(e)
+        if not err_str or len(err_str) < 3:
+            err_str = "Empty response from LLM API (check API credits/key)"
+        logger.warning(f"LLM simulation failed ({type(e).__name__}): {err_str}")
+        return {"error": f"Simulation unavailable: {err_str}"}
 
 
 async def market_overnight_report() -> str:
