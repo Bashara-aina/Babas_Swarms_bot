@@ -375,49 +375,103 @@ async def run_full_simulation(topic: str, rounds: int = 10) -> dict:
 
 
 async def _llm_market_simulation(topic: str, rounds: int) -> dict:
-    """Fallback: use MiniMax LLM to generate simulation-style analysis."""
+    """
+    Fallback: use MiniMax LLM directly via httpx to generate simulation-style analysis.
+    Handles <thinking> tags by splitting on </think> then extracting JSON from the final part.
+    """
     try:
-        from lib.legiona.minimax_client import LegionaOutput, create_structured_completion
-        messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are a senior financial analyst running a social simulation. "
-                    "Generate a structured market analysis for the given topic, "
-                    "covering: key entities, sentiment, price projections, risk factors, "
-                    "and actionable signals. Format as a clear narrative."
-                )
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Run a simulated market analysis on: {topic}\n\n"
-                    f"Consider {rounds} discussion rounds among simulated participants: "
-                    "bullish investors, bearish analysts, macro traders, and retail observers. "
-                    "Synthesize their debate into a final market narrative with signals."
-                )
-            }
-        ]
-        result = await asyncio.wait_for(
-            create_structured_completion(
-                messages=messages, preset="research", response_model=LegionaOutput
-            ),
-            timeout=45.0,
+        import re
+
+        import httpx
+
+        api_key = os.getenv("MINIMAX_API_KEY", "")
+        base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
+
+        system_msg = (
+            "You are a senior financial analyst running a social simulation. "
+            "Generate a structured market analysis for the given topic, "
+            "covering: key entities, sentiment, price projections, risk factors, "
+            "and actionable signals. Output a JSON object with keys: "
+            "answer (narrative string), confidence (HIGH/MEDIUM/LOW)."
         )
+        user_msg = (
+            f"Run a simulated market analysis on: {topic}\n\n"
+            f"Consider {rounds} discussion rounds among simulated participants: "
+            "bullish investors, bearish analysts, macro traders, and retail observers. "
+            "Synthesize their debate into a final market narrative with signals."
+        )
+
+        async def _call() -> dict:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    f"{base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": os.getenv("MINIMAX_MODEL", "MiniMax-M2.7"),
+                        "messages": [
+                            {"role": "system", "content": system_msg},
+                            {"role": "user", "content": user_msg},
+                        ],
+                        "max_tokens": 1800,
+                        "temperature": 1.0,
+                        "top_p": 0.95,
+                    },
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                raw = data["choices"][0]["message"]["content"]
+
+                # Strip <think>...</thinking> tags — split on </think> and take the last part
+                closing_tag = "</think>"
+                if closing_tag in raw:
+                    after_thinking = raw.split(closing_tag)[-1]
+                    cleaned = after_thinking.strip()
+                else:
+                    cleaned = raw.strip()
+
+                # Try to find JSON in markdown code block first (model often wraps in ```json...```)
+                json_match = re.search(r"```json\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
+                if json_match:
+                    try:
+                        parsed = json.loads(json_match.group(1))
+                        return {
+                            "answer": parsed.get("answer", ""),
+                            "confidence": parsed.get("confidence", "MEDIUM"),
+                        }
+                    except Exception:
+                        pass
+
+                # Find first { and last } to extract JSON object
+                jstart = cleaned.find("{")
+                jend = cleaned.rfind("}") + 1
+                if jstart != -1 and jend > jstart:
+                    json_str = cleaned[jstart:jend]
+                    parsed = json.loads(json_str)
+                    return {
+                        "answer": parsed.get("answer", json_str),
+                        "confidence": parsed.get("confidence", "MEDIUM"),
+                    }
+                # Fallback: return cleaned text
+                return {"answer": cleaned[:500], "confidence": "MEDIUM"}
+
+        result = await asyncio.wait_for(_call(), timeout=120.0)
         return {
-            "narrative": result.answer,
-            "confidence": result.confidence,
+            "narrative": result["answer"],
+            "confidence": result["confidence"],
             "source": "minimax-simulation",
             "topic": topic,
         }
     except TimeoutError:
-        err_str = "LLM simulation timed out after 45s (API may be slow or rate-limited)"
+        err_str = "LLM simulation timed out after 55s"
         logger.warning(err_str)
         return {"error": err_str}
-    except (json.JSONDecodeError, Exception) as e:
-        err_str = str(e)
+    except Exception as e:
+        err_str = str(e) or repr(e)
         if not err_str or len(err_str) < 3:
-            err_str = "Empty response from LLM API (check API credits/key)"
+            err_str = f"LLM API error ({type(e).__name__})"
         logger.warning(f"LLM simulation failed ({type(e).__name__}): {err_str}")
         return {"error": f"Simulation unavailable: {err_str}"}
 
