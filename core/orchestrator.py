@@ -903,7 +903,7 @@ class NexusOrchestrator:
 
                 env = Environment(
                     loader=FileSystemLoader(str(tmpl_path.parent)),
-                    autoescape=False,
+                    autoescape=True,
                 )
                 tmpl = env.get_template(tmpl_path.name)
                 return tmpl.render(

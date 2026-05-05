@@ -117,7 +117,7 @@ async def claude_code_write_session(session_md: str, summary: str = "") -> str:
         return ""
 
     import hashlib
-    slug = hashlib.md5(session_md[:80].encode()).hexdigest()[:12]
+    slug = hashlib.md5(session_md[:80].encode(), usedforsecurity=False).hexdigest()[:12]
     session_dir = WIKI_DIR / "claude-code" / "sessions"
     session_dir.mkdir(parents=True, exist_ok=True)
 

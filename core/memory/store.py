@@ -103,7 +103,7 @@ class MemoryStore:
         stored = 0
 
         for chunk in chunks:
-            doc_id = hashlib.md5(chunk.strip().lower().encode()).hexdigest()
+            doc_id = hashlib.md5(chunk.strip().lower().encode(), usedforsecurity=False).hexdigest()
             embedding = embedder.embed(chunk)
 
             with _store_lock:

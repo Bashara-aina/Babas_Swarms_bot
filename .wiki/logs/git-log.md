@@ -616,3 +616,39 @@ Memory is fully active for both swarm-bot and OpenCode.
 - Truncation recovery: regex to extract answer field even if JSON is cut
 - Removes broken markdown code-block regex that never matched
 ---
+## Commit: 3aa7fec
+- Date: Tue May  5 04:07:42 PM JST 2026
+- Message: fix: system audit — N+1 batch UPDATE, litellm callbacks, self-evolution tests
+
+Performance:
+- core/memory/tiers.py: replace N+1 per-row UPDATE loop with single
+  batch UPDATE WHERE id IN (?,?,...) — O(n) → O(1) DB round-trips
+
+Memory callbacks:
+- core/memory/litellm_callbacks.py: add missing file (untracked) that
+  registers litellm.input/success_callback for memory injection
+- Fix F841 (dead store) on line 37: removed unused `kwargs.get()` result
+- main.py: wire litellm_callbacks import; pass LITELLM_BASE_URL env
+  to opencode sidecar subprocess
+
+Tests:
+- tests/test_self_evolution.py: 14 test cases covering FailureRecord,
+  SelfEvolutionEngine (record_failure, record_decision, build_eval_set,
+  get_adversarial_challenges, _infer_tags, _infer_agent_from_task)
+- All 14 tests passing
+
+Docs:
+- swarm.md: SwarmBot agent orchestration reference
+- parallel.md: git-worktree parallel execution guide
+---
+## Commit: f1384ff
+- Date: Tue May  5 04:28:17 PM JST 2026
+- Message: fix: computer_use_agent callable type, skip symphony_server test
+
+- Replace 'callable | None' with 'Callable[..., Any] | None' (Python 3.13 compat)
+- Skip test_symphony_server.py since symphony_of_one is Node.js, not Python
+- market_intel: robust JSON extraction for embedded braces/quotes
+
+Fixes: TypeError on 'callable | None' on Python 3.13
+Fixes: ImportError for missing symphony_server Python module
+---

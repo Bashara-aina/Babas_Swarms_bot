@@ -48,7 +48,7 @@ async def handle_inline_query(query: InlineQuery) -> None:
         response = response[:_INLINE_MAX_CHARS] + "\n\n…<i>(open bot for full answer)</i>"
 
     provider = model_used.split("/")[0].upper() if model_used else "AI"
-    result_id = hashlib.md5(text.encode()).hexdigest()[:8]
+    result_id = hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()[:8]
 
     result = InlineQueryResultArticle(
         id=result_id,

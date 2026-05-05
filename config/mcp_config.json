@@ -1,42 +1,71 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "_note": "MCP server configuration - synced with .opencode/opencode.json",
+  "_bootstrap": "tools/mcpServers/bootstrap/mcp_bootstrap.sh wraps npx-based servers to filter startup messages",
   "servers": [
     {
       "name": "gitnexus",
-      "command": "/tmp/gitnexus-mcp-wrapper.sh",
-      "args": [],
+      "command": "/home/newadmin/.local/node18/bin/gitnexus",
+      "args": ["mcp"],
       "enabled": true,
-      "description": "GitNexus code intelligence"
+      "description": "GitNexus code intelligence - graph queries, symbol analysis, execution flows"
     },
     {
-      "name": "latex",
-      "command": "python3",
-      "args": ["-m", "mcp_servers.texlab_bridge"],
+      "name": "filesystem",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": ["@modelcontextprotocol/server-filesystem", "/home/newadmin"],
       "enabled": true,
-      "description": "LaTeX/TeXlab editing"
-    },
-    {
-      "name": "ruflo",
-      "command": "python3",
-      "args": ["-m", "mcp_servers.ruflo_mcp_server"],
-      "enabled": true,
-      "description": "Ruflo enterprise AI agent orchestration - 39 tools for multi-agent swarms, vector memory, neural training"
-    },
-    {
-      "name": "symphony",
-      "command": "python3",
-      "args": ["-m", "mcp_servers.symphony_server"],
-      "enabled": true,
-      "description": "Symphony Linear issue orchestration"
+      "description": "Filesystem operations via MCP - read, write, list, search files"
     },
     {
       "name": "crawl4ai",
-      "command": "python3",
+      "command": "/home/newadmin/miniconda3/bin/python3",
       "args": ["/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"],
       "enabled": true,
-      "description": "AI-friendly web crawler"
+      "description": "AI-friendly web crawler - markdown, html, screenshot, pdf, crawl"
+    },
+    {
+      "name": "browser-use",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": ["-m", "tools.mcpServers.browser_use_mcp.server"],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "env": {
+        "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
+        "LITELLM_BASE_URL": "http://localhost:4000"
+      },
+      "enabled": true,
+      "description": "Browser automation via browser-use - open, click, fill, scroll, screenshot"
+    },
+    {
+      "name": "sequential-thinking",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": ["@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": true,
+      "description": "Sequential thinking for complex reasoning"
+    },
+    {
+      "name": "symphony",
+      "command": "/home/newadmin/.local/node18/bin/node",
+      "args": ["/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"],
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one",
+      "enabled": true,
+      "description": "Symphony multi-agent collaboration - chat rooms, tasks, persistent memory"
+    },
+    {
+      "name": "obsidian",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": ["@iflow-mcp/kynlos-obsidian-mcp-server", "/home/newadmin/swarm-bot/.wiki"],
+      "enabled": true,
+      "description": "Obsidian vault knowledge management"
+    },
+    {
+      "name": "git",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": ["@mseep/git-mcp-server"],
+      "enabled": true,
+      "description": "Git operations via MCP"
     }
   ],
   "mcpServers": {},
-  "_note": "Legacy format uses servers[]. Additional servers (gmail, whatsapp, github, calendar) are referenced by LEGION_MCP_* env vars but are invoked via direct API wrappers (not stdio MCP)."
+  "_legacy_note": "Legacy format uses servers[]. Additional servers (gmail, whatsapp, github, calendar) are referenced by LEGION_MCP_* env vars."
 }

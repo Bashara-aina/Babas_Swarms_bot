@@ -2,6 +2,12 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "minimax-coding-plan/MiniMax-M2.7",
   "small_model": "minimax-coding-plan/MiniMax-M2.7",
+  "provider": {
+    "minimax-coding-plan": {
+      "api": "http://localhost:4000/v1",
+      "env": ["MINIMAX_API_KEY"]
+    }
+  },
   "snapshot": false,
   "compaction": {
     "reserved": 8192,
@@ -29,7 +35,7 @@
   "agent": {
     "build": {
       "steps": 60,
-      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled \u2014 memory recall replaces it. Treat recalled memories as accurate prior context."
+      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled — memory recall replaces it. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {
@@ -52,35 +58,13 @@
         "mcp"
       ]
     },
-    "obsidian": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/.local/node18/bin/npx",
-        "-y",
-        "@iflow-mcp/kynlos-obsidian-mcp-server",
-        "/home/newadmin/swarm-bot/.wiki"
-      ]
-    },
-    "git": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/.local/node18/bin/npx",
-        "-y",
-        "@mseep/git-mcp-server"
-      ]
-    },
     "filesystem": {
       "type": "local",
       "command": [
-        "/home/newadmin/.local/node18/bin/npx",
-        "-y",
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "@modelcontextprotocol/server-filesystem",
         "/home/newadmin"
       ]
-    },
-    "exa": {
-      "type": "remote",
-      "url": "https://mcp.exa.ai/mcp"
     },
     "crawl4ai": {
       "type": "local",
@@ -88,54 +72,6 @@
         "/home/newadmin/miniconda3/bin/python3",
         "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
       ]
-    },
-    "symphony": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/miniconda3/bin/python3",
-        "-m",
-        "mcp_servers.symphony_server"
-      ],
-      "workingDirectory": "/home/newadmin/swarm-bot"
-    },
-    "latex": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/miniconda3/bin/python3",
-        "-m",
-        "mcp_servers.latex_mcp_server"
-      ],
-      "workingDirectory": "/home/newadmin/swarm-bot"
-    },
-    "ruflo": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/miniconda3/bin/python3",
-        "-m",
-        "mcp_servers.ruflo_mcp_server"
-      ],
-      "workingDirectory": "/home/newadmin/swarm-bot"
-    },
-    "sequential-thinking": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/.local/node18/bin/npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "hermes": {
-      "type": "local",
-      "command": [
-        "/home/newadmin/miniconda3/bin/python3",
-        "-m",
-        "mcp_servers.hermes_mcp_server"
-      ],
-      "workingDirectory": "/home/newadmin/swarm-bot",
-      "env": {
-        "HERMES_CLI_CONFIG": "/home/newadmin/swarm-bot/ext/hermes-agent/cli-config.yaml",
-        "LITELLM_BASE_URL": "http://localhost:4000"
-      }
     },
     "browser-use": {
       "type": "local",
@@ -149,6 +85,56 @@
         "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
         "LITELLM_BASE_URL": "http://localhost:4000"
       }
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "symphony": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/.local/node18/bin/node",
+        "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one"
+    },
+    "obsidian": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "@iflow-mcp/kynlos-obsidian-mcp-server",
+        "/home/newadmin/swarm-bot/.wiki"
+      ]
+    },
+    "git": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "@mseep/git-mcp-server"
+      ]
+    },
+    "ruflo": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "ruflo",
+        "mcp",
+        "start"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    "hermes": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "hermes",
+        "mcp",
+        "serve"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot"
     }
   },
   "watcher": {
@@ -169,31 +155,5 @@
       "*.zip",
       "skill_labels.zip"
     ]
-  },
-  "hooks": {
-    "session:start": {
-      "command": [
-        "bash",
-        "-c",
-        "cd /home/newadmin/swarm-bot && python3 scripts/opencode_session_start.py"
-      ],
-      "description": "Load long-term memory context from ChromaDB on session start"
-    },
-    "session:end": {
-      "command": [
-        "bash",
-        "-c",
-        "cd /home/newadmin/swarm-bot && python3 scripts/opencode_session_end.py --auto"
-      ],
-      "description": "Auto-store session summary to ChromaDB memory on session end"
-    },
-    "task:complete": {
-      "command": [
-        "bash",
-        "-c",
-        "cd /home/newadmin/swarm-bot && python3 -m core.memory.cli remember \"Task completed\" --agent opencode --type episodic"
-      ],
-      "description": "Store task completion to memory on task complete"
-    }
   }
 }
