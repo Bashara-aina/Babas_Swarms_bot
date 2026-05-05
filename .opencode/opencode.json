@@ -5,7 +5,7 @@
   "snapshot": false,
   "compaction": {
     "reserved": 8192,
-    "threshold": 0.99,
+    "threshold": 1.0,
     "maxContext": 204800
   },
   "permission": {
