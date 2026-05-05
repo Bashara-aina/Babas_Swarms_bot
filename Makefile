@@ -129,13 +129,13 @@ legiona-debate:
 
 # ── Memory System ──────────────────────────────────────────────
 memory-status:
-	python -m core.memory.infinite.cli status
+	python -m core.memory.cli status
 
 memory-recall:
-	@read -p "Query: " q; python -m core.memory.infinite.cli recall "$$q"
+	@read -p "Query: " q; python -m core.memory.cli recall "$$q"
 
 memory-remember:
-	@read -p "Content: " c; python -m core.memory.infinite.cli remember "$$c" --agent shared
+	@read -p "Content: " c; python -m core.memory.cli remember "$$c" --agent shared
 
 memory-bootstrap:
 	python scripts/bootstrap_memory.py
@@ -147,6 +147,6 @@ session-end:
 	python scripts/opencode_session_end.py
 
 memory-test:
-	python -m core.memory.infinite.cli recall "cekwajar"
-	python -m core.memory.infinite.cli recall "legion"
-	python -m core.memory.infinite.cli status
+	python -m core.memory.cli recall "cekwajar"
+	python -m core.memory.cli recall "legion"
+	python -m core.memory.cli status

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -19,20 +20,37 @@ COLLECTION_NAME = "babas_swarms"
 embedder = Embedder()
 
 
+_client_singleton: chromadb.PersistentClient | None = None  # type: ignore[reportGeneralTypeIssues]
+_client_lock = threading.Lock()
+
+
 def _get_client() -> chromadb.PersistentClient:  # type: ignore[reportGeneralTypeIssues]
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(
-        path=str(MEMORY_DIR),
-        settings=Settings(anonymized_telemetry=False),
-    )
+    global _client_singleton
+    if _client_singleton is None:
+        with _client_lock:
+            if _client_singleton is None:
+                MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+                _client_singleton = chromadb.PersistentClient(
+                    path=str(MEMORY_DIR),
+                    settings=Settings(anonymized_telemetry=False),
+                )
+    return _client_singleton
+
+
+_collection_singleton: chromadb.Collection | None = None
+_collection_lock = threading.Lock()
 
 
 def _get_collection() -> chromadb.Collection:
-    client = _get_client()
-    return client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        metadata={"hnsw:space": "cosine"},
-    )
+    global _collection_singleton
+    if _collection_singleton is None:
+        with _collection_lock:
+            if _collection_singleton is None:
+                _collection_singleton = _get_client().get_or_create_collection(
+                    name=COLLECTION_NAME,
+                    metadata={"hnsw:space": "cosine"},
+                )
+    return _collection_singleton  # type: ignore[return-value]
 
 
 def _chunk(text: str, min_len: int = 60) -> list[str]:
@@ -64,6 +82,9 @@ def _chunk(text: str, min_len: int = 60) -> list[str]:
     return chunks if chunks else [text[:500]]
 
 
+_store_lock = threading.Lock()
+
+
 class MemoryStore:
     def remember(
         self,
@@ -84,22 +105,22 @@ class MemoryStore:
         for chunk in chunks:
             doc_id = hashlib.md5(chunk.strip().lower().encode()).hexdigest()
             embedding = embedder.embed(chunk)
-            count_before = col.count()
 
-            col.add(
-                documents=[chunk],
-                embeddings=[embedding],
-                metadatas=[{
-                    "agent_id": agent_id,
-                    "session_id": session_id or "none",
-                    "memory_type": memory_type,
-                    "importance": importance,
-                }],
-                ids=[doc_id],
-            )
-
-            if col.count() > count_before:
-                stored += 1
+            with _store_lock:
+                count_before = col.count()
+                col.add(
+                    documents=[chunk],
+                    embeddings=[embedding],
+                    metadatas=[{
+                        "agent_id": agent_id,
+                        "session_id": session_id or "none",
+                        "memory_type": memory_type,
+                        "importance": importance,
+                    }],
+                    ids=[doc_id],
+                )
+                if col.count() > count_before:
+                    stored += 1
 
         return stored
 
