@@ -26,6 +26,7 @@ from handlers import (
     enterprise,
     github_intel_handler,
     gstack,
+    goal_handler,
     harvest_review,
     hermes,
     inline,
@@ -95,6 +96,7 @@ _ROUTER_ORDER = [
     legion_extras.router,  # /simulate /screenpipe_status /mcp_status /voice_room /websearch /quickscrape
     wiki_router,  # /wiki_audit /wiki_flush /wiki_restore /wiki_scan /wiki_stats
     harvest_review.router,  # /harvest_review
+    goal_handler.router,    # /goal /goal_status /goal_stop /goal_evolve (owner-only)
     shortcuts.router,  # /shortcuts
     admin_handlers.router,  # /budget /soul (owner-only)
     ai.router,  # /run /think /agent /swarm + NL catch-all (LAST)
