@@ -44,12 +44,35 @@ def _load_harness():
 
 
 def get_mini_agent() -> DefaultAgent:
-    """Build mini-SWE-agent from env config."""
-    model_name = os.getenv(
-        "MSWEA_MODEL_NAME",
-        "openai/minimax-primary"
+    """Build mini-SWE-agent v2.2.8+ with proper AgentConfig."""
+    import yaml
+    from pathlib import Path
+    from minisweagent.agents.default import AgentConfig
+
+    model_name = os.getenv("MSWEA_MODEL_NAME", "openai/minimax-primary")
+
+    # Load templates from mini.yaml (mini-swe-agent v2.2.8)
+    config_path = Path(__file__).parent.parent / ".goal" / "mini_agent_config.yaml"
+    if not config_path.exists():
+        # Fallback to installed package config
+        import importlib.resources
+        for p in importlib.resources.files("minisweagent").rglob("config/mini.yaml"):
+            config_path = str(p)
+            break
+
+    with open(config_path) as f:
+        cfg = yaml.safe_load(f)
+
+    agent_cfg = cfg["agent"]
+    return DefaultAgent(
+        LitellmModel(model_name=model_name),
+        LocalEnvironment(),
+        config_class=AgentConfig,
+        system_template=agent_cfg["system_template"],
+        instance_template=agent_cfg["instance_template"],
+        step_limit=agent_cfg.get("step_limit", 0),
+        cost_limit=agent_cfg.get("cost_limit", 3.0),
     )
-    return DefaultAgent(LitellmModel(model_name=model_name), LocalEnvironment())
 
 
 def _litellm_running() -> bool:
