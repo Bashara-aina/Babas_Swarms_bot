@@ -29,7 +29,7 @@
   "agent": {
     "build": {
       "steps": 60,
-      "prompt": "You have a persistent long-term memory system. At the start of this session, run: python -m core.memory.infinite.cli recall '<topic>' to retrieve relevant past context. When you complete significant work, run: python -m core.memory.infinite.cli remember '<summary>' --agent opencode to store it for future sessions. Compaction is disabled — instead recall from memory. Treat recalled memories as accurate prior context."
+      "prompt": "You have a persistent long-term memory system. At the start of this session, run: python -m core.memory.cli recall '<topic>' to retrieve relevant past context. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Compaction is disabled \u2014 instead recall from memory. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {
@@ -168,19 +168,31 @@
       "*.pdf",
       "*.zip",
       "skill_labels.zip"
-     ]
-   },
+    ]
+  },
   "hooks": {
     "session:start": {
-      "command": ["bash", "-c", "cat /tmp/legion_session_context.txt /tmp/legion_temporal_context.txt 2>/dev/null"],
+      "command": [
+        "bash",
+        "-c",
+        "cat /tmp/legion_session_context.txt /tmp/legion_temporal_context.txt 2>/dev/null"
+      ],
       "description": "Load session hot memory on start"
     },
     "session:end": {
-      "command": ["bash", "-c", "cat > /tmp/legion_session_summary.txt << 'EOF'\nLast session summary auto-generated\nEOF"],
+      "command": [
+        "bash",
+        "-c",
+        "cat > /tmp/legion_session_summary.txt << 'EOF'\nLast session summary auto-generated\nEOF"
+      ],
       "description": "Save session summary to hot memory on end"
     },
     "task:complete": {
-      "command": ["bash", "-c", "echo 'task complete' >> /tmp/legion_task_log.txt"],
+      "command": [
+        "bash",
+        "-c",
+        "echo 'task complete' >> /tmp/legion_task_log.txt"
+      ],
       "description": "Log task completion to hot memory"
     }
   }
