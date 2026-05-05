@@ -6,7 +6,7 @@
   "compaction": {
     "reserved": 8192,
     "threshold": 1.0,
-    "maxContext": 204800
+    "maxContext": 153600
   },
   "permission": {
     "read": "allow",
@@ -29,7 +29,7 @@
   "agent": {
     "build": {
       "steps": 60,
-      "prompt": "You have a persistent long-term memory system. At the start of this session, run: python -m core.memory.cli recall '<topic>' to retrieve relevant past context. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Compaction is disabled \u2014 instead recall from memory. Treat recalled memories as accurate prior context."
+      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled \u2014 memory recall replaces it. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {
@@ -175,25 +175,25 @@
       "command": [
         "bash",
         "-c",
-        "cat /tmp/legion_session_context.txt /tmp/legion_temporal_context.txt 2>/dev/null"
+        "cd /home/newadmin/swarm-bot && python3 scripts/opencode_session_start.py"
       ],
-      "description": "Load session hot memory on start"
+      "description": "Load long-term memory context from ChromaDB on session start"
     },
     "session:end": {
       "command": [
         "bash",
         "-c",
-        "cat > /tmp/legion_session_summary.txt << 'EOF'\nLast session summary auto-generated\nEOF"
+        "cd /home/newadmin/swarm-bot && python3 scripts/opencode_session_end.py --auto"
       ],
-      "description": "Save session summary to hot memory on end"
+      "description": "Auto-store session summary to ChromaDB memory on session end"
     },
     "task:complete": {
       "command": [
         "bash",
         "-c",
-        "echo 'task complete' >> /tmp/legion_task_log.txt"
+        "cd /home/newadmin/swarm-bot && python3 -m core.memory.cli remember \"Task completed\" --agent opencode --type episodic"
       ],
-      "description": "Log task completion to hot memory"
+      "description": "Store task completion to memory on task complete"
     }
   }
 }
