@@ -1,12 +1,12 @@
 ---
 allowed-tools: Read,Bash,Grep,Glob,Task
 argument-hint: [query]
-description: "Recall prior session context from 4-layer memory before starting work. Query is optional — without args shows recent context."
+description: "Recall prior session context from 4-layer memory. Auto-starts session_watcher if not running. Without args: show recent context."
 ---
 
-# /memory — Infinite Memory Recall (4-Layer Engine)
+# /memory — Infinite Memory Recall
 
-Before starting any task, run `/memory <brief query>` to pull in prior context.
+Fully automatic — starts the session_watcher daemon if needed, then queries all 4 layers.
 
 ## Usage
 ```
@@ -18,7 +18,7 @@ Before starting any task, run `/memory <brief query>` to pull in prior context.
 
 ## How It Works
 
-`/memory` queries 4 layers in priority order:
+`/memory` queries 4 layers in priority order, auto-starting the watcher if needed:
 
 | Layer | Source | Trigger |
 |-------|--------|---------|
@@ -27,35 +27,46 @@ Before starting any task, run `/memory <brief query>` to pull in prior context.
 | 3 | langmem | `SwarmBotMemoryManager.search_memories()` |
 | 4 | graphrag | `query_wiki_graph()` — wiki knowledge base |
 
-## Session Lifecycle
+## Session Lifecycle (fully automatic now)
 
 ```
-.start_session_watcher.sh  →  work  →  /memory  →  work  →  .stop_session_watcher.sh
+.opencode-start.sh          →  work  →  /memory  →  work  →  opencode-stop.sh
 ```
 
-- **Start of session**: `./scripts/start_session_watcher.sh` — starts the background daemon
-- **During work**: daemon polls `.session_state/` every 30s, saves to mem0+langmem every 2 min
-- **Before task**: `/memory <query>` — runs 4-layer recall, result cached to `.session_state/recalled_context.md`
-- **End of session**: `./scripts/stop_session_watcher.sh` — final checkpoint + graceful stop
+Or just:
+```bash
+# Start everything (daemon + recall) — one command
+./scripts/opencode-start.sh
 
-## Memory Files
+# End session + final save — one command
+./scripts/opencode-stop.sh
+```
 
-| File | Purpose |
-|------|---------|
-| `.session_state/current.json` | Active session state (last LLM call, phase, query) |
-| `.session_state/checkpoints/` | Timestamp-named snapshots of full session state |
-| `.session_state/recalled_context.md` | Output from last /memory call |
-| `.session_state/watcher.pid` | PID of running watcher daemon |
-| `.session_state/watcher.log` | Daemon log file |
-| `.session_state/llm_events.log` | Append-only log of all LLM calls |
+## What opencode-start.sh does
 
-## /memory Implementation
+1. **Starts session_watcher daemon** (if not already running)
+2. **Queries 4-layer memory** for the given query
+3. **Writes recalled context** to `.session_state/recalled_context.md`
+4. **Echoes the context** so you paste it as OpenCode's first message
 
+## What opencode-stop.sh does
+
+1. **Graceful stop** of session_watcher (final checkpoint + save to mem0/langmem)
+2. **Session summary** (checkpoints created, files changed, LLM calls logged)
+3. **Confirmation** that memory is durable
+
+## Manual state updates (optional)
+
+During work, you can enrich checkpoints by writing state:
 ```python
-from core.memory.memory_injector import build_memory_context
-
-ctx = build_memory_context(query, user_id="bashara")
-# Returns formatted context block + writes .session_state/recalled_context.md
+from core.memory.session_watcher import write_state
+write_state({
+    "current_task": "Building Rumahlabuh search page",
+    "files_changed": ["app/search/page.tsx"],
+    "decisions": ["Server-side pagination over client-side"],
+    "progress_notes": ["API done, UI 60% complete"],
+    "status": "in_progress"
+})
 ```
 
 ## Example Output
@@ -78,6 +89,17 @@ Layers with results: 3/4
 
 ━━━ END RECALL — treat as prior context ━━━
 ```
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `.session_state/current.json` | Active session state (last LLM call, phase, query) |
+| `.session_state/checkpoints/` | Timestamp-named snapshots of full session state |
+| `.session_state/recalled_context.md` | Output from last /memory call |
+| `.session_state/watcher.pid` | PID of running watcher daemon |
+| `.session_state/watcher.log` | Daemon log file |
+| `.session_state/llm_events.log` | Append-only log of all LLM calls |
 
 ## Notes
 

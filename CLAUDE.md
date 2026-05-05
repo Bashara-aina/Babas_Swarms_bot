@@ -162,15 +162,25 @@ Max 9 child agents per parent. Overflow items are deferred in todo order.
 
 This stack implements infinite memory without compaction. Memory only grows.
 
-### Session Lifecycle
+### Session Lifecycle (fully automatic)
 
-```
-.start_session_watcher.sh → work → /memory → work → .stop_session_watcher.sh
+```bash
+./scripts/opencode-start.sh           # ONE command — starts daemon + recalls context
+# paste the echoed context as OpenCode's first message
+work...
+./scripts/opencode-stop.sh           # ONE command — final save + session summary
 ```
 
-- **Before work**: `/memory <query>` — queries 4-layer recall engine → writes `.session_state/recalled_context.md`
-- **During work**: `session_watcher` daemon polls `.session_state/` every 30s, saves to mem0+langmem every 2 min
-- **After work**: `.stop_session_watcher.sh` sends STOP_SIGNAL → final checkpoint + save
+### What opencode-start.sh does
+1. Starts session_watcher daemon (if not running)
+2. Queries 4-layer recall engine
+3. Writes `.session_state/recalled_context.md`
+4. Echoes context for you to paste as first message
+
+### What opencode-stop.sh does
+1. Graceful stop via STOP_SIGNAL file
+2. Final checkpoint + save to mem0/langmem
+3. Shows session summary (checkpoints, files, LLM calls)
 
 ### Memory Layers (recall order)
 
@@ -185,9 +195,22 @@ This stack implements infinite memory without compaction. Memory only grows.
 
 - `core/memory/session_watcher.py` — daemon; writes PID to `.session_state/watcher.pid`
 - `core/memory/memory_injector.py` — `build_memory_context(query, user_id)` for /memory command
-- `.opencode/command/memory.md` — `/memory` slash command definition
-- `scripts/start_session_watcher.sh` / `scripts/stop_session_watcher.sh` — lifecycle scripts
+- `scripts/opencode-start.sh` — one-command session start + recall
+- `scripts/opencode-stop.sh` — one-command session stop + save
+- `scripts/start_session_watcher.sh` / `scripts/stop_session_watcher.sh` — daemon lifecycle (used by opencode-start/stop)
 
 ### LiteLLM Callback Bridge
 
 `core/memory/litellm_callbacks.py` bridges every LLM call to `.session_state/current.json` via `_bridge_to_session_state()`. This lets session_watcher track LLM activity without parsing logs.
+
+### Optional mid-session state enrichment
+
+```python
+from core.memory.session_watcher import write_state
+write_state({
+    "current_task": "Building search page",
+    "files_changed": ["app/search/page.tsx"],
+    "decisions": ["Server-side pagination"],
+    "status": "in_progress"
+})
+```
