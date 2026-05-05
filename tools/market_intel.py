@@ -415,7 +415,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_msg},
                         ],
-                        "max_tokens": 3500,
+                        "max_tokens": 8000,
                         "temperature": 1.0,
                         "top_p": 0.95,
                     },
@@ -432,32 +432,34 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                 else:
                     cleaned = raw.strip()
 
-                # Try to find JSON in markdown code block first (model often wraps in ```json...```)
-                json_match = re.search(r"```json\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
-                if json_match:
-                    try:
-                        parsed = json.loads(json_match.group(1))
-                        return {
-                            "answer": parsed.get("answer", ""),
-                            "confidence": parsed.get("confidence", "MEDIUM"),
-                        }
-                    except Exception:
-                        pass
-
-                # Find first { and last } to extract JSON object
+                # Find first { and last } to extract JSON object (robust — handles
+                # nested braces inside string values)
                 jstart = cleaned.find("{")
                 jend = cleaned.rfind("}") + 1
                 if jstart != -1 and jend > jstart:
                     json_str = cleaned[jstart:jend]
-                    parsed = json.loads(json_str)
-                    return {
-                        "answer": parsed.get("answer", json_str),
-                        "confidence": parsed.get("confidence", "MEDIUM"),
-                    }
+                    try:
+                        parsed = json.loads(json_str)
+                        return {
+                            "answer": parsed.get("answer", ""),
+                            "confidence": parsed.get("confidence", "MEDIUM"),
+                        }
+                    except json.JSONDecodeError as e:
+                        # Truncated JSON — try to recover partial answer by finding the
+                        # last complete "answer" field value before the cut
+                        answer_match = re.search(r'"answer"\s*:\s*"(.*)"\s*,\s*"confidence"', json_str, re.DOTALL)
+                        if answer_match:
+                            return {
+                                "answer": answer_match.group(1).strip(),
+                                "confidence": "MEDIUM",
+                            }
+                        # Last resort: strip broken tail
+                        cut = max(0, e.pos - 200)
+                        return {"answer": json_str[cut:e.pos], "confidence": "LOW"}
                 # Fallback: return cleaned text
                 return {"answer": cleaned[:500], "confidence": "MEDIUM"}
 
-        result = await asyncio.wait_for(_call(), timeout=180.0)
+        result = await asyncio.wait_for(_call(), timeout=300.0)
         return {
             "narrative": result["answer"],
             "confidence": result["confidence"],
@@ -465,7 +467,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
             "topic": topic,
         }
     except TimeoutError:
-        err_str = "LLM simulation timed out after 55s"
+        err_str = "LLM simulation timed out after 300s"
         logger.warning(err_str)
         return {"error": err_str}
     except Exception as e:
