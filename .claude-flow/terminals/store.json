@@ -1,0 +1,22 @@
+{
+  "sessions": {
+    "term-1777991194986-mi383w": {
+      "id": "term-1777991194986-mi383w",
+      "name": "opencode-serve",
+      "status": "active",
+      "createdAt": "2026-05-05T14:26:34.986Z",
+      "lastActivity": "2026-05-05T14:26:43.959Z",
+      "workingDir": "/home/newadmin/swarm-bot",
+      "history": [
+        {
+          "command": "pkill -f \"opencode serve\" 2>/dev/null; sleep 1; env LITELLM_BASE_URL=http://localhost:4000 OPENCODE_SERVER_PASSWORD=legion nohup opencode serve --port 4097 > /tmp/opencode_serve.log 2>&1 &\nsleep 3\necho \"PID: $!\"\nps aux | grep opencode | grep -v grep | head -2",
+          "output": "",
+          "timestamp": "2026-05-05T14:26:43.959Z",
+          "exitCode": 1
+        }
+      ],
+      "env": {}
+    }
+  },
+  "version": "3.0.0"
+}

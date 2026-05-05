@@ -2712,3 +2712,38 @@ source: legion-harvester
 }
 ```
 
+---
+title: harvest-session-2026-05-05-5537ecbf
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-05-05
+updated: 2026-05-05
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-05-05
+**Session ID**: 5537ecbf
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-05-05",
+  "session_id": "5537ecbf",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+

@@ -1352,3 +1352,202 @@ async def run_legion_swarm(
 # ---------------------------------------------------------------------------
 
 nexus = NexusOrchestrator()
+
+
+# ---------------------------------------------------------------------------
+# HarnessFS CLI tool
+# ---------------------------------------------------------------------------
+
+
+def harness_fs_cli(base_dir: str = "/tmp/meta_harness") -> None:
+    """
+    CLI tool for querying HarnessFS.
+
+    Usage:
+        from core.orchestrator import harness_fs_cli
+        harness_fs_cli("/path/to/harness/fs")
+
+    Provides:
+        - List Pareto frontier candidates
+        - Show top-k candidates by reward
+        - Diff two candidates
+        - Show candidate details (code, traces, scores)
+    """
+    from core.meta_harness import HarnessFS
+
+    fs = HarnessFS(base_dir=base_dir)
+
+    print(f"\n=== HarnessFS at {base_dir} ===")
+    stats = fs.get_stats()
+    print(f"Total candidates: {stats['total_candidates']}")
+    print(f"Pareto frontier size: {stats['pareto_frontier_size']}")
+    print(f"Domains: {', '.join(stats.get('domains', []))}")
+
+    # Show Pareto frontier
+    frontier = fs.get_pareto_frontier()
+    if frontier.candidates:
+        print(f"\n=== Pareto Frontier ({len(frontier.candidates)} candidates) ===")
+        for i, c in enumerate(frontier.candidates):
+            print(f"{i+1}. {c.candidate_id}")
+            print(f"   Domain: {c.domain.value}")
+            print(f"   Reward: {c.mean_reward:.4f}, Cost: {c.mean_cost:.4f}")
+            print(f"   Description: {c.description[:80]}...")
+
+    # Show recent candidates
+    recent = fs.query_recent(n=10)
+    if recent:
+        print(f"\n=== Recent Candidates ({len(recent)} shown) ===")
+        for c in recent:
+            print(f"- {c.candidate_id}: reward={c.mean_reward:.4f}, {c.description[:60]}")
+
+    print("\n=== Available Commands ===")
+    print("  fs.get(candidate_id)     - Get full candidate details")
+    print("  fs.query_by_keyword(k)   - Search by keyword")
+    print("  fs.query_by_reward_range(min, max) - Filter by reward")
+    print("  fs.get_pareto_frontier() - Get non-dominated candidates")
+
+
+def diff_candidates(
+    candidate_id_1: str,
+    candidate_id_2: str,
+    base_dir: str = "/tmp/meta_harness",
+) -> str:
+    """
+    Diff two harness candidates and return a summary.
+
+    Usage:
+        diff = diff_candidates("harness_abc123", "harness_def456")
+        print(diff)
+    """
+    from core.meta_harness import HarnessFS
+
+    fs = HarnessFS(base_dir=base_dir)
+
+    c1 = fs.get(candidate_id_1)
+    c2 = fs.get(candidate_id_2)
+
+    if not c1 or not c2:
+        return f"Error: One or both candidates not found"
+
+    lines = [
+        f"=== Diff: {candidate_id_1} vs {candidate_id_2} ===",
+        f"",
+        f"Metric          | {candidate_id_1:20} | {candidate_id_2:20}",
+        f"-" * 60,
+        f"Reward          | {c1.mean_reward:20.4f} | {c2.mean_reward:20.4f}",
+        f"Cost            | {c1.mean_cost:20.4f} | {c2.mean_cost:20.4f}",
+        f"Domain          | {c1.domain.value:20} | {c2.domain.value:20}",
+        f"Evaluations     | {len(c1.evaluations):20} | {len(c2.evaluations):20}",
+    ]
+
+    # Show code length comparison
+    lines.append(f"Code length    | {len(c1.source_code):20} | {len(c2.source_code):20}")
+
+    # Find line-by-line differences
+    import difflib
+
+    l1 = c1.source_code.splitlines()
+    l2 = c2.source_code.splitlines()
+    diff = list(difflib.unified_diff(l1, l2, fromfile=candidate_id_1, tofile=candidate_id_2, lineterm=""))
+
+    if diff:
+        lines.append(f"\n=== Code Differences ({len(diff)} lines) ===")
+        lines.extend(diff[:50])  # Show first 50 diff lines
+        if len(diff) > 50:
+            lines.append(f"  ... ({len(diff) - 50} more lines)")
+    else:
+        lines.append("\n(No code differences)")
+
+    return "\n".join(lines)
+
+
+async def run_meta_harness(
+    task: str,
+    pattern: str = "sequential",
+    recursion_depth: int = 3,
+    use_harness: bool = True,
+    harness_domain: str = "agentic_coding",
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+) -> dict:
+    """
+    Run integrated Meta-Harness + RecursiveMAS pipeline.
+
+    This combines Meta-Harness (harness optimization) with RecursiveMAS
+    (multi-agent collaboration) in a unified workflow.
+
+    Usage:
+        result = await run_meta_recursive(
+            task="Solve this coding task...",
+            pattern="sequential",
+            recursion_depth=3,
+            use_harness=True,
+            harness_domain="agentic_coding",
+        )
+        print(result["output"])
+        print(f"Harness used: {result.get('harness_id', 'none')}")
+
+    Args:
+        task: The task/question to solve
+        pattern: RecursiveMAS collaboration pattern
+        recursion_depth: Number of recursion rounds
+        use_harness: Whether to use harness optimization
+        harness_domain: Domain for harness optimization
+        progress_fn: Optional callback for progress updates
+
+    Returns:
+        Dict with output, metrics, and harness info
+    """
+    from core.meta_harness import HarnessFS, HarnessCandidate, HarnessDomain
+    from core.recursive_mas import CollaborationPattern, RecursiveMASOrchestrator
+
+    async def llm_call(model: str, system: str, user: str) -> str:
+        from llm_client import chat
+
+        result, _ = await chat(user, agent_key="general", task_context=system)
+        return result
+
+    async def progress(msg: str) -> None:
+        if progress_fn:
+            await progress_fn(msg)
+        logger.info("[Meta-Recursive] %s", msg)
+
+    # Map pattern string to enum
+    pattern_map = {
+        "sequential": CollaborationPattern.SEQUENTIAL,
+        "mixture": CollaborationPattern.MIXTURE,
+        "distillation": CollaborationPattern.DISTILLATION,
+        "deliberation": CollaborationPattern.DELIBERATION,
+    }
+    collab_pattern = pattern_map.get(pattern.lower(), CollaborationPattern.SEQUENTIAL)
+
+    # If harness requested, get best harness from FS
+    harness_used = None
+    if use_harness:
+        await progress("Loading optimized harness from Meta-Harness...")
+        fs = HarnessFS()
+        frontier = fs.get_pareto_frontier()
+        if frontier.candidates:
+            best = frontier.candidates[0]
+            harness_used = best.candidate_id
+            await progress(f"Using harness: {best.candidate_id} (reward={best.mean_reward:.4f})")
+
+    # Run RecursiveMAS
+    await progress(f"Running RecursiveMAS ({pattern}, depth={recursion_depth})...")
+    orchestrator = RecursiveMASOrchestrator(
+        llm_call=llm_call,
+        collaboration_pattern=collab_pattern,
+        recursion_depth=recursion_depth,
+        progress_fn=progress_fn,
+    )
+    result = await orchestrator.run(task)
+
+    return {
+        "output": result.output,
+        "success": result.success,
+        "pattern": pattern,
+        "recursion_depth": recursion_depth,
+        "harness_id": harness_used,
+        "num_agents": len(orchestrator.agents),
+        "latency_ms": result.total_latency_ms,
+        "agent_results": result.agent_results,
+    }

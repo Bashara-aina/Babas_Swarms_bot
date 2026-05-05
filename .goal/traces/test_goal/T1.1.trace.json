@@ -1,0 +1,12 @@
+{
+  "task_id": "T1.1",
+  "goal_id": "test_goal",
+  "harness_version": "H_0",
+  "timestamp": "2026-05-06T00:15:57.983113",
+  "prompt": "prompt",
+  "stdout": "stdout",
+  "stderr": "stderr",
+  "returncode": 0,
+  "git_diff": "diff",
+  "outcome": "success"
+}

@@ -1,0 +1,68 @@
+# Meta-Harness Configuration
+# Based on arXiv:2603.28052 - "Meta-Harness: End-to-End Optimization of Model Harnesses"
+#
+# This file configures the Meta-Harness optimizer which meta-optimizes
+# the "harness" (prompt + memory + retrieval logic) used by RecursiveMAS agents.
+#
+# Integration: Meta-Harness optimizes harness functions H(x, y, θ) that
+# RecursiveMAS agents use to determine what to store, retrieve, and present.
+
+meta_harness:
+  # Optimization settings
+  max_iterations: 20
+  proposals_per_iteration: 2
+  population_size: 10  # Max candidates in memory before pruning
+
+  # Proposer settings
+  proposer:
+    inspection_depth: "full"  # "full", "scores_only", "scores_plus_summary"
+    # Paper shows proposer reads median 82 files per iteration
+    # "full" inspection includes execution traces (key advantage over text optimizers)
+
+  # Evaluation settings
+  evaluation:
+    num_task_instances: 5  # Number of tasks to evaluate each candidate on
+    reward_metric: "task_accuracy"  # Could also be "token_efficiency"
+    timeout_per_eval_ms: 30000
+
+  # Harness domains
+  domains:
+    - key: agentic_coding
+      name: "Agentic Coding"
+      description: "Harnesses for code generation, debugging, refactoring tasks"
+      example_tasks:
+        - "Write a function to sort a list"
+        - "Debug this code and explain the issue"
+        - "Refactor this class to improve readability"
+
+    - key: rag
+      name: "Retrieval-Augmented Generation"
+      description: "Harnesses for RAG with memory-enhanced retrieval"
+      example_tasks:
+        - "Answer questions about the codebase"
+        - "Find relevant documentation for X"
+        - "Synthesize info from multiple sources"
+
+    - key: math_reasoning
+      name: "Mathematical Reasoning"
+      description: "Harnesses for multi-step math problem solving"
+      example_tasks:
+        - "Prove this theorem"
+        - "Solve this equation step by step"
+        - "Calculate the derivative of f(x)"
+
+# Harness Filesystem (D) settings
+storage:
+  base_dir: "/tmp/meta_harness_fs"
+  # Stores: source code, evaluation scores, execution traces
+  # Proposer queries via grep/cat rather than ingesting all as single prompt
+
+# Integration with RecursiveMAS
+recursive_mas_integration:
+  enabled: true
+  # Meta-Harness optimizes the harness that RecursiveMAS agents use
+  # RecursiveMAS provides the inner-loop reasoning mechanism
+  default_pattern: "sequential"  # Use sequential pattern for harness evaluation
+  recursion_depth: 2  # Shallow recursion for faster evaluation
+  # When Meta-Harness proposes a new harness, it gets evaluated by
+  # running RecursiveMAS agents with that harness wrapping their calls

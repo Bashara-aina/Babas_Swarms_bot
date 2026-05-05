@@ -1,0 +1,13 @@
+=== TASK: T1.1 ===
+HARNESS: H_0
+OUTCOME: success
+TIMESTAMP: 2026-05-06T00:15:57.983113
+
+--- PROMPT ---
+prompt
+
+--- STDOUT ---
+stdout
+
+--- GIT DIFF ---
+diff

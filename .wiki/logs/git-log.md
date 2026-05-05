@@ -652,3 +652,105 @@ Docs:
 Fixes: TypeError on 'callable | None' on Python 3.13
 Fixes: ImportError for missing symphony_server Python module
 ---
+## Commit: f7b9db3
+- Date: Tue May  5 11:01:23 PM JST 2026
+- Message: feat: implement /goal autonomous delivery system
+
+- tools/goal_planner.py: goal decomposition via Claude → PLAN.md
+- tools/goal_auditor.py: end-to-end audit (pytest, ruff, bandit, git)
+- tools/goal_runner.py: main orchestrator using mini-swe-agent
+- handlers/goal_handler.py: Telegram /goal, /goal_status, /goal_stop
+- scripts/goal_daemon.sh: CLI runner (no Telegram required)
+- .goal/: runtime dirs (logs, checkpoints, plans, reports)
+
+Engine: mini-swe-agent v2.2.8 (74%+ SWE-bench verified)
+Model: minimax-primary via LiteLLM proxy on :4000
+Cost limit: $5/run, 200 calls/run by default
+---
+## Commit: 2d1a5b8
+- Date: Tue May  5 11:25:37 PM JST 2026
+- Message: feat(goal): /goal v2 -- Meta-Harness + RecursiveMAS autonomous delivery
+
+Implements /goal v2 grounded in two 2026 research papers:
+
+[1] Meta-Harness (arXiv:2603.28052, Stanford/MIT):
+    - Harness optimization via FULL filesystem access to execution traces
+    - Key result: full traces -> 50.0 median accuracy vs 34.6 with scores-only
+    - Harness proposer (Claude Opus) reads raw traces, proposes H_{n+1}
+    - Pareto frontier tracking: accuracy vs cost tradeoffs
+
+[2] RecursiveMAS (arXiv:2604.25917):
+    - Recursive multi-agent collaboration via latent state transfer
+    - 8.3% avg accuracy gain, 1.2x-2.4x speedup, 34.6-75.6% token reduction
+    - Each task passes compressed summary as latent state to next task
+    - Inner-outer loop: executor loop + harness evolution loop
+
+Architecture:
+  Telegram /goal -> goal_planner.py (Claude decomposes to PLAN.md)
+  -> goal_runner.py (RecursiveMAS: mini-SWE-agent per task with latent state)
+  -> goal_auditor.py (full audit: tests, lint, security, git diff)
+  -> GitHub PR auto-opened
+  -> goal_harness_proposer.py (Meta-Harness: reads all traces, evolves harness)
+
+Files:
+  tools/goal_runner.py       -- RecursiveMAS orchestrator
+  tools/goal_planner.py      -- goal decomposition + trace logging
+  tools/goal_auditor.py      -- audit + Pareto score tracking
+  tools/goal_harness_proposer.py -- Meta-Harness outer loop proposer
+  .goal/harnesses/current/harness.py -- H_0 (evolves after each run)
+  scripts/goal_daemon.sh     -- CLI runner
+  scripts/evolve_harness.sh  -- trigger Meta-Harness proposer
+
+Telegram commands:
+  /goal <description>  -- start autonomous delivery
+  /goal_status          -- check progress
+  /goal_stop            -- graceful stop
+  /goal_evolve          -- run Meta-Harness proposer to improve harness
+
+Cost limit: $5 / 200 LLM calls per goal (configurable)
+Harness evolves automatically -- gets smarter after each run.
+---
+## Commit: ecbdb21
+- Date: Wed May  6 12:16:07 AM JST 2026
+- Message: feat(memory): implement infinite memory without compaction
+
+Add additive-only infinite memory for OpenCode sessions:
+
+- session_watcher.py: background daemon polling .session_state/ every 30s,
+  checkpointing on state change, saving to mem0+langmem every 2 min.
+  SIGTERM graceful shutdown via STOP_SIGNAL file.
+- memory_injector.py: 4-layer recall engine (checkpoints → mem0 →
+  langmem → graphrag). build_memory_context(query) returns formatted
+  context block + writes .session_state/recalled_context.md
+- litellm_callbacks.py: _bridge_to_session_state() called after every
+  LLM success callback; writes current.json + llm_events.log so
+  session_watcher tracks LLM activity
+- /memory slash command: updated to use the 4-layer recall engine
+- start/stop scripts: lifecycle management for the watcher daemon
+- CLAUDE.md: INFINITE MEMORY section added documenting the system
+
+The .session_state/ directory (checkpoints, current.json, watcher.pid,
+watcher.log) is gitignored — runtime data only.
+---
+## Commit: a2d6314
+- Date: Wed May  6 12:23:22 AM JST 2026
+- Message: fix(goal): mini-swe-agent v2.2.8 AgentConfig compatibility
+
+- goal_runner.py get_mini_agent() now loads system_template + instance_template
+  from mini.yaml (AgentConfig requires these in v2.2.8)
+- Added .goal/mini_agent_config.yaml with agent config section
+- DefaultAgent(LitellmModel, LocalEnvironment) → DefaultAgent(model, env,
+  config_class=AgentConfig, system_template=..., instance_template=...,
+  step_limit=..., cost_limit=...)
+- Integration smoke test: PASS
+---
+## Commit: b051c06
+- Date: Wed May  6 12:37:24 AM JST 2026
+- Message: feat(memory): add fully-automatic session lifecycle scripts
+
+opencode-start.sh: one command starts daemon + queries 4-layer memory +
+echoes context for OpenCode's first message
+
+opencode-stop.sh: one command final save + session summary (checkpoints,
+files, LLM calls)
+---

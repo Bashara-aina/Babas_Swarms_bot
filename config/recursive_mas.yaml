@@ -1,0 +1,106 @@
+# RecursiveMAS Configuration
+# Based on arXiv:2604.25917 - "Recursive Multi-Agent Systems"
+#
+# This file configures the 4 collaboration patterns supported by RecursiveMAS.
+# Each pattern defines the agents, their roles, and how they collaborate.
+
+collaboration_patterns:
+  sequential:
+    name: "Sequential Style"
+    description: "Planner → Critic → Solver - Three complementary roles progressively decompose, judge, refine, and solve a problem"
+    agents:
+      - key: planner
+        name: "Planner"
+        role_type: "planner"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Decompose the problem into logical steps. Think about what approaches might work."
+      - key: critic
+        name: "Critic"
+        role_type: "critic"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Evaluate critically. Identify weaknesses and suggest improvements."
+      - key: solver
+        name: "Solver"
+        role_type: "solver"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Execute the solution. Provide the final answer with reasoning."
+
+  mixture:
+    name: "Mixture Style"
+    description: "Domain specialists (Math, Code, Science) reason in parallel; Summarizer aggregates their latent outputs"
+    agents:
+      - key: math
+        name: "Math Specialist"
+        role_type: "specialist"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Apply deep mathematical knowledge to analyze and solve the problem."
+      - key: code
+        name: "Code Specialist"
+        role_type: "specialist"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Apply programming expertise to solve computational aspects."
+      - key: science
+        name: "Science Specialist"
+        role_type: "specialist"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Apply scientific reasoning to analyze the problem domain."
+      - key: summarizer
+        name: "Summarizer"
+        role_type: "summarizer"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Aggregate multiple perspectives into a coherent final answer."
+
+  distillation:
+    name: "Distillation Style"
+    description: "Expert → Learner - Larger expert pairs with smaller learner to distill capability while keeping inference fast"
+    agents:
+      - key: expert
+        name: "Expert"
+        role_type: "expert"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Provide authoritative knowledge and guide the learning process."
+      - key: learner
+        name: "Learner"
+        role_type: "learner"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Learn from the expert while contributing your own insights."
+
+  deliberation:
+    name: "Deliberation Style"
+    description: "Reflector ↔ Tool-Caller - Inner-thinking reflector critiques tool-calling agent iteratively"
+    agents:
+      - key: reflector
+        name: "Reflector"
+        role_type: "reflector"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Engage in inner thinking to critique and refine solutions. Consider alternative approaches."
+      - key: tool_caller
+        name: "Tool-Caller"
+        role_type: "tool_caller"
+        model: "minimax/MiniMax-M2.7"
+        instructions: "Use available tools (Python, search) to solve problems. Execute and verify."
+
+# RecursiveLink configuration
+recursive_link:
+  hidden_dim: 4096  # Hidden dimension for latent states
+  intermediate_dim: 4096  # Intermediate dimension (same for simplicity)
+  use_residual: true  # Use residual connection (key for stable training)
+  activation: "gelu"  # GELU activation
+
+# Training configuration
+training:
+  inner_loop:
+    learning_rate: 5e-4
+    batch_size: 4
+    warmup: true
+  outer_loop:
+    learning_rate: 5e-4
+    cosine_scheduler: true
+    recursion_rounds: 3
+
+# Default settings
+defaults:
+  recursion_depth: 3  # Paper shows clean scaling up to r=3
+  latent_steps_per_agent: 3  # Steps per recursion round
+  temperature: 0.6  # For reasoning tasks
+  top_p: 0.95
