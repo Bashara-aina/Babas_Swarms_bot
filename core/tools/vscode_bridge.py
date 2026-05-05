@@ -136,7 +136,7 @@ def _run_command_sync(cmd: str, cwd: str | None = None, timeout: int = 30) -> st
     try:
         result = subprocess.run(
             cmd,
-            shell=True,
+            shell=True,  # nosec: B602 -- _run_command_sync is not exposed via MCP/agent tools; callers use hardcoded commands only
             capture_output=True,
             text=True,
             timeout=timeout,

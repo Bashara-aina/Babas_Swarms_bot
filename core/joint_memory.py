@@ -43,9 +43,9 @@ async def joint_save(
     _ensure_dirs()
     slug = _slug(content)
     ts = str(asyncio.get_running_loop().time())
-        entry_id = int(
-            hashlib.md5(f"{source}{slug}{ts}".encode(), usedforsecurity=False).hexdigest()[:8], 16
-        )
+    entry_id = int(
+        hashlib.md5(f"{source}{slug}{ts}".encode(), usedforsecurity=False).hexdigest()[:8], 16
+    )
 
     session_dir = SESSION_DIRS.get(source, SESSION_DIRS["opencode"])
     filename = session_dir / f"{slug}.json"

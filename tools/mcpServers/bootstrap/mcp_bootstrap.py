@@ -25,7 +25,7 @@ async def run_bootstrap():
         print("Usage: mcp_bootstrap.py <command> [args...]", file=sys.stderr)
         sys.exit(1)
 
-    cmd = sys.argv[1]
+    cmd = sys.argv[1]  # noqa: F841 -- preserved for clarity; args below is the used subset
     args = sys.argv[1:]  # includes cmd itself
 
     # Determine which npx command to use

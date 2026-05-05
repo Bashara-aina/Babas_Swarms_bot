@@ -34,7 +34,7 @@ def run_sync(cmd: str, timeout: int = 30) -> tuple[str, str, int]:
     """Run a shell command synchronously. Returns (stdout, stderr, returncode)."""
     try:
         p = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=timeout
+            cmd, shell=True, capture_output=True, text=True, timeout=timeout  # nosec: B602 -- all calls are hardcoded git/gh/glab commands; no user input reaches this path
         )
         return p.stdout or "", p.stderr or "", p.returncode
     except subprocess.TimeoutExpired:

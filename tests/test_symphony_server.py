@@ -455,9 +455,8 @@ class TestSwarmBotCodexAdapter:
         import asyncio
         from datetime import datetime
 
-        from symphony.models import Issue
-
         from mcp_servers.swarmbot_codex_adapter import SwarmBotCodexAdapter
+        from symphony.models import Issue
 
         async def run():
             adapter = SwarmBotCodexAdapter(workspace="/tmp/test", agent_key="coding")
