@@ -25,7 +25,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -333,7 +333,7 @@ async def _take_screenshot_safe() -> str | None:
 
 # ── Progress callback ──────────────────────────────────────────────────────────
 
-StepCallback = callable | None
+StepCallback = Callable[..., Any] | None
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
