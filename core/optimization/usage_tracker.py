@@ -115,7 +115,7 @@ class UsageTracker:
 
         if self._redis:
             key = self._redis_key(model)
-            pipe = self._redis.pipeline()
+            pipe = self._redis.pipeline()  # type: ignore[reportAttributeAccessIssue]
             pipe.hincrbyfloat(key, "input_tokens", input_tokens)
             pipe.hincrbyfloat(key, "output_tokens", output_tokens)
             pipe.hincrbyfloat(key, "requests", requests)
@@ -123,7 +123,7 @@ class UsageTracker:
             pipe.expire(key, 86400 * 7)   # Keep 7 days
             pipe.execute()
 
-            current_requests = float(self._redis.hget(key, "requests") or 0)
+            current_requests = float(self._redis.hget(key, "requests") or 0)  # type: ignore[reportAttributeAccessIssue]
         else:
             key = f"{model}:{self._today()}"
             self._memory[key]["input_tokens"] += input_tokens
@@ -155,7 +155,7 @@ class UsageTracker:
         """
         if self._redis:
             key = self._redis_key(model)
-            raw = self._redis.hgetall(key)
+            raw = self._redis.hgetall(key)  # type: ignore[reportAttributeAccessIssue]
             return {k: float(v) for k, v in raw.items()} if raw else {}
         key = f"{model}:{self._today()}"
         return dict(self._memory.get(key, {}))
@@ -228,7 +228,7 @@ class UsageTracker:
 
         if self._redis:
             key = self._redis_key(model)
-            raw = self._redis.hgetall(key)
+            raw = self._redis.hgetall(key)  # type: ignore[reportAttributeAccessIssue]
             used_input = float(raw.get("input_tokens", 0)) if raw else 0.0
             used_output = float(raw.get("output_tokens", 0)) if raw else 0.0
             used_cost = float(raw.get("cost_usd", 0.0)) if raw else 0.0

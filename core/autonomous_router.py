@@ -501,7 +501,7 @@ class AutonomousRouter:
                 reasoning="No keyword match — defaulting to conversation",
             )
 
-        best_skill = max(scores, key=scores.get)
+        best_skill = max(scores, key=scores.get)  # type: ignore[reportCallIssue]
         confidence = min(0.95, scores[best_skill] / 2.0)
 
         return SkillMatch(
@@ -553,7 +553,7 @@ class AutonomousRouter:
                 max_tokens=20,
             )
             # Normalise (strip markdown, replace spaces/dashes with underscore)
-            skill_name = raw.replace("-", "_").replace(" ", "_").strip("`*")
+            skill_name = raw.replace("-", "_").replace(" ", "_").strip("`*")  # type: ignore[reportAttributeAccessIssue]
             if skill_name not in SKILL_PATTERNS:
                 skill_name = "conversation"
             return SkillMatch(

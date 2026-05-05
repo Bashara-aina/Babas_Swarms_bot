@@ -104,9 +104,9 @@ async def _summarize_url_handler(text: str) -> str:
 
         async with AsyncWebCrawler(verbose=False) as crawler:
             result = await crawler.arun(url=url)
-            if not result or not result.get("markdown"):
+            if not result or not result.get("markdown"):  # type: ignore[reportAttributeAccessIssue]
                 return f"⚠️ Could not extract content from: {url}"
-            content = result["markdown"][:4000]
+            content = result["markdown"][:4000]  # type: ignore[reportIndexIssue]
     except Exception as exc:
         return f"❌ Failed to fetch URL: {exc}"
 

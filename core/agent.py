@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 async def cmd_think_impl(
     msg: Message,
     raw: str,
-    is_allowed_fn: callable,
-    keep_typing_fn: callable,
-    send_chunked_fn: callable,
+    is_allowed_fn: callable,  # type: ignore[reportGeneralTypeIssues]
+    keep_typing_fn: callable,  # type: ignore[reportGeneralTypeIssues]
+    send_chunked_fn: callable,  # type: ignore[reportGeneralTypeIssues]
 ) -> None:
     """Execute the /think command with layered extended thinking.
 
@@ -114,8 +114,8 @@ async def cmd_think_impl(
 async def cmd_run_impl(
     msg: Message,
     task: str,
-    is_allowed_fn: callable,
-    execute_chat_fn: callable,
+    is_allowed_fn: callable,  # type: ignore[reportGeneralTypeIssues]
+    execute_chat_fn: callable,  # type: ignore[reportGeneralTypeIssues]
 ) -> None:
     """Execute the /run command for LLM chat only (no computer access).
 

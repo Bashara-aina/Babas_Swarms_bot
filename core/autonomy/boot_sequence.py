@@ -49,7 +49,7 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         if isinstance(result, list) and len(result) > 0:
             import json
             try:
-                return json.loads(result[0].text)
+                return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
             except Exception:
                 return {}
         return {}

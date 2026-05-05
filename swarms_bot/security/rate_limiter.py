@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class RateLimiter:
     ) -> None:
         self.rpm = requests_per_minute
         self.burst_size = burst_size
-        self._buckets: Dict[int, _Bucket] = {}
+        self._buckets: dict[int, _Bucket] = {}
 
     def check(self, user_id: int) -> RateLimitResult:
         """Check if user is within rate limit. Consumes one token if allowed.

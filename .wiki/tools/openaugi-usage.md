@@ -26,7 +26,7 @@ Purpose: Extracts [[task]] items from Obsidian notes and dispatches as AI agent 
 
 ## Integration with SwarmBot
 - Place task notes in ~/swarm-bot/.wiki/prompts/
-- Use [[link]] syntax to connect related tasks
+- Use [[wikilinks]] syntax to connect related tasks
 - Agent reads and executes automatically via MCP
 
 ## Architecture

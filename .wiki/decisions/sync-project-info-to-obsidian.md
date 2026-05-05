@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: All project information in /home/newadmin/swarm-bot/project and /home/newadmin/swarm-bot/cekwajar should be stored in the Obsidian wiki to ensure claude code, opencode, and legiot bot have access to the current project details.
 wikilinks:
-  - [[./concepts/project-management]]
-  - [[./entities/claude-code]]
-  - [[./decisions/project-sync]]
+  - [[concepts/project-management]]
+  - [[entities/claude-code]]
+  - [[decisions/project-sync]]
 confidence: high
 source: claude-code
 ---

@@ -117,7 +117,7 @@ async def cmd_logs(message: Message) -> None:
     if await _route_via_intent(message, "/logs", raw):
         return
 
-    args = message.text.split(maxsplit=2)
+    args = message.text.split(maxsplit=2)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer(
             "Usage:\n"
@@ -132,7 +132,7 @@ async def cmd_logs(message: Message) -> None:
         return
 
     subcmd = args[1].lower()
-    parts = args[2].split() if len(args) > 2 else []
+    parts = args[2].split() if len(args) > 2 else []  # type: ignore[reportOptionalMemberAccess]
 
     # ── Progress tracking for long-running operations ───────────────────────
     status_msg: types.Message | None = None
@@ -201,7 +201,7 @@ async def cmd_ps(message: Message) -> None:
     if await _route_via_intent(message, "/ps", raw):
         return
 
-    args = message.text.split(maxsplit=3)
+    args = message.text.split(maxsplit=3)  # type: ignore[reportOptionalMemberAccess]
     sort_by = args[1] if len(args) > 1 else "cpu"
     top_n = int(args[2]) if len(args) > 2 else 20
     user = args[3] if len(args) > 3 else None
@@ -243,7 +243,7 @@ async def cmd_kill(message: Message) -> None:
     if await _route_via_intent(message, "/kill", raw):
         return
 
-    args = message.text.split(maxsplit=4)
+    args = message.text.split(maxsplit=4)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer(
             "Usage: /kill [pid] [signal=TERM] [confirm=yes]\n"
@@ -281,7 +281,7 @@ async def cmd_kill(message: Message) -> None:
             await status_msg.delete()
 
     if output["success"]:
-        await send_chunked(message, output["data"])
+        await send_chunked(message, output["data"])  # type: ignore[reportArgumentType]
     else:
         await send_chunked(message, f"ERROR: {output['error']}")
 
@@ -299,7 +299,7 @@ async def cmd_sys(message: Message) -> None:
     if await _route_via_intent(message, "/sys", raw):
         return
 
-    args = message.text.split(maxsplit=1)
+    args = message.text.split(maxsplit=1)  # type: ignore[reportOptionalMemberAccess]
     subcmd = args[1].lower() if len(args) > 1 else "stats"
 
     status_msg: types.Message | None = None
@@ -348,7 +348,7 @@ async def cmd_sys(message: Message) -> None:
             await status_msg.delete()
 
     if output["success"]:
-        await send_chunked(message, output["data"])
+        await send_chunked(message, output["data"])  # type: ignore[reportArgumentType]
     else:
         await send_chunked(message, f"ERROR: {output['error']}")
 
@@ -366,7 +366,7 @@ async def cmd_ls(message: Message) -> None:
     if await _route_via_intent(message, "/ls", raw):
         return
 
-    args = message.text.split(maxsplit=2)
+    args = message.text.split(maxsplit=2)  # type: ignore[reportOptionalMemberAccess]
     path = args[1] if len(args) > 1 else "."
     depth = int(args[2]) if len(args) > 2 else 1
 
@@ -401,7 +401,7 @@ async def cmd_find(message: Message) -> None:
     if await _route_via_intent(message, "/find", raw):
         return
 
-    args = message.text.split(maxsplit=3)
+    args = message.text.split(maxsplit=3)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer(
             "Usage: /find [pattern] [path=.] [type=f|d]\n"
@@ -444,7 +444,7 @@ async def cmd_grep(message: Message) -> None:
     if await _route_via_intent(message, "/grep", raw):
         return
 
-    args = message.text.split(maxsplit=3)
+    args = message.text.split(maxsplit=3)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer("Usage: /grep [pattern] [path=.] [context=2]")
         return
@@ -484,7 +484,7 @@ async def cmd_read(message: Message) -> None:
     if await _route_via_intent(message, "/read", raw):
         return
 
-    args = message.text.split(maxsplit=3)
+    args = message.text.split(maxsplit=3)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer("Usage: /read [path] [offset=0] [limit=500]")
         return
@@ -524,7 +524,7 @@ async def cmd_write(message: Message) -> None:
     if await _route_via_intent(message, "/write", raw):
         return
 
-    args = message.text.split(maxsplit=3)
+    args = message.text.split(maxsplit=3)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 3:
         await message.answer(
             "Usage: /write [path] [content] [confirm=yes]\n"
@@ -569,7 +569,7 @@ async def cmd_disk(message: Message) -> None:
     if await _route_via_intent(message, "/disk", raw):
         return
 
-    args = message.text.split(maxsplit=1)
+    args = message.text.split(maxsplit=1)  # type: ignore[reportOptionalMemberAccess]
     path = args[1] if len(args) > 1 else "/"
 
     try:
@@ -593,7 +593,7 @@ async def cmd_window(message: Message) -> None:
     if await _route_via_intent(message, "/window", raw):
         return
 
-    args = message.text.split(maxsplit=2)
+    args = message.text.split(maxsplit=2)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer(
             "Usage:\n"
@@ -666,7 +666,7 @@ async def cmd_clipboard(message: Message) -> None:
     if await _route_via_intent(message, "/clipboard", raw):
         return
 
-    args = message.text.split(maxsplit=2)
+    args = message.text.split(maxsplit=2)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer("Usage:\n/clipboard get\n/clipboard set [text]")
         return
@@ -712,7 +712,7 @@ async def cmd_service(message: Message) -> None:
     if await _route_via_intent(message, "/service", raw):
         return
 
-    args = message.text.split(maxsplit=2)
+    args = message.text.split(maxsplit=2)  # type: ignore[reportOptionalMemberAccess]
     if len(args) < 2:
         await message.answer(
             "Usage:\n"
@@ -760,7 +760,7 @@ async def cmd_tree(message: Message) -> None:
     if await _route_via_intent(message, "/tree", raw):
         return
 
-    args = message.text.split(maxsplit=1)
+    args = message.text.split(maxsplit=1)  # type: ignore[reportOptionalMemberAccess]
     pid = int(args[1]) if len(args) > 1 else 1
 
     try:
@@ -770,4 +770,4 @@ async def cmd_tree(message: Message) -> None:
     except Exception as exc:
         result = f"ERROR: {exc}"
 
-    await send_chunked(message, result)
+    await send_chunked(message, result)  # type: ignore[reportPossiblyUnboundVariable]

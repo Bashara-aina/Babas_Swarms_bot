@@ -14,7 +14,6 @@ import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ class ModelCandidate:
     cost_per_1k: float   # USD per 1000 tokens
     context_window: int  # max tokens
     env_key: str         # env var that must be set
-    specialties: List[str] = None
+    specialties: list[str] = None
 
     def __post_init__(self):
         self.specialties = self.specialties or []
@@ -46,7 +45,7 @@ class ModelCandidate:
 
 
 # Full model catalogue
-MODEL_CATALOGUE: List[ModelCandidate] = [
+MODEL_CATALOGUE: list[ModelCandidate] = [
     ModelCandidate("cerebras/llama-3.3-70b",        "cerebras",   10, 7,  0.0,    128_000, "CEREBRAS_API_KEY",   ["speed", "general"]),
     ModelCandidate("minimax/MiniMax-Text-01",  "groq",        9, 8,  0.0,    128_000, "GROQ_API_KEY",       ["coding", "debug", "general"]),
     ModelCandidate("groq/moonshard-r1-distill-70b", "groq",        8, 9,  0.0,    128_000, "GROQ_API_KEY",       ["math", "reasoning"]),
@@ -62,7 +61,7 @@ MODEL_CATALOGUE: List[ModelCandidate] = [
 ]
 
 # Agent key → required specialties (ordered by preference)
-AGENT_SPECIALTIES: Dict[str, List[str]] = {
+AGENT_SPECIALTIES: dict[str, list[str]] = {
     "coding":      ["coding", "general"],
     "debug":       ["debug", "coding", "general"],
     "math":        ["math", "reasoning", "general"],
@@ -85,7 +84,7 @@ class ModelRouter:
         complexity: TaskComplexity = TaskComplexity.MEDIUM,
         prefer_speed: bool = False,
         prefer_privacy: bool = False,
-    ) -> Tuple[str, ModelCandidate]:
+    ) -> tuple[str, ModelCandidate]:
         """Return (model_string, candidate) for this agent+complexity."""
         available = [m for m in MODEL_CATALOGUE if m.is_available()]
 

@@ -9,8 +9,8 @@ summary: "Decision to lock cekwajar.id MVP to Wajar Slip only (not all 5 tools),
 wikilinks:
   - [[projects/cekwajar-id]]
   - [[architecture/cekwajar-verdict-engine]]
-  - [[./concepts/market-data-indonesia]]
-  - [[./concepts/labor-law-indonesia]]
+  - [[concepts/market-data-indonesia]]
+  - [[concepts/labor-law-indonesia]]
 confidence: high
 source: research
 ---
@@ -197,5 +197,5 @@ A combined launch fails because it:
 
 - [[projects/cekwajar-id]] — Project overview
 - [[architecture/cekwajar-verdict-engine]] — Technical implementation
-- [[./concepts/market-data-indonesia]] — Wajar Gaji data sources
-- [[./concepts/labor-law-indonesia]] — Regulatory basis for Wajar Slip
+- [[concepts/market-data-indonesia]] — Wajar Gaji data sources
+- [[concepts/labor-law-indonesia]] — Regulatory basis for Wajar Slip

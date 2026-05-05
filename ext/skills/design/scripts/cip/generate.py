@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 CIP Design Generator - Generate corporate identity mockups using Gemini Nano Banana
 

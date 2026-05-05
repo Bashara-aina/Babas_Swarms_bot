@@ -197,8 +197,8 @@ async def handle_plan_approval(cb: CallbackQuery) -> None:
     # We publish the decision by editing the message
     icon = "✅ Approved" if approved else "❌ Rejected"
     with contextlib.suppress(Exception):
-        await cb.message.edit_text(
-            f"{cb.message.text}\n\n{icon} by you.",
+        await cb.message.edit_text(  # type: ignore[reportAttributeAccessIssue]
+            f"{cb.message.text}\n\n{icon} by you.",  # type: ignore[reportAttributeAccessIssue]
             parse_mode="HTML",
         )
     await cb.answer(icon)

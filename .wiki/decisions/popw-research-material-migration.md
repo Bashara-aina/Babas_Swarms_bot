@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Migrated POPW research meeting materials to /.wiki from /home/newadmin/swarm-bot/meeting. Disabled unknown feature.
 wikilinks:
-  - [[./concepts/popw-research]]
-  - [[./entities/swarm-bot]]
+  - [[concepts/popw-research]]
+  - [[entities/swarm-bot]]
 confidence: high
 source: claude-code
 ---

@@ -177,7 +177,7 @@ Skills can be called within swarm agents:
 
 ## Related Pages
 
-- [[./concepts/skill-registry]] — Skill management concepts
+- [[concepts/skill-registry]] — Skill management concepts
 - [[architecture/legion-module-map]] — Module overview
-- [[./entities/gpt-researcher]] — Deep research integration
-- [[./entities/opencode]] — Code execution integration
+- [[entities/gpt-researcher]] — Deep research integration
+- [[entities/opencode]] — Code execution integration

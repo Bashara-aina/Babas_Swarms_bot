@@ -45,7 +45,7 @@ def _build_browser_llm(model: str | None = None) -> Any:
 
     return ChatOpenAI(
         model=minimax_model,
-        openai_api_key=api_key,
+        openai_api_key=api_key,  # type: ignore[reportCallIssue]
         base_url="https://api.minimax.io/v1",
         temperature=0.7,
         timeout=60.0,
@@ -77,7 +77,7 @@ class BrowserUseAgent:
 
         try:
             llm = self._get_llm()
-            agent = BrowserUseAgentClass(
+            agent = BrowserUseAgentClass(  # type: ignore[reportOptionalCall]
                 task=task,
                 llm=llm,
                 headless=self.headless,
@@ -92,7 +92,7 @@ class BrowserUseAgent:
     def _parse_result(self, result: Any) -> str:
         """Parse browser-use result into text."""
         if hasattr(result, "history"):
-            history: AgentHistoryList = result.history
+            history: AgentHistoryList = result.history  # type: ignore[reportInvalidTypeForm]
             if history and len(history) > 0:
                 last = history[-1]
                 if hasattr(last, "result"):

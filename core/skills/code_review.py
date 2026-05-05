@@ -52,7 +52,7 @@ Code:
             messages=[{"role": "user", "content": review_prompt}],
             model="coding_model",
         )
-        return result
+        return result  # type: ignore[reportReturnType]
     except Exception as e:
         logger.error("Code review failed: %e", e)
         return f"❌ Code review failed: {e}"

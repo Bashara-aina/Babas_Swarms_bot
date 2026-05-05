@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from typing import Any, Callable, Coroutine, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class SpawnContext:
     depth: int = 0
     parent_agent: str = ""
     budget_remaining: float = 5.0
-    spawn_log: List[Dict] = field(default_factory=list)
+    spawn_log: list[dict] = field(default_factory=list)
 
 
 class SpawnableAgent:
@@ -49,8 +50,8 @@ class SpawnableAgent:
     def __init__(
         self,
         agent_key: str,
-        agent_registry: Dict[str, Any],
-        spawn_ctx: Optional[SpawnContext] = None,
+        agent_registry: dict[str, Any],
+        spawn_ctx: SpawnContext | None = None,
     ):
         self.agent_key = agent_key
         self.registry = agent_registry
@@ -59,7 +60,7 @@ class SpawnableAgent:
     async def execute(
         self,
         task_description: str,
-        thread_id: Optional[str] = None,
+        thread_id: str | None = None,
     ) -> tuple[str, float]:  # (result, cost_usd)
         """Execute task, auto-handling any sub-agent spawns."""
         import re

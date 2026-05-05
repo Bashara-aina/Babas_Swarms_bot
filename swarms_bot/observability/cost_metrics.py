@@ -12,7 +12,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +54,18 @@ class CostMetricsCollector:
         self._total_requests: int = 0
 
         # Per-agent tracking
-        self._agent_costs: Dict[str, float] = defaultdict(float)
-        self._agent_requests: Dict[str, int] = defaultdict(int)
-        self._agent_tokens: Dict[str, int] = defaultdict(int)
-        self._agent_latency_sum: Dict[str, float] = defaultdict(float)
+        self._agent_costs: dict[str, float] = defaultdict(float)
+        self._agent_requests: dict[str, int] = defaultdict(int)
+        self._agent_tokens: dict[str, int] = defaultdict(int)
+        self._agent_latency_sum: dict[str, float] = defaultdict(float)
 
         # Per-model tracking
-        self._model_costs: Dict[str, float] = defaultdict(float)
-        self._model_requests: Dict[str, int] = defaultdict(int)
+        self._model_costs: dict[str, float] = defaultdict(float)
+        self._model_requests: dict[str, int] = defaultdict(int)
 
         # Time series for rate calculation
-        self._recent_costs: List[tuple[float, float]] = []  # (timestamp, cost)
-        self._snapshots: List[CostSnapshot] = []
+        self._recent_costs: list[tuple[float, float]] = []  # (timestamp, cost)
+        self._snapshots: list[CostSnapshot] = []
         self._last_snapshot: float = 0.0
 
     def record(
@@ -75,7 +75,7 @@ class CostMetricsCollector:
         cost_usd: float,
         tokens_used: int = 0,
         latency_ms: int = 0,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Record a cost event. Returns alert message if threshold exceeded.
 
         Args:
@@ -134,7 +134,7 @@ class CostMetricsCollector:
         recent = [c for t, c in self._recent_costs if t >= one_hour_ago]
         return sum(recent)
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get comprehensive cost summary."""
         hourly_rate = self.get_hourly_rate()
 

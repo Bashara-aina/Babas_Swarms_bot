@@ -15,7 +15,6 @@ import asyncio
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Optional
 
 import aiofiles
 
@@ -27,7 +26,7 @@ WORKSPACE_ROOT = Path("data/workspaces")
 class SharedWorkspace:
     """Per-run shared filesystem workspace for agent coordination."""
 
-    def __init__(self, run_id: str, root: Optional[Path] = None):
+    def __init__(self, run_id: str, root: Path | None = None):
         self.run_id = run_id
         self.root = (root or WORKSPACE_ROOT) / run_id
         self.root.mkdir(parents=True, exist_ok=True)
@@ -81,12 +80,12 @@ class SharedWorkspace:
         path = self.root / "artifacts" / node_id / filename
         if not path.exists():
             return ""
-        async with aiofiles.open(path, "r", encoding="utf-8") as f:
+        async with aiofiles.open(path, encoding="utf-8") as f:
             return await f.read()
 
-    async def list_artifacts(self) -> Dict[str, list]:
+    async def list_artifacts(self) -> dict[str, list]:
         """List all artifacts by node."""
-        artifacts: Dict[str, list] = {}
+        artifacts: dict[str, list] = {}
         artifact_root = self.root / "artifacts"
         if artifact_root.exists():
             for node_dir in artifact_root.iterdir():
@@ -120,5 +119,5 @@ class SharedWorkspace:
         path = self.root / filename
         if not path.exists():
             return ""
-        async with aiofiles.open(path, "r", encoding="utf-8") as f:
+        async with aiofiles.open(path, encoding="utf-8") as f:
             return await f.read()

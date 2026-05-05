@@ -131,8 +131,8 @@ async def _check_new_important_email() -> TriggerResult:
     if not _can_send("important_email"):
         return TriggerResult(False, "important_email")
     try:
-        from tools.email_client import EmailClient
-        client = EmailClient()
+        from tools.email_client import EmailClient  # type: ignore[reportAttributeAccessIssue]
+        client = EmailClient()  # type: ignore[reportAttributeAccessIssue]
         summary = await client.summarize_inbox()
         if summary and len(summary) > 50:
             # Heuristic: if there's unread mail, mention it

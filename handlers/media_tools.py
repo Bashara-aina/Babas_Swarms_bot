@@ -55,14 +55,14 @@ def _clean_html(text: str) -> str:
 async def _download_photo(msg: Message) -> str | None:
     """Download photo to a temp file, return path or None."""
     photo: PhotoSize | None = None
-    for p in msg.photo:
-        if photo is None or p.file_size > photo.file_size:
+    for p in msg.photo:  # type: ignore[reportOptionalIterable]
+        if photo is None or p.file_size > photo.file_size:  # type: ignore[reportOperatorIssue]
             photo = p
 
     if photo is None:
         return None
 
-    if photo.file_size > MAX_PHOTO_SIZE_BYTES:
+    if photo.file_size > MAX_PHOTO_SIZE_BYTES:  # type: ignore[reportOptionalOperand]
         logger.warning("Photo too large: %d bytes", photo.file_size)
         return None
 
@@ -71,8 +71,8 @@ async def _download_photo(msg: Message) -> str | None:
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
             tmp_path = tmp.name
 
-        file = await msg.bot.get_file(photo.file_id)
-        await msg.bot.download_file(file.file_path, destination=tmp_path)
+        file = await msg.bot.get_file(photo.file_id)  # type: ignore[reportOptionalMemberAccess]
+        await msg.bot.download_file(file.file_path, destination=tmp_path)  # type: ignore[reportOptionalMemberAccess]
         return tmp_path
     except Exception as exc:
         logger.error("Failed to download photo: %s", exc)
@@ -149,7 +149,7 @@ async def cmd_imagine(msg: Message) -> None:
         logger.exception("imagine failed")
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
     finally:
-        if result and not result.startswith("Error:") and os.path.exists(result):
+        if result and not result.startswith("Error:") and os.path.exists(result):  # type: ignore[reportPossiblyUnboundVariable]
             with contextlib.suppress(Exception):
                 os.unlink(result)
 
@@ -217,7 +217,7 @@ async def cmd_search(msg: Message) -> None:
                 await send_chunked(
                     msg,
                     f"🔍 <b>Results for:</b> {_clean_html(text)}\n\n{synthesized}",
-                    parse_mode="HTML",
+                    parse_mode="HTML",  # type: ignore[reportCallIssue]
                 )
                 logger.info("Search synthesis successful, model used: %s", _model_used)
                 return
@@ -227,7 +227,7 @@ async def cmd_search(msg: Message) -> None:
             logger.warning("Search synthesis failed, using raw results: %s", synth_err)
 
         await status.delete()
-        await send_chunked(msg, f"🔍 <b>Results for:</b> {_clean_html(text)}\n\n{result}", parse_mode="HTML")
+        await send_chunked(msg, f"🔍 <b>Results for:</b> {_clean_html(text)}\n\n{result}", parse_mode="HTML")  # type: ignore[reportCallIssue]
     except Exception as exc:
         logger.exception("search failed")
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
@@ -290,7 +290,7 @@ async def cmd_speak(msg: Message) -> None:
         logger.exception("speak failed")
         await status.edit_text(f"❌ Error: {str(exc)[:200]}")
     finally:
-        if result and not result.startswith("Error:") and os.path.exists(result):
+        if result and not result.startswith("Error:") and os.path.exists(result):  # type: ignore[reportPossiblyUnboundVariable]
             with contextlib.suppress(Exception):
                 os.unlink(result)
 
@@ -348,7 +348,7 @@ async def handle_photo(msg: Message) -> None:
         await send_chunked(
             msg,
             f"🖼️ <b>Image Analysis</b>\n\n{result}",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
     except Exception as exc:
         logger.exception("photo analysis failed")
@@ -394,8 +394,8 @@ async def handle_video(msg: Message) -> None:
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
             tmp_video_path = tmp.name
 
-        file = await msg.bot.get_file(video.file_id)
-        await msg.bot.download_file(file.file_path, destination=tmp_video_path)
+        file = await msg.bot.get_file(video.file_id)  # type: ignore[reportOptionalMemberAccess]
+        await msg.bot.download_file(file.file_path, destination=tmp_video_path)  # type: ignore[reportOptionalMemberAccess]
 
         # Extract keyframes using ffmpeg (1 frame every 10 seconds, max 8 frames)
         import shutil
@@ -481,7 +481,7 @@ async def handle_video(msg: Message) -> None:
             lines.append(f"<b>Audio transcript:</b> {snippet}")
 
         await status.delete()
-        await send_chunked(msg, "\n".join(lines), parse_mode="HTML")
+        await send_chunked(msg, "\n".join(lines), parse_mode="HTML")  # type: ignore[reportCallIssue]
 
     except Exception as exc:
         logger.exception("video analysis failed")
@@ -492,7 +492,7 @@ async def handle_video(msg: Message) -> None:
                 os.unlink(tmp_video_path)
         if tmp_frames_dir and os.path.exists(tmp_frames_dir):
             with contextlib.suppress(Exception):
-                shutil.rmtree(tmp_frames_dir)
+                shutil.rmtree(tmp_frames_dir)  # type: ignore[reportPossiblyUnboundVariable]
 
 
 # ── /mcp_status ───────────────────────────────────────────────────────────────

@@ -28,6 +28,6 @@ async def handle_system_alert(payload: dict[str, Any]) -> None:
         import handlers.shared as _shared
 
         if _shared._bot and _shared.ALLOWED_USER_ID:
-            await _shared._bot.send_message(_shared.ALLOWED_USER_ID, msg)
+            await _shared._bot.send_message(_shared.ALLOWED_USER_ID, msg)  # type: ignore[reportGeneralTypeIssues]
     except Exception as e:
         logger.warning("Failed to send system alert notification: %s", e)

@@ -105,7 +105,7 @@ class WikiManager:
             user_prompt,
             system_prompt=system_prompt,
             model=model,
-            max_tokens=max_tokens,
+            max_tokens=max_tokens,  # type: ignore[reportCallIssue]
         )
 
     async def read_index(self) -> str:

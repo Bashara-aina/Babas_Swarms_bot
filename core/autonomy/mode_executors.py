@@ -145,7 +145,7 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         result = await _mcp_client.call_tool("ruflo", tool, args or {})
         if isinstance(result, list) and len(result) > 0:
             import json
-            return json.loads(result[0].text)
+            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
         return {}
     except Exception as e:
         logger.debug("ruflo %s failed: %s", tool, e)
@@ -173,7 +173,7 @@ async def execute_direct(task: str, mcp_tool: str, mcp_args: dict) -> ExecutionR
         if _mcp_client:
             result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
             if isinstance(result, list):
-                output = "\n".join(r.text if hasattr(r, "text") else str(r) for r in result)
+                output = "\n".join(r.text if hasattr(r, "text") else str(r) for r in result)  # type: ignore[reportAttributeAccessIssue]
             else:
                 output = str(result)
         else:
@@ -221,7 +221,7 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
             if _mcp_client:
                 result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
                 if isinstance(result, list):
-                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))
+                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))  # type: ignore[reportAttributeAccessIssue]
                 else:
                     outputs.append(str(result))
             else:
@@ -238,7 +238,7 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
     })
 
     # Store memory
-    [str(a.get("path", "")) for a in mcp_args if isinstance(a, dict)]
+    [str(a.get("path", "")) for a in mcp_args if isinstance(a, dict)]  # type: ignore[reportPossiblyUnboundVariable]
     await _call_ruflo("memory_store", {
         "namespace": "project/unknown",
         "key": f"lite-{int(asyncio.get_event_loop().time())}",
@@ -318,7 +318,7 @@ async def execute_swarm(
             if _mcp_client:
                 result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
                 if isinstance(result, list):
-                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))
+                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))  # type: ignore[reportAttributeAccessIssue]
                 else:
                     outputs.append(str(result))
         except Exception as e:

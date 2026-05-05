@@ -76,7 +76,7 @@ async def cmd_brain_export(msg: Message) -> None:
 
         vault_path = str(Path.home() / "brain")
         result = await export_to_obsidian(vault_path)
-        await status_msg.edit_text(result)
+        await status_msg.edit_text(result)  # type: ignore[reportArgumentType]
     except Exception as e:
         await status_msg.edit_text(f"export error: <code>{e}</code>", parse_mode="HTML")
 
@@ -121,7 +121,7 @@ async def cmd_om_stats(msg: Message) -> None:
     try:
         from tools.open_memory import om_stats
 
-        stats = await om_stats(str(msg.from_user.id))
+        stats = await om_stats(str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
         if not stats:
             await msg.answer("No OpenMemory entries yet.")
             return

@@ -24,7 +24,7 @@ import subprocess
 import sys
 import urllib.request
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -235,7 +235,7 @@ def _update_registry(pid: str, pname: str, proot: str, premote: str) -> None:
             "name": pname,
             "root": proot,
             "remote": premote,
-            "last_seen": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "last_seen": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         }
 
         tmp_file = REGISTRY_FILE.parent / f".{REGISTRY_FILE.name}.tmp.{os.getpid()}"
@@ -998,7 +998,7 @@ def _promote_specific(project: dict, instinct_id: str, force: bool, dry_run: boo
     output_content += f"source: {target.get('source', 'promoted')}\n"
     output_content += "scope: global\n"
     output_content += f"promoted_from: {project['id']}\n"
-    output_content += f"promoted_date: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}\n"
+    output_content += f"promoted_date: {datetime.now(UTC).isoformat().replace('+00:00', 'Z')}\n"
     output_content += "---\n\n"
     output_content += target.get('content', '') + "\n"
 
@@ -1070,7 +1070,7 @@ def _promote_auto(project: dict, force: bool, dry_run: bool) -> int:
         output_content += f"domain: {inst.get('domain', 'general')}\n"
         output_content += "source: auto-promoted\n"
         output_content += "scope: global\n"
-        output_content += f"promoted_date: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}\n"
+        output_content += f"promoted_date: {datetime.now(UTC).isoformat().replace('+00:00', 'Z')}\n"
         output_content += f"seen_in_projects: {len(cand['entries'])}\n"
         output_content += "---\n\n"
         output_content += inst.get('content', '') + "\n"
@@ -1229,7 +1229,7 @@ def _collect_pending_dirs() -> list[Path]:
     return dirs
 
 
-def _parse_created_date(file_path: Path) -> Optional[datetime]:
+def _parse_created_date(file_path: Path) -> datetime | None:
     """Parse the 'created' date from YAML frontmatter of an instinct file.
 
     Falls back to file mtime if no 'created' field is found.
@@ -1260,7 +1260,7 @@ def _parse_created_date(file_path: Path) -> Optional[datetime]:
                     try:
                         dt = datetime.strptime(date_str, fmt)
                         if dt.tzinfo is None:
-                            dt = dt.replace(tzinfo=timezone.utc)
+                            dt = dt.replace(tzinfo=UTC)
                         return dt
                     except ValueError:
                         continue
@@ -1268,7 +1268,7 @@ def _parse_created_date(file_path: Path) -> Optional[datetime]:
     # Fallback: file modification time
     try:
         mtime = file_path.stat().st_mtime
-        return datetime.fromtimestamp(mtime, tz=timezone.utc)
+        return datetime.fromtimestamp(mtime, tz=UTC)
     except OSError:
         return None
 
@@ -1278,7 +1278,7 @@ def _collect_pending_instincts() -> list[dict]:
 
     Each dict contains: path, created, age_days, name, parent_dir.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     results = []
     for pending_dir in _collect_pending_dirs():
         files = [

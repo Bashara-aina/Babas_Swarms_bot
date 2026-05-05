@@ -126,7 +126,7 @@ async def _run_quality_gate(msg: Message, task: str) -> None:
         )
 
         agent_key = agents.detect_agent(task)
-        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        user_id = str(msg.from_user.id) if msg.from_user else "0"  # type: ignore[reportOptionalMemberAccess]
         draft, model_used = await chat(task, agent_key=agent_key, user_id=user_id)
         verified, meta = await verify_and_repair(task, draft, user_id=user_id)
         grounded, gate = enforce_grounded_answer(task, verified, draft, min_sources=2)
@@ -199,7 +199,7 @@ async def cmd_plan(msg: Message) -> None:
         "1) Objective\n2) Scope\n3) Phased Plan\n4) Risks\n5) Verification Checklist\n\n"
         f"Goal:\n{task}"
     )
-    answer, model_used = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))
+    answer, model_used = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, answer, model_used=f"plan/{model_used}")
 
 
@@ -209,7 +209,7 @@ async def _save_checkpoint(msg: Message, requested_name: str | None = None) -> N
     if not msg.from_user:
         return
 
-    thread_id = _user_thread.get(msg.from_user.id, f"thread_{msg.from_user.id}")
+    thread_id = _user_thread.get(msg.from_user.id, f"thread_{msg.from_user.id}")  # type: ignore[reportOptionalMemberAccess]
     context = agents.get_thread_context(thread_id, max_turns=20)
     ts = time.strftime("%Y%m%d-%H%M%S")
     name = requested_name or f"checkpoint-{ts}"
@@ -263,7 +263,7 @@ async def cmd_resume_session_alias(msg: Message) -> None:
         return
 
     if msg.from_user:
-        _user_thread[msg.from_user.id] = str(session.get("thread_id") or f"thread_{msg.from_user.id}")
+        _user_thread[msg.from_user.id] = str(session.get("thread_id") or f"thread_{msg.from_user.id}")  # type: ignore[reportOptionalMemberAccess]
 
     await msg.answer(
         f"✅ Resumed <b>{html_mod.escape(str(session.get('name', name_or_id)))}</b>\n"
@@ -481,7 +481,7 @@ async def cmd_tdd(msg: Message) -> None:
         "5) Verification commands\n\n"
         f"Request:\n{task}"
     )
-    result, model = await chat(prompt, agent_key="reviewer", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="reviewer", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/tdd/{model}")
 
 
@@ -499,7 +499,7 @@ async def cmd_prompt_optimize(msg: Message) -> None:
         "- Optimized Prompt\n- Why it is better\n- Optional strict JSON output schema\n\n"
         f"Original:\n{raw}"
     )
-    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/prompt_optimize/{model}")
 
 
@@ -524,7 +524,7 @@ async def cmd_learn_eval(msg: Message) -> None:
         "1) Strong instincts\n2) Redundant/noisy instincts\n3) Missing categories\n4) Top 10 keep-list\n\n"
         f"Instincts:\n{serialized}"
     )
-    result, model = await chat(prompt, agent_key="analyst", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="analyst", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/learn_eval/{model}")
 
 
@@ -543,7 +543,7 @@ async def cmd_update_docs(msg: Message) -> None:
         "- Summary\n- Changes\n- Impact\n- Verification\n- Rollback notes\n\n"
         f"Topic:\n{topic}"
     )
-    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
 
     updates_dir = Path("/home/newadmin/swarm-bot/docs/ecc_updates")
     updates_dir.mkdir(parents=True, exist_ok=True)
@@ -615,7 +615,7 @@ async def cmd_skill_create(msg: Message) -> None:
         f"Skill name: {safe_name}\n"
         f"Description: {desc}"
     )
-    content, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))
+    content, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
 
     skill_path = Path("/home/newadmin/swarm-bot/skills") / f"{safe_name}.md"
     if skill_path.exists():
@@ -657,7 +657,7 @@ async def cmd_build_fix(msg: Message) -> None:
         "1) Root cause\n2) Minimal fix\n3) Command-by-command verification\n4) Rollback if fix fails\n\n"
         f"Error log:\n{error_text}"
     )
-    result, model = await chat(prompt, agent_key="debug", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="debug", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/build_fix/{model}")
 
 
@@ -731,7 +731,7 @@ async def cmd_multi_backend(msg: Message) -> None:
         await msg.answer("usage: <code>/multi_backend &lt;task&gt;</code>", parse_mode="HTML")
         return
     prompt = f"Backend-focused execution plan and implementation checklist:\n\n{task}"
-    result, model = await chat(prompt, agent_key="coding", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="coding", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/multi_backend/{model}")
 
 
@@ -744,7 +744,7 @@ async def cmd_multi_frontend(msg: Message) -> None:
         await msg.answer("usage: <code>/multi_frontend &lt;task&gt;</code>", parse_mode="HTML")
         return
     prompt = f"Frontend-focused execution plan and implementation checklist:\n\n{task}"
-    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/multi_frontend/{model}")
 
 
@@ -760,7 +760,7 @@ async def cmd_multi_workflow(msg: Message) -> None:
         "Create an end-to-end workflow across planning, implementation, testing, and deployment.\n\n"
         f"Task:\n{task}"
     )
-    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/multi_workflow/{model}")
 
 
@@ -853,7 +853,7 @@ async def cmd_go_review(msg: Message) -> None:
         payload = f"Review this Go file for correctness, security, and idiomatic style:\n\n{content}"
     else:
         payload = f"Review this Go code for correctness, security, and idiomatic style:\n\n{arg}"
-    result, model = await chat(payload, agent_key="reviewer", user_id=str(msg.from_user.id))
+    result, model = await chat(payload, agent_key="reviewer", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/go_review/{model}")
 
 
@@ -923,7 +923,7 @@ async def cmd_kotlin_review(msg: Message) -> None:
         payload = f"Review this Kotlin file for correctness, security, and idiomatic style:\n\n{content}"
     else:
         payload = f"Review this Kotlin code for correctness, security, and idiomatic style:\n\n{arg}"
-    result, model = await chat(payload, agent_key="reviewer", user_id=str(msg.from_user.id))
+    result, model = await chat(payload, agent_key="reviewer", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/kotlin_review/{model}")
 
 
@@ -941,7 +941,7 @@ async def cmd_promote(msg: Message) -> None:
         "- Title\n- Summary\n- Risk level\n- Rollout steps\n- Rollback plan\n- Post-deploy checks\n\n"
         f"Change:\n{change}"
     )
-    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="pm", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/promote/{model}")
 
 
@@ -958,7 +958,7 @@ async def cmd_evolve(msg: Message) -> None:
         "Design an evolution roadmap in 3 horizons (now/next/later) with metrics and risks.\n\n"
         f"Target:\n{topic}"
     )
-    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="architect", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/evolve/{model}")
 
 
@@ -975,6 +975,6 @@ async def cmd_aside(msg: Message) -> None:
         "Rewrite this as a compact teammate aside (2-4 bullets): objective, caveat, next step.\n\n"
         f"Input:\n{note}"
     )
-    result, model = await chat(prompt, agent_key="humanizer", user_id=str(msg.from_user.id))
+    result, model = await chat(prompt, agent_key="humanizer", user_id=str(msg.from_user.id))  # type: ignore[reportOptionalMemberAccess]
     await send_chunked(msg, result, model_used=f"ecc/aside/{model}")
 

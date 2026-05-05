@@ -110,7 +110,7 @@ class SemanticCache:
                 emb = resp.json()["embedding"]
                 return np.array(emb, dtype=np.float32)
             else:
-                emb = self._model.encode(text, normalize_embeddings=True)
+                emb = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportAttributeAccessIssue]
                 return np.array(emb, dtype=np.float32)
         except Exception as exc:
             logger.warning("Embedding failed: %s", exc)

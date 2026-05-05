@@ -14,7 +14,7 @@ import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class ModelTier:
 
 
 # Model pricing as of March 2026 — uses existing litellm model strings
-MODEL_TIERS: List[ModelTier] = [
+MODEL_TIERS: list[ModelTier] = [
     # Free tier (Cerebras, Groq free models)
     ModelTier("Cerebras Qwen", "minimax/MiniMax-Text-01", "cerebras", 0.0, 0.0, "free", 131072),
     ModelTier("Groq Llama 3.3", "minimax/MiniMax-Text-01", "groq", 0.0, 0.0, "free", 32768),
@@ -147,7 +147,7 @@ def classify_complexity(task: str) -> TaskComplexity:
 
 
 # Map complexity → eligible model tiers
-_COMPLEXITY_TIERS: Dict[TaskComplexity, List[str]] = {
+_COMPLEXITY_TIERS: dict[TaskComplexity, list[str]] = {
     TaskComplexity.TRIVIAL: ["free", "budget"],
     TaskComplexity.SIMPLE: ["free", "budget"],
     TaskComplexity.MODERATE: ["free", "budget", "standard"],
@@ -164,14 +164,14 @@ class CostAwareRouter:
     """
 
     def __init__(self) -> None:
-        self.routing_log: List[Dict[str, Any]] = []
+        self.routing_log: list[dict[str, Any]] = []
         self._total_estimated_savings: float = 0.0
 
     def select_model(
         self,
         agent_key: str,
         task: str,
-    ) -> Tuple[str, TaskComplexity, str]:
+    ) -> tuple[str, TaskComplexity, str]:
         """Select optimal model for agent + task combination.
 
         Args:
@@ -262,13 +262,13 @@ class CostAwareRouter:
         if len(self.routing_log) > 200:
             self.routing_log = self.routing_log[-200:]
 
-    def get_routing_stats(self) -> Dict[str, Any]:
+    def get_routing_stats(self) -> dict[str, Any]:
         """Return routing statistics."""
         if not self.routing_log:
             return {"total_routes": 0}
 
-        tier_counts: Dict[str, int] = {}
-        complexity_counts: Dict[str, int] = {}
+        tier_counts: dict[str, int] = {}
+        complexity_counts: dict[str, int] = {}
 
         for entry in self.routing_log:
             tier_counts[entry["tier"]] = tier_counts.get(entry["tier"], 0) + 1

@@ -16,6 +16,7 @@ Environment:
 
 import argparse
 import asyncio
+import itertools
 import json
 import os
 import re
@@ -60,7 +61,7 @@ def _tokenize(text: str) -> set[str]:
     text = text.lower()
     tokens = set(re.findall(r"[a-z][a-z0-9]{1,}", text))
     words = text.split()
-    tokens |= {f"{a}_{b}" for a, b in zip(words, words[1:])}
+    tokens |= {f"{a}_{b}" for a, b in itertools.pairwise(words)}
     return tokens
 
 
@@ -259,8 +260,7 @@ Execute your portion of this task. Be precise. Return your findings.
         result = subprocess.run(
             [cli_path, "run", full_prompt],
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             timeout=timeout,
         )

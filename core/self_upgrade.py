@@ -260,7 +260,7 @@ Output ONLY the JSON.
             temperature=0.1,
             max_tokens=512,
         )
-        raw = resp.choices[0].message.content or "{}"
+        raw = resp.choices[0].message.content or "{}"  # type: ignore[reportAttributeAccessIssue]
         raw = re.sub(r"```(?:json)?\n?", "", raw).strip()
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         parsed = json.loads(match.group(0) if match else raw)
@@ -397,7 +397,7 @@ Rules:
                 temperature=0.1,
                 max_tokens=8192,
             )
-            raw = response.choices[0].message.content or ""
+            raw = response.choices[0].message.content or ""  # type: ignore[reportAttributeAccessIssue]
             return self._parse_plan_json(raw)
         except Exception as e:
             logger.error("LLM plan generation failed: %s", e)
@@ -490,9 +490,9 @@ Rules:
                     importlib.reload(mod)
                 else:
                     spec = importlib.util.spec_from_file_location(module_name, self.root / path)
-                    mod = importlib.util.module_from_spec(spec)
+                    mod = importlib.util.module_from_spec(spec)  # type: ignore[reportArgumentType]
                     sys.modules[module_name] = mod
-                    spec.loader.exec_module(mod)
+                    spec.loader.exec_module(mod)  # type: ignore[reportOptionalMemberAccess]
             except Exception as e:
                 reload_errors.append(f"{module_name}: {e}")
         if reload_errors:

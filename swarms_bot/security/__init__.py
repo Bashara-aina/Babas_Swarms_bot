@@ -3,4 +3,4 @@
 from swarms_bot.security.guard import SecurityGuard
 from swarms_bot.security.rate_limiter import RateLimiter
 
-__all__ = ["SecurityGuard", "RateLimiter"]
+__all__ = ["RateLimiter", "SecurityGuard"]

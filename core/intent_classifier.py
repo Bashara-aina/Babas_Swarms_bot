@@ -281,7 +281,7 @@ def classify_intent(message: str, prior_agent_key: str = "general") -> IntentRes
 
     if prior_agent_key not in ("general", "memory") and len(message.split()) < 8:
         return IntentResult(
-            agent_key=prior_agent_key,
+            agent_key=prior_agent_key,  # type: ignore[reportArgumentType]
             confidence=0.5,
             detected_intent="continuation",
             auto_tools=[],

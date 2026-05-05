@@ -53,10 +53,12 @@ def _check_chandra_available() -> bool:
     if _chandra_available is not None:
         return _chandra_available
     try:
-        from chandra.input import load_file
-        from chandra.model.hf import load_model as hf_load_model
-        from chandra.model.vllm import generate_vllm
-        from chandra.output import parse_html, parse_markdown
+        from chandra.input import load_file  # type: ignore[reportMissingImports]
+        from chandra.model.hf import (  # type: ignore[reportMissingImports]
+            load_model as hf_load_model,  # type: ignore[reportMissingImports]
+        )
+        from chandra.model.vllm import generate_vllm  # type: ignore[reportMissingImports]
+        from chandra.output import parse_html, parse_markdown  # type: ignore[reportMissingImports]
         _chandra_available = True
     except ImportError:
         _chandra_available = False
@@ -66,7 +68,7 @@ def _check_chandra_available() -> bool:
 def _get_hf_model():
     global _chandra_model, _hf_processor
     if _chandra_model is None:
-        from chandra.model.hf import load_model
+        from chandra.model.hf import load_model  # type: ignore[reportMissingImports]
         _chandra_model = load_model()
         _hf_processor = _chandra_model.processor
     return _chandra_model
@@ -78,10 +80,14 @@ def _get_hf_model():
 
 def _ocr_sync_vllm(image_paths: list[str], output_format: str = "markdown") -> ChandraResult:
     """Run Chandra OCR via vLLM (sync). Returns markdown + HTML + raw."""
-    from chandra.input import load_file
-    from chandra.model.schema import BatchInputItem
-    from chandra.model.vllm import generate_vllm
-    from chandra.output import extract_images, parse_html, parse_markdown
+    from chandra.input import load_file  # type: ignore[reportMissingImports]
+    from chandra.model.schema import BatchInputItem  # type: ignore[reportMissingImports]
+    from chandra.model.vllm import generate_vllm  # type: ignore[reportMissingImports]
+    from chandra.output import (  # type: ignore[reportMissingImports]
+        extract_images,
+        parse_html,
+        parse_markdown,
+    )
 
     batch: list[BatchInputItem] = []
     pil_images: list = []
@@ -144,10 +150,14 @@ def _ocr_sync_vllm(image_paths: list[str], output_format: str = "markdown") -> C
 
 def _ocr_sync_hf(image_paths: list[str]) -> ChandraResult:
     """Run Chandra OCR via HuggingFace (sync). Returns markdown + HTML + raw."""
-    from chandra.input import load_file
-    from chandra.model.hf import generate_hf
-    from chandra.model.schema import BatchInputItem
-    from chandra.output import extract_images, parse_html, parse_markdown
+    from chandra.input import load_file  # type: ignore[reportMissingImports]
+    from chandra.model.hf import generate_hf  # type: ignore[reportMissingImports]
+    from chandra.model.schema import BatchInputItem  # type: ignore[reportMissingImports]
+    from chandra.output import (  # type: ignore[reportMissingImports]
+        extract_images,
+        parse_html,
+        parse_markdown,
+    )
 
     model = _get_hf_model()
     batch: list[BatchInputItem] = []
@@ -373,7 +383,7 @@ async def chandra_ocr_pdf(
             )
 
         try:
-            from chandra.input import load_pdf_images
+            from chandra.input import load_pdf_images  # type: ignore[reportMissingImports]
 
             pil_images = load_pdf_images(str(p), page_nums)
 
@@ -455,7 +465,7 @@ def is_vllm_server_available() -> bool:
     """Check if a vLLM server is reachable at the configured address."""
     try:
         import requests
-        from chandra.settings import settings
+        from chandra.settings import settings  # type: ignore[reportMissingImports]
         resp = requests.get(
             f"{settings.VLLM_API_BASE}/models",
             timeout=5,

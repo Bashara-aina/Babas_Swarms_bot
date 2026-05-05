@@ -40,7 +40,7 @@ class QuizEngine:
         return f"🎯 {score['correct']}/{score['total']} | Streak: {score['streak']}"
 
     @classmethod
-    def generate_vocab_quiz(cls, user_id: int, words: list[dict]) -> Optional[str]:
+    def generate_vocab_quiz(cls, user_id: int, words: list[dict]) -> str | None:
         if not words:
             return None
 

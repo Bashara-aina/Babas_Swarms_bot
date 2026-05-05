@@ -169,7 +169,7 @@ async def _hydrate_memory() -> dict[str, Any]:
     if is_stale(AVAILABLE_SKILLS):
         try:
             from core.legion_skill_indexer import index_skills
-            await index_skills()
+            await index_skills()  # type: ignore[reportCallIssue]
             results["skills_index_refreshed"] = True
         except Exception as e:
             logger.debug("skill index refresh failed: %s", e)
@@ -198,7 +198,7 @@ async def _fetch_hermes_skills() -> list[str]:
     try:
         client = _get_hermes_client()
         if client:
-            result = await client.call_tool("hermes", "hermes_list_skills", {})
+            result = await client.call_tool("hermes", "hermes_list_skills", {})  # type: ignore[reportAttributeAccessIssue]
             # Parse output — skill lines format: "SKILL: title | TAGS: ..."
             if isinstance(result, list) and result:
                 for item in result:

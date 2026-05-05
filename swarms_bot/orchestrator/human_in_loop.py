@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Callable, Coroutine, Optional
+from collections.abc import Callable, Coroutine
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ class HumanApprovalGate:
 
         try:
             return await asyncio.wait_for(future, timeout=self.timeout_seconds)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.info("Approval timeout for run %s — auto-cancelling", run_id)
             self._pending.pop(run_id, None)
             return False
@@ -107,7 +108,7 @@ class HumanApprovalGate:
 
         try:
             return await asyncio.wait_for(future, timeout=self.timeout_seconds)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return "proceed"  # best-effort default
 
     def resolve_clarification(self, run_id: str, answer: str) -> None:

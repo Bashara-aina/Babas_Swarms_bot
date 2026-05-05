@@ -76,7 +76,7 @@ Core memory, archival memory, and temporal graph are NOT user-scoped.
 ## Related Pages
 
 - [[architecture/memory-system-architecture]] — Technical implementation details
-- [[./concepts/memory-architecture]] — Memory concepts
+- [[concepts/memory-architecture]] — Memory concepts
 - [[projects/legion-bot]] — Project using this architecture
 
 ## Audit Findings Summary

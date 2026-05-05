@@ -32,10 +32,11 @@ import signal
 import subprocess
 import sys
 import time
+from collections.abc import Awaitable, Callable
 from contextvars import copy_context
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any
 from urllib import error as urlerror
 from urllib import request as urlrequest
 from uuid import uuid4
@@ -164,7 +165,6 @@ def _install_outbound_logging(bot: Bot) -> None:
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
-            *args,
             **kwargs,
         )
 
@@ -348,10 +348,7 @@ def print_legion_boot_report(results: dict[str, dict[str, str]]) -> None:
         ok = entry["ok"]
         detail = entry["detail"]
 
-        if ok:
-            icon = "✅"
-        else:
-            icon = "⚠️"
+        icon = "✅" if ok else "⚠️"
 
         if key == "chromadb" and not ok:
             print(f"{icon} {label}: {degrade_msg}")
@@ -359,9 +356,7 @@ def print_legion_boot_report(results: dict[str, dict[str, str]]) -> None:
         elif key == "voicevox" and not ok:
             print(f"{icon} {label}: {degrade_msg}")
             degraded.append("voice")
-        elif key == "llm" and ok:
-            print(f"{icon} {label}: {detail}")
-        elif key == "wiki" and ok:
+        elif (key == "llm" and ok) or (key == "wiki" and ok):
             print(f"{icon} {label}: {detail}")
         else:
             print(f"{icon} {label}: {detail}")

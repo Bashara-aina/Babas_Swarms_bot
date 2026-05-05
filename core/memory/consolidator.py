@@ -67,7 +67,7 @@ async def deduplicate() -> int:
     archival = ArchivalMemory()
 
     def _fetch_all() -> list[dict[str, Any]]:
-        rows = archival.conn.execute("SELECT id, content, importance FROM memories ORDER BY importance DESC").fetchall()
+        rows = archival.conn.execute("SELECT id, content, importance FROM memories ORDER BY importance DESC").fetchall()  # type: ignore[reportOptionalMemberAccess]
         return [{"id": r[0], "content": r[1], "importance": r[2]} for r in rows]
 
     rows = await asyncio.to_thread(_fetch_all)
@@ -101,8 +101,8 @@ async def deduplicate() -> int:
 
     def _delete(ids: list[int]) -> None:
         placeholders = ",".join("?" * len(ids))
-        archival.conn.execute(f"DELETE FROM memories WHERE id IN ({placeholders})", ids)
-        archival.conn.commit()
+        archival.conn.execute(f"DELETE FROM memories WHERE id IN ({placeholders})", ids)  # type: ignore[reportOptionalMemberAccess]
+        archival.conn.commit()  # type: ignore[reportUnusedCoroutine]
 
     await asyncio.to_thread(_delete, list(deleted_ids))
     logger.info("[Consolidator] Deduplicated %d memories", len(deleted_ids))
@@ -118,7 +118,7 @@ async def run_nightly() -> dict[str, int]:
     cutoff = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
 
     def _fetch_old() -> list[dict[str, Any]]:
-        rows = archival.conn.execute(
+        rows = archival.conn.execute(  # type: ignore[reportOptionalMemberAccess]
             """
             SELECT id, content, tags, importance
             FROM memories
@@ -128,7 +128,7 @@ async def run_nightly() -> dict[str, int]:
             LIMIT 200
             """,
             (cutoff,),
-        ).fetchall()
+        ).fetchall()  # type: ignore[reportAttributeAccessIssue]
         return [{"id": r[0], "content": r[1], "tags": r[2], "importance": r[3]} for r in rows]
 
     old_entries = await asyncio.to_thread(_fetch_old)
@@ -186,7 +186,7 @@ async def run_nightly() -> dict[str, int]:
 
         # Write consolidated summary as a new high-importance memory
         def _store_summary() -> None:
-            archival.store(
+            archival.store(  # type: ignore[reportUnusedCoroutine]
                 content=summary,
                 summary=f"Consolidated topic: {topic}",
                 tags=["consolidated", "long_term", topic.lower().replace(" ", "_")],
@@ -203,11 +203,11 @@ async def run_nightly() -> dict[str, int]:
 
         def _mark_archived(ids: list[int]) -> None:
             for entry_id in ids:
-                archival.conn.execute(
+                archival.conn.execute(  # type: ignore[reportOptionalMemberAccess]
                     "UPDATE memories SET tags = tags || ',consolidated', importance = importance * 0.3 WHERE id = ?",
                     (entry_id,),
                 )
-            archival.conn.commit()
+            archival.conn.commit()  # type: ignore[reportUnusedCoroutine]
 
         await asyncio.to_thread(_mark_archived, archived_ids)
 

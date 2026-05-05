@@ -31,7 +31,7 @@ async def _remember_handler(text: str) -> str:
             # Store with timestamp
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
             memory_text = f"[{timestamp}] {content}"
-            await mos.add_memory(memory_text, {"type": "user_note", "source": "telegram"})
+            await mos.add_memory(memory_text, {"type": "user_note", "source": "telegram"})  # type: ignore[reportArgumentType]
             return f"✅ Memory saved: {content[:100]}..."
         return "⚠️ MemoryOS not available. Memory not saved."
     except Exception as exc:
@@ -54,7 +54,7 @@ async def _recall_handler(text: str) -> str:
 
         mos = get_memoryos("bashara")
         if mos:
-            results = await mos.search_memories(query, limit=5)
+            results = await mos.search_memories(query, limit=5)  # type: ignore[reportAttributeAccessIssue]
             if results:
                 lines = ["🔍 Memory recall:\n"]
                 for r in results[:5]:

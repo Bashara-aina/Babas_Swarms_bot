@@ -7,8 +7,8 @@ created: 2026-04-21
 updated: 2026-04-21
 summary: Classification and action plan for 1057 orphaned files in wiki/_quarantine/
 wikilinks:
-  - [[./SCHEMA]]
-  - [[./INDEX]]
+  - [[SCHEMA]]
+  - [[INDEX]]
 confidence: high
 source: implementation
 ---

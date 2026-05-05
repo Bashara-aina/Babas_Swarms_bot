@@ -66,15 +66,21 @@ async def _transcribe(ogg_path: str) -> str:
             logger.warning("Groq Whisper failed: %s", exc)
 
     # Cached whisper model — load once in thread executor, reuse across calls
-    import whisper  # pip install openai-whisper
-
-    if not hasattr(_transcribe, "_whisper_model"):
-        _transcribe._whisper_model = await asyncio.to_thread(
-            whisper.load_model, "base"
+    try:
+        import whisper  # pip install openai-whisper  # type: ignore[reportMissingImports]
+    except ImportError:
+        raise RuntimeError(
+            " whisper not installed. Install with: pip install openai-whisper"
         )
 
+    _model_key = "_whisper_model"
+    if not hasattr(_transcribe, _model_key):
+        model = await asyncio.to_thread(whisper.load_model, "base")
+        setattr(_transcribe, _model_key, model)
+
     def _do_transcribe() -> str:
-        result = _transcribe._whisper_model.transcribe(ogg_path)
+        model = getattr(_transcribe, _model_key)
+        result = model.transcribe(ogg_path)
         return result["text"]
 
     return await asyncio.to_thread(_do_transcribe)
@@ -146,7 +152,7 @@ async def cmd_vcsearch(msg: Message) -> None:
     if not is_allowed(msg):
         return
 
-    query = msg.text.replace("/vcsearch", "").strip()
+    query = (msg.text or "").replace("/vcsearch", "").strip()
     if not query:
         await msg.answer("❌ Usage: /vcsearch <query>")
         return
@@ -177,8 +183,11 @@ async def handle_voice(msg: Message) -> None:
         with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
             tmp_path = tmp.name
 
-        file = await msg.bot.get_file(msg.voice.file_id)
-        await msg.bot.download_file(file.file_path, destination=tmp_path)
+        assert msg.voice is not None
+        file = await msg.bot.get_file(msg.voice.file_id)  # type: ignore[reportOptionalMemberAccess]
+        if file is None or file.file_path is None:
+            raise RuntimeError("get_file returned None")
+        await msg.bot.download_file(file.file_path, destination=tmp_path)  # type: ignore[reportOptionalMemberAccess]
         text = await _transcribe(tmp_path)
 
         if not text or not text.strip():
@@ -191,6 +200,7 @@ async def handle_voice(msg: Message) -> None:
         if await _voice_reply_enabled():
             from llm_client import chat
 
+            assert msg.from_user is not None
             response, _model = await chat(task=text, user_id=str(msg.from_user.id), show_thinking=False)
             await _reply_with_optional_tts(msg, response)
         else:
@@ -217,8 +227,11 @@ async def handle_audio(msg: Message) -> None:
     try:
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             tmp_path = tmp.name
-        file = await msg.bot.get_file(msg.audio.file_id)
-        await msg.bot.download_file(file.file_path, destination=tmp_path)
+        assert msg.audio is not None
+        file = await msg.bot.get_file(msg.audio.file_id)  # type: ignore[reportOptionalMemberAccess]
+        if file is None or file.file_path is None:
+            raise RuntimeError("get_file returned None")
+        await msg.bot.download_file(file.file_path, destination=tmp_path)  # type: ignore[reportOptionalMemberAccess]
         text = await _transcribe(tmp_path)
         if not text.strip():
             await status.edit_text("❌ Empty transcription")
@@ -228,6 +241,7 @@ async def handle_audio(msg: Message) -> None:
         if await _voice_reply_enabled():
             from llm_client import chat
 
+            assert msg.from_user is not None
             response, _model = await chat(task=text, user_id=str(msg.from_user.id), show_thinking=False)
             await _reply_with_optional_tts(msg, response)
         else:

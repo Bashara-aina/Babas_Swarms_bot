@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -111,9 +111,9 @@ def build_status_report() -> str:
     lines = ["## Claude Code Session Status\n"]
 
     # Session info
-    datetime.now(timezone.utc).astimezone().tzname()
+    datetime.now(UTC).astimezone().tzname()
     lines.append(f"**Session duration**: {_format_duration(elapsed)}")
-    lines.append(f"**Started**: {datetime.fromtimestamp(session_start, tz=timezone.utc).strftime('%H:%M:%S UTC')}")
+    lines.append(f"**Started**: {datetime.fromtimestamp(session_start, tz=UTC).strftime('%H:%M:%S UTC')}")
 
     # Current task
     current_task = state.get("current_task")

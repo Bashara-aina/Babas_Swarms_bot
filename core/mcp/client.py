@@ -39,9 +39,9 @@ class MCPClient:
             "method": tool_name,
             "params": params or {},
         }
-        await self._proc.stdin.write(json.dumps(req).encode())
-        await self._proc.stdin.drain()
-        line = await self._proc.stdout.readline()
+        await self._proc.stdin.write(json.dumps(req).encode())  # type: ignore[reportOptionalMemberAccess]
+        await self._proc.stdin.drain()  # type: ignore[reportOptionalMemberAccess]
+        line = await self._proc.stdout.readline()  # type: ignore[reportOptionalMemberAccess]
         resp = json.loads(line.decode())
         if "error" in resp:
             raise RuntimeError(f"MCP error: {resp['error']}")

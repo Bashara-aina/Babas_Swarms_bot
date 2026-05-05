@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Logo Generation Script using Gemini Nano Banana API
 Uses Gemini 2.5 Flash Image and Gemini 3 Pro Image Preview models

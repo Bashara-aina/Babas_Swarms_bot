@@ -97,7 +97,7 @@ async def scrape(url: str) -> str:
     Returns:
         Page text string.
     """
-    return await asyncio.run_in_executor(None, _scrape_sync, url)
+    return await asyncio.run_in_executor(None, _scrape_sync, url)  # type: ignore[reportAttributeAccessIssue]
 
 
 async def screenshot(url: str) -> Path:
@@ -111,4 +111,4 @@ async def screenshot(url: str) -> Path:
     Returns:
         Path to the PNG file.
     """
-    return await asyncio.run_in_executor(None, _screenshot_sync, url)
+    return await asyncio.run_in_executor(None, _screenshot_sync, url)  # type: ignore[reportAttributeAccessIssue]

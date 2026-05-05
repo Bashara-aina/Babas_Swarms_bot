@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 CIP HTML Presentation Renderer
 
@@ -344,10 +343,7 @@ def generate_html(brand_name, industry, images_dir, output_path=None, style=None
         info = get_deliverable_info(image_path.stem)
         img_base64 = get_image_base64(image_path)
 
-        if img_base64:
-            img_src = f"data:image/png;base64,{img_base64}"
-        else:
-            img_src = str(image_path)
+        img_src = f"data:image/png;base64,{img_base64}" if img_base64 else str(image_path)
 
         html_parts.append(f'''
         <div class="deliverable">

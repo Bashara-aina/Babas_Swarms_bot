@@ -128,7 +128,7 @@ class CapabilityAudit:
 
         if self._notify_cb and callable(self._notify_cb):
             try:
-                await self._notify_cb(report_html)
+                await self._notify_cb(report_html)  # type: ignore[reportGeneralTypeIssues]
             except Exception as e:
                 logger.warning("[CapabilityAudit] notify failed: %s", e)
 

@@ -85,4 +85,4 @@ class QualityGate:
         retry_messages = [*messages, {"role": "user", "content": retry_instruction}]
         from llm_client import call_llm
 
-        return await call_llm(messages=retry_messages)
+        return await call_llm(messages=retry_messages)  # type: ignore[reportReturnType]

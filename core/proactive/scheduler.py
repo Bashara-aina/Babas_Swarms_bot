@@ -223,7 +223,7 @@ class ProactiveScheduler:
 
             store = get_episodic_store()
             if hasattr(store, "get_unfinished_tasks"):
-                unfinished = store.get_unfinished_tasks(self.user_id, limit=3)
+                unfinished = store.get_unfinished_tasks(self.user_id, limit=3)  # type: ignore[reportAttributeAccessIssue]
             else:
                 unfinished = []
 
@@ -259,7 +259,7 @@ class ProactiveScheduler:
         profile = get_user_profile(self.user_id)
         store = get_episodic_store()
         schedule = store.get_upcoming_schedule(self.user_id, horizon_days=3)
-        unfinished = store.get_unfinished_tasks(self.user_id, limit=5)
+        unfinished = store.get_unfinished_tasks(self.user_id, limit=5)  # type: ignore[reportAttributeAccessIssue]
 
         day_str = now.strftime("%A, %B %d")
         lines = [f"☀️ <b>Good morning, Bashara! It's {day_str}.</b>\n"]

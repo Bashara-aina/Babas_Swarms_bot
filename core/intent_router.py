@@ -436,7 +436,7 @@ Respond with ONLY the intent name, nothing else."""
         if matched_intent is None:
             # Try partial match
             for intent in Intent:
-                if raw in intent.value or intent.value in raw:
+                if raw in intent.value or intent.value in raw:  # type: ignore[reportOperatorIssue]
                     matched_intent = intent
                     break
 

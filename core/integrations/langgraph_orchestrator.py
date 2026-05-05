@@ -77,7 +77,7 @@ class LangGraphAgent:
             model_name = model_name.split("/", 1)[1]
         return ChatOpenAI(
             model=model_name,
-            api_key=os.getenv("MINIMAX_API_KEY", "dummy"),
+            api_key=os.getenv("MINIMAX_API_KEY", "dummy"),  # type: ignore[reportArgumentType]
             base_url="https://api.minimax.io/v1",
             timeout=30.0,
             max_retries=2,

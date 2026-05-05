@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class ValidationResult:
 
     valid: bool
     sanitized_input: str = ""
-    warnings: List[str] = None
+    warnings: list[str] = None
     blocked_reason: str = ""
 
     def __post_init__(self):
@@ -43,7 +43,7 @@ class ScanResult:
     blocked: bool
     risk_score: float
     sanitized_text: str
-    reasons: List[str]
+    reasons: list[str]
 
 
 # Prompt injection patterns
@@ -125,7 +125,7 @@ class SecurityGuard:
             ValidationResult with validity flag and sanitized text.
         """
         self._scanned_count += 1
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         # Check length
         if len(user_input) > self.max_input_length:
@@ -222,7 +222,7 @@ class SecurityGuard:
 
         return output
 
-    def _detect_injection(self, text: str) -> Optional[str]:
+    def _detect_injection(self, text: str) -> str | None:
         """Detect prompt injection patterns.
 
         Returns the matched pattern name if injection detected, else None.
@@ -232,7 +232,7 @@ class SecurityGuard:
                 return f"pattern_{i}"
         return None
 
-    def _redact_pii(self, text: str) -> tuple[str, List[str]]:
+    def _redact_pii(self, text: str) -> tuple[str, list[str]]:
         """Redact PII patterns from text.
 
         Returns (redacted_text, list_of_warnings).
@@ -250,10 +250,7 @@ class SecurityGuard:
 
     def _contains_credentials(self, text: str) -> bool:
         """Check if text contains credential patterns."""
-        for pattern in self._credential_compiled:
-            if pattern.search(text):
-                return True
-        return False
+        return any(pattern.search(text) for pattern in self._credential_compiled)
 
     def _redact_credentials(self, text: str) -> str:
         redacted = text
@@ -261,7 +258,7 @@ class SecurityGuard:
             redacted = pattern.sub("[REDACTED]", redacted)
         return redacted
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Return security guard statistics."""
         return {
             "total_scanned": self._scanned_count,

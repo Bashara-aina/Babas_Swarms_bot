@@ -25,7 +25,7 @@ class ShadowExercise:
 
     japanese_text: str
     romaji: str
-    audio_url: Optional[str] = None
+    audio_url: str | None = None
     difficulty: str = "N5"
     scenario: str = "general"
 
@@ -197,7 +197,7 @@ class ShadowEngine:
             similarity = 100.0
         else:
             # Character-by-character comparison
-            matches = sum(1 for o, a in zip(original_clean, attempt_clean) if o == a)
+            matches = sum(1 for o, a in zip(original_clean, attempt_clean, strict=False) if o == a)
             similarity = (matches / max(len(original_clean), len(attempt_clean))) * 100
 
         # Find problem phonemes based on common mistakes

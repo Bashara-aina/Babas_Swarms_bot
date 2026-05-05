@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: In a 4-agent intelligence debate, all candidates were rejected due to topic mismatch and JSON parsing errors. The content discussed Intel Iris Xe Graphics, while the topic was rumahlabuh_property, a property rental platform.
 wikilinks:
-  - [[./concepts/topic-mismatch]]
-  - [[./entities/property-rental-platform]]
+  - [[concepts/topic-mismatch]]
+  - [[entities/property-rental-platform]]
   - [[knowledge/cekwajar/engineering/INDEX]]
 confidence: high
 source: legion-bot

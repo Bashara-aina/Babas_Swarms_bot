@@ -42,7 +42,7 @@ async def cmd_code(message: Message, state: FSMContext) -> None:
     """
     if not _require_owner(message):
         return
-    task = message.text.removeprefix("/code").strip()
+    task = message.text.removeprefix("/code").strip()  # type: ignore[reportOptionalMemberAccess]
     if not task:
         await message.answer(
             "usage: <code>/code &lt;task description&gt;</code>\n\n"

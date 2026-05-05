@@ -16,7 +16,6 @@ import logging
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +27,9 @@ class EvaluationResult:
     task_id: str
     agent_name: str
     overall_score: float  # 0.0 to 1.0
-    signals: Dict[str, float] = field(default_factory=dict)
+    signals: dict[str, float] = field(default_factory=dict)
     passed: bool = True
-    notes: List[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
 
 
 # Negative signals in agent output
@@ -51,8 +50,8 @@ class AgentEvaluator:
     """
 
     def __init__(self) -> None:
-        self._evaluations: List[EvaluationResult] = []
-        self._user_feedback: Dict[str, int] = {}  # task_id → rating (1-5)
+        self._evaluations: list[EvaluationResult] = []
+        self._user_feedback: dict[str, int] = {}  # task_id → rating (1-5)
 
     def evaluate(
         self,
@@ -76,8 +75,8 @@ class AgentEvaluator:
         Returns:
             EvaluationResult with quality signals and score.
         """
-        signals: Dict[str, float] = {}
-        notes: List[str] = []
+        signals: dict[str, float] = {}
+        notes: list[str] = []
 
         if not success or not response:
             return EvaluationResult(
@@ -200,13 +199,13 @@ class AgentEvaluator:
 
         return max(0.0, score)
 
-    def get_agent_scores(self) -> Dict[str, Dict[str, float]]:
+    def get_agent_scores(self) -> dict[str, dict[str, float]]:
         """Get average scores per agent.
 
         Returns:
             Dict mapping agent_name → {avg_score, count, pass_rate}.
         """
-        agent_data: Dict[str, List[EvaluationResult]] = {}
+        agent_data: dict[str, list[EvaluationResult]] = {}
         for ev in self._evaluations:
             agent_data.setdefault(ev.agent_name, []).append(ev)
 

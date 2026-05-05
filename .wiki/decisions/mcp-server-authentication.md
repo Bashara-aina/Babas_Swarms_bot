@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Activated base environment and investigated MCP server authentication failure. Decided to disable authentication temporarily until API is available.
 wikilinks:
-  - [[./concepts/environment-management]]
-  - [[./entities/conda]]
-  - [[./decisions/mcp-api-decision]]
+  - [[concepts/environment-management]]
+  - [[entities/conda]]
+  - [[decisions/mcp-api-decision]]
 confidence: high
 source: claude-code
 ---

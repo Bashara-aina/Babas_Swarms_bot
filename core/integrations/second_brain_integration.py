@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 SECOND_BRAIN_AVAILABLE = False
 
 try:
-    import secondbrain
+    import secondbrain  # type: ignore[reportMissingImports]
     SECOND_BRAIN_AVAILABLE = True
 except ImportError:
     secondbrain = None  # type: ignore

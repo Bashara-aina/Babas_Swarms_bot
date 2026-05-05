@@ -67,7 +67,7 @@ def _transcribe_sync(audio_bytes: bytes, extension: str = ".ogg") -> str:
 
         # ── Tier 2: openai-whisper (original fallback) ───────────────────────
         try:
-            import whisper
+            import whisper  # type: ignore[reportMissingImports]
             model_ow = whisper.load_model("base")
             result = model_ow.transcribe(tmp_path)
             text = str(result["text"]).strip()
@@ -157,7 +157,7 @@ async def text_to_speech(text: str, voice: str = TTS_VOICE) -> bytes:
     buf = io.BytesIO()
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
-            buf.write(chunk["data"])
+            buf.write(chunk["data"])  # type: ignore[reportTypedDictNotRequiredAccess]
     audio_bytes = buf.getvalue()
     logger.info("TTS: edge-tts generated %d bytes for %d chars", len(audio_bytes), len(text))
     return audio_bytes
@@ -178,7 +178,7 @@ def _extract_pdf_sync(pdf_bytes: bytes) -> str:
         from pypdf import PdfReader
     except ImportError:
         try:
-            from PyPDF2 import PdfReader
+            from PyPDF2 import PdfReader  # type: ignore[reportMissingImports]
         except ImportError:
             raise RuntimeError("pypdf not installed — run: pip install pypdf")
 

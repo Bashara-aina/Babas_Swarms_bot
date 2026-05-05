@@ -23,9 +23,9 @@ def main():
 
     # If no files specified, default to slides type
     if not args or all(arg.startswith('-') for arg in args):
-        cmd = [sys.executable, str(UNIFIED_VALIDATOR), '--type', 'slides'] + args
+        cmd = [sys.executable, str(UNIFIED_VALIDATOR), '--type', 'slides', *args]
     else:
-        cmd = [sys.executable, str(UNIFIED_VALIDATOR)] + args
+        cmd = [sys.executable, str(UNIFIED_VALIDATOR), *args]
 
     result = subprocess.run(cmd)
     sys.exit(result.returncode)

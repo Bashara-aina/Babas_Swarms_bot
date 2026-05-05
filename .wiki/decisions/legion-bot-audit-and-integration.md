@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Audit and fix all features in Legion Bot, perform smoke tests, and ensure seamless integration with Claude Code and OpenClaude. Chat context will be fed into the wiki without manual requests.
 wikilinks:
-  - [[./concepts/legion-bot]]
-  - [[./entities/claude-code]]
-  - [[./entities/openclaud]]
+  - [[concepts/legion-bot]]
+  - [[entities/claude-code]]
+  - [[entities/openclaud]]
 confidence: high
 source: claude-code
 ---

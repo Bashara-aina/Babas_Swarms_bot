@@ -214,7 +214,7 @@ class TaskRouter:
                 temperature=0.0,
                 max_tokens=24,
             )
-            token = (resp.choices[0].message.content or "").strip().lower()
+            token = (resp.choices[0].message.content or "").strip().lower()  # type: ignore[reportAttributeAccessIssue]
             token = token.replace("-", "_")
             if token:
                 token = token.split()[0].strip("`*")
@@ -303,7 +303,7 @@ class TaskRouter:
             if isinstance(r, Exception):
                 sections.append(f"## error\n{r}")
                 continue
-            role_key, content = r
+            role_key, content = r  # type: ignore[reportGeneralTypeIssues]
             sections.append(f"## {role_key}\n{content}")
 
         from llm_client import chat
@@ -426,7 +426,7 @@ class TaskRouter:
                 temperature=0.1,
                 max_tokens=400,
             )
-            raw = (resp.choices[0].message.content or "").strip()
+            raw = (resp.choices[0].message.content or "").strip()  # type: ignore[reportAttributeAccessIssue]
             raw = raw.replace("```json", "").replace("```", "").strip()
             data = json.loads(raw)
             if isinstance(data, dict) and isinstance(data.get("subtasks"), list):

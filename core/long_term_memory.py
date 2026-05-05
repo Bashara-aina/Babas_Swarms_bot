@@ -132,7 +132,7 @@ async def _semantic_search(query: str, user_id: str, limit: int = 5) -> list[Mem
 
         # Embed the query
 
-        query_embedding = embedder.encode(query).tolist()
+        query_embedding = embedder.encode(query).tolist()  # type: ignore[reportAttributeAccessIssue]
 
         # Search
         search_results = coll.query(
@@ -319,7 +319,7 @@ async def store_long_term_memory(
             return False
 
 
-        embedding = embedder.encode(text).tolist()
+        embedding = embedder.encode(text).tolist()  # type: ignore[reportAttributeAccessIssue]
         meta = {
             "user_id": str(user_id),
             "source": source,

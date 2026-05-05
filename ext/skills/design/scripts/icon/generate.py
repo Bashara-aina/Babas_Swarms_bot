@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Icon Generation Script using Gemini 3.1 Pro Preview API
 Generates SVG icons via text generation (SVG is XML text format)

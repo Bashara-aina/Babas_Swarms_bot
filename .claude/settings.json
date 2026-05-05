@@ -54,34 +54,58 @@
   "mcpServers": {
     "contree": {
       "command": "npx",
-      "args": ["-y", "@nebius/contree-mcp", "--path", "/home/newadmin/swarm-bot"],
+      "args": [
+        "-y",
+        "@nebius/contree-mcp",
+        "--path",
+        "/home/newadmin/swarm-bot"
+      ],
       "env": {}
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/newadmin"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/newadmin"
+      ],
       "env": {}
     },
     "gitnexus": {
       "command": "pnpm",
-      "args": ["dlx", "--allow-build=kuzu", "gitnexus@1.4.0", "mcp"],
+      "args": [
+        "dlx",
+        "--allow-build=kuzu",
+        "gitnexus@1.4.0",
+        "mcp"
+      ],
       "env": {}
     },
     "obsidian": {
       "command": "npx",
-      "args": ["-y", "@iflow-mcp/kynlos-obsidian-mcp-server", "/home/newadmin/swarm-bot/.wiki"],
+      "args": [
+        "-y",
+        "@iflow-mcp/kynlos-obsidian-mcp-server",
+        "/home/newadmin/swarm-bot/.wiki"
+      ],
       "env": {}
     },
     "firecrawl": {
       "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
       "env": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       }
     },
     "exa": {
       "command": "npx",
-      "args": ["-y", "exa-mcp-server"],
+      "args": [
+        "-y",
+        "exa-mcp-server"
+      ],
       "env": {
         "EXA_API_KEY": "${EXA_API_KEY}"
       }
@@ -89,5 +113,97 @@
   },
   "terminal.integrated.commandsToSkipShell": [
     "-workbench.action.quickOpen"
-  ]
+  ],
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s -X POST \"http://127.0.0.1:8788/api/hooks/session-start?octogent_session=$OCTOGENT_SESSION_ID\" -H 'Content-Type: application/json' -d @- || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s -X POST \"http://127.0.0.1:8788/api/hooks/user-prompt-submit?octogent_session=$OCTOGENT_SESSION_ID\" -H 'Content-Type: application/json' -d @- || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:8788/api/hooks/pre-tool-use",
+            "headers": {
+              "X-Octogent-Session": "$OCTOGENT_SESSION_ID"
+            },
+            "allowedEnvVars": [
+              "OCTOGENT_SESSION_ID"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:8788/api/code-intel/events",
+            "headers": {
+              "X-Octogent-Session": "$OCTOGENT_SESSION_ID"
+            },
+            "allowedEnvVars": [
+              "OCTOGENT_SESSION_ID"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://127.0.0.1:8788/api/hooks/notification",
+            "headers": {
+              "X-Octogent-Session": "$OCTOGENT_SESSION_ID"
+            },
+            "allowedEnvVars": [
+              "OCTOGENT_SESSION_ID"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -s -X POST \"http://127.0.0.1:8788/api/hooks/stop?octogent_session=$OCTOGENT_SESSION_ID\" -H 'Content-Type: application/json' -d @- || true",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }

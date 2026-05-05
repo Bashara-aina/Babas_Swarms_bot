@@ -17,7 +17,7 @@ from typing import List, Optional
 class ShadcnInstaller:
     """Handle shadcn/ui component installation."""
 
-    def __init__(self, project_root: Optional[Path] = None, dry_run: bool = False):
+    def __init__(self, project_root: Path | None = None, dry_run: bool = False):
         """
         Initialize installer.
 
@@ -38,7 +38,7 @@ class ShadcnInstaller:
         """
         return self.components_json.exists()
 
-    def get_installed_components(self) -> List[str]:
+    def get_installed_components(self) -> list[str]:
         """
         Get list of already installed components.
 
@@ -65,7 +65,7 @@ class ShadcnInstaller:
             return []
 
     def add_components(
-        self, components: List[str], overwrite: bool = False
+        self, components: list[str], overwrite: bool = False
     ) -> tuple[bool, str]:
         """
         Add shadcn/ui components.
@@ -98,7 +98,7 @@ class ShadcnInstaller:
             )
 
         # Build command
-        cmd = ["npx", "shadcn@latest", "add"] + components
+        cmd = ["npx", "shadcn@latest", "add", *components]
 
         if overwrite:
             cmd.append("--overwrite")

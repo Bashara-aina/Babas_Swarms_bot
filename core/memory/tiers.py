@@ -148,7 +148,7 @@ class ArchivalMemory:
             (content, summary, tags_str, importance, source),
         )
         await conn.commit()
-        return int(cur.lastrowid)
+        return int(cur.lastrowid)  # type: ignore[reportArgumentType]
 
     async def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         conn = await self._ensure_connection()
@@ -217,7 +217,8 @@ class ArchivalMemory:
 
     async def total_count(self) -> int:
         conn = await self._ensure_connection()
-        row = await conn.execute("SELECT COUNT(*) FROM memories").fetchone()
+        result = await conn.execute("SELECT COUNT(*) FROM memories")
+        row = await result.fetchone()
         return int(row[0]) if row else 0
 
     async def close(self) -> None:
@@ -309,13 +310,13 @@ class RecallMemory:
                 (n,),
             )
         rows_data = await rows.fetchall()
-        rows_data = list(reversed(rows_data))
+        rows_data = list(reversed(rows_data))  # type: ignore[reportCallIssue]
         return [
             {
-                "role": row[0],
-                "content": row[1],
-                "agent": row[2],
-                "timestamp": row[3] or "",
+                "role": row[0],  # type: ignore[reportIndexIssue]
+                "content": row[1],  # type: ignore[reportIndexIssue]
+                "agent": row[2],  # type: ignore[reportIndexIssue]
+                "timestamp": row[3] or "",  # type: ignore[reportIndexIssue]
             }
             for row in rows_data
         ]

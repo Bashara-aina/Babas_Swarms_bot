@@ -44,8 +44,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: 2-3 sentence TL;DR for Dataview indexing
 wikilinks:
-  - [[./concepts/karpathy-kb-pattern]]
-  - [[./knowledge/cekwajar/engineering/INDEX]]
+  - [[concepts/karpathy-kb-pattern]]
+  - [[knowledge/cekwajar/engineering/INDEX]]
 confidence: high | medium | low
 source: conversation | research | implementation | external
 ---
@@ -174,19 +174,19 @@ wiki/
 
 ```markdown
 # Basic link
-[[./concepts/memory-architecture]]
+[[concepts/memory-architecture]]
 
 # Link to specific section  
 [[memory-architecture#failure-modes]]
 
 # Link with display text
-[[./entities/supabase]]
+[[entities/supabase]]
 
 # Link to entity
-[[./entities/litellm]]
+[[entities/litellm]]
 
 # Link to project
-[[./projects/cekwajar-id]]
+[[projects/cekwajar-id]]
 ```
 
 ---

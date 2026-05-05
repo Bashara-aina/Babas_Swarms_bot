@@ -74,7 +74,7 @@ class SRSEngine:
         self._cards[user_id][item] = card
         return card
 
-    def get_card(self, user_id: int, item: str) -> Optional[SRSCard]:
+    def get_card(self, user_id: int, item: str) -> SRSCard | None:
         """Get a specific card for a user."""
         return self._cards.get(user_id, {}).get(item)
 

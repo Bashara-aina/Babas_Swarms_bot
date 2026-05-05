@@ -198,7 +198,7 @@ class ComputerController:
         if self._pyautogui is None or self._PIL_Image is None:
             raise RuntimeError("pyautogui/Pillow not installed")
 
-        _rate_limit_screenshot()
+        _rate_limit_screenshot()  # type: ignore[reportUnusedCoroutine]
         self._check_action_limit()
 
         img = self._pyautogui.screenshot(region=region)

@@ -183,6 +183,6 @@ class LegionOrchestrator:
 
 ## Related Pages
 
-- [[./concepts/multi-agent-orchestration]] — Agent coordination
-- [[./concepts/intent-routing]] — Simple routing
+- [[concepts/multi-agent-orchestration]] — Agent coordination
+- [[concepts/intent-routing]] — Simple routing
 - [[architecture/legion-module-map]] — Module overview

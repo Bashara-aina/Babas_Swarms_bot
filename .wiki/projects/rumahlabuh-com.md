@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "rumahlabuh.com is a Labuh Biru kost (boarding house) booking platform in Indonesia with Next.js + Supabase. Features open-ended and fixed-term contract management, automatic late fee enforcement (Aturan 3: Rp250K penalty for 4-15 days late), deposit refund logic (Aturan 17: ≥14 days notice = full refund), Midtrans payment integration, and atomic room assignment. Scored 100/100 in comprehensive logic audit (April 2026)."
 wikilinks:
-  - [[./entities/supabase]]
-  - [[./entities/midtrans]]
+  - [[entities/supabase]]
+  - [[entities/midtrans]]
   - [[projects/cekwajar-id]]
 confidence: high
 source: implementation
@@ -288,6 +288,6 @@ As of 2026-04-13:
 
 ## Related Articles
 
-- [[./entities/supabase]] — Database provider
+- [[entities/supabase]] — Database provider
 - [[projects/cekwajar-id]] — Related project (Indonesian salary/property data platform)
 - [[architecture/cekwajar-tech-stack]] — cekwajar tech stack reference (similar Next.js + Supabase pattern)

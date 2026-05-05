@@ -139,7 +139,7 @@ async def _unstall_swarm(context: dict) -> dict:
     from core.mcp_client import MCPClient
     try:
         client = MCPClient()
-        agents = await client.call_tool("ruflo", "agent_list")
+        agents = await client.call_tool("ruflo", "agent_list")  # type: ignore[reportCallIssue]
         stuck = [a["name"] for a in agents.get("agents", []) if a.get("status") == "active"]
         for name in stuck:
             await client.call_tool("ruflo", "agent_stop", {"name": name})

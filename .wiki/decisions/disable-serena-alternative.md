@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Disable Serena and use an alternative based on user request. Alternative not specified, but implied to be a different tool or service.
 wikilinks:
-  - [[./concepts/swarm-bot]]
-  - [[./entities/serena]]
+  - [[concepts/swarm-bot]]
+  - [[entities/serena]]
 confidence: high
 source: claude-code
 ---

@@ -145,7 +145,7 @@ source: research
 | [[llm-routing-map]] | 9 | 700 | llm calls |
 | [[llm-cost-optimization]] | 7 | 400 | llm calls |
 | [[llm-context-strategy]] | 7 | 350 | all |
-| [[./concepts/memory-architecture]] | 9 | 550 | all |
+| [[concepts/memory-architecture]] | 9 | 550 | all |
 | [[memory-gaps]] | 8 | 400 | all |
 | [[memory-injection-strategy]] | 7 | 350 | all |
 | [[intent-routing-map]] | 9 | 600 | all |
@@ -180,9 +180,9 @@ source: research
 ### Cycles 11-20: Integration, Voice, Data, Database, Git, Deployment, API, Error Handling, Testing
 | Page | Domain | Impact | Tokens | Injects Into |
 |------|--------|--------|--------|--------------|
-| [[./candidate/browser-agent-architecture]] | browser-web | 8 | 590 | tools |
-| [[./candidate/video-url-pipeline]] | browser-web | 8 | 595 | tools |
-| [[./candidate/web-scraping-patterns]] | browser-web | 7 | 545 | tools |
+| [[candidate/browser-agent-architecture]] | browser-web | 8 | 590 | tools |
+| [[candidate/video-url-pipeline]] | browser-web | 8 | 595 | tools |
+| [[candidate/web-scraping-patterns]] | browser-web | 7 | 545 | tools |
 | [[composio-email-setup]] | communications | 8 | 420 | system |
 | [[composio-calendar-guide]] | communications | 7 | 380 | system |
 | [[email-security-patterns]] | communications | 8 | 400 | security |
@@ -215,4 +215,4 @@ source: research
 
 ## root
 - [[MASTER-INTELLIGENCE]] — SwarmBot Master Intelligence Index
-- [[./tools/openaugi/README]] — SwarmBot Master Wiki
+- [[tools/openaugi/README]] — SwarmBot Master Wiki

@@ -20,8 +20,9 @@ import logging
 import re
 import time
 import uuid
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from typing import Any, Callable, Coroutine, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -127,8 +128,8 @@ def _queue_confirmation(
     fn: Callable,
     remaining_steps: tuple[TaskStep, ...] = (),
     outputs: tuple[str, ...] = (),
-    progress_fn: Callable[[str], Coroutine[Any, Any, None]] = None,
-    confirm_fn: Callable[[str, str], Coroutine[Any, Any, None]] = None,
+    progress_fn: Callable[[str], Coroutine[Any, Any, None]] | None = None,
+    confirm_fn: Callable[[str, str], Coroutine[Any, Any, None]] | None = None,
 ) -> str:
     action_id = str(uuid.uuid4())[:8]
     _pending[action_id] = PendingConfirmation(
@@ -234,7 +235,7 @@ async def start_monitor(
     interval_sec: int,
     fn: Callable[..., Coroutine[Any, Any, str]],
     notify_fn: Callable[[str], Coroutine[Any, Any, None]],
-    alert_if: Optional[Callable[[str], bool]] = None,
+    alert_if: Callable[[str], bool] | None = None,
 ) -> str:
     task_id = str(uuid.uuid4())[:8]
     monitor = MonitorTask(
@@ -253,7 +254,7 @@ async def start_monitor(
 
 async def _monitor_loop(
     monitor: MonitorTask,
-    alert_if: Optional[Callable[[str], bool]],
+    alert_if: Callable[[str], bool] | None,
 ) -> None:
     while monitor.running:
         try:
@@ -371,7 +372,7 @@ class SwarmDebateOrchestrator:
         round1_tasks = [self._call_agent(agent, task) for agent in self.AGENTS]
         round1_results_raw = await asyncio.gather(*round1_tasks, return_exceptions=True)
         round1: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, round1_results_raw):
+        for agent, result in zip(self.AGENTS, round1_results_raw, strict=False):
             round1[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 2: Cross-Examination ──────────────────────────────────────
@@ -395,7 +396,7 @@ class SwarmDebateOrchestrator:
         ]
         round2_results_raw = await asyncio.gather(*round2_tasks, return_exceptions=True)
         round2: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, round2_results_raw):
+        for agent, result in zip(self.AGENTS, round2_results_raw, strict=False):
             round2[agent] = f"[Error: {result}]" if isinstance(result, Exception) else result
 
         # ── ROUND 3: Judge Synthesis ────────────────────────────────────────
@@ -458,7 +459,7 @@ class SwarmDebateOrchestrator:
         ]
         confidence_raw = await asyncio.gather(*confidence_tasks, return_exceptions=True)
         confidence_scores: dict[str, str] = {}
-        for agent, result in zip(self.AGENTS, confidence_raw):
+        for agent, result in zip(self.AGENTS, confidence_raw, strict=False):
             confidence_scores[agent] = "?/10" if isinstance(result, Exception) else result[:150]
 
         return {

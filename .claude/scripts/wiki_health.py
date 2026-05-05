@@ -7,7 +7,7 @@
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 WIKI_ROOT = Path(__file__).parent.parent.parent / ".wiki"
@@ -195,9 +195,9 @@ def run_git_status() -> dict:
 
 
 def main():
-    print(f"═" * 60)
+    print("═" * 60)
     print(f"LEGION WIKI HEALTH CHECK — {get_timestamp()[:10]}")
-    print(f"═" * 60)
+    print("═" * 60)
 
     checks = [
         check_obsidian_dir(),
@@ -224,7 +224,7 @@ def main():
         if check["status"] == "fail":
             all_pass = False
 
-    print(f"═" * 60)
+    print("═" * 60)
     if all_pass:
         print("✅ All checks passed. Wiki is healthy.")
     else:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Logo Design Search - CLI for searching logo design guidelines
 Usage: python search.py "<query>" [--domain <domain>] [--max-results 3]

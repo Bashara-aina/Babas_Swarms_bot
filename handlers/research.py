@@ -51,7 +51,7 @@ async def cmd_scrape(msg: Message) -> None:
         screenshot_path = result.get("screenshot_path", "")
 
         if screenshot_path and Path(screenshot_path).exists():
-            _last_screenshot[msg.from_user.id] = screenshot_path
+            _last_screenshot[msg.from_user.id] = screenshot_path  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
             await msg.answer_photo(
                 photo=FSInputFile(screenshot_path),
                 caption=f"🌐 {title[:100]}" if title else "🌐 page screenshot",
@@ -116,7 +116,7 @@ async def cmd_research(msg: Message) -> None:
 
             out = await run_research_pipeline(
                 topic,
-                user_id=str(msg.from_user.id) if msg.from_user else None,
+                user_id=str(msg.from_user.id) if msg.from_user else None,  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
             )
         finally:
             typing_task.cancel()
@@ -161,7 +161,7 @@ async def cmd_research(msg: Message) -> None:
         await _phase("🌐 [Act] collecting fused evidence (web + arXiv + memory)")
         evidence_meta = await gather_fused_evidence(
             topic,
-            user_id=str(msg.from_user.id) if msg.from_user else "0",
+            user_id=str(msg.from_user.id) if msg.from_user else "0",  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
             min_sources=5,
             start_pages=8,
             max_pages=20,
@@ -180,7 +180,7 @@ async def cmd_research(msg: Message) -> None:
             await _phase(f"💭 source gate passed: {source_count} sources collected")
 
         await _phase("🧪 [Verify] synthesizing with AG2 research swarm")
-        user_id = str(msg.from_user.id) if msg.from_user else "0"
+        user_id = str(msg.from_user.id) if msg.from_user else "0"  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
         synthesis_prompt = (
             "You are a deep research analyst. Use ONLY the supplied evidence to answer. "
             "If evidence is insufficient, say that explicitly.\n\n"
@@ -310,9 +310,11 @@ async def cmd_ask_paper(msg: Message) -> None:
         await status_msg.delete()
         await send_chunked(msg, analysis, model_used="debug/paper-analysis")
         try:
-            from tools.memory import auto_save_research
+            from tools.memory import (
+                auto_save_research,  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
+            )
 
-            await auto_save_research(analysis, arxiv_id)
+            await auto_save_research(analysis, arxiv_id)  # type: ignore[reportOptionalMemberAccess,reportAttributeAccessIssue]
         except Exception:
             pass
     except Exception as e:

@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 RUVECTOR_AVAILABLE = False
 
 try:
-    import ruvector
+    import ruvector  # type: ignore[reportMissingImports]
     RUVECTOR_AVAILABLE = True
 except ImportError:
     ruvector = None  # type: ignore
@@ -47,7 +47,7 @@ class RuvectorCognitionKernel:
         if not RUVECTOR_AVAILABLE:
             raise ImportError("ruvector not installed")
         if self._client is None:
-            import ruvector
+            import ruvector  # type: ignore[reportMissingImports]
             self._client = ruvector.Client(host=self.host, port=self.port)
         return self._client
 

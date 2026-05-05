@@ -28,13 +28,13 @@ async def cmd_save(msg: Message) -> None:
         return
     try:
         if _shared._session_manager:
-            thread_id = _user_thread.get(msg.from_user.id, f"tg_{msg.chat.id}")
+            thread_id = _user_thread.get(msg.from_user.id, f"tg_{msg.chat.id}")  # type: ignore[reportOptionalMemberAccess]
             _shared._session_manager.get_or_create_session(
-                user_id=msg.from_user.id,
-                chat_id=msg.chat.id,
+                user_id=msg.from_user.id,  # type: ignore[reportOptionalMemberAccess]
+                chat_id=msg.chat.id,  # type: ignore[reportOptionalMemberAccess]
                 thread_id=thread_id,
             )
-            session = await _shared._session_manager.save_session(msg.from_user.id, name)
+            session = await _shared._session_manager.save_session(msg.from_user.id, name)  # type: ignore[reportOptionalMemberAccess]
             if session:
                 await msg.answer(
                     f"✅ Session <b>{html_mod.escape(name)}</b> saved\n"
@@ -53,7 +53,7 @@ async def cmd_save(msg: Message) -> None:
 
         from agents import ACTIVE_THREADS
         from tools.persistence import save_session
-        thread_id = f"tg_{msg.chat.id}"
+        thread_id = f"tg_{msg.chat.id}"  # type: ignore[reportOptionalMemberAccess]
         context = ACTIVE_THREADS.get(thread_id, [])
         session_id = uuid.uuid4().hex[:12]
         await save_session(
@@ -83,10 +83,10 @@ async def cmd_resume(msg: Message) -> None:
         return
     try:
         if _shared._session_manager:
-            session = await _shared._session_manager.resume_session(msg.from_user.id, name)
+            session = await _shared._session_manager.resume_session(msg.from_user.id, name)  # type: ignore[reportOptionalMemberAccess]
             if session:
                 if session.thread_id:
-                    _user_thread[msg.from_user.id] = session.thread_id
+                    _user_thread[msg.from_user.id] = session.thread_id  # type: ignore[reportOptionalMemberAccess]
                 await msg.answer(
                     f"✅ Resumed <b>{html_mod.escape(session.name)}</b>\n"
                     f"Tasks: {session.task_count} | "
@@ -104,8 +104,8 @@ async def cmd_resume(msg: Message) -> None:
 
         # Fallback to legacy persistence
         from agents import ACTIVE_THREADS
-        from tools.persistence import load_session
-        session = await load_session(name=name)
+        from tools.persistence import load_session  # type: ignore[reportAttributeAccessIssue]
+        session = await load_session(name=name)  # type: ignore[reportAttributeAccessIssue]
         if not session:
             await msg.answer(f"session not found: <b>{html_mod.escape(name)}</b>", parse_mode="HTML")
             return
@@ -113,7 +113,7 @@ async def cmd_resume(msg: Message) -> None:
         thread_id = session["thread_id"]
         context = _json.loads(session.get("context_json", "[]"))
         ACTIVE_THREADS[thread_id] = context
-        _user_thread[msg.from_user.id] = thread_id
+        _user_thread[msg.from_user.id] = thread_id  # type: ignore[reportOptionalMemberAccess]
         await msg.answer(
             f"✅ Resumed <b>{html_mod.escape(name)}</b> ({len(context)} messages)\n"
             f"Thread: <code>{thread_id}</code>",
@@ -130,7 +130,7 @@ async def cmd_sessions(msg: Message) -> None:
         return
     try:
         if _shared._session_manager:
-            sessions = await _shared._session_manager.list_sessions(msg.from_user.id)
+            sessions = await _shared._session_manager.list_sessions(msg.from_user.id)  # type: ignore[reportOptionalMemberAccess]
             if not sessions:
                 await msg.answer("No sessions saved yet. Use /save to save the current session.")
                 return

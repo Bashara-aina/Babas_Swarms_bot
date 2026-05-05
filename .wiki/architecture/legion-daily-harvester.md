@@ -8,8 +8,8 @@ updated: 2026-04-13
 summary: The daily harvester is Legion's autonomous research system — a set of 11 modules that run on a cron schedule to keep Legion's knowledge current through topic scoring, multi-source harvesting, wiki synthesis, and morning reports.
 wikilinks:
   - [[architecture/legion-module-map]]
-  - [[./concepts/multi-agent-orchestration]]
-  - [[./concepts/reasoning-loop]]
+  - [[concepts/multi-agent-orchestration]]
+  - [[concepts/reasoning-loop]]
 confidence: high
 source: implementation
 ---
@@ -112,5 +112,5 @@ Can be triggered manually via `/run harvest <topic>`.
 ## Related Pages
 
 - [[architecture/legion-module-map]] — Module context
-- [[./concepts/reasoning-loop]] — How Legion plans and refines
+- [[concepts/reasoning-loop]] — How Legion plans and refines
 - [[architecture/legion-orchestrator-system]] — How orchestration layers connect

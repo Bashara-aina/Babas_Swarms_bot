@@ -10,7 +10,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from swarms_bot.orchestrator.task import Task
@@ -28,7 +28,7 @@ class AgentResponse:
     cost_usd: float = 0.0
     tokens_used: int = 0
     execution_time_ms: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class Agent(ABC):
@@ -42,7 +42,7 @@ class Agent(ABC):
         self,
         name: str,
         agent_key: str,
-        model_config: Dict[str, Any] | None = None,
+        model_config: dict[str, Any] | None = None,
     ) -> None:
         self.name = name
         self.agent_key = agent_key
@@ -50,14 +50,14 @@ class Agent(ABC):
         self.logger = logging.getLogger(f"agent.{name}")
 
     @abstractmethod
-    async def execute(self, task: "Task") -> AgentResponse:
+    async def execute(self, task: Task) -> AgentResponse:
         """Execute a task and return a response.
 
         Must be implemented by all agent subclasses.
         """
         ...
 
-    async def get_cost_estimate(self, task: "Task") -> float:
+    async def get_cost_estimate(self, task: Task) -> float:
         """Estimate cost before execution (optional override)."""
         estimated_tokens = len(task.description.split()) * 2
         price_per_token = self.model_config.get("price_per_token", 0.000001)

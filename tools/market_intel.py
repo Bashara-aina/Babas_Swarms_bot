@@ -432,30 +432,71 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                 else:
                     cleaned = raw.strip()
 
-                # Find first { and last } to extract JSON object (robust — handles
-                # nested braces inside string values)
-                jstart = cleaned.find("{")
-                jend = cleaned.rfind("}") + 1
-                if jstart != -1 and jend > jstart:
-                    json_str = cleaned[jstart:jend]
+                                # Strip markdown code fences first
+                if cleaned.startswith("```"):
+                    fence_end = cleaned.find("\n")
+                    if fence_end != -1:
+                        cleaned = cleaned[fence_end + 1:]
+                    if cleaned.endswith("```"):
+                        cleaned = cleaned[:-3].strip()
+
+                # Find JSON boundaries by locating the "answer" field specifically.
+                # This avoids issues where the markdown/answer text contains { or }.
+                answer_key = '"answer":'
+                answer_pos = cleaned.find(answer_key)
+                if answer_pos == -1:
+                    return {"answer": cleaned[:500], "confidence": "MEDIUM"}
+
+                # Back up to the opening {
+                json_start = cleaned.rfind("{", 0, answer_pos + len(answer_key))
+                if json_start == -1:
+                    json_start = answer_pos
+
+                # Find the closing "confidence": "..."} at the end
+                conf_marker = '"confidence": "'
+                conf_pos = cleaned.find(conf_marker, answer_pos)
+                if conf_pos == -1:
+                    # No confidence field — try generic parse
                     try:
-                        parsed = json.loads(json_str)
+                        parsed = json.loads(cleaned[json_start:])
                         return {
-                            "answer": parsed.get("answer", ""),
+                            "answer": parsed.get("answer", cleaned[json_start:json_start + 500]),
                             "confidence": parsed.get("confidence", "MEDIUM"),
                         }
-                    except json.JSONDecodeError as e:
-                        # Truncated JSON — try to recover partial answer by finding the
-                        # last complete "answer" field value before the cut
-                        answer_match = re.search(r'"answer"\s*:\s*"(.*)"\s*,\s*"confidence"', json_str, re.DOTALL)
-                        if answer_match:
-                            return {
-                                "answer": answer_match.group(1).strip(),
-                                "confidence": "MEDIUM",
-                            }
-                        # Last resort: strip broken tail
-                        cut = max(0, e.pos - 200)
-                        return {"answer": json_str[cut:e.pos], "confidence": "LOW"}
+                    except Exception:
+                        return {"answer": cleaned[json_start:json_start + 500], "confidence": "MEDIUM"}
+
+                # confidence value: from after '"confidence": "' up to the next '"'
+                conf_val_start = conf_pos + len(conf_marker)
+                conf_end = cleaned.find('"', conf_val_start)
+                confidence = cleaned[conf_val_start:conf_end] if conf_end != -1 else "MEDIUM"
+
+                # answer value: from after '"answer": "' up to just before , "confidence"
+                answer_val_start = answer_pos + len(answer_key) + 1
+                # Skip whitespace
+                while answer_val_start < len(cleaned) and cleaned[answer_val_start] in ' \t\n':
+                    answer_val_start += 1
+                # Skip opening quote
+                if answer_val_start < len(cleaned) and cleaned[answer_val_start] == '"':
+                    answer_val_start += 1
+                # answer ends right before ', "confidence'
+                answer_end = cleaned.rfind('", "confidence"', 0, conf_pos)
+                if answer_end == -1:
+                    answer_end = conf_pos - 1
+
+                answer_text = cleaned[answer_val_start:answer_end]
+                # Unescape common sequences
+                answer_text = (
+                    answer_text
+                    .replace('\\"', '"')
+                    .replace('\\n', '\n')
+                    .replace('\\r', '\r')
+                    .replace('\\\\', '\\')
+                )
+                return {
+                    "answer": answer_text.strip(),
+                    "confidence": confidence or "MEDIUM",
+                }
                 # Fallback: return cleaned text
                 return {"answer": cleaned[:500], "confidence": "MEDIUM"}
 

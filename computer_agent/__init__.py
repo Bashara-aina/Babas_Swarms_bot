@@ -62,6 +62,7 @@ from computer_agent.tools import (
 __all__ = [
     "APP_MAP",
     "BROWSER_APPS",
+    "TOOL_DEFINITIONS",
     "_detected_display",
     "append_file",
     "browser_navigate",
@@ -97,7 +98,6 @@ __all__ = [
     "scroll_at",
     "set_clipboard",
     "take_screenshot",
-    "TOOL_DEFINITIONS",
     "upgrade_from_git",
     "whatsapp_send_local",
     "write_file",

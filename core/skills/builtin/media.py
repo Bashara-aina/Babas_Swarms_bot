@@ -80,7 +80,7 @@ async def _analyze_screen_handler(text: str) -> str:
         return "❌ Failed to take screenshot for analysis."
 
     try:
-        from core.llm_client import get_vision_model
+        from core.llm_client import get_vision_model  # type: ignore[reportMissingImports]
 
         # Get vision-capable model
         model = get_vision_model()
@@ -95,7 +95,7 @@ async def _analyze_screen_handler(text: str) -> str:
         # Build prompt
         query = text
         for kw in ["analyze", "screen", "screenshot", "what's on", "what is on", "describe"]:
-            query = query.replace(kw, "", case=False).strip()
+            query = query.replace(kw, "", case=False).strip()  # type: ignore[reportCallIssue]
         if not query or query == "screen":
             query = "Describe what's on the screen in detail."
 

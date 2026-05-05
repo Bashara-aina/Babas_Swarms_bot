@@ -9,7 +9,14 @@ from pathlib import Path
 # Add skills path
 sys.path.insert(0, str(Path(__file__).parent.parent / "skills"))
 
-from swarm import CAPABILITY_TOKENS, estimate_complexity, get_capability_description, select_capabilities
+import itertools
+
+from swarm import (
+    CAPABILITY_TOKENS,
+    estimate_complexity,
+    get_capability_description,
+    select_capabilities,
+)
 
 
 def main():
@@ -41,7 +48,7 @@ def main():
         text = task.lower()
         task_tokens |= set(re.findall(r"[a-z][a-z0-9]{1,}", text))
         words = text.split()
-        task_tokens |= {f"{a}_{b}" for a, b in zip(words, words[1:])}
+        task_tokens |= {f"{a}_{b}" for a, b in itertools.pairwise(words)}
 
         for cap_name, cap_keywords in CAPABILITY_TOKENS.items():
             cap_tokens = set(re.findall(r"[a-z][a-z0-9]{1,}", " ".join(cap_keywords).lower()))

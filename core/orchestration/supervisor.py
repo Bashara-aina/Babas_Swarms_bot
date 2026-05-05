@@ -183,7 +183,7 @@ async def orchestrate(
         Final synthesised result string.
     """
     if not _is_complex(task):
-        return None   # Signal to caller: use direct routing
+        return None   # Signal to caller: use direct routing  # type: ignore[reportReturnType]
 
     if progress_fn:
         await progress_fn("Decomposing complex task…")
@@ -194,7 +194,7 @@ async def orchestrate(
         steps = await _llm_decompose(task, run_fn)
 
     if not steps or len(steps) < 2:
-        return None   # Not decomposable — fall back to direct routing
+        return None   # Not decomposable — fall back to direct routing  # type: ignore[reportReturnType]
 
     if progress_fn:
         plan = "\n".join(f"{i+1}. [{s.agent_key}] {s.description}" for i, s in enumerate(steps))

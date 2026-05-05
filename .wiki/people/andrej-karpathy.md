@@ -8,9 +8,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Andrej Karpathy is an AI researcher and educator known for building LLM knowledge bases and educational content on neural networks.
 wikilinks:
-  - [[./concepts/karpathy-kb-pattern]]
-  - [[./concepts/llm-cost-routing]]
-  - [[./concepts/self-improvement-loop]]
+  - [[concepts/karpathy-kb-pattern]]
+  - [[concepts/llm-cost-routing]]
+  - [[concepts/self-improvement-loop]]
   - [[projects/legion-bot]]
 confidence: high
 source: external
@@ -37,7 +37,7 @@ Andrej Karpathy is a renowned AI researcher who served as Director of AI at Tesl
 
 ## Contributions to Legion's Wiki
 
-The [[./concepts/karpathy-kb-pattern]] was directly inspired by Karpathy's approach to structuring AI knowledge bases. The pattern emphasizes:
+The [[concepts/karpathy-kb-pattern]] was directly inspired by Karpathy's approach to structuring AI knowledge bases. The pattern emphasizes:
 
 **Structural elements that Legion adopted:**
 - YAML frontmatter with type, status, confidence, and tags fields
@@ -59,10 +59,10 @@ A minimal PyTorch implementation of a GPT model in ~300 lines of code. Purposefu
 - BPE tokenization basics
 
 ### nanoGPT (2022)
-Simple GPU-accelerated GPT training pipeline. Designed to be the simplest way to train a GPT model on custom text data. This directly influenced [[./concepts/llm-cost-routing]] decisions in Legion (training vs inference cost tradeoffs).
+Simple GPU-accelerated GPT training pipeline. Designed to be the simplest way to train a GPT model on custom text data. This directly influenced [[concepts/llm-cost-routing]] decisions in Legion (training vs inference cost tradeoffs).
 
 ### CS231n Lectures (2016–2017)
-Stanford's flagship deep learning course. Karpathy's lecture notes and assignments became the de facto standard for CNN education. The course structure (visual examples → mathematical foundation → code implementation) influenced Legion's [[./concepts/self-improvement-loop]] design.
+Stanford's flagship deep learning course. Karpathy's lecture notes and assignments became the de facto standard for CNN education. The course structure (visual examples → mathematical foundation → code implementation) influenced Legion's [[concepts/self-improvement-loop]] design.
 
 ## The Karpathy LLM Wiki Pattern
 
@@ -72,12 +72,12 @@ Karpathy's approach to LLM knowledge bases separates two concerns:
 2. **Retrieval strategy**: Embeddings + vector search for context injection
 
 Legion's wiki implementation combines both:
-- [[./concepts/vector-search]] for semantic retrieval of relevant articles
-- Dense [[./concepts/intent-routing]] based on keyword matching
+- [[concepts/vector-search]] for semantic retrieval of relevant articles
+- Dense [[concepts/intent-routing]] based on keyword matching
 - Human-readable structure for debugging and manual editing
 
 ## Related Pages
 
-- [[./concepts/karpathy-kb-pattern]] — Pattern inspired by Karpathy's wiki approach
-- [[./concepts/llm-cost-routing]] — Cost optimization influenced by nanoGPT training economics
-- [[./concepts/self-improvement-loop]] — Learning loop design inspired by CS231n pedagogy
+- [[concepts/karpathy-kb-pattern]] — Pattern inspired by Karpathy's wiki approach
+- [[concepts/llm-cost-routing]] — Cost optimization influenced by nanoGPT training economics
+- [[concepts/self-improvement-loop]] — Learning loop design inspired by CS231n pedagogy

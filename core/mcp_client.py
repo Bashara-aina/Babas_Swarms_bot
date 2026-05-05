@@ -403,8 +403,10 @@ class MCPClientPool:
                             )
                         text_result = _tool_result_to_text(result)[:12000] or "(empty tool result)"
                         try:
-                            from core.hooks import get_hook_system
-                            hs = get_hook_system()
+                            from core.hooks import (
+                                get_hook_system,  # type: ignore[reportAttributeAccessIssue]
+                            )
+                            hs = get_hook_system()  # type: ignore[reportAttributeAccessIssue]
                             if hs:
                                 hs.emit("post_tool_use", server=server_name, tool=tool_name, args=arguments, result=text_result)
                         except Exception:

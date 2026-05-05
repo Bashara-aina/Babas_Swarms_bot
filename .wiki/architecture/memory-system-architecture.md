@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Legion's memory system spans 8 subsystems including Core Memory (JSON), Archival Memory (SQLite FTS5), Recall Memory (conversation log), Episodic Store (Supabase/JSON), User Profile (Supabase), Temporal Knowledge Graph (aiosqlite bi-temporal), Semantic Cache (LRU), and mem0 vector embeddings — with ongoing unification efforts.
 wikilinks:
-  - [[./concepts/memory-architecture]]
-  - [[./entities/chromadb]]
-  - [[./entities/litellm]]
+  - [[concepts/memory-architecture]]
+  - [[entities/chromadb]]
+  - [[entities/litellm]]
   - [[architecture/legion-module-map]]
 confidence: medium
 source: implementation
@@ -180,6 +180,6 @@ At 02:00 JST daily:
 
 ## Related Pages
 
-- [[./concepts/memory-architecture]] — Memory concepts
-- [[./entities/chromadb]] — Vector database
+- [[concepts/memory-architecture]] — Memory concepts
+- [[entities/chromadb]] — Vector database
 - [[architecture/legion-module-map]] — Module overview

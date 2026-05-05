@@ -14,14 +14,14 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class StructuredFormatter(logging.Formatter):
     """JSON formatter for structured log output."""
 
     def format(self, record: logging.LogRecord) -> str:
-        entry: Dict[str, Any] = {
+        entry: dict[str, Any] = {
             "timestamp": self.formatTime(record, "%Y-%m-%dT%H:%M:%S"),
             "level": record.levelname,
             "logger": record.name,
@@ -57,9 +57,9 @@ class SwarmLogger:
     def __init__(self, component: str) -> None:
         self._logger = logging.getLogger(f"swarm.{component}")
         self._component = component
-        self._bound: Dict[str, Any] = {}
+        self._bound: dict[str, Any] = {}
 
-    def bind(self, **kwargs: Any) -> "SwarmLogger":
+    def bind(self, **kwargs: Any) -> SwarmLogger:
         """Return a new logger with additional bound context."""
         new = SwarmLogger(self._component)
         new._bound = {**self._bound, **kwargs}

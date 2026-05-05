@@ -76,7 +76,7 @@ async def _spawn_opencode_subagents(
         if isinstance(r, Exception):
             traces.append({"agent": f"{parent_agent}-sub-{i}", "error": str(r), "success": False})
         else:
-            traces.append(r)
+            traces.append(r)  # type: ignore[reportArgumentType]
 
     return traces
 
@@ -226,7 +226,7 @@ STATUS: done|blocked|needs_more
         if isinstance(r, Exception):
             traces.append({"error": str(r), "success": False})
         else:
-            traces.append(r)
+            traces.append(r)  # type: ignore[reportArgumentType]
 
     return traces
 
@@ -247,7 +247,7 @@ async def _run_concurrent(task: str, agent_names: list[str]) -> tuple[str, list[
         if isinstance(item, Exception):
             logger.warning("concurrent step failed for %s: %s", agent, item)
             continue
-        out, model, latency, sub_traces = item
+        out, model, latency, sub_traces = item  # type: ignore[reportGeneralTypeIssues]
         outputs.append(f"[{agent}] {out}")
         traces.append(
             {
@@ -300,7 +300,7 @@ async def run_topology(
 
         return SwarmResult(
             final_output=final,
-            agent_traces=traces,
+            agent_traces=traces,  # type: ignore[reportArgumentType]
             topology_used=selected,
             total_tokens=0,
             total_latency_ms=(time.perf_counter() - started) * 1000.0,
@@ -313,7 +313,7 @@ async def run_topology(
             final, traces = await _run_sequential(task, agents)
             return SwarmResult(
                 final_output=final,
-                agent_traces=traces,
+                agent_traces=traces,  # type: ignore[reportArgumentType]
                 topology_used="sequential",
                 total_tokens=0,
                 total_latency_ms=(time.perf_counter() - started) * 1000.0,

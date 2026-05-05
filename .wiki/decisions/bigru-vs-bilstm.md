@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: BiGRU is recommended for sequential dependency due to its performance and efficiency at RTX 3060 scale. It outperforms TimeSformer and has manageable overhead compared to Transformer.
 wikilinks:
-  - [[./concepts/sequential-dependency]]
-  - [[./entities/rtx-3060]]
-  - [[./decisions/choosing-between-bigru-and-bilstm]]
+  - [[concepts/sequential-dependency]]
+  - [[entities/rtx-3060]]
+  - [[decisions/choosing-between-bigru-and-bilstm]]
 confidence: high
 source: legion-bot
 ---

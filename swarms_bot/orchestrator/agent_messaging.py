@@ -18,7 +18,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,10 @@ class AgentMessage:
     recipient: str = ""                  # agent name or "broadcast"
     msg_type: MessageType = MessageType.TASK_RESULT
     content: str = ""                    # human-readable content
-    payload: Dict[str, Any] = field(default_factory=dict)  # structured data
+    payload: dict[str, Any] = field(default_factory=dict)  # structured data
     timestamp: float = field(default_factory=time.time)
     run_id: str = ""                     # orchestration run ID
-    parent_msg_id: Optional[str] = None  # for threaded conversations
+    parent_msg_id: str | None = None  # for threaded conversations
 
     def to_context_str(self) -> str:
         """Compact string for injecting into LLM context."""
@@ -64,10 +64,10 @@ class AgentMessageBus:
     Agents subscribe to message types; the orchestrator broadcasts results.
     """
 
-    def __init__(self, run_id: str = "", persist_path: Optional[str] = None):
+    def __init__(self, run_id: str = "", persist_path: str | None = None):
         self.run_id = run_id or uuid.uuid4().hex[:8]
-        self._messages: List[AgentMessage] = []
-        self._queues: Dict[str, asyncio.Queue] = {}  # recipient -> queue
+        self._messages: list[AgentMessage] = []
+        self._queues: dict[str, asyncio.Queue] = {}  # recipient -> queue
         self._persist_path = persist_path
         self._lock = asyncio.Lock()
 
@@ -76,9 +76,9 @@ class AgentMessageBus:
         sender: str,
         msg_type: MessageType,
         content: str,
-        payload: Optional[Dict] = None,
+        payload: dict | None = None,
         recipient: str = "broadcast",
-        parent_msg_id: Optional[str] = None,
+        parent_msg_id: str | None = None,
     ) -> AgentMessage:
         """Publish a message to the bus."""
         msg = AgentMessage(
@@ -113,10 +113,10 @@ class AgentMessageBus:
 
     async def get_messages(
         self,
-        sender: Optional[str] = None,
-        msg_type: Optional[MessageType] = None,
-        recipient: Optional[str] = None,
-    ) -> List[AgentMessage]:
+        sender: str | None = None,
+        msg_type: MessageType | None = None,
+        recipient: str | None = None,
+    ) -> list[AgentMessage]:
         """Query messages by filters."""
         async with self._lock:
             results = self._messages

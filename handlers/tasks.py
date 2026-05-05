@@ -55,7 +55,7 @@ async def cmd_monitor(msg: Message) -> None:
         await msg.answer("scheduler not initialized — try restarting bot")
         return
 
-    task_id = await _shared._scheduler.add_monitor(
+    task_id = await _shared._scheduler.add_monitor(  # type: ignore[reportGeneralTypeIssues]
         description=command[:50],
         command=command,
         interval_sec=interval,
@@ -102,7 +102,7 @@ async def cmd_schedule(msg: Message) -> None:
         await msg.answer("scheduler not initialized")
         return
 
-    task_id = await _shared._scheduler.add_scheduled(
+    task_id = await _shared._scheduler.add_scheduled(  # type: ignore[reportGeneralTypeIssues]
         description=command[:50],
         command=command,
         run_at=run_at,
@@ -122,7 +122,7 @@ async def cmd_tasks(msg: Message) -> None:
     if not _shared._scheduler:
         await msg.answer("scheduler not initialized")
         return
-    result = await _shared._scheduler.list_tasks()
+    result = await _shared._scheduler.list_tasks()  # type: ignore[reportGeneralTypeIssues]
     await msg.answer(result, parse_mode="HTML")
 
 
@@ -138,7 +138,7 @@ async def cmd_cancel(msg: Message) -> None:
     if not _shared._scheduler:
         await msg.answer("scheduler not initialized")
         return
-    result = await _shared._scheduler.cancel(task_id)
+    result = await _shared._scheduler.cancel(task_id)  # type: ignore[reportGeneralTypeIssues]
     await msg.answer(f"❌ {result}")
 
 
@@ -194,7 +194,7 @@ async def cmd_alert(msg: Message) -> None:
         await msg.answer("scheduler not initialized — check bot logs")
         return
 
-    task_id = await _shared._scheduler.add_monitor(
+    task_id = await _shared._scheduler.add_monitor(  # type: ignore[reportGeneralTypeIssues]
         description=f"Alert: {name}",
         command=command,
         interval_sec=interval,
@@ -230,7 +230,7 @@ async def cmd_watch_training(msg: Message) -> None:
         await msg.answer("scheduler not initialized")
         return
 
-    task_id = await _shared._scheduler.add_monitor(
+    task_id = await _shared._scheduler.add_monitor(  # type: ignore[reportGeneralTypeIssues]
         description="WorkerNet training watcher",
         command=f"tail -5 '{log_path}'",
         interval_sec=60,

@@ -196,11 +196,11 @@ class FeedbackLearner:
 
         if self._redis:
             field = "pos" if entry.rating == POSITIVE else "neg"
-            self._redis.hincrby(f"{key_prefix}:scores", field, 1)
+            self._redis.hincrby(f"{key_prefix}:scores", field, 1)  # type: ignore[reportAttributeAccessIssue]
             # Store entry in list (cap at 500 per agent)
             entry_json = json.dumps(asdict(entry))
-            self._redis.lpush(f"{key_prefix}:entries", entry_json)
-            self._redis.ltrim(f"{key_prefix}:entries", 0, 499)
+            self._redis.lpush(f"{key_prefix}:entries", entry_json)  # type: ignore[reportAttributeAccessIssue]
+            self._redis.ltrim(f"{key_prefix}:entries", 0, 499)  # type: ignore[reportAttributeAccessIssue]
         else:
             field = "pos" if entry.rating == POSITIVE else "neg"
             self._scores[agent][field] += 1
@@ -212,7 +212,7 @@ class FeedbackLearner:
 
     def _load_scores(self, agent: str) -> dict[str, int]:
         if self._redis:
-            raw = self._redis.hgetall(f"swarm:feedback:{agent}:scores")
+            raw = self._redis.hgetall(f"swarm:feedback:{agent}:scores")  # type: ignore[reportAttributeAccessIssue]
             return {
                 "pos": int(raw.get("pos", 0)),
                 "neg": int(raw.get("neg", 0)),

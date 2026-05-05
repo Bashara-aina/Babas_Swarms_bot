@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from swarms_bot.orchestrator.task import Task
@@ -25,7 +25,7 @@ class LLMAgent(Agent):
     and delegates execution to the existing chat() function with fallback chains.
     """
 
-    async def execute(self, task: "Task") -> AgentResponse:
+    async def execute(self, task: Task) -> AgentResponse:
         """Execute task using llm_client.chat()."""
         from llm_client import chat
 
@@ -65,7 +65,7 @@ class AgenticLoopAgent(Agent):
     For tasks requiring computer control (screenshots, clicks, commands).
     """
 
-    async def execute(self, task: "Task") -> AgentResponse:
+    async def execute(self, task: Task) -> AgentResponse:
         from llm_client import agent_loop
 
         start = time.monotonic()
@@ -99,7 +99,7 @@ class AgenticLoopAgent(Agent):
 class CodeReviewAgent(Agent):
     """Specialized code review agent using tools/code_reviewer.py."""
 
-    async def execute(self, task: "Task") -> AgentResponse:
+    async def execute(self, task: Task) -> AgentResponse:
         from tools.code_reviewer import review_code, review_file
 
         start = time.monotonic()
@@ -135,13 +135,13 @@ class CodeReviewAgent(Agent):
             )
 
 
-def build_agent_registry() -> Dict[str, Agent]:
+def build_agent_registry() -> dict[str, Agent]:
     """Build the full agent registry from existing config.
 
     Creates Agent instances for each agent key in agents.py,
     plus specialized agents for code review and computer control.
     """
-    agents: Dict[str, Agent] = {}
+    agents: dict[str, Agent] = {}
 
     # Standard LLM agents (map to existing agent keys)
     standard_keys = [

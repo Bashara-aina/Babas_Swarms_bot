@@ -217,7 +217,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
 async def _raw_run(model: str, task: str, agent_key: str) -> str:
     """Execute interpreter.chat in thread pool and format output."""
     configure_interpreter(model, agent_key)
-    result = await asyncio.run_in_executor(
+    result = await asyncio.run_in_executor(  # type: ignore[reportAttributeAccessIssue]
         None,
         lambda: interpreter.chat(task, display=False),
     )

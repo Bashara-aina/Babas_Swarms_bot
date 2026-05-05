@@ -7,9 +7,9 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: "cekwajar.id (meaning 'is it fair?' in Indonesian) is a wage fairness platform for Indonesian workers launching with Wajar Slip MVP: a payslip compliance auditor that verifies PPh21 TER, progressive tax, and 6-component BPJS deductions against regulatory formulas. Built with Next.js 15 App Router, Supabase PostgreSQL with Row Level Security, and Vercel deployment. Freemium model at IDR 29K Basic / IDR 79K Pro per month. Target: May 2026 launch with 136 engineering hours. Kill criteria: less than 0.5% conversion at Month 3 or any confirmed PPh21 calculation error."
 wikilinks:
- - [[./entities/supabase]]
+ - [[entities/supabase]]
  - [[architecture/cekwajar-tech-stack]]
- - [[./concepts/freemium-gate]]
+ - [[concepts/freemium-gate]]
  - [[architecture/cekwajar-verdict-engine]]
  - [[projects/rumahlabuh-com]]
 confidence: high
@@ -526,8 +526,8 @@ Start (Bootstrap)
 - [[architecture/cekwajar-tech-stack]] — Architecture details
 - [[architecture/cekwajar-data-sources]] — Data sources per tool (BPS, Kemnaker, World Bank)
 - [[architecture/cekwajar-ocr-pipeline]] — OCR pipeline with confidence thresholds
-- [[./concepts/freemium-gate]] — Freemium access control pattern
-- [[./entities/supabase]] — Database provider
+- [[concepts/freemium-gate]] — Freemium access control pattern
+- [[entities/supabase]] — Database provider
 - [[concepts/bpjs-reference]] — Regulatory formulas for 6-component BPJS
 - [[concepts/tax-indonesia]] — PPh21 TER and progressive calculation
 - [[concepts/labor-law-indonesia]] — Employment law for violation detection

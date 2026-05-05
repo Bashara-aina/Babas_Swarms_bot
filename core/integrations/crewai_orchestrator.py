@@ -102,7 +102,7 @@ class SwarmBotCrew:
             )
             result = await crew.kickoff_async()
             if hasattr(result, "raw"):
-                return result.raw
+                return result.raw  # type: ignore[reportAttributeAccessIssue]
             return str(result)
         except Exception as exc:
             logger.error("crewAI kickoff failed: %s", exc)
@@ -133,7 +133,7 @@ class SwarmBotCrew:
                 tasks=task_objs,
                 verbose=self.verbose,
             )
-            result = await crew.kickoff()
+            result = await crew.kickoff()  # type: ignore[reportGeneralTypeIssues]
             return str(result) if result else "(empty crew result)"
         except Exception as exc:
             logger.error("crewAI kickoff_with_tasks failed: %s", exc)

@@ -16,7 +16,6 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +63,11 @@ class DAGNode:
     title: str
     description: str
     agent: str
-    depends_on: List[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     priority: int = 1
     status: str = "pending"        # pending | running | done | failed | skipped
-    result: Optional[str] = None
-    error: Optional[str] = None
+    result: str | None = None
+    error: str | None = None
     cost_usd: float = 0.0
     execution_time_ms: int = 0
 
@@ -77,13 +76,13 @@ class DAGNode:
 class TaskDAG:
     """A directed acyclic graph of subtasks."""
     goal: str
-    nodes: Dict[str, DAGNode] = field(default_factory=dict)
-    execution_order: List[List[str]] = field(default_factory=list)  # batches of parallel tasks
+    nodes: dict[str, DAGNode] = field(default_factory=dict)
+    execution_order: list[list[str]] = field(default_factory=list)  # batches of parallel tasks
 
     def add_node(self, node: DAGNode) -> None:
         self.nodes[node.id] = node
 
-    def get_ready_nodes(self) -> List[DAGNode]:
+    def get_ready_nodes(self) -> list[DAGNode]:
         """Return nodes whose dependencies are all done."""
         ready = []
         for node in self.nodes.values():

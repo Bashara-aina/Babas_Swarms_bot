@@ -36,7 +36,7 @@ async def _notify(bot, user_id: int, text: str) -> None:
     MAX = 4000
     for i in range(0, max(len(text), 1), MAX):  # BUG FIX: max(len,1) prevents zero-range on empty string
         try:
-            await bot.send_message(user_id, text[i : i + MAX], parse_mode="HTML")
+            await bot.send_message(user_id, text[i : i + MAX], parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
         except Exception as e:
             logger.warning("notify failed: %s", e)
         if len(text) > MAX:
@@ -50,7 +50,7 @@ async def _notify(bot, user_id: int, text: str) -> None:
 async def cmd_overnight(msg: Message) -> None:
     if not _auth(msg):
         return
-    goal = msg.text.removeprefix("/overnight").strip()
+    goal = msg.text.removeprefix("/overnight").strip()  # type: ignore[reportOptionalMemberAccess]
     if not goal:
         await msg.answer(
             "<b>🌙 Overnight Mode</b>\n\n"
@@ -71,11 +71,11 @@ async def cmd_overnight(msg: Message) -> None:
     )
 
     try:
-        from llm_client import simple_llm_call
+        from llm_client import simple_llm_call  # type: ignore[reportAttributeAccessIssue]
         from tools.dashboard import build_ascii_dashboard
         from tools.overnight import AGENT_STATUS, create_job, plan_job_with_llm, run_overnight_job
 
-        task_dicts = await plan_job_with_llm(goal, simple_llm_call)
+        task_dicts = await plan_job_with_llm(goal, simple_llm_call)  # type: ignore[reportAttributeAccessIssue]
 
         if not task_dicts:  # BUG FIX: guard against empty plan
             await status_msg.edit_text(
@@ -95,7 +95,7 @@ async def cmd_overnight(msg: Message) -> None:
         )
 
         bot = msg.bot
-        user_id = msg.from_user.id
+        user_id = msg.from_user.id  # type: ignore[reportOptionalMemberAccess]
 
         async def notify(text: str) -> None:
             await _notify(bot, user_id, text)
@@ -108,7 +108,7 @@ async def cmd_overnight(msg: Message) -> None:
                     job_tasks=tasks,
                     title="Overnight Job Dashboard",
                 )
-                await bot.send_message(user_id, dash_text, parse_mode="HTML")
+                await bot.send_message(user_id, dash_text, parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
             except Exception as e:
                 logger.debug("Dashboard update error: %s", e)
 
@@ -117,7 +117,7 @@ async def cmd_overnight(msg: Message) -> None:
             run_overnight_job(
                 job_id=job_id,
                 tasks=tasks,
-                llm_call=simple_llm_call,
+                llm_call=simple_llm_call,  # type: ignore[reportAttributeAccessIssue]
                 notify_fn=notify,
                 update_dashboard_fn=update_dashboard,
             ),

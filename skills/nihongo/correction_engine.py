@@ -36,7 +36,7 @@ class CorrectionEngine:
         correct_clean = re.sub(r"[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]", "", correct_text)
         if not user_clean or not correct_clean:
             return False
-        similarity = sum(1 for a, b in zip(user_clean, correct_clean) if a == b)
+        similarity = sum(1 for a, b in zip(user_clean, correct_clean, strict=False) if a == b)
         return similarity / max(len(user_clean), len(correct_clean)) > 0.7
 
     @classmethod

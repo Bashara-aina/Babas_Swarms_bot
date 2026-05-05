@@ -7,8 +7,8 @@ created: 2026-04-12
 updated: 2026-04-12
 summary: OpenCode was selected over Cursor for backend coding tasks due to superior CLI integration, native server mode, and direct Telegram workflow compatibility. OpenCode provides terminal TUI, native M2.7 model support, and MCP protocol compatibility essential for Legion's automation pipeline.
 wikilinks:
-  - [[./entities/opencode]]
-  - [[./entities/cursor]]
+  - [[entities/opencode]]
+  - [[entities/cursor]]
   - [[decisions/adr-2026-04-11-opencode-integration]]
 confidence: high
 source: decision
@@ -144,8 +144,8 @@ opencode report <session_id>
 ## Related Decisions
 
 - [[decisions/adr-2026-04-11-opencode-integration]] — Initial integration decision
-- [[./entities/opencode]] — OpenCode entity page
-- [[./entities/cursor]] — Cursor entity page (alternative not selected)
+- [[entities/opencode]] — OpenCode entity page
+- [[entities/cursor]] — Cursor entity page (alternative not selected)
 - [[decisions/adr-2026-04-12-multi-agent-pipeline]] — Multi-agent context
 
 ---

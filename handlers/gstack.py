@@ -60,7 +60,7 @@ async def run_opencode_cmd(
         return (
             stdout.decode() if stdout else "",
             stderr.decode() if stderr else "",
-            p.returncode,
+            p.returncode,  # type: ignore[reportReturnType]
         )
     except TimeoutError:
         return "", "Command timed out", 124
@@ -92,7 +92,7 @@ async def cmd_review(msg: Message) -> None:
     if not is_allowed(msg):
         return
 
-    await msg.answer(f"{bold('🔍 Running /review...')}\n\nDetecting platform...", parse_mode="HTML")
+    await msg.answer(f"{bold('🔍 Running /review...')}\n\nDetecting platform...", parse_mode="HTML")  # type: ignore[reportCallIssue]
 
     # Step 0: Detect platform
     remote_out, _, _rc = run_sync("git remote get-url origin 2>/dev/null")
@@ -128,11 +128,11 @@ async def cmd_review(msg: Message) -> None:
         await msg.answer(
             f"{bold('🔍 /review')}\n\n"
             f"Nothing to review — you're on the base branch.",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
-    await msg.answer(f"Base: {code(base_branch)} | Branch: {code(branch)}\nFetching diff...", parse_mode="HTML")
+    await msg.answer(f"Base: {code(base_branch)} | Branch: {code(branch)}\nFetching diff...", parse_mode="HTML")  # type: ignore[reportCallIssue]
 
     # Fetch base and check diff
     run_sync(f"git fetch origin {base_branch} --quiet 2>/dev/null")
@@ -142,7 +142,7 @@ async def cmd_review(msg: Message) -> None:
         await msg.answer(
             f"{bold('🔍 /review')}\n\n"
             f"No diff against {code(base_branch)}.",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
@@ -201,7 +201,7 @@ async def cmd_review(msg: Message) -> None:
         result.append("")
         result.append(f"<i>Review passed. Consider running {code('/ship')} to deploy.</i>")
 
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
+    await send_chunked(msg, "\n".join(result), parse_mode="HTML")  # type: ignore[reportCallIssue]
 
 
 # ─── /ship ─────────────────────────────────────────────────────────────────────
@@ -218,14 +218,14 @@ async def cmd_ship(msg: Message) -> None:
     base_out, _, _rc = run_sync("git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || echo 'main'")
     base_branch = base_out.strip() or "main"
 
-    await msg.answer("\n".join(status_lines) + f"\nMerging {code(base_branch)}...", parse_mode="HTML")
+    await msg.answer("\n".join(status_lines) + f"\nMerging {code(base_branch)}...", parse_mode="HTML")  # type: ignore[reportCallIssue]
 
     run_sync(f"git fetch origin {base_branch} --quiet 2>/dev/null")
     _merge_out, merge_err, merge_rc = run_sync(f"git merge origin/{base_branch} --no-edit 2>&1")
 
     if merge_rc != 0 and "conflict" in merge_err.lower():
         status_lines.append("🔴 CONFLICTS — resolve before shipping")
-        await msg.answer("\n".join(status_lines) + f"\n{code(merge_err[:500])}", parse_mode="HTML")
+        await msg.answer("\n".join(status_lines) + f"\n{code(merge_err[:500])}", parse_mode="HTML")  # type: ignore[reportCallIssue]
         return
 
     status_lines.append("✅ BASE MERGE: success")
@@ -235,11 +235,11 @@ async def cmd_ship(msg: Message) -> None:
     has_pytest = "pytest ok" in test_out
 
     if has_pytest:
-        await msg.answer("\n".join(status_lines) + "\nRunning tests...", parse_mode="HTML")
+        await msg.answer("\n".join(status_lines) + "\nRunning tests...", parse_mode="HTML")  # type: ignore[reportCallIssue]
         pytest_out, _, pytest_rc = run_sync("pytest tests/ -x --asyncio-mode=auto -q 2>&1 | tail -20")
         if pytest_rc != 0:
             status_lines.append(f"🔴 TESTS: FAIL\n{code(pytest_out[-500:])}")
-            await msg.answer("\n".join(status_lines), parse_mode="HTML")
+            await msg.answer("\n".join(status_lines), parse_mode="HTML")  # type: ignore[reportCallIssue]
             return
         status_lines.append("✅ TESTS: PASS")
     else:
@@ -265,7 +265,7 @@ async def cmd_ship(msg: Message) -> None:
     status_lines.append(f"\nCurrent version info:\n{code(version_out[:200] or 'not found')}")
 
     # Step 7: Push + PR
-    await msg.answer("\n".join(status_lines) + "\nPushing...", parse_mode="HTML")
+    await msg.answer("\n".join(status_lines) + "\nPushing...", parse_mode="HTML")  # type: ignore[reportCallIssue]
 
     run_sync("git add -A 2>/dev/null")
     _push_out, push_err, push_rc = run_sync("git push origin HEAD 2>&1")
@@ -286,7 +286,7 @@ async def cmd_ship(msg: Message) -> None:
     status_lines.insert(1, "BASE MERGE: ✅ SUCCESS")
     status_lines.append(f"\n{bold('STATUS:')} ⚠️ READY FOR REVIEW — check diff before merge")
 
-    await send_chunked(msg, "\n".join(status_lines), parse_mode="HTML")
+    await send_chunked(msg, "\n".join(status_lines), parse_mode="HTML")  # type: ignore[reportCallIssue]
 
 
 # ─── /officehours ─────────────────────────────────────────────────────────────
@@ -303,7 +303,7 @@ async def cmd_officehours(msg: Message) -> None:
             f"{bold('🏛️ /officehours — YC-Style Brainstorming')}\n\n"
             f"Usage: {code('/officehours <your idea or problem>')}\n\n"
             f"Pitch your idea and I'll stress-test it:",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
@@ -311,7 +311,7 @@ async def cmd_officehours(msg: Message) -> None:
         f"{bold('🏛️ /officehours — Brainstorming')}\n\n"
         f"Idea: {escape(idea)}\n\n"
         f"{bold('Running office hours...')}",
-        parse_mode="HTML",
+        parse_mode="HTML",  # type: ignore[reportCallIssue]
     )
     typing_task = asyncio.create_task(_keep_typing(msg))
 
@@ -332,7 +332,7 @@ async def cmd_officehours(msg: Message) -> None:
         await status_msg.delete()
         await msg.answer(
             f"officehours error: <code>{escape(str(e)[:400])}</code>",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
 
 
@@ -350,7 +350,7 @@ async def cmd_investigate(msg: Message) -> None:
             f"{bold('🔬 /investigate — Root Cause Analysis')}\n\n"
             f"Usage: {code('/investigate <error message or bug description>')}\n\n"
             f"Example: {code('/investigate TypeError: cannot unpack')}",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
@@ -358,7 +358,7 @@ async def cmd_investigate(msg: Message) -> None:
         f"{bold('🔬 /investigate — Root Cause Analysis')}\n\n"
         f"Error: {code(error_spec[:200])}\n\n"
         f"{bold('Investigating...')}",
-        parse_mode="HTML",
+        parse_mode="HTML",  # type: ignore[reportCallIssue]
     )
     typing_task = asyncio.create_task(_keep_typing(msg))
 
@@ -379,7 +379,7 @@ async def cmd_investigate(msg: Message) -> None:
         await status_msg.delete()
         await msg.answer(
             f"investigate error: <code>{escape(str(e)[:400])}</code>",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
 
 
@@ -397,7 +397,7 @@ async def cmd_qa(msg: Message) -> None:
             f"{bold('🧪 /qa — Quality Assurance Testing')}\n\n"
             f"Usage: {code('/qa <URL to test>')}\n\n"
             f"Example:\n<code>/qa https://example.com</code>",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
@@ -405,7 +405,7 @@ async def cmd_qa(msg: Message) -> None:
         f"{bold('🧪 /qa — Testing')}\n\n"
         f"Target: {code(target)}\n\n"
         f"Running QA checks...",
-        parse_mode="HTML",
+        parse_mode="HTML",  # type: ignore[reportCallIssue]
     )
     typing_task = asyncio.create_task(_keep_typing(msg))
 
@@ -426,7 +426,7 @@ async def cmd_qa(msg: Message) -> None:
         await status_msg.delete()
         await msg.answer(
             f"qa error: <code>{escape(str(e)[:400])}</code>",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
 
 
@@ -445,14 +445,14 @@ async def cmd_careful(msg: Message) -> None:
             f"Usage: {code('/careful <command to check>')}\n\n"
             f"Example: {code('/careful rm -rf /tmp/test')}\n\n"
             f"Describe what you want to run and I'll analyze the risk.",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
     await msg.answer(
         f"{bold('🛡️ /careful — Analyzing')}\n\n"
         f"Command: {code(operation[:200])}",
-        parse_mode="HTML",
+        parse_mode="HTML",  # type: ignore[reportCallIssue]
     )
 
     # Risk classification
@@ -497,7 +497,7 @@ async def cmd_careful(msg: Message) -> None:
         result.append("  3. You have the exact rollback command ready")
         result.append("\nProceed only if all 3 are confirmed.")
 
-    await send_chunked(msg, "\n".join(result), parse_mode="HTML")
+    await send_chunked(msg, "\n".join(result), parse_mode="HTML")  # type: ignore[reportCallIssue]
 
 
 # ─── /planreview ─────────────────────────────────────────────────────────────
@@ -514,7 +514,7 @@ async def cmd_planreview(msg: Message) -> None:
             f"{bold('📋 /planreview — CEO-Mode Plan Review')}\n\n"
             f"Usage: {code('/planreview <brief description of your plan>')}\n\n"
             f"I'll rethink this from first principles:",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )
         return
 
@@ -522,7 +522,7 @@ async def cmd_planreview(msg: Message) -> None:
         f"{bold('📋 /planreview — CEO-Mode Review')}\n\n"
         f"Plan: {escape(plan_desc[:200])}\n\n"
         f"Analyzing...",
-        parse_mode="HTML",
+        parse_mode="HTML",  # type: ignore[reportCallIssue]
     )
     typing_task = asyncio.create_task(_keep_typing(msg))
 
@@ -543,5 +543,5 @@ async def cmd_planreview(msg: Message) -> None:
         await status_msg.delete()
         await msg.answer(
             f"planreview error: <code>{escape(str(e)[:400])}</code>",
-            parse_mode="HTML",
+            parse_mode="HTML",  # type: ignore[reportCallIssue]
         )

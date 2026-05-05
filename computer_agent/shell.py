@@ -16,7 +16,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def _resolve_tool_bin(name: str) -> Optional[str]:
+def _resolve_tool_bin(name: str) -> str | None:
     """Resolve a desktop tool binary even when systemd PATH is minimal."""
     path = shutil.which(name)
     if path:
@@ -57,7 +57,7 @@ async def run_shell(cmd: str, timeout: int = 30, capture_stderr: bool = True) ->
         if proc.returncode == 0:
             return out or "(done, no output)"
         return f"exit {proc.returncode}\nstdout: {out}\nstderr: {err}".strip()
-    except asyncio.TimeoutError:
+    except TimeoutError:
         try:
             proc.kill()  # type: ignore[name-defined]
             await proc.communicate()  # type: ignore[name-defined]
@@ -194,4 +194,4 @@ def restart_bot(delay_seconds: float = 1.0) -> None:
     """
     logger.info("Bot restarting via os.execv...")
     time.sleep(delay_seconds)
-    os.execv(sys.executable, [sys.executable] + sys.argv)
+    os.execv(sys.executable, [sys.executable, *sys.argv])

@@ -7,10 +7,10 @@ created: 2026-04-16
 updated: 2026-04-16
 summary: Master prompt for implementing claude-mem's automatic capture + progressive disclosure into Legion's memory system across Claude Code, OpenCode, and LegionBot.
 wikilinks:
- - [[./concepts/swarm-bot-architecture]]
- - [[./entities/obsidian]]
- - [[./concepts/llm-cost-routing]]
- - [[./decisions/adr-2026-04-12-legion-wiki-loop]]
+ - [[concepts/swarm-bot-architecture]]
+ - [[entities/obsidian]]
+ - [[concepts/llm-cost-routing]]
+ - [[decisions/adr-2026-04-12-legion-wiki-loop]]
 confidence: high
 source: analysis
 ---
@@ -925,6 +925,6 @@ print('private tag stripping OK')
 ## References
 
 - [claude-mem repo](https://github.com/thedotmack/claude-mem) — the source system
-- [[./concepts/swarm-bot-architecture]] — our current architecture
-- [[./concepts/llm-cost-routing]] — token budget considerations
-- [[./decisions/adr-2026-04-12-legion-wiki-loop]] — prior wiki integration decision
+- [[concepts/swarm-bot-architecture]] — our current architecture
+- [[concepts/llm-cost-routing]] — token budget considerations
+- [[decisions/adr-2026-04-12-legion-wiki-loop]] — prior wiki integration decision

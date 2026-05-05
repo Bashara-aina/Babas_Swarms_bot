@@ -17,7 +17,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +37,11 @@ class Session:
     status: str = "active"  # active, saved, archived
 
     # Thread context (from agents.py ACTIVE_THREADS)
-    thread_id: Optional[str] = None
-    thread_history: List[Dict[str, Any]] = field(default_factory=list)
+    thread_id: str | None = None
+    thread_history: list[dict[str, Any]] = field(default_factory=list)
 
     # Routing history for this session
-    routing_decisions: List[Dict[str, Any]] = field(default_factory=list)
+    routing_decisions: list[dict[str, Any]] = field(default_factory=list)
 
     # Cost tracking
     total_cost_usd: float = 0.0
@@ -49,10 +49,10 @@ class Session:
     task_count: int = 0
 
     # User context (preferences, project info)
-    context_vars: Dict[str, Any] = field(default_factory=dict)
+    context_vars: dict[str, Any] = field(default_factory=dict)
 
     # Tags for organization
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 class SessionManager:
@@ -61,9 +61,9 @@ class SessionManager:
     Persists to SQLite for durability across bot restarts.
     """
 
-    def __init__(self, db_path: Optional[Path] = None) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         self._db_path = db_path or SESSION_DB_PATH
-        self._active_sessions: Dict[int, Session] = {}  # user_id → Session
+        self._active_sessions: dict[int, Session] = {}  # user_id → Session
         self._db_initialized = False
 
     async def _ensure_db(self) -> None:
@@ -117,7 +117,7 @@ class SessionManager:
         self,
         user_id: int,
         chat_id: int,
-        thread_id: Optional[str] = None,
+        thread_id: str | None = None,
     ) -> Session:
         """Get the active session for a user, or create a new one."""
         if user_id in self._active_sessions:
@@ -137,7 +137,7 @@ class SessionManager:
         self._active_sessions[user_id] = session
         return session
 
-    def get_active_session(self, user_id: int) -> Optional[Session]:
+    def get_active_session(self, user_id: int) -> Session | None:
         """Get the current active session for a user."""
         return self._active_sessions.get(user_id)
 
@@ -148,7 +148,7 @@ class SessionManager:
         model: str,
         cost_usd: float,
         tokens: int,
-        routing_decision: Optional[Dict] = None,
+        routing_decision: dict | None = None,
     ) -> None:
         """Track a task execution within the active session."""
         session = self._active_sessions.get(user_id)
@@ -169,8 +169,8 @@ class SessionManager:
     async def save_session(
         self,
         user_id: int,
-        name: Optional[str] = None,
-    ) -> Optional[Session]:
+        name: str | None = None,
+    ) -> Session | None:
         """Save the active session to persistent storage.
 
         Args:
@@ -205,7 +205,7 @@ class SessionManager:
         self,
         user_id: int,
         name: str,
-    ) -> Optional[Session]:
+    ) -> Session | None:
         """Resume a previously saved session.
 
         Args:
@@ -235,7 +235,7 @@ class SessionManager:
         self,
         user_id: int,
         limit: int = 20,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """List saved sessions for a user.
 
         Returns:
@@ -340,7 +340,7 @@ class SessionManager:
         self,
         user_id: int,
         name: str,
-    ) -> Optional[Session]:
+    ) -> Session | None:
         """Load session from SQLite."""
         await self._ensure_db()
 
@@ -382,7 +382,7 @@ class SessionManager:
             logger.error("Failed to load session: %s", e)
             return None
 
-    def format_sessions_html(self, sessions: List[Dict[str, Any]]) -> str:
+    def format_sessions_html(self, sessions: list[dict[str, Any]]) -> str:
         """Format session list as HTML for Telegram."""
         if not sessions:
             return "<b>No saved sessions.</b>"

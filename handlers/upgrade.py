@@ -83,7 +83,7 @@ async def cmd_upgrade(msg: Message) -> None:
             bot_root=Path("."),
             notify_cb=notify,
         )
-        result = await engine.upgrade(request, user_id=msg.from_user.id)
+        result = await engine.upgrade(request, user_id=msg.from_user.id)  # type: ignore[reportOptionalMemberAccess]
 
         global _last_result
         _last_result = result

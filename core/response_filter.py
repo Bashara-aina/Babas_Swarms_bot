@@ -21,7 +21,7 @@ Assistant draft (compress without losing facts/steps/code):
 
 Rewrite: same substance, tighter, no filler, no apology meta. Preserve code blocks.""",
         model=model,
-        max_tokens=min(4096, len(text) // 2 + 500),
+        max_tokens=min(4096, len(text) // 2 + 500),  # type: ignore[reportCallIssue]
     )
     out = (tightened or "").strip()
     return out if len(out) > 200 else text

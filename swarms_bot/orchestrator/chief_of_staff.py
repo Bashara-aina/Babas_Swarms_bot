@@ -24,9 +24,10 @@ import asyncio
 import logging
 import time
 import uuid
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Coroutine, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +52,8 @@ class Task:
     user_id: int
     chat_id: int
     description: str
-    task_type: Optional[TaskType] = None
-    context: Dict[str, Any] = field(default_factory=dict)
+    task_type: TaskType | None = None
+    context: dict[str, Any] = field(default_factory=dict)
     priority: int = 1
     max_retries: int = 3
 
@@ -62,9 +63,9 @@ class Task:
         user_id: int,
         chat_id: int,
         description: str,
-        task_type: Optional[TaskType] = None,
-        context: Optional[Dict] = None,
-    ) -> "Task":
+        task_type: TaskType | None = None,
+        context: dict | None = None,
+    ) -> Task:
         return cls(
             task_id=str(uuid.uuid4())[:12],
             user_id=user_id,
@@ -85,12 +86,12 @@ class AgentResponse:
     cost_usd: float = 0.0
     tokens_used: int = 0
     execution_time_ms: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 # ── Task classification keywords ──────────────────────────────────────────────
 
-_CLASSIFICATION_KEYWORDS: Dict[TaskType, List[str]] = {
+_CLASSIFICATION_KEYWORDS: dict[TaskType, list[str]] = {
     TaskType.CODE_GENERATION: [
         "code", "implement", "function", "class", "write", "create",
         "endpoint", "api", "script", "program", "build",
@@ -125,7 +126,7 @@ _CLASSIFICATION_KEYWORDS: Dict[TaskType, List[str]] = {
 }
 
 # Task type → preferred agent key (maps to existing agents.py keys)
-_TASK_AGENT_MAP: Dict[TaskType, str] = {
+_TASK_AGENT_MAP: dict[TaskType, str] = {
     TaskType.CODE_GENERATION: "coding",
     TaskType.CODE_REVIEW: "coding",
     TaskType.PLANNING: "architect",
@@ -155,14 +156,14 @@ class ChiefOfStaff:
 
     def __init__(
         self,
-        budget_manager: Optional[Any] = None,
-        security_guard: Optional[Any] = None,
-        audit_logger: Optional[Any] = None,
-        cost_metrics: Optional[Any] = None,
-        cost_router: Optional[Any] = None,
-        session_manager: Optional[Any] = None,
+        budget_manager: Any | None = None,
+        security_guard: Any | None = None,
+        audit_logger: Any | None = None,
+        cost_metrics: Any | None = None,
+        cost_router: Any | None = None,
+        session_manager: Any | None = None,
     ) -> None:
-        self.routing_history: List[Dict[str, Any]] = []
+        self.routing_history: list[dict[str, Any]] = []
         self._total_cost_usd: float = 0.0
         self._total_tasks: int = 0
         self._successful_tasks: int = 0
@@ -203,7 +204,7 @@ class ChiefOfStaff:
             return task.task_type
 
         description_lower = task.description.lower()
-        scores: Dict[TaskType, int] = {}
+        scores: dict[TaskType, int] = {}
 
         for task_type, keywords in _CLASSIFICATION_KEYWORDS.items():
             score = sum(1 for kw in keywords if kw in description_lower)
@@ -221,7 +222,7 @@ class ChiefOfStaff:
 
         return TaskType.GENERAL_QA
 
-    def select_agent_key(self, task_type: TaskType, context: Dict) -> str:
+    def select_agent_key(self, task_type: TaskType, context: dict) -> str:
         """Select the agent key for this task type.
 
         Returns a key compatible with existing agents.py AGENT_MODELS.
@@ -416,8 +417,8 @@ class ChiefOfStaff:
     async def route_multi(
         self,
         task: Task,
-        agent_keys: List[str],
-    ) -> List[AgentResponse]:
+        agent_keys: list[str],
+    ) -> list[AgentResponse]:
         """Execute same task with multiple agents in parallel.
 
         Returns all responses for comparison/merging.
@@ -484,7 +485,7 @@ class ChiefOfStaff:
             response.execution_time_ms,
         )
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Return orchestrator performance statistics."""
         success_rate = (
             self._successful_tasks / self._total_tasks
@@ -493,7 +494,7 @@ class ChiefOfStaff:
         )
 
         # Aggregate by agent
-        agent_stats: Dict[str, Dict] = {}
+        agent_stats: dict[str, dict] = {}
         for entry in self.routing_history:
             agent = entry["agent"]
             if agent not in agent_stats:

@@ -90,7 +90,7 @@ async def run_opencode_task(
             monitor = get_context_monitor("/home/newadmin/swarm-bot")
             health = monitor.assess()
             if monitor.should_checkpoint(health):
-                await monitor.run_checkpoint(
+                await monitor.run_checkpoint(  # type: ignore[reportCallIssue]
                     session_description=f"opencode: {task_desc or prompt[:100]}",
                     task=f"OpenCode task: {prompt[:200]}",
                 )
@@ -203,7 +203,7 @@ async def stream_opencode_task(
         while True:
             try:
                 chunk = await asyncio.wait_for(
-                    process.stdout.read(1024),
+                    process.stdout.read(1024),  # type: ignore[reportOptionalMemberAccess]
                     timeout=timeout,
                 )
             except TimeoutError:
@@ -237,7 +237,7 @@ async def stream_opencode_task(
         returncode = await process.wait()
 
         if returncode != 0:
-            stderr_bytes = await asyncio.wait_for(process.stderr.read(), timeout=5)
+            stderr_bytes = await asyncio.wait_for(process.stderr.read(), timeout=5)  # type: ignore[reportOptionalMemberAccess]
             stderr_text = ANSI_RE.sub("", stderr_bytes.decode())
             yield {"type": "error", "content": f"opencode exited {returncode}: {stderr_text[:500]}", "raw": stderr_text}
         else:

@@ -333,7 +333,7 @@ async def _take_screenshot_safe() -> str | None:
 
 # ── Progress callback ──────────────────────────────────────────────────────────
 
-StepCallback = Optional[callable]
+StepCallback = callable | None
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────

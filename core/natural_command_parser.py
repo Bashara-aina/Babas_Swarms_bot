@@ -34,7 +34,7 @@ class NaturalCommand:
 # Intent → list of (regex_pattern, parser_fn) tuples
 # Parser fn receives match groups, returns dict of args
 
-_TRIGGERS: list[tuple[str, str, re.Pattern, callable]] = [
+_TRIGGERS: list[tuple[str, str, re.Pattern, callable]] = [  # type: ignore[reportGeneralTypeIssues]
     # web_audit — SEO, speed, loading checks
     (
         "web_audit",

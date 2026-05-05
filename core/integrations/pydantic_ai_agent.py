@@ -96,7 +96,7 @@ async def run_pydantic_ai_agent(
 
     try:
         result = await asyncio.wait_for(agent.run(prompt), timeout=timeout)
-        return result.data if hasattr(result, "data") else result
+        return result.data if hasattr(result, "data") else result  # type: ignore[reportAttributeAccessIssue]
     except TimeoutError:
         return f"[pydantic-ai timeout after {timeout}s]"
     except Exception as exc:

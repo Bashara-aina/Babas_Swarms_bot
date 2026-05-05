@@ -118,7 +118,7 @@ def load_registry(
                 capabilities=acfg.get("capabilities", []),
                 tools=acfg.get("tools", []),
                 complexity_tier=acfg.get("complexity_tier", "midweight"),
-                primary_model_id=MODEL_LOOKUP.get(primary_key, primary_key),
+                primary_model_id=MODEL_LOOKUP.get(primary_key, primary_key),  # type: ignore[reportArgumentType]
                 fallback_model_ids=[MODEL_LOOKUP.get(k, k) for k in fallback_keys],
                 version=acfg.get("version", "1.0.0"),
             )
@@ -157,7 +157,7 @@ def _precompute_embeddings_sync() -> None:
 
     for name, agent in AGENT_REGISTRY.items():
         text = agent.description + " " + " ".join(agent.capabilities)
-        CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)
+        CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)  # type: ignore[reportArgumentType]
 
     logger.info(f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents")
 

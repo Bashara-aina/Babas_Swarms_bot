@@ -167,7 +167,7 @@ def normalize_budget(budget: dict[str, int], total: int = 100) -> dict[str, int]
     # Adjust for rounding
     diff = total - sum(scaled.values())
     if scaled:
-        largest = max(scaled, key=scaled.get)
+        largest = max(scaled, key=scaled.get)  # type: ignore[reportCallIssue]
         scaled[largest] += diff
 
     return scaled

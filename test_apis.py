@@ -45,6 +45,6 @@ try:
     else:
         print(f"❌ OpenRouter: Error {response.status_code}")
 except Exception as e:
-    print(f"❌ OpenRouter: {str(e)}")
+    print(f"❌ OpenRouter: {e!s}")
 
 print("\n✨ Your bot will automatically rotate between working APIs!")

@@ -94,8 +94,8 @@ python -m py_compile: all .py files pass, no syntax errors
   updated: 2026-04-23
   summary: Time-windowed content scheduler for rumahlabuh Threads posts with 3 morning/4 afternoon/2 night slots, analytics tracking, and FYP survey analysis.
   wikilinks:
-    - [[./rumahlabuh-facts.json]]
-    - [[./rumahlabuh-thread-blueprints]]
+    - [[rumahlabuh-facts.json]]
+    - [[rumahlabuh-thread-blueprints]]
   confidence: high
   source: implementation
   ---

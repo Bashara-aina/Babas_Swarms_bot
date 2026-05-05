@@ -38,7 +38,7 @@ async def _call_mcp(server: str, tool: str, args: dict | None = None) -> dict:
         result = await _mcp_client.call_tool(server, tool, args or {})
         if isinstance(result, list) and len(result) > 0:
             import json
-            return json.loads(result[0].text)
+            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
         return {}
     except Exception:
         return {}

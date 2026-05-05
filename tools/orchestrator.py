@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 MAX_PARALLEL = 3
 _parallel_sem = asyncio.Semaphore(MAX_PARALLEL)
 
-ProgressCb = Optional[Callable[[str], Coroutine[Any, Any, None]]]
+ProgressCb = Callable[[str], Coroutine[Any, Any, None]] | None
 
 RESEARCH_HINTS = (
     "research",

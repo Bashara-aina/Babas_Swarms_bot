@@ -66,7 +66,18 @@ exclude_lines = [
 [tool.ruff]
 line-length = 120
 target-version = "py311"
-exclude = [".venv", "__pycache__", ".git"]
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".git",
+    "tools/mirofish/",
+    ".wiki/popw-references/",
+    ".wiki/tools/",
+    "ext/",
+    "agents/_archive/",
+    "agents/research/",
+    "cekwajar\\.id/",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

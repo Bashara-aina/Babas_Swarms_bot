@@ -15,7 +15,7 @@ from typing import Any, Optional
 logger = logging.getLogger(__name__)
 
 
-def _resolve_tool_bin(name: str) -> Optional[str]:
+def _resolve_tool_bin(name: str) -> str | None:
     """Resolve a desktop tool binary even when systemd PATH is minimal."""
     from computer_agent.shell import run_shell as _run_shell
 
@@ -28,7 +28,7 @@ def _resolve_tool_bin(name: str) -> Optional[str]:
     return None
 
 
-_detected_display: Optional[str] = None
+_detected_display: str | None = None
 
 
 async def detect_display() -> str:
@@ -87,7 +87,7 @@ async def _display_env() -> dict[str, str]:
     return env
 
 
-async def take_screenshot() -> Optional[str]:
+async def take_screenshot() -> str | None:
     """Capture the full desktop. Returns file path on success, None on failure.
 
     Tries: scrot → imagemagick import → gnome-screenshot → xwd+convert
@@ -110,7 +110,7 @@ async def take_screenshot() -> Optional[str]:
             if await asyncio.to_thread(candidate.exists):
                 xauthority = str(candidate)
 
-    async def _resolve_bin(name: str) -> Optional[str]:
+    async def _resolve_bin(name: str) -> str | None:
         path = shutil.which(name)
         if path:
             return path
@@ -169,7 +169,7 @@ async def take_screenshot() -> Optional[str]:
     return None
 
 
-async def screenshot_region(x: int, y: int, w: int, h: int) -> Optional[str]:
+async def screenshot_region(x: int, y: int, w: int, h: int) -> str | None:
     """Capture a region of the screen."""
     from computer_agent.shell import run_shell as _run_shell
 

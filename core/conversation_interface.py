@@ -84,7 +84,7 @@ async def _load_history_from_db(user_id: str) -> None:
         ) as cursor:
             rows = await cursor.fetchall()
         if rows:
-            turns = [{"role": r[0], "content": r[1], "ts": r[2]} for r in reversed(rows)]
+            turns = [{"role": r[0], "content": r[1], "ts": r[2]} for r in reversed(rows)]  # type: ignore[reportCallIssue]
             if user_id not in CONVERSATION_HISTORY:
                 CONVERSATION_HISTORY[user_id] = turns
             else:

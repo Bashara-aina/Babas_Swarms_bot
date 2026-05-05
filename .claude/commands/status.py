@@ -16,7 +16,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 STATE_FILE = Path.home() / ".claude" / "session" / "state.json"
@@ -102,7 +102,7 @@ def cmd_status() -> str:
     lines = ["```\n━━━ Claude Code Session ━━━\n"]
 
     # Session
-    start_hr = datetime.fromtimestamp(session_start, tz=timezone.utc).strftime("%H:%M:%S UTC")
+    start_hr = datetime.fromtimestamp(session_start, tz=UTC).strftime("%H:%M:%S UTC")
     lines.append(f"Duration  : {_fmtdur(elapsed)}")
     lines.append(f"Started   : {start_hr}")
 

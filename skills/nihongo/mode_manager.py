@@ -31,7 +31,7 @@ class NihongoSession:
     jlpt_level: str = "N5"
     lesson_count: int = 0
     exchange_count: int = 0
-    current_topic: Optional[str] = None
+    current_topic: str | None = None
     voice_enabled: bool = False
     slow_speech: bool = True
     show_furigana: bool = True

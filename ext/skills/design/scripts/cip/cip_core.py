@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 CIP Design Core - BM25 search engine for Corporate Identity Program design guidelines
 """
@@ -104,7 +103,7 @@ class BM25:
 # ============ SEARCH FUNCTIONS ============
 def _load_csv(filepath):
     """Load CSV and return list of dicts"""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         return list(csv.DictReader(f))
 
 
@@ -174,7 +173,7 @@ def search(query, domain=None, max_results=MAX_RESULTS):
 def search_all(query, max_results=2):
     """Search across all domains and combine results"""
     all_results = {}
-    for domain in CSV_CONFIG.keys():
+    for domain in CSV_CONFIG:
         result = search(query, domain, max_results)
         if result.get("results"):
             all_results[domain] = result["results"]

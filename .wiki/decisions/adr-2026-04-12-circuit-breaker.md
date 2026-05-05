@@ -7,7 +7,7 @@ created: 2026-04-12
 updated: 2026-04-12
 summary: Circuit breaker pattern implemented for external services to prevent cascading failures.
 wikilinks:
-  - [[./concepts/memory-architecture]]
+  - [[concepts/memory-architecture]]
   - [[projects/legion-bot]]
 confidence: medium
 source: decision

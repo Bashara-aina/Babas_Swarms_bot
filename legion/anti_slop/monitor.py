@@ -236,7 +236,7 @@ class SlopMonitor:
         count = 0
 
         try:
-            with open(log_path, "r") as f:
+            with open(log_path) as f:
                 for line in f:
                     try:
                         event_dict = json.loads(line)

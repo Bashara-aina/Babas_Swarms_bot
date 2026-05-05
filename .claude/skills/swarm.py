@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import itertools
 import re
 import time
 from typing import Any
@@ -39,7 +40,7 @@ def tokenize(text: str) -> set[str]:
     text = text.lower()
     tokens = set(re.findall(r"[a-z][a-z0-9]{1,}", text))
     words = text.split()
-    bigrams = {f"{a}_{b}" for a, b in zip(words, words[1:])}
+    bigrams = {f"{a}_{b}" for a, b in itertools.pairwise(words)}
     return tokens | bigrams
 
 

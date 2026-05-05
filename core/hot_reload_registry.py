@@ -52,9 +52,9 @@ class HotReloadRegistry:
             else:
                 # Fresh import
                 spec = importlib.util.spec_from_file_location(module_name, path)
-                mod = importlib.util.module_from_spec(spec)
+                mod = importlib.util.module_from_spec(spec)  # type: ignore[reportArgumentType]
                 sys.modules[module_name] = mod
-                spec.loader.exec_module(mod)
+                spec.loader.exec_module(mod)  # type: ignore[reportOptionalMemberAccess]
                 logger.info("Loaded new module: %s", module_name)
 
             # Register Router if present

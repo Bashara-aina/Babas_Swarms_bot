@@ -79,7 +79,7 @@ async def _transcribe_whisper_local(audio_bytes: bytes, language: str) -> str:
 
 async def text_to_speech_japanese(
     text: str, speaker: str = DEFAULT_SPEAKER, slow_speech: bool = True, use_voicevox: bool = True
-) -> Optional[bytes]:
+) -> bytes | None:
     from skills.nihongo.furigana import extract_japanese_only
 
     jp_text = extract_japanese_only(text)
@@ -95,7 +95,7 @@ async def text_to_speech_japanese(
     return await _tts_gtts_fallback(jp_text, slow_speech)
 
 
-async def _tts_voicevox(text: str, speaker: str, slow: bool) -> Optional[bytes]:
+async def _tts_voicevox(text: str, speaker: str, slow: bool) -> bytes | None:
     try:
         import httpx
 
@@ -125,7 +125,7 @@ async def _tts_voicevox(text: str, speaker: str, slow: bool) -> Optional[bytes]:
         return None
 
 
-async def _tts_gtts_fallback(text: str, slow: bool) -> Optional[bytes]:
+async def _tts_gtts_fallback(text: str, slow: bool) -> bytes | None:
     try:
         from gtts import gTTS
 

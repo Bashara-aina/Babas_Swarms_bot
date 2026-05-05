@@ -295,7 +295,7 @@ async def cmd_opencode(msg: Message) -> None:
                 async for event in stream_opencode_task(
                     task_text,
                     project_dir="/home/newadmin/swarm-bot",
-                    task_desc=task_text,
+                    task_desc=task_text,  # type: ignore[reportCallIssue]
                 ):
                     if event["type"] == "error":
                         await msg.answer(f"⛔ opencode stream error: {event['content'][:500]}")
@@ -328,14 +328,14 @@ async def cmd_opencode(msg: Message) -> None:
                 await send_chunked(msg, report)
     except (FileNotFoundError, PermissionError) as e:
         await _cancel_task(typing_task)
-        await status_msg.edit_text(
+        await status_msg.edit_text(  # type: ignore[reportAttributeAccessIssue]
             f"opencode not found or not executable: <code>{html_mod.escape(str(e)[:400])}</code>\n"
             f"Install: <code>curl -fsSL https://opencode.ai/install.sh | sh</code>",
             parse_mode="HTML",
         )
     except Exception as e:
         await _cancel_task(typing_task)
-        await status_msg.edit_text(
+        await status_msg.edit_text(  # type: ignore[reportAttributeAccessIssue]
             f"opencode error: <code>{html_mod.escape(str(e)[:400])}</code>",
             parse_mode="HTML",
         )

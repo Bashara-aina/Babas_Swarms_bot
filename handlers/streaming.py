@@ -57,7 +57,7 @@ async def stream_chat(
         )
         model_used = model
 
-        async for chunk in stream:
+        async for chunk in stream:  # type: ignore[reportGeneralTypeIssues]
             delta = chunk.choices[0].delta.content or ""
             accumulated += delta
 

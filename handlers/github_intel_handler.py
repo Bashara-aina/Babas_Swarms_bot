@@ -63,7 +63,7 @@ async def cmd_github_intel(msg: Message) -> None:
                 task.add_done_callback(
                     lambda t, repo=ev: (
                         t.result() if not t.cancelled() and t.exception() is None
-                        else logger.warning("Skill discovery failed for %s: %s", repo.name, t.exception())
+                        else logger.warning("Skill discovery failed for %s: %s", repo.name, t.exception())  # type: ignore[reportAttributeAccessIssue]
                     )
                 )
 

@@ -132,7 +132,7 @@ def circuit(name: str) -> CircuitBreaker:
     return _circuit_breakers[name]
 
 
-async def with_circuit[T](
+async def with_circuit(  # noqa: UP047
     name: str,
     coro: Awaitable[T],
     failure_threshold: int = 5,

@@ -180,7 +180,7 @@ class CulturalIntel:
         level_key = user_level.upper().replace("JLPT", "").strip()
         return self.KEIGO_GUIDANCE.get(level_key, self.KEIGO_GUIDANCE.get("N5", ""))
 
-    def get_situation_culture(self, location: str, situation: str) -> Optional[CulturalNote]:
+    def get_situation_culture(self, location: str, situation: str) -> CulturalNote | None:
         """Get cultural note for a specific location and situation.
 
         Args:

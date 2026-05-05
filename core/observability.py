@@ -87,7 +87,7 @@ def track_agent(agent_name: str) -> Callable[[Callable[..., Awaitable[Any]]], Ca
                     with contextlib.suppress(Exception):
                         agentops.record(
                             "agent_call",
-                            {
+                            {  # type: ignore[reportCallIssue]
                                 "agent": agent_name,
                                 "provider": provider,
                                 "latency_ms": latency_ms,

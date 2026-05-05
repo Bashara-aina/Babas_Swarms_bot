@@ -189,7 +189,7 @@ class ErrorRecoveryManager:
                     )
                     await asyncio.sleep(wait)
 
-        raise last_exc
+        raise last_exc  # type: ignore[reportGeneralTypeIssues]
 
     async def execute(
         self,

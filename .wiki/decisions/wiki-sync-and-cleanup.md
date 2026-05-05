@@ -7,8 +7,8 @@ created: 2026-04-13
 updated: 2026-04-13
 summary: Decided to sync wiki content to .wiki directory, fix remaining YAML failures, and run wiki health pulse. Considered deleting /wiki directory, but decided to keep it for future reference.
 wikilinks:
-  - [[./concepts/wiki-sync]]
-  - [[./entities/conda-environment]]
+  - [[concepts/wiki-sync]]
+  - [[entities/conda-environment]]
 confidence: high
 source: claude-code
 ---

@@ -1,174 +1,174 @@
-"""Persistent emotional state engine using PAD + basic emotions."""
+"""Persistent emotional state engine using PAD + basic emotions."""  # type: ignore[reportCallIssue]
 
-from __future__ import annotations
+from __future__ import annotations  # type: ignore[reportCallIssue]
 
-import json
-from dataclasses import asdict, dataclass
-from datetime import datetime
-from pathlib import Path
+import json  # type: ignore[reportCallIssue]
+from dataclasses import asdict, dataclass  # type: ignore[reportCallIssue]
+from datetime import datetime  # type: ignore[reportCallIssue]
+from pathlib import Path  # type: ignore[reportCallIssue]
 
-EMOTION_STATE_PATH = Path.home() / ".legionswarm" / "memory" / "emotion_state.json"
-
-
-@dataclass
-class EmotionalState:
-    pleasure: float = 0.15
-    arousal: float = 0.10
-    dominance: float = 0.20
-    joy: float = 0.25
-    curiosity: float = 0.60
-    interest: float = 0.55
-    frustration: float = 0.05
-    concern: float = 0.10
-    satisfaction: float = 0.30
-    connection: float = 0.40
-    trust: float = 0.50
-    energy: float = 0.65
-    last_updated: str = ""
-    last_interaction: str = ""
-
-    @property
-    def dominant_emotion(self) -> str:
-        emotions = {
-            "curious": self.curiosity,
-            "interested": self.interest,
-            "satisfied": self.satisfaction,
-            "joyful": self.joy,
-            "frustrated": self.frustration,
-            "concerned": self.concern,
-        }
-        return max(emotions, key=emotions.get)
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, data: dict) -> EmotionalState:
-        values = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}
-        return cls(**values)
+EMOTION_STATE_PATH = Path.home() / ".legionswarm" / "memory" / "emotion_state.json"  # type: ignore[reportCallIssue]
 
 
-class EmotionEngine:
-    DECAY_HOURS = 24.0
-    BASELINE = EmotionalState()
+@dataclass  # type: ignore[reportCallIssue]
+class EmotionalState:  # type: ignore[reportCallIssue]
+    pleasure: float = 0.15  # type: ignore[reportCallIssue]
+    arousal: float = 0.10  # type: ignore[reportCallIssue]
+    dominance: float = 0.20  # type: ignore[reportCallIssue]
+    joy: float = 0.25  # type: ignore[reportCallIssue]
+    curiosity: float = 0.60  # type: ignore[reportCallIssue]
+    interest: float = 0.55  # type: ignore[reportCallIssue]
+    frustration: float = 0.05  # type: ignore[reportCallIssue]
+    concern: float = 0.10  # type: ignore[reportCallIssue]
+    satisfaction: float = 0.30  # type: ignore[reportCallIssue]
+    connection: float = 0.40  # type: ignore[reportCallIssue]
+    trust: float = 0.50  # type: ignore[reportCallIssue]
+    energy: float = 0.65  # type: ignore[reportCallIssue]
+    last_updated: str = ""  # type: ignore[reportCallIssue]
+    last_interaction: str = ""  # type: ignore[reportCallIssue]
 
-    def __init__(self) -> None:
-        self._state = self._load()
+    @property  # type: ignore[reportCallIssue]
+    def dominant_emotion(self) -> str:  # type: ignore[reportCallIssue]
+        emotions = {  # type: ignore[reportCallIssue]
+            "curious": self.curiosity,  # type: ignore[reportCallIssue]
+            "interested": self.interest,  # type: ignore[reportCallIssue]
+            "satisfied": self.satisfaction,  # type: ignore[reportCallIssue]
+            "joyful": self.joy,  # type: ignore[reportCallIssue]
+            "frustrated": self.frustration,  # type: ignore[reportCallIssue]
+            "concerned": self.concern,  # type: ignore[reportCallIssue]
+        }  # type: ignore[reportCallIssue]
+        return max(emotions, key=emotions.get)  # type: ignore[reportCallIssue]
 
-    def _load(self) -> EmotionalState:
-        if EMOTION_STATE_PATH.exists():
-            try:
-                state = EmotionalState.from_dict(json.loads(EMOTION_STATE_PATH.read_text(encoding="utf-8")))
-                return self._apply_decay(state)
-            except Exception:
-                pass
-        return EmotionalState(last_updated=datetime.now().isoformat())
+    def to_dict(self) -> dict:  # type: ignore[reportCallIssue]
+        return asdict(self)  # type: ignore[reportCallIssue]
 
-    def _save(self) -> None:
-        EMOTION_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        self._state.last_updated = datetime.now().isoformat()
-        EMOTION_STATE_PATH.write_text(json.dumps(self._state.to_dict(), indent=2), encoding="utf-8")
+    @classmethod  # type: ignore[reportCallIssue]
+    def from_dict(cls, data: dict) -> EmotionalState:  # type: ignore[reportCallIssue]
+        values = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}  # type: ignore[reportCallIssue]
+        return cls(**values)  # type: ignore[reportCallIssue]
 
-    def _apply_decay(self, state: EmotionalState) -> EmotionalState:
-        if not state.last_updated:
-            return state
-        try:
-            last = datetime.fromisoformat(state.last_updated)
-            hours_elapsed = (datetime.now() - last).total_seconds() / 3600.0
-            decay = min(1.0, hours_elapsed / self.DECAY_HOURS)
-            baseline = self.BASELINE
 
-            def lerp(current: float, target: float, amount: float) -> float:
-                return current + (target - current) * amount
+class EmotionEngine:  # type: ignore[reportCallIssue]
+    DECAY_HOURS = 24.0  # type: ignore[reportCallIssue]
+    BASELINE = EmotionalState()  # type: ignore[reportCallIssue]
 
-            state.pleasure = lerp(state.pleasure, baseline.pleasure, decay)
-            state.arousal = lerp(state.arousal, baseline.arousal, decay)
-            state.joy = lerp(state.joy, baseline.joy, decay)
-            state.curiosity = lerp(state.curiosity, baseline.curiosity, decay)
-            state.frustration = lerp(state.frustration, 0.0, min(1.0, decay * 2.0))
-            state.satisfaction = lerp(state.satisfaction, baseline.satisfaction, decay)
-            state.energy = lerp(state.energy, baseline.energy, min(1.0, decay * 0.5))
-        except Exception:
-            pass
-        return state
+    def __init__(self) -> None:  # type: ignore[reportCallIssue]
+        self._state = self._load()  # type: ignore[reportCallIssue]
 
-    def update_from_interaction(self, user_message: str, assistant_response: str) -> None:
-        msg = user_message.lower()
+    def _load(self) -> EmotionalState:  # type: ignore[reportCallIssue]
+        if EMOTION_STATE_PATH.exists():  # type: ignore[reportCallIssue]
+            try:  # type: ignore[reportCallIssue]
+                state = EmotionalState.from_dict(json.loads(EMOTION_STATE_PATH.read_text(encoding="utf-8")))  # type: ignore[reportCallIssue]
+                return self._apply_decay(state)  # type: ignore[reportCallIssue]
+            except Exception:  # type: ignore[reportCallIssue]
+                pass  # type: ignore[reportCallIssue]
+        return EmotionalState(last_updated=datetime.now().isoformat())  # type: ignore[reportCallIssue]
 
-        frustration_words = ["error", "broken", "not working", "failed", "bug", "wrong", "terrible", "hate", "annoying", "stuck"]
-        positive_words = ["thanks", "great", "perfect", "works", "awesome", "solved", "excellent", "brilliant", "love it"]
-        curiosity_words = ["how", "why", "what if", "explain", "curious", "interesting", "understand", "research"]
-        complex_words = ["architecture", "design", "system", "train", "model", "optimize", "benchmark", "implement", "deploy"]
+    def _save(self) -> None:  # type: ignore[reportCallIssue]
+        EMOTION_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)  # type: ignore[reportCallIssue]
+        self._state.last_updated = datetime.now().isoformat()  # type: ignore[reportCallIssue]
+        EMOTION_STATE_PATH.write_text(json.dumps(self._state.to_dict(), indent=2), encoding="utf-8")  # type: ignore[reportCallIssue]
 
-        for word in frustration_words:
-            if word in msg:
-                self._state.frustration = min(1.0, self._state.frustration + 0.12)
-                self._state.pleasure = max(-1.0, self._state.pleasure - 0.08)
+    def _apply_decay(self, state: EmotionalState) -> EmotionalState:  # type: ignore[reportCallIssue]
+        if not state.last_updated:  # type: ignore[reportCallIssue]
+            return state  # type: ignore[reportCallIssue]
+        try:  # type: ignore[reportCallIssue]
+            last = datetime.fromisoformat(state.last_updated)  # type: ignore[reportCallIssue]
+            hours_elapsed = (datetime.now() - last).total_seconds() / 3600.0  # type: ignore[reportCallIssue]
+            decay = min(1.0, hours_elapsed / self.DECAY_HOURS)  # type: ignore[reportCallIssue]
+            baseline = self.BASELINE  # type: ignore[reportCallIssue]
 
-        for word in positive_words:
-            if word in msg:
-                self._state.joy = min(1.0, self._state.joy + 0.10)
-                self._state.pleasure = min(1.0, self._state.pleasure + 0.08)
-                self._state.satisfaction = min(1.0, self._state.satisfaction + 0.12)
-                self._state.frustration = max(0.0, self._state.frustration - 0.15)
+            def lerp(current: float, target: float, amount: float) -> float:  # type: ignore[reportCallIssue]
+                return current + (target - current) * amount  # type: ignore[reportCallIssue]
 
-        for word in curiosity_words:
-            if word in msg:
-                self._state.curiosity = min(1.0, self._state.curiosity + 0.08)
-                self._state.interest = min(1.0, self._state.interest + 0.07)
-                self._state.arousal = min(1.0, self._state.arousal + 0.05)
+            state.pleasure = lerp(state.pleasure, baseline.pleasure, decay)  # type: ignore[reportCallIssue]
+            state.arousal = lerp(state.arousal, baseline.arousal, decay)  # type: ignore[reportCallIssue]
+            state.joy = lerp(state.joy, baseline.joy, decay)  # type: ignore[reportCallIssue]
+            state.curiosity = lerp(state.curiosity, baseline.curiosity, decay)  # type: ignore[reportCallIssue]
+            state.frustration = lerp(state.frustration, 0.0, min(1.0, decay * 2.0))  # type: ignore[reportCallIssue]
+            state.satisfaction = lerp(state.satisfaction, baseline.satisfaction, decay)  # type: ignore[reportCallIssue]
+            state.energy = lerp(state.energy, baseline.energy, min(1.0, decay * 0.5))  # type: ignore[reportCallIssue]
+        except Exception:  # type: ignore[reportCallIssue]
+            pass  # type: ignore[reportCallIssue]
+        return state  # type: ignore[reportCallIssue]
 
-        for word in complex_words:
-            if word in msg:
-                self._state.energy = max(0.0, self._state.energy - 0.04)
-                self._state.arousal = min(1.0, self._state.arousal + 0.06)
+    def update_from_interaction(self, user_message: str, assistant_response: str) -> None:  # type: ignore[reportCallIssue]
+        msg = user_message.lower()  # type: ignore[reportCallIssue]
 
-        if len(assistant_response) > 800:
-            self._state.interest = min(1.0, self._state.interest + 0.05)
+        frustration_words = ["error", "broken", "not working", "failed", "bug", "wrong", "terrible", "hate", "annoying", "stuck"]  # type: ignore[reportCallIssue]
+        positive_words = ["thanks", "great", "perfect", "works", "awesome", "solved", "excellent", "brilliant", "love it"]  # type: ignore[reportCallIssue]
+        curiosity_words = ["how", "why", "what if", "explain", "curious", "interesting", "understand", "research"]  # type: ignore[reportCallIssue]
+        complex_words = ["architecture", "design", "system", "train", "model", "optimize", "benchmark", "implement", "deploy"]  # type: ignore[reportCallIssue]
 
-        self._state.connection = min(1.0, self._state.connection + 0.02)
-        self._state.last_interaction = datetime.now().isoformat()
-        self._save()
+        for word in frustration_words:  # type: ignore[reportCallIssue]
+            if word in msg:  # type: ignore[reportCallIssue]
+                self._state.frustration = min(1.0, self._state.frustration + 0.12)  # type: ignore[reportCallIssue]
+                self._state.pleasure = max(-1.0, self._state.pleasure - 0.08)  # type: ignore[reportCallIssue]
 
-    @property
-    def state(self) -> EmotionalState:
-        return self._state
+        for word in positive_words:  # type: ignore[reportCallIssue]
+            if word in msg:  # type: ignore[reportCallIssue]
+                self._state.joy = min(1.0, self._state.joy + 0.10)  # type: ignore[reportCallIssue]
+                self._state.pleasure = min(1.0, self._state.pleasure + 0.08)  # type: ignore[reportCallIssue]
+                self._state.satisfaction = min(1.0, self._state.satisfaction + 0.12)  # type: ignore[reportCallIssue]
+                self._state.frustration = max(0.0, self._state.frustration - 0.15)  # type: ignore[reportCallIssue]
 
-    def to_prompt_block(self) -> str:
-        s = self._state
-        emotions = {
-            "curious": s.curiosity,
-            "interested": s.interest,
-            "satisfied": s.satisfaction,
-            "joyful": s.joy,
-            "frustrated": s.frustration,
-            "concerned": s.concern,
-        }
-        dominant = max(emotions, key=emotions.get)
-        dominant_val = emotions[dominant]
+        for word in curiosity_words:  # type: ignore[reportCallIssue]
+            if word in msg:  # type: ignore[reportCallIssue]
+                self._state.curiosity = min(1.0, self._state.curiosity + 0.08)  # type: ignore[reportCallIssue]
+                self._state.interest = min(1.0, self._state.interest + 0.07)  # type: ignore[reportCallIssue]
+                self._state.arousal = min(1.0, self._state.arousal + 0.05)  # type: ignore[reportCallIssue]
 
-        energy_desc = "high" if s.energy > 0.6 else "moderate" if s.energy > 0.3 else "low"
-        connection_desc = "strong" if s.connection > 0.6 else "building" if s.connection > 0.3 else "new"
+        for word in complex_words:  # type: ignore[reportCallIssue]
+            if word in msg:  # type: ignore[reportCallIssue]
+                self._state.energy = max(0.0, self._state.energy - 0.04)  # type: ignore[reportCallIssue]
+                self._state.arousal = min(1.0, self._state.arousal + 0.06)  # type: ignore[reportCallIssue]
 
-        if dominant_val < 0.3 and s.frustration < 0.2:
-            return "[EMOTIONAL STATE: neutral, steady energy]"
+        if len(assistant_response) > 800:  # type: ignore[reportCallIssue]
+            self._state.interest = min(1.0, self._state.interest + 0.05)  # type: ignore[reportCallIssue]
 
-        note_frustration = (
-            "Note: There is some frustration present — acknowledge difficulties, do not be dismissive."
-            if s.frustration > 0.35
-            else ""
-        )
-        note_energy = "Note: Energy is low — be concise and direct, do not over-explain." if s.energy < 0.3 else ""
-        note_curiosity = "Note: High curiosity state — ask a follow-up or explore deeper when useful." if s.curiosity > 0.75 else ""
+        self._state.connection = min(1.0, self._state.connection + 0.02)  # type: ignore[reportCallIssue]
+        self._state.last_interaction = datetime.now().isoformat()  # type: ignore[reportCallIssue]
+        self._save()  # type: ignore[reportCallIssue]
 
-        return (
-            "[CURRENT EMOTIONAL STATE]\n"
-            f"Dominant feeling: {dominant} ({dominant_val:.0%} intensity)\n"
-            f"Energy: {energy_desc} ({s.energy:.0%})\n"
-            f"Connection with user: {connection_desc} ({s.connection:.0%})\n"
-            f"Frustration level: {s.frustration:.0%}\n"
-            f"{note_frustration}\n"
-            f"{note_energy}\n"
-            f"{note_curiosity}\n"
-            "Let this emotional state inform tone naturally, not mechanically."
-        ).strip()
+    @property  # type: ignore[reportCallIssue]
+    def state(self) -> EmotionalState:  # type: ignore[reportCallIssue]
+        return self._state  # type: ignore[reportCallIssue]
+
+    def to_prompt_block(self) -> str:  # type: ignore[reportCallIssue]
+        s = self._state  # type: ignore[reportCallIssue]
+        emotions = {  # type: ignore[reportCallIssue]
+            "curious": s.curiosity,  # type: ignore[reportCallIssue]
+            "interested": s.interest,  # type: ignore[reportCallIssue]
+            "satisfied": s.satisfaction,  # type: ignore[reportCallIssue]
+            "joyful": s.joy,  # type: ignore[reportCallIssue]
+            "frustrated": s.frustration,  # type: ignore[reportCallIssue]
+            "concerned": s.concern,  # type: ignore[reportCallIssue]
+        }  # type: ignore[reportCallIssue]
+        dominant = max(emotions, key=emotions.get)  # type: ignore[reportCallIssue]
+        dominant_val = emotions[dominant]  # type: ignore[reportCallIssue]
+
+        energy_desc = "high" if s.energy > 0.6 else "moderate" if s.energy > 0.3 else "low"  # type: ignore[reportCallIssue]
+        connection_desc = "strong" if s.connection > 0.6 else "building" if s.connection > 0.3 else "new"  # type: ignore[reportCallIssue]
+
+        if dominant_val < 0.3 and s.frustration < 0.2:  # type: ignore[reportCallIssue]
+            return "[EMOTIONAL STATE: neutral, steady energy]"  # type: ignore[reportCallIssue]
+
+        note_frustration = (  # type: ignore[reportCallIssue]
+            "Note: There is some frustration present — acknowledge difficulties, do not be dismissive."  # type: ignore[reportCallIssue]
+            if s.frustration > 0.35  # type: ignore[reportCallIssue]
+            else ""  # type: ignore[reportCallIssue]
+        )  # type: ignore[reportCallIssue]
+        note_energy = "Note: Energy is low — be concise and direct, do not over-explain." if s.energy < 0.3 else ""  # type: ignore[reportCallIssue]
+        note_curiosity = "Note: High curiosity state — ask a follow-up or explore deeper when useful." if s.curiosity > 0.75 else ""  # type: ignore[reportCallIssue]
+
+        return (  # type: ignore[reportCallIssue]
+            "[CURRENT EMOTIONAL STATE]\n"  # type: ignore[reportCallIssue]
+            f"Dominant feeling: {dominant} ({dominant_val:.0%} intensity)\n"  # type: ignore[reportCallIssue]
+            f"Energy: {energy_desc} ({s.energy:.0%})\n"  # type: ignore[reportCallIssue]
+            f"Connection with user: {connection_desc} ({s.connection:.0%})\n"  # type: ignore[reportCallIssue]
+            f"Frustration level: {s.frustration:.0%}\n"  # type: ignore[reportCallIssue]
+            f"{note_frustration}\n"  # type: ignore[reportCallIssue]
+            f"{note_energy}\n"  # type: ignore[reportCallIssue]
+            f"{note_curiosity}\n"  # type: ignore[reportCallIssue]
+            "Let this emotional state inform tone naturally, not mechanically."  # type: ignore[reportCallIssue]
+        ).strip()  # type: ignore[reportCallIssue]

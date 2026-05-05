@@ -45,8 +45,8 @@ async def _url_check_handler(text: str) -> str:
 
         async with AsyncWebCrawler(verbose=False) as crawler:
             result = await crawler.arun(url=url)
-            if result and result.get("markdown"):
-                content_preview = result["markdown"][:300]
+            if result and result.get("markdown"):  # type: ignore[reportAttributeAccessIssue]
+                content_preview = result["markdown"][:300]  # type: ignore[reportIndexIssue]
                 return f"✅ URL reachable: {url}\n\nPreview:\n{content_preview}..."
             return f"⚠️ URL returned no content: {url}"
     except Exception as exc:
@@ -65,8 +65,8 @@ async def _web_scrape_handler(text: str) -> str:
 
         async with AsyncWebCrawler(verbose=False) as crawler:
             result = await crawler.arun(url=url)
-            if result and result.get("markdown"):
-                content = result["markdown"][:4000]
+            if result and result.get("markdown"):  # type: ignore[reportAttributeAccessIssue]
+                content = result["markdown"][:4000]  # type: ignore[reportIndexIssue]
                 return f"🌐 Scraped: {url}\n\n{content}"
             return f"⚠️ No content extracted from: {url}"
     except Exception as exc:

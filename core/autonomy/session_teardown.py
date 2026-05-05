@@ -36,7 +36,7 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         result = await _mcp_client.call_tool("ruflo", tool, args or {})
         if isinstance(result, list) and len(result) > 0:
             import json
-            return json.loads(result[0].text)
+            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
         return {}
     except Exception as e:
         logger.debug("ruflo %s failed: %s", tool, e)
@@ -100,7 +100,7 @@ async def run_teardown_sequence(
         from tools.mem0_client import mem0_add
         meta = {
             "type": "session",
-            "date": today,
+            "date": today,  # type: ignore[reportPossiblyUnboundVariable]
             "projects": detected_projects,
         }
         await mem0_add("bashara", session_summary, meta)

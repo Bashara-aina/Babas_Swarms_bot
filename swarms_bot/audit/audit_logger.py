@@ -18,7 +18,7 @@ import time
 import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class AuditEvent:
     model_used: str = ""
     tokens_used: int = 0
     latency_ms: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -55,9 +55,9 @@ class AuditLogger:
     Also keeps recent entries in memory for fast query.
     """
 
-    def __init__(self, db_path: Optional[Path] = None) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         self._db_path = db_path or AUDIT_DB_PATH
-        self._memory_log: List[AuditEvent] = []
+        self._memory_log: list[AuditEvent] = []
         self._db_initialized = False
 
     async def _ensure_db(self) -> None:
@@ -116,7 +116,7 @@ class AuditLogger:
         model_used: str = "",
         tokens_used: int = 0,
         latency_ms: int = 0,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> AuditEvent:
         """Record an audit event.
 
@@ -198,9 +198,9 @@ class AuditLogger:
     async def query(
         self,
         limit: int = 50,
-        action_type: Optional[str] = None,
-        agent_name: Optional[str] = None,
-    ) -> List[AuditEvent]:
+        action_type: str | None = None,
+        agent_name: str | None = None,
+    ) -> list[AuditEvent]:
         """Query recent audit events from memory.
 
         Args:
@@ -221,7 +221,7 @@ class AuditLogger:
         events.sort(key=lambda e: e.timestamp, reverse=True)
         return events[:limit]
 
-    async def get_summary(self, hours: float = 24) -> Dict[str, Any]:
+    async def get_summary(self, hours: float = 24) -> dict[str, Any]:
         """Get audit summary for the last N hours.
 
         Args:
@@ -236,8 +236,8 @@ class AuditLogger:
         total_cost = sum(e.cost_usd for e in recent)
         success_count = sum(1 for e in recent if e.success)
 
-        action_counts: Dict[str, int] = {}
-        agent_counts: Dict[str, int] = {}
+        action_counts: dict[str, int] = {}
+        agent_counts: dict[str, int] = {}
 
         for e in recent:
             action_counts[e.action_type] = action_counts.get(e.action_type, 0) + 1
@@ -253,7 +253,7 @@ class AuditLogger:
             "by_agent": agent_counts,
         }
 
-    def format_audit_html(self, events: List[AuditEvent]) -> str:
+    def format_audit_html(self, events: list[AuditEvent]) -> str:
         """Format audit events as HTML for Telegram."""
         if not events:
             return "<b>No audit events found.</b>"

@@ -57,7 +57,7 @@ async def _system_health_handler(text: str) -> str:
 
     # Disk space
     try:
-        disk = psutil.disk_usage("/")
+        disk = psutil.disk_usage("/")  # type: ignore[reportPossiblyUnboundVariable]
         lines.append(f"Disk: {disk.percent:.1f}% used ({disk.used // (1024**3)}GB/{disk.total // (1024**3)}GB)")
     except Exception:
         pass

@@ -35,7 +35,7 @@ async def cmd_fix(message: Message) -> None:
     """
     if not _require_owner(message):
         return
-    url = message.text.removeprefix("/fix").strip()
+    url = message.text.removeprefix("/fix").strip()  # type: ignore[reportOptionalMemberAccess]
     if not url.startswith("https://github.com/"):
         await message.answer(
             "usage: <code>/fix &lt;github_issue_url&gt;</code>\n\n"
@@ -71,7 +71,7 @@ async def cmd_fix_dry(message: Message) -> None:
     """
     if not _require_owner(message):
         return
-    url = message.text.removeprefix("/fix_dry").strip()
+    url = message.text.removeprefix("/fix_dry").strip()  # type: ignore[reportOptionalMemberAccess]
     if not url.startswith("https://github.com/"):
         await message.answer(
             "usage: <code>/fix_dry &lt;github_issue_url&gt;</code>",

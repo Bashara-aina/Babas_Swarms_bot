@@ -13,7 +13,7 @@ import argparse
 import asyncio
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 # Ensure project root is on path
@@ -30,7 +30,7 @@ async def run_daily_harvest(dry_run: bool = False, date_override: str | None = N
     """Run the daily harvest pipeline."""
     from core.daily_harvester import DailyHarvester
 
-    date_str = date_override or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    date_str = date_override or datetime.now(UTC).strftime("%Y-%m-%d")
     logger.info("Starting daily harvest for %s (dry_run=%s)", date_str, dry_run)
 
     if dry_run:

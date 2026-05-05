@@ -7,8 +7,8 @@ created: 2026-04-12
 updated: 2026-04-12
 summary: OpenCode was selected over Cursor for backend coding tasks due to superior CLI integration and Telegram workflow compatibility.
 wikilinks:
-  - [[./entities/opencode]]
-  - [[./entities/cursor]]
+  - [[entities/opencode]]
+  - [[entities/cursor]]
 confidence: high
 source: decision
 ---
@@ -57,5 +57,5 @@ Select **OpenCode** for all backend coding tasks.
 
 ## Related Pages
 
-- [[./entities/opencode]] — OpenCode integration
-- [[./entities/cursor]] — Alternative not selected
+- [[entities/opencode]] — OpenCode integration
+- [[entities/cursor]] — Alternative not selected

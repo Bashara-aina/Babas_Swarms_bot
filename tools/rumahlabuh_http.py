@@ -21,10 +21,13 @@ logger = logging.getLogger(__name__)
 # Cloudflare and Google DNS servers for resilient lookups
 RESILIENT_DNS_SERVERS = ("1.1.1.1", "8.8.8.8")
 
+# Module-level singleton for default timeout
+_DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=30)
+
 
 @asynccontextmanager
 async def get_resilient_session(
-    timeout: aiohttp.ClientTimeout | float = aiohttp.ClientTimeout(total=30),
+    timeout: aiohttp.ClientTimeout | float = _DEFAULT_TIMEOUT,
     dns_servers: tuple[str, ...] = RESILIENT_DNS_SERVERS,
     **session_kwargs: Any,
 ) -> AsyncIterator[aiohttp.ClientSession]:

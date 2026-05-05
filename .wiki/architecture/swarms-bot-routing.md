@@ -8,7 +8,7 @@ updated: 2026-04-13
 summary: swarms_bot/ is Legion's enterprise-grade orchestration layer with structured routing (budget_guard, budget_manager, cost_router) and DAG-based task execution (orchestrator/).
 wikilinks:
   - [[architecture/legion-module-map]]
-  - [[./concepts/llm-cost-routing]]
+  - [[concepts/llm-cost-routing]]
   - [[architecture/legion-orchestrator-system]]
 confidence: high
 source: implementation
@@ -148,5 +148,5 @@ handlers/orchestrate.py
 ## Related Pages
 
 - [[architecture/legion-module-map]] — Full module map
-- [[./concepts/llm-cost-routing]] — Cost routing strategy
+- [[concepts/llm-cost-routing]] — Cost routing strategy
 - [[architecture/legion-orchestrator-system]] — How it connects to LegionOrchestrator

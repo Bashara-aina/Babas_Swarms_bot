@@ -215,9 +215,7 @@ async def guard_confidence(content: str, query: str) -> tuple[Verdict, float, st
         verdict_str = "NEEDS_IMPROVEMENT"
 
     # Apply thresholds
-    if verdict_str == "PASS" and score < 0.7:
-        verdict_str = "NEEDS_IMPROVEMENT"
-    elif verdict_str == "REJECT" and score >= 0.3:
+    if (verdict_str == "PASS" and score < 0.7) or (verdict_str == "REJECT" and score >= 0.3):
         verdict_str = "NEEDS_IMPROVEMENT"
     elif verdict_str not in ("PASS", "REJECT") and score >= 0.7:
         verdict_str = "PASS"

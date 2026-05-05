@@ -87,7 +87,7 @@ async def run_sandboxed_bash(
 
     try:
         stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        return proc.returncode, stdout_b.decode(), stderr_b.decode()
+        return proc.returncode, stdout_b.decode(), stderr_b.decode()  # type: ignore[reportReturnType]
     except TimeoutError:
         proc.kill()
         await proc.wait()
@@ -114,7 +114,7 @@ async def _run_direct_bash(
     )
     try:
         stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        return proc.returncode, stdout_b.decode(), stderr_b.decode()
+        return proc.returncode, stdout_b.decode(), stderr_b.decode()  # type: ignore[reportReturnType]
     except TimeoutError:
         proc.kill()
         await proc.wait()

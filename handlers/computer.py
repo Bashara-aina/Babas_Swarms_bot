@@ -45,7 +45,7 @@ COMPLEXITY_PATTERNS = ["open", "click", "type", "send", "search", "go to", "navi
 def _is_complex_task(task: str) -> bool:
     """Detect if a task requires planning (multi-step or ambiguous)."""
     task_lower = task.lower()
-    word_count = len(task.split())
+    word_count = len(task.split())  # type: ignore[reportOptionalMemberAccess]
 
     # Multi-step detection: contains connectors indicating multiple actions
     has_connectors = any(conn in task_lower for conn in COMPLEXITY_CONNECTORS)
@@ -112,15 +112,15 @@ async def _plan_task(task: str, max_iterations: int = 3) -> dict[str, Any]:
     checks = []
 
     current_section = None
-    for line in plan_text.split("\n"):
+    for line in plan_text.split("\n"):  # type: ignore[reportOptionalMemberAccess]
         line = line.strip()
-        if line.startswith("STEPS:", line.upper()) or line == "STEPS":
+        if line.startswith("STEPS:", line.upper()) or line == "STEPS":  # type: ignore[reportArgumentType]
             current_section = "steps"
             continue
-        elif line.startswith("OUTCOMES:", line.upper()) or line == "OUTCOMES":
+        elif line.startswith("OUTCOMES:", line.upper()) or line == "OUTCOMES":  # type: ignore[reportArgumentType]
             current_section = "outcomes"
             continue
-        elif line.startswith("CHECKS:", line.upper()) or line == "CHECKS":
+        elif line.startswith("CHECKS:", line.upper()) or line == "CHECKS":  # type: ignore[reportArgumentType]
             current_section = "checks"
             continue
         elif line.startswith("AMBIGUITY"):
@@ -130,17 +130,17 @@ async def _plan_task(task: str, max_iterations: int = 3) -> dict[str, Any]:
         if current_section == "steps" and line:
             # Extract step number and description
             if line[0].isdigit() and "." in line[:3]:
-                steps.append(line.split(".", 1)[1].strip() if "." in line else line)
+                steps.append(line.split(".", 1)[1].strip() if "." in line else line)  # type: ignore[reportOptionalMemberAccess]
             elif line.startswith("-"):
                 steps.append(line[1:].strip())
         elif current_section == "outcomes" and line:
             if line[0].isdigit() and "." in line[:3]:
-                outcomes.append(line.split(".", 1)[1].strip() if "." in line else line)
+                outcomes.append(line.split(".", 1)[1].strip() if "." in line else line)  # type: ignore[reportOptionalMemberAccess]
             elif line.startswith("-"):
                 outcomes.append(line[1:].strip())
         elif current_section == "checks" and line:
             if line[0].isdigit() and "." in line[:3]:
-                checks.append(line.split(".", 1)[1].strip() if "." in line else line)
+                checks.append(line.split(".", 1)[1].strip() if "." in line else line)  # type: ignore[reportOptionalMemberAccess]
             elif line.startswith("-"):
                 checks.append(line[1:].strip())
 
@@ -159,7 +159,7 @@ async def cmd_do(msg: Message) -> None:
         return
     task = (msg.text or "").removeprefix("/do").strip()
     if not task:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/do &lt;task&gt;</code>\n\n"
             "i'll autonomously:\n"
             "\u2022 take screenshots to see what's on screen\n"
@@ -184,7 +184,7 @@ async def cmd_do(msg: Message) -> None:
         try:
             from agents.code_agent import run_code_agent
 
-            status = await msg.answer("⚙️ Detected coding intent — routing to code_exec agent…")
+            status = await msg.answer("⚙️ Detected coding intent — routing to code_exec agent…")  # type: ignore[reportOptionalMemberAccess]
             result = await run_code_agent(task)
             await status.delete()
             payload = (
@@ -200,7 +200,7 @@ async def cmd_do(msg: Message) -> None:
 
     # Planning gate for complex tasks
     if _is_complex_task(task):
-        planning_msg = await msg.answer("📋 Analyzing task — creating execution plan…")
+        planning_msg = await msg.answer("📋 Analyzing task — creating execution plan…")  # type: ignore[reportOptionalMemberAccess]
 
         try:
             plan = await _plan_task(task, max_iterations=3)
@@ -221,7 +221,7 @@ async def cmd_do(msg: Message) -> None:
                 plan_display += "\n"
 
             plan_display += f"<i>Planning iterations used: {plan['iterations_used']}/3</i>"
-            await msg.answer(plan_display, parse_mode="HTML")
+            await msg.answer(plan_display, parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
 
         except Exception as e:
             await planning_msg.edit_text(
@@ -232,7 +232,7 @@ async def cmd_do(msg: Message) -> None:
             # Fall through to direct execution on planning failure
 
         # Execute complex task via computer_use_loop (vision-action-verify loop)
-        status_msg = await msg.answer("\U0001f916 executing plan…")
+        status_msg = await msg.answer("\U0001f916 executing plan…")  # type: ignore[reportOptionalMemberAccess]
         typing_task = asyncio.create_task(_keep_typing(msg))
 
         async def on_progress(step_num: int, description: str) -> None:
@@ -255,7 +255,7 @@ async def cmd_do(msg: Message) -> None:
 
             if get_pending_confirmations():
                 pending = get_pending_confirmations()[0]
-                await msg.answer(
+                await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                     "\u26a0\ufe0f <b>Confirmation required</b>\n\n"
                     f"Step {pending['step']}: dangerous action detected:\n"
                     f"<code>{html_mod.escape(pending['command'] or pending['keys'] or '?')}</code>\n\n"
@@ -266,7 +266,7 @@ async def cmd_do(msg: Message) -> None:
                 return
 
             if not result.success and result.error:
-                await msg.answer(
+                await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                     f"\u274c <b>Execution error</b>\n\n<code>{html_mod.escape(result.error)}</code>",
                     parse_mode="HTML",
                 )
@@ -291,7 +291,7 @@ async def cmd_do(msg: Message) -> None:
                     parse_mode="HTML",
                 )
             except Exception:
-                await msg.answer(
+                await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                     f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
                     parse_mode="HTML",
                 )
@@ -313,7 +313,7 @@ async def cmd_autopilot(msg: Message) -> None:
         return
     task = (msg.text or "").removeprefix("/autopilot").strip()
     if not task:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/autopilot &lt;task&gt;</code>\n\n"
             "Legion will:\n"
             "\u2022 take screenshots to see the screen\n"
@@ -329,7 +329,7 @@ async def cmd_autopilot(msg: Message) -> None:
         )
         return
 
-    status_msg = await msg.answer("\U0001f916 autopilot engaging\u2026")
+    status_msg = await msg.answer("\U0001f916 autopilot engaging\u2026")  # type: ignore[reportOptionalMemberAccess]
     typing_task = asyncio.create_task(_keep_typing(msg))
 
     async def on_progress(step_num: int, description: str) -> None:
@@ -352,7 +352,7 @@ async def cmd_autopilot(msg: Message) -> None:
 
         if get_pending_confirmations():
             pending = get_pending_confirmations()[0]
-            await msg.answer(
+            await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                 "\u26a0\ufe0f <b>Confirmation required</b>\n\n"
                 f"Step {pending['step']}: dangerous action detected:\n"
                 f"<code>{html_mod.escape(pending['command'] or pending['keys'] or '?')}</code>\n\n"
@@ -363,7 +363,7 @@ async def cmd_autopilot(msg: Message) -> None:
             return
 
         if not result.success and result.error:
-            await msg.answer(
+            await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                 f"\u274c <b>Autopilot error</b>\n\n<code>{html_mod.escape(result.error)}</code>",
                 parse_mode="HTML",
             )
@@ -388,7 +388,7 @@ async def cmd_autopilot(msg: Message) -> None:
                 parse_mode="HTML",
             )
         except Exception:
-            await msg.answer(
+            await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                 f"{friendly}\n\n<code>{html_mod.escape(str(e)[:200])}</code>",
                 parse_mode="HTML",
             )
@@ -401,17 +401,17 @@ async def cmd_confirm(msg: Message) -> None:
         return
     pending = get_pending_confirmations()
     if not pending:
-        await msg.answer("no pending confirmations")
+        await msg.answer("no pending confirmations")  # type: ignore[reportOptionalMemberAccess]
         return
     cmd_to_confirm = (msg.text or "").removeprefix("/confirm").strip()
     if cmd_to_confirm:
         confirm_command(cmd_to_confirm)
-        await msg.answer(f"\u2705 confirmed: <code>{html_mod.escape(cmd_to_confirm[:80])}</code>", parse_mode="HTML")
+        await msg.answer(f"\u2705 confirmed: <code>{html_mod.escape(cmd_to_confirm[:80])}</code>", parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
     else:
         # Confirm the most recent one
         latest = pending[-1]
         confirm_command(latest.get("command", ""))
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             f"\u2705 confirmed last pending action (step {latest['step']})",
             parse_mode="HTML",
         )
@@ -424,7 +424,7 @@ async def cmd_do_local(msg: Message) -> None:
 
     raw = (msg.text or "").removeprefix("/do_local").strip()
     if not raw:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage:\n"
             "<code>/do_local whatsapp | contact | message</code>\n"
             "or natural:\n"
@@ -437,7 +437,7 @@ async def cmd_do_local(msg: Message) -> None:
     message_text = ""
 
     if "|" in raw:
-        parts = [p.strip() for p in raw.split("|", 2)]
+        parts = [p.strip() for p in raw.split("|", 2)]  # type: ignore[reportOptionalMemberAccess]
         if len(parts) == 3 and parts[0].lower() == "whatsapp":
             contact, message_text = parts[1], parts[2]
     else:
@@ -453,7 +453,7 @@ async def cmd_do_local(msg: Message) -> None:
             plain = re.search(r"chat\s+ke\s+(.+)$", raw, flags=re.IGNORECASE)
             if plain:
                 tail = plain.group(1).strip()
-                tokens = tail.split()
+                tokens = tail.split()  # type: ignore[reportOptionalMemberAccess]
                 if len(tokens) >= 3:
                     msg_starters = {
                         "aku",
@@ -482,19 +482,19 @@ async def cmd_do_local(msg: Message) -> None:
                         message_text = " ".join(tokens[split_idx:]).strip()
 
     if not contact or not message_text:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "couldn't parse local WhatsApp task.\n"
             "Use: <code>/do_local whatsapp | pwiti little hani | aku sayang kamu</code>",
             parse_mode="HTML",
         )
         return
 
-    status_msg = await msg.answer("🖥 running local WhatsApp automation…")
+    status_msg = await msg.answer("🖥 running local WhatsApp automation…")  # type: ignore[reportOptionalMemberAccess]
 
     async def _progress_local(step_text: str) -> None:
         try:
             if step_text.startswith("💭"):
-                await msg.answer(f"<i>{html_mod.escape(step_text)}</i>", parse_mode="HTML")
+                await msg.answer(f"<i>{html_mod.escape(step_text)}</i>", parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
             else:
                 await status_msg.edit_text(html_mod.escape(step_text))
         except Exception:
@@ -510,8 +510,8 @@ async def cmd_do_local(msg: Message) -> None:
     try:
         shot = await computer_agent.take_screenshot()
         if shot and msg.from_user:
-            _last_screenshot[msg.from_user.id] = shot
-            await msg.answer_photo(
+            _last_screenshot[msg.from_user.id] = shot  # type: ignore[reportOptionalMemberAccess]
+            await msg.answer_photo(  # type: ignore[reportOptionalMemberAccess]
                 photo=FSInputFile(shot),
                 caption="📸 after /do_local",
                 reply_markup=screenshot_keyboard(),
@@ -525,7 +525,7 @@ async def cmd_do_local(msg: Message) -> None:
 async def cmd_screen(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status_msg = await msg.answer("\U0001f4f8 grabbing screen\u2026")
+    status_msg = await msg.answer("\U0001f4f8 grabbing screen\u2026")  # type: ignore[reportOptionalMemberAccess]
     try:
         path = await computer_agent.take_screenshot()
         if not path:
@@ -540,9 +540,9 @@ async def cmd_screen(msg: Message) -> None:
             return
 
         await status_msg.delete()
-        _last_screenshot[msg.from_user.id] = path
+        _last_screenshot[msg.from_user.id] = path  # type: ignore[reportOptionalMemberAccess]
 
-        await msg.answer_photo(
+        await msg.answer_photo(  # type: ignore[reportOptionalMemberAccess]
             photo=FSInputFile(path),
             caption="\U0001f5a5 desktop \u2014 tap Analyze or give me a task to do on screen",
             reply_markup=screenshot_keyboard(),
@@ -558,14 +558,14 @@ async def cmd_open(msg: Message) -> None:
         return
     target = (msg.text or "").removeprefix("/open").strip()
     if not target:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/open &lt;app or url&gt;</code>\n\n"
             "e.g. <code>/open whatsapp</code>, <code>/open https://supabase.com</code>, "
             "<code>/open vscode</code>, <code>/open ~/projects</code>",
             parse_mode="HTML",
         )
         return
-    status_msg = await msg.answer(f"opening {html_mod.escape(target)}\u2026")
+    status_msg = await msg.answer(f"opening {html_mod.escape(target)}\u2026")  # type: ignore[reportOptionalMemberAccess]
 
     # FIX #15: Prepend https:// for www. URLs — open_url() needs a full valid URL
     if target.startswith("www."):
@@ -585,9 +585,9 @@ async def cmd_open(msg: Message) -> None:
 async def cmd_click(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    parts = (msg.text or "").split()
+    parts = (msg.text or "").split()  # type: ignore[reportOptionalMemberAccess]
     if len(parts) < 3:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/click &lt;x&gt; &lt;y&gt; [left|right|double]</code>\nuse /screen first to find coordinates",
             parse_mode="HTML",
         )
@@ -596,9 +596,9 @@ async def cmd_click(msg: Message) -> None:
         x, y = int(parts[1]), int(parts[2])
         button = parts[3] if len(parts) > 3 else "left"
         result = await computer_agent.mouse_click(x, y, button)
-        await msg.answer(f"\U0001f5b1 {html_mod.escape(result)}")
+        await msg.answer(f"\U0001f5b1 {html_mod.escape(result)}")  # type: ignore[reportOptionalMemberAccess]
     except (ValueError, IndexError):
-        await msg.answer("bad coordinates \u2014 use integers: <code>/click 500 300</code>", parse_mode="HTML")
+        await msg.answer("bad coordinates \u2014 use integers: <code>/click 500 300</code>", parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
 
 
 # ── /type ─────────────────────────────────────────────────────────────────────
@@ -608,10 +608,10 @@ async def cmd_type(msg: Message) -> None:
         return
     text_to_type = (msg.text or "").removeprefix("/type").strip()
     if not text_to_type:
-        await msg.answer("usage: <code>/type &lt;text to type&gt;</code>", parse_mode="HTML")
+        await msg.answer("usage: <code>/type &lt;text to type&gt;</code>", parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
         return
     result = await computer_agent.keyboard_type(text_to_type)
-    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")
+    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")  # type: ignore[reportOptionalMemberAccess]
 
 
 # ── /key ──────────────────────────────────────────────────────────────────────
@@ -621,7 +621,7 @@ async def cmd_key(msg: Message) -> None:
         return
     combo = (msg.text or "").removeprefix("/key").strip()
     if not combo:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/key &lt;combo&gt;</code>\n\n"
             "examples: <code>ctrl+t</code>  <code>alt+Tab</code>  "
             "<code>ctrl+shift+n</code>  <code>Return</code>  <code>super</code>",
@@ -629,7 +629,7 @@ async def cmd_key(msg: Message) -> None:
         )
         return
     result = await computer_agent.key_press(combo)
-    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")
+    await msg.answer(f"\u2328\ufe0f {html_mod.escape(result)}")  # type: ignore[reportOptionalMemberAccess]
 
 
 # ── /cmd ──────────────────────────────────────────────────────────────────────
@@ -639,7 +639,7 @@ async def cmd_shell(msg: Message) -> None:
         return
     cmd = (msg.text or "").removeprefix("/cmd").strip()
     if not cmd:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/cmd &lt;shell command&gt;</code>\ne.g. <code>/cmd nvidia-smi</code>",
             parse_mode="HTML",
         )
@@ -668,16 +668,16 @@ async def cmd_shell(msg: Message) -> None:
     cmd_lower = cmd.lower()
     for b in blocked:
         if b in cmd_lower:
-            await msg.answer(
+            await msg.answer(  # type: ignore[reportOptionalMemberAccess]
                 f"blocked dangerous pattern: <code>{html_mod.escape(b)}</code>",
                 parse_mode="HTML",
             )
             return
 
-    status_msg = await msg.answer(f"<code>$ {html_mod.escape(cmd[:100])}</code>", parse_mode="HTML")
+    status_msg = await msg.answer(f"<code>$ {html_mod.escape(cmd[:100])}</code>", parse_mode="HTML")  # type: ignore[reportOptionalMemberAccess]
     output = await run_shell_command(cmd, timeout=60)
     await status_msg.delete()
-    await msg.answer(
+    await msg.answer(  # type: ignore[reportOptionalMemberAccess]
         f"<code>$ {html_mod.escape(cmd[:100])}</code>\n\n<pre>{html_mod.escape(output[:3800])}</pre>",
         parse_mode="HTML",
     )
@@ -690,7 +690,7 @@ async def cmd_install(msg: Message) -> None:
         return
     packages_str = (msg.text or "").removeprefix("/install").strip()
     if not packages_str:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/install &lt;package1&gt; &lt;package2&gt; ...</code>\n"
             "e.g. <code>/install playwright httpx rich</code>\n\n"
             "bot will install then restart automatically.",
@@ -698,8 +698,8 @@ async def cmd_install(msg: Message) -> None:
         )
         return
 
-    packages = packages_str.split()
-    status_msg = await msg.answer(
+    packages = packages_str.split()  # type: ignore[reportOptionalMemberAccess]
+    status_msg = await msg.answer(  # type: ignore[reportOptionalMemberAccess]
         f"\U0001f4e6 installing: <code>{html_mod.escape(', '.join(packages))}</code>\n(this may take a moment\u2026)",
         parse_mode="HTML",
     )
@@ -728,7 +728,7 @@ async def cmd_install(msg: Message) -> None:
         parse_mode="HTML",
     )
     await asyncio.sleep(2)
-    await msg.answer("back in a sec \U0001f44b")
+    await msg.answer("back in a sec \U0001f44b")  # type: ignore[reportOptionalMemberAccess]
     computer_agent.restart_bot()
 
 
@@ -737,7 +737,7 @@ async def cmd_install(msg: Message) -> None:
 async def cmd_upgrade(msg: Message) -> None:
     if not is_allowed(msg):
         return
-    status_msg = await msg.answer("\u2b06\ufe0f pulling latest from GitHub\u2026")
+    status_msg = await msg.answer("\u2b06\ufe0f pulling latest from GitHub\u2026")  # type: ignore[reportOptionalMemberAccess]
 
     result = await computer_agent.upgrade_from_git()
     result_lower = result.lower()
@@ -765,7 +765,7 @@ async def cmd_upgrade(msg: Message) -> None:
         parse_mode="HTML",
     )
     await asyncio.sleep(2)
-    await msg.answer("restarting with updates \U0001f504")
+    await msg.answer("restarting with updates \U0001f504")  # type: ignore[reportOptionalMemberAccess]
     computer_agent.restart_bot()
 
 
@@ -776,13 +776,13 @@ async def cmd_oi_direct(msg: Message) -> None:
         return
     task = (msg.text or "").removeprefix("/oi").strip()
     if not task:
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "usage: <code>/oi &lt;task&gt;</code>\nexample: <code>/oi open firefox and go to github.com</code>",
             parse_mode="HTML",
         )
         return
 
-    status = await msg.answer("🔄 Open Interpreter running...")
+    status = await msg.answer("🔄 Open Interpreter running...")  # type: ignore[reportOptionalMemberAccess]
     try:
         from tools.oi_bridge import oi_execute
 
@@ -791,7 +791,7 @@ async def cmd_oi_direct(msg: Message) -> None:
         chunks = llm_client.chunk_output(result)
         if len(chunks) > 1:
             for chunk in chunks[1:]:
-                await msg.answer(chunk)
+                await msg.answer(chunk)  # type: ignore[reportOptionalMemberAccess]
     except Exception as e:
         await status.edit_text(f"❌ OI error: {html_mod.escape(str(e))}")
 
@@ -800,7 +800,7 @@ async def cmd_oi_direct(msg: Message) -> None:
 @router.message(F.text == "\U0001f5a5 Do task")
 async def kbd_do_hint(msg: Message) -> None:
     if is_allowed(msg):
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "tell me what to do on the computer:\n\n"
             "just type your task naturally, or use <code>/do &lt;task&gt;</code>\n\n"
             "examples:\n"
@@ -821,7 +821,7 @@ async def kbd_screenshot(msg: Message) -> None:
 @router.message(F.text == "\u26a1 Shell")
 async def kbd_shell_hint(msg: Message) -> None:
     if is_allowed(msg):
-        await msg.answer(
+        await msg.answer(  # type: ignore[reportOptionalMemberAccess]
             "type: <code>/cmd &lt;command&gt;</code>\ne.g. <code>/cmd nvidia-smi</code>",
             parse_mode="HTML",
         )
@@ -830,31 +830,31 @@ async def kbd_shell_hint(msg: Message) -> None:
 # ── Callbacks ─────────────────────────────────────────────────────────────────
 @router.callback_query(F.data.startswith("fb:"))
 async def cb_feedback(cb: CallbackQuery) -> None:
-    action = cb.data.split(":")[1]
+    action = cb.data.split(":")[1]  # type: ignore[reportOptionalMemberAccess]
     responses = {
         "good": "\U0001f44d nice",
         "retry": "re-send your message to retry",
         "info": "provider shown in button label",
     }
-    await cb.answer(responses.get(action, "ok"))
+    await cb.answer(responses.get(action, "ok"))  # type: ignore[reportOptionalMemberAccess]
 
 
 @router.callback_query(F.data == "screen:analyze")
 async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
     if not allowed_cb(cb):
-        await cb.answer("not authorized")
+        await cb.answer("not authorized")  # type: ignore[reportOptionalMemberAccess]
         return
 
     # FIX #11: Use pop() to atomically claim the screenshot path — prevents race condition
     # on double-tap where second tap would see None and incorrectly say "screenshot expired"
-    path = _last_screenshot.pop(cb.from_user.id, None)
+    path = _last_screenshot.pop(cb.from_user.id, None)  # type: ignore[reportOptionalMemberAccess]
     if not path or not Path(path).exists():
-        await cb.answer("screenshot expired \u2014 grab a new one with /screen")
+        await cb.answer("screenshot expired \u2014 grab a new one with /screen")  # type: ignore[reportOptionalMemberAccess]
         return
 
-    await cb.answer("analyzing\u2026")
-    status_msg = await cb.message.answer("\U0001f50d analyzing screen\u2026")
-    typing_task = asyncio.create_task(_keep_typing(cb.message))
+    await cb.answer("analyzing\u2026")  # type: ignore[reportOptionalMemberAccess]
+    status_msg = await cb.message.answer("\U0001f50d analyzing screen\u2026")  # type: ignore[reportOptionalMemberAccess]
+    typing_task = asyncio.create_task(_keep_typing(cb.message))  # type: ignore[reportArgumentType]
 
     try:
         analysis, model_used = await llm_client.analyze_screenshot(
@@ -867,7 +867,7 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
         )
         typing_task.cancel()
         await status_msg.delete()
-        await send_chunked(cb.message, analysis, model_used=model_used)
+        await send_chunked(cb.message, analysis, model_used=model_used)  # type: ignore[reportArgumentType]
 
         with contextlib.suppress(Exception):
             Path(path).unlink(missing_ok=True)
@@ -882,10 +882,10 @@ async def cb_analyze_screenshot(cb: CallbackQuery) -> None:
 @router.callback_query(F.data == "screen:do")
 async def cb_screen_do(cb: CallbackQuery) -> None:
     if not allowed_cb(cb):
-        await cb.answer("not authorized")
+        await cb.answer("not authorized")  # type: ignore[reportOptionalMemberAccess]
         return
-    await cb.answer()
-    await cb.message.answer(
+    await cb.answer()  # type: ignore[reportOptionalMemberAccess]
+    await cb.message.answer(  # type: ignore[reportOptionalMemberAccess]
         "what do you want me to do on screen?\n\njust reply with your task, or use <code>/do &lt;task&gt;</code>",
         parse_mode="HTML",
     )

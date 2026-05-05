@@ -10,7 +10,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class BudgetManager:
     ) -> None:
         self.daily_limit = daily_limit
         self.monthly_limit = monthly_limit
-        self._entries: List[CostEntry] = []
+        self._entries: list[CostEntry] = []
 
     def record_cost(
         self,
@@ -81,7 +81,7 @@ class BudgetManager:
         if len(self._entries) > 10000:
             self._entries = self._entries[-10000:]
 
-    def check_budget(self) -> Dict[str, Any]:
+    def check_budget(self) -> dict[str, Any]:
         """Check if spending is within limits.
 
         Returns:
@@ -132,7 +132,7 @@ class BudgetManager:
         """
         return self.check_budget()["allowed"]
 
-    def get_cost_breakdown(self, period: str = "day") -> Dict[str, Any]:
+    def get_cost_breakdown(self, period: str = "day") -> dict[str, Any]:
         """Get cost breakdown by agent and model.
 
         Args:
@@ -155,9 +155,9 @@ class BudgetManager:
 
         entries = [e for e in self._entries if e.timestamp >= cutoff]
 
-        by_agent: Dict[str, float] = {}
-        by_model: Dict[str, float] = {}
-        by_task_type: Dict[str, float] = {}
+        by_agent: dict[str, float] = {}
+        by_model: dict[str, float] = {}
+        by_task_type: dict[str, float] = {}
         total_tokens = 0
 
         for e in entries:

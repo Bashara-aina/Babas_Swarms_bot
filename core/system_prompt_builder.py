@@ -177,7 +177,7 @@ async def _get_relevant_memory_content(user_id: str, query: str) -> str:
             return ""
         lines = ["[RELEVANT MEMORIES — top 3]"]
         for m in results[:3]:
-            content = str(m.get("content", ""))[:200]
+            content = str(m.get("content", ""))[:200]  # type: ignore[reportAttributeAccessIssue]
             lines.append(f"  - {content}")
         return "\n".join(lines)
     except Exception as e:
@@ -535,7 +535,7 @@ def build_full_system_prompt(
         try:
             from agents import get_conversation_summary_prompt
 
-            ctx = get_conversation_summary_prompt(user_id)
+            ctx = get_conversation_summary_prompt(user_id)  # type: ignore[reportCallIssue]
             if ctx:
                 parts.append(ctx)
         except Exception as e:

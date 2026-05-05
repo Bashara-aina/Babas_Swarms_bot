@@ -31,7 +31,7 @@ def buffer_conversation(user_msg: str, legion_response: str) -> None:
         {
             "user": user_msg[:200],
             "legion": legion_response[:300],
-            "ts": time.time(),
+            "ts": time.time(),  # type: ignore[reportArgumentType]
         }
     )
 
@@ -90,7 +90,7 @@ Respond in JSON only:
 
         import re
 
-        json_match = re.search(r"\{.*\}", result, re.DOTALL)
+        json_match = re.search(r"\{.*\}", result, re.DOTALL)  # type: ignore[reportCallIssue]
         if not json_match:
             return
         data = json.loads(json_match.group())

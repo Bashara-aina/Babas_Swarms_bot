@@ -22,7 +22,8 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Callable, Coroutine, Dict, Optional
+from collections.abc import Callable, Coroutine
+from typing import Any
 
 from swarms_bot.orchestrator.agent_messaging import AgentMessageBus, MessageType
 from swarms_bot.orchestrator.dag_executor import DAGExecutor
@@ -40,8 +41,8 @@ class OrchestrationRunner:
 
     def __init__(
         self,
-        agent_registry: Dict[str, Any],
-        send_fn: Optional[Callable] = None,   # async fn(text, markup=None)
+        agent_registry: dict[str, Any],
+        send_fn: Callable | None = None,   # async fn(text, markup=None)
         require_approval: bool = True,
         approval_timeout: int = 120,
         max_parallel: int = 4,
@@ -59,7 +60,7 @@ class OrchestrationRunner:
         self,
         goal: str,
         user_id: int = 0,
-        progress_cb: Optional[Callable[[str], Coroutine]] = None,
+        progress_cb: Callable[[str], Coroutine] | None = None,
     ) -> str:
         """
         Full orchestration pipeline. Returns final synthesized result string.
@@ -129,7 +130,7 @@ class OrchestrationRunner:
             await workspace.update_status(node.id, "pending", node.title)
 
         # 6. Build spawnable agent registry
-        spawnable_registry: Dict[str, Any] = {}
+        spawnable_registry: dict[str, Any] = {}
         for key, agent in self.registry.items():
             spawn_ctx = SpawnContext(run_id=run_id, budget_remaining=5.0)
             spawnable_registry[key] = SpawnableAgentWrapper(
@@ -216,7 +217,7 @@ class SpawnableAgentWrapper:
         self,
         agent: Any,
         spawn_ctx: SpawnContext,
-        registry: Dict[str, Any],
+        registry: dict[str, Any],
         bus: AgentMessageBus,
         workspace: SharedWorkspace,
     ):

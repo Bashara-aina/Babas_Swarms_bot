@@ -57,7 +57,7 @@ def check_provider_health(provider: str) -> ProviderStatus:
     health = _provider_health[provider]
     now = time.monotonic()
     last_rate_limit = health.get("last_rate_limit", 0.0)
-    time_since_limit = now - last_rate_limit
+    time_since_limit = now - last_rate_limit  # type: ignore[reportOperatorIssue]
 
     # Circuit breaker still open — completely block this provider
     if time_since_limit < _CIRCUIT_OPEN_DURATION:
