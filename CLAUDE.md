@@ -110,3 +110,48 @@ Full memory spec → .wiki/concepts/memory-architecture.md
 Full env vars → .wiki/operations/environment-variables.md
 CEKWAJAR content → CLAUDE.md.cekwajar-backup (DO NOT load into context)
 Full rules → .wiki/health/audit-2026-05-03-v2.md
+
+---
+
+## Octogent Orchestration Layer
+
+This repo uses Octogent for multi-session coordination.
+Dashboard: http://localhost:8788 (start with ./scripts/start_octogent.sh)
+
+### Tentacle → Context mapping
+
+| Tentacle ID    | Scope                              | Workdir             |
+|----------------|------------------------------------|---------------------|
+| legion-core    | Bot engine, swarms, scheduler      | ./                  |
+| mirofish       | Market intel, MiroFish bridge      | ./                  |
+| cekwajar       | Indonesian salary/tax SaaS tools   | ~/cekwajar          |
+| rumahlabuh     | Rental platform Solo               | ~/rumahlabuh        |
+| research       | Academic CV research, PyTorch      | ~/research          |
+| popw           | POPW project                      | ~/popw              |
+
+### Agent routing rules
+
+- Task touches tools/, bot.py, scheduler → use legion-core tentacle
+- Task touches tools/market_intel.py or MiroFish → use mirofish tentacle
+- Task touches Cekwajar suite (Wajar*) → use cekwajar tentacle
+- Task touches Rumahlabuh or real estate → use rumahlabuh tentacle
+- Task touches ML models, training, paper → use research tentacle
+
+### Inter-agent communication
+
+When an OpenCode session needs to delegate to another session:
+  octogent channel send <target-terminal-id> "message"
+  octogent channel list <terminal-id>
+
+Durable handoffs (survive restarts): write to tentacle markdown files.
+In-flight messages (in-memory only): use channel send.
+
+### Spawning child agents from todos
+
+From the Octogent UI (Deck), click any todo checkbox item → "Solve with Agent"
+to spawn a child OpenCode terminal scoped to that todo item. The child receives:
+  - tentacle CONTEXT.md as system context
+  - the specific todo item as its task
+  - worktree mode (isolated git branch) or shared mode
+
+Max 9 child agents per parent. Overflow items are deferred in todo order.

@@ -57,3 +57,17 @@ bot_tmp.pdf
 RandAugment_*.pdf
 BagOfTricks_*.pdf
 node_modules/
+
+# Octogent runtime state (NOT tentacle definitions — those are tracked)
+.octogent/worktrees/
+.octogent/state/
+.octogent/*.json
+# NOTE: .octogent/tentacles/ IS tracked — CONTEXT.md + todo.md are source of truth
+
+# Negate the above for tentacles (the scattered project dirs above include cekwajar/ etc.)
+!.octogent/tentacles/cekwajar/
+!.octogent/tentacles/legion-core/
+!.octogent/tentacles/mirofish/
+!.octogent/tentacles/rumahlabuh/
+!.octogent/tentacles/research/
+!.octogent/tentacles/popw/
