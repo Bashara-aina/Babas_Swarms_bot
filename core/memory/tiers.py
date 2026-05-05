@@ -166,17 +166,19 @@ class ArchivalMemory:
         )
         rows_data = await rows.fetchall()
 
-        for row in rows_data:
+        if rows_data:
+            ids = [row[0] for row in rows_data]
+            placeholders = ",".join("?" * len(ids))
             await conn.execute(
-                """
+                f"""
                 UPDATE memories
                 SET access_count = access_count + 1,
                     last_accessed = datetime('now')
-                WHERE id = ?
+                WHERE id IN ({placeholders})
                 """,
-                (row[0],),
+                ids,
             )
-        await conn.commit()
+            await conn.commit()
 
         return [
             {

@@ -60,6 +60,8 @@ from llm_client import init_humanization_layer, verify_api_keys
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env", override=True)
 
+import core.memory.litellm_callbacks  # noqa: F401 — registers litellm.input/success_callback
+
 _REQUIRED_KEYS = ["TELEGRAM_BOT_TOKEN", "ALLOWED_USER_ID"]
 _missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]
 if _missing:
@@ -1051,6 +1053,10 @@ async def on_startup(bot: Bot) -> None:
             ["opencode", "serve", "--port", "4096"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env={
+                **os.environ,
+                "LITELLM_BASE_URL": "http://localhost:4000",
+            },
         )
         _opencode_process = proc
         logger.info("opencode sidecar launched (pid=%d)", proc.pid)
