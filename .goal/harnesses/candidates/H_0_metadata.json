@@ -1,0 +1,9 @@
+{
+  "id": "H_0",
+  "created": "initial",
+  "score": null,
+  "description": "Base harness -- full context + linear task execution",
+  "strategy": "include CLAUDE.md + AGENTS.md + git log in every task prompt",
+  "evaluated": false,
+  "pareto_frontier": false
+}

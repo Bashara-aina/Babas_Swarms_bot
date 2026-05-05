@@ -117,9 +117,43 @@ async def goal_stop_handler(message: Message) -> None:
     )
 
 
+async def goal_evolve_handler(message: Message) -> None:
+    """/goal_evolve — Run Meta-Harness proposer to improve the harness."""
+    user_id = message.from_user.id
+    if not is_authorized(user_id):
+        return
+
+    await message.reply(
+        "🔄 *Running Meta-Harness proposer...*\n\n"
+        "Reading all execution traces and proposing improved harness.\n"
+        "This uses Claude Opus — costs ~$0.10-0.30.",
+        parse_mode="Markdown"
+    )
+
+    try:
+        from tools.goal_harness_proposer import run_proposer
+        result = await asyncio.to_thread(run_proposer, False)
+        if result:
+            await message.reply(
+                f"✅ *Harness evolved!*\n\n"
+                f"New harness saved to:\n`{result}`\n\n"
+                f"Next /goal run will use the improved version.",
+                parse_mode="Markdown"
+            )
+        else:
+            await message.reply(
+                "⚠️ *No improvement proposed.*\n\n"
+                "The proposer may need more execution traces before "
+                "making changes. Run a few /goal tasks first."
+            )
+    except Exception as e:
+        await message.reply(f"❌ *Evolve failed:*\n`{str(e)[:300]}`", parse_mode="Markdown")
+
+
 def register_goal_handlers() -> Router:
     """Register all goal handlers with the router."""
     router.message.register(goal_command_handler, Command("goal", prefix="/"))
     router.message.register(goal_status_handler, Command("goal_status", prefix="/"))
     router.message.register(goal_stop_handler, Command("goal_stop", prefix="/"))
+    router.message.register(goal_evolve_handler, Command("goal_evolve", prefix="/"))
     return router
