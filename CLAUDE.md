@@ -155,3 +155,39 @@ to spawn a child OpenCode terminal scoped to that todo item. The child receives:
   - worktree mode (isolated git branch) or shared mode
 
 Max 9 child agents per parent. Overflow items are deferred in todo order.
+
+---
+
+## INFINITE MEMORY (no compaction — additive only)
+
+This stack implements infinite memory without compaction. Memory only grows.
+
+### Session Lifecycle
+
+```
+.start_session_watcher.sh → work → /memory → work → .stop_session_watcher.sh
+```
+
+- **Before work**: `/memory <query>` — queries 4-layer recall engine → writes `.session_state/recalled_context.md`
+- **During work**: `session_watcher` daemon polls `.session_state/` every 30s, saves to mem0+langmem every 2 min
+- **After work**: `.stop_session_watcher.sh` sends STOP_SIGNAL → final checkpoint + save
+
+### Memory Layers (recall order)
+
+| Layer | Source | Notes |
+|-------|--------|-------|
+| 1 | `.session_state/checkpoints/` | Timestamp-named snapshots of full session state |
+| 2 | mem0 (ChromaDB + Ollama) | Vector search via `tools.mem0_client` |
+| 3 | langmem | `core.integrations.langmem_integration.SwarmBotMemoryManager` |
+| 4 | graphrag | `core.integrations.graphrag_integration.query_wiki_graph` |
+
+### Key Files
+
+- `core/memory/session_watcher.py` — daemon; writes PID to `.session_state/watcher.pid`
+- `core/memory/memory_injector.py` — `build_memory_context(query, user_id)` for /memory command
+- `.opencode/command/memory.md` — `/memory` slash command definition
+- `scripts/start_session_watcher.sh` / `scripts/stop_session_watcher.sh` — lifecycle scripts
+
+### LiteLLM Callback Bridge
+
+`core/memory/litellm_callbacks.py` bridges every LLM call to `.session_state/current.json` via `_bridge_to_session_state()`. This lets session_watcher track LLM activity without parsing logs.

@@ -64,6 +64,16 @@ node_modules/
 .octogent/*.json
 # NOTE: .octogent/tentacles/ IS tracked — CONTEXT.md + todo.md are source of truth
 
+# session_watcher runtime state (never commit these)
+.session_state/watcher.pid
+.session_state/watcher.log
+.session_state/current.json
+.session_state/llm_events.log
+.session_state/STOP_WATCHER
+.session_state/recalled_context.md
+.session_state/checkpoints/
+!.session_state/checkpoints/.gitkeep
+
 # Negate the above for tentacles (the scattered project dirs above include cekwajar/ etc.)
 !.octogent/tentacles/cekwajar/
 !.octogent/tentacles/legion-core/

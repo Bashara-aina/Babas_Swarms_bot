@@ -79,10 +79,67 @@ def _memory_input_callback(kwargs: dict) -> dict:
     return kwargs
 
 
+def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.ModelResponse | dict) -> None:
+    """
+    Bridge LiteLLM call outcomes to .session_state/ so session_watcher
+    can pick them up as memory sources.
+    
+    Writes two files atomically via temp+rename:
+    - .session_state/current.json  — used by session_watcher as its state source
+    - .session_state/llm_events.log — append-only event log for LLM call patterns
+    
+    Does NOT call mem0/langmem directly (those are managed by session_watcher).
+    """
+    try:
+        # Build current state snapshot
+        content = _extract_response_content(response_obj) or ""
+        query = _extract_query(kwargs.get("messages", []))
+        
+        import json, os, tempfile, time
+        session_dir = os.path.join(os.getcwd(), ".session_state")
+        os.makedirs(session_dir, exist_ok=True)
+        
+        # Read existing current.json to preserve checkpoint list
+        current_path = os.path.join(session_dir, "current.json")
+        prev_state = {}
+        if os.path.exists(current_path):
+            try:
+                with open(current_path) as f:
+                    prev_state = json.load(f)
+            except Exception:
+                prev_state = {}
+        
+        new_state = {
+            **prev_state,
+            "last_llm_call": int(time.time()),
+            "last_query": query[:256] if query else "",
+            "last_response_len": len(content),
+            # session_watcher reads "phase" from current.json to determine what to save
+            "phase": "llm_call_complete",
+        }
+        
+        # Atomic write to current.json
+        tmp = tempfile.NamedTemporaryFile(mode="w", dir=session_dir, delete=False, suffix=".tmp")
+        json.dump(new_state, tmp)
+        tmp.close()
+        os.rename(tmp.name, current_path)
+        
+        # Append to llm_events.log
+        log_path = os.path.join(session_dir, "llm_events.log")
+        ts = time.strftime("%Y-%m-%dT%H:%M:%S")
+        entry = json.dumps({"ts": ts, "query_len": len(query), "response_len": len(content), "content_preview": content[:80]})
+        with open(log_path, "a") as f:
+            f.write(entry + "\n")
+            
+    except Exception as e:
+        logger.debug("Bridge to session_state error: %s", e)
+
+
 def _memory_success_callback(kwargs: dict, response_obj: litellm.types.utils.ModelResponse | dict) -> None:
     """
     LiteLLM success callback. Fires AFTER every successful LLM call.
     Stores the response as episodic memory in a background thread.
+    Bridges the call to .session_state/ for session_watcher.
     """
     try:
         content = _extract_response_content(response_obj)
@@ -102,6 +159,9 @@ def _memory_success_callback(kwargs: dict, response_obj: litellm.types.utils.Mod
 
         t = threading.Thread(target=_store, daemon=True)
         t.start()
+        
+        # Bridge this LLM call to session_state (non-blocking)
+        _bridge_to_session_state(kwargs, response_obj)
 
     except Exception as e:
         logger.debug("Memory success callback error: %s", e)
