@@ -126,3 +126,27 @@ legiona-debate:
 	@read -p "Question: " q; python -c \
 	  "from lib.legiona.debate import debate_sync; \
 	   r = debate_sync('$$q'); print('=== VERDICT ==='); print(r.answer)"
+
+# ── Memory System ──────────────────────────────────────────────
+memory-status:
+	python -m core.memory.infinite.cli status
+
+memory-recall:
+	@read -p "Query: " q; python -m core.memory.infinite.cli recall "$$q"
+
+memory-remember:
+	@read -p "Content: " c; python -m core.memory.infinite.cli remember "$$c" --agent shared
+
+memory-bootstrap:
+	python scripts/bootstrap_memory.py
+
+session-start:
+	python scripts/opencode_session_start.py
+
+session-end:
+	python scripts/opencode_session_end.py
+
+memory-test:
+	python -m core.memory.infinite.cli recall "cekwajar"
+	python -m core.memory.infinite.cli recall "legion"
+	python -m core.memory.infinite.cli status

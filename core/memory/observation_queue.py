@@ -16,7 +16,7 @@ import asyncio
 import contextlib
 import logging
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 
 from .observation_store import get_observation_store
 

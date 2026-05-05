@@ -19,7 +19,7 @@ import logging
 import os
 import re
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 logger = logging.getLogger(__name__)

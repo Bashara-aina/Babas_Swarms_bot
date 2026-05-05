@@ -12,7 +12,7 @@ import os
 import re
 import sys
 from contextvars import ContextVar
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 # ── Request ID context var (propagated across async tasks) ────────────────────

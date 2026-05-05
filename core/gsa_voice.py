@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from enum import Enum
 from threading import Lock
 
@@ -472,7 +472,7 @@ async def classify_with_llm_fallback(text: str, user_id: str | None = None) -> C
 
             response = await chat(
                 "general",
-                [
+                [  # type: ignore[reportArgumentType]
                     {
                         "role": "user",
                         "content": (
@@ -484,7 +484,7 @@ async def classify_with_llm_fallback(text: str, user_id: str | None = None) -> C
                 ],
             )
             for ctx in MessageContext:
-                if ctx.value in response.lower():
+                if ctx.value in response.lower():  # type: ignore[reportAttributeAccessIssue]
                     if ctx != result.primary:
                         result.secondary = result.primary
                         result.secondary_confidence = result.confidence

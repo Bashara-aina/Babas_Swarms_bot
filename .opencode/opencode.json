@@ -5,7 +5,7 @@
   "snapshot": false,
   "compaction": {
     "reserved": 8192,
-    "threshold": 0.98,
+    "threshold": 0.99,
     "maxContext": 204800
   },
   "permission": {
@@ -28,7 +28,8 @@
   },
   "agent": {
     "build": {
-      "steps": 60
+      "steps": 60,
+      "prompt": "You have a persistent long-term memory system. At the start of this session, run: python -m core.memory.infinite.cli recall '<topic>' to retrieve relevant past context. When you complete significant work, run: python -m core.memory.infinite.cli remember '<summary>' --agent opencode to store it for future sessions. Compaction is disabled — instead recall from memory. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {

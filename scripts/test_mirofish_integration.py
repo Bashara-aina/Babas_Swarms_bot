@@ -14,8 +14,12 @@ async def test_suite():
     # Test 1: Import
     try:
         from tools.market_intel import (
-            market_brief, market_signal, run_full_simulation,
-            market_overnight_report, DEFAULT_TICKERS, _fetch_prices
+            DEFAULT_TICKERS,
+            _fetch_prices,
+            market_brief,
+            market_overnight_report,
+            market_signal,
+            run_full_simulation,
         )
         passed.append("✅ market_intel imports")
     except Exception as e:

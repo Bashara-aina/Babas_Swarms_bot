@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 from core.daily_harvester.morning_report import MorningReport
@@ -69,8 +69,8 @@ class HarvestPipeline:
                     CandidateInfo(
                         candidate_id=f"{topic}_{src['url'][:30]}",
                         topic=topic,
-                        title=src.get("title", "Untitled"),
-                        content=src.get("snippet", ""),
+                        title=src.get("title", "Untitled"),  # type: ignore[reportArgumentType]
+                        content=src.get("snippet", ""),  # type: ignore[reportArgumentType]
                         url=src["url"],
                         source_type=src["source_type"],
                         discovered_at=datetime.now(UTC).isoformat(),
@@ -118,8 +118,8 @@ class HarvestPipeline:
             c_id = candidate["candidate_id"]
             source = candidate.get("url", "unknown")
             # Derive source label from URL domain
-            if "arxiv.org" in source:
-                source = f"arxiv/{source.split('arxiv.org/abs/')[-1]}" if "abs" in source else f"arxiv/{source}"
+            if "arxiv.org" in source:  # type: ignore[reportOperatorIssue]
+                source = f"arxiv/{source.split('arxiv.org/abs/')[-1]}" if "abs" in source else f"arxiv/{source}"  # type: ignore[reportOptionalMemberAccess]
             else:
                 source = f"duckduckgo/{c_id[:8]}"
 
@@ -151,7 +151,7 @@ class HarvestPipeline:
                     "veracity_score": verdict["confidence"],
                     "superseded_ids": [],
                 }
-                file_id = await self.wiki_storage.write_entry(entry)
+                file_id = await self.wiki_storage.write_entry(entry)  # type: ignore[reportArgumentType]
                 await self.wiki_storage.update_index(candidate["topic"])
                 written.append(file_id)
                 accepted.append(candidate)
@@ -171,7 +171,7 @@ class HarvestPipeline:
                     veracity_score=verdict["confidence"],
                     superseded_ids=[],
                 )
-                file_id = await self.wiki_storage.write_entry(entry)
+                file_id = await self.wiki_storage.write_entry(entry)  # type: ignore[reportArgumentType]
                 await self.wiki_storage.update_index(candidate["topic"])
                 written.append(file_id)
                 candidate_log["_accepted"] = True

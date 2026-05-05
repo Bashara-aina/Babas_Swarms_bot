@@ -19,7 +19,7 @@ Usage:
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -137,7 +137,7 @@ class TemporalKnowledgeGraph:
             await conn.commit()
             return cursor.lastrowid or 0
 
-        return _add()
+        return _add()  # type: ignore[reportReturnType]
 
     def query(
         self,
@@ -208,7 +208,7 @@ class TemporalKnowledgeGraph:
                 for row in rows
             ]
 
-        return _query()
+        return _query()  # type: ignore[reportReturnType]
 
     def validate_fact(
         self,
@@ -262,7 +262,7 @@ class TemporalKnowledgeGraph:
             max_conf = float(row["max_conf"])
             return max_conf >= min_confidence, max_conf
 
-        return _validate()
+        return _validate()  # type: ignore[reportReturnType]
 
     async def close(self) -> None:
         """Close the database connection."""

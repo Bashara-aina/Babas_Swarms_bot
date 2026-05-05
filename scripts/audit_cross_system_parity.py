@@ -124,10 +124,10 @@ def _extract_mcp_server_names(obj: dict[str, Any]) -> set[str]:
     names: set[str] = set()
     mcp_servers = obj.get("mcpServers")
     if isinstance(mcp_servers, dict):
-        names.update(str(k) for k in mcp_servers.keys())
+        names.update(str(k) for k in mcp_servers)
     servers = obj.get("servers")
     if isinstance(servers, dict):
-        names.update(str(k) for k in servers.keys())
+        names.update(str(k) for k in servers)
     return names
 
 

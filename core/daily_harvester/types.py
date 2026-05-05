@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import TypedDict
+
+
+class StrEnum(str, Enum):  # noqa: UP042
+    """StrEnum backport for Python < 3.11."""
+    pass
 
 
 class VerdictDecision(StrEnum):

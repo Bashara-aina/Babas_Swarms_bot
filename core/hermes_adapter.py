@@ -35,7 +35,7 @@ import os
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -149,13 +149,15 @@ class HermesSessionManager:
 
     def __init__(self, db_path: Path | None = None):
         self._db_path = db_path
-        self._db: Any | None = None
+        self._db: Any = None
         self._lock = threading.Lock()
 
-    def _get_db(self):
+    def _get_db(self) -> Any:
         """Lazy-load SessionDB to avoid import-time circular deps."""
         if self._db is None:
-            from hermes_state import SessionDB
+            from hermes_state import (  # type: ignore[reportMissingImports]
+                SessionDB,  # type: ignore[reportMissingImports]  # type: ignore[reportMissingImports]
+            )
 
             self._db = SessionDB(db_path=self._db_path)
         return self._db
@@ -173,7 +175,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.create_session(
                 session_id=session_id,
                 source=source,
@@ -200,7 +202,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         msg_id = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.append_message(
                 session_id=session_id,
                 role=role,
@@ -219,7 +221,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         messages = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.get_messages(session_id),
         )
         return messages
@@ -231,7 +233,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         messages = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.get_messages_as_conversation(session_id),
         )
         return messages
@@ -246,7 +248,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         results = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.search_messages(
                 query=query,
                 source_filter=source_filter,
@@ -260,7 +262,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.end_session(session_id, end_reason),
         )
 
@@ -269,7 +271,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         session = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.get_session(session_id),
         )
         return session
@@ -284,7 +286,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         sessions = await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.list_sessions_rich(source=source, limit=limit, offset=offset),
         )
         return sessions
@@ -303,7 +305,7 @@ class HermesSessionManager:
         loop = asyncio.get_running_loop()
         db = self._get_db()
         await loop.run_in_executor(
-            self._lock,
+            None,
             lambda: db.update_token_counts(
                 session_id=session_id,
                 input_tokens=input_tokens,
@@ -379,7 +381,7 @@ def create_hermes_agent(
     Returns:
         AIAgent instance (synchronous — use with HermesAsyncBridge for async)
     """
-    from run_agent import AIAgent
+    from run_agent import AIAgent  # type: ignore[reportMissingImports]
 
     return AIAgent(
         model=model or DEFAULT_HERMES_MODEL,
@@ -423,7 +425,9 @@ def get_hermes_tool_definitions(
         List of OpenAI-format tool definitions
     """
     try:
-        from model_tools import get_tool_definitions as hermes_get_tool_definitions
+        from model_tools import (  # type: ignore[reportMissingImports]
+            get_tool_definitions as hermes_get_tool_definitions,  # type: ignore[reportMissingImports]
+        )
 
         return hermes_get_tool_definitions(
             enabled_toolsets=enabled_toolsets,
@@ -455,7 +459,9 @@ def dispatch_hermes_tool_call(
         Tool result as JSON string
     """
     try:
-        from model_tools import handle_function_call as hermes_dispatch
+        from model_tools import (  # type: ignore[reportMissingImports]
+            handle_function_call as hermes_dispatch,  # type: ignore[reportMissingImports]
+        )
 
         return hermes_dispatch(
             function_name=function_name,
@@ -570,7 +576,7 @@ async def hermes_delegate(
     Returns:
         Subagent's final summary response
     """
-    from tools.delegate_tool import _build_child_system_prompt
+    from tools.delegate_tool import _build_child_system_prompt  # type: ignore[reportMissingImports]
 
     toolsets = toolsets or ["terminal", "file", "web"]
 
@@ -690,7 +696,7 @@ async def hermes_smoke_test() -> dict[str, Any]:
 
     # Test 3: SessionDB import
     try:
-        from hermes_state import SessionDB
+        from hermes_state import SessionDB  # type: ignore[reportMissingImports]
 
         db = SessionDB()
         results["SessionDB"] = "✅ ok"
@@ -700,7 +706,7 @@ async def hermes_smoke_test() -> dict[str, Any]:
 
     # Test 4: Toolset resolution
     try:
-        from toolsets import resolve_toolset
+        from toolsets import resolve_toolset  # type: ignore[reportMissingImports]
 
         terminal_tools = resolve_toolset("terminal")
         results["toolset:terminal"] = f"✅ {len(terminal_tools)} tools"

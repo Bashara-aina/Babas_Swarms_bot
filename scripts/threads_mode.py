@@ -24,8 +24,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tools.rumahlabuh_scheduler import AnalyticsStore, Scheduler
 from tools.threads_mode_control import is_enabled, open_workspace, set_enabled, toggle
-from tools.rumahlabuh_scheduler import Scheduler, AnalyticsStore
 
 
 async def _run(action: str, open_browser: bool) -> int:
@@ -59,7 +59,7 @@ async def _scheduler_status() -> int:
     """Show scheduler status."""
     scheduler = Scheduler()
     summary = scheduler.get_analytics_summary()
-    print(f"Scheduler Status:")
+    print("Scheduler Status:")
     print(f"  Scheduled (7d): {summary['total_scheduled_7d']}")
     print(f"  Scored threads: {summary['scored_threads']}")
     print(f"  FYP candidates: {summary['fyp_candidate_count']}")
@@ -200,7 +200,6 @@ def main() -> int:
 
     # Legacy actions (backward compatible)
     if args.command in ("status", "on", "off", "toggle"):
-        open_browser = True
         if args.command == "status":
             return asyncio.run(_run("status", open_browser=False))
         elif args.command == "toggle":

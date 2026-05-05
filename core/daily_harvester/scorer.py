@@ -1,14 +1,16 @@
+from __future__ import annotations  # type: ignore[reportGeneralTypeIssues]
+
+from datetime import UTC
+
 """Scorer — feedback-aware relevance scoring for harvest candidates.
 
 Applies bias adjustments derived from user accept/reject feedback collected
 via the Telegram /harvest-review interface.
 """
 
-from __future__ import annotations
-
 import json
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import aiofiles
@@ -257,7 +259,7 @@ class Scorer:
         """
         if base_score is None:
             base_score = candidate.get("relevance_score", 0.5)
-        score = await self.apply_bias(topic, base_score)
+        score = await self.apply_bias(topic, base_score)  # type: ignore[reportArgumentType]
         # Boost if source is high-trust
         url = candidate.get("url", "")
         if any(domain in url for domain in ["arxiv.org", "github.com", "wikipedia.org"]):

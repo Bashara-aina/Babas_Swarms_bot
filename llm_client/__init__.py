@@ -36,6 +36,8 @@ from core.emotion_modulator import (
 from core.episodic_narrative import build_narrative_context
 from core.hooks import get_hooks
 from core.intent_router import build_intent_hint, classify_intent_fast
+from core.memory.infinite.llm_wrapper import inject_memory_into_messages
+from core.memory.infinite.llm_wrapper import store_response as _store_response
 from core.memory.memory_manager import MemoryManager
 from core.memory.temporal_graph import TemporalKnowledgeGraph
 from core.personality.emotion_engine import EmotionEngine
@@ -596,6 +598,12 @@ async def call_llm(
     if stream:
         return acompletion(**api_kwargs)
 
+    # ── Infinite memory: recall relevant context, inject as system message ──────────
+    try:
+        messages = inject_memory_into_messages(messages, agent_id="legion", top_k=10)
+    except Exception:
+        pass  # Memory injection is non-critical
+
     # Phoenix tracing — time the call and track token usage
     _start_time = time.perf_counter()
     _prompt_tokens = 0
@@ -638,7 +646,15 @@ async def call_llm(
             "args": json.loads(tc.function.arguments),
         }
 
-    return (msg.content or "").strip()
+    result = (msg.content or "").strip()
+
+    # ── Infinite memory: store response as episodic memory (async, non-blocking) ───
+    try:
+        _store_response(result, agent_id="legion")
+    except Exception:
+        pass  # Storage is non-critical
+
+    return result
 
 
 # ── Core model call ─────────────────────────────────────────────────────────────
