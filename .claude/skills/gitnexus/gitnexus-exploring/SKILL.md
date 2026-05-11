@@ -16,13 +16,14 @@ description: "Use when the user asks how code works, wants to understand archite
 ## Workflow
 
 ```
-1. READ gitnexus://repo/{name}/context             → Codebase overview, check staleness
-2. gitnexus_query({query: "<what you want to understand>"})  → Find related execution flows
-3. gitnexus_context({name: "<symbol>"})            → Deep dive on specific symbol
-4. READ gitnexus://repo/{name}/process/{name}     → Trace full execution flow
+1. READ gitnexus://repos                          → Discover indexed repos
+2. READ gitnexus://repo/{name}/context             → Codebase overview, check staleness
+3. gitnexus_query({query: "<what you want to understand>"})  → Find related execution flows
+4. gitnexus_context({name: "<symbol>"})            → Deep dive on specific symbol
+5. READ gitnexus://repo/{name}/process/{name}      → Trace full execution flow
 ```
 
-> If step 1 says "Index is stale" → run `npx gitnexus analyze` in terminal.
+> If step 2 says "Index is stale" → run `npx gitnexus analyze` in terminal.
 
 ## Checklist
 
@@ -49,43 +50,29 @@ description: "Use when the user asks how code works, wants to understand archite
 **gitnexus_query** — find execution flows related to a concept:
 
 ```
-gitnexus_query({query: "telegram message processing"})
-→ Processes: MessageFlow, CommandRouter, IntentClassification
+gitnexus_query({query: "payment processing"})
+→ Processes: CheckoutFlow, RefundFlow, WebhookHandler
 → Symbols grouped by flow with file locations
 ```
 
 **gitnexus_context** — 360-degree view of a symbol:
 
 ```
-gitnexus_context({name: "IntentRouter"})
-→ Incoming calls: message_handler, command_dispatcher
-→ Outgoing calls: classify_intent, route_to_handler
-→ Processes: MessageFlow (step 2/6), CommandDispatch (step 1/4)
+gitnexus_context({name: "validateUser"})
+→ Incoming calls: loginHandler, apiMiddleware
+→ Outgoing calls: checkToken, getUserById
+→ Processes: LoginFlow (step 2/5), TokenRefresh (step 1/3)
 ```
 
-## Swarm-Bot Architecture Flows
-
-Key processes to explore in swarm-bot:
-
-| Process               | What it does                                            |
-| --------------------- | ------------------------------------------------------- |
-| `MessageFlow`         | Telegram message → intent classification → handler      |
-| `LLMFallbackChain`    | Primary LLM → fallback providers → error recovery       |
-| `AgentLoop`           | Task planning → agent dispatch → result synthesis        |
-| `MemoryRecall`        | Query → semantic search → episodic retrieval             |
-| `DebateEngine`        | Topic → perspective generation → synthesis              |
-
-## Example: "How does message handling work?"
+## Example: "How does payment processing work?"
 
 ```
-1. READ gitnexus://repo/swarm-bot/context       → codebase overview
-2. gitnexus_query({query: "telegram message"})
-   → MessageFlow: receive → parse → classify → dispatch
-   → CommandRouter: /commands → handler registration
-3. gitnexus_context({name: "IntentRouter"})
-   → Incoming: message_handler, callback_query_handler
-   → Outgoing: classify_intent, route_to_handler
-4. READ gitnexus://repo/swarm-bot/process/MessageFlow
-   → Step-by-step trace from Telegram update to handler response
-5. Read handlers/ shared.py and core/intent_router.py for details
+1. READ gitnexus://repo/my-app/context       → 918 symbols, 45 processes
+2. gitnexus_query({query: "payment processing"})
+   → CheckoutFlow: processPayment → validateCard → chargeStripe
+   → RefundFlow: initiateRefund → calculateRefund → processRefund
+3. gitnexus_context({name: "processPayment"})
+   → Incoming: checkoutHandler, webhookHandler
+   → Outgoing: validateCard, chargeStripe, saveTransaction
+4. Read src/payments/processor.ts for implementation details
 ```

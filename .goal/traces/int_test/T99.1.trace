@@ -1,0 +1,86 @@
+=== TASK: T99.1 ===
+HARNESS: H_0
+OUTCOME: success
+TIMESTAMP: 2026-05-06T08:10:35.022480
+
+--- PROMPT ---
+You are a software engineering agent working on a specific task.
+Repository: /home/newadmin/swarm-bot
+Harness version: H_0
+
+=== CLAUDE.md ===
+# LEGION COGNITIVE OPERATING SYSTEM — CLAUDE.md (TRIMMED BY AUDIT v2)
+
+**Original:** CLAUDE.md.cekwajar-backup (CEKWAJAR content removed)
+**Reference:** .wiki/health/audit-2026-05-03-v2.md for full audit report
+**Purpose:** Essential boot + routing rules only. Everything else → wiki.
+
+## SESSION BOOT (runs automatically)
+1. Read SOUL.md — identity
+2. Read this file — routing + safety
+3. Read /tmp/legion_*.txt — hot memory (session boot)
+4. Call cognition_boot() — see core/cognition_boot.py
+5. Call hermes_search_memory() + gitnexus_query()
+
+**Context health:** 🟢<40% | 🟡40-60% | 🔴60-80% | 💀>80% → /compact
+
+## MODELS
+- Primary: minimax/MiniMax-M2.7 via http://localhost:4000
+- Fallback: gemini/gemini-2.0-flash-exp:free → minimax/MiniMax-Text-01
+- browser-use: MiniMax-M2.7 ONLY
+
+## SAFETY RULES
+- Verify before asserting (show proof)
+- Same approach failing twice → STOP and report
+- NEVER commit PII/secrets to wiki or memory
+- NEVER hardcode API keys — always os.getenv()
+- NEVER use time.sleep() — fully async project
+
+## 5-TIER MEMORY PYRAMID
+| Tier | Storage | TTL |
+|------|---------|-----|
+| T1 HOT | /tmp/legion_*.txt | session |
+| T2 WORKING | memory_manager.py facade | conversation |
+| T3 EPISODIC | SQLite (aiosqlite) | 30 days |
+| T4 SEMANTIC | mem0 vector store | permanent |
+| T5 STRUCTURAL | .wiki/ Obsidian | permanent |
+
+## MCP ROUTING (always available, silent)
+| Task | Tool |
+|------|------|
+| Code blast radius | gitnexus_impact |
+| Multi-step reasoning | sequentialthinking |
+| Did we do this before? | hermes_search_memory |
+| Web research | exa_web_search_exa |
+| Full page scrape | crawl4ai_crawl4ai_crawl |
+| Autonomous browser | browser-use_browser_run_task |
+| Wiki write | obsidian_create_note |
+| Memory store | hermes_write_skill |
+| Background jobs | ruflo_agent_spawn |
+
+## SECURITY (never violate)
+- ALWAYS check mess
+
+--- STDOUT ---
+
+
+--- GIT DIFF ---
+ .wiki/_archive/old-research/research/ai-agents             | 0
+ .wiki/_archive/old-research/research/ai-dev-patterns       | 0
+ .wiki/_archive/old-research/research/context-engineering   | 0
+ .wiki/_archive/old-research/research/opencode              | 0
+ .wiki/_archive/templates-archive/templates/developer-vault | 0
+ .wiki/logs/git-log.md                                      | 4 ++++
+ .wiki/popw-references/detectron2                           | 0
+ .wiki/popw-references/mmaction2                            | 0
+ .wiki/popw-references/mmpose                               | 0
+ .wiki/popw-references/performer-pytorch                    | 0
+ .wiki/popw-references/pointnet2                            | 0
+ .wiki/tools/karpathy-wiki                                  | 0
+ .wiki/tools/openaugi                                       | 0
+ ARCHIVE_cekwajar-src-version/cekwajar.id                   | 0
+ mcp_servers/symphony-of-one                                | 0
+ rustdesk                                                   | 0
+ tools/mirofish                                             | 0
+ 17 files changed, 4 insertions(+)
+

@@ -1,0 +1,38 @@
+{
+  "name": "swarm-bot",
+  "version": "1.0.0",
+  "description": "Obsidian Mind vault for swarm-bot — persistent memory for AI coding agents",
+  "vault_structure": {
+    "brain": ["North Star.md", "Memories.md", "Key Decisions.md", "Patterns.md", "Gotchas.md", "Skills.md"],
+    "work": ["active/", "archive/", "incidents/", "1-1/"],
+    "org": ["people/", "teams/", "People & Context.md"],
+    "perf": ["Brag Doc.md", "brag/", "competencies/", "evidence/", "cycles/"],
+    "reference": [],
+    "thinking": [],
+    "templates": []
+  },
+  "schemas": {
+    "work": {
+      "required": ["date", "description", "project", "status"],
+      "optional": ["quarter", "tags"]
+    },
+    "decision": {
+      "required": ["date", "description", "status", "owner"],
+      "optional": ["context", "rationale", "alternatives", "consequences"]
+    },
+    "competency": {
+      "required": ["date", "description", "current-level", "target-level"],
+      "optional": ["proficiency-table"]
+    },
+    "1-1": {
+      "required": ["date", "person", "key-takeaways"],
+      "optional": ["action-items", "quotes"]
+    },
+    "incident": {
+      "required": ["date", "ticket", "severity", "role"],
+      "optional": ["timeline", "root-cause", "impact"]
+    }
+  },
+  "qmd_index": "swarm-bot",
+  "qmd_context": "swarm-bot memories, decisions, and project context"
+}

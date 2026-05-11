@@ -134,11 +134,8 @@
     "obsidian": {
       "type": "local",
       "command": [
-        "/home/newadmin/swarm-bot/mcpServers/obsidian-patched/index.js"
-      ],
-      "env": {
-        "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
-      }
+        "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched/index.js"
+      ]
     },
     "git": {
       "type": "local",

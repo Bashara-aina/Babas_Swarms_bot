@@ -28,13 +28,26 @@ def reset_mem0_instance() -> None:
 
 def _build_mem0_config() -> dict[str, Any]:
     ollama_base = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    # Ollama LLM model (must support function calling — mistral does via Ollama's tool API)
+    ollama_llm_model = os.getenv("MEM0_LLM_MODEL", "mistral")
+
+    # Sanitise vector-store selection: only use Supabase when a real postgres://
+    # connection string is provided (not a REST API URL like
+    # https://xxx.supabase.co).  This aligns all three memory layers (L2/Mem0/
+    # legacy) on local Chroma when the Supabase REST endpoint is configured.
+    _sb_url = os.getenv("SUPABASE_DB_URL", "")
+    _use_sb = os.getenv("MEM0_USE_SUPABASE", "").strip().lower() in ("1", "true", "yes", "on")
+    if _use_sb and _sb_url and not _sb_url.startswith("postgres"):
+        os.environ["MEM0_USE_SUPABASE"] = ""
+        os.environ.pop("SUPABASE_DB_URL", None)
+
     return {
         "vector_store": mem0_vector_store_config(),
         "llm": {
-            "provider": "litellm",
+            "provider": "ollama",
             "config": {
-                "model": os.getenv("MEM0_LLM_MODEL", "minimax/MiniMax-Text-01").split("/", 1)[-1],
-                "api_key": os.getenv("GROQ_API_KEY", ""),
+                "model": ollama_llm_model,
+                "ollama_base_url": ollama_base,
                 "temperature": 0.1,
                 "max_tokens": 2000,
             },
@@ -71,18 +84,23 @@ def get_mem0() -> Any | None:
 
 
 async def mem0_add(user_id: str, content: str, metadata: dict[str, Any] | None = None) -> None:
-    """Add a memory item; falls back to the legacy memory store."""
+    """Add a memory item; falls back to the legacy memory store.
+
+    Uses infer=False to bypass LLM fact extraction (avoids silent failures
+    when the LLM doesn't produce the JSON format mem0 expects for
+    new_retrieved_facts parsing). Mem0 stores raw memories directly.
+    """
     try:
         mem = get_mem0()
         if mem is not None:
-            mem.add(content, user_id=user_id, metadata=metadata or {})
+            mem.add(content, user_id=user_id, metadata=metadata or {}, infer=False)
             return
     except Exception as exc:
-        logger.warning("mem0_add failed: %s", exc)
+        logger.debug("mem0_add failed (will use legacy): %s", exc)
     try:
         await legacy_memory.add_memory(content, tags=[f"user:{user_id}"], source="mem0-fallback")
     except Exception as exc:
-        logger.warning("legacy memory fallback failed: %s", exc)
+        logger.debug("legacy memory fallback failed: %s", exc)
 
 
 async def mem0_search(user_id: str, query: str, limit: int = 10) -> list[dict[str, Any]]:

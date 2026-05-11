@@ -200,7 +200,7 @@ class MemoryStore:
         return {
             "total_memories": n,
             "storage_path": str(MEMORY_DIR),
-            "embedder": "all-MiniLM-L6-v2 (local, CPU, 384-dim)",
+            "embedder": "nomic-embed-text (Ollama, 768-dim)",
             "collection": COLLECTION_NAME,
             "status": "healthy",
         }

@@ -1,0 +1,19 @@
+[Unit]
+Description=Legion Swarm Bot - Telegram AI Agent
+After=network.target ollama.service
+Wants=ollama.service
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+ExecStart=/home/newadmin/miniconda3/bin/python3 main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment="PATH=/home/newadmin/miniconda3/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/home/newadmin/swarm-bot"
+
+[Install]
+WantedBy=multi-user.target

@@ -18,8 +18,8 @@ description: "Use when the user wants to know what will break if they change som
 
 ```
 1. gitnexus_impact({target: "X", direction: "upstream"})  → What depends on this
-2. READ gitnexus://repo/{name}/processes                  → Check affected execution flows
-3. gitnexus_detect_changes()                              → Map current git changes to affected flows
+2. READ gitnexus://repo/{name}/processes                   → Check affected execution flows
+3. gitnexus_detect_changes()                               → Map current git changes to affected flows
 4. Assess risk and report to user
 ```
 
@@ -59,18 +59,18 @@ description: "Use when the user wants to know what will break if they change som
 
 ```
 gitnexus_impact({
-  target: "chat",
+  target: "validateUser",
   direction: "upstream",
   minConfidence: 0.8,
   maxDepth: 3
 })
 
 → d=1 (WILL BREAK):
-  - llm_client.chat (llm_client.py:89) [CALLS, 100%]
-  - agent_loop (llm_client.py:142) [CALLS, 100%]
+  - loginHandler (src/auth/login.ts:42) [CALLS, 100%]
+  - apiMiddleware (src/api/middleware.ts:15) [CALLS, 100%]
 
 → d=2 (LIKELY AFFECTED):
-  - handlers/ai.py:handle_ai_request (handlers/ai.py:42) [CALLS, 95%]
+  - authRouter (src/routes/auth.ts:22) [CALLS, 95%]
 ```
 
 **gitnexus_detect_changes** — git-diff based impact analysis:
@@ -79,31 +79,19 @@ gitnexus_impact({
 gitnexus_detect_changes({scope: "staged"})
 
 → Changed: 5 symbols in 3 files
-→ Affected: MessageFlow, IntentClassification, LLMFallbackChain
+→ Affected: LoginFlow, TokenRefresh, APIMiddlewarePipeline
 → Risk: MEDIUM
 ```
 
-## Swarm-Bot Critical Paths
-
-When changing these symbols, always run full test suite:
-
-| Symbol                | Why critical                               |
-| --------------------- | ------------------------------------------ |
-| `llm_client.chat`     | All AI responses go through this           |
-| `IntentRouter.route`  | Every message is classified through this    |
-| `memory_manager.save` | All memory writes                          |
-| `agents.py TASK_KEYWORDS` | Agent routing depends on this          |
-
-## Example: "What breaks if I change `get_fallback_chain`?"
+## Example: "What breaks if I change validateUser?"
 
 ```
-1. gitnexus_impact({target: "get_fallback_chain", direction: "upstream"})
-   → d=1: chat, agent_loop, handle_rate_limit (WILL BREAK)
-   → d=2: handlers/ai.py, task_orchestrator.py (LIKELY AFFECTED)
+1. gitnexus_impact({target: "validateUser", direction: "upstream"})
+   → d=1: loginHandler, apiMiddleware (WILL BREAK)
+   → d=2: authRouter, sessionManager (LIKELY AFFECTED)
 
-2. READ gitnexus://repo/swarm-bot/processes
-   → LLMFallbackChain and AgentLoop touch get_fallback_chain
+2. READ gitnexus://repo/my-app/processes
+   → LoginFlow and TokenRefresh touch validateUser
 
-3. Risk: 3 direct callers, 2 processes = MEDIUM
-   → Run: pytest tests/ -x --asyncio-mode=auto -q after change
+3. Risk: 2 direct callers, 2 processes = MEDIUM
 ```

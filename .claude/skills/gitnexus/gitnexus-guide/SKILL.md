@@ -7,10 +7,6 @@ description: "Use when the user asks about GitNexus itself — available tools, 
 
 Quick reference for all GitNexus MCP tools, resources, and the knowledge graph schema.
 
-## Swarm-Bot Project Context
-
-GitNexus MCP server is configured for this project. Run `npx gitnexus status` to verify the index is current.
-
 ## Always Start Here
 
 For any task involving code understanding, debugging, impact analysis, or refactoring:
@@ -29,7 +25,7 @@ For any task involving code understanding, debugging, impact analysis, or refact
 | Blast radius / "What breaks if I change X?"  | `gitnexus-impact-analysis`   |
 | Trace bugs / "Why is X failing?"             | `gitnexus-debugging`         |
 | Rename / extract / split / refactor          | `gitnexus-refactoring`       |
-| Tools, resources, schema reference          | `gitnexus-guide` (this file) |
+| Tools, resources, schema reference           | `gitnexus-guide` (this file) |
 | Index, status, clean, wiki CLI commands      | `gitnexus-cli`               |
 
 ## Tools Reference
@@ -39,10 +35,10 @@ For any task involving code understanding, debugging, impact analysis, or refact
 | `query`          | Process-grouped code intelligence — execution flows related to a concept |
 | `context`        | 360-degree symbol view — categorized refs, processes it participates in  |
 | `impact`         | Symbol blast radius — what breaks at depth 1/2/3 with confidence         |
-| `detect_changes` | Git-diff impact — what do your current changes affect                     |
+| `detect_changes` | Git-diff impact — what do your current changes affect                    |
 | `rename`         | Multi-file coordinated rename with confidence-tagged edits               |
 | `cypher`         | Raw graph queries (read `gitnexus://repo/{name}/schema` first)           |
-| `list_repos`     | Discover indexed repos                                                    |
+| `list_repos`     | Discover indexed repos                                                   |
 
 ## Resources Reference
 
@@ -54,7 +50,7 @@ Lightweight reads (~100-500 tokens) for navigation:
 | `gitnexus://repo/{name}/clusters`              | All functional areas with cohesion scores |
 | `gitnexus://repo/{name}/cluster/{clusterName}` | Area members                              |
 | `gitnexus://repo/{name}/processes`             | All execution flows                       |
-| `gitnexus://repo/{name}/process/{processName}` | Step-by-step execution trace             |
+| `gitnexus://repo/{name}/process/{processName}` | Step-by-step trace                        |
 | `gitnexus://repo/{name}/schema`                | Graph schema for Cypher                   |
 
 ## Graph Schema

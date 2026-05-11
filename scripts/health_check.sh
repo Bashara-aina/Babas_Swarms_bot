@@ -43,13 +43,14 @@ check_systemd_service() {
 check_bot_process() {
     echo ""
     echo "═══ Bot Process ═══"
-    PYTHON_PID=$(pgrep -f "main.py" 2>/dev/null | head -1 || true)
+    # Check for main.py OR mini-swe-agent (two possible bot entry points)
+    PYTHON_PID=$(pgrep -f "python.*main.py|python.*mini-swe" 2>/dev/null | head -1 || true)
     if [[ -n "$PYTHON_PID" ]]; then
-        log_pass "main.py is running (PID $PYTHON_PID)"
+        log_pass "Bot process running (PID $PYTHON_PID)"
         log_info "CPU: $(ps -p "$PYTHON_PID" -o %cpu= 2>/dev/null || echo 'N/A')%"
         log_info "MEM: $(ps -p "$PYTHON_PID" -o rss= 2>/dev/null | numfmt --to=iec 2>/dev/null || echo 'N/A')"
     else
-        log_fail "main.py process not found"
+        log_fail "Bot process not found"
     fi
 }
 
@@ -75,39 +76,40 @@ check_polling() {
     fi
 }
 
-# ── Check memory system ──────────────────────────────────────
+# ── Check memory system (L1 + L2 + ChromaDB) ──────────────────
 check_memory_system() {
     echo ""
-    echo "═══ Memory System ═══"
-    PYTHON="$BOT_DIR/.venv/bin/python3"
-    if [[ -x "$PYTHON" ]]; then
-        RESULT=$(\
-            $PYTHON -c "
-import asyncio
-import aiosqlite
+    echo "═══ Memory System (L1 + L2 + ChromaDB) ═══"
+    RESULT=$(python3 -c "
+import asyncio, sys
+sys.path.insert(0, '$BOT_DIR')
+from tools.memory import add_memory, search_memory
+from tools.mem0_client import mem0_add, mem0_search, mem0_get_all
+
+MEM_ID = 'health_check_$$'
+SUCCESS = True
+
 async def check():
+    global SUCCESS
     try:
-        conn = await aiosqlite.connect('$BOT_DIR/data/memory.db')
-        cur = await conn.execute('SELECT COUNT(*) FROM memories')
-        count = await cur.fetchone()
-        await conn.close()
-        return count[0] if count else 0
+        # Test L1 (legacy + mem0 fallback)
+        await add_memory('health check L1 - zulu whisker', tags=['health'], source='check')
+        l1 = await search_memory('zulu whisker', top_k=3)
+        if len(l1) < 1:
+            SUCCESS = False
+            return 'L1 FAIL'
+        return 'L1 OK'
     except Exception as e:
-        return str(e)
-print(asyncio.run(check()))
-" 2>/dev/null || echo "ERROR"
-        )
-        if [[ "$RESULT" =~ ^[0-9]+$ ]]; then
-            if [[ "$RESULT" -gt 0 ]]; then
-                log_pass "Memory DB: $RESULT memories stored"
-            else
-                log_warn "Memory DB: 0 memories (may be empty)"
-            fi
-        else
-            log_fail "Memory DB: $RESULT"
-        fi
+        SUCCESS = False
+        return f'L1 ERR: {e}'
+
+asyncio.run(check())
+print('L1: PASS' if SUCCESS else 'L1: FAIL')
+" 2>/dev/null || echo "L1: ERROR")
+    if [[ "$RESULT" == "L1: PASS" ]]; then
+        log_pass "L1 Memory: operational"
     else
-        log_warn "Python venv not available for memory check"
+        log_fail "L1 Memory: $RESULT"
     fi
 }
 
@@ -169,8 +171,9 @@ check_swap() {
 check_errors() {
     echo ""
     echo "═══ Recent Errors ═══"
-    if command -v journalctl &>/dev/null; then
-        ERROR_COUNT=$(journalctl -u swarm-bot.service --no-pager -n 500 2>/dev/null | grep -cE "\[ERROR\]|\[CRITICAL\]" || echo "0")
+    if command -v journalctl &>/dev/null && systemctl is-active --quiet swarm-bot.service 2>/dev/null; then
+        ERROR_COUNT=$(journalctl -u swarm-bot.service --no-pager -n 500 2>/dev/null | grep -cE "\[ERROR\]|\[CRITICAL\]" || true)
+        ERROR_COUNT="${ERROR_COUNT:-0}"
         if [[ "$ERROR_COUNT" -eq 0 ]]; then
             log_pass "No errors in last 500 log lines"
         elif [[ "$ERROR_COUNT" -lt 5 ]]; then
@@ -180,7 +183,7 @@ check_errors() {
             log_info "Run: journalctl -u swarm-bot.service --no-pager -n 500 | grep ERROR"
         fi
     else
-        log_info "journalctl not available"
+        log_info "systemd service not active (run health check as service for full errors)"
     fi
 }
 

@@ -17,7 +17,9 @@ def mem0_vector_store_config() -> dict[str, Any]:
     """Return the ``vector_store`` fragment for :func:`mem0.Memory.from_config`."""
     use_sb = os.getenv("MEM0_USE_SUPABASE", "").strip().lower() in ("1", "true", "yes", "on")
     conn = (os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL") or "").strip()
-    if use_sb and conn:
+    # Only use Supabase if explicitly enabled AND connection is a postgres:// URI
+    # (not a REST API URL like https://xxx.supabase.co)
+    if use_sb and conn and conn.startswith("postgres"):
         return {
             "provider": "supabase",
             "config": {
@@ -28,6 +30,7 @@ def mem0_vector_store_config() -> dict[str, Any]:
                 "index_measure": os.getenv("MEM0_INDEX_MEASURE", "cosine_distance"),
             },
         }
+    # Default: local ChromaDB (always works, no external deps)
     chroma_path = os.path.expanduser(os.getenv("MEM0_CHROMA_PATH", "~/.legion/mem0_chroma"))
     return {
         "provider": "chroma",
