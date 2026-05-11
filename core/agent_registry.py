@@ -149,11 +149,18 @@ def load_registry(
 
 def _precompute_embeddings_sync() -> None:
     """Encode all agents' description+capabilities with sentence-transformers (sync entrypoint)."""
-    from sentence_transformers import SentenceTransformer  # type: ignore
-
     global _embedding_model
-    if _embedding_model is None:
+    if _embedding_model is not None:
+        return  # Already initialized
+
+    # Skip if HuggingFace token is expired or unavailable — semantic search degrades gracefully
+    try:
+        from sentence_transformers import SentenceTransformer  # type: ignore
         _embedding_model = SentenceTransformer("all-mpnet-base-v2")
+    except Exception as exc:
+        logger.warning(f"Could not load SentenceTransformer embedding model: {exc}")
+        logger.warning("Agent semantic search will use keyword matching only")
+        return
 
     for name, agent in AGENT_REGISTRY.items():
         text = agent.description + " " + " ".join(agent.capabilities)
@@ -881,3 +888,10 @@ async def select_team(
 
     logger.debug("select_team: selected %d agents for task '%s'", len(selected), task_description[:50])
     return selected
+
+
+# ── Auto-load at import time ─────────────────────────────────────────────────
+try:
+    load_registry()
+except Exception:
+    logger.warning("Agent registry auto-load failed — will reload on first use")

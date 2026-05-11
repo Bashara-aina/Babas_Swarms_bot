@@ -64,6 +64,11 @@
       "date": "2026-05-04",
       "signature": "3b516378edbca5884ed043455582a0a8bc5691c0",
       "technique": "hot_take"
+    },
+    {
+      "date": "2026-05-11",
+      "signature": "bbaf4aa67fbe9a1052861eac88944192f2eda970",
+      "technique": "fake_controversy"
     }
   ]
 }

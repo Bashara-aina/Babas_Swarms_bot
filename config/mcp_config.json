@@ -53,8 +53,12 @@
     },
     {
       "name": "obsidian",
-      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-      "args": ["@iflow-mcp/kynlos-obsidian-mcp-server", "/home/newadmin/swarm-bot/.wiki"],
+      "command": "/home/newadmin/.local/node18/bin/node",
+      "args": ["/home/newadmin/swarm-bot/node_modules/@iflow-mcp/kynlos-obsidian-mcp-server/index.js"],
+      "env": {
+        "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
+      },
+      "workingDirectory": "/home/newadmin/swarm-bot",
       "enabled": true,
       "description": "Obsidian vault knowledge management"
     },

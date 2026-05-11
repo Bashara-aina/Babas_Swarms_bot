@@ -9,6 +9,8 @@ Success callback: stores the response as episodic memory (async, non-blocking).
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import logging
 import threading
 
@@ -96,7 +98,9 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
         query = _extract_query(kwargs.get("messages", []))
         
         import json, os, tempfile, time
-        session_dir = os.path.join(os.getcwd(), ".session_state")
+        # Use swarm-bot as base dir, not cwd (cwd may be /home/newadmin after os.chdir)
+        swarm_dir = Path(__file__).parent.parent.parent  # .../swarm-bot
+        session_dir = swarm_dir / ".session_state"
         os.makedirs(session_dir, exist_ok=True)
         
         # Read existing current.json to preserve checkpoint list

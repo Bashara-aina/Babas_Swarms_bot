@@ -29,14 +29,11 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__wait_for",
       "mcp__ddg__search",
       "mcp__ddg__fetch_content",
-      "mcp__firecrawl__firecrawl_search",
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
       "mcp__filesystem__read_file",
       "mcp__git__git_status",
       "mcp__filesystem__list_directory",
       "mcp__tavily__tavily_crawl",
-      "mcp__firecrawl__firecrawl_scrape",
-      "mcp__firecrawl__firecrawl_map",
       "mcp__exa__web_fetch_exa",
       "mcp__tavily__tavily_extract",
       "mcp__plugin_playwright_playwright__browser_evaluate",
@@ -52,16 +49,6 @@
     ]
   },
   "mcpServers": {
-    "contree": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@nebius/contree-mcp",
-        "--path",
-        "/home/newadmin/swarm-bot"
-      ],
-      "env": {}
-    },
     "filesystem": {
       "command": "npx",
       "args": [
@@ -89,16 +76,6 @@
         "/home/newadmin/swarm-bot/.wiki"
       ],
       "env": {}
-    },
-    "firecrawl": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "firecrawl-mcp"
-      ],
-      "env": {
-        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
-      }
     },
     "exa": {
       "command": "npx",

@@ -1,10 +1,12 @@
 """
-4-layer recall engine for infinite memory without compaction.
+6-layer recall engine for infinite memory without compaction.
 
 Layer 1 (highest priority): .session_state/checkpoints/
-Layer 2: mem0 (ChromaDB + Ollama embedder)
+Layer 2: ChromaDB (MemoryStore recall)
 Layer 3: langmem (SwarmBotMemoryManager)
-Layer 4: graphrag (query_wiki_graph)
+Layer 4: observation_store (SQLite+FTS5 progressive disclosure)
+Layer 5: graphrag (query_wiki_graph)
+Layer 6: mem0 cloud (mem0_search via litellm proxy)
 
 Usage:
     from core.memory.memory_injector import build_memory_context
@@ -13,6 +15,7 @@ Usage:
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from pathlib import Path
@@ -72,28 +75,69 @@ def _recall_from_langmem(query: str, limit: int = 5) -> list[str]:
     try:
         from core.integrations.langmem_integration import SwarmBotMemoryManager
         mgr = SwarmBotMemoryManager()
-        results = mgr.search_memories(query, limit=limit)
+        results = asyncio.run(mgr.search_memories(query=query, messages=None))
         if isinstance(results, list):
-            return [str(r) for r in results if len(str(r)) > 20]
+            return [str(r.get("content", r)) for r in results[:limit] if len(str(r)) > 20]
         return []
     except Exception as e:
         logger.debug("langmem recall error: %s", e)
         return []
 
-# ── Layer 4: graphrag ────────────────────────────────────────────────────────
+
+def _recall_from_observation_store(query: str, limit: int = 3) -> list[str]:
+    """Search observation_store (SQLite+FTS5) for recent observations."""
+    try:
+        from core.memory.observation_store import get_observation_store
+
+        async def _search():
+            store = get_observation_store()
+            results = await store.search(query=query, limit=limit)
+            return [
+                f"[{r.get('type', '?')}][{r.get('created_at', '')[:19]}] {r.get('title', '')}"
+                + (f" — {r.get('subtitle', '')}" if r.get("subtitle") else "")
+                for r in results
+                if r.get("title")
+            ]
+
+        return asyncio.run(_search())
+    except Exception as e:
+        logger.debug("observation_store recall error: %s", e)
+        return []
+
+
+# ── Layer 5: graphrag (direct keyword search — no LLM, no SDK) ─────────────
+
 
 def _recall_from_graphrag(query: str, limit: int = 3) -> list[str]:
-    """Query wiki graph for structured knowledge."""
+    """Query wiki text_units via direct keyword overlap — no LLM call needed."""
     try:
-        from core.integrations.graphrag_integration import query_wiki_graph
-        result = query_wiki_graph(query, mode="global", limit=limit)
-        if result:
-            if isinstance(result, list):
-                return [str(r) for r in result if len(str(r)) > 20]
-            return [str(result)]
-        return []
+        from core.integrations.graphrag_integration import _keyword_search_text_units
+        return _keyword_search_text_units(query=query, limit=limit)
     except Exception as e:
         logger.debug("graphrag recall error: %s", e)
+        return []
+
+
+# ── Layer 6: mem0 cloud ───────────────────────────────────────────────────────
+
+
+def _recall_from_mem0_cloud(query: str, top_k: int = 3) -> list[str]:
+    """Search mem0 cloud via litellm proxy (fallback to legacy search)."""
+    try:
+        import asyncio as _asyncio
+        from tools.mem0_client import mem0_search
+
+        async def _search():
+            results = await mem0_search(user_id="bashara", query=query, limit=top_k)
+            return [
+                f"[mem0:{r.get('metadata', {}).get('source', '?')}] {r.get('memory', r.get('content', ''))}"
+                for r in results
+                if r.get("memory") or r.get("content")
+            ]
+
+        return _asyncio.run(_search())
+    except Exception as e:
+        logger.debug("mem0 cloud recall error: %s", e)
         return []
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -106,14 +150,16 @@ def build_memory_context(query: str, user_id: str = "bashara") -> str:
     l1 = _recall_from_checkpoints(query)
     l2 = _recall_from_mem0(query)
     l3 = _recall_from_langmem(query)
-    l4 = _recall_from_graphrag(query)
+    l4 = _recall_from_observation_store(query)
+    l5 = _recall_from_graphrag(query)
+    l6 = _recall_from_mem0_cloud(query)
 
-    layers_used = sum(1 for l in [l1, l2, l3, l4] if l)
+    layers_used = sum(1 for l in [l1, l2, l3, l4, l5, l6] if l)
 
     lines = [
-        "━━━ RECALLED MEMORY (4-layer search) ━━━",
+        "━━━ RECALLED MEMORY (6-layer search) ━━━",
         f"Query: {query}",
-        f"Layers with results: {layers_used}/4",
+        f"Layers with results: {layers_used}/6",
         "",
     ]
 
@@ -136,12 +182,24 @@ def build_memory_context(query: str, user_id: str = "bashara") -> str:
         lines.append("")
 
     if l4:
-        lines.append("━━━ LAYER 4: graphrag (wiki) ━━━")
+        lines.append("━━━ LAYER 4: observation_store ━━━")
         for mem in l4:
             lines.append(f"  • {mem}")
         lines.append("")
 
-    if not any([l1, l2, l3, l4]):
+    if l5:
+        lines.append("━━━ LAYER 5: graphrag (wiki) ━━━")
+        for mem in l5:
+            lines.append(f"  • {mem}")
+        lines.append("")
+
+    if l6:
+        lines.append("━━━ LAYER 6: mem0 cloud ━━━")
+        for mem in l6:
+            lines.append(f"  • {mem}")
+        lines.append("")
+
+    if not any([l1, l2, l3, l4, l5, l6]):
         lines.append("(no memories found)")
 
     lines.append("━━━ END RECALL — treat as prior context ━━━")

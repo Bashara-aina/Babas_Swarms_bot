@@ -25,11 +25,12 @@ fi
 rm -f "$SESSION_DIR/STOP_WATCHER" 2>/dev/null || true
 
 # Start the watcher
-echo "Starting session_watcher..."
-nohup python3 -c "
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO_DIR"
+nohup "$REPO_DIR/.venv/bin/python3" -c "
 import logging, sys
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(message)s', stream=open('$LOG_FILE', 'a'))
-sys.path.insert(0, '$(pwd)')
+sys.path.insert(0, '$REPO_DIR')
 from core.memory.session_watcher import run
 run()
 " >> "$LOG_FILE" 2>&1 &

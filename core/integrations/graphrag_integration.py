@@ -44,60 +44,39 @@ DEFAULT_MODEL = "minimax/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAcces
 GRAPHRAG_INDEX_DIR = os.path.expanduser("~/.legion/graphrag_index")  # type: ignore[reportOptionalMemberAccess]
 
 
-def _build_graphrag_config(  # type: ignore[reportOptionalMemberAccess]
-    index_dir: str | None = None,  # type: ignore[reportOptionalMemberAccess]
-    model: str | None = None,  # type: ignore[reportOptionalMemberAccess]
-    llm_api_key: str | None = None,  # type: ignore[reportOptionalMemberAccess]
-) -> Any:
-    """Build a GraphRagConfig for MiniMax LLM."""  # type: ignore[reportOptionalMemberAccess]
-    from graphrag.config.models.graph_rag_config import (
-        GraphRagConfig,  # type: ignore[reportOptionalMemberAccess]
-    )
+def _keyword_search_text_units(query: str, index_dir: str | None = None, limit: int = 3) -> list[str]:
+    """
+    Direct keyword search over text_units.parquet — no LLM, no GraphRag SDK.
+    Returns top matching snippets by keyword overlap score.
+    """
+    try:
+        import pandas as pd
 
-    index_dir = index_dir or GRAPHRAG_INDEX_DIR  # type: ignore[reportOptionalMemberAccess]
-    model_name = model or DEFAULT_MODEL  # type: ignore[reportOptionalMemberAccess]
-    if "/" in model_name:
-        model_name = "gpt-4o-mini"  # type: ignore[reportOptionalMemberAccess]
+        idx = index_dir or GRAPHRAG_INDEX_DIR
+        path = Path(idx) / "text_units.parquet"
+        if not path.exists():
+            return []
 
-    api_key = llm_api_key or os.getenv("MINIMAX_API_KEY", "dummy")  # type: ignore[reportOptionalMemberAccess]
-    os.environ["OPENAI_API_KEY"] = api_key  # type: ignore[reportOptionalMemberAccess]
-    os.environ["OPENAI_BASE_URL"] = "https://api.minimax.io/v1"  # type: ignore[reportOptionalMemberAccess]
+        df = pd.read_parquet(path)
+        if df.empty:
+            return []
 
-    return GraphRagConfig(  # type: ignore[reportOptionalMemberAccess]
-        data={  # type: ignore[reportOptionalMemberAccess]
-            "input": {"type": "file", "path": index_dir},  # type: ignore[reportOptionalMemberAccess]
-            "embed_text": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-            "extract_graph": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-            "summarize_descriptions": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-            "community_reports": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-            "local_search": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-            "global_search": {
-                "model": model_name,  # type: ignore[reportOptionalMemberAccess]
-                "api_key": api_key,  # type: ignore[reportOptionalMemberAccess]
-                "api_base": "https://api.minimax.io/v1",  # type: ignore[reportOptionalMemberAccess]
-            },  # type: ignore[reportOptionalMemberAccess]
-        }
-    )
+        q_words = set(query.lower().split())
+
+        def score(row) -> int:
+            text = str(row.get("text", "")).lower()
+            return sum(1 for w in q_words if w in text)
+
+        df["_score"] = df.apply(score, axis=1)
+        top = df.nlargest(limit, "_score")
+        results = []
+        for _, row in top.iterrows():
+            txt = str(row["text"])[:300].replace("\n", " ")
+            results.append(f"[graphrag|{row.get('document_id', '?')[:40]}] {txt}")
+        return results
+    except Exception as exc:
+        logger.debug("graphrag keyword search failed: %s", exc)
+        return []
 
 
 class SwarmBotGraphRAG:
@@ -282,7 +261,7 @@ async def index_wiki_knowledge_graph(  # type: ignore[reportOptionalMemberAccess
     if not documents:
         return "[No markdown files found in vault]"
 
-    rag = SwarmBotGraphRAG(index_dir=str(vault), model=model)  # type: ignore[reportOptionalMemberAccess]
+    rag = SwarmBotGraphRAG(index_dir=GRAPHRAG_INDEX_DIR, model=model)  # type: ignore[reportOptionalMemberAccess]
     return await rag.index_documents(documents)  # type: ignore[reportOptionalMemberAccess]
 
 
@@ -304,5 +283,5 @@ async def query_wiki_graph(  # type: ignore[reportOptionalMemberAccess]
     if not GRAPHRAG_AVAILABLE:
         return "[GraphRAG not installed — pip install graphrag]"
 
-    rag = SwarmBotGraphRAG(index_dir=vault_path or "/home/newadmin/swarm-bot/.wiki")  # type: ignore[reportOptionalMemberAccess]
+    rag = SwarmBotGraphRAG(index_dir=vault_path or GRAPHRAG_INDEX_DIR)  # type: ignore[reportOptionalMemberAccess]
     return await rag.query(question, mode=mode)  # type: ignore[reportOptionalMemberAccess]

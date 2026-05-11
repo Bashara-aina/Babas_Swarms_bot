@@ -4,7 +4,9 @@
 #
 # Usage:
 #   mcp_bootstrap.sh @scope/package arg1 arg2   (npx package)
-#   mcp_bootstrap.sh command arg1 arg2         (direct command like ruflo mcp start)
+#   mcp_bootstrap.sh command arg1 arg2           (direct command like ruflo mcp start)
+#
+# Environment variables are passed through to the MCP server.
 
 FIFO=$(mktemp -u)
 mkfifo "$FIFO"
@@ -26,10 +28,10 @@ PIPER=$!
 
 # Determine if first arg is an npx package (starts with @)
 if [[ "$1" == @* ]]; then
-    # npx-based server
+    # npx-based server - pass env vars through
     npx -y "$@" > "$FIFO" 2>/dev/null
 else
-    # Direct command (e.g., ruflo mcp start)
+    # Direct command (e.g., ruflo mcp start) - pass env vars through
     "$@" > "$FIFO" 2>/dev/null
 fi
 

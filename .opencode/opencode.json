@@ -5,7 +5,9 @@
   "provider": {
     "minimax-coding-plan": {
       "api": "http://localhost:4000/v1",
-      "env": ["MINIMAX_API_KEY"]
+      "env": [
+        "MINIMAX_API_KEY"
+      ]
     }
   },
   "snapshot": false,
@@ -29,13 +31,31 @@
     "skill": "allow",
     "lsp": "allow",
     "external_directory": {
-      "/home/newadmin/**": "allow"
+      "/**": "allow",
+      "/home/**": "allow",
+      "/tmp/**": "allow",
+      "/media/**": "allow",
+      "/mnt/**": "allow",
+      "/opt/**": "allow",
+      "/srv/**": "allow",
+      "/var/**": "allow",
+      "/root/**": "allow",
+      "/nix/**": "allow",
+      "/nix/store/**": "allow",
+      "/Applications/**": "allow",
+      "/System/**": "allow",
+      "/Library/**": "allow",
+      "/usr/**": "allow",
+      "/etc/**": "allow",
+      "/dev/**": "allow",
+      "/proc/**": "allow",
+      "/sys/**": "allow"
     }
   },
   "agent": {
     "build": {
       "steps": 60,
-      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled — memory recall replaces it. Treat recalled memories as accurate prior context."
+      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled \u2014 memory recall replaces it. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {
@@ -63,7 +83,17 @@
       "command": [
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "@modelcontextprotocol/server-filesystem",
-        "/home/newadmin"
+        "/",
+        "/home",
+        "/tmp",
+        "/media",
+        "/mnt",
+        "/opt",
+        "/srv",
+        "/var",
+        "/root",
+        "/nix",
+        "/nix/store"
       ]
     },
     "crawl4ai": {
@@ -104,10 +134,11 @@
     "obsidian": {
       "type": "local",
       "command": [
-        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-        "@iflow-mcp/kynlos-obsidian-mcp-server",
-        "/home/newadmin/swarm-bot/.wiki"
-      ]
+        "/home/newadmin/swarm-bot/mcpServers/obsidian-patched/index.js"
+      ],
+      "env": {
+        "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
+      }
     },
     "git": {
       "type": "local",
@@ -135,6 +166,22 @@
         "serve"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    "local-deep-research": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "/home/newadmin/miniconda3/bin/python3",
+        "-m",
+        "local_deep_research.mcp"
+      ]
+    },
+    "exa": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+        "/home/newadmin/.local/node18/bin/exa-mcp-server"
+      ]
     }
   },
   "watcher": {

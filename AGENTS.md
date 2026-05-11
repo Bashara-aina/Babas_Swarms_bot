@@ -3,6 +3,59 @@
 > See [CLAUDE.md](./CLAUDE.md) for full project context, architecture, and coding standards.
 > This file is a quick reference for the agent roles only.
 
+---
+
+## 📚 Claude Code Best Practice
+
+This project implements the **Command → Agent → Skill** architecture pattern from [claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).
+
+### Architecture
+
+```
+┌─────────────────┐      ┌──────────────────┐      ┌─────────────────┐
+│     Command     │ ──▶  │      Agent       │ ──▶  │      Skill      │
+│ (weather-       │      │ (weather-agent)  │      │ (weather-svg-   │
+│  orchestrator)  │      │                  │      │  creator)        │
+└─────────────────┘      └──────────────────┘      └─────────────────┘
+        │                        │                         │
+   Entry point,          Fetches data using           Creates visual
+   user interaction      preloaded skill             output
+```
+
+### Key Files
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **Commands** | [`.claude/commands/`](./.claude/commands/) | Entry point slash commands |
+| **Agents** | [`.claude/agents/`](./.claude/agents/) | Specialized subagents |
+| **Skills** | [`.claude/skills/`](./.claude/skills/) | Reusable skill modules |
+| **Best Practice** | [`.claude/best-practice/`](./.claude/best-practice/) | Documentation |
+| **Implementation** | [`.claude/implementation/`](./.claude/implementation/) | Working examples |
+
+### Example: Weather Orchestrator
+
+```bash
+$ claude
+> /weather-orchestrator
+```
+
+This demonstrates:
+1. **Command** asks user for temperature unit preference
+2. **Agent** fetches data using preloaded skill
+3. **Skill** creates visual SVG output
+
+### Two Skill Patterns
+
+| Pattern | Invocation | Use Case |
+|---------|-----------|---------|
+| **Skill** | `Skill(skill: "name")` | Direct invocation for standalone tasks |
+| **Agent Skill** | Preloaded via `skills:` | Domain knowledge injected into agent |
+
+### Resources
+
+- [`.claude/README.md`](./.claude/README.md) — Full Claude Code best practice overview
+- [Orchestration Workflow](./orchestration-workflow/) — Complete working example
+
 ## 🤖 Agent Roles
 - **Planner** (@planner): Decomposes tasks, never edits files directly
 - **Worker** (@worker): Executes code changes, full file + bash access

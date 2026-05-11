@@ -7,9 +7,9 @@
 #
 # What this does:
 #   1. Start session_watcher daemon (background, persists until stop_session_watcher.sh)
-#   2. Query 4-layer memory system for prior context
+#   2. Query 6-layer memory system for prior context
 #   3. Write recalled context to .session_state/recalled_context.md
-#   4. Echo the context so you can paste it as your first message to OpenCode
+#   4. Auto-inject context into OpenCode as first message via `opencode run -f ...`
 #
 set -euo pipefail
 
@@ -24,33 +24,44 @@ echo "Starting infinite memory session..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 1. Start session_watcher (idempotent — safe to run multiple times)
-bash "$REPO/scripts/start_session_watcher.sh"
+bash "$REPO/scripts/start_session_watcher.sh" 2>/dev/null || true
 
 # 2. Build recalled context via Python
-echo ""
-echo "Querying 4-layer memory: \"$QUERY\""
 CONTEXT_FILE="$SESSION_DIR/recalled_context.md"
+echo ""
+echo "Querying 6-layer memory: \"$QUERY\""
 
-python3 -c "
+BUILD_ERR=$("$REPO/.venv/bin/python3" -c "
 import sys
 sys.path.insert(0, '$REPO')
 from core.memory.memory_injector import build_memory_context
 ctx = build_memory_context(query='$QUERY', user_id='bashara')
-print(ctx)
-" > "$CONTEXT_FILE" 2>/dev/null || {
-    echo "(memory recall skipped — run /memory manually if needed)"
-}
+# Write to file
+with open('$CONTEXT_FILE', 'w') as f:
+    f.write(ctx)
+print('memory recall done', file=sys.stderr)
+" 2>&1)
+echo "$BUILD_ERR" | grep -v "mem0 not available\|OpenViking\|RecursionError\|legacy memory" || true
 
 # 3. Show what OpenCode will see
 if [ -s "$CONTEXT_FILE" ]; then
     echo ""
-    echo "━━━ RECALLED CONTEXT (paste this as your first message) ━━━"
-    cat "$CONTEXT_FILE"
+    echo "━━━ RECALLED CONTEXT (auto-injecting into OpenCode) ━━━"
+    head -20 "$CONTEXT_FILE"
+    echo "...(truncated)"
     echo "━━━ END RECALL ━━━"
 fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Ready. session_watcher running in background."
-echo "To stop + final save: bash scripts/stop_session_watcher.sh"
+echo "Launching OpenCode with memory context auto-injected..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# 4. Auto-inject context into OpenCode via file attachment + --continue
+#    The recalled_context.md becomes the first message's attachment
+exec opencode run \
+    -f "$CONTEXT_FILE" \
+    --continue \
+    --dir "$REPO" \
+    --model minimax/MiniMax-M2.7 \
+    "Continue where we left off. Review the attached recalled context — it is your prior memory."

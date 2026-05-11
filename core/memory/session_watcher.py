@@ -14,6 +14,7 @@ Safe: all ops wrapped in try/except. SIGTERM graceful shutdown.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -27,7 +28,8 @@ from threading import Event
 logger = logging.getLogger(__name__)
 
 # ── Config ──────────────────────────────────────────────────────────────────
-SESSION_DIR = Path.cwd() / ".session_state"
+SWARM_DIR = Path(__file__).parent.parent.parent  # .../swarm-bot
+SESSION_DIR = SWARM_DIR / ".session_state"
 CHECKPOINT_DIR = SESSION_DIR / "checkpoints"
 POLL_INTERVAL = 30        # seconds between state checks
 SAVE_INTERVAL = 120       # seconds between mem0/langmem saves
@@ -146,7 +148,9 @@ def _save_to_memories(state: dict) -> None:
 
     if langmem:
         try:
-            langmem.remember(query=text[:200], data={"source": "session_watcher", "state": state})
+            # langmem.extract_memories takes messages=[{"role": "...", "content": "..."}]
+            messages = [{"role": "user", "content": text[:500]}]
+            asyncio.run(langmem.extract_memories(messages))
             logger.debug("Saved to langmem")
         except Exception as e:
             logger.debug("langmem save failed: %s", e)
