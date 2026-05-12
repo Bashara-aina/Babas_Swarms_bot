@@ -71,13 +71,28 @@ def _recall_from_mem0(query: str, top_k: int = 5) -> list[str]:
 # ── Layer 3: langmem ──────────────────────────────────────────────────────────
 
 def _recall_from_langmem(query: str, limit: int = 5) -> list[str]:
-    """Search langmem (SwarmBotMemoryManager)."""
+    """Search langmem (SwarmBotMemoryManager) with 5s timeout."""
     try:
         from core.integrations.langmem_integration import SwarmBotMemoryManager
         mgr = SwarmBotMemoryManager()
-        results = asyncio.run(mgr.search_memories(query=query, messages=None))
+        # asyncio.run with timeout so langmem hang doesn't block the whole pipeline
+        async def _search():
+            return await asyncio.wait_for(
+                mgr.search_memories(query=query, messages=None),
+                timeout=5.0,
+            )
+        results = asyncio.run(_search())
         if isinstance(results, list):
             return [str(r.get("content", r)) for r in results[:limit] if len(str(r)) > 20]
+        return []
+    except (asyncio.TimeoutError, TimeoutError):
+        logger.debug("langmem search timed out after 5s")
+        return []
+    except Exception as e:
+        logger.debug("langmem recall error: %s", e)
+        return []
+    except concurrent.futures.TimeoutError:
+        logger.debug("langmem recall timed out after 10s")
         return []
     except Exception as e:
         logger.debug("langmem recall error: %s", e)
