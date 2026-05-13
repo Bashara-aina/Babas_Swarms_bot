@@ -924,7 +924,7 @@ async def cmd_compact(msg: Message) -> None:  # type: ignore[reportUnusedCorouti
             clear_conversation,  # type: ignore[reportUnusedCoroutine]
             get_conversation_history,  # type: ignore[reportUnusedCoroutine]
         )
-        from llm_client import _compact_messages
+        from llm_client import smart_compact_messages
 
         user_id = str(msg.from_user.id) if msg.from_user else "0"  # type: ignore[reportUnusedCoroutine]
         history = get_conversation_history(user_id, last_n=100)  # type: ignore[reportUnusedCoroutine]
@@ -943,7 +943,7 @@ async def cmd_compact(msg: Message) -> None:  # type: ignore[reportUnusedCorouti
         except Exception:
             pass
 
-        compacted = _compact_messages(history, keep_recent=6)  # type: ignore[reportUnusedCoroutine]
+        compacted = smart_compact_messages(history, keep_recent=6)  # type: ignore[reportUnusedCoroutine]
         clear_conversation(user_id)  # type: ignore[reportUnusedCoroutine]
         for m in compacted[1:]:
             role = m.get("role", "user")  # type: ignore[reportUnusedCoroutine]

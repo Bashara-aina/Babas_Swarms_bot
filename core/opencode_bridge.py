@@ -30,7 +30,33 @@ async def run_opencode_task(
     project_dir = project_dir or "/home/newadmin/swarm-bot"
     model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     prompt_with_context = prompt
+    context_files: list[str] = []
 
+    # ── Memory context injection ─────────────────────────────────────────────
+    if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        try:
+            from core.memory.memory_injector import build_memory_context
+            from pathlib import Path
+
+            session_dir = Path(project_dir) / ".session_state"
+            recalled_file = session_dir / "recalled_context.md"
+
+            # Build fresh memory context (writes to recalled_context.md)
+            query = task_desc or prompt[:100]
+            ctx = build_memory_context(query=query, user_id="bashara")
+
+            if ctx and recalled_file.exists():
+                context_files.append(str(recalled_file))
+                logger.debug("Memory context ready: %s (%d chars)", recalled_file, len(ctx))
+
+            # Also inject compaction_summary.md if it exists — from smart_compact_messages
+            compaction_file = session_dir / "compaction_summary.md"
+            if compaction_file.exists() and compaction_file.stat().st_size > 0:
+                context_files.append(str(compaction_file))
+                logger.debug("Compaction summary injected: %s (%d bytes)", compaction_file, compaction_file.stat().st_size)
+        except Exception as e:
+            logger.debug("Memory context injection skipped: %s", e)
+    # ── GitNexus context ───────────────────────────────────────────────────
     if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
         try:
             from core.gitnexus_bridge import build_gitnexus_prompt_context
@@ -39,12 +65,16 @@ async def run_opencode_task(
             if gitnexus_ctx:
                 prompt_with_context = f"{gitnexus_ctx}\n\n{prompt}"
         except Exception:
-            prompt_with_context = prompt
+            pass
 
-    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", prompt_with_context]
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run"]
     if agent:
         cmd.extend(["--agent", agent])
     cmd.extend(["--model", model])
+    if context_files:
+        for cf in context_files:
+            cmd.extend(["-f", cf])
+    cmd.append(prompt_with_context)
 
     process = await asyncio.create_subprocess_exec(
         *cmd,
@@ -169,7 +199,27 @@ async def stream_opencode_task(
     project_dir = project_dir or "/home/newadmin/swarm-bot"
     model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     prompt_with_context = prompt
+    context_files: list[str] = []
 
+    # ── Memory context injection ─────────────────────────────────────────────
+    if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        try:
+            from core.memory.memory_injector import build_memory_context
+            from pathlib import Path
+
+            session_dir = Path(project_dir) / ".session_state"
+            recalled_file = session_dir / "recalled_context.md"
+
+            query = prompt[:100]
+            ctx = build_memory_context(query=query, user_id="bashara")
+
+            if ctx and recalled_file.exists():
+                context_files.append(str(recalled_file))
+                logger.debug("Memory context ready: %s (%d chars)", recalled_file, len(ctx))
+        except Exception as e:
+            logger.debug("Memory context injection skipped: %s", e)
+
+    # ── GitNexus context ───────────────────────────────────────────────────
     if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
         try:
             from core.gitnexus_bridge import build_gitnexus_prompt_context
@@ -178,12 +228,16 @@ async def stream_opencode_task(
             if gitnexus_ctx:
                 prompt_with_context = f"{gitnexus_ctx}\n\n{prompt}"
         except Exception:
-            prompt_with_context = prompt
+            pass
 
-    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", "--stream", prompt_with_context]
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", "--stream"]
     if agent:
         cmd.extend(["--agent", agent])
     cmd.extend(["--model", model])
+    if context_files:
+        for cf in context_files:
+            cmd.extend(["-f", cf])
+    cmd.append(prompt_with_context)
 
     process = await asyncio.create_subprocess_exec(
         *cmd,

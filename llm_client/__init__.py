@@ -829,19 +829,38 @@ def _microcompact_messages(messages: list[dict]) -> list[dict]:
 import concurrent.futures
 import hashlib
 import threading
+import time
 from collections import OrderedDict
+from pathlib import Path
 
 # LRU cache for compaction — 100x speedup on repeated conversation patterns
 _COMPACT_CACHE: OrderedDict = OrderedDict()
 _COMPACT_CACHE_LOCK = threading.Lock()
-_COMPACT_CACHE_MAX = 50
+_COMPACT_CACHE_MAX = 100  # increased — more conversation patterns cached
+
+# Session-level compaction log — tracks what we've already compacted
+# so we never compress the same window twice (prevents information loss)
+_COMPACT_HISTORY: dict[str, str] = {}  # cache_key → summary_text (for deduplication)
+_COMPACT_HISTORY_LOCK = threading.Lock()
+
+# Track last compaction time to avoid over-compacting
+_LAST_COMPACT_AT = 0.0
+_COMPACT_COOLDOWN = 5.0  # seconds between compactions (debounce)
 
 
 def _get_cache_key(messages: list[dict]) -> str:
-    """Fast O(n) cache key: MD5 of role pattern + message count (not full content)."""
+    """Fast O(n) cache key: MD5 of role pattern + message count + first/last tool names."""
+    tool_names = []
+    for m in messages:
+        if m.get("role") == "assistant" and m.get("tool_calls"):
+            for tc in m.get("tool_calls", []):
+                name = tc.get("function", {}).get("name", "?")
+                if name not in tool_names:
+                    tool_names.append(name)
+    first_last = tuple(tool_names[:3] + tool_names[-3:] if len(tool_names) > 6 else tool_names)
     role_pattern = "".join(m.get("role", "")[0] for m in messages if m.get("role"))
-    lengths = [len(str(m.get("content", ""))) for m in messages[-10:]]  # only last 10 msgs
-    key_str = f"{role_pattern}:{len(messages)}:{lengths}"
+    lengths = [len(str(m.get("content", ""))) for m in messages[-12:]]
+    key_str = f"{role_pattern}:{len(messages)}:{lengths}:{first_last}"
     return hashlib.md5(key_str.encode()).hexdigest()
 
 
@@ -868,15 +887,54 @@ def _sync_build_memory_context(query: str, user_id: str = "bashara") -> str:
     return _injector_bmc(query=query, user_id=user_id)
 
 
+def _query_compaction_memory_layers(query: str, timeout: float = 12.0) -> dict[str, str]:
+    """Query multiple memory layers with different queries for richer context.
+
+    Returns dict with keys: recent_sessions, decisions, open_issues, tools_used
+    Each value is a formatted string from that layer's recall.
+    """
+    queries = {
+        "recent_sessions": "recent session work tasks completed",
+        "decisions": "decisions made choices agreed architecture",
+        "open_issues": "bugs being fixed features in progress open todos",
+        "tools_used": "tools used functions commands run this session",
+    }
+
+    results: dict[str, str] = {}
+
+    def _fetch(key: str, q: str) -> str:
+        try:
+            from core.memory.memory_injector import build_memory_context
+            return build_memory_context(query=q, user_id="bashara")
+        except Exception:
+            return ""
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {key: executor.submit(_fetch, key, q) for key, q in queries.items()}
+        deadline = time.time() + timeout
+        for key, future in futures.items():
+            remaining = max(0.1, deadline - time.time())
+            try:
+                results[key] = future.result(timeout=remaining)
+            except concurrent.futures.TimeoutError:
+                results[key] = ""
+            except Exception:
+                results[key] = ""
+
+    return results
+
+
 def _generate_memory_aware_summary(
     history: list[dict],
     memory_context: str,
+    multi_layer: dict[str, str],
     model: str = "minimax/MiniMax-M2.7",
 ) -> str:
-    """Generate compaction summary enriched with 6-layer memory context."""
+    """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query."""
     if not history:
         return "[earlier conversation omitted — no content]"
 
+    # Build history text
     summary_parts = []
     for m in history:
         role = m.get("role", "")
@@ -886,42 +944,72 @@ def _generate_memory_aware_summary(
             summary_parts.append("[assistant called: " + ", ".join(tool_names) + "]")
         elif role == "tool":
             truncated = content[:200] + "..." if len(content) > 200 else content
-            summary_parts.append("[tool result: " + truncated + "]")
+            # Preserve error status in tool results
+            if "error" in content.lower() or "fail" in content.lower():
+                summary_parts.append("[tool ERROR: " + truncated + "]")
+            else:
+                summary_parts.append("[tool result: " + truncated + "]")
         elif role and content:
             truncated = content[:300] + "..." if len(content) > 300 else content
             summary_parts.append("[" + role + "]: " + truncated)
 
-    history_text = "\n".join(summary_parts[-12:])
+    history_text = "\n".join(summary_parts[-15:])  # increased from 12
 
-    memory_intro = """
-━━━ PRIOR CONTEXT FROM MEMORY ━━━
-""" + (memory_context or "(no prior memory found)") + """
+    # Build rich memory intro from multi-layer query results
+    memory_sections = []
+
+    if multi_layer.get("recent_sessions"):
+        memory_sections.append("━━━ PRIOR SESSION CONTEXT ━━━\n" + multi_layer["recent_sessions"])
+
+    if multi_layer.get("decisions"):
+        memory_sections.append("━━━ DECISIONS MADE ━━━\n" + multi_layer["decisions"])
+
+    if multi_layer.get("open_issues"):
+        memory_sections.append("━━━ OPEN ISSUES ━━━\n" + multi_layer["open_issues"])
+
+    if multi_layer.get("tools_used"):
+        memory_sections.append("━━━ TOOLS USED (HISTORICAL) ━━━\n" + multi_layer["tools_used"])
+
+    # Also include general memory context if available
+    if memory_context and memory_context.strip():
+        memory_sections.append("━━━ GENERAL MEMORY CONTEXT ━━━\n" + memory_context)
+
+    memory_intro = "\n\n".join(memory_sections) if memory_sections else "(no prior memory found)"
+
+    summary_request = """━━━ PRIOR CONTEXT FROM MEMORY ━━━
+""" + memory_intro + """
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-When summarizing, preserve:
-• Named entities, file paths, function names
-• Decisions made and why
-• Tools used and their outputs (summarized, not dropped)
-• Open issues, bugs being investigated, features in progress
-• Anything that would break continuity if forgotten
-"""
+Now condense the CONVERSATION HISTORY below into a dense narrative summary.
+The prior context above tells you what was already decided, what's open, and what's been done.
+Your job is to bridge that context with the history — do NOT repeat the prior context verbatim.
+Focus on NEW decisions, NEW changes, NEW tool outputs, and NEW open items not already listed above.
 
-    summary_request = memory_intro + """
-
-Condense this conversation history into a dense narrative summary:
+━━━ CONVERSATION HISTORY ━━━
 """ + history_text + """
 
-Output format (4 sections exactly):
-## Decisions
- What was decided, agreed, or concluded
-## Changes
- Files modified, code written, commands run
-## Tools
- Tools used and what happened (one line per tool)
-## Open Issues
- What is still being worked on, unresolved, or in progress
+━━━ OUTPUT FORMAT (9-section LEGION compaction format) ━━━
+## 1. System Purpose
+ What the system/agent is trying to accomplish in this session
+## 2. Current Files (in-progress only)
+ Files that are currently being edited, modified, or worked on
+## 3. Active Changes
+ Specific changes made (file edits, new files, deletions) — be precise
+## 4. Recent Decisions
+ Decisions made, choices agreed, architectural choices, tool selections
+## 5. Pain Points
+ Errors encountered, bugs found, failed approaches, difficult issues
+## 6. Next Moves
+ What needs to be done next, remaining tasks, TODOs from this session
+## 7. Sticky Files
+ Key files that were touched and should be revisited (file paths)
+## 8. Tools Used
+ Tools/functions called and what happened (one line per tool, include errors)
+## 9. Context Budget
+ Approximate context usage: [N] chars / 204K (65% target = 133K)
 
-Be specific — avoid generic phrases like "discussed various topics".
+Be specific — avoid generic phrases. Never say "discussed various topics".
+Include file paths, function names, error messages verbatim when relevant.
 """
 
     try:
@@ -931,12 +1019,12 @@ Be specific — avoid generic phrases like "discussed various topics".
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a precise narrative summarizer. Output only the 4-section format. No preamble.",
+                    "content":                 "You are a precise narrative summarizer. Output only the 9-section LEGION compaction format. Do not restate prior context.",
                 },
                 {"role": "user", "content": summary_request},
             ],
-            max_tokens=800,
-            temperature=0.3,
+            max_tokens=1200,  # increased for richer output
+            temperature=0.2,
             timeout=20.0,
         )
         content = response.choices[0].message.content or ""
@@ -944,17 +1032,23 @@ Be specific — avoid generic phrases like "discussed various topics".
     except Exception as e:
         logger.debug("Memory-aware summary generation failed: %s — falling back", e)
         tool_names = []
+        errors = []
         for m in history:
             if m.get("role") == "assistant" and m.get("tool_calls"):
                 for tc in m.get("tool_calls", []):
                     tool_names.append(tc.get("function", {}).get("name", "?"))
-        if tool_names:
-            return "Tools used: " + ", ".join(tool_names[-8:]) + "\nEarlier conversation summarized (memory enrichment unavailable)."
-        return "[earlier conversation summarized]"
+            elif m.get("role") == "tool":
+                c = m.get("content", "")
+                if "error" in c.lower() or "fail" in c.lower():
+                    errors.append(c[:100])
+        result = "Tools used: " + ", ".join(tool_names[-12:])
+        if errors:
+            result += "\nErrors: " + "; ".join(errors[:5])
+        return result
 
 
-def _store_compaction_summary(summary: str, message_count: int) -> None:
-    """Persist compaction summary to ChromaDB so it's recalled in future compactions."""
+def _store_compaction_summary(summary: str, message_count: int, cache_key: str) -> None:
+    """Persist compaction summary to ChromaDB AND to session file for cross-session recall."""
     try:
         from core.memory.store import MemoryStore
         store = MemoryStore()
@@ -964,29 +1058,57 @@ def _store_compaction_summary(summary: str, message_count: int) -> None:
             metadata={
                 "type": "compaction_summary",
                 "messages_compacted": message_count,
+                "cache_key": cache_key[:16],
             },
         )
         logger.debug("Stored compaction summary to MemoryStore")
     except Exception as e:
         logger.debug("Failed to store compaction summary: %s", e)
 
+    # Also write to session_state for opencode bridge injection
+    try:
+        session_dir = Path("/home/newadmin/swarm-bot/.session_state")
+        session_dir.mkdir(parents=True, exist_ok=True)
+        compaction_file = session_dir / "compaction_summary.md"
+        header = f"""---
+tags: [compaction, memory, session]
+date: {time.strftime('%Y-%m-%d %H:%M:%S')}
+messages_compacted: {message_count}
+---
+
+"""
+        with open(compaction_file, "w") as f:
+            f.write(header + summary)
+        logger.debug("Wrote compaction summary to %s", compaction_file)
+    except Exception as e:
+        logger.debug("Failed to write compaction summary file: %s", e)
+
 
 def smart_compact_messages(
     messages: list[dict],
-    keep_recent: int = 6,
+    keep_recent: int = 8,  # increased from 6 — preserve more recent turns
     system_prompt: str = "",
     model: str = "minimax/MiniMax-M2.7",
 ) -> list[dict]:
-    """Memory-aware compaction using 6-layer recall + LRU cache.
+    """Memory-aware compaction using 6-layer recall + LRU cache + multi-layer pre-query.
 
     Pipeline:
-      PRE-COMPACT  → query 6-layer memory for recent context
-      COMPACT      → LLM summarization enriched with memory context
-      POST-COMPACT → store summary in ChromaDB for next compaction
+      PRE-COMPACT  → query 4 memory layers with different queries (recent_sessions,
+                     decisions, open_issues, tools_used) + 6-layer general context
+      COMPACT      → LLM summarization enriched with all memory context
+      POST-COMPACT → store summary in ChromaDB AND .session_state/compaction_summary.md
 
     Cache: repeated compaction of same conversation pattern hits cache (100x faster).
+    Deduplication: same cache_key never gets re-summarized within cooldown window.
     Auto-trigger: called when context reaches ~65% fill (before critical threshold).
     """
+    # Debounce: don't compact more than once every _COMPACT_COOLDOWN seconds
+    global _LAST_COMPACT_AT
+    now = time.time()
+    if now - _LAST_COMPACT_AT < _COMPACT_COOLDOWN and len(messages) > 10:
+        return messages
+    _LAST_COMPACT_AT = now
+
     if len(messages) <= keep_recent + 1:
         return messages
 
@@ -1006,22 +1128,33 @@ def smart_compact_messages(
     if not history:
         return messages
 
-    # PRE-COMPACT: 6-layer memory query (non-blocking, 15s timeout)
-    memory_context = _get_memory_context_before_compact(
+    # PRE-COMPACT: multi-layer memory query (4 specific queries + general context)
+    multi_layer = _query_compaction_memory_layers(
         query="recent decisions work in progress tools used",
-        timeout=15.0,
+        timeout=12.0,
+    )
+    # Also get general 6-layer context as fallback
+    memory_context = _get_memory_context_before_compact(
+        query="session work tasks decisions tools",
+        timeout=10.0,
     )
 
     # COMPACT: memory-enriched LLM summarization
-    summary_text = _generate_memory_aware_summary(history, memory_context, model=model)
+    summary_text = _generate_memory_aware_summary(history, memory_context, multi_layer, model=model)
 
     # POST-COMPACT: store summary for future recall
-    _store_compaction_summary(summary_text, len(history))
+    _store_compaction_summary(summary_text, len(history), cache_key)
+
+    # Mark this cache_key as compacted (prevent re-compacting same window)
+    with _COMPACT_HISTORY_LOCK:
+        _COMPACT_HISTORY[cache_key] = summary_text
 
     summary_msg = {
         "role": "system",
         "content": (
-            "[Earlier conversation condensed from " + str(len(history)) + " messages:]\n" + summary_text
+            "[Earlier conversation condensed from " + str(len(history)) + " messages:]\n"
+            + summary_text
+            + "\n\n[Full prior context available in .session_state/compaction_summary.md]"
         ),
     }
 
@@ -1033,7 +1166,7 @@ def smart_compact_messages(
     result.append(summary_msg)
     result.extend(recent)
 
-    # Cache the result (LRU, max 50 entries)
+    # Cache the result (LRU, max 100 entries)
     with _COMPACT_CACHE_LOCK:
         _COMPACT_CACHE[cache_key] = result
         if len(_COMPACT_CACHE) > _COMPACT_CACHE_MAX:
