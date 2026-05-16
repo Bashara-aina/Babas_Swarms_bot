@@ -3266,13 +3266,22 @@ tags: ["daily"]
         const links = content.match(/\[\[(.*?)\]\]/g) || [];
         
         for (const link of links) {
-          const linkName = link.slice(2, -2).split('|')[0].trim();
-          if (!noteNames.has(linkName)) {
-            brokenLinks.push({
-              in_file: file,
-              broken_link: linkName,
-              full_syntax: link,
+          const linkName = link.slice(2, -2).split('|')[0].trim().replace(/\\/g, '/');
+          const normalizedLinkName = linkName.replace(/\//g, path.sep);
+          if (!noteNames.has(linkName) && !noteNames.has(normalizedLinkName)) {
+            // Also check if the target file exists at any path depth
+            const pathParts = linkName.split('/');
+            const fileExists = pathParts.some((_, i) => {
+              const subPath = pathParts.slice(i).join(path.sep);
+              return noteNames.has(subPath);
             });
+            if (!fileExists) {
+              brokenLinks.push({
+                in_file: file,
+                broken_link: linkName,
+                full_syntax: link,
+              });
+            }
           }
         }
       }

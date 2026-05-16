@@ -1,95 +1,98 @@
 ---
 name: scripts
-description: "Skill for the Scripts area of swarm-bot. 262 symbols across 42 files."
+description: "Skill for the Scripts area of swarm-bot. 641 symbols across 130 files."
 ---
 
 # Scripts
 
-262 symbols | 42 files | Cohesion: 79%
+"641 symbols | 130 files | Cohesion: 72%"
 
 ## When to Use
 
 - Working with code in `ext/`
-- Understanding how route, get_agent, semantic_search work
+- Understanding how sha256_file, read_text, ensure_parent work
 - Modifying scripts-related functionality
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `ext/everything-claude-code/skills/continuous-learning-v2/scripts/test_parse_instinct.py` | test_load_from_empty_dir, test_load_from_nonexistent_dir, test_load_annotates_metadata, test_load_defaults_scope_from_label, test_load_preserves_explicit_scope (+36) |
-| `ext/everything-claude-code/skills/continuous-learning-v2/scripts/instinct-cli.py` | _load_instincts_from_dir, _validate_instinct_id, _promote_auto, parse_instinct_file, detect_project (+23) |
-| `tools/mirofish/backend/scripts/run_parallel_simulation.py` | get_agent_names_from_config, fetch_new_actions_from_db, create_model, get_active_agents_for_round, run_twitter_simulation (+17) |
-| `ext/skills/design-system/scripts/slide_search_core.py` | tokenize, fit, score, _load_csv, _search_csv (+11) |
-| `tools/mirofish/backend/scripts/run_twitter_simulation.py` | update_status, _get_profile_path, _get_db_path, _create_model, _get_active_agents_for_round (+8) |
-| `tools/mirofish/backend/scripts/run_reddit_simulation.py` | update_status, _get_profile_path, _get_db_path, _create_model, _get_active_agents_for_round (+8) |
-| `ext/skills/gstack/scripts/gen-skill-docs.ts` | extractNameAndDescription, extractVoiceTriggers, processVoiceTriggers, transformFrontmatter, processTemplate (+6) |
-| `scripts/audit_cross_system_parity.py` | _sha256, _check_legiona_parity, _fix_legiona_parity, _check_copilot_contract, _fix_copilot_contract (+6) |
-| `ext/skills/design-system/scripts/html-token-validator.py` | add_error, load_css_variables, validate_file, validate_directory, print_summary (+6) |
-| `ext/skills/ui-styling/scripts/tailwind_config_gen.py` | generate_config_string, _generate_typescript, _generate_javascript, _format_plugins, _indent_json (+5) |
+| `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | sha256_file, read_text, ensure_parent, resolve_secret_input, load_yaml_file (+68) |
+| `ext/hermes-agent/optional-skills/productivity/telephony/scripts/telephony.py` | _twilio_owned_numbers, _twilio_list_owned, _twilio_call_status, _bland_status, _vapi_status (+32) |
+| `ext/everything-claude-code/skills/continuous-learning-v2/scripts/instinct-cli.py` | _yaml_quote, detect_project, parse_instinct_file, _load_instincts_from_dir, load_all_instincts (+17) |
+| `ext/hermes-agent/skills/productivity/google-workspace/scripts/google_api.py` | main, _gws_binary, gmail_send, gmail_modify, calendar_create (+17) |
+| `ext/hermes-agent/optional-skills/blockchain/base/scripts/base_client.py` | rpc_batch, wei_to_eth, wei_to_gwei, hex_to_int, print_json (+16) |
+| `ext/hermes-agent/skills/productivity/maps/scripts/maps_client.py` | main, print_json, haversine_m, nominatim_search, geocode_single (+14) |
+| `ext/hermes-agent/optional-skills/productivity/memento-flashcards/scripts/memento_cards.py` | _now, _iso, _parse_iso, _load, _save (+12) |
+| `ext/hermes-agent/skills/creative/comfyui/scripts/_common.py` | is_link, iter_nodes, iter_model_deps, iter_embedding_refs, resolve_api_key (+12) |
+| `ext/skills/ui-styling/scripts/tailwind_config_gen.py` | add_colors, add_fonts, add_spacing, add_breakpoints, add_plugins (+11) |
+| `ext/hermes-agent/optional-skills/creative/meme-generation/scripts/generate_meme.py` | load_curated_templates, fetch_imgflip_templates, _slugify, resolve_template, get_template_image (+11) |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`route`** (Function) — `core/orchestrator.py:712`
-- **`get_agent`** (Function) — `core/agent_registry.py:185`
-- **`semantic_search`** (Function) — `core/agent_registry.py:253`
-- **`select_team`** (Function) — `core/agent_registry.py:838`
-- **`get_agent_names_from_config`** (Function) — `tools/mirofish/backend/scripts/run_parallel_simulation.py:632`
+- **`sha256_file`** (Function) — `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py:305`
+- **`read_text`** (Function) — `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py:313`
+- **`ensure_parent`** (Function) — `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py:321`
+- **`resolve_secret_input`** (Function) — `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py:325`
+- **`load_yaml_file`** (Function) — `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py:348`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `route` | Function | `core/orchestrator.py` | 712 |
-| `get_agent` | Function | `core/agent_registry.py` | 185 |
-| `semantic_search` | Function | `core/agent_registry.py` | 253 |
-| `select_team` | Function | `core/agent_registry.py` | 838 |
-| `get_agent_names_from_config` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 632 |
-| `fetch_new_actions_from_db` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 656 |
-| `create_model` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 983 |
-| `get_active_agents_for_round` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 1039 |
-| `run_twitter_simulation` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 1100 |
-| `run_reddit_simulation` | Function | `tools/mirofish/backend/scripts/run_parallel_simulation.py` | 1292 |
-| `log_round_start` | Function | `tools/mirofish/backend/scripts/action_logger.py` | 67 |
-| `log_round_end` | Function | `tools/mirofish/backend/scripts/action_logger.py` | 79 |
-| `log_simulation_start` | Function | `tools/mirofish/backend/scripts/action_logger.py` | 91 |
-| `log_simulation_end` | Function | `tools/mirofish/backend/scripts/action_logger.py` | 104 |
-| `test_imports` | Function | `tests/test_main.py` | 12 |
-| `test_handlers_registered` | Function | `tests/test_main.py` | 35 |
-| `test_core_modules_exist` | Function | `tests/test_main.py` | 56 |
-| `test_tools_available` | Function | `tests/test_main.py` | 67 |
-| `fail` | Function | `scripts/verify_wiring.py` | 33 |
-| `check_handler_wiring` | Function | `scripts/verify_wiring.py` | 42 |
+| `sha256_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 305 |
+| `read_text` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 313 |
+| `ensure_parent` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 321 |
+| `resolve_secret_input` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 325 |
+| `load_yaml_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 348 |
+| `dump_yaml_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 355 |
+| `parse_env_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 365 |
+| `save_env_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 378 |
+| `backup_existing` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 384 |
+| `record` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 809 |
+| `migrate` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 887 |
+| `run_if_selected` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 961 |
+| `maybe_backup` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1093 |
+| `copy_file` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1107 |
+| `migrate_command_allowlist` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1199 |
+| `load_openclaw_config` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1258 |
+| `load_openclaw_env` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1270 |
+| `merge_env_values` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1274 |
+| `migrate_messaging_settings` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1320 |
+| `handle_secret_settings` | Function | `ext/hermes-agent/optional-skills/migration/openclaw-migration/scripts/openclaw_to_hermes.py` | 1360 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `Main → UpdateSendButton` | cross_community | 8 |
-| `Main → UpdateSendButton` | cross_community | 6 |
-| `Main → Parse_instinct_file` | cross_community | 6 |
-| `Main → _collect_pending_dirs` | cross_community | 4 |
-| `Main → _parse_created_date` | cross_community | 4 |
-| `GeneratePreamble → GetHostConfig` | cross_community | 3 |
-| `Run → Search_by_capability` | cross_community | 3 |
-| `Run → Semantic_search` | cross_community | 3 |
-| `Run → Get_agent` | cross_community | 3 |
-| `Main → Disable_oasis_logging` | intra_community | 3 |
+| `POST → _patch_litellm_for_minimax` | cross_community | 9 |
+| `POST → _patch_litellm_for_minimax` | cross_community | 9 |
+| `_ → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `GET → _patch_litellm_for_minimax` | cross_community | 9 |
+| `Run → _patch_litellm_for_minimax` | cross_community | 9 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Tests | 8 calls |
-| Services | 7 calls |
-| Handlers | 3 calls |
-| Cluster_279 | 1 calls |
-| Cluster_25 | 1 calls |
+| Tools | 74 calls |
+| Gateway | 12 calls |
+| Hermes_cli | 11 calls |
+| Handlers | 7 calls |
+| Platforms | 6 calls |
+| Run_agent | 4 calls |
+| Server | 3 calls |
+| Stress | 3 calls |
 
 ## How to Explore
 
-1. `gitnexus_context({name: "route"})` — see callers and callees
+1. `gitnexus_context({name: "sha256_file"})` — see callers and callees
 2. `gitnexus_query({query: "scripts"})` — find related execution flows
 3. Read key files listed above for implementation details

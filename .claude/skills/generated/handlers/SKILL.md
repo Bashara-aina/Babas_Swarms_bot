@@ -1,98 +1,89 @@
 ---
 name: handlers
-description: "Skill for the Handlers area of swarm-bot. 453 symbols across 107 files."
+description: "Skill for the Handlers area of swarm-bot. 374 symbols across 100 files."
 ---
 
 # Handlers
 
-453 symbols | 107 files | Cohesion: 86%
+"374 symbols | 100 files | Cohesion: 68%"
 
 ## When to Use
 
 - Working with code in `handlers/`
-- Understanding how introspect_schema, generate_skill_file, query_natural work
+- Understanding how start_sidecar, get_status, get_unread work
 - Modifying handlers-related functionality
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `handlers/ecc_compat.py` | _extract_arg, cmd_harness_audit, cmd_model_route, _run_quality_gate, cmd_quality_gate (+41) |
-| `handlers/system.py` | _ui_keyboard, _build_home_panel, _build_agents_panel, _build_audit_panel, _build_help_panel (+19) |
-| `handlers/computer.py` | cmd_do, cmd_autopilot, on_progress, cmd_confirm, cmd_do_local (+14) |
-| `handlers/ai.py` | _send_swarm_visualization, cmd_agent, cmd_swarm, cmd_owl, cmd_predict (+13) |
-| `handlers/shared.py` | _format_for_telegram_html, is_allowed, allowed_cb, main_keyboard, result_keyboard (+9) |
-| `handlers/harvest_review.py` | _build_candidate_card, _build_review_keyboard, _get_pending_candidates, _mark_reviewed, _load_harvest_stats (+8) |
-| `handlers/gstack.py` | run_sync, escape, code, bold, cmd_review (+7) |
-| `handlers/message_handler.py` | handle_plain_message, _handle_email, _handle_business, _handle_location, _handle_github_intel (+7) |
-| `handlers/voice.py` | _voice_reply_enabled, _set_voice_reply_enabled, cmd_voice_on, cmd_voice_off, cmd_voice_status (+6) |
-| `tools/quality_guard.py` | is_research_like, extract_urls, source_diversity, analyze_answer_consistency, estimate_confidence (+5) |
+| `handlers/ecc_compat.py` | cmd_harness_audit, cmd_model_route, _run_quality_gate, cmd_quality_gate, cmd_verify (+38) |
+| `handlers/system.py` | _build_audit_panel, cb_cmd_redirect, cb_ui_panel, _build_visual_summary, cmd_visualize (+20) |
+| `handlers/computer.py` | cmd_do, cmd_autopilot, cmd_confirm, cmd_do_local, cmd_open (+11) |
+| `handlers/ai.py` | _send_swarm_visualization, cmd_swarm, cmd_owl, cmd_predict, cmd_code_exec (+7) |
+| `handlers/gstack.py` | escape, cmd_review, run_opencode_cmd, code, bold (+6) |
+| `handlers/legiona_tools.py` | _route_via_intent, cmd_ps, cmd_kill, cmd_ls, cmd_find (+6) |
+| `handlers/shared.py` | is_allowed, allowed_cb, send_chunked, _keep_typing, _key_status (+5) |
+| `handlers/harvest_review.py` | _build_candidate_card, _get_pending_candidates, _mark_reviewed, _write_feedback_to_log, _update_scorer_bias (+5) |
+| `handlers/voice.py` | _transcribe, _reply_with_optional_tts, handle_voice, handle_audio, _voice_reply_enabled (+5) |
+| `handlers/message_handler.py` | _handle_email, _handle_business, _handle_github_intel, _handle_codebase_understanding, _wa_is_intent_message (+4) |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`introspect_schema`** (Function) — `tools/supabase_client.py:324`
-- **`generate_skill_file`** (Function) — `tools/supabase_client.py:360`
-- **`query_natural`** (Function) — `tools/supabase_client.py:403`
-- **`health_check`** (Function) — `tools/supabase_client.py:483`
-- **`is_configured`** (Function) — `tools/supabase_client.py:563`
+- **`start_sidecar`** (Function) — `bridges/whatsapp_bridge.py:43`
+- **`get_status`** (Function) — `bridges/whatsapp_bridge.py:97`
+- **`get_unread`** (Function) — `bridges/whatsapp_bridge.py:128`
+- **`run_shell_command`** (Function) — `llm_client/__init__.py:2662`
+- **`add_instinct`** (Function) — `tools/persistence.py:404`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `introspect_schema` | Function | `tools/supabase_client.py` | 324 |
-| `generate_skill_file` | Function | `tools/supabase_client.py` | 360 |
-| `query_natural` | Function | `tools/supabase_client.py` | 403 |
-| `health_check` | Function | `tools/supabase_client.py` | 483 |
-| `is_configured` | Function | `tools/supabase_client.py` | 563 |
-| `list_skills` | Function | `tools/skill_loader.py` | 171 |
-| `invalidate_cache` | Function | `tools/skill_loader.py` | 189 |
-| `run_simulation` | Function | `tools/simulation_tool.py` | 10 |
-| `add_monitor` | Function | `tools/scheduler.py` | 39 |
-| `cancel` | Function | `tools/scheduler.py` | 92 |
-| `list_tasks` | Function | `tools/scheduler.py` | 100 |
-| `scaffold_fastapi` | Function | `tools/scaffolder.py` | 113 |
-| `get_resource_snapshot` | Function | `tools/resource_monitor.py` | 194 |
-| `can_use_local_model` | Function | `tools/resource_monitor.py` | 210 |
-| `format_resource_html` | Function | `tools/resource_monitor.py` | 221 |
-| `is_research_like` | Function | `tools/quality_guard.py` | 32 |
-| `extract_urls` | Function | `tools/quality_guard.py` | 38 |
-| `source_diversity` | Function | `tools/quality_guard.py` | 50 |
+| `start_sidecar` | Function | `bridges/whatsapp_bridge.py` | 43 |
+| `get_status` | Function | `bridges/whatsapp_bridge.py` | 97 |
+| `get_unread` | Function | `bridges/whatsapp_bridge.py` | 128 |
+| `run_shell_command` | Function | `llm_client/__init__.py` | 2662 |
+| `add_instinct` | Function | `tools/persistence.py` | 404 |
 | `analyze_answer_consistency` | Function | `tools/quality_guard.py` | 73 |
-| `estimate_confidence` | Function | `tools/quality_guard.py` | 94 |
+| `build_evidence_envelope` | Function | `tools/quality_guard.py` | 108 |
+| `stop_loop` | Function | `tools/autonomous_loop.py` | 70 |
+| `get_pending_confirmations` | Function | `tools/computer_use_agent.py` | 101 |
+| `fetch_readme` | Function | `tools/github_intel.py` | 131 |
+| `generate_intel_report` | Function | `tools/github_intel.py` | 218 |
+| `is_openclaw_running` | Function | `tools/openclaw_bridge.py` | 27 |
+| `run_tests` | Function | `tools/dev_tools.py` | 18 |
+| `query_natural` | Function | `tools/supabase_client.py` | 406 |
+| `health_check` | Function | `tools/supabase_client.py` | 487 |
+| `is_configured` | Function | `tools/supabase_client.py` | 567 |
+| `render_suite_report_html` | Function | `tools/capability_benchmark.py` | 158 |
+| `get_resource_snapshot` | Function | `tools/resource_monitor.py` | 194 |
+| `format_resource_html` | Function | `tools/resource_monitor.py` | 221 |
+| `review_code` | Function | `tools/code_reviewer.py` | 65 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `Handle_nl → Build_sensei_system_prompt` | cross_community | 4 |
-| `Cmd_code_review → Escape` | intra_community | 4 |
-| `Cmd_python_review → Escape` | intra_community | 4 |
-| `Cmd_task_from → UpdateSendButton` | cross_community | 4 |
-| `Handle_video → _find_server` | cross_community | 4 |
-| `Handle_video → Initialize` | cross_community | 4 |
-| `Handle_video → _tool_result_to_text` | cross_community | 4 |
-| `Write_page → _result` | cross_community | 4 |
-| `Handle_nl → Get_mastery_distribution` | cross_community | 3 |
-| `Handle_nl → Get_phoneme_weaknesses` | cross_community | 3 |
+| `Start_os_service → Strip` | cross_community | 6 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Tools | 34 calls |
-| Computer_agent | 6 calls |
-| Llm_client | 5 calls |
-| Tests | 5 calls |
-| Bridges | 2 calls |
-| Cluster_309 | 1 calls |
-| Sessions | 1 calls |
-| Daily_harvester | 1 calls |
+| Tools | 74 calls |
+| Platforms | 11 calls |
+| Llm_client | 6 calls |
+| Memory | 5 calls |
+| Session | 4 calls |
+| Cluster_185 | 3 calls |
+| Computer_agent | 3 calls |
+| Cluster_168 | 2 calls |
 
 ## How to Explore
 
-1. `gitnexus_context({name: "introspect_schema"})` — see callers and callees
+1. `gitnexus_context({name: "start_sidecar"})` — see callers and callees
 2. `gitnexus_query({query: "handlers"})` — find related execution flows
 3. Read key files listed above for implementation details

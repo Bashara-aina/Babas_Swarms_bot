@@ -77,6 +77,7 @@ class Crawl4AITool:
                 try:
                     return await self.crawl(url)
                 except Exception as e:
+                    logger.warning("crawl_multiple: crawl failed for %s: %s", url, e)
                     return {"url": url, "error": str(e)}
 
         return await asyncio.gather(*[crawl_one(u) for u in urls])

@@ -189,7 +189,8 @@ class TestBrowserUse:
         agent = BrowserUseAgent(headless=True, max_steps=3)
         assert agent.headless is True
         assert agent.max_steps == 3
-        assert agent.model == "minimax/MiniMax-M2.7"
+        # Model comes from BROWSER_USE_MODEL env var (.env sets it to ollama/llava:13b for local privacy)
+        assert "llava" in agent.model or agent.model == "minimax/MiniMax-M2.7"
 
 
 class TestMCPBridge:

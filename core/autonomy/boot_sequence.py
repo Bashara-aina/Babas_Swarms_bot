@@ -13,10 +13,22 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
-RUFLO_MODEL = "minimax/MiniMax-M2.7"
+# Load ruflo_model from config/models.yaml
+_rurlo_cfg_path = Path("config/models.yaml")
+if _rurlo_cfg_path.exists():
+    with _rurlo_cfg_path.open() as f:
+        _cfg = yaml.safe_load(f)
+    _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
+    _ruflo_model_id = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
+    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
+else:
+    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M2.7"
 
 ruflo_available = True
 _ruflo_client = None
@@ -69,7 +81,7 @@ async def run_boot_sequence() -> BootResult:
 
     # STEP 1: Health check (parallel)
     status_task = asyncio.create_task(_call_ruflo("system_status"))
-    doctor_task = asyncio.create_task(_call_ruflo("doctor", {"fix": False}))
+    doctor_task = asyncio.create_task(_call_ruflo("system_health", {"deep": False}))
 
     status_data, doctor_data = await asyncio.gather(status_task, doctor_task)
 
@@ -94,7 +106,7 @@ async def run_boot_sequence() -> BootResult:
     result.session_restored = restore_data.get("success", False)
 
     # STEP 3: Load neural patterns
-    patterns_data = await _call_ruflo("neural_patterns_list")
+    patterns_data = await _call_ruflo("neural_patterns", {"action": "list"})
     result.patterns_loaded = "patterns" in str(patterns_data)
 
     # STEP 4: Dispatch background workers (fire-and-forget)
@@ -105,15 +117,14 @@ async def run_boot_sequence() -> BootResult:
         ("optimize", "every_5_tasks"),
     ]
     for worker_name, trigger in workers:
-        disp = await _call_ruflo("worker_dispatch", {
+        disp = await _call_ruflo("hooks_worker-dispatch", {
             "worker_name": worker_name,
             "trigger": trigger,
-            "priority": "normal",
         })
         if disp.get("success"):
             result.workers_dispatched += 1
 
-    # STEP 5: Register hooks (idempotent)
+    # STEP 5: Register hooks (idempotent) — use hooks_trigger with event/action/config
     hooks = [
         ("pre_git_commit", "security_scan", {
             "checks": ["pii_detect", "api_key_exposure"],
@@ -134,8 +145,9 @@ async def run_boot_sequence() -> BootResult:
     ]
     for event, action, config in hooks:
         hr = await _call_ruflo("hooks_trigger", {
-            "hook_name": f"{event}:{action}",
-            "context": {"event": event, "action": action, "config": config},
+            "event": event,
+            "action": action,
+            "config": config,
         })
         if hr.get("success"):
             result.hooks_registered += 1

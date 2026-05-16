@@ -166,6 +166,34 @@ async def _compaction_event_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     return ctx
 
 
+async def _recalled_context_refresh_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """GAP-28: Rebuild remembered_context.md immediately after compaction.
+
+    This ensures OpenCode receives fresh memory context without waiting
+    for the session_watcher periodic 60s refresh cycle.
+    """
+    try:
+        import sys as _sys
+        from pathlib import Path as _Path
+
+        _sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
+        from core.memory.memory_injector import build_memory_context
+
+        # Use a broad query covering all memory layers
+        query = "recent session work tasks decisions open issues tools used"
+        ctx_text = build_memory_context(query=query, user_id="bashara")
+        if ctx_text:
+            session_dir = _Path("/home/newadmin/swarm-bot/.session_state")
+            session_dir.mkdir(parents=True, exist_ok=True)
+            recalled_file = session_dir / "remembered_context.md"
+            with open(recalled_file, "w") as f:
+                f.write(ctx_text)
+            logger.debug("remembered_context.md refreshed after compaction (%d chars)", len(ctx_text))
+    except Exception as e:
+        logger.debug("recalled_context_refresh_hook: failed to refresh: %s", e)
+    return ctx
+
+
 def register_builtin_hooks() -> None:
     """Register all built-in hooks on the global HookSystem."""
     from core.hooks import get_hooks
@@ -184,6 +212,9 @@ def register_builtin_hooks() -> None:
     hooks.register("post_compact", _post_compact_reset_hook, name="incremental_summary_reset")
     hooks.register("pre_compact", _compaction_event_hook, name="compaction_event_pre")
     hooks.register("post_compact", _compaction_event_hook, name="compaction_event_post")
+
+    # GAP-28: refresh remembered_context.md immediately after any compaction
+    hooks.register("post_compact", _recalled_context_refresh_hook, name="recalled_context_refresh")
 
     _ensure_opencode_dirs()
     logger.info("Built-in hooks registered")

@@ -1,79 +1,93 @@
 ---
 name: components
-description: "Skill for the _components area of swarm-bot. 109 symbols across 75 files."
+description: "Skill for the Components area of swarm-bot. 129 symbols across 37 files."
 ---
 
-# _components
+# Components
 
-109 symbols | 75 files | Cohesion: 85%
+"129 symbols | 37 files | Cohesion: 78%"
 
 ## When to Use
 
-- Working with code in `shadboard-ref/`
-- Understanding how formatDateShort, useIsRtl, Editor work
-- Modifying _components-related functionality
+- Working with code in `ext/`
+- Understanding how lineNav, TextInput, flushParentChange work
+- Modifying components-related functionality
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `shadboard-ref/full-kit/src/lib/utils.ts` | formatDateShort, formatDistance, formatUnreadCount, ensureWithSuffix, camelCaseToTitleCase (+2) |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/calendar/_components/calendar-header.tsx` | CalendarHeader, handleDateChange, handlePrev, handleNext, handleViewChange (+1) |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/calendar/_contexts/calendar-context.tsx` | handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleSelectEvent, handleSelectCategory |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/calendar/_components/calendar-content.tsx` | parseEvent, handleEventDrop, handleEventResize, handleEventClick, CalendarContent |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/calendar/_components/event-sidebar.tsx` | onSubmit, EventSidebar, handleSidebarClose, handleOnDeleteEvent |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/kanban/_contexts/kanban-context.tsx` | handleUpdateColumn, handleDeleteColumn, handleSelectColumn |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/kanban/_components/kanban-sidebar/kanban-update-column-sidebar.tsx` | KanbanUpdateColumnSidebar, onSubmit, handleSidebarClose |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/sales-trend-chart.tsx` | SalesTrendChart, ModifiedChartTooltipContent |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/gender-distribution-chart.tsx` | getNormalizedSize, GenderDistributionChart |
-| `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/churn-rate-chart.tsx` | ChurnRateChart, ModifiedChartTooltipContent |
+| `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | invert, seg, graphemeStops, snapPos, prevPos (+22) |
+| `ext/hermes-agent/ui-tui/src/components/agentsOverlay.tsx` | formatRowId, statusGlyph, GanttStrip, ListRow, DiffPane (+9) |
+| `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | topLevelSubagents, hotnessBucket, formatSummary, fmtCost, fmtTokens (+6) |
+| `ext/hermes-agent/ui-tui/src/components/markdown.tsx` | splitRow, isTableDivider, MdImpl, gap, start (+3) |
+| `ext/hermes-agent/ui-tui/src/lib/inputMetrics.ts` | graphemes, visualLines, widthBetween, cursorLayout, offsetFromPosition (+1) |
+| `ext/hermes-agent/ui-tui/src/components/appChrome.tsx` | SpawnHud, TranscriptScrollbar, jump, modelLabel, StatusRule |
+| `cekwajar.id-20260415T173403Z-3-001/cekwajar.id/src/components/providers.tsx` | getResolvedTheme, applyTheme, ThemeProvider, handler |
+| `ARCHIVE_cekwajar-src-version/cekwajar.id/src/components/providers.tsx` | getResolvedTheme, applyTheme, ThemeProvider, handler |
+| `ext/hermes-agent/ui-tui/packages/hermes-ink/src/ink/components/ClockContext.tsx` | updateInterval, now, setTickInterval, ClockProvider |
+| `cekwajar.id-20260415T173403Z-3-001/cekwajar (1).id/components/combined.js` | fmtIDR, fmtIDRShort, parseIDR, WajarSlipPage |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`formatDateShort`** (Function) — `shadboard-ref/full-kit/src/lib/utils.ts:142`
-- **`useIsRtl`** (Function) — `shadboard-ref/starter-kit/src/hooks/use-is-rtl.tsx:4`
-- **`Editor`** (Function) — `shadboard-ref/full-kit/src/components/ui/editor/index.tsx:31`
-- **`SalesTrendSummary`** (Function) — `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/sales-trend-summary.tsx:6`
-- **`SalesTrendChart`** (Function) — `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/sales-trend-chart.tsx:38`
+- **`lineNav`** (Function) — `ext/hermes-agent/ui-tui/src/components/textInput.tsx:145`
+- **`TextInput`** (Function) — `ext/hermes-agent/ui-tui/src/components/textInput.tsx:233`
+- **`flushParentChange`** (Function) — `ext/hermes-agent/ui-tui/src/components/textInput.tsx:393`
+- **`canFastEchoBase`** (Function) — `ext/hermes-agent/ui-tui/src/components/textInput.tsx:436`
+- **`canFastAppend`** (Function) — `ext/hermes-agent/ui-tui/src/components/textInput.tsx:438`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `formatDateShort` | Function | `shadboard-ref/full-kit/src/lib/utils.ts` | 142 |
-| `useIsRtl` | Function | `shadboard-ref/starter-kit/src/hooks/use-is-rtl.tsx` | 4 |
-| `Editor` | Function | `shadboard-ref/full-kit/src/components/ui/editor/index.tsx` | 31 |
-| `SalesTrendSummary` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/sales-trend-summary.tsx` | 6 |
-| `SalesTrendChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/sales-trend-chart.tsx` | 38 |
-| `RevenueBySourceChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/revenue-by-source-chart.tsx` | 10 |
-| `GenderDistributionChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/gender-distribution-chart.tsx` | 45 |
-| `ChurnRateChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/ecommerce/_components/churn-rate-chart.tsx` | 55 |
-| `SalesTrendChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/crm/_components/sales-trend-chart.tsx` | 38 |
-| `SalesByCountryChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/crm/_components/sales-by-country-chart.tsx` | 54 |
-| `RevenueTrendChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/crm/_components/revenue-trend-chart.tsx` | 40 |
-| `PerformanceOverTimeChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/performance-over-time-chart.tsx` | 13 |
-| `NewVsReturningVisitorsChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/new-vs-returning-visitors-chart.tsx` | 10 |
-| `ConversionFunnelChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/conversion-funnel-chart.tsx` | 9 |
-| `UniqueVisitorsChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/overview/unique-visitors-chart.tsx` | 20 |
-| `ConversionRateChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/overview/conversion-rate-chart.tsx` | 39 |
-| `BounceRateChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/overview/bounce-rate-chart.tsx` | 39 |
-| `AverageSessionDurationChart` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/dashboards/analytics/_components/overview/average-session-duration-chart.tsx` | 40 |
-| `useEmailContext` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/email/_hooks/use-email-context.tsx` | 6 |
-| `EmailView` | Function | `shadboard-ref/full-kit/src/app/[lang]/(dashboard-layout)/apps/email/_components/email-view.tsx` | 11 |
+| `lineNav` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 145 |
+| `TextInput` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 233 |
+| `flushParentChange` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 393 |
+| `canFastEchoBase` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 436 |
+| `canFastAppend` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 438 |
+| `canFastBackspace` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 451 |
+| `commit` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 459 |
+| `emitPaste` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 521 |
+| `clearSel` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 569 |
+| `moveCursor` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 592 |
+| `startMouseSelection` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 636 |
+| `dragMouseSelection` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 646 |
+| `isMultiClickAt` | Function | `ext/hermes-agent/ui-tui/src/components/textInput.tsx` | 681 |
+| `topLevelSubagents` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 320 |
+| `hotnessBucket` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 331 |
+| `formatSummary` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 236 |
+| `fmtCost` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 266 |
+| `fmtTokens` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 283 |
+| `fmtDuration` | Function | `ext/hermes-agent/ui-tui/src/lib/subagentTree.ts` | 303 |
+| `cursorLayout` | Function | `ext/hermes-agent/ui-tui/src/lib/inputMetrics.ts` | 109 |
+
+## Execution Flows
+
+| Flow | Type | Steps |
+|------|------|-------|
+| `AgentsOverlay → _patch_litellm_for_minimax` | cross_community | 8 |
+| `AgentsOverlay → Items` | cross_community | 7 |
+| `AgentsOverlay → Get_hermes_home` | cross_community | 6 |
+| `TextInput → Seg` | cross_community | 5 |
+| `TextInput → IsWhitespace` | cross_community | 4 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Ui | 9 calls |
-| Auth | 7 calls |
-| Hooks | 4 calls |
-| [id] | 1 calls |
+| Hermes_cli | 8 calls |
+| Test | 8 calls |
+| Layout | 5 calls |
+| Tools | 3 calls |
+| Pages | 3 calls |
+| Cluster_2648 | 2 calls |
+| Ink | 1 calls |
+| Scripts | 1 calls |
 
 ## How to Explore
 
-1. `gitnexus_context({name: "formatDateShort"})` — see callers and callees
-2. `gitnexus_query({query: "_components"})` — find related execution flows
+1. `gitnexus_context({name: "lineNav"})` — see callers and callees
+2. `gitnexus_query({query: "components"})` — find related execution flows
 3. Read key files listed above for implementation details

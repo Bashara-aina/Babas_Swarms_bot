@@ -47,6 +47,48 @@ except ImportError:
 DEFAULT_PHOENIX_ENDPOINT = "https://app.phoenix.arize.com"  # type: ignore[reportOptionalMemberAccess]
 PHOENIX_LOCAL_PORT = 6007  # type: ignore[reportOptionalMemberAccess]
 
+_otel_tracer = None  # type: ignore[reportOptionalMemberAccess]
+_otel_provider = None  # type: ignore[reportOptionalMemberAccess]
+
+
+def _get_otel_tracer():  # type: ignore[reportOptionalMemberAccess]
+    """Get or create OTEL tracer for Phoenix spans."""
+    global _otel_tracer, _otel_provider  # type: ignore[reportOptionalMemberAccess]
+    if _otel_tracer is not None:  # type: ignore[reportOptionalMemberAccess]
+        return _otel_tracer  # type: ignore[reportOptionalMemberAccess]
+
+    try:
+        from opentelemetry import trace  # type: ignore[reportOptionalMemberAccess]
+        from opentelemetry.sdk.trace import TracerProvider  # type: ignore[reportOptionalMemberAccess]
+        from opentelemetry.sdk.trace.export import (  # type: ignore[reportOptionalMemberAccess]
+            BatchSpanProcessor,  # type: ignore[reportOptionalMemberAccess]
+            ConsoleSpanExporter,  # type: ignore[reportOptionalMemberAccess]
+        )
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # type: ignore[reportOptionalMemberAccess]
+            OTLPSpanExporter,  # type: ignore[reportOptionalMemberAccess]
+        )
+
+        _otel_provider = TracerProvider()  # type: ignore[reportOptionalMemberAccess]
+        otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")  # type: ignore[reportOptionalMemberAccess]
+        if otlp_endpoint:  # type: ignore[reportOptionalMemberAccess]
+            try:  # type: ignore[reportOptionalMemberAccess]
+                _otel_provider.add_span_processor(  # type: ignore[reportOptionalMemberAccess]
+                    BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint))  # type: ignore[reportOptionalMemberAccess]
+                )  # type: ignore[reportOptionalMemberAccess]
+            except Exception:  # type: ignore[reportOptionalMemberAccess]
+                _otel_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))  # type: ignore[reportOptionalMemberAccess]
+        else:  # type: ignore[reportOptionalMemberAccess]
+            _otel_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))  # type: ignore[reportOptionalMemberAccess]
+
+        trace.set_tracer_provider(_otel_provider)  # type: ignore[reportOptionalMemberAccess]
+        _otel_tracer = trace.get_tracer("swarm-bot.phoenix")  # type: ignore[reportOptionalMemberAccess]
+        return _otel_tracer  # type: ignore[reportOptionalMemberAccess]
+    except ImportError:  # type: ignore[reportOptionalMemberAccess]
+        return None  # type: ignore[reportOptionalMemberAccess]
+    except Exception as exc:  # type: ignore[reportOptionalMemberAccess]
+        logger.warning("OTEL tracer init failed: %s", exc)  # type: ignore[reportOptionalMemberAccess]
+        return None  # type: ignore[reportOptionalMemberAccess]
+
 
 class PhoenixLauncher:
     """Launch and manage a local Phoenix server."""  # type: ignore[reportOptionalMemberAccess]
@@ -69,7 +111,7 @@ class PhoenixLauncher:
             return self._url or f"http://localhost:{port}"  # type: ignore[reportOptionalMemberAccess]
 
         try:
-            if PHOENIX_VERSION >= 1:  # type: ignore[reportOptionalMemberAccess]
+            if _PHOENIX_VERSION >= 1:  # type: ignore[reportOptionalMemberAccess]
                 self._server = _phoenix.launch_app(port=port)  # type: ignore[reportOptionalMemberAccess]
                 self._url = f"http://localhost:{port}"  # type: ignore[reportOptionalMemberAccess]
                 logger.info("Phoenix local server launched: %s", self._url)  # type: ignore[reportOptionalMemberAccess]
@@ -137,72 +179,99 @@ class PhoenixTracer:
         token_usage: dict[str, int] | None = None,  # type: ignore[reportOptionalMemberAccess]
         metadata: dict[str, Any] | None = None,  # type: ignore[reportOptionalMemberAccess]
     ) -> None:
-        """Trace a single LLM call with Phoenix.  # type: ignore[reportOptionalMemberAccess]
+        """Trace a single LLM call with Phoenix.
 
-        In Phoenix 15+, traces are typically collected via OTLP instrumentation  # type: ignore[reportOptionalMemberAccess]
-        of the LLM client (litellm). This method logs trace metadata for  # type: ignore[reportOptionalMemberAccess]
-        manual inspection. For automated tracing, use the TokenUsageTracker.  # type: ignore[reportOptionalMemberAccess]
+        Creates real OTEL spans for LLM calls with model, latency,
+        token usage, and response metadata.
         """
         if not PHOENIX_AVAILABLE:
             return
 
-        self._ensure_launched()  # type: ignore[reportOptionalMemberAccess]
+        tracer = _get_otel_tracer()
+        if tracer is None:
+            return
+
+        self._ensure_launched()
 
         try:
-            logger.debug(  # type: ignore[reportOptionalMemberAccess]
-                "Phoenix LLM trace: model=%s latency=%.1fms tokens=%s",  # type: ignore[reportOptionalMemberAccess]
-                model,  # type: ignore[reportOptionalMemberAccess]
-                latency_ms,  # type: ignore[reportOptionalMemberAccess]
-                f"{token_usage}" if token_usage else "N/A",  # type: ignore[reportOptionalMemberAccess]
-            )
+            with tracer.start_as_current_span("llm_call") as span:
+                span.set_attribute("model", model)
+                span.set_attribute("latency_ms", latency_ms)
+                if token_usage:
+                    span.set_attribute("prompt_tokens", token_usage.get("prompt_tokens", 0))
+                    span.set_attribute("completion_tokens", token_usage.get("completion_tokens", 0))
+                if metadata:
+                    for k, v in metadata.items():
+                        span.set_attribute(f"metadata.{k}", str(v))
+
+                span.set_attribute("llm.response", response[:500] if response else "")
+
         except Exception as exc:
-            logger.debug("Phoenix trace failed: %s", exc)  # type: ignore[reportOptionalMemberAccess]
+            logger.debug("Phoenix LLM span failed: %s", exc)  # type: ignore[reportOptionalMemberAccess]
 
-    async def trace_agent_run(  # type: ignore[reportOptionalMemberAccess]
-        self,  # type: ignore[reportOptionalMemberAccess]
-        task: str,  # type: ignore[reportOptionalMemberAccess]
-        model: str,  # type: ignore[reportOptionalMemberAccess]
-        steps: list[dict[str, Any]],  # type: ignore[reportOptionalMemberAccess]
-        final_result: str,  # type: ignore[reportOptionalMemberAccess]
-        duration_ms: float,  # type: ignore[reportOptionalMemberAccess]
-        metadata: dict[str, Any] | None = None,  # type: ignore[reportOptionalMemberAccess]
+    async def trace_agent_run(
+        self,
+        task: str,
+        model: str,
+        steps: list[dict[str, Any]],
+        final_result: str,
+        duration_ms: float,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Trace a complete agent run with multiple steps."""  # type: ignore[reportOptionalMemberAccess]
+        """Trace a complete agent run with multiple steps."""
         if not PHOENIX_AVAILABLE:
             return
 
-        self._ensure_launched()  # type: ignore[reportOptionalMemberAccess]
+        tracer = _get_otel_tracer()
+        if tracer is None:
+            return
 
-        with contextlib.suppress(Exception):  # type: ignore[reportOptionalMemberAccess]
-            logger.info(  # type: ignore[reportOptionalMemberAccess]
-                "Phoenix agent trace: task=%s model=%s steps=%d duration=%.1fms",  # type: ignore[reportOptionalMemberAccess]
-                task[:50] if task else "",  # type: ignore[reportOptionalMemberAccess]
-                model,  # type: ignore[reportOptionalMemberAccess]
-                len(steps),  # type: ignore[reportOptionalMemberAccess]
-                duration_ms,  # type: ignore[reportOptionalMemberAccess]
-            )
+        try:
+            with tracer.start_as_current_span("agent_run") as span:
+                span.set_attribute("task", task[:200] if task else "")
+                span.set_attribute("model", model)
+                span.set_attribute("step_count", len(steps))
+                span.set_attribute("duration_ms", duration_ms)
+                if metadata:
+                    for k, v in metadata.items():
+                        span.set_attribute(f"metadata.{k}", str(v))
 
-    async def trace_tool_call(  # type: ignore[reportOptionalMemberAccess]
-        self,  # type: ignore[reportOptionalMemberAccess]
-        tool_name: str,  # type: ignore[reportOptionalMemberAccess]
-        args: dict[str, Any],  # type: ignore[reportOptionalMemberAccess]
-        result: str,  # type: ignore[reportOptionalMemberAccess]
-        duration_ms: float,  # type: ignore[reportOptionalMemberAccess]
-        success: bool,  # type: ignore[reportOptionalMemberAccess]
+                for i, step in enumerate(steps):
+                    with tracer.start_as_current_span(f"agent_step_{i}") as step_span:
+                        step_span.set_attribute("step", i)
+                        step_span.set_attribute("step.task", str(step.get("task", ""))[:200])
+                        step_span.set_attribute("step.agent", str(step.get("agent", "")))
+
+                span.set_attribute("agent.result", final_result[:500] if final_result else "")
+
+        except Exception as exc:
+            logger.debug("Phoenix agent span failed: %s", exc)
+
+    async def trace_tool_call(
+        self,
+        tool_name: str,
+        args: dict[str, Any],
+        result: str,
+        duration_ms: float,
+        success: bool,
     ) -> None:
-        """Trace a tool call."""  # type: ignore[reportOptionalMemberAccess]
+        """Trace a tool call."""
         if not PHOENIX_AVAILABLE:
             return
 
-        self._ensure_launched()  # type: ignore[reportOptionalMemberAccess]
+        tracer = _get_otel_tracer()
+        if tracer is None:
+            return
 
-        with contextlib.suppress(Exception):  # type: ignore[reportOptionalMemberAccess]
-            logger.debug(  # type: ignore[reportOptionalMemberAccess]
-                "Phoenix tool trace: tool=%s duration=%.1fms success=%s",  # type: ignore[reportOptionalMemberAccess]
-                tool_name,  # type: ignore[reportOptionalMemberAccess]
-                duration_ms,  # type: ignore[reportOptionalMemberAccess]
-                success,  # type: ignore[reportOptionalMemberAccess]
-            )
+        try:
+            with tracer.start_as_current_span(f"tool.{tool_name}") as span:
+                span.set_attribute("tool.name", tool_name)
+                span.set_attribute("tool.duration_ms", duration_ms)
+                span.set_attribute("tool.success", success)
+                span.set_attribute("tool.args", str(args)[:500])
+
+        except Exception as exc:
+            logger.debug("Phoenix tool span failed: %s", exc)
 
     def instrument_litellm(self) -> None:  # type: ignore[reportOptionalMemberAccess]
         """Instrument litellm with Phoenix OpenInference tracing.  # type: ignore[reportOptionalMemberAccess]

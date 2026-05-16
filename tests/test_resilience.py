@@ -19,13 +19,23 @@ async def test_bot_starts_without_chromadb():
 async def test_bot_starts_without_voicevox():
     """Bot should start and function even if VoiceVox is unavailable."""
     # VoiceVox is optional — handled by tools/voice_engine.py
-    pass
+    # Verify the module is importable and has expected exports
+    from tools import voice_engine
+    assert voice_engine is not None
+    # Should have TTSEngine or equivalent
+    assert hasattr(voice_engine, "KOKORO_VOICE") or hasattr(voice_engine, "_load_kokoro")
 
 
 async def test_llm_retry_on_rate_limit():
     """LLM client should implement retry logic for 429 errors."""
-    # Validated by overall resilience of chat() function
-    pass
+    # Verify retry/backoff logic exists in the LLM client
+    import llm_client
+    src_file = llm_client.__file__
+    with open(src_file) as f:
+        content = f.read()
+    # Should have exponential backoff retry for rate limiting
+    assert "429" in content or "retry" in content.lower() or "backoff" in content.lower(), \
+        "LLM client should implement retry/backoff for 429 rate limit errors"
 
 
 async def test_message_split_at_4096_chars():

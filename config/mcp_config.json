@@ -6,28 +6,38 @@
     {
       "name": "gitnexus",
       "command": "/home/newadmin/.local/node18/bin/gitnexus",
-      "args": ["mcp"],
+      "args": [
+        "mcp"
+      ],
       "enabled": true,
       "description": "GitNexus code intelligence - graph queries, symbol analysis, execution flows"
     },
     {
       "name": "filesystem",
       "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-      "args": ["@modelcontextprotocol/server-filesystem", "/home/newadmin"],
+      "args": [
+        "@modelcontextprotocol/server-filesystem",
+        "/home/newadmin"
+      ],
       "enabled": true,
       "description": "Filesystem operations via MCP - read, write, list, search files"
     },
     {
       "name": "crawl4ai",
       "command": "/home/newadmin/miniconda3/bin/python3",
-      "args": ["/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"],
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
+      ],
       "enabled": true,
       "description": "AI-friendly web crawler - markdown, html, screenshot, pdf, crawl"
     },
     {
       "name": "browser-use",
       "command": "/home/newadmin/miniconda3/bin/python3",
-      "args": ["-m", "tools.mcpServers.browser_use_mcp.server"],
+      "args": [
+        "-m",
+        "tools.mcpServers.browser_use_mcp.server"
+      ],
       "workingDirectory": "/home/newadmin/swarm-bot",
       "env": {
         "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
@@ -39,14 +49,18 @@
     {
       "name": "sequential-thinking",
       "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-      "args": ["@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "enabled": true,
       "description": "Sequential thinking for complex reasoning"
     },
     {
       "name": "symphony",
       "command": "/home/newadmin/.local/node18/bin/node",
-      "args": ["/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"],
+      "args": [
+        "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"
+      ],
       "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one",
       "enabled": true,
       "description": "Symphony multi-agent collaboration - chat rooms, tasks, persistent memory"
@@ -54,22 +68,65 @@
     {
       "name": "obsidian",
       "command": "/home/newadmin/.local/node18/bin/node",
-      "args": ["/home/newadmin/swarm-bot/node_modules/@iflow-mcp/kynlos-obsidian-mcp-server/index.js"],
+      "args": [
+        "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched/index.js"
+      ],
       "env": {
         "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
       },
-      "workingDirectory": "/home/newadmin/swarm-bot",
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched",
       "enabled": true,
       "description": "Obsidian vault knowledge management"
     },
     {
       "name": "git",
       "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-      "args": ["@mseep/git-mcp-server"],
+      "args": [
+        "@mseep/git-mcp-server"
+      ],
+      "enabled": false,
+      "description": "Git operations via MCP (DISABLED - @mseep/git-mcp-server not installed on npm)"
+    },
+    {
+      "name": "ruflo",
+      "command": "/home/newadmin/.local/node18/bin/ruflo",
+      "args": [
+        "mcp",
+        "start"
+      ],
       "enabled": true,
-      "description": "Git operations via MCP"
+      "description": "Ruflo autonomous agent system"
+    },
+    {
+      "name": "hermes",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": [
+        "hermes",
+        "mcp",
+        "serve"
+      ],
+      "enabled": true,
+      "description": "Hermes messaging bridge - conversations, messages, events",
+      "workingDirectory": "/home/newadmin/swarm-bot"
+    },
+    {
+      "name": "local-deep-research",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "-m",
+        "local_deep_research.mcp"
+      ],
+      "enabled": true,
+      "description": "Local deep research MCP server"
+    },
+    {
+      "name": "exa",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": [
+        "/home/newadmin/.local/node18/bin/exa-mcp-server"
+      ],
+      "enabled": true,
+      "description": "Exa web search MCP server"
     }
-  ],
-  "mcpServers": {},
-  "_legacy_note": "Legacy format uses servers[]. Additional servers (gmail, whatsapp, github, calendar) are referenced by LEGION_MCP_* env vars."
+  ]
 }

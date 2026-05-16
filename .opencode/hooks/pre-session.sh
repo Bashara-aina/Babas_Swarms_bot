@@ -12,8 +12,8 @@ if [ -f "${HOME}/.legion/sessions/latest" ]; then
 fi
 
 # Activate conda environment
-if [ -f "/home/admin/miniconda3/etc/profile.d/conda.sh" ]; then
-    source "/home/admin/miniconda3/etc/profile.d/conda.sh"
+if [ -f "/home/newadmin/miniconda3/etc/profile.d/conda.sh" ]; then
+    source "/home/newadmin/miniconda3/etc/profile.d/conda.sh"
     conda activate swarm-bot 2>/dev/null || true
 fi
 

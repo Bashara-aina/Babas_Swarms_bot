@@ -69,6 +69,9 @@ models:
 # Wildcard catch-all: any unmatched model request → M2.7
 wildcard_fallback: minimax-m2-7
 
+# Ruflo swarm agents use this model
+ruflo_model: minimax-m2-7
+
 # Complexity tiers — all route to minimax only
 complexity_tiers:
   lightweight:    [minimax]

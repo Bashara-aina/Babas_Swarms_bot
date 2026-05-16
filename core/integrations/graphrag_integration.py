@@ -32,13 +32,26 @@ from typing import Any
 logger = logging.getLogger(__name__)  # type: ignore[reportOptionalMemberAccess]
 
 GRAPHRAG_AVAILABLE = True  # type: ignore[reportOptionalMemberAccess]
+_api = None  # lazily loaded
 
-try:
-    import graphrag
-    import graphrag.api as api  # type: ignore[reportOptionalMemberAccess]
-except ImportError:
-    GRAPHRAG_AVAILABLE = False  # type: ignore[reportOptionalMemberAccess]
-    api = None  # type: ignore
+
+def _load_api():
+    """Lazily load graphrag.api — importing it directly hangs (heavy sub-dependencies)."""
+    global _api
+    if _api is not None:
+        return _api
+    try:
+        import graphrag.api as _api_local  # noqa: F401
+        _api = _api_local
+        return _api
+    except ImportError as exc:
+        logger.debug("graphrag.api lazy load failed (ImportError): %s", exc)
+        _api = None
+        return None
+    except Exception as exc:
+        logger.debug("graphrag.api lazy load failed: %s", exc)
+        _api = None
+        return None
 
 DEFAULT_MODEL = "minimax/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
 GRAPHRAG_INDEX_DIR = os.path.expanduser("~/.legion/graphrag_index")  # type: ignore[reportOptionalMemberAccess]
@@ -120,7 +133,10 @@ class SwarmBotGraphRAG:
 
             df = pd.DataFrame(documents)  # type: ignore[reportOptionalMemberAccess]
             config = self._get_config()  # type: ignore[reportOptionalMemberAccess]
-            await api.build_index(  # type: ignore[reportOptionalMemberAccess]
+            graphrag_api = _load_api()  # type: ignore[reportOptionalMemberAccess]
+            if graphrag_api is None:  # type: ignore[reportOptionalMemberAccess]
+                return "[GraphRAG api load failed]"  # type: ignore[reportOptionalMemberAccess]
+            await graphrag_api.build_index(  # type: ignore[reportOptionalMemberAccess]
                 config=config,  # type: ignore[reportOptionalMemberAccess]
                 input_documents=df,  # type: ignore[reportOptionalMemberAccess]
                 is_update_run=incremental,  # type: ignore[reportOptionalMemberAccess]
@@ -169,9 +185,12 @@ class SwarmBotGraphRAG:
                 return "[GraphRAG index not found — run index_wiki_knowledge_graph first]"
 
             config = self._get_config()  # type: ignore[reportOptionalMemberAccess]
+            graphrag_api = _load_api()  # type: ignore[reportOptionalMemberAccess]
+            if graphrag_api is None:  # type: ignore[reportOptionalMemberAccess]
+                return "[GraphRAG api load failed]"  # type: ignore[reportOptionalMemberAccess]
 
             if mode == "global":  # type: ignore[reportOptionalMemberAccess]
-                result, _ = await api.global_search(  # type: ignore[reportOptionalMemberAccess]
+                result, _ = await graphrag_api.global_search(  # type: ignore[reportOptionalMemberAccess]
                     config,  # type: ignore[reportOptionalMemberAccess]
                     entities=entities,  # type: ignore[reportOptionalMemberAccess]
                     communities=communities,  # type: ignore[reportOptionalMemberAccess]
@@ -182,7 +201,7 @@ class SwarmBotGraphRAG:
                     query=query,  # type: ignore[reportOptionalMemberAccess]
                 )
             elif mode == "drift":  # type: ignore[reportOptionalMemberAccess]
-                result, _ = await api.drift_search(  # type: ignore[reportOptionalMemberAccess]
+                result, _ = await graphrag_api.drift_search(  # type: ignore[reportOptionalMemberAccess]
                     config,  # type: ignore[reportOptionalMemberAccess]
                     entities=entities,  # type: ignore[reportOptionalMemberAccess]
                     communities=communities,  # type: ignore[reportOptionalMemberAccess]
@@ -194,14 +213,14 @@ class SwarmBotGraphRAG:
                     query=query,  # type: ignore[reportOptionalMemberAccess]
                 )
             elif mode == "basic":  # type: ignore[reportOptionalMemberAccess]
-                result, _ = await api.basic_search(  # type: ignore[reportOptionalMemberAccess]
+                result, _ = await graphrag_api.basic_search(  # type: ignore[reportOptionalMemberAccess]
                     config,  # type: ignore[reportOptionalMemberAccess]
                     text_units=text_units,  # type: ignore[reportOptionalMemberAccess]
                     response_type=response_type,  # type: ignore[reportOptionalMemberAccess]
                     query=query,  # type: ignore[reportOptionalMemberAccess]
                 )
             else:
-                result, _ = await api.local_search(  # type: ignore[reportOptionalMemberAccess]
+                result, _ = await graphrag_api.local_search(  # type: ignore[reportOptionalMemberAccess]
                     config,  # type: ignore[reportOptionalMemberAccess]
                     entities=entities,  # type: ignore[reportOptionalMemberAccess]
                     communities=communities,  # type: ignore[reportOptionalMemberAccess]
@@ -270,18 +289,18 @@ async def query_wiki_graph(  # type: ignore[reportOptionalMemberAccess]
     mode: str = "local",  # type: ignore[reportOptionalMemberAccess]
     vault_path: str | None = None,  # type: ignore[reportOptionalMemberAccess]
 ) -> str:
-    """Query the indexed wiki knowledge graph.  # type: ignore[reportOptionalMemberAccess]
+    """Query the indexed wiki knowledge graph using direct keyword search.
 
-    Args:
-        question: Natural language question
-        mode: 'local', 'global', or 'basic'  # type: ignore[reportOptionalMemberAccess]
-        vault_path: Path to the vault (used if not yet indexed)  # type: ignore[reportOptionalMemberAccess]
-
-    Returns:
-        Answer string from GraphRAG
+    Uses _keyword_search_text_units (pure pandas, no LLM) for fast, reliable
+    keyword-matching recall. The full GraphRAG LLM-based query is available
+    via SwarmBotGraphRAG.query() for cases where the index is pre-loaded
+    and graphrag.api is available.
     """
     if not GRAPHRAG_AVAILABLE:
         return "[GraphRAG not installed — pip install graphrag]"
 
-    rag = SwarmBotGraphRAG(index_dir=vault_path or GRAPHRAG_INDEX_DIR)  # type: ignore[reportOptionalMemberAccess]
-    return await rag.query(question, mode=mode)  # type: ignore[reportOptionalMemberAccess]
+    idx = vault_path or GRAPHRAG_INDEX_DIR
+    results = _keyword_search_text_units(question, index_dir=idx, limit=5)
+    if not results:
+        return "(no wiki matches found)"
+    return "\n".join(f"  • {r}" for r in results)

@@ -54,7 +54,7 @@ from tools.skill_loader import get_skills_for_agent
 
 try:
     import computer_agent
-    from computer_agent import TOOL_DEFINITIONS, execute_tool
+    from computer_agent import TOOL_DEFINITIONS as _COMPUTER_TOOLS, execute_tool
 
     _COMPUTER_AVAILABLE = True
 except ImportError as _ca_err:
@@ -62,9 +62,50 @@ except ImportError as _ca_err:
 
     _log.getLogger(__name__).warning("computer_agent unavailable (%s) — /do and computer tools disabled", _ca_err)
     computer_agent = None  # type: ignore
-    TOOL_DEFINITIONS = []
+    _COMPUTER_TOOLS = []
     execute_tool = None  # type: ignore
     _COMPUTER_AVAILABLE = False
+
+# ── MCP tool registration ─────────────────────────────────────────────────────
+# Aggregate all MCP server tools and prepend them to the tool registry.
+# This makes 200+ MCP tools (ruflo, hermes, crawl4ai, etc.) callable by the
+# agent alongside the built-in computer_agent tools.
+#
+# The pattern: MCP tool names are prefixed (e.g. "ruflo_memory_search") to
+# avoid collisions. The router maps prefixed name → original tool name.
+
+
+async def _register_mcp_tools() -> None:
+    """Async initialization — call once at startup to populate MCP tools."""
+    global TOOL_DEFINITIONS
+    try:
+        from core.mcp.router import get_mcp_router
+
+        router = get_mcp_router()
+        await router.initialize()
+        mcp_tools = await router.get_tool_definitions()
+        if mcp_tools:
+            TOOL_DEFINITIONS = mcp_tools + _COMPUTER_TOOLS
+            logger.info("MCP tools registered: %d (MCP) + %d (computer) = %d total",
+                        len(mcp_tools), len(_COMPUTER_TOOLS), len(TOOL_DEFINITIONS))
+        else:
+            TOOL_DEFINITIONS = list(_COMPUTER_TOOLS)
+            logger.warning("No MCP tools available — using computer tools only (%d)", len(TOOL_DEFINITIONS))
+    except Exception as e:
+        logger.error("Failed to register MCP tools: %s — falling back to computer tools", e)
+        TOOL_DEFINITIONS = list(_COMPUTER_TOOLS)
+
+
+# Synchronous fallback for when async init hasn't run yet
+TOOL_DEFINITIONS = list(_COMPUTER_TOOLS)
+
+# Kick off async registration in background (non-blocking)
+try:
+    import threading
+    _reg_thread = threading.Thread(target=lambda: asyncio.run(_register_mcp_tools()), daemon=True)
+    _reg_thread.start()
+except Exception:
+    pass  # Best-effort async registration
 
 logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
@@ -437,6 +478,30 @@ async def _execute_tool_with_self_heal(
     strategy_attempts: list[tuple[str, str]] = []
     errors: list[str] = []
 
+    # ── Strategy 0: MCP tool routing ────────────────────────────────────────────
+    # Route MCP-prefixed tools (ruflo_*, crawl4ai_*, etc.) through the MCP router
+    # instead of trying computer_agent.execute_tool which doesn't know them.
+    if attempt < _MAX_ATTEMPTS:
+        try:
+            from core.mcp.router import get_mcp_router
+            router = get_mcp_router()
+            # Check if this tool is registered in the MCP router
+            if tool_name in router._tool_to_server or tool_name.startswith(("ruflo_", "crawl4ai_", "browser_use_", "sequential_thinking_", "exa_", "local_deep_research_", "gitnexus_", "obsidian_", "hermes_")):
+                strategy_attempts.append(("mcp_router", f"routing via MCP router for {tool_name}"))
+                mcp_result = await router.execute_tool(tool_name, args or {})
+                if mcp_result:
+                    # Check if it's a valid result (not an error JSON)
+                    try:
+                        parsed = json.loads(mcp_result)
+                        if "error" not in parsed:
+                            return mcp_result
+                    except (json.JSONDecodeError, TypeError):
+                        if mcp_result and "error" not in mcp_result.lower():
+                            return mcp_result
+                    errors.append(f"strategy_0_mcp_router: returned error result")
+        except Exception as e:
+            errors.append(f"strategy_0_mcp_router: {e}")
+
     # ── Strategy 1: Retry with sanitized args (enhanced from original) ──────────
     if attempt < _MAX_ATTEMPTS:
         sanitized = {
@@ -530,10 +595,12 @@ async def call_llm(
         str: Normal text response
         dict: Tool call response with keys 'type' (="tool_call"), 'name', 'args'
     """
-    model = model or os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
+    model = model or os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M2.7")
 
     if _is_rate_limited(model):
-        chain = get_fallback_chain(model.split("/")[0] if "/" in model else model)
+        # FIXED: Use "general" agent key instead of provider name.
+        # Provider name (e.g., "minimax") is not a LEGACY_FALLBACK_CHAIN key.
+        chain = get_fallback_chain("general")
         for fallback_model in chain:
             if not _is_rate_limited(fallback_model):
                 model = fallback_model
@@ -629,7 +696,11 @@ async def call_llm(
 
     except litellm.RateLimitError:
         _mark_rate_limited(model)
-        chain = get_fallback_chain(provider)
+        # FIXED: Use agent key "general" instead of provider name.
+        # Provider name (e.g., "minimax") is not a LEGACY_FALLBACK_CHAIN key —
+        # it would fall through to LEGACY_FALLBACK_CHAIN["general"] anyway,
+        # but without the correct model_id format (minimax-coding-plan/ prefix).
+        chain = get_fallback_chain("general")
         for fallback_model in chain:
             if not _is_rate_limited(fallback_model):
                 return await call_llm(messages, fallback_model, tools, stream, **kwargs)
@@ -770,6 +841,7 @@ async def wiki_raw_completion(
     system_prompt: str = "You follow instructions precisely. Output only what is asked — no preamble.",
     model: str | None = None,
     temperature: float = 0.25,
+    max_tokens: int | None = None,
 ) -> str:
     """Single-turn LLM call for wiki maintenance (no mem0 / wiki / humanization stack)."""
     m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax/MiniMax-M2.7")
@@ -778,7 +850,7 @@ async def wiki_raw_completion(
         {"role": "user", "content": user_prompt},
     ]
     try:
-        resp = await _call_model(m, messages, temperature=temperature)
+        resp = await _call_model(m, messages, temperature=temperature, max_tokens=max_tokens)
         return (resp.choices[0].message.content or "").strip()
     except Exception as e:
         logger.warning("wiki_raw_completion failed: %s", e)
@@ -1319,11 +1391,21 @@ async def _agent_loop_inner(
                         logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
                 # GAP-07: Smart compaction auto-trigger — 6-layer memory aware, lower threshold
-                # MiniMax M2.7 has 204K context window; trigger at ~65% = 133K chars
+                # GAP-28 FIX: emit post_compact hook so remembered_context.md refreshes immediately
                 if len(messages) > 10:
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
                     if total_size > 133000:
                         messages = smart_compact_messages(messages, model=model)
+                        # GAP-28: refresh memory context files immediately after auto-compaction
+                        try:
+                            from core.hooks import get_hooks
+                            get_hooks().emit("post_compact", {
+                                "user_id": user_id or "default",
+                                "reason": "auto_context_full",
+                                "total_size": total_size,
+                            })
+                        except Exception:
+                            pass
 
                 if progress_cb:
                     await progress_cb(_tool_label(tool_name, args))

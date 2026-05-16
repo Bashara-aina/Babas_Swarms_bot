@@ -31,7 +31,6 @@
     "skill": "allow",
     "lsp": "allow",
     "external_directory": {
-      "/**": "allow",
       "/home/**": "allow",
       "/tmp/**": "allow",
       "/media/**": "allow",
@@ -101,14 +100,17 @@
       "command": [
         "/home/newadmin/miniconda3/bin/python3",
         "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
-      ]
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "env": {
+        "PYTHONPATH": "/home/newadmin/swarm-bot/tools/mcpServers"
+      }
     },
     "browser-use": {
       "type": "local",
       "command": [
         "/home/newadmin/miniconda3/bin/python3",
-        "-m",
-        "tools.mcpServers.browser_use_mcp.server"
+        "/home/newadmin/swarm-bot/tools/mcpServers/browser_use_mcp/server.py"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot",
       "env": {
@@ -134,8 +136,13 @@
     "obsidian": {
       "type": "local",
       "command": [
+        "/home/newadmin/.local/node18/bin/node",
         "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched/index.js"
-      ]
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched",
+      "env": {
+        "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
+      }
     },
     "git": {
       "type": "local",
@@ -199,5 +206,23 @@
       "*.zip",
       "skill_labels.zip"
     ]
+  },
+  "hooks": {
+    "pre_session": {
+      "run": ".opencode/hooks/pre-session.sh",
+      "enabled": true
+    },
+    "post_session": {
+      "run": ".opencode/hooks/post-session.sh",
+      "enabled": true
+    },
+    "pre_compact": {
+      "run": ".opencode/hooks/pre-compact.sh",
+      "enabled": true
+    },
+    "post_compact": {
+      "run": ".opencode/hooks/post-compact.sh",
+      "enabled": true
+    }
   }
 }

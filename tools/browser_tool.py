@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 async def fetch_page_text(url: str, max_chars: int = 12000) -> str:
     try:
         from playwright.async_api import async_playwright
-    except Exception:
+    except Exception as exc:
+        logger.warning("browser_tool: Playwright not available: %s", exc)
         return "Playwright not available."
 
     try:

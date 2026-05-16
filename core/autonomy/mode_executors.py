@@ -13,10 +13,21 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
-RUFLO_MODEL = "minimax/MiniMax-M2.7"
+# Load ruflo_model from config/models.yaml
+_rurlo_cfg_path = Path("config/models.yaml")
+if _rurlo_cfg_path.exists():
+    with _rurlo_cfg_path.open() as f:
+        _cfg = yaml.safe_load(f)
+    _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
+    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
+else:
+    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M2.7"
 
 ruflo_available = True
 _mcp_client = None
@@ -234,11 +245,9 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
     # Mark task complete
     await _call_ruflo("task_complete", {
         "task_id": task_id,
-        "result": "success" if all_success else "partial",
     })
 
     # Store memory
-    [str(a.get("path", "")) for a in mcp_args if isinstance(a, dict)]  # type: ignore[reportPossiblyUnboundVariable]
     await _call_ruflo("memory_store", {
         "namespace": "project/unknown",
         "key": f"lite-{int(asyncio.get_event_loop().time())}",
@@ -277,7 +286,7 @@ async def execute_swarm(
     # PRE-FLIGHT
     await asyncio.gather(
         _call_ruflo("memory_search", {"query": task, "namespace": "all", "limit": 5}),
-        _call_ruflo("neural_predict", {"context": task[:200], "pattern_type": "task"}),
+        _call_ruflo("neural_predict", {"input": task[:200]}),
     )
 
     # INIT
@@ -302,8 +311,9 @@ async def execute_swarm(
     # TASK TRACKING
     task_result = await _call_ruflo("task_create", {
         "title": task,
-        "agent_id": swarm_id,
+        "description": f"SWARM task: {task_description}",
         "priority": "high",
+        "type": "feature",
     })
     task_id = task_result.get("task_id", f"swarm-{int(asyncio.get_event_loop().time())}")
 
@@ -328,16 +338,15 @@ async def execute_swarm(
     # MONITOR (silent)
     await asyncio.gather(
         _call_ruflo("swarm_status"),
-        _call_ruflo("agent_metrics"),
+        _call_ruflo("system_status"),
     )
 
     # COMPLETE + LEARN
     await asyncio.gather(
-        _call_ruflo("task_complete", {"task_id": task_id, "result": "success"}),
+        _call_ruflo("task_complete", {"task_id": task_id}),
         _call_ruflo("neural_train", {
-            "pattern_type": "task",
+            "model_type": "classifier",
             "data": f"{task} | topology={topology} | agents={agent_roles}",
-            "epochs": 10,
         }),
         _call_ruflo("session_save", {
             "name": f"auto-{int(asyncio.get_event_loop().time())}",

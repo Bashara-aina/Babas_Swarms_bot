@@ -13,10 +13,21 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
-RUFLO_MODEL = "minimax/MiniMax-M2.7"
+# Load ruflo_model from config/models.yaml
+_rurlo_cfg_path = Path("config/models.yaml")
+if _rurlo_cfg_path.exists():
+    with _rurlo_cfg_path.open() as f:
+        _cfg = yaml.safe_load(f)
+    _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
+    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
+else:
+    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M2.7"
 
 ruflo_available = True
 _ruflo_client = None
@@ -131,8 +142,7 @@ async def classify_task(user_message: str) -> Classification:
 
     # Check neural memory for confident prediction (run in parallel)
     neural_task = _call_ruflo("neural_predict", {
-        "context": user_message[:200],
-        "pattern_type": "task",
+        "input": user_message[:200],
     })
     memory_task = _call_ruflo("memory_search", {
         "query": user_message,

@@ -76,12 +76,14 @@ _ruflo_process: subprocess.Popen[bytes] | None = None
 _opencode_process: subprocess.Popen[bytes] | None = None
 
 # ── Logging ────────────────────────────────────────────────────────────
+_log_dir = Path(__file__).parent / "logs"
+_log_dir.mkdir(exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("bot.log", encoding="utf-8"),
+        logging.FileHandler(_log_dir / "bot.log", encoding="utf-8"),
     ],
 )
 logger = logging.getLogger(__name__)
@@ -128,9 +130,7 @@ class ActivityLogMiddleware(BaseMiddleware):
         # Track last user message for curiosity engine
         try:
             if event.from_user and event.from_user.id == ALLOWED_USER_ID:
-                import handlers.shared as _sh
-
-                _sh._last_user_message_ts = time.time()
+                _shared._last_user_message_ts = time.time()
         except Exception:
             pass
         try:
@@ -835,18 +835,11 @@ async def on_startup(bot: Bot) -> None:
                 now = datetime.now()
                 target = now.replace(hour=2, minute=0, second=0, microsecond=0)
                 if now >= target:
-                    target = target.replace(day=target.day + 1)
-                try:
-                    days_in_month = calendar.monthrange(target.year, target.month)[1]
-                    if target.day > days_in_month:
-                        target = target.replace(
-                            month=target.month + 1 if target.month < 12 else 1,
-                            day=1,
-                            year=target.year + (1 if target.month == 12 else 0),
-                        )
-                except Exception:
-                    pass
-                await asyncio.sleep((target - now).total_seconds())
+                    target = target + timedelta(days=1)
+                sleep_seconds = (target - now).total_seconds()
+                if sleep_seconds <= 0:
+                    sleep_seconds = 86400  # Fallback: 24h
+                await asyncio.sleep(sleep_seconds)
                 try:
                     from core.memory.consolidator import run_nightly
 
