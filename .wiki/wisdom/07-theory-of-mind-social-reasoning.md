@@ -1,5 +1,6 @@
 ---
 title: 07 Theory Of Mind Social Reasoning
+type: concept
 tags:
   - stub
   - auto-generated

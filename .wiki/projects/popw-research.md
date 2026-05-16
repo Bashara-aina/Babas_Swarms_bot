@@ -107,5 +107,5 @@ The Pose Encoder (MLP on 13×3 keypoint coordinates → 64-dim context vector) g
 - [[concepts/multi-task-learning]]
 - [[concepts/film-modulation]]
 - [[concepts/pose-derived-detection]]
-- [[decisions/popw-conference-strategy]]
-- [[decisions/popw-pdd-pivot]]
+- [[decisions/adr-2026-04-conference-submission-strategy]]
+- [[decisions/adr-2026-03-pdd-pivot]]

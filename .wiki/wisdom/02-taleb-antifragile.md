@@ -1,5 +1,6 @@
 ---
 title: 02 Taleb Antifragile
+type: concept
 tags:
   - stub
   - auto-generated

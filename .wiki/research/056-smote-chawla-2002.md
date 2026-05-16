@@ -6,10 +6,6 @@ tags: [smote, imbalanced-learning, oversampling, classification, augmentation]
 created: 2026-04-13
 updated: 2026-04-13
 summary: '**Chawla, Bowyer, Hall & Kegelmeyer** | JAIR 2002 | [DOI:10.1613/jair.953](https://doi.org/10.1613/jair.953) | Foundational oversampling method for imbalanced classification using k-NN interpolation in feature space.'
-wikilinks:
-  - [[research/054-remix-chou-2020]]
-  - [[research/053-mislas-zhong-2021]]
-  - [[research/052-class-balanced-cui-2019]]
 confidence: high
 source: research
 project: popw
@@ -79,9 +75,3 @@ For modern deep learning, **Remix (054)** or **Mixup-based methods** generally o
 - Official (JAIR): https://www.jair.org/index.php/jair/article/view/10302
 - Archive: https://arxiv.org/abs/1106.1813
 - scikit-learn-contrib: https://github.com/scikit-learn-contrib/imbalanced-learn
-
-## See Also
-
-- [[research/054-remix-chou-2020]] — Remix (deep learning evolution of SMOTE ideas)
-- [[research/053-mislas-zhong-2021]] — MiSLAS (mixup + calibration for long-tail)
-- [[research/052-class-balanced-cui-2019]] — Class-balanced loss (re-weighting alternative)

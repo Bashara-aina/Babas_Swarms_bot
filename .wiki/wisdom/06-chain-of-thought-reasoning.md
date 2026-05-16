@@ -1,5 +1,6 @@
 ---
 title: 06 Chain Of Thought Reasoning
+type: concept
 tags:
   - stub
   - auto-generated

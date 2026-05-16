@@ -172,7 +172,7 @@ print(f"New bias: {scorer.get_bias()}")
 
 ## Related Articles
 
-- [[core/daily_harvester/scorer]] — scorer implementation
-- [[core/daily_harvester/harvest-pipeline]] — pipeline orchestration
-- [[core/intent-classifier]] — how messages are routed to handlers
-- [[handlers/harvest-review]] — Telegram review UI implementation
+- `core/daily_harvester/scorer.py` — scorer implementation
+- `core/daily_harvester/harvest_pipeline.py` — pipeline orchestration
+- `core/intent_classifier` — how messages are routed to handlers
+- `handlers/harvest_review.py` — Telegram review UI implementation

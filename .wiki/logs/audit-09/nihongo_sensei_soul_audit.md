@@ -7,8 +7,8 @@ created: 2026-04-12
 updated: 2026-04-12
 summary: Audit of Nihongo Sensei Soul module — import verification, connection map, and verdict on self-contained nature.
 wikilinks:
-  - [[skills/nihongo/sensei_soul]]
-  - [[skills/nihongo/sensei_prompt]]
+  - [[.claude/skills/nihongo/sensei_soul]]
+  - [[.claude/skills/nihongo/sensei_prompt]]
 confidence: high
 source: audit
 ---

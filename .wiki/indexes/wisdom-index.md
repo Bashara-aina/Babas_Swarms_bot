@@ -73,7 +73,7 @@ source: research
 - [[wisdom/17-skin-in-the-game-accountability]] — Accountability and alignment
 - [[wisdom/18-deep-work-focus-principles]] — Deep work focus principles
 - [[wisdom/19-network-effects-and-moats]] — Network effects and moats
-- [[wisdom/20-the-regret-minimization-why-test]] — Purpose-driven clarity
+- [[wisdom/20-the-regret-minimization-framework]] — Purpose-driven clarity
 
 ## Sources
 - Poor Charlie's Almanack (Munger)

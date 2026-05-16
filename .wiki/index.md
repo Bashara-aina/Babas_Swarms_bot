@@ -55,24 +55,11 @@ source: research
 - [[issues/000-review-summary]] (374w) — Review: All Changes Summary
 - [[issues/001-legacy-agent-count-mismatch]] (141w) — Review: Legacy Agent Count Mismatch
 - [[issues/002-missing-task-keywords]] (183w) — Review: Missing TASK_KEYWORDS for 11 Legacy Agents
-- [[issues/003-pre-existing-test-failure]] (237w) — Review: Pre-existing Test Failure
-- [[issues/review-2026-04-10-circular-import-fix]] (561w) — Review: Task 3 — Circular Import Fix
-- [[issues/review-2026-04-10-final-state-verification]] (318w) — review-2026-04-10-final-state-verification
-- [[issues/review-2026-04-10-legion-phases-2-3]] (608w) — Review: Legion Upgrade Phases 2-3 (MiniMax + Soul Engine)
-- [[issues/review-2026-04-10-legion-upgrade-phases-5-10]] (495w) — review-2026-04-10-legion-upgrade-phases-5-10
-- [[issues/review-2026-04-10-legion-upgrade]] (663w) — Review: Legion Upgrade (Session 2026-04-10)
-- [[issues/review-2026-04-10-tasks-2-4-5]] (502w) — Review: Tasks 2, 4, 5 — Parallelize Startup / Test Coverage / mypy
-- [[issues/review-2026-04-12-final-session]] (760w) — Review: Swarm-Bot Final Session — 2026-04-12
 
 ## legion
 - [[legion/audit-2026-04-11-fixes]] (287w) — Audit 2026-04-11: Critical Fixes Applied
 
 ## logs
-- [[logs/api-health]] (68w) — Auto-Generated Health Log
-- [[logs/legion-upgrade-2026-04]] (2833w) — Legion Upgrade Log — 2026-04
-- [[logs/legion-upgrade-tasks-2026-04-10]] (2153w) — Legion Upgrade — Worker Task List
-- [[logs/planner-cycles-1-5]] (6.5k) — Wiki Loop Cycles 1-5 Plan
-- [[logs/LOOP_LOG]] (4.5k) — Wiki Loop Session Log 2026-04-12
 
 ## profiles
 - [[profiles/BASHARA-MASTER-PROFILE]] (1571w) — Bashara — Complete Personal Profile
@@ -88,20 +75,8 @@ source: research
 - [[projects/rumahlabuh-architecture]] (394w) — rumahlabuh.com — Architecture & Business Context
 
 ## research
-- [[research/EXTERNAL-RESEARCH-FINDINGS]] (477w) — Legion Wiki — External Research Findings
 
 ## templates
-- [[templates/Home Page]] (105w) — HOME
-- [[templates/README]] (217w) — Custom controls
-- [[templates/REQUIREMENTS]] (1012w) — Second Brain — Blueprint
-- [[templates/SKILL]] (640w) — Second Brain — Lint
-- [[templates/claude-code]] (163w) — Claude Code Agent Config Template
-- [[templates/codex]] (162w) — Codex Agent Config Template
-- [[templates/cursor]] (185w) — Cursor Agent Config Template
-- [[templates/gemini]] (163w) — Gemini CLI Agent Config Template
-- [[templates/llm-wiki]] (1959w) — LLM Wiki
-- [[templates/tooling]] (265w) — Tooling Reference
-- [[templates/wiki-schema]] (968w) — Wiki Schema
 
 ## tools
 - [[tools/MCP-SERVERS-AVAILABLE]] (1878w) — MCP Servers Available to Legion
@@ -128,8 +103,6 @@ source: research
 - [[wisdom/17-skin-in-the-game-accountability]] (231w) — Skin in the Game — Accountability and Alignment
 - [[wisdom/18-deep-work-focus-principles]] (226w) — Deep Work — Cal Newport's Focus Principles
 - [[wisdom/19-network-effects-and-moats]] (244w) — Network Effects and Moats — Hamilton Helmer (7 Powers)
-- [[wisdom/20-the-regret-minimization-why-test]] (267w) — The Why Test — Purpose-Driven Clarity
-
 ## workflows
 - [[workflows/n8n-documentation]] (217w) — n8n Workflow Documentation
 
@@ -207,8 +180,7 @@ source: research
 | [[error-patterns-catalog]] | error-handling | 9 | 780 | core |
 | [[circuit-breaker-design]] | error-handling | 9 | 640 | core |
 | [[debugging-guide]] | error-handling | 8 | 680 | core |
-| [[test-patterns-guide]] | testing | 8 | 520 | ci |
-| [[test-security-patterns]] | testing | 8 | 480 | security |
+
 | [[quality-gates-spec]] | testing | 8 | 490 | ci |
 
 **Session total: 74 pages, ~23,580 tokens estimated**

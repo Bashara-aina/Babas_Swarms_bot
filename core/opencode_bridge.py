@@ -39,15 +39,15 @@ async def run_opencode_task(
             from pathlib import Path
 
             session_dir = Path(project_dir) / ".session_state"
-            recalled_file = session_dir / "recalled_context.md"
+            remembered_file = session_dir / "remembered_context.md"
 
-            # Build fresh memory context (writes to recalled_context.md)
+            # Build fresh memory context (writes to remembered_context.md)
             query = task_desc or prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara")
 
-            if ctx and recalled_file.exists():
-                context_files.append(str(recalled_file))
-                logger.debug("Memory context ready: %s (%d chars)", recalled_file, len(ctx))
+            if ctx and remembered_file.exists():
+                context_files.append(str(remembered_file))
+                logger.debug("Memory context ready: %s (%d chars)", remembered_file, len(ctx))
 
             # Also inject compaction_summary.md if it exists — from smart_compact_messages
             compaction_file = session_dir / "compaction_summary.md"
@@ -208,14 +208,14 @@ async def stream_opencode_task(
             from pathlib import Path
 
             session_dir = Path(project_dir) / ".session_state"
-            recalled_file = session_dir / "recalled_context.md"
+            remembered_file = session_dir / "remembered_context.md"
 
             query = prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara")
 
-            if ctx and recalled_file.exists():
-                context_files.append(str(recalled_file))
-                logger.debug("Memory context ready: %s (%d chars)", recalled_file, len(ctx))
+            if ctx and remembered_file.exists():
+                context_files.append(str(remembered_file))
+                logger.debug("Memory context ready: %s (%d chars)", remembered_file, len(ctx))
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
 

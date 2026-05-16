@@ -25,13 +25,13 @@ proficiency-table:
 ## Evidence
 
 **Work Notes:**
-- [[work/active/]]
+- [[work/active]] (notes directory)
 
 **Incidents:**
-- [[work/incidents/]]
+- [[work/incidents]] (incidents directory)
 
 **1:1s:**
-- [[work/1-1/]]
+- [[work/1-1]] (1:1 directory)
 
 ---
 

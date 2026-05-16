@@ -53,10 +53,10 @@ This rule applies to all `/obsidian-*` and `/research*` commands, all scheduled 
 ## Key Files
 
 - **Dashboard:** `[[Home]]` — main navigation
-- **Agent Registry:** `[[agents/agent-registry]]` or `core/agent_registry.py`
+- **Agent Registry:** [agents/agent-registry](agents/agent-registry.md) or `core/agent_registry.py`
 - **Memory Architecture:** `[[memory-architecture]]`
 - **Intent Routing:** `[[intent-routing-map]]`
-- **Projects Index:** `[[projects]]` folder
+- **Projects Index:** [projects/](projects/) folder
 
 ---
 
@@ -126,9 +126,9 @@ Note types: `daily` | `project` | `task` | `person` | `devlog` | `idea` | `decis
 
 ## Projects Currently Active
 
-- `[[projects/swarm-bot]]` — 76+ agent Telegram bot orchestration system
-- `[[projects/cekwajar]]` — Indonesian employment/job seeker assistance project
-- `[[projects/rumahlabuh]]` — Boarding house/rental management project
+- [swarm-bot](projects/legion-bot.md) — 76+ agent Telegram bot orchestration system
+- [cekwajar](projects/cekwajar-id.md) — Indonesian employment/job seeker assistance project
+- [rumahlabuh](projects/rumahlabuh-com.md) — Boarding house/rental management project
 
 ---
 

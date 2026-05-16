@@ -43,12 +43,16 @@ except Exception:
 # ---------------------------------------------------------------------------
 
 SWARM_TOPOLOGIES = {
+    # Valid ruflo agent types: coder, researcher, tester, reviewer, architect,
+    # coordinator, analyst, optimizer, security-architect, security-auditor,
+    # memory-specialist, swarm-specialist, performance-engineer, core-architect,
+    # test-architect, general
     "new_feature": {"topology": "hierarchical", "count": 5,
                      "agents": ["planner", "backend-developer", "frontend-developer", "test-generator", "reviewer"]},
     "large_refactor": {"topology": "mesh", "count": 5,
-                       "agents": ["planner", "backend-developer", "frontend-developer", "reviewer", "worker"]},
+                        "agents": ["planner", "backend-developer", "frontend-developer", "reviewer", "worker"]},
     "research_implement": {"topology": "hierarchical", "count": 4,
-                          "agents": ["comprehensive-researcher", "planner", "worker", "test-generator"]},
+                            "agents": ["comprehensive-researcher", "planner", "worker", "test-generator"]},
     "full_test_suite": {"topology": "mesh", "count": 4,
                         "agents": ["planner", "tdd-red", "tdd-green", "qa-expert"]},
     "security_audit": {"topology": "star", "count": 4,
@@ -56,9 +60,9 @@ SWARM_TOPOLOGIES = {
     "bug_investigation": {"topology": "ring", "count": 3,
                           "agents": ["debugger", "error-detective", "reviewer"]},
     "documentation": {"topology": "star", "count": 3,
-                      "agents": ["documentation-engineer", "readme-generator", "wikibot"]},
+                       "agents": ["documentation-engineer", "readme-generator", "wikibot"]},
     "deploy_pipeline": {"topology": "hierarchical", "count": 4,
-                         "agents": ["planner", "devops-engineer", "security-engineer", "test-runner"]},
+                          "agents": ["planner", "devops-engineer", "security-engineer", "test-runner"]},
     "competitive_research": {"topology": "mesh", "count": 3,
                               "agents": ["comprehensive-researcher", "data-researcher", "business-analyst"]},
     "code_review": {"topology": "ring", "count": 3,
@@ -70,11 +74,93 @@ SWARM_TOPOLOGIES = {
     "db_schema_migration": {"topology": "ring", "count": 3,
                             "agents": ["database-architect", "database-administrator", "security-engineer"]},
     "multi_service_integration": {"topology": "mesh", "count": 5,
-                                    "agents": ["api-architect", "worker", "worker", "test-generator", "reviewer"]},
+                                  "agents": ["api-architect", "worker", "worker", "test-generator", "reviewer"]},
     "ml_model_integration": {"topology": "hierarchical", "count": 4,
                                "agents": ["ml-engineer", "llm-architect", "backend-developer", "model-evaluator"]},
     "default": {"topology": "hierarchical", "count": 4,
                 "agents": ["planner", "worker", "reviewer", "wikibot"]},
+}
+
+# Map non-ruflo agent names to valid ruflo types for SWARM mode
+# This is needed because SWARM_TOPOLOGIES uses project-specific agent names
+RUFLO_AGENT_TYPE_MAP = {
+    "planner": "coordinator",
+    "worker": "coder",
+    "reviewer": "reviewer",
+    "wikibot": "coder",
+    "test-generator": "tester",
+    "backend-developer": "coder",
+    "frontend-developer": "coder",
+    "comprehensive-researcher": "researcher",
+    "tdd-red": "tester",
+    "tdd-green": "coder",
+    "qa-expert": "tester",
+    "mcp-security-auditor": "security-auditor",
+    "security-engineer": "security-architect",
+    "penetration-tester": "security-auditor",
+    "compliance-auditor": "security-auditor",
+    "debugger": "coder",
+    "error-detective": "analyst",
+    "documentation-engineer": "coder",
+    "readme-generator": "coder",
+    "devops-engineer": "coder",
+    "test-runner": "tester",
+    "data-researcher": "researcher",
+    "business-analyst": "analyst",
+    "wg-code-sentinel": "reviewer",
+    "wg-code-alchemist": "reviewer",
+    "performance-engineer": "performance-engineer",
+    "performance-monitor": "analyst",
+    "dx-optimizer": "coder",
+    "api-architect": "architect",
+    "api-designer": "architect",
+    "api-documenter": "coder",
+    "database-architect": "architect",
+    "database-administrator": "coder",
+    "ml-engineer": "coder",
+    "llm-architect": "architect",
+    "model-evaluator": "analyst",
+    # Swarm-specific agent types (from store.json)
+    "analyst": "analyst",
+    "architect": "architect",
+    "backend": "coder",
+    "backend-developer": "coder",
+    "code-reviewer": "reviewer",
+    "coordinator": "coordinator",
+    "core-architect": "core-architect",
+    "data": "analyst",
+    "data-analyst": "analyst",
+    "data-engineer": "coder",
+    "devops": "coder",
+    "devops-expert": "coder",
+    "docs": "coder",
+    "explorer": "researcher",
+    "memory-specialist": "memory-specialist",
+    "meta-performance-engineer": "performance-engineer",
+    "ml": "coder",
+    "optimizer": "optimizer",
+    "performance-engineer": "performance-engineer",
+    "product-project-manager": "coordinator",
+    "python-pro": "coder",
+    "research-analyst": "analyst",
+    "researcher": "researcher",
+    "reviewer": "reviewer",
+    "security-architect": "security-architect",
+    "security-auditor": "security-auditor",
+    "security-engineer": "security-architect",
+    "swarm-specialist": "swarm-specialist",
+    "test": "tester",
+    "test-architect": "test-architect",
+    "test-engineer": "tester",
+    "tester": "tester",
+    "testing": "tester",
+    "testing-test-engineer": "tester",
+    "worker": "general",
+    # Legacy/non-standard mappings
+    "test-runner": "tester",
+    "wg-code-sentinel": "reviewer",
+    "wg-code-alchemist": "reviewer",
+    "general": "general",
 }
 
 DOMAIN_TO_DEVELOPER = {
@@ -127,12 +213,8 @@ def lookup_swarm_config(task_description: str) -> dict:
 
 
 def resolve_developer_role(agent_name: str) -> str:
-    """Map generic developer roles to project-specific specialists."""
-    agent_lower = agent_name.lower()
-    for domain, developer in DOMAIN_TO_DEVELOPER.items():
-        if domain in agent_lower:
-            return developer
-    return agent_name
+    """Map project-specific agent names to valid ruflo agent types."""
+    return RUFLO_AGENT_TYPE_MAP.get(agent_name, agent_name)
 
 
 # ---------------------------------------------------------------------------
@@ -154,9 +236,10 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         return {}
     try:
         result = await _mcp_client.call_tool("ruflo", tool, args or {})
-        if isinstance(result, list) and len(result) > 0:
+        # call_tool returns str (JSON text or error message), not a list
+        if isinstance(result, str) and result.startswith("{"):
             import json
-            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
+            return json.loads(result)
         return {}
     except Exception as e:
         logger.debug("ruflo %s failed: %s", tool, e)
@@ -183,10 +266,8 @@ async def execute_direct(task: str, mcp_tool: str, mcp_args: dict) -> ExecutionR
     try:
         if _mcp_client:
             result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
-            if isinstance(result, list):
-                output = "\n".join(r.text if hasattr(r, "text") else str(r) for r in result)  # type: ignore[reportAttributeAccessIssue]
-            else:
-                output = str(result)
+            # call_tool returns str, not list
+            output = str(result) if result else ""
         else:
             error = "MCP client unavailable"
             success = False
@@ -220,7 +301,7 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
         "description": task_description,
         "priority": "normal",
     })
-    task_id = task_result.get("task_id", f"lite-{int(asyncio.get_event_loop().time())}")
+    task_id = task_result.get("taskId", f"lite-{int(asyncio.get_event_loop().time())}")
 
     # Execute all MCP calls
     outputs = []
@@ -231,10 +312,8 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
         try:
             if _mcp_client:
                 result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
-                if isinstance(result, list):
-                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))  # type: ignore[reportAttributeAccessIssue]
-                else:
-                    outputs.append(str(result))
+                # call_tool returns str, not list
+                outputs.append(str(result) if result else "")
             else:
                 errors.append(f"MCP unavailable for {mcp_tool}")
                 all_success = False
@@ -244,7 +323,7 @@ async def execute_lite(task: str, task_description: str, mcp_calls: list[tuple[s
 
     # Mark task complete
     await _call_ruflo("task_complete", {
-        "task_id": task_id,
+        "taskId": task_id,
     })
 
     # Store memory
@@ -296,13 +375,14 @@ async def execute_swarm(
         "strategy": "specialized",
         "consensus": "raft",
     })
-    swarm_id = swarm_result.get("swarm", {}).get("id", f"swarm-{int(asyncio.get_event_loop().time())}")
+    swarm_id = swarm_result.get("swarmId", f"swarm-{int(asyncio.get_event_loop().time())}")
 
     # SPAWN agents in parallel
     spawn_tasks = []
     for role in agent_roles:
+        ruflo_type = RUFLO_AGENT_TYPE_MAP.get(role, role)
         spawn_tasks.append(_call_ruflo("agent_spawn", {
-            "agent_type": role,
+            "agentType": ruflo_type,
             "task": f"{task} — {role} responsibility",
             "model": RUFLO_MODEL,
         }))
@@ -315,7 +395,7 @@ async def execute_swarm(
         "priority": "high",
         "type": "feature",
     })
-    task_id = task_result.get("task_id", f"swarm-{int(asyncio.get_event_loop().time())}")
+    task_id = task_result.get("taskId", f"swarm-{int(asyncio.get_event_loop().time())}")
 
     # EXECUTE MCP calls (the actual work happens via the spawned agents)
     # In SWARM mode the agents do the work; we just track their progress
@@ -327,10 +407,8 @@ async def execute_swarm(
         try:
             if _mcp_client:
                 result = await _mcp_client.call_tool(mcp_tool.split(".")[0], mcp_tool, mcp_args)
-                if isinstance(result, list):
-                    outputs.append("\n".join(r.text if hasattr(r, "text") else str(r) for r in result))  # type: ignore[reportAttributeAccessIssue]
-                else:
-                    outputs.append(str(result))
+                # call_tool returns str, not list
+                outputs.append(str(result) if result else "")
         except Exception as e:
             errors.append(f"{mcp_tool}: {e}")
             all_success = False
@@ -343,14 +421,18 @@ async def execute_swarm(
 
     # COMPLETE + LEARN
     await asyncio.gather(
-        _call_ruflo("task_complete", {"task_id": task_id}),
+        _call_ruflo("task_complete", {"taskId": task_id}),
         _call_ruflo("neural_train", {
-            "model_type": "classifier",
-            "data": f"{task} | topology={topology} | agents={agent_roles}",
+            "modelType": "classifier",
+            "data": {
+                "task": task,
+                "topology": topology,
+                "agents": agent_roles,
+            },
         }),
         _call_ruflo("session_save", {
             "name": f"auto-{int(asyncio.get_event_loop().time())}",
-            "include_memory": True,
+            "includeMemory": True,
         }),
     )
 

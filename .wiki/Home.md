@@ -4,19 +4,18 @@
 
 ## Quick Links
 
-- [[brain/North Star]] — Current goals and focus
-- [[brain/Memories]] — Memory topic index
-- [[brain/Key Decisions]] — Decision log
-- [[org/People & Context]] — Organizational knowledge
+- [North Star](brain/North%20Star) — Current goals and focus (note: may not exist)
+- [Memories](brain/Memories) — Memory topic index (note: may not exist)
+- [Key Decisions](brain/Key%20Decisions) — Decision log (note: may not exist)
+- [People & Context](org/People%20&%20Context) — Organizational knowledge (note: may not exist)
 
 ## Active Work
 
-- [[work/active/]] — Current projects
+- [Active Work](work/active) — Current projects (note: may not exist)
 
 ## Performance
 
-- [[perf/Brag Doc]] — Wins log
-- [[perf/competencies/]] — Competency framework
+- [Brag Doc](perf/Brag%20Doc) — Wins log (note: may not exist)
 
 ## Daily Commands
 

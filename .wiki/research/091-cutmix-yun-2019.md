@@ -6,10 +6,6 @@ tags: [cutmix, augmentation, regularization, classification, mixup]
 created: 2026-04-13
 updated: 2026-04-13
 summary: CutMix cuts and pastes rectangular patches between training images, mixing labels proportionally to patch area. Unlike Cutout (which removes information), CutMix uses all input pixels for training. ⚠️ NOT compatible with pose estimation tasks.
-wikilinks:
-  - [[research/090-bag-of-tricks]]
-  - [[research/092-randaugment]]
-  - [[research/054-remix-chou-2020]]
 confidence: high
 source: research
 project: popw

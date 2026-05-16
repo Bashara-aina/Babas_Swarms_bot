@@ -1,5 +1,6 @@
 ---
 title: 03 Paulo Graham Founder Mode
+type: concept
 tags:
   - stub
   - auto-generated

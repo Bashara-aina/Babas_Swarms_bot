@@ -1,5 +1,6 @@
 ---
 title: 04 First Principles Thinking
+type: concept
 tags:
   - stub
   - auto-generated

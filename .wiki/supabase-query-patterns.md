@@ -101,7 +101,7 @@ rows = await db.query_natural("Show me recent bookings with confirmed status")
 5. Batch inserts using `insert(table, [list of dicts])` — single HTTP call
 
 ## RLS PRODUCTION PATTERNS (Reference)
-See [[knowledge/engineering/085-supabase-rls-patterns]] for full RLS policy patterns.
+See [085-supabase-rls-patterns](knowledge/engineering/085-supabase-rls-patterns) for full RLS policy patterns.
 For Legion's Supabase usage:
 - Bot uses service role → RLS bypassed → external data isolation depends on bot logic
 - For multi-tenant Supabase projects: anon key should be used for user-facing queries with RLS enforced

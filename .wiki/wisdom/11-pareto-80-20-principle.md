@@ -1,5 +1,6 @@
 ---
 title: 11 Pareto 80-20 Principle
+type: concept
 tags:
   - stub
   - auto-generated

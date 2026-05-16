@@ -1,5 +1,6 @@
 ---
 title: 01 Munger Latticework
+type: concept
 tags:
   - stub
   - auto-generated

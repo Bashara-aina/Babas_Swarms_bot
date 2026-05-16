@@ -1,5 +1,6 @@
 ---
 title: 05 Second Order Thinking
+type: concept
 tags:
   - stub
   - auto-generated
