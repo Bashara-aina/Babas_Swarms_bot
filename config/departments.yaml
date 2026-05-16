@@ -1,4 +1,4 @@
-# config/departments.yaml — 76 agents across 9 departments
+# config/departments.yaml — 108 agents across 10 departments
 # Each agent: description, primary_model (ref models.yaml key), fallbacks, capabilities, tools, complexity_tier
 
 engineering:
@@ -67,6 +67,14 @@ engineering:
       fallbacks: [qwen3-235b, devstral]
       capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch]
       tools: [interpreter]
+      complexity_tier: heavyweight
+
+    swe_agent_dev:
+      description: "SWE-agent native implementation — agent-computer interface for GitHub issue solving"
+      primary_model: minimax-m2-7
+      fallbacks: [qwen3-235b, llama3-70b]
+      capabilities: [swe-agent, github-issue, fix-bug, agent-loop, trajectory, patch, str-replace-editor]
+      tools: [str_replace_editor, bash, grep, glob, submit]
       complexity_tier: heavyweight
 
     test_automation_engineer:

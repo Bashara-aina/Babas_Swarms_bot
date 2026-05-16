@@ -149,7 +149,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
     if model.startswith("ollama_chat/"):
         interpreter.llm.model = model
         interpreter.llm.api_base = "http://localhost:11434"
-        interpreter.llm.api_key = "ollama"
+        interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
         interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
@@ -191,7 +191,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
             )
             interpreter.llm.model = "ollama_chat/gemma4:e4b"
             interpreter.llm.api_base = "http://localhost:11434"
-            interpreter.llm.api_key = "ollama"
+            interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
             interpreter.llm.context_window = 8192
             interpreter.offline = True
             return "ollama_chat/gemma4:e4b"
@@ -206,7 +206,7 @@ def configure_interpreter(model: str, agent_key: str) -> str:
         logger.warning("Unknown model prefix '%s' — falling back to local Ollama", model)
         interpreter.llm.model = "ollama_chat/gemma4:e4b"
         interpreter.llm.api_base = "http://localhost:11434"
-        interpreter.llm.api_key = "ollama"
+        interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
         interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = True
