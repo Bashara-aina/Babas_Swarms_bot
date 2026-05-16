@@ -202,7 +202,7 @@ class PrefectPipeline:
         return await pipeline_flow()  # type: ignore[reportOptionalCall]
 
 
-def create_swarmbot_deployment(  # type: ignore[reportOptionalCall]
+async def create_swarmbot_deployment(  # type: ignore[reportOptionalCall]
     flow_fn: Callable,  # type: ignore[reportOptionalCall]
     name: str,  # type: ignore[reportOptionalCall]
     schedule: str | None = None,  # type: ignore[reportOptionalCall]
