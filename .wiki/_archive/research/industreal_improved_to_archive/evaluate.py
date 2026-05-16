@@ -26,27 +26,27 @@ from __future__ import annotations
 import json
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from model import POPWMultiTaskModel
 from torch.utils.data import DataLoader
 
 import config as C
-from model import POPWMultiTaskModel
-
 
 # ============================================================================
 # Metric Definitions (matching popw_paper.tex)
 # ============================================================================
 
 def compute_psr_precision_recall(
-    psr_dict: Dict[str, torch.Tensor],
+    psr_dict: dict[str, torch.Tensor],
     tolerance: int,
-) -> Tuple[float, float, int]:
+) -> tuple[float, float, int]:
     """
     Compute PSR precision/recall at a given frame tolerance.
 
@@ -60,8 +60,8 @@ def compute_psr_precision_recall(
     key = f"psr_valid_t{tolerance}"
     cos_key = f"psr_cos_t{tolerance}"
 
-    valid = psr_dict.get(key, None)
-    cos_sim = psr_dict.get(cos_key, None)
+    valid = psr_dict.get(key)
+    cos_sim = psr_dict.get(cos_key)
 
     if valid is None or cos_sim is None:
         return 0.0, 0.0, 0
@@ -75,7 +75,7 @@ def compute_psr_precision_recall(
     # PSR predicts "same phase" if cosine similarity > threshold
     threshold = 0.5
     preds_same_phase = (cos_sim[valid_mask] > threshold).float()
-    labels_same_phase = torch.ones_like(preds_same_phase)  # dummy labels for val
+    torch.ones_like(preds_same_phase)  # dummy labels for val
 
     tp = (preds_same_phase == 1).sum().item()
     fp = (preds_same_phase == 0).sum().item()
@@ -90,7 +90,7 @@ def compute_psr_precision_recall(
 def compute_head_pose_mae(
     pred: torch.Tensor,
     target: torch.Tensor,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Compute head pose MAE split by angular and positional components.
 
@@ -118,7 +118,7 @@ def compute_head_pose_mae(
 def compute_activity_metrics(
     logits: torch.Tensor,
     targets: torch.Tensor,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Compute activity recognition metrics.
 
@@ -129,8 +129,7 @@ def compute_activity_metrics(
     Returns:
         dict with: top1_acc, top5_acc, mcAP
     """
-    B = logits.size(0)
-    device = logits.device
+    logits.size(0)
 
     # Top-1 and Top-5 accuracy
     top1_preds = logits.argmax(dim=1)  # [B]
@@ -213,7 +212,7 @@ def compute_error_verification_metrics(
     logits: torch.Tensor,
     targets: torch.Tensor,
     threshold: float = 0.5,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Compute error verification AP and F1 (threshold=0.5).
 
@@ -272,7 +271,7 @@ def compute_error_verification_metrics(
 
 def measure_batched_fps(
     model: nn.Module,
-    input_shape: Tuple[int, int, int, int] = (2, 3, 224, 224),
+    input_shape: tuple[int, int, int, int] = (2, 3, 224, 224),
     num_warmup: int = 10,
     num_runs: int = 100,
     device: str = "cuda",
@@ -314,7 +313,7 @@ def measure_batched_fps(
 
 def measure_streaming_fps(
     model: nn.Module,
-    video_ids: List[str],
+    video_ids: list[str],
     num_frames_per_video: int = 64,
     num_warmup: int = 5,
     device: str = "cuda",
@@ -399,9 +398,9 @@ def estimate_multimodel_pipeline_fps(
 
 def evaluate_batch(
     model: nn.Module,
-    batch: Dict[str, torch.Tensor],
+    batch: dict[str, torch.Tensor],
     device: str = "cuda",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Run a single batch through the model and compute all metrics.
 
@@ -476,7 +475,7 @@ def evaluate_all(
     model: nn.Module,
     val_loader: DataLoader,
     device: str = "cuda",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Run full validation split evaluation.
 
@@ -507,15 +506,17 @@ def evaluate_all(
 def run_multi_seed_evaluation(
     model_fn: Callable[[], nn.Module],
     val_loader: DataLoader,
-    seeds: List[int] = [42, 123, 456],
+    seeds: list[int] | None = None,
     device: str = "cuda",
-) -> List[Dict[str, float]]:
+) -> list[dict[str, float]]:
     """
     Run evaluation across multiple random seeds (for variance estimation).
 
     Returns:
         list of metric dicts, one per seed
     """
+    if seeds is None:
+        seeds = [42, 123, 456]
     results = []
     for seed in seeds:
         torch.manual_seed(seed)
@@ -527,7 +528,7 @@ def run_multi_seed_evaluation(
     return results
 
 
-def _print_single_run_results(metrics: Dict[str, float]) -> None:
+def _print_single_run_results(metrics: dict[str, float]) -> None:
     """Print formatted metric results for a single evaluation run."""
     print("\n" + "=" * 60)
     print("POPW v2/v3 — Evaluation Results")
@@ -560,13 +561,13 @@ def _print_single_run_results(metrics: Dict[str, float]) -> None:
     print(f"  N valid   : {metrics.get('psr_n_valid_t5', 0)}")
 
     print("\n⚡ Efficiency:")
-    print(f"  Note: run measure_batched_fps() + measure_streaming_fps()")
+    print("  Note: run measure_batched_fps() + measure_streaming_fps()")
     print("=" * 60 + "\n")
 
 
 def _print_multi_seed_summary(
-    results: List[Dict[str, float]],
-    seeds: List[int],
+    results: list[dict[str, float]],
+    seeds: list[int],
 ) -> None:
     """Print mean ± std across seeds."""
     print("\n" + "=" * 60)

@@ -18,31 +18,32 @@ def test_imports():
     """Verify all modules import without errors."""
     print("[1/7] Testing imports...")
     try:
+        import numpy as np
         import torch
         import torch.nn as nn
-        import numpy as np
-        from model import POPWMultiTaskModel
-        import config as C
-        from losses import (
-            LDAMLoss,
-            FocalLoss,
-            WingLoss,
-            HeadPoseLoss,
-            AssemblyStateLoss,
-            ErrorVerificationLoss,
-            PSRContrastiveLoss,
-            MultiTaskLoss,
-        )
         from evaluate import (
-            compute_psr_precision_recall,
-            compute_head_pose_mae,
             compute_activity_metrics,
             compute_assembly_state_f1,
             compute_error_verification_metrics,
+            compute_head_pose_mae,
+            compute_psr_precision_recall,
+            evaluate_batch,
             measure_batched_fps,
             measure_streaming_fps,
-            evaluate_batch,
         )
+        from losses import (
+            AssemblyStateLoss,
+            ErrorVerificationLoss,
+            FocalLoss,
+            HeadPoseLoss,
+            LDAMLoss,
+            MultiTaskLoss,
+            PSRContrastiveLoss,
+            WingLoss,
+        )
+        from model import POPWMultiTaskModel
+
+        import config as C
         print("  ✅ All imports OK")
         return True
     except Exception as e:
@@ -129,7 +130,7 @@ def test_model_forward():
             assert f"psr_cos_t{tol}" in out["psr_dict"], f"Missing psr_cos_t{tol}"
             assert f"psr_valid_t{tol}" in out["psr_dict"], f"Missing psr_valid_t{tol}"
 
-        print(f"  ✅ Forward pass OK — output shapes verified")
+        print("  ✅ Forward pass OK — output shapes verified")
         print(f"     act_logits:      {out['act_logits'].shape}")
         print(f"     head_pose:       {out['head_pose'].shape}")
         print(f"     assembly_state:  {out['assembly_state_logits'].shape}")
@@ -150,9 +151,14 @@ def test_losses():
         import torch
         import torch.nn.functional as F
         from losses import (
-            LDAMLoss, FocalLoss, WingLoss, HeadPoseLoss,
-            AssemblyStateLoss, ErrorVerificationLoss,
-            PSRContrastiveLoss, MultiTaskLoss,
+            AssemblyStateLoss,
+            ErrorVerificationLoss,
+            FocalLoss,
+            HeadPoseLoss,
+            LDAMLoss,
+            MultiTaskLoss,
+            PSRContrastiveLoss,
+            WingLoss,
         )
 
         B, num_classes = 4, 33
@@ -218,7 +224,7 @@ def test_model_parameters():
         print(f"  Assembly State:  {counts['assembly_state_head']:,}")
         print(f"  Error Verif:    {counts['error_verification_head']:,}")
         print(f"  PDD:            {counts['pdd']:,}")
-        print(f"  ─────────────────────────────")
+        print("  ─────────────────────────────")
         print(f"  Total:          {counts['total']:,}")
         print(f"  Trainable:      {counts['total_trainable']:,}")
 
@@ -238,13 +244,13 @@ def test_evaluate_metrics():
     """Test evaluate metric functions."""
     print("[6/7] Testing evaluate metrics...")
     try:
-        import torch
         import numpy as np
+        import torch
         from evaluate import (
             compute_activity_metrics,
-            compute_head_pose_mae,
             compute_assembly_state_f1,
             compute_error_verification_metrics,
+            compute_head_pose_mae,
             compute_psr_precision_recall,
         )
 
@@ -316,7 +322,7 @@ def test_droppath_fix():
         block.train()  # set training mode to enable DropPath
         out = block(x)  # Uses self.training internally — no explicit training= arg
 
-        print(f"  ✅ TemporalConvBlock forward OK with training=True")
+        print("  ✅ TemporalConvBlock forward OK with training=True")
         print(f"     Input:  {x.shape}")
         print(f"     Output: {out.shape}")
         return True

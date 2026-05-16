@@ -17,7 +17,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 # ============================================================================
 # LDAMLoss — Label-Smoothing LDAM for Activity Recognition
 # ============================================================================
@@ -66,7 +65,7 @@ class LDAMLoss(nn.Module):
         Returns:
             scalar loss
         """
-        B = logits.size(0)
+        logits.size(0)
         device = logits.device
 
         # Convert targets to one-hot

@@ -110,7 +110,7 @@ class ConvNeXtBackbone(nn.Module):
     def __init__(
         self,
         pretrained: bool = True,
-        stage_to_features: Optional[Dict[int, List[int]]] = None,
+        stage_to_features: dict[int, list[int]] | None = None,
     ):
         super().__init__()
         # Lazy import to avoid requiring timm if not installed
@@ -131,7 +131,7 @@ class ConvNeXtBackbone(nn.Module):
         # But layer4 produces 7 pooled outputs [0..6] for our stage indexing
         self._stage_to_features = stage_to_features
 
-    def set_backbone_stage_requires_grad(self, frozen_stages: List[int]) -> None:
+    def set_backbone_stage_requires_grad(self, frozen_stages: list[int]) -> None:
         """
         Freeze ConvNeXt stages by feature output index.
 
@@ -197,7 +197,7 @@ class ConvNeXtBackbone(nn.Module):
             f"{total_params/1e6:.1f}M | Trainable: {trainable_count/1e6:.1f}M"
         )
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """
         Args:
             x: [B, 3, H, W] — RGB image
@@ -292,7 +292,6 @@ class TemporalConvBlock(nn.Module):
         B, C, T, H, W = x.shape
 
         # Pre-norm branch
-        residual = x
         x_norm = self.norm1(x)
         x_conv = self.conv1(x_norm)
         x_conv = self.act(x_conv)
@@ -401,8 +400,8 @@ class FeatureBankCache:
         self.max_frames = max_frames
         self.feat_dim = feat_dim
         # [T_max, B, C] — T_max is the max frames we track per video
-        self.features: Dict[str, torch.Tensor] = {}
-        self.frame_count: Dict[str, int] = {}
+        self.features: dict[str, torch.Tensor] = {}
+        self.frame_count: dict[str, int] = {}
 
     def store(self, video_id: str, features: torch.Tensor) -> None:
         """Store features for one frame of a video."""
@@ -411,7 +410,7 @@ class FeatureBankCache:
         if len(self.features[video_id]) < self.max_frames:
             self.features[video_id].append(features.detach().cpu())
 
-    def get(self, video_id: str, offset: int) -> Optional[torch.Tensor]:
+    def get(self, video_id: str, offset: int) -> torch.Tensor | None:
         """
         Get features for frame at (current_frame_idx + offset).
 
@@ -432,7 +431,7 @@ class FeatureBankCache:
         self.features.pop(video_id, None)
         self.frame_count.pop(video_id, None)
 
-    def forward(self, features: torch.Tensor, video_ids: List[str]) -> None:
+    def forward(self, features: torch.Tensor, video_ids: list[str]) -> None:
         """
         Store features for batch of frames. Each batch item is a different video
         in streaming mode (batch_size=1 in streaming, but we support batch > 1 for eval).
@@ -496,11 +495,11 @@ class STORMPSR(nn.Module):
     def forward(
         self,
         current_feat: torch.Tensor,
-        feat_bank: Optional[FeatureBankCache],
-        video_ids: Optional[List[str]] = None,
+        feat_bank: FeatureBankCache | None,
+        video_ids: list[str] | None = None,
         offset_t3: int = 3,
         offset_t5: int = 5,
-    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+    ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         """
         Args:
             current_feat  : [B, C] — projected current frame features
@@ -623,7 +622,7 @@ class HeadPoseHead(nn.Module):
         self,
         pred: torch.Tensor,
         gt: torch.Tensor,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Compute MAE metrics from predictions and ground truth.
 
@@ -802,8 +801,8 @@ class PoseDerivedDetection(nn.Module):
     def forward(
         self,
         keypoints: torch.Tensor,
-        image_size: Tuple[int, int] = (C.IMG_HEIGHT, C.IMG_WIDTH),
-    ) -> Dict[str, torch.Tensor]:
+        image_size: tuple[int, int] = (C.IMG_HEIGHT, C.IMG_WIDTH),
+    ) -> dict[str, torch.Tensor]:
         """
         Args:
             keypoints  : [B, 17, 2] — (x, y) pixel coordinates of skeleton
@@ -900,7 +899,7 @@ class MViTv2Encoder(nn.Module):
         # Temporal pooling to get [B, C] per frame
         self.temporal_pool = nn.AdaptiveAvgPool3d((1, None, None))  # pool only T
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """
         Args:
             x: [B, C, H, W] — per-frame ConvNeXt features (after spatial pooling)
@@ -951,7 +950,7 @@ class POPWMultiTaskModel(nn.Module):
     def __init__(
         self,
         pretrained: bool = True,
-        backbone_freeze_stages: Optional[List[int]] = None,
+        backbone_freeze_stages: list[int] | None = None,
         use_psr_sequence_mode: bool = False,
     ):
         super().__init__()
@@ -1004,11 +1003,11 @@ class POPWMultiTaskModel(nn.Module):
         self.pose_derived_detection = PoseDerivedDetection()
 
         # FeatureBank for streaming inference
-        self.feature_bank: Optional[FeatureBankCache] = None
+        self.feature_bank: FeatureBankCache | None = None
         self.use_psr_sequence_mode = use_psr_sequence_mode
 
         # Cache for per-video feature sequences (streaming mode)
-        self._video_feature_cache: Dict[str, List[torch.Tensor]] = {}
+        self._video_feature_cache: dict[str, list[torch.Tensor]] = {}
 
     def set_use_psr_sequence_mode(self, enabled: bool) -> None:
         """Enable PSR sequence mode after initial training validates architecture."""
@@ -1023,9 +1022,9 @@ class POPWMultiTaskModel(nn.Module):
     def forward(
         self,
         images: torch.Tensor,
-        video_ids: Optional[List[str]] = None,
-        clip_rgb: Optional[torch.Tensor] = None,
-    ) -> Dict[str, torch.Tensor]:
+        video_ids: list[str] | None = None,
+        clip_rgb: torch.Tensor | None = None,
+    ) -> dict[str, torch.Tensor]:
         """
         Full multi-task forward pass.
 
@@ -1105,7 +1104,7 @@ class POPWMultiTaskModel(nn.Module):
         }
 
 
-def count_parameters(model: POPWMultiTaskModel) -> Dict[str, int]:
+def count_parameters(model: POPWMultiTaskModel) -> dict[str, int]:
     """Count model parameters by component."""
     components = {
         "backbone": [model.backbone.backbone],

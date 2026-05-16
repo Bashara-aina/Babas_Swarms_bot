@@ -36,7 +36,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, Dataset
 
 # ---------------------------------------------------------------------------
@@ -61,21 +61,23 @@ torch.set_num_interop_threads(4)
 
 # Enable faulthandler to catch segfaults early
 import faulthandler
+
 faulthandler.enable()
 
 # ---------------------------------------------------------------------------
 # Local imports
 # ---------------------------------------------------------------------------
 sys.path.insert(0, str(Path(__file__).parent))
-from model import POPWMultiTaskModel, count_parameters
 from losses import (
-    LDAMLoss,
-    HeadPoseLoss,
     AssemblyStateLoss,
     ErrorVerificationLoss,
-    PSRContrastiveLoss,
+    HeadPoseLoss,
+    LDAMLoss,
     MultiTaskLoss,
+    PSRContrastiveLoss,
 )
+from model import POPWMultiTaskModel, count_parameters
+
 import config as C
 
 # ---------------------------------------------------------------------------
@@ -130,7 +132,7 @@ class SyntheticIndustRealDataset(Dataset):
     def __len__(self) -> int:
         return self.num_samples
 
-    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
         # Synthetic image [T=16, C=3, H=224, W=224]
         images = torch.randn(self.num_frames, 3, self.img_h, self.img_w)
         # Normalize to ImageNet stats
@@ -157,7 +159,7 @@ class SyntheticIndustRealDataset(Dataset):
         }
 
 
-def collate_fn(batch: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
+def collate_fn(batch: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
     """
     Custom collate: stack images, keep labels as-is.
     NOTE: num_workers=0 means this runs in the main process (no subprocess serialization).
@@ -193,7 +195,7 @@ class EMAModel:
     def __init__(self, model: nn.Module, decay: float = 0.9998, warmup_steps: int = 2000):
         self.decay = decay
         self.warmup_steps = warmup_steps
-        self.shadow: Dict[str, torch.Tensor] = {}
+        self.shadow: dict[str, torch.Tensor] = {}
         self.step_count = 0
         self._register(model)
 
@@ -229,13 +231,13 @@ def train_one_epoch(
     dataloader: DataLoader,
     optimizer: optim.Optimizer,
     scheduler,
-    ema: Optional[EMAModel],
+    ema: EMAModel | None,
     scaler: GradScaler,
     device: torch.device,
     logger: logging.Logger,
     epoch: int,
     global_step: int,
-    max_steps_per_epoch: Optional[int] = None,
+    max_steps_per_epoch: int | None = None,
 ) -> int:
     """
     Train one epoch. Returns new global_step.
@@ -262,7 +264,7 @@ def train_one_epoch(
 
         # Move to device
         images = batch["images"].to(device)          # [B, T, C, H, W]
-        B = images.shape[0]
+        images.shape[0]
 
         # Flatten temporal dimension for backbone: [B*T, C, H, W]
         images_flat = images.view(-1, C.IMG_HEIGHT, C.IMG_WIDTH)
@@ -339,12 +341,12 @@ def save_checkpoint(
     model: nn.Module,
     optimizer: optim.Optimizer,
     scheduler,
-    ema: Optional[EMAModel],
+    ema: EMAModel | None,
     epoch: int,
     global_step: int,
     checkpoint_dir: Path,
     logger: logging.Logger,
-    metric: Optional[Dict] = None,
+    metric: dict | None = None,
 ):
     """Save checkpoint — latest.pth and epoch-specific."""
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -379,7 +381,7 @@ def load_checkpoint(
     model: nn.Module,
     optimizer: optim.Optimizer,
     scheduler,
-    ema: Optional[EMAModel],
+    ema: EMAModel | None,
     device: torch.device,
     logger: logging.Logger,
 ) -> tuple:
@@ -411,7 +413,7 @@ def load_checkpoint(
 # Metrics logging (JSONL — written after each epoch)
 # ---------------------------------------------------------------------------
 
-def write_metrics_jsonl(metrics: Dict, log_dir: Path, epoch: int):
+def write_metrics_jsonl(metrics: dict, log_dir: Path, epoch: int):
     """Append epoch metrics to metrics.jsonl."""
     metrics_file = log_dir / "metrics.jsonl"
     line = json.dumps({"epoch": epoch, "step": metrics.get("global_step", 0), **metrics})
