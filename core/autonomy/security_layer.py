@@ -62,26 +62,25 @@ async def pre_git_commit_scan(staged_files: list[str]) -> tuple[bool, str]:
         return True, ""
 
     results = await asyncio.gather(
-        _call_ruflo("pii_detect", {
+        _call_ruflo("aidefence_has_pii", {
             "input": ",".join(staged_files),
-            "scan_type": "file",
         }),
-        _call_ruflo("security_scan", {
-            "checks": ["api_key_exposure", "hardcoded_credentials"],
-            "depth": "standard",
+        _call_ruflo("aidefence_scan", {
+            "input": ",".join(staged_files),
         }),
     )
 
     pii_result, sec_result = results
 
-    if pii_result and pii_result.get("pii_detected"):
+    if pii_result and pii_result.get("has_pii"):
         pii_types = pii_result.get("pii_types", [])
         return False, f"PII detected in staged files: {', '.join(pii_types)}. Remove or redact before committing."
 
-    if sec_result and sec_result.get("issues_found", 0) > 0:
-        severity = sec_result.get("issues", [{}])[0].get("severity", "medium")
+    if sec_result and sec_result.get("threats_found", 0) > 0:
+        threats = sec_result.get("threats", [])
+        severity = threats[0].get("severity", "medium") if threats else "medium"
         if severity in ("high", "critical"):
-            msg = sec_result["issues"][0].get("message", "Security issue detected")
+            msg = threats[0].get("message", "Security issue detected") if threats else "Security issue detected"
             return False, f"Security issue: {msg}. Fix before committing."
 
     return True, ""
@@ -90,37 +89,34 @@ async def pre_git_commit_scan(staged_files: list[str]) -> tuple[bool, str]:
 async def pre_api_endpoint_scan(schema: str) -> tuple[bool, str]:
     """Validate new API endpoint schema and run security scan."""
     results = await asyncio.gather(
-        _call_ruflo("validate_input", {
-            "value": schema,
-            "input_type": "query",
+        _call_ruflo("aidefence_scan", {
+            "input": schema,
         }),
-        _call_ruflo("security_scan", {
-            "checks": ["sql_injection", "xss", "path_traversal"],
-            "depth": "standard",
+        _call_ruflo("aidefence_scan", {
+            "input": schema,
         }),
     )
     val_result, sec_result = results
 
-    if val_result and not val_result.get("valid"):
-        issues = val_result.get("issues", [])
-        return False, f"Input validation failed: {', '.join(issues)}"
+    if val_result and val_result.get("threats_found", 0) > 0:
+        threats = val_result.get("threats", [])
+        return False, f"Input validation failed: {', '.join([t.get('message', 'unknown') for t in threats[:3]])}"
 
-    if sec_result and sec_result.get("issues_found", 0) > 0:
-        for issue in sec_result.get("issues", []):
-            if issue.get("severity") in ("high", "critical"):
-                return False, f"Security issue: {issue.get('message', 'unknown')}"
+    if sec_result and sec_result.get("threats_found", 0) > 0:
+        for threat in sec_result.get("threats", []):
+            if threat.get("severity") in ("high", "critical"):
+                return False, f"Security issue: {threat.get('message', 'unknown')}"
 
     return True, ""
 
 
 async def pre_pii_data_scan(code_content: str) -> tuple[bool, str]:
     """Scan code that will handle salary/tax/KTP/bank data."""
-    result = await _call_ruflo("pii_detect", {
+    result = await _call_ruflo("aidefence_has_pii", {
         "input": code_content,
-        "scan_type": "text",
     })
 
-    if result and result.get("pii_detected"):
+    if result and result.get("has_pii"):
         pii_types = result.get("pii_types", [])
         return False, f"PII types detected in code: {', '.join(pii_types)}. Ensure no PII is logged or exposed in error messages."
 

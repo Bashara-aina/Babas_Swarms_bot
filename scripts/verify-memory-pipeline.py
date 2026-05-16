@@ -115,10 +115,11 @@ check("MemoryStore connects",
       lambda: _run_py('from core.memory.store import MemoryStore; s=MemoryStore(); print("OK")', timeout=8))
 check("MemoryStore has entries",
       lambda: _run_py('from core.memory.store import MemoryStore; s=MemoryStore(); r=s.recall("bashara",agent_id=None,top_k=1,min_score=0.0); print(len(r)if r else 0)', timeout=8))
-check("recalled_context.md exists",
-      lambda: os.path.exists('/home/newadmin/swarm-bot/.session_state/recalled_context.md') or "OK")
-check("recalled_context.md non-empty",
-      lambda: os.path.getsize('/home/newadmin/swarm-bot/.session_state/recalled_context.md'))
+check("remembered_context.md exists",
+      lambda: os.path.exists('/home/newadmin/swarm-bot/.session_state/remembered_context.md') or "OK")
+
+check("remembered_context.md non-empty",
+      lambda: os.path.getsize('/home/newadmin/swarm-bot/.session_state/remembered_context.md'))
 
 section("Layer 3 — langmem")
 check("langmem returns list",
