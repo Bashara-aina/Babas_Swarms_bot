@@ -124,10 +124,11 @@ def tier_for(info_type: str) -> InformationTier:
     routing = WRITE_ROUTING.get(info_type)
     if routing is None:
         return InformationTier.WORKING
-    dest, _ = routing
+    dest, path = routing
     if "hermes" in dest or "mem0" in dest:
         return InformationTier.SEMANTIC
-    if ".wiki" in dest:
+    # path (second element) contains ".wiki" for Obsidian-bound writes
+    if path and ".wiki" in str(path):
         return InformationTier.STRUCTURAL
     if "/tmp" in dest:
         return InformationTier.HOT
