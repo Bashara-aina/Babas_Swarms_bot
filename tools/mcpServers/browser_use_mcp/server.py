@@ -42,7 +42,7 @@ VERSION = "1.26.0"
 
 MINIMAX_API_BASE = os.environ.get("MINIMAX_API_BASE", "https://api.minimax.io/v1")
 MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
-MINIMAX_MODEL = "minimax/MiniMax-M2.7"
+MINIMAX_MODEL = "minimax-coding-plan/MiniMax-M2.7"
 
 _FORBIDDEN = {"claude", "anthropic", "gpt-4", "gpt-5", "openai", "gemini", "groq", "together"}
 if any(k in MINIMAX_MODEL.lower() for k in _FORBIDDEN):
@@ -55,7 +55,7 @@ mcp = FastMCP(
     name=APP_NAME,
     instructions="MiniMax-native browser automation via browser-use. "
     "Open URLs, click elements, fill forms, scroll, screenshot, and run autonomous browser tasks. "
-    "All LLM calls use minimax/MiniMax-M2.7 exclusively.",
+    "All LLM calls use minimax-coding-plan/MiniMax-M2.7 exclusively.",
 )
 
 
@@ -219,6 +219,32 @@ class BrowserSessionWrapper:
         self._agent = None
         self._initialized = False
 
+    @staticmethod
+    def _escape_css_selector(selector: str) -> str:
+        """Escape CSS selector to prevent injection attacks."""
+        result = []
+        for ch in selector:
+            code = ord(ch)
+            if code < 0x20 or code >= 0x7f:
+                # Non-ASCII or control char: escape as unicode
+                result.append(f"\\{format(code, 'x')} ")
+            elif ch == "\\":
+                result.append("\\\\")
+            elif ch == "'":
+                result.append("\\'")
+            elif ch == '"':
+                result.append('\\"')
+            elif ch == "]":
+                result.append("]")  # ] closes [attr] selectors, re-escaped below
+            elif ch in ("[", "]", "(", ")", "{", "}", ":"):
+                result.append(f"\\{ch}")
+            else:
+                result.append(ch)
+        s = "".join(result)
+        # Escape closing ] for attribute selectors
+        s = s.replace("]", "\\]")
+        return s
+
     async def _ensure(self):
         if self._initialized:
             return
@@ -267,7 +293,7 @@ class BrowserSessionWrapper:
         page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        escaped = selector.replace("'", "\\'")
+        escaped = self._escape_css_selector(selector)
         js = f"() => {{ const el = document.querySelector('{escaped}'); if (!el) return 'not_found'; el.click(); return 'clicked'; }}"
         result = await page.evaluate(js)
         if result == "not_found":
@@ -279,8 +305,8 @@ class BrowserSessionWrapper:
         page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        escaped_sel = selector.replace("'", "\\'")
-        escaped_val = value.replace("'", "\\'").replace("\n", "\\n")
+        escaped_sel = _escape_css_selector(selector)
+        escaped_val = json.dumps(value)[1:-1]  # JSON.dumps quotes and escapes ALL special chars
         js = f"() => {{ const el = document.querySelector('{escaped_sel}'); if (!el) return 'not_found'; el.value = '{escaped_val}'; el.dispatchEvent(new Event('input', {{bubbles: true}})); return 'filled'; }}"
         result = await page.evaluate(js)
         if result == "not_found":
@@ -305,9 +331,24 @@ class BrowserSessionWrapper:
         if not page:
             return {"error": "No active page. Call open() first."}
         import base64
+
+        # SECURITY: Validate path is within allowed directories
+        allowed_base = os.environ.get("ALLOWED_SCREENSHOT_DIRS", "")
+        if allowed_base:
+            allowed_dirs = [os.path.abspath(d.strip()) for d in allowed_base.split(":") if d.strip()]
+            target_abs = os.path.abspath(path)
+            if not any(target_abs.startswith(d + os.sep) or target_abs == d for d in allowed_dirs):
+                return {"error": f"Path outside allowed directories: {path}"}
+
         img_data = await page.screenshot()
         if isinstance(img_data, str):
             img_data = base64.b64decode(img_data)
+
+        # Ensure parent directory exists
+        parent_dir = os.path.dirname(path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+
         with open(path, "wb") as f:
             f.write(img_data)
         return {"success": True, "path": path}
@@ -317,7 +358,7 @@ class BrowserSessionWrapper:
         page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        escaped = selector.replace("'", "\\'")
+        escaped = self._escape_css_selector(selector)
         js = f"() => document.querySelector('{escaped}')?.innerText || ''"
         text = await page.evaluate(js)
         return {"text": text, "selector": selector}
@@ -327,7 +368,7 @@ class BrowserSessionWrapper:
         page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        escaped = selector.replace("'", "\\'")
+        escaped = self._escape_css_selector(selector)
         js = f"() => document.querySelector('{escaped}')?.innerHTML || ''"
         html = await page.evaluate(js)
         return {"html": html, "selector": selector}
