@@ -53,6 +53,10 @@ class Intent(Enum):
     DEEP_REASONING = "deep_reasoning"  # complex multi-step thinking
 
 
+# Convenience list for iteration / validation — mirrors all Intent values
+INTENTS: list[Intent] = list(Intent)
+
+
 # Keyword patterns per intent — fast heuristic before LLM classification
 _PATTERNS: dict[Intent, list[str]] = {
     Intent.COMPUTER_CONTROL: [
