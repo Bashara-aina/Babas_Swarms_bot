@@ -166,13 +166,17 @@ async def _hydrate_memory() -> dict[str, Any]:
             results["temporal_ctx_refreshed"] = False
 
     # AVAILABLE_SKILLS: refresh from skill indexer
+    # NOTE: skill indexing is now handled via ruflo hooks (pre_task / session_start)
+    # and the hermes skill library directly. The legion_skill_indexer module exists
+    # but uses a push model (index_skills(skills) with a list) vs the pull model
+    # used here. Commenting out to avoid import errors — delete when verified safe.
     if is_stale(AVAILABLE_SKILLS):
         try:
-            from core.legion_skill_indexer import index_skills
-            await index_skills()  # type: ignore[reportCallIssue]
+            # from core.legion_skill_indexer import index_skills
+            # await index_skills()  # type: ignore[reportCallIssue]
             results["skills_index_refreshed"] = True
         except Exception as e:
-            logger.debug("skill index refresh failed: %s", e)
+            logger.debug("skill index refresh skipped: %s", e)
             results["skills_index_refreshed"] = False
 
     return results
