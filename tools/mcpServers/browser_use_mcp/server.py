@@ -305,7 +305,7 @@ class BrowserSessionWrapper:
         page = await self._get_page()
         if not page:
             return {"error": "No active page. Call open() first."}
-        escaped_sel = _escape_css_selector(selector)
+        escaped_sel = self._escape_css_selector(selector)
         escaped_val = json.dumps(value)[1:-1]  # JSON.dumps quotes and escapes ALL special chars
         js = f"() => {{ const el = document.querySelector('{escaped_sel}'); if (!el) return 'not_found'; el.value = '{escaped_val}'; el.dispatchEvent(new Event('input', {{bubbles: true}})); return 'filled'; }}"
         result = await page.evaluate(js)
