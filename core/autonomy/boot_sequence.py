@@ -20,9 +20,9 @@ import yaml
 logger = logging.getLogger(__name__)
 
 # Load ruflo_model from config/models.yaml
-_rurlo_cfg_path = Path("config/models.yaml")
-if _rurlo_cfg_path.exists():
-    with _rurlo_cfg_path.open() as f:
+_ruflo_cfg_path = Path("config/models.yaml")
+if _ruflo_cfg_path.exists():
+    with _ruflo_cfg_path.open() as f:
         _cfg = yaml.safe_load(f)
     _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
     _ruflo_model_id = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
@@ -58,10 +58,11 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         return {}
     try:
         result = await _ruflo_client.call_tool("ruflo", tool, args or {})
-        if isinstance(result, list) and len(result) > 0:
+        # call_tool returns str (JSON text or error message), not a list
+        if isinstance(result, str) and result.startswith("{"):
             import json
             try:
-                return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
+                return json.loads(result)
             except Exception:
                 return {}
         return {}
@@ -81,7 +82,7 @@ async def run_boot_sequence() -> BootResult:
 
     # STEP 1: Health check (parallel)
     status_task = asyncio.create_task(_call_ruflo("system_status"))
-    doctor_task = asyncio.create_task(_call_ruflo("system_health", {"deep": False}))
+    doctor_task = asyncio.create_task(_call_ruflo("doctor", {"deep": False}))
 
     status_data, doctor_data = await asyncio.gather(status_task, doctor_task)
 
@@ -117,40 +118,20 @@ async def run_boot_sequence() -> BootResult:
         ("optimize", "every_5_tasks"),
     ]
     for worker_name, trigger in workers:
-        disp = await _call_ruflo("hooks_worker-dispatch", {
-            "worker_name": worker_name,
-            "trigger": trigger,
+        disp = await _call_ruflo("worker/dispatch", {
+            "trigger": worker_name,
+            "context": trigger,
         })
         if disp.get("success"):
             result.workers_dispatched += 1
 
-    # STEP 5: Register hooks (idempotent) — use hooks_trigger with event/action/config
-    hooks = [
-        ("pre_git_commit", "security_scan", {
-            "checks": ["pii_detect", "api_key_exposure"],
-            "block_on_fail": True,
-        }),
-        ("task_complete", "memory_store", {
-            "auto_tag": True,
-            "also_store_to": ["mem0", "obsidian"],
-        }),
-        ("task_success", "neural_train", {
-            "min_confidence_threshold": 0.7,
-            "pattern_namespace": "elite-stack",
-        }),
-        ("session_end", "session_save", {
-            "include_memory": True,
-            "export_to": "~/.legion/sessions/",
-        }),
-    ]
-    for event, action, config in hooks:
-        hr = await _call_ruflo("hooks_trigger", {
-            "event": event,
-            "action": action,
-            "config": config,
-        })
-        if hr.get("success"):
-            result.hooks_registered += 1
+    # STEP 5: Initialize hooks in project (idempotent — creates .claude/settings.json and .claude/hooks/)
+    init_result = await _call_ruflo("hooks_init", {
+        "path": "/home/newadmin/swarm-bot",
+        "template": "standard",
+    })
+    if init_result.get("success") or "settingsJson" in str(init_result):
+        result.hooks_registered = init_result.get("hooks", {}).get("configured", 9)
 
     elapsed = asyncio.get_event_loop().time() - start
     logger.info(
