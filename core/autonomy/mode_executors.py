@@ -212,9 +212,46 @@ def lookup_swarm_config(task_description: str) -> dict:
     return SWARM_TOPOLOGIES["default"]
 
 
+# Valid ruflo agent types (used for fallback validation)
+_VALID_RUFLO_TYPES = frozenset({
+    "coder", "researcher", "tester", "reviewer", "architect",
+    "coordinator", "analyst", "optimizer", "security-architect",
+    "security-auditor", "memory-specialist", "swarm-specialist",
+    "performance-engineer", "core-architect", "test-architect", "general"
+})
+
+
 def resolve_developer_role(agent_name: str) -> str:
-    """Map project-specific agent names to valid ruflo agent types."""
-    return RUFLO_AGENT_TYPE_MAP.get(agent_name, agent_name)
+    """Map project-specific agent names to valid ruflo agent types.
+
+    Handles compound names like 'backend-backend-developer' by first checking
+    the full name, then trying the last segment after '-' or '_.
+    Falls back to 'general' if the resolved type is not a valid ruflo type.
+    """
+    # Try exact match first
+    if agent_name in RUFLO_AGENT_TYPE_MAP:
+        resolved = RUFLO_AGENT_TYPE_MAP[agent_name]
+    else:
+        # Try lowercased version
+        resolved = RUFLO_AGENT_TYPE_MAP.get(agent_name.lower(), agent_name)
+
+    # Validate resolved type is in the valid set
+    if resolved not in _VALID_RUFLO_TYPES:
+        # Last resort: try extracting the last segment from compound names
+        # e.g., "backend-backend-developer" -> try "backend-developer"
+        segments = agent_name.replace("_", "-").split("-")
+        if len(segments) > 1:
+            # Try progressively shorter suffixes
+            for i in range(len(segments) - 1, 0, -1):
+                candidate = "-".join(segments[i:])
+                if candidate in RUFLO_AGENT_TYPE_MAP:
+                    resolved = RUFLO_AGENT_TYPE_MAP[candidate]
+                    break
+            # If still not valid, fall back to general
+            if resolved not in _VALID_RUFLO_TYPES:
+                resolved = "general"
+
+    return resolved
 
 
 # ---------------------------------------------------------------------------
