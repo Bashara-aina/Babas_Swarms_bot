@@ -183,12 +183,28 @@ async def run_opencode_task(
         try:
             from core.memory.memory_injector import build_memory_context
 
-            # Build fresh memory context (writes to recalled_context.md)
+            # Build fresh 6-layer memory context.
+            # Writes to recalled_context.md (priority 2). We also write to
+            # remembered_context.md (priority 1) so it stays fresh between
+            # compactions — otherwise it goes stale (≥24h) and gets skipped,
+            # losing the best memory context until the next compaction fires.
             query = task_desc or prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
-            if ctx and recalled_file.exists():
-                logger.debug("Recalled context ready: %s (%d chars)", recalled_file, len(ctx))
+            if ctx:
+                # Write to priority 2 (per-task recall)
+                session_dir.mkdir(parents=True, exist_ok=True)
+                with open(recalled_file, "w") as f:
+                    f.write(ctx)
+                # Also write to priority 1 (post-compaction fresh recall)
+                # This ensures priority 1 stays fresh without waiting for compaction
+                remembered_file = session_dir / "remembered_context.md"
+                with open(remembered_file, "w") as f:
+                    f.write(ctx)
+                logger.debug(
+                    "Memory context refreshed: remembered=%s recalled=%s (%d chars)",
+                    remembered_file, recalled_file, len(ctx),
+                )
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
 
@@ -369,11 +385,24 @@ async def stream_opencode_task(
         try:
             from core.memory.memory_injector import build_memory_context
 
+            # Build fresh 6-layer memory context.
+            # Writes to recalled_context.md (priority 2). We also write to
+            # remembered_context.md (priority 1) so it stays fresh between
+            # compactions — otherwise it goes stale (≥24h) and gets skipped.
             query = prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
-            if ctx and recalled_file.exists():
-                logger.debug("Recalled context ready: %s (%d chars)", recalled_file, len(ctx))
+            if ctx:
+                session_dir.mkdir(parents=True, exist_ok=True)
+                with open(recalled_file, "w") as f:
+                    f.write(ctx)
+                remembered_file = session_dir / "remembered_context.md"
+                with open(remembered_file, "w") as f:
+                    f.write(ctx)
+                logger.debug(
+                    "Memory context refreshed: remembered=%s recalled=%s (%d chars)",
+                    remembered_file, recalled_file, len(ctx),
+                )
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
 
