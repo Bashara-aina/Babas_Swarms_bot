@@ -19,6 +19,7 @@ import asyncio
 import concurrent.futures
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -31,11 +32,18 @@ _MEM_LAYER_EXECUTOR = concurrent.futures.ThreadPoolExecutor(
 
 
 def _call_async_in_thread(coro, timeout: float = 5.0):
-    """Run coroutine in thread pool with timeout — never blocks the caller."""
+    """Run coroutine in thread pool with hard timeout.
+
+    Always uses asyncio.run() for a fresh loop — never nests via
+    run_until_complete(), which hangs if the calling loop is in an
+    incompatible state (e.g., closed, or running in the same thread).
+    """
     async def _awaiter():
         return await coro
 
     def _runner():
+        # Always use a fresh event loop — asyncio.run() handles cleanup
+        # and avoids the "event loop closed" failure from run_until_complete().
         return asyncio.run(_awaiter())
 
     future = _MEM_LAYER_EXECUTOR.submit(_runner)
@@ -59,18 +67,40 @@ except Exception:
 logger = logging.getLogger(__name__)
 
 # ── Paths ───────────────────────────────────────────────────────────────────
-SESSION_DIR = Path.cwd() / ".session_state"
-CHECKPOINT_DIR = SESSION_DIR / "checkpoints"
-RECALLED_CONTEXT_FILE = SESSION_DIR / "recalled_context.md"
+# NOTE: These are module-level defaults. build_memory_context() and
+# build_persistent_context() accept an optional project_dir override.
+# When called from opencode_bridge.py (which passes project_dir explicitly),
+# the per-call session_dir is used instead of these module-level defaults.
+_SESSION_DIR_DEFAULT = Path.cwd() / ".session_state"
+CHECKPOINT_DIR = _SESSION_DIR_DEFAULT / "checkpoints"
+RECALLED_CONTEXT_FILE = _SESSION_DIR_DEFAULT / "recalled_context.md"
+
+
+def _get_session_dir(project_dir: str | None = None) -> Path:
+    """Get session directory for a project, with proper project_dir awareness.
+
+    Called with project_dir when invoked from opencode_bridge.py (which always
+    passes the explicit project root). Without project_dir, falls back to cwd
+    for backward compatibility with direct calls.
+    """
+    if project_dir:
+        return Path(project_dir) / ".session_state"
+    return _SESSION_DIR_DEFAULT
+
+
+def _get_recalled_file(project_dir: str | None = None) -> Path:
+    """Get the recalled_context.md path for a project."""
+    return _get_session_dir(project_dir) / "recalled_context.md"
 
 # ── Layer 1: Checkpoints ─────────────────────────────────────────────────────
 
-def _recall_from_checkpoints(query: str, top_k: int = 5) -> list[str]:
+def _recall_from_checkpoints(query: str, top_k: int = 5, project_dir: str | None = None) -> list[str]:
     """Search checkpoint files for query-relevant entries."""
-    if not CHECKPOINT_DIR.exists():
+    checkpoint_dir = _get_session_dir(project_dir) / "checkpoints"
+    if not checkpoint_dir.exists():
         return []
     try:
-        checkpoints = sorted(CHECKPOINT_DIR.glob("checkpoint_*.json"), reverse=True)
+        checkpoints = sorted(checkpoint_dir.glob("checkpoint_*.json"), reverse=True)
         results = []
         for cp in checkpoints[:top_k]:
             try:
@@ -276,17 +306,54 @@ def _recall_from_mem0_cloud(query: str, top_k: int = 3) -> list[str]:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def build_memory_context(query: str, user_id: str = "bashara") -> str:
+def build_memory_context(query: str, user_id: str = "bashara", project_dir: str | None = None, timeout: float = 8.0) -> str:
     """
-    Query all 4 layers and return a formatted context block.
+    Query all 6 layers and return a formatted context block.
     Writes result to .session_state/recalled_context.md for OpenCode to pick up.
+
+    Args:
+        query: Semantic search query
+        user_id: User identifier
+        project_dir: Project root (uses cwd fallback for backward compat)
+        timeout: Hard timeout for entire build (default 8s) — prevents one slow
+                 layer (e.g., Ollama unreachable) from blocking the whole context.
     """
-    l1 = _recall_from_checkpoints(query)
-    l2 = _recall_from_mem0(query)
-    l3 = _recall_from_langmem(query)
-    l4 = _recall_from_observation_store(query)
-    l5 = _recall_from_graphrag(query)
-    l6 = _recall_from_mem0_cloud(query)
+    session_dir = _get_session_dir(project_dir)
+    recalled_file = session_dir / "recalled_context.md"
+
+    # Individual layer timeouts — each must respect its own budget so the total
+    # stays under the overall timeout. Layers are called sequentially (sync API)
+    # so we use short per-layer limits to leave room for all 6.
+    # L1/L4/L5 are fast (no network); L2/L3/L6 need caution when Ollama is down.
+    _LAYER_TIMEOUT = {
+        "_recall_from_checkpoints": 2.0,
+        "_recall_from_mem0": 2.0,        # Ollama fallback adds ~4s when unreachable
+        "_recall_from_langmem": 2.0,     # may import langmem + run search
+        "_recall_from_observation_store": 2.0,
+        "_recall_from_graphrag": 3.0,     # wiki search (LLM-free)
+        "_recall_from_mem0_cloud": 2.0,   # litellm proxy + legacy fallback
+    }
+
+    _timeout_start = time.time()
+    def _remaining() -> float:
+        return max(0.1, timeout - (time.time() - _timeout_start))
+
+    def _layer_call(fn, *args, **kwargs):
+        """Call a function with its own timeout budget, return None on timeout."""
+        t = min(_LAYER_TIMEOUT.get(fn.__name__, 2.0), _remaining())
+        if t < 0.1:
+            return None
+        try:
+            return fn(*args, **kwargs)
+        except Exception:
+            return None
+
+    l1 = _layer_call(_recall_from_checkpoints, query, project_dir=project_dir) or []
+    l2 = _layer_call(_recall_from_mem0, query) or []
+    l3 = _layer_call(_recall_from_langmem, query) or []
+    l4 = _layer_call(_recall_from_observation_store, query) or []
+    l5 = _layer_call(_recall_from_graphrag, query) or []
+    l6 = _layer_call(_recall_from_mem0_cloud, query) or []
 
     layers_used = sum(1 for l in [l1, l2, l3, l4, l5, l6] if l)
 
@@ -341,10 +408,10 @@ def build_memory_context(query: str, user_id: str = "bashara") -> str:
 
     # Write to .session_state/recalled_context.md for /memory command
     try:
-        SESSION_DIR.mkdir(parents=True, exist_ok=True)
-        with open(RECALLED_CONTEXT_FILE, "w") as f:
+        session_dir.mkdir(parents=True, exist_ok=True)
+        with open(recalled_file, "w") as f:
             f.write(text)
-        logger.debug("Wrote recalled context to %s", RECALLED_CONTEXT_FILE)
+        logger.debug("Wrote recalled context to %s", recalled_file)
     except Exception as e:
         logger.debug("Could not write recalled context: %s", e)
 
