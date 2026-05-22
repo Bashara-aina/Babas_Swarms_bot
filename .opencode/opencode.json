@@ -12,9 +12,9 @@
   },
   "snapshot": false,
   "compaction": {
-    "reserved": 8192,
-    "threshold": 1.0,
-    "maxContext": 153600
+    "reserved": 16384,
+    "threshold": 0.85,
+    "maxContext": 200000
   },
   "permission": {
     "read": "allow",
@@ -30,6 +30,10 @@
     "todowrite": "allow",
     "skill": "allow",
     "lsp": "allow",
+    "ask": "allow",
+    "invoke": "allow",
+    "Glob": "allow",
+    "Grep": "allow",
     "external_directory": {
       "/home/**": "allow",
       "/tmp/**": "allow",
@@ -53,29 +57,49 @@
   },
   "agent": {
     "build": {
-      "steps": 60,
-      "prompt": "You have a persistent long-term memory system powered by ChromaDB. Memory context is auto-injected at session start and session end. When you complete significant work, run: python -m core.memory.cli remember '<summary>' --agent opencode to store it for future sessions. Use: python -m core.memory.cli recall '<topic>' to retrieve specific context anytime. Compaction is disabled \u2014 memory recall replaces it. Treat recalled memories as accurate prior context."
+      "steps": 999,
+      "prompt": "You are an elite autonomous coding agent with a persistent 6-layer memory system, 12 live MCP tool servers, and a ChromaDB-backed long-term memory.\n\n## SESSION STATE FILES — READ THESE AT SESSION START\nBefore doing anything else, read these files:\n- `.session_state/remembered_context.md` — your recallable memory context (priority 1, most recent)\n- `.session_state/recalled_context.md` — your recalled context (priority 2, supplement)\n- `.session_state/memory_inject.md` — full 6-layer memory context (injected automatically)\n\n## YOUR 6-LAYER MEMORY SYSTEM (powers ChromaDB semantic search)\n1. **Layer 1 — Session Checkpoints**: `.session_state/` markdown files; current session state\n2. **Layer 2 — mem0**: `python -m core.memory.cli recall '<query>'`; semantic recall from mem0\n3. **Layer 3 — ChromaDB**: legacy vector search; auto-populated by memory CLI\n4. **Layer 4 — observation_store**: SQLite FTS5; operational decisions, discoveries, patterns\n5. **Layer 5 — graphrag**: wiki graph rag; project knowledge, architecture, decisions\n6. **Layer 6 — mem0-cloud + checkpoints**: distributed memory + session snapshots\n\nAfter completing significant work: `python -m core.memory.cli remember '<summary>' --agent opencode`\nTo recall: `python -m core.memory.cli recall '<topic>'`\n\n## 12 LIVE MCP TOOL SERVERS (use these, do NOT manually simulate them)\nConfigure and use MCP tools. For a task, invoke relevant MCP tools:\n- **gitnexus**: `gitnexus_context`, `gitnexus_query`, `gitnexus_impact`, `gitnexus_detect_changes` — code intelligence, blast-radius analysis before editing\n- **obsidian**: `obsidian_search_notes`, `obsidian_read_note`, `obsidian_save_knowledge_note`, `obsidian_update_note` — your second brain wiki\n- **ruflo**: `ruflo_memory_search`, `ruflo_session_save`, `ruflo_hooks_pre-task`, `ruflo_task_create` — memory, session, task management\n- **filesystem**: `read`, `write`, `edit`, `glob`, `grep`, `bash` — file operations\n- **crawl4ai**: `crawl4ai_crawl`, `crawl4ai_search` — web extraction\n- **browser-use**: `browser_run_task`, `browser_open`, `browser_click`, `browser_fill` — autonomous browser\n- **sequential-thinking**: `sequentialthinking_sequentialthinking` — deep reasoning on complex problems\n- **symphony**: `symphony_send_message`, `symphony_create_task`, `symphony_get_tasks` — task orchestration\n- **git**: `git_git_status`, `git_git_diff`, `git_git_log`, `git_git_commit` — version control\n- **hermes**: Hermes messaging — `hermes_messages_send`, `hermes_conversations_list`\n- **local-deep-research**: `local-deep-research_quick_research`, `local-deep-research_detailed_research` — deep research\n- **exa**: `exa_web_search_exa`, `exa_web_fetch_exa` — web discovery\n\n## COMPACTION BEHAVIOR\nCompaction is DISABLED. Memory recall replaces compaction. All recall operations are powered by the 6-layer system described above. Treat recalled memories as accurate prior context."
     },
     "summary": {
       "permission": {
         "read": "allow",
         "edit": "allow",
+        "write": "allow",
         "glob": "allow",
         "grep": "allow",
         "list": "allow",
         "bash": "allow",
         "webfetch": "allow",
-        "websearch": "allow"
+        "websearch": "allow",
+        "codesearch": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "skill": "allow",
+        "lsp": "allow",
+        "ask": "allow",
+        "invoke": "allow",
+        "read": "allow",
+        "write": "allow",
+        "Glob": "allow",
+        "Grep": "allow"
+      }
+    },
+    "compaction": {
+      "permission": {
+        "*": "allow"
       }
     }
   },
+  "experimental": {
+    "continue_loop_on_deny": true
+  },
   "mcp": {
     "gitnexus": {
-      "type": "local",
       "command": [
         "/home/newadmin/.local/node18/bin/gitnexus",
         "mcp"
-      ]
+      ],
+      "enabled": true
     },
     "filesystem": {
       "type": "local",
@@ -93,7 +117,8 @@
         "/root",
         "/nix",
         "/nix/store"
-      ]
+      ],
+      "enabled": true
     },
     "crawl4ai": {
       "type": "local",
@@ -104,7 +129,8 @@
       "workingDirectory": "/home/newadmin/swarm-bot",
       "env": {
         "PYTHONPATH": "/home/newadmin/swarm-bot/tools/mcpServers"
-      }
+      },
+      "enabled": true
     },
     "browser-use": {
       "type": "local",
@@ -116,14 +142,16 @@
       "env": {
         "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
         "LITELLM_BASE_URL": "http://localhost:4000"
-      }
+      },
+      "enabled": true
     },
     "sequential-thinking": {
       "type": "local",
       "command": [
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      ],
+      "enabled": true
     },
     "symphony": {
       "type": "local",
@@ -131,7 +159,8 @@
         "/home/newadmin/.local/node18/bin/node",
         "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"
       ],
-      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one"
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one",
+      "enabled": true
     },
     "obsidian": {
       "type": "local",
@@ -142,24 +171,26 @@
       "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched",
       "env": {
         "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
-      }
+      },
+      "enabled": true
     },
     "git": {
       "type": "local",
       "command": [
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "@mseep/git-mcp-server"
-      ]
+      ],
+      "enabled": true
     },
     "ruflo": {
       "type": "local",
       "command": [
-        "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-        "ruflo",
+        "/home/newadmin/.local/node18/bin/ruflo",
         "mcp",
         "start"
       ],
-      "workingDirectory": "/home/newadmin/swarm-bot"
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "enabled": true
     },
     "hermes": {
       "type": "local",
@@ -169,7 +200,8 @@
         "mcp",
         "serve"
       ],
-      "workingDirectory": "/home/newadmin/swarm-bot"
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "enabled": true
     },
     "local-deep-research": {
       "type": "local",
@@ -178,14 +210,16 @@
         "/home/newadmin/miniconda3/bin/python3",
         "-m",
         "local_deep_research.mcp"
-      ]
+      ],
+      "enabled": true
     },
     "exa": {
       "type": "local",
       "command": [
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "/home/newadmin/.local/node18/bin/exa-mcp-server"
-      ]
+      ],
+      "enabled": true
     }
   },
   "watcher": {
@@ -206,23 +240,5 @@
       "*.zip",
       "skill_labels.zip"
     ]
-  },
-  "hooks": {
-    "pre_session": {
-      "run": ".opencode/hooks/pre-session.sh",
-      "enabled": true
-    },
-    "post_session": {
-      "run": ".opencode/hooks/post-session.sh",
-      "enabled": true
-    },
-    "pre_compact": {
-      "run": ".opencode/hooks/pre-compact.sh",
-      "enabled": true
-    },
-    "post_compact": {
-      "run": ".opencode/hooks/post-compact.sh",
-      "enabled": true
-    }
   }
 }
