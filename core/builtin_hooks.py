@@ -63,7 +63,7 @@ async def opencode_session_end_hook(ctx: dict[str, Any]) -> dict[str, Any]:
 
         from core.wiki_bridge import opencode_write_session_summary
 
-        session_id = ctx.get("session_id") or f"task-{uuid.uuid4().hex[:8]}"
+        session_id = ctx.get("sessionId") or f"task-{uuid.uuid4().hex[:8]}"
         await opencode_write_session_summary(
             session_id=session_id,
             task_description=ctx.get("task", "unknown"),
@@ -171,6 +171,7 @@ async def _recalled_context_refresh_hook(ctx: dict[str, Any]) -> dict[str, Any]:
 
     This ensures OpenCode receives fresh memory context without waiting
     for the session_watcher periodic 60s refresh cycle.
+    Writes to the swarm-bot project session_state (not cwd).
     """
     try:
         import sys as _sys
@@ -179,18 +180,48 @@ async def _recalled_context_refresh_hook(ctx: dict[str, Any]) -> dict[str, Any]:
         _sys.path.insert(0, str(_Path(__file__).parent.parent.parent))
         from core.memory.memory_injector import build_memory_context
 
+        # Use the swarm-bot project dir explicitly (not cwd, which may differ
+        # when OpenCode runs with --dangerously-skip-permissions in a different cwd)
+        project_dir = ctx.get("project_dir") or "/home/newadmin/swarm-bot"
+        session_dir = _Path(project_dir) / ".session_state"
+
         # Use a broad query covering all memory layers
         query = "recent session work tasks decisions open issues tools used"
-        ctx_text = build_memory_context(query=query, user_id="bashara")
+        ctx_text = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
         if ctx_text:
-            session_dir = _Path("/home/newadmin/swarm-bot/.session_state")
             session_dir.mkdir(parents=True, exist_ok=True)
             recalled_file = session_dir / "remembered_context.md"
             with open(recalled_file, "w") as f:
                 f.write(ctx_text)
-            logger.debug("remembered_context.md refreshed after compaction (%d chars)", len(ctx_text))
+            logger.info("remembered_context.md refreshed after compaction (%d chars)", len(ctx_text))
+        else:
+            logger.warning("remembered_context.md: build_memory_context returned empty, skipping write")
     except Exception as e:
-        logger.debug("recalled_context_refresh_hook: failed to refresh: %s", e)
+        logger.error("_recalled_context_refresh_hook: failed to refresh remembered_context.md: %s", e)
+    return ctx
+
+
+async def gitnexus_detect_changes_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """Run gitnexus_detect_changes before git commit and attach diff summary to ctx."""
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["npx", "gitnexus", "detect-changes", "--scope", "staged"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            cwd="/home/newadmin/swarm-bot",
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            ctx["_gitnexus_changes"] = result.stdout.strip()[:500]
+            ctx["_gitnexus_safe"] = True
+        else:
+            ctx["_gitnexus_warning"] = result.stderr.strip()[:200] or "gitnexus check returned non-zero"
+            ctx["_gitnexus_safe"] = False
+    except Exception as e:
+        ctx["_gitnexus_warning"] = str(e)[:200]
+        ctx["_gitnexus_safe"] = True  # don't block on gitnexus failure
     return ctx
 
 
@@ -205,6 +236,15 @@ def register_builtin_hooks() -> None:
     hooks.register("post_llm_call", opencode_decision_hook, name="opencode_decision")
     hooks.register("pre_llm_call", claude_code_session_start_hook, name="cc_session_start")
     hooks.register("post_llm_call", claude_code_session_end_hook, name="cc_session_end")
+
+    # OpenCode session lifecycle hooks — map ruflo's task lifecycle to session hooks
+    # ruflo sends "task_complete" and "task_success" → map to post_task for wiki ingest
+    hooks.register("post_task", opencode_session_start_hook, name="opencode_session_start")
+    hooks.register("post_task", opencode_session_end_hook, name="opencode_session_end")
+    hooks.register("task_success", opencode_session_end_hook, name="opencode_session_end_success")
+
+    # GitNexus integration — run gitnexus_detect_changes before git commit
+    hooks.register("pre_git_commit", gitnexus_detect_changes_hook, name="gitnexus_pre_commit")
 
     from core.incremental_summary import incremental_summary_pre_compact_hook
 

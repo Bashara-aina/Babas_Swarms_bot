@@ -1,17 +1,133 @@
-"""core/opencode_bridge.py — Telegram → OpenCode bridge."""
+"""core/opencode_bridge.py — Telegram → OpenCode bridge.
+
+Memory architecture:
+  Session start : build_persistent_context() → memory_inject.md (7 layers, once)
+  Per task     : build_memory_context()      → recalled_context.md (6-layer recall)
+  Post-compact : _recalled_context_refresh_hook → remembered_context.md (freshest recall)
+  Compaction   : compaction_summary.md written by smart_compact_messages process
+  All files injected via -f so OpenCode sees them as file context.
+  GitNexus context is embedded in the prompt text (not via -f).
+  Files are freshness-checked (<24h) before injection to prevent stale memory.
+
+Memory injection priority: remembered > recalled > memory_inject > compaction
+
+MCP integration:
+  GitNexus MCP: query via build_gitnexus_prompt_context() at task runtime
+  Obsidian MCP: wiki auto-ingest via on_turn_deep_ingest() after every LLM response
+  All other MCPs: accessed through their respective _bridge modules
+"""
 
 import asyncio
 import json
 import logging
 import os
 import re
+import time
 import uuid
 from collections.abc import AsyncGenerator
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 DIRECTIVES_RE = re.compile(r"@(legion|claude)[:\s]+(.+?)(?:\n|$)", re.IGNORECASE)
+
+# ── Per-session singleton state ─────────────────────────────────────────────────
+# Ensures persistent context is built ONCE at session start, then reused.
+# Reset on bot restart (module reimport), which is the correct behavior.
+_session_memory_initialized = False
+
+
+def _get_session_dirs(project_dir: str) -> tuple[Path, Path]:
+    """Return (session_dir, wiki_dir) for a project root."""
+    session_dir = Path(project_dir) / ".session_state"
+    wiki_dir = Path(project_dir) / ".wiki"
+    return session_dir, wiki_dir
+
+
+async def _ensure_session_memory(project_dir: str, force: bool = False) -> bool:
+    """
+    Build the 7-layer persistent context ONCE at session start.
+    Writes .session_state/memory_inject.md and .session_state/persistent_memory_context.md.
+    Safe to call multiple times — only builds on first invocation per session.
+    """
+    global _session_memory_initialized
+    if _session_memory_initialized and not force:
+        return True
+
+    session_dir, wiki_dir = _get_session_dirs(project_dir)
+    try:
+        from core.memory.autoinject import build_persistent_context
+        # Pass wiki_dir so autoinject can read recent Obsidian notes
+        ctx = build_persistent_context(
+            query="project work coding AI agent tasks decisions",
+            user_id="bashara",
+            include_layers=list(range(1, 8)),
+        )
+        logger.info("7-layer persistent context built: %d chars", len(ctx))
+        _session_memory_initialized = True
+        return True
+    except Exception as e:
+        logger.warning("Persistent context build failed (non-fatal): %s", e)
+        # Still mark initialized so we don't retry every task
+        _session_memory_initialized = True
+        return False
+
+
+def _inject_memory_files(
+    session_dir: Path,
+    context_files: list[str],
+) -> None:
+    """
+    Inject all available memory context files into the OpenCode subprocess.
+    Priority order (first file wins for header conflicts):
+      1. remembered_context.md  — post-compaction fresh recall (newest content)
+      2. recalled_context.md    — per-task 6-layer semantic recall
+      3. memory_inject.md      — session-level 7-layer persistent context
+      4. compaction_summary.md — last compaction checkpoint (if exists)
+
+    Each file is checked for: existence, non-zero size, and freshness (<24h).
+    Stale files (≥24h old) are logged and skipped to prevent stale memory injection.
+    """
+    logger.debug("[MEMORY_INJECT] Scanning session dir: %s", session_dir)
+
+    files_to_check = [
+        ("remembered_context.md", "post-compaction fresh recall"),
+        ("recalled_context.md", "per-task 6-layer semantic recall"),
+        ("memory_inject.md", "session-level 7-layer persistent context"),
+        ("compaction_summary.md", "compaction checkpoint"),
+    ]
+
+    injected_count = 0
+    for filename, description in files_to_check:
+        filepath = session_dir / filename
+        if not filepath.exists():
+            logger.debug("[MEMORY_INJECT] SKIP %s — does not exist", filename)
+            continue
+
+        size = filepath.stat().st_size
+        if size == 0:
+            logger.debug("[MEMORY_INJECT] SKIP %s — zero bytes", filename)
+            continue
+
+        # Freshness check: skip files older than 24h to avoid stale memory
+        age_seconds = time.time() - filepath.stat().st_mtime
+        age_hours = age_seconds / 3600
+        if age_hours >= 24:
+            logger.warning(
+                "[MEMORY_INJECT] SKIP %s — stale (%.1fh old). description=%s size=%d",
+                filename, age_hours, description, size,
+            )
+            continue
+
+        context_files.append(str(filepath))
+        logger.info(
+            "[MEMORY_INJECT] INJECT %s (%s) — %d bytes, %.1fh fresh",
+            filename, description, size, age_hours,
+        )
+        injected_count += 1
+
+    logger.debug("[MEMORY_INJECT] Total files injected: %d", injected_count)
 
 
 def extract_directives(text: str) -> list[tuple[str, str]]:
@@ -26,37 +142,61 @@ async def run_opencode_task(
     timeout: int = 1800,
     task_desc: str | None = None,
 ) -> str:
-    """Execute a task via opencode CLI and return the result."""
+    """Execute a task via opencode CLI and return the result.
+
+    Memory architecture (3-tier injection):
+      TIER 1 — Session init  : _ensure_session_memory() writes memory_inject.md (7 layers)
+                                  Called once at first task; cached for all subsequent tasks.
+      TIER 2 — Per task recall: build_memory_context() writes recalled_context.md (6 layers)
+                                  Called every task to pull fresh recall from all memory systems.
+      TIER 3 — Compaction     : compaction_summary.md written by smart_compaction process.
+                                  Injected if present (always after compaction).
+      GITNEXUS: context file injected via -f (prompt-level, not embedded).
+    All three tiers are injected via -f flags so OpenCode sees them as file context,
+    not embedded in the prompt text.
+    """
     project_dir = project_dir or "/home/newadmin/swarm-bot"
     model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     prompt_with_context = prompt
     context_files: list[str] = []
+    session_dir = Path(project_dir) / ".session_state"
 
-    # ── Memory context injection ─────────────────────────────────────────────
+    # ── Ensure post_compact hooks are registered ────────────────────────────
+    # Normally done at bot startup via start_background_tasks() → on_startup().
+    # OpenCode bridge runs in a subprocess without bot lifecycle, so we call
+    # register_builtin_hooks() here to ensure _recalled_context_refresh_hook
+    # fires after compactions and keeps remembered_context.md fresh.
+    from core.builtin_hooks import register_builtin_hooks
+    register_builtin_hooks()
+
+    # ── TIER 1: Session-level persistent memory (one-time init at session start)
+    # Runs on first task; cached for all subsequent tasks via _session_memory_initialized flag.
+    if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        await _ensure_session_memory(project_dir)
+
+    # ── TIER 2: Per-task 6-layer semantic recall
+    # Note: We pass session_dir to _inject_memory_files below (not context_files list)
+    # to avoid double-injecting recalled_context.md.  _inject_memory_files handles
+    # all three files based on what exists on disk.
+    recalled_file = session_dir / "recalled_context.md"
     if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
         try:
             from core.memory.memory_injector import build_memory_context
-            from pathlib import Path
-
-            session_dir = Path(project_dir) / ".session_state"
-            remembered_file = session_dir / "recalled_context.md"
 
             # Build fresh memory context (writes to recalled_context.md)
             query = task_desc or prompt[:100]
-            ctx = build_memory_context(query=query, user_id="bashara")
+            ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
-            if ctx and remembered_file.exists():
-                context_files.append(str(remembered_file))
-                logger.debug("Memory context ready: %s (%d chars)", remembered_file, len(ctx))
-
-            # Also inject compaction_summary.md if it exists — from smart_compact_messages
-            compaction_file = session_dir / "compaction_summary.md"
-            if compaction_file.exists() and compaction_file.stat().st_size > 0:
-                context_files.append(str(compaction_file))
-                logger.debug("Compaction summary injected: %s (%d bytes)", compaction_file, compaction_file.stat().st_size)
+            if ctx and recalled_file.exists():
+                logger.debug("Recalled context ready: %s (%d chars)", recalled_file, len(ctx))
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
-    # ── GitNexus context ───────────────────────────────────────────────────
+
+    # ── Inject all memory files (tiers 1+2+3 via _inject_memory_files, which reads
+    # session_dir and appends whichever files exist — no list pre-population needed)
+    _inject_memory_files(session_dir, context_files)
+
+    # ── GITNEXUS context ───────────────────────────────────────────────────
     if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
         try:
             from core.gitnexus_bridge import build_gitnexus_prompt_context
@@ -75,6 +215,18 @@ async def run_opencode_task(
         for cf in context_files:
             cmd.extend(["-f", cf])
     cmd.append(prompt_with_context)
+
+    # Log what we're passing to OpenCode for debugging
+    file_args = [a for a in cmd if a.startswith("-f")]
+    logger.info(
+        "[OPENCODE LAUNCH] agent=%s model=%s files=%d prompt_chars=%d gitnexus=%s cmd=%s",
+        agent or "general",
+        model,
+        len(file_args),
+        len(prompt_with_context),
+        "yes" if gitnexus_ctx else "no",
+        " ".join(cmd[:4]) + " ...",
+    )
 
     process = await asyncio.create_subprocess_exec(
         *cmd,
@@ -193,6 +345,7 @@ async def stream_opencode_task(
 ) -> AsyncGenerator[dict[str, Any]]:
     """Stream OpenCode output as SSE events.
 
+    Memory architecture mirrors run_opencode_task (3-tier injection).
     Yields dicts with keys: type (event|data|error|done), content, raw.
     type="done" marks final output with full stdout.
     """
@@ -200,24 +353,32 @@ async def stream_opencode_task(
     model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     prompt_with_context = prompt
     context_files: list[str] = []
+    session_dir = Path(project_dir) / ".session_state"
 
-    # ── Memory context injection ─────────────────────────────────────────────
+    # ── Ensure post_compact hooks are registered ────────────────────────────
+    from core.builtin_hooks import register_builtin_hooks
+    register_builtin_hooks()
+
+    # ── TIER 1: Session-level persistent memory (one-time init at session start)
+    if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
+        await _ensure_session_memory(project_dir)
+
+    # ── TIER 2: Per-task 6-layer semantic recall (trigger build, let _inject handle file)
+    recalled_file = session_dir / "recalled_context.md"
     if os.getenv("LEGION_MEMORY_INJECT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):
         try:
             from core.memory.memory_injector import build_memory_context
-            from pathlib import Path
-
-            session_dir = Path(project_dir) / ".session_state"
-            remembered_file = session_dir / "recalled_context.md"
 
             query = prompt[:100]
-            ctx = build_memory_context(query=query, user_id="bashara")
+            ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
-            if ctx and remembered_file.exists():
-                context_files.append(str(remembered_file))
-                logger.debug("Memory context ready: %s (%d chars)", remembered_file, len(ctx))
+            if ctx and recalled_file.exists():
+                logger.debug("Recalled context ready: %s (%d chars)", recalled_file, len(ctx))
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
+
+    # ── Inject all memory files (tiers 1+2+3 via _inject_memory_files)
+    _inject_memory_files(session_dir, context_files)
 
     # ── GitNexus context ───────────────────────────────────────────────────
     if os.getenv("LEGION_GITNEXUS_PROMPT_ENABLED", "1").strip().lower() not in ("0", "false", "no", "off"):

@@ -1093,11 +1093,14 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str])
         # Emit post_compact hooks
         try:
             from core.hooks import get_hooks
+            # project_dir may be stored on messages._project_dir by the caller
+            project_dir = getattr(messages, '_project_dir', None) or "/home/newadmin/swarm-bot"
             get_hooks().emit("post_compact", {
                 "user_id": user_id or "default",
                 "reason": "async_compaction_complete",
                 "original_size": total_size,
                 "compacted_size": new_size,
+                "project_dir": project_dir,
             })
         except Exception:
             pass
@@ -1328,7 +1331,7 @@ Include file paths, function names, error messages verbatim when relevant.
                     },
                     {"role": "user", "content": summary_request},
                 ],
-                max_tokens=2048,
+                max_tokens=3072,
                 temperature=0.3,
                 timeout=timeout,
             )
@@ -1446,18 +1449,33 @@ def _async_store_compaction_summary(summary: str, message_count: int, cache_key:
         # ── Layer 4: observation_store (SQLite+FTS5) ──────────────────────────
         try:
             from core.memory.observation_store import get_observation_store
-            # Run the async method in a sync thread
-            async def _obs_write() -> None:
-                obs = get_observation_store()
-                obs.add_observation(
+            obs = get_observation_store()
+            # add_observation is async; call via running loop in a thread to avoid
+            # asyncio.run() event-loop conflicts with aiosqlite connection lifecycle.
+            def _obs_sync() -> None:
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    loop.run_until_complete(obs.add_observation(
+                        session_id="compact",
+                        content=summary,
+                        title=f"Compaction: {message_count} msgs → cache_key={cache_key[:8]}",
+                        type_="compaction",
+                        subtitle=f"saved cache_key={cache_key[:12]}",
+                        tags=["compaction", "memory", "compact"],
+                    ))
+                    return
+                loop.run_until_complete(obs.add_observation(
                     session_id="compact",
                     content=summary,
                     title=f"Compaction: {message_count} msgs → cache_key={cache_key[:8]}",
                     type_="compaction",
                     subtitle=f"saved cache_key={cache_key[:12]}",
                     tags=["compaction", "memory", "compact"],
-                )
-            _asyncio.run(_obs_write())
+                ))
+            # Run L4 in the existing _COMPACT_IO_EXECUTOR so it doesn't block
+            _COMPACT_IO_EXECUTOR.submit(_obs_sync)
         except Exception as e:
             logger.debug("L4 observation_store write failed: %s", e)
 
@@ -1483,9 +1501,25 @@ messages_compacted: {message_count}
 
         # ── Layer 6: mem0 cloud ────────────────────────────────────────────────
         try:
-            async def _mem0_write() -> None:
-                from tools.mem0_client import mem0_add
-                await mem0_add(
+            from tools.mem0_client import mem0_add
+            # mem0_add is async but mem.add() inside is sync HTTP I/O to Ollama.
+            # Run via running loop in this thread to avoid event-loop conflicts.
+            def _mem0_sync() -> None:
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    loop.run_until_complete(mem0_add(
+                        user_id="bashara",
+                        content=summary,
+                        metadata={
+                            "type": "compaction_summary",
+                            "messages_compacted": message_count,
+                            "cache_key": cache_key[:16],
+                        },
+                    ))
+                    return
+                loop.run_until_complete(mem0_add(
                     user_id="bashara",
                     content=summary,
                     metadata={
@@ -1493,8 +1527,8 @@ messages_compacted: {message_count}
                         "messages_compacted": message_count,
                         "cache_key": cache_key[:16],
                     },
-                )
-            _asyncio.run(_mem0_write())
+                ))
+            _COMPACT_IO_EXECUTOR.submit(_mem0_sync)
         except Exception as e:
             logger.debug("L6 mem0 cloud write failed: %s", e)
 
@@ -1992,10 +2026,12 @@ async def _agent_loop_inner(
                         messages = smart_compact_messages(messages, model=model, session_id=thread_id)
                         try:
                             from core.hooks import get_hooks
+                            project_dir = getattr(messages, '_project_dir', None) or "/home/newadmin/swarm-bot"
                             get_hooks().emit("post_compact", {
                                 "user_id": user_id or "default",
                                 "reason": "auto_context_full",
                                 "total_size": total_size,
+                                "project_dir": project_dir,
                             })
                         except Exception:
                             pass
@@ -2010,10 +2046,12 @@ async def _agent_loop_inner(
                         messages = smart_compact_messages(messages, model=model, session_id=thread_id)
                         try:
                             from core.hooks import get_hooks
+                            project_dir = getattr(messages, '_project_dir', None) or "/home/newadmin/swarm-bot"
                             get_hooks().emit("post_compact", {
                                 "user_id": user_id or "default",
                                 "reason": "emergency_compaction",
                                 "total_size": total_size,
+                                "project_dir": project_dir,
                             })
                         except Exception:
                             pass
