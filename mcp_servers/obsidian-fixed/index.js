@@ -57,9 +57,31 @@ server.stderr.on('data', (data) => {
   process.stderr.write(data);
 });
 
+// Track child process for proper cleanup
+let childProcess = null;
+
+// Handle graceful shutdown for child process
+process.on('SIGINT', () => {
+  if (childProcess) {
+    childProcess.kill('SIGINT');
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  if (childProcess) {
+    childProcess.kill('SIGTERM');
+  }
+  process.exit(0);
+});
+
+// stdin pipe timing fix — ensure proper drain before SIGTERM
+process.stdin.on('end', () => {
+  // stdin ended, child should already be shutting down
+});
+
 server.on('close', (code) => {
   process.exit(code);
 });
 
-// Pipe stdin to server
 process.stdin.pipe(server.stdin);

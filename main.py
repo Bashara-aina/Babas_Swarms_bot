@@ -216,7 +216,7 @@ async def _probe_llm() -> tuple[bool, str]:
     try:
         import litellm
 
-        primary = os.getenv("LEGION_LLM_MODEL", "minimax/MiniMax-M2.7")
+        primary = os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M2.7")
         if primary.lower().startswith("minimax/"):
             from openai import AsyncOpenAI
             api_key = os.getenv("MINIMAX_API_KEY", "")

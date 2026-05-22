@@ -133,21 +133,24 @@ async def cmd_hermes(msg: Message) -> None:
             session_id=session_id,
         )
 
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.delete()
 
         formatted = _format_hermes_result(result)
         await send_chunked(msg, formatted, model_used="hermes")
 
     except ImportError as e:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.edit_text(
             f"❌ Hermes not available: <code>{_escape_html(str(e))}</code>\n"
             "Set HERMES_REPO_PATH or clone hermes-agent to ~/hermes-agent",
             parse_mode="HTML",
         )
     except Exception as e:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         logger.exception("Hermes /hermes error")
         await status_msg.edit_text(
             f"❌ Hermes error: <code>{_escape_html(str(e)[:300])}</code>",
@@ -195,19 +198,22 @@ async def cmd_hermes_search(msg: Message) -> None:
             limit=5,
         )
 
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.delete()
         await send_chunked(msg, result, model_used="hermes/session-search")
 
     except ImportError:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.edit_text(
             "❌ Hermes session search not available.\n"
             "Ensure hermes_state module is accessible.",
             parse_mode="HTML",
         )
     except Exception as e:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         logger.exception("Hermes session search error")
         await status_msg.edit_text(
             f"❌ Search error: <code>{_escape_html(str(e)[:300])}</code>",
@@ -266,19 +272,22 @@ async def cmd_hermes_delegate(msg: Message) -> None:
             session_id=session_id,
         )
 
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.delete()
         await send_chunked(msg, result, model_used="hermes/delegate")
 
     except ImportError:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         await status_msg.edit_text(
             "❌ Hermes delegate not available.\n"
             "Ensure hermes-agent is cloned and HERMES_REPO_PATH is set.",
             parse_mode="HTML",
         )
     except Exception as e:
-        typing_task.cancel()
+        if typing_task and not typing_task.done():
+            typing_task.cancel()
         logger.exception("Hermes delegate error")
         await status_msg.edit_text(
             f"❌ Delegate error: <code>{_escape_html(str(e)[:300])}</code>",

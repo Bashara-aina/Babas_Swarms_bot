@@ -70,7 +70,8 @@ async def cmd_orchestrate(msg: Message) -> None:
                     f"<code>[{step_count}]</code> {safe}",
                     parse_mode="HTML",
                 )
-        except Exception:
+        except Exception as e:
+            logger.warning("Progress update failed, trying plain send: %s", e)
             with contextlib.suppress(Exception):
                 await msg.answer(html_mod.escape(text), parse_mode="HTML")
 
@@ -89,8 +90,8 @@ async def cmd_orchestrate(msg: Message) -> None:
 
             complexity_score = await MiroFishAgent().score_task_complexity(goal)
             await progress_cb(f"💭 [Plan] complexity score: {complexity_score}/10")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to score task complexity, using default (5): %s", e)
 
         if complexity_score > 8:
             try:
@@ -100,8 +101,8 @@ async def cmd_orchestrate(msg: Message) -> None:
                     f"Create a concise decomposition strategy for this orchestration goal:\n{goal}"
                 )
                 await progress_cb(f"💭 [OWL] high-complexity strategy seed ready ({len(owl_hint)} chars)")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed OWL strategy seed, skipping: %s", e)
 
         from swarms_bot.orchestrator.orchestration_runner import OrchestrationRunner
         from swarms_bot.orchestrator.registry import build_agent_registry
@@ -155,7 +156,8 @@ async def cmd_orchestrate(msg: Message) -> None:
                 f"❌ Orchestration failed:\n<code>{err[:400]}</code>",
                 parse_mode="HTML",
             )
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to edit status message with error, trying direct send: %s", e)
             await msg.answer(
                 f"❌ Orchestration failed:\n<code>{err[:400]}</code>",
                 parse_mode="HTML",

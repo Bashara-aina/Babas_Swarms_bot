@@ -14,7 +14,7 @@ class GPTResearcherClient:
     def __init__(self):
         self.available = self._check_available()
         self.llm_provider = os.getenv("GPTR_LLM_PROVIDER", "openai")
-        self.llm_model = os.getenv("GPTR_LLM_MODEL", "minimax/MiniMax-Text-01")
+        self.llm_model = os.getenv("GPTR_LLM_MODEL", "minimax-coding-plan/MiniMax-Text-01")
         self.search_api = os.getenv("GPTR_SEARCH_API", "duckduckgo")
         if os.getenv("BRAVE_API_KEY"):
             self.search_api = "tavily"

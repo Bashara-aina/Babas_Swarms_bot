@@ -1,0 +1,3785 @@
+{
+  "agents": {
+    "test": {
+      "agentId": "test",
+      "agentType": "test",
+      "status": "test",
+      "health": 1,
+      "taskCount": 1,
+      "config": {
+        "model": "test"
+      },
+      "createdAt": "2026-05-11T16:20:22.603Z",
+      "domain": "test",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "popw-cache-agent": {
+      "agentId": "popw-cache-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-14T15:53:53.853Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-eval-agent": {
+      "agentId": "popw-eval-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-14T15:54:11.239Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-train-agent": {
+      "agentId": "popw-train-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-14T15:54:24.390Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-checkpoint-agent": {
+      "agentId": "popw-checkpoint-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-14T15:54:38.286Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_loss_validator": {
+      "agentId": "ses_popw_loss_validator",
+      "agentType": "debugger",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify all loss scales match paper spec exactly",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-14T23:20:26.029Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_data_resolver": {
+      "agentId": "ses_popw_data_resolver",
+      "agentType": "debugger",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify actual recording resolution vs paper spec 1280x720",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-14T23:20:27.635Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_arch_verifier": {
+      "agentId": "ses_popw_arch_verifier",
+      "agentType": "code-reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Deep architecture verification vs paper spec",
+        "priority": "high"
+      },
+      "createdAt": "2026-05-14T23:20:31.115Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_training_auditor": {
+      "agentId": "ses_popw_training_auditor",
+      "agentType": "code-reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify staged training, freeze/unfreeze, Kendall initialization",
+        "priority": "high"
+      },
+      "createdAt": "2026-05-14T23:20:33.414Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_eval_auditor": {
+      "agentId": "ses_popw_eval_auditor",
+      "agentType": "code-reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify all 6 metric implementations in evaluate.py",
+        "priority": "high"
+      },
+      "createdAt": "2026-05-14T23:20:37.870Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_checkpoint_validator": {
+      "agentId": "ses_popw_checkpoint_validator",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify checkpoint save/load/crash recovery logic",
+        "priority": "medium"
+      },
+      "createdAt": "2026-05-14T23:20:43.042Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_dataset_integrity": {
+      "agentId": "ses_popw_dataset_integrity",
+      "agentType": "debugger",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify dataset loader integrity and class counts",
+        "priority": "high"
+      },
+      "createdAt": "2026-05-14T23:20:44.734Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_config_verifier": {
+      "agentId": "ses_popw_config_verifier",
+      "agentType": "code-reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Verify all hyperparameters match paper spec",
+        "priority": "high"
+      },
+      "createdAt": "2026-05-14T23:20:46.878Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_training_runner": {
+      "agentId": "ses_popw_training_runner",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Run 2-epoch training to verify training works end-to-end",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-14T23:20:49.216Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "ses_popw_benchmark_producer": {
+      "agentId": "ses_popw_benchmark_producer",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "description": "Run evaluation to produce actual POPW benchmark numbers",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-14T23:20:51.248Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-mem-opt": {
+      "agentId": "popw-mem-opt",
+      "agentType": "devops",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-14T23:40:38.406Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-data-prep": {
+      "agentId": "popw-data-prep",
+      "agentType": "data",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-14T23:40:43.238Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-det-fix": {
+      "agentId": "popw-det-fix",
+      "agentType": "backend",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-14T23:40:47.623Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "loss-fixes-1": {
+      "agentId": "loss-fixes-1",
+      "agentType": "backend",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:45.105Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "data-pipeline-2": {
+      "agentId": "data-pipeline-2",
+      "agentType": "data",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:47.512Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "model-audit-3": {
+      "agentId": "model-audit-3",
+      "agentType": "backend",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:51.304Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "training-loop-4": {
+      "agentId": "training-loop-4",
+      "agentType": "backend",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:53.083Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "kendall-audit-5": {
+      "agentId": "kendall-audit-5",
+      "agentType": "ml",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:55.018Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "eval-metrics-6": {
+      "agentId": "eval-metrics-6",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:57.052Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "checkpoint-fix-7": {
+      "agentId": "checkpoint-fix-7",
+      "agentType": "backend",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:31:58.867Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "deps-fix-8": {
+      "agentId": "deps-fix-8",
+      "agentType": "devops",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:32:00.537Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "docs-fix-9": {
+      "agentId": "docs-fix-9",
+      "agentType": "docs",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:32:01.568Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-eval-10": {
+      "agentId": "train-eval-10",
+      "agentType": "ml",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T00:32:08.026Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "loss-kendall-agent": {
+      "agentId": "loss-kendall-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Loss & Kendall Agent. You specialize in verifying and fixing the loss computation and Kendall uncertainty weighting in the POPW multi-task training system.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 1: Kendall uncertainty formula (L=Σ exp(-s_t)·L_t·ramp_t + s_t)\n- Category 2: Loss scales (pose loss ×0.001, joint loss ×0.001)\n- Category 3: Stage 2 head pose leak (when train_pose=False in Stage 2)\n- Category 6: Staged precision zeroing (epochs 1-5, 6-15)\n\nKEY FILES:\n- src/training/losses.py (Kendall formula, loss scales, staged training)\n- src/training/train.py (training loop, AMP)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n- project/popw/working/code/popw_paper.tex (paper spec)\n\nYOUR TASKS:\n1. Read losses.py carefully — verify the Kendall formula matches the paper exactly\n2. Verify loss scales (joints_mse ×0.001, head_pose ×0.001) are correct per paper\n3. Verify Stage 2 behavior when train_pose=False — check if non-Kendall path adds head_pose loss\n4. Verify staged precision zeroing in Kendall branch\n5. Fix any bugs found\n6. Write validation tests to prove correctness\n7. Report your findings with actual code citations (file:line)\n\nMANDATORY: Ground every statement with actual file content. Never say \"the code looks correct\" — show exact line numbers and content.\n\nUse the ruflo agent tools for spawning sub-agents if you need help, but you own the loss/kendall categories end-to-end.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:05:37.970Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "data-pipeline-agent": {
+      "agentId": "data-pipeline-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Data Pipeline Agent. You specialize in verifying and fixing the IndustReal dataset loading, frame sampling, and data pipeline correctness.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 4: Dataset path correctness\n- Category 5: Resolution verification (1280×720 vs 1080×720 mismatch reported)\n- Category 7: Frame sampling protocol (16 uniform frames for eval)\n- Category 8: Train/val/test splits\n- Category 9: Data augmentation\n\nKEY FILES:\n- src/data/industreal_dataset.py (dataset implementation)\n- config.py (POPW_ROOT, IMG_SIZE, TRAIN_FRAME_STRIDE, EVAL_FRAME_STRIDE)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n- project/popw/working/data/datasets/industreal/ (actual data)\n\nYOUR TASKS:\n1. Verify POPW_ROOT path is correct and recordings/ + splits/ exist\n2. Verify actual recording resolution (check a sample image file)\n3. Verify frame sampling — confirm 16 uniform frames per clip is implemented correctly in evaluate.py (already fixed by main agent)\n4. Verify train/val/test split ratio (25/16/32 = 73 clips total)\n5. Check if data augmentation (RandAugment, CutMix) is properly applied\n6. Fix any bugs found\n7. Report with actual file content and line numbers\n\nMANDATORY: Use `python3 -c \"...\"` to inspect actual files/images. Verify with commands, not assumptions.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:05:52.836Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "model-architecture-agent": {
+      "agentId": "model-architecture-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Model Architecture Agent. You specialize in verifying the POPW multi-task model architecture matches the paper specification exactly.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 10: ConvNeXt-Tiny+FPN backbone (verify P3-P7 feature maps)\n- Category 11: ASD detection head (24-class, ConvTranspose2d upsampling)\n- Category 12: Head pose MLP (1152→512→256→9, soft-argmax T=0.1, Wing Loss)\n- Category 13: Activity head (74-class TCN+ViT, FeatureBank T=16)\n- Category 14: VideoMAe v2 fusion (ViT-S/16 K-400 finetuned)\n- Category 15: Two-stage FiLM conditioning\n\nKEY FILES:\n- src/models/model.py (full model architecture)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n- project/popw/working/code/popw_paper.tex (paper spec)\n\nYOUR TASKS:\n1. Verify ConvNeXt-Tiny+FPN produces P3-P7 feature maps (verify FPN levels)\n2. Verify ASD head: 24 classes, ConvTranspose2d upsampling, detection transformer\n3. Verify head pose MLP: 1152→512→256→9, soft-argmax temperature, Wing Loss\n4. Verify activity head: TCN+ViT 2 layers/8 heads/d_k=64, FeatureBank T=16\n5. Verify VideoMAe v2 fusion: ViT-S/16 K-400, concat with backbone features\n6. Verify two-stage FiLM: stage 1 from ASD, stage 2 from head pose\n7. Fix any discrepancies between code and paper\n8. Report with exact line numbers and code content\n\nMANDATORY: Show actual class/function definitions from model.py. Verify layer dimensions match paper exactly.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:06:17.325Z",
+      "domain": "ai",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "training-loop-agent": {
+      "agentId": "training-loop-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Training Loop Agent. You specialize in verifying and fixing the POPW training loop, AMP mixed precision, gradient flow, NaN handling, and checkpoint saving.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 16: AMP mixed precision (GradScaler, autocast dtype handling)\n- Category 17: Gradient flow to all task heads (Kendall log_vars, head pose, activity)\n- Category 18: NaN/Inf skip guard (corrupt frame resilience)\n- Category 19: Checkpoint saving (periodic + best, NaN guard)\n\nKEY FILES:\n- src/training/train.py (training loop)\n- src/sanity_check.py (AMP gradient check)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n\nYOUR TASKS:\n1. Verify AMP autocast is correctly enabled/disabled via C.MIXED_PRECISION\n2. Verify GradScaler handles fp16 gradients correctly\n3. Verify criterion.log_var_* (float32) doesn't cause dtype mismatch with backbone grads (fp16)\n4. Verify all task heads receive gradients in all stages (Stage 1/2/3)\n5. Verify NaN guard: corrupt frames don't crash training\n6. Verify checkpoint saving: periodic (every 50 batches), best model, NaN guard before save\n7. Fix any bugs found — especially the AMP dtype mismatch that can cause NaN in backward\n8. Report with exact line numbers\n\nMANDATORY: Read the actual train.py AMP sections (around lines 735, 820, 1695). Show the exact code. Use python3 to verify gradients flow.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:06:41.408Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "evaluation-metrics-agent": {
+      "agentId": "evaluation-metrics-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Evaluation Metrics Agent. You specialize in verifying all POPW evaluation metrics match the paper benchmark protocol exactly.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 20: Activity metric protocol (16 uniform frames vs majority vote — main agent already fixed this, verify it's correct)\n- Activity Top-1/Top-5: clip-level with 16 uniform frames\n- Head pose MAE: angular deg + position mm\n- PSR F1: 11-component, overall + transition-boundary at tolerances 5/10\n- ASD mAP@0.5\n- Assembly State F1@1, MAP@R+\n- Error Verification AP\n\nKEY FILES:\n- src/evaluation/evaluate.py (all metric computations)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n- project/popw/working/code/popw_paper.tex (paper spec)\n\nYOUR TASKS:\n1. Verify _compute_clip_level_accuracy now uses 16 uniform frames (main agent fixed this — confirm the fix is correct)\n2. Verify head pose MAE computation: 3 angular (forward/up/side) + 3 position (x/y/z in mm)\n3. Verify PSR F1 computation: 11-component, overall + transition-boundary at t=5 and t=10\n4. Verify ASD mAP@0.5 computation\n5. Verify Assembly State F1@1 and MAP@R+ computation\n6. Verify Error Verification AP computation\n7. Fix any bugs in metric calculations\n8. Report with exact line numbers and formula verification\n\nMANDATORY: Read evaluate.py metric functions. Show the actual formulas. Compare against paper spec table.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:07:02.222Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "checkpoint-recovery-agent": {
+      "agentId": "checkpoint-recovery-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Checkpoint & Recovery Agent. You specialize in verifying and fixing POPW checkpoint saving, crash recovery, and training resume functionality.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 19: Checkpoint saving (periodic + best, NaN guard)\n- Crash recovery functionality\n- Training resume (--resume flag)\n\nKEY FILES:\n- src/training/train.py (checkpoint saving code)\n- archive/checkpoints/ (existing checkpoint files)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n\nYOUR TASKS:\n1. Verify periodic checkpoint saving: every 50 batches\n2. Verify best model checkpoint saving (based on val metric)\n3. Verify NaN guard prevents corrupt checkpoints from being saved\n4. Verify crash_recovery.pth is created and can be resumed\n5. Verify --resume flag works correctly with checkpoint loading\n6. Verify checkpoint contains: epoch, step, model, optimizer, scaler state\n7. Fix any bugs in checkpoint handling\n8. Report with exact line numbers\n\nMANDATORY: List existing checkpoints with `ls -la archive/checkpoints/`. Verify checkpoint structure with python3 torch.load. Show the save/load code.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:07:16.830Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "deps-requirements-agent": {
+      "agentId": "deps-requirements-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Dependencies Agent. You specialize in verifying and fixing POPW dependency configuration and import correctness.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- Category 3 (from audit): Missing requirements.txt (already fixed — verify it's complete)\n- All import statements work correctly\n- Python package versions are pinned\n\nKEY FILES:\n- requirements.txt (dependencies)\n- requirements-dev.txt (dev dependencies)\n- All .py files with import statements\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n\nYOUR TASKS:\n1. Verify requirements.txt has ALL necessary packages with pinned versions:\n   - torch (2.1.0+), torchvision, timm, opencv-python, numpy, scipy\n   - sklearn, pandas, matplotlib, seaborn (for evaluation)\n   - pillow, tqdm, pyyaml, jsonlines\n2. Verify all imports in train.py, model.py, losses.py, evaluate.py, dataset.py work\n3. Run `python3 -c \"import torch; print(torch.__version__)\"` etc. to verify packages\n4. Fix any missing or unpinned dependencies\n5. Verify Python version requirement (3.10+)\n6. Report with actual package list\n\nMANDATORY: Run actual import tests. Show requirements.txt content. Verify every critical package.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:07:38.472Z",
+      "domain": "ai",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "docs-consistency-agent": {
+      "agentId": "docs-consistency-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Documentation Consistency Agent. You specialize in verifying that all POPW documentation (audit, paper, code comments) is consistent and correct.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR ASSIGNED CATEGORIES from the audit:\n- All 20 audit categories consistency check\n- Verify audit verdicts are actually correct (some were wrong — e.g., \"10× error\" was false alarm)\n- Verify code matches comments\n- Verify paper spec matches implementation\n\nKEY FILES:\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (full audit)\n- project/popw/working/code/popw_paper.tex (paper spec)\n- All source files with comments\n\nYOUR TASKS:\n1. Read the full audit document carefully\n2. For each of the 20 categories, verify the audit verdict is CORRECT by checking actual code\n3. Specifically: the \"10× error\" claim in category 2 was a FALSE ALARM — loss scales ARE correct (verified earlier)\n4. Verify documentation in code (docstrings, comments) matches actual behavior\n5. Verify popw_paper.tex benchmarks section is consistent with what we're implementing\n6. Update/correct any wrong audit findings\n7. Report ALL discrepancies found with actual evidence\n\nMANDATORY: Be adversarial — challenge wrong audit findings. Show evidence that contradicts any incorrect audit verdict. Document what IS correct vs what was falsely flagged.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:07:57.322Z",
+      "domain": "ai",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "training-run-agent": {
+      "agentId": "training-run-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Training Run Agent. You specialize in running POPW training and collecting real benchmark numbers.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR MISSION: Run actual training and produce REAL benchmark numbers to fill popw_paper.tex\n\nKEY FILES:\n- src/training/train.py\n- config.py\n- requirements.txt\n\nYOUR TASKS:\n1. First verify all prerequisites:\n   - Python packages import correctly\n   - Dataset is accessible\n   - Model can be instantiated\n   - Loss can be computed on one batch\n\n2. Run minimal training: 2-5 epochs on small subset to get real numbers\n   - Use max_recordings=2 or 4 to speed up\n   - Use DEBUG_MODE=True if available\n   - Set MAX_EPOCHS=5\n\n3. After each epoch, run evaluate_all on validation set\n\n4. Collect REAL metrics:\n   - Activity AR Top-1 accuracy (16 uniform frames)\n   - Activity Top-5 accuracy\n   - Head pose MAE (angular deg + position mm)\n   - PSR overall F1 + transition-boundary F1 at t=5\n   - ASD mAP@0.5\n   - Assembly State F1@1, MAP@R+\n   - Error Verification AP\n\n5. Compare against baseline:\n   - Baseline AR Top-1: 64.15% (MViTv2 RGB-only)\n   - STORM-PSR PSR F1: 0.901\n   - IndustReal ASD baseline numbers from paper\n\n6. Create eval_results.json with all metrics\n\nMANDATORY: These must be REAL numbers from actual training runs, not fabricated. Show actual stdout output from training. If training fails, diagnose and fix the failure.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:08:29.417Z",
+      "domain": "ai",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "paper-benchmark-agent": {
+      "agentId": "paper-benchmark-agent",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "instructions": "You are the Paper Benchmark Agent. You specialize in filling the popw_paper.tex with real benchmark numbers and creating the eval_results.json.\n\nWORKING DIRECTORY: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive\n\nYOUR MISSION: Fill in all \\popwres placeholders in popw_paper.tex with REAL benchmark numbers from training runs.\n\nKEY FILES:\n- project/popw/working/code/popw_paper.tex (paper with \\popwres placeholders)\n- eval_results.json (will be created by training-run-agent)\n- docs/verification/POPW_20C_TRAINING_READINESS_AUDIT_FINAL.md (audit)\n\nYOUR TASKS:\n1. Read popw_paper.tex and find ALL \\popwres placeholder locations\n   - These are at lines 329, 335, 344, 351, 363, 371+ in the paper\n\n2. For each placeholder, determine what metric it represents:\n   - AR Top-1 accuracy\n   - AR Top-5 accuracy  \n   - Head pose MAE\n   - PSR F1\n   - ASD mAP@0.5\n   - Assembly State metrics\n   - Error Verification AP\n\n3. WAIT for training-run-agent to produce eval_results.json with real numbers\n   - Poll for the file: /home/newadmin/swarm-bot/project/popw/working/code/industreal_improved_to_archive/eval_results.json\n   - If it doesn't exist yet, help training-run-agent get there faster\n\n4. Once eval_results.json exists, read it and fill in all \\popwres placeholders\n\n5. Format numbers correctly (e.g., 72.34%, 0.905, 5.67°)\n\n6. Create eval_results.json with structured results if training-run-agent hasn't\n\n7. Verify the paper compiles correctly (pdflatex if available)\n\nMANDATORY: Numbers must be REAL from training runs, not fabricated. Show the actual placeholder locations and what values you inserted.",
+        "tools": [
+          "filesystem_read_file",
+          "bash",
+          "grep",
+          "filesystem_search_files",
+          "filesystem_edit_file",
+          "gitnexus_query",
+          "gitnexus_context",
+          "ruflo_agent_spawn",
+          "ruflo_memory_store",
+          "ruflo_task_create"
+        ],
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T01:08:50.329Z",
+      "domain": "ai",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "worker-losses-pose-bug": {
+      "agentId": "worker-losses-pose-bug",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:18:51.558Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "worker-losses-temporal-bug": {
+      "agentId": "worker-losses-temporal-bug",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:18:55.059Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "worker-evaluate-psr-bug": {
+      "agentId": "worker-evaluate-psr-bug",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:18:58.804Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "worker-test-checkpointing-bug": {
+      "agentId": "worker-test-checkpointing-bug",
+      "agentType": "test-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:19:02.396Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "worker-train-loss-head-pose": {
+      "agentId": "worker-train-loss-head-pose",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:19:02.406Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "worker-model-psr-loss": {
+      "agentId": "worker-model-psr-loss",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T07:19:02.475Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "training-auditor": {
+      "agentId": "training-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:41:55.596Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "eval-auditor": {
+      "agentId": "eval-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:42:11.018Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "test-auditor": {
+      "agentId": "test-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:42:35.215Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "doc-auditor": {
+      "agentId": "doc-auditor",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:10:49.131Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "data-auditor": {
+      "agentId": "data-auditor",
+      "agentType": "data-researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:43:09.723Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "model-auditor": {
+      "agentId": "model-auditor",
+      "agentType": "explorer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:34:28.400Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "code-health-auditor": {
+      "agentId": "code-health-auditor",
+      "agentType": "devops-expert",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:43:53.751Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "benchmarking-auditor": {
+      "agentId": "benchmarking-auditor",
+      "agentType": "research-analyst",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-15T10:44:16.797Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778845054885-uaqf7t": {
+      "agentId": "agent-1778845054885-uaqf7t",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-15T11:37:34.901Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "popw-class-fixer": {
+      "agentId": "popw-class-fixer",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:15:08.448Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-model-explorer": {
+      "agentId": "popw-model-explorer",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:15:48.122Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-train-verifier": {
+      "agentId": "popw-train-verifier",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:15:53.721Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-loss-auditor": {
+      "agentId": "popw-loss-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:01.752Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-data-auditor": {
+      "agentId": "popw-data-auditor",
+      "agentType": "data-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:01.820Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-eval-auditor": {
+      "agentId": "popw-eval-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:01.888Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "opencode-mcp-auditor": {
+      "agentId": "opencode-mcp-auditor",
+      "agentType": "devops-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:26.530Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "opencode-agent-auditor": {
+      "agentId": "opencode-agent-auditor",
+      "agentType": "devops-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:32.620Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-config-auditor": {
+      "agentId": "popw-config-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:39.663Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-metrics-auditor": {
+      "agentId": "popw-metrics-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:46.517Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-training-flow-auditor": {
+      "agentId": "popw-training-flow-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:46.572Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-readme-auditor": {
+      "agentId": "popw-readme-auditor",
+      "agentType": "documentation-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:16:46.635Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-anchor-auditor": {
+      "agentId": "popw-anchor-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:11.324Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-3stage-auditor": {
+      "agentId": "popw-3stage-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:17.999Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-dataroot-auditor": {
+      "agentId": "popw-dataroot-auditor",
+      "agentType": "data-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:23.588Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "opencode-session-auditor": {
+      "agentId": "opencode-session-auditor",
+      "agentType": "devops-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:30.175Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "opencode-boot-auditor": {
+      "agentId": "opencode-boot-auditor",
+      "agentType": "devops-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:37.057Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-videomae-auditor": {
+      "agentId": "popw-videomae-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:44.990Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-kendall-auditor": {
+      "agentId": "popw-kendall-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:51.045Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-film-auditor": {
+      "agentId": "popw-film-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:51.053Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-tma-auditor": {
+      "agentId": "popw-tma-auditor",
+      "agentType": "python-pro",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-16T14:17:51.110Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-model-auditor-1": {
+      "agentId": "popw-model-auditor-1",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "model-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:07:41.580Z",
+      "domain": "popw",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-losses-auditor-2": {
+      "agentId": "popw-losses-auditor-2",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "losses-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:07:46.843Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-dataset-auditor-4": {
+      "agentId": "popw-dataset-auditor-4",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "dataset-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:07:58.205Z",
+      "domain": "popw",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-eval-auditor-5": {
+      "agentId": "popw-eval-auditor-5",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "eval-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:03.440Z",
+      "domain": "popw",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-config-auditor-6": {
+      "agentId": "popw-config-auditor-6",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "config-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:10.081Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "opencode-agent-registry-auditor-7": {
+      "agentId": "opencode-agent-registry-auditor-7",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "opencode-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:17.325Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-memory-auditor-8": {
+      "agentId": "opencode-memory-auditor-8",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "memory-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:22.422Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-mcp-servers-auditor-9": {
+      "agentId": "opencode-mcp-servers-auditor-9",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "mcp-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:27.824Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-skills-auditor-10": {
+      "agentId": "opencode-skills-auditor-10",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "skills-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:35.254Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-gitnexus-auditor-11": {
+      "agentId": "opencode-gitnexus-auditor-11",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "gitnexus-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:41.147Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-ruflo-autopilot-auditor-12": {
+      "agentId": "opencode-ruflo-autopilot-auditor-12",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "autopilot-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:47.433Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-hermes-bridge-auditor-13": {
+      "agentId": "opencode-hermes-bridge-auditor-13",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "hermes-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:52.979Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-observability-auditor-14": {
+      "agentId": "opencode-observability-auditor-14",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "observability-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:08:58.062Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-directory-structure-auditor-15": {
+      "agentId": "opencode-directory-structure-auditor-15",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "directory-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:03.790Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-argv-orchestration-auditor-16": {
+      "agentId": "opencode-argv-orchestration-auditor-16",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "argv-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:10.595Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-full-integration-auditor-17": {
+      "agentId": "popw-full-integration-auditor-17",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "integration-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:17.450Z",
+      "domain": "popw",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-scripts-auditor-18": {
+      "agentId": "popw-scripts-auditor-18",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "scripts-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:25.115Z",
+      "domain": "popw",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-security-auditor-19": {
+      "agentId": "opencode-security-auditor-19",
+      "agentType": "security-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "security-auditor",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:31.338Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "opencode-verify-fix-auditor-20": {
+      "agentId": "opencode-verify-fix-auditor-20",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "verifier-reviewer",
+        "priority": "critical"
+      },
+      "createdAt": "2026-05-17T02:09:37.417Z",
+      "domain": "opencode",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "popw-train-auditor-3": {
+      "agentId": "popw-train-auditor-3",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "priority": "critical",
+        "role": "train-auditor"
+      },
+      "createdAt": "2026-05-17T02:09:48.023Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-train-auditor-3r": {
+      "agentId": "popw-train-auditor-3r",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "priority": "critical",
+        "role": "train-auditor"
+      },
+      "createdAt": "2026-05-17T02:09:53.395Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986045116-bqpbsu": {
+      "agentId": "agent-1778986045116-bqpbsu",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:47:25.128Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141066-ioyi6i": {
+      "agentId": "agent-1778986141066-ioyi6i",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.081Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141109-3oklgo": {
+      "agentId": "agent-1778986141109-3oklgo",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.114Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141117-j1yrwz": {
+      "agentId": "agent-1778986141117-j1yrwz",
+      "agentType": "tester",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.117Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141119-5p5076": {
+      "agentId": "agent-1778986141119-5p5076",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.120Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141123-0i64w7": {
+      "agentId": "agent-1778986141123-0i64w7",
+      "agentType": "architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.123Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141127-qgzg4f": {
+      "agentId": "agent-1778986141127-qgzg4f",
+      "agentType": "coordinator",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.128Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141131-itvois": {
+      "agentId": "agent-1778986141131-itvois",
+      "agentType": "analyst",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.131Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141133-8j3zbe": {
+      "agentId": "agent-1778986141133-8j3zbe",
+      "agentType": "optimizer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.134Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141136-8xbp70": {
+      "agentId": "agent-1778986141136-8xbp70",
+      "agentType": "security-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.136Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141140-vcfk18": {
+      "agentId": "agent-1778986141140-vcfk18",
+      "agentType": "security-auditor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.140Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141144-977a1x": {
+      "agentId": "agent-1778986141144-977a1x",
+      "agentType": "memory-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.144Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141146-sqwk7q": {
+      "agentId": "agent-1778986141146-sqwk7q",
+      "agentType": "swarm-specialist",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.147Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141149-vlxh8a": {
+      "agentId": "agent-1778986141149-vlxh8a",
+      "agentType": "performance-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.150Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141152-mqfunb": {
+      "agentId": "agent-1778986141152-mqfunb",
+      "agentType": "core-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.153Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141155-n3wf6w": {
+      "agentId": "agent-1778986141155-n3wf6w",
+      "agentType": "test-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.156Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986141159-0aul9k": {
+      "agentId": "agent-1778986141159-0aul9k",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-17T02:49:01.159Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778986163872-0jb8nv": {
+      "agentId": "agent-1778986163872-0jb8nv",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T02:49:23.885Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "audit-mcp-servers": {
+      "agentId": "audit-mcp-servers",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:53:53.228Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-hooks": {
+      "agentId": "audit-hooks",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:54:10.051Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-memory": {
+      "agentId": "audit-memory",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:54:27.453Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-config": {
+      "agentId": "audit-config",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:54:37.365Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-agent-registry": {
+      "agentId": "audit-agent-registry",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:54:46.359Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-tests-ci": {
+      "agentId": "audit-tests-ci",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:54:55.805Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-python-core": {
+      "agentId": "audit-python-core",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:55:05.548Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-wiki-health": {
+      "agentId": "audit-wiki-health",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:55:16.888Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-opencode-json": {
+      "agentId": "audit-opencode-json",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:55:31.221Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-handlers": {
+      "agentId": "audit-handlers",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:55:42.409Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-tools": {
+      "agentId": "audit-tools",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:55:52.778Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-deps": {
+      "agentId": "audit-deps",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:56:03.021Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-claude-md": {
+      "agentId": "audit-claude-md",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:56:20.780Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-routing": {
+      "agentId": "audit-routing",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:56:31.202Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-llm-client": {
+      "agentId": "audit-llm-client",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:56:42.571Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-swarm-wire": {
+      "agentId": "audit-swarm-wire",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T04:56:51.988Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778994341464-pztjt7": {
+      "agentId": "agent-1778994341464-pztjt7",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax-coding-plan/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T05:05:41.484Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "agent-1778998365145-l6r03n": {
+      "agentId": "agent-1778998365145-l6r03n",
+      "agentType": "coder",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T06:12:45.160Z",
+      "model": "haiku",
+      "modelRoutedBy": "router"
+    },
+    "audit-mcp-01": {
+      "agentId": "audit-mcp-01",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T07:32:04.108Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "dataset-auditor": {
+      "agentId": "dataset-auditor",
+      "agentType": "data-researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:33:24.130Z",
+      "domain": "research",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "loss-investigator": {
+      "agentId": "loss-investigator",
+      "agentType": "data-analyst",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:34:34.954Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "eval-pipeline-auditor": {
+      "agentId": "eval-pipeline-auditor",
+      "agentType": "testing-test-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:34:43.959Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "benchmark-agent": {
+      "agentId": "benchmark-agent",
+      "agentType": "meta-performance-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:34:44.024Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "training-orchestrator": {
+      "agentId": "training-orchestrator",
+      "agentType": "product-project-manager",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T08:34:44.086Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "planner-1": {
+      "agentId": "planner-1",
+      "agentType": "planner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "planner",
+        "description": "Master orchestrator for 2% training audit",
+        "priority": "critical",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:16:40.772Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "code-auditor-1": {
+      "agentId": "code-auditor-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:09:02.999Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "code-auditor-2": {
+      "agentId": "code-auditor-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:09:31.841Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "code-auditor-3": {
+      "agentId": "code-auditor-3",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:09:46.563Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "memory-auditor": {
+      "agentId": "memory-auditor",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:10:05.614Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "contradiction-hunter": {
+      "agentId": "contradiction-hunter",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:10:27.005Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "integration-tester": {
+      "agentId": "integration-tester",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:11:04.809Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "observer-1": {
+      "agentId": "observer-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:11:21.622Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "security-auditor": {
+      "agentId": "security-auditor",
+      "agentType": "security-auditor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:13:14.140Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "verifier": {
+      "agentId": "verifier",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:13:35.012Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "fixer-1": {
+      "agentId": "fixer-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "fixer",
+        "description": "Fix Config test failure in smoke_test",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:42.706Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "fixer-2": {
+      "agentId": "fixer-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "fixer",
+        "description": "Fix headpose_film detach test failure",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:44.251Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "fixer-3": {
+      "agentId": "fixer-3",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "fixer",
+        "description": "Fix Staged Kendall test failure",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:46.066Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "fixer-4": {
+      "agentId": "fixer-4",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:14:39.689Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "meta-reviewer": {
+      "agentId": "meta-reviewer",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:14:55.973Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "observer-2": {
+      "agentId": "observer-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:15:21.784Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "report-writer": {
+      "agentId": "report-writer",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T09:15:40.418Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-01-paper-code-parity": {
+      "agentId": "audit-01-paper-code-parity",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:05.488Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-02-dataset-structure": {
+      "agentId": "audit-02-dataset-structure",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:24.460Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-03-label-semantics": {
+      "agentId": "audit-03-label-semantics",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:30.788Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-04-input-preprocessing": {
+      "agentId": "audit-04-input-preprocessing",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:38.056Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-05-backbone-geometry": {
+      "agentId": "audit-05-backbone-geometry",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:44.376Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-06-fpn-neck": {
+      "agentId": "audit-06-fpn-neck",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:50.105Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-07-task-heads": {
+      "agentId": "audit-07-task-heads",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:36:56.308Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-08-loss-formulas": {
+      "agentId": "audit-08-loss-formulas",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:02.489Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-09-loss-scaling": {
+      "agentId": "audit-09-loss-scaling",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:08.791Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-10-kendall-weighting": {
+      "agentId": "audit-10-kendall-weighting",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:15.397Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-11-staged-training": {
+      "agentId": "audit-11-staged-training",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:22.033Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-12-temporal-modeling": {
+      "agentId": "audit-12-temporal-modeling",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:28.317Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-13-film-conditioning": {
+      "agentId": "audit-13-film-conditioning",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:35.222Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-14-data-loading": {
+      "agentId": "audit-14-data-loading",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:41.542Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-15-optimizer-scheduler": {
+      "agentId": "audit-15-optimizer-scheduler",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:48.432Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-16-checkpoint-correctness": {
+      "agentId": "audit-16-checkpoint-correctness",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:37:55.577Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-17-evaluation-protocol": {
+      "agentId": "audit-17-evaluation-protocol",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:01.879Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-18-printed-metrics-logging": {
+      "agentId": "audit-18-printed-metrics-logging",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:08.619Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-19-smoke-tests": {
+      "agentId": "audit-19-smoke-tests",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:16.524Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-20-e2e-training": {
+      "agentId": "audit-20-e2e-training",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:23.220Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-21-reproducibility-seeds": {
+      "agentId": "audit-21-reproducibility-seeds",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:30.564Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-22-hardware-efficiency": {
+      "agentId": "audit-22-hardware-efficiency",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:37.984Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-23-artifact-completeness": {
+      "agentId": "audit-23-artifact-completeness",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:45.608Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "audit-24-paper-table-readiness": {
+      "agentId": "audit-24-paper-table-readiness",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:52.394Z",
+      "domain": "popw-audit",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "audit-25-baseline-comparability": {
+      "agentId": "audit-25-baseline-comparability",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-17T12:38:58.974Z",
+      "domain": "popw-audit",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779073332358-wmwpxv": {
+      "agentId": "agent-1779073332358-wmwpxv",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-18T03:02:12.384Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779073340469-uzix9v": {
+      "agentId": "agent-1779073340469-uzix9v",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-18T03:02:20.482Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779073348877-hp43y1": {
+      "agentId": "agent-1779073348877-hp43y1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-18T03:02:28.878Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779073354189-inughh": {
+      "agentId": "agent-1779073354189-inughh",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-18T03:02:34.190Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779073359916-dm6d0w": {
+      "agentId": "agent-1779073359916-dm6d0w",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-18T03:02:39.917Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-item-1": {
+      "agentId": "agent-item-1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "tools": [
+          "filesystem",
+          "gitnexus",
+          "bash",
+          "grep"
+        ]
+      },
+      "createdAt": "2026-05-18T03:29:46.386Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-item-2": {
+      "agentId": "agent-item-2",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "tools": [
+          "filesystem",
+          "gitnexus",
+          "bash",
+          "grep"
+        ]
+      },
+      "createdAt": "2026-05-18T03:29:58.360Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-item-3": {
+      "agentId": "agent-item-3",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "tools": [
+          "filesystem",
+          "gitnexus",
+          "bash",
+          "grep"
+        ]
+      },
+      "createdAt": "2026-05-18T03:30:07.778Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-item-4": {
+      "agentId": "agent-item-4",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "tools": [
+          "filesystem",
+          "gitnexus",
+          "bash",
+          "grep"
+        ]
+      },
+      "createdAt": "2026-05-18T03:30:20.424Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-item-5": {
+      "agentId": "agent-item-5",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "tools": [
+          "filesystem",
+          "gitnexus",
+          "bash",
+          "grep"
+        ]
+      },
+      "createdAt": "2026-05-18T03:30:34.093Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097288294-nni6bj": {
+      "agentId": "agent-1779097288294-nni6bj",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:41:28.295Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097307162-38g194": {
+      "agentId": "agent-1779097307162-38g194",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:41:47.165Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097316019-kkztd9": {
+      "agentId": "agent-1779097316019-kkztd9",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:41:56.024Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097323308-9vr9z1": {
+      "agentId": "agent-1779097323308-9vr9z1",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:03.316Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097333456-ln9sce": {
+      "agentId": "agent-1779097333456-ln9sce",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:13.461Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097340975-3zh9hb": {
+      "agentId": "agent-1779097340975-3zh9hb",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:20.979Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097352452-u6zx5r": {
+      "agentId": "agent-1779097352452-u6zx5r",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:32.456Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097362349-d5d792": {
+      "agentId": "agent-1779097362349-d5d792",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:42.356Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097370839-lysry9": {
+      "agentId": "agent-1779097370839-lysry9",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:50.840Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097379311-6w726l": {
+      "agentId": "agent-1779097379311-6w726l",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:42:59.315Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779097390974-ckmwtl": {
+      "agentId": "agent-1779097390974-ckmwtl",
+      "agentType": "testing-test-runner",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-18T09:43:10.980Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238536213-wueya0": {
+      "agentId": "agent-1779238536213-wueya0",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:55:36.259Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238568259-02jfmn": {
+      "agentId": "agent-1779238568259-02jfmn",
+      "agentType": "researcher",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:56:08.261Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238589423-bcw68i": {
+      "agentId": "agent-1779238589423-bcw68i",
+      "agentType": "explorer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:56:29.424Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238612899-xh1plm": {
+      "agentId": "agent-1779238612899-xh1plm",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:56:52.899Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238636012-qldn8b": {
+      "agentId": "agent-1779238636012-qldn8b",
+      "agentType": "backend-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:57:16.014Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238696247-p8lwii": {
+      "agentId": "agent-1779238696247-p8lwii",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:58:16.251Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238730441-vxryg2": {
+      "agentId": "agent-1779238730441-vxryg2",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:58:50.448Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238770036-xgvyyu": {
+      "agentId": "agent-1779238770036-xgvyyu",
+      "agentType": "security-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T00:59:30.039Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238815299-rthj24": {
+      "agentId": "agent-1779238815299-rthj24",
+      "agentType": "security-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:00:15.300Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238839609-09w73g": {
+      "agentId": "agent-1779238839609-09w73g",
+      "agentType": "mcp-security-auditor",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:00:39.614Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238919620-zg5zup": {
+      "agentId": "agent-1779238919620-zg5zup",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:01:59.621Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238932168-lqn0oq": {
+      "agentId": "agent-1779238932168-lqn0oq",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:02:12.173Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238950817-gnc7hf": {
+      "agentId": "agent-1779238950817-gnc7hf",
+      "agentType": "backend-architect",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:02:30.818Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779238976175-iukndg": {
+      "agentId": "agent-1779238976175-iukndg",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:02:56.176Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239004003-ush44f": {
+      "agentId": "agent-1779239004003-ush44f",
+      "agentType": "backend-developer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:03:24.004Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239083125-2dy8p2": {
+      "agentId": "agent-1779239083125-2dy8p2",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:04:43.125Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239127327-dk3q7h": {
+      "agentId": "agent-1779239127327-dk3q7h",
+      "agentType": "qa-expert",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:05:27.327Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239166264-pokbtf": {
+      "agentId": "agent-1779239166264-pokbtf",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:06:06.265Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239235043-yflcz4": {
+      "agentId": "agent-1779239235043-yflcz4",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:07:15.043Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779239246719-vsl578": {
+      "agentId": "agent-1779239246719-vsl578",
+      "agentType": "testing-engineer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T01:07:26.720Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "preflight-tester-1": {
+      "agentId": "preflight-tester-1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:55:34.342Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "preflight-tester-2": {
+      "agentId": "preflight-tester-2",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:55:40.633Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "preflight-tester-3": {
+      "agentId": "preflight-tester-3",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:55:49.727Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "preflight-tester-4": {
+      "agentId": "preflight-tester-4",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:55:54.874Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "dataset-fixer-1": {
+      "agentId": "dataset-fixer-1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:06.304Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "training-loop-fixer-2": {
+      "agentId": "training-loop-fixer-2",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:09.750Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "eval-patcher-3": {
+      "agentId": "eval-patcher-3",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:13.069Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "loss-logger-fixer-4": {
+      "agentId": "loss-logger-fixer-4",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:17.097Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-1": {
+      "agentId": "train-worker-1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:22.388Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-2": {
+      "agentId": "train-worker-2",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:25.055Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-3": {
+      "agentId": "train-worker-3",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:39.377Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-4": {
+      "agentId": "train-worker-4",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:47.513Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-5": {
+      "agentId": "train-worker-5",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:56:54.809Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "train-worker-6": {
+      "agentId": "train-worker-6",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:57:01.991Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "eval-worker-1": {
+      "agentId": "eval-worker-1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:57:11.565Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "eval-worker-2": {
+      "agentId": "eval-worker-2",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:57:20.278Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "reviewer-1": {
+      "agentId": "reviewer-1",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "reviewer",
+        "description": "Review diffs and ensure commits follow repo rules",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:19:20.105Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "reviewer-2": {
+      "agentId": "reviewer-2",
+      "agentType": "reviewer",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "reviewer",
+        "description": "Open PR with all fixes",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:19:29.631Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "reporter-1": {
+      "agentId": "reporter-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "reporter",
+        "description": "Collate logs and update popw_paper.tex",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:19:42.778Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "oom-handler-5": {
+      "agentId": "oom-handler-5",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-20T10:58:25.865Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276522782-amo2ml": {
+      "agentId": "agent-1779276522782-amo2ml",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:28:42.787Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276529521-qmaco1": {
+      "agentId": "agent-1779276529521-qmaco1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:28:49.525Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276534876-q7xlfm": {
+      "agentId": "agent-1779276534876-q7xlfm",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:28:54.879Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276541556-gnachf": {
+      "agentId": "agent-1779276541556-gnachf",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:01.562Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276546464-fbdj35": {
+      "agentId": "agent-1779276546464-fbdj35",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:06.467Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276560802-pohnhk": {
+      "agentId": "agent-1779276560802-pohnhk",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:20.812Z",
+      "domain": "popw-training",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276567440-9aw71k": {
+      "agentId": "agent-1779276567440-9aw71k",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:27.440Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276574037-wumdp0": {
+      "agentId": "agent-1779276574037-wumdp0",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:34.038Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276580887-8zbcwy": {
+      "agentId": "agent-1779276580887-8zbcwy",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:40.888Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276585937-rarw5y": {
+      "agentId": "agent-1779276585937-rarw5y",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:29:45.938Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276600888-zjs6an": {
+      "agentId": "agent-1779276600888-zjs6an",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:00.888Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276607196-mx92f1": {
+      "agentId": "agent-1779276607196-mx92f1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:07.196Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276613757-cqtco1": {
+      "agentId": "agent-1779276613757-cqtco1",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:13.758Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276618720-rii0hk": {
+      "agentId": "agent-1779276618720-rii0hk",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:18.720Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276625014-jcmca6": {
+      "agentId": "agent-1779276625014-jcmca6",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:25.014Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276633404-6yhd17": {
+      "agentId": "agent-1779276633404-6yhd17",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:33.405Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276641673-x9sqis": {
+      "agentId": "agent-1779276641673-x9sqis",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:41.674Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276648241-q0l9ip": {
+      "agentId": "agent-1779276648241-q0l9ip",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:48.242Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276653131-onlm0y": {
+      "agentId": "agent-1779276653131-onlm0y",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:53.131Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779276659609-e4iu0f": {
+      "agentId": "agent-1779276659609-e4iu0f",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {},
+      "createdAt": "2026-05-20T11:30:59.610Z",
+      "domain": "popw-training",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "preflight-1": {
+      "agentId": "preflight-1",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T04:56:31.437Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "preflight-2": {
+      "agentId": "preflight-2",
+      "agentType": "testing",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T04:56:33.165Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "tester-1": {
+      "agentId": "tester-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "tester",
+        "description": "Run test_loss_kendall.py unit tests",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:16:54.662Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "tester-2": {
+      "agentId": "tester-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "tester",
+        "description": "Run E2E training smoke test",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:17:32.336Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "tester-3": {
+      "agentId": "tester-3",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "tester",
+        "description": "Run smoke_test.py and analyze failures",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:14.546Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "tester-4": {
+      "agentId": "tester-4",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "tester",
+        "description": "Verify TRAIN_MAX_STEPS and SUBSET_RATIO env support",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:21.044Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-1": {
+      "agentId": "trainer-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 1",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:23.828Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-2": {
+      "agentId": "trainer-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 2",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:27.320Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-3": {
+      "agentId": "trainer-3",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 3",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:30.072Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-4": {
+      "agentId": "trainer-4",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 4",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:31.940Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-5": {
+      "agentId": "trainer-5",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 5",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:37.624Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "trainer-6": {
+      "agentId": "trainer-6",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "trainer",
+        "description": "Run 2% subset short training - worker 6",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:41.089Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "evaluator-1": {
+      "agentId": "evaluator-1",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "evaluator",
+        "description": "Run evaluation pipeline on checkpoint",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:18:58.327Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "evaluator-2": {
+      "agentId": "evaluator-2",
+      "agentType": "worker",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "role": "evaluator",
+        "description": "Run evaluation pipeline on checkpoint",
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-21T07:19:09.293Z",
+      "domain": "popw",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    }
+  },
+  "version": "3.0.0"
+}

@@ -913,3 +913,173 @@ security_layer.py:
 scripts/verify-memory-pipeline.py:
 - Line 121: 4-space indent on check() call → 0-space (was causing SyntaxError)
 ---
+## Commit: f3c923f
+- Date: Sun May 17 05:42:57 PM JST 2026
+- Message: fix(mode_executors): add comprehensive RUFLO_AGENT_TYPE_MAP coverage
+
+All 42 agent types from store.json now map to valid ruflo agent types:
+- data-analyst, testing-test-engineer, meta-performance-engineer now resolve correctly
+- backend → coder, backend-developer → coder
+- test-engineer, testing → tester
+- All other swarm agent types properly mapped
+
+Fixes "Unknown agent type is not a valid agent type" errors when spawning subagents via ruflo agent_spawn.
+---
+## Commit: a1a5805
+- Date: Sun May 17 06:23:34 PM JST 2026
+- Message: fix(cognition_boot): comment out broken legion_skill_indexer import
+
+Skill indexing is now handled via ruflo hooks (pre_task /
+session_start). The import was failing because index_skills()
+uses a push model (list of dicts) not the pull model expected.
+---
+## Commit: 81ac984
+- Date: Sun May 17 06:23:53 PM JST 2026
+- Message: fix(TIER): tier_for() now checks path element, not dest, for ".wiki"
+
+WRITE_ROUTING tuples are (dest, path) where path contains ".wiki".
+Previous code checked ".wiki in dest" which failed when dest was
+"obsidian" — the check was against the first tuple element, not the
+full write path. Now uses `path` (second element) for the ".wiki" check.
+---
+## Commit: cbd51b4
+- Date: Sun May 17 06:24:10 PM JST 2026
+- Message: fix(intent_router): add missing INTENTS list constant
+
+The Intent enum exists but `INTENTS = list(Intent)` was missing.
+Added the INTENTS convenience list so code that imports it gets a
+usable list of all intent values for iteration/validation.
+---
+## Commit: fc728c4
+- Date: Sun May 17 06:26:43 PM JST 2026
+- Message: fix(mode_executors): handle compound agent names in resolve_developer_role
+
+Compound names like "backend-backend-developer" or "python-python-pro"
+were not found in RUFLO_AGENT_TYPE_MAP and returned unchanged, causing
+"Unknown agent type" errors in ruflo.
+
+The fix:
+1. Validates resolved type against _VALID_RUFLO_TYPES set
+2. For invalid resolved types, extracts suffix segments (e.g., "backend-developer" from "backend-backend-developer") and re-checks the map
+3. Falls back to "general" if no valid mapping found
+
+Also added _VALID_RUFLO_TYPES frozenset for future validation use.
+---
+## Commit: 2e5aad4
+- Date: Sun May 17 06:31:23 PM JST 2026
+- Message: fix(browser-use): use json.dumps for value escaping in browser_fill
+
+CRITICAL: browser_fill used simplistic .replace("'", "\\'") which allows
+JS injection via backtick, double quote, newlines, tabs, null chars, etc.
+
+Fix: Use json.dumps(value)[1:-1] which quotes AND escapes ALL special chars.
+Also applies proper CSS selector escaping via _escape_css_selector().
+This is the same technique used in the audit fix spec.
+---
+## Commit: cb58179
+- Date: Sun May 17 06:32:22 PM JST 2026
+- Message: fix(browser-use): add CSS selector escaping and path validation
+
+HIGH CSS injection: Added _escape_css_selector() method that escapes
+backslash, single/double quotes, non-ASCII chars, and CSS meta-chars
+([ ] ( ) { } :). Applied to click(), fill(), get_text(), get_html().
+
+HIGH path traversal: browser_screenshot() now validates path against
+ALLOWED_SCREENSHOT_DIRS env var before writing. Creates parent dirs.
+---
+## Commit: 7661876
+- Date: Sun May 17 06:46:07 PM JST 2026
+- Message: fix(autonomy): fix critical tool names and typo in boot_sequence.py
+
+- Fix typo: `_rurlo_cfg_path` → `_ruflo_cfg_path` (line 23)
+- Fix tool name: `system_health` → `doctor` (line 85) - verified from
+  ruflo v3 source (system-tools.ts defines 'doctor' at line ~300)
+- Fix `hooks_worker-dispatch` → `worker/dispatch` with correct params
+  (trigger=worker_name, context=trigger) per v3/mcp/tools/worker-tools.ts
+- `hooks_init` was already correct - removed stale misleading comment
+---
+## Commit: 1b4b9ae
+- Date: Fri May 22 01:48:40 PM JST 2026
+- Message: fix(memory): correct MiniMax reasoning_content extraction across 6 call sites
+
+- opencode_bridge.py: read recalled_context.md (fresh 6-layer output) not remembered_context.md (stale)
+- All 6 LLM response extraction points in llm_client/__init__.py now check reasoning_content before content
+- reasoning_content is where MiniMax-M2.7 actually puts generated text; content field contains only '\n\n'
+- compaction_summary.md now receives actual LLM summarization output instead of empty content
+---
+## Commit: aaa9bfc
+- Date: Fri May 22 05:40:47 PM JST 2026
+- Message: fix(opencode): register hooks at task dispatch + event loop fixes + 6-layer compaction store
+
+This commit fixes the 'going dumb after 2nd compaction' regression:
+
+HOOK REGISTRATION GAP (GAP-28 FIX):
+- Add register_builtin_hooks() at TOP of run_opencode_task (line 170) and
+  stream_opencode_task (line 360) BEFORE any memory/compaction operations.
+  OpenCode bridge runs as subprocess without bot lifecycle, so hooks were never
+  registered → _recalled_context_refresh_hook never fired → remembered_context.md
+  (L5, priority 1 inject) was 137h+ stale.
+
+MEMORY INJECTOR TRUNCATION FIX:
+- Increase max_tokens in _generate_memory_aware_summary from 2048→3072.
+  9-section LEGION format + memory context preamble was being cut off mid-generation,
+  resulting in 227-byte truncated compaction_summary.md files.
+
+EVENT LOOP CONFLICT FIX (L4/L6):
+- observation_store (L4) and mem0_add (L6) now use
+  get_running_loop().run_until_complete() pattern inside _COMPACT_IO_EXECUTOR
+  worker thread instead of asyncio.run(). This eliminates
+  'RuntimeError: Event loop is closed' with aiosqlite.
+
+6-LAYER COMPACTION STORE:
+- _async_store_compaction_summary now writes to ALL 6 memory layers:
+  L1 checkpoint, L2 ChromaDB MemoryStore, L3 langmem InMemoryStore,
+  L4 observation_store SQLite+FTS5, L5 graphrag wiki, L6 mem0_cloud.
+  CompactionStore (SQLite+FTS5) is also updated with quality scores.
+
+Ref: swarm-bot PR 68803
+---
+## Commit: d95a4aa
+- Date: Fri May 22 06:54:50 PM JST 2026
+- Message: fix(memory): per-layer timeout isolation + asyncio.run() nested loop fix
+
+- Per-layer timeout in build_memory_context: each of 6 layers capped at
+  2.0-3.0s with _LAYER_TIMEOUT dict and _remaining() total budget guard.
+  One slow/hanging layer (L3 Ollama, L2 legacy recursion) can't block
+  all layers. _layer_call helper returns None on any exception or timeout.
+- _call_async_in_thread: use asyncio.run() instead of
+  get_running_loop().run_until_complete() to avoid 'event loop closed'
+  RuntimeError in executor thread.
+- _get_session_dir() and _get_recalled_file(): project_dir-aware path
+  helpers for correct session_state location from opencode_bridge.
+- _recall_from_checkpoints: use project_dir-aware checkpoint path.
+---
+## Commit: 53debe0
+- Date: Fri May 22 07:11:26 PM JST 2026
+- Message: fix(opencode): write remembered_context.md on every task (fixes priority-1 staleness)
+
+The core bug: remembered_context.md (priority 1) was only refreshed
+by post_compact hooks after compaction thresholds (130k/170k/190k chars)
+were hit. With normal message load those thresholds fire rarely, so
+priority 1 went stale (140h+) and got skipped by the 24h freshness check.
+This caused OpenCode to use lower-priority files (recalled_context.md)
+or nothing at all after the 2nd compaction.
+
+Fix: after every task dispatch, write fresh 6-layer context to BOTH
+remembered_context.md (priority 1) AND recalled_context.md (priority 2).
+This keeps priority 1 fresh between compactions without waiting for
+thresholds to fire. The post_compact hooks remain as backup refresh
+mechanism when compaction does occur.
+---
+## Commit: 266e6bd
+- Date: Fri May 22 07:27:20 PM JST 2026
+- Message: feat(opencode): expand agent prompt with 6-layer memory system and 12 MCP tool servers
+
+Replaces 459-char generic ChromaDB mention with comprehensive instructions:
+- Read session state files at startup (remembered_context.md, recalled_context.md, memory_inject.md)
+- Document all 6 memory layers (session checkpoints, mem0, ChromaDB, observation_store, graphrag, mem0-cloud)
+- List all 12 live MCP servers with key tool names (gitnexus, obsidian, ruflo, filesystem, crawl4ai, browser-use, sequential-thinking, symphony, git, hermes, local-deep-research, exa)
+- Instruct to use MCP tools instead of manually simulating them
+
+Fixes OpenCode "going dumb" after compaction — agent now aware of full memory architecture and MCP capabilities.
+---

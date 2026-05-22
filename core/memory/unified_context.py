@@ -87,7 +87,7 @@ async def build_unified_memory_context(user_id: str, query: str) -> str:
     except Exception as e:
         logger.debug("[unified_context] Archival FTS: %s", e)
 
-    return "\n\n".join(parts) if parts else ""
+    # ── Profile Extras ─────────────────────────────────────────────────────────
     try:
         from core.memory.user_profile import get_user_profile
 

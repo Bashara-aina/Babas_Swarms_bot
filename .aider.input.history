@@ -1,0 +1,798 @@
+
+# 2026-05-13 16:01:54.752036
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.31s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:01:54.752147
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.31s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:02:34.011145
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.10s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:02:34.011437
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.10s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:03:19.982049
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.43s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:03:19.982335
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.43s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:03:50.520161
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.53s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:03:50.520382
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.53s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:04:37.589697
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.43s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:04:37.589928
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/goal_handler.py:15: in <module>
++    from tools.goal_runner import run_goal
++tools/goal_runner.py:12: in <module>
++    from minisweagent.agents.default import DefaultAgent
++E   ModuleNotFoundError: No module named 'minisweagent'
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow - Module...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.43s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:05:43.740495
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/swe_handler.py:28: in <module>
++    from core.swe_agent import SWEAgentLoop
++core/swe_agent/__init__.py:13: in <module>
++    from core.swe_agent.tools import (
++E     File "/home/newadmin/swarm-bot/core/swe_agent/tools.py", line 584
++E       "description": "View, create, or edit files in the repository. '
++E                      ^
++E   SyntaxError: unterminated string literal (detected at line 584)
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow -   File...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 13.27s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:05:43.740635
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/swe_handler.py:28: in <module>
++    from core.swe_agent import SWEAgentLoop
++core/swe_agent/__init__.py:13: in <module>
++    from core.swe_agent.tools import (
++E     File "/home/newadmin/swarm-bot/core/swe_agent/tools.py", line 584
++E       "description": "View, create, or edit files in the repository. '
++E                      ^
++E   SyntaxError: unterminated string literal (detected at line 584)
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow -   File...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 13.27s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:06:11.004270
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/swe_handler.py:28: in <module>
++    from core.swe_agent import SWEAgentLoop
++core/swe_agent/__init__.py:13: in <module>
++    from core.swe_agent.tools import (
++E     File "/home/newadmin/swarm-bot/core/swe_agent/tools.py", line 584
++E       "description": "View, create, or edit files in the repository. '
++E                      ^
++E   SyntaxError: unterminated string literal (detected at line 584)
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow -   File...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.51s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 16:06:11.004669
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 38 items
++
++tests/test_integration.py E
++
++==================================== ERRORS ====================================
++_____________ ERROR at setup of TestIntegration.test_basic_nl_flow _____________
++tests/test_integration.py:87: in with_allowed_user
++    import handlers.shared as _shared
++handlers/__init__.py:13: in <module>
++    from handlers import (
++handlers/swe_handler.py:28: in <module>
++    from core.swe_agent import SWEAgentLoop
++core/swe_agent/__init__.py:13: in <module>
++    from core.swe_agent.tools import (
++E     File "/home/newadmin/swarm-bot/core/swe_agent/tools.py", line 584
++E       "description": "View, create, or edit files in the repository. '
++E                      ^
++E   SyntaxError: unterminated string literal (detected at line 584)
++---------------------------- Captured stdout setup -----------------------------
++[EMBEDDER] Ollama connected — nomic-embed-text ready
++---------------------------- Captured stderr setup -----------------------------
++[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
++------------------------------ Captured log setup ------------------------------
++WARNING  core.agent_registry:agent_registry.py:161 Could not load SentenceTransformer embedding model: No module named 'torch'
++WARNING  core.agent_registry:agent_registry.py:162 Agent semantic search will use keyword matching only
++=========================== short test summary info ============================
++ERROR tests/test_integration.py::TestIntegration::test_basic_nl_flow -   File...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++============================== 1 error in 12.51s ===============================
++
++MCP ruflo failed to initialize: Connection lost
++
+
+# 2026-05-13 20:33:32.107701
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ....F
++
++=================================== FAILURES ===================================
++_____________________ TestLangGraph.test_langgraph_import ______________________
++tests/test_integrations.py:61: in test_langgraph_import
++    from core.integrations import (
++core/integrations/__init__.py:62: in __getattr__
++    from .langgraph_orchestrator import LangGraphAgent
++core/integrations/langgraph_orchestrator.py:29: in <module>
++    from langchain_openai import ChatOpenAI
++E   ModuleNotFoundError: No module named 'langchain_openai'
++=========================== short test summary info ============================
++FAILED tests/test_integrations.py::TestLangGraph::test_langgraph_import - Mod...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++========================= 1 failed, 4 passed in 16.59s =========================
++
++
+
+# 2026-05-13 20:33:32.107937
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ....F
++
++=================================== FAILURES ===================================
++_____________________ TestLangGraph.test_langgraph_import ______________________
++tests/test_integrations.py:61: in test_langgraph_import
++    from core.integrations import (
++core/integrations/__init__.py:62: in __getattr__
++    from .langgraph_orchestrator import LangGraphAgent
++core/integrations/langgraph_orchestrator.py:29: in <module>
++    from langchain_openai import ChatOpenAI
++E   ModuleNotFoundError: No module named 'langchain_openai'
++=========================== short test summary info ============================
++FAILED tests/test_integrations.py::TestLangGraph::test_langgraph_import - Mod...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++========================= 1 failed, 4 passed in 16.59s =========================
++
++
+
+# 2026-05-13 20:39:47.040457
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ....F
++
++=================================== FAILURES ===================================
++_____________________ TestLangGraph.test_langgraph_import ______________________
++tests/test_integrations.py:61: in test_langgraph_import
++    from core.integrations import (
++core/integrations/__init__.py:62: in __getattr__
++    from .langgraph_orchestrator import LangGraphAgent
++core/integrations/langgraph_orchestrator.py:29: in <module>
++    from langchain_openai import ChatOpenAI
++E   ModuleNotFoundError: No module named 'langchain_openai'
++=========================== short test summary info ============================
++FAILED tests/test_integrations.py::TestLangGraph::test_langgraph_import - Mod...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++========================= 1 failed, 4 passed in 15.98s =========================
++
++
+
+# 2026-05-13 20:39:47.040775
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ....F
++
++=================================== FAILURES ===================================
++_____________________ TestLangGraph.test_langgraph_import ______________________
++tests/test_integrations.py:61: in test_langgraph_import
++    from core.integrations import (
++core/integrations/__init__.py:62: in __getattr__
++    from .langgraph_orchestrator import LangGraphAgent
++core/integrations/langgraph_orchestrator.py:29: in <module>
++    from langchain_openai import ChatOpenAI
++E   ModuleNotFoundError: No module named 'langchain_openai'
++=========================== short test summary info ============================
++FAILED tests/test_integrations.py::TestLangGraph::test_langgraph_import - Mod...
++!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
++========================= 1 failed, 4 passed in 15.98s =========================
++
++
+
+# 2026-05-14 12:38:28.987151
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, langsmith-0.8.3, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ............................                  [100%]
++
++=============================== warnings summary ===============================
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/json_utils.py:10: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
++    from jsonschema import Draft7Validator, RefResolver
++
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/import_utils.py:63: DeprecationWarning: Accessing jsonschema.__version__ is deprecated and will be removed in a future release. Use importlib.metadata directly to query for jsonschema's version.
++    sys.modules[self.name].__version__ if hasattr(sys.modules[self.name], "__version__") else None
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++======================= 28 passed, 6 warnings in 21.79s ========================
++
++
+
+# 2026-05-14 12:38:28.987813
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, langsmith-0.8.3, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ............................                  [100%]
++
++=============================== warnings summary ===============================
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/json_utils.py:10: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
++    from jsonschema import Draft7Validator, RefResolver
++
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/import_utils.py:63: DeprecationWarning: Accessing jsonschema.__version__ is deprecated and will be removed in a future release. Use importlib.metadata directly to query for jsonschema's version.
++    sys.modules[self.name].__version__ if hasattr(sys.modules[self.name], "__version__") else None
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++======================= 28 passed, 6 warnings in 21.79s ========================
++
++
+
+# 2026-05-14 12:43:34.378858
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, langsmith-0.8.3, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ......s.....................                  [100%]
++
++=============================== warnings summary ===============================
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/json_utils.py:10: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
++    from jsonschema import Draft7Validator, RefResolver
++
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/import_utils.py:63: DeprecationWarning: Accessing jsonschema.__version__ is deprecated and will be removed in a future release. Use importlib.metadata directly to query for jsonschema's version.
++    sys.modules[self.name].__version__ if hasattr(sys.modules[self.name], "__version__") else None
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++================== 27 passed, 1 skipped, 6 warnings in 20.06s ==================
++
++
+
+# 2026-05-14 12:43:34.379018
++Fix these test failures. Return ONLY the fixed code — no explanation:
++
++============================= test session starts ==============================
++platform linux -- Python 3.13.5, pytest-9.0.3, pluggy-1.6.0
++rootdir: /home/newadmin/swarm-bot
++configfile: pyproject.toml
++plugins: mock-3.15.1, langsmith-0.8.3, anyio-4.13.0, devtools-0.12.2, asyncio-1.3.0
++asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
++collected 28 items
++
++tests/test_integrations.py ......s.....................                  [100%]
++
++=============================== warnings summary ===============================
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/json_utils.py:10: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
++    from jsonschema import Draft7Validator, RefResolver
++
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++tests/test_integrations.py::TestAutogen::test_autogen_import
++  /home/newadmin/swarm-bot/.venv/lib/python3.13/site-packages/autogen/import_utils.py:63: DeprecationWarning: Accessing jsonschema.__version__ is deprecated and will be removed in a future release. Use importlib.metadata directly to query for jsonschema's version.
++    sys.modules[self.name].__version__ if hasattr(sys.modules[self.name], "__version__") else None
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++================== 27 passed, 1 skipped, 6 warnings in 20.06s ==================
++
++

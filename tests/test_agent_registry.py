@@ -62,15 +62,15 @@ class TestGetFallbackChain:
         assert isinstance(chain, list)
         assert len(chain) > 0
         # Should fall back to general chain (MiniMax primary, MiniMax Text fallback)
-        assert "minimax/MiniMax-M2.7" in chain
+        assert "minimax-coding-plan/MiniMax-M2.7" in chain
 
     def test_get_fallback_chain_coding(self):
         """Coding agent should have MiniMax primary with MiniMax Text fallback."""
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain("coding")
-        assert "minimax/MiniMax-M2.7" in chain
-        assert "minimax/MiniMax-Text-01" in chain
+        assert "minimax-coding-plan/MiniMax-M2.7" in chain
+        assert "minimax-coding-plan/MiniMax-Text-01" in chain
 
 
 class TestSearchByCapability:

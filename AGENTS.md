@@ -71,7 +71,7 @@ ruff check .                              # Lint
 
 ## Key Files
 - `main.py` — bot startup
-- `core/agent_registry.py` — 76-agent registry + LEGACY_FALLBACK_CHAIN
+- `core/agent_registry.py` — 108-agent registry + LEGACY_FALLBACK_CHAIN
 - `config/models.yaml` — model registry (MiniMax-M2.7 primary, free tier fallbacks)
 - `config/departments.yaml` — department/agent definitions
 
@@ -79,7 +79,7 @@ ruff check .                              # Lint
 ```
 handlers/     — 45+ aiogram routers (one per feature domain)
 core/         — agent orchestration, intent router, memory, soul engine
-agents/       — 76+ specialized agents across 9 departments
+agents/       — 108+ specialized agents across 9 departments
 tools/        — browser, email, GitHub, n8n integrations
 config/       — models, departments, personality YAML files
 .wiki/        — knowledge base (architecture, decisions, logs, research)
@@ -93,8 +93,7 @@ Vision (local): `ollama_chat/gemma4:e4b` (RTX 3060 only)
 See `LEGACY_FALLBACK_CHAIN` in `core/agent_registry.py` for per-agent chains.
 
 ## Wiki Auto-Ingest
-- `on_conversation_turn()` — per-turn lightweight check
-- `on_session_end()` — deep session summarization
+- `on_turn_deep_ingest()` — per-turn lightweight check (fires every 3+ turns, internal SESSION_TURN_THRESHOLD gating)
 - `lint_wiki()` — weekly health check
 - Toggle: `LEGION_WIKI_AUTO_INGEST=1` (default on)
 

@@ -90,8 +90,8 @@ _cost_metrics = None
 def is_allowed(msg: Message) -> bool:
     if msg.from_user is not None and msg.from_user.id == ALLOWED_USER_ID:
         try:
-            from core.hooks import get_hook_system  # type: ignore[reportAttributeAccessIssue]
-            hs = get_hook_system()  # type: ignore[reportAttributeAccessIssue]
+            from core.hooks import get_hooks
+            hs = get_hooks()
             if hs:
                 hs.emit("command_received", msg=msg)
         except Exception:

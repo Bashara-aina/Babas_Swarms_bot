@@ -133,7 +133,7 @@ class TestCostMetricsCollector(unittest.TestCase):
     def test_record_basic(self):
         alert = self.collector.record(
             agent_name="coding",
-            model="minimax/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-Text-01",
             cost_usd=0.001,
             tokens_used=100,
             latency_ms=500,
@@ -147,7 +147,7 @@ class TestCostMetricsCollector(unittest.TestCase):
         for i in range(10):
             self.collector.record(
                 agent_name="coding" if i % 2 == 0 else "debug",
-                model="minimax/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-Text-01",
                 cost_usd=0.01,
                 tokens_used=200,
                 latency_ms=1000 + i * 100,
@@ -184,7 +184,7 @@ class TestCostMetricsCollector(unittest.TestCase):
     def test_format_dashboard(self):
         self.collector.record(
             agent_name="coding",
-            model="minimax/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-Text-01",
             cost_usd=0.001,
             tokens_used=100,
             latency_ms=500,
@@ -297,7 +297,7 @@ class TestSessionManager(unittest.TestCase):
         self.sm.track_task(
             user_id=1,
             agent_name="coding",
-            model="minimax/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-Text-01",
             cost_usd=0.001,
             tokens=100,
         )

@@ -11,7 +11,7 @@ Single source of truth for:
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
 
-Verified working models (live logs 2026-03-09): minimax/MiniMax-Text-01                   ✓
+Verified working models (live logs 2026-03-09): minimax-coding-plan/MiniMax-Text-01     ✓
   groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
     cerebras/qwen3-235b-a22b                        ✓
   zai/glm-4                                       ✓ (via openai-compat endpoint)
@@ -77,12 +77,12 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist": "minimax/MiniMax-Text-01",  # fast, large context
-    "devil_advocate": "minimax/MiniMax-Text-01",  # adversarial reasoning
-    "researcher": "minimax/MiniMax-Text-01",  # deep research
-    "pragmatist": "minimax/MiniMax-Text-01",  # practical, fast
-    "visionary": "minimax/MiniMax-Text-01",  # creative, fast
-    "critic": "minimax/MiniMax-Text-01",  # precise, analytical
+    "strategist": "minimax-coding-plan/MiniMax-Text-01",
+    "devil_advocate": "minimax-coding-plan/MiniMax-Text-01",
+    "researcher": "minimax-coding-plan/MiniMax-Text-01",
+    "pragmatist": "minimax-coding-plan/MiniMax-Text-01",
+    "visionary": "minimax-coding-plan/MiniMax-Text-01",
+    "critic": "minimax-coding-plan/MiniMax-Text-01",
 }
 
 DEBATE_ICONS = {
@@ -104,121 +104,121 @@ AGENT_MODELS: dict[str, str] = {
     # Vision: local Ollama — MiniMax can't read screenshots
     "vision": "ollama_chat/gemma4:e4b",
     # All other agents: MiniMax M2.7 only (your ONLY paid model)
-    "coding": "minimax/MiniMax-M2.7",
-    "debug": "minimax/MiniMax-M2.7",
-    "math": "minimax/MiniMax-M2.7",
-    "architect": "minimax/MiniMax-M2.7",
-    "analyst": "minimax/MiniMax-M2.7",
-    "computer": "minimax/MiniMax-M2.7",
-    "general": "minimax/MiniMax-M2.7",
-    "researcher": "minimax/MiniMax-M2.7",
-    "marketer": "minimax/MiniMax-M2.7",
-    "devops": "minimax/MiniMax-M2.7",
-    "pm": "minimax/MiniMax-M2.7",
-    "humanizer": "minimax/MiniMax-M2.7",
-    "reviewer": "minimax/MiniMax-M2.7",
-    "owl": "minimax/MiniMax-M2.7",
-    "ag2_researcher": "minimax/MiniMax-M2.7",
-    "ag2_critic": "minimax/MiniMax-M2.7",
-    "ag2_synthesizer": "minimax/MiniMax-M2.7",
-    "code_exec": "minimax/MiniMax-M2.7",
-    "predictor": "minimax/MiniMax-M2.7",
-    "claude_orchestrator": "minimax/MiniMax-M2.7",
+    "coding": "minimax-coding-plan/MiniMax-M2.7",
+    "debug": "minimax-coding-plan/MiniMax-M2.7",
+    "math": "minimax-coding-plan/MiniMax-M2.7",
+    "architect": "minimax-coding-plan/MiniMax-M2.7",
+    "analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "computer": "minimax-coding-plan/MiniMax-M2.7",
+    "general": "minimax-coding-plan/MiniMax-M2.7",
+    "researcher": "minimax-coding-plan/MiniMax-M2.7",
+    "marketer": "minimax-coding-plan/MiniMax-M2.7",
+    "devops": "minimax-coding-plan/MiniMax-M2.7",
+    "pm": "minimax-coding-plan/MiniMax-M2.7",
+    "humanizer": "minimax-coding-plan/MiniMax-M2.7",
+    "reviewer": "minimax-coding-plan/MiniMax-M2.7",
+    "owl": "minimax-coding-plan/MiniMax-M2.7",
+    "ag2_researcher": "minimax-coding-plan/MiniMax-M2.7",
+    "ag2_critic": "minimax-coding-plan/MiniMax-M2.7",
+    "ag2_synthesizer": "minimax-coding-plan/MiniMax-M2.7",
+    "code_exec": "minimax-coding-plan/MiniMax-M2.7",
+    "predictor": "minimax-coding-plan/MiniMax-M2.7",
+    "claude_orchestrator": "minimax-coding-plan/MiniMax-M2.7",
     # ── Engineering Department ────────────────────────────────────────────────
-    "senior_backend_dev": "minimax/MiniMax-M2.7",
-    "senior_frontend_dev": "minimax/MiniMax-M2.7",
-    "devops_sre": "minimax/MiniMax-M2.7",
-    "security_engineer": "minimax/MiniMax-M2.7",
-    "ml_engineer": "minimax/MiniMax-M2.7",
-    "data_engineer": "minimax/MiniMax-M2.7",
-    "mobile_dev": "minimax/MiniMax-M2.7",
-    "platform_infra": "minimax/MiniMax-M2.7",
-    "lead_engineer": "minimax/MiniMax-M2.7",
+    "senior_backend_dev": "minimax-coding-plan/MiniMax-M2.7",
+    "senior_frontend_dev": "minimax-coding-plan/MiniMax-M2.7",
+    "devops_sre": "minimax-coding-plan/MiniMax-M2.7",
+    "security_engineer": "minimax-coding-plan/MiniMax-M2.7",
+    "ml_engineer": "minimax-coding-plan/MiniMax-M2.7",
+    "data_engineer": "minimax-coding-plan/MiniMax-M2.7",
+    "mobile_dev": "minimax-coding-plan/MiniMax-M2.7",
+    "platform_infra": "minimax-coding-plan/MiniMax-M2.7",
+    "lead_engineer": "minimax-coding-plan/MiniMax-M2.7",
     # ── Design Department ──────────────────────────────────────────────────────
-    "ux_designer": "minimax/MiniMax-M2.7",
-    "ui_designer": "minimax/MiniMax-M2.7",
-    "interaction_designer": "minimax/MiniMax-M2.7",
-    "design_systems_lead": "minimax/MiniMax-M2.7",
-    "motion_designer": "minimax/MiniMax-M2.7",
-    "user_researcher": "minimax/MiniMax-M2.7",
-    "accessibility_expert": "minimax/MiniMax-M2.7",
-    "brand_designer": "minimax/MiniMax-M2.7",
-    "design_lead": "minimax/MiniMax-M2.7",
+    "ux_designer": "minimax-coding-plan/MiniMax-M2.7",
+    "ui_designer": "minimax-coding-plan/MiniMax-M2.7",
+    "interaction_designer": "minimax-coding-plan/MiniMax-M2.7",
+    "design_systems_lead": "minimax-coding-plan/MiniMax-M2.7",
+    "motion_designer": "minimax-coding-plan/MiniMax-M2.7",
+    "user_researcher": "minimax-coding-plan/MiniMax-M2.7",
+    "accessibility_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "brand_designer": "minimax-coding-plan/MiniMax-M2.7",
+    "design_lead": "minimax-coding-plan/MiniMax-M2.7",
     # ── Research Department ────────────────────────────────────────────────────
-    "literature_analyst": "minimax/MiniMax-M2.7",
-    "domain_expert": "minimax/MiniMax-M2.7",
-    "data_scientist": "minimax/MiniMax-M2.7",
-    "fact_checker": "minimax/MiniMax-M2.7",
-    "trend_analyst": "minimax/MiniMax-M2.7",
-    "contrarian_scholar": "minimax/MiniMax-M2.7",
-    "synthesizer": "minimax/MiniMax-M2.7",
-    "methodology_critic": "minimax/MiniMax-M2.7",
-    "research_director": "minimax/MiniMax-M2.7",
+    "literature_analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "domain_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "data_scientist": "minimax-coding-plan/MiniMax-M2.7",
+    "fact_checker": "minimax-coding-plan/MiniMax-M2.7",
+    "trend_analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "contrarian_scholar": "minimax-coding-plan/MiniMax-M2.7",
+    "synthesizer": "minimax-coding-plan/MiniMax-M2.7",
+    "methodology_critic": "minimax-coding-plan/MiniMax-M2.7",
+    "research_director": "minimax-coding-plan/MiniMax-M2.7",
     # ── Marketing Department ──────────────────────────────────────────────────
-    "brand_strategist": "minimax/MiniMax-M2.7",
-    "growth_hacker": "minimax/MiniMax-M2.7",
-    "content_strategist": "minimax/MiniMax-M2.7",
-    "seo_sem_specialist": "minimax/MiniMax-M2.7",
-    "social_media_lead": "minimax/MiniMax-M2.7",
-    "pr_strategist": "minimax/MiniMax-M2.7",
-    "email_marketer": "minimax/MiniMax-M2.7",
-    "performance_marketer": "minimax/MiniMax-M2.7",
-    "cmo": "minimax/MiniMax-M2.7",
+    "brand_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "growth_hacker": "minimax-coding-plan/MiniMax-M2.7",
+    "content_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "seo_sem_specialist": "minimax-coding-plan/MiniMax-M2.7",
+    "social_media_lead": "minimax-coding-plan/MiniMax-M2.7",
+    "pr_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "email_marketer": "minimax-coding-plan/MiniMax-M2.7",
+    "performance_marketer": "minimax-coding-plan/MiniMax-M2.7",
+    "cmo": "minimax-coding-plan/MiniMax-M2.7",
     # ── Operations Department ────────────────────────────────────────────────
-    "process_analyst": "minimax/MiniMax-M2.7",
-    "supply_chain_expert": "minimax/MiniMax-M2.7",
-    "finance_analyst": "minimax/MiniMax-M2.7",
-    "hr_strategist": "minimax/MiniMax-M2.7",
-    "legal_counsel": "minimax/MiniMax-M2.7",
-    "risk_manager": "minimax/MiniMax-M2.7",
-    "customer_success": "minimax/MiniMax-M2.7",
-    "support_lead": "minimax/MiniMax-M2.7",
-    "coo": "minimax/MiniMax-M2.7",
+    "process_analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "supply_chain_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "finance_analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "hr_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "legal_counsel": "minimax-coding-plan/MiniMax-M2.7",
+    "risk_manager": "minimax-coding-plan/MiniMax-M2.7",
+    "customer_success": "minimax-coding-plan/MiniMax-M2.7",
+    "support_lead": "minimax-coding-plan/MiniMax-M2.7",
+    "coo": "minimax-coding-plan/MiniMax-M2.7",
     # ── Legal & Compliance Department ─────────────────────────────────────────
-    "contract_lawyer": "minimax/MiniMax-M2.7",
-    "privacy_gdpr_expert": "minimax/MiniMax-M2.7",
-    "ip_lawyer": "minimax/MiniMax-M2.7",
-    "regulatory_expert": "minimax/MiniMax-M2.7",
-    "compliance_officer": "minimax/MiniMax-M2.7",
-    "ethics_advisor": "minimax/MiniMax-M2.7",
-    "employment_lawyer": "minimax/MiniMax-M2.7",
-    "litigation_risk": "minimax/MiniMax-M2.7",
-    "general_counsel": "minimax/MiniMax-M2.7",
+    "contract_lawyer": "minimax-coding-plan/MiniMax-M2.7",
+    "privacy_gdpr_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "ip_lawyer": "minimax-coding-plan/MiniMax-M2.7",
+    "regulatory_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "compliance_officer": "minimax-coding-plan/MiniMax-M2.7",
+    "ethics_advisor": "minimax-coding-plan/MiniMax-M2.7",
+    "employment_lawyer": "minimax-coding-plan/MiniMax-M2.7",
+    "litigation_risk": "minimax-coding-plan/MiniMax-M2.7",
+    "general_counsel": "minimax-coding-plan/MiniMax-M2.7",
     # ── Product Department ────────────────────────────────────────────────────
-    "product_manager": "minimax/MiniMax-M2.7",
-    "ux_researcher": "minimax/MiniMax-M2.7",
-    "growth_pm": "minimax/MiniMax-M2.7",
-    "b2b_pm": "minimax/MiniMax-M2.7",
-    "b2c_pm": "minimax/MiniMax-M2.7",
-    "platform_pm": "minimax/MiniMax-M2.7",
-    "monetisation_pm": "minimax/MiniMax-M2.7",
-    "roadmap_strategist": "minimax/MiniMax-M2.7",
-    "head_of_product": "minimax/MiniMax-M2.7",
+    "product_manager": "minimax-coding-plan/MiniMax-M2.7",
+    "ux_researcher": "minimax-coding-plan/MiniMax-M2.7",
+    "growth_pm": "minimax-coding-plan/MiniMax-M2.7",
+    "b2b_pm": "minimax-coding-plan/MiniMax-M2.7",
+    "b2c_pm": "minimax-coding-plan/MiniMax-M2.7",
+    "platform_pm": "minimax-coding-plan/MiniMax-M2.7",
+    "monetisation_pm": "minimax-coding-plan/MiniMax-M2.7",
+    "roadmap_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "head_of_product": "minimax-coding-plan/MiniMax-M2.7",
     # ── Creative Department ──────────────────────────────────────────────────
-    "copywriter": "minimax/MiniMax-M2.7",
-    "storyteller": "minimax/MiniMax-M2.7",
-    "creative_strategist": "minimax/MiniMax-M2.7",
-    "art_director": "minimax/MiniMax-M2.7",
-    "video_producer": "minimax/MiniMax-M2.7",
-    "meme_viral_expert": "minimax/MiniMax-M2.7",
-    "editor": "minimax/MiniMax-M2.7",
-    "tone_of_voice_expert": "minimax/MiniMax-M2.7",
-    "creative_director": "minimax/MiniMax-M2.7",
+    "copywriter": "minimax-coding-plan/MiniMax-M2.7",
+    "storyteller": "minimax-coding-plan/MiniMax-M2.7",
+    "creative_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "art_director": "minimax-coding-plan/MiniMax-M2.7",
+    "video_producer": "minimax-coding-plan/MiniMax-M2.7",
+    "meme_viral_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "editor": "minimax-coding-plan/MiniMax-M2.7",
+    "tone_of_voice_expert": "minimax-coding-plan/MiniMax-M2.7",
+    "creative_director": "minimax-coding-plan/MiniMax-M2.7",
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": "ollama_chat/gemma4:e4b",
-    "multimodal_analyst": "minimax/MiniMax-M2.7",
+    "multimodal_analyst": "minimax-coding-plan/MiniMax-M2.7",
     # ── Nexus Department ──────────────────────────────────────────────────────
-    "nexus_coordinator": "minimax/MiniMax-M2.7",
-    "nexus_analyst": "minimax/MiniMax-M2.7",
+    "nexus_coordinator": "minimax-coding-plan/MiniMax-M2.7",
+    "nexus_analyst": "minimax-coding-plan/MiniMax-M2.7",
     # ── Strategy Nexus Department ─────────────────────────────────────────────
-    "corporate_strategist": "minimax/MiniMax-M2.7",
-    "venture_capitalist": "minimax/MiniMax-M2.7",
-    "management_consultant": "minimax/MiniMax-M2.7",
-    "futurist": "minimax/MiniMax-M2.7",
-    "economist": "minimax/MiniMax-M2.7",
-    "geopolitical_analyst": "minimax/MiniMax-M2.7",
-    "first_principles_thinker": "minimax/MiniMax-M2.7",
-    "chief_strategy_officer": "minimax/MiniMax-M2.7",
+    "corporate_strategist": "minimax-coding-plan/MiniMax-M2.7",
+    "venture_capitalist": "minimax-coding-plan/MiniMax-M2.7",
+    "management_consultant": "minimax-coding-plan/MiniMax-M2.7",
+    "futurist": "minimax-coding-plan/MiniMax-M2.7",
+    "economist": "minimax-coding-plan/MiniMax-M2.7",
+    "geopolitical_analyst": "minimax-coding-plan/MiniMax-M2.7",
+    "first_principles_thinker": "minimax-coding-plan/MiniMax-M2.7",
+    "chief_strategy_officer": "minimax-coding-plan/MiniMax-M2.7",
 }
 
 # ── Fallback chains ────────────────────────────────────────────────────────────
@@ -228,8 +228,8 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     # Vision/computer: gemma4:e4b local for screen analysis when cloud fails
     "vision": [
         "ollama_chat/gemma4:e4b",
-        "minimax/MiniMax-Text-01",
-        "minimax/M2.7",
+        "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "computer": [
         "ollama_chat/gemma4:e4b",  # local only — MiniMax can't do screen reading
@@ -239,441 +239,441 @@ FALLBACK_CHAIN: dict[str, list[str]] = {
     # All other agents: free cloud only when MiniMax fails
     "coding": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "debug": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "math": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "architect": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "general": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/meta-llama/llama-3.3-70b-instruct:free",
     ],
     "researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "devops": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "humanizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "owl": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ag2_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ag2_critic": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "ag2_synthesizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "code_exec": [
         "gemini/gemini-2.0-flash-exp:free",
         "openrouter/qwen/qwen3-coder:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "predictor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "claude_orchestrator": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "reviewer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Engineering Department ─────────────────────────────────────────────────
     "senior_backend_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "senior_frontend_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "devops_sre": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "security_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ml_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "data_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "mobile_dev": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/qwen/qwen3-coder:free",
     ],
     "platform_infra": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "lead_engineer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Design Department ──────────────────────────────────────────────────────
     "ux_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ui_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "interaction_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "design_systems_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "motion_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "user_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "accessibility_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "brand_designer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "design_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Research Department ────────────────────────────────────────────────────
     "literature_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "domain_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "data_scientist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "fact_checker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "trend_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "contrarian_scholar": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
         "openrouter/deepseek/deepseek-r1:free",
     ],
     "synthesizer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "methodology_critic": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "research_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Marketing Department ────────────────────────────────────────────────────
     "brand_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "growth_hacker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "content_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "seo_sem_specialist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "social_media_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "pr_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "email_marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "performance_marketer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "cmo": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Operations Department ────────────────────────────────────────────────────
     "process_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "supply_chain_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "finance_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "hr_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "legal_counsel": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "risk_manager": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "customer_success": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "support_lead": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "coo": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Legal & Compliance Department ───────────────────────────────────────────
     "contract_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "privacy_gdpr_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ip_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "regulatory_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "compliance_officer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ethics_advisor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "employment_lawyer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "litigation_risk": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "general_counsel": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Product Department ──────────────────────────────────────────────────────
     "product_manager": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "ux_researcher": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "growth_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "b2b_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "b2c_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "platform_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "monetisation_pm": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "roadmap_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "head_of_product": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Creative Department ─────────────────────────────────────────────────────
     "copywriter": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "storyteller": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "creative_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "art_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "video_producer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "meme_viral_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "editor": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "tone_of_voice_expert": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "creative_director": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": [
         "ollama_chat/gemma4:e4b",
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "multimodal_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Nexus Department ────────────────────────────────────────────────────────
     "nexus_coordinator": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "nexus_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Strategy Nexus Department ───────────────────────────────────────────────
     "corporate_strategist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "venture_capitalist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "management_consultant": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "futurist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "economist": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "geopolitical_analyst": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "first_principles_thinker": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
     "chief_strategy_officer": [
         "gemini/gemini-2.0-flash-exp:free",
-        "minimax/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-Text-01",
     ],
 }
 

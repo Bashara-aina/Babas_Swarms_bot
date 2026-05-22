@@ -215,14 +215,17 @@ TEXT TO COMPRESS:
 {pruned}"""
 
             response = litellm.completion(
-                model="minimax/MiniMax-M2.7",
+                model="minimax-coding-plan/MiniMax-M2.7",
                 api_base="https://api.minimax.chat/v1",
                 api_key=os.environ["MINIMAX_API_KEY"],
                 messages=[{"role": "user", "content": compress_prompt}],
                 max_tokens=max(500, int(original_tokens * ratio)),
                 temperature=0.1,
             )
-            compressed = response.choices[0].message.content
+            try:
+                compressed = response.choices[0].message.content
+            except (AttributeError, IndexError, KeyError):
+                raise RuntimeError(f"Unexpected LLM response shape: {type(response)}")
             comp_tokens = count_tokens(compressed)
             return {
                 "compressed": compressed,

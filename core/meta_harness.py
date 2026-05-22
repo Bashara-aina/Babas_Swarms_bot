@@ -856,7 +856,7 @@ class AgenticProposer:
 
         try:
             response = await self.llm_call(
-                "minimax/MiniMax-M2.7", system_prompt, prompt
+                "minimax-coding-plan/MiniMax-M2.7", system_prompt, prompt
             )
 
             # Parse response into candidates
@@ -927,7 +927,7 @@ class AgenticProposer:
             summary_prompt = f"Summarize why this harness candidate succeeded:\n{c.source_code[:1000]}"
             try:
                 summary = await self.llm_call(
-                    "minimax/MiniMax-M2.7",
+                    "minimax-coding-plan/MiniMax-M2.7",
                     "You are a harness analyst.",
                     summary_prompt,
                 )
@@ -1211,7 +1211,7 @@ async def evaluate_harness_on_task(
 
         # Call LLM
         response = await llm_call(
-            "minimax/MiniMax-M2.7",
+            "minimax-coding-plan/MiniMax-M2.7",
             "You are a helpful assistant.",
             prompt,
         )

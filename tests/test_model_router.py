@@ -34,4 +34,4 @@ class TestModelRouter:
     def test_fallback_when_no_keys(self, router):
         with patch.dict("os.environ", {}, clear=True):
             model, _candidate = router.select("general")
-        assert model == "minimax/MiniMax-Text-01"  # hardcoded fallback
+        assert model == "minimax-coding-plan/MiniMax-Text-01"  # hardcoded fallback

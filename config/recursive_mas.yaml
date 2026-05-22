@@ -12,17 +12,17 @@ collaboration_patterns:
       - key: planner
         name: "Planner"
         role_type: "planner"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Decompose the problem into logical steps. Think about what approaches might work."
       - key: critic
         name: "Critic"
         role_type: "critic"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Evaluate critically. Identify weaknesses and suggest improvements."
       - key: solver
         name: "Solver"
         role_type: "solver"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Execute the solution. Provide the final answer with reasoning."
 
   mixture:
@@ -32,22 +32,22 @@ collaboration_patterns:
       - key: math
         name: "Math Specialist"
         role_type: "specialist"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Apply deep mathematical knowledge to analyze and solve the problem."
       - key: code
         name: "Code Specialist"
         role_type: "specialist"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Apply programming expertise to solve computational aspects."
       - key: science
         name: "Science Specialist"
         role_type: "specialist"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Apply scientific reasoning to analyze the problem domain."
       - key: summarizer
         name: "Summarizer"
         role_type: "summarizer"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Aggregate multiple perspectives into a coherent final answer."
 
   distillation:
@@ -57,12 +57,12 @@ collaboration_patterns:
       - key: expert
         name: "Expert"
         role_type: "expert"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Provide authoritative knowledge and guide the learning process."
       - key: learner
         name: "Learner"
         role_type: "learner"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Learn from the expert while contributing your own insights."
 
   deliberation:
@@ -72,12 +72,12 @@ collaboration_patterns:
       - key: reflector
         name: "Reflector"
         role_type: "reflector"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Engage in inner thinking to critique and refine solutions. Consider alternative approaches."
       - key: tool_caller
         name: "Tool-Caller"
         role_type: "tool_caller"
-        model: "minimax/MiniMax-M2.7"
+        model: "minimax-coding-plan/MiniMax-M2.7"
         instructions: "Use available tools (Python, search) to solve problems. Execute and verify."
 
 # RecursiveLink configuration

@@ -189,7 +189,7 @@ async def guard_confidence(content: str, query: str) -> tuple[Verdict, float, st
         response, _ = await chat(
             task=prompt,
             agent_key="general",
-            model_override="minimax/MiniMax-M2.7",
+            model_override="minimax-coding-plan/MiniMax-M2.7",
             run_post_hooks=False,
         )
 

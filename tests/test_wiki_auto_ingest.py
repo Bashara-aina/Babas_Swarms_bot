@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from core.wiki_auto_ingest import (
     is_worthy_turn,
     on_conversation_turn,
-    on_session_end,
+    on_turn_deep_ingest,
 )
 
 
@@ -78,11 +78,11 @@ class TestOnConversationTurn:
             mock_wm.assert_not_called()
 
 
-class TestOnSessionEnd:
-    """Tests for on_session_end() hook."""
+class TestOnTurnDeepIngest:
+    """Tests for on_turn_deep_ingest() hook."""
 
-    async def test_on_session_end_is_called(self):
-        """Verify on_session_end is invoked when session has enough turns."""
+    async def test_on_turn_deep_ingest_is_called(self):
+        """Verify on_turn_deep_ingest is invoked when session has enough turns."""
         conversation = [
             {"role": "user", "content": "task 1"},
             {"role": "assistant", "content": "answer 1"},
@@ -105,24 +105,24 @@ class TestOnSessionEnd:
             mock_manager.write_page = AsyncMock()
             mock_wm.return_value = mock_manager
 
-            result = await on_session_end(
+            result = await on_turn_deep_ingest(
                 user_id="user123",
                 conversation=conversation,
                 llm_client=mock_llm,
             )
 
-            # on_session_end should have been called with enough turns
+            # on_turn_deep_ingest should have been called with enough turns
             # result depends on LLM output quality
             assert "score" in result or result.get("filed") is False
 
-    async def test_on_session_end_below_threshold_skipped(self):
+    async def test_on_turn_deep_ingest_below_threshold_skipped(self):
         """Conversation with fewer than SESSION_TURN_THRESHOLD turns is skipped."""
         short_conversation = [
             {"role": "user", "content": "hi"},
             {"role": "assistant", "content": "hello"},
         ]
 
-        result = await on_session_end(
+        result = await on_turn_deep_ingest(
             user_id="user123",
             conversation=short_conversation,
         )

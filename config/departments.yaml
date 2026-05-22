@@ -1,908 +1,1865 @@
-# config/departments.yaml — 108 agents across 10 departments
-# Each agent: description, primary_model (ref models.yaml key), fallbacks, capabilities, tools, complexity_tier
-
 engineering:
   default_agent: senior_python_dev
-  description: "Software development across all stacks — backend, frontend, systems, security"
+  description: Software development across all stacks — backend, frontend, systems,
+    security
   agents:
     senior_python_dev:
-      description: "Expert Python developer for backend systems, APIs, and async workflows"
+      description: Expert Python developer for backend systems, APIs, and async workflows
       primary_model: minimax-m2-7
-      fallbacks: [qwen3-235b, llama3-70b]
-      capabilities: [python, backend, async, typing, fastapi, django, implement, function, class, script, code, write]
-      tools: [interpreter, vscode]
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - python
+      - backend
+      - async
+      - typing
+      - fastapi
+      - django
+      - implement
+      - function
+      - class
+      - script
+      - code
+      - write
+      tools:
+      - interpreter
+      - vscode
       complexity_tier: heavyweight
-
     frontend_react_dev:
-      description: "React/Next.js developer for modern web UIs and TypeScript apps"
-      primary_model: qwen3-235b
-      fallbacks: [devstral, llama3-70b]
-      capabilities: [react, typescript, nextjs, tailwind, frontend, ui, component, jsx, css, html]
-      tools: [interpreter, vscode]
-      complexity_tier: midweight
-
-    backend_fastapi_dev:
-      description: "FastAPI specialist for high-performance REST APIs, Pydantic, async"
-      primary_model: glm-4
-      fallbacks: [qwen3-235b, devstral]
-      capabilities: [fastapi, api, backend, endpoint, rest, pydantic, sqlalchemy, orm, database, async]
-      tools: [interpreter, vscode]
-      complexity_tier: heavyweight
-
-    rust_systems_dev:
-      description: "Rust systems programming, WASM, memory safety, performance-critical code"
-      primary_model: kimi-k2
-      fallbacks: [devstral, llama3-70b]
-      capabilities: [rust, systems, wasm, unsafe, cargo, memory, ownership, concurrency, performance]
-      tools: [interpreter]
-      complexity_tier: heavyweight
-
-    smart_contract_auditor:
-      description: "Solidity/EVM smart contract security audits and vulnerability detection"
-      primary_model: gemini-3.1-pro
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [solidity, smart_contract, audit, evm, blockchain, vulnerability, defi, web3]
-      tools: []
-      complexity_tier: heavyweight
-
-    security_pentester:
-      description: "Security testing, penetration testing, CVE analysis, OWASP"
-      primary_model: devstral
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [security, pentest, vulnerability, exploit, owasp, ctf, hardening]
-      tools: [interpreter]
-      complexity_tier: heavyweight
-
-    cuda_optimizer:
-      description: "CUDA/Triton kernel optimization, GPU memory management, profiling"
-      primary_model: glm-4
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [cuda, gpu, vram, triton, kernel, throughput, memory, profil, benchmark, nan, oom]
-      tools: [interpreter]
-      complexity_tier: heavyweight
-
-    debugging_specialist:
-      description: "Root cause analysis — tracebacks, PyTorch errors, async bugs, OOM, NaN"
-      primary_model: glm-4
-      fallbacks: [qwen3-235b, devstral]
-      capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch]
-      tools: [interpreter]
-      complexity_tier: heavyweight
-
-    swe_agent_dev:
-      description: "SWE-agent native implementation — agent-computer interface for GitHub issue solving"
+      description: React/Next.js developer for modern web UIs and TypeScript apps
       primary_model: minimax-m2-7
-      fallbacks: [qwen3-235b, llama3-70b]
-      capabilities: [swe-agent, github-issue, fix-bug, agent-loop, trajectory, patch, str-replace-editor]
-      tools: [str_replace_editor, bash, grep, glob, submit]
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - react
+      - typescript
+      - nextjs
+      - tailwind
+      - frontend
+      - ui
+      - component
+      - jsx
+      - css
+      - html
+      tools:
+      - interpreter
+      - vscode
+      complexity_tier: midweight
+    backend_fastapi_dev:
+      description: FastAPI specialist for high-performance REST APIs, Pydantic, async
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - fastapi
+      - api
+      - backend
+      - endpoint
+      - rest
+      - pydantic
+      - sqlalchemy
+      - orm
+      - database
+      - async
+      tools:
+      - interpreter
+      - vscode
       complexity_tier: heavyweight
-
+    rust_systems_dev:
+      description: Rust systems programming, WASM, memory safety, performance-critical
+        code
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - rust
+      - systems
+      - wasm
+      - unsafe
+      - cargo
+      - memory
+      - ownership
+      - concurrency
+      - performance
+      tools:
+      - interpreter
+      complexity_tier: heavyweight
+    smart_contract_auditor:
+      description: Solidity/EVM smart contract security audits and vulnerability detection
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - solidity
+      - smart_contract
+      - audit
+      - evm
+      - blockchain
+      - vulnerability
+      - defi
+      - web3
+      tools: []
+      complexity_tier: heavyweight
+    security_pentester:
+      description: Security testing, penetration testing, CVE analysis, OWASP
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - security
+      - pentest
+      - vulnerability
+      - exploit
+      - owasp
+      - ctf
+      - hardening
+      tools:
+      - interpreter
+      complexity_tier: heavyweight
+    cuda_optimizer:
+      description: CUDA/Triton kernel optimization, GPU memory management, profiling
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - cuda
+      - gpu
+      - vram
+      - triton
+      - kernel
+      - throughput
+      - memory
+      - profil
+      - benchmark
+      - nan
+      - oom
+      tools:
+      - interpreter
+      complexity_tier: heavyweight
+    debugging_specialist:
+      description: Root cause analysis — tracebacks, PyTorch errors, async bugs, OOM,
+        NaN
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - debug
+      - traceback
+      - exception
+      - crash
+      - fix
+      - bug
+      - oom
+      - nan
+      - stacktrace
+      - error
+      - pytorch
+      tools:
+      - interpreter
+      complexity_tier: heavyweight
+    swe_agent_dev:
+      description: SWE-agent native implementation — agent-computer interface for
+        GitHub issue solving
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - swe-agent
+      - github-issue
+      - fix-bug
+      - agent-loop
+      - trajectory
+      - patch
+      - str-replace-editor
+      tools:
+      - str_replace_editor
+      - bash
+      - grep
+      - glob
+      - submit
+      complexity_tier: heavyweight
     test_automation_engineer:
-      description: "pytest, hypothesis, coverage, CI test design, mocking strategies"
-      primary_model: qwen3-235b
-      fallbacks: [devstral, gemini-3.1-pro]
-      capabilities: [test, pytest, coverage, mock, hypothesis, tdd, selenium, unit, integration]
-      tools: [interpreter]
+      description: pytest, hypothesis, coverage, CI test design, mocking strategies
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - test
+      - pytest
+      - coverage
+      - mock
+      - hypothesis
+      - tdd
+      - selenium
+      - unit
+      - integration
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     cicd_architect:
-      description: "GitHub Actions, Docker, Kubernetes, systemd, deployment pipelines"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [cicd, github_actions, docker, kubernetes, deploy, pipeline, devops, systemd]
+      description: GitHub Actions, Docker, Kubernetes, systemd, deployment pipelines
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - cicd
+      - github_actions
+      - docker
+      - kubernetes
+      - deploy
+      - pipeline
+      - devops
+      - systemd
       tools: []
       complexity_tier: midweight
-
     database_optimizer:
-      description: "SQL optimization, indexing, query performance, migrations, PostgreSQL"
-      primary_model: kimi-k2
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [sql, postgres, index, query, migration, database, optimization, orm]
-      tools: [interpreter]
+      description: SQL optimization, indexing, query performance, migrations, PostgreSQL
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - sql
+      - postgres
+      - index
+      - query
+      - migration
+      - database
+      - optimization
+      - orm
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     mlops_engineer:
-      description: "ML model deployment, monitoring, MLflow, Kubernetes serving infrastructure"
-      primary_model: glm-4
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [mlops, mlflow, kubernetes, serving, model, monitoring, docker, gpu, deploy]
-      tools: [interpreter]
+      description: ML model deployment, monitoring, MLflow, Kubernetes serving infrastructure
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - mlops
+      - mlflow
+      - kubernetes
+      - serving
+      - model
+      - monitoring
+      - docker
+      - gpu
+      - deploy
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     api_designer:
-      description: "REST/GraphQL API design, OpenAPI specs, versioning, documentation"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, devstral]
-      capabilities: [api, rest, graphql, openapi, design, versioning, swagger, documentation]
+      description: REST/GraphQL API design, OpenAPI specs, versioning, documentation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - api
+      - rest
+      - graphql
+      - openapi
+      - design
+      - versioning
+      - swagger
+      - documentation
       tools: []
       complexity_tier: midweight
-
     code_reviewer:
-      description: "Code review, best practices, refactoring suggestions, standards enforcement"
-      primary_model: gemini-3.1-pro
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [review, best-practices, refactor, standards, documentation, clean-code]
+      description: Code review, best practices, refactoring suggestions, standards
+        enforcement
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - review
+      - best-practices
+      - refactor
+      - standards
+      - documentation
+      - clean-code
       tools: []
       complexity_tier: midweight
-
     performance_tuner:
-      description: "Performance profiling, optimization, benchmarking, memory analysis"
-      primary_model: devstral
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [performance, profil, optimization, benchmark, memory, latency, throughput]
-      tools: [interpreter]
+      description: Performance profiling, optimization, benchmarking, memory analysis
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - performance
+      - profil
+      - optimization
+      - benchmark
+      - memory
+      - latency
+      - throughput
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
 design:
   default_agent: ux_designer
-  description: "UI/UX design, branding, visual design, accessibility, prototyping"
+  description: UI/UX design, branding, visual design, accessibility, prototyping
   agents:
     ux_designer:
-      description: "UI/UX design, user research, wireframes, interaction design"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [ux, ui, figma, user-research, wireframe, interaction, design]
+      description: UI/UX design, user research, wireframes, interaction design
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ux
+      - ui
+      - figma
+      - user-research
+      - wireframe
+      - interaction
+      - design
       tools: []
       complexity_tier: midweight
-
     graphic_designer:
-      description: "Visual design, branding assets, typography, graphic creation"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [graphic, visual, typography, brand, design, assets, layout]
+      description: Visual design, branding assets, typography, graphic creation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - graphic
+      - visual
+      - typography
+      - brand
+      - design
+      - assets
+      - layout
       tools: []
       complexity_tier: lightweight
-
     branding_strategist:
-      description: "Brand strategy, identity, positioning, storytelling, voice"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [branding, strategy, identity, positioning, storytelling, logo]
+      description: Brand strategy, identity, positioning, storytelling, voice
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - branding
+      - strategy
+      - identity
+      - positioning
+      - storytelling
+      - logo
       tools: []
       complexity_tier: midweight
-
     motion_artist:
-      description: "Motion graphics, animation, After Effects concepts, video design"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [motion, animation, video, after-effects, kinetic, sequence]
+      description: Motion graphics, animation, After Effects concepts, video design
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - motion
+      - animation
+      - video
+      - after-effects
+      - kinetic
+      - sequence
       tools: []
       complexity_tier: midweight
-
     spatial_designer:
-      description: "3D spatial design, AR/VR concepts, Blender, 3D modeling"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [3d, spatial, blender, ar, vr, modeling, rendering]
+      description: 3D spatial design, AR/VR concepts, Blender, 3D modeling
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - 3d
+      - spatial
+      - blender
+      - ar
+      - vr
+      - modeling
+      - rendering
       tools: []
       complexity_tier: midweight
-
     wireframe_specialist:
-      description: "Low-fidelity wireframes, information architecture, user flows"
-      primary_model: kimi-k2
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [wireframe, low-fidelity, balsamiq, information-architecture, sketching]
+      description: Low-fidelity wireframes, information architecture, user flows
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - wireframe
+      - low-fidelity
+      - balsamiq
+      - information-architecture
+      - sketching
       tools: []
       complexity_tier: lightweight
-
     color_expert:
-      description: "Color theory, palette design, psychology, accessibility contrast"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [color, palette, theory, psychology, contrast, accessibility]
+      description: Color theory, palette design, psychology, accessibility contrast
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - color
+      - palette
+      - theory
+      - psychology
+      - contrast
+      - accessibility
       tools: []
       complexity_tier: lightweight
-
     accessibility_auditor:
-      description: "WCAG compliance, a11y audits, screen reader testing, inclusive design"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [accessibility, wcag, a11y, screen-reader, inclusive, aria]
+      description: WCAG compliance, a11y audits, screen reader testing, inclusive
+        design
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - accessibility
+      - wcag
+      - a11y
+      - screen-reader
+      - inclusive
+      - aria
       tools: []
       complexity_tier: midweight
-
     prototype_builder:
-      description: "Interactive prototypes, Framer, rapid iteration, coded prototypes"
-      primary_model: devstral
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [prototype, interactive, framer, rapid, iteration, code]
-      tools: [interpreter]
+      description: Interactive prototypes, Framer, rapid iteration, coded prototypes
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - prototype
+      - interactive
+      - framer
+      - rapid
+      - iteration
+      - code
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     user_flow_mapper:
-      description: "User flow diagrams, journey maps, process documentation"
-      primary_model: glm-4
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [flow, journey, diagram, process, map, user-experience]
+      description: User flow diagrams, journey maps, process documentation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - flow
+      - journey
+      - diagram
+      - process
+      - map
+      - user-experience
       tools: []
       complexity_tier: lightweight
-
 research:
   default_agent: deep_researcher
-  description: "Deep research, competitive analysis, data science, trend forecasting"
+  description: Deep research, competitive analysis, data science, trend forecasting
   agents:
     deep_researcher:
-      description: "Deep research, source synthesis, web search, academic rigor"
-      primary_model: gemini-3.1-pro
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [research, deep-dive, source, synthesis, academic, facts]
-      tools: [playwright]
+      description: Deep research, source synthesis, web search, academic rigor
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - research
+      - deep-dive
+      - source
+      - synthesis
+      - academic
+      - facts
+      tools:
+      - playwright
       complexity_tier: heavyweight
-
     trend_forecaster:
-      description: "Trend analysis, market forecasting, signal detection, predictions"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [trend, forecast, prediction, signal, market, future]
-      tools: [playwright]
+      description: Trend analysis, market forecasting, signal detection, predictions
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - trend
+      - forecast
+      - prediction
+      - signal
+      - market
+      - future
+      tools:
+      - playwright
       complexity_tier: midweight
-
     competitor_analyst:
-      description: "Competitive analysis, SWOT, benchmarking, market positioning"
-      primary_model: kimi-k2
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [competitor, competitive, benchmark, swot, market, positioning]
-      tools: [playwright]
+      description: Competitive analysis, SWOT, benchmarking, market positioning
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - competitor
+      - competitive
+      - benchmark
+      - swot
+      - market
+      - positioning
+      tools:
+      - playwright
       complexity_tier: midweight
-
     data_scientist:
-      description: "Data analysis, statistics, ML modeling, pandas, matplotlib"
-      primary_model: kimi-k2
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [data, statistics, ml, pandas, dataframe, csv, visualization, analysis, analytics]
-      tools: [interpreter]
+      description: Data analysis, statistics, ML modeling, pandas, matplotlib
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - data
+      - statistics
+      - ml
+      - pandas
+      - dataframe
+      - csv
+      - visualization
+      - analysis
+      - analytics
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     web_scraper_coordinator:
-      description: "Web scraping orchestration, Playwright automation, structured extraction"
-      primary_model: devstral
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [scrape, crawl, playwright, extraction, automation, parsing, web]
-      tools: [playwright, interpreter]
+      description: Web scraping orchestration, Playwright automation, structured extraction
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - scrape
+      - crawl
+      - playwright
+      - extraction
+      - automation
+      - parsing
+      - web
+      tools:
+      - playwright
+      - interpreter
       complexity_tier: midweight
-
     sentiment_analyst:
-      description: "Sentiment analysis, NLP, opinion mining, social listening"
-      primary_model: gemini-3.1-pro
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [sentiment, nlp, opinion, emotions, social, listening]
-      tools: [interpreter]
+      description: Sentiment analysis, NLP, opinion mining, social listening
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - sentiment
+      - nlp
+      - opinion
+      - emotions
+      - social
+      - listening
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     market_intel:
-      description: "Market intelligence, business insights, competitive research"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [market, intel, business, competitive, insights, intelligence]
-      tools: [playwright]
+      description: Market intelligence, business insights, competitive research
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - market
+      - intel
+      - business
+      - competitive
+      - insights
+      - intelligence
+      tools:
+      - playwright
       complexity_tier: midweight
-
     survey_designer:
-      description: "Survey design, questionnaire methodology, sampling, bias reduction"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [survey, questionnaire, methodology, sampling, bias]
+      description: Survey design, questionnaire methodology, sampling, bias reduction
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - survey
+      - questionnaire
+      - methodology
+      - sampling
+      - bias
       tools: []
       complexity_tier: lightweight
-
     interview_simulator:
-      description: "User interview simulation, qualitative research, empathy mapping"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [interview, qualitative, persona, empathy, user, questions]
+      description: User interview simulation, qualitative research, empathy mapping
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - interview
+      - qualitative
+      - persona
+      - empathy
+      - user
+      - questions
       tools: []
       complexity_tier: midweight
-
     patent_searcher:
-      description: "Patent research, prior art, IP analysis, technical documentation"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [patent, ip, prior-art, technical, legal, trademark]
-      tools: [playwright]
+      description: Patent research, prior art, IP analysis, technical documentation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - patent
+      - ip
+      - prior-art
+      - technical
+      - legal
+      - trademark
+      tools:
+      - playwright
       complexity_tier: midweight
-
     paper_summarizer:
-      description: "Academic paper summarization, arXiv reading, research synthesis"
-      primary_model: glm-4
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [paper, arxiv, academic, summarize, summary, research, source]
-      tools: [playwright]
+      description: Academic paper summarization, arXiv reading, research synthesis
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - paper
+      - arxiv
+      - academic
+      - summarize
+      - summary
+      - research
+      - source
+      tools:
+      - playwright
       complexity_tier: midweight
-
     stats_modeler:
-      description: "Statistical modeling, regression, hypothesis testing, R/Python"
-      primary_model: kimi-k2
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [statistics, regression, hypothesis, modeling, r, distribution]
-      tools: [interpreter]
+      description: Statistical modeling, regression, hypothesis testing, R/Python
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - statistics
+      - regression
+      - hypothesis
+      - modeling
+      - r
+      - distribution
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
 marketing:
   default_agent: copywriter
-  description: "Marketing, copywriting, SEO, social media, growth, brand"
+  description: Marketing, copywriting, SEO, social media, growth, brand
   agents:
     copywriter:
-      description: "Persuasive copywriting, headlines, landing pages, conversion optimization"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [copy, copywrite, persuasion, headline, landing, conversion, write]
+      description: Persuasive copywriting, headlines, landing pages, conversion optimization
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - copy
+      - copywrite
+      - persuasion
+      - headline
+      - landing
+      - conversion
+      - write
       tools: []
       complexity_tier: midweight
-
     seo_specialist:
-      description: "SEO optimization, keyword research, backlinks, technical SEO"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [seo, keyword, backlinks, on-page, technical, ranking]
-      tools: [playwright]
+      description: SEO optimization, keyword research, backlinks, technical SEO
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - seo
+      - keyword
+      - backlinks
+      - on-page
+      - technical
+      - ranking
+      tools:
+      - playwright
       complexity_tier: midweight
-
     social_media_strategist:
-      description: "Social media strategy, engagement, content calendar, platform expertise"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [social, twitter, instagram, engagement, content, platform, calendar]
+      description: Social media strategy, engagement, content calendar, platform expertise
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - social
+      - twitter
+      - instagram
+      - engagement
+      - content
+      - platform
+      - calendar
       tools: []
       complexity_tier: midweight
-
     growth_hacker:
-      description: "Growth hacking, viral experiments, funnel optimization, metrics"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [growth, viral, funnel, experiments, metrics, hack, acquisition]
+      description: Growth hacking, viral experiments, funnel optimization, metrics
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - growth
+      - viral
+      - funnel
+      - experiments
+      - metrics
+      - hack
+      - acquisition
       tools: []
       complexity_tier: midweight
-
     content_strategist:
-      description: "Content strategy, editorial planning, topic clusters, SEO content"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [content, editorial, topics, strategy, distribution, cluster]
+      description: Content strategy, editorial planning, topic clusters, SEO content
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - content
+      - editorial
+      - topics
+      - strategy
+      - distribution
+      - cluster
       tools: []
       complexity_tier: midweight
-
     ad_copywriter:
-      description: "Ad copy, PPC campaigns, Facebook/Google ads, CTR optimization"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [ad, ppc, facebook, google-ads, ctr, copy, paid]
+      description: Ad copy, PPC campaigns, Facebook/Google ads, CTR optimization
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ad
+      - ppc
+      - facebook
+      - google-ads
+      - ctr
+      - copy
+      - paid
       tools: []
       complexity_tier: lightweight
-
     viral_campaign_designer:
-      description: "Viral campaign concepts, memetics, shareability, creative hooks"
-      primary_model: gemini-3.1-pro
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [viral, campaign, hook, shareability, creative, memetics]
+      description: Viral campaign concepts, memetics, shareability, creative hooks
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - viral
+      - campaign
+      - hook
+      - shareability
+      - creative
+      - memetics
       tools: []
       complexity_tier: midweight
-
     email_marketer:
-      description: "Email marketing, newsletters, automation flows, segmentation"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [email, newsletter, automation, segmentation, deliverability, drip]
+      description: Email marketing, newsletters, automation flows, segmentation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - email
+      - newsletter
+      - automation
+      - segmentation
+      - deliverability
+      - drip
       tools: []
       complexity_tier: lightweight
-
     influencer_outreach:
-      description: "Influencer partnerships, outreach templates, ambassador programs"
-      primary_model: kimi-k2
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [influencer, outreach, partnership, ambassador, collaboration]
+      description: Influencer partnerships, outreach templates, ambassador programs
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - influencer
+      - outreach
+      - partnership
+      - ambassador
+      - collaboration
       tools: []
       complexity_tier: lightweight
-
     analytics_interpreter:
-      description: "Marketing analytics, Google Analytics, attribution, dashboards"
-      primary_model: glm-4
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [analytics, attribution, dashboard, insights, ga4, metrics]
-      tools: [interpreter]
+      description: Marketing analytics, Google Analytics, attribution, dashboards
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - analytics
+      - attribution
+      - dashboard
+      - insights
+      - ga4
+      - metrics
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     brand_voice_developer:
-      description: "Brand voice design, tone guidelines, messaging frameworks, personality"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [brand, voice, tone, messaging, guidelines, personality]
+      description: Brand voice design, tone guidelines, messaging frameworks, personality
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - brand
+      - voice
+      - tone
+      - messaging
+      - guidelines
+      - personality
       tools: []
       complexity_tier: midweight
-
     pr_crisis_manager:
-      description: "PR crisis management, reputation repair, damage control, communication"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [crisis, pr, reputation, damage-control, communication, public-relations]
+      description: PR crisis management, reputation repair, damage control, communication
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - crisis
+      - pr
+      - reputation
+      - damage-control
+      - communication
+      - public-relations
       tools: []
       complexity_tier: midweight
-
 operations:
   default_agent: project_manager
-  description: "Project management, scheduling, resource allocation, reporting"
+  description: Project management, scheduling, resource allocation, reporting
   agents:
     project_manager:
-      description: "Agile project management, sprint planning, stakeholder coordination"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [project, agile, scrum, sprint, planning, stakeholders, jira]
+      description: Agile project management, sprint planning, stakeholder coordination
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - project
+      - agile
+      - scrum
+      - sprint
+      - planning
+      - stakeholders
+      - jira
       tools: []
       complexity_tier: midweight
-
     task_coordinator:
-      description: "Task delegation, tracking, prioritization, team coordination"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [task, coordinate, delegation, tracking, prioritize]
+      description: Task delegation, tracking, prioritization, team coordination
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - task
+      - coordinate
+      - delegation
+      - tracking
+      - prioritize
       tools: []
       complexity_tier: lightweight
-
     scheduler:
-      description: "Scheduling, calendar management, deadline tracking, reminders"
-      primary_model: kimi-k2
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [schedule, calendar, deadline, time, reminder, timeline]
+      description: Scheduling, calendar management, deadline tracking, reminders
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - schedule
+      - calendar
+      - deadline
+      - time
+      - reminder
+      - timeline
       tools: []
       complexity_tier: lightweight
-
     cost_tracker:
-      description: "Financial tracking, budgeting, cost analysis, ROI estimation"
-      primary_model: glm-4
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [budget, finance, cost, roi, expense, financial]
-      tools: [interpreter]
+      description: Financial tracking, budgeting, cost analysis, ROI estimation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - budget
+      - finance
+      - cost
+      - roi
+      - expense
+      - financial
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     resource_allocator:
-      description: "Resource allocation, capacity planning, constraint optimization"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [resource, capacity, allocation, constraint, optimization]
+      description: Resource allocation, capacity planning, constraint optimization
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - resource
+      - capacity
+      - allocation
+      - constraint
+      - optimization
       tools: []
       complexity_tier: midweight
-
     workflow_optimizer:
-      description: "Workflow optimization, process improvement, bottleneck elimination"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [workflow, process, efficiency, bottleneck, automation, improve]
+      description: Workflow optimization, process improvement, bottleneck elimination
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - workflow
+      - process
+      - efficiency
+      - bottleneck
+      - automation
+      - improve
       tools: []
       complexity_tier: midweight
-
     reporting_builder:
-      description: "Dashboard creation, KPI reporting, data visualization, metrics"
-      primary_model: devstral
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [dashboard, report, visualization, kpi, metrics, chart]
-      tools: [interpreter]
+      description: Dashboard creation, KPI reporting, data visualization, metrics
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - dashboard
+      - report
+      - visualization
+      - kpi
+      - metrics
+      - chart
+      tools:
+      - interpreter
       complexity_tier: midweight
-
 legal_compliance:
   default_agent: contract_reviewer
-  description: "Legal review, compliance, privacy, risk assessment, IP, ethics"
+  description: Legal review, compliance, privacy, risk assessment, IP, ethics
   agents:
     contract_reviewer:
-      description: "Contract review, clause analysis, legal risk identification"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [contract, legal, review, clause, risk, agreement]
+      description: Contract review, clause analysis, legal risk identification
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - contract
+      - legal
+      - review
+      - clause
+      - risk
+      - agreement
       tools: []
       complexity_tier: heavyweight
-
     gdpr_expert:
-      description: "Privacy compliance — GDPR, CCPA, data protection regulations"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [gdpr, privacy, ccpa, compliance, data-protection, regulation]
+      description: Privacy compliance — GDPR, CCPA, data protection regulations
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - gdpr
+      - privacy
+      - ccpa
+      - compliance
+      - data-protection
+      - regulation
       tools: []
       complexity_tier: midweight
-
     risk_assessor:
-      description: "Risk assessment, mitigation strategies, threat modeling"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [risk, assessment, mitigation, threat, vulnerability, model]
+      description: Risk assessment, mitigation strategies, threat modeling
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - risk
+      - assessment
+      - mitigation
+      - threat
+      - vulnerability
+      - model
       tools: []
       complexity_tier: midweight
-
     ip_lawyer:
-      description: "Intellectual property — patents, trademarks, copyright, licensing"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [patent, trademark, copyright, license, ip, intellectual-property]
+      description: Intellectual property — patents, trademarks, copyright, licensing
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - patent
+      - trademark
+      - copyright
+      - license
+      - ip
+      - intellectual-property
       tools: []
       complexity_tier: heavyweight
-
     ethics_auditor:
-      description: "AI ethics, bias detection, fairness evaluation, responsible AI"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [ethics, ai-ethics, bias, fairness, responsibility, discrimination]
+      description: AI ethics, bias detection, fairness evaluation, responsible AI
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ethics
+      - ai-ethics
+      - bias
+      - fairness
+      - responsibility
+      - discrimination
       tools: []
       complexity_tier: midweight
-
     compliance_checker:
-      description: "Regulatory compliance — SOX, HIPAA, audits, standards verification"
-      primary_model: glm-4
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [compliance, regulation, audit, sox, hipaa, standard, verify]
+      description: Regulatory compliance — SOX, HIPAA, audits, standards verification
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - compliance
+      - regulation
+      - audit
+      - sox
+      - hipaa
+      - standard
+      - verify
       tools: []
       complexity_tier: midweight
-
 product:
   default_agent: product_manager
-  description: "Product management, roadmapping, user research, feature prioritization"
+  description: Product management, roadmapping, user research, feature prioritization
   agents:
     product_manager:
-      description: "Product strategy, roadmap, stakeholder alignment, vision definition"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [product, roadmap, strategy, stakeholder, vision, prd]
+      description: Product strategy, roadmap, stakeholder alignment, vision definition
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - product
+      - roadmap
+      - strategy
+      - stakeholder
+      - vision
+      - prd
       tools: []
       complexity_tier: midweight
-
     roadmap_planner:
-      description: "Roadmap planning, milestone definition, timeline management"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [roadmap, milestone, planning, timeline, quarter, priority]
+      description: Roadmap planning, milestone definition, timeline management
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - roadmap
+      - milestone
+      - planning
+      - timeline
+      - quarter
+      - priority
       tools: []
       complexity_tier: midweight
-
     user_research_lead:
-      description: "User research, interviews, personas, empathy maps, insights"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [user-research, interview, persona, empathy, insight, discovery]
+      description: User research, interviews, personas, empathy maps, insights
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - user-research
+      - interview
+      - persona
+      - empathy
+      - insight
+      - discovery
       tools: []
       complexity_tier: midweight
-
     feedback_analyzer:
-      description: "User feedback analysis — themes, sentiment, actionable insights"
-      primary_model: gemini-3.1-pro
-      fallbacks: [kimi-k2, qwen3-235b]
-      capabilities: [feedback, analysis, themes, sentiment, actionable, nps]
-      tools: [interpreter]
+      description: User feedback analysis — themes, sentiment, actionable insights
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - feedback
+      - analysis
+      - themes
+      - sentiment
+      - actionable
+      - nps
+      tools:
+      - interpreter
       complexity_tier: midweight
-
     feature_prioritizer:
-      description: "Feature prioritization — RICE, value vs effort, impact scoring"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [prioritize, prioritization, feature, value, effort, rice, impact]
+      description: Feature prioritization — RICE, value vs effort, impact scoring
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - prioritize
+      - prioritization
+      - feature
+      - value
+      - effort
+      - rice
+      - impact
       tools: []
       complexity_tier: lightweight
-
     mvp_builder:
-      description: "MVP development, lean validation, rapid prototyping, scope control"
-      primary_model: devstral
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [mvp, minimum, prototype, lean, scope, validation, speed]
-      tools: [interpreter]
+      description: MVP development, lean validation, rapid prototyping, scope control
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - mvp
+      - minimum
+      - prototype
+      - lean
+      - scope
+      - validation
+      - speed
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     beta_coordinator:
-      description: "Beta testing coordination, QA cycles, feedback loops, bug tracking"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [beta, testing, qa, feedback, bug, iteration, release]
+      description: Beta testing coordination, QA cycles, feedback loops, bug tracking
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - beta
+      - testing
+      - qa
+      - feedback
+      - bug
+      - iteration
+      - release
       tools: []
       complexity_tier: lightweight
-
     launch_strategist:
-      description: "Product launch strategy, go-to-market planning, channel selection"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [launch, go-to-market, channel, timing, announcement, strategy]
+      description: Product launch strategy, go-to-market planning, channel selection
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - launch
+      - go-to-market
+      - channel
+      - timing
+      - announcement
+      - strategy
       tools: []
       complexity_tier: midweight
-
 creative:
   default_agent: storyteller
-  description: "Creative content — storytelling, scripts, music, ideas, poetry"
+  description: Creative content — storytelling, scripts, music, ideas, poetry
   agents:
     storyteller:
-      description: "Narrative storytelling, character development, plot structure, world-building"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [story, narrative, character, plot, world, emotion]
+      description: Narrative storytelling, character development, plot structure,
+        world-building
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - story
+      - narrative
+      - character
+      - plot
+      - world
+      - emotion
       tools: []
       complexity_tier: midweight
-
     script_writer:
-      description: "Screenwriting, dialogue, scene structure, screenplay format"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [script, screenplay, dialogue, scene, format, film]
+      description: Screenwriting, dialogue, scene structure, screenplay format
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - script
+      - screenplay
+      - dialogue
+      - scene
+      - format
+      - film
       tools: []
       complexity_tier: midweight
-
     video_concept_artist:
-      description: "Video concepts, storyboards, visual narratives, creative direction"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [video, storyboard, visual-narrative, creative-direction, concept]
+      description: Video concepts, storyboards, visual narratives, creative direction
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - video
+      - storyboard
+      - visual-narrative
+      - creative-direction
+      - concept
       tools: []
       complexity_tier: midweight
-
     music_composer:
-      description: "Music composition, theory, arrangement, MIDI, soundscape design"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, glm-4]
-      capabilities: [music, melody, composition, theory, arrangement, midi, sound]
+      description: Music composition, theory, arrangement, MIDI, soundscape design
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - music
+      - melody
+      - composition
+      - theory
+      - arrangement
+      - midi
+      - sound
       tools: []
       complexity_tier: midweight
-
     meme_creator:
-      description: "Meme creation, internet humor, viral formats, cultural references"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, kimi-k2]
-      capabilities: [meme, humor, viral, internet, format, culture]
+      description: Meme creation, internet humor, viral formats, cultural references
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - meme
+      - humor
+      - viral
+      - internet
+      - format
+      - culture
       tools: []
       complexity_tier: lightweight
-
     idea_generator:
-      description: "Creative ideation, brainstorming, lateral thinking, concept generation"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [idea, brainstorm, creative, innovation, concept, lateral, novel]
+      description: Creative ideation, brainstorming, lateral thinking, concept generation
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - idea
+      - brainstorm
+      - creative
+      - innovation
+      - concept
+      - lateral
+      - novel
       tools: []
       complexity_tier: lightweight
-
     poetry_specialist:
-      description: "Poetry composition — verse forms, metaphor, rhythm, imagery"
-      primary_model: gemini-3.1-pro
-      fallbacks: [qwen3-235b, kimi-k2]
-      capabilities: [poem, poetry, verse, metaphor, rhythm, rhyme, imagery]
+      description: Poetry composition — verse forms, metaphor, rhythm, imagery
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - poem
+      - poetry
+      - verse
+      - metaphor
+      - rhythm
+      - rhyme
+      - imagery
       tools: []
       complexity_tier: lightweight
-
     concept_artist:
-      description: "Concept art descriptions, visual design briefs, world-building details"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, glm-4]
-      capabilities: [concept, art, visual, design, world-building, imagination]
+      description: Concept art descriptions, visual design briefs, world-building
+        details
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - concept
+      - art
+      - visual
+      - design
+      - world-building
+      - imagination
       tools: []
       complexity_tier: midweight
-
 vision_multimodal:
   default_agent: screenshot_analyzer
-  description: "Vision analysis — all local/private via Ollama, never sent to external APIs"
+  description: Vision analysis — all local/private via Ollama, never sent to external
+    APIs
   agents:
     screenshot_analyzer:
-      description: "Screenshot analysis, desktop UI interpretation, visual debugging (local)"
+      description: Screenshot analysis, desktop UI interpretation, visual debugging
+        (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [screenshot, screen, ui, desktop, visual, local]
+      capabilities:
+      - screenshot
+      - screen
+      - ui
+      - desktop
+      - visual
+      - local
       tools: []
       complexity_tier: lightweight
-
     diagram_interpreter:
-      description: "Diagram/flowchart/architecture interpretation, technical visuals (local)"
+      description: Diagram/flowchart/architecture interpretation, technical visuals
+        (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [diagram, flowchart, architecture, chart, interpretation, local]
+      capabilities:
+      - diagram
+      - flowchart
+      - architecture
+      - chart
+      - interpretation
+      - local
       tools: []
       complexity_tier: lightweight
-
     ui_reviewer:
-      description: "UI/UX review from screenshots, usability heuristics, design critique (local)"
+      description: UI/UX review from screenshots, usability heuristics, design critique
+        (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [ui-review, usability, heuristics, critique, interface, local]
+      capabilities:
+      - ui-review
+      - usability
+      - heuristics
+      - critique
+      - interface
+      - local
       tools: []
       complexity_tier: lightweight
-
     image_descriptor:
-      description: "Image description, alt-text generation, accessibility captions (local)"
+      description: Image description, alt-text generation, accessibility captions
+        (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [image, photo, picture, alt-text, description, caption, local]
+      capabilities:
+      - image
+      - photo
+      - picture
+      - alt-text
+      - description
+      - caption
+      - local
       tools: []
       complexity_tier: lightweight
-
     ocr_specialist:
-      description: "OCR text extraction, document scanning, text recognition (local)"
+      description: OCR text extraction, document scanning, text recognition (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [ocr, extract, text, scanning, recognition, document, local]
+      capabilities:
+      - ocr
+      - extract
+      - text
+      - scanning
+      - recognition
+      - document
+      - local
       tools: []
       complexity_tier: lightweight
-
     video_frame_analyzer:
-      description: "Video frame analysis, scene detection, temporal understanding (local)"
+      description: Video frame analysis, scene detection, temporal understanding (local)
       primary_model: gemma4-local
       fallbacks: []
-      capabilities: [video, frame, clip, scene, temporal, detection, local]
+      capabilities:
+      - video
+      - frame
+      - clip
+      - scene
+      - temporal
+      - detection
+      - local
       tools: []
       complexity_tier: lightweight
-
-# ── Legacy agents (mirrors agents.py AGENT_MODELS, used for backwards compat) ──
 legacy:
   default_agent: general
-  description: "Legacy 22-agent registry — mirrors agents.py AGENT_MODELS for backwards compat"
+  description: Legacy 22-agent registry — mirrors agents.py AGENT_MODELS for backwards
+    compat
   agents:
     vision:
-      description: "Vision analysis via Ollama (local, private, RTX 3060)"
+      description: Vision analysis via Ollama (local, private, RTX 3060)
       primary_model: gemma4-local
-      fallbacks: [llama3-70b, gemini-3.1-pro]
-      capabilities: [screenshot, screen, layar, gambar, image, photo, ocr, visual, desktop, window, capture]
-      tools: [ollama]
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - screenshot
+      - screen
+      - layar
+      - gambar
+      - image
+      - photo
+      - ocr
+      - visual
+      - desktop
+      - window
+      - capture
+      tools:
+      - ollama
       complexity_tier: lightweight
-
     coding:
-      description: "Code generation, implementation, refactoring, debugging"
-      primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-3.1-pro, devstral]
-      capabilities: [code, kode, function, script, implement, class, refactor, generate, endpoint, api, python, bash, write, tulis, buat file, build, create]
-      tools: [interpreter]
+      description: Code generation, implementation, refactoring, debugging
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - code
+      - kode
+      - function
+      - script
+      - implement
+      - class
+      - refactor
+      - generate
+      - endpoint
+      - api
+      - python
+      - bash
+      - write
+      - tulis
+      - buat file
+      - build
+      - create
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     debug:
-      description: "Root cause analysis — tracebacks, exceptions, CUDA, PyTorch, OOM, NaN"
-      primary_model: glm-4
-      fallbacks: [llama3-70b, qwen3-235b]
-      capabilities: [debug, traceback, exception, crash, fix, bug, oom, nan, stacktrace, error, pytorch, torch, cuda]
-      tools: [interpreter]
+      description: Root cause analysis — tracebacks, exceptions, CUDA, PyTorch, OOM,
+        NaN
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - debug
+      - traceback
+      - exception
+      - crash
+      - fix
+      - bug
+      - oom
+      - nan
+      - stacktrace
+      - error
+      - pytorch
+      - torch
+      - cuda
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     math:
-      description: "Math — tensor operations, matrix calculus, gradient descent, backprop"
-      primary_model: glm-4
-      fallbacks: [llama3-70b, qwen3-235b]
-      capabilities: [tensor, matrix, gradient, derivative, integral, backprop, eigenvalue, softmax, calculate, hitung]
-      tools: [interpreter]
+      description: Math — tensor operations, matrix calculus, gradient descent, backprop
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - tensor
+      - matrix
+      - gradient
+      - derivative
+      - integral
+      - backprop
+      - eigenvalue
+      - softmax
+      - calculate
+      - hitung
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     architect:
-      description: "System design, architecture, microservices, framework blueprints"
-      primary_model: qwen3-235b
-      fallbacks: [gemini-3.1-pro, llama3-70b]
-      capabilities: [design, architecture, plan, system, pipeline, struktur, rancang, overview, diagram, framework, strategy, strategi]
+      description: System design, architecture, microservices, framework blueprints
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - design
+      - architecture
+      - plan
+      - system
+      - pipeline
+      - struktur
+      - rancang
+      - overview
+      - diagram
+      - framework
+      - strategy
+      - strategi
       tools: []
       complexity_tier: heavyweight
-
     analyst:
-      description: "Data analysis, visualization, CSV, pandas, GPU metrics, training trends"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, llama3-70b]
-      capabilities: [analyze, analisis, plot, chart, csv, metrics, performance, gpu, training, trend, statistics, compare, nvidia-smi, visualize]
-      tools: [interpreter]
+      description: Data analysis, visualization, CSV, pandas, GPU metrics, training
+        trends
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - analyze
+      - analisis
+      - plot
+      - chart
+      - csv
+      - metrics
+      - performance
+      - gpu
+      - training
+      - trend
+      - statistics
+      - compare
+      - nvidia-smi
+      - visualize
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     computer:
-      description: "Web browsing, email, Git, file ops, system monitoring, Excel/PDF docs"
-      primary_model: llama3-70b
-      fallbacks: [glm-4, gemini-3.1-pro, devstral, qwen3-235b]
-      capabilities: [browse, search for, find online, look up, scrape, website, web page, pdf, excel, spreadsheet, word doc, docx, extract table, read document, email, inbox, send email, git status, git commit, git push, git pull, git diff, run tests, pytest, lint, find in code, grep, monitor, schedule, disk space, memory usage]
-      tools: [playwright, interpreter]
+      description: Web browsing, email, Git, file ops, system monitoring, Excel/PDF
+        docs
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - browse
+      - search for
+      - find online
+      - look up
+      - scrape
+      - website
+      - web page
+      - pdf
+      - excel
+      - spreadsheet
+      - word doc
+      - docx
+      - extract table
+      - read document
+      - email
+      - inbox
+      - send email
+      - git status
+      - git commit
+      - git push
+      - git pull
+      - git diff
+      - run tests
+      - pytest
+      - lint
+      - find in code
+      - grep
+      - monitor
+      - schedule
+      - disk space
+      - memory usage
+      tools:
+      - playwright
+      - interpreter
       complexity_tier: heavyweight
-
     general:
-      description: "Default fallback agent — general purpose conversation and tasks"
+      description: Default fallback agent — general purpose conversation and tasks
       primary_model: gemma4-local
-      fallbacks: [llama3-70b, qwen3-235b, gemini-3.1-pro]
-      capabilities: [general, chat, talk, casual, help]
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - general
+      - chat
+      - talk
+      - casual
+      - help
       tools: []
       complexity_tier: lightweight
-
     researcher:
-      description: "Deep research, academic sources, citation, literature synthesis"
-      primary_model: kimi-k2
-      fallbacks: [glm-4, llama3-70b]
-      capabilities: [research, paper, study, evidence, cite, source, literature, academic, experiment, hypothesis, jurnal]
-      tools: [playwright]
+      description: Deep research, academic sources, citation, literature synthesis
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - research
+      - paper
+      - study
+      - evidence
+      - cite
+      - source
+      - literature
+      - academic
+      - experiment
+      - hypothesis
+      - jurnal
+      tools:
+      - playwright
       complexity_tier: heavyweight
-
     marketer:
-      description: "Marketing copy, campaigns, brand strategy, customer acquisition"
-      primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [marketing, ads, campaign, brand, positioning, messaging, customer, acquisition, growth, conversion, funnel, iklan]
+      description: Marketing copy, campaigns, brand strategy, customer acquisition
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - marketing
+      - ads
+      - campaign
+      - brand
+      - positioning
+      - messaging
+      - customer
+      - acquisition
+      - growth
+      - conversion
+      - funnel
+      - iklan
       tools: []
       complexity_tier: midweight
-
     devops:
-      description: "CI/CD, Docker, Kubernetes, deployment pipelines, infrastructure"
-      primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [deploy, pipeline, ci cd, docker, k8s, kubernetes, monitoring, logs, alerts, infrastructure, cloud]
+      description: CI/CD, Docker, Kubernetes, deployment pipelines, infrastructure
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - deploy
+      - pipeline
+      - ci cd
+      - docker
+      - k8s
+      - kubernetes
+      - monitoring
+      - logs
+      - alerts
+      - infrastructure
+      - cloud
       tools: []
       complexity_tier: heavyweight
-
     pm:
-      description: "Project management, roadmaps, sprint planning, stakeholder coordination"
-      primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-3.1-pro]
-      capabilities: [project, roadmap, milestone, sprint, backlog, priority, stakeholder, timeline, scope, deliverable]
+      description: Project management, roadmaps, sprint planning, stakeholder coordination
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - project
+      - roadmap
+      - milestone
+      - sprint
+      - backlog
+      - priority
+      - stakeholder
+      - timeline
+      - scope
+      - deliverable
       tools: []
       complexity_tier: midweight
-
     humanizer:
-      description: "Convert text to casual, friendly, human-sounding tone"
-      primary_model: llama3-70b
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [humanize, casual, friendly, tone, rewrite]
+      description: Convert text to casual, friendly, human-sounding tone
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - humanize
+      - casual
+      - friendly
+      - tone
+      - rewrite
       tools: []
       complexity_tier: lightweight
-
     reviewer:
-      description: "Code review, quality audit, lint, best practices enforcement"
-      primary_model: llama3-70b
-      fallbacks: [qwen3-235b, gemini-3.1-pro]
-      capabilities: [review, audit, check code, inspect, quality, code review, periksa, lint, scan]
+      description: Code review, quality audit, lint, best practices enforcement
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - review
+      - audit
+      - check code
+      - inspect
+      - quality
+      - code review
+      - periksa
+      - lint
+      - scan
       tools: []
       complexity_tier: midweight
-
     think:
-      description: "Deep reasoning with QwQ-style chain-of-thought (RTX 3060 local)"
-      primary_model: qwen3-235b
-      fallbacks: [glm-4, llama3-70b]
-      capabilities: [think, reasoning, deep, analysis, chain-of-thought, cot]
-      tools: [interpreter]
+      description: Deep reasoning with QwQ-style chain-of-thought (RTX 3060 local)
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - think
+      - reasoning
+      - deep
+      - analysis
+      - chain-of-thought
+      - cot
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     owl:
-      description: "OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)"
-      primary_model: kimi-k2
-      fallbacks: [gemini-3.1-pro, qwen3-235b]
-      capabilities: [complex-tasks, research, gaia-benchmark, owl, difficult, multi-step]
-      tools: [playwright, interpreter]
+      description: OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - complex-tasks
+      - research
+      - gaia-benchmark
+      - owl
+      - difficult
+      - multi-step
+      tools:
+      - playwright
+      - interpreter
       complexity_tier: heavyweight
-
     ag2_researcher:
-      description: "AG2 multi-agent research — researcher role"
-      primary_model: kimi-k2
-      fallbacks: [glm-4, qwen3-235b]
-      capabilities: [ag2, research, multi-agent, agentic, research-agent]
-      tools: [interpreter]
+      description: AG2 multi-agent research — researcher role
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ag2
+      - research
+      - multi-agent
+      - agentic
+      - research-agent
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     ag2_critic:
-      description: "AG2 multi-agent debate — devil's advocate / critic role"
-      primary_model: glm-4
-      fallbacks: [qwen3-235b, llama3-70b]
-      capabilities: [ag2, critic, debate, devil-advocate, challenge]
+      description: AG2 multi-agent debate — devil's advocate / critic role
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ag2
+      - critic
+      - debate
+      - devil-advocate
+      - challenge
       tools: []
       complexity_tier: heavyweight
-
     ag2_synthesizer:
-      description: "AG2 multi-agent debate — synthesizer / judge role"
-      primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-3.1-pro]
-      capabilities: [ag2, synthesizer, judge, debate, synthesis, conclude]
+      description: AG2 multi-agent debate — synthesizer / judge role
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - ag2
+      - synthesizer
+      - judge
+      - debate
+      - synthesis
+      - conclude
       tools: []
       complexity_tier: heavyweight
-
     code_exec:
-      description: "Safe code execution via smolagents (Python, bash)"
-      primary_model: devstral
-      fallbacks: [llama3-70b, qwen3-235b]
-      capabilities: [code-execution, python, bash, run, execute, interpreter]
-      tools: [interpreter]
+      description: Safe code execution via smolagents (Python, bash)
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - code-execution
+      - python
+      - bash
+      - run
+      - execute
+      - interpreter
+      tools:
+      - interpreter
       complexity_tier: heavyweight
-
     predictor:
-      description: "Consensus prediction and outcome simulation (MiroFish)"
-      primary_model: qwen3-235b
-      fallbacks: [kimi-k2, glm-4]
-      capabilities: [consensus, prediction, forecast, simulate, mirofish, outcome]
+      description: Consensus prediction and outcome simulation (MiroFish)
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - consensus
+      - prediction
+      - forecast
+      - simulate
+      - mirofish
+      - outcome
       tools: []
       complexity_tier: heavyweight
-
     claude_orchestrator:
-      description: "Claude-Opus orchestration via Ruflo (requires ANTHROPIC_API_KEY)"
-      primary_model: anthropic-claude
-      fallbacks: [anthropic-claude, qwen3-235b]
-      capabilities: [claude, orchestrator, opus, ruflo, agentic]
+      description: Claude-Opus orchestration via Ruflo (requires ANTHROPIC_API_KEY)
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - claude
+      - orchestrator
+      - opus
+      - ruflo
+      - agentic
       tools: []
       complexity_tier: heavyweight
       requires_env: ANTHROPIC_API_KEY
-
     debate:
-      description: "Multi-agent debate orchestration — strategic discussion with personas"
-      primary_model: qwen3-235b
-      fallbacks: [llama3-70b, gemini-3.1-pro]
-      capabilities: [debate, discuss, opinion, argument, persona, multi-agent]
+      description: Multi-agent debate orchestration — strategic discussion with personas
+      primary_model: minimax-m2-7
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - debate
+      - discuss
+      - opinion
+      - argument
+      - persona
+      - multi-agent
       tools: []
       complexity_tier: heavyweight

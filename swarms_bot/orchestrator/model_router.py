@@ -44,20 +44,19 @@ class ModelCandidate:
         return bool(os.getenv(self.env_key))
 
 
-# Full model catalogue
+# Full model catalogue — uses models.yaml naming for MiniMax primary,
+# free cloud fallbacks per FALLBACK_CHAIN in agents.py
 MODEL_CATALOGUE: list[ModelCandidate] = [
-    ModelCandidate("cerebras/llama-3.3-70b",        "cerebras",   10, 7,  0.0,    128_000, "CEREBRAS_API_KEY",   ["speed", "general"]),
-    ModelCandidate("minimax/MiniMax-Text-01",  "groq",        9, 8,  0.0,    128_000, "GROQ_API_KEY",       ["coding", "debug", "general"]),
-    ModelCandidate("groq/moonshard-r1-distill-70b", "groq",        8, 9,  0.0,    128_000, "GROQ_API_KEY",       ["math", "reasoning"]),
-    ModelCandidate("minimax/MiniMax-Text-01",     "groq",       10, 6,  0.0,    128_000, "GROQ_API_KEY",       ["speed", "trivial"]),
-    ModelCandidate("minimax/MiniMax-Text-01",        "gemini",      8, 9,  0.0,  1_000_000, "GEMINI_API_KEY",     ["vision", "long_context", "research"]),
-    ModelCandidate("gemini/gemini-2.5-pro-preview", "gemini",      6, 10, 0.001,2_000_000, "GEMINI_API_KEY",     ["complex", "architect", "critical"]),
-    ModelCandidate("openrouter/deepseek/deepseek-chat-v3-0324", "openrouter", 7, 9, 0.0, 64_000, "OPENROUTER_API_KEY", ["coding", "math"]),
-    ModelCandidate("openrouter/meta-llama/llama-4-maverick", "openrouter",  7, 9, 0.0, 128_000, "OPENROUTER_API_KEY", ["general", "analyst"]),
-    ModelCandidate("openrouter/mistralai/mistral-small-3.1", "openrouter",  8, 7, 0.0, 128_000, "OPENROUTER_API_KEY", ["speed", "general"]),
-    ModelCandidate("zai/glm-4-plus",                "zai",         7, 8,  0.0,    128_000, "ZAI_API_KEY",        ["math", "debug", "coding"]),
-    ModelCandidate("ollama_chat/llava:latest",       "ollama",      5, 7,  0.0,    8_000,   "OLLAMA_BASE_URL",    ["vision", "privacy"]),
-    ModelCandidate("ollama_chat/qwen2.5-coder:7b",  "ollama",      6, 7,  0.0,    32_000,  "OLLAMA_BASE_URL",    ["coding", "privacy"]),
+    # Primary: MiniMax M2.7 for all serious tasks
+    ModelCandidate("minimax-coding-plan/MiniMax-M2.7", "minimax", 9, 10, 0.0, 204800, "MINIMAX_API_KEY", ["coding", "debug", "general", "reasoning", "complex"]),
+    # Fallback: MiniMax-Text-01 when M2.7 is rate-limited
+    ModelCandidate("minimax-coding-plan/MiniMax-Text-01", "minimax", 9, 8, 0.0, 245760, "MINIMAX_API_KEY", ["speed", "general", "long-context"]),
+    # Vision: local Ollama gemma4 on RTX 3060
+    ModelCandidate("ollama_chat/gemma4:e4b", "ollama", 5, 7, 0.0, 8192, "OLLAMA_BASE_URL", ["vision", "privacy"]),
+    # Free cloud fallbacks when MiniMax is unavailable
+    ModelCandidate("gemini/gemini-2.0-flash-exp:free", "gemini", 8, 7, 0.0, 1048576, "GEMINI_API_KEY", ["speed", "general", "reasoning"]),
+    ModelCandidate("openrouter/qwen/qwen3-coder:free", "openrouter", 7, 8, 0.0, 65536, "OPENROUTER_API_KEY", ["coding", "debug"]),
+    ModelCandidate("openrouter/deepseek/deepseek-r1:free", "openrouter", 6, 8, 0.0, 64000, "OPENROUTER_API_KEY", ["math", "reasoning"]),
 ]
 
 # Agent key → required specialties (ordered by preference)
@@ -89,7 +88,7 @@ class ModelRouter:
         available = [m for m in MODEL_CATALOGUE if m.is_available()]
 
         if not available:
-            return "minimax/MiniMax-Text-01", None
+            return "minimax-coding-plan/MiniMax-Text-01", None
 
         # Privacy: prefer local models
         if prefer_privacy:

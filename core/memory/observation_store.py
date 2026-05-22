@@ -312,6 +312,19 @@ class ObservationStore:
                 """,
                 (fts_query, limit),
             )
+            results = await rows.fetchall()
+            # Fallback to recent observations when FTS returns nothing
+            if not results:
+                rows = await conn.execute(
+                    """
+                    SELECT id, type, title, created_at
+                    FROM observations
+                    ORDER BY created_at DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                )
+                results = await rows.fetchall()
         else:
             rows = await conn.execute(
                 """
@@ -322,8 +335,8 @@ class ObservationStore:
                 """,
                 (limit,),
             )
+            results = await rows.fetchall()
 
-        results = await rows.fetchall()
         return [
             {
                 "id": r["id"],

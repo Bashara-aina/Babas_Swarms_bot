@@ -322,7 +322,7 @@ async def handle_plain_message(  # type: ignore[reportAttributeAccessIssue]
 
         # ── multi-source research ────────────────────────────────────────────
         if handler_key == "/research":  # type: ignore[reportAttributeAccessIssue]
-            await _execute_chat(msg, user_msg, forced_agent="researcher", routing_hint=_route_hint)  # type: ignore[reportAttributeAccessIssue]
+            await _execute_chat(msg, user_msg, forced_agent="research-agent", routing_hint=_route_hint)  # type: ignore[reportAttributeAccessIssue]
             auto_router.record_performance(skill_match.skill_name, True)  # type: ignore[reportAttributeAccessIssue]
             return
 
@@ -559,7 +559,7 @@ async def _handle_location(msg: Message, user_msg: str, router: AutonomousRouter
             "Use this location to give specific, personalised recommendations. "  # type: ignore[reportAttributeAccessIssue]
             "Search online for up-to-date options.]"  # type: ignore[reportAttributeAccessIssue]
         )
-        await _execute_chat(msg, enriched, forced_agent="researcher", routing_hint="location_advice")  # type: ignore[reportAttributeAccessIssue]
+        await _execute_chat(msg, enriched, forced_agent="research-agent", routing_hint="location_advice")  # type: ignore[reportAttributeAccessIssue]
         router.record_performance("location_advice", False)  # type: ignore[reportAttributeAccessIssue]
 
 
@@ -702,7 +702,7 @@ async def _handle_github_intel(msg: Message, user_msg: str, router: AutonomousRo
         router.record_performance("github_intel", False)  # type: ignore[reportAttributeAccessIssue]
     except Exception as exc:
         logger.warning("[github_intel handler] %s", exc)  # type: ignore[reportAttributeAccessIssue]
-        await _execute_chat(msg, user_msg, forced_agent="researcher", routing_hint="github_intel")  # type: ignore[reportAttributeAccessIssue]
+        await _execute_chat(msg, user_msg, forced_agent="research-agent", routing_hint="github_intel")  # type: ignore[reportAttributeAccessIssue]
         router.record_performance("github_intel", False)  # type: ignore[reportAttributeAccessIssue]
 
 

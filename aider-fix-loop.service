@@ -1,0 +1,20 @@
+[Unit]
+Description=Aider Self-Fix Loop for OpenCode Swarms Integration
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+ExecStart=/home/newadmin/swarm-bot/.venv/bin/python /home/newadmin/swarm-bot/scripts/aider_fix_loop.py
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/newadmin/swarm-bot
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:/home/newadmin/swarm-bot/logs/aider_fix_loop.log
+StandardError=append:/home/newadmin/swarm-bot/logs/aider_fix_loop.log
+EnvironmentFile=/home/newadmin/swarm-bot/.env
+
+[Install]
+WantedBy=multi-user.target

@@ -39,7 +39,7 @@ except ImportError:
     LANGMEM_AVAILABLE = False  # type: ignore[reportOptionalMemberAccess]
     langmem = None  # type: ignore
 
-DEFAULT_MODEL = "minimax/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
+DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
 
 
 class MemoryState(TypedDict, total=False):  # type: ignore[reportOptionalMemberAccess]
@@ -68,7 +68,7 @@ def _build_langmem_llm(model: str | None = None) -> Any:  # type: ignore[reportO
 
     model_name = model or DEFAULT_MODEL  # type: ignore[reportOptionalMemberAccess]
     if "/" in model_name:
-        model_name = "gpt-4o-mini"  # type: ignore[reportOptionalMemberAccess]
+        model_name = model_name.split("/")[1]  # extract "MiniMax-M2.7" from "minimax-coding-plan/MiniMax-M2.7"
 
     api_key = os.getenv("MINIMAX_API_KEY", "dummy")  # type: ignore[reportOptionalMemberAccess]
     os.environ["OPENAI_API_KEY"] = api_key  # type: ignore[reportOptionalMemberAccess]
@@ -207,14 +207,29 @@ class SwarmBotMemoryManager:
             return []
 
 
+def _get_langmem_store():
+    """Get or create the langgraph InMemoryStore for langmem operations."""
+    from langgraph.store.memory import InMemoryStore
+
+    global _LANGMEM_LANGGRAPH_STORE
+    if _LANGMEM_LANGGRAPH_STORE is None:
+        _LANGMEM_LANGGRAPH_STORE = InMemoryStore()
+    return _LANGMEM_LANGGRAPH_STORE
+
+
 def get_langmem_searcher(namespace: tuple[str, ...] | None = None) -> Any | None:  # type: ignore[reportOptionalMemberAccess]
-    """Get a standalone langmem memory searcher for use as a LangGraph tool."""  # type: ignore[reportOptionalMemberAccess]
+    """Get a standalone langmem memory searcher for use as a LangGraph tool."""
     if not LANGMEM_AVAILABLE:
         return None
 
     ns = namespace or ("swarmbot", "memories")  # type: ignore[reportOptionalMemberAccess]
     llm = _build_langmem_llm()  # type: ignore[reportOptionalMemberAccess]
-    return langmem.create_memory_searcher(model=llm, namespace=ns)  # type: ignore[reportOptionalMemberAccess]
+    store = _get_langmem_store()
+    return langmem.create_memory_searcher(  # type: ignore[reportOptionalMemberAccess]
+        model=llm,  # type: ignore[reportOptionalMemberAccess]
+        namespace=ns,  # type: ignore[reportOptionalMemberAccess]
+        store=store,  # type: ignore[reportOptionalMemberAccess]
+    )
 
 
 def get_langmem_manager(namespace: tuple[str, ...] | None = None) -> Any | None:  # type: ignore[reportOptionalMemberAccess]

@@ -125,9 +125,9 @@ async def _respawn_agent(context: dict) -> dict:
     try:
         client = MCPClient()
         result = await client.call_tool("ruflo", "agent_spawn", {
-            "agent_type": context.get("agent_type", "worker"),
+            "agentType": context.get("agentType", "coder"),
             "task": context.get("task", "") + " (be more conservative, previous attempt failed)",
-            "model": "minimax/MiniMax-M2.7",
+            "model": "minimax-coding-plan/MiniMax-M2.7",
         })
         return {"action": "agent_respawned", "result": result}
     except Exception as e:
@@ -139,10 +139,22 @@ async def _unstall_swarm(context: dict) -> dict:
     from core.mcp_client import MCPClient
     try:
         client = MCPClient()
-        agents = await client.call_tool("ruflo", "agent_list")  # type: ignore[reportCallIssue]
-        stuck = [a["name"] for a in agents.get("agents", []) if a.get("status") == "active"]
+        agents_raw = await client.call_tool("ruflo", "agent_list", {})
+        # call_tool returns str, parse JSON (may be truncated — handle gracefully)
+        agents = []
+        if isinstance(agents_raw, str) and agents_raw.startswith("{"):
+            import json
+            try:
+                agents_data = json.loads(agents_raw)
+                agents = agents_data.get("agents", []) if isinstance(agents_data, dict) else []
+            except json.JSONDecodeError:
+                # Truncated JSON — extract agentIds via regex
+                import re
+                agent_ids = re.findall(r'"agentId":\s*"([^"]+)"', agents_raw)
+                agents = [{"agentId": aid, "status": "active"} for aid in agent_ids]
+        stuck = [a["agentId"] for a in agents if isinstance(a, dict) and a.get("status") == "active"]
         for name in stuck:
-            await client.call_tool("ruflo", "agent_stop", {"name": name})
+            await client.call_tool("ruflo", "agent_stop", {"agentId": name})
         return {"action": "swarm_reset", "stopped_agents": len(stuck)}
     except Exception as e:
         return {"action": "swarm_reset_failed", "error": str(e)}

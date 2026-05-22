@@ -444,7 +444,7 @@ class SupabaseClient:
         try:
             raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="minimax/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-Text-01",
                 temperature=0.1,
                 max_tokens=300,
             )

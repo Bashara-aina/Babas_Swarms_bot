@@ -38,7 +38,7 @@ def test_record_paid_model():
 
 def test_daily_limit_alert():
     t = _tracker()
-    model = "minimax/MiniMax-Text-01"
+    model = "minimax-coding-plan/MiniMax-Text-01"
     limit = DAILY_LIMITS[model]
     # Simulate 85% usage
     t.record(model, requests=int(limit * 0.85))
@@ -60,7 +60,7 @@ def test_daily_report_empty():
 
 def test_daily_report_with_usage():
     t = _tracker()
-    t.record("minimax/MiniMax-Text-01", input_tokens=100, output_tokens=50, requests=5)
+    t.record("minimax-coding-plan/MiniMax-Text-01", input_tokens=100, output_tokens=50, requests=5)
     report = t.daily_report()
     assert "MiniMax-Text-01" in report
     assert "5" in report

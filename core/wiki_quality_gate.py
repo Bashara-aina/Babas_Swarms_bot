@@ -246,7 +246,7 @@ async def deep_gate(content: str, path: str) -> EvaluationResult:
         response, _ = await chat(
             task=user_prompt,
             agent_key="general",
-            model_override="minimax/MiniMax-M2.7",
+            model_override="minimax-coding-plan/MiniMax-M2.7",
             run_post_hooks=False,
         )
         # Parse JSON response

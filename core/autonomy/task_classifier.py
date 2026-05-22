@@ -60,9 +60,10 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         return {}
     try:
         result = await _ruflo_client.call_tool("ruflo", tool, args or {})
-        if isinstance(result, list) and len(result) > 0:
+        # call_tool returns str (JSON text or error message), not a list
+        if isinstance(result, str) and result.startswith("{"):
             import json
-            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
+            return json.loads(result)
         return {}
     except Exception:
         return {}

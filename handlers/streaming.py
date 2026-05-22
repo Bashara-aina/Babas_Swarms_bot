@@ -46,7 +46,7 @@ async def stream_chat(
         from agents import AGENT_MODELS
         from llm_client import call_llm
 
-        model = AGENT_MODELS.get(key, AGENT_MODELS.get("general", "minimax/MiniMax-Text-01"))
+        model = AGENT_MODELS.get(key, AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-Text-01"))
         messages = [{"role": "user", "content": task}]
 
         stream = await call_llm(

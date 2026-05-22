@@ -660,7 +660,7 @@ class HierarchicalReasoner:
         if "agent" in task_lower or "llm" in task_lower:
             function_signatures.extend([
                 "async def call_agent(agent_key: str, prompt: str) -> str: ...",
-                "# Model string: provider/model format (e.g., 'minimax/MiniMax-Text-01')",
+                "# Model string: provider/model format (e.g., 'minimax-coding-plan/MiniMax-Text-01')",
             ])
             edge_cases.extend([
                 "Rate limit error — fall back to next provider in chain",

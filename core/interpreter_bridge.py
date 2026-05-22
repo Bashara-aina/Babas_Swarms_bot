@@ -84,7 +84,7 @@ _CONTEXT_WINDOWS: dict[str, int] = {
     "cerebras/qwen3-coder:free":           131072,
     "gemini/gemini-1.5-flash":            1000000,
     "groq/moonshotai/llama3-8b-8192":     200000,
-    "minimax/MiniMax-Text-01":                           128000,
+    "minimax-coding-plan/MiniMax-Text-01":                           128000,
     "openrouter/openai/gpt-oss-120b:free": 32768,
 }
 

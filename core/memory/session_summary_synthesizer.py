@@ -140,7 +140,7 @@ Generate a structured session summary with these exact sections (respond in mark
 Be concise. Each section should be 1-3 sentences max."""
     try:
         response = await llm_client.chat(
-            model="minimax/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-Text-01",
             messages=[{"role": "user", "content": prompt}],
             timeout=60,
         )

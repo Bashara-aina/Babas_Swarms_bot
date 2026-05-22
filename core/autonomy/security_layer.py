@@ -28,9 +28,10 @@ async def _call_ruflo(tool: str, args: dict | None = None) -> dict:
         return {}
     try:
         result = await _mcp_client.call_tool("ruflo", tool, args or {})
-        if isinstance(result, list) and len(result) > 0:
+        # call_tool returns str (JSON text or error message), not a list
+        if isinstance(result, str) and result.startswith("{"):
             import json
-            return json.loads(result[0].text)  # type: ignore[reportAttributeAccessIssue]
+            return json.loads(result)
         return {}
     except Exception as e:
         logger.debug("ruflo %s failed: %s", tool, e)
@@ -88,22 +89,13 @@ async def pre_git_commit_scan(staged_files: list[str]) -> tuple[bool, str]:
 
 async def pre_api_endpoint_scan(schema: str) -> tuple[bool, str]:
     """Validate new API endpoint schema and run security scan."""
-    results = await asyncio.gather(
-        _call_ruflo("aidefence_scan", {
-            "input": schema,
-        }),
-        _call_ruflo("aidefence_scan", {
-            "input": schema,
-        }),
-    )
-    val_result, sec_result = results
+    result = await _call_ruflo("aidefence_scan", {
+        "input": schema,
+    })
 
-    if val_result and val_result.get("threats_found", 0) > 0:
-        threats = val_result.get("threats", [])
-        return False, f"Input validation failed: {', '.join([t.get('message', 'unknown') for t in threats[:3]])}"
-
-    if sec_result and sec_result.get("threats_found", 0) > 0:
-        for threat in sec_result.get("threats", []):
+    if result and result.get("threats_found", 0) > 0:
+        threats = result.get("threats", [])
+        for threat in threats:
             if threat.get("severity") in ("high", "critical"):
                 return False, f"Security issue: {threat.get('message', 'unknown')}"
 

@@ -36,6 +36,18 @@ EVENTS = frozenset({
     "error_occurred",
     "pre_compact",   # Before message compaction (GAP-14)
     "post_compact",  # After message compaction (GAP-14 + GAP-20)
+    # Part VIII security hooks
+    "pre_command",
+    "post_command",
+    "pre_edit",
+    "post_edit",
+    "pre_git_commit",
+    "session_start",
+    "session_end",
+    "task_complete",
+    "task_success",
+    "task_failure",
+    "neural_train",
 })
 
 

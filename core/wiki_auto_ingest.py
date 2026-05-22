@@ -3,7 +3,7 @@ Wiki Auto-Ingest — Karpathy LLM Wiki pattern for Legion.
 
 Hooks:
   - on_conversation_turn(): lightweight per-turn check (LLM decides if worth filing)
-  - on_session_end(): heavy session summarization (multiple turns → wiki pages)
+  - on_turn_deep_ingest(): deep ingest across recent turns (fires every turn, thresholds internally)
   - lint_wiki(): periodic health check (orphaned links, stale claims)
 
 All wiki writes go through WikiManager to keep INDEX.md in sync.
@@ -74,11 +74,11 @@ async def _llm_quality_check(q: str, a: str) -> tuple[bool, float]:
         from llm_client import chat
 
         prompt = QUALITY_CHECK_PROMPT.format(q=q[:300], a=a[:500])
-        raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax/MiniMax-M2.7")
+        raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax-coding-plan/MiniMax-M2.7")
         data = json.loads(raw)
         return bool(data.get("worthy", False)), float(data.get("score", 0.0))
     except Exception as exc:
-        logger.debug("LLM quality check failed: %s", exc)
+        logger.warning("LLM quality check failed: %s", exc)
         return False, 0.0
 
 
@@ -146,14 +146,16 @@ async def on_conversation_turn(
         return {"filed": False, "reason": str(exc), "score": 0.75}
 
 
-async def on_session_end(
+async def on_turn_deep_ingest(
     user_id: str,
     conversation: list[dict[str, str]],
     llm_client: Any = None,
 ) -> dict[str, Any]:
     """
-    Called when a session ends (multiple conversation turns).
-    Performs deep extraction across all turns.
+    Deep ingest across recent conversation turns.
+
+    NOTE: This fires every turn (not just at session end). Internal threshold
+    (SESSION_TURN_THRESHOLD=3) gates whether heavy LLM extraction actually runs.
     """
     if len(conversation) < SESSION_TURN_THRESHOLD:
         return {"filed": False, "reason": f"only {len(conversation)} turns"}
@@ -171,13 +173,13 @@ async def on_session_end(
         if llm_client is None:
             from llm_client import chat
 
-            raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax/MiniMax-M2.7")
+            raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax-coding-plan/MiniMax-M2.7")
         else:
             raw = await llm_client.complete(prompt)
 
         data = json.loads(raw)
     except Exception as exc:
-        logger.warning("on_session_end LLM call failed: %s", exc)
+        logger.warning("on_turn_deep_ingest LLM call failed: %s", exc)
         return {"filed": False, "reason": f"LLM error: {exc}"}
 
     if not data.get("worth_filing") or data.get("quality_score", 0) < QUALITY_THRESHOLD:
@@ -213,7 +215,7 @@ async def on_session_end(
         if filed:
             await _log_ingest(filed, data.get("quality_score", 0), data.get("log_entry", ""), formatted[:200])
     except Exception as exc:
-        logger.warning("on_session_end wiki write failed: %s", exc)
+        logger.warning("on_turn_deep_ingest wiki write failed: %s", exc)
         return {"filed": False, "reason": str(exc)}
 
     return {
@@ -263,7 +265,7 @@ async def _log_ingest(
     try:
         await _write_file_async(log_path, entry)
     except Exception as exc:
-        logger.debug("log_ingest write failed: %s", exc)
+        logger.warning("log_ingest write failed: %s", exc)
 
 
 async def _write_file_async(path: Path, content: str) -> None:

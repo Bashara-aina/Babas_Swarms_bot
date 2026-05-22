@@ -82,7 +82,7 @@ class HITLWorkflow:
 
         task = workflow["task"]  # type: ignore[reportAttributeAccessIssue]
         draft = await chat(  # type: ignore[reportAttributeAccessIssue]
-            model="minimax/MiniMax-Text-01",  # type: ignore[reportAttributeAccessIssue]
+            model="minimax-coding-plan/MiniMax-Text-01",  # type: ignore[reportAttributeAccessIssue]
             prompt=(  # type: ignore[reportAttributeAccessIssue]
                 f"Write a professional email for the following task:\n{task}\n\n"
                 "Keep it concise, clear, and action-oriented."  # type: ignore[reportAttributeAccessIssue]

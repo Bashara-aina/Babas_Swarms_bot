@@ -50,19 +50,19 @@ class ModelTier:
         return (self.cost_per_1m_input + self.cost_per_1m_output) / 2 / 1_000_000
 
 
-# Model pricing as of March 2026 — uses existing litellm model strings
+# Model pricing as of March 2026 — aligned with models.yaml naming conventions
+# Uses minimax-coding-plan prefix for MiniMax models, gemini prefix for Google
 MODEL_TIERS: list[ModelTier] = [
-    # Free tier (Cerebras, Groq free models)
-    ModelTier("Cerebras Qwen", "minimax/MiniMax-Text-01", "cerebras", 0.0, 0.0, "free", 131072),
-    ModelTier("Groq Llama 3.3", "minimax/MiniMax-Text-01", "groq", 0.0, 0.0, "free", 32768),
-    ModelTier("Groq Kimi K2", "minimax/MiniMax-Text-01", "groq", 0.0, 0.0, "free", 131072),
-    # Budget tier
-    ModelTier("ZAI GLM-4", "minimax/MiniMax-Text-01", "zai", 0.0, 0.0, "budget", 128000),
+    # Free tier (MiniMax free fallbacks)
+    ModelTier("MiniMax M2.7", "minimax-coding-plan/MiniMax-M2.7", "minimax", 0.0, 0.0, "free", 204800),
+    ModelTier("MiniMax Text-01", "minimax-coding-plan/MiniMax-Text-01", "minimax", 0.0, 0.0, "free", 245760),
+    # Budget tier (free cloud from FALLBACK_CHAIN)
     ModelTier("Gemini Flash", "gemini/gemini-2.0-flash-exp:free", "gemini", 0.0, 0.0, "budget", 1048576),
+    ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free", "openrouter", 0.0, 0.0, "budget", 65536),
     # Standard tier
-    ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free", "openrouter", 0.0, 0.0, "standard", 65536),
+    ModelTier("OpenRouter DeepSeek R1", "openrouter/deepseek/deepseek-r1:free", "openrouter", 0.0, 0.0, "standard", 64000),
     # Premium tier (paid models — fallback only)
-    ModelTier("Gemini Pro", "gemini/gemini-1.5-pro", "gemini", 3.50, 10.50, "premium", 1048576),
+    ModelTier("Gemini 1.5 Pro", "gemini/gemini-1.5-pro", "gemini", 3.50, 10.50, "premium", 1048576),
 ]
 
 # Complexity signals
@@ -215,7 +215,7 @@ class CostAwareRouter:
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain(agent_key)
-        default_model = chain[0] if chain else "minimax/MiniMax-Text-01"
+        default_model = chain[0] if chain else "minimax-coding-plan/MiniMax-Text-01"
         return default_model, complexity, "fallback"
 
     def estimate_cost(self, task: str, model_id: str) -> float:
