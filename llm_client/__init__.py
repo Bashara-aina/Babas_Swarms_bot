@@ -586,7 +586,7 @@ async def call_llm(
 
     Args:
         messages: List of message dicts with 'role' and 'content' keys.
-        model: Model string (e.g. "minimax/MiniMax-M2.7"). Defaults to LEGION_LLM_MODEL env var.
+        model: Model string (e.g. "minimax-coding-plan/MiniMax-M2.7"). Defaults to LEGION_LLM_MODEL env var.
         tools: Optional list of tool definitions for function calling.
         stream: Whether to stream responses (not implemented yet).
         **kwargs: Additional arguments passed to litellm.
@@ -844,29 +844,57 @@ async def wiki_raw_completion(
     max_tokens: int | None = None,
 ) -> str:
     """Single-turn LLM call for wiki maintenance (no mem0 / wiki / humanization stack)."""
-    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax/MiniMax-M2.7")
+    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax-coding-plan/MiniMax-M2.7")
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
     try:
         resp = await _call_model(m, messages, temperature=temperature, max_tokens=max_tokens)
-        return (resp.choices[0].message.content or "").strip()
+        return (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
     except Exception as e:
         logger.warning("wiki_raw_completion failed: %s", e)
         return f"[wiki completion error: {e}]"
 
 
-# ── Microcompact — lightweight pruning at 70% fill to prevent full compaction ───
+# ── Six-Layer Memory-Aware Compaction Engine ─────────────────────────────────────
+#
+#  DESIGN (with unlimited minimax API + 6 memory layers + big storage):
+#
+#  Every full compaction:
+#    1. PRE-COMPACT: query ALL 6 layers (build_memory_context)
+#                   → also query CompactionStore (FTS5) for prior summaries
+#                   → MCP deduplication to remove overlapping tool results
+#    2. COMPACT: LLM summarization enriched with prior summaries + 6-layer context
+#    3. POST-COMPACT: STORE summary to CompactionStore (FTS5 searchable)
+#                    → also store to all 6 memory layers (future compactions get richer context)
+#
+#  Compaction triggers (MiniMax-M2.7 ~200K context — with unlimited API we compact EARLIER):
+#    Tier 1 (30% fill / 60k chars):  microcompact — NO LLM, every turn, post-tool
+#    Tier 2 (50% fill / 100k chars):  microcompact again if still over threshold
+#    Tier 3 (65% fill / 130k chars):  ASYNC full compaction STARTS (non-blocking LLM call)
+#    Tier 4 (85% fill / 170k chars):  BLOCKING full compaction (only if async hasn't finished)
+#    Tier 5 (95% fill / 190k chars): EMERGENCY — force blocking even if async still running
+#
+#  The key insight: with unlimited API we can afford to run FULL compaction at 46%
+#  (91K) so summaries are shorter and more precise (less history to condense = better quality).
+#
+#  Storage: every compaction summary is stored to CompactionStore (FTS5) AND all 6 layers,
+#  making future compactions smarter because prior summaries are queryable and enriched.
 
-def _microcompact_messages(messages: list[dict]) -> list[dict]:
-    """GAP-07: Light pruning pass at 70% fill — truncate long tool results, keep structure.
+# ── Tier 1 & 2: Ultra-light microcompact — NO LLM, runs every turn ────────────────
 
-    This is NOT a full compaction (no LLM summarization). It prunes tool result content
-    to keep context at ~55% fill and prevent reaching 96% where full compaction fires.
-    Called automatically inside _agent_loop_inner when total_size > 90000 chars.
+def _microcompact_messages(messages: list[dict], threshold: int = 65000) -> list[dict]:
+    """Ultra-light pruning — truncate long tool results, preserve structure.
+
+    Called PROACTIVELY after EVERY tool result and when context crosses 50% fill.
+    NO LLM involved — pure string truncation. Keeps context at ~35% fill.
     """
     if len(messages) <= 4:
+        return messages
+
+    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+    if total_size < threshold:
         return messages
 
     system_msg = messages[0] if messages and messages[0].get("role") == "system" else None
@@ -884,26 +912,45 @@ def _microcompact_messages(messages: list[dict]) -> list[dict]:
         role = m.get("role", "")
 
         if role == "tool":
-            truncated = content[:400] + "\u2026" if len(content) > 400 else content
+            # Errors: keep SHORT (critical but noisy)
+            if any(kw in content.lower() for kw in ("error", "fail", "traceback", "exception", "invalid")):
+                truncated = content[:150] + "\u2026" if len(content) > 150 else content
+            else:
+                # Successful results: keep MEDIUM (may contain useful data)
+                truncated = content[:500] + "\u2026" if len(content) > 500 else content
             result.append({**m, "content": truncated})
         elif role == "assistant" and m.get("tool_calls"):
+            # NEVER truncate tool_calls — they're tiny and critical for the LLM
             result.append(m)
         elif role in ("user", "assistant"):
-            truncated = content[:300] + "\u2026" if len(content) > 300 else content
+            # Keep conversational content snappy
+            truncated = content[:200] + "\u2026" if len(content) > 200 else content
             result.append({**m, "content": truncated})
         else:
             result.append(m)
 
+    new_size = sum(len(str(m.get("content", ""))) for m in result)
+    logger.debug("Microcompact: %d → %d (saved %d chars)", total_size, new_size, total_size - new_size)
     return result
 
 
-# ── Context compaction ────────────────────────────────────────────────────────────
+def _microcompact_if_needed(messages: list[dict]) -> list[dict]:
+    """Called after EVERY tool result — proactive microcompact to keep context under 50%."""
+    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+    if total_size > 65000:
+        return _microcompact_messages(messages, threshold=65000)
+    return messages
+
+
+# ── Context compaction (async, non-blocking) ────────────────────────────────────
+import asyncio
 import concurrent.futures
 import hashlib
 import threading
 import time
 from collections import OrderedDict
 from pathlib import Path
+from typing import Optional
 
 # LRU cache for compaction — 100x speedup on repeated conversation patterns
 _COMPACT_CACHE: OrderedDict = OrderedDict()
@@ -918,6 +965,9 @@ _COMPACT_HISTORY_LOCK = threading.Lock()
 # Track last compaction time to avoid over-compacting
 _LAST_COMPACT_AT = 0.0
 _COMPACT_COOLDOWN = 5.0  # seconds between compactions (debounce)
+
+# Thread pool for truly async I/O (all blocking operations go here)
+_COMPACT_IO_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="compact_io")
 
 
 def _get_cache_key(messages: list[dict]) -> str:
@@ -936,8 +986,181 @@ def _get_cache_key(messages: list[dict]) -> str:
     return hashlib.md5(key_str.encode()).hexdigest()
 
 
+def _deduplicate_mcp_tool_results(messages: list[dict]) -> list[dict]:
+    """Deduplicate overlapping MCP tool results from the same session.
+
+    MCPs (ruflo, ruflo, hermes, etc.) often return the same data repeatedly.
+    When the same content appears in consecutive tool results from the same
+    MCP namespace, keep only the latest — older duplicates waste context budget.
+    """
+    if len(messages) < 6:
+        return messages
+
+    seen_content: dict[str, tuple[str, int]] = {}  # content_hash -> (content, index)
+    result: list[dict] = []
+
+    for i, m in enumerate(messages):
+        role = m.get("role", "")
+        content = m.get("content", "")
+
+        if role != "tool":
+            result.append(m)
+            continue
+
+        tool_call_id = m.get("tool_call_id", "")
+        # Create namespace key from tool_call_id prefix (e.g., "hermes_", "ruflo_")
+        namespace = tool_call_id.split("_")[0] if "_" in tool_call_id else tool_call_id[:8]
+
+        # Hash content to detect duplicates
+        content_hash = hashlib.md5(content.encode()).hexdigest()[:16]
+
+        key = f"{namespace}:{content_hash}"
+        if content_hash and len(content) > 50:
+            # Same MCP namespace + similar content within 5 messages = duplicate
+            if key in seen_content:
+                prev_idx = seen_content[key][1]
+                if i - prev_idx <= 5:
+                    # Duplicate within window — skip it, keep the newer one
+                    logger.debug(
+                        "Deduplicated MCP result %s (dup of index %d, delta=%d)",
+                        key[:8], prev_idx, i - prev_idx,
+                    )
+                    continue
+            seen_content[key] = (content, i)
+
+        result.append(m)
+
+    return result
+
+
+# ── Async memory fetch (truly non-blocking) ──────────────────────────────────
+
+async def _aget_memory_context_before_compact(query: str, timeout: float = 10.0) -> str:
+    """Async fetch 6-layer memory context — NEVER blocks the compaction pipeline.
+    
+    Runs memory query in background thread pool and returns empty string on timeout.
+    The caller does NOT wait for this — it's fire-and-forget.
+    """
+    def _sync_fetch() -> str:
+        try:
+            from core.memory.memory_injector import build_memory_context as _injector_bmc
+            return _injector_bmc(query=query, user_id="bashara")
+        except Exception:
+            return ""
+    
+    loop = asyncio.get_running_loop()
+    try:
+        return await asyncio.wait_for(
+            loop.run_in_executor(_COMPACT_IO_EXECUTOR, _sync_fetch),
+            timeout=timeout,
+        )
+    except (asyncio.TimeoutError, TimeoutError):
+        return ""
+    except Exception:
+        return ""
+
+
+async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str]) -> None:
+    """Non-blocking async full compaction — fires at Tier 3, completes before Tier 4.
+
+    With unlimited minimax API, we can afford to run LLM summarization MORE OFTEN
+    (starting at 80% instead of 96%) so the summaries are shorter and more accurate
+    (less context to summarize = better quality per token).
+    """
+    try:
+        # Small delay to allow current tool result to be added to messages
+        await asyncio.sleep(0.5)
+
+        # Check if we still need compaction (another turn may have done it)
+        total_size = sum(len(str(m.get("content", ""))) for m in messages)
+        if total_size < 90000:
+            messages._full_compact_pending = False  # type: ignore[attr-defined]
+            return
+
+        # Run full compaction with memory enrichment
+        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M2.7")
+
+        # Check if compaction actually reduced size
+        new_size = sum(len(str(m.get("content", ""))) for m in compacted)
+        if new_size >= total_size:
+            messages._full_compact_pending = False  # type: ignore[attr-defined]
+            return
+
+        # Replace messages in-place so the calling context gets the compacted version
+        messages.clear()
+        messages.extend(compacted)
+
+        # Emit post_compact hooks
+        try:
+            from core.hooks import get_hooks
+            get_hooks().emit("post_compact", {
+                "user_id": user_id or "default",
+                "reason": "async_compaction_complete",
+                "original_size": total_size,
+                "compacted_size": new_size,
+            })
+        except Exception:
+            pass
+
+        logger.debug("Async compaction complete: %d → %d chars", total_size, new_size)
+    except Exception as e:
+        logger.debug("Async compaction failed: %s", e)
+    finally:
+        try:
+            messages._full_compact_pending = False  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
+
+async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> dict[str, str]:
+    """Async query 4 memory layers in parallel — returns {} on any failure.
+    
+    Does NOT block. Uses run_in_executor so the GIL isn't held during I/O.
+    Returns dict with keys: recent_sessions, decisions, open_issues, tools_used
+    """
+    queries = {
+        "recent_sessions": "recent session work tasks completed",
+        "decisions": "decisions made choices agreed architecture",
+        "open_issues": "bugs being fixed features in progress open todos",
+        "tools_used": "tools used functions commands run this session",
+    }
+    
+    async def _fetch_layer(key: str, q: str) -> tuple[str, str]:
+        def _sync() -> str:
+            try:
+                from core.memory.memory_injector import build_memory_context
+                return build_memory_context(query=q, user_id="bashara")
+            except Exception:
+                return ""
+        
+        loop = asyncio.get_running_loop()
+        try:
+            result = await asyncio.wait_for(
+                loop.run_in_executor(_COMPACT_IO_EXECUTOR, _sync),
+                timeout=timeout,
+            )
+            return key, result
+        except (asyncio.TimeoutError, TimeoutError):
+            return key, ""
+        except Exception:
+            return key, ""
+    
+    # Fire all 4 queries in parallel — don't wait more than timeout total
+    tasks = [_fetch_layer(k, q) for k, q in queries.items()]
+    results: dict[str, str] = {}
+    try:
+        gathered = await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=timeout)
+        for item in gathered:
+            if isinstance(item, tuple) and len(item) == 2:
+                k, v = item
+                results[k] = v
+    except (asyncio.TimeoutError, Exception):
+        pass
+    return results
+
+
 def _get_memory_context_before_compact(query: str, timeout: float = 15.0) -> str:
-    """Fetch 6-layer memory context without blocking compaction pipeline."""
+    """Sync wrapper — use ONLY if you're already in a thread. For async code use _aget_*. """
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(
@@ -961,9 +1184,12 @@ def _sync_build_memory_context(query: str, user_id: str = "bashara") -> str:
 
 def _query_compaction_memory_layers(query: str, timeout: float = 12.0) -> dict[str, str]:
     """Query multiple memory layers with different queries for richer context.
-
+    
     Returns dict with keys: recent_sessions, decisions, open_issues, tools_used
     Each value is a formatted string from that layer's recall.
+    
+    NOTE: This is sync and BLOCKING. For non-blocking behavior in async context,
+    use _aget_compaction_memory_layers() instead.
     """
     queries = {
         "recent_sessions": "recent session work tasks completed",
@@ -973,6 +1199,7 @@ def _query_compaction_memory_layers(query: str, timeout: float = 12.0) -> dict[s
     }
 
     results: dict[str, str] = {}
+    deadline = time.time() + timeout
 
     def _fetch(key: str, q: str) -> str:
         try:
@@ -981,9 +1208,9 @@ def _query_compaction_memory_layers(query: str, timeout: float = 12.0) -> dict[s
         except Exception:
             return ""
 
+    # Use thread pool for I/O parallelism but respect overall timeout
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         futures = {key: executor.submit(_fetch, key, q) for key, q in queries.items()}
-        deadline = time.time() + timeout
         for key, future in futures.items():
             remaining = max(0.1, deadline - time.time())
             try:
@@ -1000,9 +1227,14 @@ def _generate_memory_aware_summary(
     history: list[dict],
     memory_context: str,
     multi_layer: dict[str, str],
-    model: str = "minimax/MiniMax-M2.7",
+    model: str = "minimax-coding-plan/MiniMax-M2.7",
+    timeout: float = 20.0,
 ) -> str:
-    """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query."""
+    """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query.
+    
+    Uses run_in_executor to avoid blocking the async caller. Returns "" on any failure
+    so the compaction pipeline can proceed without waiting.
+    """
     if not history:
         return "[earlier conversation omitted — no content]"
 
@@ -1084,27 +1316,53 @@ Be specific — avoid generic phrases. Never say "discussed various topics".
 Include file paths, function names, error messages verbatim when relevant.
 """
 
+    def _sync_llm_call() -> str:
+        try:
+            from litellm import completion
+            response = completion(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a precise narrative summarizer. Output only the 9-section LEGION compaction format. Do not restate prior context.",
+                    },
+                    {"role": "user", "content": summary_request},
+                ],
+                max_tokens=2048,
+                temperature=0.3,
+                timeout=timeout,
+            )
+            msg = response.choices[0].message
+            # MiniMax-M2.7 puts actual output in reasoning_content, not content
+            # content='\n\n' with real text in reasoning_content is a known pattern
+            raw = msg.reasoning_content or msg.content or ""
+            return raw.strip()
+        except Exception as e:
+            logger.debug("Memory-aware summary generation failed: %s — using fallback", e)
+            # FAST fallback: no LLM needed
+            tool_names = []
+            errors = []
+            for m in history:
+                if m.get("role") == "assistant" and m.get("tool_calls"):
+                    for tc in m.get("tool_calls", []):
+                        tool_names.append(tc.get("function", {}).get("name", "?"))
+                elif m.get("role") == "tool":
+                    c = m.get("content", "")
+                    if "error" in c.lower() or "fail" in c.lower():
+                        errors.append(c[:100])
+            result = "## 8. Tools Used\n" + ", ".join(tool_names[-12:])
+            if errors:
+                result += "\n## 5. Pain Points\n" + "; ".join(errors[:5])
+            return result
+
+    # Run LLM call in thread pool with hard timeout — never blocks compaction pipeline
+    future = _COMPACT_IO_EXECUTOR.submit(_sync_llm_call)
     try:
-        from litellm import completion
-        response = completion(
-            model=model,
-            messages=[
-                {
-                    "role": "system",
-                    "content":                 "You are a precise narrative summarizer. Output only the 9-section LEGION compaction format. Do not restate prior context.",
-                },
-                {"role": "user", "content": summary_request},
-            ],
-            max_tokens=1200,  # increased for richer output
-            temperature=0.2,
-            timeout=20.0,
-        )
-        content = response.choices[0].message.content or ""
-        return content.strip()
-    except Exception as e:
-        logger.debug("Memory-aware summary generation failed: %s — falling back", e)
-        tool_names = []
-        errors = []
+        return future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        logger.debug("Compaction LLM call timed out after %.0fs — using fast fallback", timeout)
+        # Instant fallback: extract only tool names and errors, no LLM needed
+        tool_names, errors = [], []
         for m in history:
             if m.get("role") == "assistant" and m.get("tool_calls"):
                 for tc in m.get("tool_calls", []):
@@ -1113,66 +1371,200 @@ Include file paths, function names, error messages verbatim when relevant.
                 c = m.get("content", "")
                 if "error" in c.lower() or "fail" in c.lower():
                     errors.append(c[:100])
-        result = "Tools used: " + ", ".join(tool_names[-12:])
+        result = "## 8. Tools Used\n" + ", ".join(tool_names[-12:])
         if errors:
-            result += "\nErrors: " + "; ".join(errors[:5])
+            result += "\n## 5. Pain Points\n" + "; ".join(errors[:5])
         return result
-
-
-def _store_compaction_summary(summary: str, message_count: int, cache_key: str) -> None:
-    """Persist compaction summary to ChromaDB AND to session file for cross-session recall."""
-    try:
-        from core.memory.store import MemoryStore
-        store = MemoryStore()
-        store.remember(
-            text=summary,
-            agent_id="compact",
-            metadata={
-                "type": "compaction_summary",
-                "messages_compacted": message_count,
-                "cache_key": cache_key[:16],
-            },
-        )
-        logger.debug("Stored compaction summary to MemoryStore")
     except Exception as e:
-        logger.debug("Failed to store compaction summary: %s", e)
+        logger.debug("Compaction LLM call exception: %s", e)
+        return ""
 
-    # Also write to session_state for opencode bridge injection
-    try:
+
+def _async_store_compaction_summary(summary: str, message_count: int, cache_key: str) -> None:
+    """Fire-and-forget storage to ALL 6 memory layers + CompactionStore.
+
+    Writes the compaction summary to every memory layer so future compactions
+    are enriched with full historical context. Never blocks the pipeline.
+    On failure of any individual layer, logs and continues — never propagates.
+    """
+    def _sync_write() -> None:
+        import asyncio as _asyncio
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
         session_dir = Path("/home/newadmin/swarm-bot/.session_state")
         session_dir.mkdir(parents=True, exist_ok=True)
-        compaction_file = session_dir / "compaction_summary.md"
-        header = f"""---
+
+        # ── Layer 1: Session checkpoint file ──────────────────────────────────
+        try:
+            checkpoint = {
+                "type": "compaction_summary",
+                "timestamp": now,
+                "messages_compacted": message_count,
+                "cache_key": cache_key[:16],
+                "summary": summary,
+            }
+            cp_path = session_dir / "checkpoints" / f"compact_{int(time.time())}.json"
+            cp_path.parent.mkdir(parents=True, exist_ok=True)
+            import json as _json
+            with open(cp_path, "w") as f:
+                _json.dump(checkpoint, f)
+        except Exception as e:
+            logger.debug("L1 checkpoint write failed: %s", e)
+
+        # ── Layer 2: ChromaDB (MemoryStore) ─────────────────────────────────────
+        try:
+            from core.memory.store import MemoryStore
+            store = MemoryStore()
+            store.remember(
+                content=summary,
+                agent_id="compact",
+                metadata={
+                    "type": "compaction_summary",
+                    "messages_compacted": message_count,
+                    "cache_key": cache_key[:16],
+                },
+            )
+        except Exception as e:
+            logger.debug("L2 MemoryStore write failed: %s", e)
+
+        # ── Layer 3: langmem (langgraph InMemoryStore) ─────────────────────────
+        try:
+            from core.memory.memory_injector import LANGMEM_AVAILABLE, _get_langmem_store
+            if LANGMEM_AVAILABLE:
+                langmem_store = _get_langmem_store()
+                langmem_store.put(
+                    ("swarmbot", "compactions"),
+                    cache_key[:16],
+                    {
+                        "content": summary,
+                        "messages_compacted": message_count,
+                        "timestamp": now,
+                    },
+                )
+        except Exception as e:
+            logger.debug("L3 langmem write failed: %s", e)
+
+        # ── Layer 4: observation_store (SQLite+FTS5) ──────────────────────────
+        try:
+            from core.memory.observation_store import get_observation_store
+            # Run the async method in a sync thread
+            async def _obs_write() -> None:
+                obs = get_observation_store()
+                obs.add_observation(
+                    session_id="compact",
+                    content=summary,
+                    title=f"Compaction: {message_count} msgs → cache_key={cache_key[:8]}",
+                    type_="compaction",
+                    subtitle=f"saved cache_key={cache_key[:12]}",
+                    tags=["compaction", "memory", "compact"],
+                )
+            _asyncio.run(_obs_write())
+        except Exception as e:
+            logger.debug("L4 observation_store write failed: %s", e)
+
+        # ── Layer 5: graphrag wiki ─────────────────────────────────────────────
+        try:
+            wiki_dir = Path("/home/newadmin/swarm-bot/.wiki/auto")
+            wiki_dir.mkdir(parents=True, exist_ok=True)
+            wiki_file = wiki_dir / f"compact_{int(time.time())}.md"
+            wiki_content = f"""---
+title: Compaction Summary {now}
+type: compaction
 tags: [compaction, memory, session]
-date: {time.strftime('%Y-%m-%d %H:%M:%S')}
+cache_key: {cache_key[:16]}
 messages_compacted: {message_count}
 ---
 
+{summary}
 """
-        with open(compaction_file, "w") as f:
-            f.write(header + summary)
-        logger.debug("Wrote compaction summary to %s", compaction_file)
-    except Exception as e:
-        logger.debug("Failed to write compaction summary file: %s", e)
+            with open(wiki_file, "w") as f:
+                f.write(wiki_content)
+        except Exception as e:
+            logger.debug("L5 graphrag wiki write failed: %s", e)
+
+        # ── Layer 6: mem0 cloud ────────────────────────────────────────────────
+        try:
+            async def _mem0_write() -> None:
+                from tools.mem0_client import mem0_add
+                await mem0_add(
+                    user_id="bashara",
+                    content=summary,
+                    metadata={
+                        "type": "compaction_summary",
+                        "messages_compacted": message_count,
+                        "cache_key": cache_key[:16],
+                    },
+                )
+            _asyncio.run(_mem0_write())
+        except Exception as e:
+            logger.debug("L6 mem0 cloud write failed: %s", e)
+
+        # ── CompactionStore (SQLite+FTS5) — re-store with quality score ─────────
+        try:
+            from llm_client.compaction_store import get_compaction_store
+            cs = get_compaction_store()
+            # Quality: estimate from summary length vs history size
+            quality = min(1.0, max(0.0, len(summary) / max(message_count * 20, 1)))
+            cs.store(
+                cache_key=cache_key,
+                summary=summary,
+                message_count=message_count,
+                model_used="minimax-coding-plan/MiniMax-M2.7",
+                chars_saved=0,
+                original_size=0,
+                compacted_size=len(summary),
+                topic_tags=["compaction"],
+                quality_score=quality,
+            )
+        except Exception as e:
+            logger.debug("CompactionStore re-write failed: %s", e)
+
+        # ── session_state file for opencode bridge ────────────────────────────
+        try:
+            compaction_file = session_dir / "compaction_summary.md"
+            header = f"""---
+tags: [compaction, memory, session]
+date: {now}
+messages_compacted: {message_count}
+cache_key: {cache_key[:16]}
+layers_written: [checkpoint, memorystore, langmem, observation_store, wiki, mem0]
+---
+
+"""
+            with open(compaction_file, "w") as f:
+                f.write(header + summary)
+        except Exception as e:
+            logger.debug("session_state file write failed: %s", e)
+
+    # Fire-and-forget — this NEVER blocks the compaction pipeline
+    _COMPACT_IO_EXECUTOR.submit(_sync_write)
+
+
+def _store_compaction_summary(summary: str, message_count: int, cache_key: str) -> None:
+    """Sync wrapper for backwards compatibility — use _async_store_compaction_summary in async code."""
+    _async_store_compaction_summary(summary, message_count, cache_key)
 
 
 def smart_compact_messages(
     messages: list[dict],
     keep_recent: int = 8,  # increased from 6 — preserve more recent turns
     system_prompt: str = "",
-    model: str = "minimax/MiniMax-M2.7",
+    model: str = "minimax-coding-plan/MiniMax-M2.7",
+    session_id: Optional[str] = None,
 ) -> list[dict]:
-    """Memory-aware compaction using 6-layer recall + LRU cache + multi-layer pre-query.
+    """Memory-aware compaction using ALL 6 memory layers + LRU cache + CompactionStore.
 
     Pipeline:
-      PRE-COMPACT  → query 4 memory layers with different queries (recent_sessions,
-                     decisions, open_issues, tools_used) + 6-layer general context
-      COMPACT      → LLM summarization enriched with all memory context
-      POST-COMPACT → store summary in ChromaDB AND .session_state/compaction_summary.md
+      PRE-COMPACT  → query all 6 memory layers via build_memory_context
+                   → query CompactionStore for prior summaries of similar conversations
+      COMPACT      → LLM summarization enriched with prior summaries + 6-layer context
+      POST-COMPACT → store to CompactionStore (FTS5 search)
+                   → store to all 6 memory layers (future compactions get richer context)
 
-    Cache: repeated compaction of same conversation pattern hits cache (100x faster).
+    With unlimited MiniMax API, we run full LLM compaction EARLIER (65% fill)
+    so summaries are shorter and more precise (less history to condense).
+
+    Cache: repeated compaction of same conversation pattern hits LRU cache (100x faster).
     Deduplication: same cache_key never gets re-summarized within cooldown window.
-    Auto-trigger: called when context reaches ~65% fill (before critical threshold).
     """
     # Debounce: don't compact more than once every _COMPACT_COOLDOWN seconds
     global _LAST_COMPACT_AT
@@ -1193,6 +1585,9 @@ def smart_compact_messages(
             logger.debug("Compaction cache hit [%s]", cache_key[:8])
             return cached
 
+    # ── Deduplicate MCP results BEFORE compacting ───────────────────────────────
+    messages = _deduplicate_mcp_tool_results(messages)
+
     system_msg = messages[0] if messages and messages[0].get("role") == "system" else None
     recent = messages[-keep_recent:]
     history = messages[1:-keep_recent] if not system_msg else messages[1:-keep_recent]
@@ -1200,22 +1595,137 @@ def smart_compact_messages(
     if not history:
         return messages
 
-    # PRE-COMPACT: multi-layer memory query (4 specific queries + general context)
-    multi_layer = _query_compaction_memory_layers(
-        query="recent decisions work in progress tools used",
-        timeout=12.0,
-    )
-    # Also get general 6-layer context as fallback
-    memory_context = _get_memory_context_before_compact(
-        query="session work tasks decisions tools",
-        timeout=10.0,
+    original_size = sum(len(str(m.get("content", ""))) for m in messages)
+
+    # ── PRE-COMPACT: full 6-layer memory context (PARALLEL, non-blocking) ─────
+    # With unlimited API + big storage, query all memory layers IN PARALLEL
+    # using the thread pool so compaction never blocks on I/O.
+    # _query_compaction_memory_layers fires 4 queries concurrently (~10s wall time max).
+    def _fetch_memory_and_store() -> tuple[str, str]:
+        """Fetch 6-layer context AND CompactionStore prior summaries in one shot."""
+        # Run both in parallel via thread pool
+        import concurrent.futures as _cf
+        results: dict[str, str] = {}
+        deadline = time.time() + 20.0
+
+        def _fetch_layers() -> dict[str, str]:
+            try:
+                return _query_compaction_memory_layers(
+                    query="session work tasks decisions tools recent",
+                    timeout=18.0,
+                )
+            except Exception:
+                return {}
+
+        def _fetch_compaction_store() -> str:
+            try:
+                from llm_client.compaction_store import get_compaction_store
+                cs = get_compaction_store()
+                return cs.get_context_for_compaction(
+                    query="session decisions tools work",
+                    session_id=session_id,
+                    limit=3,
+                )
+            except Exception:
+                return ""
+
+        with _cf.ThreadPoolExecutor(max_workers=2) as _ex:
+            f1 = _ex.submit(_fetch_layers)
+            f2 = _ex.submit(_fetch_compaction_store)
+            try:
+                multi_layer = f1.result(timeout=deadline - time.time())
+            except Exception:
+                multi_layer = {}
+            try:
+                prior_summaries = f2.result(timeout=max(1.0, deadline - time.time()))
+            except Exception:
+                prior_summaries = ""
+
+        results["multi_layer"] = multi_layer if isinstance(multi_layer, dict) else {}
+        results["prior_summaries"] = prior_summaries if isinstance(prior_summaries, str) else ""
+        return results
+
+    # Run in thread pool — never blocks the caller
+    try:
+        _mem_result = _COMPACT_IO_EXECUTOR.submit(_fetch_memory_and_store).result(timeout=25.0)
+        multi_layer = _mem_result.get("multi_layer", {})
+        prior_summaries = _mem_result.get("prior_summaries", "")
+    except Exception:
+        multi_layer = {}
+        prior_summaries = ""
+
+    # Fallback: if thread pool call timed out, try a quick direct call
+    if not multi_layer or not isinstance(multi_layer, dict):
+        memory_context = _get_memory_context_before_compact(
+            query="session work tasks decisions tools recent",
+            timeout=5.0,
+        )
+    else:
+        # Build memory_context from multi_layer results
+        memory_parts = []
+        for k, v in multi_layer.items():
+            if v and isinstance(v, str) and len(v) > 10:
+                memory_parts.append(f"[{k}]: {v[:300]}")
+        memory_context = "\n".join(memory_parts) if memory_parts else ""
+
+    # ── COMPACT: memory-enriched LLM summarization ─────────────────────────────
+    # With unlimited API, we can afford richer context — pass multi_layer too
+    summary_text = _generate_memory_aware_summary(
+        history, memory_context, multi_layer, model=model,
     )
 
-    # COMPACT: memory-enriched LLM summarization
-    summary_text = _generate_memory_aware_summary(history, memory_context, multi_layer, model=model)
+    if not summary_text or len(summary_text) < 20:
+        # LLM failed — use instant fallback
+        tool_names, errors = [], []
+        for m in history:
+            if m.get("role") == "assistant" and m.get("tool_calls"):
+                for tc in m.get("tool_calls", []):
+                    tool_names.append(tc.get("function", {}).get("name", "?"))
+            elif m.get("role") == "tool":
+                c = m.get("content", "")
+                if any(kw in c.lower() for kw in ("error", "fail", "traceback")):
+                    errors.append(c[:100])
+        summary_parts = [
+            f"## 8. Tools Used\n  • {', '.join(tool_names[-12:])}",
+        ]
+        if errors:
+            summary_parts.append(f"\n## 5. Pain Points\n  • {'; '.join(errors[:5])}")
+        summary_text = "\n".join(summary_parts)
 
-    # POST-COMPACT: store summary for future recall
-    _store_compaction_summary(summary_text, len(history), cache_key)
+    compacted_size = sum(len(str(m.get("content", ""))) for m in recent) + len(summary_text) + 200
+
+    # ── POST-COMPACT: store to CompactionStore (FTS5 searchable) ───────────────
+    chars_saved = original_size - compacted_size
+    try:
+        from llm_client.compaction_store import get_compaction_store
+        store = get_compaction_store()
+        # Auto-detect topic tags from summary
+        topic_tags = _detect_topic_tags(summary_text, history)
+        # Extract tool names for the store record
+        tool_names_used = []
+        for m in history:
+            if m.get("role") == "assistant" and m.get("tool_calls"):
+                for tc in m.get("tool_calls", []):
+                    name = tc.get("function", {}).get("name", "?")
+                    if name not in tool_names_used:
+                        tool_names_used.append(name)
+        store.store(
+            cache_key=cache_key,
+            summary=summary_text,
+            message_count=len(history),
+            model_used=model,
+            session_id=session_id,
+            chars_saved=max(0, chars_saved),
+            original_size=original_size,
+            compacted_size=compacted_size,
+            topic_tags=topic_tags,
+            tool_names=tool_names_used,
+        )
+    except Exception as e:
+        logger.debug("CompactionStore store failed: %s", e)
+
+    # ── POST-COMPACT: store summary to all 6 memory layers ─────────────────────
+    _async_store_compaction_summary(summary_text, len(history), cache_key)
 
     # Mark this cache_key as compacted (prevent re-compacting same window)
     with _COMPACT_HISTORY_LOCK:
@@ -1226,6 +1736,7 @@ def smart_compact_messages(
         "content": (
             "[Earlier conversation condensed from " + str(len(history)) + " messages:]\n"
             + summary_text
+            + ("\n\n" + prior_summaries if prior_summaries else "")
             + "\n\n[Full prior context available in .session_state/compaction_summary.md]"
         ),
     }
@@ -1245,12 +1756,60 @@ def smart_compact_messages(
             _COMPACT_CACHE.popitem(last=False)
 
     logger.debug(
-        "Smart compact: %d messages → %d (cache size: %d)",
+        "Smart compact: %d messages → %d (saved %d chars, cache size: %d)",
         len(messages),
         len(result),
+        chars_saved,
         len(_COMPACT_CACHE),
     )
     return result
+
+
+def _detect_topic_tags(summary: str, history: list[dict]) -> list[str]:
+    """Auto-detect topic tags from summary and conversation history."""
+    tags: set[str] = {"compaction"}
+    summary_lower = summary.lower()
+    history_text = " ".join(
+        str(m.get("content", ""))[:200] for m in history[-10:]
+    ).lower()
+
+    # File extensions
+    for ext in (".py", ".ts", ".js", ".md", ".yaml", ".json", ".sql", ".html", ".css"):
+        if ext in history_text:
+            tags.add(ext.lstrip("."))
+
+    # Topic keywords
+    topic_map = {
+        "bug": ["bug", "fix", "error", "crash", "fail"],
+        "refactor": ["refactor", "restructure", "clean", "improve"],
+        "feature": ["add", "new", "implement", "create", "build"],
+        "docs": ["docs", "readme", "documentation", "comment"],
+        "test": ["test", "pytest", "coverage", "spec"],
+        "security": ["security", "auth", "permission", "sanitize"],
+        "performance": ["perf", "speed", "optimize", "cache", "fast"],
+        "db": ["sql", "query", "database", "db", "migration"],
+        "api": ["api", "endpoint", "route", "request", "json"],
+        "memory": ["memory", "context", "store", "recall"],
+        "mcp": ["mcp", "tool", "server", "ruflo", "hermes"],
+    }
+
+    for tag, keywords in topic_map.items():
+        if any(kw in summary_lower or kw in history_text for kw in keywords):
+            tags.add(tag)
+
+    # Add tool-based tags
+    for m in history:
+        if m.get("role") == "assistant" and m.get("tool_calls"):
+            for tc in m.get("tool_calls", []):
+                name = tc.get("function", {}).get("name", "")
+                if "git" in name or "commit" in name or "push" in name:
+                    tags.add("git")
+                elif "search" in name or "grep" in name or "find" in name:
+                    tags.add("search")
+                elif "read" in name or "write" in name or "file" in name:
+                    tags.add("io")
+
+    return list(tags)[:10]
 
 
 def _compact_messages(
@@ -1390,13 +1949,47 @@ async def _agent_loop_inner(
                         tool_name, args = parsed
                         logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
-                # GAP-07: Smart compaction auto-trigger — 6-layer memory aware, lower threshold
-                # GAP-28 FIX: emit post_compact hook so remembered_context.md refreshes immediately
-                if len(messages) > 10:
+                # ── Five-tier compaction cascade (with unlimited minimax API) ─────────
+                # Tier 1 (30% fill / 60k chars):  microcompact — NO LLM, every turn, post-tool
+                # Tier 2 (50% fill / 100k chars):  microcompact again if still over threshold
+                # Tier 3 (65% fill / 130k chars):  ASYNC full compaction STARTS (non-blocking LLM)
+                # Tier 4 (85% fill / 170k chars):  BLOCKING full compaction (if async hasn't finished)
+                # Tier 5 (95% fill / 190k chars): EMERGENCY — force blocking even if async still running
+                if len(messages) > 8:
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
-                    if total_size > 133000:
-                        messages = smart_compact_messages(messages, model=model)
-                        # GAP-28: refresh memory context files immediately after auto-compaction
+
+                    # Tier 1: microcompact at 60k — runs every turn proactively
+                    if total_size > 60000:
+                        prev_size = total_size
+                        messages = _microcompact_messages(messages, threshold=60000)
+                        new_size = sum(len(str(m.get("content", ""))) for m in messages)
+                        logger.debug("Tier1 microcompact: %d → %d (saved %d)", prev_size, new_size, prev_size - new_size)
+
+                    # Re-measure after microcompact
+                    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+
+                    # Tier 2: microcompact again at 100k — tighter threshold
+                    if total_size > 100000:
+                        prev_size = total_size
+                        messages = _microcompact_messages(messages, threshold=100000)
+                        new_size = sum(len(str(m.get("content", ""))) for m in messages)
+                        logger.debug("Tier2 microcompact: %d → %d (saved %d)", prev_size, new_size, prev_size - new_size)
+
+                    # Re-measure again
+                    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+
+                    # Tier 3: async full compaction at 130k — start LLM summarization NOW
+                    # Fire-and-forget — completes in background before we hit Tier 4
+                    if total_size > 130000 and not getattr(messages, '_full_compact_pending', False):
+                        messages._full_compact_pending = True  # type: ignore[attr-defined]
+                        logger.debug("Tier3 async compaction started at %d chars", total_size)
+                        asyncio.create_task(_async_compact_if_needed(messages, user_id))
+
+                    # Tier 4: blocking full compaction at 170k — only if async hasn't started
+                    # If async is already running, skip — let it finish instead of double-compacting
+                    elif total_size > 170000 and not getattr(messages, '_full_compact_pending', False):
+                        messages._full_compact_pending = True  # type: ignore[attr-defined]
+                        messages = smart_compact_messages(messages, model=model, session_id=thread_id)
                         try:
                             from core.hooks import get_hooks
                             get_hooks().emit("post_compact", {
@@ -1406,6 +1999,26 @@ async def _agent_loop_inner(
                             })
                         except Exception:
                             pass
+                        logger.debug("Tier4 blocking compaction done: %d → %d chars",
+                            total_size, sum(len(str(m.get("content", ""))) for m in messages))
+
+                    # Tier 5: EMERGENCY at 190k — force blocking even if async still running
+                    total_size = sum(len(str(m.get("content", ""))) for m in messages)
+                    if total_size > 190000:
+                        # Cancel any pending async and do immediate blocking compaction
+                        messages._full_compact_pending = False  # type: ignore[attr-defined]
+                        messages = smart_compact_messages(messages, model=model, session_id=thread_id)
+                        try:
+                            from core.hooks import get_hooks
+                            get_hooks().emit("post_compact", {
+                                "user_id": user_id or "default",
+                                "reason": "emergency_compaction",
+                                "total_size": total_size,
+                            })
+                        except Exception:
+                            pass
+                        logger.debug("Tier5 EMERGENCY compaction done: %d → %d chars",
+                            total_size, sum(len(str(m.get("content", ""))) for m in messages))
 
                 if progress_cb:
                     await progress_cb(_tool_label(tool_name, args))
@@ -1452,6 +2065,16 @@ async def _agent_loop_inner(
                         "tool_call_id": tc_id,
                     }
                 )
+
+                # ── Proactive microcompact AFTER each tool result ──────────────────
+                # This keeps context from growing between tool calls
+                # With unlimited API, we can afford to microcompact EVERY turn if needed
+                total_size = sum(len(str(m.get("content", ""))) for m in messages)
+                if total_size > 65000:
+                    prev = total_size
+                    messages = _microcompact_messages(messages, threshold=65000)
+                    new_sz = sum(len(str(m.get("content", ""))) for m in messages)
+                    logger.debug("Post-tool microcompact: %d → %d (saved %d)", prev, new_sz, prev - new_sz)
 
         except litellm.RateLimitError:
             _mark_rate_limited(model)
@@ -2146,7 +2769,7 @@ async def chat(
                     "banter": 0.92,
                 }.get(_current_emotion, 0.7),
             )
-            raw = (resp.choices[0].message.content or "").strip()
+            raw = (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
             _elapsed_ms = int((time.time() - _t0) * 1000)
 
             _usage = getattr(resp, "usage", None)
@@ -2261,7 +2884,7 @@ async def chat(
                                 messages=messages,
                                 temperature=0.7,
                             )
-                            synth_raw = (synth_resp.choices[0].message.content or "").strip()
+                            synth_raw = (synth_resp.choices[0].message.reasoning_content or synth_resp.choices[0].message.content or "").strip()
                             if synth_raw:
                                 result = synth_raw
                                 logger.info("Search synthesis successful")
@@ -2307,7 +2930,7 @@ async def chat(
 
             if user_id and os.getenv("LEGION_WIKI_AUTO_INGEST", "1").strip().lower() not in ("0", "false", "no", "off"):
                 try:
-                    from core.wiki_auto_ingest import on_conversation_turn
+                    from core.wiki_auto_ingest import on_conversation_turn, on_turn_deep_ingest
 
                     def _log_err(t):
                         if t.exception():
@@ -2321,24 +2944,23 @@ async def chat(
                 except Exception as e:
                     logger.debug("on_conversation_turn outer error: %s", e)
 
-            # ── Session-level deep ingest (fires every turn, thresholds internally) ──
+# ── Deep ingest (fires every turn, thresholds internally) ──
             if user_id and os.getenv("LEGION_WIKI_AUTO_INGEST", "1").strip().lower() not in ("0", "false", "no", "off"):
                 try:
                     from core.conversation_interface import get_conversation_history
-                    from core.wiki_auto_ingest import on_session_end
 
                     conversation = get_conversation_history(str(user_id), last_n=20)
                     def _log_session_err(t):
                         if t.exception():
-                            logger.error("on_session_end failed: %s", t.exception())
+                            logger.error("on_turn_deep_ingest failed: %s", t.exception())
 
-                    _session_task = asyncio.create_task(on_session_end(str(user_id), conversation))
+                    _session_task = asyncio.create_task(on_turn_deep_ingest(str(user_id), conversation))
                     _session_task.add_done_callback(_log_session_err)
                     asyncio.wait_for(_session_task, timeout=10.0)
                 except TimeoutError:
-                    logger.warning("on_session_end timed out after 10s")
+                    logger.warning("on_turn_deep_ingest timed out after 10s")
                 except Exception as e:
-                    logger.debug("on_session_end outer error: %s", e)
+                    logger.warning("on_turn_deep_ingest outer error: %s", e)
 
             if user_id:
                 try:
@@ -2619,7 +3241,7 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
                 ],
                 max_tokens=1024,
             )
-            result = (resp.choices[0].message.content or "").strip()
+            result = (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
             logger.info("Screenshot analyzed locally via Ollama")
             return result, "ollama/gemma4:e4b \U0001f512 local"
         except Exception as e:
@@ -2633,7 +3255,7 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
 
     try:
         resp = await acompletion(
-            model="minimax/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-Text-01",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["vision"]},
                 {
@@ -2648,8 +3270,8 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
             base_url="https://api.minimax.chat/v1",
             max_tokens=1024,
         )
-        result = (resp.choices[0].message.content or "").strip()
-        _cloud_label = "minimax/MiniMax-Text-01"
+        result = (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
+        _cloud_label = "minimax-coding-plan/MiniMax-Text-01"
         if _skip_local and _skip_reason:
             return result, f"{_cloud_label} (reason: {_skip_reason})"
             _cloud_label += f" \u2601\ufe0f (local bypassed: {_skip_reason[:60]})"

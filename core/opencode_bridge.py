@@ -39,9 +39,9 @@ async def run_opencode_task(
             from pathlib import Path
 
             session_dir = Path(project_dir) / ".session_state"
-            remembered_file = session_dir / "remembered_context.md"
+            remembered_file = session_dir / "recalled_context.md"
 
-            # Build fresh memory context (writes to remembered_context.md)
+            # Build fresh memory context (writes to recalled_context.md)
             query = task_desc or prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara")
 
@@ -67,7 +67,7 @@ async def run_opencode_task(
         except Exception:
             pass
 
-    cmd = ["/home/newadmin/.opencode/bin/opencode", "run"]
+    cmd = ["/home/newadmin/.opencode/bin/opencode", "run", "--dangerously-skip-permissions"]
     if agent:
         cmd.extend(["--agent", agent])
     cmd.extend(["--model", model])
@@ -208,7 +208,7 @@ async def stream_opencode_task(
             from pathlib import Path
 
             session_dir = Path(project_dir) / ".session_state"
-            remembered_file = session_dir / "remembered_context.md"
+            remembered_file = session_dir / "recalled_context.md"
 
             query = prompt[:100]
             ctx = build_memory_context(query=query, user_id="bashara")

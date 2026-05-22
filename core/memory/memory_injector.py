@@ -16,10 +16,45 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import json
 import logging
 from pathlib import Path
 from typing import Optional
+
+# ── Shared thread pool for memory layers ──────────────────────────────────────
+# Avoids creating/destroying threads per call. 4 workers handles the 6 layers
+# (each layer is a separate call) plus concurrent requests from compaction.
+_MEM_LAYER_EXECUTOR = concurrent.futures.ThreadPoolExecutor(
+    max_workers=4, thread_name_prefix="mem_layer"
+)
+
+
+def _call_async_in_thread(coro, timeout: float = 5.0):
+    """Run coroutine in thread pool with timeout — never blocks the caller."""
+    async def _awaiter():
+        return await coro
+
+    def _runner():
+        return asyncio.run(_awaiter())
+
+    future = _MEM_LAYER_EXECUTOR.submit(_runner)
+    try:
+        return future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        logger.debug("%s timed out after %.0fs", _runner.__name__, timeout)
+        return [] if "recall" in _runner.__name__ else ""
+    except Exception as e:
+        logger.debug("Thread pool call failed: %s", e)
+        return [] if "recall" in _runner.__name__ else ""
+
+
+LANGMEM_AVAILABLE = False
+try:
+    import langmem as _langmem
+    LANGMEM_AVAILABLE = True
+except Exception:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +86,17 @@ def _recall_from_checkpoints(query: str, top_k: int = 5) -> list[str]:
             except Exception:
                 continue
         results.sort(reverse=True, key=lambda x: x[0])
+        # Fallback: if no keyword matches, return most recent checkpoint anyway
+        # (it's always relevant to "what happened in this session" queries)
+        if not results and checkpoints:
+            try:
+                with open(checkpoints[0]) as f:
+                    data = json.load(f)
+                ts = checkpoints[0].stem.replace("checkpoint_", "").replace("_", " ")
+                text = json.dumps(data, default=str)
+                results.append((0, f"[{ts}] {text[:200]}"))
+            except Exception:
+                pass
         return [r[1] for r in results]
     except Exception as e:
         logger.debug("Checkpoint recall error: %s", e)
@@ -68,31 +114,104 @@ def _recall_from_mem0(query: str, top_k: int = 5) -> list[str]:
         logger.debug("mem0 recall error: %s", e)
         return []
 
-# ── Layer 3: langmem ──────────────────────────────────────────────────────────
+_LANGMEM_LANGGRAPH_STORE = None  # cached langgraph InMemoryStore for langmem
+_langmem_store_sync = False  # one-time sync flag
+
+
+def _get_langmem_store():
+    """Get or create the langgraph InMemoryStore for langmem operations."""
+    global _LANGMEM_LANGGRAPH_STORE
+    if _LANGMEM_LANGGRAPH_STORE is None:
+        from langgraph.store.memory import InMemoryStore
+
+        _LANGMEM_LANGGRAPH_STORE = InMemoryStore()
+    return _LANGMEM_LANGGRAPH_STORE
+
+
+def _sync_mem0_into_langmem() -> None:
+    """One-time sync: copy existing mem0 memories into langmem InMemoryStore.
+
+    langmem's search tool uses langgraph InMemoryStore where put() takes
+    (namespace, key, value) with value being a dict that must have 'content' key.
+    """
+    global _langmem_store_sync
+    if _langmem_store_sync:
+        return
+
+    try:
+        if not LANGMEM_AVAILABLE:
+            _langmem_store_sync = True
+            return
+
+        store = _get_langmem_store()
+
+        # Get existing mem0 memories
+        from core.memory.store import MemoryStore
+
+        mem_store = MemoryStore()
+        mems = mem_store.recall(query="memory", agent_id=None, top_k=50, min_score=0.0)
+        if not mems:
+            _langmem_store_sync = True
+            return
+
+        # Pre-load store with existing mem0 memories
+        # langgraph InMemoryStore.put(namespace, key, value) where value is dict
+        for i, mem in enumerate(mems):
+            if len(mem) < 20:
+                continue
+            try:
+                key = f"mem0_{i:04d}"
+                # Value must be a dict with 'content' for langmem search to find it
+                store.put(("swarmbot", "memories"), key, {"content": mem})
+            except Exception:
+                continue
+
+        _langmem_store_sync = True
+        logger.debug("Synced %d mem0 memories into langmem store", len(mems))
+    except Exception as e:
+        logger.debug("langmem store sync failed (non-fatal): %s", e)
+        _langmem_store_sync = True
+
 
 def _recall_from_langmem(query: str, limit: int = 5) -> list[str]:
-    """Search langmem (SwarmBotMemoryManager) with 5s timeout."""
+    """Search langmem with pre-populated langgraph InMemoryStore, 8s timeout."""
     try:
-        from core.integrations.langmem_integration import SwarmBotMemoryManager
-        mgr = SwarmBotMemoryManager()
-        # asyncio.run with timeout so langmem hang doesn't block the whole pipeline
+        # One-time pre-population from L2 mem0
+        _sync_mem0_into_langmem()
+
+        if not LANGMEM_AVAILABLE:
+            return []
+
+        import langmem as _langmem
+
+        store = _get_langmem_store()
+
         async def _search():
-            return await asyncio.wait_for(
-                mgr.search_memories(query=query, messages=None),
-                timeout=5.0,
+            search_tool = _langmem.create_search_memory_tool(
+                namespace=("swarmbot", "memories"),
+                store=store,
+                instructions="Search for distinct memories relevant to the query.",
             )
-        results = asyncio.run(_search())
+            result = await search_tool.ainvoke({"query": query, "limit": limit})
+            # Result is a JSON string of list[dict]
+            if isinstance(result, str):
+                import json
+
+                return json.loads(result)
+            return result if isinstance(result, list) else []
+
+        results = _call_async_in_thread(_search(), timeout=8.0)
         if isinstance(results, list):
-            return [str(r.get("content", r)) for r in results[:limit] if len(str(r)) > 20]
-        return []
-    except (asyncio.TimeoutError, TimeoutError):
-        logger.debug("langmem search timed out after 5s")
-        return []
-    except Exception as e:
-        logger.debug("langmem recall error: %s", e)
-        return []
-    except concurrent.futures.TimeoutError:
-        logger.debug("langmem recall timed out after 10s")
+            # langmem returns dicts with 'value' containing {'content': ...}
+            extracted = []
+            for r in results[:limit]:
+                if isinstance(r, dict):
+                    content = r.get("value", {}).get("content", "")
+                    if not content and "content" in r:
+                        content = r.get("content", "")
+                    if content and len(content) > 20:
+                        extracted.append(content)
+            return extracted
         return []
     except Exception as e:
         logger.debug("langmem recall error: %s", e)
@@ -114,7 +233,7 @@ def _recall_from_observation_store(query: str, limit: int = 3) -> list[str]:
                 if r.get("title")
             ]
 
-        return asyncio.run(_search())
+        return _call_async_in_thread(_search(), timeout=5.0)
     except Exception as e:
         logger.debug("observation_store recall error: %s", e)
         return []
@@ -150,7 +269,7 @@ def _recall_from_mem0_cloud(query: str, top_k: int = 3) -> list[str]:
                 if r.get("memory") or r.get("content")
             ]
 
-        return _asyncio.run(_search())
+        return _call_async_in_thread(_search(), timeout=5.0)
     except Exception as e:
         logger.debug("mem0 cloud recall error: %s", e)
         return []

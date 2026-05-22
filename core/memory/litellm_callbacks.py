@@ -102,7 +102,7 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
         swarm_dir = Path(__file__).parent.parent.parent  # .../swarm-bot
         session_dir = swarm_dir / ".session_state"
         os.makedirs(session_dir, exist_ok=True)
-        
+
         # Read existing current.json to preserve checkpoint list
         current_path = os.path.join(session_dir, "current.json")
         prev_state = {}
@@ -112,7 +112,19 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
                     prev_state = json.load(f)
             except Exception:
                 prev_state = {}
-        
+
+        # Merge session metrics from SessionMetrics (live tracker of files/decisions/accomplishments)
+        try:
+            from core.legion_session import get_session_metrics
+            metrics = get_session_metrics()
+            session_name = metrics.accomplished[-1] if metrics.accomplished else ""
+            files_changed = list(metrics.files_changed) if metrics.files_changed else prev_state.get("files_changed", [])
+            decisions = list(metrics.decisions) if metrics.decisions else prev_state.get("decisions", [])
+        except Exception:
+            session_name = prev_state.get("session_name", "")
+            files_changed = prev_state.get("files_changed", [])
+            decisions = prev_state.get("decisions", [])
+
         new_state = {
             **prev_state,
             "last_llm_call": int(time.time()),
@@ -120,6 +132,10 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
             "last_response_len": len(content),
             # session_watcher reads "phase" from current.json to determine what to save
             "phase": "llm_call_complete",
+            # Enriched fields from SessionMetrics
+            "session_name": session_name or prev_state.get("session_name", ""),
+            "files_changed": files_changed,
+            "decisions": decisions,
         }
         
         # Atomic write to current.json
