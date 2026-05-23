@@ -1060,7 +1060,7 @@ async def _aget_memory_context_before_compact(query: str, timeout: float = 10.0)
         return ""
 
 
-async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str]) -> None:
+async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str], system_prompt: str = "") -> None:
     """Non-blocking async full compaction — fires at Tier 3, completes before Tier 4.
 
     With unlimited minimax API, we can afford to run LLM summarization MORE OFTEN
@@ -1078,7 +1078,7 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str])
             return
 
         # Run full compaction with memory enrichment
-        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M2.7")
+        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M2.7", system_prompt=system_prompt)
 
         # Check if compaction actually reduced size
         new_size = sum(len(str(m.get("content", ""))) for m in compacted)
@@ -1775,12 +1775,32 @@ def smart_compact_messages(
         ),
     }
 
+    # MCP reminder is a SEPARATE system message — survives independently of the
+    # summary content. This ensures MCP directives are always present after compaction
+    # regardless of how brief the summary is. The reminder is NOT buried in summary_msg.
+    mcp_reminder_msg = {
+        "role": "system",
+        "content": (
+            "━━━ MCP TOOL REMINDER ━━━\n"
+            "Your MCP tools are always active — gitnexus, obsidian, ruflo_memory,\n"
+            "filesystem, exa, hermes, crawl4ai, browser_use, symphony, and more.\n\n"
+            "MANDATORY per-task checks:\n"
+            "  1. @ruflo_memory_search — query 6-layer memory BEFORE reading files\n"
+            "  2. @mcp_gitnexus — get code context, callers, and impact BEFORE editing\n"
+            "  3. @mcp_obsidian — check .wiki for prior decisions and context\n"
+            "  4. @mcp_symphony — check task state before starting new work\n\n"
+            "These tools provide critical context from the 6-layer memory system.\n"
+            "ALWAYS use them — do NOT skip MCP calls even for simple tasks."
+        ),
+    }
+
     result: list[dict] = []
     if system_prompt:
         result.append({"role": "system", "content": system_prompt})
     elif system_msg:
         result.append(system_msg)
     result.append(summary_msg)
+    result.append(mcp_reminder_msg)
     result.extend(recent)
 
     # Cache the result (LRU, max 100 entries)
@@ -2017,13 +2037,13 @@ async def _agent_loop_inner(
                     if total_size > 130000 and not getattr(messages, '_full_compact_pending', False):
                         messages._full_compact_pending = True  # type: ignore[attr-defined]
                         logger.debug("Tier3 async compaction started at %d chars", total_size)
-                        asyncio.create_task(_async_compact_if_needed(messages, user_id))
+                        asyncio.create_task(_async_compact_if_needed(messages, user_id, system_prompt=system))
 
                     # Tier 4: blocking full compaction at 170k — only if async hasn't started
                     # If async is already running, skip — let it finish instead of double-compacting
                     elif total_size > 170000 and not getattr(messages, '_full_compact_pending', False):
                         messages._full_compact_pending = True  # type: ignore[attr-defined]
-                        messages = smart_compact_messages(messages, model=model, session_id=thread_id)
+                        messages = smart_compact_messages(messages, model=model, session_id=thread_id, system_prompt=system)
                         try:
                             from core.hooks import get_hooks
                             project_dir = getattr(messages, '_project_dir', None) or "/home/newadmin/swarm-bot"
@@ -2043,7 +2063,7 @@ async def _agent_loop_inner(
                     if total_size > 190000:
                         # Cancel any pending async and do immediate blocking compaction
                         messages._full_compact_pending = False  # type: ignore[attr-defined]
-                        messages = smart_compact_messages(messages, model=model, session_id=thread_id)
+                        messages = smart_compact_messages(messages, model=model, session_id=thread_id, system_prompt=system)
                         try:
                             from core.hooks import get_hooks
                             project_dir = getattr(messages, '_project_dir', None) or "/home/newadmin/swarm-bot"

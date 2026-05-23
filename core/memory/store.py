@@ -115,8 +115,9 @@ class MemoryStore:
 
         for chunk in chunks:
             doc_id = hashlib.md5(chunk.strip().lower().encode(), usedforsecurity=False).hexdigest()
-            embedding = embedder.embed(chunk)
-
+            embedding = embedder.embed(chunk)  # now always returns 768-dim list
+            if not embedding or len(embedding) != 768:
+                continue  # skip bad embeddings (Ollama dead / zero vector)
             with _store_lock:
                 count_before = col.count()
                 col.add(

@@ -185,8 +185,12 @@ async def _recalled_context_refresh_hook(ctx: dict[str, Any]) -> dict[str, Any]:
         project_dir = ctx.get("project_dir") or "/home/newadmin/swarm-bot"
         session_dir = _Path(project_dir) / ".session_state"
 
-        # Use a broad query covering all memory layers
-        query = "recent session work tasks decisions open issues tools used"
+        # Use the task_desc if available (set by the task dispatcher), otherwise
+        # fall back to a broad project-specific query that covers all memory layers.
+        # The task_desc is more targeted and ensures the recall is relevant to the
+        # current task, not generic.
+        task_desc = ctx.get("task_desc", "")
+        query = task_desc if task_desc else "swarm-bot project opencode memory compaction MCP tools agents recent work"
         ctx_text = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
         if ctx_text:
             session_dir.mkdir(parents=True, exist_ok=True)

@@ -81,21 +81,28 @@ def _inject_memory_files(
     """
     Inject all available memory context files into the OpenCode subprocess.
     Priority order (first file wins for header conflicts):
-      1. remembered_context.md  — post-compaction fresh recall (newest content)
-      2. recalled_context.md    — per-task 6-layer semantic recall
-      3. memory_inject.md      — session-level 7-layer persistent context
-      4. compaction_summary.md — last compaction checkpoint (if exists)
+      1. memory_inject.md       — session-level 7-layer persistent context (authoritative)
+      2. compaction_summary.md  — last compaction checkpoint (if exists)
+      3. remembered_context.md — post-compaction fresh 6-layer recall
+      4. recalled_context.md    — per-task 6-layer semantic recall
 
-    Each file is checked for: existence, non-zero size, and freshness (<24h).
-    Stale files (≥24h old) are logged and skipped to prevent stale memory injection.
+    All four files are ALWAYS injected when present and fresh (<24h).
+    The priority only determines which file's header/format wins conflicts.
     """
     logger.debug("[MEMORY_INJECT] Scanning session dir: %s", session_dir)
 
+    # Priority order — first file wins for header/style conflicts.
+    # Higher-priority = more authoritative project context, shown first.
+    # Order: memory_inject (authoritative persistent) → compaction_summary
+    #        (checkpoint) → remembered_context (post-compact recall) →
+    #        recalled_context (per-task recall).
+    # NOTE: All files are ALWAYS injected and concatenated — the priority
+    # only determines header/style conflicts, not whether to inject.
     files_to_check = [
-        ("remembered_context.md", "post-compaction fresh recall"),
-        ("recalled_context.md", "per-task 6-layer semantic recall"),
         ("memory_inject.md", "session-level 7-layer persistent context"),
         ("compaction_summary.md", "compaction checkpoint"),
+        ("remembered_context.md", "post-compaction fresh recall"),
+        ("recalled_context.md", "per-task 6-layer semantic recall"),
     ]
 
     injected_count = 0
@@ -192,18 +199,36 @@ async def run_opencode_task(
             ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
             if ctx:
+                # ── MCP tool reminder ──────────────────────────────────────────
+                # Baked into per-task context so it survives OpenCode's own
+                # compaction and is always present when OpenCode auto-calls tools.
+                mcp_reminder = """
+━━━ MCP TOOL REMINDER ━━━
+MCP tools are always active — gitnexus, obsidian, ruflo_memory,
+filesystem, exa, hermes, crawl4ai, browser_use, symphony, and more.
+
+MANDATORY per-task checks BEFORE reading files or making changes:
+  1. @ruflo_memory_search — query 6-layer memory for prior context
+  2. @mcp_gitnexus — get code context, callers, impact BEFORE editing
+  3. @mcp_obsidian — check .wiki for prior decisions and patterns
+  4. @mcp_symphony — check task state before starting new work
+
+Always use these tools — do NOT skip MCP calls even for simple tasks.
+"""
+                ctx_with_reminder = ctx + mcp_reminder
+
                 # Write to priority 2 (per-task recall)
                 session_dir.mkdir(parents=True, exist_ok=True)
                 with open(recalled_file, "w") as f:
-                    f.write(ctx)
+                    f.write(ctx_with_reminder)
                 # Also write to priority 1 (post-compaction fresh recall)
                 # This ensures priority 1 stays fresh without waiting for compaction
                 remembered_file = session_dir / "remembered_context.md"
                 with open(remembered_file, "w") as f:
-                    f.write(ctx)
+                    f.write(ctx_with_reminder)
                 logger.debug(
                     "Memory context refreshed: remembered=%s recalled=%s (%d chars)",
-                    remembered_file, recalled_file, len(ctx),
+                    remembered_file, recalled_file, len(ctx_with_reminder),
                 )
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
@@ -393,15 +418,33 @@ async def stream_opencode_task(
             ctx = build_memory_context(query=query, user_id="bashara", project_dir=project_dir)
 
             if ctx:
+                # ── MCP tool reminder ──────────────────────────────────────────
+                # Baked into per-task context so it survives OpenCode's own
+                # compaction and is always present when OpenCode auto-calls tools.
+                mcp_reminder = """
+━━━ MCP TOOL REMINDER ━━━
+MCP tools are always active — gitnexus, obsidian, ruflo_memory,
+filesystem, exa, hermes, crawl4ai, browser_use, symphony, and more.
+
+MANDATORY per-task checks BEFORE reading files or making changes:
+  1. @ruflo_memory_search — query 6-layer memory for prior context
+  2. @mcp_gitnexus — get code context, callers, impact BEFORE editing
+  3. @mcp_obsidian — check .wiki for prior decisions and patterns
+  4. @mcp_symphony — check task state before starting new work
+
+Always use these tools — do NOT skip MCP calls even for simple tasks.
+"""
+                ctx_with_reminder = ctx + mcp_reminder
+
                 session_dir.mkdir(parents=True, exist_ok=True)
                 with open(recalled_file, "w") as f:
-                    f.write(ctx)
+                    f.write(ctx_with_reminder)
                 remembered_file = session_dir / "remembered_context.md"
                 with open(remembered_file, "w") as f:
-                    f.write(ctx)
+                    f.write(ctx_with_reminder)
                 logger.debug(
                     "Memory context refreshed: remembered=%s recalled=%s (%d chars)",
-                    remembered_file, recalled_file, len(ctx),
+                    remembered_file, recalled_file, len(ctx_with_reminder),
                 )
         except Exception as e:
             logger.debug("Memory context injection skipped: %s", e)
