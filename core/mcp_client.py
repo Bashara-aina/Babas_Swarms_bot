@@ -361,8 +361,40 @@ class MCPClientPool:
                         self._failed.add(server_name)
                         self._failed_expiry[server_name] = time.monotonic()
                         await self._cleanup(server_name)
+                    except BaseException as exc:
+                        # Catch anyio Python 3.13 task-group cancel-scope bug: the bug fires
+                        # inside _cleanup → session.__aexit__ → stdio_client.__aexit__, where a
+                        # RuntimeError("Attempted to exit cancel scope in a different task") is
+                        # raised. This is wrapped in CancelledError, which is BaseException (not
+                        # Exception), so the handler above does NOT catch it. The
+                        # RuntimeError may also appear directly in a BaseExceptionGroup.
+                        # We walk the exception chain to detect the anyio bug and silently
+                        # fall through to single-call so the tool call can still succeed.
+                        def _find_anyio_bug(ex: BaseException | None) -> RuntimeError | None:
+                            if ex is None:
+                                return None
+                            if isinstance(ex, RuntimeError) and "cancel scope" in str(ex) and "different task" in str(ex):
+                                return ex
+                            if isinstance(ex, BaseExceptionGroup):
+                                for sub in ex.exceptions:
+                                    found = _find_anyio_bug(sub)
+                                    if found:
+                                        return found
+                            return _find_anyio_bug(getattr(ex, '__cause__', None))
+
+                        if _find_anyio_bug(exc):
+                            logger.warning(
+                                "MCP pool call_tool %s/%s hit anyio cancel-scope bug — falling through to single-call",
+                                server_name, tool_name,
+                            )
+                        else:
+                            raise
 
         # Single-call fallback (outside the lock to avoid blocking other servers)
+        # Yield first to let anyio task-group bug from the pool path fully settle before
+        # we spawn a fresh stdio process. Without this, the anyio bug's CancelledError
+        # propagates into our call_tool frame and crashes the generator __aexit__ chain.
+        await asyncio.sleep(0)
         return await self._call_tool_single(server_name, tool_name, arguments)
 
     async def _call_tool_single(
@@ -410,7 +442,36 @@ class MCPClientPool:
                         except Exception:
                             pass
                         return text_result
+            except asyncio.CancelledError:
+                raise  # Must propagate — cannot retry
             except Exception as exc:
+                # Check for anyio Python 3.13 bug: task-group __aexit__ in wrong task
+                # RuntimeError: "Attempted to exit cancel scope in a different task"
+                # The error may be wrapped in CancelledError, which itself may be in a BaseExceptionGroup.
+                # Walk the full chain to find the actual anyio bug RuntimeError.
+                def _find_anyio_bug(ex: BaseException | None) -> RuntimeError | None:
+                    if ex is None:
+                        return None
+                    if isinstance(ex, RuntimeError) and "cancel scope" in str(ex) and "different task" in str(ex):
+                        return ex
+                    # Recurse into BaseExceptionGroup sub-exceptions
+                    if isinstance(ex, BaseExceptionGroup):
+                        for sub in ex.exceptions:
+                            found = _find_anyio_bug(sub)
+                            if found:
+                                return found
+                    # Also check __cause__ chain
+                    return _find_anyio_bug(getattr(ex, '__cause__', None))
+
+                anyio_bug = _find_anyio_bug(exc)
+                if is_anyio_bug := (attempt == 0 and anyio_bug):
+                    logger.warning(
+                        "MCP call_tool %s/%s hit anyio cancel-scope bug (attempt %d): %s — retrying in 0.5s",
+                        server_name, tool_name, attempt + 1, anyio_bug,
+                    )
+                    await asyncio.sleep(0.5)
+                    last_exc = anyio_bug
+                    continue
                 last_exc = exc
                 if attempt == 0:
                     logger.warning(

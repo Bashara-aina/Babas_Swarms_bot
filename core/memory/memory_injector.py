@@ -143,7 +143,7 @@ _mcp_loop_ready = threading.Event()
 
 def _mcp_worker(q: _queue.Queue) -> None:
     """Dedicated thread: owns the event loop, runs it forever, processes MCP calls."""
-    global _mcp_loop
+    global _mcp_loop, _mcp_loop_thread, _mcp_work_queue
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     _mcp_loop = loop
@@ -154,11 +154,9 @@ def _mcp_worker(q: _queue.Queue) -> None:
         try:
             res = await asyncio.wait_for(coro, timeout=timeout)
             future.set_result(res)
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, asyncio.CancelledError):
             future.set_result([])
-        except asyncio.CancelledError:
-            future.set_result([])
-        except Exception as e:
+        except BaseException as e:  # catches GeneratorExit, BaseExceptionGroup from anyio bug
             try:
                 future.set_exception(e)
             except Exception:
@@ -174,7 +172,7 @@ def _mcp_worker(q: _queue.Queue) -> None:
             loop.call_soon(loop.stop)
             return
         coro, future, timeout = item
-        asyncio.create_task(_run_coroutine(coro, future, timeout))
+        loop.create_task(_run_coroutine(coro, future, timeout))
 
     # Use a periodic callback so the loop stays alive between queue reads.
     # run_in_executor makes q.get() non-blocking to the event loop.
@@ -188,14 +186,13 @@ def _mcp_worker(q: _queue.Queue) -> None:
                 loop.call_soon(loop.stop)
                 return
             coro, future, timeout = item
-            asyncio.create_task(_run_coroutine(coro, future, timeout))
+            loop.create_task(_run_coroutine(coro, future, timeout))
         finally:
             # Re-schedule ourselves
             loop.call_later(0.05, poll_queue)
 
     poll_queue()
     loop.run_forever()
-    global _mcp_loop
     _mcp_loop = None
 
 
@@ -222,7 +219,11 @@ def _mcp_async_submit(coro, timeout: float = 5.0) -> list:
     q = _get_mcp_loop_queue()
     future: Future = Future()
     q.put_nowait((coro, future, timeout))
-    return future.result(timeout=timeout + 3.0)
+    try:
+        return future.result(timeout=timeout + 3.0)
+    except Exception:
+        # GeneratorExit / BaseExceptionGroup from anyio bug in Python 3.13 — return []
+        return []
 
 
 # ── Thread pool for sync-only layer functions ───────────────────────────────────
@@ -321,6 +322,102 @@ def _safe_json(raw: str | None) -> Any:
             except Exception:
                 continue
     return None
+
+
+def _parse_json_array_robust(raw: str) -> list[dict]:
+    """Parse a potentially truncated JSON array, returning only complete items.
+
+    obsidian's search_notes truncates at 12000 chars via _tool_result_to_text,
+    which cuts through string literals and escape sequences. This function
+    finds the last complete item boundary in the array and returns everything
+    up to and including that item.
+
+    Strategy: scan from the end using a while loop (NOT for-range, since we need
+    to modify the index while iterating), track nesting depth, reset when we
+    find a complete top-level object.
+    """
+    n = len(raw)
+    if n == 0:
+        return []
+    depth = 0
+    in_string = False
+    complete_boundaries: list[int] = []
+    i = n - 1
+    while i >= 0:
+        c = raw[i]
+        if in_string:
+            if c == '\\':
+                i -= 2  # skip escaped character, stay in string
+                continue
+            elif c == '"':
+                in_string = False
+        else:
+            if c == '"':
+                in_string = True
+            elif c == '}':
+                depth += 1
+            elif c == '{':
+                depth -= 1
+                if depth == 0:
+                    # Found a complete top-level object
+                    complete_boundaries.append(i)
+        i -= 1
+
+    if not complete_boundaries:
+        return []
+
+    # Parse from the start of the first complete object to the end of the last
+    first_boundary = complete_boundaries[0]
+    last_boundary = complete_boundaries[-1]
+
+    # Find the opening '[' of the array
+    bracket_idx = raw.find('[', first_boundary)
+    if bracket_idx < 0:
+        return []
+
+    # Parse up to the end of the last complete object
+    # Use raw[bracket_idx:last_boundary+1] which is the array with complete items only
+    try:
+        result = json.loads(raw[bracket_idx:last_boundary + 1])
+        if isinstance(result, list):
+            return result
+        return [result]
+    except Exception:
+        pass
+
+    # Fallback: try each boundary independently
+    for boundary in reversed(complete_boundaries):
+        bracket_idx2 = raw.find('[', boundary)
+        if bracket_idx2 < 0:
+            continue
+        try:
+            result = json.loads(raw[bracket_idx2:boundary + 1])
+            if isinstance(result, list):
+                return result
+            return [result]
+        except Exception:
+            continue
+
+    return []
+
+
+def _safe_truncate_json(raw: str, max_chars: int = 12000) -> str:
+    """Truncate string at max_chars, then walk back to nearest JSON boundary.
+
+    obsidian's search_notes returns a large JSON array that frequently gets
+    truncated mid-escape-sequence (e.g. ...\'\\n...), making it unparseable.
+    Walking back to the last ']' or '}' before max_chars gives valid JSON
+    (even if the array is incomplete — _safe_json handles that).
+    """
+    if len(raw) <= max_chars:
+        return raw
+    # Find last complete JSON structural char within the last 200 chars
+    search_start = max(0, max_chars - 200)
+    for i in range(max_chars - 1, search_start, -1):
+        c = raw[i]
+        if c in ('}', ']') and i > 0 and raw[i - 1] not in ('\\', "'", '"', '\\n', '\\t'):
+            return raw[:i + 1]
+    return raw[:max_chars]
 
 
 # ── Safe asyncio.run wrapper (fixes anyio cancel-scope issues) ─────────────────
@@ -567,9 +664,14 @@ async def _recall_obsidian_async(query: str, limit: int = 3) -> list[MemoryResul
         if not raw or "Error" in str(raw)[:50]:
             brk.record_failure()
             return []
-        # Filter obsidian's stderr injection + find JSON boundary
+        # Filter obsidian's stderr injection
         cleaned = _filter_obsidian_text(str(raw))
-        items = _safe_json(cleaned)
+        # Truncate at JSON boundary to avoid partial escape sequences
+        truncated = _safe_truncate_json(cleaned, max_chars=12000)
+        items = _safe_json(truncated)
+        if not items:
+            # Truncated JSON — fall back to walking backward for complete items
+            items = _parse_json_array_robust(truncated)
         if not items:
             brk.record_failure()
             return []
@@ -579,9 +681,16 @@ async def _recall_obsidian_async(query: str, limit: int = 3) -> list[MemoryResul
         for item in items[:limit]:
             if not isinstance(item, dict):
                 continue
-            content = item.get("content", "") or item.get("snippet", "")
+            # Obsidian returns title + preview + content. Build a safe content field.
+            # Some previews may be truncated mid-escape (e.g. ...\'\\n...), causing
+            # _safe_json to return a partial list with some None items — skip None.
+            if item is None:
+                continue
+            fn = item.get("filename", "note") or "note"
+            title = item.get("title", "") or ""
+            preview = item.get("preview", "") or ""
+            content = item.get("content", "") or preview or title
             if content:
-                fn = item.get("filename", "note")
                 results.append(MemoryResult(
                     content=f"[obsidian:{fn}] {content[:300]}",
                     layer="obsidian_mcp",
