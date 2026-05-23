@@ -377,7 +377,7 @@ _QUERY_INTENT_PATTERNS = {
         "max_fresh_hours": 72,
     },
     "architecture_design": {
-        "keywords": ["architecture", "design", "pattern", "schema", "structure", "approach", "why did we choose", "tradeoff"],
+        "keywords": ["architecture", "design", "pattern", "schema", "structure", "approach", "why did we choose", "tradeoff", "microservices", "monolith", "distributed", "system design"],
         "primary_layers": ["graphrag", "gitnexus_mcp"],
         "boost_decisions": True,
         "max_fresh_hours": 720,
@@ -1292,6 +1292,11 @@ def build_memory_context(
             decision_keywords = ["decided", "choosing", "instead of", "went with", "opted", "rejected", "agreed", "decision"]
             if any(kw in r.content.lower() for kw in decision_keywords):
                 decision_boost = 2.0  # big boost for decision-tagged content
+        # Architecture/design decisions also get a boost if content has decision signals
+        elif intent_config.get("boost_decisions", False):
+            decision_keywords = ["decided", "choosing", "instead of", "went with", "opted", "rejected", "agreed", "decision", "architecture", "design decision"]
+            if any(kw in r.content.lower() for kw in decision_keywords):
+                decision_boost = 1.0  # moderate boost for arch/design decisions
 
         raw_score = base_conf + intent_boost_val + recency_boost_val + decision_boost
 
