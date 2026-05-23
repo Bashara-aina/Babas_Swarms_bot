@@ -371,6 +371,24 @@ def build_persistent_context(
     active = len(layer_outputs)
     lines.append(f"━━━ Memory context ready — {active}/7 layers loaded ━━━")
 
+    # ── MCP TOOL REMINDER ─────────────────────────────────────────────────────
+    # This reminder is BAKED INTO memory_inject.md so it survives OpenCode's
+    # own internal compaction (which runs at ~38k chars, 50% of 76800 max).
+    # OpenCode injects memory_inject.md via -f flags, so the reminder is always
+    # present in the prompt even after OpenCode compacts its own context.
+    lines.append("")
+    lines.append("━━━ MCP TOOL REMINDER ━━━")
+    lines.append("MCP tools are always active — gitnexus, obsidian, ruflo_memory,")
+    lines.append("filesystem, exa, hermes, crawl4ai, browser_use, symphony, and more.")
+    lines.append("")
+    lines.append("MANDATORY per-task checks BEFORE reading files or making changes:")
+    lines.append("  1. @ruflo_memory_search — query 6-layer memory for prior context")
+    lines.append("  2. @mcp_gitnexus — get code context, callers, impact BEFORE editing")
+    lines.append("  3. @mcp_obsidian — check .wiki for prior decisions and patterns")
+    lines.append("  4. @mcp_symphony — check task state before starting new work")
+    lines.append("")
+    lines.append("These tools provide critical context. ALWAYS use them.")
+
     final_text = "\n".join(lines)
 
     # Write SHORT inject version for OpenCode system prompt (summary only)
