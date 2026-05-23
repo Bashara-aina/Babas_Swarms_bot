@@ -15,6 +15,17 @@ from chromadb.config import Settings
 
 from .embedder import Embedder
 
+
+def _keyword_score(text: str, query: str) -> float:
+    """Keyword overlap score 0..1."""
+    if not query or not text:
+        return 0.0
+    q_words = set(query.lower().split())
+    t_words = set(text.lower().split())
+    if not q_words:
+        return 0.0
+    return sum(1 for w in q_words if w in t_words) / len(q_words)
+
 MEMORY_DIR = Path.home() / ".swarms_memory"
 COLLECTION_NAME = "babas_swarms"
 embedder = Embedder()
@@ -142,8 +153,24 @@ class MemoryStore:
             return []
 
         query_embedding = embedder.embed_query(query)
-        n = min(top_k, total)
+        if query_embedding is None:
+            # Ollama embedder is down — fall back to keyword-only chunk scan
+            all_chunks: list[tuple[str, float]] = []
+            try:
+                col = _get_collection()
+                all_docs = col.get(include=["documents"])["documents"]
+                for doc in all_docs:
+                    if not doc or len(doc) < 20:
+                        continue
+                    score = _keyword_score(doc, query)
+                    if score > 0:
+                        all_chunks.append((doc, score))
+                all_chunks.sort(key=lambda x: x[1], reverse=True)
+                return [doc for doc, _ in all_chunks[:top_k]]
+            except Exception:
+                return []
 
+        n = min(top_k, total)
         where = None
         if agent_id and agent_id != "shared":
             where = {"agent_id": {"$in": [agent_id, "shared"]}}
