@@ -1195,3 +1195,36 @@ dict lookup that was already built just above.
   → CONTEXT (by-layer groups, 200-char blocks) → DETAIL (decision chain + top 2)
 - All 14/14 intent classification and 5/5 build_memory_context smoke tests pass
 ---
+## Commit: 48d1de65
+- Date: Sun May 24 09:40:57 PM JST 2026
+- Message: refactor(model): enforce MiniMax-only across entire codebase
+
+MiniMax-only policy: no external cloud providers (openrouter, cerebras,
+groq, gemini). All model routing now uses MiniMax + local Ollama only.
+
+Files changed:
+- agents/__init__.py: FALLBACK_CHAIN rewritten with MiniMax+Ollama only,
+  84 agents across all departments
+- router.py: model header updated to MiniMax-only list
+- bridges/ruflo_bridge.py: default model → MiniMax-M2.7, check MINIMAX_API_KEY
+- bridges/screenpipe_bridge.py: MiniMax-only model env vars
+- core/hermes_adapter.py: DEFAULT_HERMES_MODEL → MiniMax-M2.7
+- core/interpreter_bridge.py: external provider branches → Ollama fallback
+- core/model_config.py: EMERGENCY_FALLBACK → None (no Anthropic fallback)
+- core/reflection/reflection_engine.py: cerebras → MiniMax-Text-01
+- core/reliability/fallback_chain.py: all chains → MiniMax+Ollama
+- core/reliability/model_router.py: catalog → MiniMax+Ollama
+- core/integrations/gptr_client.py: OPENAI_BASE_URL → MiniMax endpoint
+- swarms_bot/routing/cost_router.py: MODEL_TIERS → MiniMax+Ollama
+- swarms_bot/orchestrator/model_router.py: MODEL_CATALOGUE → MiniMax+Ollama
+- tools/browser_agent.py: openrouter branch → MiniMax branch
+- tools/supabase_client.py: cerebras → MiniMax-Text-01
+- scripts/aider_fix_loop.py: cascade comment → MiniMax-only
+- skills/database_agent.py: default → MiniMax-Text-01
+- .cursor/rules/v4_manus_killer.md: intent classifier → MiniMax
+- AGENTS.md: fallback chain → MiniMax-only
+- config/litellm_proxy_config.yaml: all models → MiniMax+Ollama
+- .wiki/circuit-breaker-design.md: provider table → MiniMax-only
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

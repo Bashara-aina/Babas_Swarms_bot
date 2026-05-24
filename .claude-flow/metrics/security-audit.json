@@ -1,12 +1,15 @@
 {
-  "timestamp": "2026-05-21T01:38:58.985Z",
-  "mode": "local",
-  "checks": {
-    "envFilesProtected": true,
-    "gitIgnoreExists": true,
-    "noHardcodedSecrets": true
+  "timestamp": "2026-05-24T12:42:26.417Z",
+  "mode": "headless",
+  "workerType": "audit",
+  "model": "haiku",
+  "durationMs": 119877,
+  "executionId": "audit_1779626426540_wtlrsy",
+  "success": true,
+  "findings": {
+    "parseError": true,
+    "rawOutput": "\n\n**Security Vulnerability Analysis Report**\n\nBased on the partial analysis conducted before you requested no further tool calls:\n\n**RISK SCORE: 45/100** (Medium risk)\n\n**VULNERABILITIES FOUND:**\n\n1. **CORS Misconfiguration** (Medium)\n   - File: `mcp_servers/symphony-of-one/server.js`\n   - Issue: CORS origin set to `'*'` allows any origin\n   - Recommendation: Restrict to specific domains\n\n2. **Potential Command Injection** (Medium-Low)\n   - Files: Multiple Python files using `subprocess` and `exec`\n   - Most uses `asyncio.create_subprocess_exec()` ( safer than `os.system()`)\n   - Recommendation: Continue auditing user-controlled input to exec() calls\n\n3. **SQLite Without Foreign Key Enforcement** (Low)\n   - File: `mcp_servers/symphony-of-one/server.js`\n   - Uses `sqlite3` without explicit foreign key checks\n   - Recommendation: Add `PRAGMA foreign_keys=ON` on connection\n\n4. **Telegram Bot Token Exposure** (Low)\n   - File: `.session_state/memory_inject.md` contains TELEGRAM_BOT_TOKEN reference\n   - Issue: Memory files may log sensitive data\n   - Recommendation: Ensure logging sanitization\n\n5. **No Input Validation on User IDs** (Low)\n   - File: `handlers/system.py`\n   - Recommendation: Add explicit type checking for `message.from_user.id`\n\n**POSITIVE FINDINGS:**\n- API keys properly use `os.getenv()` pattern throughout core codebase\n- `interpreter.offline = True` properly set\n- asyncio-only pattern enforced (no threading)\n- ALLOWED_USER_ID authentication pattern in place\n\n**RECOMMENDATIONS:**\n1. Add security scanner to CI/CD pipeline\n2. Implement secrets scanning (e.g., detect-secrets, truffleHog)\n3. Restrict CORS origins to specific domains\n4. Add SQL parameterized queries audit\n5. Consider key rotation for all API keys since March 2026\n"
   },
-  "riskLevel": "low",
-  "recommendations": [],
-  "note": "Install Claude Code CLI for AI-powered security analysis"
+  "rawOutputPreview": "\n\n**Security Vulnerability Analysis Report**\n\nBased on the partial analysis conducted before you requested no further tool calls:\n\n**RISK SCORE: 45/100** (Medium risk)\n\n**VULNERABILITIES FOUND:**\n\n1. **CORS Misconfiguration** (Medium)\n   - File: `mcp_servers/symphony-of-one/server.js`\n   - Issue: CORS origin set to `'*'` allows any origin\n   - Recommendation: Restrict to specific domains\n\n2. **Potential Command Injection** (Medium-Low)\n   - Files: Multiple Python files using `subprocess` and `exec`\n   - Most uses `asyncio.create_subprocess_exec()` ( safer than `os.system()`)\n   - Recommendation: Continue auditing user-controlled input to exec() calls\n\n3. **SQLite Without Foreign Key Enforcement** (Low)\n   - File: `mcp_servers/symphony-of-one/server.js`\n   - Uses `sqlite3` without explicit foreign key checks\n   - Recommendation: Add `PRAGMA foreign_keys=ON` on connection\n\n4. **Telegram Bot Token Exposure** (Low)\n   - File: `.session_state/memory_inject.md` contains TELEGRAM_BOT_TOKEN reference\n   - Issue: Memory files may log sensitive data\n   - Recommendation: Ensure logging sanitization\n\n5. **No Input Validation on User IDs** (Low)\n   - File: `handlers/system.py`\n   - Recommendation: Add explicit type checking for `message.from_user.id`\n\n**POSITIVE FINDINGS:**\n- API keys properly use `os.getenv()` pattern throughout core codebase\n- `interpreter.offline = True` properly set\n- asyncio-only pattern enforced (no threading)\n- ALLOWED_USER_ID authentication pattern in place\n\n**RECOMMENDATIONS:**\n1. Add security scanner to CI/CD pipeline\n2. Implement secrets scanning (e.g., detect-secrets, truffleHog)\n3. Restrict CORS origins to specific domains\n4. Add SQL parameterized queries audit\n5. Consider key rotation for all API keys since March 2026\n",
+  "rawOutputLength": 1766
 }
