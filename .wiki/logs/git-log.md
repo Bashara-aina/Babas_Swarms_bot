@@ -1243,3 +1243,17 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 4b336fd5
+- Date: Sun May 24 09:46:41 PM JST 2026
+- Message: refactor(legiona/minimax_client): remove OpenRouter fallback entirely
+
+- Removed OPENROUTER_BASE_URL, OPENROUTER_MODEL constants
+- get_client() now always returns MiniMax direct — fallback parameter ignored
+- All 4 complete() calls updated: model_str = model or MINIMAX_MODEL
+- Comment "#10 OpenRouter fallback for stability" → removed
+- MINIMAX_DIRECT = True flag added for clarity
+
+This is the last model-routing layer that could route to OpenRouter.
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

@@ -234,20 +234,6 @@ def _build_minimax_client() -> AsyncOpenAI:
     return AsyncOpenAI(api_key=api_key, base_url=MINIMAX_BASE_URL)
 
 
-def _build_openrouter_client() -> AsyncOpenAI:
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-    if not api_key:
-        raise ValueError("OPENROUTER_API_KEY not set")
-    return AsyncOpenAI(
-        api_key=api_key,
-        base_url=OPENROUTER_BASE_URL,
-        default_headers={
-            "HTTP-Referer": "https://github.com/legiona",
-            "X-Title": "Legiona Agent",
-        },
-    )
-
-
 def get_client(fallback: bool = False) -> AsyncOpenAI:
     """
     Returns plain AsyncOpenAI client (no instructor dependency).
