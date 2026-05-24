@@ -707,7 +707,7 @@ Keep total under ~3500 characters. No markdown code blocks."""
     if not (body or "").strip():
         return (
             "Jarvis bundle was gathered but the synthesis model returned empty. "
-            f"Raw context length: {len(context)} chars. Check GROQ_API_KEY / LEGION_JARVIS_MODEL."
+            f"Raw context length: {len(context)} chars. Check MINIMAX_API_KEY / LEGION_JARVIS_MODEL."
         )
     return body.strip()
 
