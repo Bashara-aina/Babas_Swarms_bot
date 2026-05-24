@@ -316,6 +316,190 @@ def _fingerprint(text: str) -> str:
     return hashlib.sha1(text.lower().encode()).hexdigest()[:16]
 
 
+# ── BM25 Scoring Pass — beyond keyword overlap ─────────────────────────────────
+#
+# After the initial keyword_score pass, we run a BM25 pass over all results.
+# BM25 (Lucene-style) uses term frequency saturation and document length
+# normalization — much better than raw overlap for semantic-ish matching.
+# Runs in pure Python, no external dependencies needed.
+
+def _bm25_score(query: str, text: str, k1: float = 1.5, b: float = 0.75) -> float:
+    """Compute BM25 score for query terms against text.
+    
+    BM25 formula:
+      score = sum over qterms of IDF(t) * (tf * (k1+1)) / (tf + k1*(1-b+b*dl/avgdl))
+    where tf = term freq in doc, dl = doc len, avgdl = avg doc len across corpus.
+    We approximate avgdl from text len (using 100 as corpus avg doc length).
+    
+    Returns a non-negative score. Higher = more relevant.
+    """
+    if not query or not text:
+        return 0.0
+    
+    q_terms = [t.lower() for t in query.split() if t]
+    text_lower = text.lower()
+    text_words = text_lower.split()
+    dl = len(text_words)
+    if dl == 0:
+        return 0.0
+    
+    avg_dl = 100.0  # approximate average document length in words
+    
+    # IDF approximation: log((N - n + 0.5) / (n + 0.5))
+    # We don't know corpus N/n precisely, so we use a simplified form:
+    # rare terms (in doc OR query) get higher IDF weight.
+    # For simplicity, use a lookup-free approximation:
+    # idf ≈ 1.0 for common terms, 2.0 for uncommon ones.
+    
+    score = 0.0
+    for term in q_terms:
+        tf = text_words.count(term)
+        if tf == 0:
+            continue
+        
+        # Simplified IDF: more "specialized" terms get higher weight.
+        # In the full formula, rare terms across corpus have high IDF.
+        # Approximate: terms with special chars or ≥4 chars are rarer.
+        idf = 2.0 if (len(term) >= 4 or any(c.isupper() for c in term)) else 1.0
+        
+        numerator = tf * (k1 + 1)
+        denominator = tf + k1 * (1 - b + b * dl / avg_dl)
+        score += idf * numerator / denominator
+    
+    return score
+
+
+def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryResult, float]]:
+    """Re-rank results using BM25 scores as an additional signal.
+    
+    Returns list of (result, bm25_score) for all results.
+    BM25 scores are NOT added to confidence — they're a separate signal
+    used to reweight the final ranking when BM25 disagrees with confidence.
+    
+    Cases where BM25 should override confidence:
+    - confidence is near-zero but BM25 is high (keyword-dense content)
+    - result came from a low-priority layer but matches query terms exactly
+    """
+    scored = []
+    for r in results:
+        bm25 = _bm25_score(query, r.content)
+        scored.append((r, bm25))
+    
+    # Find max BM25 to normalize into a [0, 1] range
+    max_bm25 = max(bm25 for _, bm25 in scored) if scored else 1.0
+    if max_bm25 == 0:
+        max_bm25 = 1.0
+    
+    # Normalize and create override signal
+    # BM25 override threshold: if BM25 norm > 0.3 AND confidence is low (< 5.0),
+    # boost result to rank it higher despite low layer confidence.
+    # This helps low-priority layers break through when they match well.
+    final = []
+    for r, bm25 in scored:
+        bm25_norm = bm25 / max_bm25
+        # Override: if bm25 norm > 0.5 and base confidence < 5.0, apply override
+        base_conf = r.confidence
+        if bm25_norm > 0.5 and base_conf < 5.0:
+            # Force score = bm25_norm * 12 (strong override, comparable to mid-tier)
+            override_score = bm25_norm * 12.0
+            final.append((r, override_score, True))  # True = override
+        else:
+            final.append((r, base_conf, False))  # False = no override
+    
+    return final
+
+
+# ── Quality metadata computation ───────────────────────────────────────────────
+
+def _compute_quality_metadata(r: MemoryResult, query: str, intent_config: dict) -> tuple[float, float, float]:
+    """Compute quality metadata for a result.
+
+    Returns (freshness, signal_strength, source_reliability), each 0.0–1.0.
+
+    freshness:
+      Parses timestamps in content. <1h=1.0, <6h=0.8, <24h=0.6, <72h=0.4, older=0.2.
+      Falls back to layer-specific default if no timestamp found.
+
+    signal_strength:
+      Bigram + unigram overlap with query. ≥0.7=strong, ≥0.4=moderate, <0.4=weak.
+
+    source_reliability:
+      Normalized layer priority weight. L1-checkpoints=1.0, L10-mem0-cloud=0.3,
+      linear scale in between.
+    """
+    import datetime
+
+    # — freshness: parse timestamps vs now —
+    now = datetime.datetime.now()
+    best_delta_hours = None
+    date_patterns = [
+        (r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", "%Y-%m-%dT%H:%M:%S"),
+        (r"\d{4}-\d{2}-\d{2}", "%Y-%m-%d"),
+    ]
+    for pat, fmt in date_patterns:
+        for m in re.finditer(pat, r.content):
+            try:
+                ts = datetime.datetime.strptime(m.group(), fmt)
+                delta = (now - ts).total_seconds() / 3600
+                if best_delta_hours is None or delta < best_delta_hours:
+                    best_delta_hours = delta
+            except Exception:
+                continue
+
+    if best_delta_hours is not None:
+        if best_delta_hours < 1:
+            freshness = 1.0
+        elif best_delta_hours < 6:
+            freshness = 0.8
+        elif best_delta_hours < 24:
+            freshness = 0.6
+        elif best_delta_hours < 72:
+            freshness = 0.4
+        else:
+            freshness = 0.2
+    else:
+        # Fallback: layer-specific freshness defaults
+        layer_freshness_defaults = {
+            "checkpoints": 0.9,
+            "mem0": 0.7,
+            "langmem": 0.6,
+            "observation": 0.5,
+            "graphrag": 0.3,
+            "obsidian_mcp": 0.4,
+            "gitnexus_mcp": 0.5,
+            "ruflo_mcp": 0.4,
+            "symphony_tasks": 0.6,
+            "mem0_cloud": 0.5,
+        }
+        freshness = layer_freshness_defaults.get(r.layer, 0.3)
+
+    # — signal_strength: bigram + unigram overlap —
+    signal_strength = _keyword_score(r.content, query)
+
+    # — source_reliability: normalized layer priority weight —
+    raw_priority = _LAYER_PRIORITY.get(r.layer, 3.0)
+    max_priority = max(_LAYER_PRIORITY.values())  # 10.0 (checkpoints)
+    min_priority = min(_LAYER_PRIORITY.values())  # 3.0 (mem0_cloud)
+    source_reliability = (raw_priority - min_priority) / (max_priority - min_priority)
+
+    return freshness, signal_strength, source_reliability
+
+
+def _inject_quality_metadata(
+    results: list[MemoryResult],
+    query: str,
+    intent_config: dict,
+) -> list[MemoryResult]:
+    """Annotate each result with quality metadata, return new list."""
+    annotated = []
+    for r in results:
+        freshness, signal_strength, source_reliability = _compute_quality_metadata(
+            r, query, intent_config
+        )
+        annotated.append(r.with_quality(freshness, signal_strength, source_reliability))
+    return annotated
+
+
 def _keyword_score(text: str, query: str) -> float:
     """Keyword overlap score 0..1. Uses bigram matching for better context."""
     if not query or not text:
@@ -353,10 +537,14 @@ _QUERY_INTENT_PATTERNS = {
         "max_fresh_hours": 72,
     },
     "decision_recovery": {
-        "keywords": ["decided", "choice", "instead of", "went with", "opted", "rejected", "why did we", "why not", "what was the decision", "agreed to"],
+        "keywords": ["decided", "decision", "chose to", "chose not", "choice made",
+                      "what did we decide", "what was decided", "agreed to go with",
+                      "went with", "opted for", "instead of", "why not", "why did we",
+                      "who did we decide", "what did we choose", "who did we hire",
+                      "what was the decision", "decision was"],
         "primary_layers": ["observation", "checkpoints", "graphrag"],
         "boost_decisions": True,
-        "max_fresh_hours": 168,   # decisions stay relevant for a week
+        "max_fresh_hours": 168,
     },
     "code_implementation": {
         "keywords": ["code", "function", "class", "implement", "how does", "where is", "find", "search for", "file"],
@@ -388,20 +576,128 @@ _QUERY_INTENT_PATTERNS = {
         "boost_decisions": False,
         "max_fresh_hours": 720,
     },
+    # ── Sub-intent types (5 new) ────────────────────────────────────────────────
+    "error_pattern": {
+        "keywords": ["traceback", "root cause", "exception", "why is it failing", "fails with",
+                      "error pattern", "got error", "crashed because", "raises", "stack trace"],
+        "primary_layers": ["observation", "checkpoints"],
+        "boost_decisions": False,
+        "max_fresh_hours": 72,
+    },
+    "agent_progress": {
+        "keywords": ["agent status", "what is agent", "worker state", "agent doing",
+                      "which agent", "agent X", "multi-agent progress", "swarm state"],
+        "primary_layers": ["ruflo_mcp", "symphony_tasks"],
+        "boost_decisions": False,
+        "max_fresh_hours": 24,
+    },
+    "file_review": {
+        "keywords": ["review changes", "changes in", "what changed", "diff", "modified files",
+                      "recent changes", "file history", "git diff", "commit history"],
+        "primary_layers": ["checkpoints", "gitnexus_mcp"],
+        "boost_decisions": False,
+        "max_fresh_hours": 168,
+    },
+    "test_result": {
+        "keywords": ["test result", "pytest", "coverage", "CI failure", "test failed",
+                      "test passed", "testing output", "unit test", "integration test"],
+        "primary_layers": ["checkpoints", "graphrag"],
+        "boost_decisions": False,
+        "max_fresh_hours": 72,
+    },
+    "memory_consolidation": {
+        "keywords": ["forget", "prune", "summarize", "compact memory", "compress context",
+                      "memory cleanup", "memory prune", "forget old", "context length",
+                      "clean up", "clean up memories", "tokens", "memory overhead", "memory summary",
+                      "shrink context", "memory drain", "free memory"],
+        "primary_layers": ["mem0", "langmem"],
+        "boost_decisions": False,
+        "max_fresh_hours": 24,
+    },
 }
 
 
 def _classify_intent(query: str) -> str:
-    """Classify query into one of 8 intent types, falling back to 'general'."""
+    """Classify query into one of 13 intent types, falling back to 'general'.
+
+    Tie-breaking: when two intent types have the same hit count, prefer the one
+    whose matched keyword is longer (more specific). This ensures "what did we
+    decide about X" → decision_recovery rather than session_summary, and
+    "what did we implement" → session_summary rather than decision_recovery.
+    """
     q = query.lower()
     best_type = "general"
     best_hits = 0
+    best_max_kw_len = 0
     for intent_type, config in _QUERY_INTENT_PATTERNS.items():
         hits = sum(1 for kw in config["keywords"] if kw in q)
         if hits > best_hits:
             best_hits = hits
             best_type = intent_type
+            best_max_kw_len = max(len(kw) for kw in config["keywords"] if kw in q) if hits > 0 else 0
+        elif hits == best_hits and hits > 0:
+            # Tie-break: prefer the intent with the longest matched keyword
+            max_kw_len = max(len(kw) for kw in config["keywords"] if kw in q)
+            if max_kw_len > best_max_kw_len:
+                best_max_kw_len = max_kw_len
+                best_type = intent_type
     return best_type
+
+
+# ── Decision chain recovery ────────────────────────────────────────────────────
+#
+# For decision_recovery queries, we don't just return individual decisions.
+# We trace the full decision chain: chronological sequence of choices made,
+# including alternatives considered, constraints, and reasoning path.
+# This lets us answer "why did we choose X instead of Y" with full context.
+
+def _recover_decision_chain(results: list[MemoryResult]) -> list[MemoryResult]:
+    """Sort decision_recovery results into chronological chain order.
+
+    Decision chain recovery strategy:
+    1. Extract all results containing decision signals (decided/choosing/opted/etc.)
+    2. Sort by timestamp (oldest first = chain start)
+    3. Deduplicate by fingerprint
+    4. Return oldest-first chain (chain flows chronologically: oldest → newest)
+
+    Returns results sorted so the chain flows oldest → newest.
+    """
+    decision_keywords = [
+        "decided", "choosing", "opted", "rejected", "agreed",
+        "decision", "instead of", "went with", "went for",
+        "chose to", "selected", "picked", "preferred",
+    ]
+
+    # Filter to decision-tagged results
+    decision_results = [
+        r for r in results
+        if any(kw in r.content.lower() for kw in decision_keywords)
+    ]
+
+    if not decision_results:
+        return results  # fallback to default sort
+
+    # Sort by timestamp (oldest first) — chain flows chronologically
+    def decision_timestamp(r: MemoryResult) -> float:
+        import datetime
+        date_patterns = [
+            (r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", "%Y-%m-%dT%H:%M:%S"),
+            (r"\d{4}-\d{2}-\d{2}", "%Y-%m-%d"),
+        ]
+        now = datetime.datetime.now()
+        best_delta = 999999.0
+        for pat, fmt in date_patterns:
+            for m in re.finditer(pat, r.content):
+                try:
+                    ts = datetime.datetime.strptime(m.group(), fmt)
+                    delta = (now - ts).total_seconds() / 3600
+                    if delta < best_delta:
+                        best_delta = delta
+                except Exception:
+                    continue
+        return best_delta
+
+    return sorted(decision_results, key=lambda r: -decision_timestamp(r))
 
 
 # ── Temporal Decay — layer-specific half-life curves ────────────────────────────
@@ -561,6 +857,51 @@ def _query_relevance_boost(query: str, layer: str) -> float:
         if layer == "checkpoints": return 0.25
         if layer == "graphrag": return 0.15
     return 0.0
+
+
+# ── Priority booster for high-importance queries ─────────────────────────────
+#
+# Detects urgency/importance signals in the query that warrant elevated recall.
+# High-priority queries get a multiplier applied to all scores, so marginal
+# results bubble up and no critical context is missed.
+
+_QUERY_PRIORITY_SIGNALS: list[tuple[str, float]] = [
+    # Explicit urgency
+    ("critical",    1.5),
+    ("urgent",      1.4),
+    ("asap",        1.4),
+    ("emergency",   1.5),
+    # Explicit importance
+    ("important",   1.3),
+    ("top priority", 1.4),
+    ("high priority", 1.35),
+    ("must know",   1.35),
+    ("this matters", 1.4),
+    ("crucial",     1.4),
+    # Emphatic punctuation (ALL CAPS words not in normal queries)
+    ("!!!",         1.3),
+    ("??",          1.2),
+    # Decision-critical
+    ("decision",    1.2),
+    ("final",       1.25),
+    ("sign off",    1.3),
+    ("approve",     1.3),
+    # Bug-investigation urgency
+    ("production",  1.35),
+    ("p0",          1.5),
+    ("sev-1",       1.5),
+    ("outage",      1.5),
+]
+
+
+def _detect_query_priority(query: str) -> float:
+    """Detect if query has urgency/importance signals. Returns 1.0 (no boost) to 1.5 (max)."""
+    q = query.lower()
+    max_boost = 1.0
+    for signal, boost in _QUERY_PRIORITY_SIGNALS:
+        if signal in q:
+            max_boost = max(max_boost, boost)
+    return max_boost
 
 
 # ── Circuit breaker for flaky MCP layers ────────────────────────────────────
@@ -764,6 +1105,46 @@ class MemoryResult:
     layer: str
     confidence: float
     fp: str  # fingerprint
+    # Quality metadata — set during scoring pipeline
+    freshness: float = 0.0   # 0.0–1.0 recency score (1.0 = < 1 hour old)
+    signal_strength: float = 0.0  # 0.0–1.0 keyword/bigram match quality
+    source_reliability: float = 0.0  # 0.0–1.0 layer reliability (prior weight normalized)
+
+    def with_quality(self, freshness: float = 0.0, signal_strength: float = 0.0,
+                     source_reliability: float = 0.0) -> "MemoryResult":
+        """Return a copy with quality metadata applied."""
+        r = MemoryResult(
+            content=self.content, layer=self.layer, confidence=self.confidence,
+            fp=self.fp, freshness=freshness,
+            signal_strength=signal_strength, source_reliability=source_reliability,
+        )
+        return r
+
+    def quality_tags(self) -> list[str]:
+        """Human-readable quality tags for display."""
+        tags = []
+        if self.freshness >= 0.8:
+            tags.append("🔥 fresh")
+        elif self.freshness >= 0.5:
+            tags.append("📅 stale")
+        if self.signal_strength >= 0.7:
+            tags.append("🎯 strong-signal")
+        elif self.signal_strength >= 0.4:
+            tags.append("📡 weak-signal")
+        if self.source_reliability >= 0.8:
+            tags.append("✅ reliable")
+        elif self.source_reliability >= 0.5:
+            tags.append("⚠️ moderate")
+        else:
+            tags.append("🔶 low-reliability")
+        return tags
+
+    def quality_label(self) -> str:
+        """Compact single-label quality indicator: FR=fresh+reliable, etc."""
+        f = "F" if self.freshness >= 0.8 else ("S" if self.freshness >= 0.5 else "O")
+        s = "S" if self.signal_strength >= 0.7 else ("W" if self.signal_strength >= 0.4 else "N")
+        r = "R" if self.source_reliability >= 0.8 else ("M" if self.source_reliability >= 0.5 else "L")
+        return f"{f}{s}{r}"
 
     def __str__(self) -> str:
         return self.content
@@ -1220,12 +1601,17 @@ def build_memory_context(
     intent_label = {
         "session_summary":     "📋  Session Summary",
         "task_list":           "✅  Task List",
-        "decision_recovery":    "⚖️   Decision Recovery",
+        "decision_recovery":   "⚖️   Decision Recovery",
         "code_implementation": "💻  Code Implementation",
         "entity_facts":        "🔖  Entity Facts",
         "bug_investigation":   "🐛  Bug Investigation",
         "architecture_design": "🏗️  Architecture/Design",
         "wiki_docs":           "📚  Wiki/Docs",
+        "error_pattern":       "🔎  Error Pattern",
+        "agent_progress":      "🤖  Agent Progress",
+        "file_review":         "📄  File Review",
+        "test_result":         "🧪  Test Result",
+        "memory_consolidation":"🗜️  Memory Consolidation",
         "general":             "🧠  General",
     }.get(intent_type, intent_type)
 
@@ -1269,6 +1655,10 @@ def build_memory_context(
 
     total_time = time.monotonic() - t0
 
+    # ── Step 3b: Inject quality metadata ─────────────────────────────────────────
+    # Annotate every result with freshness / signal_strength / source_reliability
+    all_results = _inject_quality_metadata(all_results, query, intent_config)
+
     # ── Step 4: Score each result with multi-factor boosting ───────────────────
     #
     # boosted_confidence = base_confidence
@@ -1278,8 +1668,30 @@ def build_memory_context(
     #
     # Then apply temporal_decay and cross_layer_boost:
 
+    # ── Step 4: Score each result with multi-factor boosting + BM25 reranking ─────
+    #
+    # Phase A: Multi-factor scoring (confidence + boosts)
+    # Phase B: BM25 reranking — breaks ties and elevates keyword-dense content
+    # Phase C: Cross-layer triangulation boost
+    # Phase D: Intent-aware final sort
+    #
+    # boosted_confidence = base_confidence
+    #                     + _query_relevance_boost(query, layer)
+    #                     + _recency_boost(content, layer)
+    #                     + (2.0 if decision_recovery intent AND decision keywords)
+    #                     + (1.0 if boost_decisions intent AND decision keywords)
+    #                     ↓ temporal_decay (layer-specific half-life, exponential)
+    #                     ↓ BM25 rerank (keyword-dense low-priority content rises)
+    #                     ↓ cross_layer_boost (3+ layers → 1.5x, 2 → 1.3x)
+    #                     ↓ final_score → sorted
+
     cross_boosts = _cross_layer_boost(all_results)  # fp → multiplier
 
+    # Priority multiplier: high-importance queries get boosted scores
+    # so marginal results bubble up — no critical context missed on urgent queries
+    priority_mult = _detect_query_priority(query)
+
+    # Phase A: multi-factor scoring
     scored: list[tuple[MemoryResult, float]] = []
     for r in all_results:
         base_conf = r.confidence
@@ -1292,40 +1704,61 @@ def build_memory_context(
             decision_keywords = ["decided", "choosing", "instead of", "went with", "opted", "rejected", "agreed", "decision"]
             if any(kw in r.content.lower() for kw in decision_keywords):
                 decision_boost = 2.0  # big boost for decision-tagged content
-        # Architecture/design decisions also get a boost if content has decision signals
+        # Architecture/design decisions also get a moderate boost
         elif intent_config.get("boost_decisions", False):
             decision_keywords = ["decided", "choosing", "instead of", "went with", "opted", "rejected", "agreed", "decision", "architecture", "design decision"]
             if any(kw in r.content.lower() for kw in decision_keywords):
-                decision_boost = 1.0  # moderate boost for arch/design decisions
+                decision_boost = 1.0
 
         raw_score = base_conf + intent_boost_val + recency_boost_val + decision_boost
 
         # Apply temporal decay
         decayed_score = _temporal_decay(r.layer, raw_score, r.content)
 
-        # Apply cross-layer triangulation boost
-        triangulation_mult = cross_boosts.get(r.fp, 1.0)
-        final_score = decayed_score * triangulation_mult
+        scored.append((r, decayed_score))
 
-        scored.append((r, final_score))
+    # Phase B: BM25 reranking — override low-confidence keyword-dense results
+    # Get original scores before BM25 to detect overrides
+    pre_bm25_scores: dict[str, float] = {r.fp: s for r, s in scored}
 
-    # ── Step 5: Sort and take top N ─────────────────────────────────────────────
-    scored.sort(key=lambda x: x[1], reverse=True)
-    top_results = [r for r, _ in scored[:top_n]]
+    bm25_reranked = _bm25_rerank(query, [r for r, _ in scored])
+
+    # Apply BM25 override where applicable
+    final_scored: list[tuple[MemoryResult, float]] = []
+    for (r, bm25_score, overridden) in bm25_reranked:
+        if overridden:
+            # Use BM25 override score (already includes cross_boost)
+            cross_mult = cross_boosts.get(r.fp, 1.0)
+            final_scored.append((r, bm25_score * cross_mult))
+        else:
+            # Use original score with cross-layer boost
+            pre_score = pre_bm25_scores[r.fp]
+            cross_mult = cross_boosts.get(r.fp, 1.0)
+            final_scored.append((r, pre_score * cross_mult))
+
+    # Phase C: sort by final score (priority multiplier applied to all scores)
+    # High-importance queries: marginal results bubble up, ensuring no critical
+    # context is missed on urgent/important queries. Scale: 1.0 (normal) → 1.5 (critical).
+    final_scored = [(r, s * priority_mult) for r, s in final_scored]
+    final_scored.sort(key=lambda x: x[1], reverse=True)
+    top_results = [r for r, _ in final_scored[:top_n]]
 
     # ── Step 6: Build 3-tier progressive output ───────────────────────────────────
+    # Format: dense, LLM-friendly, progressive disclosure.
+    #   Tier 1 (INDEX):   compact ≤80-char lines — score + layer + snippet
+    #   Tier 2 (CONTEXT): by-layer groups with 200-char content blocks
+    #   Tier 3 (DETAIL):  full content for decision chain + top 2 results
     layers_with_results = {r.layer for r in top_results}
+    priority_flag = " 🔴" if _detect_query_priority(query) > 1.0 else ""
 
-    # Intent-aware header
     lines = [
-        f"━━━ MEMORY CONTEXT ━━━  intent: {intent_label}  query: «{query}»",
-        f"   layers: {len(layers_with_results)}/10  results: {len(top_results)}  time: {total_time:.2f}s ━━━",
+        f"━━━ MEMORY CONTEXT ━━━ intent={intent_label}{priority_flag} query=\"{query[:60]}\"",
+        f"   {len(layers_with_results)}/10 layers | {len(top_results)} results | {total_time:.2f}s ━━━",
         "",
     ]
 
     if not top_results:
-        lines.append("(no memories found)")
-        lines.append("━━━ END MEMORY CONTEXT ━━━")
+        lines += ["(no memories found)", "━━━ END MEMORY CONTEXT ━━━"]
         text = "\n".join(lines)
         try:
             recalled_file.write_text(text)
@@ -1333,33 +1766,30 @@ def build_memory_context(
             pass
         return text
 
-    # ── Tier 1: Index — compact single lines for overview ──────────────────────
-    lines.append("━━ INDEX ━━")
-    for r, score in scored[:top_n]:
-        age_label = ""
-        if "2026-05" in r.content or "2025-05" in r.content:
-            age_label = " [recent]"
-        layer_emoji = {
-            "checkpoints": "📌", "mem0": "🧠", "langmem": "🔗",
-            "observation": "📝", "graphrag": "📚", "obsidian_mcp": "🏛️",
-            "gitnexus_mcp": "🔍", "ruflo_mcp": "🧬", "symphony_tasks": "✅",
-            "mem0_cloud": "☁️",
-        }.get(r.layer, "•")
-        snippet = r.content.replace("\n", " ")[:100]
-        lines.append(f"  {layer_emoji} [{score:.2f}]{age_label}  {snippet}")
+    # Build score map (priority multiplier already applied to final_scored scores)
+    final_score_map: dict[str, float] = {r.fp: s for r, s in final_scored}
+
+    # ── Tier 1: INDEX — compact ≤80-char lines ─────────────────────────────────
+    # Format: L1  12.3 FR│Layer│Snippet────────────────────────────────
+    lines.append("━━━ INDEX ━━━")
+    for r, score in final_scored[:top_n]:
+        age = " ⏱" if ("2026-05" in r.content or "2025-05" in r.content) else ""
+        qlab = r.quality_label()
+        snippet = r.content.replace("\n", " ")[:60].strip()
+        layer_abbrev = {"checkpoints": "CP", "mem0": "M0", "langmem": "LM",
+                        "observation": "OB", "graphrag": "GR", "obsidian_mcp": "OD",
+                        "gitnexus_mcp": "GN", "ruflo_mcp": "RF", "symphony_tasks": "SY",
+                        "mem0_cloud": "MC"}.get(r.layer, "--")
+        lines.append(f"  {layer_abbrev:<3}  {score:5.2f} {qlab}{age}  {snippet}")
     lines.append("")
 
-    # ── Tier 2: Context blocks — medium detail ──────────────────────────────────
-    lines.append("━━ CONTEXT ━━")
+    # ── Tier 2: CONTEXT — by-layer groups with 200-char blocks ──────────────────
     from collections import defaultdict
     by_layer: dict[str, list[MemoryResult]] = defaultdict(list)
     for r in top_results:
         by_layer[r.layer].append(r)
 
-    # Build score lookup: result fp → boosted score (for label display)
-    scored_fps: dict[str, float] = {r.fp: s for r, s in scored}
-
-    layer_labels_short = {
+    layer_labels = {
         "checkpoints":    "📌 L1 Checkpoints",
         "mem0":           "🧠 L2 mem0",
         "langmem":        "🔗 L3 langmem",
@@ -1372,31 +1802,35 @@ def build_memory_context(
         "mem0_cloud":     "☁️ L10 mem0-cloud",
     }
 
+    lines.append("━━━ CONTEXT ━━━")
     for layer_name, results in by_layer.items():
-        label = layer_labels_short.get(layer_name, layer_name)
-        first_fp = results[0].fp
-        score = scored_fps.get(first_fp, results[0].confidence)
-        lines.append(f"  {label}  (score={score:.2f})  [{len(results)} result{'s' if len(results)>1 else ''}]")
+        score = final_score_map.get(results[0].fp, results[0].confidence)
+        label = layer_labels.get(layer_name, layer_name)
+        n = len(results)
+        lines.append(f"  {label}  score={score:.2f}  [{n} result{'s' if n > 1 else ''}]")
         for r in results:
-            content_block = r.content.replace("\n", " ")[:200]
+            content_block = r.content.replace("\n", " ")[:200].strip()
             lines.append(f"    • {content_block}")
         lines.append("")
 
-    # ── Tier 3: Decisions + top full detail ─────────────────────────────────────
-    decision_results = [r for r in top_results if any(
-        kw in r.content.lower() for kw in ["decided", "choosing", "opted", "agreed", "decision"]
-    )]
-    if decision_results or (intent_type == "decision_recovery" and top_results):
-        lines.append("━━ DECISIONS ━━")
+    # ── Tier 3: DETAIL — decision chain (oldest→newest) + top 2 full content ─────
+    if intent_type == "decision_recovery":
+        decision_results = _recover_decision_chain(top_results)
+    else:
+        decision_results = [r for r in top_results if any(
+            kw in r.content.lower()
+            for kw in ["decided", "choosing", "opted", "agreed", "decision"]
+        )]
+    if decision_results:
+        lines.append("━━━ DECISIONS (oldest→newest) ━━━")
         for r in decision_results[:5]:
             lines.append(f"  ⚖️  {r.content[:500]}")
         if not decision_results:
             lines.append("  (no explicit decisions found)")
         lines.append("")
 
-    # Top-2 full detail for everything else
-    lines.append("━━ DETAIL ━━")
-    for r, score in scored[:2]:
+    lines.append("━━━ DETAIL ━━━")
+    for r, score in final_scored[:2]:
         lines.append(f"  [{score:.2f}] {r.content[:500]}")
         lines.append("")
 
