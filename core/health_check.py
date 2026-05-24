@@ -70,5 +70,5 @@ _ARCHIVED_FEATURES: dict[str, dict[str, Any]] = {
     "pydantic_ai": {"status": "abandoned", "pkg": "pydantic_ai", "env": None, "enabled": False},
     "agentops": {"status": "abandoned", "pkg": "agentops", "env": "AGENTOPS_API_KEY", "enabled": False},
     "mirofish": {"status": "abandoned", "pkg": None, "env": None, "enabled": False},
-    "ruflo": {"status": "abandoned", "pkg": None, "env": "OPENROUTER_API_KEY", "enabled": False},
+    "ruflo": {"status": "abandoned", "pkg": None, "env": "MINIMAX_API_KEY", "enabled": False},
 }

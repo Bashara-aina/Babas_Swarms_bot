@@ -396,7 +396,7 @@ def create_hermes_agent(
         skip_memory=skip_memory,
         save_trajectories=save_trajectories,
         verbose_logging=verbose_logging,
-        base_url=base_url or os.environ.get("OPENROUTER_BASE_URL", "https://api.minimax.io/anthropic"),
+        base_url=base_url or os.environ.get("MINIMAX_API_BASE", "https://api.minimax.io/anthropic"),
         api_key=api_key or os.environ.get("MINIMAX_API_KEY"),
         provider=provider,
     )

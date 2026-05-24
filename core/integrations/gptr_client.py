@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class GPTResearcherClient:
     """
     Wrapper around gpt-researcher library.
-    Uses OpenRouter (already configured in Legion via OPENROUTER_API_KEY).
+    Uses MiniMax (already configured in Legion via MINIMAX_API_KEY).
     Falls back to direct LLM call if gpt-researcher unavailable.
     """
 

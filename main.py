@@ -990,7 +990,7 @@ async def on_startup(bot: Bot) -> None:
 
     # ruflo sidecar (synchronous launch + async health check)
     global _ruflo_process
-    if os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+    if os.getenv("MINIMAX_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
         try:
             proc = subprocess.Popen(
                 ["node", "tools/ruflo/server.js"],
@@ -1269,7 +1269,7 @@ async def on_startup(bot: Bot) -> None:
 
     key_status = verify_api_keys()
     active = [k for k, v in key_status.items() if v]
-    cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+    cloud = ["MINIMAX_API_KEY", "OLLAMA_API_KEY"]
 
     display = await computer_agent.detect_display()
 
