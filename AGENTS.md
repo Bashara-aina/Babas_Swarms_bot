@@ -88,7 +88,7 @@ tests/        — pytest-asyncio suite
 
 ## LLM Model Reference
 Primary: `minimax/MiniMax-M2.7` (MiniMax M2.7)
-Fallback chain: MiniMax-M2.7 → gemini/gemini-2.0-flash-exp:free → minimax/MiniMax-Text-01 → free tier
+Fallback chain: MiniMax-M2.7 → MiniMax-Text-01 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
 Vision (local): `ollama_chat/gemma4:e4b` (RTX 3060 only)
 See `LEGACY_FALLBACK_CHAIN` in `core/agent_registry.py` for per-agent chains.
 
@@ -684,7 +684,7 @@ Ruflo was just... already there.
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **swarm-bot** (68803 symbols, 167635 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **swarm-bot** (69988 symbols, 169601 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

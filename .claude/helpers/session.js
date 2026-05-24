@@ -123,13 +123,14 @@ const commands = {
   },
 };
 
-// CLI
-const [,, command, ...args] = process.argv;
-
-if (command && commands[command]) {
-  commands[command](...args);
-} else {
-  console.log('Usage: session.js <start|restore|end|status|update|metric> [args]');
+// CLI — only run when executed directly, not when imported as module
+if (require.main === module) {
+  const [,, command, ...args] = process.argv;
+  if (command && commands[command]) {
+    commands[command](...args);
+  } else {
+    console.log('Usage: session.js <start|restore|end|status|update|metric> [args]');
+  }
 }
 
 module.exports = commands;

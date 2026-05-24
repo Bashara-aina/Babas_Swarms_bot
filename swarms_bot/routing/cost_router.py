@@ -50,19 +50,13 @@ class ModelTier:
         return (self.cost_per_1m_input + self.cost_per_1m_output) / 2 / 1_000_000
 
 
-# Model pricing as of March 2026 — aligned with models.yaml naming conventions
-# Uses minimax-coding-plan prefix for MiniMax models, gemini prefix for Google
+# Model pricing as of March 2026 — MiniMax only + local Ollama
 MODEL_TIERS: list[ModelTier] = [
-    # Free tier (MiniMax free fallbacks)
+    # Free tier (MiniMax free + local Ollama)
     ModelTier("MiniMax M2.7", "minimax-coding-plan/MiniMax-M2.7", "minimax", 0.0, 0.0, "free", 204800),
     ModelTier("MiniMax Text-01", "minimax-coding-plan/MiniMax-Text-01", "minimax", 0.0, 0.0, "free", 245760),
-    # Budget tier (free cloud from FALLBACK_CHAIN)
-    ModelTier("Gemini Flash", "gemini/gemini-2.0-flash-exp:free", "gemini", 0.0, 0.0, "budget", 1048576),
-    ModelTier("OpenRouter Qwen Coder", "openrouter/qwen/qwen3-coder:free", "openrouter", 0.0, 0.0, "budget", 65536),
-    # Standard tier
-    ModelTier("OpenRouter DeepSeek R1", "openrouter/deepseek/deepseek-r1:free", "openrouter", 0.0, 0.0, "standard", 64000),
-    # Premium tier (paid models — fallback only)
-    ModelTier("Gemini 1.5 Pro", "gemini/gemini-1.5-pro", "gemini", 3.50, 10.50, "premium", 1048576),
+    ModelTier("Ollama Gemma4", "ollama_chat/gemma4:e4b", "ollama", 0.0, 0.0, "free", 8192),
+    ModelTier("Ollama Llama3.3", "ollama_chat/llama3.3:70b", "ollama", 0.0, 0.0, "free", 131072),
 ]
 
 # Complexity signals

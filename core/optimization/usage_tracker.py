@@ -17,31 +17,16 @@ logger = logging.getLogger(__name__)
 # Pricing per 1M tokens (input/output) in USD — 0.0 = free tier
 # Covers all models used in LEGACY_FALLBACK_CHAIN + agent_registry fallback chains
 PRICING: dict[str, dict[str, float]] = {
-    # MiniMax stack
+    # MiniMax stack (free)
     "minimax-coding-plan/MiniMax-Text-01":                        {"input": 0.0, "output": 0.0},
     "minimax-coding-plan/MiniMax-M2.7":                           {"input": 0.0, "output": 0.0},
-    "minimax-coding-plan/MiniMax-M2.7":               {"input": 0.0, "output": 0.0},
-    # Ollama local
+    # Ollama local (free)
     "ollama_chat/gemma3:12b":                         {"input": 0.0, "output": 0.0},
     "ollama_chat/qwen3.5:35b":                        {"input": 0.0, "output": 0.0},
     "ollama_chat/exaone-deep:32b":                    {"input": 0.0, "output": 0.0},
     "ollama_chat/phi4":                               {"input": 0.0, "output": 0.0},
     "ollama_chat/llama3.3:70b":                       {"input": 0.0, "output": 0.0},
     "ollama_chat/gemma4:e4b":                         {"input": 0.0, "output": 0.0},
-    # OpenRouter free
-    "openrouter/qwen/qwen3-coder:free":               {"input": 0.0, "output": 0.0},
-    "openrouter/openai/gpt-oss-120b:free":            {"input": 0.0, "output": 0.0},
-    "openrouter/deepseek/deepseek-r1:free":           {"input": 0.0, "output": 0.0},
-    "openrouter/meta-llama/llama-3.3-70b-instruct:free": {"input": 0.0, "output": 0.0},
-    "openrouter/anthropic/claude-opus-4":             {"input": 0.0, "output": 0.0},
-    # Gemini
-    "gemini/gemini-3.1-pro":                           {"input": 0.035, "output": 0.105},
-    "gemini/gemini-2.0-flash-exp:free":               {"input": 0.0, "output": 0.0},
-    "gemini/gemma-3-27b-it":                           {"input": 0.0, "output": 0.0},
-    # Cerebras
-    "cerebras/qwen-3-32b":                            {"input": 0.0, "output": 0.0},
-    # Anthropic
-    "anthropic/claude-sonnet-4-20250514":             {"input": 0.0, "output": 0.0},
     # Vision
     "vision":                                         {"input": 0.0, "output": 0.0},  # alias for ollama/gemma4:e4b
 }

@@ -204,20 +204,20 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
         # browser-use uses LangChain-compatible LLMs
         # Support openrouter or openai-compatible providers via BROWSER_USE_MODEL
         if "/" in model_str:
-            # e.g. "openrouter/google/gemini-flash-1.5" → use OpenAI-compatible client
+            # e.g. "minimax-coding-plan/MiniMax-Text-01" → use OpenAI-compatible client
             provider, model_id = model_str.split("/", 1)
-            if provider == "openrouter":
+            if provider == "minimax":
                 llm = ChatOpenAI(
                     model=model_id,
-                    base_url="https://openrouter.ai/api/v1",
-                    api_key=os.getenv("OPENROUTER_API_KEY", ""),
+                    base_url="https://api.minimax.io/anthropic",
+                    api_key=os.getenv("MINIMAX_API_KEY", ""),
                 )
             else:
                 # Generic OpenAI-compatible endpoint
                 llm = ChatOpenAI(model=model_str)
         else:
-            # Default: use whatever OPENAI_API_KEY is set
-            llm = ChatOpenAI(model=model_str or "gpt-4o-mini")
+            # Default: use MiniMax
+            llm = ChatOpenAI(model=model_str or "MiniMax-Text-01", base_url="https://api.minimax.io/anthropic", api_key=os.getenv("MINIMAX_API_KEY", ""))
 
         # Build domain restriction lists for autonomous navigation
         # When a URL is explicitly provided, restrict browser to that domain only

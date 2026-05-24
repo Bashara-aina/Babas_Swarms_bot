@@ -52,7 +52,7 @@ When Bashara sends a message:
 [MESSAGE RECEIVED]
        │
        ▼
-[INTENT CLASSIFIER] ← groq/llama-3.1-8b-instant (fast, 50ms)
+[INTENT CLASSIFIER] ← minimax-coding-plan/MiniMax-Text-01 (fast classification)
        │
        ├── Simple chat → Legion responds directly (no agent spawning)
        ├── Research task → ResearchSwarm (parallel agents)

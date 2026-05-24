@@ -389,7 +389,7 @@ class SupabaseClient:
 
         content = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="cerebras/qwen-3-235b-a22b",
+            model="minimax-coding-plan/MiniMax-Text-01",
             temperature=0.2,
             max_tokens=3000,
         )

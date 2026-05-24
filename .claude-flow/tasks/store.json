@@ -155,6 +155,23 @@
       "createdAt": "2026-05-18T03:29:06.371Z",
       "startedAt": null,
       "completedAt": null
+    },
+    "task-1779526390718-7rssh7": {
+      "taskId": "task-1779526390718-7rssh7",
+      "type": "bugfix",
+      "description": "Fix all remaining bugs: None-handling in store.py, mem0 timeout, MCP reconnect logic, verify results, commit",
+      "priority": "high",
+      "status": "pending",
+      "progress": 0,
+      "assignedTo": [],
+      "tags": [
+        "memory",
+        "bugfix",
+        "swarm-bot"
+      ],
+      "createdAt": "2026-05-23T08:53:10.719Z",
+      "startedAt": null,
+      "completedAt": null
     }
   },
   "version": "3.0.0"

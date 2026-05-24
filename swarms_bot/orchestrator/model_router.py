@@ -44,8 +44,7 @@ class ModelCandidate:
         return bool(os.getenv(self.env_key))
 
 
-# Full model catalogue — uses models.yaml naming for MiniMax primary,
-# free cloud fallbacks per FALLBACK_CHAIN in agents.py
+# Full model catalogue — MiniMax only + local Ollama fallbacks
 MODEL_CATALOGUE: list[ModelCandidate] = [
     # Primary: MiniMax M2.7 for all serious tasks
     ModelCandidate("minimax-coding-plan/MiniMax-M2.7", "minimax", 9, 10, 0.0, 204800, "MINIMAX_API_KEY", ["coding", "debug", "general", "reasoning", "complex"]),
@@ -53,10 +52,8 @@ MODEL_CATALOGUE: list[ModelCandidate] = [
     ModelCandidate("minimax-coding-plan/MiniMax-Text-01", "minimax", 9, 8, 0.0, 245760, "MINIMAX_API_KEY", ["speed", "general", "long-context"]),
     # Vision: local Ollama gemma4 on RTX 3060
     ModelCandidate("ollama_chat/gemma4:e4b", "ollama", 5, 7, 0.0, 8192, "OLLAMA_BASE_URL", ["vision", "privacy"]),
-    # Free cloud fallbacks when MiniMax is unavailable
-    ModelCandidate("gemini/gemini-2.0-flash-exp:free", "gemini", 8, 7, 0.0, 1048576, "GEMINI_API_KEY", ["speed", "general", "reasoning"]),
-    ModelCandidate("openrouter/qwen/qwen3-coder:free", "openrouter", 7, 8, 0.0, 65536, "OPENROUTER_API_KEY", ["coding", "debug"]),
-    ModelCandidate("openrouter/deepseek/deepseek-r1:free", "openrouter", 6, 8, 0.0, 64000, "OPENROUTER_API_KEY", ["math", "reasoning"]),
+    # Local fallback for heavy reasoning
+    ModelCandidate("ollama_chat/llama3.3:70b", "ollama", 4, 8, 0.0, 131072, "OLLAMA_BASE_URL", ["reasoning", "complex"]),
 ]
 
 # Agent key → required specialties (ordered by preference)

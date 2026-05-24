@@ -12,18 +12,20 @@ FIFO=$(mktemp -u)
 mkfifo "$FIFO"
 
 # Filter stdout - skip non-JSON lines until JSON-RPC begins
+# Keep reading until we hit a line that's valid JSON (starts with '{')
+# then pass everything through (including the first JSON line)
 {
     while IFS= read -r line; do
-        if [[ "$line" == \{* ]]; then
+        if [[ "$line" =~ ^\{.* ]]; then
+            # Found JSON start - echo it and switch to cat mode
             echo "$line"
             break
         fi
         # Skip non-JSON lines (startup messages)
     done
-    # Now pass through everything as-is
+    # Now pass through everything as-is (remaining JSON + future output)
     cat
 } < "$FIFO" &
-
 PIPER=$!
 
 # Determine if first arg is an npx package (starts with @)

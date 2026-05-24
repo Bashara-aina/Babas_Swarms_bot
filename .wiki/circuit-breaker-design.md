@@ -102,11 +102,11 @@ class CircuitBreaker:
 
 ### Provider Chains by Task Type
 
-| Task | P1 | P2 | P3 | P4 | Emergency |
-|---|---|---|---|---|---|
-| coding | openrouter/qwen/qwen3-coder:free | groq/llama-3.3-70b-versatile | cerebras/llama3.1-70b | gemini/gemini-2.0-flash-exp:free | ollama_chat/gemma4:e4b |
-| chat | groq/llama-3.3-70b-versatile | openrouter/qwen/qwen3-coder:free | cerebras/llama3.1-70b | gemini/gemini-2.0-flash-exp:free | ollama_chat/gemma4:e4b |
-| analysis | openrouter/qwen/qwen3-coder:free | gemini/gemini-2.0-flash-exp:free | groq/llama-3.3-70b-versatile | cerebras/llama3.1-70b | ollama_chat/gemma4:e4b |
+| Task | P1 | P2 | P3 | Emergency |
+|---|---|---|---|---|
+| coding | minimax-coding-plan/MiniMax-M2.7 | minimax-coding-plan/MiniMax-Text-01 | ollama_chat/llama3.3:70b | ollama_chat/gemma4:e4b |
+| chat | minimax-coding-plan/MiniMax-Text-01 | minimax-coding-plan/MiniMax-M2.7 | ollama_chat/gemma4:e4b | ollama_chat/gemma4:e4b |
+| analysis | minimax-coding-plan/MiniMax-M2.7 | minimax-coding-plan/MiniMax-Text-01 | ollama_chat/llama3.3:70b | ollama_chat/gemma4:e4b |
 
 ### Emergency Local Fallback
 

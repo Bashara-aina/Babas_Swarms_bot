@@ -36,10 +36,7 @@ logger = logging.getLogger(__name__)
 # ── LLM bridge (single-turn chat, no tools) ──────────────────────────────────
 
 _KEY_MAP: dict[str, str] = {
-    "cerebras": "CEREBRAS_API_KEY",
-    "groq": "GROQ_API_KEY",
-    "gemini": "GEMINI_API_KEY",
-    "openrouter": "OPENROUTER_API_KEY",
+    "minimax": "MINIMAX_API_KEY",
     "zai": "ZAI_API_KEY",
     "ollama_chat": "",  # no key needed for local Ollama
 }
@@ -84,7 +81,7 @@ async def _llm_call(
             temperature=temperature,
         )
     except Exception as e:
-        logger.warning("Primary model %s failed (%s), falling back to groq", model, e)
+        logger.warning("Primary model %s failed (%s), falling back to MiniMax Text-01", model, e)
         try:
             return await call_llm(
                 messages=[

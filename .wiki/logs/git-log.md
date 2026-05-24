@@ -1083,3 +1083,115 @@ Replaces 459-char generic ChromaDB mention with comprehensive instructions:
 
 Fixes OpenCode "going dumb" after compaction — agent now aware of full memory architecture and MCP capabilities.
 ---
+## Commit: 105f65c
+- Date: Fri May 22 07:38:18 PM JST 2026
+- Message: docs: update session summary with verified fix results
+
+Full chain verified working:
+- OpenCode agent prompt expanded to ~2400 chars with 6-layer system + 12 MCPs
+- GitNexus MCP fires and returns real code intelligence (query 'opencode bridge' → 11 results)
+- Obsidian MCP searches wiki and returns real note titles/summaries
+- OpenCode recalls session context from injected memory files (session 20260521 160112)
+- All 12 MCP servers correctly listed by OpenCode when prompted
+
+Fix chain (5 commits):
+[266e6bd] feat(opencode): expand agent prompt with 6-layer memory + 12 MCPs
+[53debe0] fix(opencode): write remembered_context.md on every task
+[d95a4aa] fix(memory): per-layer timeout isolation + asyncio.run() nested loop fix
+[aaa9bfc] fix(opencode): register hooks at task dispatch + 6-layer compaction store
+[20260520] (prior session restore)
+---
+## Commit: 29f2f0f7
+- Date: Sat May 23 05:57:26 PM JST 2026
+- Message: fix(memory): None-handling for dead Ollama + catch GeneratorExit in async runner
+
+- store.py recall(): if embedder.embed_query() returns None (Ollama dead),
+  fall back to keyword-only chunk scan via _keyword_score() over all docs
+- Added _keyword_score() helper to store.py (previously only in memory_injector)
+- memory_injector.py _run_async(): catch bare GeneratorExit (not just
+  anyio wrapped form) to handle MCP stdio_client async generator exits
+  that propagate as unhandled GeneratorExit through the thread pool
+---
+## Commit: 66d45e11
+- Date: Sat May 23 06:32:51 PM JST 2026
+- Message: fix(memory): prevent compaction cascade — Ollama dead fallback, persistent async loop, circuit breakers
+
+- store.py: skip bad embeddings (Ollama dead / zero vector) instead of crashing
+- memory_injector.py: persistent async loop thread avoids stdio_client GeneratorExit
+  crash that occurred when loop was closed by thread-pool timeout
+- memory_injector.py: per-layer circuit breakers trip after 3 failures, reset on success
+  (prevents repeated hammer on broken MCP layers — obsidian stderr injection, gitnexus timeouts)
+- memory_injector.py: safe JSON parsing with multiple fallbacks (direct, find-from-bracket)
+- memory_injector.py: query expansion for short/vague queries using domain knowledge
+- opencode_bridge.py: correct priority order (memory_inject.md first), MCP reminder
+  embedded in every context write and survives OpenCode's own compaction
+- builtin_hooks.py: use task_desc for targeted recall instead of generic fallback query
+- llm_client/__init__.py: MCP reminder injected as SEPARATE system message
+  post-compaction (not buried in summary_msg), passes system_prompt to compact
+
+These fixes address the 'going dumb after 2nd compaction' root causes.
+---
+## Commit: a31e4b3f
+- Date: Sat May 23 08:16:06 PM JST 2026
+- Message: fix(mcp): catch anyio Python 3.13 cancel-scope bug in pool path
+
+The anyio Python 3.13 task-group bug fires inside `_cleanup` → `session.__aexit__` → `stdio_client.__aexit__`, raising RuntimeError("Attempted to exit cancel scope in a different task") wrapped in CancelledError. Since CancelledError is BaseException (not Exception), the existing `except Exception` handler at line 356 did NOT catch it — it propagated to the caller, skipping the single-call fallback entirely and corrupting the call path.
+
+Fix: added `except BaseException` handler (line 364) that walks the full exception chain (including BaseExceptionGroup.sub-exceptions and __cause__) to detect the anyio bug RuntimeError. When detected, it silently falls through to the single-call fallback path instead of propagating.
+
+Also included:
+- memory_injector.py: robust JSON truncation (_safe_truncate_json) that walks back to last structural boundary rather than blindly chopping
+- memory_injector.py: fallback parser (_parse_json_array_robust) using while-loop to find complete top-level JSON objects after truncation
+---
+## Commit: a4dca6d1
+- Date: Sat May 23 08:35:45 PM JST 2026
+- Message: feat(memory): add 5 ranking improvements to memory_injector scoring
+
+- _recency_boost: parse ISO timestamps, boost <1hr/+0.15, <6hr/+0.10, <24hr/+0.05; layer-specific defaults (checkpoints=+0.03, graphrag=-0.01)
+- _cross_layer_boost: triangulation via SHA1 fingerprint Counter; 3+ layers→1.5x, 2 layers→1.3x
+- _query_relevance_boost: query-keyword→layer mapping (history→checkpoints+mem0, bug→observation+checkpoints, task→symphony_tasks+checkpoints, code→gitnexus, wiki→graphrag+obsidian, memory→mem0+langmem+ruflo)
+- _expand_query: exact phrase match → substring anchor → project-specific → short generic boost
+- _keyword_score: bigram overlap (0.4) alongside direct word match (0.6) for better context scoring
+- build_memory_context: apply recency + query_relevance boosts per result; apply cross_layer boosts before final sort; sort by boosted confidence
+---
+## Commit: c6fb58a1
+- Date: Sat May 23 09:11:14 PM JST 2026
+- Message: fix(memory): scored_fps dict lookup instead of list index search in build_memory_context
+
+The scored list lookup on line 1372 was using list.index() which is O(n) and
+could raise ValueError if the result wasn't found. Replaced with O(1) scored_fps
+dict lookup that was already built just above.
+---
+## Commit: 91a80218
+- Date: Sat May 23 09:54:51 PM JST 2026
+- Message: fix(core): add MCP tool reminder to autoinject + remove embedder lock
+---
+## Commit: 35867568
+- Date: Sat May 23 10:02:46 PM JST 2026
+- Message: fix(memory): extend architecture_design intent + add design-decision boost to scoring
+---
+## Commit: 01820678
+- Date: Sun May 24 10:04:03 AM JST 2026
+- Message: feat(memory): expand memory_injector with 5 sub-intents, BM25 reranking, quality metadata, and priority booster
+
+- Add 5 new sub-intent types: error_pattern, agent_progress, file_review,
+  test_result, memory_consolidation (each with keywords, primary_layers,
+  boost_decisions, max_fresh_hours)
+- Add BM25 scoring pass with override logic for keyword-dense low-priority
+  content (pure Python, no external deps)
+- Add quality metadata injection: freshness, signal_strength,
+  source_reliability per result with quality_tags() and quality_label()
+  helpers
+- Add _detect_query_priority() with 14 urgency signals (1.0x–1.5x multiplier)
+  applied to all scores; header shows 🔴 flag on high-priority queries
+- Improve decision_recovery keywords (14 total) and memory_consolidation
+  keywords (16 total)
+- Add tie-breaking in _classify_intent: longest matched keyword wins on
+  equal hit count, prevents generic intents from winning on ambiguous queries
+- Fix _recover_decision_chain sort direction (was descending, now ascending
+  = oldest→newest chronological chain)
+- Fix intent_label indentation bug in build_memory_context
+- 3-tier dense output: INDEX (≤80-char lines: abbrev+score+quality+age+snippet)
+  → CONTEXT (by-layer groups, 200-char blocks) → DETAIL (decision chain + top 2)
+- All 14/14 intent classification and 5/5 build_memory_context smoke tests pass
+---

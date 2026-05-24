@@ -38,10 +38,10 @@ class GPTResearcherClient:
         try:
             from gpt_researcher import GPTResearcher
 
-            os.environ["OPENAI_API_KEY"] = os.getenv("OPENROUTER_API_KEY", "")
-            os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
+            os.environ["OPENAI_API_KEY"] = os.getenv("MINIMAX_API_KEY", "")
+            os.environ["OPENAI_BASE_URL"] = "https://api.minimax.io/anthropic"
             os.environ["FAST_LLM"] = self.llm_model
-            os.environ["SMART_LLM"] = os.getenv("GPTR_SMART_MODEL", "anthropic/claude-3-5-haiku")
+            os.environ["SMART_LLM"] = os.getenv("GPTR_SMART_MODEL", "minimax-coding-plan/MiniMax-Text-01")
             os.environ["RETRIEVER"] = self.search_api
             researcher = GPTResearcher(query=query, report_type=report_type)
             await researcher.conduct_research()

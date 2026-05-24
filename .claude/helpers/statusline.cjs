@@ -548,16 +548,17 @@ function getIntegrationStatus() {
   const mcpServers = { total: 0, enabled: 0 };
   const settings = getSettings();
 
-  if (settings && settings.mcpServers && typeof settings.mcpServers === 'object') {
-    const servers = Object.keys(settings.mcpServers);
+  if (settings && settings.mcp && typeof settings.mcp === 'object') {
+    const servers = Object.keys(settings.mcp);
     mcpServers.total = servers.length;
-    mcpServers.enabled = settings.enabledMcpjsonServers
-      ? settings.enabledMcpjsonServers.filter(s => servers.includes(s)).length
+    mcpServers.enabled = settings.enabledMcpServers
+      ? settings.enabledMcpServers.filter(s => servers.includes(s)).length
       : servers.length;
   }
 
   if (mcpServers.total === 0) {
-    const mcpConfig = readJSON(path.join(CWD, '.mcp.json'))
+    const mcpConfig = readJSON(path.join(CWD, '.mcp', 'servers.json'))
+                   || readJSON(path.join(CWD, '.mcp.json'))
                    || readJSON(path.join(os.homedir(), '.claude', 'mcp.json'));
     if (mcpConfig && mcpConfig.mcpServers) {
       const s = Object.keys(mcpConfig.mcpServers);

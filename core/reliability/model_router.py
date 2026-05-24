@@ -28,16 +28,15 @@ TIERS: dict[str, dict] = {
     "midweight": {
         "models": [
             "minimax-coding-plan/MiniMax-Text-01",                        # Free, strong reasoning
-            "openrouter/qwen/qwen3-coder:free", # Free coding
+            "ollama_chat/gemma4:e4b",                                    # Local fallback
         ],
         "description": "Standard coding, debugging, math, explanation",
         "max_task_len": 600,
     },
     "heavyweight": {
         "models": [
-            "openrouter/qwen/qwen3-coder:free",          # QwQ-Coder free tier
-            "gemini/gemini-3.1-pro",                     # 1M context
-            "minimax-coding-plan/MiniMax-Text-01",                  # Fast fallback
+            "minimax-coding-plan/MiniMax-Text-01",                       # Fast MiniMax
+            "ollama_chat/llama3.3:70b",                                # Local fallback
         ],
         "description": "Complex reasoning, multi-step, long-form",
         "max_task_len": None,  # No limit

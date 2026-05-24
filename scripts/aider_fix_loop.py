@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """aider_fix_loop.py — Self-correcting test-fix cycle powered by MiniMax M2.7.
 
-Cascade order: MiniMax-M2.7 → gemini-2.0-flash-exp → MiniMax-Text-01 → openrouter/deepseek/deepseek-r1:free
+Cascade order: MiniMax-M2.7 → MiniMax-Text-01 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
 
 Usage:
     python scripts/aider_fix_loop.py                  # default: pytest tests/

@@ -4,9 +4,11 @@ agents.py is the single source of truth for model registry, keywords,
 fallback chains, and thread memory. This file re-exports everything
 for any legacy callers that import from router directly.
 
-Verified working models (from live logs 2026-03-09): minimax/MiniMax-Text-01  ✓
-  cerebras/qwen3-235b-a22b      ✓
-  zai/glm-4                     ✓ (via openai-compat endpoint)
+MiniMax-only models (no external cloud providers):
+  minimax-coding-plan/MiniMax-Text-01  ✓ (primary, free tier)
+  minimax-coding-plan/MiniMax-M2.7     ✓ (complex reasoning, free tier)
+  ollama_chat/llama3.3:70b             ✓ (local fallback, privacy)
+  ollama_chat/gemma4:e4b               ✓ (local vision, RTX 3060)
 """
 
 from __future__ import annotations

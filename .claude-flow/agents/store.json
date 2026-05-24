@@ -3779,6 +3779,59 @@
       "domain": "popw",
       "model": "sonnet",
       "modelRoutedBy": "router"
+    },
+    "popw-debug-001": {
+      "agentId": "popw-debug-001",
+      "agentType": "debugger",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-23T10:40:03.484Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-debug-002": {
+      "agentId": "popw-debug-002",
+      "agentType": "error-detective",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-23T10:40:10.015Z",
+      "model": "sonnet",
+      "modelRoutedBy": "router"
+    },
+    "popw-debug-003": {
+      "agentId": "popw-debug-003",
+      "agentType": "data-analyst",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "minimax/MiniMax-M2.7"
+      },
+      "createdAt": "2026-05-23T10:40:15.271Z",
+      "model": "opus",
+      "modelRoutedBy": "router"
+    },
+    "agent-1779597833680-zlaht6": {
+      "agentId": "agent-1779597833680-zlaht6",
+      "agentType": "general",
+      "status": "idle",
+      "health": 1,
+      "taskCount": 0,
+      "config": {
+        "model": "haiku"
+      },
+      "createdAt": "2026-05-24T04:43:53.680Z",
+      "domain": "research",
+      "model": "haiku",
+      "modelRoutedBy": "explicit"
     }
   },
   "version": "3.0.0"

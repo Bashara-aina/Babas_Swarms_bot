@@ -16,7 +16,7 @@ version: 1.0.0
 # Routing configuration
 routing:
   complexity: medium
-  model: sonnet  # Good at visual reasoning and DOM interpretation
+  model: minimax-coding-plan/MiniMax-M2.7  # Visual reasoning with MiniMax
   priority: normal
   keywords:
     - browser

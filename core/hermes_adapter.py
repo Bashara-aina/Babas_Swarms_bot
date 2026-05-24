@@ -338,7 +338,7 @@ def get_hermes_session_manager() -> HermesSessionManager:
 # Default model for Hermes agent in LegionBot
 DEFAULT_HERMES_MODEL = os.environ.get(
     "HERMES_DEFAULT_MODEL",
-    "openrouter/qwen/qwen3-coder:free",
+    "minimax-coding-plan/MiniMax-M2.7",
 )
 
 
@@ -362,7 +362,7 @@ def create_hermes_agent(
     """Factory to create a configured Hermes AIAgent instance.
 
     Args:
-        model: Provider/model string (e.g. "openrouter/qwen/qwen3-coder:free")
+        model: Provider/model string (e.g. "minimax-coding-plan/MiniMax-M2.7")
         enabled_toolsets: Toolset names to enable (e.g. ["terminal", "file", "web"])
         disabled_toolsets: Toolset names to disable
         session_id: Pre-generated session ID for logging
@@ -396,8 +396,8 @@ def create_hermes_agent(
         skip_memory=skip_memory,
         save_trajectories=save_trajectories,
         verbose_logging=verbose_logging,
-        base_url=base_url or os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
-        api_key=api_key or os.environ.get("OPENROUTER_API_KEY"),
+        base_url=base_url or os.environ.get("OPENROUTER_BASE_URL", "https://api.minimax.io/anthropic"),
+        api_key=api_key or os.environ.get("MINIMAX_API_KEY"),
         provider=provider,
     )
 

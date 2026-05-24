@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-05-24T12:40:26.539Z",
+  "projectRoot": "/home/newadmin/swarm-bot",
+  "structure": {
+    "hasPackageJson": true,
+    "hasTsConfig": false,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1779626426539
+}

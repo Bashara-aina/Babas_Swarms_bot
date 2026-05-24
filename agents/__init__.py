@@ -11,10 +11,11 @@ Single source of truth for:
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
 
-Verified working models (live logs 2026-03-09): minimax-coding-plan/MiniMax-Text-01     ✓
-  groq/meta-llama/llama-4-scout-17b-16e-instruct ✓
-    cerebras/qwen3-235b-a22b                        ✓
-  zai/glm-4                                       ✓ (via openai-compat endpoint)
+Verified working models (MiniMax-only — no external cloud providers):
+  minimax-coding-plan/MiniMax-Text-01     ✓ (primary, free tier)
+  minimax-coding-plan/MiniMax-M2.7        ✓ (complex reasoning, free tier)
+  ollama_chat/llama3.3:70b                ✓ (local fallback, privacy)
+  ollama_chat/gemma4:e4b                  ✓ (local vision, RTX 3060)
 """
 
 from __future__ import annotations
@@ -222,458 +223,535 @@ AGENT_MODELS: dict[str, str] = {
 }
 
 # ── Fallback chains ────────────────────────────────────────────────────────────
-# Free cloud only when MiniMax fails/rate-limited. No local models except vision.
-# NO cerebras/llama3.1-70b (paid) — only free tier models as fallback.
+# MiniMax-only fallback chain. No external cloud providers. Local Ollama for vision/computer.
 FALLBACK_CHAIN: dict[str, list[str]] = {
-    # Vision/computer: gemma4:e4b local for screen analysis when cloud fails
+    # Vision/computer: gemma4:e4b local for screen analysis (MiniMax can't do screen reading)
     "vision": [
         "ollama_chat/gemma4:e4b",
         "minimax-coding-plan/MiniMax-Text-01",
         "minimax-coding-plan/MiniMax-M2.7",
     ],
     "computer": [
-        "ollama_chat/gemma4:e4b",  # local only — MiniMax can't do screen reading
-        "gemini/gemini-2.0-flash-exp:free",
-        "openrouter/qwen/qwen3-coder:free",
-    ],
-    # All other agents: free cloud only when MiniMax fails
-    "coding": [
-        "gemini/gemini-2.0-flash-exp:free",
+        "ollama_chat/gemma4:e4b",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+    ],
+    # All other agents: MiniMax only, Ollama local for heavy reasoning
+    "coding": [
+        "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "debug": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "math": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "architect": [
-        "gemini/gemini-2.0-flash-exp:free",
+        "minimax-coding-plan/MiniMax-M2.7",
         "minimax-coding-plan/MiniMax-Text-01",
+        "ollama_chat/llama3.3:70b",
     ],
     "analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "general": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/gemma4:e4b",
     ],
     "researcher": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "marketer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "devops": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "humanizer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "owl": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "ag2_researcher": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "ag2_critic": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ag2_synthesizer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "code_exec": [
-        "gemini/gemini-2.0-flash-exp:free",
-        "openrouter/qwen/qwen3-coder:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "predictor": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "claude_orchestrator": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "reviewer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     # ── Engineering Department ─────────────────────────────────────────────────
     "senior_backend_dev": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "senior_frontend_dev": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "devops_sre": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "security_engineer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ml_engineer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "data_engineer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "mobile_dev": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/qwen/qwen3-coder:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "platform_infra": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
     ],
     "lead_engineer": [
-        "gemini/gemini-2.0-flash-exp:free",
+        "minimax-coding-plan/MiniMax-M2.7",
         "minimax-coding-plan/MiniMax-Text-01",
     ],
     # ── Design Department ──────────────────────────────────────────────────────
     "ux_designer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ui_designer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "interaction_designer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "design_systems_lead": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "motion_designer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "user_researcher": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "accessibility_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "brand_designer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "design_lead": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Research Department ────────────────────────────────────────────────────
     "literature_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "domain_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "data_scientist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "fact_checker": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "trend_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "contrarian_scholar": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
-        "openrouter/deepseek/deepseek-r1:free",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "synthesizer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "methodology_critic": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "research_director": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Marketing Department ────────────────────────────────────────────────────
     "brand_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "growth_hacker": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "content_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "seo_sem_specialist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "social_media_lead": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "pr_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "email_marketer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "performance_marketer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "cmo": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Operations Department ────────────────────────────────────────────────────
     "process_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "supply_chain_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "finance_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "hr_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "legal_counsel": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "risk_manager": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "customer_success": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "support_lead": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "coo": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Legal & Compliance Department ───────────────────────────────────────────
     "contract_lawyer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "privacy_gdpr_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ip_lawyer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "regulatory_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "compliance_officer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ethics_advisor": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "employment_lawyer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "litigation_risk": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "general_counsel": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Product Department ──────────────────────────────────────────────────────
     "product_manager": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "ux_researcher": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "growth_pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "b2b_pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "b2c_pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "platform_pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "monetisation_pm": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "roadmap_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "head_of_product": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Creative Department ─────────────────────────────────────────────────────
     "copywriter": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "storyteller": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "creative_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "art_director": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "video_producer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "meme_viral_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "editor": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "tone_of_voice_expert": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "creative_director": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": [
         "ollama_chat/gemma4:e4b",
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "multimodal_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Nexus Department ────────────────────────────────────────────────────────
     "nexus_coordinator": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "nexus_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     # ── Strategy Nexus Department ───────────────────────────────────────────────
     "corporate_strategist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "venture_capitalist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "management_consultant": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "futurist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "economist": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "geopolitical_analyst": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "first_principles_thinker": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
     "chief_strategy_officer": [
-        "gemini/gemini-2.0-flash-exp:free",
         "minimax-coding-plan/MiniMax-Text-01",
+        "minimax-coding-plan/MiniMax-M2.7",
+        "ollama_chat/llama3.3:70b",
     ],
 }
 

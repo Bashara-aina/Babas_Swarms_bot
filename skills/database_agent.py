@@ -63,7 +63,7 @@ async def _nl_to_sql(nl_query: str) -> str:
 
         prompt = _build_nl_to_sql_prompt(nl_query, _TABLE_SCHEMAS)
         resp = await litellm.acompletion(
-            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.3-70b-versatile"),
+            model=os.getenv("DEFAULT_MODEL", "minimax-coding-plan/MiniMax-Text-01"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
             max_tokens=256,

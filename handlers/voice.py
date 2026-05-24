@@ -45,43 +45,41 @@ async def _set_voice_reply_enabled(enabled: bool) -> None:
 
 
 async def _transcribe(ogg_path: str) -> str:
-    """Transcribe audio file using Groq Whisper API or local whisper."""
-    groq_key = os.getenv("GROQ_API_KEY")
-    if groq_key:
-        try:
-            import httpx
-
-            loop = asyncio.get_running_loop()
-            audio_bytes = await loop.run_in_executor(None, lambda: open(ogg_path, "rb").read())
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    "https://api.groq.com/openai/v1/audio/transcriptions",
-                    headers={"Authorization": f"Bearer {groq_key}"},
-                    files={"file": ("audio.ogg", audio_bytes, "audio/ogg")},
-                    data={"model": "whisper-large-v3", "response_format": "text"},
-                )
-                resp.raise_for_status()
-                return resp.text.strip()
-        except Exception as exc:
-            logger.warning("Groq Whisper failed: %s", exc)
+    """Transcribe audio file using local whisper (faster-whisper, no API key needed)."""
 
     # Cached whisper model — load once in thread executor, reuse across calls
     try:
-        import whisper  # pip install openai-whisper  # type: ignore[reportMissingImports]
+        from faster_whisper import WhisperModel
     except ImportError:
-        raise RuntimeError(
-            " whisper not installed. Install with: pip install openai-whisper"
-        )
+        try:
+            import whisper  # pip install openai-whisper  # type: ignore[reportMissingImports]
+        except ImportError:
+            raise RuntimeError(
+                " whisper not installed. Install with: pip install faster-whisper  # recommended"
+                " or pip install openai-whisper"
+            )
 
     _model_key = "_whisper_model"
     if not hasattr(_transcribe, _model_key):
-        model = await asyncio.to_thread(whisper.load_model, "base")
+        try:
+            # faster-whisper: runs on CUDA if available
+            model = WhisperModel("base", device="cuda" if __import__("torch").cuda.is_available() else "cpu")
+        except Exception:
+            # fallback to openai-whisper
+            import whisper as ow
+            model = ow.load_model("base")
         setattr(_transcribe, _model_key, model)
 
     def _do_transcribe() -> str:
         model = getattr(_transcribe, _model_key)
-        result = model.transcribe(ogg_path)
-        return result["text"]
+        try:
+            # faster-whisper API
+            segments, _ = model.transcribe(ogg_path, beam_size=5)
+            return " ".join(seg.text for seg in segments)
+        except Exception:
+            # openai-whisper fallback API
+            result = model.transcribe(ogg_path)
+            return result["text"]
 
     return await asyncio.to_thread(_do_transcribe)
 

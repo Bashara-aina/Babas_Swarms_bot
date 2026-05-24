@@ -70,22 +70,12 @@ SYSTEM_PROMPTS = {
 
 # Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
 _CONTEXT_WINDOWS: dict[str, int] = {
-    # ⭐ PRIORITY 1: YOUR FASTEST APIs FIRST (60+ req/min)
-    "gemini/gemini-1.5-flash-latest":     1000000,  # ⭐ MOST GENEROUS
-    "groq/llama3-8b-8192":                 8192,    # Lightning fast
-    "cerebras/llama-3.1-8b":               131072,  # High quality
+    # ⭐ PRIORITY 1: MiniMax (zero cost)
+    "minimax-coding-plan/MiniMax-Text-01": 245760,
 
-    # PRIORITY 2: OpenRouter free tier
-    "openrouter/qwen/qwen2.5:0.5b":        32768,
-    "openrouter/meta-llama/llama-3.1-8b-instruct:free": 8192,
-
-    # PRIORITY 3: Current models (fallback)
-    "openrouter/qwen/qwen3-coder:free":    131072,
-    "cerebras/qwen3-coder:free":           131072,
-    "gemini/gemini-1.5-flash":            1000000,
-    "groq/moonshotai/llama3-8b-8192":     200000,
-    "minimax-coding-plan/MiniMax-Text-01":                           128000,
-    "openrouter/openai/gpt-oss-120b:free": 32768,
+    # PRIORITY 2: Local Ollama (zero cost, privacy)
+    "ollama_chat/gemma4:e4b":              8192,
+    "ollama_chat/llama3.3:70b":           131072,
 }
 
 _MAX_TOKENS = 4096
@@ -170,37 +160,16 @@ def configure_interpreter(model: str, agent_key: str) -> str:
         logger.info("Using Z.AI: %s", model_name)
 
     elif model.startswith(("openrouter/", "cerebras/", "gemini/", "groq/")):
-        # LiteLLM handles these providers natively via their prefix.
-        # Do NOT strip the prefix and do NOT set api_base — LiteLLM picks the right URL.
-        interpreter.llm.model = model
-        interpreter.llm.api_base = None  # Let LiteLLM use its built-in provider URL
-        interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 32768)
+        # External API routes removed — MiniMax-only config.
+        # Falls back to local Ollama if no API key is set.
+        logger.warning("External provider removed — falling back to local Ollama")
+        interpreter.llm.model = "ollama_chat/gemma4:e4b"
+        interpreter.llm.api_base = "http://localhost:11434"
+        interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
+        interpreter.llm.context_window = 8192
         interpreter.llm.max_tokens = _MAX_TOKENS
-        provider = model.split("/")[0]
-        key_map = {
-            "openrouter": "OPENROUTER_API_KEY",
-            "cerebras":   "CEREBRAS_API_KEY",
-            "gemini":     "GEMINI_API_KEY",
-            "groq":       "GROQ_API_KEY",
-        }
-        env_var = key_map.get(provider, "")
-        api_key = os.getenv(env_var, "")
-        if not api_key:
-            logger.warning(
-                "No API key for provider '%s' — falling back to local Ollama", provider
-            )
-            interpreter.llm.model = "ollama_chat/gemma4:e4b"
-            interpreter.llm.api_base = "http://localhost:11434"
-            interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
-            interpreter.llm.context_window = 8192
-            interpreter.offline = True
-            return "ollama_chat/gemma4:e4b"
-        # Set both the attribute AND the env var so LiteLLM picks it up as BYOK
-        interpreter.llm.api_key = api_key
-        if env_var:
-            os.environ[env_var] = api_key
-        interpreter.offline = False
-        logger.info("Using %s: %s", provider, model)
+        interpreter.offline = True
+        return "ollama_chat/gemma4:e4b"
 
     else:
         logger.warning("Unknown model prefix '%s' — falling back to local Ollama", model)

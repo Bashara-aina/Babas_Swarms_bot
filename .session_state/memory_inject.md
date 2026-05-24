@@ -3,6 +3,30 @@
 ║  All items below are confirmed prior context. Use as reliable. ║
 ╚════════════════════════════════════════════════════════════════╝
 
+## MCP TOOLS — ACTIVE AND AVAILABLE
+You have 12 MCP servers connected and ready. Use them freely:
+  • @ruflo_memory_search, @ruflo_memory_store, @ruflo_agentdb_* — memory/recall
+  • @mcp_filesystem — file read/write/edit/list
+  • @mcp_gitnexus_* — code intelligence, context, impact analysis
+  • @mcp_crawl4ai — web content extraction
+  • @mcp_exa_web_search_exa — web search
+  • @mcp_symphony_* — task/room management
+  • @mcp_obsidian_* — wiki vault operations
+  • @mcp_hermes_messages_send — messaging
+  • @mcp_local-deep-research — research
+  • @mcp_browser-use — autonomous browser
+  • @mcp_sequential-thinking — structured reasoning
+
+## 6-LAYER MEMORY ARCHITECTURE
+  Layer 1: checkpoints/  (session snapshots)
+  Layer 2: ChromaDB        (mem0 vector store — may be unavailable if Ollama down)
+  Layer 3: langmem         (SwarmBotMemoryManager)
+  Layer 4: observation_store (SQLite+FTS5)
+  Layer 5: graphrag        (wiki query)
+  Layer 6: mem0 cloud      (litellm proxy)
+
+Use @ruflo_memory_search for semantic recall. Use @mcp_filesystem for file ops.
+
 Generated: 2026-05-22 19:33:25
 Query anchor: project work coding AI agent tasks decisions
 

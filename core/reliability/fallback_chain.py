@@ -12,30 +12,27 @@ from core.reliability.provider_health import check_provider_health
 
 logger = logging.getLogger(__name__)
 
-# Provider fallback chains by priority (fastest to slowest, free tiers first)
+# Provider fallback chains by priority (fastest to slowest, MiniMax free tiers first)
 # RTX 3060 (12GB VRAM): gemma4:e4b (9.6GB) is the only viable local model.
 # qwen3.5:35b needs ~23GB — too heavy, never use it.
 _FALLBACK_CHAINS = {
-    # Coding tasks: prioritize speed and code quality
+    # Coding tasks: MiniMax primary, Ollama local fallback
     "coding": [
-        ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen Coder"),
-        ("minimax-coding-plan/MiniMax-Text-01", "Groq Llama 3.3 70B"),
-        ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
-        ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
+        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
+        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
-    # General chat: prioritize speed
+    # General chat: MiniMax primary
     "chat": [
-        ("minimax-coding-plan/MiniMax-Text-01", "Groq Llama 3.3 70B"),
-        ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen"),
-        ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
-        ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
+        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
+        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
-    # Analysis tasks: prioritize reasoning quality
+    # Analysis tasks: MiniMax primary, Ollama Llama for heavy reasoning
     "analysis": [
-        ("openrouter/qwen/qwen3-coder:free", "OpenRouter Qwen"),
-        ("gemini/gemini-2.0-flash-exp:free", "Gemini 2.0 Flash"),
-        ("minimax-coding-plan/MiniMax-Text-01", "Groq Llama 3.3 70B"),
-        ("cerebras/llama3.1-70b", "Cerebras Llama 3.1 70B"),
+        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
+        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("ollama_chat/llama3.3:70b", "Local Ollama Llama 3.3 70B"),
     ],
 }
 
@@ -150,7 +147,7 @@ def get_fallback_chain(agent_key: str = "coding") -> list[str]:
 
     Example:
         >>> chain = get_fallback_chain("coding")
-        >>> # Returns ["openrouter/qwen/qwen3-coder:free", "minimax-coding-plan/MiniMax-Text-01", ...]
+        >>> # Returns ["minimax-coding-plan/MiniMax-M2.7", "minimax-coding-plan/MiniMax-Text-01", ...]
     """
     chain = FallbackChain.get_provider_chain(agent_key)
     return [model for model, _ in chain]
@@ -167,9 +164,9 @@ def get_best_provider(agent_key: str = "coding") -> str:
 
     Example:
         >>> model = get_best_provider("coding")
-        >>> # Returns "openrouter/qwen/qwen3-coder:free" if healthy
-        >>> # Or "minimax-coding-plan/MiniMax-Text-01" if OpenRouter down
-        >>> # Or "ollama_chat/gemma4:e4b" if all cloud providers down (emergency only)
+        >>> # Returns "minimax-coding-plan/MiniMax-M2.7" if healthy
+        >>> # Returns "minimax-coding-plan/MiniMax-Text-01" if M2.7 down
+        >>> # Or "ollama_chat/llama3.3:70b" if all cloud down (local fallback)
     """
     model, _ = FallbackChain.get_optimal_provider(agent_key)
     return model

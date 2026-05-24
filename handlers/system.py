@@ -943,7 +943,7 @@ async def cmd_compact(msg: Message) -> None:  # type: ignore[reportUnusedCorouti
         except Exception:
             pass
 
-        compacted = smart_compact_messages(history, keep_recent=6)  # type: ignore[reportUnusedCoroutine]
+        compacted = smart_compact_messages(history, keep_recent=6, system_prompt="")  # type: ignore[reportUnusedCoroutine]
         clear_conversation(user_id)  # type: ignore[reportUnusedCoroutine]
         for m in compacted[1:]:
             role = m.get("role", "user")  # type: ignore[reportUnusedCoroutine]

@@ -2,7 +2,7 @@
 
 Two-tier routing:
   1. Fast keyword pre-filter with Indonesian synonyms (< 1 ms)
-  2. LLM fallback via groq/llama-3.3-70b when confidence < 0.55 or message > 30 words
+  2. LLM fallback via MiniMax when confidence < 0.55 or message > 30 words
 Performance history boosts/penalises skills based on rolling success rate.
 """
 

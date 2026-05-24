@@ -67,21 +67,9 @@ async def run_pydantic_ai_agent(
     agent_kwargs: dict[str, Any] = {}
     if provider == "minimax":
         agent_kwargs = _configure_minimax(model_str)
-    elif provider == "openrouter":
-        os.environ["OPENAI_API_KEY"] = os.getenv("OPENROUTER_API_KEY", "") or "dummy"
-        os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
-        agent_kwargs["model"] = model_str
-        agent_kwargs["extra_headers"] = {
-            "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
-            "X-Title": "LegionSwarm",
-        }
-    elif provider == "groq":
-        os.environ["OPENAI_API_KEY"] = os.getenv("GROQ_API_KEY", "") or "dummy"
-        os.environ["OPENAI_BASE_URL"] = "https://api.groq.com/openai/v1"
-        agent_kwargs["model"] = model_str
     else:
-        os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "") or "dummy"
-        agent_kwargs["model"] = model_str
+        # Default to MiniMax for any unknown provider
+        agent_kwargs = _configure_minimax(model_str)
 
     if system_prompt:
         agent_kwargs["system_prompt"] = system_prompt
