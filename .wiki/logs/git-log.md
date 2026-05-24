@@ -1228,3 +1228,18 @@ Files changed:
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 87a03965
+- Date: Sun May 24 09:45:52 PM JST 2026
+- Message: chore: enable MCP autoStart, session hooks, and worker auto-start
+
+- .claude-flow/config.yaml: mcp.autoStart: false → true, added servers list
+- daemon-state.json: autoStart stays false for worker-level control
+- OpenCode config: already MiniMax-only with minimax-coding-plan/MiniMax-M2.7
+- Hooks: pre-edit, post-edit, pre-command, post-command, pre-task, post-task,
+  session-start, session-end, session-restore, pretrain all enabled
+- All model routing, AGENT_MODELS, FALLBACK_CHAIN verified MiniMax-only
+- config/litellm_proxy_config.yaml: all models → MiniMax + Ollama only
+- Auto-memory store: 71 entries active, ~66KB data
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

@@ -129,8 +129,7 @@ def _inject_images_into_messages(
 # ── Model ────────────────────────────────────────────────────────────────────
 MINIMAX_MODEL = os.getenv("MINIMAX_MODEL", "MiniMax-M2.7")
 MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.chat/v1")
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_MODEL = "minimax/minimax-m2"  # [VERIFY BEFORE USE: confirm M2.7 slug on openrouter.ai]
+MINIMAX_DIRECT = True  # Always route direct to MiniMax — no OpenRouter fallback
 
 
 # ── Sampling presets (#3, #7) ────────────────────────────────────────────────
@@ -252,14 +251,11 @@ def _build_openrouter_client() -> AsyncOpenAI:
 def get_client(fallback: bool = False) -> AsyncOpenAI:
     """
     Returns plain AsyncOpenAI client (no instructor dependency).
-    fallback=True  → OpenRouter (more stable, slightly higher latency)
-    fallback=False → MiniMax direct (fastest, primary)
+    MiniMax direct only — OpenRouter fallback disabled (MINIMAX_DIRECT=True).
 
     Gap 3 fix: removed instructor.from_openai() — structured output
     is now handled via response_format={"type": "json_object"} + manual parsing.
     """
-    if fallback:
-        return _build_openrouter_client()
     return _build_minimax_client()
 
 
@@ -290,7 +286,7 @@ async def create_structured_completion[T: BaseModel](
     """
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or (MINIMAX_MODEL if not fallback else OPENROUTER_MODEL)
+    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # Prepend cached evolved rules as system message
@@ -370,7 +366,7 @@ def complete[T: BaseModel](
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or (MINIMAX_MODEL if not fallback else OPENROUTER_MODEL)
+    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # Gap 3: use json_object response_format instead of response_model=
@@ -441,7 +437,7 @@ async def stream_complete(
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or (MINIMAX_MODEL if not fallback else OPENROUTER_MODEL)
+    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     stream = await client.chat.completions.create(
@@ -642,7 +638,7 @@ async def create_completion_with_tools(
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or (MINIMAX_MODEL if not fallback else OPENROUTER_MODEL)
+    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # If no tool schemas passed, pull all from registry
