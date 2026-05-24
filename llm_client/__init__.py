@@ -368,12 +368,9 @@ def _get_api_key(model: str) -> str | None:
     """Return API key for a model provider."""
     provider = model.split("/")[0].lower()
     key_map = {
-        "cerebras": "CEREBRAS_API_KEY",
-        "groq": "GROQ_API_KEY",
-        "gemini": "GEMINI_API_KEY",
-        "openrouter": "OPENROUTER_API_KEY",
-        "zai": "ZAI_API_KEY",
         "minimax": "MINIMAX_API_KEY",
+        "ollama_chat": "OLLAMA_API_KEY",
+        "zai": "ZAI_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
     }
     env_var = key_map.get(provider)
@@ -621,20 +618,7 @@ async def call_llm(
 
     _is_pytest_run = bool(os.getenv("PYTEST_CURRENT_TEST"))
 
-    if provider == "openrouter":
-        api_kwargs["api_base"] = "https://openrouter.ai/api/v1"
-        api_key = os.getenv("OPENROUTER_API_KEY", "")
-        if not api_key:
-            if _is_pytest_run:
-                api_key = "dummy"
-            else:
-                raise ValueError("OPENROUTER_API_KEY not set")
-        api_kwargs["api_key"] = api_key
-        api_kwargs["extra_body"] = {
-            "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
-            "X-Title": "LegionSwarm",
-        }
-    elif provider == "minimax":
+    if provider == "minimax":
         api_kwargs["api_base"] = "https://api.minimax.io/v1"
         api_key = os.getenv("MINIMAX_API_KEY", "")
         if not api_key:
@@ -653,12 +637,9 @@ async def call_llm(
                 raise ValueError("ANTHROPIC_API_KEY not set")
         api_kwargs["api_key"] = api_key
     else:
-        api_key = os.getenv("LEGION_API_KEY", "") or os.getenv(f"{provider.upper()}_API_KEY", "")
-        if not api_key:
-            if _is_pytest_run:
-                api_key = "dummy"
-            else:
-                raise ValueError(f"No API key for '{provider}'")
+        # Ollama local fallback
+        api_kwargs["api_base"] = "http://localhost:11434"
+        api_key = os.getenv("OLLAMA_API_KEY", "ollama")
         api_kwargs["api_key"] = api_key
 
     # Streaming: return async generator directly without awaiting
@@ -764,21 +745,17 @@ async def _call_model(
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
 
-        if provider == "openrouter":
-            kwargs["api_base"] = "https://openrouter.ai/api/v1"
-            api_key = os.getenv("OPENROUTER_API_KEY", "")
+        if provider == "minimax":
+            kwargs["api_base"] = "https://api.minimax.io/v1"
+            api_key = os.getenv("MINIMAX_API_KEY", "")
             if not api_key:
                 if _is_pytest_run:
                     api_key = "dummy"
                 else:
-                    raise ValueError("OPENROUTER_API_KEY not set")
+                    raise ValueError("MINIMAX_API_KEY not set")
             kwargs["api_key"] = api_key
-            kwargs["extra_body"] = {
-                "HTTP-Referer": "https://github.com/Bashara-aina/Babas_Swarms_bot",
-                "X-Title": "LegionSwarm",
-            }
 
-        elif provider == "minimax":
+        elif provider == "anthropic":
             kwargs["api_base"] = "https://api.minimax.io/v1"
             api_key = os.getenv("MINIMAX_API_KEY", "")
             if not api_key:
@@ -3389,10 +3366,8 @@ def chunk_output(text: str, max_length: int = 4000) -> list[str]:
 
 def verify_api_keys() -> dict[str, bool]:
     keys = [
-        "CEREBRAS_API_KEY",
-        "GROQ_API_KEY",
-        "GEMINI_API_KEY",
-        "OPENROUTER_API_KEY",
+        "MINIMAX_API_KEY",
+        "OLLAMA_API_KEY",
         "ZAI_API_KEY",
         "HF_TOKEN",
     ]

@@ -217,10 +217,8 @@ async def _cancel_task(task: asyncio.Task | None) -> None:
 def _key_status() -> str:
     status = verify_api_keys()
     names = {
-        "CEREBRAS_API_KEY": "Cerebras   \u26a1 1,500 tok/s",
-        "GROQ_API_KEY": "Groq       \U0001f680 function calling",
-        "GEMINI_API_KEY": "Gemini     \U0001f4da 1M context",
-        "OPENROUTER_API_KEY": "OpenRouter  \U0001f500 free models",
+        "MINIMAX_API_KEY": "MiniMax    \U0001f680 primary models",
+        "OLLAMA_API_KEY": "Ollama     \U0001f511 local privacy",
         "ZAI_API_KEY": "ZAI/GLM-4  \U0001f9e0 debug+math",
         "HF_TOKEN": "HuggingFace \U0001f917",
     }
@@ -228,7 +226,7 @@ def _key_status() -> str:
     for k, label in names.items():
         icon = "\u2705" if status.get(k) else "\u274c"
         lines.append(f"  {icon} {label}")
-    cloud = ["CEREBRAS_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+    cloud = ["MINIMAX_API_KEY", "OLLAMA_API_KEY"]
     lines.append("")
     lines.append("cloud active \u2713" if any(status.get(k) for k in cloud) else "\u26a0\ufe0f <b>no cloud keys!</b>")
     return "\n".join(lines)
