@@ -24,6 +24,98 @@ import aiofiles
 import litellm
 from litellm import acompletion
 
+# Surrogate character regex (U+D800 to U+DFFF) — used by _sanitize_messages_surrogates
+# and _sanitize_structure_surrogates to prevent JSONEncodeError crashes from
+# byte-level reasoning models (xiaomi/mimo, kimi, glm).
+_SURROGATE_RE = re.compile(r'[\ud800-\udfff]')
+
+def _sanitize_surrogates(text: str) -> str:
+    """Replace surrogate code points with the Unicode replacement character."""
+    return _SURROGATE_RE.sub('\ufffd', text)
+
+def _sanitize_messages_surrogates(messages: list[dict]) -> bool:
+    """Walk message dicts in-place, replacing surrogates in all string fields.
+
+    Returns True if any surrogates were found and replaced.
+    Covers content, name, tool_calls, and any additional nested fields
+    (reasoning_content, reasoning_details, etc.) from byte-level reasoning models.
+    """
+    found = False
+    for msg in messages:
+        if not isinstance(msg, dict):
+            continue
+        # content (str or list of parts)
+        content = msg.get("content")
+        if isinstance(content, str) and _SURROGATE_RE.search(content):
+            msg["content"] = _SURROGATE_RE.sub('\ufffd', content)
+            found = True
+        elif isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict):
+                    text = part.get("text")
+                    if isinstance(text, str) and _SURROGATE_RE.search(text):
+                        part["text"] = _SURROGATE_RE.sub('\ufffd', text)
+                        found = True
+        # name
+        name = msg.get("name")
+        if isinstance(name, str) and _SURROGATE_RE.search(name):
+            msg["name"] = _SURROGATE_RE.sub('\ufffd', name)
+            found = True
+        # tool_calls
+        tool_calls = msg.get("tool_calls")
+        if isinstance(tool_calls, list):
+            for tc in tool_calls:
+                if not isinstance(tc, dict):
+                    continue
+                tc_id = tc.get("id")
+                if isinstance(tc_id, str) and _SURROGATE_RE.search(tc_id):
+                    tc["id"] = _SURROGATE_RE.sub('\ufffd', tc_id)
+                    found = True
+                fn = tc.get("function")
+                if isinstance(fn, dict):
+                    fn_name = fn.get("name")
+                    if isinstance(fn_name, str) and _SURROGATE_RE.search(fn_name):
+                        fn["name"] = _SURROGATE_RE.sub('\ufffd', fn_name)
+                        found = True
+                    fn_args = fn.get("arguments")
+                    if isinstance(fn_args, str) and _SURROGATE_RE.search(fn_args):
+                        fn["arguments"] = _SURROGATE_RE.sub('\ufffd', fn_args)
+                        found = True
+        # Walk any additional nested string fields
+        for key, value in msg.items():
+            if key in {"content", "name", "tool_calls", "role"}:
+                continue
+            if isinstance(value, str) and _SURROGATE_RE.search(value):
+                msg[key] = _SURROGATE_RE.sub('\ufffd', value)
+                found = True
+            elif isinstance(value, (dict, list)):
+                if _sanitize_structure_surrogates(value):
+                    found = True
+    return found
+
+def _sanitize_structure_surrogates(payload: Any) -> bool:
+    """Replace surrogate code points in nested dict/list payloads in-place.
+
+    Returns True if any surrogates were replaced.
+    """
+    found = False
+    def _walk(node):
+        nonlocal found
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if isinstance(value, str):
+                    if _SURROGATE_RE.search(value):
+                        node[key] = _SURROGATE_RE.sub('\ufffd', value)
+                        found = True
+                elif isinstance(value, (dict, list)):
+                    _walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                if isinstance(item, (dict, list)):
+                    _walk(item)
+    _walk(payload)
+    return found
+
 from core.autonomous_router import AutonomousRouter
 from core.character import build_base_persona, build_mode_instructions, get_disagreement_prompt
 from core.cognition_pipeline import build_cognition_system_fragment
@@ -495,7 +587,7 @@ async def _execute_tool_with_self_heal(
                     except (json.JSONDecodeError, TypeError):
                         if mcp_result and "error" not in mcp_result.lower():
                             return mcp_result
-                    errors.append(f"strategy_0_mcp_router: returned error result")
+                    errors.append("strategy_0_mcp_router: returned error result")
         except Exception as e:
             errors.append(f"strategy_0_mcp_router: {e}")
 
@@ -652,6 +744,10 @@ async def call_llm(
     except Exception:
         pass  # Memory injection is non-critical
 
+    # ── Surrogate sanitization (hermes ADR-095 pattern) ─────────────────────────
+    # Strip lone surrogates that crash json.dumps in byte-level reasoning models
+    _sanitize_messages_surrogates(messages)
+
     # Phoenix tracing — time the call and track token usage
     _start_time = time.perf_counter()
     _prompt_tokens = 0
@@ -746,16 +842,6 @@ async def _call_model(
             kwargs["max_tokens"] = max_tokens
 
         if provider == "minimax":
-            kwargs["api_base"] = "https://api.minimax.io/v1"
-            api_key = os.getenv("MINIMAX_API_KEY", "")
-            if not api_key:
-                if _is_pytest_run:
-                    api_key = "dummy"
-                else:
-                    raise ValueError("MINIMAX_API_KEY not set")
-            kwargs["api_key"] = api_key
-
-        elif provider == "anthropic":
             kwargs["api_base"] = "https://api.minimax.io/v1"
             api_key = os.getenv("MINIMAX_API_KEY", "")
             if not api_key:
@@ -1031,7 +1117,7 @@ async def _aget_memory_context_before_compact(query: str, timeout: float = 10.0)
             loop.run_in_executor(_COMPACT_IO_EXECUTOR, _sync_fetch),
             timeout=timeout,
         )
-    except (asyncio.TimeoutError, TimeoutError):
+    except TimeoutError:
         return ""
     except Exception:
         return ""
@@ -1120,7 +1206,7 @@ async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> di
                 timeout=timeout,
             )
             return key, result
-        except (asyncio.TimeoutError, TimeoutError):
+        except TimeoutError:
             return key, ""
         except Exception:
             return key, ""
@@ -1134,7 +1220,7 @@ async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> di
             if isinstance(item, tuple) and len(item) == 2:
                 k, v = item
                 results[k] = v
-    except (asyncio.TimeoutError, Exception):
+    except (TimeoutError, Exception):
         pass
     return results
 
