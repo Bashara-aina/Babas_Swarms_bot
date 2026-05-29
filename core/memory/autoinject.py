@@ -143,7 +143,7 @@ def _load_archival(query: str = "", limit: int = 20) -> str:
         for r in results:
             content = str(r.get("content", ""))[:400]
             importance = r.get("importance", 0.5)
-            tags = r.get("tags", [])
+            # tags = r.get("tags", [])  # reserved for future tagging use
             created = str(r.get("created_at", ""))[:10]
             lines.append(f"  [{created}] [imp={importance:.1f}] {content}")
         return "\n".join(lines)
@@ -173,7 +173,7 @@ def _load_mem0_context(query: str = "project work coding agent AI", top_k: int =
             logger.debug("MemoryStore recall returned 0 results")
             return ""
 
-        lines = ["[LONG-TERM MEMORY (ChromaDB semantic recall, top %d)]" % top_k]
+        lines = [f"[LONG-TERM MEMORY (ChromaDB semantic recall, top {top_k})]"]
         for i, mem in enumerate(memories, 1):
             lines.append(f"  {i}. {mem}")
         return "\n".join(lines)
@@ -300,7 +300,7 @@ def build_persistent_context(
         "",
     ]
 
-    layer_names = {
+    layer_names = {  # noqa: F841 — reserved for future layer visualization/debugging
         1: "CoreMemory (always-on key-value, 200KB cap)",
         2: "RecallMemory (recent 500 turns)",
         3: "ArchivalMemory (FTS5 full-text search)",
@@ -395,20 +395,11 @@ def build_persistent_context(
     # Write FULL version as persistent memory archive
     try:
         SESSION_DIR.mkdir(parents=True, exist_ok=True)
-        # Build filtered version for inject
-        inject_lines = []
-        skip_turn_data = False
-        for line in lines:
-            if line.startswith("  [") and "] " in line and ": " in line.split("] ", 1)[-1]:
-                continue
-            inject_lines.append(line)
-        inject_text = "\n".join(inject_lines)
-        # Filter on final_text (joined) lines — NOT the pre-join lines array
-        # (layer outputs contain embedded \n, turn data lines appear after join)
+        # Filter turn-data lines from final_text before writing
         final_lines = final_text.split('\n')
         inject_lines = [
-            l for l in final_lines
-            if not (l.startswith("  [") and "] " in l and ": " in l.split("] ", 1)[-1])
+            line_item for line_item in final_lines
+            if not (line_item.startswith("  [") and "] " in line_item and ": " in line_item.split("] ", 1)[-1])
         ]
         inject_text = "\n".join(inject_lines)
         print(f"[DEBUG] write: final_lines={len(final_lines)} inject_lines={len(inject_lines)}")
