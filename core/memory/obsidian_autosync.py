@@ -86,7 +86,6 @@ memory_layers: {memory_layers_used}
 
     # Time entry
     ts = datetime.now().strftime("%H:%M")
-    session_id = datetime.now().strftime("%Y%m%d-%H%M")
 
     entry_lines = [
         f"\n## Session {ts} — {session_name or 'OpenCode session'}\n",
@@ -117,12 +116,12 @@ memory_layers: {memory_layers_used}
         entry_lines.append("\n")
 
     if user_message:
-        entry_lines.append(f"### User Message\n")
+        entry_lines.append("### User Message\n")
         entry_lines.append(f"> {user_message[:500]}\n\n")
 
     if assistant_response:
         resp_preview = assistant_response[:300].replace("\n", " ")
-        entry_lines.append(f"### Assistant Response (preview)\n")
+        entry_lines.append("### Assistant Response (preview)\n")
         entry_lines.append(f"> {resp_preview}...\n\n")
 
     entry_text = "".join(entry_lines)
@@ -212,7 +211,7 @@ memory_layers: 7
     content += f"- Tasks: {len(tasks)}\n"
     content += f"- Decisions: {len(decisions)}\n"
     content += f"- Files: {len(files)}\n"
-    content += f"- Memory layers used: 7\n"
+    content += "- Memory layers used: 7\n"
     content += f"- Duration: {duration_min} minutes\n"
 
     session_file.write_text(content, encoding="utf-8")

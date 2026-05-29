@@ -32,6 +32,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable
+from collections import deque
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +227,7 @@ from typing import Any
 
 class Harness:
     def __init__(self):
-        self.memory = []
+        self.memory = deque(maxlen=1000)
 
     def retrieve(self, query: str) -> list[dict]:
         """Retrieve relevant examples from memory."""
@@ -254,7 +255,7 @@ from typing import Any
 
 class Harness:
     def __init__(self):
-        self.memory = []
+        self.memory = deque(maxlen=1000)
 
     def retrieve(self, query: str) -> list[dict]:
         """Retrieve relevant math problems."""
@@ -279,7 +280,7 @@ from typing import Any
 
 class Harness:
     def __init__(self):
-        self.history = []
+        self.history = deque(maxlen=500)
 
     def retrieve(self, task: str) -> list[dict]:
         """Retrieve similar completed tasks."""
@@ -350,11 +351,11 @@ class Harness:
             if f"def {method}" not in source_code:
                 # Add the missing method
                 if method == "retrieve":
-                    source_code += f"\n    def retrieve(self, query: str) -> list[dict]:\n        return []\n"
+                    source_code += "\n    def retrieve(self, query: str) -> list[dict]:\n        return []\n"
                 elif method == "update":
                     source_code += "\n    def update(self, item: dict) -> None:\n        pass\n"
                 elif method == "assemble":
-                    source_code += f"\n    def assemble(self, query: str, retrieved: list[dict]) -> str:\n        return f'Query: {{query}}'\n"
+                    source_code += "\n    def assemble(self, query: str, retrieved: list[dict]) -> str:\n        return f'Query: {{query}}'\n"
 
         return source_code
 
@@ -399,7 +400,7 @@ class Harness:
         description = f"Multi-stage harness with {len(parts)} stages"
 
         # Build the composed harness code
-        lines = ['"""Multi-stage harness from Meta-Harness Assembler."""', "", "from typing import Any, list", "", "class Harness:", "    def __init__(self):", "        self.stages = []", "        self.memory = []"]
+        lines = ['"""Multi-stage harness from Meta-Harness Assembler."""', "", "from typing import Any, list", "", "class Harness:", "    def __init__(self):", "        self.stages = []", "        self.memory = deque(maxlen=1000)"]
 
         for i, part in enumerate(parts):
             stage_name = part.get("stage_name", f"stage_{i}")
@@ -1165,7 +1166,7 @@ class MetaHarnessOptimizer:
 
         # Return final Pareto frontier
         frontier = self.harness_fs.get_pareto_frontier()
-        await progress(f"\n=== Optimization Complete ===")
+        await progress("\n=== Optimization Complete ===")
         await progress(f"Final Pareto frontier: {len(frontier.candidates)} candidates")
 
         return frontier

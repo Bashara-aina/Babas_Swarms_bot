@@ -41,7 +41,7 @@ def _load_api():
     if _api is not None:
         return _api
     try:
-        import graphrag.api as _api_local  # noqa: F401
+        import graphrag.api as _api_local
         _api = _api_local
         return _api
     except ImportError as exc:
@@ -55,6 +55,20 @@ def _load_api():
 
 DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
 GRAPHRAG_INDEX_DIR = os.path.expanduser("~/.legion/graphrag_index")  # type: ignore[reportOptionalMemberAccess]
+
+
+def _build_graphrag_config(index_dir: str | None, model: str | None) -> Any:  # type: ignore[reportOptionalMemberAccess]
+    """Build a minimal GraphRagConfig for indexing/querying."""
+    try:
+        from graphrag.config.models.graph_rag_config import GraphRagConfig
+    except ImportError:
+        return None
+    idx = index_dir or GRAPHRAG_INDEX_DIR
+    return GraphRagConfig(
+        input_storage={"type": "file", "base_dir": f"{idx}/input"},
+        output_storage={"type": "file", "base_dir": f"{idx}/output"},
+        vector_store={"type": "lancedb", "db_uri": f"{idx}/output/lancedb"},
+    )
 
 
 def _keyword_search_text_units(query: str, index_dir: str | None = None, limit: int = 3) -> list[str]:

@@ -1178,6 +1178,19 @@ class LegionSwarmOrchestrator:
             )
             agent_results.append(result)
 
+        # Wire self-evolution: record this swarm session
+        try:
+            from core.swarm_utils import record_swarm_session
+            agent_names = [a.key for a in team_defs]  # type: ignore[reportAttributeAccessIssue]
+            await record_swarm_session(
+                task=task,
+                agents=agent_names,
+                outcome=f"Synthesized: {final_synthesis[:100]}...",
+                success=bool(final_synthesis),
+            )
+        except Exception as exc:
+            logger.debug("Swarm session recording failed (non-fatal): %s", exc)
+
         return SwarmReport(
             phase1_outputs=phase1_outputs,
             phase2_outputs=phase2_outputs,
@@ -1427,13 +1440,13 @@ def diff_candidates(
     c2 = fs.get(candidate_id_2)
 
     if not c1 or not c2:
-        return f"Error: One or both candidates not found"
+        return "Error: One or both candidates not found"
 
     lines = [
         f"=== Diff: {candidate_id_1} vs {candidate_id_2} ===",
-        f"",
+        "",
         f"Metric          | {candidate_id_1:20} | {candidate_id_2:20}",
-        f"-" * 60,
+        "-" * 60,
         f"Reward          | {c1.mean_reward:20.4f} | {c2.mean_reward:20.4f}",
         f"Cost            | {c1.mean_cost:20.4f} | {c2.mean_cost:20.4f}",
         f"Domain          | {c1.domain.value:20} | {c2.domain.value:20}",
