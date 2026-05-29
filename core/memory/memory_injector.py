@@ -2,7 +2,8 @@
 10-Layer Recall Engine — OpenCode Memory System
 ==============================================
 
-Priority order (1 = highest, used first; 10 = lowest, last resort):
+Priority order (1 = highest, used first; 11 = lowest, last resort):
+  L0:  Previous session  — /tmp/legion_last_user_prompt.txt + obsidian Sessions/ (verbatim last prompt)
   L1:  Session checkpoints  — .session_state/checkpoints/ (most recent = most relevant)
   L2:  mem0 ChromaDB        — MemoryStore recall (semantic vector, live memories)
   L3:  langmem              — SwarmBotMemoryManager + langgraph InMemoryStore
@@ -25,13 +26,15 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
 import concurrent.futures
 import hashlib
 import json
 import logging
+import os
 import re
 import time
+from dataclasses import dataclass
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -171,12 +174,13 @@ def _expand_query(query: str) -> str:
 
 # ── Layer priority weights (higher = more trusted) ──────────────────────────────
 _LAYER_PRIORITY = {
+    "previous_session": 10.5,  # Verbatim last user prompt (authoritative source of truth)
     "checkpoints":      10.0,   # Most recent session state
     "mem0":             9.0,   # Live semantic memory
     "langmem":          8.0,   # Graph-structured memory
     "observation":      7.0,   # Recent observations
     "graphrag":         6.0,   # Wiki knowledge base
-    "obsidian_mcp":     5.5,   # Personal vault
+    "obsidian_mcp":     8.5,   # Personal vault (boosted from 5.5 for semantic content)
     "gitnexus_mcp":     5.0,   # Code knowledge graph
     "ruflo_mcp":       4.5,   # Learned patterns
     "symphony_tasks":  4.0,   # Active tasks (ephemeral)
@@ -195,8 +199,8 @@ _LAYER_PRIORITY = {
 # run_in_executor to make it non-blocking to the loop, and process items
 # via call_soon_threadsafe so cancellations propagate correctly.
 
-import threading
 import queue as _queue
+import threading
 from concurrent.futures import Future
 
 _mcp_loop: asyncio.AbstractEventLoop | None = None
@@ -218,7 +222,7 @@ def _mcp_worker(q: _queue.Queue) -> None:
         try:
             res = await asyncio.wait_for(coro, timeout=timeout)
             future.set_result(res)
-        except (asyncio.TimeoutError, asyncio.CancelledError):
+        except (TimeoutError, asyncio.CancelledError):
             future.set_result([])
         except BaseException as e:  # catches GeneratorExit, BaseExceptionGroup from anyio bug
             try:
@@ -241,18 +245,24 @@ def _mcp_worker(q: _queue.Queue) -> None:
     # Use a periodic callback so the loop stays alive between queue reads.
     # run_in_executor makes q.get() non-blocking to the event loop.
     def poll_queue() -> None:
+        """Poll queue and reschedule regardless of exceptions (defensive)."""
         try:
             item = q.get_nowait()
         except _queue.Empty:
             pass
         else:
-            if item is None:
-                loop.call_soon(loop.stop)
-                return
-            coro, future, timeout = item
-            loop.create_task(_run_coroutine(coro, future, timeout))
+            try:
+                if item is None:
+                    loop.call_soon(loop.stop)
+                    return
+                coro, future, timeout = item
+                loop.create_task(_run_coroutine(coro, future, timeout))
+            except Exception as exc:
+                logger.debug("poll_queue create_task error: %s", exc)
         finally:
-            # Re-schedule ourselves
+            # ALWAYS reschedule — even after exceptions, even after loop is shutting down.
+            # The anyio CancelScope bug raises GeneratorExit which hits poll_queue before
+            # finally runs — the finally IS our defense against starvation.
             loop.call_later(0.05, poll_queue)
 
     poll_queue()
@@ -369,7 +379,7 @@ def _bm25_score(query: str, text: str, k1: float = 1.5, b: float = 0.75) -> floa
     return score
 
 
-def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryResult, float]]:
+def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryResult, float, bool]]:
     """Re-rank results using BM25 scores as an additional signal.
     
     Returns list of (result, bm25_score) for all results.
@@ -399,7 +409,7 @@ def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryRe
         bm25_norm = bm25 / max_bm25
         # Override: if bm25 norm > 0.5 and base confidence < 5.0, apply override
         base_conf = r.confidence
-        if bm25_norm > 0.5 and base_conf < 5.0:
+        if bm25_norm > 0.5 and base_conf < 8.0:
             # Force score = bm25_norm * 12 (strong override, comparable to mid-tier)
             override_score = bm25_norm * 12.0
             final.append((r, override_score, True))  # True = override
@@ -511,8 +521,8 @@ def _keyword_score(text: str, query: str) -> float:
     # Single word match
     direct = sum(1 for w in q_words if w in t_words) / len(q_words)
     # Bigram overlap (pairs of adjacent words in query)
-    q_bigrams = {f"{a}_{b}" for a, b in zip(query.lower().split(), query.lower().split()[1:])}
-    t_bigrams = {f"{a}_{b}" for a, b in zip(text.lower().split(), text.lower().split()[1:])}
+    q_bigrams = {f"{a}_{b}" for a, b in zip(query.lower().split(), query.lower().split()[1:], strict=True)}
+    t_bigrams = {f"{a}_{b}" for a, b in zip(text.lower().split(), text.lower().split()[1:], strict=True)}
     bigram_score = len(q_bigrams & t_bigrams) / len(q_bigrams) if q_bigrams else 0.0
     return 0.6 * direct + 0.4 * bigram_score
 
@@ -1052,8 +1062,11 @@ def _safe_truncate_json(raw: str, max_chars: int = 12000) -> str:
     """
     if len(raw) <= max_chars:
         return raw
-    # Find last complete JSON structural char within the last 200 chars
-    search_start = max(0, max_chars - 200)
+    # search_start = max(0, max_chars - 200)
+    # Walk back up to 500 chars to find a clean break point (item boundary).
+    # This is safe because obsidian returns a JSON array — the last complete
+    # item before truncation is always a valid JSON result.
+    search_start = max(0, max_chars - 500)
     for i in range(max_chars - 1, search_start, -1):
         c = raw[i]
         if c in ('}', ']') and i > 0 and raw[i - 1] not in ('\\', "'", '"', '\\n', '\\t'):
@@ -1075,7 +1088,7 @@ _IGNORE_PATTERNS = [
     re.compile(r"^Reading config"),
     re.compile(r"^Loaded tools:"),
     re.compile(r"^Info: "),
-    re.compile(r"^[^\s{\"]{2,}$"),  # single-word non-JSON lines
+    re.compile(r"^[^\s{\"}]{2,}$"),  # single-word non-JSON lines (preserve } and ,)
 ]
 
 
@@ -1105,17 +1118,22 @@ class MemoryResult:
     layer: str
     confidence: float
     fp: str  # fingerprint
+    # Optional timestamp for temporal scoring (obsidian mtime, checkpoint ctime)
+    created_at: datetime | None = None
+    # Optional tags for categorization (used by previous_session layer)
+    tags: list[str] | None = None
     # Quality metadata — set during scoring pipeline
     freshness: float = 0.0   # 0.0–1.0 recency score (1.0 = < 1 hour old)
     signal_strength: float = 0.0  # 0.0–1.0 keyword/bigram match quality
     source_reliability: float = 0.0  # 0.0–1.0 layer reliability (prior weight normalized)
 
     def with_quality(self, freshness: float = 0.0, signal_strength: float = 0.0,
-                     source_reliability: float = 0.0) -> "MemoryResult":
+                     source_reliability: float = 0.0) -> MemoryResult:
         """Return a copy with quality metadata applied."""
         r = MemoryResult(
             content=self.content, layer=self.layer, confidence=self.confidence,
-            fp=self.fp, freshness=freshness,
+            fp=self.fp, created_at=self.created_at, tags=self.tags,
+            freshness=freshness,
             signal_strength=signal_strength, source_reliability=source_reliability,
         )
         return r
@@ -1148,6 +1166,89 @@ class MemoryResult:
 
     def __str__(self) -> str:
         return self.content
+
+
+# ── Layer 0: Previous session content ───────────────────────────────────────────
+# Reads from .wiki/Sessions/ (Obsidian) + /tmp/legion_last_user_prompt.txt
+# Captures verbatim last user prompt, in-progress files, and session summary
+# from the immediately prior session. This is the highest-priority layer because
+# it represents the authoritative source of truth for the current work.
+
+def _recall_previous_session(query: str, project_dir: str | None = None) -> list[MemoryResult]:
+    """
+    L0: Read prior session state — last user prompt, in-progress files, session notes.
+    Highest priority because this is what the user explicitly asked for.
+    """
+    results = []
+    wiki_root = Path.home() / "swarm-bot" / ".wiki"
+    sessions_dir = wiki_root / "Sessions"
+
+    # 1. Verbatim last user prompt (source of truth) — always include if query matches
+    try:
+        prompt_path = Path("/tmp/legion_last_user_prompt.txt")
+        if prompt_path.exists():
+            content = prompt_path.read_text().strip()
+            if content and content != "NO_USER_PROMPT" and len(content) > 5:
+                kw_score = _keyword_score(content, query)
+                # High confidence — verbatim user request is maximally authoritative
+                results.append(MemoryResult(
+                    content=f"[LAST USER PROMPT — SOURCE OF TRUTH]\n{content}",
+                    layer="previous_session",
+                    confidence=10.0 + kw_score * 0.5,
+                    fp=_fingerprint("last_user_prompt_" + content[:50]),
+                    tags=["last-prompt", "source-of-truth"],
+                ))
+    except Exception as e:
+        logger.debug("L0 last prompt read failed: %s", e)
+
+    # 2. Read most recent session note from obsidian
+    try:
+        if sessions_dir.exists():
+            session_files = sorted(
+                sessions_dir.glob("*.md"),
+                key=lambda f: f.stat().st_mtime,
+                reverse=True,
+            )
+            for sess_file in session_files[:2]:  # check 2 most recent
+                content = sess_file.read_text(encoding="utf-8")
+                kw_score = _keyword_score(content, query)
+                if kw_score > 0.1 or len(results) == 0:  # include even if low score (carry-over)
+                    # Strip frontmatter for cleaner content
+                    clean_content = re.sub(r"^---.*?---\n", "", content, flags=re.DOTALL).strip()
+                    # Get title from first h1
+                    title_match = re.search(r"^# (.+)", content, re.MULTILINE)
+                    title = title_match.group(1) if title_match else sess_file.name
+                    results.append(MemoryResult(
+                        content=f"[SESSION NOTE: {title}]\n{clean_content[:800]}",
+                        layer="previous_session",
+                        confidence=8.5 + kw_score * 0.5,
+                        fp=_fingerprint(f"session_note_{sess_file.stem}"),
+                        tags=["session-note", "obsidian"],
+                    ))
+    except Exception as e:
+        logger.debug("L0 obsidian session read failed: %s", e)
+
+    # 3. Read compaction checkpoint for decisions + in-progress files
+    try:
+        ckpt_path = Path("/tmp/legion_compaction_checkpoint.json")
+        if ckpt_path.exists():
+            ckpt = json.loads(ckpt_path.read_text())
+            ctx_size = ckpt.get("context_size", 0)
+            if ctx_size > 100:  # meaningful session
+                # Include session decisions if present
+                decisions_text = json.dumps(ckpt.get("decisions", []), ensure_ascii=False)
+                if decisions_text and _keyword_score(decisions_text, query) > 0.1:
+                    results.append(MemoryResult(
+                        content=f"[PRIOR SESSION DECISIONS]\n{decisions_text[:500]}",
+                        layer="previous_session",
+                        confidence=8.0,
+                        fp=_fingerprint("session_decisions"),
+                        tags=["decisions"],
+                    ))
+    except Exception as e:
+        logger.debug("L0 checkpoint read failed: %s", e)
+
+    return sorted(results, key=lambda r: r.confidence, reverse=True)[:3]
 
 
 # ── Layer 1: Session checkpoints ───────────────────────────────────────────────
@@ -1224,8 +1325,9 @@ def _sync_mem0_into_langmem() -> None:
         return
     _LANGMEM_SYNCED = True
     try:
-        from core.memory.store import MemoryStore
         from langgraph.store.memory import InMemoryStore
+
+        from core.memory.store import MemoryStore
         store = _get_langmem_store()
         mems = MemoryStore().recall(query="memory", agent_id=None, top_k=50, min_score=0.0)
         for i, mem in enumerate(mems):
@@ -1333,7 +1435,7 @@ def _recall_graphrag(query: str) -> list[MemoryResult]:
 
 # ── Layer 6: obsidian MCP ──────────────────────────────────────────────────────
 
-async def _recall_obsidian_async(query: str, limit: int = 3) -> list[MemoryResult]:
+async def _recall_obsidian_async(query: str, limit: int = 20) -> list[MemoryResult]:
     pool = _get_mcp_pool()
     if not pool:
         return []
@@ -1347,8 +1449,10 @@ async def _recall_obsidian_async(query: str, limit: int = 3) -> list[MemoryResul
             return []
         # Filter obsidian's stderr injection
         cleaned = _filter_obsidian_text(str(raw))
-        # Truncate at JSON boundary to avoid partial escape sequences
-        truncated = _safe_truncate_json(cleaned, max_chars=12000)
+        # Use large max_chars to avoid cutting mid-escape-sequence.
+        # obsidian returns a JSON array; 50000 chars safely contains 100+ items.
+        # _safe_json handles any truncated tail gracefully.
+        truncated = _safe_truncate_json(cleaned, max_chars=50000)
         items = _safe_json(truncated)
         if not items:
             # Truncated JSON — fall back to walking backward for complete items
@@ -1372,11 +1476,19 @@ async def _recall_obsidian_async(query: str, limit: int = 3) -> list[MemoryResul
             preview = item.get("preview", "") or ""
             content = item.get("content", "") or preview or title
             if content:
+                # Parse file mtime for temporal decay / recency_boost
+                vault_path = os.environ.get("OBSIDIAN_VAULT_PATH", "/home/newadmin/swarm-bot/.wiki")
+                file_path = Path(vault_path) / fn if fn and not Path(fn).is_absolute() else Path(fn)
+                try:
+                    mtime = datetime.fromtimestamp(file_path.stat().st_mtime, tz=UTC)
+                except Exception:
+                    mtime = datetime.now(UTC)
                 results.append(MemoryResult(
-                    content=f"[obsidian:{fn}] {content[:300]}",
+                    content=f"[obsidian:{fn}] {content[:1000]}",
                     layer="obsidian_mcp",
                     confidence=_LAYER_PRIORITY["obsidian_mcp"],
                     fp=_fingerprint(content),
+                    created_at=mtime,
                 ))
         brk.record_success()
         return results
@@ -1589,7 +1701,7 @@ def build_memory_context(
 
     Writes result to .session_state/recalled_context.md for /memory command.
     """
-    from core.memory.memory_injector import _get_session_dir, _get_recalled_file
+    from core.memory.memory_injector import _get_recalled_file, _get_session_dir
     session_dir = _get_session_dir(project_dir)
     recalled_file = _get_recalled_file(project_dir)
 
@@ -1618,8 +1730,9 @@ def build_memory_context(
     # Expand short queries for better layer coverage
     expanded_query = _expand_query(query)
 
-    # ── Step 2: Fire all 10 layers concurrently ─────────────────────────────────
+    # ── Step 2: Fire all 11 layers concurrently ─────────────────────────────────
     futures = {
+        "previous_session": _EXECUTOR.submit(_recall_previous_session, expanded_query, project_dir),
         "checkpoints":    _EXECUTOR.submit(_recall_checkpoints, expanded_query, project_dir),
         "mem0":           _EXECUTOR.submit(_recall_mem0, expanded_query),
         "langmem":         _EXECUTOR.submit(_recall_langmem, expanded_query),
@@ -1741,6 +1854,10 @@ def build_memory_context(
     # context is missed on urgent/important queries. Scale: 1.0 (normal) → 1.5 (critical).
     final_scored = [(r, s * priority_mult) for r, s in final_scored]
     final_scored.sort(key=lambda x: x[1], reverse=True)
+
+    # Score threshold: discard noise below 0.15, then cap at top_n
+    FINAL_THRESHOLD = 0.15
+    final_scored = [(r, s) for r, s in final_scored if s >= FINAL_THRESHOLD]
     top_results = [r for r, _ in final_scored[:top_n]]
 
     # ── Step 6: Build 3-tier progressive output ───────────────────────────────────
