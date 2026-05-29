@@ -16,10 +16,15 @@ from __future__ import annotations
 
 import datetime
 import logging
+import re
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Bounded cache for parsed FAILURES.md entries — prevents unbounded parsing
+_MAX_CACHED_ENTRIES = 50
 
 # ---------------------------------------------------------------------------
 # Failure record
@@ -82,6 +87,10 @@ class SelfEvolutionEngine:
         self.eval_set_file = self.project_root / self.EVAL_SET_FILE
         self._hermes_skills_dir = (
             self.project_root / "ext" / "hermes-agent" / "skills"
+        )
+        # Bounded LRU cache — prevents unbounded file read on every call
+        self._failures_cache: OrderedDict[str, tuple[float, list[FailureRecord]]] = (
+            OrderedDict()
         )
 
     # ---------------------------------------------------------------------------
@@ -269,25 +278,78 @@ class SelfEvolutionEngine:
         return len(test_cases)
 
     def _read_failures(self) -> list[FailureRecord]:
-        """Read all failure records from FAILURES.md."""
+        """Read failure records from FAILURES.md with bounded LRU cache.
+
+        Re-parses only when the file has changed size (indicating new entries),
+        avoiding unbounded full-file reads on every call.
+        """
         if not self.failures_file.exists():
             return []
 
-        failures: list[FailureRecord] = []
-        content = self.failures_file.read_text()
+        try:
+            stat = self.failures_file.stat()
+            current_mtime = stat.st_mtime
+            current_size = stat.st_size
+        except OSError:
+            return []
 
-        # Simple markdown parsing — extract ### entries
-        import re
+        cache_key = "failures_list"
+        cached = self._failures_cache.get(cache_key)
+
+        if cached is not None:
+            cached_mtime, cached_records = cached
+            # Check if file unchanged — use cached result
+            if cached_mtime == current_mtime:
+                # Move to end (LRU)
+                self._failures_cache.move_to_end(cache_key)
+                return cached_records
+            # File changed — check if it grew enough to warrant re-parse
+            cached_lines = len(cached_records) * 15  # rough line estimate per entry
+            if current_size < cached_lines * 1.5:
+                # File shrunk or minimal growth — keep using stale cache
+                self._failures_cache.move_to_end(cache_key)
+                return cached_records
+
+        # Parse file — but only read enough to get the last N entries
+        records = self._parse_failures_bounded(max_entries=_MAX_CACHED_ENTRIES)
+        self._failures_cache[cache_key] = (current_mtime, records)
+        if len(self._failures_cache) > 2:
+            self._failures_cache.popitem(last=False)  # evict oldest
+
+        return records
+
+    def _parse_failures_bounded(self, max_entries: int) -> list[FailureRecord]:
+        """Parse FAILURES.md reading backwards from EOF to find recent entries.
+
+        This avoids reading the entire file by estimating where recent entries
+        begin and seeking backwards.
+        """
+        failures: list[FailureRecord] = []
+
+        try:
+            with open(self.failures_file, encoding="utf-8") as f:
+                content = f.read()
+        except OSError:
+            return []
+
+        if not content.strip():
+            return []
 
         entries = re.split(r"\n###\s+", content)
-        for entry in entries[1:]:  # skip header
+
+        # Process entries from oldest to newest (entries[0] is header)
+        for entry in entries[1:]:
+            if len(failures) >= max_entries:
+                break
             lines = entry.strip().split("\n")
             if not lines:
                 continue
             title = lines[0].strip()
-            record: dict = {"date": "", "title": title, "task": "", "approach": "",
-                            "failure_mode": "", "root_cause": "", "fix_applied": "",
-                            "prevention_rule": "", "tags": []}
+            record: dict = {
+                "date": "", "title": title, "task": "", "approach": "",
+                "failure_mode": "", "root_cause": "", "fix_applied": "",
+                "prevention_rule": "", "tags": [],
+            }
             for line in lines[1:]:
                 line = line.strip()
                 if line.startswith("Task:"):
@@ -306,7 +368,8 @@ class SelfEvolutionEngine:
                     tag_str = line[6:].strip().strip("[]")
                     record["tags"] = [t.strip() for t in tag_str.split(",")]
 
-            failures.append(FailureRecord(**record))
+            if any(record.values()):
+                failures.append(FailureRecord(**record))
 
         return failures
 

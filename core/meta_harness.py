@@ -28,11 +28,11 @@ import json
 import logging
 import time
 import uuid
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
-from collections import deque
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -712,9 +712,8 @@ class HarnessFS:
         """Query candidates by keyword in description or code."""
         results = []
         for c in self._index.values():
-            if field == "description" and keyword.lower() in c.description.lower():
-                results.append(c)
-            elif field == "code" and keyword.lower() in c.source_code.lower():
+            if field == "description" and keyword.lower() in c.description.lower() or \
+               field == "code" and keyword.lower() in c.source_code.lower():
                 results.append(c)
         return results
 
@@ -813,7 +812,7 @@ class AgenticProposer:
         self,
         llm_call: Callable[[str, str, str], str],
         harness_fs: HarnessFS,
-        recursive_mas: "RecursiveMASOrchestrator | None" = None,
+        recursive_mas: RecursiveMASOrchestrator | None = None,
     ):
         self.llm_call = llm_call
         self.harness_fs = harness_fs
@@ -1077,7 +1076,7 @@ class MetaHarnessOptimizer:
         self,
         llm_call: Callable[[str, str, str], str],
         harness_fs: HarnessFS | None = None,
-        recursive_mas: "RecursiveMASOrchestrator | None" = None,
+        recursive_mas: RecursiveMASOrchestrator | None = None,
         proposals_per_iteration: int = 2,
         max_iterations: int = 20,
     ):
@@ -1262,7 +1261,7 @@ async def run_meta_harness(
         best = frontier.candidates[0]
         print(f"Best harness: {best.description}")
     """
-    from core.recursive_mas import RecursiveMASOrchestrator, CollaborationPattern
+    from core.recursive_mas import CollaborationPattern, RecursiveMASOrchestrator
 
     # Initialize optimizer
     optimizer = MetaHarnessOptimizer(
