@@ -85,9 +85,6 @@ SWARM_TOPOLOGIES = {
 # This is needed because SWARM_TOPOLOGIES uses project-specific agent names
 RUFLO_AGENT_TYPE_MAP = {
     "planner": "coordinator",
-    "worker": "coder",
-    "reviewer": "reviewer",
-    "wikibot": "coder",
     "test-generator": "tester",
     "backend-developer": "coder",
     "frontend-developer": "coder",
@@ -96,7 +93,7 @@ RUFLO_AGENT_TYPE_MAP = {
     "tdd-green": "coder",
     "qa-expert": "tester",
     "mcp-security-auditor": "security-auditor",
-    "security-engineer": "security-architect",
+    # security-engineer maps to security-architect (deduped from below)
     "penetration-tester": "security-auditor",
     "compliance-auditor": "security-auditor",
     "debugger": "coder",
@@ -124,7 +121,6 @@ RUFLO_AGENT_TYPE_MAP = {
     "analyst": "analyst",
     "architect": "architect",
     "backend": "coder",
-    "backend-developer": "coder",
     "code-reviewer": "reviewer",
     "coordinator": "coordinator",
     "core-architect": "core-architect",
@@ -139,15 +135,12 @@ RUFLO_AGENT_TYPE_MAP = {
     "meta-performance-engineer": "performance-engineer",
     "ml": "coder",
     "optimizer": "optimizer",
-    "performance-engineer": "performance-engineer",
     "product-project-manager": "coordinator",
     "python-pro": "coder",
     "research-analyst": "analyst",
     "researcher": "researcher",
-    "reviewer": "reviewer",
     "security-architect": "security-architect",
     "security-auditor": "security-auditor",
-    "security-engineer": "security-architect",
     "swarm-specialist": "swarm-specialist",
     "test": "tester",
     "test-architect": "test-architect",
@@ -156,10 +149,6 @@ RUFLO_AGENT_TYPE_MAP = {
     "testing": "tester",
     "testing-test-engineer": "tester",
     "worker": "general",
-    # Legacy/non-standard mappings
-    "test-runner": "tester",
-    "wg-code-sentinel": "reviewer",
-    "wg-code-alchemist": "reviewer",
     "general": "general",
 }
 
