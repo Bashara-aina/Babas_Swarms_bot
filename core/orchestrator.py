@@ -1510,7 +1510,7 @@ async def run_meta_harness(
     Returns:
         Dict with output, metrics, and harness info
     """
-    from core.meta_harness import HarnessFS, HarnessCandidate, HarnessDomain
+    from core.meta_harness import HarnessCandidate, HarnessDomain, HarnessFS
     from core.recursive_mas import CollaborationPattern, RecursiveMASOrchestrator
 
     async def llm_call(model: str, system: str, user: str) -> str:

@@ -67,14 +67,15 @@
     },
     {
       "name": "obsidian",
-      "command": "/home/newadmin/.local/node18/bin/node",
+      "command": "/home/newadmin/swarm-bot/mcp_servers/obsidian-wrapper.sh",
       "args": [
+        "/home/newadmin/.local/node18/bin/node",
         "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched/index.js"
       ],
+      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched",
       "env": {
         "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
       },
-      "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/obsidian-patched",
       "enabled": true,
       "description": "Obsidian vault knowledge management"
     },

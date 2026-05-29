@@ -28,10 +28,14 @@ def generate_compaction_summary(
     conversation_content: str,
     output_path: str = "/tmp/legion_precompact_checkpoint.md",
     context_chars: int = 0,
+    last_user_prompt: str = "",
 ) -> str:
     """
-    Generate the 9-section mandatory compaction summary.
+    Generate the 9-section mandatory compaction summary + Section 10 (verbatim last prompt).
     Returns the generated markdown content.
+
+    The last_user_prompt is saved verbatim — this is the user's explicit request,
+    which is the authoritative source of truth per CLAUDE.md session protocol.
     """
     lines = []
     lines.append("# LEGION COMPACTION SUMMARY\n")
@@ -76,9 +80,20 @@ def generate_compaction_summary(
         lines.append("- (none loaded)\n")
 
     lines.append("## 9. CONTEXT BUDGET\n")
-    pct = f"{(context_chars / 22000) * 100:.0f}%" if context_chars else "unknown"
-    target_pct = min(int(pct.rstrip("%")) * 0.4, 40)
+    if context_chars and context_chars > 0:
+        pct = f"{(context_chars / 22000) * 100:.0f}%"
+        target_pct = min(int(pct.rstrip("%")) * 0.4, 40)
+    else:
+        pct = "0%"
+        target_pct = 10
     lines.append(f"Used: ~{pct} | Target after compaction: ~{target_pct}%\n")
+
+    lines.append("## 10. VERBATIM LAST USER PROMPT\n")
+    lines.append("**Source of truth — what the user explicitly requested.**\n\n")
+    if last_user_prompt:
+        lines.append(f"> {last_user_prompt}\n")
+    else:
+        lines.append("_No user prompt captured (compaction may have fired before any user message)._\n")
 
     content = "".join(lines)
     Path(output_path).write_text(content)
@@ -168,6 +183,7 @@ def run_compaction_cli() -> None:
     parser.add_argument("--input", default="/tmp/legion_conversation.txt", help="Input file")
     parser.add_argument("--output", default="/tmp/legion_precompact_checkpoint.md", help="Output file")
     parser.add_argument("--context-chars", type=int, default=0, help="Context size in chars")
+    parser.add_argument("--last-prompt", default="", help="Verbatim last user prompt (source of truth)")
     args = parser.parse_args()
 
     try:
@@ -176,7 +192,7 @@ def run_compaction_cli() -> None:
     except Exception:
         content = ""
 
-    result = generate_compaction_summary(content, args.output, args.context_chars)
+    result = generate_compaction_summary(content, args.output, args.context_chars, args.last_prompt)
     print(f"Compaction summary written to {args.output}")
     print(f"Length: {len(result)} chars")
 

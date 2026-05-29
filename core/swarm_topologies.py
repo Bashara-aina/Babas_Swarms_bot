@@ -117,14 +117,22 @@ async def _maybe_spawn_subagents(
     agent: str,
     depth: int = 0,
     max_depth: int = 2,
+    tool_call_count: int = 0,
 ) -> list[dict[str, Any]]:
     """Intelligently spawn sub-agents based on task complexity and agent type.
 
     Returns trace of spawned sub-agents. Depth limits recursion.
+
+    Anti-loop: stops spawning if tool_call_count >= 8 and no progress.
     """
     traces: list[dict[str, Any]] = []
 
     if depth >= max_depth:
+        return traces
+
+    # Anti-loop: if too many tool calls with no sub-agent results, stop
+    if tool_call_count >= 8 and not traces:
+        logger.debug("Anti-loop: max tool calls reached, no sub-agents spawned")
         return traces
 
     # Task complexity signals for sub-agent spawning
@@ -192,6 +200,19 @@ async def _maybe_spawn_subagents(
 
             result = await run_opencode_task(
                 prompt=f"""You are a focused sub-agent ({sub_agent_type}) analyzing a sub-task.
+
+ANTI-LOOP RULES:
+- Same file read >2x → STOP, summarize, proceed
+- Same test/command >2x → STOP, change approach
+- 3 identical tool results → STOP, escalate
+- 8+ tool calls without progress → STOP, replan
+
+THINKING PROTOCOL:
+1. What did the last tool return?
+2. Does this match my expectation?
+3. What is the single next action that moves me closer to the goal?
+4. Is there any risk of repeating myself?
+
 Parent task: {task}
 Your focus: {sub_task}
 

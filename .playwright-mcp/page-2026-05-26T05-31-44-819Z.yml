@@ -1,0 +1,1106 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - link "Skyscanner" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e12]: Skyscanner
+        - generic:
+          - link "すぐ検索結果に進む":
+            - /url: "#dayview-first-result"
+        - navigation "ユーザー設定" [ref=e13]:
+          - list [ref=e14]:
+            - listitem [ref=e15]:
+              - button "日本語 JP 日本 ¥ JPY" [ref=e17] [cursor=pointer]:
+                - generic [ref=e18]:
+                  - generic [ref=e19]: 日本語
+                  - img "JP" [ref=e20]
+                  - generic [ref=e21]: 日本
+                  - generic [ref=e22]: ¥ JPY
+            - listitem [ref=e23]:
+              - link "マイリスト内の航空券、ホテル、レンタカー" [ref=e24] [cursor=pointer]:
+                - /url: /profile/saved
+                - img [ref=e25]
+            - listitem [ref=e27]:
+              - button "新規登録またはログイン" [ref=e28] [cursor=pointer]
+      - navigation "ナビゲーションタブ" [ref=e31]:
+        - tablist [ref=e32]:
+          - tab "航空券" [selected] [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]:
+              - img [ref=e36]
+              - generic [ref=e39]: 航空券
+          - tab "ホテル" [ref=e40] [cursor=pointer]:
+            - generic [ref=e41]:
+              - img [ref=e43]
+              - generic [ref=e45]: ホテル
+          - tab "レンタカー" [ref=e46] [cursor=pointer]:
+            - generic [ref=e47]:
+              - img [ref=e49]
+              - generic [ref=e52]: レンタカー
+    - generic [ref=e53]:
+      - search [ref=e57] [cursor=pointer]:
+        - navigation "航空券検索の入力欄" [ref=e58]:
+          - button "東京 (すべての空港) - ジャカルタ (CGK) 大人1人, エコノミー" [ref=e59]:
+            - img [ref=e62]
+            - generic [ref=e65]:
+              - generic [ref=e66]:
+                - generic [ref=e67]: 東京 (すべての空港)
+                - generic [ref=e68]: "-"
+                - generic [ref=e69]: ジャカルタ (CGK)
+              - generic [ref=e71]: 大人1人, エコノミー
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - button "1日前" [ref=e74]:
+                - img [ref=e77]
+              - textbox "2026年8月1日土曜日" [ref=e81]: 8月1日(土)
+              - button "1日後" [ref=e82]:
+                - img [ref=e85]
+            - generic [ref=e87]: •
+            - generic [ref=e88]:
+              - button "1日前" [ref=e89]:
+                - img [ref=e92]
+              - textbox "2026年8月7日金曜日" [ref=e96]: 8月7日(金)
+              - button "1日後" [ref=e97]:
+                - img [ref=e100]
+      - heading "航空券の検索結果" [level=1] [ref=e102]
+    - generic [ref=e103]:
+      - main [ref=e105]:
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - heading "航空券" [level=2] [ref=e112]
+            - generic [ref=e113]: 結果を読み込んでいます...
+            - generic [ref=e114]:
+              - link "絞り込み" [ref=e115] [cursor=pointer]:
+                - /url: "#/filters"
+              - button "プライスアラートを受信" [ref=e116] [cursor=pointer]:
+                - img [ref=e118]
+            - generic [ref=e121]:
+              - img [ref=e124]
+              - generic [ref=e137]: （51件中50件の代理店を確認済み）
+              - generic [ref=e138]: 検索中中国南方航空...
+            - progressbar "51社のうち50社の プロバイダーをチェック" [ref=e1775]
+            - heading "次の条件別で結果を表示" [level=2] [ref=e142]
+            - group "フライト旅程表の並べ替え" [ref=e144]:
+              - button "最適プラン 平均11時間13分" [pressed] [ref=e1776] [cursor=pointer]:
+                - generic [ref=e146]:
+                  - paragraph [ref=e147]: 最適プラン
+                  - generic [ref=e151]: ¥76,792
+                  - generic [ref=e152]: 平均11時間13分
+                  - paragraph [ref=e153]: 平均11時間13分
+              - button "最安プラン 平均14時間45分" [ref=e1777] [cursor=pointer]:
+                - generic [ref=e155]:
+                  - paragraph [ref=e156]: 最安プラン
+                  - generic [ref=e160]: ¥72,325
+                  - generic [ref=e161]: 平均14時間45分
+                  - paragraph [ref=e162]: 平均14時間45分
+              - button "最短プラン 平均7時間30分" [ref=e163] [cursor=pointer]:
+                - generic [ref=e164]:
+                  - paragraph [ref=e165]: 最短プラン
+                  - generic [ref=e169]: ¥146,221
+                  - generic [ref=e170]: 平均7時間30分
+                  - paragraph [ref=e171]: 平均7時間30分
+              - generic [ref=e172] [cursor=pointer]:
+                - generic:
+                  - generic: 並び替え
+                  - img
+                - combobox "フライト旅程表の並べ替え" [ref=e173]:
+                  - option "最適プラン" [selected]
+                  - option "最安プランから順"
+                  - option "最短プランから順"
+                  - option "往路の出発時刻 (早い順)"
+                  - option "復路の出発時刻（早い順）"
+            - list [ref=e174]:
+              - listitem [ref=e1778]:
+                - generic [ref=e1780]:
+                  - generic [ref=e1782]:
+                    - img "Trip.com(トリップドットコム)の広告。" [ref=e1784]
+                    - button "パートナーによる提供、詳細を見る" [ref=e1787] [cursor=pointer]:
+                      - generic [ref=e1788]: 提供
+                      - img [ref=e1790]
+                    - generic [ref=e1792]:
+                      - paragraph [ref=e1793]: ジャカルタへの航空券はTrip.comで
+                      - paragraph [ref=e1795]: 受賞歴のあるサービス、世界中の旅行者から信頼されています
+                  - link "フライトオプション1つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。 往路便航空会社はキャセイパシフィック航空。 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e1798] [cursor=pointer]:
+                    - /url: https://www.skyscanner.jp/transport_deeplink/4.0/JP/ja-JP/JPY/cjpt/2/7968.10485.2026-08-01,10485.7968.2026-08-07/air/trava/inlineads?itinerary=flight%7C-32456%7C543%7C12234%7C2026-08-01T10%3A05%7C12191%7C2026-08-01T13%3A50%7C285%7C-%7C-%7C-%3Bflight%7C-32456%7C719%7C12191%7C2026-08-01T15%3A45%7C10485%7C2026-08-01T19%3A40%7C295%7C-%7C-%7C-%2Cflight%7C-32456%7C718%7C10485%7C2026-08-07T08%3A00%7C12191%7C2026-08-07T14%3A10%7C310%7C-%7C-%7C-%3Bflight%7C-32456%7C500%7C12191%7C2026-08-07T15%3A20%7C14788%7C2026-08-07T20%3A50%7C270%7C-%7C-%7C-&carriers=-32456&operators=-32456%3B-32456%2C-32456%3B-32456&passengers=1&channel=website&cabin_class=economy&fps_session_id=d4fb9800-fed9-465b-9552-dc9f21f695a0&ticket_price=78870.00&is_npt=false&is_multipart=false&client_id=skyscanner_website&request_id=903e879f-4ddd-49a1-8e7f-c89d479b9dc3&q_ids=H4sIAAAAAAAA_-PS4WJJziooEWLmWGAnxczxNVCh4d2Wy2waDQeuXGYzYlJgLGLNStT1Cqhi9gqIBACM6TJTLgAAAA%7C7458533210584177478%7C2&q_sources=JACQUARD&commercial_filters=false&q_datetime_utc=2026-05-26T05%3A31%3A36&pqid=true&fare_type=base_fare&facilitated=false&requested_depth=BOOKING_PAGE&creative_id=CAM-f0338ef8-066d-4b2f-81db-66cb720a4791_*%2F*%2F*%2F*%2F*%2F*%2F*%2F*&creative_click_guid=9ffbdfff-b71d-403f-b5ca-2340cb76fac6
+                    - generic [ref=e1801]:
+                      - generic [ref=e1804]:
+                        - generic [ref=e1805]:
+                          - heading "フライトオプション1つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。" [level=3] [ref=e1806]
+                          - list [ref=e1807]:
+                            - listitem: 往路便航空会社はキャセイパシフィック航空。
+                            - listitem: 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。
+                            - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: キャセイパシフィック航空の到着便。
+                            - listitem: ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。
+                            - listitem: 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                            - listitem: 料金には税金と手数料が含まれる。
+                        - generic [ref=e1808]:
+                          - generic [ref=e1809]:
+                            - generic [ref=e1810]: キャセイパシフィック航空
+                            - generic [ref=e1811]:
+                              - generic [ref=e1812]:
+                                - generic [ref=e1814]: 10:05
+                                - tooltip [ref=e1816]: HND
+                              - generic [ref=e1817]:
+                                - text: 11時間35分
+                                - img [ref=e1820]
+                                - generic [ref=e1822]:
+                                  - generic [ref=e1823]: 乗継1回
+                                  - tooltip [ref=e1826]: HKG
+                              - generic [ref=e1827]:
+                                - generic [ref=e1829]: 19:40
+                                - tooltip [ref=e1831]: CGK
+                          - generic [ref=e1832]:
+                            - generic [ref=e1833]: キャセイパシフィック航空
+                            - generic [ref=e1834]:
+                              - generic [ref=e1835]:
+                                - generic [ref=e1837]: 8:00
+                                - tooltip [ref=e1839]: CGK
+                              - generic [ref=e1840]:
+                                - text: 10時間50分
+                                - img [ref=e1843]
+                                - generic [ref=e1845]:
+                                  - generic [ref=e1846]: 乗継1回
+                                  - tooltip [ref=e1849]: HKG
+                              - generic [ref=e1850]:
+                                - generic [ref=e1852]: 20:50
+                                - tooltip [ref=e1854]: NRT
+                      - generic [ref=e1859]:
+                        - generic [ref=e1860]: Trip.com(トリップドットコム)で予約、最安値
+                        - generic [ref=e1861]:
+                          - generic [ref=e1864]:
+                            - generic [ref=e1865]: ¥78,870
+                            - img [ref=e1867]
+                          - button "選ぶ" [ref=e1881]:
+                            - text: 選ぶ
+                            - img [ref=e1883]
+              - listitem [ref=e1885]:
+                - generic [ref=e1886]:
+                  - generic [ref=e1887]:
+                    - paragraph [ref=e1889]:
+                      - generic [ref=e1890]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e1891]: 10%少ない
+                        - text: フライトです
+                      - generic [ref=e1892]: 二酸化炭素排出量が通常のフライトよりも10%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 2" [ref=e1893] [cursor=pointer]:
+                      - img [ref=e1894]
+                  - generic [ref=e1896]:
+                    - link "フライトオプション2つ：合計金額¥76,792。 往路便航空会社はキャセイパシフィック航空。 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e1897] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/12234-2608011005--32456-1-10485-2608011940|10485-2608070800--32456-1-14788-2608072050?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e1900]:
+                        - generic [ref=e1903]:
+                          - generic [ref=e1904]:
+                            - heading "フライトオプション2つ：合計金額¥76,792。" [level=3] [ref=e1905]
+                            - list [ref=e1906]:
+                              - listitem: 往路便航空会社はキャセイパシフィック航空。
+                              - listitem: 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。
+                              - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: キャセイパシフィック航空の到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。
+                              - listitem: 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e1907]:
+                            - generic [ref=e1908]:
+                              - img [ref=e1912]
+                              - generic [ref=e1913]:
+                                - generic [ref=e1914]:
+                                  - generic [ref=e1916]: 10:05
+                                  - tooltip [ref=e1918]: HND
+                                - generic [ref=e1919]:
+                                  - text: 11時間35分
+                                  - img [ref=e1922]
+                                  - generic [ref=e1924]:
+                                    - generic [ref=e1925]: 乗継1回
+                                    - tooltip [ref=e1928]: HKG
+                                - generic [ref=e1929]:
+                                  - generic [ref=e1931]: 19:40
+                                  - tooltip [ref=e1933]: CGK
+                            - generic [ref=e1934]:
+                              - img [ref=e1938]
+                              - generic [ref=e1939]:
+                                - generic [ref=e1940]:
+                                  - generic [ref=e1942]: 8:00
+                                  - tooltip [ref=e1944]: CGK
+                                - generic [ref=e1945]:
+                                  - text: 10時間50分
+                                  - img [ref=e1948]
+                                  - generic [ref=e1950]:
+                                    - generic [ref=e1951]: 乗継1回
+                                    - tooltip [ref=e1954]: HKG
+                                - generic [ref=e1955]:
+                                  - generic [ref=e1957]: 20:50
+                                  - tooltip [ref=e1959]: NRT
+                        - generic [ref=e1964]:
+                          - generic [ref=e1966]: 10件の予約サイト
+                          - generic [ref=e1967]:
+                            - generic [ref=e1970]:
+                              - generic [ref=e1971]: ¥76,792
+                              - img [ref=e1973]
+                            - button "選ぶ" [ref=e1987]:
+                              - text: 選ぶ
+                              - img [ref=e1989]
+                    - button "航空券を保存します。2のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e1992] [cursor=pointer]:
+                      - img [ref=e1994]
+                      - img [ref=e1997]
+              - listitem [ref=e1999]:
+                - generic [ref=e2000]:
+                  - generic [ref=e2001]:
+                    - paragraph [ref=e2003]:
+                      - generic [ref=e2004]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2005]: 7%少ない
+                        - text: フライトです
+                      - generic [ref=e2006]: 二酸化炭素排出量が通常のフライトよりも7%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 3" [ref=e2007] [cursor=pointer]:
+                      - img [ref=e2008]
+                  - generic [ref=e2010]:
+                    - link "フライトオプション3つ：合計金額¥72,877。 往路便航空会社はキャセイパシフィック航空。 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に13:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2011] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/14788-2608010925--32456-1-10485-2608012255|10485-2608070005--32456-1-14788-2608071340?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2014]:
+                        - generic [ref=e2017]:
+                          - generic [ref=e2018]:
+                            - heading "フライトオプション3つ：合計金額¥72,877。" [level=3] [ref=e2019]
+                            - list [ref=e2020]:
+                              - listitem: 往路便航空会社はキャセイパシフィック航空。
+                              - listitem: 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。
+                              - listitem: 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: キャセイパシフィック航空の到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に13:40に到着。
+                              - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2021]:
+                            - generic [ref=e2022]:
+                              - img [ref=e2026]
+                              - generic [ref=e2027]:
+                                - generic [ref=e2028]:
+                                  - generic [ref=e2030]: 9:25
+                                  - tooltip [ref=e2032]: NRT
+                                - generic [ref=e2033]:
+                                  - text: 15時間30分
+                                  - img [ref=e2036]
+                                  - generic [ref=e2038]:
+                                    - generic [ref=e2039]: 乗継1回
+                                    - tooltip [ref=e2042]: HKG
+                                - generic [ref=e2043]:
+                                  - generic [ref=e2045]: 22:55
+                                  - tooltip [ref=e2047]: CGK
+                            - generic [ref=e2048]:
+                              - img [ref=e2052]
+                              - generic [ref=e2053]:
+                                - generic [ref=e2054]:
+                                  - generic [ref=e2056]: 0:05
+                                  - tooltip [ref=e2058]: CGK
+                                - generic [ref=e2059]:
+                                  - text: 11時間35分
+                                  - img [ref=e2062]
+                                  - generic [ref=e2064]:
+                                    - generic [ref=e2065]: 乗継1回
+                                    - tooltip [ref=e2068]: HKG
+                                - generic [ref=e2069]:
+                                  - generic [ref=e2071]: 13:40
+                                  - tooltip [ref=e2073]: NRT
+                        - generic [ref=e2078]:
+                          - generic [ref=e2080]: 12件の予約サイト
+                          - generic [ref=e2081]:
+                            - generic [ref=e2084]:
+                              - generic [ref=e2085]: ¥72,877
+                              - img [ref=e2087]
+                            - button "選ぶ" [ref=e2101]:
+                              - text: 選ぶ
+                              - img [ref=e2103]
+                    - button "航空券を保存します。3のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2106] [cursor=pointer]:
+                      - img [ref=e2108]
+                      - img [ref=e2111]
+              - listitem [ref=e2113]:
+                - generic [ref=e2115]:
+                  - link "フライトオプション4つ：合計金額¥144,901。 往路便航空会社は日本航空。 東京 成田を11:15に出発し、ジャカルタ スカルノハッタ国際に17:05に到着。 飛行時間7時間50分の直行便。 日本航空の到着便。 ジャカルタ スカルノハッタ国際を21:50に出発し、東京 成田に7:25、1日後に到着。 飛行時間7時間35分の直行便。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2116] [cursor=pointer]:
+                    - /url: /transport/flights/tyo/cgk/260801/260807/config/14788-2608011115--32184-0-10485-2608011705|10485-2608072150--32184-0-14788-2608080725?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                    - generic [ref=e2119]:
+                      - generic [ref=e2122]:
+                        - generic [ref=e2123]:
+                          - heading "フライトオプション4つ：合計金額¥144,901。" [level=3] [ref=e2124]
+                          - list [ref=e2125]:
+                            - listitem: 往路便航空会社は日本航空。
+                            - listitem: 東京 成田を11:15に出発し、ジャカルタ スカルノハッタ国際に17:05に到着。
+                            - listitem: 飛行時間7時間50分の直行便。
+                            - listitem: 日本航空の到着便。
+                            - listitem: ジャカルタ スカルノハッタ国際を21:50に出発し、東京 成田に7:25、1日後に到着。
+                            - listitem: 飛行時間7時間35分の直行便。
+                            - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                            - listitem: 料金には税金と手数料が含まれる。
+                        - generic [ref=e2126]:
+                          - generic [ref=e2127]:
+                            - img [ref=e2131]
+                            - generic [ref=e2132]:
+                              - generic [ref=e2133]:
+                                - generic [ref=e2135]: 11:15
+                                - tooltip [ref=e2137]: NRT
+                              - generic [ref=e2138]:
+                                - text: 7時間50分
+                                - img [ref=e2140]
+                                - generic [ref=e2143]: 直行便
+                              - generic [ref=e2144]:
+                                - generic [ref=e2146]: 17:05
+                                - tooltip [ref=e2148]: CGK
+                          - generic [ref=e2149]:
+                            - img [ref=e2153]
+                            - generic [ref=e2154]:
+                              - generic [ref=e2155]:
+                                - generic [ref=e2157]: 21:50
+                                - tooltip [ref=e2159]: CGK
+                              - generic [ref=e2160]:
+                                - text: 7時間35分
+                                - img [ref=e2162]
+                                - generic [ref=e2165]: 直行便
+                              - generic [ref=e2166]:
+                                - generic [ref=e2168]:
+                                  - text: 7:25
+                                  - tooltip [ref=e2169]:
+                                    - generic [ref=e2170]: "+1"
+                                - tooltip [ref=e2172]: NRT
+                      - generic [ref=e2177]:
+                        - generic [ref=e2179]: 13件の予約サイト
+                        - generic [ref=e2180]:
+                          - generic [ref=e2183]:
+                            - generic [ref=e2184]: ¥144,901
+                            - img [ref=e2186]
+                          - button "選ぶ" [ref=e2200]:
+                            - text: 選ぶ
+                            - img [ref=e2202]
+                  - button "航空券を保存します。4のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2205] [cursor=pointer]:
+                    - img [ref=e2207]
+                    - img [ref=e2210]
+              - listitem [ref=e638]:
+                - button "価格の変動をチェック プライスアラートを設定すると、現在の検索条件の航空券が値上がり・値下がりしたときにメールで通知が受け取れます。 設定する" [ref=e639] [cursor=pointer]:
+                  - generic [ref=e640]:
+                    - img [ref=e642]
+                    - generic [ref=e659]:
+                      - paragraph [ref=e660]: 価格の変動をチェック
+                      - paragraph [ref=e661]: プライスアラートを設定すると、現在の検索条件の航空券が値上がり・値下がりしたときにメールで通知が受け取れます。
+                      - generic [ref=e663]: 設定する
+              - listitem [ref=e2212]:
+                - generic [ref=e2213]:
+                  - generic [ref=e2214]:
+                    - paragraph [ref=e2216]:
+                      - generic [ref=e2217]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2218]: 10%少ない
+                        - text: フライトです
+                      - generic [ref=e2219]: 二酸化炭素排出量が通常のフライトよりも10%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 5" [ref=e2220] [cursor=pointer]:
+                      - img [ref=e2221]
+                  - generic [ref=e2223]:
+                    - link "フライトオプション5つ：合計金額¥76,827。 往路便航空会社はキャセイパシフィック航空。 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に13:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2224] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/12234-2608011005--32456-1-10485-2608011940|10485-2608070005--32456-1-14788-2608071340?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2227]:
+                        - generic [ref=e2230]:
+                          - generic [ref=e2231]:
+                            - heading "フライトオプション5つ：合計金額¥76,827。" [level=3] [ref=e2232]
+                            - list [ref=e2233]:
+                              - listitem: 往路便航空会社はキャセイパシフィック航空。
+                              - listitem: 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。
+                              - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: キャセイパシフィック航空の到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に13:40に到着。
+                              - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2234]:
+                            - generic [ref=e2235]:
+                              - img [ref=e2239]
+                              - generic [ref=e2240]:
+                                - generic [ref=e2241]:
+                                  - generic [ref=e2243]: 10:05
+                                  - tooltip [ref=e2245]: HND
+                                - generic [ref=e2246]:
+                                  - text: 11時間35分
+                                  - img [ref=e2249]
+                                  - generic [ref=e2251]:
+                                    - generic [ref=e2252]: 乗継1回
+                                    - tooltip [ref=e2255]: HKG
+                                - generic [ref=e2256]:
+                                  - generic [ref=e2258]: 19:40
+                                  - tooltip [ref=e2260]: CGK
+                            - generic [ref=e2261]:
+                              - img [ref=e2265]
+                              - generic [ref=e2266]:
+                                - generic [ref=e2267]:
+                                  - generic [ref=e2269]: 0:05
+                                  - tooltip [ref=e2271]: CGK
+                                - generic [ref=e2272]:
+                                  - text: 11時間35分
+                                  - img [ref=e2275]
+                                  - generic [ref=e2277]:
+                                    - generic [ref=e2278]: 乗継1回
+                                    - tooltip [ref=e2281]: HKG
+                                - generic [ref=e2282]:
+                                  - generic [ref=e2284]: 13:40
+                                  - tooltip [ref=e2286]: NRT
+                        - generic [ref=e2291]:
+                          - generic [ref=e2293]: 10件の予約サイト
+                          - generic [ref=e2294]:
+                            - generic [ref=e2297]:
+                              - generic [ref=e2298]: ¥76,827
+                              - img [ref=e2300]
+                            - button "選ぶ" [ref=e2314]:
+                              - text: 選ぶ
+                              - img [ref=e2316]
+                    - button "航空券を保存します。5のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2319] [cursor=pointer]:
+                      - img [ref=e2321]
+                      - img [ref=e2324]
+              - listitem [ref=e2326]:
+                - generic [ref=e2328]:
+                  - generic [ref=e2330]:
+                    - img "Trip.com(トリップドットコム)の広告。" [ref=e2332]
+                    - button "パートナーによる提供、詳細を見る" [ref=e2335] [cursor=pointer]:
+                      - generic [ref=e2336]: 提供
+                      - img [ref=e2338]
+                    - generic [ref=e2340]:
+                      - paragraph [ref=e2341]: ジャカルタへの航空券はTrip.comで
+                      - paragraph [ref=e2343]: 受賞歴のあるサービス、世界中の旅行者から信頼されています
+                  - link "フライトオプション6つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。 往路便航空会社はキャセイパシフィック航空。 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2346] [cursor=pointer]:
+                    - /url: https://www.skyscanner.jp/transport_deeplink/4.0/JP/ja-JP/JPY/cjpt/2/7968.10485.2026-08-01,10485.7968.2026-08-07/air/trava/inlineads?itinerary=flight%7C-32456%7C543%7C12234%7C2026-08-01T10%3A05%7C12191%7C2026-08-01T13%3A50%7C285%7C-%7C-%7C-%3Bflight%7C-32456%7C719%7C12191%7C2026-08-01T15%3A45%7C10485%7C2026-08-01T19%3A40%7C295%7C-%7C-%7C-%2Cflight%7C-32456%7C718%7C10485%7C2026-08-07T08%3A00%7C12191%7C2026-08-07T14%3A10%7C310%7C-%7C-%7C-%3Bflight%7C-32456%7C500%7C12191%7C2026-08-07T15%3A20%7C14788%7C2026-08-07T20%3A50%7C270%7C-%7C-%7C-&carriers=-32456&operators=-32456%3B-32456%2C-32456%3B-32456&passengers=1&channel=website&cabin_class=economy&fps_session_id=d4fb9800-fed9-465b-9552-dc9f21f695a0&ticket_price=78870.00&is_npt=false&is_multipart=false&client_id=skyscanner_website&request_id=903e879f-4ddd-49a1-8e7f-c89d479b9dc3&q_ids=H4sIAAAAAAAA_-PS4WJJziooEWLmWGAnxczxNVCh4d2Wy2waDQeuXGYzYlJgLGLNStT1Cqhi9gqIBACM6TJTLgAAAA%7C7458533210584177478%7C2&q_sources=JACQUARD&commercial_filters=false&q_datetime_utc=2026-05-26T05%3A31%3A36&pqid=true&fare_type=base_fare&facilitated=false&requested_depth=BOOKING_PAGE&creative_id=CAM-f0338ef8-066d-4b2f-81db-66cb720a4791_*%2F*%2F*%2F*%2F*%2F*%2F*%2F*&creative_click_guid=3cd196e0-0a87-4874-a2f2-ce407860fa06
+                    - generic [ref=e2349]:
+                      - generic [ref=e2352]:
+                        - generic [ref=e2353]:
+                          - heading "フライトオプション6つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。" [level=3] [ref=e2354]
+                          - list [ref=e2355]:
+                            - listitem: 往路便航空会社はキャセイパシフィック航空。
+                            - listitem: 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。
+                            - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: キャセイパシフィック航空の到着便。
+                            - listitem: ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。
+                            - listitem: 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                            - listitem: 料金には税金と手数料が含まれる。
+                        - generic [ref=e2356]:
+                          - generic [ref=e2357]:
+                            - generic [ref=e2358]: キャセイパシフィック航空
+                            - generic [ref=e2359]:
+                              - generic [ref=e2360]:
+                                - generic [ref=e2362]: 10:05
+                                - tooltip [ref=e2364]: HND
+                              - generic [ref=e2365]:
+                                - text: 11時間35分
+                                - img [ref=e2368]
+                                - generic [ref=e2370]:
+                                  - generic [ref=e2371]: 乗継1回
+                                  - tooltip [ref=e2374]: HKG
+                              - generic [ref=e2375]:
+                                - generic [ref=e2377]: 19:40
+                                - tooltip [ref=e2379]: CGK
+                          - generic [ref=e2380]:
+                            - generic [ref=e2381]: キャセイパシフィック航空
+                            - generic [ref=e2382]:
+                              - generic [ref=e2383]:
+                                - generic [ref=e2385]: 8:00
+                                - tooltip [ref=e2387]: CGK
+                              - generic [ref=e2388]:
+                                - text: 10時間50分
+                                - img [ref=e2391]
+                                - generic [ref=e2393]:
+                                  - generic [ref=e2394]: 乗継1回
+                                  - tooltip [ref=e2397]: HKG
+                              - generic [ref=e2398]:
+                                - generic [ref=e2400]: 20:50
+                                - tooltip [ref=e2402]: NRT
+                      - generic [ref=e2407]:
+                        - generic [ref=e2408]: Trip.com(トリップドットコム)で予約、最安値
+                        - generic [ref=e2409]:
+                          - generic [ref=e2412]:
+                            - generic [ref=e2413]: ¥78,870
+                            - img [ref=e2415]
+                          - button "選ぶ" [ref=e2429]:
+                            - text: 選ぶ
+                            - img [ref=e2431]
+              - listitem [ref=e2433]:
+                - generic [ref=e2434]:
+                  - generic [ref=e2435]:
+                    - paragraph [ref=e2437]:
+                      - generic [ref=e2438]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2439]: 8%少ない
+                        - text: フライトです
+                      - generic [ref=e2440]: 二酸化炭素排出量が通常のフライトよりも8%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 7" [ref=e2441] [cursor=pointer]:
+                      - img [ref=e2442]
+                  - generic [ref=e2444]:
+                    - link "フライトオプション7つ：合計金額¥72,877。 往路便航空会社はキャセイパシフィック航空。 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2445] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/14788-2608010925--32456-1-10485-2608012255|10485-2608070800--32456-1-14788-2608072050?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2448]:
+                        - generic [ref=e2451]:
+                          - generic [ref=e2452]:
+                            - heading "フライトオプション7つ：合計金額¥72,877。" [level=3] [ref=e2453]
+                            - list [ref=e2454]:
+                              - listitem: 往路便航空会社はキャセイパシフィック航空。
+                              - listitem: 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。
+                              - listitem: 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: キャセイパシフィック航空の到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。
+                              - listitem: 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2455]:
+                            - generic [ref=e2456]:
+                              - img [ref=e2460]
+                              - generic [ref=e2461]:
+                                - generic [ref=e2462]:
+                                  - generic [ref=e2464]: 9:25
+                                  - tooltip [ref=e2466]: NRT
+                                - generic [ref=e2467]:
+                                  - text: 15時間30分
+                                  - img [ref=e2470]
+                                  - generic [ref=e2472]:
+                                    - generic [ref=e2473]: 乗継1回
+                                    - tooltip [ref=e2476]: HKG
+                                - generic [ref=e2477]:
+                                  - generic [ref=e2479]: 22:55
+                                  - tooltip [ref=e2481]: CGK
+                            - generic [ref=e2482]:
+                              - img [ref=e2486]
+                              - generic [ref=e2487]:
+                                - generic [ref=e2488]:
+                                  - generic [ref=e2490]: 8:00
+                                  - tooltip [ref=e2492]: CGK
+                                - generic [ref=e2493]:
+                                  - text: 10時間50分
+                                  - img [ref=e2496]
+                                  - generic [ref=e2498]:
+                                    - generic [ref=e2499]: 乗継1回
+                                    - tooltip [ref=e2502]: HKG
+                                - generic [ref=e2503]:
+                                  - generic [ref=e2505]: 20:50
+                                  - tooltip [ref=e2507]: NRT
+                        - generic [ref=e2512]:
+                          - generic [ref=e2514]: 13件の予約サイト
+                          - generic [ref=e2515]:
+                            - generic [ref=e2518]:
+                              - generic [ref=e2519]: ¥72,877
+                              - img [ref=e2521]
+                            - button "選ぶ" [ref=e2535]:
+                              - text: 選ぶ
+                              - img [ref=e2537]
+                    - button "航空券を保存します。7のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2540] [cursor=pointer]:
+                      - img [ref=e2542]
+                      - img [ref=e2545]
+              - listitem [ref=e2547]:
+                - generic [ref=e2548]:
+                  - generic [ref=e2549]:
+                    - paragraph [ref=e2551]:
+                      - generic [ref=e2552]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2553]: 10%少ない
+                        - text: フライトです
+                      - generic [ref=e2554]: 二酸化炭素排出量が通常のフライトよりも10%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 8" [ref=e2555] [cursor=pointer]:
+                      - img [ref=e2556]
+                  - generic [ref=e2558]:
+                    - link "フライトオプション8つ：合計金額¥72,881。 往路便航空会社はキャセイパシフィック航空。 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に14:30に到着。 飛行時間12時間25分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2559] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/14788-2608010925--32456-1-10485-2608012255|10485-2608070005--32456-1-14788-2608071430?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2562]:
+                        - generic [ref=e2565]:
+                          - generic [ref=e2566]:
+                            - heading "フライトオプション8つ：合計金額¥72,881。" [level=3] [ref=e2567]
+                            - list [ref=e2568]:
+                              - listitem: 往路便航空会社はキャセイパシフィック航空。
+                              - listitem: 東京 成田を9:25に出発し、ジャカルタ スカルノハッタ国際に22:55に到着。
+                              - listitem: 飛行時間15時間30分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: キャセイパシフィック航空の到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を0:05に出発し、東京 成田に14:30に到着。
+                              - listitem: 飛行時間12時間25分の経由便で、香港国際で1回乗り継ぎあり。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2569]:
+                            - generic [ref=e2570]:
+                              - img [ref=e2574]
+                              - generic [ref=e2575]:
+                                - generic [ref=e2576]:
+                                  - generic [ref=e2578]: 9:25
+                                  - tooltip [ref=e2580]: NRT
+                                - generic [ref=e2581]:
+                                  - text: 15時間30分
+                                  - img [ref=e2584]
+                                  - generic [ref=e2586]:
+                                    - generic [ref=e2587]: 乗継1回
+                                    - tooltip [ref=e2590]: HKG
+                                - generic [ref=e2591]:
+                                  - generic [ref=e2593]: 22:55
+                                  - tooltip [ref=e2595]: CGK
+                            - generic [ref=e2596]:
+                              - img [ref=e2600]
+                              - generic [ref=e2601]:
+                                - generic [ref=e2602]:
+                                  - generic [ref=e2604]: 0:05
+                                  - tooltip [ref=e2606]: CGK
+                                - generic [ref=e2607]:
+                                  - text: 12時間25分
+                                  - img [ref=e2610]
+                                  - generic [ref=e2612]:
+                                    - generic [ref=e2613]: 乗継1回
+                                    - tooltip [ref=e2616]: HKG
+                                - generic [ref=e2617]:
+                                  - generic [ref=e2619]: 14:30
+                                  - tooltip [ref=e2621]: NRT
+                        - generic [ref=e2626]:
+                          - generic [ref=e2628]: 12件の予約サイト
+                          - generic [ref=e2629]:
+                            - generic [ref=e2632]:
+                              - generic [ref=e2633]: ¥72,881
+                              - img [ref=e2635]
+                            - button "選ぶ" [ref=e2649]:
+                              - text: 選ぶ
+                              - img [ref=e2651]
+                    - button "航空券を保存します。8のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2654] [cursor=pointer]:
+                      - img [ref=e2656]
+                      - img [ref=e2659]
+              - listitem [ref=e2661]:
+                - generic [ref=e2662]:
+                  - generic [ref=e2663]:
+                    - paragraph [ref=e2665]:
+                      - generic [ref=e2666]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2667]: 19%少ない
+                        - text: フライトです
+                      - generic [ref=e2668]: 二酸化炭素排出量が通常のフライトよりも19%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 9" [ref=e2669] [cursor=pointer]:
+                      - img [ref=e2670]
+                  - generic [ref=e2672]:
+                    - link "フライトオプション9つ：合計金額¥149,155。 往路便航空会社はANA。 東京 羽田を10:15に出発し、ジャカルタ スカルノハッタ国際に16:00に到着。 飛行時間7時間45分の直行便。 ANAの到着便。 ジャカルタ スカルノハッタ国際を7:00に出発し、東京 羽田に16:25に到着。 飛行時間7時間25分の直行便。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2673] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/12234-2608011015--32571-0-10485-2608011600|10485-2608070700--32571-0-12234-2608071625?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2676]:
+                        - generic [ref=e2679]:
+                          - generic [ref=e2680]:
+                            - heading "フライトオプション9つ：合計金額¥149,155。" [level=3] [ref=e2681]
+                            - list [ref=e2682]:
+                              - listitem: 往路便航空会社はANA。
+                              - listitem: 東京 羽田を10:15に出発し、ジャカルタ スカルノハッタ国際に16:00に到着。
+                              - listitem: 飛行時間7時間45分の直行便。
+                              - listitem: ANAの到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を7:00に出発し、東京 羽田に16:25に到着。
+                              - listitem: 飛行時間7時間25分の直行便。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2683]:
+                            - generic [ref=e2684]:
+                              - img [ref=e2688]
+                              - generic [ref=e2689]:
+                                - generic [ref=e2690]:
+                                  - generic [ref=e2692]: 10:15
+                                  - tooltip [ref=e2694]: HND
+                                - generic [ref=e2695]:
+                                  - text: 7時間45分
+                                  - img [ref=e2697]
+                                  - generic [ref=e2700]: 直行便
+                                - generic [ref=e2701]:
+                                  - generic [ref=e2703]: 16:00
+                                  - tooltip [ref=e2705]: CGK
+                            - generic [ref=e2706]:
+                              - img [ref=e2710]
+                              - generic [ref=e2711]:
+                                - generic [ref=e2712]:
+                                  - generic [ref=e2714]: 7:00
+                                  - tooltip [ref=e2716]: CGK
+                                - generic [ref=e2717]:
+                                  - text: 7時間25分
+                                  - img [ref=e2719]
+                                  - generic [ref=e2722]: 直行便
+                                - generic [ref=e2723]:
+                                  - generic [ref=e2725]: 16:25
+                                  - tooltip [ref=e2727]: HND
+                        - generic [ref=e2732]:
+                          - generic [ref=e2734]: 10件の予約サイト
+                          - generic [ref=e2735]:
+                            - generic [ref=e2738]:
+                              - generic [ref=e2739]: ¥149,155
+                              - img [ref=e2741]
+                            - button "選ぶ" [ref=e2755]:
+                              - text: 選ぶ
+                              - img [ref=e2757]
+                    - button "航空券を保存します。9のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2760] [cursor=pointer]:
+                      - img [ref=e2762]
+                      - img [ref=e2765]
+              - listitem [ref=e2767]:
+                - generic [ref=e2768]:
+                  - generic [ref=e2769]:
+                    - paragraph [ref=e2771]:
+                      - generic [ref=e2772]:
+                        - text: 二酸化炭素排出量が通常のフライトよりも
+                        - strong [ref=e2773]: 19%少ない
+                        - text: フライトです
+                      - generic [ref=e2774]: 二酸化炭素排出量が通常のフライトよりも19%少ないフライトです
+                    - button "各フライトのCO2排出量に関する詳細情報の表示／非表示を切り替える 10" [ref=e2775] [cursor=pointer]:
+                      - img [ref=e2776]
+                  - generic [ref=e2778]:
+                    - link "フライトオプション10つ：合計金額¥161,380。 往路便航空会社はANA。 東京 羽田を23:30に出発し、ジャカルタ スカルノハッタ国際に5:05、1日後に到着。 飛行時間7時間35分の直行便。 ANAの到着便。 ジャカルタ スカルノハッタ国際を21:25に出発し、東京 羽田に6:50、1日後に到着。 飛行時間7時間25分の直行便。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2779] [cursor=pointer]:
+                      - /url: /transport/flights/tyo/cgk/260801/260807/config/12234-2608012330--32571-0-10485-2608020505|10485-2608072125--32571-0-12234-2608080650?previousCultureSource=GEO_LOCATION&redirectedFrom=www.skyscanner.com
+                      - generic [ref=e2782]:
+                        - generic [ref=e2785]:
+                          - generic [ref=e2786]:
+                            - heading "フライトオプション10つ：合計金額¥161,380。" [level=3] [ref=e2787]
+                            - list [ref=e2788]:
+                              - listitem: 往路便航空会社はANA。
+                              - listitem: 東京 羽田を23:30に出発し、ジャカルタ スカルノハッタ国際に5:05、1日後に到着。
+                              - listitem: 飛行時間7時間35分の直行便。
+                              - listitem: ANAの到着便。
+                              - listitem: ジャカルタ スカルノハッタ国際を21:25に出発し、東京 羽田に6:50、1日後に到着。
+                              - listitem: 飛行時間7時間25分の直行便。
+                              - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                              - listitem: 料金には税金と手数料が含まれる。
+                          - generic [ref=e2789]:
+                            - generic [ref=e2790]:
+                              - img [ref=e2794]
+                              - generic [ref=e2795]:
+                                - generic [ref=e2796]:
+                                  - generic [ref=e2798]: 23:30
+                                  - tooltip [ref=e2800]: HND
+                                - generic [ref=e2801]:
+                                  - text: 7時間35分
+                                  - img [ref=e2803]
+                                  - generic [ref=e2806]: 直行便
+                                - generic [ref=e2807]:
+                                  - generic [ref=e2809]:
+                                    - text: 5:05
+                                    - tooltip [ref=e2810]:
+                                      - generic [ref=e2811]: "+1"
+                                  - tooltip [ref=e2813]: CGK
+                            - generic [ref=e2814]:
+                              - img [ref=e2818]
+                              - generic [ref=e2819]:
+                                - generic [ref=e2820]:
+                                  - generic [ref=e2822]: 21:25
+                                  - tooltip [ref=e2824]: CGK
+                                - generic [ref=e2825]:
+                                  - text: 7時間25分
+                                  - img [ref=e2827]
+                                  - generic [ref=e2830]: 直行便
+                                - generic [ref=e2831]:
+                                  - generic [ref=e2833]:
+                                    - text: 6:50
+                                    - tooltip [ref=e2834]:
+                                      - generic [ref=e2835]: "+1"
+                                  - tooltip [ref=e2837]: HND
+                        - generic [ref=e2842]:
+                          - generic [ref=e2844]: 10件の予約サイト
+                          - generic [ref=e2845]:
+                            - generic [ref=e2848]:
+                              - generic [ref=e2849]: ¥161,380
+                              - img [ref=e2851]
+                            - button "選ぶ" [ref=e2865]:
+                              - text: 選ぶ
+                              - img [ref=e2867]
+                    - button "航空券を保存します。10のオプション、東京発ジャカルタ スカルノハッタ国際行き" [ref=e2870] [cursor=pointer]:
+                      - img [ref=e2872]
+                      - img [ref=e2875]
+              - listitem [ref=e2877]:
+                - generic [ref=e2879]:
+                  - generic [ref=e2881]:
+                    - img "Trip.com(トリップドットコム)の広告。" [ref=e2883]
+                    - button "パートナーによる提供、詳細を見る" [ref=e2886] [cursor=pointer]:
+                      - generic [ref=e2887]: 提供
+                      - img [ref=e2889]
+                    - generic [ref=e2891]:
+                      - paragraph [ref=e2892]: ジャカルタへの航空券はTrip.comで
+                      - paragraph [ref=e2894]: 受賞歴のあるサービス、世界中の旅行者から信頼されています
+                  - link "フライトオプション11つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。 往路便航空会社はキャセイパシフィック航空。 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。 キャセイパシフィック航空の到着便。 ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。 料金には税金と手数料が含まれる。 選ぶ" [ref=e2897] [cursor=pointer]:
+                    - /url: https://www.skyscanner.jp/transport_deeplink/4.0/JP/ja-JP/JPY/cjpt/2/7968.10485.2026-08-01,10485.7968.2026-08-07/air/trava/inlineads?itinerary=flight%7C-32456%7C543%7C12234%7C2026-08-01T10%3A05%7C12191%7C2026-08-01T13%3A50%7C285%7C-%7C-%7C-%3Bflight%7C-32456%7C719%7C12191%7C2026-08-01T15%3A45%7C10485%7C2026-08-01T19%3A40%7C295%7C-%7C-%7C-%2Cflight%7C-32456%7C718%7C10485%7C2026-08-07T08%3A00%7C12191%7C2026-08-07T14%3A10%7C310%7C-%7C-%7C-%3Bflight%7C-32456%7C500%7C12191%7C2026-08-07T15%3A20%7C14788%7C2026-08-07T20%3A50%7C270%7C-%7C-%7C-&carriers=-32456&operators=-32456%3B-32456%2C-32456%3B-32456&passengers=1&channel=website&cabin_class=economy&fps_session_id=d4fb9800-fed9-465b-9552-dc9f21f695a0&ticket_price=78870.00&is_npt=false&is_multipart=false&client_id=skyscanner_website&request_id=903e879f-4ddd-49a1-8e7f-c89d479b9dc3&q_ids=H4sIAAAAAAAA_-PS4WJJziooEWLmWGAnxczxNVCh4d2Wy2waDQeuXGYzYlJgLGLNStT1Cqhi9gqIBACM6TJTLgAAAA%7C7458533210584177478%7C2&q_sources=JACQUARD&commercial_filters=false&q_datetime_utc=2026-05-26T05%3A31%3A36&pqid=true&fare_type=base_fare&facilitated=false&requested_depth=BOOKING_PAGE&creative_id=CAM-f0338ef8-066d-4b2f-81db-66cb720a4791_*%2F*%2F*%2F*%2F*%2F*%2F*%2F*&creative_click_guid=5a2b4a9b-64be-4e75-9fdf-1fd355ab5706
+                    - generic [ref=e2900]:
+                      - generic [ref=e2903]:
+                        - generic [ref=e2904]:
+                          - heading "フライトオプション11つ：提供：Trip.com(トリップドットコム). 合計金額¥78,870。" [level=3] [ref=e2905]
+                          - list [ref=e2906]:
+                            - listitem: 往路便航空会社はキャセイパシフィック航空。
+                            - listitem: 東京 羽田を10:05に出発し、ジャカルタ スカルノハッタ国際に19:40に到着。
+                            - listitem: 飛行時間11時間35分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: キャセイパシフィック航空の到着便。
+                            - listitem: ジャカルタ スカルノハッタ国際を8:00に出発し、東京 成田に20:50に到着。
+                            - listitem: 飛行時間10時間50分の経由便で、香港国際で1回乗り継ぎあり。
+                            - listitem: 機内持ち込み手荷物の情報は不明です。 受託手荷物の情報は不明です。
+                            - listitem: 料金には税金と手数料が含まれる。
+                        - generic [ref=e2907]:
+                          - generic [ref=e2908]:
+                            - generic [ref=e2909]: キャセイパシフィック航空
+                            - generic [ref=e2910]:
+                              - generic [ref=e2911]:
+                                - generic [ref=e2913]: 10:05
+                                - tooltip [ref=e2915]: HND
+                              - generic [ref=e2916]:
+                                - text: 11時間35分
+                                - img [ref=e2919]
+                                - generic [ref=e2921]:
+                                  - generic [ref=e2922]: 乗継1回
+                                  - tooltip [ref=e2925]: HKG
+                              - generic [ref=e2926]:
+                                - generic [ref=e2928]: 19:40
+                                - tooltip [ref=e2930]: CGK
+                          - generic [ref=e2931]:
+                            - generic [ref=e2932]: キャセイパシフィック航空
+                            - generic [ref=e2933]:
+                              - generic [ref=e2934]:
+                                - generic [ref=e2936]: 8:00
+                                - tooltip [ref=e2938]: CGK
+                              - generic [ref=e2939]:
+                                - text: 10時間50分
+                                - img [ref=e2942]
+                                - generic [ref=e2944]:
+                                  - generic [ref=e2945]: 乗継1回
+                                  - tooltip [ref=e2948]: HKG
+                              - generic [ref=e2949]:
+                                - generic [ref=e2951]: 20:50
+                                - tooltip [ref=e2953]: NRT
+                      - generic [ref=e2958]:
+                        - generic [ref=e2959]: Trip.com(トリップドットコム)で予約、最安値
+                        - generic [ref=e2960]:
+                          - generic [ref=e2963]:
+                            - generic [ref=e2964]: ¥78,870
+                            - img [ref=e2966]
+                          - button "選ぶ" [ref=e2980]:
+                            - text: 選ぶ
+                            - img [ref=e2982]
+            - button "その他の結果を表示" [ref=e2984] [cursor=pointer]
+          - generic [ref=e1358]:
+            - paragraph [ref=e1359]:
+              - generic [ref=e1360]: 航空券の価格は、空席状況などにより随時変動 しています。
+            - paragraph [ref=e1361]:
+              - generic [ref=e1362]: 受託手荷物などの追加料金についてはこちら
+              - link "受託手荷物などの追加料金についてはこちら" [ref=e1363] [cursor=pointer]:
+                - /url: /airlinefees
+                - generic [ref=e1364]: 受託手荷物などの追加料金についてはこちら
+          - generic [ref=e1365]:
+            - region [ref=e1367]:
+              - generic [ref=e1368]:
+                - heading "ジャカルタ スカルノハッタ国際のホテルのお得情報" [level=2] [ref=e1369]
+                - radiogroup "ホテルの絞り込み条件" [ref=e1375]:
+                  - generic [ref=e1376]: ホテルの絞り込み条件
+                  - radio "最適" [checked] [ref=e1377] [cursor=pointer]:
+                    - generic [ref=e1378]: 最適
+                  - radio "4つ星以上" [ref=e1379] [cursor=pointer]:
+                    - generic [ref=e1380]: 4つ星以上
+                  - radio "3つ星以上" [ref=e1381] [cursor=pointer]:
+                    - generic [ref=e1382]: 3つ星以上
+                  - radio "高評価" [ref=e1383] [cursor=pointer]:
+                    - generic [ref=e1384]: 高評価
+                  - radio "朝食付き" [ref=e1385] [cursor=pointer]:
+                    - generic [ref=e1386]: 朝食付き
+                  - radio "キャンセル無料" [ref=e1387] [cursor=pointer]:
+                    - generic [ref=e1388]: キャンセル無料
+                - generic [ref=e1389]:
+                  - link "マリーン パーク ホテル. 5つ星. Tripadvisorの10227件の評価で、5段階中4.3の評価. ¥6,393/泊." [ref=e1392] [cursor=pointer]:
+                    - /url: /hotels/search?adults=1&checkin=2026-08-01&checkout=2026-08-07&entity_id=27539774&upsort_hotels=128471720&rooms=1&sort=-relevance&source=combined_search&trace_info=eyJzb3VyY2UiOiJjb21iaW5lZF9zZWFyY2giLCJwcmljZSI6NjM5My4wLCJjdXJyZW5jeSI6IkpQWSIsImhvdGVsX2lkIjoiMTI4NDcxNzIwIn0%3D
+                    - generic [ref=e1393]:
+                      - generic [ref=e1395]:
+                        - img "マリーン パーク ホテル" [ref=e1396]:
+                          - img [ref=e1403]
+                        - generic [ref=e1416]:
+                          - generic [ref=e1417]: マリーン パーク ホテル
+                          - img "最高評価星5つのうち5の評価。" [ref=e1418]:
+                            - img [ref=e1420]
+                            - img [ref=e1423]
+                            - img [ref=e1426]
+                            - img [ref=e1429]
+                            - img [ref=e1432]
+                          - figure "とても良いの評価、10227件のレビューで5点中4.3点。" [ref=e1435]:
+                            - generic [ref=e1436]:
+                              - text: "4.3"
+                              - generic [ref=e1438]: /5
+                            - generic [ref=e1439]:
+                              - generic [ref=e1440]: とても良い
+                              - generic [ref=e1441]: 10,227件のレビュー
+                      - generic [ref=e1443]:
+                        - generic [ref=e1445]:
+                          - generic [ref=e1446]: ¥6,393
+                          - generic [ref=e1447]: 1泊あたり
+                        - button "詳細を表示" [ref=e1448]
+                  - link "ホテル インドネシア ケンピンスキー ジャカルタ. 5つ星. Tripadvisorの6458件の評価で、5段階中4.6の評価. ¥26,642/泊." [ref=e1451] [cursor=pointer]:
+                    - /url: /hotels/search?adults=1&checkin=2026-08-01&checkout=2026-08-07&entity_id=27539774&upsort_hotels=128470678&rooms=1&sort=-relevance&source=combined_search&trace_info=eyJzb3VyY2UiOiJjb21iaW5lZF9zZWFyY2giLCJwcmljZSI6MjY2NDIuMCwiY3VycmVuY3kiOiJKUFkiLCJob3RlbF9pZCI6IjEyODQ3MDY3OCJ9
+                    - generic [ref=e1452]:
+                      - generic [ref=e1454]:
+                        - img "ホテル インドネシア ケンピンスキー ジャカルタ" [ref=e1455]:
+                          - img [ref=e1462]
+                        - generic [ref=e1475]:
+                          - generic [ref=e1476]: ホテル インドネシア ケンピンスキー ジャカルタ
+                          - img "最高評価星5つのうち5の評価。" [ref=e1477]:
+                            - img [ref=e1479]
+                            - img [ref=e1482]
+                            - img [ref=e1485]
+                            - img [ref=e1488]
+                            - img [ref=e1491]
+                          - figure "大変満足の評価、6458件のレビューで5点中4.6点。" [ref=e1494]:
+                            - generic [ref=e1495]:
+                              - text: "4.6"
+                              - generic [ref=e1497]: /5
+                            - generic [ref=e1498]:
+                              - generic [ref=e1499]: 大変満足
+                              - generic [ref=e1500]: 6,458件のレビュー
+                      - generic [ref=e1502]:
+                        - generic [ref=e1504]:
+                          - generic [ref=e1505]: ¥26,642
+                          - generic [ref=e1506]: 1泊あたり
+                        - button "詳細を表示" [ref=e1507]
+                  - link "ダルチチ ホテル スンテル. 3つ星. Tripadvisorの383件の評価で、5段階中4.2の評価. ¥1,932/泊." [ref=e1510] [cursor=pointer]:
+                    - /url: /hotels/search?adults=1&checkin=2026-08-01&checkout=2026-08-07&entity_id=27539774&upsort_hotels=135785594&rooms=1&sort=-relevance&source=combined_search&trace_info=eyJzb3VyY2UiOiJjb21iaW5lZF9zZWFyY2giLCJwcmljZSI6MTkzMi4wLCJjdXJyZW5jeSI6IkpQWSIsImhvdGVsX2lkIjoiMTM1Nzg1NTk0In0%3D
+                    - generic [ref=e1511]:
+                      - generic [ref=e1513]:
+                        - img "ダルチチ ホテル スンテル" [ref=e1514]:
+                          - img [ref=e1521]
+                        - generic [ref=e1534]:
+                          - generic [ref=e1535]: ダルチチ ホテル スンテル
+                          - img "最高評価星5つのうち3の評価。" [ref=e1536]:
+                            - img [ref=e1538]
+                            - img [ref=e1541]
+                            - img [ref=e1544]
+                          - figure "とても良いの評価、383件のレビューで5点中4.2点。" [ref=e1547]:
+                            - generic [ref=e1548]:
+                              - text: "4.2"
+                              - generic [ref=e1550]: /5
+                            - generic [ref=e1551]:
+                              - generic [ref=e1552]: とても良い
+                              - generic [ref=e1553]: 383件のレビュー
+                      - generic [ref=e1555]:
+                        - generic [ref=e1557]:
+                          - generic [ref=e1558]: ¥1,932
+                          - generic [ref=e1559]: 1泊あたり
+                        - button "詳細を表示" [ref=e1560]
+                - link "ホテルを検索" [ref=e1562] [cursor=pointer]:
+                  - /url: /hotels/search?source=combined_search&entity_id=95673340&checkin=2026-08-01&adults=1&rooms=1&checkout=2026-08-07
+            - generic [ref=e1565]:
+              - heading "ジャカルタ スカルノハッタ国際のレンタカー" [level=2] [ref=e1566]
+              - radiogroup "レンタカーの絞り込み条件" [ref=e1572]:
+                - generic [ref=e1573]: レンタカーの絞り込み条件
+                - radio "コンパクト" [checked] [ref=e1574] [cursor=pointer]:
+                  - generic [ref=e1575]: コンパクト
+                - radio "ワンボックス" [ref=e1576] [cursor=pointer]:
+                  - generic [ref=e1577]: ワンボックス
+                - radio "小型車" [ref=e1578] [cursor=pointer]:
+                  - generic [ref=e1579]: 小型車
+                - radio "スタンダード" [ref=e1580] [cursor=pointer]:
+                  - generic [ref=e1581]: スタンダード
+                - radio "SUV" [ref=e1582] [cursor=pointer]:
+                  - generic [ref=e1583]: SUV
+              - generic [ref=e1584]:
+                - link "乗客輸送用ミニバンの車両。7人乗り。荷物2個まで収納可。。1日あたり¥6,765。" [ref=e1587] [cursor=pointer]:
+                  - /url: https://www.skyscanner.jp/carhire/results/95673340/95673340/2026-08-01t10:00/2026-08-07t10:00/30/?source=combined_result&filters=car-type:medium&indicative_price=6764.50
+                  - generic [ref=e1588]:
+                    - generic [ref=e1591]:
+                      - generic [ref=e1592]: 乗客輸送用ミニバン
+                      - generic [ref=e1593]:
+                        - generic [ref=e1594]:
+                          - img [ref=e1595]
+                          - generic [ref=e1597]: "7"
+                        - generic [ref=e1598]:
+                          - img [ref=e1599]
+                          - generic [ref=e1602]: "2"
+                        - generic [ref=e1603]:
+                          - img [ref=e1604]
+                          - generic [ref=e1606]: マニュアル
+                    - generic [ref=e1617]:
+                      - generic [ref=e1618]:
+                        - generic [ref=e1619]: レンタカー最安値
+                        - generic [ref=e1620]:
+                          - generic [ref=e1621]: ¥6,765
+                          - generic [ref=e1622]: 1日あたり
+                      - button "お得情報を表示" [ref=e1623]
+                - link "乗客輸送用ミニバンの車両。7人乗り。荷物1個まで収納可。。1日あたり¥7,253。" [ref=e1626] [cursor=pointer]:
+                  - /url: https://www.skyscanner.jp/carhire/results/95673340/95673340/2026-08-01t10:00/2026-08-07t10:00/30/?source=combined_result&filters=car-type:medium&indicative_price=7252.97
+                  - generic [ref=e1627]:
+                    - generic [ref=e1630]:
+                      - generic [ref=e1631]: 乗客輸送用ミニバン
+                      - generic [ref=e1632]:
+                        - generic [ref=e1633]:
+                          - img [ref=e1634]
+                          - generic [ref=e1636]: "7"
+                        - generic [ref=e1637]:
+                          - img [ref=e1638]
+                          - generic [ref=e1641]: "1"
+                        - generic [ref=e1642]:
+                          - img [ref=e1643]
+                          - generic [ref=e1645]: マニュアル
+                    - generic [ref=e1656]:
+                      - generic [ref=e1657]:
+                        - generic [ref=e1658]: レンタカー最安値
+                        - generic [ref=e1659]:
+                          - generic [ref=e1660]: ¥7,253
+                          - generic [ref=e1661]: 1日あたり
+                      - button "お得情報を表示" [ref=e1662]
+                - link "乗客輸送用ミニバンの車両。7人乗り。荷物2個まで収納可。。1日あたり¥10,658。" [ref=e1665] [cursor=pointer]:
+                  - /url: https://www.skyscanner.jp/carhire/results/95673340/95673340/2026-08-01t10:00/2026-08-07t10:00/30/?source=combined_result&filters=car-type:medium&indicative_price=10657.42
+                  - generic [ref=e1666]:
+                    - generic [ref=e1669]:
+                      - generic [ref=e1670]: 乗客輸送用ミニバン
+                      - generic [ref=e1671]:
+                        - generic [ref=e1672]:
+                          - img [ref=e1673]
+                          - generic [ref=e1675]: "7"
+                        - generic [ref=e1676]:
+                          - img [ref=e1677]
+                          - generic [ref=e1680]: "2"
+                        - generic [ref=e1681]:
+                          - img [ref=e1682]
+                          - generic [ref=e1684]: オートマ
+                    - generic [ref=e1695]:
+                      - generic [ref=e1696]:
+                        - generic [ref=e1697]: レンタカー最安値
+                        - generic [ref=e1698]:
+                          - generic [ref=e1699]: ¥10,658
+                          - generic [ref=e1700]: 1日あたり
+                      - button "お得情報を表示" [ref=e1701]
+              - link "レンタカーを検索" [ref=e1703] [cursor=pointer]:
+                - /url: /carhire/results/CGK/CGK/2026-08-01/2026-08-07/30
+      - complementary
+    - contentinfo [ref=e1705]:
+      - generic [ref=e1706]:
+        - generic [ref=e1707]:
+          - link "アプリを入手する" [ref=e1709] [cursor=pointer]:
+            - /url: https://skyscanner.app.link/4c8KEJ2HaIb
+            - img [ref=e1711]
+            - text: アプリを入手する
+          - generic [ref=e1715]:
+            - text: JP·ja-JP·
+            - generic [ref=e1716]:
+              - generic [ref=e1717]: ¥
+              - text: JPY
+        - generic [ref=e1718]:
+          - link "ヘルプ" [ref=e1719] [cursor=pointer]:
+            - /url: https://help.skyscanner.net/hc/ja?skyCurrency=currency_jpy&skyLanguage=lang_ja&skyMarket=jp_skyscanner
+          - link "プライバシー設定" [ref=e1720] [cursor=pointer]:
+            - /url: /privacy-settings
+          - link "ログイン" [ref=e1721] [cursor=pointer]:
+            - /url: /profile
+        - generic [ref=e1722]:
+          - link "クッキーポリシー" [ref=e1723] [cursor=pointer]:
+            - /url: https://www.skyscanner.jp/media/cookie-policy
+          - link "プライバシー ポリシー" [ref=e1724] [cursor=pointer]:
+            - /url: https://www.skyscanner.jp/media/privacy-policy
+          - link "利用規約" [ref=e1725] [cursor=pointer]:
+            - /url: /terms-of-service
+          - link "会社概要" [ref=e1726] [cursor=pointer]:
+            - /url: /company-details
+        - generic [ref=e1727]:
+          - button "探す・発見する" [ref=e1730] [cursor=pointer]:
+            - generic [ref=e1731]:
+              - generic [ref=e1732]: 探す・発見する
+              - img [ref=e1735]
+          - button "企業情報" [ref=e1739] [cursor=pointer]:
+            - generic [ref=e1740]:
+              - generic [ref=e1741]: 企業情報
+              - img [ref=e1744]
+          - button "パートナー" [ref=e1748] [cursor=pointer]:
+            - generic [ref=e1749]:
+              - generic [ref=e1750]: パートナー
+              - img [ref=e1753]
+          - button "トリップ" [ref=e1757] [cursor=pointer]:
+            - generic [ref=e1758]:
+              - generic [ref=e1759]: トリップ
+              - img [ref=e1762]
+          - button "世界のSkyscannerサイト" [ref=e1766] [cursor=pointer]:
+            - generic [ref=e1767]:
+              - generic [ref=e1768]: 世界のSkyscannerサイト
+              - img [ref=e1771]
+      - generic [ref=e1774]: © Skyscanner Ltd 2002 – 2026
+  - generic:
+    - generic [ref=e2985]: mmmmmmmmmmlli
+    - generic [ref=e2986]: mmmmmmmmmmlli

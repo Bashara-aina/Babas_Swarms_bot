@@ -247,7 +247,7 @@ def _insert_at_line(path: Path, line_num: int, content: str, display_path: str) 
         )
 
     # Save for undo
-    new_lines = lines[:line_num] + [content + "\n"] + lines[line_num:]
+    new_lines = [*lines[:line_num], content + "\n", *lines[line_num:]]
     new_content = "".join(new_lines)
 
     history = EditHistory(

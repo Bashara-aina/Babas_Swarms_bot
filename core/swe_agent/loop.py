@@ -12,12 +12,53 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Iteration budget (hermes pattern — thread-safe, with refund support)
+# ---------------------------------------------------------------------------
+
+class IterationBudget:
+    """Thread-safe iteration counter for an agent loop.
+
+    Supports refund() for execute_code turns that shouldn't consume budget.
+    The consume() method returns False when exhausted so the loop can stop.
+    """
+
+    def __init__(self, max_total: int) -> None:
+        self.max_total = max_total
+        self._used = 0
+        self._lock = threading.Lock()
+
+    def consume(self) -> bool:
+        """Try to consume one iteration. Returns True if allowed, False if exhausted."""
+        with self._lock:
+            if self._used >= self.max_total:
+                return False
+            self._used += 1
+            return True
+
+    def refund(self) -> None:
+        """Refund one iteration (e.g. for execute_code turns)."""
+        with self._lock:
+            if self._used > 0:
+                self._used -= 1
+
+    @property
+    def used(self) -> int:
+        return self._used
+
+    @property
+    def remaining(self) -> int:
+        with self._lock:
+            return max(0, self.max_total - self._used)
 
 # ---------------------------------------------------------------------------
 # Exceptions
@@ -176,8 +217,8 @@ class SWEAgentLoop:
         from .tools import (
             ToolResult,
             bash,
-            grep,
             glob,
+            grep,
             str_replace_editor,
             submit,
         )

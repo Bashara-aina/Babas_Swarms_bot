@@ -1,10 +1,7 @@
 {
-  "version": "3.0.0",
-  "initialized": "2026-05-20T10:15:14.608Z",
   "domains": {
     "completed": 0,
-    "total": 5,
-    "status": "INITIALIZING"
+    "total": 5
   },
   "ddd": {
     "progress": 0,
@@ -13,14 +10,9 @@
     "totalLines": 0
   },
   "swarm": {
-    "activeAgents": 0,
-    "maxAgents": 15,
-    "topology": "hierarchical-mesh"
+    "activeAgents": 74,
+    "totalAgents": 15
   },
-  "learning": {
-    "status": "READY",
-    "patternsLearned": 0,
-    "sessionsCompleted": 0
-  },
-  "_note": "Metrics will update as you use Ruflo. Run: npx ruflo@latest daemon start"
+  "lastUpdated": "2026-05-29T11:22:26.160Z",
+  "source": "metrics.db"
 }

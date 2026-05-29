@@ -1,17 +1,21 @@
 """Progress store for Nihongo Mode — Supabase adapter (isolated namespace)."""
 
 import logging
-from typing import Optional
+from collections import OrderedDict
 
 logger = logging.getLogger("nihongo.progress_store")
 
+MAX_CACHE_SIZE = 200
+
 
 class ProgressStore:
-    _cache: dict[int, dict] = {}
+    _cache: OrderedDict[int, dict] = OrderedDict()
 
     @classmethod
     def get_user_progress(cls, user_id: int) -> dict:
         if user_id not in cls._cache:
+            if len(cls._cache) >= MAX_CACHE_SIZE:
+                cls._cache.popitem(last=False)  # evict oldest
             cls._cache[user_id] = {
                 "words_seen": [],
                 "words_mastered": [],
@@ -19,6 +23,8 @@ class ProgressStore:
                 "grammar_seen": [],
                 "lesson_count": 0,
             }
+        else:
+            cls._cache.move_to_end(user_id)  # mark as recently used
         return cls._cache[user_id]
 
     @classmethod

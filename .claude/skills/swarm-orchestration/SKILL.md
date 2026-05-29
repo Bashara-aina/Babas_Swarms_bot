@@ -1,6 +1,6 @@
 ---
 name: "Swarm Orchestration"
-description: "Orchestrate multi-agent swarms with agentic-flow for parallel task execution, dynamic topology, and intelligent coordination. Use when scaling beyond single agents, implementing complex workflows, or building distributed AI systems."
+description: "Auto-trigger for: run agents in parallel, coordinate multiple agents, multi-agent workflow, swarm orchestration, use multiple agents, parallelize tasks, agent team, distribute work across agents, complex task needs multiple agents, build with swarm, deploy agent team, research with multiple agents, full-stack with frontend and backend agents, test with agent team, analyze with specialists. Use when scaling beyond single agents, implementing complex workflows, or building distributed AI systems. Activates automatically when task involves multiple agents, parallel execution, distributed AI, or swarm coordination."
 ---
 
 # Swarm Orchestration
@@ -8,6 +8,38 @@ description: "Orchestrate multi-agent swarms with agentic-flow for parallel task
 ## What This Skill Does
 
 Orchestrates multi-agent swarms using agentic-flow's advanced coordination system. Supports mesh, hierarchical, and adaptive topologies with automatic task distribution, load balancing, and fault tolerance.
+
+## Auto-Execute (Native Claude Code Feel)
+
+When invoked, this skill automatically selects and runs the best swarm pattern — no extra prompting needed:
+
+```python
+from core.orchestration.swarm_patterns import select_pattern, debate, voting, critique_refine
+
+# Auto-select best pattern from task description
+pattern = select_pattern(task)  # returns: "voting" | "critique_refine" | "debate" | None
+
+# Auto-execute with anti-loop, convergence, and self-audit built-in
+if pattern == "debate":
+    result = await debate(task, debaters=[...], run_fn=...)
+elif pattern == "voting":
+    result = await voting(task, agents=[...], run_fn=...)
+elif pattern == "critique_refine":
+    result = await critique_refine(task, producer=..., critic=..., run_fn=...)
+else:
+    # Fall back to concurrent swarm topology
+    result = await run_topology(task, topology="auto", agent_names=[...])
+```
+
+The swarm automatically:
+- **Stops loops** — AntiLoopGuard fires after 2x same action, 3 identical results, or 8+ tool calls
+- **Gates confidence** — ConfidenceGate blocks irreversible actions below 90%
+- **Thinks between steps** — ThinkingProtocol injected between agent rounds
+- **Labels evidence** — P1-P6 evidence hierarchy on all claims
+- **Self-audits** — LEGIONA SELF-AUDIT footer on every output
+- **Converges early** — 70% agreement triggers early termination in debate/voting
+- **Preserves dissent** — Minority reports saved after consensus
+- **Learns** — Sessions recorded to self-evolution engine
 
 ## Prerequisites
 

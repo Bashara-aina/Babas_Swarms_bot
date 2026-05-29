@@ -11,12 +11,14 @@ from core.self_evolution import FailureRecord, SelfEvolutionEngine
 
 def _engine(tmp_path: Path) -> SelfEvolutionEngine:
     """Return a fresh engine with temp directories (no hermes dependencies)."""
+    from collections import OrderedDict
     engine = SelfEvolutionEngine.__new__(SelfEvolutionEngine)
     engine.project_root = tmp_path
     engine.failures_file = tmp_path / "FAILURES.md"
     engine.decisions_file = tmp_path / "DECISIONS.md"
     engine.eval_set_file = tmp_path / "EVAL_SET.md"
     engine._hermes_skills_dir = tmp_path / "hermes_skills"
+    engine._failures_cache = OrderedDict()
     return engine
 
 

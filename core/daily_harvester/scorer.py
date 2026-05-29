@@ -40,6 +40,7 @@ class Scorer:
 
     def __init__(self) -> None:
         self._bias: dict[str, float] = {}
+        self._bias_loaded: bool = False
         self._load_bias_sync()
 
     def _load_bias_sync(self) -> None:
@@ -53,9 +54,12 @@ class Scorer:
                 self._bias = DEFAULT_BIAS.copy()
         else:
             self._bias = DEFAULT_BIAS.copy()
+        self._bias_loaded = True
 
     async def load_bias(self) -> dict[str, float]:
-        """Load bias from file (async)."""
+        """Load bias from file (async). Cached after first load."""
+        if self._bias_loaded:
+            return self._bias
         if BIAS_FILE.exists():
             try:
                 async with aiofiles.open(BIAS_FILE, encoding="utf-8") as f:
@@ -67,6 +71,7 @@ class Scorer:
                 self._bias = DEFAULT_BIAS.copy()
         else:
             self._bias = DEFAULT_BIAS.copy()
+        self._bias_loaded = True
         return self._bias
 
     async def save_bias(self) -> None:

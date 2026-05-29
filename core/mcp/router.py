@@ -75,10 +75,20 @@ class MCPRouter:
 
         # Import server configs
         from core.mcp.servers import (
-            brave, browser, browser_use, crawl4ai, exa,
-            filesystem, github, gitnexus, hermes,
-            local_deep_research, obsidian, ruflo,
-            sequential_thinking, supabase,
+            brave,
+            browser,
+            browser_use,
+            crawl4ai,
+            exa,
+            filesystem,
+            github,
+            gitnexus,
+            hermes,
+            local_deep_research,
+            obsidian,
+            ruflo,
+            sequential_thinking,
+            supabase,
         )
 
         server_configs = {

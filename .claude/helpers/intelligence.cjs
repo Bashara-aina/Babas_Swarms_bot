@@ -71,10 +71,12 @@ function writeJSON(filePath, data) {
 
 function tokenize(text) {
   if (!text) return [];
-  return text.toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+  return [...new Set(
+    text.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+  )];
 }
 
 function trigrams(words) {
@@ -552,6 +554,43 @@ function getContext(prompt) {
     const display = (e.summary || e.content || '').slice(0, 80);
     const accessed = e.accessCount || 0;
     lines.push(`  * (${e.score.toFixed(2)}) ${display} [rank #${i + 1}, ${accessed}x accessed]`);
+  }
+
+  // ── Skill auto-trigger suggestions ─────────────────────────────────────
+  // Match prompt against known skill activation patterns (no LLM needed)
+  const promptLower = (prompt || '').toLowerCase();
+  const skillSignatures = [
+    { skill: 'swarm-advanced', triggers: ['swarm', 'parallel', 'multi-agent', 'coordination', 'distributed', 'orchestrat', 'fan-out', 'hierarchical', 'mesh'] },
+    { skill: 'gitnexus-impact-analysis', triggers: ['impact', 'blast radius', 'refactor', 'rename', 'what break', 'affects', 'caller', 'upstream', 'downstream'] },
+    { skill: 'gitnexus-debugging', triggers: ['debug', 'trace', 'error', 'crash', 'stack trace', 'failing', 'exception', 'bug in'] },
+    { skill: 'gitnexus-refactoring', triggers: ['extract', 'split', 'move code', 'inline', 'rename symbol', 'restructure'] },
+    { skill: 'gitnexus-exploring', triggers: ['explore', 'understand', 'how does', 'find execution', 'call chain'] },
+    { skill: 'frontend-design', triggers: ['design', 'ui', 'ux', 'component', 'layout', 'beautiful', 'tailwind', 'css', 'dark mode', 'animation', 'premium', 'linear-style'] },
+    { skill: 'ui-ux-pro-max', triggers: ['gradient', 'button', 'card', 'dashboard', 'landing page', 'responsive', 'font', 'typography', 'color scheme'] },
+    { skill: 'brainstorming', triggers: ['brainstorm', 'ideate', 'think', 'explore options', 'possible approaches', 'what if'] },
+    { skill: 'debugging', triggers: ['bug', 'fix', 'error', 'not working', 'broken', 'issue', 'incorrect', 'unexpected'] },
+    { skill: 'tdd', triggers: ['test first', 'tdd', 'write test', 'test-driven', 'red green refactor'] },
+    { skill: 'code-review', triggers: ['review', 'check quality', 'security scan', 'best practice', 'lint'] },
+    { skill: 'architecture', triggers: ['architect', 'system design', 'pattern', 'scalability', 'api design', 'schema'] },
+    { skill: 'adr-architect', triggers: ['adr', 'decision record', 'architectural decision', 'adr-'] },
+    { skill: 'deploy-to-vercel', triggers: ['deploy', 'vercel', 'production', 'hosting', 'publish'] },
+    { skill: 'github-code-review', triggers: ['github', 'pull request', 'pr', 'code review', 'merge'] },
+    { skill: 'mirofish_simulation', triggers: ['simulate', 'forecast', 'consensus', 'mirofish', 'scenario'] },
+    { skill: 'web-search', triggers: ['search', 'find online', 'look up', 'google', 'research'] },
+    { skill: 'brainstorming', triggers: ['brainstorm', 'ideate', 'explore options'] },
+  ];
+
+  const matched = [];
+  const seen = new Set();
+  for (const s of skillSignatures) {
+    if (seen.has(s.skill)) continue;
+    for (const t of s.triggers) {
+      if (promptLower.includes(t)) { matched.push(s.skill); seen.add(s.skill); break; }
+    }
+  }
+  if (matched.length > 0) {
+    lines.push('');
+    lines.push('[💡 Skill Auto-Trigger] Consider: ' + matched.join(', '));
   }
 
   return lines.join('\n');

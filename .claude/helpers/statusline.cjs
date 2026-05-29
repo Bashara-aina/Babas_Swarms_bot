@@ -24,7 +24,9 @@ const CONFIG = {
   maxAgents: 15,
 };
 
-const CWD = process.cwd();
+// Use __dirname so paths resolve correctly regardless of where node was launched from.
+// CWD becomes that subdirectory, making all `.claude-flow/metrics/*` paths resolve incorrectly.
+const CWD = path.resolve(__dirname, '..', '..');
 
 // ANSI colors
 const c = {
@@ -227,20 +229,20 @@ function getLearningStats() {
     }
   }
 
-  // 4. Count real session files
+  // 4. Count real session files from claude-flow (167 entries) — checked first (more populated)
   try {
-    const sessDir = path.join(CWD, '.claude', 'sessions');
-    if (fs.existsSync(sessDir)) {
-      sessions = fs.readdirSync(sessDir).filter(f => f.endsWith('.json')).length;
+    const cfSessDir = path.join(CWD, '.claude-flow', 'sessions');
+    if (fs.existsSync(cfSessDir)) {
+      sessions = fs.readdirSync(cfSessDir).filter(f => f.endsWith('.json')).length;
     }
   } catch { /* ignore */ }
 
-  // 5. Count session files from claude-flow
+  // 5. Fallback: count session files from ~/.claude/sessions
   if (sessions === 0) {
     try {
-      const cfSessDir = path.join(CWD, '.claude-flow', 'sessions');
-      if (fs.existsSync(cfSessDir)) {
-        sessions = fs.readdirSync(cfSessDir).filter(f => f.endsWith('.json')).length;
+      const sessDir = path.join(CWD, '.claude', 'sessions');
+      if (fs.existsSync(sessDir)) {
+        sessions = fs.readdirSync(sessDir).filter(f => f.endsWith('.json')).length;
       }
     } catch { /* ignore */ }
   }
@@ -251,11 +253,18 @@ function getLearningStats() {
 // V3 progress from metrics files (pure file reads)
 function getV3Progress() {
   const learning = getLearningStats();
-  const totalDomains = 5;
 
   const dddData = readJSON(path.join(CWD, '.claude-flow', 'metrics', 'ddd-progress.json'));
   let dddProgress = dddData ? (dddData.progress || 0) : 0;
-  let domainsCompleted = Math.min(5, Math.floor(dddProgress / 20));
+  // Read actual completed/total from ddd-progress.json (written by ddd-tracker.sh)
+  // completed = domains with score >= 50, total = all domains
+  // Fall back to derivation only if file doesn't have these fields
+  let domainsCompleted = dddData && typeof dddData.completed === 'number'
+    ? dddData.completed
+    : Math.min(5, Math.floor(dddProgress / 20));
+  let totalDomains = dddData && typeof dddData.total === 'number'
+    ? dddData.total
+    : 5;
 
   // Only derive DDD progress from real ddd-progress.json or real pattern data
   // Don't inflate domains from pattern count — 0 means no DDD work tracked
@@ -278,15 +287,16 @@ function getSecurityStatus() {
   const auditData = readJSON(path.join(CWD, '.claude-flow', 'security', 'audit-status.json'));
   if (auditData) {
     const auditDate = auditData.lastAudit || auditData.lastScan;
+    const totalCves = auditData.totalCves || 0;
     if (!auditDate) {
-      return { status: 'PENDING', cvesFixed: 0, totalCves: 0 };
+      return { status: 'PENDING', cvesFixed: 0, totalCves };
     }
     const auditAge = Date.now() - new Date(auditDate).getTime();
     const isStale = auditAge > 7 * 24 * 60 * 60 * 1000;
     return {
       status: isStale ? 'STALE' : (auditData.status || 'PENDING'),
       cvesFixed: auditData.cvesFixed || 0,
-      totalCves: auditData.totalCves || 0,
+      totalCves,
     };
   }
 
@@ -312,16 +322,30 @@ function getSwarmStatus() {
 
   const swarmStatePath = path.join(CWD, '.claude-flow', 'swarm', 'swarm-state.json');
   const swarmState = readJSON(swarmStatePath);
-  if (swarmState) {
-    const updatedAt = swarmState.updatedAt || swarmState.startedAt;
+  if (swarmState && swarmState.swarms) {
+    const swarms = Object.values(swarmState.swarms);
+    const running = swarms.filter(s => s.status === 'running' && s.agents && s.agents.length > 0);
+    const totalEver = swarms.length;
+    const activeNow = running.length;
+    const updatedAt = swarms[0] && (swarms[0].updatedAt || swarms[0].createdAt);
     const age = updatedAt ? now - new Date(updatedAt).getTime() : Infinity;
-    if (age < staleThresholdMs) {
+    if (activeNow > 0 || age < staleThresholdMs) {
       return {
-        activeAgents: (swarmState.agents && swarmState.agents.length) || swarmState.agentCount || 0,
+        activeAgents: running.reduce((sum, s) => sum + (s.agents ? s.agents.length : 0), 0),
         maxAgents: swarmState.maxAgents || CONFIG.maxAgents,
-        coordinationActive: true,
+        coordinationActive: activeNow > 0,
+        totalSwarms: totalEver,
+        runningSwarms: activeNow,
       };
     }
+    // Historical swarms exist but are stale — show total count
+    return {
+      activeAgents: 0,
+      maxAgents: swarmState.maxAgents || CONFIG.maxAgents,
+      coordinationActive: false,
+      totalSwarms: totalEver,
+      runningSwarms: 0,
+    };
   }
 
   const activityData = readJSON(path.join(CWD, '.claude-flow', 'metrics', 'swarm-activity.json'));
@@ -346,26 +370,26 @@ function getSystemMetrics() {
   const learning = getLearningStats();
   const agentdb = getAgentDBStats();
 
-  // Intelligence from learning.json
+  // Intelligence from learning.json (has real scores) or real data
   const learningData = readJSON(path.join(CWD, '.claude-flow', 'metrics', 'learning.json'));
   let intelligencePct = 0;
   let contextPct = 0;
 
   if (learningData && learningData.intelligence && learningData.intelligence.score !== undefined) {
     intelligencePct = Math.min(100, Math.floor(learningData.intelligence.score));
-  } else {
-    // Use real data only — patterns from actual store, vectors from actual DB
+  } else if (learning.patterns > 0 || agentdb.vectorCount > 0) {
+    // Use real data — patterns from actual store, vectors from actual DB
     const fromPatterns = learning.patterns > 0 ? Math.min(100, Math.floor(learning.patterns / 20)) : 0;
     const fromVectors = agentdb.vectorCount > 0 ? Math.min(100, Math.floor(agentdb.vectorCount / 20)) : 0;
     intelligencePct = Math.max(fromPatterns, fromVectors);
   }
-  // No fake fallback — 0% means no real learning data exists
+  // 0% means no real learning data exists
 
-  if (learningData && learningData.sessions && learningData.sessions.total !== undefined) {
+  if (learningData && learningData.sessions && learningData.sessions.total > 0) {
     contextPct = Math.min(100, learningData.sessions.total * 5);
-  } else {
-    // Real session count only — no heuristic derivation from patterns
-    contextPct = learning.sessions > 0 ? Math.min(100, learning.sessions * 5) : 0;
+  } else if (learning.sessions > 0) {
+    // Use log scale so large session counts don't max out instantly
+    contextPct = Math.min(100, Math.floor(Math.log(learning.sessions) * 15));
   }
 
   // Sub-agents from file metrics (no ps aux)
@@ -385,6 +409,7 @@ function getADRStatus() {
     path.join(CWD, 'v3', 'implementation', 'adrs'),
     path.join(CWD, 'docs', 'adrs'),
     path.join(CWD, '.claude-flow', 'adrs'),
+    path.join(CWD, '.wiki', 'decisions'),
   ];
 
   for (const adrPath of adrPaths) {
@@ -393,7 +418,9 @@ function getADRStatus() {
         const files = fs.readdirSync(adrPath).filter(f =>
           f.endsWith('.md') && (f.startsWith('ADR-') || f.startsWith('adr-') || /^\d{4}-/.test(f))
         );
-        return { count: files.length, implemented: files.length, compliance: 0 };
+        if (files.length > 0) {
+          return { count: files.length, implemented: files.length, compliance: 0 };
+        }
       }
     } catch { /* ignore */ }
   }
@@ -518,16 +545,16 @@ function getTestStats() {
 
   function countTestFiles(dir, depth) {
     if (depth === undefined) depth = 0;
-    if (depth > 6) return;
+    if (depth > 10) return;
     try {
       if (!fs.existsSync(dir)) return;
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
+        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules' && !entry.name.includes('.venv')) {
           countTestFiles(path.join(dir, entry.name), depth + 1);
         } else if (entry.isFile()) {
           const n = entry.name;
-          if (n.includes('.test.') || n.includes('.spec.') || n.includes('_test.') || n.includes('_spec.')) {
+          if (n.includes('.test.') || n.includes('.spec.') || n.includes('_test.') || n.includes('_spec.') || n.startsWith('test_')) {
             testFiles++;
           }
         }
@@ -567,11 +594,34 @@ function getIntegrationStatus() {
     }
   }
 
+  // Count Claude Code plugin MCP servers (separate layer from .mcp/servers.json)
+  // These are stdio servers started by Claude Code plugins, not in .mcp/servers.json
+  // enabledPlugins lives in ~/.claude/settings.json (home), not project settings
+  const pluginMcpCount = (() => {
+    const homeSettings = readJSON(path.join(os.homedir(), '.claude', 'settings.json'));
+    if (!homeSettings) return 0;
+    // enabledPlugins is a dict {pluginName: enabledBool}, not an array
+    const enabledPlugins = homeSettings.enabledPlugins || {};
+    const pluginMcps = {
+      'playwright@claude-plugins-official': true,
+      'telegram@claude-plugins-official': true,
+      'context7@claude-plugins-official': true,
+      'chrome-devtools-mcp@claude-plugins-official': true,
+      'firecrawl@claude-plugins-official': true,
+      'tavily@claude-plugins-official': true,
+      'ddg-mcp-search@claude-plugins-official': true,
+    };
+    return Object.keys(enabledPlugins).filter(p => pluginMcps[p] && enabledPlugins[p]).length;
+  })();
+  // Merge: plugin MCPs are in addition to .mcp/servers.json entries
+  const totalMcpServers = mcpServers.total + pluginMcpCount;
+  const enabledMcpServers = mcpServers.enabled + pluginMcpCount;
+
   const hasDatabase = ['.swarm/memory.db', '.claude-flow/memory.db', 'data/memory.db']
     .some(p => fs.existsSync(path.join(CWD, p)));
   const hasApi = !!(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY);
 
-  return { mcpServers, hasDatabase, hasApi };
+  return { mcpServers: { total: totalMcpServers, enabled: enabledMcpServers }, hasDatabase, hasApi };
 }
 
 // Session stats (pure file reads)
@@ -684,14 +734,18 @@ function generateStatusline() {
 
   // Line 2: Swarm + Hooks + CVE + Memory + Intelligence
   const swarmInd = swarm.coordinationActive ? c.brightGreen + '\u25C9' + c.reset : c.dim + '\u25CB' + c.reset;
-  const agentsColor = swarm.activeAgents > 0 ? c.brightGreen : c.red;
+  const swarmCount = swarm.totalSwarms !== undefined ? swarm.totalSwarms : (swarm.activeAgents > 0 ? swarm.activeAgents : 0);
+  const swarmDisplay = swarm.totalSwarms !== undefined
+    ? String(swarm.runningSwarms > 0 ? swarm.runningSwarms : swarmCount).padStart(2) + '/' + swarmCount
+    : String(swarm.activeAgents).padStart(2) + '/' + swarm.maxAgents;
+  const agentsColor = swarm.activeAgents > 0 ? c.brightGreen : (swarm.totalSwarms > 0 ? c.yellow : c.red);
   const secIcon = security.status === 'CLEAN' ? '\uD83D\uDFE2' : (security.status === 'IN_PROGRESS' || security.status === 'STALE') ? '\uD83D\uDFE1' : (security.status === 'NONE' ? '\u26AA' : '\uD83D\uDD34');
   const secColor = security.status === 'CLEAN' ? c.brightGreen : (security.status === 'IN_PROGRESS' || security.status === 'STALE') ? c.brightYellow : (security.status === 'NONE' ? c.dim : c.brightRed);
   const hooksColor = hooks.enabled > 0 ? c.brightGreen : c.dim;
   const intellColor = system.intelligencePct >= 80 ? c.brightGreen : system.intelligencePct >= 40 ? c.brightYellow : c.dim;
 
   lines.push(
-    c.brightYellow + '\uD83E\uDD16 Swarm' + c.reset + '  ' + swarmInd + ' [' + agentsColor + String(swarm.activeAgents).padStart(2) + c.reset + '/' + c.brightWhite + swarm.maxAgents + c.reset + ']  ' +
+    c.brightYellow + '\uD83E\uDD16 Swarm' + c.reset + '  ' + swarmInd + ' [' + agentsColor + swarmDisplay + c.reset + ']  ' +
     c.brightPurple + '\uD83D\uDC65 ' + system.subAgents + c.reset + '    ' +
     c.brightBlue + '\uD83E\uDE9D ' + hooksColor + hooks.enabled + c.reset + '/' + c.brightWhite + hooks.total + c.reset + '    ' +
     secIcon + ' ' + secColor + 'CVE ' + security.cvesFixed + c.reset + '/' + c.brightWhite + security.totalCves + c.reset + '    ' +

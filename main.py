@@ -651,6 +651,13 @@ async def _run_group_a_startup(bot: Bot) -> None:
 
             register_builtin_hooks()
             logger.info("Lifecycle hooks registered")
+            # Emit session_start so symphony, cc_session_start, and other hooks fire
+            try:
+                from core.hooks import get_hooks
+                hooks = get_hooks()
+                await hooks.emit("session_start", {"source": "legion_startup"})
+            except Exception:
+                pass
         except Exception as e:
             logger.warning("Hook init failed (non-fatal): %s", e)
 
@@ -1345,6 +1352,14 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
 
         mem = get_memory()
         mem.close()
+    except Exception:
+        pass
+
+    # Emit session_end so registered hooks (e.g. opencode_session_end_hook) fire automatically
+    try:
+        from core.hooks import get_hooks
+        hooks = get_hooks()
+        await hooks.emit("session_end", {"source": "legion_shutdown"})
     except Exception:
         pass
 

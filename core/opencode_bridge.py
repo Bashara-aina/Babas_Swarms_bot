@@ -292,18 +292,24 @@ Always use these tools — do NOT skip MCP calls even for simple tasks.
         err_text = ANSI_RE.sub("", stderr.decode())
         return f"⛔ opencode error:\n{err_text[:2000]}"
 
-    # Direct write of session summary after subprocess completes
+    # Emit task lifecycle hooks so registered handlers (e.g. opencode_session_end_hook)
+    # automatically ingest this task into the wiki brain. The _opencode_session_started
+    # flag must be set so opencode_session_end_hook's guard passes.
     try:
-        from core.wiki_bridge import opencode_write_session_summary
-
-        await opencode_write_session_summary(
-            session_id=f"task-{uuid.uuid4().hex[:8]}",
-            task_description=task_desc or prompt[:200],
-            actions_taken="",
-            outcome=stdout.decode()[:2000],
-        )
+        from core.hooks import get_hooks
+        hooks = get_hooks()
+        task_id = f"task-{uuid.uuid4().hex[:8]}"
+        task_ctx = {
+            "task": task_desc or prompt[:200],
+            "sessionId": task_id,
+            "actions_taken": "",
+            "outcome": stdout.decode()[:2000],
+            "_opencode_session_started": True,  # enables opencode_session_end_hook wiki write
+        }
+        await hooks.emit("post_task", task_ctx)
+        await hooks.emit("task_success", task_ctx)
     except Exception:
-        pass  # wiki bridge may be unavailable
+        pass  # hooks may be unavailable
 
     # GAP-12 FIX: Integrate ContextHealthMonitor into OpenCode flow
     # Run checkpoint after long-running opencode tasks to maintain session continuity

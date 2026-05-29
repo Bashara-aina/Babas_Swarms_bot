@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import datetime
 import json
+from collections import deque
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -84,7 +85,7 @@ class ContextHealthMonitor:
         self.bootstrap_file = self.project_root / ".claude" / "memory_bootstrap.md"
         self.checkpoint_file = self.project_root / ".claude" / ".context_checkpoints.json"
 
-        self._checkpoints: list[Checkpoint] = []
+        self._checkpoints: deque[Checkpoint] = deque(maxlen=100)
         self._last_checkpoint_at: str | None = None
         self._load_checkpoints()
 
@@ -97,12 +98,12 @@ class ContextHealthMonitor:
         if self.checkpoint_file.exists():
             try:
                 data = json.loads(self.checkpoint_file.read_text())
-                self._checkpoints = [
+                self._checkpoints = deque(
                     Checkpoint(**c) for c in data.get("checkpoints", [])
-                ]
+                )
                 self._last_checkpoint_at = data.get("last_checkpoint_at")
             except Exception:
-                self._checkpoints = []
+                self._checkpoints = deque()
 
     def _save_checkpoints(self) -> None:
         """Persist checkpoint history to JSON."""
@@ -121,7 +122,7 @@ class ContextHealthMonitor:
                     "next_steps": c.next_steps,
                     "anti_patterns": c.anti_patterns,
                 }
-                for c in self._checkpoints[-20:]  # keep last 20
+                for c in list(self._checkpoints)[-20:]  # keep last 20
             ],
             "last_checkpoint_at": self._last_checkpoint_at,
         }
@@ -282,7 +283,7 @@ class ContextHealthMonitor:
 
     def load_checkpoint_history(self, limit: int = 5) -> list[Checkpoint]:
         """Load last N checkpoints."""
-        return self._checkpoints[-limit:]
+        return list(self._checkpoints)[-limit:]
 
     def format_health_report(self, current_health: HealthLevel | None = None) -> str:
         """Format a human-readable health status report."""

@@ -77,31 +77,41 @@ async def run_teardown_sequence(
         "destination": "~/.legion/sessions/",
     })
 
-    # STEP 3: Write obsidian daily note
+    # STEP 3: Write obsidian daily note (via direct write — MCP append_to_note
+    # requires vault path env, fallback to obsidian_autosync which writes directly)
     try:
-        from core.mcp_client import MCPClient
-        client = MCPClient()
-        today = datetime.now().strftime("%Y-%m-%d")
-        time_str = datetime.now().strftime("%H:%M")
-        content = (
-            f"## Session {time_str}\n"
-            f"Tasks: {task_count}\n"
-            f"Summary: {session_summary}\n"
-            f"Projects: {', '.join(detected_projects)}\n"
+        from core.legion_session import get_session_metrics
+        from core.memory.obsidian_autosync import write_daily_session_log, write_memory_block
+
+        metrics = get_session_metrics()
+        write_daily_session_log(
+            session_name=f"legion-{ts}",
+            tasks_completed=metrics.accomplished,
+            key_decisions=metrics.decisions,
+            files_changed=metrics.files_changed,
+            user_message=session_summary[:200],
+            memory_layers_used=7,
         )
-        await client.call_tool("obsidian", "append_to_note", {
-            "filename": f"Sessions/{today}.md",
-            "content": content,
-        })
+        # Write any flagged memories
+        for decision in metrics.decisions[:3]:
+            if len(decision) > 20:
+                write_memory_block(
+                    content=decision,
+                    title=f"decision-{ts}",
+                    tags=["auto-saved", "decision"],
+                    memory_type="semantic",
+                    importance=0.7,
+                )
     except Exception as e:
         logger.debug("obsidian daily note write failed: %s", e)
 
     # STEP 4: mem0 add
     try:
         from tools.mem0_client import mem0_add
+        today_str = datetime.now().strftime("%Y-%m-%d")
         meta = {
             "type": "session",
-            "date": today,  # type: ignore[reportPossiblyUnboundVariable]
+            "date": today_str,
             "projects": detected_projects,
         }
         await mem0_add("bashara", session_summary, meta)

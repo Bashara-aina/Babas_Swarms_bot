@@ -22,7 +22,7 @@
       "swarmId": "swarm-1778768884455-jmdako",
       "topology": "hierarchical",
       "maxAgents": 10,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -34,13 +34,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-14T14:28:04.456Z",
-      "updatedAt": "2026-05-14T14:28:04.456Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 349h stale"
     },
     "swarm-1778771253954-bremsx": {
       "swarmId": "swarm-1778771253954-bremsx",
       "topology": "hierarchical",
       "maxAgents": 10,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -52,13 +53,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-14T15:07:33.954Z",
-      "updatedAt": "2026-05-14T15:07:33.954Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 348h stale"
     },
     "swarm-1778774015123-fnyqsq": {
       "swarmId": "swarm-1778774015123-fnyqsq",
       "topology": "hierarchical",
       "maxAgents": 4,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -70,13 +72,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-14T15:53:35.123Z",
-      "updatedAt": "2026-05-14T15:53:35.123Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 347h stale"
     },
     "swarm-1778800816240-5wg40a": {
       "swarmId": "swarm-1778800816240-5wg40a",
       "topology": "hierarchical",
       "maxAgents": 10,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -88,7 +91,8 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-14T23:20:16.240Z",
-      "updatedAt": "2026-05-14T23:20:16.240Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 340h stale"
     },
     "swarm-1778802031943-4t3qic": {
       "swarmId": "swarm-1778802031943-4t3qic",
@@ -112,7 +116,7 @@
       "swarmId": "swarm-1778805006636-0ftzr0",
       "topology": "hierarchical",
       "maxAgents": 10,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -124,13 +128,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T00:30:06.636Z",
-      "updatedAt": "2026-05-15T00:30:06.636Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 339h stale"
     },
     "swarm-1778807094761-ba5qc7": {
       "swarmId": "swarm-1778807094761-ba5qc7",
       "topology": "hierarchical",
       "maxAgents": 12,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -142,13 +147,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T01:04:54.761Z",
-      "updatedAt": "2026-05-15T01:04:54.761Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 338h stale"
     },
     "swarm-1778829463947-obqlt8": {
       "swarmId": "swarm-1778829463947-obqlt8",
       "topology": "mesh",
       "maxAgents": 6,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -160,13 +166,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T07:17:43.947Z",
-      "updatedAt": "2026-05-15T07:17:43.947Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 332h stale"
     },
     "swarm-1778830234896-7uqsyu": {
       "swarmId": "swarm-1778830234896-7uqsyu",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -178,13 +185,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T07:30:34.896Z",
-      "updatedAt": "2026-05-15T07:30:34.896Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 332h stale"
     },
     "swarm-1778841653594-awxph3": {
       "swarmId": "swarm-1778841653594-awxph3",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -196,13 +204,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T10:40:53.594Z",
-      "updatedAt": "2026-05-15T10:40:53.594Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 329h stale"
     },
     "swarm-1778841696002-hg32ep": {
       "swarmId": "swarm-1778841696002-hg32ep",
       "topology": "hierarchical",
       "maxAgents": 8,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -214,13 +223,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T10:41:36.002Z",
-      "updatedAt": "2026-05-15T10:41:36.002Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 329h stale"
     },
     "swarm-1778844593118-o02st6": {
       "swarmId": "swarm-1778844593118-o02st6",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -232,13 +242,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T11:29:53.119Z",
-      "updatedAt": "2026-05-15T11:29:53.119Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 328h stale"
     },
     "swarm-1778853169604-yi1skb": {
       "swarmId": "swarm-1778853169604-yi1skb",
       "topology": "hierarchical-mesh",
       "maxAgents": 12,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -250,13 +261,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T13:52:49.604Z",
-      "updatedAt": "2026-05-15T13:52:49.604Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 325h stale"
     },
     "swarm-1778856094941-9h7jhf": {
       "swarmId": "swarm-1778856094941-9h7jhf",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -268,13 +280,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T14:41:34.941Z",
-      "updatedAt": "2026-05-15T14:41:34.941Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 325h stale"
     },
     "swarm-1778889408549-2oe039": {
       "swarmId": "swarm-1778889408549-2oe039",
       "topology": "mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -286,13 +299,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-15T23:56:48.549Z",
-      "updatedAt": "2026-05-15T23:56:48.549Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 315h stale"
     },
     "swarm-1778896483325-6u984i": {
       "swarmId": "swarm-1778896483325-6u984i",
       "topology": "hierarchical-mesh",
       "maxAgents": 12,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -304,13 +318,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T01:54:43.325Z",
-      "updatedAt": "2026-05-16T01:54:43.325Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 313h stale"
     },
     "swarm-1778915489789-ohx83i": {
       "swarmId": "swarm-1778915489789-ohx83i",
       "topology": "hierarchical-mesh",
       "maxAgents": 12,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -322,13 +337,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T07:11:29.789Z",
-      "updatedAt": "2026-05-16T07:11:29.789Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 308h stale"
     },
     "swarm-1778915703802-m0azal": {
       "swarmId": "swarm-1778915703802-m0azal",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -340,13 +356,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T07:15:03.802Z",
-      "updatedAt": "2026-05-16T07:15:03.802Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 308h stale"
     },
     "swarm-1778936010344-weok82": {
       "swarmId": "swarm-1778936010344-weok82",
       "topology": "hierarchical-mesh",
       "maxAgents": 15,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -358,13 +375,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T12:53:30.345Z",
-      "updatedAt": "2026-05-16T12:53:30.345Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 302h stale"
     },
     "swarm-1778936146716-7egnjj": {
       "swarmId": "swarm-1778936146716-7egnjj",
       "topology": "hierarchical-mesh",
       "maxAgents": 15,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -376,13 +394,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T12:55:46.716Z",
-      "updatedAt": "2026-05-16T12:55:46.716Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 302h stale"
     },
     "swarm-1778939515581-ndphvz": {
       "swarmId": "swarm-1778939515581-ndphvz",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -394,13 +413,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T13:51:55.581Z",
-      "updatedAt": "2026-05-16T13:51:55.581Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 301h stale"
     },
     "swarm-1778940874999-f13m2m": {
       "swarmId": "swarm-1778940874999-f13m2m",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -412,13 +432,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-16T14:14:34.999Z",
-      "updatedAt": "2026-05-16T14:14:34.999Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 301h stale"
     },
     "swarm-1778983647388-qfqyu2": {
       "swarmId": "swarm-1778983647388-qfqyu2",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -430,13 +451,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T02:07:27.388Z",
-      "updatedAt": "2026-05-17T02:07:27.388Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 289h stale"
     },
     "swarm-1778993620977-k839au": {
       "swarmId": "swarm-1778993620977-k839au",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -448,13 +470,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T04:53:40.977Z",
-      "updatedAt": "2026-05-17T04:53:40.977Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 286h stale"
     },
     "swarm-1778994307683-4iawc4": {
       "swarmId": "swarm-1778994307683-4iawc4",
       "topology": "hierarchical",
       "maxAgents": 15,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -466,13 +489,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T05:05:07.684Z",
-      "updatedAt": "2026-05-17T05:05:07.684Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 286h stale"
     },
     "swarm-1779003109332-kohjup": {
       "swarmId": "swarm-1779003109332-kohjup",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -484,13 +508,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T07:31:49.332Z",
-      "updatedAt": "2026-05-17T07:31:49.332Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 284h stale"
     },
     "swarm-1779003185614-evikx8": {
       "swarmId": "swarm-1779003185614-evikx8",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -502,13 +527,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T07:33:05.614Z",
-      "updatedAt": "2026-05-17T07:33:05.614Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 284h stale"
     },
     "swarm-1779006763375-xpt3qt": {
       "swarmId": "swarm-1779006763375-xpt3qt",
       "topology": "mesh",
       "maxAgents": 6,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -520,13 +546,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T08:32:43.375Z",
-      "updatedAt": "2026-05-17T08:32:43.375Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 283h stale"
     },
     "swarm-1779008881379-3m01fk": {
       "swarmId": "swarm-1779008881379-3m01fk",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -538,13 +565,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T09:08:01.379Z",
-      "updatedAt": "2026-05-17T09:08:01.379Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 282h stale"
     },
     "swarm-1779009130345-ini9yq": {
       "swarmId": "swarm-1779009130345-ini9yq",
       "topology": "mesh",
       "maxAgents": 4,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -556,13 +584,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T09:12:10.345Z",
-      "updatedAt": "2026-05-17T09:12:10.345Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 282h stale"
     },
     "swarm-1779009256615-0gdq64": {
       "swarmId": "swarm-1779009256615-0gdq64",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -574,13 +603,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T09:14:16.615Z",
-      "updatedAt": "2026-05-17T09:14:16.615Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 282h stale"
     },
     "swarm-1779021099707-qxs38h": {
       "swarmId": "swarm-1779021099707-qxs38h",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -592,13 +622,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-17T12:31:39.707Z",
-      "updatedAt": "2026-05-17T12:31:39.707Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 279h stale"
     },
     "swarm-1779068077643-1vk1w7": {
       "swarmId": "swarm-1779068077643-1vk1w7",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -610,13 +641,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T01:34:37.643Z",
-      "updatedAt": "2026-05-18T01:34:37.643Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 266h stale"
     },
     "swarm-1779070786761-1vnkgj": {
       "swarmId": "swarm-1779070786761-1vnkgj",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -628,13 +660,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T02:19:46.761Z",
-      "updatedAt": "2026-05-18T02:19:46.761Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 265h stale"
     },
     "swarm-1779070934650-2693v9": {
       "swarmId": "swarm-1779070934650-2693v9",
       "topology": "hierarchical-mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -646,13 +679,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T02:22:14.650Z",
-      "updatedAt": "2026-05-18T02:22:14.650Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 265h stale"
     },
     "swarm-1779073282072-bdeztf": {
       "swarmId": "swarm-1779073282072-bdeztf",
       "topology": "mesh",
       "maxAgents": 5,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -664,13 +698,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T03:01:22.072Z",
-      "updatedAt": "2026-05-18T03:01:22.072Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 264h stale"
     },
     "swarm-1779074817708-9thmrd": {
       "swarmId": "swarm-1779074817708-9thmrd",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -682,13 +717,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T03:26:57.708Z",
-      "updatedAt": "2026-05-18T03:26:57.708Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 264h stale"
     },
     "swarm-1779079429032-6pfz1q": {
       "swarmId": "swarm-1779079429032-6pfz1q",
       "topology": "hierarchical",
       "maxAgents": 5,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -700,13 +736,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T04:43:49.032Z",
-      "updatedAt": "2026-05-18T04:43:49.032Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 263h stale"
     },
     "swarm-1779097077394-ji4oly": {
       "swarmId": "swarm-1779097077394-ji4oly",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -718,13 +755,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T09:37:57.394Z",
-      "updatedAt": "2026-05-18T09:37:57.394Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 258h stale"
     },
     "swarm-1779104680771-rw1zzq": {
       "swarmId": "swarm-1779104680771-rw1zzq",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -736,13 +774,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T11:44:40.771Z",
-      "updatedAt": "2026-05-18T11:44:40.771Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 256h stale"
     },
     "swarm-1779105060265-a7g3zs": {
       "swarmId": "swarm-1779105060265-a7g3zs",
       "topology": "hierarchical",
       "maxAgents": 10,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -754,13 +793,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T11:51:00.265Z",
-      "updatedAt": "2026-05-18T11:51:00.265Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 255h stale"
     },
     "swarm-1779105173311-fz8v11": {
       "swarmId": "swarm-1779105173311-fz8v11",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -772,13 +812,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-18T11:52:53.311Z",
-      "updatedAt": "2026-05-18T11:52:53.311Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 255h stale"
     },
     "swarm-1779149436719-o5trav": {
       "swarmId": "swarm-1779149436719-o5trav",
       "topology": "mesh",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -790,13 +831,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-19T00:10:36.719Z",
-      "updatedAt": "2026-05-19T00:10:36.719Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 243h stale"
     },
     "swarm-1779238502627-hj8o8f": {
       "swarmId": "swarm-1779238502627-hj8o8f",
       "topology": "hierarchical",
       "maxAgents": 50,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -808,13 +850,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-20T00:55:02.627Z",
-      "updatedAt": "2026-05-20T00:55:02.627Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 218h stale"
     },
     "swarm-1779267538313-twfrnm": {
       "swarmId": "swarm-1779267538313-twfrnm",
       "topology": "mesh",
       "maxAgents": 25,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -826,13 +869,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-20T08:58:58.313Z",
-      "updatedAt": "2026-05-20T08:58:58.313Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 210h stale"
     },
     "swarm-1779273086659-hz0kza": {
       "swarmId": "swarm-1779273086659-hz0kza",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -844,13 +888,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-20T10:31:26.659Z",
-      "updatedAt": "2026-05-20T10:31:26.659Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 209h stale"
     },
     "swarm-1779274508399-f4h45c": {
       "swarmId": "swarm-1779274508399-f4h45c",
       "topology": "hierarchical",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -862,13 +907,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-20T10:55:08.399Z",
-      "updatedAt": "2026-05-20T10:55:08.399Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 208h stale"
     },
     "swarm-1779276489676-h5f9rn": {
       "swarmId": "swarm-1779276489676-h5f9rn",
       "topology": "hierarchical",
       "maxAgents": 25,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -880,13 +926,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-20T11:28:09.676Z",
-      "updatedAt": "2026-05-20T11:28:09.676Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 208h stale"
     },
     "swarm-1779342941146-g48r1q": {
       "swarmId": "swarm-1779342941146-g48r1q",
       "topology": "hierarchical-mesh",
       "maxAgents": 20,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -898,13 +945,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-21T05:55:41.146Z",
-      "updatedAt": "2026-05-21T05:55:41.146Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 189h stale"
     },
     "swarm-1779355189808-sypzrv": {
       "swarmId": "swarm-1779355189808-sypzrv",
       "topology": "hierarchical",
       "maxAgents": 5,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -916,13 +964,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-21T09:19:49.808Z",
-      "updatedAt": "2026-05-21T09:19:49.808Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 186h stale"
     },
     "swarm-1779494806094-ajtmr3": {
       "swarmId": "swarm-1779494806094-ajtmr3",
       "topology": "mesh",
       "maxAgents": 12,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -934,13 +983,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-23T00:06:46.094Z",
-      "updatedAt": "2026-05-23T00:06:46.094Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 147h stale"
     },
     "swarm-1779532694775-ztv1b8": {
       "swarmId": "swarm-1779532694775-ztv1b8",
       "topology": "hierarchical",
       "maxAgents": 9,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -952,13 +1002,14 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-23T10:38:14.775Z",
-      "updatedAt": "2026-05-23T10:38:14.775Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 137h stale"
     },
     "swarm-1779597830952-hoe2cj": {
       "swarmId": "swarm-1779597830952-hoe2cj",
       "topology": "hierarchical-mesh",
       "maxAgents": 15,
-      "status": "running",
+      "status": "terminated",
       "agents": [],
       "tasks": [],
       "config": {
@@ -970,7 +1021,27 @@
         "consensusMechanism": "majority"
       },
       "createdAt": "2026-05-24T04:43:50.952Z",
-      "updatedAt": "2026-05-24T04:43:50.952Z"
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "terminationReason": "no pid recorded and heartbeat is 119h stale"
+    },
+    "swarm-1780024675601-h23pl7": {
+      "swarmId": "swarm-1780024675601-h23pl7",
+      "topology": "hierarchical",
+      "maxAgents": 20,
+      "status": "running",
+      "agents": [],
+      "tasks": [],
+      "config": {
+        "topology": "hierarchical",
+        "maxAgents": 20,
+        "strategy": "specialized",
+        "communicationProtocol": "message-bus",
+        "autoScaling": true,
+        "consensusMechanism": "majority"
+      },
+      "createdAt": "2026-05-29T03:17:55.601Z",
+      "updatedAt": "2026-05-29T03:17:55.601Z",
+      "pid": 3200046
     }
   },
   "version": "3.0.0"

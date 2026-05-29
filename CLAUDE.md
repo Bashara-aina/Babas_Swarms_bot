@@ -76,19 +76,32 @@ npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --
 | Feature | architect, coder, tester, reviewer | hierarchical |
 | Refactor | architect, coder, reviewer | hierarchical |
 | Performance | perf-engineer, coder | hierarchical |
-| Security | security-architect, auditor | hierarchical |
+| Security | security-architect, auditor, independent-auditor | hierarchical |
 
 ### When to Swarm
 - **YES**: 3+ files, new features, cross-module refactoring, API changes, security, performance
 - **NO**: single file edits, 1-2 line fixes, docs updates, config changes, questions
+
+### Skill Auto-Trigger (NL Routing)
+| Task | Skill |
+|------|-------|
+| Find bugs / Audit code | independent-auditor |
+| Code review / PR review | auditor, code-review |
+| Debug / Trace execution | gitnexus-debugging |
+| Security scan | security-review |
+| Performance analysis | perf-analyzer |
+| Terminal / Shell / Web / Browser / Delegate / Vision / Cross-session recall | hermes-agent |
+| Claude Code CLI / Full tool access via MCP (claude_code_task, claude_code_agent, etc.) | hermes-agent |
 
 ### 3-Tier Model Routing
 
 | Tier | Handler | Use Cases |
 |------|---------|-----------|
 | 1 | Agent Booster (WASM) | Simple transforms — skip LLM, use Edit directly |
-| 2 | Haiku | Simple tasks, low complexity |
-| 3 | Sonnet/Opus | Architecture, security, complex reasoning |
+| 2 | Haiku / MiniMax-M2 | Simple tasks, low complexity |
+| 3 | MiniMax-Text-01 | Architecture, security, complex reasoning |
+
+**All agents run on MiniMax only — no Anthropic models.**
 
 ## Memory & Learning
 
@@ -139,6 +152,20 @@ npx @claude-flow/cli@latest hooks worker dispatch --trigger audit
 **Coordination**: `hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`
 **GitHub**: `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`
 
+**Hermes Swarm** (10 specialized agents, all use hermes MCP + 6-layer memory):
+| Agent | Specialization |
+|-------|---------------|
+| `hermes-orchestrator` | Master coordinator, routes to sub-agents |
+| `hermes-researcher` | Deep research via hermes web + all search MCPs |
+| `hermes-code-analyst` | Code exploration via hermes file + gitnexus |
+| `hermes-memory-guardian` | 6-layer memory system management |
+| `hermes-security-auditor` | Vulnerability scanning, secret detection |
+| `hermes-swarm-commander` | Multi-agent orchestration, hermes delegate |
+| `hermes-knowledge-synthesizer` | Knowledge synthesis across all sources |
+| `hermes-performance-profiler` | Bottleneck analysis, benchmarking |
+| `hermes-vision-analyst` | Image/screenshot analysis, UI review |
+| `hermes-session-archivist` | Cross-session FTS5 recall, continuity |
+
 Any string works as a custom agent type.
 
 ## Build & Test
@@ -185,7 +212,7 @@ npx @claude-flow/cli@latest doctor --fix
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **swarm-bot** (69988 symbols, 169601 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **swarm-bot** (70149 symbols, 169906 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

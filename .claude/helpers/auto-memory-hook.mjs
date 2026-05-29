@@ -35,6 +35,39 @@ const dim = (msg) => console.log(`  ${DIM}${msg}${RESET}`);
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
 // ============================================================================
+// FNV-1a 64-bit content fingerprint (mirrors intelligence.cjs)
+// ============================================================================
+
+function fingerprintContent(text) {
+  if (!text) return '0_0_0';
+  let h1 = 0x811c9dc5, h2 = 0xcbf29ce4;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    h1 ^= c; h1 = Math.imul(h1, 0x01000193) >>> 0;
+    h2 ^= c; h2 = Math.imul(h2, 0x100000001b3 >>> 0) >>> 0;
+  }
+  return `${h1.toString(16)}_${h2.toString(16)}_${text.length}`;
+}
+
+function deduplicateByContent(entries) {
+  if (!entries || !Array.isArray(entries)) return entries;
+  const seen = new Map();
+  for (const entry of entries) {
+    const content = entry.content || entry.summary || entry.value || '';
+    const fp = fingerprintContent(typeof content === 'string' ? content : JSON.stringify(content));
+    if (!seen.has(fp)) {
+      seen.set(fp, entry);
+    } else {
+      const existing = seen.get(fp);
+      const existingAccess = existing.accessCount || existing.metadata?.accessCount || 0;
+      const candidateAccess = entry.accessCount || entry.metadata?.accessCount || 0;
+      if (candidateAccess > existingAccess) seen.set(fp, entry);
+    }
+  }
+  return Array.from(seen.values());
+}
+
+// ============================================================================
 // Simple JSON File Backend (implements IMemoryBackend interface)
 // ============================================================================
 
@@ -49,7 +82,12 @@ class JsonFileBackend {
       try {
         const data = JSON.parse(readFileSync(this.filePath, 'utf-8'));
         if (Array.isArray(data)) {
-          for (const entry of data) this.entries.set(entry.id, entry);
+          // Deduplicate by content fingerprint before loading
+          const unique = deduplicateByContent(data);
+          for (const entry of unique) this.entries.set(entry.id, entry);
+          if (unique.length < data.length) {
+            dim(`Deduped ${data.length - unique.length} duplicate entries`);
+          }
         }
       } catch { /* start fresh */ }
     }
@@ -121,7 +159,9 @@ class JsonFileBackend {
 
   _persist() {
     try {
-      writeFileSync(this.filePath, JSON.stringify([...this.entries.values()], null, 2), 'utf-8');
+      const all = [...this.entries.values()];
+      const unique = deduplicateByContent(all);
+      writeFileSync(this.filePath, JSON.stringify(unique, null, 2), 'utf-8');
     } catch { /* best effort */ }
   }
 }
@@ -321,6 +361,98 @@ async function doSync() {
   await backend.shutdown();
 }
 
+// ── doCapture: save verbatim last user prompt as highest-priority memory ──────
+// Called before compaction. Saves to /tmp/legion_last_user_prompt.txt AND
+// to the auto-memory store so it persists across sessions.
+
+async function doCapture() {
+  const memPkg = await loadMemoryPackage();
+
+  // 1. Read last user prompt from /tmp/legion_conversation.txt
+  const conversationPath = '/tmp/legion_conversation.txt';
+  let lastPrompt = '';
+  let sessionDuration = 0;
+
+  try {
+    if (existsSync(conversationPath)) {
+      const content = readFileSync(conversationPath, 'utf-8');
+
+      // Extract last user message block
+      const matches = content.matchAll(/(?:^|\n)(?:>|\*)(.*?)(?=\n\n|\Z)/gs);
+      let last = '';
+      for (const m of matches) {
+        const cleaned = m[1].trim();
+        if (cleaned.length > 10) last = cleaned;
+      }
+      lastPrompt = last.slice(0, 2000);
+      sessionDuration = content.length;
+    }
+  } catch (err) {
+    dim(`Prompt extraction: ${err.message}`);
+  }
+
+  // 2. Write to /tmp/legion_last_user_prompt.txt (L0 layer reads this)
+  const promptPath = '/tmp/legion_last_user_prompt.txt';
+  if (lastPrompt && lastPrompt.length > 5) {
+    writeFileSync(promptPath, lastPrompt, 'utf-8');
+    dim(`Last prompt captured: ${lastPrompt.length} chars`);
+  } else {
+    writeFileSync(promptPath, 'NO_USER_PROMPT', 'utf-8');
+    dim('No user prompt found in conversation');
+  }
+
+  // 3. Write compaction checkpoint (read by session-start-trigger.mjs)
+  try {
+    const checkpoint = {
+      timestamp: new Date().toISOString(),
+      sessionDuration,
+      contextSize: sessionDuration,
+      lastUserPrompt: lastPrompt || '',
+    };
+    writeFileSync('/tmp/legion_compaction_checkpoint.json', JSON.stringify(checkpoint, null, 2), 'utf-8');
+  } catch (err) {
+    dim(`Checkpoint write: ${err.message}`);
+  }
+
+  // 4. Save to auto-memory store if package available
+  if (memPkg && memPkg.AutoMemoryBridge) {
+    const config = readConfig();
+    const backend = new JsonFileBackend(STORE_PATH);
+    await backend.initialize();
+
+    const bridgeConfig = { workingDir: PROJECT_ROOT, syncMode: 'on-session-end' };
+    const bridge = new memPkg.AutoMemoryBridge(backend, bridgeConfig);
+
+    if (lastPrompt && lastPrompt.length > 5) {
+      const id = `last-prompt-${Date.now()}`;
+      const entry = {
+        id,
+        type: 'episodic',
+        namespace: 'session',
+        content: lastPrompt,
+        metadata: {
+          capturedAt: Date.now(),
+          accessCount: 0,
+          lastAccessedAt: Date.now(),
+          tags: ['last-prompt', 'source-of-truth'],
+          sessionDuration,
+        },
+        tags: ['last-prompt', 'source-of-truth'],
+        confidence: 0.99,
+      };
+      await backend.store(entry);
+      success(`Saved last prompt (${lastPrompt.length} chars) to memory store`);
+    }
+
+    if (bridge.destroy) bridge.destroy();
+    await backend.shutdown();
+  } else {
+    dim('Memory package not available — prompt saved to /tmp only');
+  }
+
+  success('Capture complete');
+}
+
 async function doStatus() {
   const memPkg = await loadMemoryPackage();
   const config = readConfig();
@@ -355,9 +487,10 @@ try {
   switch (command) {
     case 'import': await doImport(); break;
     case 'sync': await doSync(); break;
+    case 'capture': await doCapture(); break;
     case 'status': await doStatus(); break;
     default:
-      console.log('Usage: auto-memory-hook.mjs <import|sync|status>');
+      console.log('Usage: auto-memory-hook.mjs <import|sync|capture|status>');
       break;
   }
 } catch (err) {

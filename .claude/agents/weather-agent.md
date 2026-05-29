@@ -4,7 +4,7 @@ description: Use this agent PROACTIVELY when you need to fetch weather data for 
 allowedTools:
   - "Read"
   - "Skill"
-model: sonnet
+model: MiniMax-M2.7
 color: green
 maxTurns: 5
 permissionMode: acceptEdits

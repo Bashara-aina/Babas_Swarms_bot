@@ -9,7 +9,7 @@ import pytest
 from core.memory.observation_store import (
     ObservationStore,
     _classify_type,
-    _escape_fts_query,
+    _sanitize_fts5_query as _escape_fts_query,
     _should_skip_path,
     _strip_private,
 )
@@ -72,15 +72,43 @@ class TestShouldSkipPath:
 
 
 class TestEscapeFtsQuery:
-    def test_removes_special_chars(self):
-        assert _escape_fts_query("hello world") == '"hello" "world"'
+    def test_passthrough_simple_words(self):
+        assert _escape_fts_query("hello world") == "hello world"
 
-    def test_returns_star_for_empty(self):
-        assert _escape_fts_query("") == "*"
-        assert _escape_fts_query("  ") == "*"
+    def test_returns_empty_for_empty(self):
+        assert _escape_fts_query("") == ""
+        assert _escape_fts_query("  ") == ""
 
-    def test_quotes_each_word(self):
-        assert _escape_fts_query("foo bar baz") == '"foo" "bar" "baz"'
+    def test_strips_dangerous_chars(self):
+        assert "+" not in _escape_fts_query("C++")
+        assert '"' not in _escape_fts_query('"unterminated')
+        assert "(" not in _escape_fts_query("(problem")
+        assert "{" not in _escape_fts_query("{test}")
+
+    def test_removes_dangling_operators(self):
+        assert _escape_fts_query("hello AND") == "hello"
+        assert _escape_fts_query("OR world") == "world"
+
+    def test_removes_leading_bare_star(self):
+        assert _escape_fts_query("***") == ""
+        assert _escape_fts_query("deploy*") == "deploy*"
+
+    def test_quotes_hyphenated_terms(self):
+        result = _escape_fts_query("chat-send")
+        assert '"chat-send"' in result or "chat-send" in result
+
+    def test_quotes_dotted_terms(self):
+        result = _escape_fts_query("P2.2")
+        assert '"P2.2"' in result or "P2.2" in result
+
+    def test_preserves_quoted_phrases(self):
+        result = _escape_fts_query('"exact phrase"')
+        assert '"exact phrase"' in result
+
+    def test_multiple_quoted_phrases(self):
+        result = _escape_fts_query('"hello world" OR "foo bar"')
+        assert '"hello world"' in result
+        assert '"foo bar"' in result
 
 
 @pytest.mark.asyncio

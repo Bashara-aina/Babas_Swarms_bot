@@ -1,0 +1,308 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - button "Main menu" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+        - link "Google" [ref=e11] [cursor=pointer]:
+          - /url: /
+      - generic [ref=e13]:
+        - generic:
+          - generic:
+            - generic:
+              - button "Skip to main content" [ref=e14]:
+                - generic: Skip to main content
+              - button "Accessibility feedback" [ref=e17]:
+                - generic: Accessibility feedback
+        - generic [ref=e26]:
+          - button "Change appearance" [ref=e28]:
+            - img
+          - tooltip [ref=e31]: Change appearance
+      - generic [ref=e33]:
+        - button "Google apps" [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+        - link "Sign in" [ref=e41] [cursor=pointer]:
+          - /url: https://accounts.google.com/ServiceLogin?service=searchandassistant&passive=1209600&continue=https://www.google.com/travel/flights/search?tfs%3DCBwQAhoeEgoyMDI2LTA4LTAxagcIARIDVE9ZGhZKAxIEBuB_6_4BagwiEgoyMDI2LTA4LTA3agwIAxIIL2v8vxoMAhIDkOwQ0AFqBAgB%26hl%3Den%26gl%3Djp%26curr%3DJPY%26autographer%3DHISTORIC_ROUND_TRIP&followup=https://www.google.com/travel/flights/search?tfs%3DCBwQAhoeEgoyMDI2LTA4LTAxagcIARIDVE9ZGhZKAxIEBuB_6_4BagwiEgoyMDI2LTA4LTA3agwIAxIIL2v8vxoMAhIDkOwQ0AFqBAgB%26hl%3Den%26gl%3Djp%26curr%3DJPY%26autographer%3DHISTORIC_ROUND_TRIP&hl=en&ec=GAZAlQM
+  - generic [ref=e49]:
+    - heading "Flights" [level=1] [ref=e52]
+    - generic [ref=e53]:
+      - search "Flight" [ref=e55]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - combobox "Change ticket type. Round trip" [ref=e63] [cursor=pointer]:
+              - generic:
+                - img
+              - generic:
+                - generic: Round trip
+              - generic:
+                - img
+            - button "1 passenger, change number of passengers." [ref=e69]:
+              - generic [ref=e72]:
+                - img [ref=e73]
+                - generic [ref=e75]: "1"
+              - img [ref=e76]
+            - combobox "Change seating class. Economy" [ref=e82] [cursor=pointer]:
+              - generic:
+                - generic: Economy
+              - generic:
+                - img
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e91]:
+                - combobox "Where from?" [ref=e92]: Tokyo
+                - generic [ref=e94]: Tokyo
+                - img [ref=e95]
+              - generic [ref=e98]:
+                - button "Swap origin and destination." [disabled]:
+                  - img
+              - generic [ref=e104]:
+                - combobox "Where to?" [active] [ref=e105]
+                - img [ref=e106]
+            - generic [ref=e117]:
+              - generic [ref=e119]:
+                - img [ref=e121]
+                - textbox "Departure" [ref=e124]
+              - textbox "Return" [ref=e128]
+        - button "Explore destinations" [ref=e132]:
+          - img [ref=e135]
+          - generic [ref=e137]: Explore
+      - main [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e141]:
+            - img [ref=e142]
+            - generic [ref=e144]:
+              - heading "Flexible? Discover the best flight deals with AI" [level=2] [ref=e146]
+              - generic [ref=e147]: Describe your ideal trip, and let Google Flights find the best deals for you
+            - button "Explore deals with AI" [ref=e149]:
+              - generic [ref=e152]: Explore deals with AI
+          - heading "Find and book cheap flights worldwide and track prices" [level=1] [ref=e153]
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - heading "Find cheap flights from Japan to anywhere" [level=2] [ref=e156]
+              - button "Learn more about this section" [ref=e159] [cursor=pointer]:
+                - img [ref=e161]
+            - generic [ref=e163]:
+              - tablist [ref=e167]:
+                - tab "Tokyo" [selected] [ref=e168] [cursor=pointer]
+                - tab "Osaka" [ref=e169] [cursor=pointer]
+                - tab "Fukuoka" [ref=e170] [cursor=pointer]
+                - tab "Sapporo" [ref=e171] [cursor=pointer]
+              - list [ref=e172]:
+                - listitem [ref=e173]:
+                  - button "Find flights from Tokyo (NRT) to Sapporo (CTS) from ¥11,880. Operated by Spring Japan. Jun 27 to Jul 3. Nonstop" [ref=e174] [cursor=pointer]:
+                    - generic [ref=e175]:
+                      - generic [ref=e176]: Tokyo
+                      - img [ref=e177]
+                      - generic [ref=e179]: Sapporo
+                    - generic [ref=e180]:
+                      - generic [ref=e181]: Jun 27 — Jul 3
+                      - generic [ref=e182]:
+                        - generic [ref=e183]: ·
+                        - text: Nonstop
+                    - generic [ref=e184]:
+                      - generic [ref=e185]: from ¥11,880
+                      - img [ref=e187]
+                - listitem [ref=e189]:
+                  - button "Find flights from Tokyo (NRT) to Okinawa (OKA) from ¥15,020. Operated by Jetstar. May 28 to Jun 3. Nonstop" [ref=e190] [cursor=pointer]:
+                    - generic [ref=e191]:
+                      - generic [ref=e192]: Tokyo
+                      - img [ref=e193]
+                      - generic [ref=e195]: Okinawa
+                    - generic [ref=e196]:
+                      - generic [ref=e197]: May 28 — Jun 3
+                      - generic [ref=e198]:
+                        - generic [ref=e199]: ·
+                        - text: Nonstop
+                    - generic [ref=e200]:
+                      - generic [ref=e201]: from ¥15,020
+                      - img [ref=e203]
+                - listitem [ref=e205]:
+                  - button "Find flights from Tokyo (NRT) to Kagoshima (KOJ) from ¥13,690. Operated by Jetstar. Jul 2 to Jul 8. Nonstop" [ref=e206] [cursor=pointer]:
+                    - generic [ref=e207]:
+                      - generic [ref=e208]: Tokyo
+                      - img [ref=e209]
+                      - generic [ref=e211]: Kagoshima
+                    - generic [ref=e212]:
+                      - generic [ref=e213]: Jul 2 — Jul 8
+                      - generic [ref=e214]:
+                        - generic [ref=e215]: ·
+                        - text: Nonstop
+                    - generic [ref=e216]:
+                      - generic [ref=e217]: from ¥13,690
+                      - img [ref=e219]
+                - text: · · · · · · · · ·
+              - generic [ref=e221]:
+                - button "Explore more destinations from Tokyo" [ref=e222] [cursor=pointer]
+                - button [ref=e223]:
+                  - generic [ref=e226]: Explore destinations
+          - generic [ref=e227]:
+            - heading "Useful tools to help you find the best airline tickets" [level=2] [ref=e228]
+            - generic [ref=e229]:
+              - tablist [ref=e230]:
+                - tab "Find the cheapest days to fly The Date grid and Price graph make it easy to find the best flight deals" [selected] [ref=e231] [cursor=pointer]:
+                  - generic [ref=e232]:
+                    - img [ref=e233]
+                    - generic [ref=e235]:
+                      - generic [ref=e236]: Find the cheapest days to fly
+                      - generic [ref=e237]: The Date grid and Price graph make it easy to find the best flight deals
+                - tab "Know when to book with price insights Price history and trend data show you the best time to book your airline ticket to get the cheapest price for your flight" [ref=e238] [cursor=pointer]:
+                  - generic [ref=e239]:
+                    - img [ref=e240]
+                    - generic [ref=e242]:
+                      - generic [ref=e243]: Know when to book with price insights
+                      - generic [ref=e244]: Price history and trend data show you the best time to book your airline ticket to get the cheapest price for your flight
+                - tab "Track flight prices for a trip Not ready to book yet? Observe price changes for a route or flight and get notified when prices drop." [ref=e245] [cursor=pointer]:
+                  - generic [ref=e246]:
+                    - img [ref=e247]
+                    - generic [ref=e250]:
+                      - generic [ref=e251]: Track flight prices for a trip
+                      - generic [ref=e252]: Not ready to book yet? Observe price changes for a route or flight and get notified when prices drop.
+                - tab "Explore the best flight deals with AI Describe your ideal trip and let Google Flights find you the best deals" [ref=e253] [cursor=pointer]:
+                  - generic [ref=e254]:
+                    - img [ref=e255]
+                    - generic [ref=e257]:
+                      - generic [ref=e258]: Explore the best flight deals with AI
+                      - generic [ref=e259]: Describe your ideal trip and let Google Flights find you the best deals
+              - tabpanel "Find the cheapest days to fly The Date grid and Price graph make it easy to find the best flight deals" [ref=e260]:
+                - generic [ref=e261]: Insightful tools help you choose your trip dates
+                - generic [ref=e262]: If your travel plans are flexible, use the form above to start searching for a specific trip. Then, play around with the Date grid and Price graph options on the Search page to find the cheapest days to fly and book your tickets.
+          - generic [ref=e264]:
+            - heading "Popular flight destinations from Japan" [level=2] [ref=e265]
+            - generic [ref=e268]:
+              - link "City image for Tokyo Tokyo" [ref=e270] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-tokyo.html?gl=JP&hl=en
+                - img "City image for Tokyo" [ref=e272]
+                - generic [ref=e273]: Tokyo
+              - link "City image for Osaka Osaka" [ref=e275] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-osaka.html?gl=JP&hl=en
+                - img "City image for Osaka" [ref=e277]
+                - generic [ref=e278]: Osaka
+              - link "City image for Sapporo Sapporo" [ref=e280] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-sapporo.html?gl=JP&hl=en
+                - img "City image for Sapporo" [ref=e282]
+                - generic [ref=e283]: Sapporo
+              - link "City image for Fukuoka Fukuoka" [ref=e285] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-fukuoka.html?gl=JP&hl=en
+                - img "City image for Fukuoka" [ref=e287]
+                - generic [ref=e288]: Fukuoka
+              - link "City image for Taipei City Taipei City" [ref=e290] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-taipei-city.html?gl=JP&hl=en
+                - img "City image for Taipei City" [ref=e292]
+                - generic [ref=e293]: Taipei City
+              - link "City image for Okinawa Okinawa" [ref=e295] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-okinawa.html?gl=JP&hl=en
+                - img "City image for Okinawa" [ref=e297]
+                - generic [ref=e298]: Okinawa
+              - link "City image for Seoul Seoul" [ref=e300] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-seoul.html?gl=JP&hl=en
+                - img "City image for Seoul" [ref=e302]
+                - generic [ref=e303]: Seoul
+              - link "City image for Shanghai Shanghai" [ref=e305] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-shanghai.html?gl=JP&hl=en
+                - img "City image for Shanghai" [ref=e307]
+                - generic [ref=e308]: Shanghai
+              - link "City image for London London" [ref=e310] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-london.html?gl=JP&hl=en
+                - img "City image for London" [ref=e312]
+                - generic [ref=e313]: London
+              - link "City image for Bangkok Bangkok" [ref=e315] [cursor=pointer]:
+                - /url: https://www.google.com/travel/flights/flights-to-bangkok.html?gl=JP&hl=en
+                - img "City image for Bangkok" [ref=e317]
+                - generic [ref=e318]: Bangkok
+          - generic [ref=e319]:
+            - heading "Frequently asked questions" [level=2] [ref=e321]
+            - group "Frequently asked questions" [ref=e322]:
+              - generic [ref=e324] [cursor=pointer]:
+                - generic [ref=e325]: What are some good flight destinations from Japan?
+                - button "What are some good flight destinations from Japan?" [ref=e328]:
+                  - img [ref=e331]
+              - generic [ref=e334] [cursor=pointer]:
+                - generic [ref=e335]: How can I find last-minute flight deals?
+                - button "How can I find last-minute flight deals?" [ref=e338]:
+                  - img [ref=e341]
+              - generic [ref=e344] [cursor=pointer]:
+                - generic [ref=e345]: How can I find cheap flights for a weekend getaway?
+                - button "How can I find cheap flights for a weekend getaway?" [ref=e348]:
+                  - img [ref=e351]
+              - generic [ref=e354] [cursor=pointer]:
+                - generic [ref=e355]: How can I find flight deals if my travel plans are flexible?
+                - button "How can I find flight deals if my travel plans are flexible?" [ref=e358]:
+                  - img [ref=e361]
+              - generic [ref=e364] [cursor=pointer]:
+                - generic [ref=e365]: How can I find cheap flights from Japan to anywhere?
+                - button "How can I find cheap flights from Japan to anywhere?" [ref=e368]:
+                  - img [ref=e371]
+              - generic [ref=e374] [cursor=pointer]:
+                - generic [ref=e375]: How can I get flight alerts for my trip?
+                - button "How can I get flight alerts for my trip?" [ref=e378]:
+                  - img [ref=e381]
+          - heading "Search more flights" [level=2] [ref=e383]
+          - generic [ref=e384]:
+            - heading "Find cheap flights on popular routes" [level=3] [ref=e385]
+            - generic [ref=e387]:
+              - tablist [ref=e388]:
+                - generic [ref=e391]:
+                  - tab "Flights from cities in Japan" [selected] [ref=e393] [cursor=pointer]:
+                    - generic:
+                      - generic: Flights from cities in Japan
+                  - tab "International flights from Japan" [ref=e396] [cursor=pointer]:
+                    - generic:
+                      - generic: International flights from Japan
+                  - tab "Domestic flights in Japan" [ref=e399] [cursor=pointer]:
+                    - generic:
+                      - generic: Domestic flights in Japan
+              - tabpanel "Flights from cities in Japan" [ref=e402]:
+                - generic [ref=e404]:
+                  - link "Flights from Tokyo" [ref=e405] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-tokyo.html?gl=JP&hl=en
+                  - link "Flights from Osaka" [ref=e406] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-osaka.html?gl=JP&hl=en
+                  - link "Flights from Fukuoka" [ref=e407] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-fukuoka.html?gl=JP&hl=en
+                  - link "Flights from Sapporo" [ref=e408] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-sapporo.html?gl=JP&hl=en
+                  - link "Flights from Nagoya" [ref=e409] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-nagoya.html?gl=JP&hl=en
+                  - link "Flights from Okinawa" [ref=e410] [cursor=pointer]:
+                    - /url: https://www.google.com/travel/flights/flights-from-okinawa.html?gl=JP&hl=en
+      - contentinfo [ref=e413]:
+        - generic [ref=e415]:
+          - button "Language·English (United States)" [ref=e416]:
+            - img [ref=e419]
+            - generic [ref=e421]: Language·English (United States)
+          - button "Location·Japan" [ref=e422]:
+            - img [ref=e425]
+            - generic [ref=e428]: Location·Japan
+          - button "Currency JPY" [ref=e429]:
+            - img [ref=e432]
+            - generic [ref=e442]: Currency·JPY
+        - generic [ref=e443]:
+          - paragraph [ref=e444]: "Current language and currency options applied: English (United States) - Japan - JPY"
+          - paragraph [ref=e445]:
+            - text: Displayed currencies may differ from the currencies used to purchase flights.
+            - link "Learn more about currencies" [ref=e446] [cursor=pointer]:
+              - /url: https://www.google.com/googlefinance/disclaimer?hl=en-US&gl=JP
+              - text: Learn more
+        - generic [ref=e447]:
+          - link "About Google Travel" [ref=e448] [cursor=pointer]:
+            - /url: https://about.google/?hl=en-US
+            - text: About
+          - link "Privacy" [ref=e449] [cursor=pointer]:
+            - /url: https://policies.google.com/privacy?hl=en-US
+          - link "Terms" [ref=e450] [cursor=pointer]:
+            - /url: https://policies.google.com/terms?hl=en-US
+          - link "Join user studies" [ref=e451] [cursor=pointer]:
+            - /url: https://google.qualtrics.com/jfe/form/SV_3NMIMtX0F2zkakR?reserved%3D1%26utm_source%3DFooter%2520link%26utm_medium%3Down_web%26%20utm_campaign%3DQ2%26productTag%3D0%26campaignDate%3DApril2020%26referral_code%3DUXbJ377133&Q_Language=en-US
+          - link "Feedback" [ref=e452] [cursor=pointer]:
+            - /url: ./#0
+          - link "Help Center" [ref=e453] [cursor=pointer]:
+            - /url: https://support.google.com/travel/?hl=en-US#topic=2475360
+        - generic [ref=e455]:
+          - generic [ref=e459]:
+            - generic [ref=e460] [cursor=pointer]: International sites
+            - button "International sites" [ref=e463]:
+              - img [ref=e466]
+          - generic [ref=e471]:
+            - generic [ref=e472] [cursor=pointer]: Explore flights
+            - button "Explore flights" [ref=e475]:
+              - img [ref=e478]

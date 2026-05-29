@@ -11,6 +11,7 @@ Does NOT log user message content (privacy requirement from CLAUDE.md).
 
 from __future__ import annotations
 
+from collections import deque
 import logging
 import re
 from dataclasses import dataclass
@@ -28,12 +29,19 @@ class ValidationResult:
 
     valid: bool
     sanitized_input: str = ""
-    warnings: list[str] = None
+    warnings: deque[str] | None = None
     blocked_reason: str = ""
 
     def __post_init__(self):
         if self.warnings is None:
-            self.warnings = []
+            self.warnings = deque(maxlen=100)
+        elif not isinstance(self.warnings, deque):
+            # Convert list or other iterables to bounded deque
+            self.warnings = deque(self.warnings, maxlen=100)
+        else:
+            # Already a deque — ensure it has a maxlen (wrap if unbounded)
+            if self.warnings.maxlen is None:
+                self.warnings = deque(self.warnings, maxlen=100)
 
 
 @dataclass
@@ -125,7 +133,7 @@ class SecurityGuard:
             ValidationResult with validity flag and sanitized text.
         """
         self._scanned_count += 1
-        warnings: list[str] = []
+        warnings: deque[str] = deque()
 
         # Check length
         if len(user_input) > self.max_input_length:
@@ -166,7 +174,7 @@ class SecurityGuard:
         """
         validation = self.validate_input(text)
         sanitized = validation.sanitized_input if validation.valid else text
-        reasons: list[str] = list(validation.warnings)
+        reasons: list[str] = list(validation.warnings or [])
         risk = 0.0
 
         if not validation.valid:
@@ -232,12 +240,12 @@ class SecurityGuard:
                 return f"pattern_{i}"
         return None
 
-    def _redact_pii(self, text: str) -> tuple[str, list[str]]:
+    def _redact_pii(self, text: str) -> tuple[str, deque[str]]:
         """Redact PII patterns from text.
 
         Returns (redacted_text, list_of_warnings).
         """
-        warnings = []
+        warnings = deque()
         result = text
 
         for pii_type, pattern in _PII_PATTERNS.items():

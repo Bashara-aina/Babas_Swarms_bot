@@ -712,8 +712,8 @@ class HarnessFS:
         """Query candidates by keyword in description or code."""
         results = []
         for c in self._index.values():
-            if field == "description" and keyword.lower() in c.description.lower() or \
-               field == "code" and keyword.lower() in c.source_code.lower():
+            if (field == "description" and keyword.lower() in c.description.lower()) or \
+               (field == "code" and keyword.lower() in c.source_code.lower()):
                 results.append(c)
         return results
 

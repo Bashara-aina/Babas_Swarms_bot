@@ -82,7 +82,7 @@ class SWEAgentConfig:
     tools: ToolsConfig = field(default_factory=ToolsConfig)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SWEAgentConfig":
+    def from_dict(cls, data: dict[str, Any]) -> SWEAgentConfig:
         """Create config from dict."""
         model_cfg = ModelConfig(**data.get("agent", {}).get("model", {}))
         agent_cfg = AgentConfig(model=model_cfg, **{
@@ -95,7 +95,7 @@ class SWEAgentConfig:
         return cls(agent=agent_cfg, env=env_cfg, tools=tools_cfg)
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> "SWEAgentConfig":
+    def from_yaml(cls, path: str | Path) -> SWEAgentConfig:
         """Load config from YAML file."""
         p = Path(path)
         if not p.exists():

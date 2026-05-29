@@ -1257,3 +1257,149 @@ This is the last model-routing layer that could route to OpenRouter.
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 953efcfa
+- Date: Sun May 24 09:47:05 PM JST 2026
+- Message: refactor(legiona/minimax_client): complete OpenRouter removal
+
+Deleted _build_openrouter_client() function entirely.
+get_client() now always calls _build_minimax_client() — fallback param is retained for API compatibility but routes to MiniMax always.
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 37cac600
+- Date: Sun May 24 09:50:39 PM JST 2026
+- Message: refactor(main): swap remaining OPENROUTER references to MiniMax-only
+
+- ruflo launch condition: OPENROUTER_API_KEY → MINIMAX_API_KEY
+- cloud key list: removed CEREBRAS, GROQ, GEMINI, OPENROUTER → kept MINIMAX, OLLAMA
+- health_check ruflo env: OPENROUTER_API_KEY → MINIMAX_API_KEY
+- gptr_client docstring: OpenRouter → MiniMax
+- hermes_adapter base_url fallback: OPENROUTER_BASE_URL → MINIMAX_API_BASE
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 38d48e78
+- Date: Sun May 24 09:53:38 PM JST 2026
+- Message: refactor(llm_client): remove all OpenRouter code paths
+
+- verify_api_keys: removed cerebras, groq, gemini, openrouter
+- _get_api_key: mapped only minimax, ollama_chat, zai, anthropic
+- _call_model: removed openrouter branch, replaced with ollama fallback
+- _acompletion: removed openrouter branch, replaced with ollama fallback
+- handlers/shared: updated key display to minimax+ollama
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 6b3427fe
+- Date: Sun May 24 10:06:46 PM JST 2026
+- Message: fix(simulation_agent): devstral → MiniMax-Text-01 for scenario extraction
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 49ec02ec
+- Date: Sun May 24 10:15:03 PM JST 2026
+- Message: fix(oi_bridge): GROQ_API_KEY → MINIMAX_API_KEY for Open Interpreter
+fix(orchestrator): update error hint from GROQ_API_KEY to MINIMAX_API_KEY
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 75ab2fd3
+- Date: Fri May 29 06:50:08 PM JST 2026
+- Message: fix(mcp_client): clean up 3 ruff lint warnings
+
+- Fix unsorted import in _isolated_list_tools (I001)
+- Remove unnecessary quotes from type annotations (UP037)
+- Remove unused walrus variable assignment (F841)
+
+All 74 tests still passing.
+---
+## Commit: 660c98b4
+- Date: Fri May 29 06:53:23 PM JST 2026
+- Message: fix(llm_client): remove duplicate anthropic provider branch + cleanup
+
+- Deduplicate duplicate 'anthropic' elif branch (lines were identical)
+- Remove f-string without placeholders (F541)
+- Replace asyncio.TimeoutError with builtin TimeoutError (UP041)
+- All 52 tests pass
+---
+## Commit: c4a04e9f
+- Date: Fri May 29 06:56:30 PM JST 2026
+- Message: fix(mcp_client): remove unused sys import + fix 2 long lines (E501)
+
+- Remove unused  (F401)
+- Break long line 268 (agentmail display_name, 103 chars)
+- Break long line 469 (anyio bug check, 122 chars)
+
+All 74 tests pass, ruff clean.
+---
+## Commit: e5b6481a
+- Date: Fri May 29 06:59:43 PM JST 2026
+- Message: fix(autonomy/mode_executors): remove 8 duplicate dict keys (F601)
+
+Removed duplicate keys from RUFLO_AGENT_TYPE_MAP:
+- backend-developer, performance-engineer, reviewer, security-engineer,
+  test-runner, wg-code-sentinel, wg-code-alchemist (all already defined)
+- worker kept as single entry instead of appearing twice
+
+All 32 tests pass.
+---
+## Commit: c89def58
+- Date: Fri May 29 07:18:24 PM JST 2026
+- Message: fix: F821 undefined name + F541 f-string fixes + unused noqa
+
+- graphrag_integration: add missing _build_graphrag_config function (F821)
+- obsidian_autosync: remove 3 f-string prefixes, remove unused session_id (F841)
+- meta_harness: remove 2 f-string prefixes
+- orchestrator: remove f-string prefixes from static strings
+
+All 46 tests pass.
+---
+## Commit: a5370c50
+- Date: Fri May 29 07:19:15 PM JST 2026
+- Message: fix(obsidian_autosync): SIM108 ternary operator + remove unused noqa
+---
+## Commit: 7c860bc6
+- Date: Fri May 29 08:06:06 PM JST 2026
+- Message: fix(autoinject): F841 unused vars + E741 ambiguous var + UP031 percent format
+
+- Fix F841: comment out unused 'tags' var (reserved for future tagging)
+- Fix F841: add noqa to layer_names dict (reserved for layer visualization)
+- Fix UP031: replace % top_k format with f-string interpolation
+- Fix E741: rename ambiguous 'l' loop var to 'line_item' in list comprehension
+- Fix redundant filter: remove duplicate loop over 'lines' variable
+  (the filter was running twice on final_text anyway)
+---
+## Commit: 7399523e
+- Date: Fri May 29 08:07:56 PM JST 2026
+- Message: fix(memory_injector): B905 zip strict=True + UP041 TimeoutError alias
+
+- B905: Add strict=True to zip() in _signal_strength() bigram overlap
+  (catches unequal-length iterables that would silently truncate)
+- UP041: Replace aliased TimeoutError with stdlib TimeoutError
+---
+## Commit: eddf7cbc
+- Date: Fri May 29 08:17:50 PM JST 2026
+- Message: fix(memory+swe_agent): F841 dead vars + UP031 percent format + RUF100 noqa
+
+Core fixes:
+- observation_store: remove unused conn from store_observation() outer scope
+  (inner _do_insert callback gets its own conn via _write_with_retry)
+- session_watcher: remove unused last_state_mtime, dead try/except stat block,
+  unused cur_mtime; prefix last_save_time with _; convert 3x percent format
+  to f-strings (UP031)
+- observation_store: clarify PERF203 noqa comment explaining intentional sleep
+
+SWE-agent fixes:
+- cli.py: mark unused system_prompt/instance_prompt with _ (built but not used
+  in current run path; reserved for future trajectory logging)
+- tools.py: remove dead diff var in _str_replace (was computed but never used
+  in output); add noqa to patch var in _submit_diff (reserved for future)
+---
+## Commit: ebc22f76
+- Date: Fri May 29 08:19:07 PM JST 2026
+- Message: fix(meta_harness/recursive_mas/self_evolution): SIM114 or-merge + UP035 collections.abc + UP015 mode arg
+
+- meta_harness: SIM114 combine if-branches with or (same body under two conditions)
+- recursive_mas: UP035 import Callable from collections.abc instead of typing
+- self_evolution: UP015 remove unnecessary mode argument in open() call
+---

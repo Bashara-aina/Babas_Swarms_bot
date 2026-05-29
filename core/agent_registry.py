@@ -12,6 +12,7 @@ import logging
 import re
 import signal
 import time
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import lru_cache
@@ -56,7 +57,10 @@ class AgentDef:
 AGENT_REGISTRY: dict[str, AgentDef] = {}
 DEPARTMENT_INDEX: dict[str, list[str]] = {}
 CAPABILITY_INDEX: dict[str, list[str]] = {}
-CAPABILITY_EMBEDDINGS: dict[str, np.ndarray] = {}
+
+# Bounded LRU cache — prevents unbounded embedding storage
+_MAX_EMBEDDINGS = 200
+CAPABILITY_EMBEDDINGS: OrderedDict[str, np.ndarray] = OrderedDict()
 MODEL_LOOKUP: dict[str, str] = {}  # yaml key → litellm model_id
 
 _embedding_model = None  # sentence-transformers instance (lazy)
@@ -163,8 +167,11 @@ def _precompute_embeddings_sync() -> None:
         return
 
     for name, agent in AGENT_REGISTRY.items():
+        if len(CAPABILITY_EMBEDDINGS) >= _MAX_EMBEDDINGS:
+            CAPABILITY_EMBEDDINGS.popitem(last=False)  # evict oldest
         text = agent.description + " " + " ".join(agent.capabilities)
         CAPABILITY_EMBEDDINGS[name] = _embedding_model.encode(text, normalize_embeddings=True)  # type: ignore[reportArgumentType]
+        CAPABILITY_EMBEDDINGS.move_to_end(name)  # mark as recently used
 
     logger.info(f"✓ Precomputed embeddings for {len(CAPABILITY_EMBEDDINGS)} agents")
 
@@ -599,18 +606,21 @@ LEGACY_TASK_KEYWORDS: dict[str, list[str]] = {
     ],
 }
 
-# Load PERSONA_WRAPPER from personality.yaml (at module load time)
-_PERSONA_WRAPPER: str = ""
+# Load personality.yaml once (shared between PERSONA_WRAPPER and debate_personas)
+_personality_cfg: dict = {}
 try:
     _personality_path = Path(__file__).parent.parent / "config" / "personality.yaml"
     if _personality_path.exists():
         import yaml as _yaml
 
         with _personality_path.open() as _f:
-            _personality_cfg = _yaml.safe_load(_f)
+            _personality_cfg = _yaml.safe_load(_f) or {}
         _PERSONA_WRAPPER = _personality_cfg.get("personality_wrapper", "") or ""
+    else:
+        _PERSONA_WRAPPER = ""
 except Exception:
-    pass
+    _PERSONA_WRAPPER = ""
+    _personality_cfg = {}
 
 PERSONA_WRAPPER = _PERSONA_WRAPPER
 
@@ -626,16 +636,10 @@ _DEBATE_PERSONA_MODELS: dict[str, str] = {}
 _DEBATE_ICONS: dict[str, str] = {}
 
 try:
-    import yaml as _yaml
-
-    _personality_path = Path(__file__).parent.parent / "config" / "personality.yaml"
-    if _personality_path.exists():
-        with _personality_path.open() as _f:
-            _cfg = _yaml.safe_load(_f)
-        _debate = _cfg.get("debate_personas", {})
-        _DEBATE_PERSONAS = {k: v["description"] for k, v in _debate.items()}
-        _DEBATE_PERSONA_MODELS = {k: v["model"] for k, v in _debate.items()}
-        _DEBATE_ICONS = {k: v["icon"] for k, v in _debate.items()}
+    _debate = _personality_cfg.get("debate_personas", {})
+    _DEBATE_PERSONAS = {k: v["description"] for k, v in _debate.items()}
+    _DEBATE_PERSONA_MODELS = {k: v["model"] for k, v in _debate.items()}
+    _DEBATE_ICONS = {k: v["icon"] for k, v in _debate.items()}
 except Exception:
     pass
 

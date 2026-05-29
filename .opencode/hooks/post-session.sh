@@ -9,10 +9,59 @@ if [ -f /tmp/legion_session_context.txt ]; then
     cp /tmp/legion_session_context.txt "${HOME}/.legion/sessions/latest" 2>/dev/null || true
 fi
 
-# Write session summary to daily log
-SESSION_LOG="${HOME}/.legion/logs/sessions/$(date +%Y-%m-%d).md"
-mkdir -p "$(dirname "$SESSION_LOG")"
-echo "## $(date +%H:%M) — Session ended" >> "$SESSION_LOG" 2>/dev/null || true
+# Write session summary to Obsidian vault via obsidian_autosync
+python3 -c "
+import sys
+sys.path.insert(0, '.')
+try:
+    from core.memory.obsidian_autosync import full_session_sync
+    from pathlib import Path
+    from datetime import datetime
+    import json, os
+
+    session_id = os.environ.get('SESSION_ID', datetime.now().strftime('%Y%m%d-%H%M'))
+    session_name = 'OpenCode session'
+
+    # Read session context if available
+    context_blocks = ''
+    if Path('/tmp/legion_session_context.txt').exists():
+        context_blocks = Path('/tmp/legion_session_context.txt').read_text()[:2000]
+
+    # Read last user prompt
+    last_prompt = ''
+    if Path('/tmp/legion_last_user_prompt.txt').exists():
+        content = Path('/tmp/legion_last_user_prompt.txt').read_text().strip()
+        if content and content != 'NO_USER_PROMPT':
+            last_prompt = content
+
+    # Count tasks/interruptions from checkpoint if available
+    tasks = []
+    decisions = []
+    files_changed = []
+
+    if Path('/tmp/legion_compaction_checkpoint.json').exists():
+        ckpt = json.loads(Path('/tmp/legion_compaction_checkpoint.json').read_text())
+        if ckpt.get('context_size', 0) > 0:
+            tasks = [{'description': 'Session work (see obsidian)', 'status': 'completed'}]
+
+    results = full_session_sync(
+        session_id=session_id,
+        session_name=session_name,
+        user_query=last_prompt or 'Session archived',
+        tasks=tasks,
+        decisions=decisions,
+        files_changed=files_changed,
+        context_summary=context_blocks,
+        duration=0,
+    )
+
+    print(f'[post-session] Obsidian sync: {len(results)} files written')
+    for k, v in results.items():
+        if v:
+            print(f'  - {k}: {v}')
+except Exception as e:
+    print(f'[post-session] Obsidian sync skipped: {e}')
+" 2>/dev/null || true
 
 # Consolidate hermes skills
 python3 -c "
@@ -22,7 +71,6 @@ try:
     from tools.mem0_client import get_mem0, mem0_add
     import datetime
     m = get_mem0()
-    # Session summary stored by memory_consolidate worker
 except Exception:
     pass
 " 2>/dev/null || true

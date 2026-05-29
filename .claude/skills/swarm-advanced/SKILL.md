@@ -1,6 +1,6 @@
 ---
 name: swarm-advanced
-description: Advanced swarm orchestration patterns for research, development, testing, and complex distributed workflows
+description: "Auto-trigger for: research swarm, development swarm, testing swarm, analysis swarm, parallel agents, distributed workflow, multi-agent coordination, mesh topology, hierarchical topology, adaptive topology. Activates automatically when user asks for research with multiple agents, build with multiple specialists, test comprehensively, analyze with parallel agents, coordinate agent teams, distributed AI workflows."
 version: 2.0.0
 category: orchestration
 tags: [swarm, distributed, parallel, research, testing, development, coordination]

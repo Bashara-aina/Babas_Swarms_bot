@@ -3,6 +3,7 @@ Context Maximizer for Elite OpenCode Stack
 Token budget tracking + heuristic compression.
 Ollama integration: phi model via Ollama when available, else MiniMax API, else heuristic.
 """
+from collections import deque
 import json
 import os
 import re
@@ -56,7 +57,7 @@ class ContextBudget:
 
     def __init__(self):
         self.used = 0
-        self.log = []
+        self.log = deque(maxlen=200)
         self.pruned_chars = 0
 
     def add(self, label: str, content: str, compress_ratio: float | None = None):

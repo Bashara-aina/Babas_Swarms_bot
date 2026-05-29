@@ -22,6 +22,7 @@ Reference: M2.7 Full Capability Activation — Error Accumulation Prevention (Se
 from __future__ import annotations
 
 import datetime
+from collections import deque
 from dataclasses import dataclass, field
 from enum import StrEnum
 
@@ -79,7 +80,7 @@ class DriftDetector:
 
     def __init__(self) -> None:
         self.original_goal: str | None = None
-        self.accumulated_state: list[str] = []
+        self.accumulated_state: deque[str] = deque(maxlen=100)
         self.tool_call_count: int = 0
         self.last_check_at: str | None = None
         self._aborted: bool = False
@@ -87,7 +88,7 @@ class DriftDetector:
     def set_goal(self, goal: str) -> None:
         """Set the original goal (call at task start)."""
         self.original_goal = goal
-        self.accumulated_state = []
+        self.accumulated_state = deque(maxlen=100)
         self.tool_call_count = 0
         self._aborted = False
         self.last_check_at = datetime.datetime.now(
@@ -126,7 +127,7 @@ class DriftDetector:
         recommendations: list[str] = []
 
         # Build current state summary
-        state_entries = self.accumulated_state[-5:]
+        state_entries = list(self.accumulated_state)[-5:]
         state_parts = [
             f"[{len(self.accumulated_state)} state changes recorded]"
         ]

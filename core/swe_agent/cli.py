@@ -149,8 +149,8 @@ def main() -> int:
         problem_statement = args.issue
     elif args.issue_url:
         # Fetch issue from GitHub
-        import urllib.request
         import json
+        import urllib.request
 
         # Parse GitHub URL
         url = args.issue_url

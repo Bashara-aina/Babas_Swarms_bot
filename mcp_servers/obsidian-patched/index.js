@@ -7766,8 +7766,11 @@ tags: ["merged"]
 
   async run() {
     const transport = new StdioServerTransport();
+    // Write directly to raw FD 2 before connect so this never touches the
+    // stdout JSON-RPC channel used by the MCP Python SDK.  Using
+    // process.stderr.write (not console.error) guarantees raw FD access.
+    process.stderr.write("Obsidian MCP server running on stdio\n");
     await this.server.connect(transport);
-    console.error("Obsidian MCP server running on stdio");
   }
 }
 

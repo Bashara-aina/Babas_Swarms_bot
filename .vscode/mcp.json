@@ -6,7 +6,9 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "/home/newadmin"
-      ]
+      ],
+      "description": "Local filesystem access for reading/writing files",
+      "timeout": 30000
     },
     "git": {
       "command": "npx",
@@ -15,7 +17,9 @@
         "@modelcontextprotocol/server-git",
         "--repository",
         "/home/newadmin/swarm-bot"
-      ]
+      ],
+      "description": "Git operations via MCP protocol",
+      "timeout": 30000
     },
     "gitnexus": {
       "command": "pnpm",
@@ -24,7 +28,9 @@
         "--allow-build=kuzu",
         "gitnexus@1.4.0",
         "mcp"
-      ]
+      ],
+      "description": "Code intelligence and graph analysis",
+      "timeout": 60000
     },
     "obsidian": {
       "command": "npx",
@@ -32,7 +38,9 @@
         "-y",
         "@iflow-mcp/kynlos-obsidian-mcp-server",
         "/home/newadmin/swarm-bot/.wiki"
-      ]
+      ],
+      "description": "Obsidian vault knowledge management",
+      "timeout": 30000
     },
     "firecrawl": {
       "command": "npx",
@@ -41,8 +49,10 @@
         "firecrawl-mcp"
       ],
       "env": {
-        "FIRECRAWL_API_KEY": "fc-09da51dd5e5c46b5b73d7b1ca5cb4c74"
-      }
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "description": "Web scraping and content extraction",
+      "timeout": 60000
     },
     "exa": {
       "command": "npx",
@@ -51,8 +61,10 @@
         "exa-mcp-server"
       ],
       "env": {
-        "EXA_API_KEY": "2f2f6644-9907-4444-bb6b-c507b32c4820"
-      }
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "description": "Neural search for web and code research",
+      "timeout": 60000
     }
   },
   "inputs": []

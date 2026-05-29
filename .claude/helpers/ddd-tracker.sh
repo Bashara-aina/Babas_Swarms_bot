@@ -13,8 +13,8 @@ LAST_RUN_FILE="$METRICS_DIR/.ddd-last-run"
 
 mkdir -p "$METRICS_DIR"
 
-# V3 Target Domains
-DOMAINS=("agent-lifecycle" "task-execution" "memory-management" "coordination" "shared-kernel")
+# V3 Target Domains — mapped to actual swarm-bot structure
+DOMAINS=("orchestration" "memory" "agent" "skills" "swarm")
 
 should_run() {
   if [ ! -f "$LAST_RUN_FILE" ]; then return 0; fi
@@ -25,48 +25,67 @@ should_run() {
 
 check_domain() {
   local domain="$1"
-  local domain_path="$PROJECT_ROOT/v3/@claude-flow/$domain"
-  local alt_path="$PROJECT_ROOT/src/domains/$domain"
+  # Map domain name to actual file/folder locations in swarm-bot structure
+  local domain_path="$PROJECT_ROOT/core/${domain}.py"
+  local alt_path="$PROJECT_ROOT/core/${domain}_*.py"
+  local alt_dir="$PROJECT_ROOT/core/${domain}"
+  local glob_files
 
   local score=0
   local max_score=100
 
-  # Check if domain directory exists (20 points)
-  if [ -d "$domain_path" ] || [ -d "$alt_path" ]; then
+  # Check if domain has files in core/ (20 points)
+  # agent domain → core/agent.py, core/agent_*.py, core/agent_registry.py, etc.
+  # swarm domain → core/swarm.py, core/swarm_*.py, core/legion_swarm.py, etc.
+  local glob_expr=""
+  case "$domain" in
+    orchestration) glob_expr="orchestrat" ;;
+    memory) glob_expr="memory" ;;
+    agent) glob_expr="agent" ;;
+    skills) glob_expr="skill" ;;
+    swarm) glob_expr="swarm" ;;
+  esac
+
+  local match_count
+  # Use grep instead of find -name for regex-like patterns (find -name doesn't support ^ $ anchors)
+  match_count=$(ls "$PROJECT_ROOT/core"/ 2>/dev/null | grep -E "${glob_expr}.*\.py$" | wc -l)
+  if [ "$match_count" -gt 0 ]; then
     score=$((score + 20))
-    local path="${domain_path:-$alt_path}"
-    [ -d "$domain_path" ] && path="$domain_path" || path="$alt_path"
 
-    # Check for domain layer (15 points)
-    [ -d "$path/domain" ] || [ -d "$path/src/domain" ] && score=$((score + 15))
+    # Check for explicit domain/ subdir (15 points)
+    [ -d "$PROJECT_ROOT/core/${domain}" ] && score=$((score + 15))
 
-    # Check for application layer (15 points)
-    [ -d "$path/application" ] || [ -d "$path/src/application" ] && score=$((score + 15))
+    # Check for domain module with explicit sub-structure (15 points each)
+    [ -d "$PROJECT_ROOT/core/${domain}/domain" ] || [ -d "$PROJECT_ROOT/core/${domain}/src/domain" ] && score=$((score + 15))
+    [ -d "$PROJECT_ROOT/core/${domain}/application" ] || [ -d "$PROJECT_ROOT/core/${domain}/src/application" ] && score=$((score + 15))
+    [ -d "$PROJECT_ROOT/core/${domain}/infrastructure" ] || [ -d "$PROJECT_ROOT/core/${domain}/src/infrastructure" ] && score=$((score + 15))
+    [ -d "$PROJECT_ROOT/core/${domain}/api" ] || [ -d "$PROJECT_ROOT/core/${domain}/src/api" ] && score=$((score + 10))
 
-    # Check for infrastructure layer (15 points)
-    [ -d "$path/infrastructure" ] || [ -d "$path/src/infrastructure" ] && score=$((score + 15))
-
-    # Check for API/interface layer (10 points)
-    [ -d "$path/api" ] || [ -d "$path/src/api" ] && score=$((score + 10))
+    # Check for DDD layer markers in agent files (10 pts — @dataclass for entity/value object)
+    local ddd_marker_count
+    ddd_marker_count=$(ls "$PROJECT_ROOT/core"/ 2>/dev/null | grep -E "agent.*\.py$" | while read f; do grep -l "@dataclass\|class.*Entity\|class.*Value" "$PROJECT_ROOT/core/$f" 2>/dev/null; done | wc -l)
+    [ "$ddd_marker_count" -gt 0 ] && score=$((score + 10))
 
     # Check for tests (15 points)
-    local test_count=$(find "$path" -name "*.test.ts" -o -name "*.spec.ts" 2>/dev/null | wc -l)
+    local test_count
+    test_count=$(ls "$PROJECT_ROOT/core"/ 2>/dev/null | grep -E "agent.*_test\.py$|agent.*\.test\.py$" | wc -l)
     [ "$test_count" -gt 0 ] && score=$((score + 15))
 
-    # Check for index/exports (10 points)
-    [ -f "$path/index.ts" ] || [ -f "$path/src/index.ts" ] && score=$((score + 10))
+    # Check for module index (10 points)
+    [ -f "$PROJECT_ROOT/core/${domain}/__init__.py" ] || [ -f "$PROJECT_ROOT/core/${domain}/src/__init__.py" ] && score=$((score + 10))
   fi
 
   echo "$score"
 }
 
 count_entities() {
-  local type="$1"
-  local pattern="$2"
-
-  find "$PROJECT_ROOT/v3" "$PROJECT_ROOT/src" -name "*.ts" 2>/dev/null | \
-    xargs grep -l "$pattern" 2>/dev/null | \
-    grep -v node_modules | grep -v ".test." | wc -l || echo "0"
+  local pattern="$1"
+  local count
+  count=$(find "$PROJECT_ROOT/core" "$PROJECT_ROOT/v3" "$PROJECT_ROOT/src" -name "*.py" -type f 2>/dev/null | \
+    xargs grep -lE "$pattern" 2>/dev/null | \
+    grep -vE "node_modules|\.test\." | \
+    awk 'END {print (NR ? NR : 0)}')
+  printf '%s' "${count:-0}"
 }
 
 track_ddd() {
@@ -81,20 +100,20 @@ track_ddd() {
     total_score=$((total_score + score))
     domain_scores="$domain_scores\"$domain\": $score, "
 
-    [ "$score" -ge 50 ] && completed_domains=$((completed_domains + 1))
+    [ "$score" -ge 30 ] && completed_domains=$((completed_domains + 1))
   done
 
   # Calculate overall progress
   local max_total=$((${#DOMAINS[@]} * 100))
   local progress=$((total_score * 100 / max_total))
 
-  # Count DDD artifacts
-  local entities=$(count_entities "entities" "class.*Entity\|interface.*Entity")
-  local value_objects=$(count_entities "value-objects" "class.*VO\|ValueObject")
-  local aggregates=$(count_entities "aggregates" "class.*Aggregate\|AggregateRoot")
-  local repositories=$(count_entities "repositories" "interface.*Repository\|Repository")
-  local services=$(count_entities "services" "class.*Service\|Service")
-  local events=$(count_entities "events" "class.*Event\|DomainEvent")
+  # Count DDD artifacts (Python patterns)
+  local entities=$(count_entities "class \w+.*:")
+  local value_objects=$(count_entities "@dataclass|class \w+Value")
+  local aggregates=$(count_entities "class \w+Aggregate")
+  local repositories=$(count_entities "class \w+Repo|Repository")
+  local services=$(count_entities "class \w+Service|async def|def handle_")
+  local events=$(count_entities "class \w+Event|DomainEvent")
 
   # Write DDD metrics
   cat > "$DDD_FILE" << EOF

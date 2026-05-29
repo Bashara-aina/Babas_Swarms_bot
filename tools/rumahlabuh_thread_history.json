@@ -69,6 +69,66 @@
       "date": "2026-05-11",
       "signature": "bbaf4aa67fbe9a1052861eac88944192f2eda970",
       "technique": "fake_controversy"
+    },
+    {
+      "date": "2026-05-24",
+      "signature": "78e6f2057a7f6fc5240309774848965f3bb3480d",
+      "technique": "edukasi"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "0ba9fc238a463241480c87c6512e658c07559e94",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "45f95fcfeb24fc0aa30b0d5d00de5c21d3b7f8c1",
+      "technique": "hot_take"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "aee4a45732d9702259c7f06a924b96e35a8c498b",
+      "technique": "fake_controversy"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "1f069eb49384e57a185feb6272c007130aab5704",
+      "technique": "showcase_soft"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "975f21fa9ac040b6f2243490791dc426df515c0b",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "9aa1783d50cefac481c5d3a2acf7b8113f08fcaa",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "e24ec93994518a6230a6469194b0c5c41420bf5d",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "8672f72ad489575f4f7de74f557fd407b0c2d7c1",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "41eefdf9b7b087d71b8b23d2e0546dd4c55f5f02",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "5a1fd8e6a4f8e37eed792c23b4e58b02e70c45ee",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-05-25",
+      "signature": "3970c511989fd99a61c07e2967de6b2bc0226fe9",
+      "technique": "relatable_story"
     }
   ]
 }

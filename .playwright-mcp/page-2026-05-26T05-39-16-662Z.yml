@@ -1,0 +1,1159 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - link [ref=e9] [cursor=pointer]:
+          - /url: /en-jp
+          - img [ref=e10]
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e15] [cursor=pointer]:
+              - img [ref=e17]
+              - generic [ref=e20]: JPY | EN
+              - img [ref=e21]
+            - link "Deals" [ref=e24] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/promotion
+              - img [ref=e26]
+              - generic [ref=e27]: Deals
+            - link "Get App" [ref=e29] [cursor=pointer]:
+              - /url: https://www.traveloka.com/download-app
+              - img [ref=e31]
+              - generic [ref=e33]: Get App
+            - link "Partnership" [ref=e35] [cursor=pointer]:
+              - /url: /en-jp/partnership
+              - generic [ref=e36]: Partnership
+            - generic [ref=e39] [cursor=pointer]:
+              - generic [ref=e41]: Support
+              - img [ref=e43]
+            - link "Bookings" [ref=e46] [cursor=pointer]:
+              - /url: /en-jp/retrieve
+              - generic [ref=e47]: Bookings
+          - generic [ref=e48]:
+            - button "Log In" [ref=e49] [cursor=pointer]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: Log In
+                - img [ref=e1553]
+            - button "Register" [ref=e56] [cursor=pointer]:
+              - generic [ref=e58]: Register
+      - generic [ref=e62]:
+        - link "Hotels" [ref=e63] [cursor=pointer]:
+          - /url: /en-jp/hotel
+          - generic [ref=e64]: Hotels
+        - link "Flights" [ref=e65] [cursor=pointer]:
+          - /url: /en-jp/flight
+          - generic [ref=e66]: Flights
+        - link "Airport Transfer" [ref=e67] [cursor=pointer]:
+          - /url: /en-jp/airport-transfer
+          - generic [ref=e68]: Airport Transfer
+        - link "Car Rental" [ref=e69] [cursor=pointer]:
+          - /url: /en-jp/car-rental
+          - generic [ref=e70]: Car Rental
+        - link "Things to Do" [ref=e71] [cursor=pointer]:
+          - /url: /en-jp/activities
+          - generic [ref=e72]: Things to Do
+    - generic [ref=e85]:
+      - heading "Flight from Tokyo (NRT) to Jakarta (CGK)" [level=1] [ref=e87]
+      - generic [ref=e92]:
+        - generic [ref=e94]:
+          - generic [ref=e96]:
+            - button "One-way" [ref=e97] [cursor=pointer]:
+              - generic [ref=e99]: One-way
+            - button "Round-trip" [ref=e101] [cursor=pointer]:
+              - generic [ref=e103]: Round-trip
+            - button "Multi-city" [ref=e105] [cursor=pointer]:
+              - generic [ref=e107]: Multi-city
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e113] [cursor=pointer]:
+                - generic:
+                  - img
+                - generic:
+                  - img
+              - generic [ref=e115] [cursor=pointer]: Direct Flights only
+            - generic [ref=e120] [cursor=pointer]:
+              - img [ref=e121]
+              - generic [ref=e124]: 1 Adult, 0 Child, 0 Infant (on lap)
+              - img [ref=e126]
+            - generic [ref=e131] [cursor=pointer]:
+              - img [ref=e132]
+              - generic [ref=e134]: Economy
+              - img [ref=e136]
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - generic [ref=e142]:
+              - generic [ref=e150]:
+                - generic [ref=e151]: From
+                - generic [ref=e153]:
+                  - img [ref=e1555]
+                  - generic [ref=e157]:
+                    - textbox "Origin" [ref=e158]: Tokyo (NRT)
+                    - paragraph [ref=e159]: Narita Intl
+              - generic "swap airports" [ref=e162] [cursor=pointer]:
+                - img [ref=e163]
+              - generic [ref=e172]:
+                - generic [ref=e173]: To
+                - generic [ref=e175]:
+                  - img [ref=e1557]
+                  - generic [ref=e179]:
+                    - textbox "Destination" [ref=e180]: Jakarta (CGK)
+                    - paragraph [ref=e181]: Soekarno Hatta International Airport
+            - generic [ref=e183]:
+              - generic [ref=e186]:
+                - generic [ref=e187]: Departure date
+                - generic [ref=e189]:
+                  - img [ref=e1559]
+                  - generic [ref=e193]:
+                    - textbox "Select return date": May 27, 2026
+              - generic [ref=e197] [cursor=pointer]:
+                - generic [ref=e198]: Return Date
+                - generic [ref=e200]:
+                  - img [ref=e1561]
+                  - generic [ref=e204]:
+                    - textbox "Select return date": May 29, 2026
+                  - button [ref=e207]:
+                    - img [ref=e210]
+            - button "Search Flights" [ref=e214] [cursor=pointer]:
+              - generic [ref=e216]: Search Flights
+          - link "Feeling spontaneous? Search flights to anywhere!" [ref=e218] [cursor=pointer]:
+            - /url: /en-jp/flight/discover
+            - generic [ref=e219]:
+              - img [ref=e220]
+              - generic [ref=e223]: Feeling spontaneous? Search flights to anywhere!
+    - generic "Breadcrumb" [ref=e229]:
+      - link "Home" [ref=e230] [cursor=pointer]:
+        - /url: /en-jp/
+      - text: /
+      - link "Flights" [ref=e231] [cursor=pointer]:
+        - /url: /en-jp/flight
+      - text: /
+      - link "Flights to Indonesia" [ref=e232] [cursor=pointer]:
+        - /url: /en-jp/flight/country/indonesia.id
+      - text: /
+      - link "Flights to Jakarta" [ref=e233] [cursor=pointer]:
+        - /url: /en-jp/flight/to/jakarta.jkta
+      - text: /
+      - link "Flights to Soekarno Hatta International Airport" [ref=e234] [cursor=pointer]:
+        - /url: /en-jp/flight/to/jakarta.cgk
+      - text: /
+      - link "Flights from Tokyo to Jakarta" [ref=e235] [cursor=pointer]:
+        - /url: /en-jp/flight/route/Tokyo-Jakarta.NRT.CGK
+    - generic [ref=e1566]:
+      - heading "Curated flight deals from Tokyo(NRT) to Jakarta (CGK)" [level=2] [ref=e1568]
+      - generic [ref=e1573]:
+        - generic [ref=e1576]: Cheapest direct flight
+        - link "All Nippon Airways Tokyo (NRT) Jakarta (CGK) Tuesday, Jun 16, 2026 219,837円 One Way" [ref=e1578] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=16-6-2026.NA&sc=ECONOMY&far=NH&fpa=b42dae3b-6e58-4d66-be40-ccaf6a7703fa&funnelSource=WinnerSeo_Cheapest+Direct+-+All+Locales+except+JP+KR
+          - generic [ref=e1579]:
+            - generic [ref=e1580]:
+              - img [ref=e1581]
+              - generic [ref=e1582]:
+                - generic [ref=e1583]: All Nippon Airways
+                - generic [ref=e1584]:
+                  - paragraph [ref=e1585]: Tokyo
+                  - paragraph [ref=e1586]: (NRT)
+                  - img [ref=e1588]
+                  - paragraph [ref=e1591]: Jakarta
+                  - paragraph [ref=e1592]: (CGK)
+                - generic [ref=e1593]: Tuesday, Jun 16, 2026
+            - generic [ref=e1594]:
+              - generic [ref=e1595]:
+                - paragraph [ref=e1596]: 219,837円
+                - generic [ref=e1598]: One Way
+              - img [ref=e1599]
+    - generic [ref=e239]:
+      - heading "Tokyo発Jakarta行きのお得な航空券" [level=2] [ref=e241]
+      - generic [ref=e244]:
+        - link "Japan Airlines Tokyo (NRT) Jakarta (CGK) Saturday, May 30, 2026 197,414円" [ref=e246] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=30-5-2026.NA&sc=ECONOMY&far=JL&fpa=c6d5da95-a1e9-4ce0-9257-1032847fef0f&funnelSource=SEO-Route-Table
+          - generic [ref=e247]:
+            - generic [ref=e248]:
+              - img [ref=e249]
+              - generic [ref=e250]:
+                - generic [ref=e251]: Japan Airlines
+                - generic [ref=e252]:
+                  - paragraph [ref=e253]: Tokyo
+                  - paragraph [ref=e254]: (NRT)
+                  - img [ref=e256]
+                  - paragraph [ref=e259]: Jakarta
+                  - paragraph [ref=e260]: (CGK)
+                - generic [ref=e261]: Saturday, May 30, 2026
+            - generic [ref=e262]:
+              - paragraph [ref=e264]: 197,414円
+              - img [ref=e266]
+        - link "Japan Airlines Tokyo (NRT) Jakarta (CGK) Sunday, May 31, 2026 197,414円" [ref=e269] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=31-5-2026.NA&sc=ECONOMY&far=JL&fpa=58aa263f-60aa-45e1-8900-bc4a4630697e&funnelSource=SEO-Route-Table
+          - generic [ref=e270]:
+            - generic [ref=e271]:
+              - img [ref=e272]
+              - generic [ref=e273]:
+                - generic [ref=e274]: Japan Airlines
+                - generic [ref=e275]:
+                  - paragraph [ref=e276]: Tokyo
+                  - paragraph [ref=e277]: (NRT)
+                  - img [ref=e279]
+                  - paragraph [ref=e282]: Jakarta
+                  - paragraph [ref=e283]: (CGK)
+                - generic [ref=e284]: Sunday, May 31, 2026
+            - generic [ref=e285]:
+              - paragraph [ref=e287]: 197,414円
+              - img [ref=e289]
+        - link "All Nippon Airways Tokyo (NRT) Jakarta (CGK) Tuesday, Jun 16, 2026 219,837円" [ref=e292] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=16-6-2026.NA&sc=ECONOMY&far=NH&fpa=b42dae3b-6e58-4d66-be40-ccaf6a7703fa&funnelSource=SEO-Route-Table
+          - generic [ref=e293]:
+            - generic [ref=e294]:
+              - img [ref=e295]
+              - generic [ref=e296]:
+                - generic [ref=e297]: All Nippon Airways
+                - generic [ref=e298]:
+                  - paragraph [ref=e299]: Tokyo
+                  - paragraph [ref=e300]: (NRT)
+                  - img [ref=e302]
+                  - paragraph [ref=e305]: Jakarta
+                  - paragraph [ref=e306]: (CGK)
+                - generic [ref=e307]: Tuesday, Jun 16, 2026
+            - generic [ref=e308]:
+              - paragraph [ref=e310]: 219,837円
+              - img [ref=e312]
+        - link "All Nippon Airways Tokyo (NRT) Jakarta (CGK) Monday, Jun 22, 2026 219,837円" [ref=e315] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=22-6-2026.NA&sc=ECONOMY&far=NH&fpa=510f82dd-9a09-4536-bbb0-38c31ca978c4&funnelSource=SEO-Route-Table
+          - generic [ref=e316]:
+            - generic [ref=e317]:
+              - img [ref=e318]
+              - generic [ref=e319]:
+                - generic [ref=e320]: All Nippon Airways
+                - generic [ref=e321]:
+                  - paragraph [ref=e322]: Tokyo
+                  - paragraph [ref=e323]: (NRT)
+                  - img [ref=e325]
+                  - paragraph [ref=e328]: Jakarta
+                  - paragraph [ref=e329]: (CGK)
+                - generic [ref=e330]: Monday, Jun 22, 2026
+            - generic [ref=e331]:
+              - paragraph [ref=e333]: 219,837円
+              - img [ref=e335]
+        - link "Garuda Indonesia Tokyo (NRT) Jakarta (CGK) Thursday, Jun 4, 2026 225,307円" [ref=e338] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=4-6-2026.NA&sc=ECONOMY&far=GA&fpa=9171371b-0079-4357-90ce-116ee976b698&funnelSource=SEO-Route-Table
+          - generic [ref=e339]:
+            - generic [ref=e340]:
+              - img [ref=e341]
+              - generic [ref=e342]:
+                - generic [ref=e343]: Garuda Indonesia
+                - generic [ref=e344]:
+                  - paragraph [ref=e345]: Tokyo
+                  - paragraph [ref=e346]: (NRT)
+                  - img [ref=e348]
+                  - paragraph [ref=e351]: Jakarta
+                  - paragraph [ref=e352]: (CGK)
+                - generic [ref=e353]: Thursday, Jun 4, 2026
+            - generic [ref=e354]:
+              - paragraph [ref=e356]: 225,307円
+              - img [ref=e358]
+        - link "Japan Airlines Tokyo (NRT) Jakarta (CGK) Monday, Jun 8, 2026 202,874円" [ref=e361] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=8-6-2026.NA&sc=ECONOMY&far=JL&fpa=38774095-db23-4680-80f2-b8a1c6ec8823&funnelSource=SEO-Route-Table
+          - generic [ref=e362]:
+            - generic [ref=e363]:
+              - img [ref=e364]
+              - generic [ref=e365]:
+                - generic [ref=e366]: Japan Airlines
+                - generic [ref=e367]:
+                  - paragraph [ref=e368]: Tokyo
+                  - paragraph [ref=e369]: (NRT)
+                  - img [ref=e371]
+                  - paragraph [ref=e374]: Jakarta
+                  - paragraph [ref=e375]: (CGK)
+                - generic [ref=e376]: Monday, Jun 8, 2026
+            - generic [ref=e377]:
+              - paragraph [ref=e379]: 202,874円
+              - img [ref=e381]
+        - link "All Nippon Airways Tokyo (NRT) Jakarta (CGK) Tuesday, Jun 23, 2026 219,837円" [ref=e384] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=23-6-2026.NA&sc=ECONOMY&far=NH&fpa=5f2e648f-1e41-4ebc-aa98-0e27bdabeff0&funnelSource=SEO-Route-Table
+          - generic [ref=e385]:
+            - generic [ref=e386]:
+              - img [ref=e387]
+              - generic [ref=e388]:
+                - generic [ref=e389]: All Nippon Airways
+                - generic [ref=e390]:
+                  - paragraph [ref=e391]: Tokyo
+                  - paragraph [ref=e392]: (NRT)
+                  - img [ref=e394]
+                  - paragraph [ref=e397]: Jakarta
+                  - paragraph [ref=e398]: (CGK)
+                - generic [ref=e399]: Tuesday, Jun 23, 2026
+            - generic [ref=e400]:
+              - paragraph [ref=e402]: 219,837円
+              - img [ref=e404]
+        - link "Xiamen Air Tokyo (NRT) Jakarta (CGK) Saturday, Jun 13, 2026 32,644円" [ref=e407] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=13-6-2026.NA&sc=ECONOMY&far=MF&fpa=1cd61625-50e8-408d-9aa2-701cfbc23595&funnelSource=SEO-Route-Table
+          - generic [ref=e408]:
+            - generic [ref=e409]:
+              - img [ref=e410]
+              - generic [ref=e411]:
+                - generic [ref=e412]: Xiamen Air
+                - generic [ref=e413]:
+                  - paragraph [ref=e414]: Tokyo
+                  - paragraph [ref=e415]: (NRT)
+                  - img [ref=e417]
+                  - paragraph [ref=e420]: Jakarta
+                  - paragraph [ref=e421]: (CGK)
+                - generic [ref=e422]: Saturday, Jun 13, 2026
+            - generic [ref=e423]:
+              - paragraph [ref=e425]: 32,644円
+              - img [ref=e427]
+        - link "Xiamen Air Tokyo (NRT) Jakarta (CGK) Thursday, Jun 11, 2026 32,644円" [ref=e430] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=11-6-2026.NA&sc=ECONOMY&far=MF&fpa=4470d3b3-68dd-4b94-a40f-4da14ac3c98f&funnelSource=SEO-Route-Table
+          - generic [ref=e431]:
+            - generic [ref=e432]:
+              - img [ref=e433]
+              - generic [ref=e434]:
+                - generic [ref=e435]: Xiamen Air
+                - generic [ref=e436]:
+                  - paragraph [ref=e437]: Tokyo
+                  - paragraph [ref=e438]: (NRT)
+                  - img [ref=e440]
+                  - paragraph [ref=e443]: Jakarta
+                  - paragraph [ref=e444]: (CGK)
+                - generic [ref=e445]: Thursday, Jun 11, 2026
+            - generic [ref=e446]:
+              - paragraph [ref=e448]: 32,644円
+              - img [ref=e450]
+        - link "Scoot Tokyo (NRT) Jakarta (CGK) Wednesday, Jun 10, 2026 34,337円" [ref=e453] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=10-6-2026.NA&sc=ECONOMY&far=TR&fpa=cb60afed-3025-4851-9d85-f5ad55a35866&funnelSource=SEO-Route-Table
+          - generic [ref=e454]:
+            - generic [ref=e455]:
+              - img [ref=e456]
+              - generic [ref=e457]:
+                - generic [ref=e458]: Scoot
+                - generic [ref=e459]:
+                  - paragraph [ref=e460]: Tokyo
+                  - paragraph [ref=e461]: (NRT)
+                  - img [ref=e463]
+                  - paragraph [ref=e466]: Jakarta
+                  - paragraph [ref=e467]: (CGK)
+                - generic [ref=e468]: Wednesday, Jun 10, 2026
+            - generic [ref=e469]:
+              - paragraph [ref=e471]: 34,337円
+              - img [ref=e473]
+    - generic [ref=e478]:
+      - heading "Tokyo発Jakarta行きのフライト情報" [level=2] [ref=e480]
+      - generic [ref=e483]:
+        - link "Cheapest one-way flight 25,026円" [ref=e485] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=7-10-2026.NA&sc=ECONOMY&funnelSource=SEO-Destination-CheapestOneWay
+          - generic [ref=e486]:
+            - img [ref=e487]
+            - generic [ref=e489]:
+              - heading "Cheapest one-way flight" [level=3] [ref=e490]
+              - generic [ref=e492]:
+                - paragraph [ref=e493]: 25,026円
+                - img [ref=e494]
+        - link "Cheapest round-trip flight 47,872円" [ref=e497] [cursor=pointer]:
+          - /url: /en-jp/flight/fulltwosearch?ap=NRT.CGK&dt=26-11-2026.8-12-2026&sc=ECONOMY&funnelSource=SEO-Destination-CheapestRoundTrip
+          - generic [ref=e498]:
+            - img [ref=e499]
+            - generic [ref=e502]:
+              - heading "Cheapest round-trip flight" [level=3] [ref=e503]
+              - generic [ref=e505]:
+                - paragraph [ref=e506]: 47,872円
+                - img [ref=e507]
+        - link "Cheapest month to fly October" [ref=e510] [cursor=pointer]:
+          - /url: /en-jp/flight/fullsearch?ap=NRT.CGK&dt=7-10-2026.NA&sc=ECONOMY&cl=1&funnelSource=SEO-Destination-CheapestMonth-October
+          - generic [ref=e511]:
+            - img [ref=e512]
+            - generic [ref=e514]:
+              - heading "Cheapest month to fly" [level=3] [ref=e515]
+              - generic [ref=e517]:
+                - paragraph [ref=e518]: October
+                - img [ref=e519]
+        - generic [ref=e523]:
+          - img [ref=e524]
+          - generic [ref=e528]:
+            - heading "Shortest flight duration" [level=3] [ref=e529]
+            - paragraph [ref=e532]: 7 hr(s), 50 mins
+    - generic [ref=e536]:
+      - generic [ref=e537]:
+        - heading "Direct Airline from Tokyo to Jakarta" [level=2] [ref=e539]
+        - generic [ref=e540]:
+          - generic [ref=e541]: Available Airline that flying directly from Tokyo to Jakarta start from 32,644円
+          - generic [ref=e542]: Choose your favorite airline to fly from Tokyo to Jakarta. With airlines flying directly, you can arrive at your Jakarta in 7 hr 50 mins.
+      - generic [ref=e545]:
+        - generic [ref=e546]:
+          - img "Japan Airlines" [ref=e547]
+          - generic [ref=e548]: Japan Airlines
+          - link "See Airlines" [ref=e549] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/japan-airlines.JL
+            - generic [ref=e550]: See Airlines
+        - generic [ref=e551]:
+          - img "Garuda Indonesia" [ref=e552]
+          - generic [ref=e553]: Garuda Indonesia
+          - link "See Airlines" [ref=e554] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/garuda-indonesia.GA
+            - generic [ref=e555]: See Airlines
+        - generic [ref=e556]:
+          - img "All Nippon Airways" [ref=e557]
+          - generic [ref=e558]: All Nippon Airways
+          - link "See Airlines" [ref=e559] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/all-nippon-airways.NH
+            - generic [ref=e560]: See Airlines
+    - generic [ref=e568]:
+      - generic [ref=e569]:
+        - heading "50M+ Downloads, 1M+ Reviews" [level=2] [ref=e570]:
+          - text: 50M+ Downloads,
+          - text: 1M+ Reviews
+        - generic [ref=e572]:
+          - link "icon 4,9" [ref=e573] [cursor=pointer]:
+            - /url: https://traveloka.onelink.me/OzTp?c=route_landing_page_desktop&af_adset=%2Fen-jp%2Fflight%2Froute%2FTokyo-Jakarta.NRT.CGK%3FdepartureDate%3D01-08-2026%26returnDate%3D07-08-2026%26adult%3D1%26child%3D0%26infant%3D0%26cabinClass%3Deconomy&af_ad=&af_label=0559EF52B123CE3A38ECF859ABBDC16F89DE216CACC3FD45D4FDB95BFC7B6E65&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fflight%3Fdt%3D27-05-2026%26ap%3DNRT.CGK%26funnel_source%3DSEO-Route-AppInstallIcon%26w2a_link_source%3Droute_landing_page_desktop&af_dp=traveloka%3A%2F%2Fflight%3Fdt%3D27-05-2026%26ap%3DNRT.CGK%26funnel_source%3DSEO-Route-AppInstallIcon%26w2a_link_source%3Droute_landing_page_desktop
+            - generic [ref=e574]:
+              - img "icon" [ref=e575]
+              - generic [ref=e576]:
+                - text: 4,9
+                - img [ref=e577]
+          - link "icon 4,8" [ref=e581] [cursor=pointer]:
+            - /url: https://traveloka.onelink.me/OzTp?c=route_landing_page_desktop&af_adset=%2Fen-jp%2Fflight%2Froute%2FTokyo-Jakarta.NRT.CGK%3FdepartureDate%3D01-08-2026%26returnDate%3D07-08-2026%26adult%3D1%26child%3D0%26infant%3D0%26cabinClass%3Deconomy&af_ad=&af_label=0559EF52B123CE3A38ECF859ABBDC16F89DE216CACC3FD45D4FDB95BFC7B6E65&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fflight%3Fdt%3D27-05-2026%26ap%3DNRT.CGK%26funnel_source%3DSEO-Route-AppInstallIcon%26w2a_link_source%3Droute_landing_page_desktop&af_dp=traveloka%3A%2F%2Fflight%3Fdt%3D27-05-2026%26ap%3DNRT.CGK%26funnel_source%3DSEO-Route-AppInstallIcon%26w2a_link_source%3Droute_landing_page_desktop
+            - generic [ref=e582]:
+              - img "icon" [ref=e583]
+              - generic [ref=e584]:
+                - text: 4,8
+                - img [ref=e585]
+      - generic [ref=e590]:
+        - generic [ref=e594]:
+          - img [ref=e595]
+          - generic [ref=e596]:
+            - paragraph [ref=e597]: Easy Flight Changes
+            - generic [ref=e598]: Cancel or change your flight booking without hassle
+        - generic [ref=e602]:
+          - img [ref=e603]
+          - generic [ref=e604]:
+            - paragraph [ref=e605]: Convenient Payment
+            - generic [ref=e606]: Easy transaction with Credit Card and others.
+        - generic [ref=e610]:
+          - img [ref=e611]
+          - generic [ref=e612]:
+            - paragraph [ref=e613]: 24/7 Support
+            - generic [ref=e614]: Reach out to us anytime, anywhere
+    - generic [ref=e618]:
+      - heading "When is the cheapest flight time from Tokyo to Jakarta?" [level=2] [ref=e620]
+      - generic [ref=e622]:
+        - application [ref=e626]:
+          - application [ref=e627]:
+            - generic [ref=e1603]:
+              - generic [ref=e1606]: May
+              - generic [ref=e1609]: Jun
+              - generic [ref=e1612]: Jul
+              - generic [ref=e1615]: Aug
+              - generic [ref=e1618]: Sep
+              - generic [ref=e1621]: Oct
+              - generic [ref=e1624]: Nov
+              - generic [ref=e1627]: Dec
+              - generic [ref=e1630]: Jan
+              - generic [ref=e1633]: Feb
+              - generic [ref=e1636]: Mar
+              - generic [ref=e1639]: Apr
+            - generic [ref=e667]:
+              - generic [ref=e670]: 20,000円
+              - generic [ref=e673]: 40,000円
+              - generic [ref=e676]: 60,000円
+        - table [ref=e704]:
+          - rowgroup [ref=e705]:
+            - row "Origin Destination Departure Date Price" [ref=e706]:
+              - columnheader "Origin" [ref=e707]
+              - columnheader "Destination" [ref=e708]
+              - columnheader "Departure Date" [ref=e709]
+              - columnheader "Price" [ref=e710]
+          - rowgroup [ref=e711]:
+            - row "Tokyo (TYOA) Jakarta (CGK) Thursday, May 28, 2026 47,169円" [ref=e712]:
+              - cell "Tokyo (TYOA)" [ref=e713]
+              - cell "Jakarta (CGK)" [ref=e714]
+              - cell "Thursday, May 28, 2026" [ref=e715]
+              - cell "47,169円" [ref=e716]
+            - row "Tokyo (TYOA) Jakarta (CGK) Thursday, June 11, 2026 32,644円" [ref=e717]:
+              - cell "Tokyo (TYOA)" [ref=e718]
+              - cell "Jakarta (CGK)" [ref=e719]
+              - cell "Thursday, June 11, 2026" [ref=e720]
+              - cell "32,644円" [ref=e721]
+            - row "Tokyo (TYOA) Jakarta (CGK) Wednesday, July 15, 2026 40,051円" [ref=e722]:
+              - cell "Tokyo (TYOA)" [ref=e723]
+              - cell "Jakarta (CGK)" [ref=e724]
+              - cell "Wednesday, July 15, 2026" [ref=e725]
+              - cell "40,051円" [ref=e726]
+            - row "Tokyo (TYOA) Jakarta (CGK) Thursday, August 27, 2026 26,373円" [ref=e727]:
+              - cell "Tokyo (TYOA)" [ref=e728]
+              - cell "Jakarta (CGK)" [ref=e729]
+              - cell "Thursday, August 27, 2026" [ref=e730]
+              - cell "26,373円" [ref=e731]
+            - row "Tokyo (TYOA) Jakarta (CGK) Monday, September 28, 2026 27,345円" [ref=e732]:
+              - cell "Tokyo (TYOA)" [ref=e733]
+              - cell "Jakarta (CGK)" [ref=e734]
+              - cell "Monday, September 28, 2026" [ref=e735]
+              - cell "27,345円" [ref=e736]
+            - row "Tokyo (TYOA) Jakarta (CGK) Wednesday, October 14, 2026 26,285円" [ref=e737]:
+              - cell "Tokyo (TYOA)" [ref=e738]
+              - cell "Jakarta (CGK)" [ref=e739]
+              - cell "Wednesday, October 14, 2026" [ref=e740]
+              - cell "26,285円" [ref=e741]
+            - row "Tokyo (TYOA) Jakarta (CGK) Wednesday, November 11, 2026 26,330円" [ref=e742]:
+              - cell "Tokyo (TYOA)" [ref=e743]
+              - cell "Jakarta (CGK)" [ref=e744]
+              - cell "Wednesday, November 11, 2026" [ref=e745]
+              - cell "26,330円" [ref=e746]
+            - row "Tokyo (TYOA) Jakarta (CGK) Thursday, December 3, 2026 29,263円" [ref=e747]:
+              - cell "Tokyo (TYOA)" [ref=e748]
+              - cell "Jakarta (CGK)" [ref=e749]
+              - cell "Thursday, December 3, 2026" [ref=e750]
+              - cell "29,263円" [ref=e751]
+            - row "Tokyo (TYOA) Jakarta (CGK) Sunday, January 24, 2027 27,113円" [ref=e752]:
+              - cell "Tokyo (TYOA)" [ref=e753]
+              - cell "Jakarta (CGK)" [ref=e754]
+              - cell "Sunday, January 24, 2027" [ref=e755]
+              - cell "27,113円" [ref=e756]
+            - row "Tokyo (TYOA) Jakarta (CGK) Friday, February 26, 2027 25,589円" [ref=e757]:
+              - cell "Tokyo (TYOA)" [ref=e758]
+              - cell "Jakarta (CGK)" [ref=e759]
+              - cell "Friday, February 26, 2027" [ref=e760]
+              - cell "25,589円" [ref=e761]
+            - row "Tokyo (TYOA) Jakarta (CGK) Tuesday, March 16, 2027 26,999円" [ref=e762]:
+              - cell "Tokyo (TYOA)" [ref=e763]
+              - cell "Jakarta (CGK)" [ref=e764]
+              - cell "Tuesday, March 16, 2027" [ref=e765]
+              - cell "26,999円" [ref=e766]
+            - row "Tokyo (TYOA) Jakarta (CGK) Wednesday, April 7, 2027 32,934円" [ref=e767]:
+              - cell "Tokyo (TYOA)" [ref=e768]
+              - cell "Jakarta (CGK)" [ref=e769]
+              - cell "Wednesday, April 7, 2027" [ref=e770]
+              - cell "32,934円" [ref=e771]
+    - generic [ref=e775]:
+      - generic [ref=e776]:
+        - heading "Flight Schedule from Tokyo to Jakarta" [level=2] [ref=e777]
+        - generic [ref=e778]: The following are all scheduled flights from Tokyo to Jakarta, with the shortest duration being 7 hours and 50 minutes.
+      - generic [ref=e781]:
+        - generic [ref=e782]:
+          - button "Tue, May 26, 2026 (Today)" [ref=e784] [cursor=pointer]:
+            - generic [ref=e786]: Tue, May 26, 2026 (Today)
+          - button "Wed, May 27, 2026" [ref=e789] [cursor=pointer]:
+            - generic [ref=e791]: Wed, May 27, 2026
+          - button "Thu, May 28, 2026" [ref=e794] [cursor=pointer]:
+            - generic [ref=e796]: Thu, May 28, 2026
+          - button "Fri, May 29, 2026" [ref=e799] [cursor=pointer]:
+            - generic [ref=e801]: Fri, May 29, 2026
+          - button "Sat, May 30, 2026" [ref=e804] [cursor=pointer]:
+            - generic [ref=e806]: Sat, May 30, 2026
+          - button "Sun, May 31, 2026" [ref=e809] [cursor=pointer]:
+            - generic [ref=e811]: Sun, May 31, 2026
+          - button "Mon, Jun 1, 2026" [ref=e814] [cursor=pointer]:
+            - generic [ref=e816]: Mon, Jun 1, 2026
+          - button "Tue, Jun 2, 2026" [ref=e819] [cursor=pointer]:
+            - generic [ref=e821]: Tue, Jun 2, 2026
+        - table [ref=e824]:
+          - rowgroup [ref=e825]:
+            - row "Airline Departure Time Arrival Time Origin airport Destination airport" [ref=e826]:
+              - columnheader "Airline" [ref=e827]
+              - columnheader "Departure Time" [ref=e828]
+              - columnheader "Arrival Time" [ref=e829]
+              - columnheader "Origin airport" [ref=e830]
+              - columnheader "Destination airport" [ref=e831]
+              - columnheader [ref=e832]
+          - rowgroup [ref=e833]:
+            - row "All Nippon Airways All Nippon Airways 17:50 23:45 Tokyo (NRT) Jakarta (CGK) Book flight" [ref=e834] [cursor=pointer]:
+              - cell "All Nippon Airways All Nippon Airways" [ref=e835]:
+                - generic [ref=e836]:
+                  - img "All Nippon Airways" [ref=e837]
+                  - generic [ref=e838]: All Nippon Airways
+              - cell "17:50" [ref=e839]:
+                - generic [ref=e842]: 17:50
+              - cell "23:45" [ref=e843]:
+                - generic [ref=e846]: 23:45
+              - cell "Tokyo (NRT)" [ref=e847]:
+                - generic [ref=e850]: Tokyo (NRT)
+              - cell "Jakarta (CGK)" [ref=e851]:
+                - generic [ref=e854]: Jakarta (CGK)
+              - cell "Book flight" [ref=e855]:
+                - button "Book flight" [ref=e856]:
+                  - generic [ref=e858]: Book flight
+    - generic [ref=e867]:
+      - generic [ref=e869]:
+        - heading "About Jakarta" [level=2] [ref=e870]
+        - generic [ref=e872]: Looking for cheap flights from Tokyo to Jakarta? Discover the best deals for flight tickets on Traveloka! Flying from Tokyo to Jakarta will be more enjoyable with our exclusive Traveloka flight promo. Not just flights, you can also find discounted hotels, airport transfers, and attraction tickets from all over the world. With our complete product offering, booking one-way, round-trip, and multi-city flights will be much easier. Book now and dive into endless adventures with Traveloka!
+      - generic [ref=e876]:
+        - heading "Flight Information to Jakarta" [level=2] [ref=e877]
+        - table [ref=e881]:
+          - rowgroup [ref=e882]:
+            - row "航空時間 7 hr(s) 50 mins" [ref=e883]:
+              - cell "航空時間" [ref=e884]:
+                - heading "航空時間" [level=3] [ref=e885]
+              - cell "7 hr(s) 50 mins" [ref=e886]: 7 hr(s) 50 mins
+            - row "空港 Jakarta Narita Intl (NRT)" [ref=e887]:
+              - cell "空港 Jakarta" [ref=e888]:
+                - heading "空港 Jakarta" [level=3] [ref=e889]
+              - cell "Narita Intl (NRT)" [ref=e890]:
+                - link "Narita Intl (NRT)" [ref=e892] [cursor=pointer]:
+                  - /url: /en-jp/flight/airport/NRT
+            - row "Airport in Jakarta Soekarno Hatta International Airport (CGK)" [ref=e893]:
+              - cell "Airport in Jakarta" [ref=e894]:
+                - heading "Airport in Jakarta" [level=3] [ref=e895]
+              - cell "Soekarno Hatta International Airport (CGK)" [ref=e896]:
+                - link "Soekarno Hatta International Airport (CGK)" [ref=e898] [cursor=pointer]:
+                  - /url: /en-jp/flight/airport/CGK
+    - generic [ref=e907]:
+      - heading "よくある質問" [level=2] [ref=e908]
+      - generic [ref=e909]:
+        - generic [ref=e911] [cursor=pointer]:
+          - generic [ref=e913]: TokyoからJakartaへの航空券の最安料金はいくらですか？
+          - img [ref=e915]
+        - paragraph [ref=e919]: 32,644円, select, null TokyoからJakartaへの最安料金のデータは現在ありません。 other 当社のデータによると、TokyoからJakartaへの航空券は、32,644円からご利用いただけます。クーポンや追加のプロモーションを使うとさらにお得に予約することができます。
+      - generic [ref=e920]:
+        - generic [ref=e922] [cursor=pointer]:
+          - generic [ref=e924]: Jakartaへのフライトのために、空港にはどのくらい前に到着する必要がありますか？
+          - img [ref=e926]
+        - paragraph [ref=e930]: 国内線の場合、予定出発時刻の少なくとも1時間前にTokyo空港に到着することをお勧めします。国際線の場合、スムーズにチェックイン、セキュリティチェック、遅延に備えるため、出発時刻の少なくとも2時間前に空港に到着することを目指してください。？各航空会社にはチェックインと手荷物預かりの締め切り時間に関するルールがあるため、念のため、Tokyoに向かう前に航空会社のHPにて確認するようにしてください。
+      - generic [ref=e931]:
+        - generic [ref=e933] [cursor=pointer]:
+          - generic [ref=e935]: TokyoからJakartaへの航空券を購入するのに最適な時期はいつですか？
+          - img [ref=e937]
+        - paragraph [ref=e941]: 航空券を購入する最適なタイミングは目的地やエアラインによっても様々ですが、通常、国内線の場合、出発の4～6週間前、国際線の場合、少なくとも2～3か月前に予約するのが最適です。トラベロカをつかって航空券の価格変動を常に監視し、アラートを設定することも可能です。
+      - generic [ref=e942]:
+        - generic [ref=e944] [cursor=pointer]:
+          - generic [ref=e946]: Jakartaへの航空券で最も安い日はいつですか？
+          - img [ref=e948]
+        - paragraph [ref=e952]: 最も安い航空券の日程は予約時期によって異なりますが一般的に、平日（特に火曜・水曜）、早朝や深夜のフライト、オフシーズンの旅行は料金が安くなる傾向があります。常に価格は変動するためトラベロカの検索機能を活用し、柔軟な日程で比較するのがおすすめです。また、早めの予約やセール情報をチェックすると、さらにお得なチケットが見つかる可能性があります。
+      - generic [ref=e953]:
+        - generic [ref=e955] [cursor=pointer]:
+          - generic [ref=e957]: 航空券を予約する際に知っておくべきことは？
+          - img [ref=e959]
+        - paragraph [ref=e963]: 航空会社ごとに手荷物のサイズ・重量制限が異なるため、事前に確認しておきましょう。また、予期せぬ予定変更に備え、払い戻しや日程変更の条件を確認しておくことが大切です。
+      - generic [ref=e964]:
+        - generic [ref=e966] [cursor=pointer]:
+          - generic [ref=e968]: TokyoからJakartaへの航空券には、パスポートとビザが必要ですか？
+          - img [ref=e970]
+        - paragraph [ref=e974]: 国際線の場合、パスポートは常に必要です。これには、国際線への国内線乗り継ぎも含まれます。ビザの有無についてはJakartaの入国規定によって異なりますので、必ずご確認ください。国内線の場合、パスポートもビザも不要です。
+      - generic [ref=e975]:
+        - generic [ref=e977] [cursor=pointer]:
+          - generic [ref=e979]: なぜトラベロカで航空券を予約するべきなのでしょうか？
+          - img [ref=e981]
+        - paragraph [ref=e985]: トラベロカでは、豊富な種類のお支払い方法に対応しており、航空券の予約後も手数料無料で日程を変更するオプションも取り揃えております。また、出発直前の予約にも対応しています。
+      - generic [ref=e986]:
+        - generic [ref=e988] [cursor=pointer]:
+          - generic [ref=e990]: TokyoからJakartaへの航空便の所要時間は何時間ですか？
+          - img [ref=e992]
+        - paragraph [ref=e996]: 直行便の場合、TokyoからJakartaへのフライトの所要時間は約7時間50分です。
+      - generic [ref=e997]:
+        - generic [ref=e999] [cursor=pointer]:
+          - generic [ref=e1001]: トラベロカで航空券の購入につかえるクーポンや実施中のプロモーションはありますか？
+          - img [ref=e1003]
+        - paragraph [ref=e1007]:
+          - text: 現在、航空券購入に活用できるクーポンはありませんが、ホテル、アクティビティ、レンタカーを予約する場合は、初回購入時にプロモーションコード
+          - strong [ref=e1008]: WELCOME8
+          - text: を利用すると、購入料金から8%の割引が適用できます。
+    - generic [ref=e1012]:
+      - generic [ref=e1013]:
+        - heading "Popular Airline" [level=2] [ref=e1015]
+        - generic [ref=e1016]:
+          - generic [ref=e1017]: Domestic & International Airline Partners
+          - generic [ref=e1018]: We are partnering with various airlines across the globe to get you to wherever you need to be.
+      - generic [ref=e1021]:
+        - generic [ref=e1022]:
+          - img "All Nippon Airways" [ref=e1023]
+          - generic [ref=e1024]: All Nippon Airways
+          - link "See Airlines" [ref=e1025] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/all-nippon-airways.nh
+            - generic [ref=e1026]: See Airlines
+        - generic [ref=e1027]:
+          - img "Japan Airlines" [ref=e1028]
+          - generic [ref=e1029]: Japan Airlines
+          - link "See Airlines" [ref=e1030] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/japan-airlines.jl
+            - generic [ref=e1031]: See Airlines
+        - generic [ref=e1032]:
+          - img "Asiana Airlines" [ref=e1033]
+          - generic [ref=e1034]: Asiana Airlines
+          - link "See Airlines" [ref=e1035] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/asiana-airlines.oz
+            - generic [ref=e1036]: See Airlines
+        - generic [ref=e1037]:
+          - img "Korean Air" [ref=e1038]
+          - generic [ref=e1039]: Korean Air
+          - link "See Airlines" [ref=e1040] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/korean-air.ke
+            - generic [ref=e1041]: See Airlines
+        - generic [ref=e1042]:
+          - img "Cathay Pacific" [ref=e1043]
+          - generic [ref=e1044]: Cathay Pacific
+          - link "See Airlines" [ref=e1045] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/cathay-pacific.cx
+            - generic [ref=e1046]: See Airlines
+        - generic [ref=e1047]:
+          - img "Jeju Air" [ref=e1048]
+          - generic [ref=e1049]: Jeju Air
+          - link "See Airlines" [ref=e1050] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/jeju-air.7c
+            - generic [ref=e1051]: See Airlines
+        - generic [ref=e1052]:
+          - img "China Airlines" [ref=e1053]
+          - generic [ref=e1054]: China Airlines
+          - link "See Airlines" [ref=e1055] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/china-airlines.ci
+            - generic [ref=e1056]: See Airlines
+        - generic [ref=e1057]:
+          - img "Jin Air" [ref=e1058]
+          - generic [ref=e1059]: Jin Air
+          - link "See Airlines" [ref=e1060] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/jin-air.lj
+            - generic [ref=e1061]: See Airlines
+        - generic [ref=e1062]:
+          - img "EVA Air" [ref=e1063]
+          - generic [ref=e1064]: EVA Air
+          - link "See Airlines" [ref=e1065] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/eva-air.br
+            - generic [ref=e1066]: See Airlines
+        - generic [ref=e1067]:
+          - img "United Airlines" [ref=e1068]
+          - generic [ref=e1069]: United Airlines
+          - link "See Airlines" [ref=e1070] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/united-airlines.ua
+            - generic [ref=e1071]: See Airlines
+        - generic [ref=e1072]:
+          - img "T’way Air" [ref=e1073]
+          - generic [ref=e1074]: T’way Air
+          - link "See Airlines" [ref=e1075] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/t-way-air.tw
+            - generic [ref=e1076]: See Airlines
+        - generic [ref=e1077]:
+          - img "Air Busan" [ref=e1078]
+          - generic [ref=e1079]: Air Busan
+          - link "See Airlines" [ref=e1080] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/air-busan.bx
+            - generic [ref=e1081]: See Airlines
+        - generic [ref=e1082]:
+          - img "Peach Airline" [ref=e1083]
+          - generic [ref=e1084]: Peach Airline
+          - link "See Airlines" [ref=e1085] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/peach-airline.mm
+            - generic [ref=e1086]: See Airlines
+        - generic [ref=e1087]:
+          - img "Singapore Airlines" [ref=e1088]
+          - generic [ref=e1089]: Singapore Airlines
+          - link "See Airlines" [ref=e1090] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/singapore-airlines.sq
+            - generic [ref=e1091]: See Airlines
+        - generic [ref=e1092]:
+          - img "HK Express" [ref=e1093]
+          - generic [ref=e1094]: HK Express
+          - link "See Airlines" [ref=e1095] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/hk-express.uo
+            - generic [ref=e1096]: See Airlines
+        - generic [ref=e1097]:
+          - img "Tigerair Taiwan" [ref=e1098]
+          - generic [ref=e1099]: Tigerair Taiwan
+          - link "See Airlines" [ref=e1100] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/tigerair-taiwan.it
+            - generic [ref=e1101]: See Airlines
+        - generic [ref=e1102]:
+          - img "Bangkok Airways" [ref=e1103]
+          - generic [ref=e1104]: Bangkok Airways
+          - link "See Airlines" [ref=e1105] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/bangkok-airways.pg
+            - generic [ref=e1106]: See Airlines
+        - generic [ref=e1107]:
+          - img "STARLUX Airlines" [ref=e1108]
+          - generic [ref=e1109]: STARLUX Airlines
+          - link "See Airlines" [ref=e1110] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/starlux.jx
+            - generic [ref=e1111]: See Airlines
+        - generic [ref=e1112]:
+          - img "China Southern Airlines" [ref=e1113]
+          - generic [ref=e1114]: China Southern Airlines
+          - link "See Airlines" [ref=e1115] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/china-southern-airlines.cz
+            - generic [ref=e1116]: See Airlines
+        - generic [ref=e1117]:
+          - img "Air Japan" [ref=e1118]
+          - generic [ref=e1119]: Air Japan
+          - link "See Airlines" [ref=e1120] [cursor=pointer]:
+            - /url: /en-jp/flight/airline/air-japan.nq
+            - generic [ref=e1121]: See Airlines
+    - generic [ref=e1128]:
+      - heading "Popular Payments" [level=2] [ref=e1129]
+      - generic [ref=e1130]: We are partnering with the most reliable payment service providers to make sure every transaction is smooth and worry-free!
+    - generic [ref=e1138]:
+      - generic [ref=e1139]:
+        - img [ref=e1140]
+        - heading "Top Hotels in Jakarta" [level=2] [ref=e1142]
+      - generic [ref=e1143]:
+        - generic [ref=e1145]:
+          - link "d'primahotel Airport Jakarta d'primahotel Airport Jakarta" [ref=e1147] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/dprimahotel-airport-jakarta-3000010005976?spec=27-05-2026.29-05-2026.2.1.HOTEL.3000010005976..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1148]:
+              - img "d'primahotel Airport Jakarta" [ref=e1149]
+              - generic [ref=e1150]:
+                - generic [ref=e1151]: d'primahotel Airport Jakarta
+                - generic [ref=e1154]:
+                  - img [ref=e1155]
+                  - img [ref=e1156]
+          - link "d'primahotel Airport Jakarta 2 d'primahotel Airport Jakarta 2" [ref=e1158] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/dprimahotel-airport-jakarta-2--3000020012008?spec=27-05-2026.29-05-2026.2.1.HOTEL.3000020012008..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1159]:
+              - img "d'primahotel Airport Jakarta 2" [ref=e1160]
+              - generic [ref=e1161]:
+                - generic [ref=e1162]: d'primahotel Airport Jakarta 2
+                - generic [ref=e1165]:
+                  - img [ref=e1166]
+                  - img [ref=e1167]
+                  - img [ref=e1168]
+          - link "Central Front One Inn Jakarta Airport Central Front One Inn Jakarta Airport" [ref=e1170] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/central-front-one-inn-jakarta-airport-3000020014146?spec=27-05-2026.29-05-2026.2.1.HOTEL.3000020014146..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1171]:
+              - img "Central Front One Inn Jakarta Airport" [ref=e1172]
+              - generic [ref=e1173]:
+                - generic [ref=e1174]: Central Front One Inn Jakarta Airport
+                - generic [ref=e1177]:
+                  - img [ref=e1178]
+                  - img [ref=e1179]
+          - link "Hotel Permata Bandara Hotel Permata Bandara" [ref=e1181] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/hotel-permata-bandara-3000010007497?spec=27-05-2026.29-05-2026.2.1.HOTEL.3000010007497..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1182]:
+              - img "Hotel Permata Bandara" [ref=e1183]
+              - generic [ref=e1184]:
+                - generic [ref=e1185]: Hotel Permata Bandara
+                - img [ref=e1189]
+          - link "OYO 2741 Kr Bulan OYO 2741 Kr Bulan" [ref=e1191] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/oyo-2741-kr-bulan-9000000690917?spec=27-05-2026.29-05-2026.2.1.HOTEL.9000000690917..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1192]:
+              - img "OYO 2741 Kr Bulan" [ref=e1193]
+              - generic [ref=e1194]:
+                - generic [ref=e1195]: OYO 2741 Kr Bulan
+                - img [ref=e1199]
+          - link "Blessing Hotel Blessing Hotel" [ref=e1201] [cursor=pointer]:
+            - /url: https://www.traveloka.com/hotel/indonesia/blessing-hotel-3000020012935?spec=27-05-2026.29-05-2026.2.1.HOTEL.3000020012935..2&contexts=%7B%22sourceHotelDetail%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+            - generic [ref=e1202]:
+              - img "Blessing Hotel" [ref=e1203]
+              - generic [ref=e1205]: Blessing Hotel
+        - button [ref=e1208] [cursor=pointer]:
+          - img [ref=e1211]
+      - link "See all Hotels" [ref=e1214] [cursor=pointer]:
+        - /url: https://www.traveloka.com/hotel/search?spec=27-05-2026.29-05-2026.2.1.HOTEL_GEO.100331..2&quickFilter=34&contexts=%7B%22sourceHotelSearch%22%3A%22FLIGHT_LANDING_PAGE.1866228240804224276%22%7D
+        - button "See all Hotels" [ref=e1216]:
+          - generic [ref=e1217]:
+            - generic [ref=e1218]: See all Hotels
+            - img [ref=e1220]
+    - generic [ref=e1229]:
+      - generic [ref=e1230]:
+        - img [ref=e1231]
+        - heading "Interesting Activities in Jakarta" [level=2] [ref=e1233]
+      - generic [ref=e1234]:
+        - generic [ref=e1236]:
+          - link "Dufan Ancol Tickets Dufan Ancol Tickets 2,464円 2,374円" [ref=e1238] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/dufan-ancol-tickets-2001186750067?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1239]:
+              - img "Dufan Ancol Tickets" [ref=e1240]
+              - generic [ref=e1241]:
+                - generic [ref=e1242]: Dufan Ancol Tickets
+                - generic [ref=e1243]:
+                  - generic [ref=e1244]: 2,464円
+                  - generic [ref=e1245]: 2,374円
+          - link "Ancol Entrance Gate Tickets Ancol Entrance Gate Tickets 314円 289円" [ref=e1247] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/ancol-entrance-gate-tickets-2000364679993?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1248]:
+              - img "Ancol Entrance Gate Tickets" [ref=e1249]
+              - generic [ref=e1250]:
+                - generic [ref=e1251]: Ancol Entrance Gate Tickets
+                - generic [ref=e1252]:
+                  - generic [ref=e1253]: 314円
+                  - generic [ref=e1254]: 289円
+          - link "KidZania Jakarta Tickets KidZania Jakarta Tickets 2,688円 1,613円" [ref=e1256] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/kidzania-jakarta-tickets-2000348493902?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1257]:
+              - img "KidZania Jakarta Tickets" [ref=e1258]
+              - generic [ref=e1259]:
+                - generic [ref=e1260]: KidZania Jakarta Tickets
+                - generic [ref=e1261]:
+                  - generic [ref=e1262]: 2,688円
+                  - generic [ref=e1263]: 1,613円
+          - link "Sea World Ancol Tickets Sea World Ancol Tickets 1,075円 985円" [ref=e1265] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/sea-world-ancol-tickets-2002053221267?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1266]:
+              - img "Sea World Ancol Tickets" [ref=e1267]
+              - generic [ref=e1268]:
+                - generic [ref=e1269]: Sea World Ancol Tickets
+                - generic [ref=e1270]:
+                  - generic [ref=e1271]: 1,075円
+                  - generic [ref=e1272]: 985円
+          - link "National Museum of Indonesia National Museum of Indonesia 314円" [ref=e1274] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/national-museum-of-indonesia-4484433519186?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1275]:
+              - img "National Museum of Indonesia" [ref=e1276]
+              - generic [ref=e1277]:
+                - generic [ref=e1278]: National Museum of Indonesia
+                - generic [ref=e1280]: 314円
+          - link "Taman Mini Indonesia Indah (TMII) Tickets Taman Mini Indonesia Indah (TMII) Tickets 224円 196円" [ref=e1282] [cursor=pointer]:
+            - /url: /en-jp/activities/indonesia/product/taman-mini-indonesia-indah-tmii-tickets-9790977050032?funnel_id=flight.DES-CGK.popularProduct&funnel_source=
+            - generic [ref=e1283]:
+              - img "Taman Mini Indonesia Indah (TMII) Tickets" [ref=e1284]
+              - generic [ref=e1285]:
+                - generic [ref=e1286]: Taman Mini Indonesia Indah (TMII) Tickets
+                - generic [ref=e1287]:
+                  - generic [ref=e1288]: 224円
+                  - generic [ref=e1289]: 196円
+        - button [ref=e1292] [cursor=pointer]:
+          - img [ref=e1295]
+      - link "See all Activities" [ref=e1298] [cursor=pointer]:
+        - /url: /en-jp/activities/search?st=GEO&eid=102813&sort=RELEVANCE
+        - button "See all Activities" [ref=e1300]:
+          - generic [ref=e1301]:
+            - generic [ref=e1302]: See all Activities
+            - img [ref=e1304]
+    - generic [ref=e1313]:
+      - generic [ref=e1315]:
+        - heading "For all your unique travel choices, we got you" [level=2] [ref=e1316]
+        - generic [ref=e1318]:
+          - generic [ref=e1320]:
+            - heading "Popular Routes from Narita Intl" [level=3] [ref=e1323] [cursor=pointer]
+            - heading "Popular Routes from Soekarno Hatta International Airport" [level=3] [ref=e1326] [cursor=pointer]
+            - heading "Popular Airline to Jakarta" [level=3] [ref=e1329] [cursor=pointer]
+            - heading "Popular Routes" [level=3] [ref=e1332] [cursor=pointer]
+            - heading "Popular Destinations" [level=3] [ref=e1335] [cursor=pointer]
+            - heading "Popular Airlines" [level=3] [ref=e1338] [cursor=pointer]
+            - heading "Popular Airline & Destination" [level=3] [ref=e1341] [cursor=pointer]
+            - heading "Popular Airports" [level=3] [ref=e1344] [cursor=pointer]
+          - generic [ref=e1347]:
+            - link "Flight from Tokyo to Fukuoka" [ref=e1665] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Fukuoka.NRT.FUK
+              - generic [ref=e1666]: Flight from Tokyo to Fukuoka
+            - link "Flight from Tokyo to Okinawa" [ref=e1667] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Okinawa.NRT.OKA
+              - generic [ref=e1668]: Flight from Tokyo to Okinawa
+            - link "Flight from Tokyo to Seoul" [ref=e1669] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Seoul.NRT.ICN
+              - generic [ref=e1670]: Flight from Tokyo to Seoul
+            - link "Flight from Tokyo to Sapporo" [ref=e1671] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Sapporo.NRT.CTS
+              - generic [ref=e1672]: Flight from Tokyo to Sapporo
+            - link "Flight from Tokyo to Osaka" [ref=e1673] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Osaka.NRT.KIX
+              - generic [ref=e1674]: Flight from Tokyo to Osaka
+            - link "Flight from Tokyo to Matsuyama" [ref=e1675] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Matsuyama.NRT.MYJ
+              - generic [ref=e1676]: Flight from Tokyo to Matsuyama
+            - link "Flight from Tokyo to Busan" [ref=e1677] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Busan.NRT.PUS
+              - generic [ref=e1678]: Flight from Tokyo to Busan
+            - link "Flight from Tokyo to Bangkok" [ref=e1679] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Bangkok.NRT.BKK
+              - generic [ref=e1680]: Flight from Tokyo to Bangkok
+            - link "Flight from Tokyo to Kumamoto" [ref=e1681] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Kumamoto.NRT.KMJ
+              - generic [ref=e1682]: Flight from Tokyo to Kumamoto
+            - link "Flight from Tokyo to Jakarta" [ref=e1683] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Jakarta.NRT.CGK
+              - generic [ref=e1684]: Flight from Tokyo to Jakarta
+            - link "Flight from Tokyo to Manila" [ref=e1685] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Manila.NRT.MNL
+              - generic [ref=e1686]: Flight from Tokyo to Manila
+            - link "Flight from Tokyo to Taipei" [ref=e1687] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Taipei.NRT.TPE
+              - generic [ref=e1688]: Flight from Tokyo to Taipei
+            - link "Flight from Tokyo to Hanoi" [ref=e1689] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Hanoi.NRT.HAN
+              - generic [ref=e1690]: Flight from Tokyo to Hanoi
+            - link "Flight from Tokyo to Cebu" [ref=e1691] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Cebu.NRT.CEB
+              - generic [ref=e1692]: Flight from Tokyo to Cebu
+            - link "Flight from Tokyo to Honolulu Hawaii" [ref=e1693] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Honolulu-Hawaii.NRT.HNL
+              - generic [ref=e1694]: Flight from Tokyo to Honolulu Hawaii
+            - link "Flight from Tokyo to Ho Chi Minh City" [ref=e1695] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Ho-Chi-Minh-City.NRT.SGN
+              - generic [ref=e1696]: Flight from Tokyo to Ho Chi Minh City
+            - link "Flight from Tokyo to Vancouver" [ref=e1697] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Vancouver.NRT.YVR
+              - generic [ref=e1698]: Flight from Tokyo to Vancouver
+            - link "Flight from Tokyo to Ishigaki" [ref=e1699] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Ishigaki.NRT.ISG
+              - generic [ref=e1700]: Flight from Tokyo to Ishigaki
+            - link "Flight from Tokyo to Los Angeles" [ref=e1701] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Los-Angeles.NRT.LAX
+              - generic [ref=e1702]: Flight from Tokyo to Los Angeles
+            - link "Flight from Tokyo to Bali / Denpasar" [ref=e1703] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Bali-Denpasar.NRT.DPS
+              - generic [ref=e1704]: Flight from Tokyo to Bali / Denpasar
+            - link "Flight from Tokyo to Kuala Lumpur" [ref=e1705] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Kuala-Lumpur.NRT.KUL
+              - generic [ref=e1706]: Flight from Tokyo to Kuala Lumpur
+            - link "Flight from Tokyo to Da Nang" [ref=e1707] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Da-Nang.NRT.DAD
+              - generic [ref=e1708]: Flight from Tokyo to Da Nang
+            - link "Flight from Tokyo to Hong Kong" [ref=e1709] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Hong-Kong.NRT.HKG
+              - generic [ref=e1710]: Flight from Tokyo to Hong Kong
+            - link "Flight from Tokyo to Singapore" [ref=e1711] [cursor=pointer]:
+              - /url: https://www.traveloka.com/en-jp/flight/route/Tokyo-Singapore.NRT.SIN
+              - generic [ref=e1712]: Flight from Tokyo to Singapore
+      - img [ref=e1396]
+    - generic [ref=e1397]:
+      - img [ref=e1398]
+      - img
+      - generic [ref=e1399]:
+        - img
+        - generic [ref=e1400]:
+          - generic [ref=e1401]: Stay updated with travel tips, recommendations, and latest promos.
+          - generic [ref=e1402]:
+            - generic [ref=e1404]:
+              - img [ref=e1407]
+              - textbox "Your Email Address" [ref=e1410]
+            - button "Subscribe to Newsletter" [ref=e1411] [cursor=pointer]:
+              - generic [ref=e1412]: Subscribe to Newsletter
+              - generic [ref=e1414]: Subscribe to Newsletter
+          - heading "Have your dream trip at your fingertips. Get The App." [level=2] [ref=e1418]
+          - generic [ref=e1419]:
+            - img [ref=e1421]
+            - link:
+              - /url: https://traveloka.onelink.me/OzTp?c=&af_adset=&af_ad=&af_label=0559EF52B123CE3A38ECF859ABBDC16F89DE216CACC3FD45D4FDB95BFC7B6E65&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fhomepage&af_dp=traveloka%3A%2F%2Fhomepage
+              - img
+            - link:
+              - /url: https://traveloka.onelink.me/OzTp?c=&af_adset=&af_ad=&af_label=0559EF52B123CE3A38ECF859ABBDC16F89DE216CACC3FD45D4FDB95BFC7B6E65&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fhomepage&af_dp=traveloka%3A%2F%2Fhomepage
+              - img
+      - img
+    - generic [ref=e1423]:
+      - generic [ref=e1424]:
+        - generic [ref=e1425]:
+          - img [ref=e1426]
+          - generic [ref=e1427]:
+            - generic [ref=e1428]:
+              - img
+              - img
+            - link "Partner with Traveloka" [ref=e1429] [cursor=pointer]:
+              - /url: /en-jp/partnership
+              - button "Partner with Traveloka" [ref=e1430]:
+                - generic [ref=e1431]:
+                  - generic [ref=e1432]: Partner with Traveloka
+                  - img [ref=e1434]
+            - generic [ref=e1437]:
+              - generic [ref=e1439]: Payment Partners
+              - img [ref=e1441]
+              - img [ref=e1443]
+              - img [ref=e1445]
+              - img [ref=e1447]
+              - img [ref=e1449]
+              - img [ref=e1451]
+              - img [ref=e1453]
+              - img [ref=e1455]
+              - img [ref=e1457]
+        - generic [ref=e1458]:
+          - generic [ref=e1459]:
+            - generic [ref=e1460]:
+              - generic [ref=e1462]: About Traveloka
+              - list [ref=e1463]:
+                - listitem [ref=e1464]:
+                  - link "How to Book" [ref=e1465] [cursor=pointer]:
+                    - /url: /en-jp/how-to/bookflight
+                - listitem [ref=e1466]:
+                  - link "Contact Us" [ref=e1467] [cursor=pointer]:
+                    - /url: /en-jp/contactus?source=web_footer_menu
+                - listitem [ref=e1468]:
+                  - link "Help Center" [ref=e1469] [cursor=pointer]:
+                    - /url: /en-jp/help?source=web_footer_menu
+                - listitem [ref=e1470]:
+                  - link "Careers" [ref=e1471] [cursor=pointer]:
+                    - /url: /en-jp/careers
+                - listitem [ref=e1472]:
+                  - link "About Us" [ref=e1473] [cursor=pointer]:
+                    - /url: /en-jp/about-us
+            - generic [ref=e1474]:
+              - generic [ref=e1476]: Follow us on
+              - list [ref=e1477]:
+                - listitem [ref=e1478]:
+                  - link "Facebook" [ref=e1479] [cursor=pointer]:
+                    - /url: https://www.facebook.com/TravelokaJP
+                    - img [ref=e1480]
+                    - text: Facebook
+                - listitem [ref=e1485]:
+                  - link "Instagram" [ref=e1486] [cursor=pointer]:
+                    - /url: https://www.instagram.com/traveloka.jp/
+                    - img [ref=e1487]
+                    - text: Instagram
+                - listitem [ref=e1489]:
+                  - link "Twitter" [ref=e1490] [cursor=pointer]:
+                    - /url: https://x.com/TravelokaJP
+                    - img [ref=e1491]
+                    - text: Twitter
+                - listitem [ref=e1493]:
+                  - link "Youtube" [ref=e1494] [cursor=pointer]:
+                    - /url: https://www.youtube.com/@travelokajp
+                    - img [ref=e1495]
+                    - text: Youtube
+          - generic [ref=e1498]:
+            - generic [ref=e1500]: Products
+            - list [ref=e1501]:
+              - listitem [ref=e1502]:
+                - link "Hotels" [ref=e1503] [cursor=pointer]:
+                  - /url: /en-jp/hotel
+              - listitem [ref=e1504]:
+                - link "Flights" [ref=e1505] [cursor=pointer]:
+                  - /url: /en-jp/flight
+              - listitem [ref=e1506]:
+                - link "Airport Transfer" [ref=e1507] [cursor=pointer]:
+                  - /url: /en-jp/airport-transfer
+              - listitem [ref=e1508]:
+                - link "Car Rental" [ref=e1509] [cursor=pointer]:
+                  - /url: /en-jp/car-rental
+              - listitem [ref=e1510]:
+                - link "Things to Do" [ref=e1511] [cursor=pointer]:
+                  - /url: /en-jp/activities
+              - listitem [ref=e1512]:
+                - link "Villas" [ref=e1513] [cursor=pointer]:
+                  - /url: /en-jp/accommodation/villa
+              - listitem [ref=e1514]:
+                - link "Apartments" [ref=e1515] [cursor=pointer]:
+                  - /url: /en-jp/accommodation/apartment
+          - generic [ref=e1516]:
+            - generic [ref=e1517]:
+              - generic [ref=e1519]: Others
+              - list [ref=e1520]:
+                - listitem [ref=e1521]:
+                  - link "Traveloka Affiliate" [ref=e1522] [cursor=pointer]:
+                    - /url: /en-jp/p/affiliate
+                - listitem [ref=e1523]:
+                  - link "Refer a Friend" [ref=e1524] [cursor=pointer]:
+                    - /url: https://www.traveloka.com/en-jp/promotion/referafriend-jp
+                - listitem [ref=e1525]:
+                  - link "Blog" [ref=e1526] [cursor=pointer]:
+                    - /url: https://www.traveloka.com/explore
+                - listitem [ref=e1527]:
+                  - link "Privacy Notice" [ref=e1528] [cursor=pointer]:
+                    - /url: /en-jp/privacy-notice
+                - listitem [ref=e1529]:
+                  - link "Terms & Conditions" [ref=e1530] [cursor=pointer]:
+                    - /url: /en-jp/termsandconditions
+                - listitem [ref=e1531]:
+                  - link "Register Your Accommodation" [ref=e1532] [cursor=pointer]:
+                    - /url: https://tera.traveloka.com/v2/landing
+                - listitem [ref=e1533]:
+                  - link "Register Your Experience Business" [ref=e1534] [cursor=pointer]:
+                    - /url: https://internal.xxt.traveloka.com
+                - listitem [ref=e1535]:
+                  - link "Traveloka Press Room" [ref=e1536] [cursor=pointer]:
+                    - /url: https://press.traveloka.com
+                - listitem [ref=e1537]:
+                  - link "Vulnerability Disclosure Program" [ref=e1538] [cursor=pointer]:
+                    - /url: /en-jp/vulnerability-disclosure-program
+                - listitem [ref=e1539]:
+                  - link "APAC Travel Insights" [ref=e1540] [cursor=pointer]:
+                    - /url: https://www.traveloka.com/en-jp/apac-travel-insights?funnel_source=desktop_web_footer
+            - generic [ref=e1541]:
+              - generic [ref=e1543]: Download Traveloka App
+              - generic:
+                - link:
+                  - /url: https://traveloka.onelink.me/OzTp?c=&af_adset=&af_ad=&af_label=&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fhomepage&af_dp=traveloka%3A%2F%2Fhomepage
+                  - img
+              - generic:
+                - link:
+                  - /url: https://traveloka.onelink.me/OzTp?c=&af_adset=&af_ad=&af_label=&is_retargeting=true&af_click_lookback=7d&af_reengagement_window=30d&af_force_deeplink=true&pid=Traveloka%20Desktop&deep_link_value=traveloka%3A%2F%2Fhomepage&af_dp=traveloka%3A%2F%2Fhomepage
+                  - img
+      - separator [ref=e1544]
+      - generic [ref=e1545]: Registered Travel Agency No. 2174 approved by the Commissioner of the Japan Tourism Agency
+      - generic [ref=e1546]: Copyright © 2026 Traveloka. All rights reserved
+  - alert [ref=e1547]
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - heading "availableCoupons" [level=2]
+  - generic [ref=e1552]: 20,000円

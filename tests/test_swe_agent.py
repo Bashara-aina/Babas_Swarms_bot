@@ -393,8 +393,264 @@ class TestTrajectoryAnalysis:
         assert stats.submitted is True
         assert stats.tools_used.get("str_replace_editor", 0) == 2
 
+    def test_normalize_tool_stats(self):
+        """Test _normalize_tool_stats fills all tools with defaults."""
+        from core.swe_agent.trajectory import _normalize_tool_stats
 
-class TestPromptBuilder:
+        raw = {"bash": {"count": 3, "success": 2, "failure": 1}}
+        result = _normalize_tool_stats(raw)
+        assert result["bash"] == {"count": 3, "success": 2, "failure": 1}
+        assert result["str_replace_editor"] == {"count": 0, "success": 0, "failure": 0}
+
+    def test_normalize_tool_error_counts(self):
+        """Test _normalize_tool_error_counts fills all tools with zero."""
+        from core.swe_agent.trajectory import _normalize_tool_error_counts
+
+        raw = {"grep": 2}
+        result = _normalize_tool_error_counts(raw)
+        assert result["grep"] == 2
+        assert result["bash"] == 0
+
+    def test_tool_stats_from_trajectory(self):
+        """Test tool_stats_from_trajectory extracts and normalizes stats."""
+        from core.swe_agent.trajectory import tool_stats_from_trajectory
+
+        trajectory = {
+            "instance_id": "test-002",
+            "steps": [
+                {
+                    "step_num": 1,
+                    "tool_calls": [
+                        {"id": "call_1", "function": {"name": "bash", "arguments": "{}"}},
+                    ],
+                    "observation": '{"error": null}',
+                },
+                {
+                    "step_num": 2,
+                    "tool_calls": [
+                        {"id": "call_2", "function": {"name": "grep", "arguments": "{}"}},
+                    ],
+                    "observation": '{"error": "pattern not found"}',
+                },
+            ],
+            "model": "test-model",
+        }
+        stats, errors = tool_stats_from_trajectory(trajectory)
+        assert stats["bash"]["count"] == 1
+        assert stats["grep"]["count"] == 1
+        assert stats["bash"]["failure"] == 0
+        assert stats["grep"]["failure"] == 1
+        assert errors["grep"] == 1
+
+    def test_export_sharegpt(self):
+        """Test export_sharegpt converts trajectory to ShareGPT format."""
+        from core.swe_agent.trajectory import export_sharegpt
+
+        trajectory = {
+            "steps": [
+                {
+                    "step_num": 1,
+                    "thought": "I should look at the file",
+                    "action": "str_replace_editor view file.py",
+                    "tool_calls": [
+                        {
+                            "id": "call_1",
+                            "function": {"name": "str_replace_editor", "arguments": "{}"},
+                        },
+                    ],
+                    "observation": "file contents here",
+                },
+            ],
+            "model": "test-model",
+        }
+        convs = export_sharegpt(trajectory)
+        assert convs[0]["from"] == "system"
+        assert convs[1]["from"] == "human"
+        assert "look at the file" in convs[1]["value"]
+        # check tool call message present
+        tool_msgs = [c for c in convs if c.get("from") == "gpt" and c.get("tool_calls")]
+        assert len(tool_msgs) == 1
+        assert tool_msgs[0]["tool_calls"][0]["function"]["name"] == "str_replace_editor"
+        # check tool response
+        tool_responses = [c for c in convs if c.get("from") == "tool"]
+        assert len(tool_responses) == 1
+        assert "file contents here" in tool_responses[0]["value"]
+
+    def test_save_sharegpt_trajectory(self, tmp_path):
+        """Test save_sharegpt_trajectory writes valid JSONL."""
+        from core.swe_agent.trajectory import save_sharegpt_trajectory
+
+        trajectory = {
+            "instance_id": "test-003",
+            "model": "test-model",
+            "steps": [
+                {
+                    "step_num": 1,
+                    "thought": "View file",
+                    "action": "view",
+                    "tool_calls": [],
+                    "observation": "content",
+                },
+            ],
+        }
+        out_file = tmp_path / "trajectories.jsonl"
+        result = save_sharegpt_trajectory(trajectory, filename=str(out_file), completed=True)
+        assert Path(result) == out_file
+        import json
+        with open(out_file) as f:
+            entry = json.loads(f.readline())
+        assert "conversations" in entry
+        assert entry["model"] == "test-model"
+        assert entry["completed"] is True
+        assert entry["instance_id"] == "test-003"
+
+
+class TestTrajectoryCompressor:
+    """Test TrajectoryCompressor compression."""
+
+    def test_compression_config_defaults(self):
+        """Test CompressionConfig has correct defaults."""
+        from core.swe_agent.trajectory import CompressionConfig
+
+        config = CompressionConfig()
+        assert config.target_max_tokens == 15250
+        assert config.summary_target_tokens == 750
+        assert config.protect_first_system is True
+        assert config.protect_first_human is True
+        assert config.protect_first_gpt is True
+        assert config.protect_first_tool is True
+        assert config.protect_last_n_turns == 4
+        assert config.summarization_model == "minimax-coding-plan/MiniMax-Text-01"
+
+    def test_compression_metrics_to_dict(self):
+        """Test TrajectoryCompressionMetrics serialization."""
+        from core.swe_agent.trajectory import TrajectoryCompressionMetrics
+
+        metrics = TrajectoryCompressionMetrics(
+            original_tokens=1000,
+            compressed_tokens=500,
+            tokens_saved=500,
+            compression_ratio=0.5,
+            original_turns=20,
+            compressed_turns=10,
+            turns_removed=10,
+            was_compressed=True,
+            still_over_limit=False,
+        )
+        d = metrics.to_dict()
+        assert d["original_tokens"] == 1000
+        assert d["compressed_tokens"] == 500
+        assert d["was_compressed"] is True
+        assert "compression_region" in d
+
+    def test_compressor_init(self):
+        """Test TrajectoryCompressor initializes correctly."""
+        from core.swe_agent.trajectory import TrajectoryCompressor, CompressionConfig
+
+        compressor = TrajectoryCompressor()
+        assert compressor.config.target_max_tokens == 15250
+        assert compressor._tokenizer is not None  # tiktoken loaded
+
+        config = CompressionConfig(target_max_tokens=5000, protect_last_n_turns=2)
+        compressor2 = TrajectoryCompressor(config=config)
+        assert compressor2.config.target_max_tokens == 5000
+        assert compressor2.config.protect_last_n_turns == 2
+
+    def test_count_tokens(self):
+        """Test token counting with tiktoken."""
+        from core.swe_agent.trajectory import TrajectoryCompressor
+
+        compressor = TrajectoryCompressor()
+        # "hello world" is 2 tokens in cl100k_base
+        count = compressor.count_tokens("hello world")
+        assert count == 2
+
+        # Empty string
+        assert compressor.count_tokens("") == 0
+
+    def test_compress_trajectory_short(self):
+        """Test compression doesn't touch short trajectories."""
+        from core.swe_agent.trajectory import TrajectoryCompressor
+
+        compressor = TrajectoryCompressor()
+        # Short trajectory under target
+        trajectory = [
+            {"from": "system", "value": "You are a helpful assistant."},
+            {"from": "human", "value": "Hello"},
+            {"from": "gpt", "value": "Hi there!"},
+        ]
+
+        compressed, metrics = compressor.compress_trajectory(trajectory)
+        assert compressed == trajectory
+        assert metrics.was_compressed is False
+        assert metrics.skipped_under_target is True
+
+    def test_compress_trajectory_identifies_protected(self):
+        """Test _find_protected_indices identifies head and tail."""
+        from core.swe_agent.trajectory import TrajectoryCompressor
+
+        compressor = TrajectoryCompressor()
+        # 10-turn trajectory
+        trajectory = [
+            {"from": "system", "value": "System prompt"},
+            {"from": "human", "value": "Human input"},
+            {"from": "gpt", "value": "First response"},
+            {"from": "tool", "value": "Tool result"},
+            {"from": "gpt", "value": "Second response"},
+            {"from": "tool", "value": "Tool result 2"},
+            {"from": "gpt", "value": "Third response"},
+            {"from": "tool", "value": "Tool result 3"},
+            {"from": "gpt", "value": "Fourth response"},
+            {"from": "tool", "value": "Tool result 4"},
+        ]
+
+        protected, compress_start, compress_end = compressor._find_protected_indices(trajectory)
+
+        # First system, human, gpt, tool should be protected
+        assert 0 in protected  # system
+        assert 1 in protected  # human
+        assert 2 in protected  # first gpt
+        assert 3 in protected  # first tool
+
+        # Last 4 turns should be protected (tail)
+        assert 6 in protected  # gpt (3rd from end)
+        assert 7 in protected  # tool
+        assert 8 in protected  # gpt
+        assert 9 in protected  # tool (last)
+
+    def test_compress_and_save(self, tmp_path):
+        """Test compress_and_save produces valid JSONL."""
+        from core.swe_agent.trajectory import TrajectoryCompressor
+
+        compressor = TrajectoryCompressor()
+        # compress_and_save expects a trajectory DICT (with steps key), not a raw list
+        trajectory = {
+            "instance_id": "test-compress-001",
+            "model": "test-model",
+            "steps": [
+                {"from": "system", "value": "You are a helpful assistant."},
+                {"from": "human", "value": "Hello"},
+                {"from": "gpt", "value": "Hi there!"},
+            ],
+        }
+
+        out_path = tmp_path / "output_compressed.jsonl"
+        result_path, metrics = compressor.compress_and_save(
+            trajectory, output_path=str(out_path), completed=True
+        )
+
+        assert Path(result_path) == out_path
+        assert out_path.exists()
+
+        import json
+        with open(out_path) as f:
+            entry = json.loads(f.readline())
+        assert "conversations" in entry
+        assert entry["completed"] is True
+        assert entry["instance_id"] == "test-compress-001"
+
+
+class TestSWEPromptBuilder:
     """Test SWE-agent prompt builder."""
 
     def test_system_prompt(self):

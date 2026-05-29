@@ -59,13 +59,15 @@ def _get_otel_tracer():  # type: ignore[reportOptionalMemberAccess]
 
     try:
         from opentelemetry import trace  # type: ignore[reportOptionalMemberAccess]
-        from opentelemetry.sdk.trace import TracerProvider  # type: ignore[reportOptionalMemberAccess]
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # type: ignore[reportOptionalMemberAccess]
+            OTLPSpanExporter,  # type: ignore[reportOptionalMemberAccess]
+        )
+        from opentelemetry.sdk.trace import (
+            TracerProvider,  # type: ignore[reportOptionalMemberAccess]
+        )
         from opentelemetry.sdk.trace.export import (  # type: ignore[reportOptionalMemberAccess]
             BatchSpanProcessor,  # type: ignore[reportOptionalMemberAccess]
             ConsoleSpanExporter,  # type: ignore[reportOptionalMemberAccess]
-        )
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # type: ignore[reportOptionalMemberAccess]
-            OTLPSpanExporter,  # type: ignore[reportOptionalMemberAccess]
         )
 
         _otel_provider = TracerProvider()  # type: ignore[reportOptionalMemberAccess]

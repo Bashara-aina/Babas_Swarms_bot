@@ -9,10 +9,9 @@ Success callback: stores the response as episodic memory (async, non-blocking).
 """
 from __future__ import annotations
 
-from pathlib import Path
-
 import logging
 import threading
+from pathlib import Path
 
 import litellm
 
@@ -97,7 +96,10 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
         content = _extract_response_content(response_obj) or ""
         query = _extract_query(kwargs.get("messages", []))
         
-        import json, os, tempfile, time
+        import json
+        import os
+        import tempfile
+        import time
         # Use swarm-bot as base dir, not cwd (cwd may be /home/newadmin after os.chdir)
         swarm_dir = Path(__file__).parent.parent.parent  # .../swarm-bot
         session_dir = swarm_dir / ".session_state"

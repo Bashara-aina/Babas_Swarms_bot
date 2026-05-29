@@ -126,7 +126,7 @@ class ObservationStore:
             try:
                 conn = await self._ensure_connection()
                 return await fn(conn)
-            except Exception as exc:  # noqa: PERF203 — intentional async sleep in retry loop
+            except Exception as exc:  # intentional async sleep in retry loop
                 # PERF203: await inside retry loop; we want controlled backoff, not CancellableSleep
                 err_msg = str(exc).lower()
                 if "locked" in err_msg or "busy" in err_msg:

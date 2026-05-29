@@ -1,38 +1,21 @@
 model_list:
-  - model_name: minimax-primary
+  - model_name: minimax/MiniMax-M2.7
     litellm_params:
-      model: minimax-coding-plan/MiniMax-M2.7
+      model: minimax/MiniMax-M2.7
       api_base: https://api.minimax.io/v1
       api_key: os.environ/MINIMAX_API_KEY
 
-  - model_name: minimax-coding-plan/MiniMax-M2.7
+  - model_name: minimax/MiniMax-Text-01
     litellm_params:
-      model: minimax-coding-plan/MiniMax-M2.7
-      api_base: https://api.minimax.io/v1
-      api_key: os.environ/MINIMAX_API_KEY
-
-  - model_name: minimax-text
-    litellm_params:
-      model: minimax-coding-plan/MiniMax-Text-01
+      model: minimax/MiniMax-Text-01
       api_base: https://api.minimax.io/v1
       api_key: os.environ/MINIMAX_API_KEY
 
   - model_name: ollama-llama3.3
     litellm_params:
-      model: ollama_chat/llama3.3:70b
+      model: ollama/llama3.3:70b
       api_base: http://localhost:11434
       api_key: os.environ/OLLAMA_API_KEY
-
-router_settings:
-  routing_strategy: simple-shuffle
-  fallbacks:
-    - minimax-primary:
-        - minimax-text
-        - ollama-llama3.3
-  retry_policy:
-    BadRequestErrorRetries: 0
-    RateLimitErrorRetries: 3
-    TimeoutErrorRetries: 2
 
 litellm_settings:
   set_verbose: false

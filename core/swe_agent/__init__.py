@@ -14,8 +14,8 @@ from core.swe_agent.tools import (
     TOOL_DEFINITIONS,
     ToolResult,
     bash,
-    grep,
     glob,
+    grep,
     str_replace_editor,
     submit,
 )
@@ -28,29 +28,29 @@ from core.swe_agent.trajectory import (
     load_trajectory_dir,
 )
 
-__all__ = [
+__all__ = [  # noqa: RUF022 — grouped by concern, not alphabetically
     # Config
-    "SWEAgentConfig",
     "DEFAULT_CONFIG",
-    "DEFAULT_CONFIG_MINIMAX",
     "DEFAULT_CONFIG_ANTHROPIC",
+    "DEFAULT_CONFIG_MINIMAX",
     "load_config",
-    # Loop
-    "SWEAgentLoop",
-    "Trajectory",
-    "MaxStepsExceeded",
+    "SWEAgentConfig",
     # Environment
     "Environment",
-    # Tools
-    "str_replace_editor",
-    "bash",
-    "grep",
-    "glob",
-    "submit",
-    "ToolResult",
-    "TOOL_DEFINITIONS",
+    # Loop
+    "MaxStepsExceeded",
+    "SWEAgentLoop",
+    "Trajectory",
     # Prompts
     "PromptBuilder",
+    # Tools
+    "TOOL_DEFINITIONS",
+    "ToolResult",
+    "bash",
+    "glob",
+    "grep",
+    "str_replace_editor",
+    "submit",
     # Trajectory
     "TrajectoryStats",
     "compute_stats",

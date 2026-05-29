@@ -76,19 +76,25 @@ class WikiIndexer:
 
         Returns a list of WikiEntry dicts.
         """
+        import asyncio
+
         from core.daily_harvester.wiki_storage import _topic_dir
 
         dir_path = _topic_dir(topic)
-        results: list[WikiEntry] = []
 
         if not dir_path.exists():
-            return results
+            return []
 
-        for f in sorted(dir_path.glob("*.md")):
-            if f.name == "INDEX.md":
-                continue
+        files = [f for f in sorted(dir_path.glob("*.md")) if f.name != "INDEX.md"]
+
+        async def read_one(f):
             async with aiofiles.open(f, encoding="utf-8") as fh:
-                text = await fh.read()
+                return f, await fh.read()
+
+        file_texts = await asyncio.gather(*[read_one(f) for f in files])
+
+        results: list[WikiEntry] = []
+        for f, text in file_texts:
             lines = text.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), f.stem)
 
@@ -130,14 +136,19 @@ class WikiIndexer:
 
         Returns a list of WikiEntry dicts.
         """
+        import asyncio
+
+        files = [f for f in self.wiki_root.rglob("*.md")
+                 if f.name != "INDEX.md" and not f.name.startswith("_")]
+
+        async def read_one(f):
+            async with aiofiles.open(f, encoding="utf-8") as fh:
+                return f, await fh.read()
+
+        file_texts = await asyncio.gather(*[read_one(f) for f in files])
+
         results: list[WikiEntry] = []
-
-        for md_file in self.wiki_root.rglob("*.md"):
-            if md_file.name == "INDEX.md" or md_file.name.startswith("_"):
-                continue
-
-            async with aiofiles.open(md_file, encoding="utf-8") as fh:
-                text = await fh.read()
+        for md_file, text in file_texts:
 
             # Check tags section
             tags_match = re.search(r"## Tags\n(.+?)\n", text, re.MULTILINE)
@@ -185,23 +196,27 @@ class WikiIndexer:
 
         Optionally filter by topic.
         """
+        import asyncio
         from datetime import timedelta
 
         cutoff = datetime.now(ZoneInfo("Asia/Jakarta")) - timedelta(days=days)
-        results: list[WikiEntry] = []
 
         search_root = self.wiki_root / topic if topic else self.wiki_root
 
-        for md_file in search_root.rglob("*.md"):
-            if md_file.name == "INDEX.md" or md_file.name.startswith("_"):
-                continue
+        files = [f for f in search_root.rglob("*.md")
+                 if f.name != "INDEX.md" and not f.name.startswith("_")]
 
+        async def read_one(f):
+            async with aiofiles.open(f, encoding="utf-8") as fh:
+                return f, await fh.read()
+
+        file_texts = await asyncio.gather(*[read_one(f) for f in files])
+
+        results: list[WikiEntry] = []
+        for md_file, text in file_texts:
             mtime = datetime.fromtimestamp(md_file.stat().st_mtime)
             if mtime < cutoff:
                 continue
-
-            async with aiofiles.open(md_file, encoding="utf-8") as fh:
-                text = await fh.read()
 
             lines = text.splitlines()
             title = next((ln.lstrip("# ").strip() for ln in lines if ln.startswith("# ")), md_file.stem)

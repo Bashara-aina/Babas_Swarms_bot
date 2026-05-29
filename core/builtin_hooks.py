@@ -9,9 +9,16 @@ Currently provides:
 from __future__ import annotations
 
 import logging
+import re
+from datetime import datetime
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# Module-level store for CC session data since hook ctx is not preserved
+# between emit() calls. Populated by claude_code_session_start_hook and
+# consumed by claude_code_session_end_hook on session_end.
+_cc_session_store: dict[str, Any] = {}
 
 
 async def audit_logger_hook(ctx: dict[str, Any]) -> dict[str, Any]:
@@ -105,32 +112,44 @@ async def opencode_decision_hook(ctx: dict[str, Any]) -> dict[str, Any]:
 async def claude_code_session_start_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     """Record Claude Code session start metadata for wiki ingest on completion."""
     import uuid
+    session_id = ctx.get("session_id") or f"cc-{uuid.uuid4().hex[:8]}"
+    prompt = ctx.get("prompt", "")[:500]
     ctx["_cc_session_started"] = True
-    ctx["_cc_session_id"] = ctx.get("session_id") or f"cc-{uuid.uuid4().hex[:8]}"
-    ctx["_cc_session_prompt"] = ctx.get("prompt", "")[:500]
+    ctx["_cc_session_id"] = session_id
+    ctx["_cc_session_prompt"] = prompt
+    # Also persist to module store so session_end hook can access it
+    _cc_session_store["session_id"] = session_id
+    _cc_session_store["prompt"] = prompt
+    _cc_session_store["started"] = True
     return ctx
 
 
 async def claude_code_session_end_hook(ctx: dict[str, Any]) -> dict[str, Any]:
-    """Ingest completed Claude Code sessions into the wiki brain."""
-    if not ctx.get("_cc_session_started"):
+    """Ingest completed Claude Code sessions into the wiki brain.
+
+    Fires on session_end. Reads session data from module-level _cc_session_store
+    since ctx is not preserved between emit() calls.
+    """
+    # Check module store (set by claude_code_session_start_hook on pre_llm_call)
+    if not _cc_session_store.get("started"):
         return ctx
     try:
-        import uuid
-
         from core.wiki_bridge import claude_code_write_session
 
-        session_id = ctx.get("_cc_session_id") or f"cc-{uuid.uuid4().hex[:8]}"
-        report = ctx.get("report", "")
+        session_id = ctx.get("_cc_session_id") or _cc_session_store.get("session_id", "unknown")
+        prompt = ctx.get("_cc_session_prompt") or _cc_session_store.get("prompt", "")
+        report = ctx.get("report", ctx.get("outcome", ""))
         await claude_code_write_session(
             session_md=(
                 f"# Claude Code Session\n\n"
                 f"**ID**: {session_id}\n\n"
-                f"## Prompt\n\n{ctx.get('_cc_session_prompt', '')}\n\n"
+                f"## Prompt\n\n{prompt}\n\n"
                 f"## Result\n\n{report[:2000]}"
             ),
-            summary=f"CC session: {report[:100]}",
+            summary=f"CC session: {report[:100] if report else 'no output'}",
         )
+        # Clear store after writing
+        _cc_session_store.clear()
     except Exception:
         logger.debug("claude_code_session_end_hook: wiki bridge unavailable, skipping")
     return ctx
@@ -205,6 +224,103 @@ async def _recalled_context_refresh_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     return ctx
 
 
+# ── Symphony session lifecycle hooks ─────────────────────────────────────────
+# Symphony MCP: multi-agent chat rooms, task boards, persistent memory.
+# Automatically: create tasks on post_task, store memories on session_end.
+
+
+async def _get_mcp_pool():
+    """Lazily get the MCPClientPool singleton."""
+    try:
+        from core.mcp_client import MCPClientPool
+        return MCPClientPool()
+    except Exception:
+        return None
+
+
+async def symphony_session_start_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """On session_start: join the swarm-bot room so this session is visible to teammates."""
+    try:
+        pool = await _get_mcp_pool()
+        if not pool:
+            return ctx
+        # Join the default swarm-bot coordination room
+        await pool.call_tool("symphony", "room_join", {"room_id": "swarm-bot"})
+        ctx["_symphony_room_joined"] = True
+        logger.debug("Symphony: joined swarm-bot room")
+    except Exception:
+        pass
+    return ctx
+
+
+async def symphony_post_task_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """On post_task: create a Symphony task for the completed task."""
+    try:
+        pool = await _get_mcp_pool()
+        if not pool:
+            return ctx
+        task_desc = ctx.get("task", "")
+        if not task_desc:
+            return ctx
+        outcome = ctx.get("outcome", "")[:200]
+        task_id = await pool.call_tool(
+            "symphony", "create_task",
+            {
+                "title": task_desc[:100],
+                "description": outcome or "completed",
+                "status": "done",
+                "priority": "medium",
+            },
+        )
+        if task_id and "Error" not in str(task_id)[:50]:
+            ctx["_symphony_task_created"] = str(task_id)[:100]
+            logger.debug("Symphony: created task %s", task_id)
+    except Exception:
+        pass
+    return ctx
+
+
+async def symphony_session_end_hook(ctx: dict[str, Any]) -> dict[str, Any]:
+    """On session_end: store session summary to Symphony persistent memory."""
+    try:
+        pool = await _get_mcp_pool()
+        if not pool:
+            return ctx
+
+        # Build session summary from ctx
+        session_id = ctx.get("session_id", "legion-session")
+        source = ctx.get("source", "unknown")
+
+        # Store session metadata in symphony memory
+        await pool.call_tool(
+            "symphony", "memory_store",
+            {
+                "key": f"session-{session_id}",
+                "value": f"Legion session ended | source={source} | ts={datetime.now().isoformat()}",
+            },
+        )
+
+        # Update any in-progress tasks created by symphony_post_task_hook as done
+        if ctx.get("_symphony_task_created"):
+            try:
+                created = ctx["_symphony_task_created"]
+                # Try to extract task_id from the result text
+                id_match = re.search(r"id['\"]?\s*:\s*['\"]?([\w-]+)", created)
+                if id_match:
+                    task_id = id_match.group(1)
+                    await pool.call_tool(
+                        "symphony", "update_task",
+                        {"task_id": task_id, "status": "done"},
+                    )
+            except Exception:
+                pass
+
+        logger.debug("Symphony: session_end memory stored")
+    except Exception:
+        pass
+    return ctx
+
+
 async def gitnexus_detect_changes_hook(ctx: dict[str, Any]) -> dict[str, Any]:
     """Run gitnexus_detect_changes before git commit and attach diff summary to ctx."""
     try:
@@ -239,13 +355,18 @@ def register_builtin_hooks() -> None:
     hooks.register("command_received", command_audit_hook, name="command_audit")
     hooks.register("post_llm_call", opencode_decision_hook, name="opencode_decision")
     hooks.register("pre_llm_call", claude_code_session_start_hook, name="cc_session_start")
-    hooks.register("post_llm_call", claude_code_session_end_hook, name="cc_session_end")
+    hooks.register("session_end", claude_code_session_end_hook, name="cc_session_end")
 
     # OpenCode session lifecycle hooks — map ruflo's task lifecycle to session hooks
     # ruflo sends "task_complete" and "task_success" → map to post_task for wiki ingest
     hooks.register("post_task", opencode_session_start_hook, name="opencode_session_start")
     hooks.register("post_task", opencode_session_end_hook, name="opencode_session_end")
     hooks.register("task_success", opencode_session_end_hook, name="opencode_session_end_success")
+
+    # Symphony session lifecycle — auto-task-creation and memory persistence
+    hooks.register("session_start", symphony_session_start_hook, name="symphony_session_start")
+    hooks.register("post_task", symphony_post_task_hook, name="symphony_post_task")
+    hooks.register("session_end", symphony_session_end_hook, name="symphony_session_end")
 
     # GitNexus integration — run gitnexus_detect_changes before git commit
     hooks.register("pre_git_commit", gitnexus_detect_changes_hook, name="gitnexus_pre_commit")

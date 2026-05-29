@@ -91,6 +91,12 @@ class TestMCPClientPoolFallback:
 
     async def test_pool_fallback_on_error(self, pool):
         """First call fails via pool, single-call fallback is then used."""
+        # Clear any persistent session state from previous tests (singleton isolation)
+        pool._sessions.clear()
+        pool._readers.clear()
+        pool._writers.clear()
+        pool._failed.discard("test-server")
+        pool._failed_expiry.pop("test-server", None)
         pool._cfg = {
             "servers": [
                 {
@@ -130,10 +136,11 @@ class TestMCPClientPoolFallback:
         with patch("mcp.client.stdio.stdio_client", return_value=stdio_ctx):
             with patch("mcp.ClientSession", return_value=session_ctx):
                 # Simulate _call_tool_single succeeding after pool failed
-                async def fake_single(server_name, tool_name, arguments):
+                async def fake_single(self, server_name, tool_name, arguments):
                     return "ok result"
 
-                with patch.object(pool, "_call_tool_single", fake_single):
+                # Patch at class level so call_tool's `await self._call_tool_single(...)` works
+                with patch("core.mcp_client.MCPClientPool._call_tool_single", fake_single):
                     result1 = await pool.call_tool("test-server", "fake_tool", {"arg": 1})
                     result2 = await pool.call_tool("test-server", "fake_tool", {"arg": 2})
 

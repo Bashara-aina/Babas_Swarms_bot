@@ -255,7 +255,7 @@ class Environment:
     # Context manager
     # ------------------------------------------------------------------
 
-    def __enter__(self) -> "Environment":
+    def __enter__(self) -> Environment:
         """Enter context manager - setup environment."""
         self.setup()
         return self

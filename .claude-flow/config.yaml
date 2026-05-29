@@ -1,5 +1,6 @@
 # RuFlo V3 Runtime Configuration
-# Generated: 2026-05-20T10:15:14.603Z
+# Generated: 2026-05-24
+# Auto-managed — do not edit manually
 
 version: "3.0.0"
 
@@ -37,6 +38,31 @@ neural:
 hooks:
   enabled: true
   autoExecute: true
+
+daemon:
+  autoStart: true
+  workers:
+    - map
+    - audit
+    - optimize
+    - consolidate
+    - testgaps
+  schedules:
+    map:
+      interval: 900000  # 15 minutes
+      priority: normal
+    audit:
+      interval: 14400000  # 4 hours
+      priority: critical
+    optimize:
+      interval: 7200000  # 2 hours
+      priority: high
+    consolidate:
+      interval: 1800000  # 30 minutes
+      priority: low
+    testgaps:
+      interval: 1200000  # 20 minutes
+      priority: normal
 
 mcp:
   autoStart: true
