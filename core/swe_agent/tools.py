@@ -226,8 +226,6 @@ def _str_replace(path: Path, old_str: str, new_str: str, display_path: str) -> T
     new_content = content.replace(old_str, new_str, 1)
     path.write_text(new_content)
 
-    # Show diff
-    diff = _make_diff(path.name, old_str, new_str)
     output = f"The file {display_path} has been edited. Here's the result of running `cat -n` on a snippet of {display_path}:\n"
     output += _view_file_snippet(path, display_path)
 
@@ -546,8 +544,9 @@ def submit(working_dir: str | None = None) -> ToolResult:
         if not diff.strip():
             return ToolResult(success=False, error="No changes found to submit")
 
-        # Generate patch file
-        patch = diff  # Already in patch format
+        # Generate patch file — already in patch format from diff output
+        # (patch variable kept for future extension: write to file, validate, etc.)
+        patch = diff  # noqa: F841 — reserved for future patch file write/validation
 
         return ToolResult(
             success=True,

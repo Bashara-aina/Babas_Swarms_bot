@@ -7,12 +7,23 @@
 
 Shared SQLite at data/observations.db — OpenCode, Claude Code, and LegionBot all write here.
 <private> tags are stripped at WRITE time (defense-in-depth).
+
+Hermes patterns ported (ADR-095 G6):
+  - FTS5 trigram tokenizer for CJK/substring search (hermes hermes_state.py)
+  - WAL mode with random-jitter retry for write contention (20-150ms)
+  - _write_with_retry() wrapping all writes via asyncio.wait(FIRST_COMPLETED)
+  - _sanitize_fts5_query() with balanced-quote preservation, operator stripping,
+    and hyphenated/dotted-term quoting (replaces naive _escape_fts_query)
+  - _reconcile_columns() declarative schema reconciliation on every connection
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import random
 import re
+import time
 from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -24,6 +35,10 @@ logger = logging.getLogger(__name__)
 OBSERVATION_ROOT = Path(__file__).parent.parent.parent / "data"
 OBSERVATION_ROOT.mkdir(parents=True, exist_ok=True)
 DB_PATH = OBSERVATION_ROOT / "observations.db"
+
+_WRITE_MAX_RETRIES = 15
+_WRITE_RETRY_MIN_MS = 20
+_WRITE_RETRY_MAX_MS = 150
 
 # Observation type taxonomy (from claude-mem)
 OBSERVATION_TYPES = frozenset({
@@ -96,7 +111,32 @@ class ObservationStore:
             await self.conn.execute("PRAGMA journal_mode=WAL")
             await self.conn.execute("PRAGMA foreign_keys=ON")
             await self._init_db()
+            await self._reconcile_columns()
         return self.conn
+
+    async def _write_with_retry(self, fn: callable) -> Any:
+        """Execute a write with random-jitter retry (hermes WAL pattern).
+
+        SQLite's built-in busy handler uses deterministic sleep that causes
+        convoy effects under high concurrency. Random jitter staggers
+        competing writers naturally.
+        """
+        last_err: Exception | None = None
+        for attempt in range(_WRITE_MAX_RETRIES):
+            try:
+                conn = await self._ensure_connection()
+                return await fn(conn)
+            except Exception as exc:  # noqa: PERF203 — intentional async sleep in retry loop
+                # PERF203: await inside retry loop; we want controlled backoff, not CancellableSleep
+                err_msg = str(exc).lower()
+                if "locked" in err_msg or "busy" in err_msg:
+                    last_err = exc
+                    if attempt < _WRITE_MAX_RETRIES - 1:
+                        jitter_ms = random.uniform(_WRITE_RETRY_MIN_MS, _WRITE_RETRY_MAX_MS)
+                        await asyncio.sleep(jitter_ms / 1000)
+                    continue
+                raise
+        raise last_err if last_err else RuntimeError("Write retries exhausted")
 
     async def _init_db(self) -> None:
         """Create schema: observations, session_summaries, user_prompts + FTS5 tables."""
@@ -151,6 +191,36 @@ class ObservationStore:
                        content='session_summaries', content_rowid='id')
         """)
 
+        # Trigram FTS5 for CJK substring search (hermes pattern)
+        # Default tokenizer splits CJK into individual tokens, breaking phrase matching.
+        # Trigram creates overlapping 3-byte sequences so substring queries work for any script.
+        await conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS observations_fts_trigram
+            USING fts5(title, subtitle, narrative, facts, concepts, tags,
+                       tokenize='trigram',
+                       content='observations', content_rowid='id')
+        """)
+        await conn.execute("""
+            CREATE TRIGGER IF NOT EXISTS obs_trigram_ai AFTER INSERT ON observations BEGIN
+                INSERT INTO observations_fts_trigram(rowid, title, subtitle, narrative, facts, concepts, tags)
+                VALUES (new.id, new.title, new.subtitle, new.narrative, new.facts, new.concepts, new.tags);
+            END
+        """)
+        await conn.execute("""
+            CREATE TRIGGER IF NOT EXISTS obs_trigram_ad AFTER DELETE ON observations BEGIN
+                INSERT INTO observations_fts_trigram(observations_fts_trigram, rowid, title, subtitle, narrative, facts, concepts, tags)
+                VALUES('delete', old.id, old.title, old.subtitle, old.narrative, old.facts, old.concepts, old.tags);
+            END
+        """)
+        await conn.execute("""
+            CREATE TRIGGER IF NOT EXISTS obs_trigram_au AFTER UPDATE ON observations BEGIN
+                INSERT INTO observations_fts_trigram(observations_fts_trigram, rowid, title, subtitle, narrative, facts, concepts, tags)
+                VALUES('delete', old.id, old.title, old.subtitle, old.narrative, old.facts, old.concepts, old.tags);
+                INSERT INTO observations_fts_trigram(rowid, title, subtitle, narrative, facts, concepts, tags)
+                VALUES (new.id, new.title, new.subtitle, new.narrative, new.facts, new.concepts, new.tags);
+            END
+        """)
+
         # Sync triggers — keep FTS in sync with base tables
         # observations → observations_fts (10 searchable columns)
         await conn.execute("""
@@ -199,6 +269,77 @@ class ObservationStore:
         await conn.commit()
         logger.info("[ObservationStore] Initialized at %s", DB_PATH)
 
+    async def _reconcile_columns(self) -> None:
+        """Ensure live tables have every column declared in the schema.
+
+        Declarative reconciliation pattern (hermes/Beets/sqlite-utils):
+        the hardcoded schema below is the single source of truth.
+        On every startup this method diffs live columns (via PRAGMA
+        table_info) against the declared columns, and ADDs any missing.
+        This makes column additions a declarative operation — just add
+        the column here and it appears on the next startup.
+        """
+        conn = await self._ensure_connection()
+        cursor = await conn.cursor()
+
+        expected: dict[str, dict[str, str]] = {
+            "observations": {
+                "id":             "INTEGER",
+                "session_id":      "TEXT",
+                "type":           "TEXT",
+                "title":          "TEXT",
+                "subtitle":       "TEXT",
+                "narrative":      "TEXT",
+                "facts":          "TEXT",
+                "concepts":       "TEXT",
+                "tags":           "TEXT",
+                "files_read":     "TEXT",
+                "files_modified": "TEXT",
+                "created_at":     "TEXT",
+            },
+            "session_summaries": {
+                "id":           "INTEGER",
+                "session_id":   "TEXT",
+                "request":      "TEXT",
+                "investigated": "TEXT",
+                "learned":      "TEXT",
+                "completed":    "TEXT",
+                "next_steps":   "TEXT",
+                "notes":        "TEXT",
+                "created_at":   "TEXT",
+            },
+        }
+
+        for table_name, declared_cols in expected.items():
+            try:
+                rows = await cursor.execute(f'PRAGMA table_info("{table_name}")')
+                live_rows = await rows.fetchall()
+            except Exception:
+                continue
+            live_cols = set()
+            for row in live_rows:
+                live_cols.add(row["name"])
+
+            for col_name, col_type in declared_cols.items():
+                if col_name not in live_cols:
+                    safe_name = col_name.replace('"', '""')
+                    try:
+                        await cursor.execute(
+                            f'ALTER TABLE "{table_name}" ADD COLUMN "{safe_name}" {col_type}'
+                        )
+                        logger.info(
+                            "[ObservationStore] Added column %s.%s",
+                            table_name,
+                            col_name,
+                        )
+                    except Exception as exc:
+                        logger.debug(
+                            "reconcile %s.%s: %s",
+                            table_name,
+                            col_name,
+                            exc,
+                        )
+
     # ── Write operations ───────────────────────────────────────────────────────
 
     async def add_observation(
@@ -216,7 +357,7 @@ class ObservationStore:
         files_modified: list[str] | None = None,
     ) -> int:
         """Store an observation. Returns the row ID."""
-        conn = await self._ensure_connection()
+        await self._ensure_connection()  # ensure connection is initialized before write
 
         # Strip <private> tags at write time — defense in depth
         content = _strip_private(content)
@@ -231,29 +372,32 @@ class ObservationStore:
 
         now = datetime.now(UTC).isoformat(timespec="seconds")
 
-        cur = await conn.execute(
-            """
-            INSERT INTO observations
-            (session_id, type, title, subtitle, narrative, facts, concepts, tags,
-             files_read, files_modified, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                session_id,
-                obs_type,
-                title,
-                subtitle,
-                narrative,
-                facts,
-                concepts,
-                ",".join(tags or []),
-                ",".join(files_read or []),
-                ",".join(files_modified or []),
-                now,
-            ),
-        )
-        await conn.commit()
-        return int(cur.lastrowid)  # type: ignore[union-return]
+        async def _do_insert(conn: aiosqlite.Connection) -> int:
+            cur = await conn.execute(
+                """
+                INSERT INTO observations
+                (session_id, type, title, subtitle, narrative, facts, concepts, tags,
+                 files_read, files_modified, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    session_id,
+                    obs_type,
+                    title,
+                    subtitle,
+                    narrative,
+                    facts,
+                    concepts,
+                    ",".join(tags or []),
+                    ",".join(files_read or []),
+                    ",".join(files_modified or []),
+                    now,
+                ),
+            )
+            await conn.commit()
+            return int(cur.lastrowid)  # type: ignore[union-return]
+
+        return await self._write_with_retry(_do_insert)
 
     async def add_session_summary(
         self,
@@ -266,19 +410,21 @@ class ObservationStore:
         notes: str = "",
     ) -> int:
         """Store or replace (UPSERT) a session summary."""
-        conn = await self._ensure_connection()
         now = datetime.now(UTC).isoformat(timespec="seconds")
 
-        cur = await conn.execute(
-            """
-            INSERT OR REPLACE INTO session_summaries
-            (session_id, request, investigated, learned, completed, next_steps, notes, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (session_id, request, investigated, learned, completed, next_steps, notes, now),
-        )
-        await conn.commit()
-        return int(cur.lastrowid)  # type: ignore[union-return]
+        async def _do_upsert(conn: aiosqlite.Connection) -> int:
+            cur = await conn.execute(
+                """
+                INSERT OR REPLACE INTO session_summaries
+                (session_id, request, investigated, learned, completed, next_steps, notes, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (session_id, request, investigated, learned, completed, next_steps, notes, now),
+            )
+            await conn.commit()
+            return int(cur.lastrowid)  # type: ignore[union-return]
+
+        return await self._write_with_retry(_do_upsert)
 
     # ── Layer 1: search — compact index (~50-100 tokens/result) ────────────────
 
@@ -298,9 +444,10 @@ class ObservationStore:
                 """,
                 (type_filter, limit),
             )
+            results = await rows.fetchall()
         elif query:
             # FTS5 search on title/subtitle/narrative/concepts
-            fts_query = _escape_fts_query(query)
+            fts_query = _sanitize_fts5_query(query)
             rows = await conn.execute(
                 """
                 SELECT o.id, o.type, o.title, o.created_at
@@ -377,7 +524,7 @@ class ObservationStore:
                 (type_filter, cutoff_str, limit),
             )
         elif query:
-            fts_query = _escape_fts_query(query)
+            fts_query = _sanitize_fts5_query(query)
             rows = await conn.execute(
                 """
                 SELECT o.id, o.type, o.title, o.subtitle, o.created_at
@@ -522,20 +669,62 @@ class ObservationStore:
             self.conn = None
 
 
-def _escape_fts_query(query: str) -> str:
-    """Escape special FTS5 characters and format for AND search."""
-    # Remove special operators, escape quotes
-    special = {'"', "'", "*", "(", ")", ":", "^", "-", "+", "~"}
-    for ch in special:
-        query = query.replace(ch, " ")
-    query = query.strip()
-    if not query:
-        return "*"
-    # Split into words and require all of them
-    words = [w for w in query.split() if w]
-    if not words:
-        return "*"
-    return " ".join(f'"{w}"' for w in words)
+def _sanitize_fts5_query(query: str) -> str:
+    """Sanitize user input for safe use in FTS5 MATCH queries.
+
+    FTS5 has its own query syntax where characters like ``"``, ``(``, ``)``,
+    ``+``, ``*``, ``{``, ``}`` and bare boolean operators (``AND``, ``OR``,
+    ``NOT``) have special meaning.  Passing raw user input directly to
+    MATCH can cause ``sqlite3.OperationalError``.
+
+    Strategy:
+    - Preserve properly paired quoted phrases (``"exact phrase"``)
+    - Strip unmatched FTS5-special characters that would cause errors
+    - Wrap unquoted hyphenated and dotted terms in quotes so FTS5
+      matches them as exact phrases instead of splitting on the
+      hyphen/dot (e.g. ``chat-send``, ``P2.2``, ``my-app.config.ts``)
+    """
+    # Step 1: Extract balanced double-quoted phrases and protect them
+    # from further processing via numbered placeholders.
+    _quoted_parts: list = []
+
+    def _preserve_quoted(m: re.Match) -> str:
+        _quoted_parts.append(m.group(0))
+        return f"\x00Q{len(_quoted_parts) - 1}\x00"
+
+    sanitized = re.sub(r'"[^"]*"', _preserve_quoted, query)
+
+    # Step 2: Strip remaining (unmatched) FTS5-special characters
+    sanitized = re.sub(r"[+{}()^]", " ", sanitized)
+
+    # Step 3: Collapse repeated * (e.g. "***") into a single one,
+    # and remove leading * (prefix-only needs at least one char before *)
+    sanitized = re.sub(r"\*+", "*", sanitized)
+    sanitized = re.sub(r"(^|\s)\*", r"\1", sanitized)
+
+    # Step 4: Remove dangling boolean operators at start/end that would
+    # cause syntax errors (e.g. "hello AND" or "OR world")
+    sanitized = re.sub(r"(?i)^(AND|OR|NOT)\b\s*", "", sanitized.strip())
+    sanitized = re.sub(r"(?i)\s+(AND|OR|NOT)\s*$", "", sanitized.strip())
+
+    # Step 5: Wrap unquoted dotted and/or hyphenated terms in double
+    # quotes.  FTS5's tokenizer splits on dots and hyphens, turning
+    # ``chat-send`` into ``chat AND send`` and ``P2.2`` into ``p2 AND 2``.
+    # Quoting preserves phrase semantics.  A single pass avoids the
+    # double-quoting bug that would occur if dotted, hyphenated and underscored
+    # patterns were applied sequentially (e.g. ``my-app.config``).
+    sanitized = re.sub(r"\b(\w+(?:[._-]\w+)+)\b", r'"\1"', sanitized)
+
+    # Step 6: Strip any remaining unmatched double quotes (e.g. "unterminated)
+    # that were not captured as properly-paired phrases in Step 1.
+    # Do this BEFORE restoring preserved phrases so we don't strip their quotes.
+    sanitized = sanitized.replace('"', "")
+
+    # Step 7: Restore preserved quoted phrases
+    for i, quoted in enumerate(_quoted_parts):
+        sanitized = sanitized.replace(f"\x00Q{i}\x00", quoted)
+
+    return sanitized.strip()
 
 
 # ── Singleton ─────────────────────────────────────────────────────────────────

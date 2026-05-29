@@ -176,13 +176,11 @@ def _log(msg: str) -> None:
 # ── Main loop ────────────────────────────────────────────────────────────────
 
 def run() -> None:
-    _log("session_watcher started (PID %d)" % os.getpid())
+    _log(f"session_watcher started (PID {os.getpid()})")
     _write_pid()
     logger.info("session_watcher started — poll=%ds save=%ds", POLL_INTERVAL, SAVE_INTERVAL)
 
-    last_state_mtime = 0
-    last_save_time = time.time()
-    last_state: dict = {}
+    _last_save_time = time.time()
     prev_state_str = ""
 
     while not stop_event.wait(POLL_INTERVAL):
@@ -192,12 +190,6 @@ def run() -> None:
                 _log("stop signal detected")
                 break
 
-            # Check if current.json changed (new checkpoint trigger)
-            try:
-                cur_mtime = STATE_FILE.stat().st_mtime
-            except OSError:
-                cur_mtime = 0
-
             state = _load_current_state()
 
             # Checkpoint on state change
@@ -205,19 +197,18 @@ def run() -> None:
             if state_str != prev_state_str and state:
                 _write_checkpoint(state)
                 prev_state_str = state_str
-                last_save_time = time.time()  # reset save timer on new checkpoint
-                last_state_mtime = cur_mtime
-                _log("checkpoint created (phase=%s)" % state.get("phase", "?"))
+                _last_save_time = time.time()  # reset save timer on new checkpoint
+                _log(f"checkpoint created (phase={state.get('phase', '?')})")
 
             # Periodic save to mem0/langmem
-            if time.time() - last_save_time >= SAVE_INTERVAL:
+            if time.time() - _last_save_time >= SAVE_INTERVAL:
                 _save_to_memories(state)
-                last_save_time = time.time()
+                _last_save_time = time.time()
                 _log("periodic save done")
 
         except Exception as e:
             logger.debug("Poll error: %s", e)
-            _log("poll error: %s" % e)
+            _log(f"poll error: {e}")
 
     # Graceful shutdown: final checkpoint + save
     _log("shutting down — final save")

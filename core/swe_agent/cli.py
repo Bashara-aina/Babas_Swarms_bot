@@ -62,11 +62,11 @@ async def run_swe_agent(
         )
 
         # Build prompts
-        system_prompt = loop.build_system_prompt(
+        _ = loop.build_system_prompt(
             repo_path=str(env.repo_path),
             repo_url=env.repo_url or "",
         )
-        instance_prompt = loop.build_instance_prompt(problem_statement)
+        _ = loop.build_instance_prompt(problem_statement)
 
         # Run the agent loop
         logger.info(f"Starting SWE-agent run: {instance_id}")
