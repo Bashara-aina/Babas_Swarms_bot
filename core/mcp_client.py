@@ -7,7 +7,6 @@ import contextlib
 import json
 import logging
 import os
-import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -265,7 +264,9 @@ class MCPClient:
             "create_inbox",
             {
                 "username": os.getenv("AGENTMAIL_USERNAME", "legion"),
-                "display_name": os.getenv("AGENTMAIL_DISPLAY_NAME", "Legion — Bashara's AI Assistant"),
+                "display_name": os.getenv(
+                    "AGENTMAIL_DISPLAY_NAME", "Legion — Bashara's AI Assistant"
+                ),
             },
         )
 
@@ -600,7 +601,11 @@ class MCPClientPool:
                 def _find_anyio_bug(ex: BaseException | None) -> RuntimeError | None:
                     if ex is None:
                         return None
-                    if isinstance(ex, RuntimeError) and "cancel scope" in str(ex) and "different task" in str(ex):
+                    if (
+                        isinstance(ex, RuntimeError)
+                        and "cancel scope" in str(ex)
+                        and "different task" in str(ex)
+                    ):
                         return ex
                     if isinstance(ex, BaseExceptionGroup):
                         for sub in ex.exceptions:
