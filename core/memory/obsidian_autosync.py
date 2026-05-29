@@ -77,10 +77,7 @@ memory_layers: {memory_layers_used}
     if log_file.exists():
         existing = log_file.read_text(encoding="utf-8")
         # If existing has no frontmatter yet, add it
-        if not existing.startswith("---"):
-            content = frontmatter + existing
-        else:
-            content = None
+        content = frontmatter + existing if not existing.startswith("---") else None
     else:
         content = frontmatter
 
