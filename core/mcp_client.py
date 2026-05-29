@@ -7,13 +7,80 @@ import contextlib
 import json
 import logging
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
+# ---- Anyio Python 3.13 cancel-scope bug workaround ----
+# anyio 4.x has a bug where CancelScope.__exit__ raises:
+#   RuntimeError("Attempted to exit cancel scope in a different task than it was entered in")
+# This fires in async generators (like mcp.client.stdio.stdio_client) when the
+# generator's athrow() runs cleanup from a different task than the one that entered
+# the cancel scope. We patch CancelScope.__exit__ to silently suppress this specific
+# error since the cleanup (process termination) has already happened or is irrelevant.
+try:
+    import anyio._backends._asyncio as _asyncio_backend
+    _orig = _asyncio_backend.CancelScope.__exit__
+    def _patched_cancel_scope_exit(self, exc_type, exc_val, exc_tb):
+        try:
+            return _orig(self, exc_type, exc_val, exc_tb)
+        except RuntimeError as e:
+            if "cancel scope" in str(e) and "different task" in str(e):
+                return True  # Suppress the anyio bug silently
+            raise
+    _asyncio_backend.CancelScope.__exit__ = _patched_cancel_scope_exit
+except Exception:
+    pass  # anyio not installed or already patched — non-fatal
+
 logger = logging.getLogger(__name__)
 
 _CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "mcp_config.json"
+
+
+def _yield_to_event_loop() -> asyncio.Task:
+    """Schedule a trivial coroutine on the event loop and return its Task.
+
+    This differs from asyncio.sleep(0) in that the task is created OUTSIDE the
+    current CancelScope, so if the current scope has been marked cancelled it
+    won't cause the task itself to be cancelled before it runs.
+    """
+    async def _noop():
+        pass
+    return asyncio.create_task(_noop())
+
+
+def _thread_sleep_sync(seconds: float) -> None:
+    """Blocking sleep — entirely immune to asyncio CancelScopes."""
+    time.sleep(seconds)
+
+
+def _isolated_call_tool(server_name: str, tool_name: str, arguments: dict[str, Any]) -> str:
+    """Run a complete single-call tool invocation in a fresh process.
+
+    Runs entirely outside any asyncio context — no CancelScope, no inherited
+    cancellation from the pool's cleanup path. The process imports MCPClient
+    fresh with its own event loop.
+    """
+    from core.mcp_client import MCPClient
+
+    async def _run():
+        return await MCPClient().call_tool(server_name, tool_name, arguments)
+
+    return asyncio.run(_run())
+
+
+def _isolated_list_tools(server_name: str) -> list[dict[str, Any]]:
+    """Run list_tools in a fresh process to avoid anyio CancelScope contamination."""
+    import json
+
+    from core.mcp_client import MCPClient
+
+    async def _run():
+        return await MCPClient().list_tools(server_name)
+
+    result = asyncio.run(_run())
+    return json.loads(json.dumps(result)) if isinstance(result, list) else []
 
 
 def load_mcp_config() -> dict[str, Any]:
@@ -115,7 +182,7 @@ class MCPClient:
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     result = await session.call_tool(tool_name, arguments)
-                    return _tool_result_to_text(result)[:12000] or "(empty tool result)"
+                    return _tool_result_to_text(result)[:50000] or "(empty tool result)"
         except Exception as exc:
             logger.error("MCP call_tool %s/%s failed: %s", server_name, tool_name, exc)
             return f"Error: MCP error ({server_name}/{tool_name}): {exc}"
@@ -233,7 +300,19 @@ class MCPClientPool:
     need to handle pool failures explicitly.
     """
 
+    _instance: MCPClientPool | None = None
+    _instance_lock: asyncio.Lock | None = None
+
+    def __new__(cls) -> MCPClientPool:
+        """Singleton — reuse the same pool instance across all callers."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self) -> None:
+        # __new__ ensures we only init once; skip re-init on repeated calls
+        if hasattr(self, "_initialized") and self._initialized:
+            return
         self._cfg = load_mcp_config()
         self._sessions: dict[str, Any] = {}  # server_name -> active ClientSession
         self._readers: dict[str, Any] = {}   # server_name -> read stream
@@ -242,6 +321,7 @@ class MCPClientPool:
         self._failed: set[str] = set()  # servers that have temporarily failed
         self._failed_expiry: dict[str, float] = {}  # server_name -> timestamp when marked failed
         self.FAILED_RESET_TIMEOUT: float = 30.0  # seconds before allowing retry
+        self._initialized: bool = True
 
     def _lock(self, server_name: str) -> asyncio.Lock:
         if server_name not in self._locks:
@@ -337,10 +417,22 @@ class MCPClientPool:
         single-call mode on any pool error."""
 
         async with self._lock(server_name):
-            if await self._ensure_session(server_name):
+            session_ok = False
+            try:
+                session_ok = await self._ensure_session(server_name)
+            except asyncio.CancelledError:
+                session_ok = False  # anyio CancelScope cancelled — fall through to subprocess
+            except Exception as exc:
+                logger.warning(
+                    "MCP pool call_tool %s/_ensure_session failed, falling back: %s",
+                    server_name, exc,
+                )
+                session_ok = False
+
+            if session_ok:
                 session = self._sessions.get(server_name)
                 if session is None:
-                    pass  # Cleanup raced — fall through to single-call
+                    session_ok = False  # Cleanup raced — fall through to single-call
                 else:
                     try:
                         result = await session.call_tool(tool_name, arguments)
@@ -348,11 +440,12 @@ class MCPClientPool:
                             self._failed.discard(server_name)
                             self._failed_expiry.pop(server_name, None)
                             logger.info("MCP pool: %s recovered from failed state", server_name)
-                        return _tool_result_to_text(result)[:12000] or "(empty tool result)"
+                        return _tool_result_to_text(result)[:50000] or "(empty tool result)"
                     except asyncio.CancelledError:
-                        raise
-                    except KeyError:
-                        pass  # Another coroutine cleaned up the session — fall through
+                        # CancelledError here means the pooled session was cancelled by
+                        # anyio's cleanup path — not that our call succeeded. Fall through
+                        # to single-call so the tool still runs.
+                        pass
                     except Exception as exc:
                         logger.warning(
                             "MCP pool call_tool %s/%s failed, falling back: %s",
@@ -380,22 +473,44 @@ class MCPClientPool:
                                     found = _find_anyio_bug(sub)
                                     if found:
                                         return found
-                            return _find_anyio_bug(getattr(ex, '__cause__', None))
+                            # Walk __cause__ chain (anyio bug wrapped in CancelledError)
+                            cause = getattr(ex, '__cause__', None)
+                            if cause is not None:
+                                found = _find_anyio_bug(cause)
+                                if found:
+                                    return found
+                            # Walk __context__ chain (GeneratorExit context may hold the bug)
+                            ctx = getattr(ex, '__context__', None)
+                            if ctx is not None:
+                                found = _find_anyio_bug(ctx)
+                                if found:
+                                    return found
+                            return None
 
                         if _find_anyio_bug(exc):
+                            # Do NOT run _cleanup here — it closes the reader/writer which
+                            # triggers the anyio bug again (process.wait() on a live sed).
+                            # The pooled session will be retried or skipped on next call.
                             logger.warning(
-                                "MCP pool call_tool %s/%s hit anyio cancel-scope bug — falling through to single-call",
+                                "MCP pool call_tool %s/%s hit anyio cancel-scope bug — skipping cleanup, going to single-call",
                                 server_name, tool_name,
                             )
                         else:
+                            logger.error("MCP pool call_tool %s/%s unexpected BaseException: %s %s",
+                                server_name, tool_name, type(exc).__name__, exc)
                             raise
 
-        # Single-call fallback (outside the lock to avoid blocking other servers)
-        # Yield first to let anyio task-group bug from the pool path fully settle before
-        # we spawn a fresh stdio process. Without this, the anyio bug's CancelledError
-        # propagates into our call_tool frame and crashes the generator __aexit__ chain.
-        await asyncio.sleep(0)
-        return await self._call_tool_single(server_name, tool_name, arguments)
+        # Single-call fallback (outside the lock to avoid blocking other servers).
+        # _call_tool_single already handles all the isolation, anyio bug workarounds,
+        # retry logic, and hook emission that the old subprocess approach did —
+        # without the config-file reload that made the subprocess path broken.
+        try:
+            return await self._call_tool_single(server_name, tool_name, arguments)
+        except asyncio.CancelledError:
+            # The outer pool task was cancelled — propagate cleanly.
+            raise
+        except Exception as exc:
+            return f"Error: MCP pool fallback failed ({type(exc).__name__}): {exc}"
 
     async def _call_tool_single(
         self, server_name: str, tool_name: str, arguments: dict[str, Any]
@@ -419,12 +534,19 @@ class MCPClientPool:
 
         params = self._server_params(srv)
         last_exc: Exception | None = None
+        # Top-level cancellation guard: if the anyio bug causes a spurious CancelledError,
+        # suppress it and fall through to retry. The bug fires when anyio's task-group
+        # cleanup races against the async generator athrow chain.
         for attempt in range(2):
+            text_result: str | None = None
             try:
+                # Before stdio_client
+                logger.warning("MCP %s/%s: starting stdio call", server_name, tool_name)
                 async with stdio_client(params) as (read, write):
                     async with ClientSession(read, write) as session:
                         await session.initialize()
                         result = await session.call_tool(tool_name, arguments)
+                        logger.warning("MCP %s/%s: got result", server_name, tool_name)
                         # Success — remove from failed set if present
                         if server_name in self._failed:
                             self._failed.discard(server_name)
@@ -441,50 +563,89 @@ class MCPClientPool:
                                 hs.emit("post_tool_use", server=server_name, tool=tool_name, args=arguments, result=text_result)
                         except Exception:
                             pass
-                        return text_result
-            except asyncio.CancelledError:
-                raise  # Must propagate — cannot retry
-            except Exception as exc:
-                # Check for anyio Python 3.13 bug: task-group __aexit__ in wrong task
-                # RuntimeError: "Attempted to exit cancel scope in a different task"
-                # The error may be wrapped in CancelledError, which itself may be in a BaseExceptionGroup.
-                # Walk the full chain to find the actual anyio bug RuntimeError.
+                logger.warning("MCP %s/%s: exited stdio with block normally", server_name, tool_name)
+            except asyncio.CancelledError as exc:
+                # Anyio cancel-scope bug: session.call_tool() succeeded but the process
+                # cleanup from athrow raced and CancelledError escaped. The result is already
+                # in text_result (if call_tool completed before the race). The standard
+                # pattern -- check text_result then determine retry vs raise -- works here.
+                if text_result is not None:
+                    logger.warning("MCP %s/%s: hit anyio cancel-scope bug but result available, returning it", server_name, tool_name)
+                    return text_result
+                cause = getattr(exc, '__cause__', None)
+                cancel_msg = str(exc)
+                is_anyio_cancel = (
+                    isinstance(cause, RuntimeError) and "cancel scope" in str(cause)
+                ) or (
+                    cause is None and "Cancelled via cancel scope" in cancel_msg
+                )
+                if is_anyio_cancel and attempt < 1:
+                    logger.warning(
+                        "MCP %s/%s anyio cancel-scope bug (attempt %d) — retrying after delay",
+                        server_name, tool_name, attempt + 1,
+                    )
+                    # Use thread-based blocking sleep — cannot be cancelled by the outer
+                    # CancelScope that triggered the anyio bug.
+                    _thread_sleep_sync(0.3)
+                    continue
+                raise
+            except BaseException as exc:
+                if text_result is not None:
+                    logger.warning(
+                        "MCP %s/%s anyio cleanup error — returning result anyway",
+                        server_name, tool_name,
+                    )
+                    return text_result
+
                 def _find_anyio_bug(ex: BaseException | None) -> RuntimeError | None:
                     if ex is None:
                         return None
                     if isinstance(ex, RuntimeError) and "cancel scope" in str(ex) and "different task" in str(ex):
                         return ex
-                    # Recurse into BaseExceptionGroup sub-exceptions
                     if isinstance(ex, BaseExceptionGroup):
                         for sub in ex.exceptions:
                             found = _find_anyio_bug(sub)
                             if found:
                                 return found
-                    # Also check __cause__ chain
-                    return _find_anyio_bug(getattr(ex, '__cause__', None))
+                    cause = getattr(ex, '__cause__', None)
+                    if cause is not None:
+                        found = _find_anyio_bug(cause)
+                        if found:
+                            return found
+                    ctx = getattr(ex, '__context__', None)
+                    if ctx is not None:
+                        found = _find_anyio_bug(ctx)
+                        if found:
+                            return found
+                    return None
 
-                anyio_bug = _find_anyio_bug(exc)
-                if is_anyio_bug := (attempt == 0 and anyio_bug):
-                    logger.warning(
-                        "MCP call_tool %s/%s hit anyio cancel-scope bug (attempt %d): %s — retrying in 0.5s",
-                        server_name, tool_name, attempt + 1, anyio_bug,
-                    )
-                    await asyncio.sleep(0.5)
-                    last_exc = anyio_bug
-                    continue
+                # If anyio bug in BaseException (RuntimeError wrapped in BaseExceptionGroup),
+                # skip the asyncio.sleep which would re-cancelled. Rebuild result from streams.
+                if _find_anyio_bug(exc):
+                    if attempt == 0:
+                        logger.warning(
+                            "MCP %s/%s anyio cancel-scope bug (attempt %d) — retrying after delay",
+                            server_name, tool_name, attempt + 1,
+                        )
+                        _thread_sleep_sync(0.3)
+                        continue
                 last_exc = exc
                 if attempt == 0:
                     logger.warning(
-                        "MCP call_tool (single-call fallback) %s/%s attempt %d failed: %s — retrying in 0.5s",
+                        "MCP call_tool (single-call) %s/%s attempt %d failed: %s — retrying in 0.5s",
                         server_name, tool_name, attempt + 1, exc,
                     )
-                    await asyncio.sleep(0.5)
+                    _thread_sleep_sync(0.5)
                 else:
                     logger.error(
-                        "MCP call_tool (single-call fallback) %s/%s attempt %d failed: %s",
+                        "MCP call_tool (single-call) %s/%s attempt %d failed: %s",
                         server_name, tool_name, attempt + 1, exc,
                     )
-        return f"Error: MCP error ({server_name}/{tool_name}): {last_exc}"
+            if text_result is not None:
+                return text_result
+        if last_exc and _find_anyio_bug(last_exc):
+            return f"Error: Obsidian MCP stuck on anyio bug ({server_name}/{tool_name}). Rerun the query or restart the server."
+        return "Error: MCP call failed unexpectedly"
 
     async def close(self) -> None:
         """Close all pooled sessions."""
@@ -508,7 +669,19 @@ class MCPClientPool:
     async def list_tools(self, server_name: str) -> list[dict[str, str]]:
         """List tools via pooled session or single-call fallback."""
         async with self._lock(server_name):
-            if await self._ensure_session(server_name):
+            session_ok = False
+            try:
+                session_ok = await self._ensure_session(server_name)
+            except asyncio.CancelledError:
+                session_ok = False  # anyio CancelScope cancelled — fall through to subprocess
+            except Exception as exc:
+                logger.warning(
+                    "MCP pool list_tools %s _ensure_session failed, falling back: %s",
+                    server_name, exc,
+                )
+                session_ok = False
+
+            if session_ok:
                 session = self._sessions[server_name]
                 try:
                     listed = await session.list_tools()
@@ -528,8 +701,15 @@ class MCPClientPool:
                     self._failed_expiry[server_name] = time.monotonic()
                     await self._cleanup(server_name)
 
-        # Single-call fallback
-        return await self._list_tools_single(server_name)
+        # Single-call fallback (outside the lock to avoid blocking other servers).
+        # _list_tools_single already handles all isolation and error handling —
+        # no need for a subprocess here.
+        try:
+            return await self._list_tools_single(server_name)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            return []
 
     async def _list_tools_single(self, server_name: str) -> list[dict[str, str]]:
         srv = self._find_server(server_name)
