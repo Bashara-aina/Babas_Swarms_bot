@@ -157,7 +157,7 @@ def run_claude(args: list[str], timeout: int = 120) -> dict[str, Any]:
     """Run Claude CLI and return parsed output."""
     try:
         result = subprocess.run(
-            [CLAUDE_BIN] + args,
+            [CLAUDE_BIN, *args],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -193,7 +193,7 @@ def handle_list_tools() -> dict[str, Any]:
 
 
 def handle_call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-    workspace = arguments.get("workspace", WORKSPACE)
+    _workspace = arguments.get("workspace", WORKSPACE)  # reserved for future use
     output_format = arguments.get("output_format", "json")
 
     if name == "claude_code_task":
@@ -256,7 +256,7 @@ def handle_call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"error": f"Unknown tool: {name}", "success": False}
 
 
-def handle_jsonrpc(message: dict[str, Any]) -> Optional[dict[str, Any]]:
+def handle_jsonrpc(message: dict[str, Any]) -> dict[str, Any] | None:
     method = message.get("method", "")
     msg_id = message.get("id")
 
