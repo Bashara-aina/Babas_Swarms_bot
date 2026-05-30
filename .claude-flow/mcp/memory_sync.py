@@ -222,7 +222,7 @@ def read_layer4_observations(limit: int = 50) -> list[dict[str, Any]]:
                 rows = conn.execute(f"SELECT * FROM {table} LIMIT ?", (limit,)).fetchall()
                 cols = [d[0] for d in conn.execute(f"PRAGMA table_info({table})").fetchall()]
                 for row in rows:
-                    entry = dict(zip(cols, row))
+                    entry = dict(zip(cols, row, strict=True))
                     results.append({"source": "L4_observations", "table": table, "entry": entry})
             except Exception:
                 pass
@@ -395,7 +395,7 @@ def pull_from_hermes(summary: str = "Claude Code context sync") -> dict[str, Any
         for i, entry in enumerate(mem_entries[-10:], 1):
             sync_content += f"### Entry {i}\n\n{entry}\n\n"
 
-        write_result = write_to_layer3_langmem("hermes_memory_sync", sync_content)
+        _write_result = write_to_layer3_langmem("hermes_memory_sync", sync_content)
         results["layers_updated"].append("L3_langmem")
         results["entries_transferred"] += len(mem_entries)
 

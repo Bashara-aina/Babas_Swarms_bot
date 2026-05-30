@@ -175,7 +175,7 @@ def execute_hierarchy(coordinator_id: str, goal: str, max_specialists: int = 5,
 
     # Each specialist spawns workers
     all_worker_ids = []
-    for i, (sid, subtask) in enumerate(zip(specialist_ids, subtasks)):
+    for i, (sid, subtask) in enumerate(zip(specialist_ids, subtasks, strict=True)):
         workers_needed = min(max_workers_per_specialist, 1)
         worker_ids = spawn_worker(sid, subtask["domain"], workers_needed)
         all_worker_ids.extend(worker_ids)
@@ -188,7 +188,7 @@ def execute_hierarchy(coordinator_id: str, goal: str, max_specialists: int = 5,
         return {"worker_id": wid, "status": "completed"}
 
     # Simulated completion
-    for (sid, subtask), worker_ids in zip(zip(specialist_ids, subtasks), [all_worker_ids]):
+    for (sid, subtask), worker_ids in zip(zip(specialist_ids, subtasks, strict=True), [all_worker_ids], strict=True):
         for wid in worker_ids:
             _simulate_worker(wid, subtask)
         _update_agent(sid, status="completed", completed_at=time.time())

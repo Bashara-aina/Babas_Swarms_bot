@@ -1016,7 +1016,7 @@ def handle_hermes_hooks(args: dict) -> str:
 
 def _init_builtins() -> None:
     """Auto-register common built-in hooks if not already registered."""
-    registry = get_instance()
+    get_registry()  # triggers lazy singleton initialization
 
     # Auto-register tool logger for all tool-call events
     # This runs silently; user can unregister if not wanted

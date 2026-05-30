@@ -231,7 +231,7 @@ class _Ex(ast.NodeVisitor):
 
 def _parse(path: str) -> tuple[list[dict], list[tuple]]:
     try: src=Path(path).read_text(encoding="utf-8",errors="ignore")
-    except: return [],[]
+    except Exception: return [],[]
     try: tree=ast.parse(src,filename=path)
     except SyntaxError: return [],[]
     ex=_Ex(path); ex.visit(tree)

@@ -2230,7 +2230,7 @@ if RETRIEVAL_FUSION_AVAILABLE:
 CLAUDE_BIN = "/home/newadmin/.local/bin/claude"
 CLAUDE_WORKSPACE = "/home/newadmin/swarm-bot"
 
-def _safe_json_dumps(obj: Any, max_len: int = 50000) -> str:
+def _safe_json_dumps(obj: Any, max_len: int = 50000) -> str:  # noqa: F821 — Any imported at line 2965
     """Serialize to JSON, truncating long outputs to prevent API argument size errors."""
     try:
         s = json.dumps(obj)
@@ -2962,6 +2962,7 @@ def execute_java(code: str, timeout: int = 60) -> str:
 # ════════════════════════════════════════════════════════════════════════════
 
 import concurrent.futures
+from typing import Any
 
 _SHARED_CHROMA_NS = "hermes_subagents"
 

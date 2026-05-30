@@ -334,7 +334,7 @@ def export_session_bundle(session_ids: list[str], path: str) -> dict[str, Any]:
             row = conn.execute("SELECT * FROM sessions_fts WHERE session_id = ?", (sid,)).fetchone()
             if row:
                 cols = [d[0] for d in conn.execute("PRAGMA table_info(sessions_fts)").fetchall()]
-                bundle.append(dict(zip(cols, row)))
+                bundle.append(dict(zip(cols, row, strict=True)))
         conn.close()
 
     with gzip.open(path, "wt", encoding="utf-8") as f:

@@ -189,7 +189,7 @@ def index_collection(collection: str, texts: list[str], doc_ids: list[str] = Non
         total_docs = len(texts)
 
         # Insert documents
-        for doc_id, text, tokens, dl in zip(doc_ids, texts, tokenized_texts, doc_lens):
+        for doc_id, text, tokens, dl in zip(doc_ids, texts, tokenized_texts, doc_lens, strict=True):
             conn.execute("""
                 INSERT INTO bm25_index (doc_id, collection, content, tokenized, doc_len, updated)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -244,7 +244,7 @@ def _bm25_search(collection: str, query: str, top_k: int = 20) -> list[tuple[str
             return []
 
         doc_count, avg_doc_len, idf_cache = row
-        idf = json.loads(idf_cache) if idf_cache else {}
+        # idf_cache read but not used in scoring — IDF is recomputed per-query via _compute_idf
 
         # Get all docs for this collection
         rows = conn.execute("""
@@ -302,7 +302,6 @@ def _vector_search(query: str, collection: str = "hermes_shared", top_k: int = 2
 
         # Score by keyword match density
         results = []
-        query_lower = query.lower()
         for row in rows:
             doc_id, doc, _ = row
             if not doc:
@@ -369,7 +368,6 @@ def fusion_retrieve(query: str, collection: str = "memory", top_k: int = 10) -> 
 
     # Build final result
     doc_ids = [d for d, _ in fused[:top_k]]
-    doc_scores_map = dict(fused)
 
     # Fetch doc contents
     with LOCK:

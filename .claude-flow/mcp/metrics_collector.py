@@ -95,7 +95,7 @@ def get_tool_metrics(tool_name: str) -> dict[str, Any]:
     if not row:
         return {"tool_name": tool_name, "error": "not found"}
     cols = ["tool_name", "call_count", "total_latency_ms", "error_count", "last_called", "latency_samples"]
-    data = dict(zip(cols, row))
+    data = dict(zip(cols, row, strict=True))
     avg_latency = data["total_latency_ms"] / data["call_count"] if data["call_count"] > 0 else 0
     error_rate = data["error_count"] / data["call_count"] if data["call_count"] > 0 else 0
     # Compute percentiles from log

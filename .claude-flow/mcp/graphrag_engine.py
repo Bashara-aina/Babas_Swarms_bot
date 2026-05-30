@@ -209,7 +209,7 @@ def index_file(path: str, conn: sqlite3.Connection) -> dict:
 
     for n in nodes:
         emb = json.dumps(n["embedding"]) if n["embedding"] else None
-        cur = conn.execute("""
+        conn.execute("""
             INSERT OR REPLACE INTO nodes (name, kind, file_path, line_number, docstring,
             signature, content_hash, embedding, updated)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -278,7 +278,7 @@ def _vector_search(query: str, top_k: int = 10) -> list[dict]:
     for row in rows:
         try:
             ne = json.loads(row[7])
-            sim = sum(a * b for a, b in zip(emb, ne))
+            sim = sum(a * b for a, b in zip(emb, ne, strict=True))
             scored.append((sim, row))
         except Exception:
             pass

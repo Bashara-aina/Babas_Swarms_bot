@@ -152,7 +152,7 @@ def read_layer4(limit: int = 20) -> list[dict[str, Any]]:
                 rows = conn.execute(f"SELECT * FROM {table} LIMIT ?", (limit,)).fetchall()
                 cols = [d[0] for d in conn.execute(f"PRAGMA table_info({table})").fetchall()]
                 for row in rows:
-                    entry = dict(zip(cols, row))
+                    entry = dict(zip(cols, row, strict=True))
                     results.append({"table": table, "entry": entry})
             except Exception:
                 pass

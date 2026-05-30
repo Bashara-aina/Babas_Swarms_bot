@@ -244,7 +244,7 @@ def _classify_entry(content: str, code_refs: list[str]) -> dict[str, Any]:
 Entry: {content[:300]}
 Code refs: {code_refs}
 
-Respond with only valid JSON."""
+Respond with only valid JSON."""  # noqa: F841 — call-ready scaffold, LLM call commented out
 
     # This would make the actual LLM call:
     # import httpx
@@ -295,7 +295,7 @@ Remove redundant parts, keep the key insight.
 Chunks:
 {chr(10).join(chunks[:5])}
 
-Respond with only the synthesized content, no formatting."""
+Respond with only the synthesized content, no formatting."""  # noqa: F841 — call-ready scaffold, LLM call commented out
 
     # Actual LLM call would be:
     # response = httpx.post(...)
@@ -339,7 +339,7 @@ def extract_from_messages(
 
     # Extract content from messages
     content_chunks: list[str] = []
-    current_topic = ""
+    _current_topic = ""  # noqa: F841 — reserved for future topic tracking
 
     for msg in messages:
         content = msg.get("content", "") or ""
