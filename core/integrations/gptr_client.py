@@ -21,7 +21,7 @@ class GPTResearcherClient:
 
     def _check_available(self) -> bool:
         try:
-            import gpt_researcher  # noqa: F401 — side effect checks availability
+            import gpt_researcher
 
             return True
         except ImportError:

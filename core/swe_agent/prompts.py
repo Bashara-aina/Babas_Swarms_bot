@@ -7,8 +7,6 @@ They follow the SWE-agent paper's approach to agent prompts.
 
 from __future__ import annotations
 
-import os
-import textwrap
 from pathlib import Path
 
 # ---------------------------------------------------------------------------

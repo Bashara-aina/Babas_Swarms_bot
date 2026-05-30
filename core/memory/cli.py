@@ -6,7 +6,6 @@ Usage:
   python -m core.memory.infinite.cli remember "OpenCode session: implemented X"
 """
 import argparse
-import sys
 
 
 def main():

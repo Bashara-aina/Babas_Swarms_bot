@@ -8,7 +8,6 @@ import hashlib
 import re
 import threading
 from pathlib import Path
-from typing import Optional
 
 import chromadb
 from chromadb.config import Settings

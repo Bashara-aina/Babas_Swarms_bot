@@ -34,7 +34,7 @@ import os
 import re
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -1345,7 +1345,6 @@ def _sync_mem0_into_langmem() -> None:
         return
     _LANGMEM_SYNCED = True
     try:
-        from langgraph.store.memory import InMemoryStore
 
         from core.memory.store import MemoryStore
         store = _get_langmem_store()

@@ -29,10 +29,11 @@ import logging
 import time
 import uuid
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from core.recursive_mas import RecursiveMASOrchestrator
@@ -499,7 +500,6 @@ class HarnessVerifier:
             (all_passed, results) where results has per-case info
         """
         import sys
-        from io import StringIO
 
         # Create a namespace to execute harness
         namespace = {"__name__": "__harness_test__"}
@@ -1265,7 +1265,6 @@ async def run_meta_harness(
         best = frontier.candidates[0]
         print(f"Best harness: {best.description}")
     """
-    from core.recursive_mas import CollaborationPattern, RecursiveMASOrchestrator
 
     # Initialize optimizer
     optimizer = MetaHarnessOptimizer(

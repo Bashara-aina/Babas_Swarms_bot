@@ -13,12 +13,10 @@ from __future__ import annotations
 import difflib
 import logging
 import os
-import re
 import shlex
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 

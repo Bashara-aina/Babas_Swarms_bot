@@ -10,10 +10,8 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import logging
 import sys
-from pathlib import Path
 
 from core.swe_agent.config import DEFAULT_CONFIG, load_config
 from core.swe_agent.environment import Environment

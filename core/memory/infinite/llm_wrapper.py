@@ -5,7 +5,6 @@ Surgically adds memory recall block to the system message.
 from __future__ import annotations
 
 import threading
-from typing import Optional
 
 from ..store import MemoryStore
 
