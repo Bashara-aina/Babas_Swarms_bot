@@ -10,7 +10,7 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 PROJECT_ROOT = Path("/home/newadmin/swarm-bot")
 DATA_DIR = PROJECT_ROOT / ".claude-flow" / "data"
@@ -22,7 +22,7 @@ MAX_TOKENS = 128000
 TRIGGERS = {"light": 0.70, "medium": 0.85, "aggressive": 0.95}
 LOCK = threading.Lock()
 
-def _load_history() -> List[Dict[str, Any]]:
+def _load_history() -> list[dict[str, Any]]:
     """Load compaction history."""
     if not HISTORY_PATH.exists():
         return []
@@ -31,11 +31,11 @@ def _load_history() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _save_history(history: List[Dict[str, Any]]) -> None:
+def _save_history(history: list[dict[str, Any]]) -> None:
     """Save compaction history."""
     HISTORY_PATH.write_text(json.dumps(history[-50:], indent=2))
 
-def _load_session_state() -> Dict[str, Any]:
+def _load_session_state() -> dict[str, Any]:
     """Load current session state (context utilization tracking)."""
     if not SESSION_STATE_PATH.exists():
         return _default_state()
@@ -44,7 +44,7 @@ def _load_session_state() -> Dict[str, Any]:
     except Exception:
         return _default_state()
 
-def _default_state() -> Dict[str, Any]:
+def _default_state() -> dict[str, Any]:
     """Default session state."""
     return {
         "context_length": 0,
@@ -55,7 +55,7 @@ def _default_state() -> Dict[str, Any]:
         "last_checkpoint_path": None,
     }
 
-def _save_session_state(state: Dict[str, Any]) -> None:
+def _save_session_state(state: dict[str, Any]) -> None:
     """Save session state."""
     SESSION_STATE_PATH.write_text(json.dumps(state, indent=2))
 
@@ -73,7 +73,7 @@ def _determine_level(utilization: float) -> str:
         return "light"
     return "none"
 
-def _load_session_messages() -> List[Dict[str, Any]]:
+def _load_session_messages() -> list[dict[str, Any]]:
     """Load current session messages from session state."""
     state = _load_session_state()
     msgs_path = DATA_DIR / "session_messages.json"
@@ -84,7 +84,7 @@ def _load_session_messages() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _preserve_current_file(msgs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _preserve_current_file(msgs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Preserve: current file being edited, recent tool results, active task."""
     preserved = []
     for m in msgs[-20:]:
@@ -97,7 +97,7 @@ def _preserve_current_file(msgs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             break
     return preserved[-5:] if preserved else msgs[-3:]
 
-def _condense_messages(msgs: List[Dict[str, Any]], level: str) -> List[Dict[str, Any]]:
+def _condense_messages(msgs: list[dict[str, Any]], level: str) -> list[dict[str, Any]]:
     """Condense: older messages, repeated patterns, verbose tool outputs."""
     if level == "none":
         return msgs
@@ -115,7 +115,7 @@ def _condense_messages(msgs: List[Dict[str, Any]], level: str) -> List[Dict[str,
         condensed.append({"role": role, "content": content})
     return condensed[-keep_count:] if len(condensed) > keep_count else condensed
 
-def _summarize_discussion(msgs: List[Dict[str, Any]]) -> str:
+def _summarize_discussion(msgs: list[dict[str, Any]]) -> str:
     """Summarize long discussions into key points."""
     if len(msgs) <= 5:
         return ""
@@ -127,7 +127,7 @@ def _summarize_discussion(msgs: List[Dict[str, Any]]) -> str:
             summaries.append(f"[{role}]: {content[:150]}...")
     return "\n".join(summaries[-10:])
 
-def _build_checkpoint(msgs: List[Dict[str, Any]], level: str, reason: str) -> str:
+def _build_checkpoint(msgs: list[dict[str, Any]], level: str, reason: str) -> str:
     """Build checkpoint markdown compatible with CLAUDE.md reload."""
     sections = []
     sections.append("# Context Compaction Checkpoint\n")
@@ -179,7 +179,7 @@ def _write_checkpoint(content: str, level: str) -> str:
     CHECKPOINT_PATH.write_text(content)
     return str(path)
 
-def update_context_length(text_length: int) -> Dict[str, Any]:
+def update_context_length(text_length: int) -> dict[str, Any]:
     """Update current context length and return utilization state."""
     with LOCK:
         state = _load_session_state()
@@ -194,7 +194,7 @@ def update_context_length(text_length: int) -> Dict[str, Any]:
             "last_compaction": state.get("last_compaction"),
         }
 
-def compactor_status() -> Dict[str, Any]:
+def compactor_status() -> dict[str, Any]:
     """Get current utilization and last compaction info."""
     with LOCK:
         state = _load_session_state()
@@ -214,7 +214,7 @@ def compactor_status() -> Dict[str, Any]:
             "last_compaction_info": last,
         }
 
-def compactor_compact(level: str = "auto", reason: str = "") -> Dict[str, Any]:
+def compactor_compact(level: str = "auto", reason: str = "") -> dict[str, Any]:
     """Trigger compaction at specified or auto-determined level."""
     with LOCK:
         state = _load_session_state()
@@ -259,7 +259,7 @@ def compactor_compact(level: str = "auto", reason: str = "") -> Dict[str, Any]:
             "compaction_count": state["compaction_count"],
         }
 
-def compactor_restore() -> Dict[str, Any]:
+def compactor_restore() -> dict[str, Any]:
     """Restore context from last checkpoint."""
     if not CHECKPOINT_PATH.exists():
         return {"error": "no checkpoint found"}
@@ -276,7 +276,7 @@ def compactor_restore() -> Dict[str, Any]:
     except Exception as e:
         return {"error": str(e)}
 
-def compactor_history() -> Dict[str, Any]:
+def compactor_history() -> dict[str, Any]:
     """Get list of past compactions."""
     history = _load_history()
     return {
@@ -306,7 +306,7 @@ def compactor_register_message(role: str, content: str) -> None:
         state["utilization_pct"] = min(100.0, (total_len / MAX_TOKENS) * 100)
         _save_session_state(state)
 
-def handle_context_compactor(args: Dict[str, Any]) -> str:
+def handle_context_compactor(args: dict[str, Any]) -> str:
     """Handler for context compactor operations."""
     action = args.get("action", "status")
     if action == "status":

@@ -7,7 +7,7 @@ import json
 import os
 import subprocess
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 VERSION = "1.0.0"
 CLAUDE_BIN = "/home/newadmin/.local/bin/claude"
@@ -153,7 +153,7 @@ TOOLS = [
 ]
 
 
-def run_claude(args: List[str], timeout: int = 120) -> Dict[str, Any]:
+def run_claude(args: list[str], timeout: int = 120) -> dict[str, Any]:
     """Run Claude CLI and return parsed output."""
     try:
         result = subprocess.run(
@@ -180,7 +180,7 @@ def run_claude(args: List[str], timeout: int = 120) -> Dict[str, Any]:
         return {"error": str(e), "stdout": "", "stderr": str(e), "returncode": -1, "success": False}
 
 
-def handle_initialize() -> Dict[str, Any]:
+def handle_initialize() -> dict[str, Any]:
     return {
         "protocolVersion": "2024-11-05",
         "capabilities": {"tools": {}},
@@ -188,11 +188,11 @@ def handle_initialize() -> Dict[str, Any]:
     }
 
 
-def handle_list_tools() -> Dict[str, Any]:
+def handle_list_tools() -> dict[str, Any]:
     return {"tools": TOOLS}
 
 
-def handle_call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+def handle_call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     workspace = arguments.get("workspace", WORKSPACE)
     output_format = arguments.get("output_format", "json")
 
@@ -256,7 +256,7 @@ def handle_call_tool(name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         return {"error": f"Unknown tool: {name}", "success": False}
 
 
-def handle_jsonrpc(message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def handle_jsonrpc(message: dict[str, Any]) -> Optional[dict[str, Any]]:
     method = message.get("method", "")
     msg_id = message.get("id")
 
