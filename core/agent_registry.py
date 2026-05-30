@@ -642,7 +642,7 @@ try:
     _DEBATE_PERSONA_MODELS = {k: v["model"] for k, v in _debate.items()}
     _DEBATE_ICONS = {k: v["icon"] for k, v in _debate.items()}
 except Exception:
-    pass
+    logger.warning("Failed to load debate_personas from config — DEBATE_PERSONAS will be empty")
 
 DEBATE_PERSONAS = _DEBATE_PERSONAS
 DEBATE_PERSONA_MODELS = _DEBATE_PERSONA_MODELS
