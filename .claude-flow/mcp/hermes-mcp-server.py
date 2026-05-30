@@ -188,7 +188,7 @@ except Exception as e:
 
 try:
     sys.path.insert(0, str(Path(__file__).parent))
-    from dreaming_consolidation import dreaming_status, dreaming_run, dreaming_preview
+    from dreaming_consolidation import dreaming_preview, dreaming_run, dreaming_status
     DREAMING_AVAILABLE = True
     print("[Hermes MCP] Dreaming consolidation loaded", file=sys.stderr)
 except Exception as e:
@@ -197,7 +197,7 @@ except Exception as e:
 
 try:
     sys.path.insert(0, str(Path(__file__).parent))
-    from retrieval_fusion import fusion_retrieve, fusion_index, fusion_stats
+    from retrieval_fusion import fusion_index, fusion_retrieve, fusion_stats
     RETRIEVAL_FUSION_AVAILABLE = True
     print("[Hermes MCP] Retrieval fusion loaded", file=sys.stderr)
 except Exception as e:
@@ -207,7 +207,7 @@ except Exception as e:
 # ── Hermes Iteration Engine ────────────────────────────────────────────────────
 try:
     sys.path.insert(0, str(Path(__file__).parent))
-    from hermes_iteration import handle_hermes_iteration, HERMES_ITERATION_SCHEMA
+    from hermes_iteration import HERMES_ITERATION_SCHEMA, handle_hermes_iteration
     HERMES_ITERATION_AVAILABLE = True
     print("[Hermes MCP] Hermes iteration engine loaded", file=sys.stderr)
 except Exception as e:
@@ -218,14 +218,14 @@ except Exception as e:
 try:
     sys.path.insert(0, str(Path(__file__).parent))
     from hermes_hooks import (
-        handle_hermes_hooks,
-        hook_register,
-        hook_fire,
-        hook_list,
-        hook_stats,
-        hook_builtin_register,
         HERMES_HOOKS_SCHEMA,
         HOOK_EVENTS,
+        handle_hermes_hooks,
+        hook_builtin_register,
+        hook_fire,
+        hook_list,
+        hook_register,
+        hook_stats,
     )
     HERMES_HOOKS_AVAILABLE = True
     print("[Hermes MCP] Hermes hooks loaded", file=sys.stderr)
@@ -239,9 +239,9 @@ try:
     sys.path.insert(0, str(Path(__file__).parent))
     from hermes_token_meter import (
         TokenMeter,
-        token_meter_get,
         count_turn,
         get_meter,
+        token_meter_get,
     )
     HERMES_TOKEN_METER_SCHEMA = TokenMeter.SCHEMA
     TOKEN_METER_AVAILABLE = True
@@ -254,9 +254,9 @@ except Exception as e:
 try:
     sys.path.insert(0, str(Path(__file__).parent))
     from hermes_approval_gate import (
-        handle_hermes_approval_gate,
         HERMES_APPROVAL_GATE_SCHEMA,
         check_approval,
+        handle_hermes_approval_gate,
     )
     APPROVAL_GATE_AVAILABLE = True
     print("[Hermes MCP] Hermes approval gate loaded", file=sys.stderr)
@@ -268,9 +268,9 @@ except Exception as e:
 try:
     sys.path.insert(0, str(Path(__file__).parent))
     from hermes_context_injector import (
-        handle_hermes_context_injector,
         HERMES_CONTEXT_INJECTOR_SCHEMA,
         context_inject_now,
+        handle_hermes_context_injector,
     )
     CONTEXT_INJECTOR_AVAILABLE = True
     print("[Hermes MCP] Hermes context injector loaded", file=sys.stderr)
@@ -727,7 +727,7 @@ def github_get_file_contents(owner: str, repo: str, path: str,
 def filesystem_read_file(path: str, head: int | None = None) -> str:
     """Read the complete contents of a file."""
     try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
+        with open(path, encoding="utf-8", errors="replace") as f:
             content = f.read() if not head else "".join(f.readlines(head))
         return content
     except FileNotFoundError:
@@ -1246,7 +1246,7 @@ if WEB_SEARCH_AGGREGATOR_AVAILABLE:
 if SESSION_ARCHIVIST_AVAILABLE:
     @mcp.tool()
     def session_archivist(action: str, session_id: str = "",
-                         messages: list = None, query: str = "",
+                         messages: list | None = None, query: str = "",
                          limit: int = 5) -> str:
         """FTS5 cross-session indexing, search, graph, similarity, auto-archive."""
         return handle_session_archivist({
@@ -1264,7 +1264,7 @@ if SESSION_ARCHIVIST_AVAILABLE:
 if MEMORY_LAYER_BRIDGE_AVAILABLE:
     @mcp.tool()
     def memory_layer_bridge(action: str = "query", query: str = "",
-                            layers: list = None, top_k: int = 5,
+                            layers: list | None = None, top_k: int = 5,
                             layer: str = "") -> str:
         """Query all 6 CC memory layers with unified interface."""
         return handle_memory_layer_bridge({
@@ -1318,7 +1318,7 @@ def _check_mcp_server_latency(cmd, timeout=5):
     import time
     start = time.perf_counter()
     try:
-        r = subprocess.run(cmd, capture_output=True, timeout=timeout)
+        subprocess.run(cmd, capture_output=True, timeout=timeout)
         latency_ms = (time.perf_counter() - start) * 1000
         return {"latency_ms": round(latency_ms, 2), "status": "connected", "error": None}
     except subprocess.TimeoutExpired:
@@ -1376,6 +1376,7 @@ def hermes_health_check() -> str:
 
 import time as _time
 
+
 class CircuitBreakerState:
     CLOSED = "closed"
     OPEN = "open"
@@ -1403,7 +1404,7 @@ class CircuitBreaker:
             self.failures[tool_name] = 0
             self.state[tool_name] = CircuitBreakerState.CLOSED
             return result
-        except Exception as e:
+        except Exception:
             self.failures[tool_name] = self.failures.get(tool_name, 0) + 1
             self.last_failure_time[tool_name] = _time.time()
             if self.failures[tool_name] >= self.failure_threshold:
@@ -1437,7 +1438,7 @@ def circuit_breaker_status(tool_name: str = "") -> str:
     if tool_name:
         return json.dumps({"tool": tool_name, "state": _cb_registry.get_state(tool_name)})
     return json.dumps({
-        "tools": {t: _cb_registry.get_state(t) for t in _cb_registry.state.keys()},
+        "tools": {t: _cb_registry.get_state(t) for t in _cb_registry.state},
         "failure_counts": _cb_registry.failures,
     })
 
@@ -1579,7 +1580,7 @@ if GRAPHRAG_AVAILABLE:
         })
 
     @mcp.tool()
-    def graphrag_index(paths: list = None, kind: str = "auto",
+    def graphrag_index(paths: list | None = None, kind: str = "auto",
                        incremental: bool = True) -> str:
         """Build/refresh code knowledge graph index from source paths."""
         return handle_graphrag({
@@ -2276,6 +2277,72 @@ def claude_code_security_scan(path: str = "", level: str = "standard") -> str:
     return json.dumps(result)
 
 
+@mcp.tool()
+def claude_code_background_task(prompt: str, workspace: str = "/home/newadmin/swarm-bot",
+                                  max_time: int = 600) -> str:
+    """
+    Run a coding task in the background (non-blocking).
+
+    Args:
+        prompt: The task to execute
+        workspace: Working directory
+        max_time: Maximum time in seconds (default: 600)
+    """
+    import subprocess
+    import threading
+
+    def _run_bg():
+        cmd = [
+            CLAUDE_BIN, "-p", prompt,
+            "--output-format", "json",
+            "--no-session-persistence",
+            "--allowedTools", "Read,Edit,Bash,Notebook,WebSearch,Task",
+            "--max-turns", "50"
+        ]
+        subprocess.run(cmd, cwd=workspace, env={**os.environ, "ANTHROPIC_API_KEY": os.environ.get("MINIMAX_API_KEY", "")},
+                      capture_output=True, timeout=max_time)
+
+    thread = threading.Thread(target=_run_bg, daemon=True)
+    thread.start()
+    return json.dumps({"status": "background", "note": f"Task running in background (max {max_time}s)"})
+
+
+@mcp.tool()
+def claude_code_semantic_search(query: str, workspace: str = "/home/newadmin/swarm-bot",
+                                  file_pattern: str = "**/*.py") -> str:
+    """
+    Semantic code search - understands code context beyond grep.
+
+    Args:
+        query: Natural language search query
+        workspace: Working directory
+        file_pattern: File pattern to search (default: **/*.py)
+    """
+    p = f"Search the codebase semantically for: '{query}'. "
+    p += f"Look in files matching '{file_pattern}'. Understand the code structure. "
+    p += "Report matches with context explaining WHY they match."
+
+    result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=60)
+    return json.dumps(result)
+
+
+@mcp.tool()
+def claude_code_ci_check(branch: str = "HEAD", workspace: str = "/home/newadmin/swarm-bot") -> str:
+    """
+    Run CI checks for the current branch before merge.
+
+    Args:
+        branch: Branch to check (default: HEAD)
+        workspace: Working directory
+    """
+    p = f"Run pre-merge CI checks on branch '{branch}'. "
+    p += "Run: lint, type check, tests, and report pass/fail for each. "
+    p += "If checks fail, explain what needs to be fixed."
+
+    result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=180)
+    return json.dumps(result)
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # SECTION 35: HERMES ITERATION ENGINE (GoalLoop + RalphWiggum)
 # ════════════════════════════════════════════════════════════════════════════
@@ -2478,6 +2545,7 @@ def _list_jobs():
     return jobs
 
 import uuid as _uuid
+
 
 @mcp.tool()
 def terminal_background_create(command: str, cwd: str = "") -> str:
