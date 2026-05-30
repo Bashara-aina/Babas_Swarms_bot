@@ -339,7 +339,7 @@ def extract_from_messages(
 
     # Extract content from messages
     content_chunks: list[str] = []
-    _current_topic = ""  # noqa: F841 — reserved for future topic tracking
+    _current_topic = ""
 
     for msg in messages:
         content = msg.get("content", "") or ""

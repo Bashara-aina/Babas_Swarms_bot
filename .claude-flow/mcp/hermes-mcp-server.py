@@ -2230,7 +2230,7 @@ if RETRIEVAL_FUSION_AVAILABLE:
 CLAUDE_BIN = "/home/newadmin/.local/bin/claude"
 CLAUDE_WORKSPACE = "/home/newadmin/swarm-bot"
 
-def _safe_json_dumps(obj: Any, max_len: int = 50000) -> str:  # noqa: F821 — Any imported at line 2965
+def _safe_json_dumps(obj, max_len: int = 50000) -> str:  # type: ignore[valid-type]
     """Serialize to JSON, truncating long outputs to prevent API argument size errors."""
     try:
         s = json.dumps(obj)
