@@ -776,7 +776,7 @@ def filesystem_list_directory(path: str,
 def filesystem_search_files(path: str, pattern: str) -> str:
     """Recursively search for files matching a glob pattern."""
     try:
-        from.glob import glob
+        from glob import glob
         matches = glob(str(Path(path) / pattern), recursive=True)
         return json.dumps({"matches": matches, "count": len(matches)})
     except Exception as e:
@@ -2054,17 +2054,17 @@ def _safe_json_dumps(obj: Any, max_len: int = 50000) -> str:
         return json.dumps({"_error": "json serialization failed", "_obj_type": type(obj).__name__})
 
 
-def _safe_claude(args: list, timeout: int = 60) -> str:
-    """Call _run_claude and return JSON string. NEVER raises — all errors returned as JSON."""
+def _safe_claude(args: list, timeout: int = 60) -> dict:
+    """Call _run_claude and return dict. NEVER raises — all errors returned as dict."""
     try:
         result = _run_claude(args, timeout=timeout)
         if result.get("success"):
-            return result.get("stdout", result.get("stderr", ""))
+            return {"success": True, "stdout": result.get("stdout", ""), "stderr": result.get("stderr", "")}
         else:
             err = result.get("stderr", result.get("error", "Unknown error"))
-            return _safe_json_dumps({"error": err, "success": False})
+            return {"success": False, "error": err}
     except Exception as e:
-        return _safe_json_dumps({"error": f"claude bridge exception: {e}", "success": False})
+        return {"success": False, "error": f"claude bridge exception: {e}"}
 
 
 def _run_claude(args: list, timeout: int = 120) -> dict:
