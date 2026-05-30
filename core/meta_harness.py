@@ -32,7 +32,10 @@ from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from core.recursive_mas import RecursiveMASOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -312,8 +315,9 @@ class Harness:
     def update(self, item: dict) -> None:
         self.state[item.get("id", len(self.state))] = item
 
-    def assemble(self, query: str, retrieved: list[dict]) -> str:
-        return f"Query: {query}\\nContext: {json.dumps(retrieved)}"
+    def assemble(_task: str, _retrieved: list[dict]) -> str:
+        parts = ["Task: ", str(_task), "\\nContext: ", json.dumps(_retrieved)]
+        return "".join(parts)
 '''
 
     def _apply_guardrails(self, source_code: str) -> str:

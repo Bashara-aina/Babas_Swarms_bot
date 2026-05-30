@@ -205,6 +205,16 @@
     "CLAUDE_FLOW_V3_ENABLED": "true",
     "CLAUDE_FLOW_HOOKS_ENABLED": "true"
   },
+  "mcpServers": {
+    "hermes": {
+      "command": "python3",
+      "args": [".claude-flow/mcp/hermes-mcp-server.py"],
+      "env": {
+        "HERMES_REPO_PATH": "/home/newadmin/hermes-agent",
+        "MINIMAX_API_KEY": "${MINIMAX_API_KEY}"
+      }
+    }
+  },
   "claudeFlow": {
     "version": "3.0.0",
     "enabled": true,
