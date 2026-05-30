@@ -4,12 +4,17 @@ CoordinationPrimitives — Robust multi-agent coordination for Hermes.
 Circuit breakers, bulkheads, layered verification, idempotency, observability, message bus.
 Persists to /tmp/hermes_coordination.db SQLite.
 """
-import hashlib, json, sqlite3, threading, time, uuid
+import hashlib
+import json
+import sqlite3
+import threading
+import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 COORDINATION_DB = Path("/tmp/hermes_coordination.db")
@@ -44,7 +49,7 @@ class CircuitBreakerState:
     opened_at: float = 0.0
     half_open_test_start: float = 0.0
 
-_circuit_breakers: Dict[str, CircuitBreakerState] = {}
+_circuit_breakers: dict[str, CircuitBreakerState] = {}
 _circuit_lock = threading.Lock()
 
 def _get_breaker(agent_id: str) -> CircuitBreakerState:
@@ -53,7 +58,7 @@ def _get_breaker(agent_id: str) -> CircuitBreakerState:
             _circuit_breakers[agent_id] = CircuitBreakerState(agent_id=agent_id)
         return _circuit_breakers[agent_id]
 
-def record_failure(agent_id: str) -> Dict[str, Any]:
+def record_failure(agent_id: str) -> dict[str, Any]:
     breaker = _get_breaker(agent_id)
     now = time.time()
     with _circuit_lock:
@@ -69,7 +74,7 @@ def record_failure(agent_id: str) -> Dict[str, Any]:
             return {"agent_id": agent_id, "state": "half_open", "failures": breaker.failures}
         return {"agent_id": agent_id, "state": breaker.state.value, "failures": breaker.failures}
 
-def record_success(agent_id: str) -> Dict[str, Any]:
+def record_success(agent_id: str) -> dict[str, Any]:
     breaker = _get_breaker(agent_id)
     now = time.time()
     with _circuit_lock:
@@ -93,14 +98,14 @@ def is_blocked(agent_id: str) -> bool:
             return True
     return False
 
-def get_circuit_status(agent_id: str) -> Dict[str, Any]:
+def get_circuit_status(agent_id: str) -> dict[str, Any]:
     breaker = _get_breaker(agent_id)
     with _circuit_lock:
         return {"agent_id": agent_id, "state": breaker.state.value, "failures": breaker.failures,
                 "successes": breaker.successes, "last_failure_time": breaker.last_failure_time,
                 "last_success_time": breaker.last_success_time}
 
-def get_all_circuit_statuses() -> List[Dict[str, Any]]:
+def get_all_circuit_statuses() -> list[dict[str, Any]]:
     with _circuit_lock:
         return [{"agent_id": bid, "state": b.state.value, "failures": b.failures, "successes": b.successes}
                 for bid, b in _circuit_breakers.items()]
@@ -114,8 +119,8 @@ class BulkheadState:
     total_requests: int = 0
     rejected_requests: int = 0
 
-_bulkheads: Dict[str, BulkheadState] = {}
-_bulkhead_locks: Dict[str, threading.Lock] = {}
+_bulkheads: dict[str, BulkheadState] = {}
+_bulkhead_locks: dict[str, threading.Lock] = {}
 _bulkhead_global_lock = threading.Lock()
 DEFAULT_BULKHEAD_LIMITS = {"coordinator": 10, "specialist": 8, "worker": 5, "verifier": 4, "default": 3}
 
@@ -125,7 +130,7 @@ def _get_bulkhead_lock(agent_type: str) -> threading.Lock:
             _bulkhead_locks[agent_type] = threading.Lock()
         return _bulkhead_locks[agent_type]
 
-def register_bulkhead(agent_type: str, max_concurrency: Optional[int] = None) -> None:
+def register_bulkhead(agent_type: str, max_concurrency: int | None = None) -> None:
     limit = max_concurrency or DEFAULT_BULKHEAD_LIMITS.get(agent_type, DEFAULT_BULKHEAD_LIMITS["default"])
     with _bulkhead_global_lock:
         _bulkheads[agent_type] = BulkheadState(agent_type=agent_type, max_concurrency=limit)
@@ -152,7 +157,7 @@ def release_bulkhead(agent_type: str) -> None:
         if bulkhead.current_concurrency > 0:
             bulkhead.current_concurrency -= 1
 
-def get_bulkhead_status(agent_type: str) -> Dict[str, Any]:
+def get_bulkhead_status(agent_type: str) -> dict[str, Any]:
     if agent_type not in _bulkheads:
         register_bulkhead(agent_type)
     b = _bulkheads[agent_type]
@@ -161,7 +166,7 @@ def get_bulkhead_status(agent_type: str) -> Dict[str, Any]:
             "available_slots": b.max_concurrency - b.current_concurrency,
             "total_requests": b.total_requests, "rejected_requests": b.rejected_requests}
 
-def get_all_bulkhead_statuses() -> List[Dict[str, Any]]:
+def get_all_bulkhead_statuses() -> list[dict[str, Any]]:
     with _bulkhead_global_lock:
         return [{"agent_type": bt, "max_concurrency": b.max_concurrency,
                  "current_concurrency": b.current_concurrency,
@@ -178,7 +183,7 @@ class VerificationResult:
     timestamp: float
     trace_id: str
 
-_verifications: List[VerificationResult] = []
+_verifications: list[VerificationResult] = []
 _verification_lock = threading.Lock()
 
 def verify_result(result: Any, agent_id: str, action_type: str = "general",
@@ -208,7 +213,7 @@ def verify_result(result: Any, agent_id: str, action_type: str = "general",
         _verifications.append(verification)
     return verification
 
-def get_verification_history(limit: int = 50) -> List[Dict[str, Any]]:
+def get_verification_history(limit: int = 50) -> list[dict[str, Any]]:
     with _verification_lock:
         recent = _verifications[-limit:]
         return [{"verified": v.verified, "confidence": v.confidence, "message": v.message,
@@ -216,7 +221,7 @@ def get_verification_history(limit: int = 50) -> List[Dict[str, Any]]:
                 for v in recent]
 
 # ── Idempotency ─────────────────────────────────────────────────────────────────
-_idempotency_store: Dict[str, float] = {}
+_idempotency_store: dict[str, float] = {}
 _idempotency_lock = threading.Lock()
 
 def generate_idempotency_key(*parts: str) -> str:
@@ -249,12 +254,12 @@ class Message:
     timestamp: float
     idempotency_key: str
     trace_id: str
-    reply_to: Optional[str] = None
+    reply_to: str | None = None
 
-_agent_inboxes: Dict[str, List[Message]] = {}
-_inbox_locks: Dict[str, threading.Lock] = {}
+_agent_inboxes: dict[str, list[Message]] = {}
+_inbox_locks: dict[str, threading.Lock] = {}
 _global_inbox_lock = threading.Lock()
-_subscribers: Dict[str, List[str]] = {}
+_subscribers: dict[str, list[str]] = {}
 _sub_lock = threading.Lock()
 
 def _get_inbox_lock(agent_id: str) -> threading.Lock:
@@ -264,7 +269,7 @@ def _get_inbox_lock(agent_id: str) -> threading.Lock:
         return _inbox_locks[agent_id]
 
 def send_message(from_agent: str, to_agent: str, content: Any,
-                 msg_type: MessageType = MessageType.DIRECT, reply_to: Optional[str] = None) -> Dict[str, Any]:
+                 msg_type: MessageType = MessageType.DIRECT, reply_to: str | None = None) -> dict[str, Any]:
     msg_id = uuid.uuid4().hex[:12]
     trace_id = str(uuid.uuid4())
     idempotency_key = generate_idempotency_key(from_agent, to_agent, str(content), str(time.time()))
@@ -280,7 +285,7 @@ def send_message(from_agent: str, to_agent: str, content: Any,
         _agent_inboxes[to_agent].append(msg)
     return {"status": "delivered", "msg_id": msg_id, "trace_id": trace_id, "idempotency_key": idempotency_key}
 
-def broadcast_message(from_agent: str, content: Any) -> Dict[str, Any]:
+def broadcast_message(from_agent: str, content: Any) -> dict[str, Any]:
     msg_id = uuid.uuid4().hex[:12]
     trace_id = str(uuid.uuid4())
     idempotency_key = generate_idempotency_key(from_agent, "broadcast", str(content), str(time.time()))
@@ -301,7 +306,7 @@ def broadcast_message(from_agent: str, content: Any) -> Dict[str, Any]:
             delivered_count += 1
     return {"status": "broadcast", "msg_id": msg_id, "delivered_count": delivered_count, "trace_id": trace_id}
 
-def get_messages(agent_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+def get_messages(agent_id: str, limit: int = 50) -> list[dict[str, Any]]:
     inbox_lock = _get_inbox_lock(agent_id)
     with inbox_lock:
         if agent_id not in _agent_inboxes:
@@ -348,7 +353,7 @@ def record_handoff(trace_id: str, from_agent: str, to_agent: str,
     conn.commit()
     conn.close()
 
-def get_trace(trace_id: str) -> Dict[str, Any]:
+def get_trace(trace_id: str) -> dict[str, Any]:
     conn = _get_trace_db()
     trace_rows = conn.execute("SELECT * FROM traces WHERE trace_id = ? ORDER BY timestamp", (trace_id,)).fetchall()
     handoff_rows = conn.execute("SELECT * FROM handoffs WHERE trace_id = ? ORDER BY timestamp", (trace_id,)).fetchall()
@@ -359,17 +364,17 @@ def get_trace(trace_id: str) -> Dict[str, Any]:
     handoff_cols = ["handoff_id", "trace_id", "from_agent", "to_agent", "stage_name", "latency_ms", "verification_passed", "timestamp"]
     stages = []
     for row in trace_rows:
-        s = dict(zip(cols, row))
+        s = dict(zip(cols, row, strict=False))
         s["input_data"] = json.loads(s["input_data"]) if isinstance(s["input_data"], str) else s["input_data"]
         s["output_data"] = json.loads(s["output_data"]) if isinstance(s["output_data"], str) else s["output_data"]
         stages.append(s)
-    handoffs = [dict(zip(handoff_cols, row)) for row in handoff_rows]
+    handoffs = [dict(zip(handoff_cols, row, strict=False)) for row in handoff_rows]
     total_latency = sum(s["latency_ms"] for s in stages)
     return {"trace_id": trace_id, "stages": stages, "handoffs": handoffs,
             "total_stages": len(stages), "total_handoffs": len(handoffs),
             "total_latency_ms": round(total_latency, 2)}
 
-def get_recent_traces(limit: int = 20) -> List[Dict[str, Any]]:
+def get_recent_traces(limit: int = 20) -> list[dict[str, Any]]:
     conn = _get_trace_db()
     rows = conn.execute("""SELECT trace_id, MAX(timestamp) as ts, SUM(latency_ms), MAX(success)
         FROM traces GROUP BY trace_id ORDER BY ts DESC LIMIT ?""", (limit,)).fetchall()
@@ -415,7 +420,7 @@ def load_circuit_breakers() -> None:
                 opened_at=row[6], half_open_test_start=row[7])
 
 # ── MCP Handlers ───────────────────────────────────────────────────────────────
-def handle_coordination(args: Dict[str, Any]) -> str:
+def handle_coordination(args: dict[str, Any]) -> str:
     action = args.get("action", "status")
     if action == "circuit_status":
         agent_id = args.get("agent_id")
@@ -475,19 +480,19 @@ COORDINATION_SCHEMA = {
 }
 
 # ── Exported convenience functions ────────────────────────────────────────────
-def coordination_circuit_status(agent_id: Optional[str] = None) -> Dict[str, Any]:
+def coordination_circuit_status(agent_id: str | None = None) -> dict[str, Any]:
     return get_circuit_status(agent_id) if agent_id else {"circuits": get_all_circuit_statuses()}
 
-def coordination_send(to_agent: str, message: Any, from_agent: str = "hermes") -> Dict[str, Any]:
+def coordination_send(to_agent: str, message: Any, from_agent: str = "hermes") -> dict[str, Any]:
     return send_message(from_agent, to_agent, message, MessageType.DIRECT)
 
-def coordination_broadcast(message: Any, from_agent: str = "hermes") -> Dict[str, Any]:
+def coordination_broadcast(message: Any, from_agent: str = "hermes") -> dict[str, Any]:
     return broadcast_message(from_agent, message)
 
 def coordination_verify(result: Any, agent_id: str = "hermes", action_type: str = "general") -> VerificationResult:
     return verify_result(result, agent_id, action_type)
 
-def coordination_trace(trace_id: str) -> Dict[str, Any]:
+def coordination_trace(trace_id: str) -> dict[str, Any]:
     return get_trace(trace_id)
 
 def coordination_register_agent(agent_id: str) -> None:
