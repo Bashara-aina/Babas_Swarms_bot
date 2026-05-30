@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 
 
 def command() -> list[str]:
@@ -17,7 +16,7 @@ def command() -> list[str]:
 def is_available() -> bool:
     """Check if Browser-Use MCP server is available."""
     try:
-        from browser_use import Agent
+        from browser_use import Agent  # noqa: F401 — side effect checks availability
         return True
     except ImportError:
         return False

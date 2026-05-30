@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def _check_markitdown() -> bool:
     try:
-        from markitdown import MarkItDown
+        from markitdown import MarkItDown  # noqa: F401 — side effect checks availability
 
         return True
     except ImportError:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 
 
 def command() -> list[str]:
@@ -21,7 +20,7 @@ def command() -> list[str]:
 def is_available() -> bool:
     """Check if Local Deep Research MCP server is available."""
     try:
-        import local_deep_research
+        import local_deep_research  # noqa: F401 — side effect checks availability
         return True
     except ImportError:
         return False

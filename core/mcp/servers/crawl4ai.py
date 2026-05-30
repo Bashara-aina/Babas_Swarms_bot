@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 
 
 def command() -> list[str]:
@@ -16,7 +15,7 @@ def command() -> list[str]:
 def is_available() -> bool:
     """Check if Crawl4AI MCP server is available."""
     try:
-        from crawl4ai import AsyncWebCrawler
+        from crawl4ai import AsyncWebCrawler  # noqa: F401 — side effect checks availability
         return True
     except ImportError:
         return False

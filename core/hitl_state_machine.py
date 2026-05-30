@@ -24,7 +24,7 @@ def _check_burr() -> bool:  # type: ignore[reportAttributeAccessIssue]
     global _burr_installed
     if _burr_installed is None:
         try:
-            import burr.core  # type: ignore[reportAttributeAccessIssue]
+            import burr.core  # type: ignore[reportAttributeAccessIssue]  # noqa: F401 — side effect sets _burr_installed
 
             _burr_installed = True  # type: ignore[reportAttributeAccessIssue]
         except ImportError:

@@ -1145,7 +1145,6 @@ class TrajectoryCompressor:
                 TaskProgressColumn,
                 TextColumn,
                 TimeElapsedColumn,
-                TimeRemainingColumn,
             )
         except ImportError:
             logger.warning("Rich not available, using basic progress output")
