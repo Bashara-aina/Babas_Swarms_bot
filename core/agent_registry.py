@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import re
 import signal
 import time
@@ -899,11 +900,10 @@ async def select_team(
 # ── Auto-load at import time ─────────────────────────────────────────────────
 # Set env vars BEFORE load_registry() to prevent transformers from making
 # network calls that can hang the process at startup (advisory warning checks).
-import os as _os
-_os.environ.setdefault("HF_HUB_DISABLE_EXPERIMENTAL_WARNING", "1")
-_os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-_os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
-_os.environ.setdefault("TOKENIZERS_NO_ADVISORY_WARNINGS", "1")
+os.environ.setdefault("HF_HUB_DISABLE_EXPERIMENTAL_WARNING", "1")
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
+os.environ.setdefault("TOKENIZERS_NO_ADVISORY_WARNINGS", "1")
 
 try:
     load_registry()

@@ -2123,11 +2123,7 @@ def claude_code_task(prompt: str, workspace: str = "/home/newadmin/swarm-bot",
         cmd.extend(["--model", model])
 
     result = _safe_claude(cmd, timeout=180)
-
-    if result.get("success"):
-        return result.get("stdout", result.get("stderr", ""))
-    else:
-        return json.dumps({"error": result.get("stderr", result.get("error", "Unknown error")), "success": False})
+    return json.dumps(result)
 
 @mcp.tool()
 def claude_code_read(files: str, workspace: str = "/home/newadmin/swarm-bot",
@@ -2147,7 +2143,7 @@ def claude_code_read(files: str, workspace: str = "/home/newadmin/swarm-bot",
         p += "Provide a summary of each file's contents."
 
     result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=60)
-    return result.get("stdout", result.get("stderr", ""))
+    return json.dumps(result)
 
 @mcp.tool()
 def claude_code_search(query: str, workspace: str = "/home/newadmin/swarm-bot",
@@ -2162,7 +2158,7 @@ def claude_code_search(query: str, workspace: str = "/home/newadmin/swarm-bot",
     """
     p = f"Search the codebase for: '{query}' in files matching '{file_pattern}'. Use grep and read relevant files to find matches. Report what you find with file paths and line numbers."
     result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=60)
-    return result.get("stdout", result.get("stderr", ""))
+    return json.dumps(result)
 
 @mcp.tool()
 def claude_code_git(command: str, workspace: str = "/home/newadmin/swarm-bot") -> str:
@@ -2175,7 +2171,7 @@ def claude_code_git(command: str, workspace: str = "/home/newadmin/swarm-bot") -
     """
     p = f"Run this git command and explain the output: git {command}"
     result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=30)
-    return result.get("stdout", result.get("stderr", ""))
+    return json.dumps(result)
 
 @mcp.tool()
 def claude_code_agent(task: str, workspace: str = "/home/newadmin/swarm-bot",
@@ -2191,7 +2187,7 @@ def claude_code_agent(task: str, workspace: str = "/home/newadmin/swarm-bot",
     """
     p = f"You are a {agent_type}. {task}. Work autonomously until complete. Use appropriate tools, run tests, and commit your changes."
     result = _safe_claude(["-p", p, "--agent", agent_type, "--output-format", "json", "--no-session-persistence"], timeout=max_time)
-    return result.get("stdout", result.get("stderr", ""))
+    return json.dumps(result)
 
 @mcp.tool()
 def claude_code_list_tools() -> str:
