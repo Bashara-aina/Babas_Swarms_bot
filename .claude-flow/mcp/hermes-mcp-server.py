@@ -2072,7 +2072,7 @@ def _run_claude(args: list, timeout: int = 120) -> dict:
     """Run Claude CLI and return parsed output."""
     try:
         result = subprocess.run(
-            [CLAUDE_BIN] + args,
+            [CLAUDE_BIN, *args],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -2351,7 +2351,7 @@ if HERMES_ITERATION_AVAILABLE:
     @mcp.tool()
     def hermes_iteration(action: str, goal: str = "", loop_id: str = "",
                           rw_id: str = "", context: str = "",
-                          done_criteria: list = None,
+                          done_criteria: list | None = None,
                           max_iterations: int = 10) -> str:
         """
         Goal-driven iteration engine for Hermes (loop + ralph-wiggum equivalents).
@@ -2389,7 +2389,7 @@ if HERMES_HOOKS_AVAILABLE:
     @mcp.tool()
     def hermes_hooks(action: str = "list", event: str = "",
                      script_path: str = "", hook_id: str = "",
-                     context: dict = None, blocking: bool = False,
+                     context: dict | None = None, blocking: bool = False,
                      builtin_name: str = "", timeout: int = 30) -> str:
         """
         Manage and fire 26-event lifecycle hooks for Hermes MCP.
@@ -2454,7 +2454,7 @@ if APPROVAL_GATE_AVAILABLE:
                               proposed_action: str = "", risk_level: str = "LOW",
                               approval_id: str = "", decision: str = "",
                               policy: str = "auto_allow",
-                              context: dict = None) -> str:
+                              context: dict | None = None) -> str:
         """
         Per-tool approval gate with configurable policies.
 
@@ -2490,7 +2490,7 @@ if CONTEXT_INJECTOR_AVAILABLE:
     @mcp.tool()
     def hermes_context_injector(action: str = "inject", project_path: str = "",
                                  profile_name: str = "", max_chars: int = 4000,
-                                 includes: list = None) -> str:
+                                 includes: list | None = None) -> str:
         """
         Auto-inject CLAUDE.md and project context for Hermes sessions.
 
@@ -2689,7 +2689,7 @@ def _list_all_skills():
 
 @mcp.tool()
 def skills_auto_create(name: str, description: str = "",
-                        tool_sequence: list = None) -> str:
+                        tool_sequence: list | None = None) -> str:
     """Create a new skill from a sequence of tool calls."""
     content = f"---\nname: {name}\ndescription: {description}\nversion: 1.0\n---\n"
     content += f"## Skill: {name}\n{description}\n\n"
