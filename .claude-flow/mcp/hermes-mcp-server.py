@@ -2206,8 +2206,79 @@ def claude_code_list_tools() -> str:
         {"name": "claude_code_search", "description": "Search code using Claude Code's grep and context"},
         {"name": "claude_code_git", "description": "Run git operations via Claude Code"},
         {"name": "claude_code_agent", "description": "Run Claude Code in agent mode for autonomous tasks"},
+        {"name": "claude_code_create_pr", "description": "Create a GitHub Pull Request via Claude Code"},
+        {"name": "claude_code_review", "description": "Code review tool - analyze files for issues and auto-fix"},
+        {"name": "claude_code_security_scan", "description": "Security vulnerability scanner with severity levels"},
     ]
     return json.dumps({"tools": tools, "count": len(tools)})
+
+
+@mcp.tool()
+def claude_code_create_pr(title: str, body: str = "", base: str = "main",
+                           auto_approve: bool = False) -> str:
+    """
+    Create a GitHub Pull Request via Claude Code.
+
+    Args:
+        title: PR title
+        body: PR description (optional)
+        base: Target branch (default: main)
+        auto_approve: If True, attempt to auto-approve and merge (requires permissions)
+    """
+    approve_instruction = " Then approve and merge the PR." if auto_approve else ""
+    p = f"Create a PR with title: '{title}'. "
+    if body:
+        p += f"Description: {body}. "
+    p += f"Target branch: {base}.{approve_instruction}"
+
+    cmd = [
+        "-p", p,
+        "--output-format", "json",
+        "--no-session-persistence",
+        "--allowedTools", "Bash,Read,Edit,Todo"
+    ]
+    result = _safe_claude(cmd, timeout=120)
+    return json.dumps(result)
+
+
+@mcp.tool()
+def claude_code_review(files: str = "", auto_fix: bool = False) -> str:
+    """
+    Code review tool - analyze files for issues, best practices, security.
+
+    Args:
+        files: Space-separated file paths to review (default: all changed files)
+        auto_fix: If True, automatically fix issues found
+    """
+    scope = f"Review these files: {files}" if files else "Review all changed files"
+    fix_instruction = " Automatically fix any issues found." if auto_fix else ""
+    p = f"{scope}. Check for: bugs, security vulnerabilities, performance issues, code style violations, and best practices.{fix_instruction}"
+
+    result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=90)
+    return json.dumps(result)
+
+
+@mcp.tool()
+def claude_code_security_scan(path: str = "", level: str = "standard") -> str:
+    """
+    Security vulnerability scanner integrated with Claude Code.
+
+    Args:
+        path: Directory/file to scan (default: entire workspace)
+        level: Scan depth - 'quick', 'standard', 'deep'
+    """
+    scope = f"Scan: {path}" if path else "Scan entire codebase"
+    depth_instruction = {
+        "quick": "Quick scan for critical issues only",
+        "standard": "Standard scan for common vulnerabilities",
+        "deep": "Deep scan including dependency analysis, secrets detection, OWASP Top 10"
+    }.get(level, "Standard scan")
+
+    p = f"{scope}. {depth_instruction}. Report findings with severity and remediation."
+
+    result = _safe_claude(["-p", p, "--output-format", "json", "--no-session-persistence"], timeout=120)
+    return json.dumps(result)
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # SECTION 35: HERMES ITERATION ENGINE (GoalLoop + RalphWiggum)
