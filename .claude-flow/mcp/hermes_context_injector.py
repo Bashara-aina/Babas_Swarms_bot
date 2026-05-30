@@ -237,7 +237,7 @@ def parse_dep_file(file_path: Path, file_type: str) -> str:
 
 def build_context(
     project_path: str,
-    includes: Optional[List[str]] = None,
+    includes: list[str] | None = None,
     max_chars: int = DEFAULT_MAX_CHARS,
 ) -> str:
     """
@@ -340,7 +340,7 @@ def budget_context(context: str, max_chars: int) -> str:
 def context_profile_save(
     name: str,
     project_path: str,
-    includes: Optional[List[str]] = None,
+    includes: list[str] | None = None,
 ) -> str:
     """
     Save a context profile for later use.
@@ -370,7 +370,7 @@ def context_profile_save(
     return str(profile_path)
 
 
-def context_profile_load(name: str) -> Optional[Dict[str, Any]]:
+def context_profile_load(name: str) -> dict[str, Any] | None:
     """
     Load a saved context profile.
 
@@ -390,7 +390,7 @@ def context_profile_load(name: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def context_profile_list() -> List[Dict[str, Any]]:
+def context_profile_list() -> list[dict[str, Any]]:
     """
     List all available context profiles.
 
@@ -457,11 +457,11 @@ HERMES_CONTEXT_INJECTOR_SCHEMA = {
 
 def handle_hermes_context_injector(
     action: str,
-    project_path: Optional[str] = None,
-    profile_name: Optional[str] = None,
+    project_path: str | None = None,
+    profile_name: str | None = None,
     max_chars: int = DEFAULT_MAX_CHARS,
-    includes: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    includes: list[str] | None = None,
+) -> dict[str, Any]:
     """
     MCP handler for hermes_context_injector tools.
 

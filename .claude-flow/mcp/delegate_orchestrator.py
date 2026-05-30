@@ -10,11 +10,12 @@ import json
 import threading
 import time
 import uuid
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 # ── Level Enums ─────────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ class AgentState:
     domain: str  # code, web, file, research
     status: str = "idle"  # idle, running, completed, failed
     parent_id: str = ""
-    children: List[str] = field(default_factory=list)
+    children: list[str] = field(default_factory=list)
     result: Any = None
     error: str = ""
     started_at: float = 0.0
@@ -42,9 +43,9 @@ class AgentState:
 # ── Hierarchy Registry ───────────────────────────────────────────────────────
 
 _hierarchy_lock = threading.Lock()
-_hierarchy: Dict[str, AgentState] = {}
+_hierarchy: dict[str, AgentState] = {}
 
-def _get_agent(agent_id: str) -> Optional[AgentState]:
+def _get_agent(agent_id: str) -> AgentState | None:
     return _hierarchy.get(agent_id)
 
 def _register_agent(agent: AgentState) -> str:
@@ -62,7 +63,7 @@ def _update_agent(agent_id: str, **kwargs) -> bool:
             return True
     return False
 
-def _all_agents() -> List[AgentState]:
+def _all_agents() -> list[AgentState]:
     with _hierarchy_lock:
         return list(_hierarchy.values())
 
@@ -79,7 +80,7 @@ def spawn_coordinator(goal: str, coordinator_id: str = "") -> str:
     _register_agent(agent)
     return cid
 
-def spawn_specialist(coordinator_id: str, domain: str, specialists_count: int = 1) -> List[str]:
+def spawn_specialist(coordinator_id: str, domain: str, specialists_count: int = 1) -> list[str]:
     """Spawn specialist agents under a coordinator."""
     specialist_ids = []
     for i in range(specialists_count):
@@ -99,7 +100,7 @@ def spawn_specialist(coordinator_id: str, domain: str, specialists_count: int = 
                 _hierarchy[coordinator_id].children.append(sid)
     return specialist_ids
 
-def spawn_worker(specialist_id: str, domain: str, workers_count: int = 1) -> List[str]:
+def spawn_worker(specialist_id: str, domain: str, workers_count: int = 1) -> list[str]:
     """Spawn worker agents under a specialist."""
     worker_ids = []
     for i in range(workers_count):
@@ -121,7 +122,7 @@ def spawn_worker(specialist_id: str, domain: str, workers_count: int = 1) -> Lis
 
 # ── Goal Decomposition ────────────────────────────────────────────────────────
 
-def _decompose_goal(goal: str) -> List[Dict[str, Any]]:
+def _decompose_goal(goal: str) -> list[dict[str, Any]]:
     """Break a goal into subtasks based on keywords."""
     # Simple keyword-based decomposition
     subtasks = []
@@ -155,8 +156,8 @@ class HierarchyResult:
     coordinator_id: str
     status: str
     total_time: float
-    specialists: List[Dict[str, Any]]
-    errors: List[str]
+    specialists: list[dict[str, Any]]
+    errors: list[str]
 
 def execute_hierarchy(coordinator_id: str, goal: str, max_specialists: int = 5,
                        max_workers_per_specialist: int = 5, max_time_per_worker: int = 60) -> HierarchyResult:
@@ -182,7 +183,7 @@ def execute_hierarchy(coordinator_id: str, goal: str, max_specialists: int = 5,
 
     # Wait for all workers (simulated with timer threads)
     # In real implementation, these would be async subprocesses
-    def _simulate_worker(wid: str, task: Dict[str, Any]) -> Dict[str, Any]:
+    def _simulate_worker(wid: str, task: dict[str, Any]) -> dict[str, Any]:
         _update_agent(wid, status="completed", completed_at=time.time(), result={"domain": task["domain"], "description": task["description"]})
         return {"worker_id": wid, "status": "completed"}
 
@@ -220,7 +221,7 @@ def execute_hierarchy(coordinator_id: str, goal: str, max_specialists: int = 5,
         errors=errors,
     )
 
-def hierarchical_status(coordinator_id: str) -> Dict[str, Any]:
+def hierarchical_status(coordinator_id: str) -> dict[str, Any]:
     """Return hierarchical status report."""
     coord = _get_agent(coordinator_id)
     if not coord:
@@ -247,7 +248,7 @@ def hierarchical_status(coordinator_id: str) -> Dict[str, Any]:
         },
     }
 
-def hierarchical_result_merge(coordinator_id: str) -> Dict[str, Any]:
+def hierarchical_result_merge(coordinator_id: str) -> dict[str, Any]:
     """Aggregate all levels into single result."""
     coord = _get_agent(coordinator_id)
     if not coord:
@@ -273,7 +274,7 @@ def hierarchical_result_merge(coordinator_id: str) -> Dict[str, Any]:
 
     return merged
 
-def handle_delegate_orchestrator(args: Dict[str, Any]) -> str:
+def handle_delegate_orchestrator(args: dict[str, Any]) -> str:
     """Handler for orchestrator operations."""
     action = args.get("action", "execute")
     if action == "spawn":

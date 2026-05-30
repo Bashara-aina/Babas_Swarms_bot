@@ -39,7 +39,7 @@ LAYER_WEIGHTS = {
 MAX_CONTEXT_CHARS = 8000
 LOCK = threading.Lock()
 
-def _read_layer1(top_k: int = 5) -> List[Dict[str, Any]]:
+def _read_layer1(top_k: int = 5) -> list[dict[str, Any]]:
     """Read recent checkpoints."""
     cp_dir = CC_LAYER_PATHS["L1"]
     if not cp_dir.exists():
@@ -53,7 +53,7 @@ def _read_layer1(top_k: int = 5) -> List[Dict[str, Any]]:
             pass
     return results
 
-def _read_layer2(query: str = "", top_k: int = 5) -> List[Dict[str, Any]]:
+def _read_layer2(query: str = "", top_k: int = 5) -> list[dict[str, Any]]:
     """Query ChromaDB."""
     db_path = CC_LAYER_PATHS["L2"] / "chroma.sqlite3"
     if not db_path.exists():
@@ -72,7 +72,7 @@ def _read_layer2(query: str = "", top_k: int = 5) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _read_layer3(top_k: int = 10) -> List[Dict[str, Any]]:
+def _read_layer3(top_k: int = 10) -> list[dict[str, Any]]:
     """Read LangMem files."""
     langmem_dir = CC_LAYER_PATHS["L3"]
     if not langmem_dir.exists():
@@ -95,7 +95,7 @@ def _read_layer3(top_k: int = 10) -> List[Dict[str, Any]]:
             break
     return results
 
-def _read_layer4(limit: int = 20) -> List[Dict[str, Any]]:
+def _read_layer4(limit: int = 20) -> list[dict[str, Any]]:
     """Read observations."""
     db_path = CC_LAYER_PATHS["L4"]
     if not db_path.exists():
@@ -123,7 +123,7 @@ def _read_layer4(limit: int = 20) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _read_layer5() -> List[Dict[str, Any]]:
+def _read_layer5() -> list[dict[str, Any]]:
     """Read GraphRAG/Mem0."""
     path = CC_LAYER_PATHS["L5"]
     if not path.exists():
@@ -135,7 +135,7 @@ def _read_layer5() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def _compute_relevance_score(item: Dict[str, Any], layer: str, query: str = "") -> float:
+def _compute_relevance_score(item: dict[str, Any], layer: str, query: str = "") -> float:
     """Score item by layer weight and keyword overlap with query."""
     weight = LAYER_WEIGHTS.get(layer, 0.1)
     if not query:
@@ -145,7 +145,7 @@ def _compute_relevance_score(item: Dict[str, Any], layer: str, query: str = "") 
     overlap = len(query_terms & set(item_str.split()))
     return weight * (1.0 + 0.1 * overlap)
 
-def _format_layer_section(layer: str, items: List[Dict[str, Any]], max_chars: int = 1500) -> str:
+def _format_layer_section(layer: str, items: list[dict[str, Any]], max_chars: int = 1500) -> str:
     """Format a layer's data as a markdown section."""
     if not items:
         return f"## {layer}\n_No entries found_\n"
@@ -164,7 +164,7 @@ def _format_layer_section(layer: str, items: List[Dict[str, Any]], max_chars: in
     content = "".join(lines)
     return content[:max_chars]
 
-def restore_context(session_id: str = "", query: str = "") -> Dict[str, Any]:
+def restore_context(session_id: str = "", query: str = "") -> dict[str, Any]:
     """
     On CC startup: query all 6 layers, aggregate relevant context.
     Returns structured markdown with headers per layer.
@@ -213,7 +213,7 @@ def restore_context(session_id: str = "", query: str = "") -> Dict[str, Any]:
 
     # Build markdown sections
     sections = []
-    sections.append(f"# Session Context Restoration\n")
+    sections.append("# Session Context Restoration\n")
     sections.append(f"_Restored at: {datetime.now().isoformat()}_\n")
     if session_id:
         sections.append(f"_Resumed from session: {session_id}_\n")
@@ -242,7 +242,7 @@ def restore_context(session_id: str = "", query: str = "") -> Dict[str, Any]:
         "context_chars": len(markdown),
     }
 
-def restore_context_stream(session_id: str = "", query: str = "", chunk_size: int = 1000) -> List[str]:
+def restore_context_stream(session_id: str = "", query: str = "", chunk_size: int = 1000) -> list[str]:
     """Stream context in chunks for progressive loading."""
     ctx = restore_context(session_id, query)
     content = ctx["context"]
@@ -251,7 +251,7 @@ def restore_context_stream(session_id: str = "", query: str = "", chunk_size: in
         chunks.append(content[i:i+chunk_size])
     return chunks
 
-def handle_context_restorer(args: Dict[str, Any]) -> str:
+def handle_context_restorer(args: dict[str, Any]) -> str:
     """Handler for context restoration."""
     action = args.get("action", "restore")
     if action == "restore":

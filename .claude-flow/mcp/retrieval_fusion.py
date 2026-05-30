@@ -43,7 +43,7 @@ LOCK = threading.Lock()
 # ---------------------------------------------------------------------------
 # Tokenization (whitespace + punctuation, lowercase)
 # ---------------------------------------------------------------------------
-def _tokenize(text: str) -> List[str]:
+def _tokenize(text: str) -> list[str]:
     """Tokenize on whitespace + punctuation, lowercase."""
     if not text:
         return []
@@ -94,7 +94,7 @@ def _get_fusion_db() -> sqlite3.Connection:
 # ---------------------------------------------------------------------------
 # IDF computation
 # ---------------------------------------------------------------------------
-def _compute_idf(doc_freqs: Dict[str, int], total_docs: int) -> Dict[str, float]:
+def _compute_idf(doc_freqs: dict[str, int], total_docs: int) -> dict[str, float]:
     """Compute IDF for each term: log((N - n + 0.5) / (n + 0.5))."""
     idf = {}
     for term, df in doc_freqs.items():
@@ -113,11 +113,11 @@ class SimpleBM25:
         self.b = b
         self.doc_len_avg = 0.0
         self.N = 0
-        self.doc_freqs: Dict[str, int] = defaultdict(int)
-        self.doc_lengths: List[int] = []
-        self.doc_term_freqs: List[Dict[str, int]] = []
+        self.doc_freqs: dict[str, int] = defaultdict(int)
+        self.doc_lengths: list[int] = []
+        self.doc_term_freqs: list[dict[str, int]] = []
 
-    def index(self, texts: List[str]) -> None:
+    def index(self, texts: list[str]) -> None:
         """Build inverted index from list of texts."""
         self.doc_term_freqs = []
         self.doc_lengths = []
@@ -138,7 +138,7 @@ class SimpleBM25:
         # Compute IDF for all terms
         self.idf = _compute_idf(dict(self.doc_freqs), self.N)
 
-    def score(self, query: str) -> List[Tuple[int, float]]:
+    def score(self, query: str) -> list[tuple[int, float]]:
         """Score all docs against query. Returns list of (doc_idx, score)."""
         q_tokens = _tokenize(query)
         scores = []
@@ -158,14 +158,14 @@ class SimpleBM25:
         scores.sort(key=lambda x: -x[1])
         return scores
 
-    def get_top_k(self, query: str, k: int = 20) -> List[Tuple[int, float]]:
+    def get_top_k(self, query: str, k: int = 20) -> list[tuple[int, float]]:
         """Return top-k doc indices with scores."""
         return self.score(query)[:k]
 
 # ---------------------------------------------------------------------------
 # BM25 index management
 # ---------------------------------------------------------------------------
-def index_collection(collection: str, texts: List[str], doc_ids: List[str] = None) -> Dict[str, Any]:
+def index_collection(collection: str, texts: list[str], doc_ids: list[str] = None) -> dict[str, Any]:
     """Build/refresh BM25 index for a collection."""
     if doc_ids is None:
         doc_ids = [f"doc_{i}" for i in range(len(texts))]
@@ -225,7 +225,7 @@ def index_collection(collection: str, texts: List[str], doc_ids: List[str] = Non
 # ---------------------------------------------------------------------------
 # BM25 retrieval
 # ---------------------------------------------------------------------------
-def _bm25_search(collection: str, query: str, top_k: int = 20) -> List[Tuple[str, float, int]]:
+def _bm25_search(collection: str, query: str, top_k: int = 20) -> list[tuple[str, float, int]]:
     """
     Run BM25 search on collection.
     Returns list of (doc_id, score, rank) — rank is 1-based.
@@ -280,7 +280,7 @@ def _bm25_search(collection: str, query: str, top_k: int = 20) -> List[Tuple[str
 # ---------------------------------------------------------------------------
 # ChromaDB vector retrieval (reuse pattern from memory_layer_bridge)
 # ---------------------------------------------------------------------------
-def _vector_search(query: str, collection: str = "hermes_shared", top_k: int = 20) -> List[Tuple[str, float, int]]:
+def _vector_search(query: str, collection: str = "hermes_shared", top_k: int = 20) -> list[tuple[str, float, int]]:
     """Query ChromaDB vector store. Returns list of (doc_id, score, rank)."""
     if not CHROMA_DB.exists():
         return []
@@ -324,16 +324,16 @@ def _vector_search(query: str, collection: str = "hermes_shared", top_k: int = 2
 # Reciprocal Rank Fusion
 # ---------------------------------------------------------------------------
 def _reciprocal_rank_fusion(
-    bm25_results: List[Tuple[str, float, int]],
-    vector_results: List[Tuple[str, float, int]],
+    bm25_results: list[tuple[str, float, int]],
+    vector_results: list[tuple[str, float, int]],
     k: int = 60
-) -> List[Tuple[str, float]]:
+) -> list[tuple[str, float]]:
     """
     Merge ranked results using RRF formula.
     RRF_score(d) = Σ 1/(k + rank_i(d))
     Lower rank (1=best) gives higher contribution.
     """
-    doc_scores: Dict[str, float] = defaultdict(float)
+    doc_scores: dict[str, float] = defaultdict(float)
 
     for doc_id, score, rank in bm25_results:
         if rank > 0:
@@ -349,7 +349,7 @@ def _reciprocal_rank_fusion(
 # ---------------------------------------------------------------------------
 # Unified fusion retrieval API
 # ---------------------------------------------------------------------------
-def fusion_retrieve(query: str, collection: str = "memory", top_k: int = 10) -> Dict[str, Any]:
+def fusion_retrieve(query: str, collection: str = "memory", top_k: int = 10) -> dict[str, Any]:
     """
     Dual retrieval: BM25 + Vector, merged with RRF.
     Returns final ranked list with scores from each strategy.
@@ -412,7 +412,7 @@ def fusion_retrieve(query: str, collection: str = "memory", top_k: int = 10) -> 
         }
     }
 
-def _fts5_fallback(query: str, collection: str, top_k: int) -> List[Tuple[str, float, int]]:
+def _fts5_fallback(query: str, collection: str, top_k: int) -> list[tuple[str, float, int]]:
     """FTS5 fallback when BM25 returns no results."""
     with LOCK:
         conn = _get_fusion_db()
@@ -442,7 +442,7 @@ def _fts5_fallback(query: str, collection: str, top_k: int) -> List[Tuple[str, f
 # ---------------------------------------------------------------------------
 # Index management API
 # ---------------------------------------------------------------------------
-def fusion_index(collection: str, texts: List[str] = None, doc_ids: List[str] = None) -> Dict[str, Any]:
+def fusion_index(collection: str, texts: list[str] = None, doc_ids: list[str] = None) -> dict[str, Any]:
     """Build or refresh BM25 index for a collection."""
     if texts is None:
         return {"error": "texts list is required"}
@@ -451,7 +451,7 @@ def fusion_index(collection: str, texts: List[str] = None, doc_ids: List[str] = 
 # ---------------------------------------------------------------------------
 # Stats API
 # ---------------------------------------------------------------------------
-def fusion_stats(collection: str = None) -> Dict[str, Any]:
+def fusion_stats(collection: str = None) -> dict[str, Any]:
     """Return index statistics."""
     with LOCK:
         conn = _get_fusion_db()
@@ -493,7 +493,7 @@ def fusion_stats(collection: str = None) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Handler for Hermes MCP
 # ---------------------------------------------------------------------------
-def handle_retrieval_fusion(args: Dict[str, Any]) -> str:
+def handle_retrieval_fusion(args: dict[str, Any]) -> str:
     """Handler for retrieval fusion operations."""
     action = args.get("action", "retrieve")
 
@@ -507,10 +507,10 @@ def handle_retrieval_fusion(args: Dict[str, Any]) -> str:
         result = fusion_index(
             args.get("collection", "memory"),
             args.get("texts", []),
-            args.get("doc_ids", None)
+            args.get("doc_ids")
         )
     elif action == "stats":
-        result = fusion_stats(args.get("collection", None))
+        result = fusion_stats(args.get("collection"))
     else:
         result = {"error": f"unknown action: {action}"}
 

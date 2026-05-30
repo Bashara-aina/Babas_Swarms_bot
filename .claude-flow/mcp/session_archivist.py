@@ -72,9 +72,9 @@ def _get_content_hash(content: str) -> str:
     import hashlib
     return hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
 
-def index_session(session_id: str, messages: List[Dict[str, Any]],
+def index_session(session_id: str, messages: list[dict[str, Any]],
                    agent_name: str = "hermes", parent_session_id: str = "",
-                   checkpoint_threshold: int = 100) -> Dict[str, Any]:
+                   checkpoint_threshold: int = 100) -> dict[str, Any]:
     """Index a session incrementally (only new messages since last checkpoint)."""
     with LOCK:
         conn = _get_fts_db()
@@ -141,7 +141,7 @@ def index_session(session_id: str, messages: List[Dict[str, Any]],
             "errors": errors
         }
 
-def _generate_summary(messages: List[Dict[str, Any]]) -> str:
+def _generate_summary(messages: list[dict[str, Any]]) -> str:
     """Generate a brief summary of session messages."""
     if not messages:
         return ""
@@ -154,7 +154,7 @@ def _generate_summary(messages: List[Dict[str, Any]]) -> str:
             snippets.append(f"[{role}]: {content[:100]}")
     return " | ".join(snippets)[:500]
 
-def search_sessions(query: str, limit: int = 5) -> List[Dict[str, Any]]:
+def search_sessions(query: str, limit: int = 5) -> list[dict[str, Any]]:
     """Rank-based search with Snippet() highlighting."""
     with LOCK:
         conn = _get_fts_db()
@@ -196,7 +196,7 @@ def search_sessions(query: str, limit: int = 5) -> List[Dict[str, Any]]:
             for r in rows
         ]
 
-def get_session_graph(session_id: str) -> Dict[str, Any]:
+def get_session_graph(session_id: str) -> dict[str, Any]:
     """Get session continuity graph."""
     with LOCK:
         conn = _get_fts_db()
@@ -233,7 +233,7 @@ def get_session_graph(session_id: str) -> Dict[str, Any]:
             "depth": len(ancestors)
         }
 
-def session_similarity_search(ref_session_id: str, limit: int = 5) -> List[Dict[str, Any]]:
+def session_similarity_search(ref_session_id: str, limit: int = 5) -> list[dict[str, Any]]:
     """Find sessions similar to ref_session using ChromaDB embeddings."""
     refs = _get_session_content(ref_session_id)
     if not refs:
@@ -280,7 +280,7 @@ def _get_session_content(session_id: str) -> str:
             pass
     return ""
 
-def auto_archive_session(session_id: str) -> Dict[str, Any]:
+def auto_archive_session(session_id: str) -> dict[str, Any]:
     """Archive sessions older than 14 days to compressed gzip bundle."""
     with LOCK:
         conn = _get_fts_db()
@@ -324,7 +324,7 @@ def auto_archive_session(session_id: str) -> Dict[str, Any]:
 
         return {"archived": True, "path": str(archive_path), "age_days": round(age_days, 1)}
 
-def export_session_bundle(session_ids: List[str], path: str) -> Dict[str, Any]:
+def export_session_bundle(session_ids: list[str], path: str) -> dict[str, Any]:
     """Export session bundle as gzip JSON."""
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     bundle = []
@@ -341,7 +341,7 @@ def export_session_bundle(session_ids: List[str], path: str) -> Dict[str, Any]:
         json.dump(bundle, f)
     return {"success": True, "path": path, "sessions_exported": len(bundle)}
 
-def handle_session_archivist(args: Dict[str, Any]) -> str:
+def handle_session_archivist(args: dict[str, Any]) -> str:
     """Main handler for session archivist operations."""
     action = args.get("action", "status")
     if action == "index":

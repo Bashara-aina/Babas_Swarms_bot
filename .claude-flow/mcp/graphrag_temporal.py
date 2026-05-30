@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """GraphRAG Temporal Versioning — Time-aware graph storage. Extends graphrag_engine.py."""
-import ast, hashlib, json, sqlite3, threading, time
-from datetime import datetime, timezone
+import ast
+import hashlib
+import json
+import sqlite3
+import threading
+import time
+from datetime import UTC, datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 HERMES_HOME = Path("/home/newadmin/.hermes")
 GRAPH_DB = HERMES_HOME / "graphrag" / "graphrag_temporal.db"
@@ -45,21 +50,26 @@ def _db() -> sqlite3.Connection:
     conn.commit()
     return conn
 
-def _now() -> float: return time.time()
-def _ts(ts: Optional[float]) -> str:
-    return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat() if ts else "NULL"
+def _now() -> float:
+    return time.time()
 
-def _nr(row) -> Dict: return {"id":row[0],"name":row[1],"kind":row[2],"file_path":row[3],
-    "line_number":row[4],"docstring":row[5],"signature":row[6],
-    "valid_from":row[10],"valid_until":row[11],"created_by":row[12],"superseded_by":row[13]}
-def _er(row) -> Dict: return {"id":row[0],"source_id":row[1],"target_id":row[2],
-    "edge_type":row[3],"weight":row[4],"updated":row[5],
-    "valid_from":row[6],"valid_until":row[7],"created_by":row[8],"superseded_by":row[9]}
+def _ts(ts: float | None) -> str:
+    return datetime.fromtimestamp(ts, tz=UTC).isoformat() if ts else "NULL"
+
+def _nr(row) -> dict:
+    return {"id": row[0], "name": row[1], "kind": row[2], "file_path": row[3],
+            "line_number": row[4], "docstring": row[5], "signature": row[6],
+            "valid_from": row[10], "valid_until": row[11], "created_by": row[12], "superseded_by": row[13]}
+
+def _er(row) -> dict:
+    return {"id": row[0], "source_id": row[1], "target_id": row[2],
+            "edge_type": row[3], "weight": row[4], "updated": row[5],
+            "valid_from": row[6], "valid_until": row[7], "created_by": row[8], "superseded_by": row[9]}
 
 # ---------------------------------------------------------------------------
 # Temporal insert with contradiction detection
 # ---------------------------------------------------------------------------
-def _insert_node(conn, node: Dict, agent: str = "unknown") -> int:
+def _insert_node(conn, node: dict, agent: str = "unknown") -> int:
     now = _now()
     # Check active node with same key for contradiction
     old = conn.execute("""SELECT id FROM nodes WHERE name=? AND kind=? AND file_path=?
@@ -74,10 +84,11 @@ def _insert_node(conn, node: Dict, agent: str = "unknown") -> int:
          node.get("docstring",""),node.get("signature",""),node.get("content_hash",""),
          emb,node.get("updated",now),now,agent))
     new_id = cur.lastrowid
-    if old: conn.execute("UPDATE nodes SET superseded_by=? WHERE id=?", (new_id, old[0]))
+    if old:
+        conn.execute("UPDATE nodes SET superseded_by=? WHERE id=?", (new_id, old[0]))
     return new_id
 
-def _insert_edge(conn, src: int, tgt: int, etype: str, w: float=1.0, agent: str="unknown") -> int:
+def _insert_edge(conn: sqlite3.Connection, src: int, tgt: int, etype: str, w: float = 1.0, agent: str = "unknown") -> int:
     now = _now()
     old = conn.execute("""SELECT id FROM edges WHERE source_id=? AND target_id=?
         AND edge_type=? AND valid_until IS NULL""", (src, tgt, etype)).fetchone()
@@ -87,13 +98,14 @@ def _insert_edge(conn, src: int, tgt: int, etype: str, w: float=1.0, agent: str=
         valid_from,created_by) VALUES (?,?,?,?,?,?,?)""",
         (src, tgt, etype, w, now, now, agent))
     new_id = cur.lastrowid
-    if old: conn.execute("UPDATE edges SET superseded_by=? WHERE id=?", (new_id, old[0]))
+    if old:
+        conn.execute("UPDATE edges SET superseded_by=? WHERE id=?", (new_id, old[0]))
     return new_id
 
 # ---------------------------------------------------------------------------
 # Temporal queries
 # ---------------------------------------------------------------------------
-def graphrag_query_at_time(query: str, timestamp: float, depth: int=2, top_k: int=10) -> Dict:
+def graphrag_query_at_time(query: str, timestamp: float, depth: int = 2, top_k: int = 10) -> dict:
     with LOCK:
         conn = _db()
         rows = conn.execute("""SELECT id,name,kind,file_path,line_number,docstring,signature,
@@ -102,11 +114,12 @@ def graphrag_query_at_time(query: str, timestamp: float, depth: int=2, top_k: in
             ORDER BY valid_from DESC""", (timestamp, timestamp)).fetchall()
         if not rows:
             conn.close()
-            return {"query":query,"timestamp":_ts(timestamp),"results":[],"message":"no facts at this time"}
+            return {"query": query, "timestamp": _ts(timestamp), "results": [], "message": "no facts at this time"}
         name_map = {}
         for row in rows:
-            key = (row[1],row[2],row[3])
-            if key not in name_map: name_map[key] = _nr(row)
+            key = (row[1], row[2], row[3])
+            if key not in name_map:
+                name_map[key] = _nr(row)
         nodes = list(name_map.values())
         edge_rows = conn.execute("""SELECT id,source_id,target_id,edge_type,weight,updated,
             valid_from,valid_until,created_by,superseded_by FROM edges
@@ -114,10 +127,10 @@ def graphrag_query_at_time(query: str, timestamp: float, depth: int=2, top_k: in
             (timestamp, timestamp)).fetchall()
         edges = [_er(r) for r in edge_rows]
         conn.close()
-        return {"query":query,"timestamp":_ts(timestamp),"nodes":nodes[:top_k],"edges":edges,
-                "indexed_files":len(set(n["file_path"] for n in nodes))}
+        return {"query": query, "timestamp": _ts(timestamp), "nodes": nodes[:top_k], "edges": edges,
+                "indexed_files": len(set(n["file_path"] for n in nodes))}
 
-def graphrag_query_current(query: str, top_k: int=10) -> Dict:
+def graphrag_query_current(query: str, top_k: int = 10) -> dict:
     with LOCK:
         conn = _db()
         rows = conn.execute("""SELECT id,name,kind,file_path,line_number,docstring,signature,
@@ -125,8 +138,9 @@ def graphrag_query_current(query: str, top_k: int=10) -> Dict:
             ORDER BY valid_from DESC""").fetchall()
         name_map = {}
         for row in rows:
-            key = (row[1],row[2],row[3])
-            if key not in name_map: name_map[key] = _nr(row)
+            key = (row[1], row[2], row[3])
+            if key not in name_map:
+                name_map[key] = _nr(row)
         nodes = list(name_map.values())
         edge_rows = conn.execute("""SELECT id,source_id,target_id,edge_type,weight,updated,
             valid_from,valid_until,created_by,superseded_by FROM edges WHERE valid_until IS NULL
@@ -134,52 +148,59 @@ def graphrag_query_current(query: str, top_k: int=10) -> Dict:
             AND target_id IN (SELECT id FROM nodes WHERE valid_until IS NULL)""").fetchall()
         edges = [_er(r) for r in edge_rows]
         conn.close()
-        return {"query":query,"timestamp":_ts(_now()),"nodes":nodes[:top_k],"edges":edges,
-                "indexed_files":len(set(n["file_path"] for n in nodes))}
+        return {"query": query, "timestamp": _ts(_now()), "nodes": nodes[:top_k], "edges": edges,
+                "indexed_files": len(set(n["file_path"] for n in nodes))}
 
-def graphrag_history(symbol: str, kind: str=None) -> Dict:
+def graphrag_history(symbol: str, kind: str | None = None) -> dict:
     with LOCK:
         conn = _db()
         q = "SELECT id,name,kind,file_path,line_number,docstring,signature,valid_from,valid_until,created_by,superseded_by FROM nodes WHERE name=?"
         p = [symbol]
-        if kind: q += " AND kind=?"; p.append(kind)
+        if kind:
+            q += " AND kind=?"
+            p.append(kind)
         q += " ORDER BY valid_from ASC"
         rows = conn.execute(q, p).fetchall()
         conn.close()
-        if not rows: return {"symbol":symbol,"kind":kind,"versions":[],"message":"not found"}
+        if not rows:
+            return {"symbol": symbol, "kind": kind, "versions": [], "message": "not found"}
         versions = [_nr(r) for r in rows]
-        return {"symbol":symbol,"kind":kind,"versions":versions,"total_versions":len(versions),
+        return {"symbol": symbol, "kind": kind, "versions": versions, "total_versions": len(versions),
                 "current":versions[-1] if versions else None}
 
-def graphrag_diff(symbol: str, from_time: float, to_time: float, kind: str=None) -> Dict:
+def graphrag_diff(symbol: str, from_time: float, to_time: float, kind: str | None = None) -> dict:
     before = graphrag_query_at_time(symbol, from_time)
     after = graphrag_query_at_time(symbol, to_time)
     with LOCK:
         conn = _db()
         q = "SELECT id,name,kind,file_path,line_number,docstring,signature,valid_from,valid_until,created_by,superseded_by FROM nodes WHERE name=? AND valid_from<=? AND valid_from>?"
         p = [symbol, from_time, 0]
-        if kind: q += " AND kind=?"; p.append(kind)
+        if kind:
+            q += " AND kind=?"
+            p.append(kind)
         born_rows = conn.execute(q, p).fetchall()
         conn.close()
         born = [_nr(r) for r in born_rows]
-        return {"symbol":symbol,"kind":kind,"from":_ts(from_time),"to":_ts(to_time),
-                "before_count":len(before.get("nodes",[])),"after_count":len(after.get("nodes",[])),
-                "version_chain":born,"current_facts":after.get("nodes",[])}
+        return {"symbol": symbol, "kind": kind, "from": _ts(from_time), "to": _ts(to_time),
+                "before_count": len(before.get("nodes", [])), "after_count": len(after.get("nodes", [])),
+                "version_chain": born, "current_facts": after.get("nodes", [])}
 
 # ---------------------------------------------------------------------------
 # AST extraction
 # ---------------------------------------------------------------------------
-def _embed(text: str) -> Optional[List[float]]:
+def _embed(text: str) -> list[float] | None:
     try:
         from sentence_transformers import SentenceTransformer
         m = SentenceTransformer("all-MiniLM-L6-v2", device="cuda:0")
         return m.encode(text, normalize_embeddings=True).tolist()
-    except: pass
+    except Exception:
+        pass
     try:
         from sentence_transformers import SentenceTransformer
         m = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
         return m.encode(text, normalize_embeddings=True).tolist()
-    except: return None
+    except Exception:
+        return None
 
 class _Ex(ast.NodeVisitor):
     def __init__(self, p): self.p=p; self.ns=[]; self.es=[]; self._ids={}; self._f=None; self._c=None
@@ -208,7 +229,7 @@ class _Ex(ast.NodeVisitor):
             if base: self.es.append((self._f,base,"calls"))
         self.generic_visit(node)
 
-def _parse(path: str) -> Tuple[List[Dict], List[Tuple]]:
+def _parse(path: str) -> tuple[list[dict], list[tuple]]:
     try: src=Path(path).read_text(encoding="utf-8",errors="ignore")
     except: return [],[]
     try: tree=ast.parse(src,filename=path)
@@ -222,7 +243,7 @@ def _parse(path: str) -> Tuple[List[Dict], List[Tuple]]:
         if sid and tid: res.append((sid,tid,et,w))
     return ex.ns, res
 
-def index_file_temporal(path: str, agent: str="unknown") -> Dict:
+def index_file_temporal(path: str, agent: str="unknown") -> dict:
     h=hashlib.sha256(Path(path).read_text(encoding="utf-8",errors="ignore").encode()).hexdigest()[:16]
     nodes,edges=_parse(path)
     if not nodes: return {"skipped":True,"reason":"no nodes","file":path}
@@ -240,7 +261,7 @@ def index_file_temporal(path: str, agent: str="unknown") -> Dict:
         conn.commit(); conn.close()
         return {"indexed":True,"file":path,"nodes":len(nodes),"edges":len(edges)}
 
-def build_index_temporal(paths: List[str]=None, agent: str="unknown") -> Dict:
+def build_index_temporal(paths: list[str]=None, agent: str="unknown") -> dict:
     if paths is None: paths=["/home/newadmin/swarm-bot"]
     files=[]
     for base in paths:
@@ -259,7 +280,7 @@ def build_index_temporal(paths: List[str]=None, agent: str="unknown") -> Dict:
 # ---------------------------------------------------------------------------
 # MCP handler
 # ---------------------------------------------------------------------------
-def handle_graphrag_temporal(args: Dict[str, Any]) -> str:
+def handle_graphrag_temporal(args: dict[str, Any]) -> str:
     a=args.get("action","query_current")
     if a=="query_at_time": result=graphrag_query_at_time(args.get("query",""),args.get("timestamp",_now()),args.get("depth",2),args.get("top_k",10))
     elif a=="query_current": result=graphrag_query_current(args.get("query",""),args.get("top_k",10))

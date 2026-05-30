@@ -133,7 +133,7 @@ def _should_push_entry(entry: str) -> bool:
 # Claude Code Layer Readers
 # ============================================================================
 
-def read_layer1_checkpoints() -> List[Dict[str, Any]]:
+def read_layer1_checkpoints() -> list[dict[str, Any]]:
     """Read checkpoint files from L1."""
     cp_dir = CC_LAYER_PATHS["L1_checkpoints"]
     if not cp_dir.exists():
@@ -148,7 +148,7 @@ def read_layer1_checkpoints() -> List[Dict[str, Any]]:
     return results
 
 
-def read_layer2_chroma(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+def read_layer2_chroma(query: str, top_k: int = 5) -> list[dict[str, Any]]:
     """Query ChromaDB vector store."""
     chroma_path = CC_LAYER_PATHS["L2_chroma"]
     db_path = chroma_path / "chroma.sqlite3"
@@ -183,7 +183,7 @@ def read_layer2_chroma(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         return []
 
 
-def read_layer3_langmem() -> List[Dict[str, Any]]:
+def read_layer3_langmem() -> list[dict[str, Any]]:
     """Read LangMem .md files from L3."""
     langmem_dir = CC_LAYER_PATHS["L3_langmem"]
     if not langmem_dir.exists():
@@ -201,7 +201,7 @@ def read_layer3_langmem() -> List[Dict[str, Any]]:
     return results
 
 
-def read_layer4_observations(limit: int = 50) -> List[Dict[str, Any]]:
+def read_layer4_observations(limit: int = 50) -> list[dict[str, Any]]:
     """Query L4 observation store."""
     db_path = CC_LAYER_PATHS["L4_observations"]
     if not db_path.exists():
@@ -233,7 +233,7 @@ def read_layer4_observations(limit: int = 50) -> List[Dict[str, Any]]:
         return []
 
 
-def read_layer5_graphrag() -> Dict[str, Any]:
+def read_layer5_graphrag() -> dict[str, Any]:
     """Read L5/L6 GraphRAG/Mem0 JSON store."""
     path = CC_LAYER_PATHS["L5_graphrag"]
     if not path.exists():
@@ -250,7 +250,7 @@ def read_layer5_graphrag() -> Dict[str, Any]:
 # Hermes Memory Readers
 # ============================================================================
 
-def read_hermes_memory() -> List[str]:
+def read_hermes_memory() -> list[str]:
     """Read Hermes MEMORY.md entries."""
     path = HERMES_PATHS["memory_md"]
     if not path.exists():
@@ -261,7 +261,7 @@ def read_hermes_memory() -> List[str]:
     return [e.strip() for e in raw.split(ENTRY_DELIMITER) if e.strip()]
 
 
-def read_hermes_user() -> List[str]:
+def read_hermes_user() -> list[str]:
     """Read Hermes USER.md entries."""
     path = HERMES_PATHS["user_md"]
     if not path.exists():
@@ -272,7 +272,7 @@ def read_hermes_user() -> List[str]:
     return [e.strip() for e in raw.split(ENTRY_DELIMITER) if e.strip()]
 
 
-def read_hermes_sessions(limit: int = 5) -> List[Dict[str, Any]]:
+def read_hermes_sessions(limit: int = 5) -> list[dict[str, Any]]:
     """Read recent Hermes session transcripts."""
     sessions_dir = HERMES_PATHS["sessions"]
     if not sessions_dir.exists():
@@ -291,7 +291,7 @@ def read_hermes_sessions(limit: int = 5) -> List[Dict[str, Any]]:
 # Hermes Memory Writers
 # ============================================================================
 
-def write_hermes_memory_entry(content: str) -> Dict[str, Any]:
+def write_hermes_memory_entry(content: str) -> dict[str, Any]:
     """Add an entry to Hermes MEMORY.md."""
     mem_path = HERMES_PATHS["memory_md"]
     mem_path.parent.mkdir(parents=True, exist_ok=True)
@@ -312,7 +312,7 @@ def write_hermes_memory_entry(content: str) -> Dict[str, Any]:
     return {"success": True, "action": "added", "entries": len(new_entries)}
 
 
-def write_hermes_user_entry(content: str) -> Dict[str, Any]:
+def write_hermes_user_entry(content: str) -> dict[str, Any]:
     """Add an entry to Hermes USER.md."""
     user_path = HERMES_PATHS["user_md"]
     user_path.parent.mkdir(parents=True, exist_ok=True)
@@ -336,7 +336,7 @@ def write_hermes_user_entry(content: str) -> Dict[str, Any]:
 # Claude Code Memory Writers
 # ============================================================================
 
-def write_to_layer3_langmem(title: str, content: str) -> Dict[str, Any]:
+def write_to_layer3_langmem(title: str, content: str) -> dict[str, Any]:
     """Write content as a .md file in L3 LangMem."""
     langmem_dir = CC_LAYER_PATHS["L3_langmem"]
     langmem_dir.mkdir(parents=True, exist_ok=True)
@@ -346,7 +346,7 @@ def write_to_layer3_langmem(title: str, content: str) -> Dict[str, Any]:
     return {"success": True, "file": str(path)}
 
 
-def append_to_layer5_graphrag(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+def append_to_layer5_graphrag(entries: list[dict[str, Any]]) -> dict[str, Any]:
     """Append entries to L5 GraphRAG store."""
     path = CC_LAYER_PATHS["L5_graphrag"]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -376,7 +376,7 @@ def append_to_layer5_graphrag(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
 # Main Sync Functions
 # ============================================================================
 
-def pull_from_hermes(summary: str = "Claude Code context sync") -> Dict[str, Any]:
+def pull_from_hermes(summary: str = "Claude Code context sync") -> dict[str, Any]:
     """
     Pull memory from Hermes → Claude Code layers.
     Imports recent session context and key memory entries into CC layers.
@@ -446,7 +446,7 @@ def pull_from_hermes(summary: str = "Claude Code context sync") -> Dict[str, Any
     return results
 
 
-def push_to_hermes(summary: str = "Claude Code learnings") -> Dict[str, Any]:
+def push_to_hermes(summary: str = "Claude Code learnings") -> dict[str, Any]:
     """
     Push key learnings from Claude Code → Hermes memory.
     Exports important CC findings, decisions, and patterns to Hermes.
@@ -496,7 +496,7 @@ def push_to_hermes(summary: str = "Claude Code learnings") -> Dict[str, Any]:
     return results
 
 
-def full_sync(bidirectional: bool = True) -> Dict[str, Any]:
+def full_sync(bidirectional: bool = True) -> dict[str, Any]:
     """
     Run a full bidirectional memory sync.
     Returns sync status for both directions.
@@ -551,7 +551,7 @@ MEMORY_SYNC_SCHEMA = {
 }
 
 
-def handle_memory_sync(args: Dict[str, Any]) -> str:
+def handle_memory_sync(args: dict[str, Any]) -> str:
     """Handle memory_sync tool invocation."""
     direction = args.get("direction", "bidirectional")
     dry_run = args.get("dry_run", False)
@@ -605,5 +605,5 @@ def handle_memory_sync(args: Dict[str, Any]) -> str:
 
 
 # Alias for MCP handler
-def memory_sync_tool(args: Dict[str, Any]) -> str:
+def memory_sync_tool(args: dict[str, Any]) -> str:
     return handle_memory_sync(args)

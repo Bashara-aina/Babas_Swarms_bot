@@ -18,8 +18,9 @@ import sqlite3
 import subprocess
 import threading
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
@@ -345,7 +346,7 @@ class HookRegistry:
             builtin_name = script_path[8:]  # strip "builtin:" prefix → e.g. "prettier-fix"
             full_key = f"builtin:{builtin_name}"
             if full_key not in BUILTIN_HOOKS:
-                return {"success": False, "error": f"Unknown builtin: {builtin_name}", "known": list(k[8:] for k in BUILTIN_HOOKS.keys())}
+                return {"success": False, "error": f"Unknown builtin: {builtin_name}", "known": list(k[8:] for k in BUILTIN_HOOKS)}
             # Install built-in to a real path
             HERMES_HOOKS_DIR.mkdir(parents=True, exist_ok=True)
             actual_path = str(HERMES_HOOKS_DIR / f"builtin_{builtin_name}.sh")
@@ -467,7 +468,7 @@ class HookRegistry:
     def fire(
         self,
         event: str,
-        context: Optional[dict] = None,
+        context: dict | None = None,
         blocking: bool = False,
         timeout: int = HOOK_TIMEOUT,
     ) -> dict:
@@ -524,7 +525,7 @@ class HookRegistry:
             try:
                 r = self._run_hook(h, context, timeout)
                 self._update_hook_stats(h["hook_id"], r)
-            except Exception as e:
+            except Exception:
                 pass  # Swallow async errors silently
 
     def _run_hook(self, hook: dict, context: dict, timeout: int) -> dict:
@@ -603,7 +604,7 @@ class HookRegistry:
         except Exception:
             pass  # Non-critical
 
-    def list_hooks(self, event: Optional[str] = None) -> dict:
+    def list_hooks(self, event: str | None = None) -> dict:
         """
         List all registered hooks, optionally filtered by event.
 
@@ -674,7 +675,7 @@ def hook_unregister(hook_id: str) -> dict:
 
 def hook_fire(
     event: str,
-    context: Optional[dict] = None,
+    context: dict | None = None,
     blocking: bool = True,
     timeout: int = HOOK_TIMEOUT,
 ) -> dict:
@@ -685,7 +686,7 @@ def hook_fire(
     return get_registry().fire(event, context or {}, blocking=blocking, timeout=timeout)
 
 
-def hook_list(event: Optional[str] = None) -> dict:
+def hook_list(event: str | None = None) -> dict:
     """List all registered hooks, optionally filtered by event."""
     return get_registry().list_hooks(event)
 

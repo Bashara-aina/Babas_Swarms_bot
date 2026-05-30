@@ -22,7 +22,7 @@ import re
 import sqlite3
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -139,7 +139,7 @@ class MemoryEntry:
         self,
         entry_type: str,
         content: str,
-        code_refs: Optional[List[str]] = None,
+        code_refs: list[str] | None = None,
         confidence: float = 0.5,
         session_id: str = "",
         significance: str = "medium",
@@ -149,12 +149,12 @@ class MemoryEntry:
         self.code_refs = code_refs or []
         self.confidence = confidence
         self.session_id = session_id
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
         self.project = PROJECT_NAME
         self.decay_rate = DECAY_RATES.get(entry_type, 0.1)
         self.significance = significance
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "type": self.entry_type,
             "content": self.content,
@@ -200,7 +200,7 @@ def _is_noise(line: str) -> bool:
     return False
 
 
-def _extract_code_refs(text: str) -> List[str]:
+def _extract_code_refs(text: str) -> list[str]:
     """Extract file:line references from text."""
     refs = []
     # Match common patterns: file.py:123, file.ts:456
@@ -228,7 +228,7 @@ def _clean_content(content: str) -> str:
 # LLM Classification (call-ready)
 # ============================================================================
 
-def _classify_entry(content: str, code_refs: List[str]) -> Dict[str, Any]:
+def _classify_entry(content: str, code_refs: list[str]) -> dict[str, Any]:
     """
     Classify a memory entry type using MiniMax-M2.7.
     Returns dict with entry_type, confidence, significance.
@@ -277,7 +277,7 @@ Respond with only valid JSON."""
     return {"type": "preference", "confidence": 0.5, "significance": "low"}
 
 
-def _synthesize_content(chunks: List[str]) -> str:
+def _synthesize_content(chunks: list[str]) -> str:
     """
     Synthesize multiple content chunks into concise memory.
     Uses MiniMax-M2.7 for synthesis.
@@ -311,10 +311,10 @@ Respond with only the synthesized content, no formatting."""
 # ============================================================================
 
 def extract_from_messages(
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     session_id: str = "",
     use_llm: bool = False
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Extract structured memory entries from a list of messages.
 
@@ -333,12 +333,12 @@ def extract_from_messages(
     session_id = session_id or f"session_{int(start_time)}"
 
     # Group messages by topic (simple heuristic)
-    entries: List[MemoryEntry] = []
+    entries: list[MemoryEntry] = []
     noise_count = 0
     raw_count = len(messages)
 
     # Extract content from messages
-    content_chunks: List[str] = []
+    content_chunks: list[str] = []
     current_topic = ""
 
     for msg in messages:
@@ -395,10 +395,10 @@ def extract_from_messages(
 
 
 def extract_session(
-    session_transcript: List[Dict[str, Any]],
+    session_transcript: list[dict[str, Any]],
     session_id: str = "",
     use_llm: bool = False
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Process a complete session transcript and extract memory entries.
 
@@ -432,7 +432,7 @@ def _store_extraction_stats(
         conn.close()
 
 
-def get_extraction_stats(session_id: Optional[str] = None) -> Dict[str, Any]:
+def get_extraction_stats(session_id: str | None = None) -> dict[str, Any]:
     """
     Get extraction statistics, optionally filtered by session.
 
@@ -492,7 +492,7 @@ def get_extraction_stats(session_id: Optional[str] = None) -> Dict[str, Any]:
 # Persistence
 # ============================================================================
 
-def save_entries(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+def save_entries(entries: list[dict[str, Any]]) -> dict[str, Any]:
     """Save extracted entries to database."""
     with LOCK:
         conn = _get_db()
@@ -522,15 +522,15 @@ def save_entries(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def get_entries(
-    session_id: Optional[str] = None,
-    entry_type: Optional[str] = None,
+    session_id: str | None = None,
+    entry_type: str | None = None,
     min_confidence: float = 0.0
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Retrieve stored memory entries with optional filters."""
     with LOCK:
         conn = _get_db()
         query = "SELECT * FROM memory_entries WHERE confidence >= ?"
-        params: List[Any] = [min_confidence]
+        params: list[Any] = [min_confidence]
 
         if session_id:
             query += " AND session_id = ?"
@@ -566,7 +566,7 @@ def get_entries(
 # MCP Handler
 # ============================================================================
 
-def handle_memory_extractor(args: Dict[str, Any]) -> str:
+def handle_memory_extractor(args: dict[str, Any]) -> str:
     """Main handler for memory_extractor MCP tool."""
     action = args.get("action", "status")
 
@@ -665,5 +665,5 @@ MEMORY_EXTRACTOR_SCHEMA = {
 
 
 # Alias for MCP tool
-def memory_extractor_tool(args: Dict[str, Any]) -> str:
+def memory_extractor_tool(args: dict[str, Any]) -> str:
     return handle_memory_extractor(args)

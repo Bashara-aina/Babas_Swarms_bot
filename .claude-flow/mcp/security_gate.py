@@ -198,7 +198,7 @@ def _get_db() -> sqlite3.Connection:
 # Core Scanning Logic
 # ============================================================================
 
-def _scan_patterns(code: str, file_path: str = "") -> List[Dict[str, Any]]:
+def _scan_patterns(code: str, file_path: str = "") -> list[dict[str, Any]]:
     """Scan code against all vulnerability patterns."""
     findings = []
     lines = code.split("\n")
@@ -212,7 +212,7 @@ def _scan_patterns(code: str, file_path: str = "") -> List[Dict[str, Any]]:
                 # Get surrounding context (up to 2 lines before/after)
                 before = "\n".join(lines[max(0, line_num - 3):line_num - 1])
                 after = "\n".join(lines[line_num:min(len(lines), line_num + 2)])
-                snippet = "{}\n{}\n{}".format(before, match.group(), after)[:500]
+                snippet = f"{before}\n{match.group()}\n{after}"[:500]
 
                 severity = "critical" if confidence >= 0.9 else "high" if confidence >= 0.8 else "medium"
 
@@ -222,7 +222,7 @@ def _scan_patterns(code: str, file_path: str = "") -> List[Dict[str, Any]]:
                     "pattern_id": pattern_id,
                     "confidence": confidence,
                     "severity": severity,
-                    "description": "Detected {}: {}".format(category, pattern_id),
+                    "description": f"Detected {category}: {pattern_id}",
                     "code_snippet": snippet,
                     "file_path": file_path,
                     "line_number": line_num,
@@ -234,7 +234,7 @@ def _scan_patterns(code: str, file_path: str = "") -> List[Dict[str, Any]]:
     return findings
 
 
-def _scan_ast(code: str) -> List[Dict[str, Any]]:
+def _scan_ast(code: str) -> list[dict[str, Any]]:
     """Use AST parsing for deeper Python-specific analysis."""
     findings = []
 
@@ -257,10 +257,10 @@ def _scan_ast(code: str) -> List[Dict[str, Any]]:
                 findings.append({
                     "type": "ast_dangerous_call",
                     "category": "cwe",
-                    "pattern_id": "ast_{}".format(func_name),
+                    "pattern_id": f"ast_{func_name}",
                     "confidence": 0.95,
                     "severity": "critical",
-                    "description": "Dangerous function call: os.{}()".format(func_name),
+                    "description": f"Dangerous function call: os.{func_name}()",
                     "line_number": getattr(node, "lineno", 0) or 0,
                 })
 
@@ -290,7 +290,7 @@ def _is_safe_subprocess(node: ast.Call) -> bool:
     return False
 
 
-def _aggregate_confidence(findings: List[Dict[str, Any]]) -> float:
+def _aggregate_confidence(findings: list[dict[str, Any]]) -> float:
     """Aggregate multiple findings into overall confidence score."""
     if not findings:
         return 1.0  # No issues = full confidence
@@ -319,7 +319,7 @@ def _aggregate_confidence(findings: List[Dict[str, Any]]) -> float:
 # Main Security Functions
 # ============================================================================
 
-def security_scan_code(code_snippet: str, file_path: str = "") -> Dict[str, Any]:
+def security_scan_code(code_snippet: str, file_path: str = "") -> dict[str, Any]:
     """
     Scan code snippet before writing. Returns findings + confidence.
     """
@@ -391,24 +391,24 @@ def security_scan_code(code_snippet: str, file_path: str = "") -> Dict[str, Any]
     }
 
 
-def security_check_file(file_path: str) -> Dict[str, Any]:
+def security_check_file(file_path: str) -> dict[str, Any]:
     """
     Scan an existing file for security issues.
     """
     path = Path(file_path)
     if not path.exists():
-        return {"error": "File not found: {}".format(file_path)}
+        return {"error": f"File not found: {file_path}"}
 
     try:
         code = path.read_text(errors="replace")
     except Exception as e:
-        return {"error": "Cannot read file: {}".format(e)}
+        return {"error": f"Cannot read file: {e}"}
 
     return security_scan_code(code, file_path)
 
 
 def security_gate(action: str, confidence: float = 1.0,
-                   description: str = "") -> Dict[str, Any]:
+                   description: str = "") -> dict[str, Any]:
     """
     Security checkpoint gate. Blocks actions with confidence < BLOCK_THRESHOLD.
 
@@ -425,20 +425,20 @@ def security_gate(action: str, confidence: float = 1.0,
 
     now = time.time()
     decision = "allow"
-    reasoning = "Action '{}' passed security gate".format(action)
+    reasoning = f"Action '{action}' passed security gate"
 
     if confidence < effective_threshold:
         decision = "block"
         reasoning = (
-            "BLOCKED: Action '{}' has confidence {:.2f} "
-            "(threshold: {:.2f}). {}"
-        ).format(action, confidence, effective_threshold, description)
+            f"BLOCKED: Action '{action}' has confidence {confidence:.2f} "
+            f"(threshold: {effective_threshold:.2f}). {description}"
+        )
     elif confidence < REVIEW_THRESHOLD:
         decision = "review"
         reasoning = (
-            "REVIEW REQUIRED: Action '{}' has moderate confidence "
-            "{:.2f} (review threshold: {:.2f}). {}"
-        ).format(action, confidence, REVIEW_THRESHOLD, description)
+            f"REVIEW REQUIRED: Action '{action}' has moderate confidence "
+            f"{confidence:.2f} (review threshold: {REVIEW_THRESHOLD:.2f}). {description}"
+        )
 
     # Store decision
     try:
@@ -457,10 +457,7 @@ def security_gate(action: str, confidence: float = 1.0,
     try:
         SECURITY_LOG.parent.mkdir(parents=True, exist_ok=True)
         with open(SECURITY_LOG, "a") as f:
-            f.write("[{}] {} | {} | conf={:.3f} | {}\n".format(
-                datetime.now().isoformat(), decision.upper(), action,
-                confidence, reasoning[:200]
-            ))
+            f.write(f"[{datetime.now().isoformat()}] {decision.upper()} | {action} | conf={confidence:.3f} | {reasoning[:200]}\n")
     except Exception:
         pass
 
@@ -476,7 +473,7 @@ def security_gate(action: str, confidence: float = 1.0,
     }
 
 
-def security_report() -> Dict[str, Any]:
+def security_report() -> dict[str, Any]:
     """
     Generate security status report from stored findings and decisions.
     """
@@ -576,7 +573,7 @@ def security_report() -> Dict[str, Any]:
 # MCP Tool Handlers
 # ============================================================================
 
-def handle_security_scan(args: Dict[str, Any]) -> str:
+def handle_security_scan(args: dict[str, Any]) -> str:
     """Handle security_scan_code tool invocation."""
     code = args.get("code_snippet", "")
     file_path = args.get("file_path", "")
@@ -586,7 +583,7 @@ def handle_security_scan(args: Dict[str, Any]) -> str:
     return json.dumps(result, indent=2)
 
 
-def handle_security_check(args: Dict[str, Any]) -> str:
+def handle_security_check(args: dict[str, Any]) -> str:
     """Handle security_check_file tool invocation."""
     file_path = args.get("file_path", "")
     if not file_path:
@@ -595,7 +592,7 @@ def handle_security_check(args: Dict[str, Any]) -> str:
     return json.dumps(result, indent=2)
 
 
-def handle_security_gate(args: Dict[str, Any]) -> str:
+def handle_security_gate(args: dict[str, Any]) -> str:
     """Handle security_gate tool invocation."""
     action = args.get("action", "")
     confidence = args.get("confidence", 1.0)
@@ -606,7 +603,7 @@ def handle_security_gate(args: Dict[str, Any]) -> str:
     return json.dumps(result, indent=2)
 
 
-def handle_security_report(args: Dict[str, Any]) -> str:
+def handle_security_report(args: dict[str, Any]) -> str:
     """Handle security_report tool invocation."""
     result = security_report()
     return json.dumps(result, indent=2)
@@ -641,7 +638,7 @@ if __name__ == "__main__":
         elif cmd == "report":
             print(json.dumps(security_report(), indent=2))
         else:
-            print("Usage: {} [scan|check <file>|gate <action> <conf>|report]".format(sys.argv[0]))
+            print(f"Usage: {sys.argv[0]} [scan|check <file>|gate <action> <conf>|report]")
     else:
         # Self-test
         test_code = 'password = "super_secret_123"  # hardcoded'

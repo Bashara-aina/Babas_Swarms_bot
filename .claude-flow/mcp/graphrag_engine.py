@@ -4,7 +4,12 @@ GraphRAG Engine — Code-aware graph retrieval for Hermes.
 Combines vector embeddings with call graph traversal for multi-hop reasoning.
 Supports Python AST extraction, dependency graphs, and incremental indexing.
 """
-import ast, hashlib, json, sqlite3, threading, time
+import ast
+import hashlib
+import json
+import sqlite3
+import threading
+import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -38,7 +43,7 @@ def _get_model():
         pass
     return None
 
-def _embed(text: str) -> Optional[List[float]]:
+def _embed(text: str) -> list[float] | None:
     m = _get_model()
     if not m:
         return None
@@ -87,7 +92,7 @@ def _db() -> sqlite3.Connection:
     conn.commit()
     return conn
 
-def _node(row) -> Dict[str, Any]:
+def _node(row) -> dict[str, Any]:
     return {"id": row[0], "name": row[1], "kind": row[2], "file_path": row[3],
             "line_number": row[4], "docstring": row[5], "signature": row[6]}
 
@@ -97,11 +102,11 @@ def _node(row) -> Dict[str, Any]:
 class _Extractor(ast.NodeVisitor):
     def __init__(self, path: str):
         self.path = path
-        self.nodes: List[Dict] = []
-        self.edges: List[Tuple] = []
-        self._ids: Dict[Tuple, int] = {}
-        self._func: Optional[str] = None
-        self._cls: Optional[str] = None
+        self.nodes: list[dict] = []
+        self.edges: list[tuple] = []
+        self._ids: dict[tuple, int] = {}
+        self._func: str | None = None
+        self._cls: str | None = None
 
     def _add(self, name: str, kind: str, line: int = 0, doc: str = "", sig: str = "") -> int:
         key = (name, kind)
@@ -157,7 +162,7 @@ class _Extractor(ast.NodeVisitor):
     def visit_ImportFrom(self, node):
         pass
 
-def _parse_file(path: str) -> Tuple[List[Dict], List[Tuple]]:
+def _parse_file(path: str) -> tuple[list[dict], list[tuple]]:
     try:
         src = Path(path).read_text(encoding="utf-8", errors="ignore")
     except Exception:
@@ -186,7 +191,7 @@ def _parse_file(path: str) -> Tuple[List[Dict], List[Tuple]]:
 def _hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
 
-def index_file(path: str, conn: sqlite3.Connection) -> Dict:
+def index_file(path: str, conn: sqlite3.Connection) -> dict:
     content = Path(path).read_text(encoding="utf-8", errors="ignore")
     h = _hash(content)
     row = conn.execute("SELECT content_hash FROM file_index WHERE file_path = ?",
@@ -222,7 +227,7 @@ def index_file(path: str, conn: sqlite3.Connection) -> Dict:
     conn.commit()
     return {"indexed": True, "file": path, "nodes": len(nodes), "edges": len(edges)}
 
-def build_index(paths: List[str] = None) -> Dict[str, Any]:
+def build_index(paths: list[str] = None) -> dict[str, Any]:
     if paths is None:
         paths = [str(PROJECT_ROOT)]
     files = []
@@ -258,7 +263,7 @@ def build_index(paths: List[str] = None) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Query / retrieval
 # ---------------------------------------------------------------------------
-def _vector_search(query: str, top_k: int = 10) -> List[Dict]:
+def _vector_search(query: str, top_k: int = 10) -> list[dict]:
     emb = _embed(query)
     if not emb:
         return []
@@ -280,8 +285,8 @@ def _vector_search(query: str, top_k: int = 10) -> List[Dict]:
     scored.sort(reverse=True)
     return [{"vector_score": round(s, 4), **_node(r)} for s, r in scored[:top_k]]
 
-def _traverse(node_id: int, depth: int = 2, etypes: List[str] = None,
-              direction: str = "both") -> List[Dict]:
+def _traverse(node_id: int, depth: int = 2, etypes: list[str] = None,
+              direction: str = "both") -> list[dict]:
     if etypes is None:
         etypes = ["calls", "inherits", "imports"]
     results = []
@@ -325,7 +330,7 @@ def _traverse(node_id: int, depth: int = 2, etypes: List[str] = None,
         conn.close()
     return results
 
-def _resolve(name: str, kind: str = None) -> Optional[int]:
+def _resolve(name: str, kind: str = None) -> int | None:
     with LOCK:
         conn = _db()
         if kind:
@@ -348,7 +353,7 @@ def _file_count() -> int:
         conn.close()
         return c
 
-def graphrag_query(query: str, depth: int = 2, top_k: int = 10) -> Dict[str, Any]:
+def graphrag_query(query: str, depth: int = 2, top_k: int = 10) -> dict[str, Any]:
     vres = _vector_search(query, top_k)
     if not vres:
         return {"query": query, "vector_results": [], "graph_results": [], "merged_results": []}
@@ -372,14 +377,14 @@ def graphrag_query(query: str, depth: int = 2, top_k: int = 10) -> Dict[str, Any
     return {"query": query, "vector_results": vres, "graph_results": gres,
             "merged_results": merged[:top_k], "indexed_files": _file_count()}
 
-def graphrag_get_dependencies(symbol: str, kind: str = None, depth: int = 2) -> Dict:
+def graphrag_get_dependencies(symbol: str, kind: str = None, depth: int = 2) -> dict:
     nid = _resolve(symbol, kind)
     if not nid:
         return {"error": f"symbol not found: {symbol}"}
     return {"symbol": symbol, "node_id": nid, "depth": depth,
             "related": _traverse(nid, depth=depth, etypes=["calls", "imports", "inherits"])}
 
-def get_callers(symbol: str) -> Dict:
+def get_callers(symbol: str) -> dict:
     nid = _resolve(symbol)
     if not nid:
         return {"error": f"symbol not found: {symbol}"}
@@ -393,7 +398,7 @@ def get_callers(symbol: str) -> Dict:
         conn.close()
     return {"symbol": symbol, "callers": [_node(r) for r in rows]}
 
-def get_symbol_context(symbol: str, kind: str = None) -> Dict:
+def get_symbol_context(symbol: str, kind: str = None) -> dict:
     nid = _resolve(symbol, kind)
     if not nid:
         return {"error": f"symbol not found: {symbol}"}
@@ -415,7 +420,7 @@ def get_symbol_context(symbol: str, kind: str = None) -> Dict:
     return {"symbol": symbol, "node": _node(row) if row else None,
             "callers": [_node(r) for r in callers], "callees": [_node(r) for r in callees]}
 
-def get_execution_path(from_sym: str, to_sym: str) -> Dict:
+def get_execution_path(from_sym: str, to_sym: str) -> dict:
     from_id = _resolve(from_sym)
     to_id = _resolve(to_sym)
     if not from_id or not to_id:
@@ -444,7 +449,7 @@ def get_execution_path(from_sym: str, to_sym: str) -> Dict:
 # ---------------------------------------------------------------------------
 # Handler
 # ---------------------------------------------------------------------------
-def handle_graphrag(args: Dict[str, Any]) -> str:
+def handle_graphrag(args: dict[str, Any]) -> str:
     action = args.get("action", "query")
     if action == "query":
         result = graphrag_query(args.get("query", ""), args.get("depth", 2), args.get("top_k", 10))

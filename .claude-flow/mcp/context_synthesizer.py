@@ -4,7 +4,11 @@ ContextSynthesizer — LLM-powered context synthesis for session resumption.
 Queries all 6 memory layers and synthesizes a coherent briefing via MiniMax-M2.7,
 with LLM-free fallback.
 """
-import json, os, sqlite3, threading, urllib.request
+import json
+import os
+import sqlite3
+import threading
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -34,7 +38,7 @@ _STATS = {"total_syntheses": 0, "llm_fallbacks": 0, "tokens_used": 0, "entries_p
 # Layer readers
 # ---------------------------------------------------------------------------
 
-def _read_layer1(top_k: int = 5) -> List[Dict]:
+def _read_layer1(top_k: int = 5) -> list[dict]:
     cp_dir = CC_LAYER_PATHS["L1"]
     if not cp_dir.exists(): return []
     results = []
@@ -46,7 +50,7 @@ def _read_layer1(top_k: int = 5) -> List[Dict]:
     return results
 
 
-def _read_layer2(query: str, top_k: int = 5) -> List[Dict]:
+def _read_layer2(query: str, top_k: int = 5) -> list[dict]:
     db_path = CC_LAYER_PATHS["L2"] / "chroma.sqlite3"
     if not db_path.exists(): return []
     try:
@@ -60,7 +64,7 @@ def _read_layer2(query: str, top_k: int = 5) -> List[Dict]:
     except Exception: return []
 
 
-def _read_layer3(top_k: int = 10) -> List[Dict]:
+def _read_layer3(top_k: int = 10) -> list[dict]:
     langmem_dir = CC_LAYER_PATHS["L3"]
     if not langmem_dir.exists(): return []
     results = []
@@ -75,7 +79,7 @@ def _read_layer3(top_k: int = 10) -> List[Dict]:
     return results
 
 
-def _read_layer4(limit: int = 20) -> List[Dict]:
+def _read_layer4(limit: int = 20) -> list[dict]:
     db_path = CC_LAYER_PATHS["L4"]
     if not db_path.exists(): return []
     try:
@@ -95,7 +99,7 @@ def _read_layer4(limit: int = 20) -> List[Dict]:
     except Exception: return []
 
 
-def _read_layer5() -> List[Dict]:
+def _read_layer5() -> list[dict]:
     path = CC_LAYER_PATHS["L5"]
     if not path.exists(): return []
     try:
@@ -109,7 +113,7 @@ def _read_layer5() -> List[Dict]:
 # Aggregation
 # ---------------------------------------------------------------------------
 
-def _aggregate_layers(session_id: str = "", current_task: str = "") -> List[Dict]:
+def _aggregate_layers(session_id: str = "", current_task: str = "") -> list[dict]:
     query = current_task or session_id
     layer_data = {
         "L1": _read_layer1(5), "L2": _read_layer2(query, 5),
@@ -126,7 +130,7 @@ def _aggregate_layers(session_id: str = "", current_task: str = "") -> List[Dict
     return all_entries
 
 
-def _entries_to_prompt(entries: List[Dict], max_chars: int = 6000) -> str:
+def _entries_to_prompt(entries: list[dict], max_chars: int = 6000) -> str:
     chunks, total = [], 0
     for e in entries:
         chunk = _format_entry(e)
@@ -135,7 +139,7 @@ def _entries_to_prompt(entries: List[Dict], max_chars: int = 6000) -> str:
     return "\n".join(chunks) or "[no memory entries found]"
 
 
-def _format_entry(entry: Dict) -> str:
+def _format_entry(entry: dict) -> str:
     layer = entry.get("_layer", "?")
     if layer == "L1":
         data = entry.get("data", {})
@@ -195,7 +199,7 @@ Follow this EXACT format — reproduce the headers exactly:
 Be concise. Merge duplicates. Prioritize recent entries. Do not invent information."""
 
 
-def _build_prompt(entries: List[Dict], current_task: str) -> str:
+def _build_prompt(entries: list[dict], current_task: str) -> str:
     formatted = _entries_to_prompt(entries)
     task_line = f"\nCurrent task description: {current_task}" if current_task else ""
     return (f"Memory entries from all 6 layers (chronologically recent first):\n{formatted}"
@@ -206,7 +210,7 @@ def _build_prompt(entries: List[Dict], current_task: str) -> str:
 # LLM-free fallback
 # ---------------------------------------------------------------------------
 
-def _synthesize_fallback(entries: List[Dict], current_task: str = "") -> str:
+def _synthesize_fallback(entries: list[dict], current_task: str = "") -> str:
     sorted_e = sorted(entries, key=lambda x: (x.get("ts", 0), x.get("_weight", 0)), reverse=True)
     top = sorted_e[:20]
     lines = ["# Session Context Brief", "_Synthesized without LLM (fallback mode)_", "",
@@ -246,7 +250,7 @@ def _synthesize_fallback(entries: List[Dict], current_task: str = "") -> str:
 # History
 # ---------------------------------------------------------------------------
 
-def _record(session_id: str, current_task: str, entries: List[Dict], result: str, used_llm: bool):
+def _record(session_id: str, current_task: str, entries: list[dict], result: str, used_llm: bool):
     try:
         SYNTHESIS_HISTORY.parent.mkdir(parents=True, exist_ok=True)
         with open(SYNTHESIS_HISTORY, "a") as f:
@@ -282,7 +286,7 @@ def synthesize_context(session_id: str = "", current_task: str = "") -> str:
     return fb
 
 
-def synthesize_from_memories(memory_entries: List[Dict]) -> str:
+def synthesize_from_memories(memory_entries: list[dict]) -> str:
     if not memory_entries:
         return ("# Session Context Brief\n\n## Last Session Summary\n"
                 "No memory entries provided.\n\n## Active Work\n"
@@ -302,7 +306,7 @@ def synthesize_from_memories(memory_entries: List[Dict]) -> str:
     return fb
 
 
-def get_synthesis_stats() -> Dict:
+def get_synthesis_stats() -> dict:
     with LOCK:
         ts = _STATS["total_syntheses"]
         fb = _STATS["llm_fallbacks"]
@@ -313,7 +317,7 @@ def get_synthesis_stats() -> Dict:
         }
 
 
-def handle_context_synthesizer(args: Dict) -> str:
+def handle_context_synthesizer(args: dict) -> str:
     action = args.get("action", "synthesize")
     if action == "synthesize":
         return synthesize_context(args.get("session_id", ""), args.get("current_task", ""))

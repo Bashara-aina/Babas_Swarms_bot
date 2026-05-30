@@ -719,6 +719,166 @@ def github_get_file_contents(owner: str, repo: str, path: str,
                     {"owner": owner, "repo": repo, "path": path, "ref": ref})
 
 
+@mcp.tool()
+def github_create_pull_request(owner: str, repo: str, title: str,
+                               head: str, base: str = "main",
+                               body: str = "", draft: bool = False) -> str:
+    """
+    Create a GitHub pull request directly via API.
+
+    Args:
+        owner: Repository owner
+        repo: Repository name
+        title: PR title
+        head: Branch name containing the changes
+        base: Target branch (default: main)
+        body: PR description
+        draft: Create as draft PR
+    """
+    import os
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if not token:
+        return json.dumps({"error": "GITHUB_TOKEN not set"})
+
+    import urllib.error
+    import urllib.request
+
+    url = f"https://api.github.com/repos/{owner}/{repo}/pulls"
+    payload = {
+        "title": title,
+        "head": head,
+        "base": base,
+        "body": body,
+        "draft": draft,
+    }
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(url, data=data)
+    req.add_header("Authorization", f"token {token}")
+    req.add_header("Accept", "application/vnd.github.v3+json")
+    req.add_header("User-Agent", "hermes-mcp-server")
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read().decode())
+            return json.dumps({
+                "success": True,
+                "pr_number": result.get("number"),
+                "pr_url": result.get("html_url"),
+                "pr_state": result.get("state"),
+            }, indent=2)
+    except urllib.error.HTTPError as e:
+        return json.dumps({"error": f"HTTP {e.code}: {e.reason}", "details": e.read().decode()})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# SECTION 7.5: GITHUB WEBHOOK TOOLS
+# ════════════════════════════════════════════════════════════════════════════
+
+@mcp.tool()
+def github_webhook_create(owner: str, repo: str, webhook_url: str,
+                          events: list[str] | None = None, active: bool = True) -> str:
+    """
+    Create a GitHub webhook for a repository.
+
+    Args:
+        owner: Repository owner
+        repo: Repository name
+        webhook_url: URL to send webhook payloads to
+        events: List of events to subscribe to (default: push, pull_request)
+        active: Whether webhook is active (default: True)
+    """
+    import os
+    events = events or ["push", "pull_request"]
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if not token:
+        return json.dumps({"error": "GITHUB_TOKEN not set - cannot create webhooks"})
+
+    import urllib.error
+    import urllib.request
+
+    url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
+    payload = {
+        "name": "web",
+        "active": active,
+        "events": events,
+        "config": {
+            "url": webhook_url,
+            "content_type": "json",
+            "insecure_ssl": "0"
+        }
+    }
+
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(url, data=data)
+    req.add_header("Authorization", f"token {token}")
+    req.add_header("Accept", "application/vnd.github.v3+json")
+    req.add_header("User-Agent", "hermes-mcp-server")
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read().decode())
+            return json.dumps({
+                "success": True,
+                "webhook_id": result.get("id"),
+                "webhook_url": result.get("url"),
+                "events": result.get("events"),
+            }, indent=2)
+    except urllib.error.HTTPError as e:
+        return json.dumps({"error": f"HTTP {e.code}: {e.reason}", "details": e.read().decode()})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def github_webhook_list(owner: str, repo: str) -> str:
+    """List all webhooks for a repository."""
+    import os
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if not token:
+        return json.dumps({"error": "GITHUB_TOKEN not set"})
+
+    import urllib.request
+    url = f"https://api.github.com/repos/{owner}/{repo}/hooks"
+    req = urllib.request.Request(url)
+    req.add_header("Authorization", f"token {token}")
+    req.add_header("Accept", "application/vnd.github.v3+json")
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            hooks = json.loads(resp.read().decode())
+            return json.dumps({
+                "webhooks": [{"id": h["id"], "url": h["url"], "events": h["events"], "active": h["active"]}
+                            for h in hooks]}, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def github_webhook_delete(owner: str, repo: str, webhook_id: int) -> str:
+    """Delete a webhook by ID."""
+    import os
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if not token:
+        return json.dumps({"error": "GITHUB_TOKEN not set"})
+
+    import urllib.error
+    import urllib.request
+    url = f"https://api.github.com/repos/{owner}/{repo}/hooks/{webhook_id}"
+    req = urllib.request.Request(url, method="DELETE")
+    req.add_header("Authorization", f"token {token}")
+    req.add_header("Accept", "application/vnd.github.v3+json")
+
+    try:
+        with urllib.request.urlopen(req, timeout=30):
+            return json.dumps({"success": True, "deleted": webhook_id})
+    except urllib.error.HTTPError as e:
+        return json.dumps({"error": f"HTTP {e.code}: {e.reason}"})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # SECTION 8: FILESYSTEM TOOLS (direct Python - no subprocess needed)
 # ════════════════════════════════════════════════════════════════════════════
@@ -1180,7 +1340,9 @@ _EXTERNAL_TOOLSET_MAP = {
     "github_create_issue": "github", "github_list_issues": "github",
     "github_search_repositories": "github", "github_list_commits": "github",
     "github_search_code": "github", "github_list_pull_requests": "github",
-    "github_get_file_contents": "github",
+    "github_get_file_contents": "github", "github_create_pull_request": "github",
+    "github_webhook_create": "github", "github_webhook_list": "github",
+    "github_webhook_delete": "github",
     # Filesystem
     "filesystem_read_file": "filesystem", "filesystem_write_file": "filesystem",
     "filesystem_list_directory": "filesystem", "filesystem_search_files": "filesystem",
@@ -1870,6 +2032,30 @@ if CONTEXT_COMPACTOR_AVAILABLE:
         return handle_context_compactor({
             "action": "update_length",
             "context_length": context_length,
+        })
+
+    @mcp.tool()
+    def compactor_set_limits(max_tokens: int = 128000,
+                             light_trigger: float = 0.70,
+                             medium_trigger: float = 0.85,
+                             aggressive_trigger: float = 0.95) -> str:
+        """
+        Configure memory limits and compaction triggers at runtime.
+
+        Args:
+            max_tokens: New max token limit (default: 128000)
+            light_trigger: Light compaction threshold (0.0-1.0)
+            medium_trigger: Medium compaction threshold (0.0-1.0)
+            aggressive_trigger: Aggressive compaction threshold (0.0-1.0)
+        """
+        return handle_context_compactor({
+            "action": "set_limits",
+            "max_tokens": max_tokens,
+            "triggers": {
+                "light": light_trigger,
+                "medium": medium_trigger,
+                "aggressive": aggressive_trigger,
+            }
         })
 
 # ════════════════════════════════════════════════════════════════════════════

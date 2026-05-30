@@ -20,7 +20,7 @@ import sys
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -38,8 +38,8 @@ LLM_API_KEY = os.environ.get("MINIMAX_API_KEY", "local")
 
 def _llm_complete(prompt: str, max_tokens: int = 256) -> str:
     """Call MiniMax chat completion for goal evaluation."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     payload = {
         "model": "MiniMax-Text-01",
@@ -82,8 +82,8 @@ class LoopState:
     max_iterations: int
     current_iteration: int = 0
     status: str = "active"  # active | converged | goal_reached | maxed | stopped
-    iterations: List[IterationRecord] = field(default_factory=list)
-    convergence_signals: List[str] = field(default_factory=list)
+    iterations: list[IterationRecord] = field(default_factory=list)
+    convergence_signals: list[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
 
@@ -142,13 +142,13 @@ class RwCriterion:
 class RwState:
     rw_id: str
     goal: str
-    done_criteria: List[str]
+    done_criteria: list[str]
     max_iters: int
     current_iteration: int = 0
     status: str = "active"  # active | done | maxed | stopped
-    criteria: List[Dict] = field(default_factory=list)  # serialized RwCriterion
-    iterations: List[IterationRecord] = field(default_factory=list)
-    convergence_signals: List[str] = field(default_factory=list)
+    criteria: list[dict] = field(default_factory=list)  # serialized RwCriterion
+    iterations: list[IterationRecord] = field(default_factory=list)
+    convergence_signals: list[str] = field(default_factory=list)
     final_result: str = ""
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
@@ -213,7 +213,7 @@ def _save_loop(ls: LoopState) -> None:
     with _lock:
         _loop_path(ls.loop_id).write_text(json.dumps(ls.to_dict(), indent=2))
 
-def _load_loop(loop_id: str) -> Optional[LoopState]:
+def _load_loop(loop_id: str) -> LoopState | None:
     path = _loop_path(loop_id)
     if not path.exists():
         return None
@@ -226,7 +226,7 @@ def _save_rw(rs: RwState) -> None:
     with _lock:
         _rw_path(rs.rw_id).write_text(json.dumps(rs.to_dict(), indent=2))
 
-def _load_rw(rw_id: str) -> Optional[RwState]:
+def _load_rw(rw_id: str) -> RwState | None:
     path = _rw_path(rw_id)
     if not path.exists():
         return None
@@ -235,7 +235,7 @@ def _load_rw(rw_id: str) -> Optional[RwState]:
     except Exception:
         return None
 
-def _list_active_loops() -> List[dict]:
+def _list_active_loops() -> list[dict]:
     results = []
     with _lock:
         for f in _ITERATION_STATE_DIR.glob("loop_*.json"):
@@ -252,7 +252,7 @@ def _list_active_loops() -> List[dict]:
                 pass
     return results
 
-def _list_active_rws() -> List[dict]:
+def _list_active_rws() -> list[dict]:
     results = []
     with _lock:
         for f in _ITERATION_STATE_DIR.glob("rw_*.json"):
@@ -275,7 +275,7 @@ def _similarity(a: str, b: str) -> float:
     """Return 0-1 similarity score between two strings."""
     return difflib.SequenceMatcher(None, a, b).ratio()
 
-def _check_convergence(records: List[IterationRecord]) -> tuple[bool, str]:
+def _check_convergence(records: list[IterationRecord]) -> tuple[bool, str]:
     """
     Check if results have converged.
     Returns (has_converged, signal_message).
@@ -534,7 +534,7 @@ def loop_stop(loop_id: str) -> str:
 
 # ── RalphWiggum Structured Iteration ──────────────────────────────────────────
 
-def rw_define(goal: str, done_criteria: List[str], max_iters: int = 20) -> str:
+def rw_define(goal: str, done_criteria: list[str], max_iters: int = 20) -> str:
     """
     Define a RalphWiggum structured iteration: define done criteria upfront.
 
@@ -565,7 +565,7 @@ def rw_define(goal: str, done_criteria: List[str], max_iters: int = 20) -> str:
         "message": f"RalphWiggum '{rw_id}' defined. Use rw_check to evaluate or rw_iterate to run.",
     })
 
-def _rw_criteria_prompt(goal: str, done_criteria: List[str], context: str, result: str) -> str:
+def _rw_criteria_prompt(goal: str, done_criteria: list[str], context: str, result: str) -> str:
     """Build the LLM prompt for checking all done criteria."""
     criteria_text = "\n".join(f"- {c}" for c in done_criteria)
     return f"""You are a structured completion-checker. Evaluate each done criterion for the given goal.
@@ -807,7 +807,7 @@ def rw_stop(rw_id: str) -> str:
 
 def handle_hermes_iteration(action: str, goal: str = "", loop_id: str = "",
                              rw_id: str = "", context: str = "",
-                             done_criteria: List[str] = None,
+                             done_criteria: list[str] = None,
                              max_iterations: int = 10) -> str:
     """
     Unified MCP handler for the hermes_iteration tool.

@@ -19,7 +19,7 @@ import os
 import sqlite3
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -130,7 +130,7 @@ def _make_provenance(
     pr_id: str = "",
     agent_name: str = "",
     session_id: str = ""
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build a provenance record."""
     return {
         "file_path": file_path,
@@ -138,7 +138,7 @@ def _make_provenance(
         "pr_id": pr_id,
         "agent_name": agent_name,
         "session_id": session_id,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -166,10 +166,10 @@ def _compute_priority(
 def memory_save(
     key: str,
     value: str,
-    provenance: Optional[Dict[str, Any]] = None,
-    metadata: Optional[Dict[str, Any]] = None,
+    provenance: dict[str, Any] | None = None,
+    metadata: dict[str, Any] | None = None,
     session_id: str = ""
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Save a memory entry with provenance. Creates version history entry.
     Returns dict with success status and version number.
@@ -235,7 +235,7 @@ def memory_recall(
     key: str,
     min_priority: float = 0.5,
     session_id: str = ""
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """
     Recall a memory entry, updating access stats and priority.
     Returns None if not found or below min_priority threshold.
@@ -287,7 +287,7 @@ def memory_recall(
         }
 
 
-def memory_forget(key: str, cascade: bool = True) -> Dict[str, Any]:
+def memory_forget(key: str, cascade: bool = True) -> dict[str, Any]:
     """
     Mark a memory entry for decay/archival.
     If cascade=True, also archive all version history.
@@ -311,7 +311,7 @@ def memory_forget(key: str, cascade: bool = True) -> Dict[str, Any]:
         return {"success": result > 0, "key": key, "archived": result > 0}
 
 
-def memory_get_history(key: str) -> List[Dict[str, Any]]:
+def memory_get_history(key: str) -> list[dict[str, Any]]:
     """Get version history for rollback support."""
     with LOCK:
         conn = _get_db()
@@ -336,7 +336,7 @@ def memory_get_history(key: str) -> List[Dict[str, Any]]:
         ]
 
 
-def memory_rollback(key: str, target_version: int) -> Dict[str, Any]:
+def memory_rollback(key: str, target_version: int) -> dict[str, Any]:
     """Rollback to a specific version."""
     with LOCK:
         conn = _get_db()
@@ -391,7 +391,7 @@ def memory_rollback(key: str, target_version: int) -> Dict[str, Any]:
 # Decay and Auto-Archive
 # ============================================================================
 
-def run_decay_cycle() -> Dict[str, Any]:
+def run_decay_cycle() -> dict[str, Any]:
     """
     Run Ebbinghaus decay cycle.
     Recalculates priority for all entries and archives below threshold.
@@ -426,7 +426,7 @@ def run_decay_cycle() -> Dict[str, Any]:
         return {"success": True, "archived_count": archived, "total_checked": len(rows)}
 
 
-def get_all_entries(min_priority: float = 0.0, include_archived: bool = False) -> List[Dict[str, Any]]:
+def get_all_entries(min_priority: float = 0.0, include_archived: bool = False) -> list[dict[str, Any]]:
     """Get all memory entries with optional filtering."""
     with LOCK:
         conn = _get_db()
@@ -471,8 +471,8 @@ def get_all_entries(min_priority: float = 0.0, include_archived: bool = False) -
 
 def fire_trigger(
     trigger_type: str,
-    payload: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    payload: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """
     Fire a write trigger. Supported types:
       - pr_created: On PR creation
@@ -534,7 +534,7 @@ def fire_trigger(
         }
 
 
-def get_trigger_history(limit: int = 20) -> List[Dict[str, Any]]:
+def get_trigger_history(limit: int = 20) -> list[dict[str, Any]]:
     """Get recent trigger history."""
     with LOCK:
         conn = _get_db()
@@ -564,9 +564,9 @@ def get_trigger_history(limit: int = 20) -> List[Dict[str, Any]]:
 def memory_sync_from_session(
     session_id: str,
     turn_count: int,
-    entries: Optional[List[Dict[str, Any]]] = None,
+    entries: list[dict[str, Any]] | None = None,
     commit_sha: str = ""
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Sync entries from current session.
     Updates sync state and applies turn-count checkpoint trigger.
@@ -631,7 +631,7 @@ def memory_sync_from_session(
         }
 
 
-def get_sync_state(session_id: str) -> Optional[Dict[str, Any]]:
+def get_sync_state(session_id: str) -> dict[str, Any] | None:
     """Get sync state for a session."""
     with LOCK:
         conn = _get_db()
@@ -661,7 +661,7 @@ def detect_conflicts(
     key: str,
     expected_version: int,
     expected_value_hash: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Detect conflicts when merging from different sessions.
     Returns conflict info if local version differs from expected.
@@ -697,7 +697,7 @@ def detect_conflicts(
 # Status
 # ============================================================================
 
-def get_memory_status() -> Dict[str, Any]:
+def get_memory_status() -> dict[str, Any]:
     """Get overall memory system status."""
     with LOCK:
         conn = _get_db()
@@ -733,7 +733,7 @@ def get_memory_status() -> Dict[str, Any]:
 # MCP Tool Handlers
 # ============================================================================
 
-def handle_cross_session_memory(args: Dict[str, Any]) -> str:
+def handle_cross_session_memory(args: dict[str, Any]) -> str:
     """Main handler for cross_session_memory MCP tool."""
     action = args.get("action", "status")
 
@@ -869,5 +869,5 @@ CROSS_SESSION_MEMORY_SCHEMA = {
 
 
 # Alias for MCP handler
-def cross_session_memory_tool(args: Dict[str, Any]) -> str:
+def cross_session_memory_tool(args: dict[str, Any]) -> str:
     return handle_cross_session_memory(args)

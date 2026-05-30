@@ -34,7 +34,7 @@ LAYER_WEIGHTS = {
 }
 
 # L1: Checkpoints
-def read_layer1(query: str = "", top_k: int = 5) -> List[Dict[str, Any]]:
+def read_layer1(query: str = "", top_k: int = 5) -> list[dict[str, Any]]:
     """Read checkpoint files from L1."""
     cp_dir = CC_LAYER_PATHS["L1"]
     if not cp_dir.exists():
@@ -48,7 +48,7 @@ def read_layer1(query: str = "", top_k: int = 5) -> List[Dict[str, Any]]:
             pass
     return results
 
-def watch_layer1_new() -> Optional[str]:
+def watch_layer1_new() -> str | None:
     """Return most recent checkpoint file if new since last check."""
     cp_dir = CC_LAYER_PATHS["L1"]
     if not cp_dir.exists():
@@ -57,7 +57,7 @@ def watch_layer1_new() -> Optional[str]:
     return str(files[0]) if files else None
 
 # L2: ChromaDB
-def read_layer2(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+def read_layer2(query: str, top_k: int = 5) -> list[dict[str, Any]]:
     """Query ChromaDB vector store."""
     chroma_path = CC_LAYER_PATHS["L2"]
     db_path = chroma_path / "chroma.sqlite3"
@@ -77,7 +77,7 @@ def read_layer2(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def write_layer2_chroma(collection: str, doc: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+def write_layer2_chroma(collection: str, doc: str, metadata: dict[str, Any]) -> dict[str, Any]:
     """Write to Hermes shared ChromaDB namespace."""
     chroma_path = CC_LAYER_PATHS["L2"]
     db_path = chroma_path / "chroma.sqlite3"
@@ -104,7 +104,7 @@ def write_layer2_chroma(collection: str, doc: str, metadata: Dict[str, Any]) -> 
         return {"error": str(e)}
 
 # L3: LangMem
-def read_layer3(top_k: int = 10) -> List[Dict[str, Any]]:
+def read_layer3(top_k: int = 10) -> list[dict[str, Any]]:
     """Read LangMem .md files from L3."""
     langmem_dir = CC_LAYER_PATHS["L3"]
     if not langmem_dir.exists():
@@ -123,7 +123,7 @@ def read_layer3(top_k: int = 10) -> List[Dict[str, Any]]:
             break
     return results
 
-def write_layer3_langmem(title: str, content: str) -> Dict[str, Any]:
+def write_layer3_langmem(title: str, content: str) -> dict[str, Any]:
     """Write content as LangMem .md file in L3."""
     langmem_dir = CC_LAYER_PATHS["L3"]
     langmem_dir.mkdir(parents=True, exist_ok=True)
@@ -133,7 +133,7 @@ def write_layer3_langmem(title: str, content: str) -> Dict[str, Any]:
     return {"success": True, "file": str(path)}
 
 # L4: Observations
-def read_layer4(limit: int = 20) -> List[Dict[str, Any]]:
+def read_layer4(limit: int = 20) -> list[dict[str, Any]]:
     """Query L4 observation store."""
     db_path = CC_LAYER_PATHS["L4"]
     if not db_path.exists():
@@ -161,7 +161,7 @@ def read_layer4(limit: int = 20) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-def write_layer4_observation(table: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+def write_layer4_observation(table: str, entry: dict[str, Any]) -> dict[str, Any]:
     """Write observation entry to L4 observations.db."""
     db_path = CC_LAYER_PATHS["L4"]
     db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -180,7 +180,7 @@ def write_layer4_observation(table: str, entry: Dict[str, Any]) -> Dict[str, Any
         return {"error": str(e)}
 
 # L5: GraphRAG
-def read_layer5() -> Dict[str, Any]:
+def read_layer5() -> dict[str, Any]:
     """Read L5 GraphRAG JSON store."""
     path = CC_LAYER_PATHS["L5"]
     if not path.exists():
@@ -191,7 +191,7 @@ def read_layer5() -> Dict[str, Any]:
     except Exception:
         return {}
 
-def write_layer5_graphrag(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+def write_layer5_graphrag(entries: list[dict[str, Any]]) -> dict[str, Any]:
     """Append entries to L5 GraphRAG store."""
     path = CC_LAYER_PATHS["L5"]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -213,16 +213,16 @@ def write_layer5_graphrag(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {"success": True, "total_entries": len(existing)}
 
 # L6: Mem0 (shared with L5)
-def read_layer6() -> Dict[str, Any]:
+def read_layer6() -> dict[str, Any]:
     """Read L6 Mem0 (shares file with L5)."""
     return read_layer5()
 
-def write_layer6_mem0(entry: Dict[str, Any]) -> Dict[str, Any]:
+def write_layer6_mem0(entry: dict[str, Any]) -> dict[str, Any]:
     """Write entry to Mem0 (shared with L5)."""
     return write_layer5_graphrag([entry])
 
 # Health check
-def health_check() -> Dict[str, Any]:
+def health_check() -> dict[str, Any]:
     """Report connectivity status for each CC layer."""
     status = {}
     for layer, path in CC_LAYER_PATHS.items():
@@ -247,7 +247,7 @@ def health_check() -> Dict[str, Any]:
     return status
 
 # Unified query
-def query_memory_layers(query: str, layers: List[str] = None, top_k: int = 5) -> Dict[str, Any]:
+def query_memory_layers(query: str, layers: list[str] = None, top_k: int = 5) -> dict[str, Any]:
     """Query all specified CC layers with relevance scoring."""
     if layers is None:
         layers = ["L1", "L2", "L3", "L4", "L5", "L6"]
@@ -291,13 +291,13 @@ def query_memory_layers(query: str, layers: List[str] = None, top_k: int = 5) ->
         "results": scored_results
     }
 
-def handle_memory_layer_bridge(args: Dict[str, Any]) -> str:
+def handle_memory_layer_bridge(args: dict[str, Any]) -> str:
     """Handler for memory layer bridge operations."""
     action = args.get("action", "query")
     if action == "query":
         result = query_memory_layers(
             args.get("query", ""),
-            args.get("layers", None),
+            args.get("layers"),
             args.get("top_k", 5)
         )
     elif action == "health":

@@ -4,7 +4,15 @@ Dreaming Consolidation — Hippocampal replay for Minerva/Hermes.
 Max 450 lines. Async background reorganizing memory between sessions.
 Triggers: session end + idle>60s | manual dreaming_run(force=True) | every 30min.
 """
-import asyncio, concurrent.futures, hashlib, json, logging, os, re, sqlite3, time
+import asyncio
+import concurrent.futures
+import hashlib
+import json
+import logging
+import os
+import re
+import sqlite3
+import time
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
@@ -30,7 +38,7 @@ _DEFAULT = {"last_run_at": 0.0, "last_run_duration": 0.0, "total_runs": 0,
            "entries_processed": 0, "changes_made": 0, "patterns_found": 0,
            "dedup_merges": 0, "last_error": None, "is_running": False, "run_history": []}
 
-def _load_state() -> Dict[str, Any]:
+def _load_state() -> dict[str, Any]:
     if not STATE_FILE.exists():
         return _DEFAULT.copy()
     try:
@@ -38,7 +46,7 @@ def _load_state() -> Dict[str, Any]:
     except Exception:
         return _DEFAULT.copy()
 
-def _save_state(state: Dict[str, Any]) -> None:
+def _save_state(state: dict[str, Any]) -> None:
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
 
@@ -46,7 +54,7 @@ def _save_state(state: Dict[str, Any]) -> None:
 # Session Access (read-only)
 # ============================================================================
 
-def _get_recent_sessions(limit: int = MAX_SESSIONS) -> List[Dict[str, Any]]:
+def _get_recent_sessions(limit: int = MAX_SESSIONS) -> list[dict[str, Any]]:
     if not FTS_DB.exists():
         return []
     try:
@@ -75,7 +83,7 @@ def _session_content(session_id: str) -> str:
 # Memory Access (read-only)
 # ============================================================================
 
-def _get_memory_entries(include_archived: bool = False) -> List[Dict[str, Any]]:
+def _get_memory_entries(include_archived: bool = False) -> list[dict[str, Any]]:
     if not MEMORY_DB.exists():
         return []
     try:
@@ -97,18 +105,18 @@ def _get_memory_entries(include_archived: bool = False) -> List[Dict[str, Any]]:
 # Pattern Recognition (no LLM)
 # ============================================================================
 
-def _tokenize(text: str) -> Set[str]:
+def _tokenize(text: str) -> set[str]:
     return {t for t in re.sub(r"[^a-z0-9\s]", " ", text.lower()).split() if len(t) > 2}
 
-def _jaccard(set_a: Set[str], set_b: Set[str]) -> float:
+def _jaccard(set_a: set[str], set_b: set[str]) -> float:
     if not set_a or not set_b:
         return 0.0
     inter = len(set_a & set_b)
     union = len(set_a | set_b)
     return inter / union if union > 0 else 0.0
 
-def _detect_repeated_bugs(sessions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    error_patterns: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
+def _detect_repeated_bugs(sessions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    error_patterns: dict[str, list[tuple[str, float]]] = defaultdict(list)
     bug_regex = re.compile(r"(?:Error|Exception|Traceback|failed|FAILED|crashed|CRASHED)[^\n]{0,100}", re.IGNORECASE)
     for sess in sessions:
         if sess.get("error_count", 0) == 0:
@@ -120,8 +128,8 @@ def _detect_repeated_bugs(sessions: List[Dict[str, Any]]) -> List[Dict[str, Any]
              "sessions": [s for s, _ in occ], "first_seen": min(t for _, t in occ), "last_seen": max(t for _, t in occ)}
             for pk, occ in error_patterns.items() if len(occ) >= 2][:MAX_PATTERNS]
 
-def _detect_decision_reversals(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    topic_groups: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+def _detect_decision_reversals(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    topic_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for entry in entries:
         val = entry.get("value", "")
         if isinstance(val, str) and any(ind in val.lower() for ind in ["instead", "prefer", "changed", "updated", "now using", "switched", "migrated", "refactored", "replaced", "new approach"]):
@@ -137,8 +145,8 @@ def _detect_decision_reversals(entries: List[Dict[str, Any]]) -> List[Dict[str, 
                                   "superseded_value": oldest[:200], "current_value": newest[:200]})
     return reversals[:MAX_PATTERNS]
 
-def _detect_new_conventions(sessions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    patterns: Dict[str, Dict[str, Any]] = {}
+def _detect_new_conventions(sessions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    patterns: dict[str, dict[str, Any]] = {}
     for sess in sessions[-10:]:
         for match in re.finditer(r"(?:import|from)\s+([a-zA-Z0-9_\.]+)", _session_content(sess["session_id"])):
             mod = match.group(1)
@@ -150,8 +158,8 @@ def _detect_new_conventions(sessions: List[Dict[str, Any]]) -> List[Dict[str, An
              "first_session": info["first_session"], "confidence": min(1.0, info["seen_count"] / 5.0)}
             for info in patterns.values() if info["seen_count"] >= 2][:MAX_PATTERNS]
 
-def _detect_recurring_errors(sessions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    session_errors: Dict[str, Set[str]] = defaultdict(set)
+def _detect_recurring_errors(sessions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    session_errors: dict[str, set[str]] = defaultdict(set)
     for sess in sessions:
         if sess.get("error_count", 0) > 0:
             content = _session_content(sess["session_id"])
@@ -161,7 +169,7 @@ def _detect_recurring_errors(sessions: List[Dict[str, Any]]) -> List[Dict[str, A
     return [{"type": "recurring_error", "error_type": et, "affected_sessions": len(sids), "session_ids": list(sids)[:10]}
             for et, sids in session_errors.items() if len(sids) >= 2][:MAX_PATTERNS]
 
-def _find_near_duplicates(entries: List[Dict[str, Any]]) -> List[Tuple[Dict, Dict, float]]:
+def _find_near_duplicates(entries: list[dict[str, Any]]) -> list[tuple[dict, dict, float]]:
     active = [e for e in entries if not e.get("is_archived") and e.get("value")]
     pairs, checked = [], set()
     for i, a in enumerate(active):
@@ -182,7 +190,7 @@ def _find_near_duplicates(entries: List[Dict[str, Any]]) -> List[Tuple[Dict, Dic
 # Memory Reorganization
 # ============================================================================
 
-def _archive_superseded(reversals: List[Dict]) -> int:
+def _archive_superseded(reversals: list[dict]) -> int:
     if not MEMORY_DB.exists():
         return 0
     try:
@@ -204,7 +212,7 @@ def _archive_superseded(reversals: List[Dict]) -> int:
         logger.warning("Archive superseded failed: %s", e)
         return 0
 
-def _promote_patterns(patterns: List[Dict], session_count: int) -> int:
+def _promote_patterns(patterns: list[dict], session_count: int) -> int:
     if not MEMORY_DB.exists():
         return 0
     confident = [p for p in patterns if p.get("confidence", 0) >= 0.7]
@@ -253,7 +261,7 @@ def _apply_decay() -> int:
         logger.warning("Apply decay failed: %s", e)
         return 0
 
-def _merge_duplicates(pairs: List[Tuple[Dict, Dict, float]]) -> int:
+def _merge_duplicates(pairs: list[tuple[dict, dict, float]]) -> int:
     if not MEMORY_DB.exists():
         return 0
     merged = 0
@@ -278,7 +286,7 @@ def _merge_duplicates(pairs: List[Tuple[Dict, Dict, float]]) -> int:
 # Briefing
 # ============================================================================
 
-def _generate_briefing(sessions: List[Dict], patterns: List[Dict], reversals: List[Dict]) -> str:
+def _generate_briefing(sessions: list[dict], patterns: list[dict], reversals: list[dict]) -> str:
     lines = [f"# Session Briefing — {time.strftime('%Y-%m-%d %H:%M:%S')}\n"]
     if sessions:
         rs = sessions[0]
@@ -309,7 +317,7 @@ def _cache_briefing(briefing: str, tag: str = "default") -> Path:
 # Preview
 # ============================================================================
 
-def dreaming_preview() -> Dict[str, Any]:
+def dreaming_preview() -> dict[str, Any]:
     state = _load_state()
     sessions = _get_recent_sessions()
     entries = _get_memory_entries()
@@ -331,7 +339,7 @@ def dreaming_preview() -> Dict[str, Any]:
 # Async Pipeline
 # ============================================================================
 
-async def _pipeline(force: bool = False) -> Dict[str, Any]:
+async def _pipeline(force: bool = False) -> dict[str, Any]:
     if not force:
         st = _load_state()
         idle = time.time() - st.get("last_run_at", 0)
@@ -383,7 +391,7 @@ async def _pipeline(force: bool = False) -> Dict[str, Any]:
 # Public API
 # ============================================================================
 
-def dreaming_run(force: bool = False) -> Dict[str, Any]:
+def dreaming_run(force: bool = False) -> dict[str, Any]:
     state = _load_state()
     if state.get("is_running", False):
         return {"status": "already_running", "started_at": state.get("last_run_at", 0)}
@@ -409,7 +417,7 @@ def dreaming_run(force: bool = False) -> Dict[str, Any]:
             result = {"status": "error", "error": str(e)}
     return result
 
-def dreaming_cancel() -> Dict[str, Any]:
+def dreaming_cancel() -> dict[str, Any]:
     state = _load_state()
     if not state.get("is_running", False):
         return {"status": "not_running"}
@@ -417,7 +425,7 @@ def dreaming_cancel() -> Dict[str, Any]:
     _save_state(state)
     return {"status": "cancelled"}
 
-def dreaming_status() -> Dict[str, Any]:
+def dreaming_status() -> dict[str, Any]:
     state = _load_state()
     sessions = _get_recent_sessions(5)
     cache_files = list(CACHE_DIR.glob("briefing_*.md")) if CACHE_DIR.exists() else []
@@ -435,7 +443,7 @@ def dreaming_status() -> Dict[str, Any]:
 # MCP Handler & Schema
 # ============================================================================
 
-def handle_dreaming(args: Dict[str, Any]) -> str:
+def handle_dreaming(args: dict[str, Any]) -> str:
     action = args.get("action", "status")
     if action == "run":
         result = dreaming_run(force=args.get("force", False))

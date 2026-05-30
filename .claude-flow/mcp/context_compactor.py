@@ -18,7 +18,39 @@ CHECKPOINT_PATH = DATA_DIR / "compact_checkpoint.md"
 HISTORY_PATH = DATA_DIR / "compact_history.json"
 SESSION_STATE_PATH = DATA_DIR / "session_state.json"
 
-MAX_TOKENS = 128000
+# Configurable memory limits - can be overridden via environment variables or config file
+_MAX_TOKENS_ENV = os.environ.get("HERMES_MAX_CONTEXT_TOKENS")
+_MAX_TOKENS_CONFIG = None  # Loaded from config file if available
+
+def _get_max_tokens() -> int:
+    """Get configured max tokens with priority: env > config > default."""
+    if _MAX_TOKENS_ENV:
+        return int(_MAX_TOKENS_ENV)
+    if _MAX_TOKENS_CONFIG is not None:
+        return _MAX_TOKENS_CONFIG
+    return 128000
+
+def _load_config_limits() -> None:
+    """Load memory limits from config file if available."""
+    global _MAX_TOKENS_CONFIG
+    config_path = PROJECT_ROOT / ".claude-flow" / "config.yaml"
+    if config_path.exists():
+        try:
+            import yaml
+            with open(config_path) as f:
+                cfg = yaml.safe_load(f)
+            memory_cfg = cfg.get("memory", {})
+            if "maxTokens" in memory_cfg:
+                _MAX_TOKENS_CONFIG = int(memory_cfg["maxTokens"])
+            elif "contextLimit" in memory_cfg:
+                _MAX_TOKENS_CONFIG = int(memory_cfg["contextLimit"])
+        except Exception:
+            pass  # Use defaults
+
+# Try to load config at module init
+_load_config_limits()
+
+MAX_TOKENS = _get_max_tokens()
 TRIGGERS = {"light": 0.70, "medium": 0.85, "aggressive": 0.95}
 LOCK = threading.Lock()
 
@@ -323,6 +355,21 @@ def handle_context_compactor(args: dict[str, Any]) -> str:
     elif action == "register_message":
         result = {"registered": True}
         compactor_register_message(args.get("role", "user"), args.get("content", ""))
+    elif action == "set_limits":
+        # Update memory limits at runtime
+        global MAX_TOKENS, _MAX_TOKENS_CONFIG
+        new_max = args.get("max_tokens")
+        if new_max is not None:
+            MAX_TOKENS = int(new_max)
+            _MAX_TOKENS_CONFIG = MAX_TOKENS
+        new_triggers = args.get("triggers")
+        if new_triggers:
+            TRIGGERS.update(new_triggers)
+        result = {
+            "max_tokens": MAX_TOKENS,
+            "triggers": TRIGGERS,
+            "source": "config" if _MAX_TOKENS_CONFIG else "env",
+        }
     else:
         result = {"error": f"unknown action: {action}"}
     return json.dumps(result, indent=2)
@@ -333,12 +380,14 @@ CONTEXT_COMPACTOR_SCHEMA = {
     "parameters": {
         "type": "object",
         "properties": {
-            "action": {"type": "string", "enum": ["status", "compact", "restore", "history", "update_length", "register_message"]},
+            "action": {"type": "string", "enum": ["status", "compact", "restore", "history", "update_length", "register_message", "set_limits"]},
             "level": {"type": "string", "enum": ["auto", "light", "medium", "aggressive"]},
             "reason": {"type": "string"},
             "text_length": {"type": "integer"},
             "role": {"type": "string"},
             "content": {"type": "string"},
+            "max_tokens": {"type": "integer", "description": "New max token limit"},
+            "triggers": {"type": "object", "description": "New trigger thresholds"},
         },
     },
 }

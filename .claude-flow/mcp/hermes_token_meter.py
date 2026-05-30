@@ -112,9 +112,17 @@ class TokenSession:
     """Holds all token counters for a single session."""
 
     __slots__ = (
-        "session_id", "started_at", "input_tokens", "output_tokens",
-        "cache_creation_tokens", "cache_read_tokens", "total_cost_usd",
-        "model", "turn_count", "budget_tokens", "warnings_issued",
+        "budget_tokens",
+        "cache_creation_tokens",
+        "cache_read_tokens",
+        "input_tokens",
+        "model",
+        "output_tokens",
+        "session_id",
+        "started_at",
+        "total_cost_usd",
+        "turn_count",
+        "warnings_issued",
     )
 
     def __init__(
@@ -646,7 +654,7 @@ class TokenMeter:
 # ── Convenience wrappers ──────────────────────────────────────────────────────
 
 # Global singleton
-_METER: Optional[TokenMeter] = None
+_METER: TokenMeter | None = None
 _METER_LOCK = threading.Lock()
 
 

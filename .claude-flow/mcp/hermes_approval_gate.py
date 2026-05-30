@@ -197,7 +197,7 @@ class ApprovalGate:
         self._lock = threading.RLock()
         self._approvals: dict[str, dict] = {}
         self._current_policy = Policy.AUTO_ALLOW
-        self._user_telegram_id: Optional[str] = None
+        self._user_telegram_id: str | None = None
         self._load_policy()
 
     def _init_db(self) -> sqlite3.Connection:
@@ -231,7 +231,7 @@ class ApprovalGate:
         except Exception as e:
             logger.warning("Failed to save policy: %s", e)
 
-    def set_policy(self, policy: Policy, user_telegram_id: Optional[str] = None) -> dict:
+    def set_policy(self, policy: Policy, user_telegram_id: str | None = None) -> dict:
         with self._lock:
             old = self._current_policy
             self._current_policy = policy
@@ -247,7 +247,7 @@ class ApprovalGate:
 
     def request_approval(
         self, tool_name: str, proposed_action: str = "",
-        risk_level: Optional[str] = None, context: Optional[dict] = None,
+        risk_level: str | None = None, context: dict | None = None,
     ) -> dict:
         """Request approval for a tool action. Returns decision."""
         with self._lock:
@@ -348,7 +348,7 @@ class ApprovalGate:
             return pending
 
     def check_approval(self, tool_name: str, proposed_action: str = "",
-                       context: Optional[dict] = None) -> dict:
+                       context: dict | None = None) -> dict:
         return self.request_approval(tool_name, proposed_action, None, context)
 
     def set_telegram_user(self, telegram_id: str) -> None:
@@ -386,7 +386,7 @@ class ApprovalGate:
 # Singleton & Public API
 # ============================================================================
 
-_gate: Optional[ApprovalGate] = None
+_gate: ApprovalGate | None = None
 
 
 def get_approval_gate() -> ApprovalGate:
@@ -397,13 +397,13 @@ def get_approval_gate() -> ApprovalGate:
 
 
 def check_approval(tool_name: str, proposed_action: str = "",
-                   context: Optional[dict] = None) -> dict:
+                   context: dict | None = None) -> dict:
     """Main integration point for hermes-mcp-server.py tool execution wrapper."""
     return get_approval_gate().check_approval(tool_name, proposed_action, context)
 
 
-def approval_request(tool: str, action: str = "", risk: Optional[str] = None,
-                      context: Optional[dict] = None) -> dict:
+def approval_request(tool: str, action: str = "", risk: str | None = None,
+                      context: dict | None = None) -> dict:
     return get_approval_gate().request_approval(tool, action, risk, context)
 
 
@@ -416,7 +416,7 @@ def approval_pending() -> list[dict]:
     return get_approval_gate().pending_approvals()
 
 
-def policy_set(policy: str, telegram_id: Optional[str] = None) -> dict:
+def policy_set(policy: str, telegram_id: str | None = None) -> dict:
     return get_approval_gate().set_policy(Policy(policy), telegram_id)
 
 

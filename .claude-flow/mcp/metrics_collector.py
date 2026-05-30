@@ -8,12 +8,12 @@ Persists to /tmp/hermes_metrics.db SQLite.
 import json
 import os
 import sqlite3
+import statistics
 import threading
 import time
+from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from functools import wraps
-import statistics
 
 METRICS_DB = Path("/tmp/hermes_metrics.db")
 METRICS_DIR = METRICS_DB.parent
@@ -55,7 +55,7 @@ def track_metrics(tool_name: str):
             try:
                 result = func(*args, **kwargs)
                 return result
-            except Exception as e:
+            except Exception:
                 error = True
                 raise
             finally:
@@ -87,7 +87,7 @@ def _record_metric(tool_name: str, latency_ms: float, is_error: bool):
         conn.commit()
         conn.close()
 
-def get_tool_metrics(tool_name: str) -> Dict[str, Any]:
+def get_tool_metrics(tool_name: str) -> dict[str, Any]:
     """Return metrics for a specific tool."""
     conn = _get_db()
     row = conn.execute("SELECT * FROM tool_metrics WHERE tool_name = ?", (tool_name,)).fetchone()
@@ -123,7 +123,7 @@ def get_tool_metrics(tool_name: str) -> Dict[str, Any]:
         "last_called": data["last_called"],
     }
 
-def get_top_tools(limit: int = 10, by: str = "call_count") -> List[Dict[str, Any]]:
+def get_top_tools(limit: int = 10, by: str = "call_count") -> list[dict[str, Any]]:
     """List most-used tools."""
     conn = _get_db()
     order_col = "call_count" if by == "call_count" else "total_latency_ms"
@@ -137,7 +137,7 @@ def get_top_tools(limit: int = 10, by: str = "call_count") -> List[Dict[str, Any
         for r in rows
     ]
 
-def get_slowest_tools(limit: int = 10) -> List[Dict[str, Any]]:
+def get_slowest_tools(limit: int = 10) -> list[dict[str, Any]]:
     """Tools with highest p95 latency."""
     conn = _get_db()
     rows = conn.execute("""
@@ -151,7 +151,7 @@ def get_slowest_tools(limit: int = 10) -> List[Dict[str, Any]]:
         for r in rows
     ]
 
-def get_error_prone_tools(limit: int = 10) -> List[Dict[str, Any]]:
+def get_error_prone_tools(limit: int = 10) -> list[dict[str, Any]]:
     """Tools with highest error rate."""
     conn = _get_db()
     rows = conn.execute("""
@@ -166,7 +166,7 @@ def get_error_prone_tools(limit: int = 10) -> List[Dict[str, Any]]:
         for r in rows
     ]
 
-def metrics_export_csv(path: str) -> Dict[str, Any]:
+def metrics_export_csv(path: str) -> dict[str, Any]:
     """Export all metrics to CSV file."""
     import csv
     conn = _get_db()
@@ -180,7 +180,7 @@ def metrics_export_csv(path: str) -> Dict[str, Any]:
             writer.writerow({c: row[i] for i, c in enumerate(cols[:5])})
     return {"success": True, "path": path, "rows_exported": len(rows)}
 
-def cache_clear(tool_name: Optional[str] = None) -> Dict[str, Any]:
+def cache_clear(tool_name: str | None = None) -> dict[str, Any]:
     """Clear metrics for a tool or all tools."""
     with LOCK:
         conn = _get_db()
@@ -196,7 +196,7 @@ def cache_clear(tool_name: Optional[str] = None) -> Dict[str, Any]:
 
 # ── MCP Tool Schema ─────────────────────────────────────────────────────────
 
-def handle_metrics(args: Dict[str, Any]) -> str:
+def handle_metrics(args: dict[str, Any]) -> str:
     """Handle all metrics tools."""
     action = args.get("action", "status")
     if action == "get_tool":
