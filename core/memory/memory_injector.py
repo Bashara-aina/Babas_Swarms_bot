@@ -832,40 +832,60 @@ def _query_relevance_boost(query: str, layer: str) -> float:
     q = query.lower()
     # History / session queries → checkpoints + mem0
     if any(k in q for k in ["what did we", "what happened", "history", "session", "recent", "yesterday"]):
-        if layer == "checkpoints": return 0.4
-        if layer == "mem0": return 0.25
-        if layer == "langmem": return 0.15
+        if layer == "checkpoints":
+            return 0.4
+        if layer == "mem0":
+            return 0.25
+        if layer == "langmem":
+            return 0.15
     # Bug / error queries → observation + checkpoints
     if any(k in q for k in ["bug", "error", "crash", "debug", "traceback", "issue"]):
-        if layer == "observation": return 0.35
-        if layer == "checkpoints": return 0.2
-        if layer == "mem0": return 0.1
+        if layer == "observation":
+            return 0.35
+        if layer == "checkpoints":
+            return 0.2
+        if layer == "mem0":
+            return 0.1
     # Task / todo / remaining → symphony + checkpoints
     if any(k in q for k in ["todo", "task", "next", "remaining", "pending", "plan", "upcoming"]):
-        if layer == "symphony_tasks": return 0.4
-        if layer == "checkpoints": return 0.15
-        if layer == "mem0": return 0.1
+        if layer == "symphony_tasks":
+            return 0.4
+        if layer == "checkpoints":
+            return 0.15
+        if layer == "mem0":
+            return 0.1
     # Code / implementation / function → gitnexus
     if any(k in q for k in ["code", "function", "class", "implementation", "api", "module", "file"]):
-        if layer == "gitnexus_mcp": return 0.4
-        if layer == "checkpoints": return 0.1
+        if layer == "gitnexus_mcp":
+            return 0.4
+        if layer == "checkpoints":
+            return 0.1
     # Wiki / documentation → graphrag + obsidian
     if any(k in q for k in ["wiki", "documentation", "docs", "note", "knowledge"]):
-        if layer == "graphrag": return 0.35
-        if layer == "obsidian_mcp": return 0.3
+        if layer == "graphrag":
+            return 0.35
+        if layer == "obsidian_mcp":
+            return 0.3
     # Memory / context / remember → mem0 + langmem
     if any(k in q for k in ["memory", "context", "remember", "recall"]):
-        if layer == "mem0": return 0.35
-        if layer == "langmem": return 0.25
-        if layer == "ruflo_mcp": return 0.2
+        if layer == "mem0":
+            return 0.35
+        if layer == "langmem":
+            return 0.25
+        if layer == "ruflo_mcp":
+            return 0.2
     # Architecture / design / pattern → graphrag + gitnexus
     if any(k in q for k in ["architecture", "design", "pattern", "schema", "structure"]):
-        if layer == "graphrag": return 0.3
-        if layer == "gitnexus_mcp": return 0.25
+        if layer == "graphrag":
+            return 0.3
+        if layer == "gitnexus_mcp":
+            return 0.25
     # Deploy / config / settings → checkpoints + graphrag
     if any(k in q for k in ["deploy", "config", "settings", "env", "yaml"]):
-        if layer == "checkpoints": return 0.25
-        if layer == "graphrag": return 0.15
+        if layer == "checkpoints":
+            return 0.25
+        if layer == "graphrag":
+            return 0.15
     return 0.0
 
 
