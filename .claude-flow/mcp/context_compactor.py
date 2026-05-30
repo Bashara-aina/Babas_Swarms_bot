@@ -75,7 +75,6 @@ def _determine_level(utilization: float) -> str:
 
 def _load_session_messages() -> list[dict[str, Any]]:
     """Load current session messages from session state."""
-    state = _load_session_state()
     msgs_path = DATA_DIR / "session_messages.json"
     if not msgs_path.exists():
         return []
@@ -89,7 +88,6 @@ def _preserve_current_file(msgs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     preserved = []
     for m in msgs[-20:]:
         content = m.get("content", "")
-        role = m.get("role", "")
         if isinstance(content, str):
             if any(kw in content.lower() for kw in ["current file", "editing", "active task"]):
                 preserved.append(m)
