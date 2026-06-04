@@ -210,7 +210,7 @@ asyncio.create_task(_fanout(obs))
 | 9 | Extend `verify-memory-pipeline.py` | existing script | +40 | Script runs all 5 checks green |
 | 10 | Live smoke test | (no code) | 0 | All 6 health checks green |
 
-**Totals**: ~480 new lines (4 bridge files + tests) + ~85 lines added to existing files. All under 500 lines/file.
+**Totals**: ~325 new lines in 4 bridge files (`_base.py`+`__init__.py` ~55, `six_layer.py` ~120, `hermes.py` ~80, `gitnexus.py` ~100) + ~290 lines in 3 new test files (`test_bridges.py` ~150, `test_observation_fanout.py` ~80, `test_private_tag_stripping.py` ~60) = ~615 new lines. ~125 lines added to existing files (30 synth + 20 capture + 15 store + 20 hook-handler + 40 verify-pipeline). All files under 500 lines.
 
 **Single PR**: yes — bridges share `Observation` dataclass + `_base.py` interface, splitting would create 3 broken-commit histories.
 
