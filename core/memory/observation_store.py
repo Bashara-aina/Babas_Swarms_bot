@@ -102,6 +102,9 @@ class ObservationStore:
     def __init__(self) -> None:
         self.conn: aiosqlite.Connection | None = None
 
+    def _db_path(self) -> Path:
+        return DB_PATH
+
     async def _ensure_connection(self) -> aiosqlite.Connection:
         if self.conn is None:
             self.conn = await aiosqlite.connect(str(DB_PATH))
@@ -358,9 +361,13 @@ class ObservationStore:
         """Store an observation. Returns the row ID."""
         await self._ensure_connection()  # ensure connection is initialized before write
 
-        # Strip <private> tags at write time — defense in depth
+        # Strip <private> tags from EVERY string field — defense in depth
         content = _strip_private(content)
+        title = _strip_private(title)
+        subtitle = _strip_private(subtitle)
         narrative = _strip_private(narrative)
+        facts = _strip_private(facts)
+        concepts = _strip_private(concepts)
 
         if not title:
             title = content[:120].replace("\n", " ").strip()
