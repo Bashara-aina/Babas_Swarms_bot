@@ -403,7 +403,14 @@ class ObservationStore:
             await conn.commit()
             return int(cur.lastrowid)  # type: ignore[union-return]
 
-        return await self._write_with_retry(_do_insert)
+        result = await self._write_with_retry(_do_insert)
+        # Fire-and-forget fan-out to bridges (claude-mem pattern)
+        asyncio.create_task(_fanout_to_bridges(result, _build_obs_payload(
+            session_id=session_id, content=content, title=title, type_=obs_type,
+            subtitle=subtitle, narrative=narrative, facts=facts, concepts=concepts,
+            tags=tags, files_read=files_read, files_modified=files_modified,
+        )))
+        return result
 
     async def add_session_summary(
         self,
@@ -673,6 +680,41 @@ class ObservationStore:
         if self.conn:
             await self.conn.close()
             self.conn = None
+
+
+async def _fanout_to_bridges(obs_id: int, obs_payload: dict[str, Any]) -> None:
+    """Fire-and-forget fan-out to all registered bridges. Never raises."""
+    try:
+        from .bridges import get_bridges
+    except Exception:
+        return  # bridges subpackage missing — degrade silently
+    for bridge in get_bridges():
+        try:
+            await asyncio.wait_for(bridge.push(obs_id, obs_payload), timeout=5.0)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[bridge:%s] push failed for obs_id=%s: %s",
+                           getattr(bridge, "name", "?"), obs_id, e)
+
+
+def _build_obs_payload(
+    *, session_id: str, content: str, title: str, type_: str,
+    subtitle: str, narrative: str, facts: str, concepts: str,
+    tags: list[str] | None, files_read: list[str] | None,
+    files_modified: list[str] | None,
+) -> dict[str, Any]:
+    return {
+        "session_id": session_id,
+        "content": content,
+        "title": title,
+        "type": type_,
+        "subtitle": subtitle,
+        "narrative": narrative,
+        "facts": facts,
+        "concepts": concepts,
+        "tags": list(tags or []),
+        "files_read": list(files_read or []),
+        "files_modified": list(files_modified or []),
+    }
 
 
 def _sanitize_fts5_query(query: str) -> str:
