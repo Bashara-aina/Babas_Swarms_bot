@@ -5,6 +5,131 @@
 
 ---
 
+## 🎨 taste-skill integration (cross-agent compat)
+
+This repo integrates the full [taste-skill](https://github.com/leonxlnx/taste-skill) suite (13 skills, 3-dial system, brief-inference, pre-flight checklist). The rules below are loaded by **Cursor, Windsurf, Codex, Aider, Continue.dev, and Roo Code** in addition to Claude Code.
+
+### 13 skill variants (NL-routed — auto-activate from prompt)
+
+| Prompt signal | Load this skill |
+|---|---|
+| New landing page / portfolio / marketing site | `taste-skill` (v2, **default**) |
+| Premium / Apple-y / luxury / Awwwards | `soft-skill` |
+| Minimalist / clean / editorial / Notion-style | `minimalist-skill` |
+| Brutalist / Swiss / data-dense / HUD | `brutalist-skill` |
+| Redesign / audit this UI / looks generic | `redesign-skill` |
+| Output truncating / `// ...` placeholders | `output-skill` (always co-load) |
+| Target is GPT-4 / GPT-5 / Codex | `gpt-tasteskill` |
+| Pin to v1 (legacy) | `taste-skill-v1` |
+| Image-to-code / match a reference image | `image-to-code-skill` |
+| Google Stitch DESIGN.md generation | `stitch-skill` |
+| Web section image comps | `imagegen-frontend-web` |
+| iOS / Android screen concepts | `imagegen-frontend-mobile` |
+| Brand kit / identity board | `brandkit` |
+
+**Source paths:** `.claude/skills/<variant>/SKILL.md`
+
+### 3-dial system (declare before any UI code)
+
+```
+DESIGN_VARIANCE:  8   (1 = symmetric,         10 = artsy chaos)
+MOTION_INTENSITY: 6   (1 = static,            10 = cinematic / physics)
+VISUAL_DENSITY:   4   (1 = gallery airy,      10 = cockpit packed)
+```
+
+Brief overrides:
+- Minimalist / editorial → VARIANCE 5-6, MOTION 3-4, DENSITY 2-3
+- Premium consumer / Apple-y → VARIANCE 7-8, MOTION 5-7, DENSITY 3-4
+- Landing / marketing (default) → VARIANCE 7-9, MOTION 6-8, DENSITY 3-5
+- Data dashboard / IDE-style → VARIANCE 4-5, MOTION 2-4, DENSITY 7-9
+- Trust-first / public-sector → VARIANCE 3-4, MOTION 2-3, DENSITY 4-5
+
+### Brief inference (MANDATORY — one line before code)
+
+```
+Reading this as: <page kind> for <audience>, with a <vibe> language, leaning toward <design system>.
+```
+
+### 5 anti-slop pillars
+
+1. **No generic UI** — strong typographic hierarchy, alignment care
+2. **Premium whitespace** — `clamp()` over rigid padding
+3. **Cinematic motion** — spring physics, never linear easing
+4. **Complete implementation** — no `// TODO: add code here` placeholders
+5. **Contextual awareness** — read `.claude/skills/<variant>/SKILL.md` for deep style configs
+
+### Banned patterns (LLM tells)
+
+- Fonts: Inter, Roboto, Arial, Open Sans, system-ui (unless a11y constraint)
+- Icons: Lucide, Heroicons solid, FontAwesome → use Phosphor Light, Remix Line, or hand-drawn
+- Purple / indigo gradient backgrounds
+- 3-equal-icon-cards feature grid (the AI slop tell)
+- `linear-gradient()` on buttons — solid accent only
+- Pure `#000000` body text → use `#111` or charcoal
+- Centered hero over dark mesh with glassmorphism
+- "Welcome to [App Name]" headings
+- Emoji as icons
+- `// ...` or "rest follows the same pattern" in code
+
+### Pre-flight checklist (18 items, before declaring done)
+
+```
+[ ] Brief read declared on its own line
+[ ] Dials stated (VARIANCE / MOTION / DENSITY)
+[ ] taste-skill variant identified
+[ ] No banned fonts / icons / gradients
+[ ] No 3-equal-icon-cards feature grid
+[ ] No linear-gradient on buttons
+[ ] Body text not pure #000000
+[ ] Headlines letter-spacing -0.02em to -0.04em
+[ ] Layout symmetric OR explicitly asymmetric with intent
+[ ] No emoji as icons / no "Welcome to [App Name]" headings
+[ ] All CTAs are full sentences / specific verbs
+[ ] output-skill enforced: no placeholders
+[ ] All interactive elements Tab + Enter/Space accessible
+[ ] Dark mode token set declared
+[ ] Mobile collapse strategy explicit
+```
+
+Gate: **3+ fail → regenerate. 1-2 fail → fix inline.**
+
+### Cross-platform bridges
+
+| Agent tool | Loads from |
+|---|---|
+| Claude Code | `.claude/rules/taste-router.md` + `ui-ux-excellence.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Cursor | `.cursorrules` + this file |
+| Windsurf / Codex / Aider / Continue / Roo Code | This file (`AGENTS.md`) |
+| Gemini CLI | `GEMINI.md` |
+| All (skill install) | `source ./skill.sh <skill-name>` → path to SKILL.md |
+
+### Impeccable skill (cross-vocabulary design)
+
+The repo also ships [impeccable](https://github.com/pbakaus/impeccable) at `.claude/skills/impeccable/` and 11 other harness directories (1.5MB each, byte-identical). It is a vocabulary-first design skill that **coexists with taste-skill** — they are complementary, not redundant.
+
+| Signal | Load |
+|---|---|
+| `/impeccable <cmd>` or named commands (audit, polish, critique, distill, harden, animate, bolder, quieter, typeset, layout, colorize, adapt, onboard, overdrive, delight, optimize, clarify, extract, document, init, shape, craft, live) | **impeccable** |
+| Brand-vs-product register, "anti-pattern rules", "design vocabulary" | **impeccable** |
+| Shape picker (Soft, Minimalist, Brutalist) or 3-dial spec (VARIANCE / MOTION / DENSITY) | **taste-skill** (above) |
+| "redesign" / "audit this UI" | **taste-skill `redesign-skill`** (preferred) |
+
+**Pair order on frontend tasks:** impeccable FIRST (vocabulary + brand-vs-product register), taste-skill SECOND (dials + variant for the build). Cross-check both pre-flight checklists before declaring done (taste-router's 18 items + impeccable's 27-rule anti-pattern detector via `npx impeccable detect`).
+
+### Rollback
+
+```bash
+mv .claude/rules/taste-router.md{,.disabled}
+mv .cursorrules{,.disabled}
+mv .github/copilot-instructions.md{,.disabled}
+mv GEMINI.md{,.disabled}
+```
+
+---
+
+---
+
 ## 📚 Claude Code Best Practice
 
 This project implements the **Command → Agent → Skill** architecture pattern from [claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).

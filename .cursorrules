@@ -1,0 +1,116 @@
+# Cursor Rules — taste-skill native integration
+
+# When generating UI/UX code in this repository, the following anti-slop
+# rules apply. This file is auto-loaded by Cursor for every prompt and
+# mirrors `.claude/rules/taste-router.md` + `ui-ux-excellence.md`.
+
+# ═══════════════════════════════════════════════════════════════
+# 13 taste-skill variants — pick by prompt signal
+# ═══════════════════════════════════════════════════════════════
+# taste-skill (v2, DEFAULT) — any new frontend brief
+# soft-skill — premium / Apple-y / luxury / Awwwards
+# minimalist-skill — clean / editorial / Notion-style
+# brutalist-skill — Swiss / data-dense / HUD / tactical
+# redesign-skill — when user says "redesign" / "audit this UI"
+# output-skill — ALWAYS co-load (no placeholders)
+# gpt-tasteskill — when target is GPT-4/5/Codex
+# taste-skill-v1 — only if user explicitly requests v1
+# image-to-code-skill — image-to-code / match a reference
+# stitch-skill — Google Stitch DESIGN.md generation
+# imagegen-frontend-web — web section image comps
+# imagegen-frontend-mobile — iOS / Android screen concepts
+# brandkit — brand identity board / logo system
+
+# Source files: .claude/skills/<variant>/SKILL.md
+
+# ═══════════════════════════════════════════════════════════════
+# 3-dial system — declare before any code
+# ═══════════════════════════════════════════════════════════════
+# DESIGN_VARIANCE:  1 (symmetric) → 10 (artsy chaos)
+# MOTION_INTENSITY: 1 (static) → 10 (cinematic / physics)
+# VISUAL_DENSITY:   1 (airy) → 10 (cockpit data-packed)
+# Default: 8 / 6 / 4
+#
+# Brief overrides:
+#   minimalist/editorial → V 5-6, M 3-4, D 2-3
+#   premium consumer    → V 7-8, M 5-7, D 3-4
+#   landing/marketing   → V 7-9, M 6-8, D 3-5
+#   data dashboard      → V 4-5, M 2-4, D 7-9
+#   trust-first/public  → V 3-4, M 2-3, D 4-5
+
+# ═══════════════════════════════════════════════════════════════
+# Brief inference (MANDATORY — one line before any code)
+# ═══════════════════════════════════════════════════════════════
+# Reading this as: <page kind> for <audience>, with a <vibe> language, leaning toward <design system>.
+
+# ═══════════════════════════════════════════════════════════════
+# 5 anti-slop pillars (matches .github/copilot-instructions.md)
+# ═══════════════════════════════════════════════════════════════
+# 1. No generic UI — strong typographic hierarchy, alignment care
+# 2. Premium whitespace — clamp() over rigid padding
+# 3. Cinematic motion — spring physics, never linear easing
+# 4. Complete implementation — no `// TODO: add code here`
+# 5. Contextual awareness — read .claude/skills/<variant>/SKILL.md
+
+# ═══════════════════════════════════════════════════════════════
+# Banned patterns (the LLM tells)
+# ═══════════════════════════════════════════════════════════════
+# - Inter, Roboto, Arial, Open Sans, system-ui (unless a11y constraint)
+# - Lucide / Heroicons solid / FontAwesome → use Phosphor Light or Remix Line
+# - Purple / indigo gradient backgrounds
+# - 3-equal-icon-cards feature grid
+# - linear-gradient() on buttons
+# - Pure #000000 body text → use #111 or charcoal
+# - Centered hero over dark mesh with glassmorphism
+# - "Welcome to [App Name]" headings
+# - Emoji as icons
+# - "// ..." / "rest follows the same pattern" in code
+
+# ═══════════════════════════════════════════════════════════════
+# 18-item pre-flight checklist (declare before "done")
+# ═══════════════════════════════════════════════════════════════
+# [ ] Brief read declared on its own line
+# [ ] Dials stated (VARIANCE / MOTION / DENSITY)
+# [ ] taste-skill variant identified
+# [ ] No banned fonts
+# [ ] No banned icons
+# [ ] No purple/indigo gradient backgrounds
+# [ ] No 3-equal-icon-cards feature grid
+# [ ] No linear-gradient on buttons
+# [ ] Body text not pure #000000
+# [ ] Headlines letter-spacing -0.02em to -0.04em
+# [ ] Layout symmetric OR explicitly asymmetric with intent
+# [ ] No emoji as icons
+# [ ] No "Welcome to [App Name]" headings
+# [ ] All CTAs are full sentences / specific verbs
+# [ ] output-skill enforced: no placeholders
+# [ ] All interactive elements Tab + Enter/Space accessible
+# [ ] Dark mode token set declared
+# [ ] Mobile collapse strategy explicit
+# Gate: 3+ fail → regenerate. 1-2 fail → fix inline.
+
+# For deep style configs, read .claude/skills/<variant>/SKILL.md.
+
+# ═══════════════════════════════════════════════════════════════
+# Impeccable coexistence (pbakaus upstream)
+# ═══════════════════════════════════════════════════════════════
+# The repo also ships [impeccable](https://github.com/pbakaus/impeccable) at
+# .cursor/skills/impeccable/ (and 11 other harness dirs) — a vocabulary-first
+# design skill with 23 commands and 27 anti-pattern rules.
+#
+# When to load which:
+#   /impeccable <cmd> or named commands (audit, polish, critique, distill,
+#     harden, animate, bolder, quieter, typeset, layout, colorize, adapt,
+#     onboard, overdrive, delight, optimize, clarify, extract, document,
+#     init, shape, craft, live) → load impeccable from .cursor/skills/
+#   shape picker (Soft / Minimalist / Brutalist) or 3-dial spec
+#     (VARIANCE / MOTION / DENSITY) → load taste-skill (already above)
+#
+# Both ban the same LLM tells. The 18-item pre-flight above is for
+# taste-skill; impeccable ships its own 27-rule anti-pattern detector
+# (run via `npx impeccable detect <path>` — uses the impeccable npm CLI,
+# already installed alongside the skill).
+#
+# Pair order: impeccable FIRST (vocabulary + brand-vs-product register),
+# taste-skill SECOND (dials + variant for the build). Cross-check both
+# pre-flight checklists before declaring done.
