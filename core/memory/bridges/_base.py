@@ -11,7 +11,7 @@ import aiosqlite
 
 logger = logging.getLogger(__name__)
 
-STATE_DB = Path(__file__).parent.parent.parent / "data" / "bridges_state.db"
+STATE_DB = Path(__file__).parent.parent.parent.parent / "data" / "bridges_state.db"
 STATE_DB.parent.mkdir(parents=True, exist_ok=True)
 
 
