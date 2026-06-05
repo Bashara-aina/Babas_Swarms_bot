@@ -51,7 +51,7 @@ class StreamingResponseManager:
 
         Args:
             chat_id: Telegram chat id to send updates to.
-            model: Model string (e.g. "minimax-coding-plan/MiniMax-Text-01").
+            model: Model string (e.g. "minimax-coding-plan/MiniMax-M3").
             task: Task text.
             agent_key: Agent identifier.
             header: HTML header shown above streamed content.

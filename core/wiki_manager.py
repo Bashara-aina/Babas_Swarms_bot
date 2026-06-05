@@ -261,7 +261,7 @@ Return ONLY complete markdown for the page. Use [[other/path]] for cross-links. 
 
     async def query(self, question: str, top_k: int = 3) -> str:
         index = await self.read_index()
-        router_model = os.getenv("LEGION_WIKI_ROUTER_MODEL", "minimax-coding-plan/MiniMax-Text-01")
+        router_model = os.getenv("LEGION_WIKI_ROUTER_MODEL", "minimax-coding-plan/MiniMax-M3")
         routing_prompt = f"""Wiki Index:
 {index[:4000]}
 

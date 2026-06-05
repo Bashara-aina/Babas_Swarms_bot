@@ -52,7 +52,7 @@ When Bashara sends a message:
 [MESSAGE RECEIVED]
        │
        ▼
-[INTENT CLASSIFIER] ← minimax-coding-plan/MiniMax-Text-01 (fast classification)
+[INTENT CLASSIFIER] ← minimax-coding-plan/MiniMax-M3 (fast classification)
        │
        ├── Simple chat → Legion responds directly (no agent spawning)
        ├── Research task → ResearchSwarm (parallel agents)

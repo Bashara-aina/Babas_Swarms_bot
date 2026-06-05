@@ -6,7 +6,7 @@ from typing import Any
 import aiohttp
 
 
-async def run_ruflo_workflow(task: str, agents: list[str], model: str = "minimax-coding-plan/MiniMax-M2.7") -> str:
+async def run_ruflo_workflow(task: str, agents: list[str], model: str = "minimax-coding-plan/MiniMax-M3") -> str:
     if not os.getenv("MINIMAX_API_KEY"):
         return "ruflo disabled: MINIMAX_API_KEY not set"
 

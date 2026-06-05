@@ -47,7 +47,7 @@ class NanobrowserAgent:
     - Validator: confirms action produced expected result
     """
 
-    def __init__(self, headless: bool = True, model: str = "minimax-coding-plan/MiniMax-Text-01"):
+    def __init__(self, headless: bool = True, model: str = "minimax-coding-plan/MiniMax-M3"):
         self.headless = headless
         self.model = model
         self._browser = None

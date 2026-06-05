@@ -1,9 +1,9 @@
 # model_config.py — Single source of truth for Legion's model routing
-# MiniMax M2.7 is the ONLY model. No fallbacks to broken APIs.
+# MiniMax M3 is the ONLY model. No fallbacks to broken APIs.
 
 import os
 
-PRIMARY_MODEL = "MiniMax-M2.7"
+PRIMARY_MODEL = "MiniMax-M3"
 PRIMARY_BASE_URL = "https://api.minimax.io/v1"
 PRIMARY_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
 

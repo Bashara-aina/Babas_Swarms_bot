@@ -11,7 +11,7 @@ projects:
 agents:
   - name: planner
     role: Task decomposition and planning
-    model: minimax/MiniMax-M2.7
+    model: minimax/MiniMax-M3
     tools:
       - sequential_thinking
       - ruflo_task_create
@@ -19,7 +19,7 @@ agents:
 
   - name: worker
     role: Execute implementation tasks
-    model: minimax/MiniMax-M2.7
+    model: minimax/MiniMax-M3
     tools:
       - browser_open
       - browser_run_task
@@ -29,7 +29,7 @@ agents:
 
   - name: browser-automation
     role: Autonomous browser tasks
-    model: minimax/MiniMax-M2.7
+    model: minimax/MiniMax-M3
     tools:
       - browser_open
       - browser_click
@@ -40,7 +40,7 @@ agents:
 
   - name: web-researcher
     role: Web content discovery and synthesis
-    model: minimax/MiniMax-M2.7
+    model: minimax/MiniMax-M3
     tools:
       - exa_web_search_exa
       - crawl4ai_crawl
@@ -48,7 +48,7 @@ agents:
 
   - name: reviewer
     role: Code and plan quality review
-    model: minimax/MiniMax-M2.7
+    model: minimax/MiniMax-M3
     tools:
       - sequential_thinking
 

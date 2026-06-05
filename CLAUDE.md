@@ -99,7 +99,7 @@ npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --
 |------|---------|-----------|
 | 1 | Agent Booster (WASM) | Simple transforms — skip LLM, use Edit directly |
 | 2 | Haiku / MiniMax-M2 | Simple tasks, low complexity |
-| 3 | MiniMax-Text-01 | Architecture, security, complex reasoning |
+| 3 | MiniMax-M3 | Architecture, security, complex reasoning |
 
 **All agents run on MiniMax only — no Anthropic models.**
 

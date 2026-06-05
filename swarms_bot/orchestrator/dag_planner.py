@@ -121,7 +121,7 @@ class TaskDAG:
 class DAGPlanner:
     """Uses an LLM to decompose a goal into a TaskDAG."""
 
-    def __init__(self, model: str = "minimax-coding-plan/MiniMax-Text-01"):
+    def __init__(self, model: str = "minimax-coding-plan/MiniMax-M3"):
         self.model = model
 
     async def decompose(self, goal: str, max_tasks: int = 12) -> TaskDAG:

@@ -13,7 +13,7 @@
 
 | Feature | File | Status | Notes |
 |---------|------|--------|-------|
-| **MiniMax M2.7 with reasoning_split** | `.claude/settings.json` | ✅ Complete | `reasoning_split=True`, `temperature=1.0`, model=`MiniMax-M2.7` |
+| **MiniMax M3 with reasoning_split** | `.claude/settings.json` | ✅ Complete | `reasoning_split=True`, `temperature=1.0`, model=`MiniMax-M3` |
 | **10-layer anti-hallucination protocol** | `.claude/settings.json`, `.github/copilot-instructions.md` | ✅ Complete | CoT + CoVe, P1–P6 evidence hierarchy, `[VERIFY]` tags |
 | **Context Health Monitor** | `core/context_health.py` | ✅ Complete | HEALTHY/CAUTION/CRITICAL/OVERFLOW levels; pre-compaction checkpoint ritual |
 | **Drift Detection** | `core/drift_detector.py` | ✅ Complete | Error accumulation prevention; abort at 5+ failed attempts |

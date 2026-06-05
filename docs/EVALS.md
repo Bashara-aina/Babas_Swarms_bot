@@ -1,6 +1,6 @@
 # Legiona Agent — Evaluation & Benchmark Procedures
 
-> **Purpose**: Document reproducible benchmarks for the Legiona multi-agent system running on MiniMax-M2.7 with reasoning_split=True.
+> **Purpose**: Document reproducible benchmarks for the Legiona multi-agent system running on MiniMax-M3 with reasoning_split=True.
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| Model | MiniMax-M2.7 |
+| Model | MiniMax-M3 |
 | Reasoning Split | `reasoning_split=true` (interleaved CoT) |
 | Base URL | `https://api.minimax.io/anthropic` |
 | Default Temperature | 1.0 |

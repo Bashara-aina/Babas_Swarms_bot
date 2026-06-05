@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 # Covers all models used in LEGACY_FALLBACK_CHAIN + agent_registry fallback chains
 PRICING: dict[str, dict[str, float]] = {
     # MiniMax stack (free)
-    "minimax-coding-plan/MiniMax-Text-01":                        {"input": 0.0, "output": 0.0},
-    "minimax-coding-plan/MiniMax-M2.7":                           {"input": 0.0, "output": 0.0},
+    "minimax-coding-plan/MiniMax-M3":                        {"input": 0.0, "output": 0.0},
+    "minimax-coding-plan/MiniMax-M3":                           {"input": 0.0, "output": 0.0},
     # Ollama local (free)
     "ollama_chat/gemma3:12b":                         {"input": 0.0, "output": 0.0},
     "ollama_chat/qwen3.5:35b":                        {"input": 0.0, "output": 0.0},
@@ -33,7 +33,7 @@ PRICING: dict[str, dict[str, float]] = {
 
 # Daily request limits (0 = unlimited)
 DAILY_LIMITS: dict[str, int] = {
-    "minimax-coding-plan/MiniMax-Text-01": 14400,
+    "minimax-coding-plan/MiniMax-M3": 14400,
 }
 
 ALERT_THRESHOLD = 0.80   # Alert at 80% of daily limit
@@ -84,7 +84,7 @@ class UsageTracker:
         """Record token usage for a model.
 
         Args:
-            model: Model string (e.g. 'minimax-coding-plan/MiniMax-Text-01').
+            model: Model string (e.g. 'minimax-coding-plan/MiniMax-M3').
             input_tokens: Number of input/prompt tokens.
             output_tokens: Number of output/completion tokens.
             requests: Number of requests (default 1).
@@ -184,7 +184,7 @@ class UsageTracker:
         """Check BEFORE making an API call whether it would exceed daily/monthly budget.
 
         Args:
-            model: Model string (e.g. 'minimax-coding-plan/MiniMax-M2.7').
+            model: Model string (e.g. 'minimax-coding-plan/MiniMax-M3').
             estimated_tokens: Estimated total tokens for this call (input + output).
 
         Returns:

@@ -130,14 +130,14 @@ Items needing verification: [list or "none"]
 ### Stack context
 - Languages: TypeScript, Python, SQL
 - Frameworks: Next.js (App Router), Supabase, Tailwind CSS
-- AI integrations: MiniMax M2.7, OpenAI Codex, Claude Code
+- AI integrations: MiniMax M3, OpenAI Codex, Claude Code
 - Agent surfaces: GitHub Copilot, Claude Code, OpenCode (legiona)
 - Constraint: prefer idempotent agent actions
 - Deployment: Vercel (frontend), Supabase (backend/DB)
 
 ## ANTI-LOOP PROTOCOL (M2.7 Self-Evolution Rules)
 
-These rules emerged from MiniMax M2.7's own self-optimization process.
+These rules emerged from MiniMax M3's own self-optimization process.
 Violating them causes spinning, token waste, and degraded output.
 
 DETECTION RULES:
@@ -244,25 +244,25 @@ firecrawl_extract(urls=["<url>"], prompt="extract full content")
 - If all fallbacks fail, say "I don't know" instead of fabricating
 - Document which tool succeeded in your response
 
-## MiniMax M2.7 — Reasoning Split Configuration
+## MiniMax M3 — Reasoning Split Configuration
 
-MiniMax M2.7 is the project-standard reasoning model (CLAUDE.md §0n).
+MiniMax M3 is the project-standard reasoning model (CLAUDE.md §0n).
 
 REASONING_SPLIT PROTOCOL (M2.7 only):
 - **reasoning_split=true**: model separates thought tokens from output
 - Thought tokens are NEVER shown to user — only final response
 - Budget conscious: set ANTHROPIC_API_TIMEOUT_MS=3000000 for complex tasks
-- Model selection: MiniMax M2.7 for all coding, analysis, research tasks
+- Model selection: MiniMax M3 for all coding, analysis, research tasks
 - Fallback only: cloud provider models via get_fallback_chain()
 
 Model configuration in `.claude/settings.json`:
 ```json
 {
-  "ANTHROPIC_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_MODEL": "MiniMax-M3",
   "ANTHROPIC_REASONING_SPLIT": true,
-  "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7",
-  "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7",
-  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M3",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M3",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M3",
   "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic"
 }
 ```

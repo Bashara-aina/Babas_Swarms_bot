@@ -5,8 +5,8 @@ fallback chains, and thread memory. This file re-exports everything
 for any legacy callers that import from router directly.
 
 MiniMax-only models (no external cloud providers):
-  minimax-coding-plan/MiniMax-Text-01  ✓ (primary, free tier)
-  minimax-coding-plan/MiniMax-M2.7     ✓ (complex reasoning, free tier)
+  minimax-coding-plan/MiniMax-M3  ✓ (primary, free tier)
+  minimax-coding-plan/MiniMax-M3     ✓ (complex reasoning, free tier)
   ollama_chat/llama3.3:70b             ✓ (local fallback, privacy)
   ollama_chat/gemma4:e4b               ✓ (local vision, RTX 3060)
 """

@@ -13,14 +13,14 @@ Usage:
     tracker = TokenUsageTracker()  # type: ignore[reportOptionalMemberAccess]
 
     await tracer.trace_llm_call(  # type: ignore[reportOptionalMemberAccess]
-        model="minimax-coding-plan/MiniMax-M2.7",  # type: ignore[reportOptionalMemberAccess]
+        model="minimax-coding-plan/MiniMax-M3",  # type: ignore[reportOptionalMemberAccess]
         prompt="Explain quantum computing",  # type: ignore[reportOptionalMemberAccess]
         response="Quantum computing uses...",  # type: ignore[reportOptionalMemberAccess]
         latency_ms=234.5,  # type: ignore[reportOptionalMemberAccess]
         token_usage={"prompt_tokens": 50, "completion_tokens": 120},  # type: ignore[reportOptionalMemberAccess]
     )
 
-    tracker.record_run("minimax-coding-plan/MiniMax-M2.7", 50, 120, 234.5)  # type: ignore[reportOptionalMemberAccess]
+    tracker.record_run("minimax-coding-plan/MiniMax-M3", 50, 120, 234.5)  # type: ignore[reportOptionalMemberAccess]
     print(tracker.report())  # type: ignore[reportOptionalMemberAccess]
 """
 

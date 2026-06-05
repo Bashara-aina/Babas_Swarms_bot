@@ -334,7 +334,7 @@ PROJECT REGISTRY:
     Next.js 15 + React 19 + TypeScript + Supabase
     Primary agents: frontend/, backend/, db/, typescript/
     Key MCPs: gitnexus, filesystem, git, exa (Indonesian law)
-    Model: MiniMax M2.7 for all LLM, Supabase for data
+    Model: MiniMax M3 for all LLM, Supabase for data
 
   popw       → /home/newadmin/swarm-bot/project/popw
     Research project, academic writing, LaTeX

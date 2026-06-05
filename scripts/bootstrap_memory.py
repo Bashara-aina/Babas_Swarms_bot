@@ -34,7 +34,7 @@ CORE_KNOWLEDGE = [
     },
     {
         "content": (
-            "Primary LLM: MiniMax M2.7 on $20/month flat plan. "
+            "Primary LLM: MiniMax M3 on $20/month flat plan. "
             "Context limit: 200K tokens per call. "
             "This limit is overcome by the InfiniteMemoryLLM wrapper "
             "which injects only the most relevant recalled context "
@@ -93,7 +93,7 @@ CORE_KNOWLEDGE = [
             "browser-use, crawl4ai, exa, filesystem, gitnexus, "
             "hermes, latex, obsidian, ruflo, sequential-thinking, websearch. "
             "These tools are available inside OpenCode sessions. "
-            "OpenCode runs MiniMax M2.7, context was at 81% (165K/200K) "
+            "OpenCode runs MiniMax M3, context was at 81% (165K/200K) "
             "when memory system was implemented on 2026-05-04."
         ),
         "agent_id": "opencode",

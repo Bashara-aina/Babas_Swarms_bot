@@ -4,7 +4,7 @@
 name: intent_router_eval
 inputs:
   test_cases_path: str
-  model: str = "minimax/MiniMax-Text-01"
+  model: str = "minimax/MiniMax-M3"
 outputs:
   precision: float
   recall: float

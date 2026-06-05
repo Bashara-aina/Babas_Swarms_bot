@@ -58,7 +58,7 @@ async def _llm_call(
     Legion's identity is present in all debate responses.
 
     Args:
-        model:       litellm model string, e.g. 'minimax-coding-plan/MiniMax-Text-01'
+        model:       litellm model string, e.g. 'minimax-coding-plan/MiniMax-M3'
         system:      System prompt
         user:        User message
         max_tokens:  Token limit (default 1500 — enough for full debate position)
@@ -88,7 +88,7 @@ async def _llm_call(
                     {"role": "system", "content": full_system},
                     {"role": "user", "content": user},
                 ],
-                model="minimax-coding-plan/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-M3",
                 max_tokens=max_tokens,
                 temperature=temperature,
             )
@@ -308,7 +308,7 @@ async def _run_department(
             f"Your specialist perspective: {agent_persona}\n\n"
             "Give your expert take in 3-4 focused sentences. Be direct, specific, opinionated."
         )
-        model = AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-Text-01")
+        model = AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-M3")
         return await _llm_call(
             model,
             system,
@@ -337,7 +337,7 @@ async def _run_department(
     )
     lead_user = f"Topic: {task}\n\nYour team's briefing:\n{team_briefing[:8000]}"
     # Use architect model for lead synthesis — needs large context window
-    lead_model = AGENT_MODELS.get("architect", "minimax-coding-plan/MiniMax-Text-01")
+    lead_model = AGENT_MODELS.get("architect", "minimax-coding-plan/MiniMax-M3")
     lead_synthesis = await _llm_call(
         lead_model,
         lead_system,

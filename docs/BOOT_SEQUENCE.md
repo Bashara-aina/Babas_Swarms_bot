@@ -257,7 +257,7 @@ Use `scripts/start_with_watchdog.sh` to start with watchdog.
 | `TELEGRAM_BOT_TOKEN` | YES | Telegram bot API token |
 | `ALLOWED_USER_ID` | YES | Telegram user ID (owner) |
 | `BASHARA_TELEGRAM_ID` | alt | Alternative to ALLOWED_USER_ID |
-| `LEGION_LLM_MODEL` | no | Override default LLM (default: minimax/MiniMax-M2.7) |
+| `LEGION_LLM_MODEL` | no | Override default LLM (default: minimax/MiniMax-M3) |
 | `OPENROUTER_API_KEY` | no | Enable ruflo sidecar |
 | `ANTHROPIC_API_KEY` | no | Enable ruflo sidecar |
 | `SCREENPIPE_ENABLED` | no | Enable Screenpipe desktop monitoring |
@@ -271,7 +271,7 @@ After bot starts, check `bot.log` for:
 ```
 🚀 LEGION BOOT — 2026-04-21 HH:MM:SS
 ✅ Telegram: @your_bot_username
-✅ LLM: minimax/MiniMax-M2.7
+✅ LLM: minimax/MiniMax-M3
 ⚠️ ChromaDB: unavailable (memory degraded)
 ✅ Wiki: 42 documents loaded
 ✅ Data: writable

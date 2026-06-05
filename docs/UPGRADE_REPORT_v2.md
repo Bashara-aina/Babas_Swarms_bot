@@ -2,7 +2,7 @@
 
 **Generated:** 2026-04-21  
 **System:** LEGIONA (Legion Autonomous Network Agent Architecture)  
-**Model:** MiniMax-M2.7 (12B parameters, VRAM-optimized)  
+**Model:** MiniMax-M3 (12B parameters, VRAM-optimized)  
 **Status:** ✅ PHASE 9+10 COMPLETE — All smoke tests pass
 
 ---

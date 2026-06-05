@@ -1,8 +1,8 @@
 """
 lib/legiona/minimax_client.py
-MiniMax M2.7 — fully optimized for maximum intelligence.
+MiniMax M3 — fully optimized for maximum intelligence.
 Methods implemented:
-  #1  Model = MiniMax-M2.7 (latest, self-evolving)
+  #1  Model = MiniMax-M3 (latest, self-evolving)
   #2  reasoning_split=True (interleaved chain-of-thought)
   #3  Optimal sampling: temperature=1.0, top_p=0.95, top_k=40
   #6  Interleaved thinking between tool calls via system prompt
@@ -127,13 +127,13 @@ def _inject_images_into_messages(
 
 
 # ── Model ────────────────────────────────────────────────────────────────────
-MINIMAX_MODEL = os.getenv("MINIMAX_MODEL", "MiniMax-M2.7")
+MINIMAX_MODEL = os.getenv("MINIMAX_MODEL", "MiniMax-M3")
 MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.chat/v1")
 MINIMAX_DIRECT = True  # Always route direct to MiniMax — no OpenRouter fallback
 
 
 # ── Sampling presets (#3, #7) ────────────────────────────────────────────────
-# MiniMax M2.7 is tuned for temperature=1.0 — NOT 0.7
+# MiniMax M3 is tuned for temperature=1.0 — NOT 0.7
 PRESET_PROFILES = {
     "coding": {
         "temperature": 1.0,
@@ -666,7 +666,7 @@ async def create_completion_with_tools(
         choice = response.choices[0]
         assistant_message: dict[str, Any] = choice.message.model_dump()
 
-        # Log reasoning details if present (MiniMax M2.7 puts CoT in reasoning field)
+        # Log reasoning details if present (MiniMax M3 puts CoT in reasoning field)
         reasoning_detail = ""
         if hasattr(response, "choices") and response.choices:
             extra = response.choices[0].model_extra or {}

@@ -72,7 +72,7 @@ ruff check .                              # Lint
 ## Key Files
 - `main.py` — bot startup
 - `core/agent_registry.py` — 108-agent registry + LEGACY_FALLBACK_CHAIN
-- `config/models.yaml` — model registry (MiniMax-M2.7 primary, free tier fallbacks)
+- `config/models.yaml` — model registry (MiniMax-M3 primary, free tier fallbacks)
 - `config/departments.yaml` — department/agent definitions
 
 ## Directory Structure
@@ -87,8 +87,8 @@ tests/        — pytest-asyncio suite
 ```
 
 ## LLM Model Reference
-Primary: `minimax/MiniMax-M2.7` (MiniMax M2.7)
-Fallback chain: MiniMax-M2.7 → MiniMax-Text-01 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
+Primary: `minimax/MiniMax-M3` (MiniMax M3)
+Fallback chain: MiniMax-M3 → MiniMax-M3 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
 Vision (local): `ollama_chat/gemma4:e4b` (RTX 3060 only)
 See `LEGACY_FALLBACK_CHAIN` in `core/agent_registry.py` for per-agent chains.
 
@@ -163,10 +163,10 @@ BOOT STEP 3 — Load memory (< 2 seconds):
   → Do NOT show the user this list
 
 BOOT STEP 4 — Activate background workers (fire-and-forget, async):
-  ruflo: worker_dispatch { "worker": "audit",              "trigger": "session_start",    "model": "minimax/MiniMax-M2.7" }
-  ruflo: worker_dispatch { "worker": "memory_consolidate", "trigger": "session_end",      "model": "minimax/MiniMax-M2.7" }
-  ruflo: worker_dispatch { "worker": "testgaps",           "trigger": "after_implementation", "model": "minimax/MiniMax-M2.7" }
-  ruflo: worker_dispatch { "worker": "optimize",           "trigger": "every_5_tasks",    "model": "minimax/MiniMax-M2.7" }
+  ruflo: worker_dispatch { "worker": "audit",              "trigger": "session_start",    "model": "minimax/MiniMax-M3" }
+  ruflo: worker_dispatch { "worker": "memory_consolidate", "trigger": "session_end",      "model": "minimax/MiniMax-M3" }
+  ruflo: worker_dispatch { "worker": "testgaps",           "trigger": "after_implementation", "model": "minimax/MiniMax-M3" }
+  ruflo: worker_dispatch { "worker": "optimize",           "trigger": "every_5_tasks",    "model": "minimax/MiniMax-M3" }
   → These are background processes. Do not wait for them. Continue immediately.
 
 BOOT STEP 5 — Register hooks (idempotent, runs every boot, safe):
@@ -261,7 +261,7 @@ MODE: SWARM  (5+ files, 3+ domains, 3+ phases, or complex task)
 ────────────────────────────────────────────────────────────────────────
 Trigger: 5+ files OR 3+ domains OR 3+ phases OR matches complex task table (Part V)
 
-Execution sequence (all ruflo tool calls, model always minimax/MiniMax-M2.7):
+Execution sequence (all ruflo tool calls, model always minimax/MiniMax-M3):
 
   PRE-FLIGHT (2 calls, silent):
     ruflo: memory_search { "query": "<task>", "limit": 5 }
@@ -275,8 +275,8 @@ Execution sequence (all ruflo tool calls, model always minimax/MiniMax-M2.7):
       "consensus": "raft"
     }
 
-  SPAWN (1 call per agent, all parallel, all with model: minimax/MiniMax-M2.7):
-    ruflo: agent_spawn { "role": "<dept/role>", "objective": "<specific>", "model": "minimax/MiniMax-M2.7", "tools": [...] }
+  SPAWN (1 call per agent, all parallel, all with model: minimax/MiniMax-M3):
+    ruflo: agent_spawn { "role": "<dept/role>", "objective": "<specific>", "model": "minimax/MiniMax-M3", "tools": [...] }
     # Repeat for each phase/domain — all spawns fire simultaneously
 
   TASK TRACKING (1 call):
@@ -521,7 +521,7 @@ AUTO-TEARDOWN SEQUENCE (silent, < 10 seconds total):
     "
 
   STEP 5: Run memory consolidation worker
-    ruflo: worker_dispatch { "worker": "memory_consolidate", "trigger": "immediate", "model": "minimax/MiniMax-M2.7" }
+    ruflo: worker_dispatch { "worker": "memory_consolidate", "trigger": "immediate", "model": "minimax/MiniMax-M3" }
 
   STEP 6 (only if session had code changes): Confirm git is clean
     git: status

@@ -199,7 +199,7 @@ class OrchestrationRunner:
                 f"Produce a clear, complete, well-structured final answer that achieves the original goal."
             )
             response = await litellm.acompletion(
-                model="minimax-coding-plan/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-M3",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
                 max_tokens=4096,

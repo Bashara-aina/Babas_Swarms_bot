@@ -1,7 +1,7 @@
 # Model Audit Report: `src/models/model.py`
 
 **Date:** 2026-05-16
-**Auditor:** AI (MiniMax-M2.7)
+**Auditor:** AI (MiniMax-M3)
 **Input:** B=1, 3×720×1280 RGB
 **Reference:** `popw_paper.tex`
 

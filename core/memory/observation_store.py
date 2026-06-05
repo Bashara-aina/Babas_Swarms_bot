@@ -357,6 +357,7 @@ class ObservationStore:
         tags: list[str] | None = None,
         files_read: list[str] | None = None,
         files_modified: list[str] | None = None,
+        tool_name: str = "",
     ) -> int:
         """Store an observation. Returns the row ID."""
         await self._ensure_connection()  # ensure connection is initialized before write
@@ -409,6 +410,7 @@ class ObservationStore:
             session_id=session_id, content=content, title=title, type_=obs_type,
             subtitle=subtitle, narrative=narrative, facts=facts, concepts=concepts,
             tags=tags, files_read=files_read, files_modified=files_modified,
+            tool_name=tool_name,
         )))
         return result
 
@@ -700,7 +702,7 @@ def _build_obs_payload(
     *, session_id: str, content: str, title: str, type_: str,
     subtitle: str, narrative: str, facts: str, concepts: str,
     tags: list[str] | None, files_read: list[str] | None,
-    files_modified: list[str] | None,
+    files_modified: list[str] | None, tool_name: str = "",
 ) -> dict[str, Any]:
     return {
         "session_id": session_id,
@@ -714,6 +716,7 @@ def _build_obs_payload(
         "tags": list(tags or []),
         "files_read": list(files_read or []),
         "files_modified": list(files_modified or []),
+        "tool_name": tool_name,
     }
 
 

@@ -580,7 +580,7 @@ class CompressionConfig:
     protect_last_n_turns: int = 4
 
     # Summarization (uses swarm-bot's call_llm)
-    summarization_model: str = "minimax-coding-plan/MiniMax-Text-01"
+    summarization_model: str = "minimax-coding-plan/MiniMax-M3"
     temperature: float = 0.3
     max_retries: int = 3
     retry_delay: int = 2
@@ -656,7 +656,7 @@ class TrajectoryCompressor:
     4. Replace compressed turns with a single human summary message
     5. Keep remaining middle turns intact (model continues with tools)
 
-    Uses swarm-bot's call_llm for summarization (MiniMax-Text-01 by default).
+    Uses swarm-bot's call_llm for summarization (MiniMax-M3 by default).
     """
 
     def __init__(self, config: CompressionConfig | None = None) -> None:

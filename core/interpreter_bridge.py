@@ -71,7 +71,7 @@ SYSTEM_PROMPTS = {
 # Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
 _CONTEXT_WINDOWS: dict[str, int] = {
     # ⭐ PRIORITY 1: MiniMax (zero cost)
-    "minimax-coding-plan/MiniMax-Text-01": 245760,
+    "minimax-coding-plan/MiniMax-M3":      1048576,
 
     # PRIORITY 2: Local Ollama (zero cost, privacy)
     "ollama_chat/gemma4:e4b":              8192,

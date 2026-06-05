@@ -74,9 +74,9 @@ class TestFallbackChain:
 
     @patch("core.reliability.fallback_chain.FallbackChain.get_optimal_provider")
     def test_get_best_provider_returns_model_string(self, mock_optimal):
-        mock_optimal.return_value = ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7")
+        mock_optimal.return_value = ("minimax-coding-plan/MiniMax-M3", "MiniMax M3")
         model = get_best_provider("coding")
-        assert model == "minimax-coding-plan/MiniMax-M2.7"
+        assert model == "minimax-coding-plan/MiniMax-M3"
 
 
 class TestFallbackChainEdgeCases:

@@ -18,20 +18,20 @@ logger = logging.getLogger(__name__)
 _FALLBACK_CHAINS = {
     # Coding tasks: MiniMax primary, Ollama local fallback
     "coding": [
-        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
-        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
         ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
     # General chat: MiniMax primary
     "chat": [
-        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
-        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
         ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
     # Analysis tasks: MiniMax primary, Ollama Llama for heavy reasoning
     "analysis": [
-        ("minimax-coding-plan/MiniMax-M2.7", "MiniMax M2.7"),
-        ("minimax-coding-plan/MiniMax-Text-01", "MiniMax Text-01"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
         ("ollama_chat/llama3.3:70b", "Local Ollama Llama 3.3 70B"),
     ],
 }
@@ -147,7 +147,7 @@ def get_fallback_chain(agent_key: str = "coding") -> list[str]:
 
     Example:
         >>> chain = get_fallback_chain("coding")
-        >>> # Returns ["minimax-coding-plan/MiniMax-M2.7", "minimax-coding-plan/MiniMax-Text-01", ...]
+        >>> # Returns ["minimax-coding-plan/MiniMax-M3", "minimax-coding-plan/MiniMax-M3", ...]
     """
     chain = FallbackChain.get_provider_chain(agent_key)
     return [model for model, _ in chain]
@@ -164,8 +164,8 @@ def get_best_provider(agent_key: str = "coding") -> str:
 
     Example:
         >>> model = get_best_provider("coding")
-        >>> # Returns "minimax-coding-plan/MiniMax-M2.7" if healthy
-        >>> # Returns "minimax-coding-plan/MiniMax-Text-01" if M2.7 down
+        >>> # Returns "minimax-coding-plan/MiniMax-M3" if healthy
+        >>> # Returns "minimax-coding-plan/MiniMax-M3" if M2.7 down
         >>> # Or "ollama_chat/llama3.3:70b" if all cloud down (local fallback)
     """
     model, _ = FallbackChain.get_optimal_provider(agent_key)

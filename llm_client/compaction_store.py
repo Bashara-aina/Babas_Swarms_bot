@@ -54,7 +54,7 @@ Usage:
 
     # Store a summary
     store.store(cache_key="abc123", summary="Fixed auth bug...", message_count=47,
-                model_used="MiniMax-M2.7", chars_saved=45000, original_size=95000,
+                model_used="MiniMax-M3", chars_saved=45000, original_size=95000,
                 compacted_size=50000, topic_tags=["bugfix", "auth"])
 
     # Search old summaries
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS compactions (
     cache_key       TEXT UNIQUE NOT NULL,
     summary         TEXT NOT NULL,
     message_count   INTEGER NOT NULL,
-    model_used      TEXT NOT NULL DEFAULT 'minimax-coding-plan/MiniMax-M2.7',
+    model_used      TEXT NOT NULL DEFAULT 'minimax-coding-plan/MiniMax-M3',
     session_id      TEXT,
     created_at      REAL NOT NULL,
     chars_saved     INTEGER NOT NULL DEFAULT 0,
@@ -197,7 +197,7 @@ class CompactionStore:
         cache_key: str,
         summary: str,
         message_count: int,
-        model_used: str = "minimax-coding-plan/MiniMax-M2.7",
+        model_used: str = "minimax-coding-plan/MiniMax-M3",
         session_id: Optional[str] = None,
         chars_saved: int = 0,
         original_size: int = 0,

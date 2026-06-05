@@ -211,7 +211,7 @@ class TestSWEConfig:
         from core.swe_agent import SWEAgentConfig
 
         config = SWEAgentConfig()
-        assert config.agent.model.name == "minimax-coding-plan/MiniMax-M2.7"
+        assert config.agent.model.name == "minimax-coding-plan/MiniMax-M3"
         assert config.agent.max_steps == 30
         assert config.env.repo_path == ""
 
@@ -520,7 +520,7 @@ class TestTrajectoryCompressor:
         assert config.protect_first_gpt is True
         assert config.protect_first_tool is True
         assert config.protect_last_n_turns == 4
-        assert config.summarization_model == "minimax-coding-plan/MiniMax-Text-01"
+        assert config.summarization_model == "minimax-coding-plan/MiniMax-M3"
 
     def test_compression_metrics_to_dict(self):
         """Test TrajectoryCompressionMetrics serialization."""

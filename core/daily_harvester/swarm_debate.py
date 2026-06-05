@@ -54,7 +54,7 @@ Reply with a JSON object: {{"concerns": ["concern 1", "concern 2", ...]}}"""
         response, _ = await chat(
             task=prompt,
             agent_key="debate",
-            model_override="minimax-coding-plan/MiniMax-M2.7",
+            model_override="minimax-coding-plan/MiniMax-M3",
         )
         import json as _json
 
@@ -94,7 +94,7 @@ Reply with a JSON object: {{"rebuttals": ["rebuttal 1", "rebuttal 2", ...]}}"""
         response, _ = await chat(
             task=prompt,
             agent_key="debate",
-            model_override="minimax-coding-plan/MiniMax-M2.7",
+            model_override="minimax-coding-plan/MiniMax-M3",
         )
         import json as _json
 

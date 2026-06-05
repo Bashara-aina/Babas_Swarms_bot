@@ -25,9 +25,9 @@ if _rurlo_cfg_path.exists():
     with _rurlo_cfg_path.open() as f:
         _cfg = yaml.safe_load(f)
     _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
-    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M2.7")
+    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M3")
 else:
-    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M2.7"
+    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M3"
 
 ruflo_available = True
 _mcp_client = None

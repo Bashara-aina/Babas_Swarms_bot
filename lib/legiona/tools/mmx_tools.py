@@ -91,7 +91,7 @@ def mmx_speech(text: str, voice: str | None = None) -> str:
 
 def mmx_text_chat(message: str) -> str:
     """
-    Quick text chat via MiniMax M2.7.
+    Quick text chat via MiniMax M3.
 
     Args:
         message: The user message to send
@@ -168,7 +168,7 @@ MMX_TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "mmx_text_chat",
-            "description": "Quick text chat via MiniMax M2.7. For simple queries that don't need the full tool loop.",
+            "description": "Quick text chat via MiniMax M3. For simple queries that don't need the full tool loop.",
             "parameters": {
                 "type": "object",
                 "properties": {

@@ -675,7 +675,7 @@ async def call_llm(
 
     Args:
         messages: List of message dicts with 'role' and 'content' keys.
-        model: Model string (e.g. "minimax-coding-plan/MiniMax-M2.7"). Defaults to LEGION_LLM_MODEL env var.
+        model: Model string (e.g. "minimax-coding-plan/MiniMax-M3"). Defaults to LEGION_LLM_MODEL env var.
         tools: Optional list of tool definitions for function calling.
         stream: Whether to stream responses (not implemented yet).
         **kwargs: Additional arguments passed to litellm.
@@ -684,7 +684,7 @@ async def call_llm(
         str: Normal text response
         dict: Tool call response with keys 'type' (="tool_call"), 'name', 'args'
     """
-    model = model or os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M2.7")
+    model = model or os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
 
     if _is_rate_limited(model):
         # FIXED: Use "general" agent key instead of provider name.
@@ -907,7 +907,7 @@ async def wiki_raw_completion(
     max_tokens: int | None = None,
 ) -> str:
     """Single-turn LLM call for wiki maintenance (no mem0 / wiki / humanization stack)."""
-    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax-coding-plan/MiniMax-M2.7")
+    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
@@ -932,7 +932,7 @@ async def wiki_raw_completion(
 #    3. POST-COMPACT: STORE summary to CompactionStore (FTS5 searchable)
 #                    → also store to all 6 memory layers (future compactions get richer context)
 #
-#  Compaction triggers (MiniMax-M2.7 ~200K context — with unlimited API we compact EARLIER):
+#  Compaction triggers (MiniMax-M3 ~200K context — with unlimited API we compact EARLIER):
 #    Tier 1 (30% fill / 60k chars):  microcompact — NO LLM, every turn, post-tool
 #    Tier 2 (50% fill / 100k chars):  microcompact again if still over threshold
 #    Tier 3 (65% fill / 130k chars):  ASYNC full compaction STARTS (non-blocking LLM call)
@@ -1141,7 +1141,7 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str],
             return
 
         # Run full compaction with memory enrichment
-        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M2.7", system_prompt=system_prompt)
+        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M3", system_prompt=system_prompt)
 
         # Check if compaction actually reduced size
         new_size = sum(len(str(m.get("content", ""))) for m in compacted)
@@ -1293,7 +1293,7 @@ def _generate_memory_aware_summary(
     history: list[dict],
     memory_context: str,
     multi_layer: dict[str, str],
-    model: str = "minimax-coding-plan/MiniMax-M2.7",
+    model: str = "minimax-coding-plan/MiniMax-M3",
     timeout: float = 20.0,
 ) -> str:
     """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query.
@@ -1399,7 +1399,7 @@ Include file paths, function names, error messages verbatim when relevant.
                 timeout=timeout,
             )
             msg = response.choices[0].message
-            # MiniMax-M2.7 puts actual output in reasoning_content, not content
+            # MiniMax-M3 puts actual output in reasoning_content, not content
             # content='\n\n' with real text in reasoning_content is a known pattern
             raw = msg.reasoning_content or msg.content or ""
             return raw.strip()
@@ -1605,7 +1605,7 @@ messages_compacted: {message_count}
                 cache_key=cache_key,
                 summary=summary,
                 message_count=message_count,
-                model_used="minimax-coding-plan/MiniMax-M2.7",
+                model_used="minimax-coding-plan/MiniMax-M3",
                 chars_saved=0,
                 original_size=0,
                 compacted_size=len(summary),
@@ -1645,7 +1645,7 @@ def smart_compact_messages(
     messages: list[dict],
     keep_recent: int = 8,  # increased from 6 — preserve more recent turns
     system_prompt: str = "",
-    model: str = "minimax-coding-plan/MiniMax-M2.7",
+    model: str = "minimax-coding-plan/MiniMax-M3",
     session_id: Optional[str] = None,
 ) -> list[dict]:
     """Memory-aware compaction using ALL 6 memory layers + LRU cache + CompactionStore.
@@ -3376,7 +3376,7 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
 
     try:
         resp = await acompletion(
-            model="minimax-coding-plan/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-M3",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["vision"]},
                 {
@@ -3392,7 +3392,7 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
             max_tokens=1024,
         )
         result = (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
-        _cloud_label = "minimax-coding-plan/MiniMax-Text-01"
+        _cloud_label = "minimax-coding-plan/MiniMax-M3"
         if _skip_local and _skip_reason:
             return result, f"{_cloud_label} (reason: {_skip_reason})"
             _cloud_label += f" \u2601\ufe0f (local bypassed: {_skip_reason[:60]})"

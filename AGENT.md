@@ -45,7 +45,7 @@ This means:
 
 The script `scripts/aider_fix_loop.py` is the self-healing engine:
 - Runs `pytest tests/test_integrations.py` → on failure, feeds stderr to aider `--message` (non-interactive)
-- Model: MiniMax-M2.7 ONLY — no cascade, no fallback
+- Model: MiniMax-M3 ONLY — no cascade, no fallback
 - Escalates on API/auth error ONLY (not on test failure)
 - Max retries: 10
 - NOTE: `test_integration.py` excluded — it imports `minisweagent` which is not in the venv

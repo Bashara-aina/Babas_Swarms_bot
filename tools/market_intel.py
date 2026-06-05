@@ -410,7 +410,7 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
                         "Content-Type": "application/json",
                     },
                     json={
-                        "model": os.getenv("MINIMAX_MODEL", "MiniMax-M2.7"),
+                        "model": os.getenv("MINIMAX_MODEL", "MiniMax-M3"),
                         "messages": [
                             {"role": "system", "content": system_msg},
                             {"role": "user", "content": user_msg},

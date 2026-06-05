@@ -448,10 +448,10 @@ Before saying "done", verify:
 ## PHASE 13 — MODEL POLICY (hardcoded, never override)
 
 All OpenCode inference routes through the LiteLLM proxy at `http://localhost:4000`.
-The proxy resolves to **MiniMax M2.7** as the primary model.
+The proxy resolves to **MiniMax M3** as the primary model.
 
 ```
-Primary:  minimax/MiniMax-Text-01  via http://localhost:4000
+Primary:  minimax/MiniMax-M3  via http://localhost:4000
 Fallback: minimax/abab6.5s-chat   via http://localhost:4000
 NEVER:    Direct OpenAI API / Direct Anthropic API / Any cloud bypass
 ```

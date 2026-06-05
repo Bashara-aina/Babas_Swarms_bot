@@ -19,15 +19,15 @@ logger = logging.getLogger(__name__)
 TIERS: dict[str, dict] = {
     "lightweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-Text-01",       # Free, 1500 tok/s
-            "minimax-coding-plan/MiniMax-Text-01", # Free, fast
+            "minimax-coding-plan/MiniMax-M3",       # Free, 1500 tok/s
+            "minimax-coding-plan/MiniMax-M3", # Free, fast
         ],
         "description": "Simple queries, fact retrieval, formatting",
         "max_task_len": 150,
     },
     "midweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-Text-01",                        # Free, strong reasoning
+            "minimax-coding-plan/MiniMax-M3",                        # Free, strong reasoning
             "ollama_chat/gemma4:e4b",                                    # Local fallback
         ],
         "description": "Standard coding, debugging, math, explanation",
@@ -35,7 +35,7 @@ TIERS: dict[str, dict] = {
     },
     "heavyweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-Text-01",                       # Fast MiniMax
+            "minimax-coding-plan/MiniMax-M3",                       # Fast MiniMax
             "ollama_chat/llama3.3:70b",                                # Local fallback
         ],
         "description": "Complex reasoning, multi-step, long-form",
@@ -111,7 +111,7 @@ def select_model(agent_key: str, task: str, force_tier: str | None = None) -> st
         force_tier: Override complexity detection with specific tier.
 
     Returns:
-        Model string to use (e.g. 'minimax-coding-plan/MiniMax-Text-01').
+        Model string to use (e.g. 'minimax-coding-plan/MiniMax-M3').
     """
     import core.agent_registry as ag
 

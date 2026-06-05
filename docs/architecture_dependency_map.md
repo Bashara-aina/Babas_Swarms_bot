@@ -211,7 +211,7 @@ llm_client.py                   ↓
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `LEGION_DEFAULT_MODEL` | `minimax-coding-plan/MiniMax-M2.7` | Default Ollama model |
+| `LEGION_DEFAULT_MODEL` | `minimax-coding-plan/MiniMax-M3` | Default Ollama model |
 | `LEGION_GITNEXUS_PROMPT_ENABLED` | `1` | Enable GitNexus context injection |
 | `LEGION_JARVIS_MEMORY` | `1` | Enable memory layer |
 | `LEGION_JARVIS_SCREENPIPE` | `1` | Enable screenpipe layer |

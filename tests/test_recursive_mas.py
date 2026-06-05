@@ -86,7 +86,7 @@ class TestAgentRole:
             key="planner",
             name="Planner",
             role_type="planner",
-            model="minimax-coding-plan/MiniMax-M2.7",
+            model="minimax-coding-plan/MiniMax-M3",
             instructions="Plan the approach",
             hidden_dim=4096,
         )

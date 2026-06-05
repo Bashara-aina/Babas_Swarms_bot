@@ -170,13 +170,13 @@ tasks_count: {len(tasks)}
 decisions_count: {len(decisions)}
 files_count: {len(files)}
 duration_minutes: {duration_min}
-model: {model_used or 'MiniMax-M2.7'}
+model: {model_used or 'MiniMax-M3'}
 memory_layers: 7
 ---
 
 # Session: {session_name}
 
-**Date:** {ts.strftime('%Y-%m-%d %H:%M')} | **Duration:** {duration_min}min | **Model:** {model_used or 'MiniMax-M2.7'}
+**Date:** {ts.strftime('%Y-%m-%d %H:%M')} | **Duration:** {duration_min}min | **Model:** {model_used or 'MiniMax-M3'}
 
 ## User Query
 {user_query}

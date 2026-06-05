@@ -75,7 +75,7 @@
 | Anti-loop protocol | ✅ Lines 138-158 | ✅ §0j | ✅ Match |
 | 7 override rules | ✅ Lines 121-128 | ✅ §0a | ✅ Match |
 | 85% confidence threshold | ✅ Line 98 | ✅ §0h | ✅ Match |
-| MiniMax M2.7 reference | ✅ Line 133 | ✅ Stack context | ✅ Match |
+| MiniMax M3 reference | ✅ Line 133 | ✅ Stack context | ✅ Match |
 | Agent Teams (Planner/Builder/Critic) | ✅ Line 160-167 | ✅ §0b | ✅ Match |
 | Personality/voice rules | ✅ Line 168-173 | ✅ §5 | ✅ Match |
 | Context Health Monitor | ✅ Line 162-166 | ✅ §0c | ✅ Match |

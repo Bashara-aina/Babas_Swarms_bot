@@ -39,7 +39,7 @@ except ImportError:
     LANGMEM_AVAILABLE = False  # type: ignore[reportOptionalMemberAccess]
     langmem = None  # type: ignore
 
-DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
+DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M3"  # type: ignore[reportOptionalMemberAccess]
 
 
 class MemoryState(TypedDict, total=False):  # type: ignore[reportOptionalMemberAccess]
@@ -68,7 +68,7 @@ def _build_langmem_llm(model: str | None = None) -> Any:  # type: ignore[reportO
 
     model_name = model or DEFAULT_MODEL  # type: ignore[reportOptionalMemberAccess]
     if "/" in model_name:
-        model_name = model_name.split("/")[1]  # extract "MiniMax-M2.7" from "minimax-coding-plan/MiniMax-M2.7"
+        model_name = model_name.split("/")[1]  # extract "MiniMax-M3" from "minimax-coding-plan/MiniMax-M3"
 
     api_key = os.getenv("MINIMAX_API_KEY", "dummy")  # type: ignore[reportOptionalMemberAccess]
     os.environ["OPENAI_API_KEY"] = api_key  # type: ignore[reportOptionalMemberAccess]

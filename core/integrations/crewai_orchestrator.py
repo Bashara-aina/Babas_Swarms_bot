@@ -18,7 +18,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M2.7"
+DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M3"
 
 
 class SwarmBotCrew:

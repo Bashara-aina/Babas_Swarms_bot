@@ -110,7 +110,7 @@ Be specific and evidence-based."""
 
             response = await self.llm.complete(
                 messages=[{"role": "user", "content": reflection_prompt}],
-                model="minimax-coding-plan/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-M3",
                 temperature=0.7,
                 max_tokens=500,
                 skip_post_hooks=True,

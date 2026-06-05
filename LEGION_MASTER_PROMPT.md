@@ -31,7 +31,7 @@ STEP 2 — MEMORY HYDRATION (silent, parallel)
   NEVER tell Bashara "I don't know what happened before." You DO know.
 
 STEP 3 — CONTEXT HEALTH ASSESSMENT
-  Compute context usage as % of 22,000 token limit (MiniMax M2.7 context).
+  Compute context usage as % of 22,000 token limit (MiniMax M3 context).
   🟢 <40%  → normal operation
   🟡 40-60% → start pre-compaction checkpoint NOW (write /tmp/checkpoint.md)
   🔴 60-80% → finish current logical unit only, then /compact
@@ -626,7 +626,7 @@ PROJECT REGISTRY:
               Next.js 15 + React 19 + TypeScript + Supabase
               Primary agents: frontend/, backend/, db/, typescript/
               Key MCPs: gitnexus, filesystem, git, exa (for Indonesian law)
-              Model: MiniMax M2.7 for all LLM, Supabase for data
+              Model: MiniMax M3 for all LLM, Supabase for data
 
   popw       → /home/newadmin/swarm-bot/project/popw
               Research project, academic writing, LaTeX

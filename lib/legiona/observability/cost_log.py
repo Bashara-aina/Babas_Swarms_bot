@@ -12,7 +12,7 @@ from pathlib import Path
 COST_LOG = Path("lib/legiona/memory/cost_log.jsonl")
 
 
-# ¥ per 1K tokens (MiniMax M2.7)
+# ¥ per 1K tokens (MiniMax M3)
 _IN_JPY_PER_1K = 0.04
 _OUT_JPY_PER_1K = 0.12
 

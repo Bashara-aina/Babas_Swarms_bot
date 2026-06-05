@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""aider_fix_loop.py — Self-correcting test-fix cycle powered by MiniMax M2.7.
+"""aider_fix_loop.py — Self-correcting test-fix cycle powered by MiniMax M3.
 
-Cascade order: MiniMax-M2.7 → MiniMax-Text-01 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
+Cascade order: MiniMax-M3 → MiniMax-M3 → ollama_chat/llama3.3:70b (MiniMax-only, no external providers)
 
 Usage:
     python scripts/aider_fix_loop.py                  # default: pytest tests/
@@ -27,7 +27,7 @@ MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
 
 # ── MiniMax-only cascade (no gemini, no deepseek — MiniMax only) ───────────────
 MODEL_CASCADE: list[dict[str, str]] = [
-    {"model": "minimax-coding-plan/MiniMax-M2.7", "label": "MiniMax M2.7"},
+    {"model": "minimax-coding-plan/MiniMax-M3", "label": "MiniMax M3"},
 ]
 
 # ── Test command defaults ─────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ DEFAULT_TEST_CMD = (
     "tests/test_integrations.py -x --tb=short -q"
 )
 DEFAULT_MAX_RETRIES = 10
-DEFAULT_AIDER_MODEL = "openai/MiniMax-M2.7"
+DEFAULT_AIDER_MODEL = "openai/MiniMax-M3"
 
 # ── Aider binary (system-wide install) ────────────────────────────────────────
 AIDER_BIN = "/home/newadmin/.local/bin/aider"
@@ -199,7 +199,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Self-correcting test-fix loop using MiniMax M2.7 via aider --message",
+        description="Self-correcting test-fix loop using MiniMax M3 via aider --message",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

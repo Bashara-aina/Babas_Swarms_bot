@@ -1,7 +1,7 @@
 """M2.7 Performance Activation System — Deep Implementation.
 
 This module implements the full M2.7 capability activation stack based on:
-- MiniMax M2.7 spec-first training bias (architect before coding)
+- MiniMax M3 spec-first training bias (architect before coding)
 - Interleaved thinking: reason AFTER every tool call, not just at the start
 - Skeleton-of-thought: define structure before implementation
 - Confidence-informed self-consistency: rate confidence, offer alternatives when low

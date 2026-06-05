@@ -680,7 +680,7 @@ async def compose_jarvis_response(bundle: dict[str, Any]) -> str:
 
     from llm_client import wiki_raw_completion
 
-    os.getenv("LEGION_JARVIS_MODEL", "minimax-coding-plan/MiniMax-Text-01")
+    os.getenv("LEGION_JARVIS_MODEL", "minimax-coding-plan/MiniMax-M3")
     prompt = f"""User goal (Bashara):
 {goal}
 
@@ -1016,7 +1016,7 @@ class LegionSwarmOrchestrator:
     def _get_model_for_agent(self, agent_key: str) -> str:
         from agents import AGENT_MODELS
 
-        return AGENT_MODELS.get(agent_key, AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-M2.7"))
+        return AGENT_MODELS.get(agent_key, AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-M3"))
 
     def _build_system_prompt(self, agent_def: Any) -> str:
         from core.agent_registry import PERSONA_WRAPPER
@@ -1157,7 +1157,7 @@ class LegionSwarmOrchestrator:
 
         try:
             final_synthesis = await self.llm_call(
-                "minimax-coding-plan/MiniMax-M2.7",
+                "minimax-coding-plan/MiniMax-M3",
                 synth_system,
                 synth_msg,
             )

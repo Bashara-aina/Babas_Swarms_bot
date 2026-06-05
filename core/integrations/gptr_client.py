@@ -14,7 +14,7 @@ class GPTResearcherClient:
     def __init__(self):
         self.available = self._check_available()
         self.llm_provider = os.getenv("GPTR_LLM_PROVIDER", "openai")
-        self.llm_model = os.getenv("GPTR_LLM_MODEL", "minimax-coding-plan/MiniMax-Text-01")
+        self.llm_model = os.getenv("GPTR_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
         self.search_api = os.getenv("GPTR_SEARCH_API", "duckduckgo")
         if os.getenv("BRAVE_API_KEY"):
             self.search_api = "tavily"
@@ -41,7 +41,7 @@ class GPTResearcherClient:
             os.environ["OPENAI_API_KEY"] = os.getenv("MINIMAX_API_KEY", "")
             os.environ["OPENAI_BASE_URL"] = "https://api.minimax.io/anthropic"
             os.environ["FAST_LLM"] = self.llm_model
-            os.environ["SMART_LLM"] = os.getenv("GPTR_SMART_MODEL", "minimax-coding-plan/MiniMax-Text-01")
+            os.environ["SMART_LLM"] = os.getenv("GPTR_SMART_MODEL", "minimax-coding-plan/MiniMax-M3")
             os.environ["RETRIEVER"] = self.search_api
             researcher = GPTResearcher(query=query, report_type=report_type)
             await researcher.conduct_research()

@@ -153,7 +153,7 @@ async def run_nightly() -> dict[str, int]:
     try:
         llm_output = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="minimax-coding-plan/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-M3",
             temperature=0.2,
             max_tokens=2000,
         )
@@ -257,7 +257,7 @@ async def promote_important(recent_turns: list[dict[str, str]]) -> None:
     try:
         raw = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="minimax-coding-plan/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-M3",
             temperature=0.1,
             max_tokens=200,
         )

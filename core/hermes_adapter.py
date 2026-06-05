@@ -338,7 +338,7 @@ def get_hermes_session_manager() -> HermesSessionManager:
 # Default model for Hermes agent in LegionBot
 DEFAULT_HERMES_MODEL = os.environ.get(
     "HERMES_DEFAULT_MODEL",
-    "minimax-coding-plan/MiniMax-M2.7",
+    "minimax-coding-plan/MiniMax-M3",
 )
 
 
@@ -362,7 +362,7 @@ def create_hermes_agent(
     """Factory to create a configured Hermes AIAgent instance.
 
     Args:
-        model: Provider/model string (e.g. "minimax-coding-plan/MiniMax-M2.7")
+        model: Provider/model string (e.g. "minimax-coding-plan/MiniMax-M3")
         enabled_toolsets: Toolset names to enable (e.g. ["terminal", "file", "web"])
         disabled_toolsets: Toolset names to disable
         session_id: Pre-generated session ID for logging

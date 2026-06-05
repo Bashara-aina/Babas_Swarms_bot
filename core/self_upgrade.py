@@ -256,7 +256,7 @@ Output ONLY the JSON.
 """
         resp = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="minimax-coding-plan/MiniMax-Text-01",
+            model="minimax-coding-plan/MiniMax-M3",
             temperature=0.1,
             max_tokens=512,
         )
@@ -393,7 +393,7 @@ Rules:
 """
             response = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="minimax-coding-plan/MiniMax-Text-01",
+                model="minimax-coding-plan/MiniMax-M3",
                 temperature=0.1,
                 max_tokens=8192,
             )

@@ -127,7 +127,7 @@ async def _respawn_agent(context: dict) -> dict:
         result = await client.call_tool("ruflo", "agent_spawn", {
             "agentType": context.get("agentType", "coder"),
             "task": context.get("task", "") + " (be more conservative, previous attempt failed)",
-            "model": "minimax-coding-plan/MiniMax-M2.7",
+            "model": "minimax-coding-plan/MiniMax-M3",
         })
         return {"action": "agent_respawned", "result": result}
     except Exception as e:

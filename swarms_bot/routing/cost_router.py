@@ -53,8 +53,8 @@ class ModelTier:
 # Model pricing as of March 2026 — MiniMax only + local Ollama
 MODEL_TIERS: list[ModelTier] = [
     # Free tier (MiniMax free + local Ollama)
-    ModelTier("MiniMax M2.7", "minimax-coding-plan/MiniMax-M2.7", "minimax", 0.0, 0.0, "free", 204800),
-    ModelTier("MiniMax Text-01", "minimax-coding-plan/MiniMax-Text-01", "minimax", 0.0, 0.0, "free", 245760),
+    ModelTier("MiniMax M3", "minimax-coding-plan/MiniMax-M3", "minimax", 0.0, 0.0, "free", 1048576),
+    ModelTier("MiniMax M3 Fallback", "minimax-coding-plan/MiniMax-M3", "minimax", 0.0, 0.0, "free", 1048576),
     ModelTier("Ollama Gemma4", "ollama_chat/gemma4:e4b", "ollama", 0.0, 0.0, "free", 8192),
     ModelTier("Ollama Llama3.3", "ollama_chat/llama3.3:70b", "ollama", 0.0, 0.0, "free", 131072),
 ]
@@ -209,7 +209,7 @@ class CostAwareRouter:
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain(agent_key)
-        default_model = chain[0] if chain else "minimax-coding-plan/MiniMax-Text-01"
+        default_model = chain[0] if chain else "minimax-coding-plan/MiniMax-M3"
         return default_model, complexity, "fallback"
 
     def estimate_cost(self, task: str, model_id: str) -> float:

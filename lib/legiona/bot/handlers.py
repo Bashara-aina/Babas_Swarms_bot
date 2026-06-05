@@ -476,7 +476,7 @@ async def cmd_status(message: Message) -> None:
 
     await message.answer(
         f"🤖 **Legiona M2.7 Status**\n\n"
-        f"-  Model: `MiniMax-M2.7`\n"
+        f"-  Model: `MiniMax-M3`\n"
         f"-  Tools: {tool_count} (RAG: {rag_status})\n"
         f"-  Evolved rules: ~{rules_count} lines\n"
         f"-  Today's cost: ¥{today_total_jpy():.2f}\n"

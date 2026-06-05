@@ -2,7 +2,7 @@
 
 **Created:** 2026-04-21  
 **Project:** Babas_Swarms_bot (Legion v10)  
-**Model:** MiniMax-M2.7 (reasoning_split enabled)  
+**Model:** MiniMax-M3 (reasoning_split enabled)  
 **Purpose:** Phase 0 discovery baseline — all metrics are real, from live codebase
 
 ---
@@ -60,14 +60,14 @@
 
 ## 3. Model Configuration Baseline
 
-**MiniMax M2.7 Settings (from `.claude/settings.json`):**
+**MiniMax M3 Settings (from `.claude/settings.json`):**
 ```json
 {
-  "ANTHROPIC_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_MODEL": "MiniMax-M3",
   "ANTHROPIC_REASONING_SPLIT": "true",
-  "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7",
-  "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7",
-  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M3",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M3",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M3",
   "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
   "ANTHROPIC_API_TIMEOUT_MS": "3000000"
 }

@@ -21,7 +21,7 @@ except ImportError as e:
 
 LLM_CONFIG = {
     "config_list": [{
-        "model": "minimax-coding-plan/MiniMax-M2.7",
+        "model": "minimax-coding-plan/MiniMax-M3",
         "api_key": "legion-proxy-key",
         "base_url": "http://localhost:4000",
         "api_type": "openai",

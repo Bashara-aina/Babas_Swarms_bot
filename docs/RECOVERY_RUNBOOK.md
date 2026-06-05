@@ -50,7 +50,7 @@ If empty, key is not loaded.
 curl -X POST https://api.minimax.io/anthropic/v1/messages \
   -H "Authorization: Bearer $(grep ANTHROPIC_AUTH_TOKEN .env | cut -d= -f2)" \
   -H "Content-Type: application/json" \
-  -d '{"model":"MiniMax-M2.7","max_tokens":10,"messages":[{"role":"user","content":"hi"}]}'
+  -d '{"model":"MiniMax-M3","max_tokens":10,"messages":[{"role":"user","content":"hi"}]}'
 ```
 If returns `401` or `429`, key is invalid or rate-limited.
 

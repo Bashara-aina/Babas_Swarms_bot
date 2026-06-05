@@ -49,7 +49,7 @@ def prune_text(text: str) -> tuple[str, int]:
 
 # ── Context budget tracker ────────────────────────────────────────
 class ContextBudget:
-    TOTAL = 204800
+    TOTAL = 1048576  # 1M context window (MiniMax-M3)
     SYSTEM_RESERVED = 6000
     OUTPUT_RESERVED = 8192
     SAFETY_BUFFER = 2048
@@ -103,14 +103,14 @@ def patch_opencode_config(config_path: str = "/home/newadmin/swarm-bot/.opencode
     config["compaction"] = {
         "reserved": 8192,
         "threshold": 0.98,
-        "maxContext": 204800,
+        "maxContext": 1048576,
     }
 
     path.write_text(json.dumps(config, indent=2))
     print(f"✅ Patched {config_path}")
     print("   compaction.threshold: 0.98")
     print("   compaction.reserved: 8,192")
-    print("   compaction.maxContext: 204,800")
+    print("   compaction.maxContext: 1,048,576 (1M)")
 
 # ── Backend detection for compression ───────────────────────────
 _compressor = None
@@ -216,7 +216,7 @@ TEXT TO COMPRESS:
 {pruned}"""
 
             response = litellm.completion(
-                model="minimax-coding-plan/MiniMax-M2.7",
+                model="minimax-coding-plan/MiniMax-M3",
                 api_base="https://api.minimax.chat/v1",
                 api_key=os.environ["MINIMAX_API_KEY"],
                 messages=[{"role": "user", "content": compress_prompt}],

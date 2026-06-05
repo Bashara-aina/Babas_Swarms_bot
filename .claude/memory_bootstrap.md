@@ -6,13 +6,13 @@ hidden: true
 ---
 
 # LEGION MEMORY BOOTSTRAP — AUTO-GENERATED
-_Generated at session start. Last refresh: 2026-05-29T11:14:35.756Z_
+_Generated at session start. Last refresh: 2026-06-05T00:17:48.757Z_
 
 ## CURRENT SESSION
 
-- **Session ID**: session-20260529-111435-wkx6
-- **Started**: 2026-05-29T11:14:35.751Z
-- **Previous Session**: session-1780052950978 (3min)
+- **Session ID**: session-20260605-001748-l440
+- **Started**: 2026-06-05T00:17:48.757Z
+- **Previous Session**: session-1780618448867 (2min)
 - **Recent Archives**: 0 sessions
 
 ## MEMORY LAYERS (HOT → COLD)
@@ -23,16 +23,16 @@ _Generated at session start. Last refresh: 2026-05-29T11:14:35.756Z_
 | L2 chromadb | chroma.sqlite3 | 184KB | OK |
 | L3 langmem | .claude | 9 | OK |
 | L4 observation | observations.db | 96KB | OK |
-| L5 graphrag | auto-memory-store.json | 81 | OK |
-| L6 mem0cloud | auto-memory-store.json | 81 | OK |
+| L5 graphrag | auto-memory-store.json | 134 | OK |
+| L6 mem0cloud | auto-memory-store.json | 134 | OK |
 
 ## HOT CONTEXT (from PageRank)
 
-- `insight-1780041588350-kgj5` (PR: 0.0920)
-- `insight-1780039832713-fpah` (PR: 0.0497)
-- `insight-1780037919286-c03v` (PR: 0.0349)
-- `insight-1780031228237-w787` (PR: 0.0272)
-- `mem_mpo37rlv_7rewwkfg` (PR: 0.0232)
+- `insight-1780618344195-l4h9` (PR: 0.0751)
+- `insight-1780616651403-irub` (PR: 0.0406)
+- `insight-1780616275980-fyaw` (PR: 0.0285)
+- `mem_mpz1ea9c_4o9wy074` (PR: 0.0247)
+- `insight-1780577293572-1tqs` (PR: 0.0209)
 
 ---
 _This file is regenerated at every SessionStart._

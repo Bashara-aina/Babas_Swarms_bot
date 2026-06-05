@@ -53,7 +53,7 @@ def _load_api():
         _api = None
         return None
 
-DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M2.7"  # type: ignore[reportOptionalMemberAccess]
+DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M3"  # type: ignore[reportOptionalMemberAccess]
 GRAPHRAG_INDEX_DIR = os.path.expanduser("~/.legion/graphrag_index")  # type: ignore[reportOptionalMemberAccess]
 
 
