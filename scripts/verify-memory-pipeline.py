@@ -7,6 +7,9 @@ import time
 import shlex
 import select
 import threading
+import asyncio
+import sqlite3
+from pathlib import Path
 
 sys.path.insert(0, '/home/newadmin/swarm-bot')
 
@@ -100,6 +103,32 @@ def check(label, fn, expected_any=False):
     except Exception as e:
         print(f"  [{label}] {red('✗ FAIL')} — {e}")
         FAIL += 1
+
+
+async def _check_bridges():
+    """Verify all observation bridges are registered and healthy."""
+    from core.memory.bridges import get_bridges
+    bridges = get_bridges()
+    result = {"ok": True, "bridges": {}}
+    for b in bridges:
+        h = await b.health()
+        result["bridges"][b.name] = h
+        if not h.get("ok"):
+            result["ok"] = False
+    return result
+
+
+async def _check_bridge_idempotency():
+    """Verify bridges_state.db exists and rows are present. Pre-smoke absence is OK."""
+    db_path = Path("/home/newadmin/swarm-bot/data/bridges_state.db")
+    if not db_path.exists():
+        return {"ok": True, "advanced_bridges": [], "rows": [],
+                "note": "bridges_state.db not yet created (pre-smoke-test)"}
+    con = sqlite3.connect(str(db_path))
+    rows = con.execute("SELECT bridge_name, last_pushed_id FROM bridge_state").fetchall()
+    con.close()
+    advanced = [name for name, last_id in rows if last_id > 0]
+    return {"ok": True, "advanced_bridges": advanced, "rows": rows}
 
 def section(name):
     print(f"\n{yellow(f'━━━ {name} ━━━')}")
@@ -220,6 +249,37 @@ section("Startup Scripts")
 for s in ['opencode-start.sh', 'start-opencode-mcp.sh', 'start_session_watcher.sh', 'verify-memory-pipeline.sh']:
     check(f"{s} exists",
           lambda p=s: os.path.exists(f'/home/newadmin/swarm-bot/scripts/{p}') or "OK")
+
+section("Observation Bridges")
+try:
+    bridges_result = asyncio.run(_check_bridges())
+    n_bridges = len(bridges_result["bridges"])
+    if bridges_result["ok"]:
+        print(f"  [bridges] {green('✓ PASS')} — {n_bridges} registered, all healthy")
+        PASS += 1
+    else:
+        print(f"  [bridges] {red('✗ FAIL')} — {n_bridges} registered, one or more unhealthy")
+        FAIL += 1
+    for name, h in bridges_result["bridges"].items():
+        lpid = h.get("last_pushed_id", 0)
+        ok_str = green("ok") if h.get("ok") else red("FAIL")
+        print(f"    - {name}: {ok_str} last_pushed_id={lpid}")
+except Exception as e:
+    print(f"  [bridges] {red('✗ FAIL')} — {e}")
+    FAIL += 1
+
+try:
+    idem_result = asyncio.run(_check_bridge_idempotency())
+    advanced = idem_result.get("advanced_bridges", [])
+    if idem_result["ok"]:
+        print(f"  [idempotency] {green('✓ PASS')} — advanced={advanced}")
+        PASS += 1
+    else:
+        print(f"  [idempotency] {red('✗ FAIL')} — {idem_result.get('error', 'unknown')}")
+        FAIL += 1
+except Exception as e:
+    print(f"  [idempotency] {red('✗ FAIL')} — {e}")
+    FAIL += 1
 
 print(f"\n{yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}")
 print(f"Results: {green(str(PASS)+' passed')} | {red(str(FAIL)+' failed')}")
