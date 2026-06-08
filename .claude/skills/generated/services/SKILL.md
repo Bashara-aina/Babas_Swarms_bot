@@ -1,11 +1,11 @@
 ---
 name: services
-description: "Skill for the Services area of swarm-bot. 135 symbols across 23 files."
+description: "Skill for the Services area of swarm-bot."
 ---
 
 # Services
 
-"135 symbols | 23 files | Cohesion: 57%"
+"services area"
 
 ## When to Use
 

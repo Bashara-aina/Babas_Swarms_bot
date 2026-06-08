@@ -1,11 +1,11 @@
 ---
 name: hermes-cli
-description: "Skill for the Hermes_cli area of swarm-bot. 1802 symbols across 214 files."
+description: "Skill for the Hermes_cli area of swarm-bot."
 ---
 
 # Hermes_cli
 
-"1802 symbols | 214 files | Cohesion: 61%"
+"hermes-cli area"
 
 ## When to Use
 

@@ -1,11 +1,11 @@
 ---
 name: handlers
-description: "Skill for the Handlers area of swarm-bot. 374 symbols across 100 files."
+description: "Skill for the Handlers area of swarm-bot."
 ---
 
 # Handlers
 
-"374 symbols | 100 files | Cohesion: 68%"
+"handlers area"
 
 ## When to Use
 

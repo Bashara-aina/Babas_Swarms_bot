@@ -1,11 +1,11 @@
 ---
 name: plugins
-description: "Skill for the Plugins area of swarm-bot. 138 symbols across 24 files."
+description: "Skill for the Plugins area of swarm-bot."
 ---
 
 # Plugins
 
-"138 symbols | 24 files | Cohesion: 73%"
+"plugins area"
 
 ## When to Use
 

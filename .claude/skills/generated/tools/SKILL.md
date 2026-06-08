@@ -1,11 +1,11 @@
 ---
 name: tools
-description: "Skill for the Tools area of swarm-bot. 2329 symbols across 436 files."
+description: "Skill for the Tools area of swarm-bot."
 ---
 
 # Tools
 
-"2329 symbols | 436 files | Cohesion: 60%"
+"tools area"
 
 ## When to Use
 

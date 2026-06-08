@@ -1,11 +1,11 @@
 ---
 name: scripts
-description: "Skill for the Scripts area of swarm-bot. 641 symbols across 130 files."
+description: "Skill for the Scripts area of swarm-bot."
 ---
 
 # Scripts
 
-"641 symbols | 130 files | Cohesion: 72%"
+"scripts area"
 
 ## When to Use
 

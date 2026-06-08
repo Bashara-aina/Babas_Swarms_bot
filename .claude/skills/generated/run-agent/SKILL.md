@@ -1,11 +1,11 @@
 ---
 name: run-agent
-description: "Skill for the Run_agent area of swarm-bot. 200 symbols across 40 files."
+description: "Skill for the Run_agent area of swarm-bot."
 ---
 
 # Run_agent
 
-"200 symbols | 40 files | Cohesion: 68%"
+"run-agent area"
 
 ## When to Use
 

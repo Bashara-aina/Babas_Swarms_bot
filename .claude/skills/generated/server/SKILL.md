@@ -1,11 +1,11 @@
 ---
 name: server
-description: "Skill for the Server area of swarm-bot. 421 symbols across 37 files."
+description: "Skill for the Server area of swarm-bot."
 ---
 
 # Server
 
-"421 symbols | 37 files | Cohesion: 57%"
+"server area"
 
 ## When to Use
 

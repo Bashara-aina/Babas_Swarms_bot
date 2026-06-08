@@ -1,11 +1,11 @@
 ---
 name: platforms
-description: "Skill for the Platforms area of swarm-bot. 915 symbols across 117 files."
+description: "Skill for the Platforms area of swarm-bot."
 ---
 
 # Platforms
 
-"915 symbols | 117 files | Cohesion: 60%"
+"platforms area"
 
 ## When to Use
 

@@ -1,11 +1,11 @@
 ---
 name: tests
-description: "Skill for the Tests area of swarm-bot. 399 symbols across 78 files."
+description: "Skill for the Tests area of swarm-bot."
 ---
 
 # Tests
 
-"399 symbols | 78 files | Cohesion: 68%"
+"tests area"
 
 ## When to Use
 

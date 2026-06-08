@@ -1,11 +1,11 @@
 ---
 name: environments
-description: "Skill for the Environments area of swarm-bot. 145 symbols across 23 files."
+description: "Skill for the Environments area of swarm-bot."
 ---
 
 # Environments
 
-"145 symbols | 23 files | Cohesion: 71%"
+"environments area"
 
 ## When to Use
 

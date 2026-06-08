@@ -1,11 +1,11 @@
 ---
 name: ink
-description: "Skill for the Ink area of swarm-bot. 221 symbols across 57 files."
+description: "Skill for the Ink area of swarm-bot."
 ---
 
 # Ink
 
-"221 symbols | 57 files | Cohesion: 69%"
+"ink area"
 
 ## When to Use
 

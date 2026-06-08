@@ -1,11 +1,11 @@
 ---
 name: memory
-description: "Skill for the Memory area of swarm-bot. 142 symbols across 35 files."
+description: "Skill for the Memory area of swarm-bot."
 ---
 
 # Memory
 
-"142 symbols | 35 files | Cohesion: 65%"
+"memory area"
 
 ## When to Use
 

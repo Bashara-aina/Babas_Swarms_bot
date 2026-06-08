@@ -1,11 +1,11 @@
 ---
 name: agent
-description: "Skill for the Agent area of swarm-bot. 828 symbols across 113 files."
+description: "Skill for the Agent area of swarm-bot."
 ---
 
 # Agent
 
-"828 symbols | 113 files | Cohesion: 64%"
+"agent area"
 
 ## When to Use
 

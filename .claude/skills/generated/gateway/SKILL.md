@@ -1,11 +1,11 @@
 ---
 name: gateway
-description: "Skill for the Gateway area of swarm-bot. 1487 symbols across 192 files."
+description: "Skill for the Gateway area of swarm-bot."
 ---
 
 # Gateway
 
-"1487 symbols | 192 files | Cohesion: 69%"
+"gateway area"
 
 ## When to Use
 

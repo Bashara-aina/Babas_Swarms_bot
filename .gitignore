@@ -22,6 +22,10 @@ screenshots/
 # Accidental pip artifacts
 =*
 
+# graphify knowledge graph — generated, regenerated, 200MB+ untracked
+# Regenerate locally with: graphify update . && graphify cluster-only .
+graphify-out/
+
 # Cloned reference repos (not part of the bot)
 everything-claude-code-main/
 ungate/

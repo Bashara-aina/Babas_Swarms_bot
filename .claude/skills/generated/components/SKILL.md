@@ -1,11 +1,11 @@
 ---
 name: components
-description: "Skill for the Components area of swarm-bot. 129 symbols across 37 files."
+description: "Skill for the Components area of swarm-bot."
 ---
 
 # Components
 
-"129 symbols | 37 files | Cohesion: 78%"
+"components area"
 
 ## When to Use
 

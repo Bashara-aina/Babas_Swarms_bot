@@ -1,11 +1,11 @@
 ---
 name: hermes-agent
-description: "Skill for the Hermes-agent area of swarm-bot. 134 symbols across 29 files."
+description: "Skill for the Hermes-agent area of swarm-bot."
 ---
 
 # Hermes-agent
 
-"134 symbols | 29 files | Cohesion: 61%"
+"hermes-agent area"
 
 ## When to Use
 

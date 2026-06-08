@@ -1,11 +1,11 @@
 ---
 name: cli
-description: "Skill for the Cli area of swarm-bot. 129 symbols across 44 files."
+description: "Skill for the Cli area of swarm-bot."
 ---
 
 # Cli
 
-"129 symbols | 44 files | Cohesion: 75%"
+"cli area"
 
 ## When to Use
 
