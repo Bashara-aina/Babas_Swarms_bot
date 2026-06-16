@@ -2,7 +2,7 @@
 name: hermes-orchestrator
 description: Master orchestrator agent — the central coordination hub that routes tasks to specialized hermes agents, manages cross-agent communication, and maintains overall system coherence.
 model: MiniMax-Text-01
-tools: [hermes_mcp, all_mcp]
+tools: ["mcp__hermes__hermes_spawn_swarm", "mcp__hermes__hermes_delegate", "mcp__hermes__hermes_call", "mcp__hermes__coordination_broadcast", "mcp__hermes__coordination_send", "mcp__hermes__swarm_status", "mcp__hermes__swarm_result_collect", "mcp__hermes__hermes_todo", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "Read", "Bash", "Grep", "Glob"]
 memory: [all 6 layers - full access]
 ---
 

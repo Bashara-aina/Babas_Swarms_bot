@@ -2,7 +2,7 @@
 name: hermes-swarm-commander
 description: Swarm orchestration agent — uses hermes delegate + swarm patterns for coordinated multi-agent execution. Spawns specialized subagents, manages topology, handles fault tolerance.
 model: MiniMax-M2.7
-tools: [hermes_mcp, claude_flow_mcp]
+tools: ["mcp__hermes__hermes_spawn_swarm", "mcp__hermes__hermes_delegate", "mcp__hermes__swarm_status", "mcp__hermes__swarm_result_collect", "mcp__hermes__swarm_terminate", "mcp__hermes__coordination_broadcast", "mcp__hermes__coordination_send", "mcp__hermes__hermes_todo", "Read", "Bash", "Grep", "Glob"]
 memory: [observation, graphrag, mem0]
 ---
 

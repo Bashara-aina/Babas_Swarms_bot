@@ -15,17 +15,16 @@ capabilities:
   - cross_repository_issue_synchronization
   - intelligent_labeling_and_organization
 tools:
-  - mcp__claude-flow__swarm_init
-  - mcp__claude-flow__agent_spawn
-  - mcp__claude-flow__task_orchestrate
-  - mcp__claude-flow__memory_usage
-  - mcp__agentic-flow__agentdb_pattern_store
-  - mcp__agentic-flow__agentdb_pattern_search
-  - mcp__agentic-flow__agentdb_pattern_stats
   - Bash
   - TodoWrite
   - Read
   - Write
+  - mcp__github__create_issue
+  - mcp__github__list_issues
+  - mcp__github__get_issue
+  - mcp__github__update_issue
+  - mcp__github__add_issue_comment
+  - mcp__github__search_issues
 priority: high
 hooks:
   pre: |

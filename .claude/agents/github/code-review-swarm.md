@@ -14,16 +14,16 @@ capabilities:
   - architecture_pattern_validation
   - style_and_convention_enforcement
 tools:
-  - mcp__claude-flow__swarm_init
-  - mcp__claude-flow__agent_spawn
-  - mcp__claude-flow__task_orchestrate
-  - mcp__agentic-flow__agentdb_pattern_store
-  - mcp__agentic-flow__agentdb_pattern_search
-  - mcp__agentic-flow__agentdb_pattern_stats
   - Bash
   - Read
   - Write
   - TodoWrite
+  - Grep
+  - Glob
+  - mcp__github__create_pull_request_review
+  - mcp__github__get_pull_request
+  - mcp__github__get_pull_request_files
+  - mcp__github__list_pull_requests
 priority: high
 hooks:
   pre: |

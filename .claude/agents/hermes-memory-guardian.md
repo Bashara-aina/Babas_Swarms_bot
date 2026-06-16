@@ -2,7 +2,7 @@
 name: hermes-memory-guardian
 description: Memory system guardian — manages all 6 memory layers (checkpoints, chromadb, langmem, observation_store, graphrag, mem0). Use for: memory audits, pattern learning, context restoration, memory optimization.
 model: MiniMax-M2.7
-tools: [hermes_mcp, filesystem_mcp]
+tools: ["mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__memory_forget", "mcp__hermes__memory_sync", "mcp__hermes__memory_layer_bridge", "mcp__hermes__memory_extract_session", "mcp__hermes__session_archivist", "mcp__hermes__synthesize_from_memories", "Read", "Write", "Bash", "Grep", "Glob"]
 memory: [all 6 layers]
 ---
 

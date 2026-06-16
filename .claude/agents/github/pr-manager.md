@@ -15,19 +15,13 @@ tools:
   - Edit
   - Glob
   - Grep
-  - LS
   - TodoWrite
-  - mcp__claude-flow__swarm_init
-  - mcp__claude-flow__agent_spawn
-  - mcp__claude-flow__task_orchestrate
-  - mcp__claude-flow__swarm_status
-  - mcp__claude-flow__memory_usage
-  - mcp__claude-flow__github_pr_manage
-  - mcp__claude-flow__github_code_review
-  - mcp__claude-flow__github_metrics
-  - mcp__agentic-flow__agentdb_pattern_store
-  - mcp__agentic-flow__agentdb_pattern_search
-  - mcp__agentic-flow__agentdb_pattern_stats
+  - mcp__github__create_pull_request
+  - mcp__github__get_pull_request
+  - mcp__github__list_pull_requests
+  - mcp__github__merge_pull_request
+  - mcp__github__create_pull_request_review
+  - mcp__github__update_pull_request_branch
 priority: high
 hooks:
   pre: |

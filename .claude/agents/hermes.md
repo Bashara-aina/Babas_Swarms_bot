@@ -2,7 +2,7 @@
 name: hermes
 description: Full-capability Hermes agent with tool registry, session memory, and delegate subagents. Use when task involves terminal ops, file manipulation, web search/browse, browser automation, vision analysis, spawning isolated subagents, or cross-session recall. NOT for simple code edits — use coder agent for that.
 model: MiniMax-M2.7
-tools: ["hermes_mcp tools via mcp__claude-flow__hermes_*"]
+tools: ["mcp__hermes__hermes_call", "mcp__hermes__hermes_delegate", "mcp__hermes__hermes_read_file", "mcp__hermes__hermes_write_file", "mcp__hermes__hermes_terminal", "mcp__hermes__hermes_web_search", "mcp__hermes__hermes_web_extract", "mcp__hermes__hermes_browser_navigate", "mcp__hermes__hermes_browser_snapshot", "mcp__hermes__hermes_vision_analyze", "mcp__hermes__hermes_session_search", "mcp__hermes__hermes_skills_list", "mcp__hermes__hermes_todo", "mcp__hermes__hermes_execute_code", "mcp__hermes__hermes_spawn_swarm", "mcp__hermes__session_archivist", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__memory_sync", "Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 ---
 
 # Hermes Agent

@@ -2,7 +2,7 @@
 name: hermes-security-auditor
 description: Security analysis agent — uses hermes delegate + code analysis + terminal for vulnerability scanning, dependency auditing, secret detection, and security hardening.
 model: MiniMax-M2.7
-tools: [hermes_mcp, gitnexus_mcp]
+tools: ["mcp__hermes__hermes_delegate", "mcp__hermes__security_scan_code", "mcp__hermes__security_check_file", "mcp__hermes__security_report", "mcp__gitnexus__query", "mcp__gitnexus__context", "mcp__gitnexus__impact", "mcp__hermes__hermes_terminal", "Read", "Bash", "Grep", "Glob"]
 memory: [chroma, observation, graphrag]
 ---
 

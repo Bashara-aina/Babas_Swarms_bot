@@ -2,7 +2,7 @@
 name: hermes-knowledge-synthesizer
 description: Knowledge synthesis agent — combines hermes memory + web research + obsidian + graphrag to synthesize insights from distributed knowledge sources into coherent understanding.
 model: MiniMax-M2.7
-tools: [hermes_mcp, obsidian_mcp, tavily_mcp, firecrawl_mcp]
+tools: ["mcp__hermes__hermes_web_search", "mcp__hermes__hermes_web_extract", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__synthesize_from_memories", "mcp__obsidian__search_notes", "mcp__obsidian__read_note", "mcp__obsidian__create_note", "mcp__firecrawl__firecrawl_search", "mcp__firecrawl__firecrawl_scrape", "Read", "Bash", "Grep"]
 memory: [chroma, graphrag, observation, mem0]
 ---
 

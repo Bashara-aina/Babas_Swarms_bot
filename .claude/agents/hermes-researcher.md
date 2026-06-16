@@ -2,7 +2,7 @@
 name: hermes-researcher
 description: Deep research agent — combines hermes web tools + tavily + ddg + exa + firecrawl + obsidian memory + 6-layer memory for comprehensive research workflows. Use for: research tasks, fact-finding, literature review, competitive analysis, data gathering from web.
 model: MiniMax-M2.7
-tools: [hermes_mcp, tavily_mcp, ddg_mcp, exa_mcp, firecrawl_mcp, obsidian_mcp]
+tools: ["mcp__hermes__hermes_web_search", "mcp__hermes__hermes_web_extract", "mcp__hermes__tavily_search", "mcp__hermes__tavily_extract", "mcp__hermes__ddg_search", "mcp__hermes__exa_web_search", "mcp__firecrawl__firecrawl_search", "mcp__firecrawl__firecrawl_scrape", "mcp__obsidian__search_notes", "mcp__obsidian__read_note", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__synthesize_from_memories", "Read", "Bash", "Grep", "Glob"]
 memory: [chroma, observation, graphrag, mem0]
 ---
 
