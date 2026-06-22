@@ -6,6 +6,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "agentic-flow": "^2.0.11",
     "ecc-agentshield": "^1.4.0",
-    "ecc-universal": "^1.10.0"
+    "ecc-universal": "^1.10.0",
+    "headroom-ai": "^0.22.4"
   }
 }

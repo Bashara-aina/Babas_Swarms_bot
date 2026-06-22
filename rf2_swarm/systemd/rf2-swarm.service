@@ -1,0 +1,16 @@
+[Unit]
+Description=RF2 Training — 20-Agent Monitoring Swarm
+After=network.target
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+ExecStart=/home/newadmin/swarm-bot/.venv/bin/python -m rf2_swarm --interval 300
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:/media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/swarm_loop.log
+StandardError=append:/media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/swarm_loop.log
+
+[Install]
+WantedBy=multi-user.target

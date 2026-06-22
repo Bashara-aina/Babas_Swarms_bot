@@ -1,4 +1,4 @@
-"""M2.7 Self-Consistency Verifier — multi-approach scoring for high-stakes decisions.
+"""M3 Self-Consistency Verifier — multi-approach scoring for high-stakes decisions.
 
 Solves the "single-path blind spot" problem: when you're confident in one approach
 but haven't stress-tested alternatives. Generates 3 diverse candidate approaches,
@@ -6,7 +6,7 @@ then scores each on correctness × maintainability × risk × fit-to-project-sca
 
 High-stakes threshold: confidence < 80% → surface to user before proceeding.
 
-Reference: M2.7 Full Capability Activation — Self-Consistency Verification (Section D3)
+Reference: M3 Full Capability Activation — Self-Consistency Verification (Section D3)
 Original paper: "Self-Consistency Improves Chain of Thought Reasoning in Language Models" (ICLR 2023)
 """
 

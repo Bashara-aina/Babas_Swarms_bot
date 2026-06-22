@@ -53,11 +53,11 @@ The system is a **multi-agent orchestration platform** with three primary surfac
 | Command | Handler Function | Description |
 |---------|-----------------|-------------|
 | `/run` | `cmd_run` | Stream agent response with tools |
-| `/think` | `cmd_think` | Direct M2.7 completion (no tools) |
+| `/think` | `cmd_think` | Direct M3 completion (no tools) |
 | `/evolve` | `cmd_evolve` | Self-evolution from session history |
 | `/rules` | `cmd_rules` | Show evolved rules |
 | `/memory` | `cmd_memory` | Show global memory preview |
-| `/cost` | `cmd_cost` | Today's M2.7 spend |
+| `/cost` | `cmd_cost` | Today's M3 spend |
 | `/budget` | `cmd_budget` | Month spend vs projection |
 | `/soul` | `cmd_soul` | Display SOUL.md |
 | `/debate` | `cmd_debate` | 3-agent debate |
@@ -139,7 +139,7 @@ swarm-bot/
 │   ├── bot/
 │   │   ├── handlers.py               # /run, /think, /debate, /status, etc.
 │   │   └── stream_handler.py         # Telegram streaming
-│   ├── minimax_client.py            # M2.7 API client
+│   ├── minimax_client.py            # M3 API client
 │   ├── self_evolve.py               # Rule evolution from sessions
 │   ├── tools/
 │   │   ├── registry.py               # TOOL_SCHEMAS

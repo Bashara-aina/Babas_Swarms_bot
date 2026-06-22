@@ -14,7 +14,7 @@ export BROWSER_USE_HEADLESS="${BROWSER_USE_HEADLESS:-true}"
 # Route through local LiteLLM proxy (port 4000)
 export BROWSER_USE_LLM_PROVIDER="${BROWSER_USE_LLM_PROVIDER:-litellm}"
 export BROWSER_LLM_URL="${BROWSER_LLM_URL:-http://localhost:4000}"
-export BROWSER_LLM_MODEL="${BROWSER_LLM_MODEL:-minimax-primary}"
+export BROWSER_LLM_MODEL="${BROWSER_LLM_MODEL:-opencode-go-primary}"
 export BROWSER_LLM_CRED="${BROWSER_LLM_CRED:-placeholder}"
 
 # ── MiniMax-only policy enforcement ───────────────────────────────────────

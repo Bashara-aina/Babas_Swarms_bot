@@ -129,6 +129,36 @@
       "date": "2026-05-25",
       "signature": "3970c511989fd99a61c07e2967de6b2bc0226fe9",
       "technique": "relatable_story"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "61a652c78f7dc1483c0eadaf408f9e542922d125",
+      "technique": "hot_take"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "336cbea6245f41275bfeaef9fbca8e1efe6feece",
+      "technique": "fake_controversy"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "96b59906c73a0b2319c77f70de9a715af3c4ecdd",
+      "technique": "showcase_soft"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "75f4ad0cf0a5751add06e5e7b56341bbff08da1c",
+      "technique": "edukasi"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "00eed07009a2f722809d7dfa62c4646d2df123aa",
+      "technique": "relatable_story"
+    },
+    {
+      "date": "2026-06-05",
+      "signature": "f2fc2611760868bb0be946223a690f7f8b343eea",
+      "technique": "hot_take"
     }
   ]
 }

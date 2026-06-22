@@ -1,8 +1,8 @@
-# M2.7 Full Capability Activation — Bootstrap Reference
+# M3 Full Capability Activation — Bootstrap Reference
 **File:** `core/CLAUDE_M2_BOOTSTRAP.md`
-**Purpose:** Standalone M2.7 reference — the infrastructure modules and behavioral
+**Purpose:** Standalone M3 reference — the infrastructure modules and behavioral
            protocols that live alongside CLAUDE.md. When CLAUDE.md is too crowded,
-           move M2.7-specific discipline here and import from CLAUDE.md Section 0a.
+           move M3-specific discipline here and import from CLAUDE.md Section 0a.
 **Maintainer:** Bashara + Legion
 
 ---
@@ -24,7 +24,7 @@
 
 | File | Purpose |
 |------|---------|
-| `FAILURES.md` | Seed for M2.7 evaluation set — all failure trajectories |
+| `FAILURES.md` | Seed for M3 evaluation set — all failure trajectories |
 | `DECISIONS.md` | Architecture Decision Record log |
 | `EVAL_SET.md` | Regression tests derived from 5+ FAILURES.md entries |
 | `.claude/memory_bootstrap.md` | Pre-compaction checkpoint template |

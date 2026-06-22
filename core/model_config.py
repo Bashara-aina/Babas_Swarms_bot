@@ -1,13 +1,13 @@
 # model_config.py — Single source of truth for Legion's model routing
-# MiniMax M3 is the ONLY model. No fallbacks to broken APIs.
+# OpenCode Go (deepseek-v4-pro primary), OpenRouter nemotron free as emergency fallback.
 
 import os
 
-PRIMARY_MODEL = "MiniMax-M3"
-PRIMARY_BASE_URL = "https://api.minimax.io/v1"
-PRIMARY_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
+PRIMARY_MODEL = "deepseek-v4-pro"
+PRIMARY_BASE_URL = "https://opencode.ai/zen/go/v1"
+PRIMARY_API_KEY = os.environ.get("OPENCODE_GO_API_KEY", "")
 
-# Retry config — if MiniMax is slow, retry MiniMax. Not switch provider.
+# Retry config — if OpenCode Go is slow, retry. Not switch provider.
 MAX_RETRIES = 3
 RETRY_DELAY_SECONDS = 30
 RETRY_ON_STATUS = [429, 503, 502]
@@ -25,8 +25,8 @@ TEMPERATURE = {
 MAX_CONTEXT_TOKENS = 1_000_000
 MAX_OUTPUT_TOKENS = 16_384
 
-# What to do if MiniMax is completely down (rare)
-EMERGENCY_FALLBACK = None  # Set to "claude-3-5-sonnet" only if ANTHROPIC_API_KEY is valid
+# Emergency fallback if OpenCode Go is completely down
+EMERGENCY_FALLBACK = "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"  # Free OpenRouter fallback
 
 
 def get_client_config(task_type: str = "conversation") -> dict:

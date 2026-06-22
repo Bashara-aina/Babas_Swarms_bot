@@ -152,14 +152,14 @@ check("remembered_context.md non-empty",
 
 section("Layer 3 — langmem")
 check("langmem returns list",
-      lambda: _run_py('from core.memory.memory_injector import _recall_from_langmem; r=_recall_from_langmem("test",3); print(type(r).__name__)', timeout=30))
+      lambda: _run_py('from core.memory.memory_injector import _recall_langmem; r=_recall_langmem("test"); print(type(r).__name__, len(r), sep="|")', timeout=30))
 
 section("Layer 4 — observation_store")
 proc = subprocess.Popen(
     ['python3', '-c',
      'import sys; sys.path.insert(0,"/home/newadmin/swarm-bot"); '
-     'from core.memory.memory_injector import _recall_from_observation_store; '
-     'r=_recall_from_observation_store("test",3); '
+     'from core.memory.memory_injector import _recall_observation; '
+     'r=_recall_observation("test"); '
      'print(type(r).__name__, len(r), sep="|")'],
     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     env={**os.environ, 'PYTHONPATH': '/home/newadmin/swarm-bot', 'PYTHONUNBUFFERED': 'x'}

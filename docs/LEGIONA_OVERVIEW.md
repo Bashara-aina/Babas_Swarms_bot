@@ -195,7 +195,7 @@
 
 ### Tool Registry
 
-**Total tools:** 8 native tools in M2.7 tool-calling loop.
+**Total tools:** 8 native tools in M3 tool-calling loop.
 
 | Tool | Function | Status |
 |------|---------|--------|
@@ -248,7 +248,7 @@
 | Layer 9 | Structured output validation | ✅ Complete |
 | Layer 10 | Self-audit footer (confidence/verification checklist) | ✅ Complete |
 
-### ANTI-LOOP PROTOCOL (M2.7 Self-Evolution)
+### ANTI-LOOP PROTOCOL (M3 Self-Evolution)
 
 | Rule | Trigger | Action |
 |------|---------|--------|

@@ -6910,3 +6910,73 @@ source: legion-harvester
 }
 ```
 
+---
+title: harvest-session-2026-06-05-6259f4f5
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-06-05
+updated: 2026-06-05
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-06-05
+**Session ID**: 6259f4f5
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-06-05",
+  "session_id": "6259f4f5",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+
+---
+title: harvest-session-2026-06-05-b753430a
+type: timeline
+status: active
+tags: [legion, harvester, harvest-session]
+created: 2026-06-05
+updated: 2026-06-05
+summary: Harvest session — 0 accepted, 0 rejected, 0 pending
+wikilinks: []
+confidence: high
+source: legion-harvester
+---
+
+# Harvest Session
+
+**Date**: 2026-06-05
+**Session ID**: b753430a
+**Accepted**: 0 | **Rejected**: 0 | **Pending**: 0
+
+## Candidates
+
+```json
+{
+  "date": "2026-06-05",
+  "session_id": "b753430a",
+  "candidates_reviewed": [],
+  "metadata": {
+    "candidates_found": 0,
+    "candidates_reviewed": 0,
+    "pending": 0,
+    "review_mode": "auto"
+  }
+}
+```
+

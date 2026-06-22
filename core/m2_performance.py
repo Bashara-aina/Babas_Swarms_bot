@@ -1,23 +1,23 @@
-"""M2.7 Performance Activation System — Deep Implementation.
+"""M3 Performance Activation System — Deep Implementation.
 
-This module implements the full M2.7 capability activation stack based on:
+This module implements the full M3 capability activation stack based on:
 - MiniMax M3 spec-first training bias (architect before coding)
 - Interleaved thinking: reason AFTER every tool call, not just at the start
 - Skeleton-of-thought: define structure before implementation
 - Confidence-informed self-consistency: rate confidence, offer alternatives when low
 
-Key insight: M2.7 scores 80.2% on SWE-Bench (vs Opus's 49.3%) BUT only when
+Key insight: M3 scores 80.2% on SWE-Bench (vs Opus's 49.3%) BUT only when
 the calling layer triggers its spec-first reasoning mode. Without it, quality
 regresses to average.
 
-Reference: MiniMax M2.5/M2.7 research — forcing M2.7 to skip spec-writing degrades quality.
+Reference: MiniMax M2.5/M3 research — forcing M3 to skip spec-writing degrades quality.
 """
 
 from __future__ import annotations
 
 import os
 
-# ── M2.7 Performance Activation Prompt ──────────────────────────────────────────
+# ── M3 Performance Activation Prompt ──────────────────────────────────────────
 # Inject as a system message layer for ALL MiniMax calls involving:
 # - Complex tasks (>20 words, multi-step)
 # - Code generation or architecture
@@ -25,7 +25,7 @@ import os
 # - Agent team Planner/Critic operations
 
 M2_ACTIVATION_PROMPT = """\
-## MINIMAX M2.7 PERFORMANCE ACTIVATION
+## MINIMAX M3 PERFORMANCE ACTIVATION
 
 You are operating with full reasoning capability. Do not skip thinking.
 
@@ -161,7 +161,7 @@ This technique adds 15-25% accuracy on hard reasoning problems.
 
 
 def get_m2_activation_prompt() -> str:
-    """Return the full M2.7 performance activation system prompt."""
+    """Return the full M3 performance activation system prompt."""
     return M2_ACTIVATION_PROMPT
 
 
@@ -186,7 +186,7 @@ def get_m2_self_consistency_prompt() -> str:
 
 
 def should_use_m2_activation(task: str, agent_key: str | None = None) -> bool:
-    """Decide whether to inject M2.7 performance activation.
+    """Decide whether to inject M3 performance activation.
 
     Activation is beneficial for:
     - Complex tasks (>20 words, multi-step)
@@ -232,7 +232,7 @@ def build_m2_system_fragment(
     use_architect_mode: bool = False,
     use_skeleton: bool = False,
 ) -> str:
-    """Build the M2.7 performance activation system fragment.
+    """Build the M3 performance activation system fragment.
 
     Args:
         task: The user task (used to decide activation level)

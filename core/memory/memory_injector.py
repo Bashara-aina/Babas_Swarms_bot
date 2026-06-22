@@ -521,8 +521,8 @@ def _keyword_score(text: str, query: str) -> float:
     # Single word match
     direct = sum(1 for w in q_words if w in t_words) / len(q_words)
     # Bigram overlap (pairs of adjacent words in query)
-    q_bigrams = {f"{a}_{b}" for a, b in zip(query.lower().split(), query.lower().split()[1:], strict=True)}
-    t_bigrams = {f"{a}_{b}" for a, b in zip(text.lower().split(), text.lower().split()[1:], strict=True)}
+    q_bigrams = {f"{a}_{b}" for a, b in zip(query.lower().split(), query.lower().split()[1:])}
+    t_bigrams = {f"{a}_{b}" for a, b in zip(text.lower().split(), text.lower().split()[1:])}
     bigram_score = len(q_bigrams & t_bigrams) / len(q_bigrams) if q_bigrams else 0.0
     return 0.6 * direct + 0.4 * bigram_score
 

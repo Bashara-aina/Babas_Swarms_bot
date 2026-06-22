@@ -1,4 +1,4 @@
-"""M2.7 Drift Detector — error accumulation prevention.
+"""M3 Drift Detector — error accumulation prevention.
 
 Monitors whether current work has drifted from the original goal.
 Today's LLM failures in long agentic runs are NOT intelligence failures —
@@ -16,7 +16,7 @@ RED FLAGS that trigger ABORT:
   ✗ An assumption made early has been invalidated by new information
   ✗ The solution is more complex than the problem requires
 
-Reference: M2.7 Full Capability Activation — Error Accumulation Prevention (Section E3)
+Reference: M3 Full Capability Activation — Error Accumulation Prevention (Section E3)
 """
 
 from __future__ import annotations

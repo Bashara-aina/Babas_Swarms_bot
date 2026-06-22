@@ -1,9 +1,9 @@
-"""M2.7 Skill Harness — TIER 1-4 contextual skill loading system.
+"""M3 Skill Harness — TIER 1-4 contextual skill loading system.
 
 Built on top of core/skills/registry.py. Dynamically loads skills from
 ~/.claude/skills/ based on task type and domain context.
 
-TIER DISCIPLINE (from M2.7 Full Capability Activation Section F1):
+TIER DISCIPLINE (from M3 Full Capability Activation Section F1):
   TIER 1 (always):      next-js-app-router, typescript-strict
   TIER 2 (by type):     supabase-realtime, stripe-integration, recharts-dataviz
   TIER 3 (by domain):   indonesian-market, property-valuation, salary-benchmark
@@ -12,7 +12,7 @@ TIER DISCIPLINE (from M2.7 Full Capability Activation Section F1):
 Skill loading is MANDATORY at task start:
   "Loading skills: [list] for [task type]"
 
-Reference: M2.7 Full Capability Activation — Skill Harness (Section F1)
+Reference: M3 Full Capability Activation — Skill Harness (Section F1)
 """
 
 from __future__ import annotations
@@ -198,7 +198,7 @@ def describe_active_skill_context(task_type: str = "", domain: str = "") -> str:
     if not skills:
         return ""
 
-    sections = ["[SKILL HULL — M2.7 TIER-DRIVEN SKILL LOADING]"]
+    sections = ["[SKILL HULL — M3 TIER-DRIVEN SKILL LOADING]"]
     sections.append(f"Task type: {task_type or 'general'} | Domain: {domain or 'all'}")
     sections.append(f"Loaded skills ({len(skills)}): {', '.join(skills)}")
     sections.append("")
@@ -282,7 +282,7 @@ def infer_task_type_from_message(message: str) -> tuple[str, str]:
 
 
 def format_skill_declaration(task_type: str, domain: str) -> str:
-    """Format the M2.7 mandatory skill loading declaration.
+    """Format the M3 mandatory skill loading declaration.
 
     Example output:
         "Loading skills: typescript-strict, next-js-app-router, indonesian-market for feature/cekwajar"

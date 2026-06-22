@@ -29,6 +29,25 @@ from litellm import acompletion
 # byte-level reasoning models (xiaomi/mimo, kimi, glm).
 _SURROGATE_RE = re.compile(r'[\ud800-\udfff]')
 
+# ── Per-task max_tokens (Mitigation 3: token reduction) ─────────────────────
+# When call_llm() is called with task_type=<str> and no explicit max_tokens
+# in kwargs, it pulls the default from this table. Concrete-cap call sites
+# (e.g. max_tokens=3072) keep their explicit value; this only fills gaps.
+# Override the "default" key via env: LEGION_DEFAULT_MAX_TOKENS
+_TASK_MAX_TOKENS: dict[str, int] = {
+    "default": 4096,
+    "chat": 2048,
+    "wiki": 2048,
+    "summary": 3072,
+    "agent": 2048,
+    "code": 4096,
+    "research": 4096,
+    "vision": 1024,
+}
+_default_max_tokens_env = os.getenv("LEGION_DEFAULT_MAX_TOKENS")
+if _default_max_tokens_env and _default_max_tokens_env.isdigit():
+    _TASK_MAX_TOKENS["default"] = int(_default_max_tokens_env)
+
 def _sanitize_surrogates(text: str) -> str:
     """Replace surrogate code points with the Unicode replacement character."""
     return _SURROGATE_RE.sub('\ufffd', text)
@@ -460,7 +479,7 @@ def _get_api_key(model: str) -> str | None:
     """Return API key for a model provider."""
     provider = model.split("/")[0].lower()
     key_map = {
-        "minimax": "MINIMAX_API_KEY",
+        "opencode-go": "OPENCODE_GO_API_KEY",
         "ollama_chat": "OLLAMA_API_KEY",
         "zai": "ZAI_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
@@ -669,26 +688,29 @@ async def call_llm(
     model: str | None = None,
     tools: list | None = None,
     stream: bool = False,
+    task_type: str | None = None,
     **kwargs,
 ) -> str | dict:
     """Public LLM call interface with fallback chain and tool call support.
 
     Args:
         messages: List of message dicts with 'role' and 'content' keys.
-        model: Model string (e.g. "minimax-coding-plan/MiniMax-M3"). Defaults to LEGION_LLM_MODEL env var.
+        model: Model string (e.g. "opencode-go/deepseek-v4-pro"). Defaults to LEGION_LLM_MODEL env var.
         tools: Optional list of tool definitions for function calling.
         stream: Whether to stream responses (not implemented yet).
+        task_type: Optional task category (e.g. "summary", "agent", "wiki").
+            When set and max_tokens is not in kwargs, the default for this
+            task type is pulled from _TASK_MAX_TOKENS.
         **kwargs: Additional arguments passed to litellm.
 
     Returns:
         str: Normal text response
         dict: Tool call response with keys 'type' (="tool_call"), 'name', 'args'
     """
-    model = model or os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
+    model = model or os.getenv("LEGION_LLM_MODEL", "opencode-go/deepseek-v4-pro")
 
     if _is_rate_limited(model):
         # FIXED: Use "general" agent key instead of provider name.
-        # Provider name (e.g., "minimax") is not a LEGACY_FALLBACK_CHAIN key.
         chain = get_fallback_chain("general")
         for fallback_model in chain:
             if not _is_rate_limited(fallback_model):
@@ -698,6 +720,13 @@ async def call_llm(
             return "rate limited on all providers — retry shortly"
 
     provider = model.split("/")[0].lower()
+
+    # Per-task max_tokens default (Mitigation 3: token reduction)
+    if task_type and "max_tokens" not in kwargs:
+        kwargs["max_tokens"] = _TASK_MAX_TOKENS.get(
+            task_type, _TASK_MAX_TOKENS["default"]
+        )
+
     api_kwargs: dict[str, Any] = {
         "model": model,
         "messages": messages,
@@ -710,14 +739,14 @@ async def call_llm(
 
     _is_pytest_run = bool(os.getenv("PYTEST_CURRENT_TEST"))
 
-    if provider == "minimax":
-        api_kwargs["api_base"] = "https://api.minimax.io/v1"
-        api_key = os.getenv("MINIMAX_API_KEY", "")
+    if provider == "opencode-go":
+        api_kwargs["api_base"] = "https://opencode.ai/zen/go/v1"
+        api_key = os.getenv("OPENCODE_GO_API_KEY", "")
         if not api_key:
             if _is_pytest_run:
                 api_key = "dummy"
             else:
-                raise ValueError("MINIMAX_API_KEY not set")
+                raise ValueError("OPENCODE_GO_API_KEY not set")
         api_kwargs["api_key"] = api_key
     elif provider == "anthropic":
         api_kwargs["api_base"] = "https://api.minimax.io/anthropic"
@@ -841,14 +870,14 @@ async def _call_model(
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
 
-        if provider == "minimax":
-            kwargs["api_base"] = "https://api.minimax.io/v1"
-            api_key = os.getenv("MINIMAX_API_KEY", "")
+        if provider == "opencode-go":
+            kwargs["api_base"] = "https://opencode.ai/zen/go/v1"
+            api_key = os.getenv("OPENCODE_GO_API_KEY", "")
             if not api_key:
                 if _is_pytest_run:
                     api_key = "dummy"
                 else:
-                    raise ValueError("MINIMAX_API_KEY not set")
+                    raise ValueError("OPENCODE_GO_API_KEY not set")
             kwargs["api_key"] = api_key
 
         elif provider == "anthropic":
@@ -907,7 +936,7 @@ async def wiki_raw_completion(
     max_tokens: int | None = None,
 ) -> str:
     """Single-turn LLM call for wiki maintenance (no mem0 / wiki / humanization stack)."""
-    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
+    m = model or os.getenv("LEGION_WIKI_LLM_MODEL", "opencode-go/deepseek-v4-pro")
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
@@ -922,7 +951,7 @@ async def wiki_raw_completion(
 
 # ── Six-Layer Memory-Aware Compaction Engine ─────────────────────────────────────
 #
-#  DESIGN (with unlimited minimax API + 6 memory layers + big storage):
+#  DESIGN (with unlimited go API + 6 memory layers + big storage):
 #
 #  Every full compaction:
 #    1. PRE-COMPACT: query ALL 6 layers (build_memory_context)
@@ -932,22 +961,59 @@ async def wiki_raw_completion(
 #    3. POST-COMPACT: STORE summary to CompactionStore (FTS5 searchable)
 #                    → also store to all 6 memory layers (future compactions get richer context)
 #
-#  Compaction triggers (MiniMax-M3 ~200K context — with unlimited API we compact EARLIER):
-#    Tier 1 (30% fill / 60k chars):  microcompact — NO LLM, every turn, post-tool
-#    Tier 2 (50% fill / 100k chars):  microcompact again if still over threshold
-#    Tier 3 (65% fill / 130k chars):  ASYNC full compaction STARTS (non-blocking LLM call)
-#    Tier 4 (85% fill / 170k chars):  BLOCKING full compaction (only if async hasn't finished)
-#    Tier 5 (95% fill / 190k chars): EMERGENCY — force blocking even if async still running
+#  Compaction triggers (model-aware — all relative to _COMPACTION_MAX_CONTEXT):
+#    Tier 1 (50% fill):  microcompact — NO LLM, every turn, post-tool
+#    Tier 2 (70% fill):  microcompact again if still over threshold
+#    Tier 3 (85% fill):  ASYNC full compaction STARTS (non-blocking LLM call)
+#    Tier 4 (95% fill):  BLOCKING full compaction (only if async hasn't finished)
+#    Tier 5 (99% fill): EMERGENCY — force blocking even if async still running
 #
-#  The key insight: with unlimited API we can afford to run FULL compaction at 46%
-#  (91K) so summaries are shorter and more precise (less history to condense = better quality).
+#  The key insight: with unlimited API we can afford to run FULL compaction at 80%
+#  (800K chars) so summaries are shorter and more precise (less history to condense = better quality).
 #
 #  Storage: every compaction summary is stored to CompactionStore (FTS5) AND all 6 layers,
 #  making future compactions smarter because prior summaries are queryable and enriched.
 
+# ── Model-aware compaction thresholds ──────────────────────────────────────
+# All tiers are RELATIVE to _COMPACTION_MAX_CONTEXT (chars), which is read
+# from `.opencode/opencode.json` → `compaction.maxContext` at import time.
+# This means:
+#   1. maxContext = 1000000 → Tier 3 fires at 850K chars (85%)
+#   2. Edit maxContext in opencode.json → all 5 tiers auto-adjust
+#   3. Behaves like OpenCode native: config is the single source of truth
+#
+# The config path is derived from this file's location (works regardless of cwd).
+_COMPACTION_CONFIG_PATH = Path(__file__).resolve().parent.parent / ".opencode" / "opencode.json"
+
+
+def _load_compaction_max_context(fallback: int = 1000000) -> int:
+    """Read `compaction.maxContext` from opencode.json at import time.
+
+    This mirrors how OpenCode native reads config — the JSON file is the
+    single source of truth for the model's context window. If unavailable
+    (e.g. tests, different project layout), returns the fallback.
+    """
+    try:
+        import json
+        cfg = json.loads(_COMPACTION_CONFIG_PATH.read_text())
+        max_ctx = cfg.get("compaction", {}).get("maxContext")
+        if max_ctx and isinstance(max_ctx, (int, float)) and max_ctx > 0:
+            return int(max_ctx)
+    except Exception:
+        pass
+    return fallback
+
+
+_COMPACTION_MAX_CONTEXT = _load_compaction_max_context()
+_COMPACTION_TIER_1 = int(0.50 * _COMPACTION_MAX_CONTEXT)  # 50% — microcompact, NO LLM
+_COMPACTION_TIER_2 = int(0.70 * _COMPACTION_MAX_CONTEXT)  # 70% — tighter microcompact
+_COMPACTION_TIER_3 = int(0.85 * _COMPACTION_MAX_CONTEXT)  # 85% — ASYNC full LLM compaction
+_COMPACTION_TIER_4 = int(0.95 * _COMPACTION_MAX_CONTEXT)  # 95% — BLOCKING full LLM
+_COMPACTION_TIER_5 = int(0.99 * _COMPACTION_MAX_CONTEXT)  # 99% — EMERGENCY force
+
 # ── Tier 1 & 2: Ultra-light microcompact — NO LLM, runs every turn ────────────────
 
-def _microcompact_messages(messages: list[dict], threshold: int = 65000) -> list[dict]:
+def _microcompact_messages(messages: list[dict], threshold: int = _COMPACTION_TIER_1) -> list[dict]:
     """Ultra-light pruning — truncate long tool results, preserve structure.
 
     Called PROACTIVELY after EVERY tool result and when context crosses 50% fill.
@@ -1000,8 +1066,8 @@ def _microcompact_messages(messages: list[dict], threshold: int = 65000) -> list
 def _microcompact_if_needed(messages: list[dict]) -> list[dict]:
     """Called after EVERY tool result — proactive microcompact to keep context under 50%."""
     total_size = sum(len(str(m.get("content", ""))) for m in messages)
-    if total_size > 65000:
-        return _microcompact_messages(messages, threshold=65000)
+    if total_size > _COMPACTION_TIER_1:
+        return _microcompact_messages(messages, threshold=_COMPACTION_TIER_1)
     return messages
 
 
@@ -1031,6 +1097,34 @@ _COMPACT_COOLDOWN = 5.0  # seconds between compactions (debounce)
 
 # Thread pool for truly async I/O (all blocking operations go here)
 _COMPACT_IO_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="compact_io")
+
+# ── Tier 3/4 cascade prevention ──────────────────────────────────────────────
+# Prevents Tier 4 (blocking) from firing while Tier 3 (async) is still running.
+# This is the GLOBAL flag (not per-messages-list) so it survives list replacement.
+_ASYNC_COMPACT_IN_FLIGHT: bool = False
+_ASYNC_COMPACT_LOCK: threading.Lock = threading.Lock()
+
+# ── OpenCode shell hook runner ───────────────────────────────────────────────
+# When OpenCode native compaction is disabled (threshold=1.0), its auto-discovered
+# pre-compact.sh / post-compact.sh hooks no longer fire. We run them from here instead.
+
+_SHELL_HOOKS_DIR = Path(__file__).resolve().parent.parent / ".opencode" / "hooks"
+
+
+def _run_shell_hook(hook_name: str) -> None:
+    """Run an OpenCode shell hook script if present. Non-blocking, best-effort."""
+    hook_path = _SHELL_HOOKS_DIR / f"{hook_name}.sh"
+    if not hook_path.exists():
+        return
+    try:
+        import subprocess
+        subprocess.run(
+            ["bash", str(hook_path)],
+            timeout=10,
+            capture_output=True,
+        )
+    except Exception:
+        logger.debug("Shell hook %s failed (non-fatal)", hook_name)
 
 
 def _get_cache_key(messages: list[dict]) -> str:
@@ -1138,15 +1232,19 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str],
         total_size = sum(len(str(m.get("content", ""))) for m in messages)
         if total_size < 90000:
             messages._full_compact_pending = False  # type: ignore[attr-defined]
+            with _ASYNC_COMPACT_LOCK:
+                _ASYNC_COMPACT_IN_FLIGHT = False
             return
 
         # Run full compaction with memory enrichment
-        compacted = smart_compact_messages(messages, model="minimax-coding-plan/MiniMax-M3", system_prompt=system_prompt)
+        compacted = smart_compact_messages(messages, model="opencode-go/deepseek-v4-pro", system_prompt=system_prompt)
 
         # Check if compaction actually reduced size
         new_size = sum(len(str(m.get("content", ""))) for m in compacted)
         if new_size >= total_size:
             messages._full_compact_pending = False  # type: ignore[attr-defined]
+            with _ASYNC_COMPACT_LOCK:
+                _ASYNC_COMPACT_IN_FLIGHT = False
             return
 
         # Replace messages in-place so the calling context gets the compacted version
@@ -1172,10 +1270,13 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str],
     except Exception as e:
         logger.debug("Async compaction failed: %s", e)
     finally:
+        # Clear BOTH the per-messages flag AND the global Tier 3/4 cascade lock
         try:
             messages._full_compact_pending = False  # type: ignore[attr-defined]
         except Exception:
             pass
+        with _ASYNC_COMPACT_LOCK:
+            _ASYNC_COMPACT_IN_FLIGHT = False
 
 
 async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> dict[str, str]:
@@ -1293,7 +1394,7 @@ def _generate_memory_aware_summary(
     history: list[dict],
     memory_context: str,
     multi_layer: dict[str, str],
-    model: str = "minimax-coding-plan/MiniMax-M3",
+    model: str = "opencode-go/deepseek-v4-pro",
     timeout: float = 20.0,
 ) -> str:
     """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query.
@@ -1605,7 +1706,7 @@ messages_compacted: {message_count}
                 cache_key=cache_key,
                 summary=summary,
                 message_count=message_count,
-                model_used="minimax-coding-plan/MiniMax-M3",
+                model_used="opencode-go/deepseek-v4-pro",
                 chars_saved=0,
                 original_size=0,
                 compacted_size=len(summary),
@@ -1645,7 +1746,7 @@ def smart_compact_messages(
     messages: list[dict],
     keep_recent: int = 8,  # increased from 6 — preserve more recent turns
     system_prompt: str = "",
-    model: str = "minimax-coding-plan/MiniMax-M3",
+    model: str = "opencode-go/deepseek-v4-pro",
     session_id: Optional[str] = None,
 ) -> list[dict]:
     """Memory-aware compaction using ALL 6 memory layers + LRU cache + CompactionStore.
@@ -1693,6 +1794,21 @@ def smart_compact_messages(
         return messages
 
     original_size = sum(len(str(m.get("content", ""))) for m in messages)
+
+    # ── Run OpenCode shell hooks (pre-compact) ────────────────────────────────
+    # With OpenCode native compaction disabled (threshold=1.0), its auto-discovered
+    # shell hooks (pre-compact.sh, post-compact.sh) no longer fire. We run them
+    # here instead so session state checkpointing still works.
+    _run_shell_hook("pre-compact")
+    try:
+        from core.hooks import get_hooks
+        get_hooks().emit("pre_compact", {
+            "reason": "smart_compact",
+            "original_size": original_size,
+            "message_count": len(history),
+        })
+    except Exception:
+        pass
 
     # ── PRE-COMPACT: full 6-layer memory context (PARALLEL, non-blocking) ─────
     # With unlimited API + big storage, query all memory layers IN PARALLEL
@@ -1871,6 +1987,9 @@ def smart_compact_messages(
         _COMPACT_CACHE[cache_key] = result
         if len(_COMPACT_CACHE) > _COMPACT_CACHE_MAX:
             _COMPACT_CACHE.popitem(last=False)
+
+    # ── Run OpenCode shell hooks (post-compact) ──────────────────────────────
+    _run_shell_hook("post-compact")
 
     logger.debug(
         "Smart compact: %d messages → %d (saved %d chars, cache size: %d)",
@@ -2066,45 +2185,52 @@ async def _agent_loop_inner(
                         tool_name, args = parsed
                         logger.info("Recovered XML tool call: %s(%s)", tool_name, list(args.keys()) if args else [])
 
-                # ── Five-tier compaction cascade (with unlimited minimax API) ─────────
-                # Tier 1 (30% fill / 60k chars):  microcompact — NO LLM, every turn, post-tool
-                # Tier 2 (50% fill / 100k chars):  microcompact again if still over threshold
-                # Tier 3 (65% fill / 130k chars):  ASYNC full compaction STARTS (non-blocking LLM)
-                # Tier 4 (85% fill / 170k chars):  BLOCKING full compaction (if async hasn't finished)
-                # Tier 5 (95% fill / 190k chars): EMERGENCY — force blocking even if async still running
+                # ── Five-tier compaction cascade (model-aware thresholds) ──────────
+                # All tiers relative to _COMPACTION_MAX_CONTEXT (set above).
+                # Tier 1 (50%): microcompact — NO LLM, every turn, post-tool
+                # Tier 2 (70%): microcompact again if still over threshold
+                # Tier 3 (85%): ASYNC full compaction STARTS (non-blocking LLM)
+                # Tier 4 (95%): BLOCKING full compaction (if async hasn't finished)
+                # Tier 5 (99%): EMERGENCY — force blocking even if async still running
                 if len(messages) > 8:
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
 
-                    # Tier 1: microcompact at 60k — runs every turn proactively
-                    if total_size > 60000:
+                    # Tier 1: microcompact at 50% fill — runs every turn proactively
+                    if total_size > _COMPACTION_TIER_1:
                         prev_size = total_size
-                        messages = _microcompact_messages(messages, threshold=60000)
+                        messages = _microcompact_messages(messages, threshold=_COMPACTION_TIER_1)
                         new_size = sum(len(str(m.get("content", ""))) for m in messages)
                         logger.debug("Tier1 microcompact: %d → %d (saved %d)", prev_size, new_size, prev_size - new_size)
 
                     # Re-measure after microcompact
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
 
-                    # Tier 2: microcompact again at 100k — tighter threshold
-                    if total_size > 100000:
+                    # Tier 2: microcompact again at 70% fill — tighter threshold
+                    if total_size > _COMPACTION_TIER_2:
                         prev_size = total_size
-                        messages = _microcompact_messages(messages, threshold=100000)
+                        messages = _microcompact_messages(messages, threshold=_COMPACTION_TIER_2)
                         new_size = sum(len(str(m.get("content", ""))) for m in messages)
                         logger.debug("Tier2 microcompact: %d → %d (saved %d)", prev_size, new_size, prev_size - new_size)
 
                     # Re-measure again
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
 
-                    # Tier 3: async full compaction at 130k — start LLM summarization NOW
+                    # Tier 3: async full compaction at 850k — start LLM summarization NOW
                     # Fire-and-forget — completes in background before we hit Tier 4
-                    if total_size > 130000 and not getattr(messages, '_full_compact_pending', False):
+                    # Uses BOTH per-messages _full_compact_pending AND global _ASYNC_COMPACT_IN_FLIGHT
+                    # to prevent Tier 4 from firing even if messages list is recreated (e.g. by
+                    # _microcompact_messages returning a new list) or _async_compact_if_needed has
+                    # already completed but the current turn still exceeds Tier 4 threshold.
+                    if total_size > _COMPACTION_TIER_3 and not _ASYNC_COMPACT_IN_FLIGHT and not getattr(messages, '_full_compact_pending', False):
                         messages._full_compact_pending = True  # type: ignore[attr-defined]
+                        with _ASYNC_COMPACT_LOCK:
+                            _ASYNC_COMPACT_IN_FLIGHT = True
                         logger.debug("Tier3 async compaction started at %d chars", total_size)
                         asyncio.create_task(_async_compact_if_needed(messages, user_id, system_prompt=system))
 
-                    # Tier 4: blocking full compaction at 170k — only if async hasn't started
+                    # Tier 4: blocking full compaction at 950k — only if async hasn't started
                     # If async is already running, skip — let it finish instead of double-compacting
-                    elif total_size > 170000 and not getattr(messages, '_full_compact_pending', False):
+                    elif total_size > _COMPACTION_TIER_4 and not _ASYNC_COMPACT_IN_FLIGHT and not getattr(messages, '_full_compact_pending', False):
                         messages._full_compact_pending = True  # type: ignore[attr-defined]
                         messages = smart_compact_messages(messages, model=model, session_id=thread_id, system_prompt=system)
                         try:
@@ -2121,11 +2247,13 @@ async def _agent_loop_inner(
                         logger.debug("Tier4 blocking compaction done: %d → %d chars",
                             total_size, sum(len(str(m.get("content", ""))) for m in messages))
 
-                    # Tier 5: EMERGENCY at 190k — force blocking even if async still running
+                    # Tier 5: EMERGENCY at 990k — force blocking even if async still running
                     total_size = sum(len(str(m.get("content", ""))) for m in messages)
-                    if total_size > 190000:
+                    if total_size > _COMPACTION_TIER_5:
                         # Cancel any pending async and do immediate blocking compaction
                         messages._full_compact_pending = False  # type: ignore[attr-defined]
+                        with _ASYNC_COMPACT_LOCK:
+                            _ASYNC_COMPACT_IN_FLIGHT = False
                         messages = smart_compact_messages(messages, model=model, session_id=thread_id, system_prompt=system)
                         try:
                             from core.hooks import get_hooks
@@ -2191,9 +2319,9 @@ async def _agent_loop_inner(
                 # This keeps context from growing between tool calls
                 # With unlimited API, we can afford to microcompact EVERY turn if needed
                 total_size = sum(len(str(m.get("content", ""))) for m in messages)
-                if total_size > 65000:
+                if total_size > _COMPACTION_TIER_1:
                     prev = total_size
-                    messages = _microcompact_messages(messages, threshold=65000)
+                    messages = _microcompact_messages(messages, threshold=_COMPACTION_TIER_1)
                     new_sz = sum(len(str(m.get("content", ""))) for m in messages)
                     logger.debug("Post-tool microcompact: %d → %d (saved %d)", prev, new_sz, prev - new_sz)
 
@@ -3366,17 +3494,17 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
             logger.info("Screenshot analyzed locally via Ollama")
             return result, "ollama/gemma4:e4b \U0001f512 local"
         except Exception as e:
-            logger.warning("Ollama vision failed: %s → trying MiniMax", e)
+            logger.warning("Ollama vision failed: %s → trying OpenCode Go", e)
     else:
         logger.info("analyze_screenshot: using cloud directly (%s)", _skip_reason)
 
-    minimax_key = os.getenv("MINIMAX_API_KEY", "")
-    if not minimax_key:
-        raise RuntimeError("No MINIMAX_API_KEY and Ollama vision failed/skipped")
+    go_key = os.getenv("OPENCODE_GO_API_KEY", "")
+    if not go_key:
+        raise RuntimeError("No OPENCODE_GO_API_KEY and Ollama vision failed/skipped")
 
     try:
         resp = await acompletion(
-            model="minimax-coding-plan/MiniMax-M3",
+            model="opencode-go/deepseek-v4-pro",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["vision"]},
                 {
@@ -3387,16 +3515,16 @@ async def analyze_screenshot(image_path: str, question: str = "Describe what you
                     ],
                 },
             ],
-            api_key=minimax_key,
-            base_url="https://api.minimax.chat/v1",
+            api_key=go_key,
+            base_url="https://opencode.ai/zen/go/v1",
             max_tokens=1024,
         )
         result = (resp.choices[0].message.reasoning_content or resp.choices[0].message.content or "").strip()
-        _cloud_label = "minimax-coding-plan/MiniMax-M3"
+        _cloud_label = "opencode-go/deepseek-v4-pro"
         if _skip_local and _skip_reason:
             return result, f"{_cloud_label} (reason: {_skip_reason})"
             _cloud_label += f" \u2601\ufe0f (local bypassed: {_skip_reason[:60]})"
-        logger.info("Screenshot analyzed via Groq cloud vision")
+        logger.info("Screenshot analyzed via OpenCode Go")
         return result, _cloud_label
     except Exception as e:
         raise RuntimeError(
@@ -3452,7 +3580,7 @@ def chunk_output(text: str, max_length: int = 4000) -> list[str]:
 
 def verify_api_keys() -> dict[str, bool]:
     keys = [
-        "MINIMAX_API_KEY",
+        "OPENCODE_GO_API_KEY",
         "OLLAMA_API_KEY",
         "ZAI_API_KEY",
         "HF_TOKEN",

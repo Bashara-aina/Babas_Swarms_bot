@@ -493,7 +493,7 @@ async def classify_intent(message: str) -> IntentResult:
         except Exception:
             pass
 
-    # ── M2.7 TIER Skill Context Injection ────────────────────────────────
+    # ── M3 TIER Skill Context Injection ────────────────────────────────
     # After intent classification, load TIER-appropriate skills so the
     # system prompt can include them. This runs regardless of confidence.
     skill_context = _build_skill_context(result)
@@ -504,7 +504,7 @@ async def classify_intent(message: str) -> IntentResult:
 
 
 def _build_skill_context(result: IntentResult) -> str:
-    """Build M2.7 TIER skill context string from classified intent.
+    """Build M3 TIER skill context string from classified intent.
 
     Uses harness.load_skills_for_task() to get the relevant TIER 1-4 skills,
     then returns a formatted string for injection into system prompts.
@@ -527,7 +527,7 @@ def _build_skill_context(result: IntentResult) -> str:
 
 def _intent_to_task_type_domain(intent: Intent) -> tuple[str, str]:
     """Map Intent enum to (task_type, domain) for skill harness."""
-    # Map Intent → M2.7 task type
+    # Map Intent → M3 task type
     task_type_map = {
         Intent.CODE_GENERATION: "feature",
         Intent.CODE_REVIEW: "security",

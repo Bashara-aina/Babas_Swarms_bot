@@ -38,7 +38,7 @@ def log_usage(prompt_tokens: int, completion_tokens: int, cached_tokens: int = 0
 
 
 def today_total_jpy() -> float:
-    """Return today's total M2.7 cost in ¥ from cost_log.jsonl."""
+    """Return today's total M3 cost in ¥ from cost_log.jsonl."""
     if not COST_LOG.exists():
         return 0.0
     today = datetime.now(UTC).date().isoformat()
@@ -54,7 +54,7 @@ def today_total_jpy() -> float:
 
 
 def current_month_total_jpy() -> float:
-    """Return the current calendar month's total M2.7 cost in ¥."""
+    """Return the current calendar month's total M3 cost in ¥."""
     if not COST_LOG.exists():
         return 0.0
     month_prefix = datetime.now(UTC).strftime("%Y-%m")

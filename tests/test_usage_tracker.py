@@ -28,12 +28,16 @@ def test_record_free_model():
     assert stats["cost_usd"] == 0.0
 
 
-def test_record_paid_model():
+def test_record_unknown_model_uses_free_default():
+    # Project is fully migrated to free-tier MiniMax-M3 — no paid models in
+    # PRICING. record() must default unknown models to 0.0 cost rather than
+    # raising, so telemetry never crashes when a new free model is added.
     t = _tracker()
-    t.record("gemini/gemini-3.1-pro", input_tokens=1_000_000, output_tokens=1_000_000)
+    alert = t.record("gemini/gemini-3.1-pro", input_tokens=1_000_000, output_tokens=1_000_000)
+    assert alert is None   # no DAILY_LIMITS entry → no alert
     stats = t.get_today("gemini/gemini-3.1-pro")
-    # input: $0.035, output: $0.105 → total $0.14
-    assert abs(stats["cost_usd"] - 0.14) < 0.0001
+    assert stats["cost_usd"] == 0.0   # no PRICING entry → free
+    assert stats["requests"] == 1     # but request count is still tracked
 
 
 def test_daily_limit_alert():

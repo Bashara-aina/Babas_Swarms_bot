@@ -258,7 +258,7 @@ Legiona is the autonomous self-improvement subsystem.
 |------|---------|
 | `__init__.py` | Package init |
 | `scheduler.py` | `start_scheduler()` → Legiona autonomous maintenance |
-| `self_evolve.py` | `evolve(last_n=5)` → one M2.7 self-evolution cycle |
+| `self_evolve.py` | `evolve(last_n=5)` → one M3 self-evolution cycle |
 | `minimax_client.py` | Structured LLM calls via MiniMax |
 | `rag_indexer.py` | Build RAG index from .wiki/ |
 | `rag_retriever.py` | Retrieve relevant context from RAG |

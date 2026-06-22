@@ -9,6 +9,35 @@
   "avgComplexity": 0.5588447119553019,
   "avgConfidence": 0.5562633812649723,
   "circuitBreakerTrips": 0,
-  "lastUpdated": "2026-05-23T10:40:15.270Z",
-  "learningHistory": []
+  "lastUpdated": "2026-06-17T10:40:00.000Z",
+  "configChanges": {
+    "applied": "2026-06-17",
+    "modelsYaml": [
+      "REMOVED kimi-k2-6 (0 routing decisions, dead entry)",
+      "REMOVED deepseek-v4-pro-fallback (exact duplicate of deepseek-v4-pro)",
+      "ADDED minimax-m3 entry with full config (was primary_model for 80+ agents but missing)"
+    ],
+    "settingsJson": [
+      "FIXED global modelRestrictions allowOnly: ['deepseek','kimi','qwen','glm','mimo'] -> ['deepseek','minimax']",
+      "Removed 4 dead prefixes (kimi, qwen, glm, mimo) that no agent could use",
+      "Added minimax to allow agents to reach minimax-m3"
+    ],
+    "modelRouterPy": [
+      "REPLACED all 3 TIERS entries to fix 99.4% opus routing (root cause: flash was absent)",
+      "lightweight: primary -> deepseek-v4-flash (was deepseek-v4-pro)",
+      "midweight: primary -> deepseek-v4-flash (was deepseek-v4-pro)",
+      "heavyweight: primary -> minimax-m3 (was deepseek-v4-pro)",
+      "Expected: 60-80% of lightweight/midweight tasks now routed to flash"
+    ]
+  },
+  "expectedShift": {
+    "description": "After config changes, lightweight and midweight tasks should route to deepseek-v4-flash instead of deepseek-v4-pro. With avgComplexity=0.56 indicating mostly midweight tasks, majority of routing should shift from opus to flash.",
+    "lightweightCutoff": 150,
+    "midweightCutoff": 600,
+    "estimatedFlashRate": "60-80% of sub-600-char tasks"
+  },
+  "learningHistory": [],
+  "pendingIssues": [
+    "API_TIMEOUT_MS=3000000 (50min) is an OMEGA architectural setting, not in settings.json. Needs decision on whether to reduce."
+  ]
 }

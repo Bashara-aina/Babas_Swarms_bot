@@ -233,7 +233,7 @@ async function main() {
       cmd: ['/home/newadmin/miniconda3/bin/python3', '-m', 'tools.mcpServers.browser_use_mcp.server'],
       cwd: '/home/newadmin/swarm-bot',
       env: {
-        BROWSER_USE_MODEL: 'minimax/MiniMax-M2.7',
+        BROWSER_USE_MODEL: 'minimax/MiniMax-M3',
         LITELLM_BASE_URL: 'http://localhost:4000'
       },
       wait: 5000,

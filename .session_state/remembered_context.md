@@ -1,18 +1,41 @@
-━━━ RECALLED MEMORY (6-layer search) ━━━
-Query: verify-memory-layers
-Layers with results: 3/6
+# Session State: OpenCode Go Proxy — Claude-Style Role Presets
 
-━━━ LAYER 1: Session Checkpoints ━━━
-  • [20260521 160112] {"session_name": "memory recall fix \u2014 6-layer all returning results", "phase": "llm_call_complete", "last_query": "what did we do so far", "last_llm_call": 1747600000, "last_response_len": 2000, 
+## What We Did
+1. **Installed oc-cc-proxy** (v0.1.3) — LiteLLM proxy bridging Claude Code (Anthropic API) → OpenCode Go
+2. **Replaced MiniMax direct API** with OpenCode Go passthrough via proxy on port 4001
+3. **Configured 4 Claude-style role presets** mapping to Go's best 1M-context models
+4. **Updated all API keys** across .env, .claude/settings.json, and mirofish backend
+5. **Submitted feature request** to OpenCode Go: https://github.com/anomalyco/opencode/issues/31833
 
-━━━ LAYER 4: observation_store ━━━
-  • [discovery][2026-04-15T17:21:30] Queue test
-  • [decision][2026-04-15T17:17:58] Storage decision: SQLite over ChromaDB
-  • [discovery][2026-04-15T17:17:58] Testing observation store
+## Architecture
+```
+Claude Code → ANTHROPIC_BASE_URL=http://127.0.0.1:4001
+              ↓
+        oc-cc-proxy (:4001)
+          ├── Haiku  → deepseek-v4-flash  (31,650 calls/5h)
+          ├── Sonnet → deepseek-v4-pro    (3,450 calls/5h)
+          ├── Opus   → minimax-m3         (3,200 calls/5h)
+          └── Fable  → kimi-k2.6          (1,200 calls/5h)
+              ↓
+        OpenCode Go API (opencode.ai/zen/go/v1)
+```
 
-━━━ LAYER 5: graphrag (wiki) ━━━
-  • [graphrag|tool-output-formatting] --- title: Tool Output Formatting type: concept status: active tags: - / - home - newadmin - swarm-bot - tool-output-formatting.md created: '2026-04-14' updated: '2026-04-14' summary: How tool output should be formatted for Telegram display — truncation, HTML,   chunking. wikilinks: [] confidence: m
-  • [graphrag|observability-stack] --- title: Observability Stack type: concept status: active tags: - / - home - newadmin - swarm-bot - observability-stack.md created: '2026-04-14' updated: '2026-04-14' summary: Prometheus metrics on :8001, AgentOps optional, local structured JSON logs,   in-memory cost tracking — no unified dashboa
-  • [graphrag|observability-stack] ** — no Alertmanager integration 2. **No Grafana dashboard** — metrics exist but no visualization 3. **No distributed tracing** — no request ID / correlation ID across agent calls 4. **No query-level Supabase metrics** — cannot identify slow tables or missing indexes 5. **No cost per-user breakdown*
+## Running Process
+- **oc-cc-proxy** (litellm) on `:4001` — Anthropic→OpenAI wildcard passthrough to OpenCode Go
+- Start: `scripts/start-oc-cc-proxy.sh` or `oc-cc-proxy --api-key $OPENCODE_GO_API_KEY --port 4001`
 
-━━━ END RECALL — treat as prior context ━━━
+## Key Config
+- `settings.json`: `ANTHROPIC_BASE_URL = http://127.0.0.1:4001`
+- `settings.json`: `ANTHROPIC_API_KEY = dummy-key-for-claude-code` (proxy handles real auth)
+- `.env`: `OPENCODE_GO_API_KEY = sk-RzkWr...` (real key for proxy)
+- `.env`: `OC_PROXY_PORT = 4001`
+
+## Validated Models (through proxy)
+- `deepseek-v4-flash` ✅ (fast, high-volume)
+- `deepseek-v4-pro` ✅ (workhorse, reasoning)
+- `minimax-m3` ✅ (orchestrator)
+- `kimi-k2.6` ✅ (hardest reasoning)
+- `qwen3.6-plus` ✅ (alternative)
+- `glm-5.1` ✅ (alternative)
+- `MiniMax-M3` ❌ (not available on Go — use `minimax-m3` lowercase)
+- `qwen3.7-max` ❌ (auth error on Go)

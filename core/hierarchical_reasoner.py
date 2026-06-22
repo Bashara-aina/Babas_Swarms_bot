@@ -1,4 +1,4 @@
-"""M2.7 Hierarchical Reasoner — 3-layer reasoning decomposition.
+"""M3 Hierarchical Reasoner — 3-layer reasoning decomposition.
 
 ReasonFlux-inspired: decompose every complex task into 3 distinct layers
 that cannot "leak" upward. Layer 3 (execution) outputs cannot change Layer 1 goals.
@@ -25,7 +25,7 @@ CRITICAL RULE: Layer 3 reasoning CANNOT change Layer 1 goals.
 If Layer 3 discovers something that challenges Layer 1, it surfaces
 via a "REVISIT FLAG" but does NOT modify Layer 1 directly.
 
-Reference: M2.7 Full Capability Activation — Hierarchical Reasoning (Section D4)
+Reference: M3 Full Capability Activation — Hierarchical Reasoning (Section D4)
 Inspired by: ReasonFlux multi-level reasoning architecture
 """
 
@@ -660,7 +660,7 @@ class HierarchicalReasoner:
         if "agent" in task_lower or "llm" in task_lower:
             function_signatures.extend([
                 "async def call_agent(agent_key: str, prompt: str) -> str: ...",
-                "# Model string: provider/model format (e.g., 'minimax-coding-plan/MiniMax-M3')",
+                "# Model string: provider/model format (e.g., 'opencode-go/deepseek-v4-pro')",
             ])
             edge_cases.extend([
                 "Rate limit error — fall back to next provider in chain",

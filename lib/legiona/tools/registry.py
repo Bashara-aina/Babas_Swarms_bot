@@ -1,6 +1,6 @@
 """
 lib/legiona/tools/registry.py
-M2.7 native tool registry — defines every tool available to the tool-calling loop.
+M3 native tool registry — defines every tool available to the tool-calling loop.
 Each entry maps a tool name -> (function, JSON schema).
 Schemas are OpenAI-compatible (tool_calls format).
 """

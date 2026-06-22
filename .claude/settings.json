@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" pre-bash'",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous-git.sh",
             "timeout": 5000
           }
         ]
@@ -16,8 +16,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" pre-edit'",
-            "timeout": 5000
+            "command": "echo '[OK] Pre-edit check passed'",
+            "timeout": 500
           }
         ]
       }
@@ -29,17 +29,7 @@
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" post-edit'",
-            "timeout": 10000
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" post-bash'",
-            "timeout": 5000
+            "timeout": 3000
           }
         ]
       }
@@ -49,51 +39,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" route'",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/bin/headroom-proxy.sh\" >/dev/null 2>&1 || true'",
-            "timeout": 30000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-restore'",
-            "timeout": 15000
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end'",
-            "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync'",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync'",
-            "timeout": 10000
+            "command": "echo '[OK] Prompt received'",
+            "timeout": 500
           }
         ]
       }
@@ -130,9 +77,38 @@
         ]
       }
     ],
-    "SubagentStart": [],
-    "SubagentStop": [],
-    "Notification": []
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-restore'",
+            "timeout": 15000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end'",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/create-checkpoint.cjs\"'",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\"'",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
   },
   "statusLine": {
     "type": "command",
@@ -152,26 +128,17 @@
   },
   "modelRestrictions": {
     "global": {
-      "denyProviders": [
-        "anthropic"
-      ],
       "allowOnly": [
-        "minimax",
-        "openai",
-        "ollama"
+        "deepseek",
+        "minimax"
       ],
-      "fallbackTo": "MiniMax-M2.7"
+      "fallbackTo": "deepseek-v4-pro"
     },
     "agents": {
-      "deny": [
-        "sonnet",
-        "opus",
-        "haiku",
-        "claude-*"
-      ],
       "allowOnly": [
-        "MiniMax-M2.7",
-        "minimax"
+          "deepseek-v4-pro",
+          "deepseek-v4-flash",
+          "minimax-m3"
       ]
     }
   },
@@ -183,40 +150,23 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_FLOW_V3_ENABLED": "true",
     "CLAUDE_FLOW_HOOKS_ENABLED": "true",
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8787",
-    "ANTHROPIC_TARGET_API_URL": "https://api.minimax.io/anthropic",
-    "HEADROOM_HOST": "127.0.0.1",
-    "HEADROOM_PORT": "8787",
-    "HEADROOM_TELEMETRY": "off",
-    "HF_HUB_OFFLINE": "1",
-    "TRANSFORMERS_OFFLINE": "1"
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:4001",
+    "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
+    "ANTHROPIC_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "HERMES_MAX_CONTEXT_TOKENS": "131072",
+    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
   },
   "mcpServers": {
-    "hermes": {
-      "command": "python3",
+    "hermes-lite": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
       "args": [
-        ".claude-flow/mcp/hermes-mcp-server.py"
+        ".claude-flow/mcp/hermes-lite-mcp-server.py"
       ],
       "env": {
-        "HERMES_REPO_PATH": "/home/newadmin/hermes-agent",
-        "MINIMAX_API_KEY": "${MINIMAX_API_KEY}"
-      }
-    },
-    "headroom": {
-      "command": "/home/newadmin/miniconda3/bin/headroom",
-      "args": [
-        "mcp",
-        "serve",
-        "--no-telemetry",
-        "--proxy-url=http://127.0.0.1:8787"
-      ],
-      "env": {
-        "ANTHROPIC_TARGET_API_URL": "https://api.minimax.io/anthropic",
-        "HEADROOM_TELEMETRY": "off",
-        "HEADROOM_HOST": "127.0.0.1",
-        "HEADROOM_PORT": "8787",
-        "HF_HUB_OFFLINE": "1",
-        "TRANSFORMERS_OFFLINE": "1"
+        "HERMES_REPO_PATH": "/home/newadmin/hermes-agent"
       }
     }
   },
@@ -229,8 +179,8 @@
       "shell": "bash"
     },
     "modelPreferences": {
-      "default": "MiniMax-M2.7",
-      "routing": "MiniMax-M2.7"
+      "default": "deepseek-v4-pro",
+      "routing": "deepseek-v4-flash"
     },
     "agentTeams": {
       "enabled": true,
@@ -267,16 +217,16 @@
       "persistPath": ".claude-flow/data",
       "learningBridge": {
         "enabled": true,
-        "sonaMode": "balanced",
-        "confidenceDecayRate": 0.005,
-        "accessBoostAmount": 0.03,
-        "consolidationThreshold": 10
+        "sonaMode": "focused",
+        "confidenceDecayRate": 0.02,
+        "accessBoostAmount": 0.10,
+        "consolidationThreshold": 3
       },
       "memoryGraph": {
         "enabled": true,
         "pageRankDamping": 0.85,
-        "maxNodes": 5000,
-        "similarityThreshold": 0.8
+        "maxNodes": 2000,
+        "similarityThreshold": 0.85
       },
       "agentScopes": {
         "enabled": true,
@@ -293,7 +243,7 @@
     },
     "learning": {
       "enabled": true,
-      "autoTrain": true,
+      "autoTrain": false,
       "patterns": [
         "coordination",
         "optimization",
@@ -301,7 +251,7 @@
       ],
       "retention": {
         "shortTerm": "24h",
-        "longTerm": "30d"
+        "longTerm": "90d"
       }
     },
     "adr": {

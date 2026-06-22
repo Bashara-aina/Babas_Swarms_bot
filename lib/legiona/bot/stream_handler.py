@@ -42,7 +42,7 @@ async def stream_response(
     verbose: bool = False,
 ) -> str:
     """
-    Stream M2.7 responses via SSE, invoking `on_chunk` for each delta.
+    Stream M3 responses via SSE, invoking `on_chunk` for each delta.
 
     Args:
         messages: OpenAI-style message list
@@ -54,9 +54,9 @@ async def stream_response(
     Returns:
         Full accumulated response string
     """
-    api_key = os.getenv("MINIMAX_API_KEY", "")
+    api_key = os.getenv("OPENCODE_GO_API_KEY", "")
     if not api_key:
-        raise ValueError("MINIMAX_API_KEY not set")
+        raise ValueError("OPENCODE_GO_API_KEY not set")
 
     model_str = model or MINIMAX_MODEL
     preset_map = {
@@ -74,7 +74,7 @@ async def stream_response(
         "model": model_str,
         "messages": messages,
         "stream": True,
-        "extra_body": {"reasoning_split": True},
+        "extra_body": {"reasoning_split": False},
         **params,
     }
 
@@ -266,7 +266,7 @@ async def stream_to_telegram(
     parse_mode: str = "HTML",
 ) -> str:
     """
-    Stream M2.7 response directly to a Telegram chat.
+    Stream M3 response directly to a Telegram chat.
     Sends initial placeholder, then progressively edits the message.
 
     Args:

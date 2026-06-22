@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
-Dual-model proxy: routes Anthropic /v1/messages to either:
-
-  model=nemotron         → Anthropic→OpenAI translation → LiteLLM port 4000 → OpenRouter
-  model=minimax/MiniMax-M3 → Passthrough to Headroom (api.minimax.io/anthropic)
-
+Anthropic-to-OpenAI proxy: translates Anthropic /v1/messages to OpenAI-compatible API.
+Routes all models through the LiteLLM proxy (port 4000) with Anthropic→OpenAI translation.
 Both streaming and non-streaming are supported.
 
 Usage:
@@ -24,42 +21,25 @@ HOST = "0.0.0.0"
 PORT = int(os.environ.get("PROXY_PORT", "4001"))
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
-# Upstream for Nemotron (LiteLLM OpenAI endpoint)
-NEMOTRON_UPSTREAM = os.environ.get("NEMOTRON_UPSTREAM", "http://localhost:4000")
+# Upstream — all models route through LiteLLM (OpenAI endpoint)
+LLM_UPSTREAM = os.environ.get("LLM_UPSTREAM", "http://localhost:4000")
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-
-# Upstream for MiniMax (Headroom Anthropic endpoint)
-MINIMAX_API_URL = os.environ.get("MINIMAX_API_URL", "https://api.minimax.io/anthropic")
-MINIMAX_KEY = os.environ.get("MINIMAX_API_KEY", "")
 
 log = logging.getLogger("model-proxy")
 
-# Models that use the Nemotron path (Anthropic→OpenAI translation)
+# Models that use the Nemotron path (Anthropic→OpenAI translation via OpenRouter)
 NEMOTRON_MODELS = {"nemotron", "nvidia/nemotron-3-ultra-550b-a55b:free"}
-# Models that use the MiniMax passthrough (Anthropic → Headroom)
-MINIMAX_MODELS = {
-    "minimax/MiniMax-M3", "MiniMax-M3",
-    # Map common Claude Code model names → MiniMax
-    "claude-sonnet-4-20250514", "claude-sonnet-4",
-    "claude-3.5-sonnet", "claude-3-opus",
-    "claude-opus-4-20250514", "claude-opus-4",
-    "claude-haiku", "claude-3-haiku",
-}
 
 
 # ── Router ───────────────────────────────────────────────────────────────────
 
 def get_route(model: str) -> str:
-    """Return 'nemotron' or 'minimax' based on the model name."""
-    if model in NEMOTRON_MODELS:
-        return "nemotron"
-    if model in MINIMAX_MODELS:
-        return "minimax"
-    # Default to MiniMax (useful one); explicitly use "nemotron" model for Nemotron
-    return "minimax"
+    """Return 'translated' for all models (Anthropic→OpenAI translation).
+    All models go through the same translation path to the upstream LLM proxy."""
+    return "translated"
 
 
-# ── Nemotron: Anthropic → OpenAI translation ─────────────────────────────────
+# ── Anthropic → OpenAI translation ────────────────────────────────────────
 
 def anthropic_request_to_openai(body: dict) -> dict:
     """Convert an Anthropic /v1/messages request to OpenAI /v1/chat/completions."""
@@ -85,7 +65,7 @@ def anthropic_request_to_openai(body: dict) -> dict:
         messages.append({"role": role, "content": content})
 
     oai_body = {
-        "model": "nemotron",
+        "model": body.get("model", "deepseek-v4-pro"),
         "messages": messages,
         "stream": body.get("stream", False),
         "max_tokens": body.get("max_tokens", 4096),
@@ -103,8 +83,8 @@ def make_anthropic_message_id() -> str:
     return f"msg_{uuid.uuid4().hex[:24]}"
 
 
-async def nemotron_nonstream(request_json: dict) -> dict:
-    """Non-streaming Nemotron: translate, call LiteLLM, translate back."""
+async def translate_nonstream(request_json: dict) -> dict:
+    """Non-streaming: translate Anthropic→OpenAI, call upstream, translate back."""
     oai_body = anthropic_request_to_openai(request_json)
     oai_body["stream"] = False
 
@@ -112,13 +92,13 @@ async def nemotron_nonstream(request_json: dict) -> dict:
 
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            f"{NEMOTRON_UPSTREAM}/v1/chat/completions",
+            f"{LLM_UPSTREAM}/v1/chat/completions",
             headers=headers, json=oai_body,
             timeout=aiohttp.ClientTimeout(total=300),
         ) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
-                log.error(f"Nemotron upstream error {resp.status}: {error_text}")
+                log.error(f"Upstream error {resp.status}: {error_text}")
                 return {"type": "error", "error": {"type": "api_error", "message": f"Upstream returned {resp.status}"}}
             oai_result = await resp.json()
 
@@ -133,7 +113,7 @@ async def nemotron_nonstream(request_json: dict) -> dict:
         "type": "message",
         "role": "assistant",
         "content": [{"type": "text", "text": content_text}],
-        "model": request_json.get("model", "nemotron"),
+        "model": request_json.get("model", "deepseek-v4-pro"),
         "stop_reason": "end_turn" if finish == "stop" else finish,
         "stop_sequence": None,
         "usage": {
@@ -143,8 +123,8 @@ async def nemotron_nonstream(request_json: dict) -> dict:
     }
 
 
-async def nemotron_stream(request_json: dict, writer) -> None:
-    """Streaming Nemotron: translate, stream from LiteLLM SSE, emit Anthropic SSE."""
+async def translate_stream(request_json: dict, writer) -> None:
+    """Streaming: translate Anthropic→OpenAI, stream from upstream SSE, emit Anthropic SSE."""
     oai_body = anthropic_request_to_openai(request_json)
     oai_body["stream"] = True
 
@@ -159,13 +139,13 @@ async def nemotron_stream(request_json: dict, writer) -> None:
 
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            f"{NEMOTRON_UPSTREAM}/v1/chat/completions",
+            f"{LLM_UPSTREAM}/v1/chat/completions",
             headers=headers, json=oai_body,
             timeout=aiohttp.ClientTimeout(total=300),
         ) as resp:
             if resp.status != 200:
                 error_text = await resp.text()
-                log.error(f"Nemotron upstream error {resp.status}: {error_text}")
+                log.error(f"Upstream error {resp.status}: {error_text}")
                 await sse(f"event: error\ndata: {json.dumps({'error': {'message': f'Upstream error: {resp.status}'}})}\n\n")
                 return
 
@@ -231,68 +211,6 @@ async def nemotron_stream(request_json: dict, writer) -> None:
             })}\n\n")
 
 
-# ── MiniMax: passthrough to Headroom ─────────────────────────────────────────
-
-async def minimax_passthrough(body: dict, writer, is_stream: bool) -> None:
-    """Passthrough Anthropic Messages API → Headroom (api.minimax.io/anthropic).
-
-    Headroom already speaks Anthropic Messages API, so we just forward the
-    request as-is and pass through the response unchanged (streaming or not).
-    """
-    upstream_url = f"{MINIMAX_API_URL}/v1/messages"
-    upstream_headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {MINIMAX_KEY}",
-        "anthropic-version": "2023-06-01",
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            upstream_url,
-            headers=upstream_headers,
-            json=body,
-            timeout=aiohttp.ClientTimeout(total=300),
-        ) as resp:
-            if is_stream:
-                if resp.status != 200:
-                    error_text = await resp.text()
-                    log.error(f"MiniMax upstream error {resp.status}: {error_text}")
-                    await send_json_response(writer, resp.status, {
-                        "error": {"message": f"MiniMax upstream error: {error_text[:200]}"}
-                    })
-                    return
-
-                # Stream mode: pass through SSE events as-is
-                response_headers = (
-                    "HTTP/1.1 200 OK\r\n"
-                    "Content-Type: text/event-stream\r\n"
-                    "Cache-Control: no-cache\r\n"
-                    "Connection: keep-alive\r\n"
-                    "Access-Control-Allow-Origin: *\r\n"
-                    "x-request-id: " + uuid.uuid4().hex + "\r\n"
-                    "\r\n"
-                ).encode()
-                writer.write(response_headers)
-                await writer.drain()
-
-                async for line_bytes, _ in resp.content.iter_chunks():
-                    writer.write(line_bytes)
-                    await writer.drain()
-            else:
-                # Non-streaming: pass through JSON response as-is
-                body_bytes = await resp.read()
-                response = (
-                    f"HTTP/1.1 {resp.status} {'OK' if resp.status == 200 else 'Error'}\r\n"
-                    f"Content-Type: application/json\r\n"
-                    f"Content-Length: {len(body_bytes)}\r\n"
-                    "Access-Control-Allow-Origin: *\r\n"
-                    f"x-request-id: {uuid.uuid4().hex}\r\n"
-                    "\r\n"
-                ).encode() + body_bytes
-                writer.write(response)
-                await writer.drain()
-
-
 # ── HTTP Handler ─────────────────────────────────────────────────────────────
 
 async def handle_request(reader, writer):
@@ -311,9 +229,21 @@ async def handle_request(reader, writer):
         elif path == "/v1/models" and method == "GET":
             await send_json_response(writer, 200, {
                 "data": [
-                    {"id": "MiniMax-M3", "object": "model", "created": 1677610602, "owned_by": "minimax"},
-                    {"id": "minimax/MiniMax-M3", "object": "model", "created": 1677610602, "owned_by": "minimax"},
-                    {"id": "nemotron", "object": "model", "created": 1677610602, "owned_by": "openrouter"},
+                    {
+                        "id": "deepseek-v4-pro", "type": "model",
+                        "display_name": "DeepSeek V4 Pro (via OpenCode Go)",
+                        "created_at": "2026-06-01T00:00:00Z",
+                    },
+                    {
+                        "id": "deepseek-v4-flash", "type": "model",
+                        "display_name": "DeepSeek V4 Flash (via OpenCode Go)",
+                        "created_at": "2026-06-01T00:00:00Z",
+                    },
+                    {
+                        "id": "nemotron", "type": "model",
+                        "display_name": "Nemotron 3 Ultra 550B (via OpenRouter)",
+                        "created_at": "2026-06-01T00:00:00Z",
+                    },
                 ]
             })
         else:
@@ -332,26 +262,19 @@ async def handle_request(reader, writer):
 
 
 async def handle_messages(body_bytes: bytes, headers: dict, writer):
-    """Route POST /v1/messages to the correct backend based on model."""
+    """Route POST /v1/messages through Anthropic→OpenAI translation."""
     try:
         body = json.loads(body_bytes)
     except json.JSONDecodeError:
         await send_json_response(writer, 400, {"error": {"message": "Invalid JSON"}})
         return
 
-    model = body.get("model", "nemotron")
-    route = get_route(model)
+    model = body.get("model", "deepseek-v4-pro")
     is_stream = body.get("stream", False)
 
-    log.info(f"Routing model={model!r} route={route} stream={is_stream}")
+    log.info(f"Translating model={model!r} stream={is_stream}")
 
-    if route == "minimax":
-        # MiniMax → passthrough to Headroom
-        body["model"] = "minimax/MiniMax-M3"
-        await minimax_passthrough(body, writer, is_stream)
-        return
-
-    # Nemotron → Anthropic→OpenAI translation
+    # All models → Anthropic→OpenAI translation
     if is_stream:
         response_headers = (
             "HTTP/1.1 200 OK\r\n"
@@ -364,10 +287,10 @@ async def handle_messages(body_bytes: bytes, headers: dict, writer):
         ).encode()
         writer.write(response_headers)
         await writer.drain()
-        await nemotron_stream(body, writer)
+        await translate_stream(body, writer)
         await writer.drain()
     else:
-        result = await nemotron_nonstream(body)
+        result = await translate_nonstream(body)
         body_json = json.dumps(result)
         response = (
             "HTTP/1.1 200 OK\r\n"
@@ -450,17 +373,15 @@ async def send_json_response(writer, status_code: int, data: dict):
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 async def main():
-    parser = argparse.ArgumentParser(description="Dual-model proxy for Nemotron + MiniMax")
+    parser = argparse.ArgumentParser(description="Anthropic→OpenAI translation proxy")
     parser.add_argument("--port", type=int, default=PORT, help=f"Port to listen on (default: {PORT})")
-    args = parser.parse_args()
 
     logging.basicConfig(level=getattr(logging, LOG_LEVEL), format="%(asctime)s %(levelname)s %(message)s")
 
     server = await asyncio.start_server(handle_request, HOST, args.port)
     addr = server.sockets[0].getsockname()
-    log.info(f"Model proxy listening on {addr[0]}:{addr[1]}")
-    log.info(f"  Nemotron upstream: {NEMOTRON_UPSTREAM}")
-    log.info(f"  MiniMax upstream:  {MINIMAX_API_URL}")
+    log.info(f"Translation proxy listening on {addr[0]}:{addr[1]}")
+    log.info(f"  Upstream (OpenAI-compatible): {LLM_UPSTREAM}")
 
     async with server:
         await server.serve_forever()

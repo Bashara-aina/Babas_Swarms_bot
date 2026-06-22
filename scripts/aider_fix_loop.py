@@ -22,12 +22,12 @@ import time
 from dataclasses import dataclass
 
 # ── MiniMax API config (mirrors what agents/__init__.py uses) ─────────────────
-MINIMAX_API_KEY = os.getenv("MINIMAX_API_KEY", "")
-MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
+OPENCODE_GO_API_KEY = os.getenv("OPENCODE_GO_API_KEY", "")
+MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.opencode.ai/zen/go/v1")
 
 # ── MiniMax-only cascade (no gemini, no deepseek — MiniMax only) ───────────────
 MODEL_CASCADE: list[dict[str, str]] = [
-    {"model": "minimax-coding-plan/MiniMax-M3", "label": "MiniMax M3"},
+    {"model": "opencode-go/deepseek-v4-pro", "label": "MiniMax M3"},
 ]
 
 # ── Test command defaults ─────────────────────────────────────────────────────
@@ -59,8 +59,8 @@ def _build_aider_env() -> dict:
     """Build a clean env dict for aider subprocess."""
     env = os.environ.copy()
     env["OPENAI_API_BASE"] = MINIMAX_BASE_URL
-    if MINIMAX_API_KEY:
-        env["OPENAI_API_KEY"] = MINIMAX_API_KEY
+    if OPENCODE_GO_API_KEY:
+        env["OPENAI_API_KEY"] = OPENCODE_GO_API_KEY
     return env
 
 

@@ -1,6 +1,6 @@
 """
 lib/legiona/self_evolve.py
-M2.7 self-evolution pattern: after each agent session,
+M3 self-evolution pattern: after each agent session,
 Legiona critiques its own performance and patches its system prompt.
 
 Usage:
@@ -104,7 +104,7 @@ def _rule_exists(new_rule: str) -> bool:
 
 def evolve(last_n: int = 5) -> str | None:
     """
-    Read last N sessions. Ask M2.7 to:
+    Read last N sessions. Ask M3 to:
     1. Identify what went wrong or could be improved
     2. Propose ONE concrete new rule
     3. Append it to rules.md (deduplicated — never overwrite)

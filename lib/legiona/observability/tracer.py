@@ -1,6 +1,6 @@
 """
 lib/legiona/observability/tracer.py
-OpenTelemetry tracing for every M2.7 call and tool loop round.
+OpenTelemetry tracing for every M3 call and tool loop round.
 Export to Jaeger (local) or stdout (CI/default).
 
 Setup for local dev:
@@ -41,7 +41,7 @@ else:
     _provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
 trace.set_tracer_provider(_provider)
-tracer = trace.get_tracer("legiona.m2_7")
+tracer = trace.get_tracer("legiona.m3")
 
 
 @contextmanager

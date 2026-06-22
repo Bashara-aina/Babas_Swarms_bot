@@ -14,6 +14,7 @@
  *   session-end     - End session and persist state
  *   compact-manual  - Manual compaction hook
  *   compact-auto    - Auto compaction hook
+ *   compact-summarize - LLM-based conversation summarizer (PreCompact payload)
  *   status          - Show hook/status info
  *   notify          - Send notification
  */
@@ -24,6 +25,11 @@ const path = require('path');
 const fs = require('fs');
 
 const helpersDir = __dirname;
+
+// All diagnostic output goes to stderr — stdout is reserved for statusline,
+// structured command output, and Claude Code's internal rendering.
+// Concurrent stdout writes during agent deployment cause interleaved garbled text.
+function log(msg = '') { process.stderr.write(msg + '\n'); }
 
 // Safe require with stdout suppression
 function safeRequire(modulePath) {
@@ -44,9 +50,11 @@ function safeRequire(modulePath) {
   return null;
 }
 
-const router = safeRequire(path.join(helpersDir, 'router.js'));
-const session = safeRequire(path.join(helpersDir, 'session.js'));
-const intelligence = safeRequire(path.join(helpersDir, 'intelligence.cjs'));
+// ── Lazy-loading getters (no top-level require — saves tokens on simple hooks) ──
+let _router, _session, _intelligence;
+function getRouter() { return _router || (_router = safeRequire(path.join(helpersDir, 'router.js'))); }
+function getSession() { return _session || (_session = safeRequire(path.join(helpersDir, 'session.js'))); }
+function getIntelligence() { return _intelligence || (_intelligence = safeRequire(path.join(helpersDir, 'intelligence.cjs'))); }
 
 // ── Intelligence timeout protection ────────────────────────────────────────
 const INTELLIGENCE_TIMEOUT_MS = 3000;
@@ -98,23 +106,29 @@ async function readStdin(timeoutMs = 500) {
   if (process.stdin.isTTY) return '';
   return new Promise((resolve) => {
     let data = '';
+    let settled = false;
+    const done = (val) => { if (!settled) { settled = true; resolve(val || data); } };
     const timer = setTimeout(() => {
       try { process.stdin.removeAllListeners(); } catch (_) {}
-      try { process.stdin.pause(); } catch (_) {}
-      resolve(data);
+      try { process.stdin.destroy(); } catch (_) {}
+      done();
     }, timeoutMs);
     timer.unref();
     process.stdin.setEncoding('utf8');
     process.stdin.on('data', (chunk) => { data += chunk; });
-    process.stdin.on('end', () => { clearTimeout(timer); resolve(data); });
-    process.stdin.on('error', () => { clearTimeout(timer); resolve(data); });
+    process.stdin.on('end', () => { clearTimeout(timer); done(); });
+    process.stdin.on('error', () => { clearTimeout(timer); done(); });
     try { process.stdin.resume(); } catch (_) {}
   });
 }
 
 async function main() {
+  // Skip stdin for commands that don't need hookInput data (saves ~500ms per call)
+  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats'];
   let stdinData = '';
-  try { stdinData = await readStdin(500); } catch (e) { /* ignore stdin errors */ }
+  if (!command || !NO_STDIN_COMMANDS.includes(command)) {
+    try { stdinData = await readStdin(500); } catch (e) { /* ignore stdin errors */ }
+  }
 
   let hookInput = {};
   if (stdinData && stdinData.trim()) {
@@ -130,11 +144,13 @@ async function main() {
 
   const handlers = {
     'route': async () => {
+      const intelligence = getIntelligence();
+      const router = getRouter();
       if (intelligence && intelligence.getContext) {
         try {
           const ctx = await runWithTimeout(
-            () => intelligence.getContext(prompt),
-            'intelligence.getContext()'
+            () => getIntelligence().getContext(prompt),
+            'getIntelligence().getContext()'
           );
           if (ctx) console.log(ctx);
         } catch (e) { /* non-fatal */ }
@@ -199,148 +215,206 @@ async function main() {
       const dangerous = ['rm -rf /', 'format c:', 'del /s /q c:\\', ':(){:|:&};:', 'mkfs'];
       for (const d of dangerous) {
         if (cmd.includes(d)) {
-          console.error(`[BLOCKED] Dangerous command detected: ${d}`);
+          log(`[BLOCKED] Dangerous command detected: ${d}`);
           process.exit(1);
         }
       }
-      console.log('[OK] Command validated');
     },
 
-    'pre-edit': () => {
-      console.log('[OK] Pre-edit check passed');
-    },
+    'pre-edit': () => {},
 
     'post-edit': () => {
-      if (session && session.metric) {
-        try { session.metric('edits'); } catch (e) { /* no active session */ }
+      const sessionMod = getSession();
+      const intelligenceMod = getIntelligence();
+      if (sessionMod && sessionMod.metric) {
+        try { sessionMod.metric('edits'); } catch (e) { /* no active session */ }
       }
-      if (intelligence && intelligence.recordEdit) {
+      if (intelligenceMod && intelligenceMod.recordEdit) {
         try {
           const file = hookInput.file_path || toolInput.file_path
             || process.env.TOOL_INPUT_file_path || args[0] || '';
-          runWithTimeout(() => intelligence.recordEdit(file), 'intelligence.recordEdit()');
+          runWithTimeout(() => intelligenceMod.recordEdit(file), 'intelligenceMod.recordEdit()');
         } catch (e) { /* non-fatal */ }
       }
-      console.log('[OK] Edit recorded');
     },
 
     'session-restore': async () => {
-      if (session) {
-        const existing = session.restore && session.restore();
+      const sessionMod = getSession();
+      const intelligenceMod = getIntelligence();
+      if (sessionMod) {
+        const existing = sessionMod.restore && sessionMod.restore();
         if (!existing) {
-          session.start && session.start();
+          sessionMod.start && sessionMod.start();
         }
       } else {
-        const sessionId = `session-${Date.now()}`;
-        console.log(`[INFO] Restoring session: %SESSION_ID%`);
-        console.log('');
-        console.log(`[OK] Session restored from %SESSION_ID%`);
-        console.log(`New session ID: ${sessionId}`);
-        console.log('');
-        console.log('Restored State');
-        console.log('+----------------+-------+');
-        console.log('| Item           | Count |');
-        console.log('+----------------+-------+');
-        console.log('| Tasks          |     0 |');
-        console.log('| Agents         |     0 |');
-        console.log('| Memory Entries |     0 |');
-        console.log('+----------------+-------+');
+        log(`[INFO] Session restored`);
       }
-      if (intelligence && intelligence.init) {
-        const initResult = await runWithTimeout(() => intelligence.init(), 'intelligence.init()');
-        if (initResult && initResult.nodes > 0) {
-          console.log(`[INTELLIGENCE] Loaded ${initResult.nodes} patterns, ${initResult.edges} edges`);
+      if (intelligenceMod && intelligenceMod.init) {
+        // Suppress intelligence.cjs internal console.log (it redundantly prints
+        // JSON to stdout at module export level — agent deployment interleaves it).
+        const origLog = console.log;
+        console.log = () => {};
+        try {
+          const initResult = await runWithTimeout(() => intelligenceMod.init(), 'intelligenceMod.init()');
+          if (initResult && initResult.nodes > 0) {
+            log(`[INTELLIGENCE] Loaded ${initResult.nodes} patterns, ${initResult.edges} edges`);
+          }
+        } finally {
+          console.log = origLog;
         }
       }
     },
 
     'session-end': async () => {
-      if (intelligence && intelligence.consolidate) {
-        const consResult = await runWithTimeout(() => intelligence.consolidate(), 'intelligence.consolidate()');
-        if (consResult && consResult.entries > 0) {
-          console.log(`[INTELLIGENCE] Consolidated: ${consResult.entries} entries, ${consResult.edges} edges${consResult.newEntries > 0 ? `, ${consResult.newEntries} new` : ''}, PageRank recomputed`);
+      const intelligenceMod = getIntelligence();
+      const sessionMod = getSession();
+      if (intelligenceMod && intelligenceMod.consolidate) {
+        // Suppress intelligence.cjs internal console.log (redundant JSON to stdout).
+        const origLog = console.log;
+        console.log = () => {};
+        try {
+          const consResult = await runWithTimeout(() => intelligenceMod.consolidate(), 'intelligenceMod.consolidate()');
+          if (consResult && consResult.entries > 0) {
+            log(`[INTELLIGENCE] Consolidated: ${consResult.entries} entries, ${consResult.edges} edges${consResult.newEntries > 0 ? `, ${consResult.newEntries} new` : ''}, PageRank recomputed`);
+          }
+        } finally {
+          console.log = origLog;
         }
       }
-      if (session && session.end) {
-        session.end();
-      } else {
-        console.log('[OK] Session ended');
+      if (sessionMod && sessionMod.end) {
+        sessionMod.end();
       }
     },
 
     'pre-task': () => {
-      if (session && session.metric) {
-        try { session.metric('tasks'); } catch (e) { /* no active session */ }
+      const sessionMod = getSession();
+      const routerMod = getRouter();
+      if (sessionMod && sessionMod.metric) {
+        try { sessionMod.metric('tasks'); } catch (e) { /* no active session */ }
       }
-      if (router && router.routeTask && prompt) {
-        const result = router.routeTask(prompt);
-        console.log(`[INFO] Task routed to: ${result.agent} (confidence: ${result.confidence})`);
-      } else {
-        console.log('[OK] Task started');
+      if (routerMod && routerMod.routeTask && prompt) {
+        const result = routerMod.routeTask(prompt);
+        log(`[INFO] Task routed to: ${result.agent} (confidence: ${result.confidence})`);
       }
     },
 
     'post-task': () => {
-      if (intelligence && intelligence.feedback) {
-        try { intelligence.feedback(true); } catch (e) { /* non-fatal */ }
+      const intelligenceMod = getIntelligence();
+      if (intelligenceMod && intelligenceMod.feedback) {
+        try { intelligenceMod.feedback(true); } catch (e) { /* non-fatal */ }
       }
-      console.log('[OK] Task completed');
     },
 
     'compact-manual': () => {
-      if (session && session.end) {
-        console.log('[INFO] Manual compact: archiving session');
-        session.end();
+      const sessionMod = getSession();
+      if (sessionMod && sessionMod.end) {
+        sessionMod.end();
       }
-      console.log('[OK] Compact manual complete');
     },
 
     'compact-auto': () => {
-      if (intelligence && intelligence.consolidate) {
-        runWithTimeout(() => intelligence.consolidate(), 'intelligence.consolidate()');
+      const intelligenceMod = getIntelligence();
+      if (intelligenceMod && intelligenceMod.consolidate) {
+        runWithTimeout(() => intelligenceMod.consolidate(), 'intelligenceMod.consolidate()');
       }
-      console.log('[OK] Compact auto complete');
+    },
+
+    'compact-summarize': () => {
+      // Real LLM-based summarizer. Subprocess Python so the JS hook stays thin.
+      // Idempotent: identical conversation window returns dedup on second call.
+      let spawn;
+      try {
+        spawn = require('child_process').spawnSync;
+      } catch (e) {
+        log('[WARN] compact-summarize: child_process unavailable');
+        return;
+      }
+      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
+      const proc = spawn('python3', ['-m', 'core.compaction_summarizer'], {
+        cwd: repoRoot,
+        encoding: 'utf-8',
+        timeout: 25000,
+        env: Object.assign({}, process.env, {
+          COMPACTION_LOG_LEVEL: process.env.COMPACTION_LOG_LEVEL || 'WARNING',
+        }),
+      });
+      if (proc.error) {
+        log('[WARN] compact-summarize spawn failed:', proc.error.message);
+        return;
+      }
+      const out = (proc.stdout || '').trim();
+      if (!out) {
+        if (proc.status !== 0) {
+          log('[WARN] compact-summarize exited', proc.status);
+        }
+        return;
+      }
+      let result;
+      try {
+        result = JSON.parse(out);
+      } catch (_) {
+        return;
+      }
+      switch (result.status) {
+        case 'ok':
+          log(`[COMPACT] user=${result.user_id} saved=${result.chars_saved}ch msgs=${result.message_count} model=${result.model} time=${result.elapsed_ms}ms id=${result.id}`);
+          break;
+        case 'dedup':
+          log(`[COMPACT] dedup: existing summary id=${result.id} user=${result.user_id} saved=${result.chars_saved}ch`);
+          break;
+        case 'no_users':
+        case 'no_history':
+        case 'empty_input':
+        case 'empty_output':
+        case 'error':
+          break;
+        default:
+          log(`[COMPACT] ${result.status} user=${result.user_id || '?'}`);
+      }
     },
 
     'status': () => {
-      if (intelligence && intelligence.stats) {
-        intelligence.stats(args.includes('--json'));
+      const intelligenceMod = getIntelligence();
+      if (intelligenceMod && intelligenceMod.stats) {
+        intelligenceMod.stats(args.includes('--json'));
       } else {
-        console.log('[WARN] Intelligence module not available');
+        log('[WARN] Intelligence module not available');
       }
     },
 
-    'notify': () => {
-      console.log('[OK] Notification handled');
-    },
+    'notify': () => {},
 
     'stats': () => {
-      if (intelligence && intelligence.stats) {
-        intelligence.stats(args.includes('--json'));
+      const intelligenceMod = getIntelligence();
+      if (intelligenceMod && intelligenceMod.stats) {
+        intelligenceMod.stats(args.includes('--json'));
       } else {
-        console.log('[WARN] Intelligence module not available. Run session-restore first.');
+        log('[WARN] Intelligence module not available. Run session-restore first.');
       }
     },
   };
 
   if (command && handlers[command]) {
+    // compact-summarize spawns a Python LLM call; give it more time than the
+    // default 5s safety cap so the subprocess can finish or hit its own 25s.
+    const safetyMs = command === 'compact-summarize' ? 30000 : 5000;
     try {
       await withSafetyTimeout(async () => {
         await Promise.resolve(handlers[command]());
-      }, command, 5000);
+      }, command, safetyMs);
     } catch (e) {
-      console.log(`[WARN] Hook ${command} encountered an error: ${e.message}`);
+      log(`[WARN] Hook ${command} encountered an error: ${e.message}`);
     }
   } else if (command) {
-    console.log(`[OK] Hook: ${command}`);
+    log(`[OK] Hook: ${command}`);
   } else {
-    console.log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|status|notify|stats>');
+    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|stats>');
   }
 }
 
-process.exitCode = 0;
 main().catch((e) => {
-  try { console.log(`[WARN] Hook handler error: ${e.message}`); } catch (_) {}
+  try { log(`[WARN] Hook handler error: ${e.message}`); } catch (_) {}
 }).finally(() => {
-  process.exit(0);
+  // Let event loop flush stdout naturally — don't force exit
+  // process.exit() would discard buffered console.log output
 });

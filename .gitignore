@@ -28,6 +28,9 @@ graphify-out/
 
 # Cloned reference repos (not part of the bot)
 everything-claude-code-main/
+
+# Archived skills — removed from scanned skills-archive to save context tokens
+.archive/
 ungate/
 _graveyard/
 

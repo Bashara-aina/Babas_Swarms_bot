@@ -7,10 +7,11 @@ Responsibilities:
 3. Route incoming tool calls to the correct MCP server
 4. Provide async tool execution with proper error handling
 
-All 10 MCP servers are supported:
+All 17 MCP servers are supported:
   ruflo (200+ tools), hermes, crawl4ai, browser-use,
   sequential-thinking, exa, local-deep-research,
-  gitnexus, obsidian, filesystem, brave, github, supabase
+  gitnexus, obsidian, filesystem, brave, github, supabase,
+  browser, graphify
 
 Usage:
   from core.mcp.router import get_mcp_router, MCP_ROUTER
@@ -30,6 +31,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -51,10 +54,67 @@ TOOL_PREFIXES: dict[str, str] = {
     "github": "github_",
     "supabase": "supabase_",
     "browser": "browser_",
+    "graphify": "graphify_",
 }
 
 # Reverse map: prefix → server name
 PREFIX_TO_SERVER: dict[str, str] = {v.rstrip("_"): k for k, v in TOOL_PREFIXES.items()}
+
+
+# ── Lazy-load: config + env-based enable gate ────────────────────────────────
+# Mitigation 2 (token reduction): only start MCP servers that are explicitly
+# enabled. Priority: env var (MCP_<NAME>_ENABLED) > config/mcp_config.json > True
+# (default for backward compat). Loading the config file once at import time
+# avoids per-call I/O.
+
+def _load_mcp_config_enabled() -> dict[str, bool]:
+    """Read config/mcp_config.json and return {server_name: enabled_bool}.
+
+    Failures are non-fatal — returns empty dict and we fall back to defaults.
+    """
+    try:
+        config_path = (
+            Path(__file__).resolve().parent.parent.parent / "config" / "mcp_config.json"
+        )
+        if not config_path.exists():
+            return {}
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+        result: dict[str, bool] = {}
+        for server in data.get("servers", []):
+            name = server.get("name")
+            if name:
+                # Normalize: "browser-use" (config, hyphen) -> "browser_use" to match
+                # TOOL_PREFIXES in core/mcp/servers/* and env-var naming convention.
+                # The python router only iterates over TOOL_PREFIXES, so config keys
+                # not in TOOL_PREFIXES (e.g. "symphony", "git") are loaded but unused.
+                normalized = name.lower().replace("-", "_")
+                result[normalized] = bool(server.get("enabled", True))
+        return result
+    except Exception as exc:
+        logger.warning("mcp_config.json read failed: %s — falling back to defaults", exc)
+        return {}
+
+
+_MCP_CONFIG_ENABLED: dict[str, bool] = _load_mcp_config_enabled()
+
+
+def _is_mcp_enabled(name: str) -> bool:
+    """Check whether an MCP server is enabled.
+
+    Precedence:
+      1. Env var ``MCP_<NAME>_ENABLED`` (if set: ``"1"``/``"0"``).
+      2. ``config/mcp_config.json`` ``enabled`` flag (loaded at import).
+      3. Default: ``True`` (backward compatibility).
+    """
+    # Normalize to canonical form (lowercase + underscores) so env-var name
+    # and dict lookup match what _load_mcp_config_enabled stored.
+    canonical = name.lower().replace("-", "_")
+    env_val = os.getenv(f"MCP_{canonical.upper()}_ENABLED")
+    if env_val is not None:
+        return env_val == "1"
+    if canonical in _MCP_CONFIG_ENABLED:
+        return _MCP_CONFIG_ENABLED[canonical]
+    return True
 
 
 class MCPRouter:
@@ -83,6 +143,7 @@ class MCPRouter:
             filesystem,
             github,
             gitnexus,
+            graphify,
             hermes,
             local_deep_research,
             obsidian,
@@ -106,10 +167,15 @@ class MCPRouter:
             "github": github,
             "supabase": supabase,
             "browser": browser,
+            "graphify": graphify,
         }
 
         for name, config in server_configs.items():
             try:
+                if not _is_mcp_enabled(name):
+                    logger.info("MCP %s: skipped (disabled via env or config)", name)
+                    continue
+
                 if not config.is_available():
                     logger.debug("MCP %s: not available (is_available=False)", name)
                     continue

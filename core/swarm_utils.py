@@ -1,4 +1,4 @@
-"""M2.7 Swarm Utilities — anti-loop, confidence gating, evidence hierarchy, thinking protocol.
+"""M3 Swarm Utilities — anti-loop, confidence gating, evidence hierarchy, thinking protocol.
 
 Shared components for swarm orchestration patterns:
 - AntiLoopGuard: tracks repeated actions, fires stop signal

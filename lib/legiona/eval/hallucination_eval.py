@@ -33,7 +33,7 @@ EVAL_QA = [
     },
     {
         "question": "Which environment variable controls MiniMax API key access?",
-        "ground_truth": "MINIMAX_API_KEY",
+        "ground_truth": "OPENCODE_GO_API_KEY",
     },
     {
         "question": "Where are shared Claude legiona agent definitions located?",

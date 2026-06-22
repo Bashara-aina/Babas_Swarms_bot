@@ -1,20 +1,42 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "minimax-coding-plan/MiniMax-M2.7",
-  "small_model": "minimax-coding-plan/MiniMax-M2.7",
+  "model": "opencode-go/deepseek-v4-pro",
+  "small_model": "opencode-go/deepseek-v4-pro",
   "provider": {
-    "minimax-coding-plan": {
+    "opencode-go": {
+      "api": "https://opencode.ai/zen/go/v1",
+      "env": [
+        "OPENCODE_GO_API_KEY"
+      ]
+    },
+    "openrouter": {
       "api": "http://localhost:4000/v1",
       "env": [
-        "MINIMAX_API_KEY"
-      ]
+        "OPENROUTER_API_KEY"
+      ],
+      "models": {
+        "nvidia/nemotron-3-ultra-550b-a55b:free": {
+          "id": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+          "name": "Nemotron Free",
+          "family": "nemotron",
+          "limit": {
+            "context": 1000000,
+            "output": 65536
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          },
+          "status": "active"
+        }
+      }
     }
   },
-  "snapshot": true,
+  "snapshot": false,
   "compaction": {
-    "reserved": 16384,
-    "threshold": 1.0,
-    "maxContext": 999999
+    "reserved": 65536,
+    "threshold": 0.85,
+    "maxContext": 1000000
   },
   "permission": {
     "*": "allow",
@@ -60,7 +82,7 @@
       "permission": {
         "*": "allow"
       },
-      "prompt": "You are an elite autonomous coding agent with a persistent 6-layer memory system, 12 live MCP tool servers, and a ChromaDB-backed long-term memory.\n\n## SESSION STATE FILES — READ THESE AT SESSION START\nBefore doing anything else, read these files:\n- `.session_state/remembered_context.md` — your recallable memory context (priority 1, most recent)\n- `.session_state/recalled_context.md` — your recalled context (priority 2, supplement)\n- `.session_state/memory_inject.md` — full 6-layer memory context (injected automatically)\n\n## YOUR 6-LAYER MEMORY SYSTEM (powers ChromaDB semantic search)\n1. **Layer 1 — Session Checkpoints**: `.session_state/` markdown files; current session state\n2. **Layer 2 — mem0**: `python -m core.memory.cli recall '<query>'`; semantic recall from mem0\n3. **Layer 3 — ChromaDB**: legacy vector search; auto-populated by memory CLI\n4. **Layer 4 — observation_store**: SQLite FTS5; operational decisions, discoveries, patterns\n5. **Layer 5 — graphrag**: wiki graph rag; project knowledge, architecture, decisions\n6. **Layer 6 — mem0-cloud + checkpoints**: distributed memory + session snapshots\n\nAfter completing significant work: `python -m core.memory.cli remember '<summary>' --agent opencode`\nTo recall: `python -m core.memory.cli recall '<topic>'`\n\n## 12 LIVE MCP TOOL SERVERS (use these, do NOT manually simulate them)\nConfigure and use MCP tools. For a task, invoke relevant MCP tools:\n- **gitnexus**: `gitnexus_context`, `gitnexus_query`, `gitnexus_impact`, `gitnexus_detect_changes` — code intelligence, blast-radius analysis before editing\n- **obsidian**: `obsidian_search_notes`, `obsidian_read_note`, `obsidian_save_knowledge_note`, `obsidian_update_note` — your second brain wiki\n- **ruflo**: `ruflo_memory_search`, `ruflo_session_save`, `ruflo_hooks_pre-task`, `ruflo_task_create` — memory, session, task management\n- **filesystem**: `read`, `write`, `edit`, `glob`, `grep`, `bash` — file operations\n- **crawl4ai**: `crawl4ai_crawl`, `crawl4ai_search` — web extraction\n- **browser-use**: `browser_run_task`, `browser_open`, `browser_click`, `browser_fill` — autonomous browser\n- **sequential-thinking**: `sequentialthinking_sequentialthinking` — deep reasoning on complex problems\n- **symphony**: `symphony_send_message`, `symphony_create_task`, `symphony_get_tasks` — task orchestration\n- **git**: `git_git_status`, `git_git_diff`, `git_git_log`, `git_git_commit` — version control\n- **hermes**: Hermes messaging — `hermes_messages_send`, `hermes_conversations_list`\n- **local-deep-research**: `local-deep-research_quick_research`, `local-deep-research_detailed_research` — deep research\n- **exa**: `exa_web_search_exa`, `exa_web_fetch_exa` — web discovery\n\n## COMPACTION BEHAVIOR\nCompaction is DISABLED. Memory recall replaces compaction. All recall operations are powered by the 6-layer system described above. Treat recalled memories as accurate prior context."
+      "prompt": "You are an elite autonomous coding agent. Verify facts with evidence. Never confabulate.\n\n## ESSENTIAL MCP TOOLS\n- **gitnexus**: impact analysis before editing, code intelligence queries\n- **filesystem**: file read/write/search/list/move  \n- **git**: version control\n- **exa**: web search and URL fetch\n- **sequential-thinking**: deep reasoning on complex problems\n\n## MEMORY & SESSION\n- After significant work: `python -m core.memory.cli remember '<summary>' --agent opencode`\n- To recall: `python -m core.memory.cli recall '<topic>'`\n- Read `.session_state/remembered_context.md` at session start for prior context"
     },
     "compaction": {
       "permission": {
@@ -77,7 +99,7 @@
         "*": "allow"
       }
     },
-"grep": {
+    "grep": {
       "permission": {
         "*": "allow"
       }
@@ -111,7 +133,7 @@
         "/nix",
         "/nix/store"
       ],
-      "enabled": true
+      "enabled": false
     },
     "crawl4ai": {
       "type": "local",
@@ -123,7 +145,7 @@
       "env": {
         "PYTHONPATH": "/home/newadmin/swarm-bot/tools/mcpServers"
       },
-      "enabled": true
+      "enabled": false
     },
     "browser-use": {
       "type": "local",
@@ -133,10 +155,10 @@
       ],
       "workingDirectory": "/home/newadmin/swarm-bot",
       "env": {
-        "BROWSER_USE_MODEL": "minimax/MiniMax-M2.7",
+        "BROWSER_USE_MODEL": "opencode-go/deepseek-v4-pro",
         "LITELLM_BASE_URL": "http://localhost:4000"
       },
-      "enabled": true
+      "enabled": false
     },
     "sequential-thinking": {
       "type": "local",
@@ -153,7 +175,7 @@
         "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one/mcp-server.js"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot/mcp_servers/symphony-of-one",
-      "enabled": true
+      "enabled": false
     },
     "obsidian": {
       "type": "local",
@@ -165,7 +187,7 @@
       "env": {
         "OBSIDIAN_VAULT_PATH": "/home/newadmin/swarm-bot/.wiki"
       },
-      "enabled": true
+      "enabled": false
     },
     "git": {
       "type": "local",
@@ -173,7 +195,7 @@
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "@mseep/git-mcp-server"
       ],
-      "enabled": true
+      "enabled": false
     },
     "ruflo": {
       "type": "local",
@@ -183,7 +205,7 @@
         "start"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot",
-      "enabled": true
+      "enabled": false
     },
     "hermes": {
       "type": "local",
@@ -194,7 +216,7 @@
         "serve"
       ],
       "workingDirectory": "/home/newadmin/swarm-bot",
-      "enabled": true
+      "enabled": false
     },
     "local-deep-research": {
       "type": "local",
@@ -204,7 +226,7 @@
         "-m",
         "local_deep_research.mcp"
       ],
-      "enabled": true
+      "enabled": false
     },
     "exa": {
       "type": "local",
@@ -212,7 +234,37 @@
         "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
         "/home/newadmin/.local/node18/bin/exa-mcp-server"
       ],
-      "enabled": true
+      "enabled": false
+    },
+    "graphify": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/.local/share/uv/tools/graphifyy/bin/python",
+        "-m",
+        "graphify.serve",
+        "/home/newadmin/swarm-bot/graphify-out/graph.json"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "enabled": false
+    },
+    "headroom": {
+      "type": "local",
+      "command": [
+        "/home/newadmin/miniconda3/bin/headroom",
+        "mcp",
+        "serve"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "env": {
+        "HEADROOM_HOST": "127.0.0.1",
+        "HEADROOM_PORT": "8787",
+        "HEADROOM_MEMORY_STORAGE": "project",
+        "HEADROOM_MEMORY_DB_PATH": "/home/newadmin/swarm-bot/.headroom/memory.db",
+        "HEADROOM_TELEMETRY": "off",
+        "ANTHROPIC_TARGET_API_URL": "http://127.0.0.1:4001",
+        "TRANSFORMERS_OFFLINE": "1"
+      },
+      "enabled": false
     }
   },
   "watcher": {
@@ -233,5 +285,6 @@
       "*.zip",
       "skill_labels.zip"
     ]
-  }
+  },
+  "plugin": [".claude-plugin/plugin.json"]
 }

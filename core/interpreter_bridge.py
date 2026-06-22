@@ -71,7 +71,10 @@ SYSTEM_PROMPTS = {
 # Known context windows per model (tokens). Open Interpreter defaults to 8000 without this.
 _CONTEXT_WINDOWS: dict[str, int] = {
     # ⭐ PRIORITY 1: MiniMax (zero cost)
-    "minimax-coding-plan/MiniMax-M3":      1048576,
+    "opencode-go/deepseek-v4-pro":      1048576,
+
+    # OpenRouter models
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free": 128000,
 
     # PRIORITY 2: Local Ollama (zero cost, privacy)
     "ollama_chat/gemma4:e4b":              8192,
@@ -154,12 +157,34 @@ def configure_interpreter(model: str, agent_key: str) -> str:
         interpreter.llm.model = f"openai/{model_name}"
         interpreter.llm.api_base = "https://open.bigmodel.cn/api/paas/v4"
         interpreter.llm.api_key = os.getenv("ZAI_API_KEY", "")
-        interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 128000)
+        interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 1_048_576)  # MiniMax-M3 default
         interpreter.llm.max_tokens = _MAX_TOKENS
         interpreter.offline = False
         logger.info("Using Z.AI: %s", model_name)
 
-    elif model.startswith(("openrouter/", "cerebras/", "gemini/", "groq/")):
+    elif model.startswith("openrouter/"):
+        # Route to OpenRouter when API key is available
+        or_key = os.getenv("OPENROUTER_API_KEY", "")
+        if or_key:
+            model_name = model.removeprefix("openrouter/")
+            interpreter.llm.model = f"openai/{model_name}"
+            interpreter.llm.api_base = "https://openrouter.ai/api/v1"
+            interpreter.llm.api_key = or_key
+            interpreter.llm.context_window = _CONTEXT_WINDOWS.get(model, 128_000)
+            interpreter.llm.max_tokens = _MAX_TOKENS
+            interpreter.offline = False
+            logger.info("Using OpenRouter: %s", model_name)
+        else:
+            logger.warning("OPENROUTER_API_KEY not set — falling back to local Ollama")
+            interpreter.llm.model = "ollama_chat/gemma4:e4b"
+            interpreter.llm.api_base = "http://localhost:11434"
+            interpreter.llm.api_key = os.getenv("OLLAMA_API_KEY", "ollama")
+            interpreter.llm.context_window = 8192
+            interpreter.llm.max_tokens = _MAX_TOKENS
+            interpreter.offline = True
+            return "ollama_chat/gemma4:e4b"
+
+    elif model.startswith(("cerebras/", "gemini/", "groq/")):
         # External API routes removed — MiniMax-only config.
         # Falls back to local Ollama if no API key is set.
         logger.warning("External provider removed — falling back to local Ollama")

@@ -24,11 +24,11 @@ _ruflo_cfg_path = Path("config/models.yaml")
 if _ruflo_cfg_path.exists():
     with _ruflo_cfg_path.open() as f:
         _cfg = yaml.safe_load(f)
-    _ruflo_model_key = _cfg.get("ruflo_model", "minimax-m2-7")
-    _ruflo_model_id = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M3")
-    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "minimax-coding-plan/MiniMax-M3")
+    _ruflo_model_key = _cfg.get("ruflo_model", "deepseek-v4-pro")
+    _ruflo_model_id = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "opencode-go/deepseek-v4-pro")
+    RUFLO_MODEL = _cfg.get("models", {}).get(_ruflo_model_key, {}).get("model_id", "opencode-go/deepseek-v4-pro")
 else:
-    RUFLO_MODEL = "minimax-coding-plan/MiniMax-M3"
+    RUFLO_MODEL = "opencode-go/deepseek-v4-pro"
 
 ruflo_available = True
 _ruflo_client = None

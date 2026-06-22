@@ -417,3 +417,99 @@ ASSISTANT: answer 2
 USER: task 3
 ASSISTANT: answer 3
 
+## [2026-06-05 10:15 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 10:15 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+
+## [2026-06-05 14:10 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 14:10 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+
+## [2026-06-05 14:26 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 14:26 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+
+## [2026-06-05 14:34 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 14:34 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+
+## [2026-06-05 14:39 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 14:39 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+
+## [2026-06-05 14:43 JST] auto-ingest | score=0.75 | solved command/error
+
+- pages: test-page.md
+- src: User: How do I fix the ImportError in Python?
+Legion: Run `pip install flask` to fix it
+
+## [2026-06-05 14:43 JST] auto-ingest | score=0.80 | learned something
+
+- pages: test.md
+- src: USER: task 1
+ASSISTANT: answer 1
+USER: task 2
+ASSISTANT: answer 2
+USER: task 3
+ASSISTANT: answer 3
+

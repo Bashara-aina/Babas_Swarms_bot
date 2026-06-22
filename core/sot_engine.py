@@ -1,10 +1,10 @@
-"""M2.7 Skeleton-of-Thought Engine — component skeleton generation before implementation.
+"""M3 Skeleton-of-Thought Engine — component skeleton generation before implementation.
 
 Generate complete skeletons BEFORE writing any implementation.
 For every component, function, module — skeleton first, implementation second.
 
 Reference: imagination-research/sot (ICLR 2024) — "generate skeleton first, then implement"
-Reference: M2.7 Full Capability Activation — Technique 3 (SoT)
+Reference: M3 Full Capability Activation — Technique 3 (SoT)
 
 Usage:
     eng = SoTEngine()

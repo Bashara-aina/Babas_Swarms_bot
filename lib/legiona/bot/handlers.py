@@ -118,7 +118,7 @@ async def cmd_run(message: Message, command: CommandObject, state: FSMContext) -
         # Uncertainty format for confidence expression
         UNCERTAINTY_FORMAT.format(
             level="MEDIUM",
-            reason="Response generated via streaming M2.7",
+            reason="Response generated via streaming M3",
             evidence="RAG grounding applied via stream_complete",
             kg_validated="partial",
         )
@@ -144,7 +144,7 @@ async def cmd_run(message: Message, command: CommandObject, state: FSMContext) -
 @_require_owner
 async def cmd_think(message: Message, command: CommandObject, state: FSMContext) -> None:
     """
-    /think <prompt> — Direct M2.7 completion without tools.
+    /think <prompt> — Direct M3 completion without tools.
     Uses standard send_message (no streaming).
     """
     if not BOT_TOKEN:
@@ -226,9 +226,9 @@ async def cmd_memory(message: Message) -> None:
 @router.message(F.text & Command("cost"))
 @_require_owner
 async def cmd_cost(message: Message) -> None:
-    """Show today's M2.7 spend in ¥."""
+    """Show today's M3 spend in ¥."""
     total = today_total_jpy()
-    await message.answer(f"💴 **Today's M2.7 cost:** ¥{total:.2f}")
+    await message.answer(f"💴 **Today's M3 cost:** ¥{total:.2f}")
 
 
 @router.message(F.text & Command("budget"))
@@ -475,7 +475,7 @@ async def cmd_status(message: Message) -> None:
         pass
 
     await message.answer(
-        f"🤖 **Legiona M2.7 Status**\n\n"
+        f"🤖 **Legiona M3 Status**\n\n"
         f"-  Model: `MiniMax-M3`\n"
         f"-  Tools: {tool_count} (RAG: {rag_status})\n"
         f"-  Evolved rules: ~{rules_count} lines\n"
@@ -577,7 +577,7 @@ async def cmd_vision(message: Message, command: CommandObject) -> None:
 async def handle_vision_photo(message: Message, state: FSMContext) -> None:
     """
     Handle photo messages — run mmx vision analysis.
-    Send photo first with a caption, then reply with M2.7 analysis.
+    Send photo first with a caption, then reply with M3 analysis.
     """
     if not BOT_TOKEN:
         await message.answer("[ERROR] TELEGRAM_BOT_TOKEN not configured")

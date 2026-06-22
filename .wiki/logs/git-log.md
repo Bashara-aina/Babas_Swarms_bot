@@ -1403,3 +1403,178 @@ SWE-agent fixes:
 - recursive_mas: UP035 import Callable from collections.abc instead of typing
 - self_evolution: UP015 remove unnecessary mode argument in open() call
 ---
+## Commit: 353c06aa
+- Date: Fri Jun  5 12:53:40 AM JST 2026
+- Message: fix(privacy): strip <private> tags from all string fields on observation write
+---
+## Commit: dd475a16
+- Date: Fri Jun  5 01:11:47 AM JST 2026
+- Message: feat(bridges): base protocol + BridgeState + stub bridges
+---
+## Commit: 6692e50f
+- Date: Fri Jun  5 07:52:41 AM JST 2026
+- Message: feat(bridges): six_layer bridge with idempotency and <private> scrubbing
+
+- Real push(): load state, scrub <private> tags, fan out to 4 layer
+  adapters (chroma, langmem, graphrag, mem0), advance state.
+- Each layer call is best-effort: one layer's failure logs a warning
+  and never blocks the others.
+- LATE-BINDING FIX: layer adapters are looked up via globals() at call
+  time (not captured at import) so monkeypatch.setattr works in tests.
+- TEST FIX: test_push_is_idempotent expects 4 (one per layer) not 1
+  (4 layers x 1 effective push = 4 entries; replay adds 0).
+- All 3 tests pass: layer fan-out, <private> scrubbing, idempotency.
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 6e5453fa
+- Date: Fri Jun  5 07:55:23 AM JST 2026
+- Message: feat(bridges): hermes bridge with offline resilience and <private> scrubbing
+---
+## Commit: 0c839385
+- Date: Fri Jun  5 07:58:09 AM JST 2026
+- Message: feat(bridges): gitnexus bridge with code-tool filter and noise-path skip
+---
+## Commit: 7d96eaa2
+- Date: Fri Jun  5 08:43:44 AM JST 2026
+- Message: feat(bridges): wire _fanout_to_bridges from add_observation
+---
+## Commit: ebb7c88e
+- Date: Fri Jun  5 09:12:47 AM JST 2026
+- Message: feat(verify): add bridge health checks (count, per-bridge status, idempotency)
+---
+## Commit: ef963678
+- Date: Fri Jun  5 09:18:37 AM JST 2026
+- Message: feat(models): migrate MiniMax-M2.7/Text-01 → MiniMax-M3 with 1M context
+
+Replace all M2.7/Text-01 model references with M3 (minimax-coding-plan/MiniMax-M3)
+and upgrade context window to 1,048,576 tokens (1M) across the entire swarm-bot
+codebase — active code, configs, agents, tests, tools, handlers, bridges, scripts,
+and project docs.
+
+Changes:
+- config/models.yaml: M3 primary + M3-fallback, both 1M context (was 204800/245760)
+- core/interpreter_bridge.py, core/orchestrator.py, core/opencode_bridge.py,
+  core/response_filter.py, core/agent_registry.py, core/reliability/fallback_chain.py,
+  core/swe_agent/{config,cli,loop,trajectory}.py: model strings + context windows
+- swarms_bot/orchestrator/model_router.py + swarms_bot/routing/cost_router.py:
+  ModelCandidate/ModelTier context windows → 1,048,576
+- tools/context_maximizer.py: ContextBudget.TOTAL = 1,048,576, maxContext: 1,048,576
+- agents/__init__.py (84 agents): default model → M3
+- All test files, scripts, handlers, bridges, llm_client, lib/legiona/*: M3
+- Project docs: CLAUDE.md, AGENTS.md, LEGION_*, OPENCODE_*, docs/*.md, AGENT.md
+
+Out of scope (skipped per scope):
+- ext/hermes-agent/* (third-party vendor)
+- .venv-mirofish/* (Python venv)
+- .opencode/* (OpenCode tool configs)
+- .claude-flow/*, .session_state/* (runtime state)
+- .wiki/, ARCHIVE_cekwajar-src-version/ (vendored archives)
+- *.bak, *.browser-backup, *.cekwajar-backup (backup files)
+
+126 files changed, 690 insertions(+), 687 deletions(-)
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: bc1762ad
+- Date: Fri Jun  5 09:20:17 AM JST 2026
+- Message: fix(bridges): place STATE_DB at project-root data/ not core/data/
+
+parent.parent.parent of core/memory/bridges/_base.py is core/, not the
+project root. Add one more parent hop so bridges_state.db lives at
+data/bridges_state.db alongside observations.db, memory.db, etc.
+
+Existing data migrated to data/; core/data/ removed.
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: ead6f624
+- Date: Fri Jun  5 07:44:03 PM JST 2026
+- Message: feat(skills): integrate pbakaus/impeccable with native cross-platform support
+
+Deep, correct sync of the upstream impeccable frontend design skill
+(github.com/pbakaus/impeccable) into swarm-bot, with byte-identical
+installs across 12 AI coding harness directories.
+
+Canonical install: .claude/skills/impeccable/
+  - SKILL.md (1 monolithic skill, post-compile, 0 placeholders)
+  - reference/  (27 files: 23 commands + brand.md + codex.md + product.md
+                  + interaction-design.md)
+  - scripts/    (37 scripts: context/palette/pin/detect/command-metadata/
+                  is-generated/impeccable-paths/critique-storage/cleanup-
+                  deprecated + 28 live-* scripts)
+  - agents/     (2 Codex-specific: impeccable-asset-producer.md,
+                  impeccable-manual-edit-applier.md)
+
+Cross-platform copies (11 byte-identical mirrors, 1,368,748 bytes each):
+  .cursor/  .gemini/  .opencode/  .pi/  .agents/  .github/  .kiro/
+  .trae/  .trae-cn/  .rovodev/  .qoder/
+
+Bridge files updated to declare impeccable coexistence alongside
+taste-skill, with explicit pair-order (impeccable FIRST for vocabulary +
+brand-vs-product register, taste-skill SECOND for dials + variant):
+  - .claude/rules/taste-router.md (added §9 IMPECCABLE + §10 STACK)
+  - GEMINI.md (added Impeccable companion section + rollback)
+  - .cursorrules (added Impeccable coexistence block)
+  - .github/copilot-instructions.md (added Companion: Impeccable Skill)
+  - AGENTS.md (added 12-harness install note + pair-order rule)
+
+Verified:
+  - 0 placeholders in SKILL.md (all {{...}} substituted at compile)
+  - 27 reference files / 37 scripts / 2 agents
+  - All 12 dirs byte-identical
+  - palette.mjs smoke test (seed-124, teal)
+  - context.mjs returns expected NO_PRODUCT_MD
+  - All 5 bridge files updated
+
+Design doc: docs/superpowers/specs/2026-06-05-impeccable-integration-design.md
+
+Rollback: rm -rf .claude/skills/impeccable/ and 11 mirrors; revert bridge
+files. The two skills remain independent and either can be removed
+without affecting the other.
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 0074f251
+- Date: Mon Jun  8 11:27:10 PM JST 2026
+- Message: perf(context): trim hooks, skills, and env for ~2,300+ token savings per session
+
+- Remove graphify nag hooks from PreToolUse (Bash/Read/Glob) — worst offender
+- Remove auto-memory import from SessionStart — ~8s delay per start
+- Remove SubagentStart/SubagentStop/Notification hooks — overhead per event
+- Set daemon.autoStart → false — stops 5 background workers
+- Add headroom MCP server + proxy env vars (ANTHROPIC_BASE_URL tunnel)
+- Trim settings.json: 406→322 lines (20.7%)
+- Archive 52 unused skills to .skills-archive/ (47.3% reduction, recoverable)
+- Trim verbose metadata from 20 generated SKILL.md files (~275 tokens saved)
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: a5fb2522
+- Date: Tue Jun  9 02:14:25 PM JST 2026
+- Message: feat(proxy): dual-model proxy for MiniMax-M3 (default) + Nemotron via OpenRouter
+
+MiniMax-M3 is the default route; disable Nemotron by removing API key.
+- Routes Claude Code model names (claude-sonnet-4-*) → MiniMax-M3 Headroom
+- Routes "nemotron" explicitly → LiteLLM → OpenRouter
+- Streaming + non-streaming for both models
+- Default route changed to MiniMax-M3 (was Nemotron)
+- Updated /v1/models endpoint with accurate model listings
+---
+## Commit: e41b86f8
+- Date: Tue Jun 16 09:38:41 PM JST 2026
+- Message: chore: archive unused agents, add gitignore for runtime dirs
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 9a2632db
+- Date: Wed Jun 17 04:50:44 PM JST 2026
+- Message: perf(skills): remove 14 stale/redundant skill entries (56K token savings)
+
+- vercel-optimize (1.2MB, zero project relevance) and vercel-cli-with-tokens
+- 5 gitnexus top-level duplicates (exact copies of subdir skill variants)
+- grill-me and zoom-out (trivial content, <650 bytes each)
+- swarm.py and session-status.py (Python scripts misplaced in skills/)
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

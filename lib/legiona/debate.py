@@ -1,7 +1,7 @@
 """
 lib/legiona/debate.py
 Three-agent debate for high-stakes decisions.
-Improves factual accuracy ~18% on contested questions (M2.7 research).
+Improves factual accuracy ~18% on contested questions (M3 research).
 
 Usage:
     from lib.legiona.debate import debate_simple  # 3-agent basic debate

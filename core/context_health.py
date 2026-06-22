@@ -1,6 +1,6 @@
-"""M2.7 Context Health Monitor — tracks Claude Code session context levels.
+"""M3 Context Health Monitor — tracks Claude Code session context levels.
 
-Prevents context pollution which causes M2.7 to become "noticeably dumber
+Prevents context pollution which causes M3 to become "noticeably dumber
 after compaction" (r/openclaw community finding, April 2026).
 
 CONTEXT HEALTH LEVELS:
@@ -12,7 +12,7 @@ CONTEXT HEALTH LEVELS:
 Designed to be called from CLAUDE.md behavioral guidance.
 Writes checkpoints to .claude/memory_bootstrap.md.
 
-Reference: M2.7 Full Capability Activation — Context Management (Section C1-C2)
+Reference: M3 Full Capability Activation — Context Management (Section C1-C2)
 """
 
 from __future__ import annotations

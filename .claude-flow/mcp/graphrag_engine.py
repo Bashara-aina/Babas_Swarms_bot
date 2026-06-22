@@ -353,8 +353,42 @@ def _file_count() -> int:
         conn.close()
         return c
 
+def _model_is_random() -> bool:
+    """Check if embedding model is a random fallback (not a real pretrained model)."""
+    global _Model
+    if _Model is None:
+        return True
+    try:
+        import sentence_transformers
+        name = getattr(_Model, '_model_name', '') or getattr(_Model, '_model_card_text', '') or ''
+        return 'random' in name.lower() or 'creating a new one' in str(type(_Model)).lower() or not name
+    except Exception:
+        return True
+
+def _fts_search(query: str, top_k: int = 10) -> list[dict]:
+    """FTS5 text search (always reliable, no external model needed)."""
+    with LOCK:
+        conn = _db()
+        try:
+            rows = conn.execute("""
+                SELECT n.id, n.name, n.kind, n.file_path, n.line_number, n.docstring, n.signature
+                FROM nodes_fts f JOIN nodes n ON f.rowid = n.id
+                WHERE nodes_fts MATCH ?
+                ORDER BY rank
+                LIMIT ?
+            """, (query, top_k)).fetchall()
+            conn.close()
+            return [{"vector_score": 0.5, "relevance": "fts", **_node(r)} for r in rows]
+        except Exception:
+            conn.close()
+            return []
+
 def graphrag_query(query: str, depth: int = 2, top_k: int = 10) -> dict[str, Any]:
-    vres = _vector_search(query, top_k)
+    # FTS5 is primary (always reliable); vector is secondary (may be random)
+    fts = _fts_search(query, top_k)
+    vres = _vector_search(query, top_k) if not _model_is_random() else []
+    if not vres:
+        vres = fts
     if not vres:
         return {"query": query, "vector_results": [], "graph_results": [], "merged_results": []}
     gid = vres[0].get("id")

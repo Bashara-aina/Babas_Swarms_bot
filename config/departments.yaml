@@ -5,7 +5,7 @@ engineering:
   agents:
     senior_python_dev:
       description: Expert Python developer for backend systems, APIs, and async workflows
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -28,7 +28,7 @@ engineering:
       complexity_tier: heavyweight
     frontend_react_dev:
       description: React/Next.js developer for modern web UIs and TypeScript apps
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -49,7 +49,7 @@ engineering:
       complexity_tier: midweight
     backend_fastapi_dev:
       description: FastAPI specialist for high-performance REST APIs, Pydantic, async
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -71,7 +71,7 @@ engineering:
     rust_systems_dev:
       description: Rust systems programming, WASM, memory safety, performance-critical
         code
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -90,7 +90,7 @@ engineering:
       complexity_tier: heavyweight
     smart_contract_auditor:
       description: Solidity/EVM smart contract security audits and vulnerability detection
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -107,7 +107,7 @@ engineering:
       complexity_tier: heavyweight
     security_pentester:
       description: Security testing, penetration testing, CVE analysis, OWASP
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -124,7 +124,7 @@ engineering:
       complexity_tier: heavyweight
     cuda_optimizer:
       description: CUDA/Triton kernel optimization, GPU memory management, profiling
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -146,7 +146,7 @@ engineering:
     debugging_specialist:
       description: Root cause analysis — tracebacks, PyTorch errors, async bugs, OOM,
         NaN
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -168,7 +168,7 @@ engineering:
     swe_agent_dev:
       description: SWE-agent native implementation — agent-computer interface for
         GitHub issue solving
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -189,7 +189,7 @@ engineering:
       complexity_tier: heavyweight
     test_automation_engineer:
       description: pytest, hypothesis, coverage, CI test design, mocking strategies
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -208,7 +208,7 @@ engineering:
       complexity_tier: midweight
     cicd_architect:
       description: GitHub Actions, Docker, Kubernetes, systemd, deployment pipelines
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -225,7 +225,7 @@ engineering:
       complexity_tier: midweight
     database_optimizer:
       description: SQL optimization, indexing, query performance, migrations, PostgreSQL
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -243,7 +243,7 @@ engineering:
       complexity_tier: midweight
     mlops_engineer:
       description: ML model deployment, monitoring, MLflow, Kubernetes serving infrastructure
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -262,7 +262,7 @@ engineering:
       complexity_tier: heavyweight
     api_designer:
       description: REST/GraphQL API design, OpenAPI specs, versioning, documentation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -280,7 +280,7 @@ engineering:
     code_reviewer:
       description: Code review, best practices, refactoring suggestions, standards
         enforcement
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -295,7 +295,7 @@ engineering:
       complexity_tier: midweight
     performance_tuner:
       description: Performance profiling, optimization, benchmarking, memory analysis
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -314,9 +314,37 @@ design:
   default_agent: ux_designer
   description: UI/UX design, branding, visual design, accessibility, prototyping
   agents:
+    taste_frontend_architect:
+      description: Senior taste-frontend architect — runs the taste-skill pipeline
+        (brief inference → dial setting → variant selection → implementation →
+        pre-flight checklist). Orchestrates the 10 design sub-agents, enforces
+        anti-slop discipline, ships Linear/Vercel/Stripe/Oxide-grade interfaces.
+      primary_model: minimax-m3
+      fallbacks:
+      - minimax-text-01
+      - minimax-text-01
+      capabilities:
+      - taste-skill
+      - design-taste
+      - frontend-architect
+      - brief-inference
+      - dial-setting
+      - design-variance
+      - motion-intensity
+      - visual-density
+      - design-system
+      - anti-slop
+      - handoff
+      - typography
+      - motion-physics
+      - color-discipline
+      - layout
+      tools:
+      - interpreter
+      complexity_tier: heavyweight
     ux_designer:
-      description: UI/UX design, user research, wireframes, interaction design
-      primary_model: minimax-m2-7
+      description: "UI/UX design, user research, wireframes, interaction design. taste-skill loading: ALWAYS load minimalist-skill + output-skill; for broader briefs also load taste-skill v2. Dial defaults 6/4/3 (VARIANCE/MOTION/DENSITY) — calm, restrained, editorial. Honor the brief-inference line and 18-item pre-flight checklist from .claude/rules/taste-router.md before any output."
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -328,11 +356,14 @@ design:
       - wireframe
       - interaction
       - design
+      - taste-skill-minimalist
+      - taste-skill-output
+      - dial-6-4-3
       tools: []
       complexity_tier: midweight
     graphic_designer:
-      description: Visual design, branding assets, typography, graphic creation
-      primary_model: minimax-m2-7
+      description: "Visual design, branding assets, typography, graphic creation. taste-skill loading: ALWAYS load brutalist-skill (typography) + output-skill; for brand refinement also load minimalist-skill. Dial defaults 7/5/4 — visual-first, brand-faithful. Type is the design; weight, scale, and letter-spacing matter more than decoration."
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -344,11 +375,14 @@ design:
       - design
       - assets
       - layout
+      - taste-skill-brutalist
+      - taste-skill-output
+      - dial-7-5-4
       tools: []
       complexity_tier: lightweight
     branding_strategist:
-      description: Brand strategy, identity, positioning, storytelling, voice
-      primary_model: minimax-m2-7
+      description: "Brand strategy, identity, positioning, storytelling, voice. taste-skill loading: ALWAYS load minimalist-skill (color discipline) + output-skill; for premium brand also load soft-skill. Dial defaults 6/4/3 — voice + identity, low motion. Brand is restraint, color is load-bearing."
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -359,11 +393,14 @@ design:
       - positioning
       - storytelling
       - logo
+      - taste-skill-minimalist
+      - taste-skill-output
+      - dial-6-4-3
       tools: []
       complexity_tier: midweight
     motion_artist:
-      description: Motion graphics, animation, After Effects concepts, video design
-      primary_model: minimax-m2-7
+      description: "Motion graphics, animation, After Effects concepts, video design. taste-skill loading: ALWAYS load soft-skill (haptic motion) + output-skill; for strict GSAP also load gpt-tasteskill. Dial defaults 8/9/4 — max motion, less density. Motion is the design; easing, duration, and physics matter more than choreography."
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -374,11 +411,14 @@ design:
       - after-effects
       - kinetic
       - sequence
+      - taste-skill-soft
+      - taste-skill-output
+      - dial-8-9-4
       tools: []
       complexity_tier: midweight
     spatial_designer:
       description: 3D spatial design, AR/VR concepts, Blender, 3D modeling
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -394,7 +434,7 @@ design:
       complexity_tier: midweight
     wireframe_specialist:
       description: Low-fidelity wireframes, information architecture, user flows
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -408,7 +448,7 @@ design:
       complexity_tier: lightweight
     color_expert:
       description: Color theory, palette design, psychology, accessibility contrast
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -424,7 +464,7 @@ design:
     accessibility_auditor:
       description: WCAG compliance, a11y audits, screen reader testing, inclusive
         design
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -439,7 +479,7 @@ design:
       complexity_tier: midweight
     prototype_builder:
       description: Interactive prototypes, Framer, rapid iteration, coded prototypes
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -455,7 +495,7 @@ design:
       complexity_tier: midweight
     user_flow_mapper:
       description: User flow diagrams, journey maps, process documentation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -474,7 +514,7 @@ research:
   agents:
     deep_researcher:
       description: Deep research, source synthesis, web search, academic rigor
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -490,7 +530,7 @@ research:
       complexity_tier: heavyweight
     trend_forecaster:
       description: Trend analysis, market forecasting, signal detection, predictions
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -506,7 +546,7 @@ research:
       complexity_tier: midweight
     competitor_analyst:
       description: Competitive analysis, SWOT, benchmarking, market positioning
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -522,7 +562,7 @@ research:
       complexity_tier: midweight
     data_scientist:
       description: Data analysis, statistics, ML modeling, pandas, matplotlib
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -541,7 +581,7 @@ research:
       complexity_tier: heavyweight
     web_scraper_coordinator:
       description: Web scraping orchestration, Playwright automation, structured extraction
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -559,7 +599,7 @@ research:
       complexity_tier: midweight
     sentiment_analyst:
       description: Sentiment analysis, NLP, opinion mining, social listening
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -575,7 +615,7 @@ research:
       complexity_tier: midweight
     market_intel:
       description: Market intelligence, business insights, competitive research
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -591,7 +631,7 @@ research:
       complexity_tier: midweight
     survey_designer:
       description: Survey design, questionnaire methodology, sampling, bias reduction
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -605,7 +645,7 @@ research:
       complexity_tier: lightweight
     interview_simulator:
       description: User interview simulation, qualitative research, empathy mapping
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -620,7 +660,7 @@ research:
       complexity_tier: midweight
     patent_searcher:
       description: Patent research, prior art, IP analysis, technical documentation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -636,7 +676,7 @@ research:
       complexity_tier: midweight
     paper_summarizer:
       description: Academic paper summarization, arXiv reading, research synthesis
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -653,7 +693,7 @@ research:
       complexity_tier: midweight
     stats_modeler:
       description: Statistical modeling, regression, hypothesis testing, R/Python
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -673,7 +713,7 @@ marketing:
   agents:
     copywriter:
       description: Persuasive copywriting, headlines, landing pages, conversion optimization
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -689,7 +729,7 @@ marketing:
       complexity_tier: midweight
     seo_specialist:
       description: SEO optimization, keyword research, backlinks, technical SEO
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -705,7 +745,7 @@ marketing:
       complexity_tier: midweight
     social_media_strategist:
       description: Social media strategy, engagement, content calendar, platform expertise
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -721,7 +761,7 @@ marketing:
       complexity_tier: midweight
     growth_hacker:
       description: Growth hacking, viral experiments, funnel optimization, metrics
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -737,7 +777,7 @@ marketing:
       complexity_tier: midweight
     content_strategist:
       description: Content strategy, editorial planning, topic clusters, SEO content
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -752,7 +792,7 @@ marketing:
       complexity_tier: midweight
     ad_copywriter:
       description: Ad copy, PPC campaigns, Facebook/Google ads, CTR optimization
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -768,7 +808,7 @@ marketing:
       complexity_tier: lightweight
     viral_campaign_designer:
       description: Viral campaign concepts, memetics, shareability, creative hooks
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -783,7 +823,7 @@ marketing:
       complexity_tier: midweight
     email_marketer:
       description: Email marketing, newsletters, automation flows, segmentation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -798,7 +838,7 @@ marketing:
       complexity_tier: lightweight
     influencer_outreach:
       description: Influencer partnerships, outreach templates, ambassador programs
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -812,7 +852,7 @@ marketing:
       complexity_tier: lightweight
     analytics_interpreter:
       description: Marketing analytics, Google Analytics, attribution, dashboards
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -828,7 +868,7 @@ marketing:
       complexity_tier: midweight
     brand_voice_developer:
       description: Brand voice design, tone guidelines, messaging frameworks, personality
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -843,7 +883,7 @@ marketing:
       complexity_tier: midweight
     pr_crisis_manager:
       description: PR crisis management, reputation repair, damage control, communication
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -862,7 +902,7 @@ operations:
   agents:
     project_manager:
       description: Agile project management, sprint planning, stakeholder coordination
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -878,7 +918,7 @@ operations:
       complexity_tier: midweight
     task_coordinator:
       description: Task delegation, tracking, prioritization, team coordination
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -892,7 +932,7 @@ operations:
       complexity_tier: lightweight
     scheduler:
       description: Scheduling, calendar management, deadline tracking, reminders
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -907,7 +947,7 @@ operations:
       complexity_tier: lightweight
     cost_tracker:
       description: Financial tracking, budgeting, cost analysis, ROI estimation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -923,7 +963,7 @@ operations:
       complexity_tier: midweight
     resource_allocator:
       description: Resource allocation, capacity planning, constraint optimization
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -937,7 +977,7 @@ operations:
       complexity_tier: midweight
     workflow_optimizer:
       description: Workflow optimization, process improvement, bottleneck elimination
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -952,7 +992,7 @@ operations:
       complexity_tier: midweight
     reporting_builder:
       description: Dashboard creation, KPI reporting, data visualization, metrics
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -972,7 +1012,7 @@ legal_compliance:
   agents:
     contract_reviewer:
       description: Contract review, clause analysis, legal risk identification
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -987,7 +1027,7 @@ legal_compliance:
       complexity_tier: heavyweight
     gdpr_expert:
       description: Privacy compliance — GDPR, CCPA, data protection regulations
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1002,7 +1042,7 @@ legal_compliance:
       complexity_tier: midweight
     risk_assessor:
       description: Risk assessment, mitigation strategies, threat modeling
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1017,7 +1057,7 @@ legal_compliance:
       complexity_tier: midweight
     ip_lawyer:
       description: Intellectual property — patents, trademarks, copyright, licensing
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1032,7 +1072,7 @@ legal_compliance:
       complexity_tier: heavyweight
     ethics_auditor:
       description: AI ethics, bias detection, fairness evaluation, responsible AI
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1047,7 +1087,7 @@ legal_compliance:
       complexity_tier: midweight
     compliance_checker:
       description: Regulatory compliance — SOX, HIPAA, audits, standards verification
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1067,7 +1107,7 @@ product:
   agents:
     product_manager:
       description: Product strategy, roadmap, stakeholder alignment, vision definition
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1082,7 +1122,7 @@ product:
       complexity_tier: midweight
     roadmap_planner:
       description: Roadmap planning, milestone definition, timeline management
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1097,7 +1137,7 @@ product:
       complexity_tier: midweight
     user_research_lead:
       description: User research, interviews, personas, empathy maps, insights
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1112,7 +1152,7 @@ product:
       complexity_tier: midweight
     feedback_analyzer:
       description: User feedback analysis — themes, sentiment, actionable insights
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1128,7 +1168,7 @@ product:
       complexity_tier: midweight
     feature_prioritizer:
       description: Feature prioritization — RICE, value vs effort, impact scoring
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1144,7 +1184,7 @@ product:
       complexity_tier: lightweight
     mvp_builder:
       description: MVP development, lean validation, rapid prototyping, scope control
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1161,7 +1201,7 @@ product:
       complexity_tier: heavyweight
     beta_coordinator:
       description: Beta testing coordination, QA cycles, feedback loops, bug tracking
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1177,7 +1217,7 @@ product:
       complexity_tier: lightweight
     launch_strategist:
       description: Product launch strategy, go-to-market planning, channel selection
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1197,7 +1237,7 @@ creative:
     storyteller:
       description: Narrative storytelling, character development, plot structure,
         world-building
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1212,7 +1252,7 @@ creative:
       complexity_tier: midweight
     script_writer:
       description: Screenwriting, dialogue, scene structure, screenplay format
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1227,7 +1267,7 @@ creative:
       complexity_tier: midweight
     video_concept_artist:
       description: Video concepts, storyboards, visual narratives, creative direction
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1241,7 +1281,7 @@ creative:
       complexity_tier: midweight
     music_composer:
       description: Music composition, theory, arrangement, MIDI, soundscape design
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1257,7 +1297,7 @@ creative:
       complexity_tier: midweight
     meme_creator:
       description: Meme creation, internet humor, viral formats, cultural references
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1272,7 +1312,7 @@ creative:
       complexity_tier: lightweight
     idea_generator:
       description: Creative ideation, brainstorming, lateral thinking, concept generation
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1288,7 +1328,7 @@ creative:
       complexity_tier: lightweight
     poetry_specialist:
       description: Poetry composition — verse forms, metaphor, rhythm, imagery
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1305,7 +1345,7 @@ creative:
     concept_artist:
       description: Concept art descriptions, visual design briefs, world-building
         details
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1436,7 +1476,7 @@ legacy:
       complexity_tier: lightweight
     coding:
       description: Code generation, implementation, refactoring, debugging
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1465,7 +1505,7 @@ legacy:
     debug:
       description: Root cause analysis — tracebacks, exceptions, CUDA, PyTorch, OOM,
         NaN
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1488,7 +1528,7 @@ legacy:
       complexity_tier: heavyweight
     math:
       description: Math — tensor operations, matrix calculus, gradient descent, backprop
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1508,7 +1548,7 @@ legacy:
       complexity_tier: heavyweight
     architect:
       description: System design, architecture, microservices, framework blueprints
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1530,7 +1570,7 @@ legacy:
     analyst:
       description: Data analysis, visualization, CSV, pandas, GPU metrics, training
         trends
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1555,7 +1595,7 @@ legacy:
     computer:
       description: Web browsing, email, Git, file ops, system monitoring, Excel/PDF
         docs
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1614,7 +1654,7 @@ legacy:
       complexity_tier: lightweight
     researcher:
       description: Deep research, academic sources, citation, literature synthesis
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1635,7 +1675,7 @@ legacy:
       complexity_tier: heavyweight
     marketer:
       description: Marketing copy, campaigns, brand strategy, customer acquisition
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1656,7 +1696,7 @@ legacy:
       complexity_tier: midweight
     devops:
       description: CI/CD, Docker, Kubernetes, deployment pipelines, infrastructure
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1676,7 +1716,7 @@ legacy:
       complexity_tier: heavyweight
     pm:
       description: Project management, roadmaps, sprint planning, stakeholder coordination
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1695,7 +1735,7 @@ legacy:
       complexity_tier: midweight
     humanizer:
       description: Convert text to casual, friendly, human-sounding tone
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1709,7 +1749,7 @@ legacy:
       complexity_tier: lightweight
     reviewer:
       description: Code review, quality audit, lint, best practices enforcement
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1727,7 +1767,7 @@ legacy:
       complexity_tier: midweight
     think:
       description: Deep reasoning with QwQ-style chain-of-thought (RTX 3060 local)
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1743,7 +1783,7 @@ legacy:
       complexity_tier: heavyweight
     owl:
       description: OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1760,7 +1800,7 @@ legacy:
       complexity_tier: heavyweight
     ag2_researcher:
       description: AG2 multi-agent research — researcher role
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1775,7 +1815,7 @@ legacy:
       complexity_tier: heavyweight
     ag2_critic:
       description: AG2 multi-agent debate — devil's advocate / critic role
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1789,7 +1829,7 @@ legacy:
       complexity_tier: heavyweight
     ag2_synthesizer:
       description: AG2 multi-agent debate — synthesizer / judge role
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1804,7 +1844,7 @@ legacy:
       complexity_tier: heavyweight
     code_exec:
       description: Safe code execution via smolagents (Python, bash)
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1820,7 +1860,7 @@ legacy:
       complexity_tier: heavyweight
     predictor:
       description: Consensus prediction and outcome simulation (MiroFish)
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1835,7 +1875,7 @@ legacy:
       complexity_tier: heavyweight
     claude_orchestrator:
       description: Claude-Opus orchestration via Ruflo (requires ANTHROPIC_API_KEY)
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01
@@ -1850,7 +1890,7 @@ legacy:
       requires_env: ANTHROPIC_API_KEY
     debate:
       description: Multi-agent debate orchestration — strategic discussion with personas
-      primary_model: minimax-m2-7
+      primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
       - minimax-text-01

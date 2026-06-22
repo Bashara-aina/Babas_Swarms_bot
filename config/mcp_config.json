@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "_note": "MCP server configuration - synced with .opencode/opencode.json",
+  "_note": "MCP server configuration - synced with .opencode/opencode.json. Consumed by TWO consumers: (1) opencode (CLI) reads servers directly; (2) core/mcp/router.py _load_mcp_config_enabled reads `enabled` flag and normalizes names (lowercase + hyphens-to-underscores) so it matches TOOL_PREFIXES in core/mcp/servers/*. Servers not in TOOL_PREFIXES (e.g. symphony, git) are loaded but unused by the python router.",
   "_bootstrap": "tools/mcpServers/bootstrap/mcp_bootstrap.sh wraps npx-based servers to filter startup messages",
   "servers": [
     {
@@ -80,15 +80,6 @@
       "description": "Obsidian vault knowledge management"
     },
     {
-      "name": "git",
-      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
-      "args": [
-        "@mseep/git-mcp-server"
-      ],
-      "enabled": false,
-      "description": "Git operations via MCP (DISABLED - @mseep/git-mcp-server not installed on npm)"
-    },
-    {
       "name": "ruflo",
       "command": "/home/newadmin/.local/node18/bin/ruflo",
       "args": [
@@ -128,6 +119,45 @@
       ],
       "enabled": true,
       "description": "Exa web search MCP server"
+    },
+    {
+      "name": "brave",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": [
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "enabled": false,
+      "description": "Brave web search MCP server (DISABLED - BRAVE_API_KEY not set)"
+    },
+    {
+      "name": "github",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": false,
+      "description": "GitHub MCP server (DISABLED - GITHUB_TOKEN not set)"
+    },
+    {
+      "name": "supabase",
+      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "args": [
+        "@modelcontextprotocol/server-supabase"
+      ],
+      "enabled": false,
+      "description": "Supabase MCP server (DISABLED - SUPABASE_SERVICE_ROLE_KEY not set)"
+    },
+    {
+      "name": "graphify",
+      "command": "/home/newadmin/.local/share/uv/tools/graphifyy/bin/python",
+      "args": [
+        "-m",
+        "graphify.serve",
+        "/home/newadmin/swarm-bot/graphify-out/graph.json"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "enabled": true,
+      "description": "Graphify knowledge-graph MCP server. Reads graphify-out/graph.json (built by /graphify or `graphify update`). Provides tools: graphify_query, graphify_explain, graphify_path, graphify_graph_stats, graphify_god_nodes, graphify_affected, etc."
     }
   ]
 }

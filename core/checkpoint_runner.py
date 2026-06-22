@@ -1,11 +1,11 @@
-"""M2.7 Pre-Compaction Checkpoint Runner.
+"""M3 Pre-Compaction Checkpoint Runner.
 
 Exposes the pre-compaction checkpoint ritual as an importable async module.
 Used by CLAUDE.md Section 0d — run this at 60% context before /compact.
 
 Writes structured markdown to .claude/memory_bootstrap.md.
 
-Reference: M2.7 Full Capability Activation — Pre-Compaction Checkpoint (Section C2)
+Reference: M3 Full Capability Activation — Pre-Compaction Checkpoint (Section C2)
 """
 
 from __future__ import annotations
@@ -56,7 +56,7 @@ async def run_pre_compaction_checkpoint(
     session_tag: str | None = None,
     context_percent: float = 0.0,
 ) -> Checkpoint:
-    """Run pre-compaction checkpoint — the M2.7 mandatory ritual before /compact.
+    """Run pre-compaction checkpoint — the M3 mandatory ritual before /compact.
 
     Call this when context hits CAUTION (40%) or CRITICAL (60%).
     Writes to both .claude/memory_bootstrap.md (human-readable) and
@@ -78,7 +78,7 @@ async def run_pre_compaction_checkpoint(
     Example call site (from CLAUDE.md):
         from core.checkpoint_runner import run_pre_compaction_checkpoint
         await run_pre_compaction_checkpoint(
-            task="M2.7 full capability activation",
+            task="M3 full capability activation",
             decisions=["Added AgentTeams orchestrator", "Skill harness TIER system"],
             modified_files=["core/agent_teams.py", "core/skills/harness.py"],
             blockers=["Awaiting Bashara review of CLAUDE.md changes"],
@@ -150,7 +150,7 @@ def _append_to_memory_bootstrap(checkpoint: Checkpoint) -> None:
     # Ensure file exists with header
     if not MEMORY_BOOTSTRAP.exists():
         MEMORY_BOOTSTRAP.write_text(
-            "# M2.7 Memory Bootstrap\n"
+            "# M3 Memory Bootstrap\n"
             "# Pre-compaction checkpoints — survives context compaction\n\n"
             "## Template\n"
             "Copy and fill for each session. Reload after /compact.\n\n---\n\n"

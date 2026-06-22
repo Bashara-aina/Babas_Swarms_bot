@@ -10,8 +10,8 @@ import httpx
 
 EMBED_MODEL = "embo-01"  # [VERIFY BEFORE USE: confirm MiniMax embedding model name]
 EMBED_DIM = 1536  # [VERIFY BEFORE USE: confirm MiniMax embo-01 output dimension]
-EMBED_URL = "https://api.minimax.chat/v1/embeddings"
-CHUNK_TOKENS = 2000  # expanded for M2.7 large context window
+EMBED_URL = "https://api.opencode.ai/zen/go/v1/embeddings"
+CHUNK_TOKENS = 2000  # expanded for M3 large context window
 CHUNK_OVERLAP = 200  # 10% overlap ensures continuity
 SUPPORTED_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".sql", ".md"}
 
@@ -36,9 +36,9 @@ def _chunk_words(words: list[str], chunk_size: int = CHUNK_TOKENS, overlap: int 
 
 def get_embedding(text: str) -> list[float]:
     """Get embedding vector from MiniMax embo-01 endpoint."""
-    api_key = os.getenv("MINIMAX_API_KEY", "")
+    api_key = os.getenv("OPENCODE_GO_API_KEY", "")
     if not api_key:
-        raise ValueError("MINIMAX_API_KEY not set")
+        raise ValueError("OPENCODE_GO_API_KEY not set")
     headers = {"Authorization": f"Bearer {api_key}"}
     payload = {"model": EMBED_MODEL, "input": [text]}
     with httpx.Client(timeout=60.0) as client:
@@ -49,9 +49,9 @@ def get_embedding(text: str) -> list[float]:
 
 
 def _embed_texts(texts: list[str]) -> list[list[float]]:
-    api_key = os.getenv("MINIMAX_API_KEY", "")
+    api_key = os.getenv("OPENCODE_GO_API_KEY", "")
     if not api_key:
-        raise ValueError("MINIMAX_API_KEY not set")
+        raise ValueError("OPENCODE_GO_API_KEY not set")
     headers = {"Authorization": f"Bearer {api_key}"}
     payload = {"model": EMBED_MODEL, "input": texts}
     with httpx.Client(timeout=60.0) as client:

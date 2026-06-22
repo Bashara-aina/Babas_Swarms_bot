@@ -1,11 +1,11 @@
-# config/models.yaml — MiniMax-M3 / 1M context
-# All model IDs use litellm prefix convention
-# Last updated: M3 migration (1M context window)
+# config/models.yaml — OpenCode Go (deepseek-v4-pro primary)
+# All model IDs use opencode-go prefix convention
+# Last updated: MiniMax → OpenCode Go migration (Jun 2026)
 
 providers:
-  minimax:
-    base_url: "https://api.minimax.chat/v1"
-    api_key_env: "MINIMAX_API_KEY"
+  opencode-go:
+    base_url: "https://opencode.ai/zen/go/v1"
+    api_key_env: "OPENCODE_GO_API_KEY"
     daily_limit: null
 
   ollama:
@@ -13,11 +13,16 @@ providers:
     api_key_env: null
     daily_limit: null
 
+  openrouter:
+    base_url: "https://openrouter.ai/api/v1"
+    api_key_env: "OPENROUTER_API_KEY"
+    daily_limit: null
+
 models:
   # PRIMARY — all tasks use this
-  minimax-m3:
-    provider: minimax
-    model_id: "minimax-coding-plan/MiniMax-M3"
+  deepseek-v4-pro:
+    provider: opencode-go
+    model_id: "opencode-go/deepseek-v4-pro"
     context_window: 1048576
     max_tokens: 8192
     temperature_conversation: 0.2
@@ -27,15 +32,41 @@ models:
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-  # Rate-limit fallback ONLY — 429 from M3 triggers this
-  minimax-m3-fallback:
-    provider: minimax
-    model_id: "minimax-coding-plan/MiniMax-M3"
+  # Fast model — review, search, autocomplete
+  deepseek-v4-flash:
+    provider: opencode-go
+    model_id: "opencode-go/deepseek-v4-flash"
+    context_window: 1048576
+    max_tokens: 4096
+    temperature_conversation: 0.3
+    temperature_code: 0.1
+    strengths: [coding, review, search, fast]
+    cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
+
+  # Agent primary — complex orchestration (used as Opus by Claude Code)
+  minimax-m3:
+    provider: opencode-go
+    model_id: "opencode-go/minimax-m3"
     context_window: 1048576
     max_tokens: 8192
     temperature_conversation: 0.2
     temperature_code: 0.1
-    strengths: [coding, reasoning, conversation, general, long-context]
+    strengths: [orchestration, reasoning, architecture, coding, conversation, long-context]
+    cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
+
+  # OpenRouter — nemotron free model (emergency fallback)
+  nemotron-free:
+    provider: openrouter
+    model_id: "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
+    context_window: 1000000
+    max_tokens: 4096
+    temperature_conversation: 0.3
+    temperature_code: 0.1
+    strengths: [coding, reasoning, conversation, general]
     cost_per_1m_tokens: 0.0
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
@@ -66,14 +97,14 @@ models:
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
-# Wildcard catch-all: any unmatched model request → M3
-wildcard_fallback: minimax-m3
+# Wildcard catch-all: any unmatched model request → primary
+wildcard_fallback: deepseek-v4-pro
 
 # Ruflo swarm agents use this model
-ruflo_model: minimax-m3
+ruflo_model: deepseek-v4-pro
 
-# Complexity tiers — all route to minimax only
+# Complexity tiers — all route to opencode-go
 complexity_tiers:
-  lightweight:    [minimax]
-  midweight:      [minimax]
-  heavyweight:   [minimax]
+  lightweight:    [opencode-go]
+  midweight:      [opencode-go]
+  heavyweight:   [opencode-go]

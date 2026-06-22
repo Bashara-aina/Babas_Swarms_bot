@@ -14,7 +14,7 @@ Architecture-level facts about swarm-bot (populated by evolve() after each agent
 
 ## Architecture Decisions
 
-- **MMX-CLI native tools** (`lib/legiona/tools/mmx_tools.py`): mmx-cli wraps 7 MiniMax modalities (text, vision, speech, music, search, video, image-gen). Tool loop uses `subprocess.run` with `NO_COLOR=1 NON_INTERACTIVE=1` for deterministic output. API key set via `mmx config set api_key=<key>` — not env vars. Registered as 3 tools in registry.py: `mmx_vision`, `mmx_search`, `mmx_speech` (8 tools total). Temperature always 1.0 + reasoning_split=True for M2.7.
+- **MMX-CLI native tools** (`lib/legiona/tools/mmx_tools.py`): mmx-cli wraps 7 MiniMax modalities (text, vision, speech, music, search, video, image-gen). Tool loop uses `subprocess.run` with `NO_COLOR=1 NON_INTERACTIVE=1` for deterministic output. API key set via `mmx config set api_key=<key>` — not env vars. Registered as 3 tools in registry.py: `mmx_vision`, `mmx_search`, `mmx_speech` (8 tools total). Temperature always 1.0 + reasoning_split=True for M3.
 
 ## Known Gotchas
 Bugs, edge cases, and workaround rules (populated by evolve() — tracked in .wiki/decisions/ and .wiki/logs/).

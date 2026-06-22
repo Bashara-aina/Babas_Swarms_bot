@@ -1,4 +1,4 @@
-# M2.7 Agent Teams Protocol
+# M3 Agent Teams Protocol
 
 Every complex task runs through a 3-role adversarial team. This is how we get to correct — not just done.
 

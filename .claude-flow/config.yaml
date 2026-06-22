@@ -25,7 +25,7 @@ memory:
   memoryGraph:
     enabled: true
     pageRankDamping: 0.85
-    maxNodes: 5000
+    maxNodes: 500
     similarityThreshold: 0.8
   agentScopes:
     enabled: true

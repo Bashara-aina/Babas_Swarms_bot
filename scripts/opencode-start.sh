@@ -63,5 +63,5 @@ exec opencode run \
     -f "$CONTEXT_FILE" \
     --continue \
     --dir "$REPO" \
-    --model minimax/MiniMax-M3 \
+    --model opencode-go/MiniMax-M3 \
     "Continue where we left off. Review the attached recalled context — it is your prior memory."

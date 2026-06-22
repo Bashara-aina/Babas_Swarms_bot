@@ -23,7 +23,7 @@ CC_LAYER_PATHS = {
     "L3": PROJECT_ROOT / ".claude",
     "L4": PROJECT_ROOT / "data" / "observations.db",
     "L5": PROJECT_ROOT / ".claude-flow" / "data" / "auto-memory-store.json",
-    "L6": PROJECT_ROOT / ".claude-flow" / "data" / "auto-memory-store.json",
+    "L6": PROJECT_ROOT / ".claude-flow" / "data" / "mem0-store.json",
 }
 
 # Priority weights for context restoration (sum to 1.0)
@@ -36,7 +36,7 @@ LAYER_WEIGHTS = {
     "L6": 0.10,  # Mem0 - shared context
 }
 
-MAX_CONTEXT_CHARS = 8000
+MAX_CONTEXT_CHARS = 2000
 LOCK = threading.Lock()
 
 def _read_layer1(top_k: int = 5) -> list[dict[str, Any]]:
@@ -54,21 +54,24 @@ def _read_layer1(top_k: int = 5) -> list[dict[str, Any]]:
     return results
 
 def _read_layer2(query: str = "", top_k: int = 5) -> list[dict[str, Any]]:
-    """Query ChromaDB."""
+    """Query ChromaDB (native Chroma schema — documents in embedding_metadata)."""
     db_path = CC_LAYER_PATHS["L2"] / "chroma.sqlite3"
     if not db_path.exists():
         return []
     try:
         conn = sqlite3.connect(str(db_path), check_same_thread=False)
+        # Chroma stores documents in embedding_metadata keyed by "document"
+        # embedding_metadata.id = TEXT matching embeddings.embedding_id
         rows = conn.execute("""
-            SELECT c.name, e.docUMENT, e.id
+            SELECT e.embedding_id, m.string_value
             FROM embeddings e
-            JOIN collections c ON e.collection_id = c.id
-            WHERE e.docUMENT LIKE ?
+            JOIN embedding_metadata m ON e.embedding_id = m.id AND m.key = 'document'
+            WHERE m.string_value IS NOT NULL AND m.string_value LIKE ?
+            ORDER BY e.seq_id DESC
             LIMIT ?
         """, (f"%{query}%", top_k)).fetchall()
         conn.close()
-        return [{"collection": r[0], "doc": r[1][:500]} for r in rows if r[1]]
+        return [{"collection": "chroma", "id": r[0], "doc": r[1][:500]} for r in rows]
     except Exception:
         return []
 
@@ -124,8 +127,20 @@ def _read_layer4(limit: int = 20) -> list[dict[str, Any]]:
         return []
 
 def _read_layer5() -> list[dict[str, Any]]:
-    """Read GraphRAG/Mem0."""
+    """Read GraphRAG — knowledge graph relationships."""
     path = CC_LAYER_PATHS["L5"]
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text())
+        entries = data if isinstance(data, list) else [data]
+        return entries[(-50):] if entries else []
+    except Exception:
+        return []
+
+def _read_layer6() -> list[dict[str, Any]]:
+    """Read Mem0 — user preferences, style, personalization."""
+    path = CC_LAYER_PATHS["L6"]
     if not path.exists():
         return []
     try:
@@ -183,7 +198,7 @@ def restore_context(session_id: str = "", query: str = "") -> dict[str, Any]:
         "L3": _read_layer3(10),
         "L4": _read_layer4(20),
         "L5": _read_layer5(),
-        "L6": _read_layer5(),  # Shares with L5
+        "L6": _read_layer6(),
     }
 
     for layer, items in layer_data.items():

@@ -1,9 +1,9 @@
 """
 lib/legiona/minimax_client.py
-MiniMax M3 — fully optimized for maximum intelligence.
+OpenCode M3 — fully optimized for maximum intelligence.
 Methods implemented:
-  #1  Model = MiniMax-M3 (latest, self-evolving)
-  #2  reasoning_split=True (interleaved chain-of-thought)
+  #1  Model = deepseek-v4-pro (latest, self-evolving)
+  #2  reasoning_split=False (env-var override: OPGO_REASONING_SPLIT)
   #3  Optimal sampling: temperature=1.0, top_p=0.95, top_k=40
   #6  Interleaved thinking between tool calls via system prompt
   #7  Preset parameter profiles for coding vs research tasks
@@ -126,14 +126,29 @@ def _inject_images_into_messages(
     return msgs
 
 
+def _resolve_reasoning_split(reasoning_split: bool = False) -> bool:
+    """
+    Allow env-var OPGO_REASONING_SPLIT to override the code-level default.
+
+    Setting OPGO_REASONING_SPLIT=true re-enables reasoning trace output
+    for debugging without needing code changes. Default is False — OpenCode
+    performs internal chain-of-thought regardless; this flag only controls
+    whether the reasoning trace stream is included in the API response.
+    """
+    env_val = os.environ.get("OPGO_REASONING_SPLIT")
+    if env_val is not None:
+        return env_val.lower() in ("true", "1", "yes")
+    return reasoning_split
+
+
 # ── Model ────────────────────────────────────────────────────────────────────
-MINIMAX_MODEL = os.getenv("MINIMAX_MODEL", "MiniMax-M3")
-MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.chat/v1")
-MINIMAX_DIRECT = True  # Always route direct to MiniMax — no OpenRouter fallback
+MINIMAX_MODEL = os.getenv("MINIMAX_MODEL", "deepseek-v4-pro")
+MINIMAX_BASE_URL = os.getenv("MINIMAX_BASE_URL", "https://api.opencode.ai/zen/go/v1")
+MINIMAX_DIRECT = True  # Always route direct to OpenCode — no OpenRouter fallback
 
 
 # ── Sampling presets (#3, #7) ────────────────────────────────────────────────
-# MiniMax M3 is tuned for temperature=1.0 — NOT 0.7
+# OpenCode M3 is tuned for temperature=1.0 — NOT 0.7
 PRESET_PROFILES = {
     "coding": {
         "temperature": 1.0,
@@ -227,22 +242,22 @@ def _validate_structured_output(data: dict, expected_model: type[BaseModel]) -> 
 
 
 # ── Client factory (#10: primary + fallback) ────────────────────────────────
-def _build_minimax_client() -> AsyncOpenAI:
-    api_key = os.getenv("MINIMAX_API_KEY", "")
+def _build_go_client() -> AsyncOpenAI:
+    api_key = os.getenv("OPENCODE_GO_API_KEY", "")
     if not api_key:
-        raise ValueError("MINIMAX_API_KEY not set")
+        raise ValueError("OPENCODE_GO_API_KEY not set")
     return AsyncOpenAI(api_key=api_key, base_url=MINIMAX_BASE_URL)
 
 
 def get_client(fallback: bool = False) -> AsyncOpenAI:
     """
     Returns plain AsyncOpenAI client (no instructor dependency).
-    MiniMax direct only — OpenRouter fallback disabled (MINIMAX_DIRECT=True).
+    OpenCode direct only — OpenRouter fallback disabled (MINIMAX_DIRECT=True).
 
     Gap 3 fix: removed instructor.from_openai() — structured output
     is now handled via response_format={"type": "json_object"} + manual parsing.
     """
-    return _build_minimax_client()
+    return _build_go_client()
 
 
 # ── Smart async completion wrapper (#2: reasoning_split, #3: optimal params) ─
@@ -254,25 +269,27 @@ async def create_structured_completion[T: BaseModel](
     profile: str | None = None,
     fallback: bool = False,
     max_tokens: int = 8192,
-    reasoning_split: bool = True,
+    reasoning_split: bool = False,
     model: str | None = None,
 ) -> T:
     """
-    Main async call wrapper. Uses reasoning_split=True by default so M2.7
-    performs interleaved chain-of-thought before every response.
+    Main async call wrapper. Uses reasoning_split=False by default to save
+    ~50% output tokens — OpenCode performs internal chain-of-thought regardless;
+    this flag only controls whether the reasoning trace is streamed in the response.
+    Set OPGO_REASONING_SPLIT=true env-var to re-enable for debugging.
 
     Gap 3 fix: replaced instructor response_model= with native JSON-mode parsing.
-    M2.7 is instructed to output a JSON object; we parse it manually.
+    M3 is instructed to output a JSON object; we parse it manually.
 
     Args:
         preset: "coding" | "research" | "creative" — selects sampling parameters
-        reasoning_split: Method #2 — interleaved CoT, always on by default
-        fallback: Route via OpenRouter instead of MiniMax direct
+        reasoning_split: Whether to stream interleaved CoT trace (default False)
+        fallback: Route via OpenRouter instead of OpenCode direct
         model: Override model string (default: MINIMAX_MODEL or OPENROUTOR_MODEL)
     """
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
+    model_str = model or MINIMAX_MODEL  # Always use OpenCode direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # Prepend cached evolved rules as system message
@@ -291,7 +308,7 @@ async def create_structured_completion[T: BaseModel](
         messages=msgs,
         response_format={"type": "json_object"},
         max_tokens=max_tokens,
-        extra_body={"reasoning_split": reasoning_split},
+        extra_body={"reasoning_split": _resolve_reasoning_split(reasoning_split)},
         **params,
     )
 
@@ -325,7 +342,7 @@ def complete[T: BaseModel](
     response_model: type[T] = LegionaOutput,
     fallback: bool = False,
     max_tokens: int = 8192,
-    reasoning_split: bool = True,
+    reasoning_split: bool = False,
     model: str | None = None,
 ) -> T:
     """
@@ -352,7 +369,7 @@ def complete[T: BaseModel](
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
+    model_str = model or MINIMAX_MODEL  # Always use OpenCode direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # Gap 3: use json_object response_format instead of response_model=
@@ -361,7 +378,7 @@ def complete[T: BaseModel](
         messages=msgs,
         response_format={"type": "json_object"},
         max_tokens=max_tokens,
-        extra_body={"reasoning_split": reasoning_split},
+        extra_body={"reasoning_split": _resolve_reasoning_split(reasoning_split)},
         **params,
     )
 
@@ -394,11 +411,11 @@ async def stream_complete(
     profile: str | None = None,
     fallback: bool = False,
     max_tokens: int = 8192,
-    reasoning_split: bool = True,
+    reasoning_split: bool = False,
     model: str | None = None,
 ):
     """
-    Async generator that yields SSE Delta events from M2.7.
+    Async generator that yields SSE Delta events from M3.
 
     Each yield is a dict with keys:
       content     — str token chunk (accumulates in .join() for final answer)
@@ -423,7 +440,7 @@ async def stream_complete(
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
+    model_str = model or MINIMAX_MODEL  # Always use OpenCode direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     stream = await client.chat.completions.create(
@@ -431,7 +448,7 @@ async def stream_complete(
         messages=msgs,
         stream=True,
         max_tokens=max_tokens,
-        extra_body={"reasoning_split": reasoning_split},
+        extra_body={"reasoning_split": _resolve_reasoning_split(reasoning_split)},
         **params,
     )
 
@@ -487,7 +504,7 @@ async def stream_structured_completion[T: BaseModel](
     profile: str | None = None,
     fallback: bool = False,
     max_tokens: int = 8192,
-    reasoning_split: bool = True,
+    reasoning_split: bool = False,
     model: str | None = None,
 ) -> T:
     """
@@ -529,12 +546,12 @@ async def stream_structured_completion[T: BaseModel](
 # ── Embedding (for RAG — embo-01) ───────────────────────────────────────────
 def get_embedding(text: str) -> list[float]:
     """
-    MiniMax embedding via direct HTTP (not instructor).
+    OpenCode embedding via direct HTTP (not instructor).
     Model: emo-01 (1536-dim) [VERIFY BEFORE USE: confirm dimension on platform]
     """
-    api_key = os.getenv("MINIMAX_API_KEY", "")
+    api_key = os.getenv("OPENCODE_GO_API_KEY", "")
     if not api_key:
-        raise ValueError("MINIMAX_API_KEY not set")
+        raise ValueError("OPENCODE_GO_API_KEY not set")
     resp = httpx.post(
         f"{MINIMAX_BASE_URL}/embeddings",
         headers={
@@ -584,20 +601,20 @@ async def create_completion_with_tools(
     model: str | None = None,
     verbose: bool = True,
     image_paths: list[str] | None = None,
-    reasoning_split: bool = True,
+    reasoning_split: bool = False,
 ) -> ToolResult:
     """
-    M2.7 native tool-calling loop with per-round reasoning trace.
+    M3 native tool-calling loop with per-round reasoning trace.
 
-    Executes a tool-call loop: sends messages + tools to M2.7,
+    Executes a tool-call loop: sends messages + tools to M3,
     executes any tool_calls in the response, appends results, and
-    loops until M2.7 returns a plain answer.
+    loops until M3 returns a plain answer.
 
     Args:
         messages: OpenAI-style message list (role + content)
         tool_schemas: OpenAI tool schemas to register (from tools.registry.TOOL_SCHEMAS)
         preset: "coding" | "research" | "creative"
-        fallback: Route via OpenRouter instead of MiniMax direct
+        fallback: Route via OpenRouter instead of OpenCode direct
         max_tokens: Max tokens per completion call
         max_rounds: Hard cap on tool-call loops (prevents infinite loops)
         model: Override model string
@@ -624,7 +641,7 @@ async def create_completion_with_tools(
 
     profile_key = profile or preset
     params = PRESET_PROFILES.get(profile_key, PRESET_PROFILES["coding"])
-    model_str = model or MINIMAX_MODEL  # Always use MiniMax direct — no OpenRouter fallback
+    model_str = model or MINIMAX_MODEL  # Always use OpenCode direct — no OpenRouter fallback
     client = get_client(fallback=fallback)
 
     # If no tool schemas passed, pull all from registry
@@ -644,7 +661,7 @@ async def create_completion_with_tools(
     while result.rounds < max_rounds:
         result.rounds += 1
 
-        # Call M2.7 with reasoning_split + tools
+        # Call M3 with reasoning_split + tools
         try:
             response = await client.chat.completions.create(
                 model=model_str,
@@ -652,7 +669,7 @@ async def create_completion_with_tools(
                 tools=tool_schemas,
                 tool_choice="auto",
                 max_tokens=max_tokens,
-                extra_body={"reasoning_split": reasoning_split},
+                extra_body={"reasoning_split": _resolve_reasoning_split(reasoning_split)},
                 **params,
             )
         except Exception as exc:
@@ -666,7 +683,7 @@ async def create_completion_with_tools(
         choice = response.choices[0]
         assistant_message: dict[str, Any] = choice.message.model_dump()
 
-        # Log reasoning details if present (MiniMax M3 puts CoT in reasoning field)
+        # Log reasoning details if present (OpenCode M3 puts CoT in reasoning field)
         reasoning_detail = ""
         if hasattr(response, "choices") and response.choices:
             extra = response.choices[0].model_extra or {}
@@ -682,7 +699,7 @@ async def create_completion_with_tools(
         content = assistant_message.get("content") or ""
         tool_calls = assistant_message.get("tool_calls") or []
 
-        # If no tool calls → M2.7 returned a final answer
+        # If no tool calls → M3 returned a final answer
         if not tool_calls:
             result.final_answer = content
             break
@@ -825,8 +842,8 @@ def analyze_image(
     model: str | None = None,
 ) -> str:
     """
-    One-shot image analysis using M2.7 vision.
-    Loads images as base64, sends to M2.7 with a user message, returns the answer.
+    One-shot image analysis using M3 vision.
+    Loads images as base64, sends to M3 with a user message, returns the answer.
 
     Args:
         image_paths: List of image file paths (PNG, JPEG, GIF, WebP)

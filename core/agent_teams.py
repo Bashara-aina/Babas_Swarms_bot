@@ -1,4 +1,4 @@
-"""M2.7 Agent Teams Orchestrator — 3-role adversarial reasoning system.
+"""M3 Agent Teams Orchestrator — 3-role adversarial reasoning system.
 
 Formalizes Planner / Builder / Critic roles for complex tasks.
 This is NOT a runtime for the Telegram bot — it is a utility module for
@@ -15,7 +15,7 @@ Adversarial loop:
   4. Planner resolves Critic's objections
   5. Builder finalizes
 
-Reference: M2.7 Full Capability Activation — Agent Teams Protocol (Section 0b)
+Reference: M3 Full Capability Activation — Agent Teams Protocol (Section 0b)
 """
 
 from __future__ import annotations
@@ -118,7 +118,7 @@ class TeamSession:
 
 
 class Critic:
-    """M2.7 Critic role — adversarial challenge against plan or implementation."""
+    """M3 Critic role — adversarial challenge against plan or implementation."""
 
     def __init__(self) -> None:
         self._failure_patterns: list[str] = []
@@ -359,7 +359,7 @@ class Critic:
 
 
 class Planner:
-    """M2.7 Planner role — owns goal, generates SPEC before Builder acts."""
+    """M3 Planner role — owns goal, generates SPEC before Builder acts."""
 
     async def generate_spec(self, task: str) -> Spec:
         """Analyze task and generate locked SPEC.
@@ -421,7 +421,7 @@ class Planner:
 
 
 class Builder:
-    """M2.7 Builder role — implements against Planner's locked SPEC ONLY.
+    """M3 Builder role — implements against Planner's locked SPEC ONLY.
 
     This is a placeholder — actual implementation is done by Claude Code / OpenCode.
     Builder methods exist to formalize the interface and emit BuildResult.
@@ -455,7 +455,7 @@ class Builder:
 
 
 class AgentTeam:
-    """M2.7 3-role adversarial team orchestrator.
+    """M3 3-role adversarial team orchestrator.
 
     Usage:
         team = AgentTeam()

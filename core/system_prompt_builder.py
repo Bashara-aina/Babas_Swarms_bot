@@ -40,7 +40,8 @@ logger = logging.getLogger(__name__)
 # ── Context Window Budget Management (Priority 10) ─────────────────────────────
 
 MODEL_CONTEXT_LIMITS: dict[str, int] = {
-    "default": 16000,
+    "default": 1_048_576,  # MiniMax-M3 — 1M context window
+    "opencode-go/deepseek-v4-pro": 1_048_576,
     "gpt-4o": 128000,
     "claude-3-5-haiku": 200000,
 }
@@ -126,29 +127,23 @@ async def _get_working_memory_content(user_id: str) -> str:
     if not user_id:
         return ""
     try:
-        from core.working_memory import load_state
+        from core.working_memory import get_recent_exchanges, load_state
 
         st = load_state(user_id)
-        if not st.get("turn_count"):
-            return ""
-        lines = ["[WORKING MEMORY — session continuity]"]
-        tc = st.get("turn_count", 0)
-        if tc:
-            lines.append(f"Exchange count this session (approx): {tc}")
-        focus = st.get("current_focus", "")
-        if focus:
-            lines.append(f"Current focus: {focus}")
-        threads = st.get("open_threads", [])
-        if threads:
-            lines.append("Open threads (newest first):")
-            for th in threads[:5]:
-                lines.append(f"  • {th}")
-        return "\n".join(lines)
-    except Exception as e:
-        logger.debug("[PromptBuilder] working_memory not available: %s", e)
-        return ""
-    try:
-        from core.working_memory import get_recent_exchanges
+        if st.get("turn_count"):
+            lines = ["[WORKING MEMORY — session continuity]"]
+            tc = st.get("turn_count", 0)
+            if tc:
+                lines.append(f"Exchange count this session (approx): {tc}")
+            focus = st.get("current_focus", "")
+            if focus:
+                lines.append(f"Current focus: {focus}")
+            threads = st.get("open_threads", [])
+            if threads:
+                lines.append("Open threads (newest first):")
+                for th in threads[:5]:
+                    lines.append(f"  • {th}")
+            return "\n".join(lines)
 
         exchanges = await get_recent_exchanges(user_id, n=5)
         if not exchanges:
@@ -167,21 +162,6 @@ async def _get_working_memory_content(user_id: str) -> str:
 async def _get_relevant_memory_content(user_id: str, query: str) -> str:
     """Get relevant memory — top 3 semantic results."""
     if not user_id or not query:
-        return ""
-    try:
-        from core.memory_manager import LegionSemanticMemory
-
-        mem = LegionSemanticMemory()
-        results = await mem.search_memories(query, str(user_id), limit=3)
-        if not results:
-            return ""
-        lines = ["[RELEVANT MEMORIES — top 3]"]
-        for m in results[:3]:
-            content = str(m.get("content", ""))[:200]  # type: ignore[reportAttributeAccessIssue]
-            lines.append(f"  - {content}")
-        return "\n".join(lines)
-    except Exception as e:
-        logger.debug("[PromptBuilder] relevant_memory not available: %s", e)
         return ""
     try:
         from core.memory.semantic_cache import get_relevant_memories
@@ -246,20 +226,11 @@ async def _get_skill_context_content(extras: dict) -> str:
         from core.skills import get_skill_registry
 
         registry = get_skill_registry()
-        skill_obj = registry.find_by_example(skill)
-        if skill_obj:
-            return f"[SKILL ACTIVE: {skill_obj.name}] {skill_obj.description}"
-        return ""
-    except Exception as e:
-        logger.debug("[PromptBuilder] skill_context not available: %s", e)
-        return ""
-    try:
-        from core.skills import get_skill_registry
-
-        registry = get_skill_registry()
-        skill_obj = registry.get(skill)
+        skill_obj = registry.find_by_example(skill) or registry.get(skill)
         if skill_obj and hasattr(skill_obj, "system_prompt_block"):
             return skill_obj.system_prompt_block()
+        if skill_obj:
+            return f"[SKILL ACTIVE: {skill_obj.name}] {skill_obj.description}"
         return ""
     except Exception as e:
         logger.debug("[PromptBuilder] skill_context not available: %s", e)
@@ -325,7 +296,7 @@ async def build_system_prompt(
     if extras is None:
         extras = {}
 
-    budget_tokens = int(MODEL_CONTEXT_LIMITS.get(model, 16000) * CONTEXT_BUDGET_RATIO)
+    budget_tokens = int(MODEL_CONTEXT_LIMITS.get(model, MODEL_CONTEXT_LIMITS["default"]) * CONTEXT_BUDGET_RATIO)
     used_tokens = 0
     sections: list[str] = []
 

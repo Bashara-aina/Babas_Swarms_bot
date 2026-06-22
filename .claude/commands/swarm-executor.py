@@ -27,6 +27,12 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+# All diagnostic output goes to stderr — stdout must stay clean for statusline.
+# Concurrent print() calls during agent deployment cause interleaved garbled text.
+def eprint(*args, **kw):
+    kw.setdefault('file', sys.stderr)
+    print(*args, **kw)
+
 # --------------------------------------------------------------------------- #
 # Capability engine (mirrors swarm-bot's AgentSelector)
 # --------------------------------------------------------------------------- #
@@ -258,7 +264,7 @@ Execute your portion of this task. Be precise. Return your findings.
 
     try:
         result = subprocess.run(
-            [cli_path, "run", full_prompt],
+            [cli_path, "run", full_prompt, "--format", "json"],
             stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
@@ -320,12 +326,12 @@ def run_swarm(task: str, max_agents: int = 4, timeout_per_agent: int = 180) -> d
             "results": [],
         }
 
-    print("\n## Swarm Execution Plan")
-    print(f"**Task**: {task[:100]}{'...' if len(task) > 100 else ''}")
-    print(f"**Selected Capabilities**: {', '.join(c for c, _ in capabilities)}")
-    print(f"**Sub-agents to spawn**: ~{complexity}")
-    print(f"**Session ID**: {session_id}")
-    print(f"[CLI] Using: {OPENCODE_CLI}\n")
+    eprint("\n## Swarm Execution Plan")
+    eprint(f"**Task**: {task[:100]}{'...' if len(task) > 100 else ''}")
+    eprint(f"**Selected Capabilities**: {', '.join(c for c, _ in capabilities)}")
+    eprint(f"**Sub-agents to spawn**: ~{complexity}")
+    eprint(f"**Session ID**: {session_id}")
+    eprint(f"[CLI] Using: {OPENCODE_CLI}\n")
 
     # Run agents concurrently
     import concurrent.futures
@@ -346,7 +352,7 @@ def run_swarm(task: str, max_agents: int = 4, timeout_per_agent: int = 180) -> d
 
         for future in concurrent.futures.as_completed(futures):
             cap = futures[future]
-            print(f"[{cap}] completed")
+            eprint(f"[{cap}] completed")
             results.append(future.result())
 
     # Synthesize results
@@ -423,7 +429,7 @@ def main():
     if args.json:
         print(json.dumps(result, indent=2))
     else:
-        print(result["synthesis"])
+        eprint(result["synthesis"])
 
     return 0 if result["failure_count"] == 0 else 1
 

@@ -1,15 +1,15 @@
-"""M2.7 Self-Evolution Engine — bridges FeedbackLearner with FAILURES.md pipeline.
+"""M3 Self-Evolution Engine — bridges FeedbackLearner with FAILURES.md pipeline.
 
-Implements the M2.7 100-round self-improvement loop adapted for swarm-bot:
+Implements the M3 100-round self-improvement loop adapted for swarm-bot:
   1. After every failed attempt → append to FAILURES.md
   2. After 5+ failures → build EVAL_SET.md regression tests
   3. Analyze failures → hypothesize harness fix → modify ONE CLAUDE.md thing
   4. Evaluate → compare → keep or revert
 
 Leverages existing core/optimization/feedback_learner.py (Redis-backed feedback)
-and creates M2.7-style documentation files.
+and creates M3-style documentation files.
 
-Reference: M2.7 Full Capability Activation — Self-Evolution System (Section D1-D2)
+Reference: M3 Full Capability Activation — Self-Evolution System (Section D1-D2)
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ class FailureRecord:
 
 
 class SelfEvolutionEngine:
-    """M2.7 self-evolution feedback pipeline.
+    """M3 self-evolution feedback pipeline.
 
     Usage:
         engine = SelfEvolutionEngine("/path/to/project")

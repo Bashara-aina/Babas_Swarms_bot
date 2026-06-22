@@ -2,11 +2,11 @@
 """Dynamic model routing by task complexity and cost tier.
 
 Tiers:
-- lightweight: Free ultra-fast models (Cerebras, Groq) — simple queries
+- lightweight: Local Ollama models (fast, free) — simple queries
 - midweight: Standard models — average tasks
 - heavyweight: Best-in-class models — complex multi-step tasks
 
-Expected savings: 60-80% cost reduction by routing simple tasks to free fast models.
+Expected savings: 60-80% cost reduction by routing simple tasks to local free models (Ollama).
 """
 
 from __future__ import annotations
@@ -19,24 +19,27 @@ logger = logging.getLogger(__name__)
 TIERS: dict[str, dict] = {
     "lightweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-M3",       # Free, 1500 tok/s
-            "minimax-coding-plan/MiniMax-M3", # Free, fast
+            "opencode-go/deepseek-v4-flash",                   # Fast, 1M context — primary for simple
+            "ollama_chat/mistral:latest",                       # Local fallback if proxy down
+            "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", # OpenRouter free tier
         ],
-        "description": "Simple queries, fact retrieval, formatting",
+        "description": "Simple queries, fact retrieval, formatting — routed to flash",
         "max_task_len": 150,
     },
     "midweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-M3",                        # Free, strong reasoning
-            "ollama_chat/gemma4:e4b",                                    # Local fallback
+            "opencode-go/deepseek-v4-flash",                   # Fast enough for standard tasks
+            "opencode-go/deepseek-v4-pro",                      # Strong reasoning fallback
+            "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", # OpenRouter free tier
         ],
         "description": "Standard coding, debugging, math, explanation",
         "max_task_len": 600,
     },
     "heavyweight": {
         "models": [
-            "minimax-coding-plan/MiniMax-M3",                       # Fast MiniMax
-            "ollama_chat/llama3.3:70b",                                # Local fallback
+            "opencode-go/minimax-m3",                            # Best-in-class orchestration
+            "opencode-go/deepseek-v4-pro",                       # Strong reasoning fallback
+            "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free", # OpenRouter free tier
         ],
         "description": "Complex reasoning, multi-step, long-form",
         "max_task_len": None,  # No limit
@@ -111,7 +114,7 @@ def select_model(agent_key: str, task: str, force_tier: str | None = None) -> st
         force_tier: Override complexity detection with specific tier.
 
     Returns:
-        Model string to use (e.g. 'minimax-coding-plan/MiniMax-M3').
+        Model string to use (e.g. 'opencode-go/deepseek-v4-pro').
     """
     import core.agent_registry as ag
 

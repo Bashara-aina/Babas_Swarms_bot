@@ -1,15 +1,46 @@
 model_list:
-  - model_name: minimax/MiniMax-M3
+  # OpenCode Go via openai-compatible provider
+  - model_name: opencode-go/*
     litellm_params:
-      model: minimax/MiniMax-M3
-      api_base: https://api.minimax.io/v1
-      api_key: os.environ/MINIMAX_API_KEY
+      model: opencode-go/*
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: os.environ/OPENCODE_GO_API_KEY
+      rpm: 500
+      drop_params: true
 
-  - model_name: minimax/MiniMax-M3
+  # NVIDIA Nemotron via OpenRouter (as OpenAI-compatible)
+  # Short name for Claude Code (ANTHROPIC_MODEL=nemotron)
+  # NOTE: Nemotron is VERY slow — ~30s reasoning before first token
+  - model_name: nemotron
     litellm_params:
-      model: minimax/MiniMax-M3
-      api_base: https://api.minimax.io/v1
-      api_key: os.environ/MINIMAX_API_KEY
+      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_base: https://openrouter.ai/api/v1
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 10
+      timeout: 300
+      stream_timeout: 300
+      drop_params: true
+
+  # Full OpenRouter model name (for OpenCode & other clients that use full model IDs)
+  # CRITICAL: Uses 'openai/' prefix so LiteLLM strips it before sending to OpenRouter.
+  # Without this, the 'openrouter/*' wildcard passes 'openrouter/...' to OpenRouter
+  # which returns "not a valid model ID".
+  - model_name: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+    litellm_params:
+      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+      api_base: https://openrouter.ai/api/v1
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 30
+      timeout: 180
+      drop_params: true
+
+  - model_name: openrouter/*
+    litellm_params:
+      model: openrouter/*
+      api_base: https://openrouter.ai/api/v1
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 500
+      drop_params: true
 
   - model_name: ollama-llama3.3
     litellm_params:
@@ -24,8 +55,14 @@ litellm_settings:
   disable_constraints: true
   no-cache: true
 
+  # OpenRouter recommended headers for model providers
+  default_headers:
+    HTTP-Referer: "https://swarm-bot.ai"
+    X-Title: "swarm-bot"
+
 general_settings:
-  master_key: "legion-proxy-key"
+  # No master_key: proxy accepts any Authorization header.
+  # Security is via upstream API keys managed by the proxy.
 
 budget_manager:
   planner:

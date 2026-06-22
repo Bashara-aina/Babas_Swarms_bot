@@ -44,7 +44,7 @@
 
 ### 3.1 Structured Output Validation
 
-**Objective**: Verify M2.7 responds with valid JSON conforming to `LegionaOutput` schema.
+**Objective**: Verify M3 responds with valid JSON conforming to `LegionaOutput` schema.
 
 **Method**:
 ```bash
@@ -150,7 +150,7 @@ cat /home/newadmin/swarm-bot/lib/legiona/memory/rules.md | tail -10
 
 ### 3.4 Tool-Call Loop
 
-**Objective**: Verify M2.7 can execute multi-round tool calls with reasoning traces.
+**Objective**: Verify M3 can execute multi-round tool calls with reasoning traces.
 
 **Method**:
 ```bash
@@ -326,7 +326,7 @@ print(f'Total cost: ¥{total_jpy:.2f}')
 |-------|------------|
 | `imghdr` deprecated in Python 3.11+ | Image format detected by extension first, fallback to extension-based mime |
 | `response_model=` from `instructor` removed | Uses `response_format={"type": "json_object"}` + manual JSON parsing |
-| OpenRouter M2.7 slug unverified | Check `https://openrouter.ai/models` before using `OPENROUTER_MODEL` |
+| OpenRouter M3 slug unverified | Check `https://openrouter.ai/models` before using `OPENROUTER_MODEL` |
 | Self-evolution runs synchronously | `evolve()` calls `complete()` which blocks — run in background task if needed |
 
 ---

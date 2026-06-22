@@ -18,20 +18,20 @@ logger = logging.getLogger(__name__)
 _FALLBACK_CHAINS = {
     # Coding tasks: MiniMax primary, Ollama local fallback
     "coding": [
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
         ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
     # General chat: MiniMax primary
     "chat": [
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
         ("ollama_chat/gemma4:e4b", "Local Ollama gemma4:e4b"),
     ],
     # Analysis tasks: MiniMax primary, Ollama Llama for heavy reasoning
     "analysis": [
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
-        ("minimax-coding-plan/MiniMax-M3", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
+        ("opencode-go/deepseek-v4-pro", "MiniMax M3"),
         ("ollama_chat/llama3.3:70b", "Local Ollama Llama 3.3 70B"),
     ],
 }
@@ -123,15 +123,19 @@ class FallbackChain:
             agent_key: Agent type
 
         Returns:
-            Dict mapping display names to health status
+            Dict mapping "{position}:{model_string}" to health status. Keys
+            include the chain position so that chains with duplicate providers
+            (e.g. retrying the same cloud provider before local fallback) still
+            surface one stat per chain step rather than collapsing to a
+            single deduped entry.
         """
         chain = FallbackChain.get_provider_chain(agent_key)
         stats = {}
 
-        for model_string, display_name in chain:
+        for idx, (model_string, _display_name) in enumerate(chain):
             provider = model_string.split("/")[0] if "/" in model_string else model_string
             status = check_provider_health(provider)
-            stats[display_name] = status
+            stats[f"{idx}:{model_string}"] = status
 
         return stats
 
@@ -147,7 +151,7 @@ def get_fallback_chain(agent_key: str = "coding") -> list[str]:
 
     Example:
         >>> chain = get_fallback_chain("coding")
-        >>> # Returns ["minimax-coding-plan/MiniMax-M3", "minimax-coding-plan/MiniMax-M3", ...]
+        >>> # Returns ["opencode-go/deepseek-v4-pro", "opencode-go/deepseek-v4-pro", ...]
     """
     chain = FallbackChain.get_provider_chain(agent_key)
     return [model for model, _ in chain]
@@ -164,8 +168,8 @@ def get_best_provider(agent_key: str = "coding") -> str:
 
     Example:
         >>> model = get_best_provider("coding")
-        >>> # Returns "minimax-coding-plan/MiniMax-M3" if healthy
-        >>> # Returns "minimax-coding-plan/MiniMax-M3" if M2.7 down
+        >>> # Returns "opencode-go/deepseek-v4-pro" if healthy
+        >>> # Returns "opencode-go/deepseek-v4-pro" if M3 down
         >>> # Or "ollama_chat/llama3.3:70b" if all cloud down (local fallback)
     """
     model, _ = FallbackChain.get_optimal_provider(agent_key)
