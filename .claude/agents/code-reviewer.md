@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes.
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 ---
 
 You are a senior code reviewer ensuring high standards of code quality and security.
@@ -223,7 +223,7 @@ When available, also check project-specific conventions from `CLAUDE.md` or proj
 
 Adapt your review to the project's established patterns. When in doubt, match what the rest of the codebase does.
 
-## v1.8 AI-Generated Code Review Addendum
+## AI-Generated Code Review Addendum
 
 When reviewing AI-generated changes, prioritize:
 

@@ -4,10 +4,13 @@ Goal decomposition -- converts natural language goal to structured PLAN.md.
 Logs its own reasoning trace to .goal/traces/ (Meta-Harness pattern).
 """
 
-import os, json, asyncio, re, subprocess
+import os
+import json
+import asyncio
+import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 import anthropic
 
 GOAL_DIR = Path(".goal")

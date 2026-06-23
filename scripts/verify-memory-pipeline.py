@@ -4,8 +4,6 @@ import subprocess
 import sys
 import os
 import time
-import shlex
-import select
 import threading
 import asyncio
 import sqlite3

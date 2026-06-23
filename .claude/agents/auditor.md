@@ -1,7 +1,7 @@
 ---
 name: auditor
 description: Independent code auditor that finds bugs without external diagnosis. Uses systematic 7-layer audit method — traces every path, checks all branches, verifies tensor shapes. NOT a fix delivery system. Will find bugs independently and report with exact line numbers.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["Read", "Bash", "Grep", "Glob", "mcp__gitnexus__query", "mcp__gitnexus__context", "mcp__gitnexus__cypher"]
 ---
 

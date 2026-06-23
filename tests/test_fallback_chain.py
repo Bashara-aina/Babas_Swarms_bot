@@ -1,6 +1,5 @@
 """Tests for core/reliability/fallback_chain.py"""
 
-import pytest
 from unittest.mock import patch
 
 from core.reliability.fallback_chain import (

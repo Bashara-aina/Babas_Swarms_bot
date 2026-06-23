@@ -8,12 +8,8 @@ No firecrawl dependency. Replaces firecrawl-based scraping with pure CDP.
 """
 from __future__ import annotations
 
-import asyncio
-import gzip
 import logging
 import os
-import urllib.request
-from typing import Optional
 
 import httpx
 from bs4 import BeautifulSoup

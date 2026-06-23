@@ -5,9 +5,6 @@ Run: python3 test_infinite_memory_e2e.py
 import json
 import os
 import shutil
-import sys
-import tempfile
-import time
 from pathlib import Path
 
 # Change to swarm-bot dir for path resolution
@@ -55,7 +52,7 @@ def test_memory_injector():
 
 def test_session_watcher_lifecycle():
     """Test watcher start/stop via STOP_SIGNAL."""
-    from core.memory.session_watcher import SESSION_DIR, STOP_FILE, PID_FILE, LOG_FILE, run, stop_event, _write_checkpoint, _load_current_state
+    from core.memory.session_watcher import SESSION_DIR, STOP_FILE, PID_FILE, run, stop_event
     SESSION_DIR.mkdir(exist_ok=True)
     (SESSION_DIR / "checkpoints").mkdir(exist_ok=True)
     stop_event.clear()

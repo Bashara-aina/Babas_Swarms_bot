@@ -1,8 +1,8 @@
 ---
 name: code-architect
 description: Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concrete files, interfaces, data flow, and build order.
-model: MiniMax-M2.7
-tools: [Read, Grep, Glob, Bash]
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
 # Code Architect Agent

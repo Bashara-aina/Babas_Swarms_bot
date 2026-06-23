@@ -4,13 +4,10 @@ TTS: VoiceVox (Japanese neural TTS) → fallback: gTTS
 Completely isolated from any future Legion voice system.
 """
 
-import asyncio
 import io
 import logging
 import os
 import tempfile
-from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger("nihongo.voice")
 

@@ -7,11 +7,9 @@ import logging
 import os
 import shlex
 import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +127,6 @@ async def open_app(app_name: str) -> str:
     from computer_agent.display import detect_display as _detect_display
 
     display = await _detect_display()
-    import re
 
     key = app_name.lower().strip()
     if key in APP_MAP:

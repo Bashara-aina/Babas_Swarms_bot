@@ -7,8 +7,6 @@ Uses web scraping (no API key required) or WebFetch tool integration.
 
 import csv
 import json
-import re
-import sys
 from pathlib import Path
 
 # Project root relative to this script

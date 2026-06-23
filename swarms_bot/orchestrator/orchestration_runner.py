@@ -18,7 +18,6 @@ Usage in handlers/ai.py:
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 import uuid
@@ -30,7 +29,7 @@ from swarms_bot.orchestrator.dag_executor import DAGExecutor
 from swarms_bot.orchestrator.dag_planner import DAGPlanner
 from swarms_bot.orchestrator.human_in_loop import HumanApprovalGate
 from swarms_bot.orchestrator.model_router import ModelRouter
-from swarms_bot.orchestrator.nested_agents import SpawnableAgent, SpawnContext
+from swarms_bot.orchestrator.nested_agents import SpawnContext
 from swarms_bot.orchestrator.shared_workspace import SharedWorkspace
 
 logger = logging.getLogger(__name__)

@@ -9,10 +9,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional
 
 import aiohttp
 

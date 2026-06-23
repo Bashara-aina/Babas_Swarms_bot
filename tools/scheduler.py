@@ -12,7 +12,6 @@ import re
 import time
 import uuid
 from datetime import datetime
-from typing import Any, Optional
 
 from aiogram import Bot
 

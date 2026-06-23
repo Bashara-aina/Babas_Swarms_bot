@@ -12,7 +12,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 from swarms_bot.orchestrator.dag_planner import DAGNode, TaskDAG
 

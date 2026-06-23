@@ -21,10 +21,9 @@ from __future__ import annotations
 import asyncio
 import html
 import logging
-import os
 import re
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 from agents import AGENT_MODELS, DEBATE_ICONS, build_system_prompt
 from llm_client import call_llm

@@ -13,7 +13,6 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-import aiodns
 import aiohttp
 
 logger = logging.getLogger(__name__)

@@ -9,7 +9,6 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Optional
 
 
 # ── Token counter (tiktoken-style approximation) ──────────────────
@@ -165,7 +164,6 @@ def compress(text: str, ratio: float = 0.5, instruction: str = "",
     if backend.startswith("ollama/"):
         # Ollama phi compression via LLMLingua
         try:
-            import requests
             from llmlingua import PromptCompressor
 
             model_name = backend.replace("ollama/", "")

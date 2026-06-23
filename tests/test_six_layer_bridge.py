@@ -1,5 +1,4 @@
 """test_six_layer_bridge.py — six_layer bridge: idempotency, all 4 layers called."""
-import asyncio
 import pytest
 from core.memory.bridges.six_layer import SixLayerBridge
 

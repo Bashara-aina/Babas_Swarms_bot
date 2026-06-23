@@ -6,7 +6,7 @@ Supports: access/refresh tokens, password hashing, role-based access.
 from __future__ import annotations
 
 import os
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status

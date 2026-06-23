@@ -10,14 +10,13 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 def _resolve_tool_bin(name: str) -> str | None:
     """Resolve a desktop tool binary even when systemd PATH is minimal."""
-    from computer_agent.shell import run_shell as _run_shell
 
     path = shutil.which(name)
     if path:

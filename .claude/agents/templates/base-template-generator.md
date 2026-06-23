@@ -25,6 +25,7 @@ description: >-
   endpoint, so use the base-template-generator agent to provide a comprehensive
   starting point.</commentary></example>
 color: orange
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre_execution: |
     echo "🎨 Base Template Generator starting..."

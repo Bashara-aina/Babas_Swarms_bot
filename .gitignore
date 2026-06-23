@@ -166,3 +166,22 @@ skill.sh
 .claude/.claude-flow/
 .claude/skills/.claude-flow/
 /.claude-flow/
+
+# IDE configs - not project state
+.vscode/
+
+# Type checking caches
+.mypy_cache/
+.pytest_cache/
+
+# Orphaned scripts at root
+rf2_checklist.py
+
+# Large binary model files (regenerate from training)
+*.pt
+*.pth
+
+# Ghost submodules no longer tracked
+ext/skills/gstack
+mcp_servers/symphony-of-one
+rustdesk

@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import os
 import re
-from collections.abc import AsyncGenerator
 from urllib.parse import urlparse
 
 SWE_AGENT_PATH = os.getenv("SWE_AGENT_PATH", "/home/newadmin/swe-agent")

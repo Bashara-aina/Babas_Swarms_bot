@@ -1,6 +1,7 @@
 ---
 name: people-profiler
 model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 description: Bulk creates or updates person notes from profile data (Slack, GitHub, etc.).
 type: agent
 ---

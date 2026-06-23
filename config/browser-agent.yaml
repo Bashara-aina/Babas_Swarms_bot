@@ -16,7 +16,7 @@ version: 1.0.0
 # Routing configuration
 routing:
   complexity: medium
-  model: minimax-coding-plan/MiniMax-M2.7  # Visual reasoning with MiniMax
+  model: deepseek-v4-flash  # Visual reasoning
   priority: normal
   keywords:
     - browser

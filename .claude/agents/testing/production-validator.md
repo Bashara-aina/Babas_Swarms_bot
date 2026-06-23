@@ -11,6 +11,7 @@ capabilities:
   - deployment_readiness
   - real_world_simulation
 priority: critical
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🔍 Production Validator starting: $TASK"

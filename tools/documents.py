@@ -8,13 +8,10 @@ Requirements:
 from __future__ import annotations
 
 import asyncio
-import glob
 import logging
-import os
 import shutil
 import time
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +195,6 @@ async def ocr_pdf(path: str, lang: str = "eng", pages: str = "all") -> str:
     def _ocr_pdf():
         import pdfplumber
         import pytesseract
-        from PIL import Image
 
         texts = []
         with pdfplumber.open(str(p)) as pdf:

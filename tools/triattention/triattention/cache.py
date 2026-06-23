@@ -6,9 +6,8 @@ for intelligent KV eviction during long-context inference.
 """
 
 import torch
-from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any, Tuple
-from collections import deque
+from dataclasses import dataclass
+from typing import List, Dict, Any, Tuple
 
 
 @dataclass

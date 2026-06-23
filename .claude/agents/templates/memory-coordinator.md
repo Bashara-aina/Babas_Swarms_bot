@@ -12,6 +12,7 @@ capabilities:
   - synchronization
   - search-retrieval
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🧠 Memory Coordination Specialist initializing"

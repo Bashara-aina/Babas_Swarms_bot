@@ -12,15 +12,16 @@ capabilities:
   - optimization_planning
   - trend_analysis
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "📊 Performance Analyzer starting analysis"
-    memory_store "analysis_start" "$(date +%s)"
+    echo "[memory] Analysis start recorded"
     # Collect baseline metrics
     echo "📈 Collecting baseline performance metrics"
   post: |
     echo "✅ Performance analysis complete"
-    memory_store "perf_analysis_complete_$(date +%s)" "Performance report generated"
+    echo "[memory] Performance analysis recorded"
     echo "💡 Optimization recommendations available"
 ---
 

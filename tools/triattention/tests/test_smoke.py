@@ -13,13 +13,10 @@ Run with: python -m pytest tests/test_smoke.py -v
 
 import torch
 import pytest
-from triattention.core import TriAttention, TriAttentionConfig, CalibrationData, compute_mrl
+from triattention.core import TriAttention, TriAttentionConfig, compute_mrl
 from triattention.cache import TriAttentionCache
 from triattention.scoring import (
     compute_trig_score,
-    compute_norm_score,
-    compute_combined_score,
-    score_keys_at_offsets,
 )
 
 

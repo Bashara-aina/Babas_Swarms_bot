@@ -4,7 +4,6 @@ Tests for TriAttention scoring functions.
 
 import torch
 import pytest
-import math
 from triattention.scoring import (
     compute_trig_score,
     compute_trig_score_batch,

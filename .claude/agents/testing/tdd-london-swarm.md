@@ -11,6 +11,7 @@ capabilities:
   - swarm_test_coordination
   - collaboration_testing
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🧪 TDD London School agent starting: $TASK"

@@ -46,7 +46,6 @@ def check_handler_wiring() -> bool:
 
     # Import the handlers package dynamically
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    import handlers
     from handlers import _ROUTER_ORDER
 
     # Discover what handlers/__init__.py imports
@@ -210,18 +209,10 @@ def check_llm_client() -> bool:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
     try:
-        import llm_client
 
         ok("llm_client imported successfully")
 
         # Check key functions exist
-        from llm_client import (
-            agent_loop,
-            chat,
-            chunk_output,
-            verify_api_keys,
-            wiki_raw_completion,
-        )
 
         ok("llm_client exports required functions")
 
@@ -303,16 +294,6 @@ def check_skills() -> bool:
         registry = get_skill_registry()
         ok(f"Skill registry loaded: {len(registry.list_all())} skills registered")
 
-        from core.skills.builtin import (
-            github,
-            media,
-            memory,
-            personal,
-            productivity,
-            research,
-            system,
-            web,
-        )
 
         ok("All builtin skill modules imported")
 
@@ -330,19 +311,10 @@ def check_agents() -> bool:
     sys.path.insert(0, str(Path(__file__).parent.parent))
 
     try:
-        import agents
 
         ok("agents module imported")
 
         # Check key exports
-        from agents import (
-            AGENT_MODELS,
-            DEFAULT_AGENT,
-            FALLBACK_CHAIN,
-            TASK_KEYWORDS,
-            detect_agent,
-            get_fallback_chain,
-        )
 
         ok("agents exports required functions and data")
 

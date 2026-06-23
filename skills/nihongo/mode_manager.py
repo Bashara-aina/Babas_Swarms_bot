@@ -5,12 +5,10 @@ Uses its own in-memory dict + Supabase persistence.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger("nihongo.mode_manager")
 

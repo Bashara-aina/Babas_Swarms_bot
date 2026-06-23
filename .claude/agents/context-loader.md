@@ -1,6 +1,7 @@
 ---
 name: context-loader
 model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 description: Loads all vault context about a person, project, or concept used before deep work.
 type: agent
 ---

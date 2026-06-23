@@ -17,15 +17,12 @@ Safety: destructive actions (rm, drop, delete) require user confirmation
 from __future__ import annotations
 
 import asyncio
-import base64
 import json
 import logging
-import os
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 

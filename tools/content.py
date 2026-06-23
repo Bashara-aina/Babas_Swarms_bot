@@ -6,10 +6,7 @@ RSS-to-post pipeline.
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
-from typing import Optional
 
 import aiohttp
 

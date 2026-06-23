@@ -15,16 +15,13 @@ Environment:
 """
 
 import argparse
-import asyncio
 import itertools
 import json
-import os
 import re
 import subprocess
 import sys
 import time
 import uuid
-from pathlib import Path
 from typing import Any
 
 # All diagnostic output goes to stderr — stdout must stay clean for statusline.

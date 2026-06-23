@@ -17,11 +17,10 @@ import logging
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from typing import Literal
 
-from legion.anti_slop.core import _ANTI_SLOP_DIR, _REJECTIONS_LOG
+from legion.anti_slop.core import _ANTI_SLOP_DIR
 
 logger = logging.getLogger(__name__)
 

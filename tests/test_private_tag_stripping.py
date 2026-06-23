@@ -1,5 +1,4 @@
 """test_private_tag_stripping.py — <private> tags stripped in every write path."""
-import asyncio
 import pytest
 from core.memory.observation_store import get_observation_store, _strip_private
 

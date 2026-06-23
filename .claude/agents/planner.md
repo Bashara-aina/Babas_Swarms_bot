@@ -2,7 +2,7 @@
 name: plan-specialist
 description: Expert planning specialist for complex features and refactoring. Use PROACTIVELY when users request feature implementation, architectural changes, or complex refactoring. Automatically activated for planning tasks.
 tools: ["Read", "Grep", "Glob"]
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 ---
 
 You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.

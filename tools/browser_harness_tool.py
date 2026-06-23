@@ -12,17 +12,14 @@ Usage:
 """
 from __future__ import annotations
 
-import asyncio
 import base64
 import json
 import logging
 import os
 import socket
-import sys
 import time
 import urllib.request
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

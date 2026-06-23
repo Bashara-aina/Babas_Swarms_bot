@@ -345,37 +345,37 @@ def _bm25_score(query: str, text: str, k1: float = 1.5, b: float = 0.75) -> floa
     """
     if not query or not text:
         return 0.0
-    
+
     q_terms = [t.lower() for t in query.split() if t]
     text_lower = text.lower()
     text_words = text_lower.split()
     dl = len(text_words)
     if dl == 0:
         return 0.0
-    
+
     avg_dl = 100.0  # approximate average document length in words
-    
+
     # IDF approximation: log((N - n + 0.5) / (n + 0.5))
     # We don't know corpus N/n precisely, so we use a simplified form:
     # rare terms (in doc OR query) get higher IDF weight.
     # For simplicity, use a lookup-free approximation:
     # idf ≈ 1.0 for common terms, 2.0 for uncommon ones.
-    
+
     score = 0.0
     for term in q_terms:
         tf = text_words.count(term)
         if tf == 0:
             continue
-        
+
         # Simplified IDF: more "specialized" terms get higher weight.
         # In the full formula, rare terms across corpus have high IDF.
         # Approximate: terms with special chars or ≥4 chars are rarer.
         idf = 2.0 if (len(term) >= 4 or any(c.isupper() for c in term)) else 1.0
-        
+
         numerator = tf * (k1 + 1)
         denominator = tf + k1 * (1 - b + b * dl / avg_dl)
         score += idf * numerator / denominator
-    
+
     return score
 
 
@@ -394,12 +394,12 @@ def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryRe
     for r in results:
         bm25 = _bm25_score(query, r.content)
         scored.append((r, bm25))
-    
+
     # Find max BM25 to normalize into a [0, 1] range
     max_bm25 = max(bm25 for _, bm25 in scored) if scored else 1.0
     if max_bm25 == 0:
         max_bm25 = 1.0
-    
+
     # Normalize and create override signal
     # BM25 override threshold: if BM25 norm > 0.3 AND confidence is low (< 5.0),
     # boost result to rank it higher despite low layer confidence.
@@ -415,7 +415,7 @@ def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryRe
             final.append((r, override_score, True))  # True = override
         else:
             final.append((r, base_conf, False))  # False = no override
-    
+
     return final
 
 

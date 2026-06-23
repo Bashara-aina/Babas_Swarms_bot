@@ -51,7 +51,7 @@ _crew_instance: Any | None = None
 async def _query_supabase(query_description: str) -> str:
     """Delegate Supabase queries to the existing supabase_client tool."""
     try:
-        from tools.supabase_client import get_client, query_table
+        from tools.supabase_client import get_client
 
         client = get_client()
         if not client:

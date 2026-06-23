@@ -8,7 +8,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +55,7 @@ function generateSessionId() {
 function ensureDirectories() {
   const dirs = [
     DATA_DIR, SESSION_DIR, METRICS_DIR,
-    ...Object.values(MEMORY_LAYERS),
+    ...Object.values(MEMORY_LAYERS).filter(p => !extname(p)),
   ];
   for (const dir of dirs) {
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -219,7 +219,7 @@ function buildPriorSessionContent(prevSessionId) {
 
   // 1. Read last user prompt from pre-compact checkpoint
   try {
-    const promptPath = join(DATA_DIR, '..', '..', 'tmp', 'legion_last_user_prompt.txt');
+    const promptPath = '/tmp/legion_last_user_prompt.txt';
     if (existsSync(promptPath)) {
       const content = readFileSync(promptPath, 'utf-8').trim();
       if (content && content !== 'NO_USER_PROMPT' && content.length > 5) {
@@ -358,14 +358,24 @@ async function initializeSession() {
   log('Booting 6-layer memory system...');
   ensureDirectories();
 
-  const sessionId = generateSessionId();
+  // Check if session.js already created a session in the session-restore hook
+  let existingSession = null;
+  try {
+    if (existsSync(SESSION_FILE)) {
+      const raw = JSON.parse(readFileSync(SESSION_FILE, 'utf-8'));
+      if (raw.id && raw.startedAt) existingSession = raw;
+    }
+  } catch { /* no existing session — fresh start */ }
+
+  const sessionId = existingSession ? existingSession.id : generateSessionId();
+  const startedAt = existingSession ? existingSession.startedAt : new Date().toISOString();
   const prevSession = getPreviousSession();
   const recentSessions = getRecentSessions(3);
   const memLayerInfo = initMemoryLayerIndex();
 
   const session = {
     id: sessionId,
-    startedAt: new Date().toISOString(),
+    startedAt,
     cwd: PROJECT_ROOT,
     previousSession: prevSession ? {
       id: prevSession.id,
@@ -379,12 +389,8 @@ async function initializeSession() {
     })),
     memoryLayers: MEMORY_LAYERS,
     memoryIndex: memLayerInfo.index,
-    metrics: {
-      edits: 0,
-      commands: 0,
-      tasks: 0,
-      errors: 0,
-    },
+    context: existingSession?.context || { tasks: [], decisions: [], lastUserQuery: '', filesChanged: [] },
+    metrics: existingSession?.metrics || { edits: 0, commands: 0, tasks: 0, errors: 0 },
   };
 
   writeFileSync(SESSION_FILE, JSON.stringify(session, null, 2));

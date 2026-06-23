@@ -142,7 +142,7 @@ async def get_calendar_events(days_ahead: int = 7) -> list[dict[str, Any]]:
             return events
     except Exception:
         pass
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     future = (datetime.now(UTC) + timedelta(days=days_ahead)).isoformat().replace("+00:00", "Z")

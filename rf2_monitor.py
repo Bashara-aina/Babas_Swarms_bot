@@ -3,7 +3,9 @@
 RF2 Training Monitoring Loop — continuously runs the 100-item checklist.
 Tracks changes between runs and alerts on new failures.
 """
-import json, os, sys, time, subprocess
+import json
+import time
+import subprocess
 from pathlib import Path
 from datetime import datetime
 

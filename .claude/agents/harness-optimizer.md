@@ -2,7 +2,7 @@
 name: harness-optimizer
 description: Analyze and improve the local agent harness configuration for reliability, cost, and throughput.
 tools: ["Read", "Grep", "Glob", "Bash", "Edit"]
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 color: teal
 ---
 
@@ -14,7 +14,7 @@ Raise agent completion quality by improving harness configuration, not by rewrit
 
 ## Workflow
 
-1. Run `/harness-audit` and collect baseline score.
+1. Run harness audit inline and collect baseline score.
 2. Identify top 3 leverage areas (hooks, evals, routing, context, safety).
 3. Propose minimal, reversible configuration changes.
 4. Apply changes and run validation.

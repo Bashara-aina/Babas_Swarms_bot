@@ -2,7 +2,7 @@
 name: tdd-guide
 description: Test-Driven Development specialist enforcing write-tests-first methodology. Use PROACTIVELY when writing new features, fixing bugs, or refactoring code. Ensures 80%+ test coverage.
 tools: ["Read", "Write", "Edit", "Bash", "Grep"]
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 ---
 
 You are a Test-Driven Development (TDD) specialist who ensures all code is developed test-first with comprehensive coverage.
@@ -79,7 +79,7 @@ npm run test:coverage
 
 For detailed mocking patterns and framework-specific examples, see `skill: tdd-workflow`.
 
-## v1.8 Eval-Driven TDD Addendum
+## Eval-Driven TDD Addendum
 
 Integrate eval-driven development into TDD flow:
 

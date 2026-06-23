@@ -1,6 +1,7 @@
 ---
 name: brag-spotter
 model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 description: Finds uncaptured wins and competency gaps from the current session or recent work.
 type: agent
 ---

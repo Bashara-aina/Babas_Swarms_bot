@@ -2,7 +2,6 @@
 
 import logging
 import random
-from typing import Optional
 
 logger = logging.getLogger("nihongo.lesson")
 

@@ -13,7 +13,9 @@ Run after each /goal completion:
   python tools/goal_harness_proposer.py
 """
 
-import os, json, subprocess, sys
+import os
+import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -73,7 +75,7 @@ def collect_trace_evidence(max_traces: int = 20) -> str:
             pass
 
     evidence_parts.append(
-        f"=== HARNESS SCORE HISTORY (newest last) ===\n" +
+        "=== HARNESS SCORE HISTORY (newest last) ===\n" +
         ("\n".join(scores_summary) if scores_summary else "  (no scores yet)")
     )
 
@@ -190,16 +192,16 @@ def run_proposer(dry_run: bool = False) -> Optional[Path]:
     current_version = get_harness_version()
     next_version = current_version + 1
 
-    print(f"Meta-Harness Proposer")
+    print("Meta-Harness Proposer")
     print(f"Current harness: H_{current_version}")
     print(f"Proposing: H_{next_version}")
-    print(f"Collecting traces...")
+    print("Collecting traces...")
 
     evidence = collect_trace_evidence()
     evidence_tokens_est = len(evidence) // 4
     print(f"Evidence collected: ~{evidence_tokens_est:,} tokens")
 
-    print(f"Calling proposer (Claude Opus)...")
+    print("Calling proposer (Claude Opus)...")
     new_harness_code = propose_next_harness(evidence, current_version)
 
     valid, msg = validate_harness(new_harness_code)

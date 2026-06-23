@@ -9,7 +9,7 @@ DANGEROUS_PATTERNS=(
   'git push --force'
   'git push -f'
   'git reset --hard'
-  'git checkout \.'
+  'git checkout .'
   'git clean -f'
   'git branch -D'
   'git rebase --abort'

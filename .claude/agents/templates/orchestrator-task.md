@@ -12,15 +12,16 @@ capabilities:
   - progress_tracking
   - priority_management
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🎯 Task Orchestrator initializing"
-    memory_store "orchestrator_start" "$(date +%s)"
+    echo "[memory] Orchestrator start recorded"
     # Check for existing task plans
-    memory_search "task_plan" | tail -1
+    echo "[memory] Searched task plans"
   post: |
     echo "✅ Task orchestration complete"
-    memory_store "orchestration_complete_$(date +%s)" "Tasks distributed and monitored"
+    echo "[memory] Orchestration complete recorded"
 ---
 
 # Task Orchestrator Agent

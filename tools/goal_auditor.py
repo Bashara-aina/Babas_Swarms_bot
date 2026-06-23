@@ -4,7 +4,8 @@ End-to-end audit system. Produces structured results + Pareto scores.
 Meta-Harness insight: Full traces > summaries. Log everything.
 """
 
-import subprocess, json, os
+import subprocess
+import json
 from pathlib import Path
 from datetime import datetime
 from typing import Optional

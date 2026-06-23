@@ -8,7 +8,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - python
       - backend
@@ -31,7 +30,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - react
       - typescript
@@ -51,7 +49,6 @@ engineering:
       description: FastAPI specialist for high-performance REST APIs, Pydantic, async
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - fastapi
@@ -74,7 +71,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - rust
       - systems
@@ -93,7 +89,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - solidity
       - smart_contract
@@ -110,7 +105,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - security
       - pentest
@@ -126,7 +120,6 @@ engineering:
       description: CUDA/Triton kernel optimization, GPU memory management, profiling
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - cuda
@@ -149,7 +142,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - debug
       - traceback
@@ -171,7 +163,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - swe-agent
       - github-issue
@@ -192,7 +183,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - test
       - pytest
@@ -211,7 +201,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - cicd
       - github_actions
@@ -227,7 +216,6 @@ engineering:
       description: SQL optimization, indexing, query performance, migrations, PostgreSQL
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - sql
@@ -245,7 +233,6 @@ engineering:
       description: ML model deployment, monitoring, MLflow, Kubernetes serving infrastructure
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - mlops
@@ -265,7 +252,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - api
       - rest
@@ -283,7 +269,6 @@ engineering:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - review
       - best-practices
@@ -297,7 +282,6 @@ engineering:
       description: Performance profiling, optimization, benchmarking, memory analysis
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - performance
@@ -321,7 +305,6 @@ design:
         anti-slop discipline, ships Linear/Vercel/Stripe/Oxide-grade interfaces.
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - taste-skill
@@ -347,7 +330,6 @@ design:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - ux
       - ui
@@ -365,7 +347,6 @@ design:
       description: "Visual design, branding assets, typography, graphic creation. taste-skill loading: ALWAYS load brutalist-skill (typography) + output-skill; for brand refinement also load minimalist-skill. Dial defaults 7/5/4 — visual-first, brand-faithful. Type is the design; weight, scale, and letter-spacing matter more than decoration."
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - graphic
@@ -385,7 +366,6 @@ design:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - branding
       - strategy
@@ -402,7 +382,6 @@ design:
       description: "Motion graphics, animation, After Effects concepts, video design. taste-skill loading: ALWAYS load soft-skill (haptic motion) + output-skill; for strict GSAP also load gpt-tasteskill. Dial defaults 8/9/4 — max motion, less density. Motion is the design; easing, duration, and physics matter more than choreography."
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - motion
@@ -421,7 +400,6 @@ design:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - 3d
       - spatial
@@ -437,7 +415,6 @@ design:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - wireframe
       - low-fidelity
@@ -450,7 +427,6 @@ design:
       description: Color theory, palette design, psychology, accessibility contrast
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - color
@@ -467,7 +443,6 @@ design:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - accessibility
       - wcag
@@ -481,7 +456,6 @@ design:
       description: Interactive prototypes, Framer, rapid iteration, coded prototypes
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - prototype
@@ -497,7 +471,6 @@ design:
       description: User flow diagrams, journey maps, process documentation
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - flow
@@ -517,7 +490,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - research
       - deep-dive
@@ -532,7 +504,6 @@ research:
       description: Trend analysis, market forecasting, signal detection, predictions
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - trend
@@ -549,7 +520,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - competitor
       - competitive
@@ -564,7 +534,6 @@ research:
       description: Data analysis, statistics, ML modeling, pandas, matplotlib
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - data
@@ -584,7 +553,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - scrape
       - crawl
@@ -602,7 +570,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - sentiment
       - nlp
@@ -617,7 +584,6 @@ research:
       description: Market intelligence, business insights, competitive research
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - market
@@ -634,7 +600,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - survey
       - questionnaire
@@ -647,7 +612,6 @@ research:
       description: User interview simulation, qualitative research, empathy mapping
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - interview
@@ -662,7 +626,6 @@ research:
       description: Patent research, prior art, IP analysis, technical documentation
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - patent
@@ -679,7 +642,6 @@ research:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - paper
       - arxiv
@@ -695,7 +657,6 @@ research:
       description: Statistical modeling, regression, hypothesis testing, R/Python
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - statistics
@@ -716,7 +677,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - copy
       - copywrite
@@ -731,7 +691,6 @@ marketing:
       description: SEO optimization, keyword research, backlinks, technical SEO
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - seo
@@ -748,7 +707,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - social
       - twitter
@@ -763,7 +721,6 @@ marketing:
       description: Growth hacking, viral experiments, funnel optimization, metrics
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - growth
@@ -780,7 +737,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - content
       - editorial
@@ -794,7 +750,6 @@ marketing:
       description: Ad copy, PPC campaigns, Facebook/Google ads, CTR optimization
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - ad
@@ -811,7 +766,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - viral
       - campaign
@@ -825,7 +779,6 @@ marketing:
       description: Email marketing, newsletters, automation flows, segmentation
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - email
@@ -841,7 +794,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - influencer
       - outreach
@@ -854,7 +806,6 @@ marketing:
       description: Marketing analytics, Google Analytics, attribution, dashboards
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - analytics
@@ -871,7 +822,6 @@ marketing:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - brand
       - voice
@@ -885,7 +835,6 @@ marketing:
       description: PR crisis management, reputation repair, damage control, communication
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - crisis
@@ -905,7 +854,6 @@ operations:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - project
       - agile
@@ -921,7 +869,6 @@ operations:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - task
       - coordinate
@@ -934,7 +881,6 @@ operations:
       description: Scheduling, calendar management, deadline tracking, reminders
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - schedule
@@ -949,7 +895,6 @@ operations:
       description: Financial tracking, budgeting, cost analysis, ROI estimation
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - budget
@@ -966,7 +911,6 @@ operations:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - resource
       - capacity
@@ -979,7 +923,6 @@ operations:
       description: Workflow optimization, process improvement, bottleneck elimination
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - workflow
@@ -994,7 +937,6 @@ operations:
       description: Dashboard creation, KPI reporting, data visualization, metrics
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - dashboard
@@ -1015,7 +957,6 @@ legal_compliance:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - contract
       - legal
@@ -1029,7 +970,6 @@ legal_compliance:
       description: Privacy compliance — GDPR, CCPA, data protection regulations
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - gdpr
@@ -1045,7 +985,6 @@ legal_compliance:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - risk
       - assessment
@@ -1059,7 +998,6 @@ legal_compliance:
       description: Intellectual property — patents, trademarks, copyright, licensing
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - patent
@@ -1075,7 +1013,6 @@ legal_compliance:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - ethics
       - ai-ethics
@@ -1089,7 +1026,6 @@ legal_compliance:
       description: Regulatory compliance — SOX, HIPAA, audits, standards verification
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - compliance
@@ -1110,7 +1046,6 @@ product:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - product
       - roadmap
@@ -1124,7 +1059,6 @@ product:
       description: Roadmap planning, milestone definition, timeline management
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - roadmap
@@ -1140,7 +1074,6 @@ product:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - user-research
       - interview
@@ -1154,7 +1087,6 @@ product:
       description: User feedback analysis — themes, sentiment, actionable insights
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - feedback
@@ -1171,7 +1103,6 @@ product:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - prioritize
       - prioritization
@@ -1186,7 +1117,6 @@ product:
       description: MVP development, lean validation, rapid prototyping, scope control
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - mvp
@@ -1204,7 +1134,6 @@ product:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - beta
       - testing
@@ -1219,7 +1148,6 @@ product:
       description: Product launch strategy, go-to-market planning, channel selection
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - launch
@@ -1240,7 +1168,6 @@ creative:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - story
       - narrative
@@ -1254,7 +1181,6 @@ creative:
       description: Screenwriting, dialogue, scene structure, screenplay format
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - script
@@ -1270,7 +1196,6 @@ creative:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - video
       - storyboard
@@ -1283,7 +1208,6 @@ creative:
       description: Music composition, theory, arrangement, MIDI, soundscape design
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - music
@@ -1300,7 +1224,6 @@ creative:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - meme
       - humor
@@ -1314,7 +1237,6 @@ creative:
       description: Creative ideation, brainstorming, lateral thinking, concept generation
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - idea
@@ -1331,7 +1253,6 @@ creative:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - poem
       - poetry
@@ -1347,7 +1268,6 @@ creative:
         details
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - concept
@@ -1458,7 +1378,6 @@ legacy:
       primary_model: gemma4-local
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - screenshot
       - screen
@@ -1478,8 +1397,6 @@ legacy:
       description: Code generation, implementation, refactoring, debugging
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - code
@@ -1508,7 +1425,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - debug
       - traceback
@@ -1531,7 +1447,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - tensor
       - matrix
@@ -1550,7 +1465,6 @@ legacy:
       description: System design, architecture, microservices, framework blueprints
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - design
@@ -1572,7 +1486,6 @@ legacy:
         trends
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - analyze
@@ -1597,9 +1510,6 @@ legacy:
         docs
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
-      - minimax-text-01
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - browse
@@ -1642,8 +1552,6 @@ legacy:
       primary_model: gemma4-local
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
-      - minimax-text-01
       capabilities:
       - general
       - chat
@@ -1656,7 +1564,6 @@ legacy:
       description: Deep research, academic sources, citation, literature synthesis
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - research
@@ -1678,7 +1585,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - marketing
       - ads
@@ -1699,7 +1605,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - deploy
       - pipeline
@@ -1719,7 +1624,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - project
       - roadmap
@@ -1738,7 +1642,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - humanize
       - casual
@@ -1751,7 +1654,6 @@ legacy:
       description: Code review, quality audit, lint, best practices enforcement
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - review
@@ -1770,7 +1672,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - think
       - reasoning
@@ -1785,7 +1686,6 @@ legacy:
       description: OWL specialist for complex GAIA-benchmark tasks (CAMEL-OWL)
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - complex-tasks
@@ -1803,7 +1703,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - ag2
       - research
@@ -1818,7 +1717,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - ag2
       - critic
@@ -1831,7 +1729,6 @@ legacy:
       description: AG2 multi-agent debate — synthesizer / judge role
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - ag2
@@ -1846,7 +1743,6 @@ legacy:
       description: Safe code execution via smolagents (Python, bash)
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - code-execution
@@ -1863,7 +1759,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - consensus
       - prediction
@@ -1878,7 +1773,6 @@ legacy:
       primary_model: minimax-m3
       fallbacks:
       - minimax-text-01
-      - minimax-text-01
       capabilities:
       - claude
       - orchestrator
@@ -1892,7 +1786,6 @@ legacy:
       description: Multi-agent debate orchestration — strategic discussion with personas
       primary_model: minimax-m3
       fallbacks:
-      - minimax-text-01
       - minimax-text-01
       capabilities:
       - debate

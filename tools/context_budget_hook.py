@@ -6,7 +6,7 @@ import json
 import sys
 
 sys.path.insert(0, "/home/newadmin/swarm-bot/tools")
-from context_maximizer import compress, count_tokens, prune_text
+from context_maximizer import compress, count_tokens
 
 LARGE_TASK_THRESHOLD = 20000
 

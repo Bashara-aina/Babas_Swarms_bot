@@ -2,17 +2,24 @@
 - **graphify** (`.claude/skills/graphify/SKILL.md`) — knowledge graph for codebase queries.
   Auto-updated via git post-commit hook (AST-only rebuild on changed files, no LLM cost).
   Trigger: `/graphify` for full pipeline (docs/images), or `/graphify query "<question>"` for graph search.
-- Graph at `graphify-out/graph.json` (225K nodes, 342K edges) — rebuilt incrementally on every `git commit`.
+- Graph at `graphify-out/graph.json` (214K nodes, 318K edges) — rebuilt incrementally on every `git commit`.
 - Rebuild logs: `~/.cache/graphify-rebuild.log` (background, non-blocking).
 - Skip per-commit: `GRAPHIFY_SKIP_HOOK=1 git commit`.
-- MCP server enabled in `config/mcp_config.json` — graphify tools available during session.
+- MCP server enabled in `config/mcp_config.json` + `.claude/settings.json` — graphify tools available during session.
+
+# Session management
+- `session.js` (`.claude/helpers/session.js`) — session lifecycle: start/restore/end/update/metric/trackFile.
+- Writes `current.json` (`.claude-flow/data/`) on start and `last-session.json` (`.claude-flow/metrics/`) on end.
+- `store-user-query` hook captures user prompt into session context for obsidian sync.
+- `dreaming-consolidate` hook fires at session end for hippocampal replay via `.claude-flow/mcp/dreaming_consolidation.py`.
 
 # Obsidian vault
 - Wiki at `.wiki/` — auto-synced from session end hooks.
 - Session logs: `.wiki/Sessions/YYYY-MM-DD.md` (auto-appended).
-- Memory files mirrored to `.wiki/memories/claude-*.md` (33 memory files).
+- Memory files mirrored to `.wiki/memories/claude-*.md` (32 source files, 32 synced + cleanup on source delete).
 - Git commit log: `.wiki/logs/git-log.md`.
 - Daily cron at 23:23 ensures at least one entry on no-session days.
+- Weekly cron Mon 9:57 checks graph freshness.
 - Obsidian MCP server (`@iflow-mcp/kynlos-obsidian-mcp-server`) enabled — use `search_notes`/`read_note` during sessions.
 
 # Design rules (load on demand only)

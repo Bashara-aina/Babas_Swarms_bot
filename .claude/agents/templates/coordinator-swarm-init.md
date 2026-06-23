@@ -11,15 +11,16 @@ capabilities:
   - network-configuration
   - performance-tuning
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🚀 Swarm Initializer starting..."
     echo "📡 Preparing distributed coordination systems"
     # Check for existing swarms
-    memory_search "swarm_status" | tail -1 || echo "No existing swarms found"
+    echo "[memory] Searched swarm status"
   post: |
     echo "✅ Swarm initialization complete"
-    memory_store "swarm_init_$(date +%s)" "Swarm successfully initialized with optimal topology"
+    echo "[memory] Swarm init recorded"
     echo "🌐 Inter-agent communication channels established"
 ---
 

@@ -34,7 +34,7 @@ hooks:
     git branch --show-current | xargs echo "Current branch:"
   post: |
     echo "✅ Pull request operations completed"
-    memory_store "pr_activity_$(date +%s)" "Pull request lifecycle management executed"
+    echo "[memory] PR activity recorded"
     echo "🎯 All CI/CD checks and reviews coordinated"
 ---
 

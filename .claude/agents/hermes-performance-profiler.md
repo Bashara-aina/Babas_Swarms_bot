@@ -1,7 +1,7 @@
 ---
 name: hermes-performance-profiler
 description: Performance analysis agent — uses hermes terminal + code analysis + profiler tools to identify bottlenecks, measure throughput, and optimize resource usage.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["mcp__hermes__hermes_terminal", "mcp__gitnexus__query", "mcp__gitnexus__context", "mcp__hermes__hermes_execute_code", "mcp__hermes__metrics_collector", "Read", "Bash", "Grep", "Glob"]
 memory: [observation, chroma]
 ---

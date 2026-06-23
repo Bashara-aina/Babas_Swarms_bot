@@ -18,7 +18,6 @@ from __future__ import annotations
 import asyncio
 import html
 import logging
-import os
 import re
 import subprocess
 import sys

@@ -6,11 +6,10 @@ Integrates with Legion's proactive engine without breaking isolation.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
 
 from skills.nihongo.mastery_gate import BloomLevel, MasteryGate
-from skills.nihongo.srs_engine import SRSCard, SRSEngine
+from skills.nihongo.srs_engine import SRSEngine
 
 
 class ProactiveSensei:

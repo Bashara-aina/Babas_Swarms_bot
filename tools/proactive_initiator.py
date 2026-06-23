@@ -16,7 +16,7 @@ import asyncio
 import logging
 import os
 import random
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

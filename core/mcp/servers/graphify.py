@@ -13,7 +13,6 @@ The graph.json file is produced by either `/graphify` slash command
 from __future__ import annotations
 
 import os
-from pathlib import Path
 
 
 # Resolved at import time so the router can hot-swap the interpreter if needed.

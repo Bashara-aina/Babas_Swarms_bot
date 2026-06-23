@@ -98,7 +98,7 @@ class Runner:
                 cwd="/media/newadmin/master/POPW/working/code/industreal_improved",
             )
             if result.returncode == 0:
-                self._log(f"  Auto-restart OK — training relaunched")
+                self._log("  Auto-restart OK — training relaunched")
             else:
                 self._log(f"  Auto-restart FAILED (exit={result.returncode}): {result.stderr[:200]}")
         except subprocess.TimeoutExpired:
@@ -185,5 +185,5 @@ class Runner:
                 self._dead_cycles = 0  # reset to prevent rapid re-restart
         else:
             if self._dead_cycles > 0:
-                self._log(f"  Training alive again — resetting dead counter")
+                self._log("  Training alive again — resetting dead counter")
             self._dead_cycles = 0

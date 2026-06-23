@@ -14,7 +14,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

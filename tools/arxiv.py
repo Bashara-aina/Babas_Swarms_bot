@@ -6,14 +6,10 @@ Supports WorkerNet paper analysis for the POPW protocol.
 
 from __future__ import annotations
 
-import asyncio
 import logging
-import os
 import re
-import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any, Optional
 from urllib.parse import quote_plus
 
 import aiohttp

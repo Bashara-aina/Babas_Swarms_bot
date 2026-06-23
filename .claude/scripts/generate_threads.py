@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Generate viral Threads posts with automatic language validation."""
 
-import re
 import sys
 
 

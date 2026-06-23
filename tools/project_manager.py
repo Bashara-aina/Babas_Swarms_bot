@@ -10,7 +10,6 @@ import json
 import logging
 import os
 import time
-from typing import Any, Optional
 
 import aiohttp
 

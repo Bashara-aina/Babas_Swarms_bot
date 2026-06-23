@@ -10,8 +10,7 @@ import logging
 import os
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
 
 logger = logging.getLogger("market_intel")
 
@@ -380,7 +379,6 @@ async def _llm_market_simulation(topic: str, rounds: int) -> dict:
     Handles <thinking> tags by splitting on </think> then extracting JSON from the final part.
     """
     try:
-        import re
 
         import httpx
 

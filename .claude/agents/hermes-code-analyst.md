@@ -1,7 +1,7 @@
 ---
 name: hermes-code-analyst
 description: Code exploration and analysis agent — uses hermes file tools + gitnexus + filesystem MCP for deep code understanding, impact analysis, refactoring, and architecture assessment.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["mcp__gitnexus__query", "mcp__gitnexus__context", "mcp__gitnexus__impact", "mcp__gitnexus__rename", "mcp__gitnexus__detect_changes", "mcp__gitnexus__cypher", "mcp__hermes__hermes_read_file", "mcp__hermes__hermes_write_file", "mcp__hermes__hermes_terminal", "mcp__hermes__hermes_delegate", "Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 ---
 

@@ -68,7 +68,7 @@ def generate_report(
     elif warned > 5:
         lines.append(f"  VERDICT: ATTENTION — {warned} warning(s) to review")
     else:
-        lines.append(f"  VERDICT: HEALTHY — All checks passing")
+        lines.append("  VERDICT: HEALTHY — All checks passing")
     lines.append(f"{'=' * 72}")
 
     lines.append(f"\nTotals: {total} checks — {passed}P {warned}W {failed}F {info}I | {blocking} blocking")

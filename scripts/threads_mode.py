@@ -17,14 +17,13 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.rumahlabuh_scheduler import AnalyticsStore, Scheduler
+from tools.rumahlabuh_scheduler import Scheduler
 from tools.threads_mode_control import is_enabled, open_workspace, set_enabled, toggle
 
 

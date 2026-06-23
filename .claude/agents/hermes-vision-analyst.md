@@ -1,7 +1,7 @@
 ---
 name: hermes-vision-analyst
 description: Vision and image analysis agent — uses hermes vision tools + screenshot capture + browser automation for visual understanding, UI analysis, and image-based research.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["mcp__hermes__hermes_vision_analyze", "mcp__hermes__vision_ocr_image", "mcp__hermes__vision_analyze_screenshot", "mcp__hermes__chrome_screenshot", "mcp__hermes__chrome_snapshot", "mcp__hermes__playwright_browser_navigate", "mcp__hermes__playwright_browser_snapshot", "mcp__hermes__playwright_browser_take_screenshot", "mcp__hermes__hermes_browser_navigate", "mcp__hermes__hermes_browser_snapshot", "Read", "Bash"]
 memory: [observation, graphrag]
 ---

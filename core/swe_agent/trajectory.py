@@ -549,7 +549,6 @@ def save_sharegpt_trajectory(
 # ---------------------------------------------------------------------------
 
 import asyncio
-import time
 from dataclasses import dataclass
 
 try:

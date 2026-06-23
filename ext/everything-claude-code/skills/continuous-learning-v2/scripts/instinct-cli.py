@@ -24,9 +24,8 @@ import subprocess
 import sys
 import urllib.request
 from collections import defaultdict
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 try:
     import fcntl

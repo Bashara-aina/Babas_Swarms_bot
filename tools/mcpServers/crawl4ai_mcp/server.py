@@ -6,8 +6,6 @@ Provides: markdown, html, screenshot, pdf, crawl, js execution via crawl4ai SDK
 
 import asyncio
 import json
-import os
-import sys
 from contextlib import redirect_stdout
 from io import StringIO
 from typing import Any

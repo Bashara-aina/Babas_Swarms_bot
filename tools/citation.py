@@ -17,7 +17,6 @@ Design:
 from __future__ import annotations
 
 import re
-from typing import Optional
 
 # ── Citation prompt addon ─────────────────────────────────────────────────────
 # Append this to system prompts for research/debug/coding agents

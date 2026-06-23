@@ -14,7 +14,6 @@ import logging
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
 
 from tools.browser_harness import helpers as bh
 

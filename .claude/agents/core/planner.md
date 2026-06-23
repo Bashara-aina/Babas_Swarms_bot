@@ -1,6 +1,7 @@
 ---
 name: planner
 model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 type: coordinator
 color: "#4ECDC4"
 description: Strategic planning and task orchestration agent with AI-powered resource optimization

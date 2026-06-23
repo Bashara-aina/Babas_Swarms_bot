@@ -535,16 +535,16 @@ def _search_obsidian_fallback(query: str, limit: int = 10) -> list[dict[str, str
     results = []
     try:
         proc = subprocess.run(
-            ["grep", "-rn", "--include=*.md", "-l", query, str(WIKI_ROOT)],
+            ["grep", "-rn", "--include=*.md", "-m", "1", query, str(WIKI_ROOT)],
             capture_output=True,
             text=True,
             timeout=10,
         )
         for line in proc.stdout.strip().split("\n")[:limit]:
             if line:
-                parts = line.split(":", 1)
-                if len(parts) == 2:
-                    results.append({"filename": parts[0], "snippet": parts[1]})
+                parts = line.split(":", 2)
+                if len(parts) >= 2:
+                    results.append({"filename": parts[0], "snippet": parts[2] if len(parts) > 2 else parts[1]})
     except Exception:
         pass
     return results
@@ -609,6 +609,12 @@ if __name__ == "__main__":
         print(f"Wrote session summary: {path}")
 
     if args.full_sync:
+        # Ensure core module imports work from CLI
+        import sys
+        _project_root = str(Path(__file__).resolve().parent.parent.parent)
+        if _project_root not in sys.path:
+            sys.path.insert(0, _project_root)
+
         # Read session state from last-session.json (written by session.js end)
         session_data = {}
         session_metrics_path = (
@@ -623,9 +629,9 @@ if __name__ == "__main__":
         metrics = session_data.get("metrics", {}) if session_data else {}
         files_changed = metrics.get("filesEdited", []) if metrics else []
 
-        # Also try reading current session for context (if session-end hasn't archived it yet)
+        # Also try reading current session for context (session.js writes to data/current.json)
         current_session_path = (
-            Path.home() / "swarm-bot" / ".claude-flow" / "sessions" / "current.json"
+            Path.home() / "swarm-bot" / ".claude-flow" / "data" / "current.json"
         )
         current_session = {}
         if current_session_path.exists():

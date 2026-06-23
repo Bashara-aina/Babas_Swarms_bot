@@ -16,7 +16,6 @@ import asyncio
 import os
 import shutil
 from collections.abc import AsyncGenerator
-from pathlib import Path
 
 PLANDEX_CLI = shutil.which("plandex") or os.getenv("PLANDEX_PATH", "plandex")
 PLANDEX_PROJECT_DIR = os.getenv(

@@ -23,7 +23,8 @@ const GRAPH_PATH = path.join(DATA_DIR, 'graph-state.json');
 const RANKED_PATH = path.join(DATA_DIR, 'ranked-context.json');
 const PENDING_PATH = path.join(DATA_DIR, 'pending-insights.jsonl');
 const SESSION_DIR = path.join(process.cwd(), '.claude-flow', 'sessions');
-const SESSION_FILE = path.join(SESSION_DIR, 'current.json');
+// session-start-trigger.mjs writes to data/current.json, not sessions/
+const SESSION_FILE = path.join(DATA_DIR, 'current.json');
 
 // ── Safety limits (fixes #1530, #1531) ─────────────────────────────────────
 const MAX_DATA_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — skip files larger than this
@@ -65,8 +66,12 @@ function readJSON(filePath) {
 }
 
 function writeJSON(filePath, data) {
-  ensureDataDir();
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  try {
+    ensureDataDir();
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    process.stderr.write('[INTELLIGENCE] WARN: Failed to write ' + path.basename(filePath) + ': ' + e.message + '\n');
+  }
 }
 
 function tokenize(text) {
@@ -320,7 +325,8 @@ function bootstrapFromMemoryFiles() {
     // For the projects dir, scope to CURRENT project only (not all 51+ dirs)
     if (base.endsWith('projects')) {
       try {
-        const projectSlug = cwd.replace(/^\//, '').replace(/\//g, '-');
+        // Claude Code prepends '-' for absolute paths
+        const projectSlug = '-' + cwd.replace(/^\//, '').replace(/\//g, '-');
         const memDir = path.join(base, projectSlug, 'memory');
         if (fs.existsSync(memDir)) {
           parseMemoryDir(memDir, entries);
@@ -438,15 +444,16 @@ function init() {
     }
   }
 
-  // Build nodes from deduped entries
+  // Build nodes from deduped entries (preserve accessCount from previous graph state)
   const nodes = {};
   for (const entry of deduped) {
     const id = entry.id || entry.key || `entry-${Math.random().toString(36).slice(2, 8)}`;
+    const prevNode = (graphState && graphState.nodes && graphState.nodes[id]) || {};
     nodes[id] = {
       id,
       category: entry.namespace || entry.type || 'default',
-      confidence: (entry.metadata && entry.metadata.confidence) || 0.5,
-      accessCount: (entry.metadata && entry.metadata.accessCount) || 0,
+      confidence: (entry.metadata && entry.metadata.confidence) || prevNode.confidence || 0.5,
+      accessCount: (entry.metadata && entry.metadata.accessCount) || prevNode.accessCount || 0,
       createdAt: entry.createdAt || Date.now(),
     };
     // Ensure entry has id for edge building
@@ -625,7 +632,7 @@ function recordEdit(file) {
     type: 'edit',
     file: file || 'unknown',
     timestamp: Date.now(),
-    sessionId: sessionGet('sessionId') || null,
+    sessionId: sessionGet('id') || null,
   });
   fs.appendFileSync(PENDING_PATH, entry + '\n', 'utf-8');
 }
@@ -737,7 +744,7 @@ function consolidate() {
     }
 
     // Clear pending
-    fs.writeFileSync(PENDING_PATH, '', 'utf-8');
+    try { fs.writeFileSync(PENDING_PATH, '', 'utf-8'); } catch (e) { process.stderr.write('[INTELLIGENCE] WARN: Failed to clear pending: ' + e.message + '\n'); }
   }
 
   // 2. Confidence decay for unaccessed entries
@@ -839,7 +846,7 @@ function consolidate() {
   if (staleIds.size > 0) {
     store = store.filter(e => !staleIds.has(e.id));
     for (const id of staleIds) delete nodes[id];
-    log(`[PRUNE] Removed ${staleIds.size} stale entries (never accessed, low confidence, >7d)`);
+    process.stderr.write(`[INTELLIGENCE] [PRUNE] Removed ${staleIds.size} stale entries (never accessed, low confidence, >7d)\n`);
   }
 
   // 9. Persist updated store (deduped or with new insight entries)

@@ -124,7 +124,7 @@ async function readStdin(timeoutMs = 500) {
 
 async function main() {
   // Skip stdin for commands that don't need hookInput data (saves ~500ms per call)
-  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats', 'obsidian-sync'];
+  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats', 'obsidian-sync', 'dreaming-consolidate', 'store-user-query'];
   let stdinData = '';
   if (!command || !NO_STDIN_COMMANDS.includes(command)) {
     try { stdinData = await readStdin(500); } catch (e) { /* ignore stdin errors */ }
@@ -354,7 +354,8 @@ async function main() {
       const out = (proc.stdout || '').trim();
       if (!out) {
         if (proc.status !== 0) {
-          log('[WARN] compact-summarize exited', proc.status);
+          const stderr = (proc.stderr || '').trim().slice(0, 200);
+          log(`[WARN] compact-summarize exited ${proc.status}${stderr ? ': ' + stderr : ''}`);
         }
         return;
       }
@@ -376,6 +377,7 @@ async function main() {
         case 'empty_input':
         case 'empty_output':
         case 'error':
+          log(`[COMPACT] ${result.status}${result.error ? ': ' + result.error : ''}`);
           break;
         default:
           log(`[COMPACT] ${result.status} user=${result.user_id || '?'}`);
@@ -409,44 +411,73 @@ async function main() {
         echo "done"
       `], { timeout: 5000 });
 
-      // Clean stale session cache (keep newest 10 JSONL files)
+      // Clean stale session cache (keep newest 10 JSONL files, remove orphaned UUID dirs)
       const homedir = require('os').homedir();
       const cacheDir = require('path').join(homedir, '.claude', 'projects', '-home-newadmin-swarm-bot');
       try {
         const fs = require('fs');
-        const files = fs.readdirSync(cacheDir)
-          .filter(f => f.endsWith('.jsonl'))
+        const items = fs.readdirSync(cacheDir);
+        // Prune old JSONL files (keep newest 10)
+        const jsonlFiles = items.filter(f => f.endsWith('.jsonl'))
           .map(f => ({ name: f, mtime: fs.statSync(require('path').join(cacheDir, f)).mtimeMs }))
           .sort((a, b) => b.mtime - a.mtime);
-        if (files.length > 10) {
-          const toRemove = files.slice(10);
+        if (jsonlFiles.length > 10) {
+          const toRemove = jsonlFiles.slice(10);
           for (const f of toRemove) {
             fs.unlinkSync(require('path').join(cacheDir, f.name));
           }
-          log(`[cleanup] Pruned ${toRemove.length} stale session caches (kept newest 10)`);
+          log(`[cleanup] Pruned ${toRemove.length} stale JSONL caches (kept newest 10)`);
         }
-      } catch (e) { /* non-fatal */ }
+        // Prune orphaned UUID-named directories (compaction artifacts)
+        const uuidDirPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+        let prunedDirs = 0;
+        for (const item of items) {
+          if (uuidDirPattern.test(item)) {
+            try {
+              const fullPath = require('path').join(cacheDir, item);
+              const stat = fs.statSync(fullPath);
+              if (stat.isDirectory()) {
+                // Only remove if older than 24 hours (protects in-flight sessions)
+                if (Date.now() - stat.mtimeMs > 86400000) {
+                  fs.rmSync(fullPath, { recursive: true, force: true });
+                  prunedDirs++;
+                }
+              }
+            } catch (_) { /* skip inaccessible */ }
+          }
+        }
+        if (prunedDirs > 0) log(`[cleanup] Pruned ${prunedDirs} orphaned UUID session dirs (>24h old)`);
+      } catch (e) { process.stderr.write('[cleanup-orphans] Cache cleanup failed: ' + e.message + '\n'); }
     },
 
         'store-user-query': () => {
-      // Capture the current user prompt into session context for obsidian sync
-      const stdinData = process.stdin.isTTY ? '' : (() => {
-        try {
-          const buf = require('fs').readFileSync(0, 'utf-8').trim();
-          return buf;
-        } catch { return ''; }
-      })();
-      let prompt = stdinData || '';
-      // Try to parse as JSON hookInput
-      try {
-        const parsed = JSON.parse(prompt);
-        prompt = parsed.prompt || parsed.command || '';
-      } catch { /* plain text */ }
+      // Use the already-captured prompt from scope (readStdin already captured
+      // stdin and parsed it into hookInput → prompt before this handler runs).
       if (prompt && prompt.length > 10) {
         const sessionMod = getSession();
         if (sessionMod && sessionMod.update) {
-          try { sessionMod.update('lastUserQuery', prompt.slice(0, 500)); } catch {}
+          try { sessionMod.update('lastUserQuery', prompt.slice(0, 500)); } catch (e) { process.stderr.write('[store-user-query] session.update() failed: ' + e.message + '\n'); }
         }
+      }
+    },
+
+    'dreaming-consolidate': () => {
+      // Run dreaming consolidation (hippocampal replay) at session end
+      const spawn = require('child_process').spawnSync;
+      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
+      const result = spawn('python3', [
+        '-c', 'import importlib.util; spec=importlib.util.spec_from_file_location("dreaming", ".claude-flow/mcp/dreaming_consolidation.py"); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); print(mod.dreaming_run(force=True))',
+      ], { cwd: repoRoot, encoding: 'utf-8', timeout: 30000 });
+      if (result.stdout && result.stdout.trim()) {
+        try {
+          var report = JSON.parse(result.stdout.trim());
+          log('[dreaming] Scanned ' + (report.sessions_scanned || 0) + ' sessions, ' + (report.patterns_found || 0) + ' patterns, ' + (report.dedup_merges || 0) + ' merges, ' + (report.elapsed_seconds || 0).toFixed(1) + 's');
+        } catch (__e) {
+          log('[dreaming] ' + result.stdout.trim());
+        }
+      }
+      if (result.stderr && result.stderr.trim()) {
+        log('[dreaming] stderr: ' + result.stderr.trim());
       }
     },
 
@@ -498,7 +529,7 @@ async function main() {
   } else if (command) {
     log(`[OK] Hook: ${command}`);
   } else {
-    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|store-user-query|obsidian-sync|stats>');
+    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|store-user-query|dreaming-consolidate|obsidian-sync|stats>');
   }
 }
 

@@ -90,7 +90,6 @@ async def detect_objects_in_screenshot(
     if not _check_supervision():
         return []
 
-    import supervision as sv
     import torch
 
     model_obj = torch.hub.load("ultralytics/yolov8", model.replace(".pt", ""))

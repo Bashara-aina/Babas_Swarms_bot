@@ -12,11 +12,9 @@ Usage:
   python html-token-validator.py --fix              # Auto-fix issues (WIP)
 """
 
-import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 # Project root relative to this script
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent

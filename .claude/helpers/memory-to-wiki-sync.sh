@@ -51,4 +51,15 @@ EOFM
   count=$((count + 1))
 done
 
-echo "[memory-to-wiki] Synced $count files to $WIKI_TARGET"
+# Clean up orphaned targets whose source files were deleted
+orphan_count=0
+for target in "$WIKI_TARGET"/claude-*.md; do
+  [ -f "$target" ] || continue
+  source_file="$MEMORY_SOURCE/$(echo "$(basename "$target")" | sed 's/^claude-//')"
+  if [ ! -f "$source_file" ]; then
+    rm "$target"
+    orphan_count=$((orphan_count + 1))
+  fi
+done
+
+echo "[memory-to-wiki] Synced $count files, removed $orphan_count orphans to $WIKI_TARGET"

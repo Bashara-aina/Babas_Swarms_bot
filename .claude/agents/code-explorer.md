@@ -1,8 +1,8 @@
 ---
 name: code-explorer
 description: Deeply analyzes existing codebase features by tracing execution paths, mapping architecture layers, and documenting dependencies to inform new development.
-model: MiniMax-M2.7
-tools: [Read, Grep, Glob, Bash]
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
 # Code Explorer Agent

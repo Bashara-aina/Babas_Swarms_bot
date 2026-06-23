@@ -21,11 +21,11 @@ import logging
 import random
 import time
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from tools.persistence import add_scheduled_task, get_active_tasks, init_db, record_task_execution
+from tools.persistence import init_db
 
 logger = logging.getLogger(__name__)
 

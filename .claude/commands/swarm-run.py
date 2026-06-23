@@ -2,7 +2,6 @@
 """Claude Code swarm CLI — Multi-agent orchestration via subprocess."""
 
 import argparse
-import asyncio
 import sys
 from pathlib import Path
 

@@ -19,10 +19,9 @@ Example:
     outputs = llm.generate(["Hello world"], SamplingParams(max_tokens=100))
 """
 
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, Tuple
 from dataclasses import dataclass
 import torch
-import torch.nn as nn
 
 
 @dataclass

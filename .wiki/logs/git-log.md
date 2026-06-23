@@ -1578,3 +1578,110 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 3c2afbf1
+- Date: Mon Jun 22 10:47:16 AM JST 2026
+- Message: perf(skills): remove 14 stale skill entries, update configs and core files
+
+- Remove 14 redundant/deleted skill entries across 7 skill directories
+- Update .claude configs, settings, and helper files
+- Update core source files (agent_registry, MCP, memory, autonomy)
+- Update wiki, documentation, and config files
+- Clean up binary artifacts and stale skill references
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 987fb330
+- Date: Tue Jun 23 03:45:39 PM JST 2026
+- Message: test graphify hook
+---
+## Commit: 3c7b2020
+- Date: Tue Jun 23 03:45:59 PM JST 2026
+- Message: test graphify rebuild
+---
+## Commit: 9e70a23c
+- Date: Tue Jun 23 04:35:53 PM JST 2026
+- Message: cleanup: strip v3 fiction, fix configs, remove orphans, add agent frontmatter
+
+- Strip v3.0.0-alpha.1 fiction from 16 agent files (capability labels, hook
+  calls, self-learning/GNN/Flash Attention references)
+- Add YAML frontmatter to 8 agents (brag-spotter, context-loader, cross-linker,
+  people-profiler, review-fact-checker, review-prep, slack-archaeologist,
+  vault-librarian)
+- Merge 4 duplicate agent pairs (planner, github-pr-manager, code-analyzer)
+- Fix YAML quoting in pr-test-analyzer.md and silent-failure-hunter.md
+- Clean taste-router.md/ui-ux-excellence.md phantom references
+- Fix PreToolUse hook variable syntax for consistency
+- Remove stale settings.local.json permissions (38 entries)
+- Deduplicate crawl4ai MCP server, add graphify MCP to settings.json
+- Fix Redis memory limit mismatch (256m→2g) in docker-compose.yml
+- Update model-routing.md to match config (Sonnet/Haiku=flash)
+- Add /.claude-flow/ to .gitignore
+- Remove orphan submodules (civora-ref, halolight-ref, nextjs-dashboard-ref, shadboard-ref)
+- Delete ARCHIVE_cekwajar-src-version (808MB) and ext/hermes-agent (361MB)
+- Delete stale wiki entity stubs
+- Add obsidian autosync --full-sync + hook-handler dispatcher
+- Increase Jaccard threshold (0.3→0.55), add stale entry pruning in intelligence.cjs
+- Update build command (npm→make check), add Karpathy principles
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: cdef56cb
+- Date: Tue Jun 23 04:36:24 PM JST 2026
+- Message: cleanup: strip remaining v3 fiction from issue-tracker.md
+---
+## Commit: 2c89a268
+- Date: Tue Jun 23 04:47:12 PM JST 2026
+- Message: cleanup: strip v3 fiction from 11 agents, delete 35 dead helpers, remove mirofish submodule
+
+Agent fixes:
+- Strip v3 fiction from 3 swarm coordinators (6KB+ of mcp__claude-flow__* calls removed)
+- Strip v3 fiction from documentation/docs-api-openapi.md, analysis/code-analyzer.md
+- Strip v3 capabilities from core/coder, core/reviewer, core/researcher
+- Strip claude-flow refs from github/issue-tracker, github/release-manager
+- Add model: deepseek-v4-flash to 25 agent files missing model field
+- Fix hermes-memory-guardian .claude-flow/ → .claude/ path refs
+
+Infrastructure:
+- Delete 35 dead v3-era helper scripts (259KB reclaimed)
+- Delete tools/mirofish submodule (5.1GB chess engine, zero config refs)
+- Remove dreaming-consolidate handler from hook-handler.cjs (always fails)
+- Remove claudeFlow config block from settings.json (100 lines dead config)
+- Remove stale CLAUDE_FLOW_V3_ENABLED/CLAUDE_FLOW_HOOKS_ENABLED env vars
+- Remove stale npx @claude-flow* / mcp__claude-flow__:* permissions
+- Strip .claude-flow/ to core essentials (194M→2.7M), keep data/config only
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 2c0380f9
+- Date: Tue Jun 23 04:57:59 PM JST 2026
+- Message: cleanup: remove duplicate agents, stop tracking runtime files, finalize v3 cleanup
+
+- Remove duplicate pr-manager (github/ points to templates/ as canonical)
+- Rename root planner → plan-specialist to avoid name collision with core/planner
+- Move AGENT_AUDIT_REPORT.md from .claude/agents/ to docs/agents/
+- Add runtime files to .gitignore (session state, memory bootstrap, clawfe-flow typo dir)
+- Stop tracking .claude-flow runtime state (daemon-state, metrics, security audit)
+- 7 agent files finalized (model+tools frontmatter, v3 fiction stripped)
+- Remove memory_bootstrap.md, memory_inject.md, compactions.db from tracking
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 6dfccb9b
+- Date: Tue Jun 23 05:21:29 PM JST 2026
+- Message: chore: delete 12 orphaned Python files confirmed dead by audit
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: e8e84176
+- Date: Tue Jun 23 05:21:50 PM JST 2026
+- Message: chore: remove deprecated handlers, archive cleanup, lint auto-fix
+
+- Delete /orchestrate_legacy and /workernet_papers deprecated handlers
+- Clean up 92 archive agent files from .claude/agents-archive/
+- Remove test-long-runner.md stub
+- Delete .mcp/servers.json (consolidated into config/mcp_config.json)
+- Auto-fix 398 ruff lint errors
+- Remove stale workernet_papers BotCommand comment
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

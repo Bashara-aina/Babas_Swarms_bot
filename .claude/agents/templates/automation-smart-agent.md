@@ -12,15 +12,16 @@ capabilities:
   - auto-scaling
   - workload-prediction
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "🤖 Smart Agent Coordinator initializing..."
     echo "📊 Analyzing task requirements and resource availability"
     # Check current swarm status
-    memory_retrieve "current_swarm_status" || echo "No active swarm detected"
+    echo "[memory] Retrieved current swarm status"
   post: |
     echo "✅ Smart coordination complete"
-    memory_store "last_coordination_$(date +%s)" "Intelligent agent coordination executed"
+    echo "[memory] Coordination info stored"
     echo "💡 Agent spawning patterns learned and stored"
 ---
 

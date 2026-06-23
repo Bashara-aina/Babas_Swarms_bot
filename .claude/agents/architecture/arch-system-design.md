@@ -7,6 +7,7 @@ color: "purple"
 version: "1.0.0"
 created: "2025-07-25"
 author: "Claude Code"
+tools: ["Read", "Grep", "Glob", "Bash"]
 
 metadata:
   description: "Expert agent for system architecture design, patterns, and high-level technical decisions"

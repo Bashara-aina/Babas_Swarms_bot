@@ -12,6 +12,7 @@ capabilities:
   - documentation
   - parallel-execution
 priority: high
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
     echo "💻 SPARC Implementation Specialist initiating code generation"

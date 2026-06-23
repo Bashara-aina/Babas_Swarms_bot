@@ -22,10 +22,9 @@ from __future__ import annotations
 import json as _json
 import logging
 import os
-import shlex
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 try:
     import httpx

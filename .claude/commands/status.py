@@ -13,10 +13,9 @@ Usage:
 """
 
 import json
-import os
 import sys
 import time
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 STATE_FILE = Path.home() / ".claude" / "session" / "state.json"

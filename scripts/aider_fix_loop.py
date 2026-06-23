@@ -150,7 +150,7 @@ def run_fix_loop(
             )
 
         # Tests failed — show output
-        print(f"\n❌ Tests failed. Feeding output to aider...")
+        print("\n❌ Tests failed. Feeding output to aider...")
         failure_excerpt = output[:3000]
         print(f"   Failure excerpt:\n{failure_excerpt[:500]}...")
 

@@ -95,7 +95,7 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
         # Build current state snapshot
         content = _extract_response_content(response_obj) or ""
         query = _extract_query(kwargs.get("messages", []))
-        
+
         import json
         import os
         import tempfile
@@ -139,20 +139,20 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
             "files_changed": files_changed,
             "decisions": decisions,
         }
-        
+
         # Atomic write to current.json
         tmp = tempfile.NamedTemporaryFile(mode="w", dir=session_dir, delete=False, suffix=".tmp")
         json.dump(new_state, tmp)
         tmp.close()
         os.rename(tmp.name, current_path)
-        
+
         # Append to llm_events.log
         log_path = os.path.join(session_dir, "llm_events.log")
         ts = time.strftime("%Y-%m-%dT%H:%M:%S")
         entry = json.dumps({"ts": ts, "query_len": len(query), "response_len": len(content), "content_preview": content[:80]})
         with open(log_path, "a") as f:
             f.write(entry + "\n")
-            
+
     except Exception as e:
         logger.debug("Bridge to session_state error: %s", e)
 
@@ -181,7 +181,7 @@ def _memory_success_callback(kwargs: dict, response_obj: litellm.types.utils.Mod
 
         t = threading.Thread(target=_store, daemon=True)
         t.start()
-        
+
         # Bridge this LLM call to session_state (non-blocking)
         _bridge_to_session_state(kwargs, response_obj)
 

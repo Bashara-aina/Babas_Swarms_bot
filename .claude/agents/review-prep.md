@@ -1,6 +1,7 @@
 ---
 name: review-prep
 model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 description: Aggregates all performance evidence for a review period using /om-review-brief.
 type: agent
 ---

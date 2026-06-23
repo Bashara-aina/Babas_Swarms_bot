@@ -10,7 +10,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable, Coroutine
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)

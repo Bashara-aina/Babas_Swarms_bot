@@ -21,11 +21,10 @@ import json
 import logging
 import time
 import uuid
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
-from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 

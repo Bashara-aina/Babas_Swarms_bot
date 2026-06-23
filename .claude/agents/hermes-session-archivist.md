@@ -1,7 +1,7 @@
 ---
 name: hermes-session-archivist
 description: Cross-session memory agent — uses hermes session_search FTS5 across all conversations to recall context, decisions, and learnings from prior sessions. The memory continuity specialist.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["mcp__hermes__hermes_session_search", "mcp__hermes__session_archivist", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__memory_sync", "mcp__hermes__synthesize_session_context", "mcp__obsidian__search_notes", "mcp__obsidian__read_note", "mcp__hermes__restore_context", "Read", "Write", "Bash", "Grep", "Glob"]
 memory: [all 6 layers - full access]
 ---
@@ -48,7 +48,7 @@ hermes_session_search("evaluate.py", limit=10)
 
 - [ ] hermes_session_search for relevant prior sessions
 - [ ] Read session notes from obsidian (`.wiki/Sessions/`)
-- [ ] Check compaction checkpoint (`/tmp/legion_compaction_checkpoint.json`)
+- [ ] Check compaction checkpoint (`$TEMP_DIR/compaction_checkpoint.json`)
 - [ ] Verify last user prompt from prior session
 - [ ] Build context brief with decisions + in-progress work
 - [ ] Store new session summary to obsidian

@@ -1,5 +1,4 @@
 """test_gitnexus_bridge_memory.py — gitnexus memory bridge: code-tool filter, MERGE calls."""
-import asyncio
 import pytest
 from core.memory.bridges.gitnexus import GitNexusBridge
 

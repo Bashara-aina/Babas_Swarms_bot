@@ -19,7 +19,6 @@ import torch
 import torch.nn as nn
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass
-from collections import deque
 
 from ..core import TriAttention, TriAttentionConfig, CalibrationData
 

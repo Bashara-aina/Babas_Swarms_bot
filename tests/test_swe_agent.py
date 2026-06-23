@@ -13,7 +13,6 @@ Run with: pytest tests/test_swe_agent.py -x --asyncio-mode=auto -q
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 import shutil
@@ -200,7 +199,7 @@ class TestSWEConfig:
 
     def test_load_default_config(self):
         """Test loading default config."""
-        from core.swe_agent import DEFAULT_CONFIG, load_config
+        from core.swe_agent import load_config
 
         config = load_config()
         assert config is not None

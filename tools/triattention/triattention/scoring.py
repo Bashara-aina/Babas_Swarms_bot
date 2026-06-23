@@ -6,7 +6,6 @@ scoring described in the TriAttention paper.
 """
 
 import torch
-import math
 from typing import Optional, List, Tuple
 
 

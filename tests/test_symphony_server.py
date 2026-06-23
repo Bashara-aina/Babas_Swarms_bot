@@ -16,7 +16,6 @@ These tests are skipped until the Python symphony server is implemented.
 """
 
 import os
-import sys
 import tempfile
 from pathlib import Path
 

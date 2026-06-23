@@ -1,5 +1,4 @@
 """test_bridges_base.py — BridgeState idempotency + ObservationBridge protocol."""
-import asyncio
 import pytest
 from core.memory.bridges._base import BridgeState, ObservationBridge
 

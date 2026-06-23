@@ -22,7 +22,6 @@ from core.agent_registry import (
     DEBATE_PERSONAS,
     DEFAULT_AGENT,
     FALLBACK_CHAIN,
-    LEGACY_TASK_KEYWORDS,
     PERSONA_WRAPPER,
     TASK_KEYWORDS,
     detect_agent,

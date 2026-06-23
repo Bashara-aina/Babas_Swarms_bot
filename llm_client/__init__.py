@@ -1072,14 +1072,10 @@ def _microcompact_if_needed(messages: list[dict]) -> list[dict]:
 
 
 # ── Context compaction (async, non-blocking) ────────────────────────────────────
-import asyncio
 import concurrent.futures
-import hashlib
 import threading
-import time
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
 
 # LRU cache for compaction — 100x speedup on repeated conversation patterns
 _COMPACT_CACHE: OrderedDict = OrderedDict()
@@ -1204,7 +1200,7 @@ async def _aget_memory_context_before_compact(query: str, timeout: float = 10.0)
             return _injector_bmc(query=query, user_id="bashara")
         except Exception:
             return ""
-    
+
     loop = asyncio.get_running_loop()
     try:
         return await asyncio.wait_for(
@@ -1291,7 +1287,7 @@ async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> di
         "open_issues": "bugs being fixed features in progress open todos",
         "tools_used": "tools used functions commands run this session",
     }
-    
+
     async def _fetch_layer(key: str, q: str) -> tuple[str, str]:
         def _sync() -> str:
             try:
@@ -1299,7 +1295,7 @@ async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> di
                 return build_memory_context(query=q, user_id="bashara")
             except Exception:
                 return ""
-        
+
         loop = asyncio.get_running_loop()
         try:
             result = await asyncio.wait_for(
@@ -1311,7 +1307,7 @@ async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> di
             return key, ""
         except Exception:
             return key, ""
-    
+
     # Fire all 4 queries in parallel — don't wait more than timeout total
     tasks = [_fetch_layer(k, q) for k, q in queries.items()]
     results: dict[str, str] = {}

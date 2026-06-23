@@ -15,7 +15,6 @@ Designed for the /research command.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import re
 from collections.abc import Callable, Coroutine
