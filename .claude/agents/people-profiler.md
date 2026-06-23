@@ -1,3 +1,9 @@
+---
+name: people-profiler
+description: Bulk creates or updates person notes from profile data (Slack, GitHub, etc.).
+type: agent
+---
+
 # People Profiler Subagent
 
 ## Purpose

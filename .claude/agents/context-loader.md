@@ -1,3 +1,9 @@
+---
+name: context-loader
+description: Loads all vault context about a person, project, or concept used before deep work.
+type: agent
+---
+
 # Context Loader Subagent
 
 ## Purpose

@@ -12,7 +12,7 @@
 - Topology: hierarchical-mesh (anti-drift), max 15 agents, HNSW + Neural enabled
 
 ## Build & Test
-- After changes: `npm run build && npm test`
+- After changes: `make check` (ruff lint + pytest) — Python project, no npm build needed
 
 ## GitNexus (required)
 - **Before edit**: `gitnexus_impact({target, direction: "upstream"})` — warn on HIGH/CRITICAL
@@ -27,6 +27,19 @@
 - UI/UX: `.claude/reference/taste-router.md` + `ui-ux-excellence.md` (BOTH before UI work)
 - Agent skills: `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md`
 - Full agent list: `.claude/agents/` (update count via `ls`)
+
+## Karpathy Principles (Plugin: andrej-karpathy-skills@karpathy-skills)
+### Think Before Coding
+State assumptions, surface tradeoffs, push back when warranted, stop when unclear.
+
+### Simplicity First
+No features beyond what's asked, no abstractions for single-use, match "would a senior engineer say this is overcomplicated?"
+
+### Surgical Changes
+Touch only what you must. Every changed line traces to your request. Remove only orphans your changes created.
+
+### Goal-Driven Execution
+Transform tasks into verifiable goals with success criteria. Loop until tests pass.
 
 ## graphify
 - For codebase Qs: `graphify query "<question>"` if `graphify-out/graph.json` exists

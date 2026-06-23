@@ -5,46 +5,21 @@ type: rule
 applies_to: design-dept, frontend-dev, branding, motion, redesign
 ---
 
-# 🎚️ TASTE-SKILL ROUTER — Dial Setter + Variant Picker
+# 🎚️ TASTE-SKILL ROUTER — Dial Setter + Pre-Flight Checklist
 
-> Loads **before** any UI/UX work. Pairs with `ui-ux-excellence.md` (forbidden-pattern detector + component quality) and the SKILL.md files in `.claude/skills/` for all 13 taste-skill variants: `taste-skill/` (v2 default), `taste-skill-v1/`, `gpt-tasteskill/`, `image-to-code-skill/`, `stitch-skill/`, `imagegen-frontend-web/`, `imagegen-frontend-mobile/`, `brandkit/`, `redesign-skill/`, `soft-skill/`, `output-skill/`, `minimalist-skill/`, `brutalist-skill/`.
+> Pairs with `ui-ux-excellence.md` (forbidden-pattern detector + component quality). This file owns the dial system, brief inference protocol, and pre-flight checklist. No variant picker needed — `impeccable` (`.claude/skills/impeccable/`) is the loaded design skill.
 
 ---
 
 ## §0 — WHY THIS RULE EXISTS
 
-The swarm-bot design department has 10 agents. Without routing, every agent falls back to LLM defaults (Inter + slate-900 + 3-column icon cards + purple gradient). taste-skill ships **13 opinionated skill variants** + a 3-dial system. This rule:
+Without routing, every agent falls back to LLM defaults (Inter + slate-900 + 3-column icon cards + purple gradient). This rule:
 
-1. **Picks** the right taste-skill variant per sub-discipline
-2. **Sets** the dials based on brief inference (VARIANCE 1-10 / MOTION 1-10 / DENSITY 1-10)
-3. **Forces** the brief-inference line before any code
-4. **Forces** the pre-flight checklist before any output
+1. **Sets** the dials based on brief inference (VARIANCE 1-10 / MOTION 1-10 / DENSITY 1-10)
+2. **Forces** the brief-inference line before any code
+3. **Forces** the pre-flight checklist before any output
 
-The detailed rules live IN the SKILL.md files. This rule is the switchboard.
-
----
-
-## §1 — VARIANT PICKER (which taste-skill loads for which task)
-
-| Task signal | Load SKILL | Install name | When to use |
-|---|---|---|---|
-| New landing page, portfolio, marketing site | `taste-skill` (v2) | `design-taste-frontend` | **DEFAULT** for any new frontend brief. Brief inference → dials → 3-section rule. |
-| Awwwards-tier, $150k agency feel, premium consumer | `soft-skill` | `high-end-visual-design` | "premium", "Apple-y", "luxury", "agency-tier", "Awwwards" |
-| Notion/Linear editorial, calm restrained UI | `minimalist-skill` | `minimalist-ui` | "minimalist", "clean", "editorial", "document-style", "warm monochrome" |
-| Data dashboards, Swiss typography, military/HUD aesthetic | `brutalist-skill` | `industrial-brutalist-ui` | "brutalist", "Swiss", "blueprint", "data-dense", "tactical" |
-| Audit-and-fix existing UI | `redesign-skill` | `redesign-existing-projects` | When the user says "redesign", "upgrade", "audit this UI", "looks generic" |
-| LLM truncating output, placeholder comments appearing | `output-skill` | `full-output-enforcement` | When previous output had `// ...`, "rest follows the same pattern", etc. |
-| GPT/Codex-specific strictness (randomized layouts, AIDA) | `gpt-tasteskill` | `gpt-taste` | When the generation target is GPT-4/GPT-5/Codex specifically |
-| Pin to v1 of taste-skill (legacy behavior) | `taste-skill-v1` | `design-taste-frontend-v1` | Only if user explicitly requests v1 backward-compat |
-| **Image-first website** (Codex image-to-code, generate→analyze→implement) | `image-to-code-skill` | `image-to-code` | "build from a reference image", "match this design exactly", "image-to-code" |
-| **Google Stitch screen generation** (semantic DESIGN.md producer) | `stitch-skill` | `stitch-design-taste` | "generate a Stitch DESIGN.md", "Google Stitch", "screen generation spec" |
-| **Web image-direction** (one image per section, premium comps) | `imagegen-frontend-web` | `imagegen-frontend-web` | "generate website section references", "image comps for devs", "section-by-section mockups" |
-| **Mobile app screen concepts** (iOS/Android, phone-framed) | `imagegen-frontend-mobile` | `imagegen-frontend-mobile` | "generate mobile app screens", "iOS concepts", "Android flow screens" |
-| **Brand identity board** (logo system, guidelines, visual world) | `brandkit` | `brandkit` | "brand kit", "logo system", "identity deck", "brand-guidelines board" |
-
-**Default order** (when multiple match): `taste-skill` (v2) → `output-skill` (always co-load) → context-specific (soft/minimalist/brutalist/redesign).
-
-**`output-skill` is ALWAYS loaded** alongside any other taste-skill variant. It bans placeholder comments, partial outputs, and "rest follows the same pattern" — see `.claude/skills/output-skill/SKILL.md`.
+The referenced taste-skill variants (soft, minimalist, brutalist, redesign, etc.) do not exist as installed skills. Use `impeccable` (`.claude/skills/impeccable/`) as the primary design vocabulary and execution skill.
 
 ---
 
@@ -150,28 +125,6 @@ When in doubt: taste-router decides WHICH. ui-ux-excellence decides WHAT to avoi
 
 ---
 
-## §6 — AGENT ROUTING TABLE (which agent loads which skill)
-
-When `taste_frontend_architect` (or any orchestrator) hands off work:
-
-| Design sub-agent | Always loads | Sometimes loads |
-|---|---|---|
-| `taste_frontend_architect` | taste-skill v2 + output-skill | brief-specific (soft/minimalist/brutalist) |
-| `ux_designer` | minimalist-skill + output-skill | taste-skill v2 (when brief is broader) |
-| `graphic_designer` | brutalist-skill (typography) + output-skill | minimalist-skill (for brand refinement) |
-| `branding_strategist` | minimalist-skill + output-skill | soft-skill (when premium brand) |
-| `motion_artist` | soft-skill (haptic motion) + output-skill | gpt-tasteskill (when strict GSAP needed) |
-| `spatial_designer` | brutalist-skill + output-skill | soft-skill (premium 3D) |
-| `wireframe_specialist` | output-skill + redesign-skill (audit pattern) | — |
-| `color_expert` | minimalist-skill (color discipline) + output-skill | — |
-| `accessibility_auditor` | output-skill + ui-ux-excellence.md | — (a11y is constraint, not aesthetic) |
-| `prototype_builder` | taste-skill v2 + output-skill | soft-skill (when demonstrating motion) |
-| `user_flow_mapper` | output-skill | — (flows are not aesthetic) |
-
-Cross-cutting: `redesign-skill` loads when the task says "redesign", "audit this UI", "improve this design", or when the codebase already has a UI and the user is iterating on it.
-
----
-
 ## §7 — FAILURE MODES (anti-patterns in taste-skill usage itself)
 
 - **Cargo-culted brutalism:** Applying brutalist-skill to a wedding-planning site. Match the variant to the brief.
@@ -185,9 +138,7 @@ Cross-cutting: `redesign-skill` loads when the task says "redesign", "audit this
 
 ## §8 — ROLLBACK
 
-To disable taste-skill routing: rename `.claude/rules/taste-router.md` to `.claude/rules/taste-router.md.disabled` and restart. The base system falls back to `ui-ux-excellence.md` + `frontend-design` (Anthropic default) — same behavior as before this rule was added.
-
-To uninstall a specific variant: `rm -rf .claude/skills/<variant-name>/`. No other files reference it.
+To disable taste-skill routing: rename this file to `.claude/reference/taste-router.md.disabled` and restart.
 
 ---
 

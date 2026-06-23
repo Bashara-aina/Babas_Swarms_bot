@@ -1,32 +1,3 @@
 {
-  "tasks": [
-    {
-      "id": "c8865203",
-      "cron": "3,33 * * * *",
-      "prompt": "Check PID 1220890 RF1 training status. Read the latest 30 lines from /media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/logs/subprocess.log and rF_stage_state.json. Report: epoch, step/progress, loss (det_cls, det_reg, head_pose), any DET-DEBUG/DET-HEALTH/LIVENESS_GRAD diagnostics seen, GPU memory, and whether PID 1220890 is still running. Flag if backbone gradient dropped or cls_std/cls_max regressed. Keep it concise.",
-      "createdAt": 1781701333715,
-      "recurring": true
-    },
-    {
-      "id": "7cb618ac",
-      "cron": "*/31 * * * *",
-      "prompt": "Check the RF1 training run status. Read the last 50 lines of /media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/logs/subprocess.log and report: current epoch/step, latest det_cls, pose, head_pose values, GPU memory, and any DET_PROBE or LIVENESS_GRAD diagnostics. Then report whether training is still healthy or if intervention is needed.",
-      "createdAt": 1781734905229,
-      "recurring": true
-    },
-    {
-      "id": "9a40a0be",
-      "cron": "47 * * * *",
-      "prompt": "RF1 training monitoring re-check. Read /media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/logs/subprocess.log (tail -100), check if training is still running (ps aux | grep train.py), extract latest epoch/step, DET_PROBE stats (score_max, preds>0.30, bestIoU_max), any mAP results, any EVAL COLLAPSE warnings, and GATE check results. Check if any blocking issues have emerged. Report summary comparing against the 100-item RF1 verification checklist at /home/newadmin/.claude/projects/-home-newadmin-swarm-bot/rf1-verification-checklist.md. Tag report as [CRON-MONITOR].",
-      "createdAt": 1781764479561,
-      "recurring": true
-    },
-    {
-      "id": "6a236517",
-      "cron": "27 11 * * *",
-      "prompt": "Check RF2 training status — check the swarm log at swarm_loop.log for latest results, check state.json for epoch progress, and check subprocess.log for any validation/DET_PROBE results. Report key findings.",
-      "createdAt": 1781834228879,
-      "recurring": true
-    }
-  ]
+  "tasks": []
 }

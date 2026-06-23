@@ -4,10 +4,6 @@ description: Intelligent issue management and project coordination with automate
 type: development
 color: green
 capabilities:
-  - self_learning         # ReasoningBank pattern storage
-  - context_enhancement   # GNN-enhanced search
-  - fast_processing       # Flash Attention
-  - smart_coordination    # Attention-based consensus
   - automated_issue_creation_with_smart_templates
   - progress_tracking_with_swarm_coordination
   - multi_agent_collaboration_on_complex_issues
@@ -30,59 +26,16 @@ hooks:
   pre: |
     echo "🚀 [Issue Tracker] starting: $TASK"
 
-    # 1. Learn from past similar issue patterns (ReasoningBank)
-    SIMILAR_ISSUES=$(npx agentdb-cli pattern search "Issue triage for $ISSUE_CONTEXT" --k=5 --min-reward=0.8)
-    if [ -n "$SIMILAR_ISSUES" ]; then
-      echo "📚 Found ${SIMILAR_ISSUES} similar successful issue patterns"
-      npx agentdb-cli pattern stats "issue management" --k=5
-    fi
-
-    # 2. GitHub authentication
-    echo "Initializing issue management swarm"
+    # GitHub authentication
+    echo "Initializing issue management"
     gh auth status || (echo "GitHub CLI not authenticated" && exit 1)
-    echo "Setting up issue coordination environment"
-
-    # 3. Store task start
-    npx agentdb-cli pattern store \
-      --session-id "issue-tracker-$AGENT_ID-$(date +%s)" \
-      --task "$TASK" \
-      --input "$ISSUE_CONTEXT" \
-      --status "started"
 
   post: |
     echo "✨ [Issue Tracker] completed: $TASK"
 
-    # 1. Calculate issue management metrics
-    REWARD=$(calculate_issue_quality "$ISSUE_OUTPUT")
-    SUCCESS=$(validate_issue_resolution "$ISSUE_OUTPUT")
-    TOKENS=$(count_tokens "$ISSUE_OUTPUT")
-    LATENCY=$(measure_latency)
-
-    # 2. Store learning pattern for future issue management
-    npx agentdb-cli pattern store \
-      --session-id "issue-tracker-$AGENT_ID-$(date +%s)" \
-      --task "$TASK" \
-      --input "$ISSUE_CONTEXT" \
-      --output "$ISSUE_OUTPUT" \
-      --reward "$REWARD" \
-      --success "$SUCCESS" \
-      --critique "$ISSUE_CRITIQUE" \
-      --tokens-used "$TOKENS" \
-      --latency-ms "$LATENCY"
-
-    # 3. Standard post-checks
+    # Standard post-checks
     echo "Issues created and coordinated"
     echo "Progress tracking initialized"
-    echo "Swarm memory updated with issue state"
-
-    # 4. Train neural patterns for successful issue management
-    if [ "$SUCCESS" = "true" ] && [ "$REWARD" -gt "0.9" ]; then
-      echo "🧠 Training neural pattern from successful issue management"
-      npx claude-flow neural train \
-        --pattern-type "coordination" \
-        --training-data "$ISSUE_OUTPUT" \
-        --epochs 50
-    fi
 ---
 
 # GitHub Issue Tracker

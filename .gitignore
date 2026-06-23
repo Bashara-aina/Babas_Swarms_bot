@@ -157,3 +157,4 @@ skill.sh
 # Claude-flow runtime data inside .claude/
 .claude/.claude-flow/
 .claude/skills/.claude-flow/
+/.claude-flow/

@@ -260,7 +260,7 @@ function buildEdges(entries) {
     }
   }
 
-  // Similarity edges within categories (Jaccard > 0.3).
+  // Similarity edges within categories (Jaccard > 0.55).
   // ADR-095 G6 perf: hoist the trigram computation outside the inner
   // loop. Previously we re-tokenized + re-trigrammed group[j] for every
   // i — O(n²) extra work for nothing. Now compute once per entry.
@@ -278,7 +278,7 @@ function buildEdges(entries) {
       const triA = triCache[i];
       for (let j = i + 1; j < group.length; j++) {
         const sim = jaccardSimilarity(triA, triCache[j]);
-        if (sim > 0.3) {
+        if (sim > 0.55) {
           edges.push({
             sourceId: group[i].id,
             targetId: group[j].id,
@@ -790,10 +790,29 @@ function consolidate() {
     entries: rankedEntries,
   });
 
-  // 8. Persist updated store (deduped or with new insight entries)
-  if (newEntries > 0 || store.length < preDedupCount) writeJSON(STORE_PATH, store);
+  // 8. Prune stale entries (confidence < 0.15, never accessed, >7 days old)
+  const now = Date.now();
+  const storeBefore = store.length;
+  const staleIds = new Set();
+  for (const entry of store) {
+    const node = nodes[entry.id];
+    if (node) {
+      const ageDays = (now - (node.createdAt || now)) / 86400000;
+      if (node.accessCount === 0 && (node.confidence || 0.5) < 0.15 && ageDays > 7) {
+        staleIds.add(entry.id);
+      }
+    }
+  }
+  if (staleIds.size > 0) {
+    store = store.filter(e => !staleIds.has(e.id));
+    for (const id of staleIds) delete nodes[id];
+    log(`[PRUNE] Removed ${staleIds.size} stale entries (never accessed, low confidence, >7d)`);
+  }
 
-  // 9. Save snapshot for delta tracking
+  // 9. Persist updated store (deduped or with new insight entries)
+  if (newEntries > 0 || store.length < storeBefore || staleIds.size > 0) writeJSON(STORE_PATH, store);
+
+  // 10. Save snapshot for delta tracking
   const updatedGraph = readJSON(GRAPH_PATH);
   const updatedRanked = readJSON(RANKED_PATH);
   saveSnapshot(updatedGraph, updatedRanked);
@@ -802,6 +821,7 @@ function consolidate() {
     entries: store.length,
     edges: edges.length,
     newEntries,
+    pruned: staleIds.size,
     message: 'Consolidated',
   };
 }
@@ -1044,7 +1064,31 @@ function stats(outputJson) {
   return report;
 }
 
-module.exports = { init, getContext, recordEdit, feedback, consolidate, stats };
+/**
+ * getTopRanked(n) — Read-path fix (Gap 1).
+ * Returns top N entries from ranked-context.json by composite score (no prompt needed).
+ * Used by session-restore to inject high-value context into every session.
+ */
+function getTopRanked(n = 5) {
+  const ranked = readJSON(RANKED_PATH);
+  if (!ranked || !ranked.entries || ranked.entries.length === 0) {
+    return '[INTELLIGENCE] No ranked context available yet.';
+  }
+
+  const top = ranked.entries.slice(0, Math.min(n, ranked.entries.length));
+  const lines = ['[INTELLIGENCE] Top-ranked context for this session:'];
+  for (let i = 0; i < top.length; i++) {
+    const e = top[i];
+    const score = (0.6 * (e.pageRank || 0) + 0.4 * (e.confidence || 0.5)).toFixed(4);
+    const summary = (e.summary || e.content || '(no summary)').slice(0, 100);
+    const accessed = e.accessCount || 0;
+    lines.push(`  ${i + 1}. [score=${score}] ${summary} [${accessed}x accessed]`);
+  }
+  lines.push(`  (${ranked.entries.length} total entries in ranked index)`);
+  return lines.join('\n');
+}
+
+module.exports = { init, getContext, getTopRanked, recordEdit, feedback, consolidate, stats };
 
 // ── CLI entrypoint ──────────────────────────────────────────────────────────
 if (require.main === module) {

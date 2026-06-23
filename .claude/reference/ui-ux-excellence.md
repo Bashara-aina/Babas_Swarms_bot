@@ -12,36 +12,11 @@ You are a **senior product designer + full-stack engineer** with taste equal to 
 
 ---
 
-## 🔌 HOW SKILLS AUTO-ACTIVATE (NO SLASH COMMANDS NEEDED)
+## 🔌 SKILLS
 
-Skills activate automatically when your prompt matches their description — no `/` required.
+This project has `impeccable` (`.claude/skills/impeccable/`) as the primary design skill. Use it for design vocabulary, anti-pattern detection, and execution.
 
-### Always Auto-Invoked on UI/UX Prompts:
-```
-ui-ux-pro-max     → tier 2 → matches: "design", "UI", "UX", "make it look", "landing page",
-                     "dashboard", "button", "card", "layout", "color", "font", "typography",
-                     "animation", "motion", "responsive", "dark mode", "tailwind", "css",
-                     "component", "beautiful", "premium", "Linear-style", "Vercel-style"
-
-frontend-design    → tier 2 → matches: "build a page", "landing page", "dashboard",
-                     "React component", "HTML/CSS layout", "web interface", "beautiful UI"
-
-libre-ui-ux        → tier 2 → matches: "build a component", "create a button", "shadcn/ui",
-                     "Radix UI", "Lucide icons", "modal", "drawer", "form validation",
-                     "table", "navigation", "responsive layout"
-
-taste              → tier 2 → matches: "make it look premium", "luxury feel", "minimalist",
-                     "boutique", "dense dashboard", "editorial", "the vibe is", "aesthetic"
-```
-
-### How NL Routing Works:
-1. You write: "build me a landing page that looks premium"
-2. CLAUDE.md NL routing table matches → `frontend-design` + `ui-ux-pro-max`
-3. Both skill preambles are prepended as context automatically
-4. No `/design`, no slash commands — just describe what you want
-
-**Decision rule:** If ANY part of the task touches how something looks, moves, or is
-interacted with — UI skills auto-invoke from the NL routing table before writing code.
+Skills do NOT auto-activate based on prompt matching — they must be explicitly invoked via the Skill tool or by loading the SKILL.md file.
 
 ---
 
@@ -82,20 +57,8 @@ IF project === "vanilla HTML/CSS"             → DaisyUI + Lucide CDN
 
 ## 🎨 DESIGN SYSTEM (MANDATORY WORKFLOW)
 
-### Step 1 — Skills Auto-Activate from Your Prompt:
-Skills are NOT called with slashes — they activate automatically when your prompt describes
-UI/UX work. Just write naturally. Examples:
-
-| If you write... | These skills auto-load |
-|---|---|
-| "build me a landing page" | `frontend-design` + `ui-ux-pro-max` |
-| "make this look premium" | `ui-ux-pro-max` + `taste` |
-| "create a React dashboard with dark mode" | `libre-ui-ux` + `ui-ux-pro-max` |
-| "design a button with animation" | `ui-ux-pro-max` (animation focus) |
-| "tailwind styling" | `ui-ux-pro-max` (stack focus) |
-
-Skills use preamble-tier 2 matching — the NL routing table in CLAUDE.md plus the skill
-description field are both checked. No scripts, no `/` commands needed.
+### Step 1 — Load Skills:
+Loading `.claude/reference/ui-ux-excellence.md` + `.claude/reference/taste-router.md` provides the design system reference. Invoke `impeccable` via Skill tool or load `.claude/skills/impeccable/SKILL.md` for vocabulary and anti-pattern detection.
 
 ### Step 2 — Design Token System (Always Use):
 
@@ -246,8 +209,8 @@ Toast notifications                        → sonner (Emil Kowalski)
 
 ```
 1. ANALYZE  → product type, audience, tone, stack
-2. LOAD     → ui-ux-pro-max + libre-ui-ux + frontend-design skills first
-3. DESIGN   → use ui-ux-pro-max for forbidden pattern enforcement;
+2. LOAD     → impeccable + taste-router.md + ui-ux-excellence.md
+3. DESIGN   → use impeccable for forbidden pattern enforcement;
               use frontend-design for aesthetic direction and bold creative choices
 4. PROOF    → build design-test.html, validate tokens
 5. SELECT   → libraries via decision tree above (shadcn/ui, NextUI, Mantine, etc.)

@@ -97,6 +97,24 @@ This agent specializes in managing the complete lifecycle of pull requests, from
 5. Staged merge with feature flags
 ```
 
+### 4. Complete PR Lifecycle (Batch Operations)
+```bash
+# Create PR
+gh pr create --title "feat: Add subscription billing" --body "..." --base main
+
+# Coordinate review
+gh pr view --json files
+gh pr review --approve --body "Reviewed and approved"
+
+# Run validation
+npm test
+npm run lint
+npm run build
+
+# Merge when checks pass
+gh pr merge --squash --delete-branch
+```
+
 ## GitHub CLI Integration
 
 ### Common Commands
@@ -131,6 +149,9 @@ gh pr merge --squash --delete-branch
 - **Release Manager**: For version coordination
 - **Issue Tracker**: For linked issue updates
 - **CI/CD Orchestrator**: For pipeline management
+- **Branch Manager**: For branch strategy coordination
+- **Security Reviewer**: For vulnerability assessment
+- **Performance Analyzer**: For impact analysis
 
 ## Best Practices
 

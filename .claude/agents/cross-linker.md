@@ -1,3 +1,9 @@
+---
+name: cross-linker
+description: Finds missing wikilinks, orphan notes, and broken backlinks during vault audits.
+type: agent
+---
+
 # Cross-Linker Subagent
 
 ## Purpose

@@ -582,10 +582,12 @@ def _read_obsidian_note_fallback(filename: str) -> str:
 
 if __name__ == "__main__":
     import argparse
+    import json
 
     parser = argparse.ArgumentParser(description="Obsidian autosync operations")
     parser.add_argument("--daily-log", action="store_true", help="Write daily session log")
     parser.add_argument("--session-summary", action="store_true", help="Write full session summary")
+    parser.add_argument("--full-sync", action="store_true", help="Run full session sync from session state")
     parser.add_argument("--session-id", default="cli-session", help="Session ID")
     parser.add_argument("--session-name", default="CLI session", help="Session name")
     args = parser.parse_args()
@@ -605,3 +607,56 @@ if __name__ == "__main__":
             files=["example.py"],
         )
         print(f"Wrote session summary: {path}")
+
+    if args.full_sync:
+        # Read session state from last-session.json (written by session.js end)
+        session_data = {}
+        session_metrics_path = (
+            Path.home() / "swarm-bot" / ".claude-flow" / "metrics" / "last-session.json"
+        )
+        if session_metrics_path.exists():
+            try:
+                session_data = json.loads(session_metrics_path.read_text())
+            except Exception:
+                pass
+
+        metrics = session_data.get("metrics", {}) if session_data else {}
+        files_changed = metrics.get("filesEdited", []) if metrics else []
+
+        # Also try reading current session for context (if session-end hasn't archived it yet)
+        current_session_path = (
+            Path.home() / "swarm-bot" / ".claude-flow" / "sessions" / "current.json"
+        )
+        current_session = {}
+        if current_session_path.exists():
+            try:
+                current_session = json.loads(current_session_path.read_text())
+            except Exception:
+                pass
+
+        context = current_session.get("context", {}) if current_session else {}
+        files_from_current = (
+            current_session.get("metrics", {}).get("filesEdited", [])
+            if current_session
+            else []
+        )
+        # Merge files from both sources
+        if files_from_current and not files_changed:
+            files_changed = files_from_current
+
+        results = full_session_sync(
+            session_id=args.session_id or session_data.get("id", "unknown"),
+            session_name=args.session_name,
+            user_query=context.get("lastUserQuery", ""),
+            tasks=[{"description": t, "status": "completed"} for t in context.get("tasks", [])],
+            decisions=context.get("decisions", []),
+            files_changed=files_changed,
+            duration=session_data.get("duration", 0),
+        )
+        written = [str(v) for v in results.values() if v]
+        if written:
+            print(f"[obsidian-sync] Full sync complete — {len(written)} files written")
+            for p in written:
+                print(f"  {p}")
+        else:
+            print("[obsidian-sync] Full sync completed (no files written)")

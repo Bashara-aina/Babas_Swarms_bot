@@ -1,3 +1,9 @@
+---
+name: review-fact-checker
+description: Verifies every claim in a review draft against vault sources before submission.
+type: agent
+---
+
 # Review Fact Checker Subagent
 
 ## Purpose

@@ -1,3 +1,9 @@
+---
+name: brag-spotter
+description: Finds uncaptured wins and competency gaps from the current session or recent work.
+type: agent
+---
+
 # Brag Spotter Subagent
 
 ## Purpose

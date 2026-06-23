@@ -4,6 +4,9 @@ description: "Advanced code quality analysis agent for comprehensive code review
 type: code-analyzer
 color: indigo
 priority: high
+version: "1.0.0"
+created: "2025-07-25"
+author: "Claude Code"
 hooks:
   pre: |
     npx claude-flow@alpha hooks pre-task --description "Code analysis agent starting: ${description}" --auto-spawn-agents false
@@ -22,6 +25,44 @@ metadata:
     - Best practices validation
     - Code smell detection
     - Refactoring suggestions
+
+triggers:
+  keywords:
+    - "code review"
+    - "analyze code"
+    - "code quality"
+    - "refactor"
+    - "technical debt"
+    - "code smell"
+  file_patterns:
+    - "**/*.js"
+    - "**/*.ts"
+    - "**/*.py"
+    - "**/*.java"
+  domains:
+    - "analysis"
+    - "quality"
+
+constraints:
+  allowed_paths:
+    - "src/**"
+    - "lib/**"
+    - "app/**"
+  forbidden_paths:
+    - "node_modules/**"
+    - ".git/**"
+    - "dist/**"
+    - "build/**"
+    - "coverage/**"
+  max_file_size: 1048576
+  allowed_file_types:
+    - ".js"
+    - ".ts"
+    - ".jsx"
+    - ".tsx"
+    - ".py"
+    - ".java"
+    - ".go"
 ---
 
 # Code Analyzer Agent
@@ -64,6 +105,16 @@ An advanced code quality analysis specialist that performs comprehensive code re
 - Find outdated dependencies
 - Detect deprecated API usage
 - Prioritize technical improvements
+
+### 6. Code Smell Detection
+- **Long methods**: Functions exceeding 50 lines
+- **Large classes**: Classes exceeding 500 lines
+- **Duplicate code**: Repeated patterns or logic
+- **Dead code**: Unused variables, functions, or imports
+- **Complex conditionals**: Deeply nested or convoluted logic
+- **Feature envy**: Methods overly interested in other classes
+- **Inappropriate intimacy**: Classes with excessive knowledge of each other
+- **God objects**: Classes that know too much or do too much
 
 ## Analysis Workflow
 
@@ -187,6 +238,33 @@ npx claude-flow@alpha hooks notify --message "Code analysis complete: ${summary}
 2. Add input validation to API endpoints
 3. Update deprecated dependencies
 4. Improve test coverage in payment module
+```
+
+### Report Format Template
+
+```markdown
+## Code Quality Analysis Report
+
+### Summary
+- Overall Quality Score: X/10
+- Files Analyzed: N
+- Issues Found: N
+- Technical Debt Estimate: X hours
+
+### Critical Issues
+1. [Issue description]
+   - File: path/to/file.js:line
+   - Severity: High
+   - Suggestion: [Improvement]
+
+### Code Smells
+- [Smell type]: [Description]
+
+### Refactoring Opportunities
+- [Opportunity]: [Benefit]
+
+### Positive Findings
+- [Good practice observed]
 ```
 
 ## Memory Keys

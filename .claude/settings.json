@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous-git.sh",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/block-dangerous-git.sh",
             "timeout": 5000
           }
         ]
@@ -39,8 +39,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[OK] Prompt received'",
-            "timeout": 500
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" store-user-query'",
+            "timeout": 2000
           }
         ]
       }
@@ -105,6 +105,21 @@
             "type": "command",
             "command": "sh -c 'exec bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\"'",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate'",
+            "timeout": 35000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync'",
+            "timeout": 20000
           }
         ]
       }
@@ -136,9 +151,9 @@
     },
     "agents": {
       "allowOnly": [
-          "deepseek-v4-pro",
-          "deepseek-v4-flash",
-          "minimax-m3"
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "minimax-m3"
       ]
     }
   },
@@ -154,7 +169,7 @@
     "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
     "ANTHROPIC_MODEL": "deepseek-v4-flash",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "950000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "HERMES_MAX_CONTEXT_TOKENS": "131072",
     "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
@@ -167,6 +182,17 @@
       ],
       "env": {
         "HERMES_REPO_PATH": "/home/newadmin/hermes-agent"
+      }
+    },
+    "graphify": {
+      "command": "/home/newadmin/.local/share/uv/tools/graphifyy/bin/python",
+      "args": [
+        "-m",
+        "graphify.serve",
+        "/home/newadmin/swarm-bot/graphify-out/graph.json"
+      ],
+      "env": {
+        "WORKING_DIRECTORY": "/home/newadmin/swarm-bot"
       }
     }
   },
@@ -219,7 +245,7 @@
         "enabled": true,
         "sonaMode": "focused",
         "confidenceDecayRate": 0.02,
-        "accessBoostAmount": 0.10,
+        "accessBoostAmount": 0.1,
         "consolidationThreshold": 3
       },
       "memoryGraph": {

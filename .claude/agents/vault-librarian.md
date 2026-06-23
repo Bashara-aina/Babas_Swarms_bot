@@ -1,3 +1,9 @@
+---
+name: vault-librarian
+description: Deep vault maintenance — finds and fixes orphans, broken links, and stale content.
+type: agent
+---
+
 # Vault Librarian Subagent
 
 ## Purpose

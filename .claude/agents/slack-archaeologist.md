@@ -1,3 +1,9 @@
+---
+name: slack-archaeologist
+description: Deep scan of Slack channels/DMs for evidence used by /om-incident-capture.
+type: agent
+---
+
 # Slack Archaeologist Subagent
 
 ## Purpose

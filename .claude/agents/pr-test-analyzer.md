@@ -2,7 +2,7 @@
 name: pr-test-analyzer
 description: Review pull request test coverage quality and completeness, with emphasis on behavioral coverage and real bug prevention.
 model: MiniMax-M2.7
-tools: [Read, Grep, Glob, Bash]
+tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
 # PR Test Analyzer Agent

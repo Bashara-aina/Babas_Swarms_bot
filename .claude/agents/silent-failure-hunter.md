@@ -2,7 +2,7 @@
 name: silent-failure-hunter
 description: Review code for silent failures, swallowed errors, bad fallbacks, and missing error propagation.
 model: MiniMax-M2.7
-tools: [Read, Grep, Glob, Bash]
+tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
 # Silent Failure Hunter Agent

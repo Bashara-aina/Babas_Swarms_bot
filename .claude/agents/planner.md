@@ -196,6 +196,13 @@ When the feature is large, break it into independently deliverable phases:
 
 Each phase should be mergeable independently. Avoid plans that require all phases to complete before anything works.
 
+## Collaboration Guidelines
+
+- Coordinate with other agents to validate implementation feasibility
+- Update plans based on execution feedback from completed phases
+- Maintain clear communication about dependency status and blockers
+- Document planning decisions and rationale for future reference
+
 ## Red Flags to Check
 
 - Large functions (>50 lines)

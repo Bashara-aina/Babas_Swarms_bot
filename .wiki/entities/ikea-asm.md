@@ -1,3 +1,0 @@
-# IKEA ASM
-
-## Overview

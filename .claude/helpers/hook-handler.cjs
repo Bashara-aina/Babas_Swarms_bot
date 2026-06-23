@@ -124,7 +124,7 @@ async function readStdin(timeoutMs = 500) {
 
 async function main() {
   // Skip stdin for commands that don't need hookInput data (saves ~500ms per call)
-  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats'];
+  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats', 'obsidian-sync'];
   let stdinData = '';
   if (!command || !NO_STDIN_COMMANDS.includes(command)) {
     try { stdinData = await readStdin(500); } catch (e) { /* ignore stdin errors */ }
@@ -263,6 +263,13 @@ async function main() {
           console.log = origLog;
         }
       }
+      // Inject top-ranked context into session (read-path fix)
+      if (intelligenceMod && intelligenceMod.getTopRanked) {
+        try {
+          const topContext = intelligenceMod.getTopRanked(5);
+          if (topContext) console.log(topContext);
+        } catch (e) { /* non-fatal */ }
+      }
     },
 
     'session-end': async () => {
@@ -275,7 +282,10 @@ async function main() {
         try {
           const consResult = await runWithTimeout(() => intelligenceMod.consolidate(), 'intelligenceMod.consolidate()');
           if (consResult && consResult.entries > 0) {
-            log(`[INTELLIGENCE] Consolidated: ${consResult.entries} entries, ${consResult.edges} edges${consResult.newEntries > 0 ? `, ${consResult.newEntries} new` : ''}, PageRank recomputed`);
+            log(`[INTELLIGENCE] Consolidated: ${consResult.entries} entries, ${consResult.edges} edges` +
+              (consResult.newEntries > 0 ? `, ${consResult.newEntries} new` : '') +
+              (consResult.pruned > 0 ? `, ${consResult.pruned} pruned` : '') +
+              `, PageRank recomputed`);
           }
         } finally {
           console.log = origLog;
@@ -299,10 +309,9 @@ async function main() {
     },
 
     'post-task': () => {
-      const intelligenceMod = getIntelligence();
-      if (intelligenceMod && intelligenceMod.feedback) {
-        try { intelligenceMod.feedback(true); } catch (e) { /* non-fatal */ }
-      }
+      // Removed: feedback(true) always boosted confidence regardless of outcome.
+      // getContext() already handles boosting in its call path, and consolidate()
+      // applies decay during session-end. This avoids unbounded confidence inflation.
     },
 
     'compact-manual': () => {
@@ -384,6 +393,113 @@ async function main() {
 
     'notify': () => {},
 
+    'cleanup-orphans': () => {
+      // Clean up orphan MCP processes and stale session caches
+      const spawn = require('child_process').spawnSync;
+
+      // Kill orphan MCP server instances (from previous sessions)
+      spawn('bash', ['-c', `
+        for p in firecrawl-mcp git-mcp-server sequential-thinking exa-mcp-server; do
+          pkill -f "bunx.*$p" 2>/dev/null || true
+        done
+        pkill -f "python3.*hermes-mcp-server" 2>/dev/null || true
+        pkill -f "python3.*claude-code-bridge" 2>/dev/null || true
+        pkill -f "python3.*crawl4ai-mcp" 2>/dev/null || true
+        pkill -f "node.*mcp-server-github" 2>/dev/null || true
+        echo "done"
+      `], { timeout: 5000 });
+
+      // Clean stale session cache (keep newest 10 JSONL files)
+      const homedir = require('os').homedir();
+      const cacheDir = require('path').join(homedir, '.claude', 'projects', '-home-newadmin-swarm-bot');
+      try {
+        const fs = require('fs');
+        const files = fs.readdirSync(cacheDir)
+          .filter(f => f.endsWith('.jsonl'))
+          .map(f => ({ name: f, mtime: fs.statSync(require('path').join(cacheDir, f)).mtimeMs }))
+          .sort((a, b) => b.mtime - a.mtime);
+        if (files.length > 10) {
+          const toRemove = files.slice(10);
+          for (const f of toRemove) {
+            fs.unlinkSync(require('path').join(cacheDir, f.name));
+          }
+          log(`[cleanup] Pruned ${toRemove.length} stale session caches (kept newest 10)`);
+        }
+      } catch (e) { /* non-fatal */ }
+    },
+
+    'dreaming-consolidate': () => {
+      const spawn = require('child_process').spawnSync;
+      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
+      const result = spawn('python3', ['-c', `
+import sys, json
+sys.path.insert(0, '""" + (process.env.CLAUDE_PROJECT_DIR || '.') + """')
+try:
+    from claude_flow.mcp.dreaming_consolidation import dreaming_run, dreaming_status
+    st = dreaming_status()
+    if st.get('is_running'):
+        print('[dreaming] Already running')
+    else:
+        force = st.get('total_runs', 0) == 0
+        res = dreaming_run(force=force)
+        if res.get('elapsed_seconds'):
+            print(f'[dreaming] Consolidation: {res.get(\"sessions_scanned\",0)} sessions, {res.get(\"patterns_found\",0)} patterns, {res.get(\"dedup_merges\",0)} merges in {res[\"elapsed_seconds\"]}s')
+        else:
+            print(f'[dreaming] Result: {json.dumps(res)[:200]}')
+except ImportError:
+    print('[dreaming] dreaming_consolidation not available')
+except Exception as e:
+    print(f'[dreaming] Error: {e}')
+      `.trim()], { cwd: repoRoot, encoding: 'utf-8', timeout: 30000 });
+      if (result.stdout && result.stdout.trim()) log(result.stdout.trim());
+    },
+
+    'store-user-query': () => {
+      // Capture the current user prompt into session context for obsidian sync
+      const stdinData = process.stdin.isTTY ? '' : (() => {
+        try {
+          const buf = require('fs').readFileSync(0, 'utf-8').trim();
+          return buf;
+        } catch { return ''; }
+      })();
+      let prompt = stdinData || '';
+      // Try to parse as JSON hookInput
+      try {
+        const parsed = JSON.parse(prompt);
+        prompt = parsed.prompt || parsed.command || '';
+      } catch { /* plain text */ }
+      if (prompt && prompt.length > 10) {
+        const sessionMod = getSession();
+        if (sessionMod && sessionMod.update) {
+          try { sessionMod.update('lastUserQuery', prompt.slice(0, 500)); } catch {}
+        }
+      }
+    },
+
+    'obsidian-sync': () => {
+      const spawn = require('child_process').spawnSync;
+      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
+      const sessionName = process.env.SESSION_NAME || 'Claude Code session';
+
+      // 1. Write daily session log + summary (full sync)
+      const logResult = spawn('python3', [
+        'core/memory/obsidian_autosync.py',
+        '--full-sync',
+        '--session-name', sessionName,
+      ], { cwd: repoRoot, encoding: 'utf-8', timeout: 15000 });
+      if (logResult.stdout && logResult.stdout.trim()) {
+        log(`[obsidian-sync] ${logResult.stdout.trim()}`);
+      }
+
+      // 2. Sync memory files to wiki
+      const syncResult = spawn('bash', [
+        '.claude/helpers/memory-to-wiki-sync.sh',
+      ], { cwd: repoRoot, encoding: 'utf-8', timeout: 10000 });
+      if (syncResult.stdout && syncResult.stdout.trim()) {
+        log(`[obsidian-sync] ${syncResult.stdout.trim()}`);
+      }
+    },
+
     'stats': () => {
       const intelligenceMod = getIntelligence();
       if (intelligenceMod && intelligenceMod.stats) {
@@ -408,7 +524,7 @@ async function main() {
   } else if (command) {
     log(`[OK] Hook: ${command}`);
   } else {
-    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|stats>');
+    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|dreaming-consolidate|store-user-query|obsidian-sync|stats>');
   }
 }
 

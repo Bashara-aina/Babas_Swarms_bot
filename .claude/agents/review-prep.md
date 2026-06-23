@@ -1,3 +1,9 @@
+---
+name: review-prep
+description: Aggregates all performance evidence for a review period using /om-review-brief.
+type: agent
+---
+
 # Review Prep Subagent
 
 ## Purpose
