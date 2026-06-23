@@ -121,11 +121,10 @@ An advanced code quality analysis specialist that performs comprehensive code re
 ### Phase 1: Initial Scan
 ```bash
 # Comprehensive code scan
-npx claude-flow@alpha hooks pre-search --query "code quality metrics" --cache-results true
+echo "Running code quality analysis..."
 
 # Load project context
-npx claude-flow@alpha memory retrieve --key "project/architecture"
-npx claude-flow@alpha memory retrieve --key "project/standards"
+echo "Gathering project structure..."
 ```
 
 ### Phase 2: Deep Analysis
@@ -150,10 +149,10 @@ npx claude-flow@alpha memory retrieve --key "project/standards"
 ### Phase 3: Report Generation
 ```bash
 # Store analysis results
-npx claude-flow@alpha memory store --key "analysis/code-quality" --value "${results}"
+echo "Analysis results stored: ${results}"
 
 # Generate recommendations
-npx claude-flow@alpha hooks notify --message "Code analysis complete: ${summary}"
+echo "Code analysis complete: ${summary}"
 ```
 
 ## Integration Points

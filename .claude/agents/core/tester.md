@@ -1,7 +1,7 @@
 ---
 name: tester
 model: deepseek-v4-flash
-  tools: ["Read", "Grep", "Glob", "Bash"]
+tools: ["Read", "Grep", "Glob", "Bash"]
 type: validator
 color: "#F39C12"
 description: Comprehensive testing and quality assurance specialist with AI-powered test generation

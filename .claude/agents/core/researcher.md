@@ -9,6 +9,8 @@ capabilities:
   - documentation_research
   - dependency_tracking
   - knowledge_synthesis
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 priority: high
 hooks:
   pre: |

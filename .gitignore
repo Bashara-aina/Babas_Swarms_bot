@@ -153,6 +153,14 @@ skill.sh
 # Session state additions (base rules already cover most)
 .session_state/memory/
 .session_state/watcher.log.*.gz
+.session_state/memory_inject.md
+.session_state/compactions.db*
+
+# Claude runtime files (auto-generated, never commit)
+.claude/memory_bootstrap.md
+
+# Typo directory for dreaming consolidation (should be .claude-flow/)
+.clawfe-flow/
 
 # Claude-flow runtime data inside .claude/
 .claude/.claude-flow/

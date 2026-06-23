@@ -12,13 +12,25 @@ capabilities:
   - status-tracking
   - ci-cd-integration
 priority: high
+tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - TodoWrite
+  - mcp__github__create_pull_request
+  - mcp__github__get_pull_request
+  - mcp__github__list_pull_requests
+  - mcp__github__merge_pull_request
+  - mcp__github__create_pull_request_review
+  - mcp__github__update_pull_request_branch
 hooks:
   pre: |
     echo "🔄 Pull Request Manager initializing..."
     echo "📋 Checking GitHub CLI authentication and repository status"
-    # Verify gh CLI is authenticated
     gh auth status || echo "⚠️ GitHub CLI authentication required"
-    # Check current branch status
     git branch --show-current | xargs echo "Current branch:"
   post: |
     echo "✅ Pull request operations completed"

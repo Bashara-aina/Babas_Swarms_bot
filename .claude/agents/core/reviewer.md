@@ -9,6 +9,8 @@ capabilities:
   - performance_analysis
   - best_practices
   - documentation_review
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 priority: medium
 hooks:
   pre: |

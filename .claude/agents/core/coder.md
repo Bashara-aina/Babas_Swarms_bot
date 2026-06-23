@@ -9,6 +9,8 @@ capabilities:
   - optimization
   - api_design
   - error_handling
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 priority: high
 hooks:
   pre: |
