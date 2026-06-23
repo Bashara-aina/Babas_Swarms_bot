@@ -45,9 +45,7 @@ from aiogram import BaseMiddleware, Bot, Dispatcher
 from aiogram.types import BotCommand, Message
 from dotenv import load_dotenv
 
-import agents as agents_registry
 import computer_agent
-import handlers
 import handlers.shared as _shared
 from core.daily_harvester.scheduler import DailyHarvesterScheduler
 from core.health_check import FEATURE_FLAGS, print_health_report, run_health_check
@@ -836,7 +834,6 @@ async def on_startup(bot: Bot) -> None:
     try:
 
         async def _run_memory_consolidation_nightly() -> None:
-            import calendar
 
             while True:
                 now = datetime.now()
@@ -1152,7 +1149,6 @@ async def on_startup(bot: Bot) -> None:
                 # Research
                 BotCommand(command="paper", description="Search arXiv papers"),
                 BotCommand(command="ask_paper", description="Ask about a paper"),
-                # DEPRECATED: workernet_papers — removed from menu (handler still works for backward compat)
                 BotCommand(command="research", description="Deep web research"),
                 BotCommand(command="jarvis", description="Context bundle + plan (no auto-send)"),
                 BotCommand(command="scrape", description="Scrape a URL"),

@@ -4,17 +4,34 @@ Main orchestrator -- RecursiveMAS inner loop pattern.
 Agents share latent state (execution traces) rather than raw text.
 """
 
-import asyncio, json, os, subprocess, sys, io, contextlib, importlib.util
+import asyncio
+import json
+import os
+import subprocess
+import sys
+import io
+import contextlib
+import importlib.util
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Callable, Any
 
-from minisweagent.agents.default import DefaultAgent
-from minisweagent.models.litellm_model import LitellmModel
-from minisweagent.environments.local import LocalEnvironment
+_minisweagent_available = True
+try:
+    from minisweagent.agents.default import DefaultAgent, AgentConfig
+    from minisweagent.models.litellm_model import LitellmModel
+    from minisweagent.environments.local import LocalEnvironment
+except ImportError:
+    _minisweagent_available = False
+    DefaultAgent = None
+    AgentConfig = None
+    LitellmModel = None
+    LocalEnvironment = None
+    logging.warning("minisweagent not installed -- some goal-runner features disabled")
 
 from tools.goal_planner import plan_goal
-from tools.goal_auditor import run_full_audit, format_telegram_report
+from tools.goal_auditor import run_full_audit
 
 GOAL_DIR = Path(".goal")
 STATUS_FILE = GOAL_DIR / "STATUS.md"
@@ -45,9 +62,12 @@ def _load_harness():
 
 def get_mini_agent() -> DefaultAgent:
     """Build mini-SWE-agent v2.2.8+ with proper AgentConfig."""
+    if not _minisweagent_available:
+        raise ImportError(
+            "minisweagent is not installed. Install with: pip install minisweagent"
+        )
     import yaml
     from pathlib import Path
-    from minisweagent.agents.default import AgentConfig
 
     model_name = os.getenv("MSWEA_MODEL_NAME", "openai/minimax-primary")
 

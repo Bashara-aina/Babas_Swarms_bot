@@ -321,18 +321,3 @@ async def cmd_ask_paper(msg: Message) -> None:
         typing_task.cancel()
         with contextlib.suppress(Exception):
             await status_msg.edit_text(f"paper error: <code>{e}</code>", parse_mode="HTML")
-
-
-# ── /workernet_papers — DEPRECATED ────────────────────────────────────────────
-@router.message(Command("workernet_papers"))
-async def cmd_workernet_papers(msg: Message) -> None:
-    """Deprecated: /workernet_papers has been replaced."""
-    await msg.answer(
-        "⚠️ <b>Deprecated:</b> /workernet_papers is no longer available.\n\n"
-        "替代方案 / Alternatives:\n"
-        "• <code>/research &lt;topic&gt;</code> — deep multi-source research\n"
-        "• <code>/paper &lt;query&gt;</code> — search arXiv for specific papers\n"
-        "• <code>/ask_paper &lt;arxiv_id&gt; &lt;question&gt;</code> — analyze a specific paper\n\n"
-        "The 6 WorkerNet papers are now available via <code>/paper</code> individually.",
-        parse_mode="HTML",
-    )

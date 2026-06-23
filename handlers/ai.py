@@ -591,22 +591,6 @@ async def cmd_multi_plan(msg: Message) -> None:  # type: ignore[reportOptionalMe
         )
 
 
-# ── /orchestrate_legacy — DEPRECATED ─────────────────────────────────────────
-@router.message(Command("orchestrate_legacy"))  # type: ignore[reportOptionalMemberAccess]
-async def cmd_orchestrate(msg: Message) -> None:  # type: ignore[reportOptionalMemberAccess]
-    """Deprecated: /orchestrate_legacy has been replaced."""  # type: ignore[reportOptionalMemberAccess]
-    await msg.answer(  # type: ignore[reportOptionalMemberAccess]
-        "⚠️ <b>Deprecated:</b> /orchestrate_legacy is no longer available.\n\n"  # type: ignore[reportOptionalMemberAccess]
-        "替代方案 / Alternatives:\n"
-        "• <code>/swarm &lt;task&gt;</code> — multi-agent team execution (recommended)\n"  # type: ignore[reportOptionalMemberAccess]
-        "• <code>/multi_execute &lt;task&gt;</code> — run same task with multiple agents\n"
-        "• <code>/multi_plan &lt;task&gt;</code> — generate 3 planning approaches in parallel\n"
-        "• <code>/loop &lt;goal&gt;</code> — autonomous plan→execute loop with safety bounds\n\n"
-        "For complex task decomposition, use <code>/swarm</code> with topology flag.",  # type: ignore[reportOptionalMemberAccess]
-        parse_mode="HTML",  # type: ignore[reportOptionalMemberAccess]
-    )
-
-
 # ── /loop — Autonomous plan-execute loop ─────────────────────────────────────
 @router.message(Command("loop"))  # type: ignore[reportOptionalMemberAccess]
 async def cmd_loop(msg: Message) -> None:  # type: ignore[reportOptionalMemberAccess]
