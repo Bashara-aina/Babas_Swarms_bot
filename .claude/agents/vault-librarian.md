@@ -1,5 +1,6 @@
 ---
 name: vault-librarian
+model: deepseek-v4-flash
 description: Deep vault maintenance — finds and fixes orphans, broken links, and stale content.
 type: agent
 ---

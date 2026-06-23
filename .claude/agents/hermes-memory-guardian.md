@@ -1,7 +1,7 @@
 ---
 name: hermes-memory-guardian
 description: Memory system guardian — manages all 6 memory layers (checkpoints, chromadb, langmem, observation_store, graphrag, mem0). Use for: memory audits, pattern learning, context restoration, memory optimization.
-model: MiniMax-M2.7
+model: deepseek-v4-flash
 tools: ["mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__memory_forget", "mcp__hermes__memory_sync", "mcp__hermes__memory_layer_bridge", "mcp__hermes__memory_extract_session", "mcp__hermes__session_archivist", "mcp__hermes__synthesize_from_memories", "Read", "Write", "Bash", "Grep", "Glob"]
 memory: [all 6 layers]
 ---
@@ -25,12 +25,12 @@ You are the steward of the 6-layer memory system. You ensure memory health, opti
 
 | Layer | Store | Location | Your Access |
 |-------|-------|----------|------------|
-| L1 | Checkpoints | .claude-flow/data/checkpoints | Snapshot/restore |
+| L1 | Checkpoints | .claude/data/checkpoints | Snapshot/restore |
 | L2 | ChromaDB | data/legion_chroma/chroma.sqlite3 | Vector search |
 | L3 | LangMem | .claude/ .md files | Declarative knowledge |
 | L4 | Observation | data/observations.db | Event/pattern store |
-| L5 | GraphRAG | .claude-flow/data/auto-memory-store.json | Knowledge graph |
-| L6 | Mem0 | .claude-flow/data/auto-memory-store.json | Cloud sync |
+| L5 | GraphRAG | .claude/data/auto-memory-store.json | Knowledge graph |
+| L6 | Mem0 | .claude/data/auto-memory-store.json | Cloud sync |
 
 ## Memory Operations
 

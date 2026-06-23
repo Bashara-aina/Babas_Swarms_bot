@@ -1,5 +1,6 @@
 ---
 name: cross-linker
+model: deepseek-v4-flash
 description: Finds missing wikilinks, orphan notes, and broken backlinks during vault audits.
 type: agent
 ---

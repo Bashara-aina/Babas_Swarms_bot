@@ -1,5 +1,6 @@
 ---
 name: swarm-init
+model: deepseek-v4-flash
 type: coordination
 color: teal
 description: Swarm initialization and topology optimization specialist

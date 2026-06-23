@@ -7,11 +7,11 @@ priority: high
 version: "1.0.0"
 created: "2025-07-25"
 author: "Claude Code"
+model: deepseek-v4-flash
+tools: ["Read", "Grep", "Glob", "Bash"]
 hooks:
   pre: |
-    npx claude-flow@alpha hooks pre-task --description "Code analysis agent starting: ${description}" --auto-spawn-agents false
-  post: |
-    npx claude-flow@alpha hooks post-task --task-id "analysis-${timestamp}" --analyze-performance true
+    echo "Code analysis agent starting"
 metadata:
   specialization: "Code quality assessment and security analysis"
   capabilities:

@@ -1,5 +1,6 @@
 ---
 name: tdd-london-swarm
+model: deepseek-v4-flash
 type: tester
 color: "#E91E63"
 description: TDD London School specialist for mock-driven development within swarm coordination

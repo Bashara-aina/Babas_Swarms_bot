@@ -428,33 +428,7 @@ async function main() {
       } catch (e) { /* non-fatal */ }
     },
 
-    'dreaming-consolidate': () => {
-      const spawn = require('child_process').spawnSync;
-      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
-      const result = spawn('python3', ['-c', `
-import sys, json
-sys.path.insert(0, '""" + (process.env.CLAUDE_PROJECT_DIR || '.') + """')
-try:
-    from claude_flow.mcp.dreaming_consolidation import dreaming_run, dreaming_status
-    st = dreaming_status()
-    if st.get('is_running'):
-        print('[dreaming] Already running')
-    else:
-        force = st.get('total_runs', 0) == 0
-        res = dreaming_run(force=force)
-        if res.get('elapsed_seconds'):
-            print(f'[dreaming] Consolidation: {res.get(\"sessions_scanned\",0)} sessions, {res.get(\"patterns_found\",0)} patterns, {res.get(\"dedup_merges\",0)} merges in {res[\"elapsed_seconds\"]}s')
-        else:
-            print(f'[dreaming] Result: {json.dumps(res)[:200]}')
-except ImportError:
-    print('[dreaming] dreaming_consolidation not available')
-except Exception as e:
-    print(f'[dreaming] Error: {e}')
-      `.trim()], { cwd: repoRoot, encoding: 'utf-8', timeout: 30000 });
-      if (result.stdout && result.stdout.trim()) log(result.stdout.trim());
-    },
-
-    'store-user-query': () => {
+        'store-user-query': () => {
       // Capture the current user prompt into session context for obsidian sync
       const stdinData = process.stdin.isTTY ? '' : (() => {
         try {
@@ -524,7 +498,7 @@ except Exception as e:
   } else if (command) {
     log(`[OK] Hook: ${command}`);
   } else {
-    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|dreaming-consolidate|store-user-query|obsidian-sync|stats>');
+    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|store-user-query|obsidian-sync|stats>');
   }
 }
 

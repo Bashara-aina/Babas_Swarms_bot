@@ -1,5 +1,6 @@
 ---
 name: test-long-runner
+model: deepseek-v4-flash
 description: Test agent that can run for 30+ minutes on complex tasks
 category: custom
 ---

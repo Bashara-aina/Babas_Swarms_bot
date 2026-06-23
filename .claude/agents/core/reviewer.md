@@ -9,10 +9,6 @@ capabilities:
   - performance_analysis
   - best_practices
   - documentation_review
-  - self_learning
-  - context_enhancement
-  - fast_processing
-  - smart_coordination
 priority: medium
 hooks:
   pre: |

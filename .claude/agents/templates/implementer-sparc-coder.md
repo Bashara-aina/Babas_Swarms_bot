@@ -1,5 +1,6 @@
 ---
 name: sparc-coder
+model: deepseek-v4-flash
 type: development
 color: blue
 description: Transform specifications into working code with TDD practices

@@ -1,5 +1,6 @@
 ---
 name: perf-analyzer
+model: deepseek-v4-flash
 color: "amber"
 type: analysis
 description: Performance bottleneck analyzer for identifying and resolving workflow inefficiencies

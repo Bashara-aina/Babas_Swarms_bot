@@ -1,5 +1,6 @@
 ---
 name: pr-manager
+model: deepseek-v4-flash
 description: Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows
 type: development
 color: "#4ECDC4"
@@ -52,29 +53,16 @@ Comprehensive pull request management with swarm coordination for automated revi
 
 ## Usage Patterns
 
-### 1. Create and Manage PR with Swarm Coordination
+### 1. Create and Manage PR
 ```javascript
-// Initialize review swarm
-mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 4 }
-mcp__claude-flow__agent_spawn { type: "reviewer", name: "Code Quality Reviewer" }
-mcp__claude-flow__agent_spawn { type: "tester", name: "Testing Agent" }
-mcp__claude-flow__agent_spawn { type: "coordinator", name: "PR Coordinator" }
-
-// Create PR and orchestrate review
+// Create PR
 mcp__github__create_pull_request {
   owner: "ruvnet",
   repo: "ruv-FANN",
-  title: "Integration: claude-code-flow and ruv-swarm",
-  head: "integration/claude-code-flow-ruv-swarm",
+  title: "Integration: feature",
+  head: "feature-branch",
   base: "main",
-  body: "Comprehensive integration between packages..."
-}
-
-// Orchestrate review process
-mcp__claude-flow__task_orchestrate {
-  task: "Complete PR review with testing and validation",
-  strategy: "parallel",
-  priority: "high"
+  body: "Integration between packages..."
 }
 ```
 
@@ -102,21 +90,14 @@ mcp__github__create_pull_request_review {
 // Validate PR status and merge when ready
 mcp__github__get_pull_request_status { owner: "ruvnet", repo: "ruv-FANN", pull_number: 54 }
 
-// Merge with coordination
+// Merge
 mcp__github__merge_pull_request {
   owner: "ruvnet",
   repo: "ruv-FANN",
   pull_number: 54,
   merge_method: "squash",
-  commit_title: "feat: Complete claude-code-flow and ruv-swarm integration",
-  commit_message: "Comprehensive integration with swarm coordination"
-}
-
-// Post-merge coordination
-mcp__claude-flow__memory_usage {
-  action: "store",
-  key: "pr/54/merged",
-  value: { timestamp: Date.now(), status: "success" }
+  commit_title: "feat: Complete integration",
+  commit_message: "Complete integration"
 }
 ```
 
@@ -125,12 +106,6 @@ mcp__claude-flow__memory_usage {
 ### Complete PR Lifecycle in Parallel:
 ```javascript
 [Single Message - Complete PR Management]:
-  // Initialize coordination
-  mcp__claude-flow__swarm_init { topology: "hierarchical", maxAgents: 5 }
-  mcp__claude-flow__agent_spawn { type: "reviewer", name: "Senior Reviewer" }
-  mcp__claude-flow__agent_spawn { type: "tester", name: "QA Engineer" }
-  mcp__claude-flow__agent_spawn { type: "coordinator", name: "Merge Coordinator" }
-  
   // Create and manage PR using gh CLI
   Bash("gh pr create --repo :owner/:repo --title '...' --head '...' --base 'main'")
   Bash("gh pr view 54 --repo :owner/:repo --json files")
@@ -152,12 +127,7 @@ mcp__claude-flow__memory_usage {
 
 ## Best Practices
 
-### 1. **Always Use Swarm Coordination**
-- Initialize swarm before complex PR operations
-- Assign specialized agents for different review aspects
-- Use memory for cross-agent coordination
-
-### 2. **Batch PR Operations**
+### 1. **Batch PR Operations**
 - Combine multiple GitHub API calls in single messages
 - Parallel file operations for large PRs
 - Coordinate testing and validation simultaneously
@@ -189,8 +159,3 @@ mcp__claude-flow__memory_usage {
 - Test failures with automatic re-runs
 - Review bottlenecks with load balancing
 
-### Swarm coordination ensures:
-- No single point of failure
-- Automatic agent failover
-- Progress preservation across interruptions
-- Comprehensive error reporting and recovery

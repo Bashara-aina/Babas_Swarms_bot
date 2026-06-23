@@ -9,10 +9,6 @@ capabilities:
   - documentation_research
   - dependency_tracking
   - knowledge_synthesis
-  - self_learning
-  - context_enhancement
-  - fast_processing
-  - smart_coordination
 priority: high
 hooks:
   pre: |

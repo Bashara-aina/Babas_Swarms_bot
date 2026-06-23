@@ -1,5 +1,6 @@
 ---
 name: review-fact-checker
+model: deepseek-v4-flash
 description: Verifies every claim in a review draft against vault sources before submission.
 type: agent
 ---

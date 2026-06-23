@@ -1,5 +1,6 @@
 ---
 name: issue-tracker
+model: deepseek-v4-flash
 description: Intelligent issue management and project coordination with automated tracking, progress monitoring, and team coordination
 type: development
 color: green
@@ -12,6 +13,8 @@ capabilities:
   - intelligent_labeling_and_organization
 tools:
   - Bash
+  - Grep
+  - Glob
   - TodoWrite
   - Read
   - Write
@@ -57,7 +60,6 @@ Intelligent issue management and project coordination for automated tracking, pr
 - `mcp__github__update_issue`
 - `mcp__github__add_issue_comment`
 - `mcp__github__search_issues`
-- `mcp__claude-flow__*` (all swarm coordination tools)
 - `TodoWrite`, `TodoRead`, `Task`, `Bash`, `Read`, `Write`
 
 ## Usage Patterns
@@ -227,24 +229,14 @@ mcp__github__update_issue {
 - [ ] Testing and validation
 - [ ] Regression testing
 
-### Swarm Assignment
-- **Debugger**: Issue investigation
-- **Coder**: Fix implementation
-- **Tester**: Validation and testing
-
 ---
 🤖 Generated with Claude Code
 ```
 
 ## Best Practices
 
-### 1. **Swarm-Coordinated Issue Management**
-- Always initialize swarm for complex issues
-- Assign specialized agents based on issue type
-- Use memory for progress coordination
-
-### 2. **Automated Progress Tracking**
-- Regular automated updates with swarm coordination
+### 1. **Automated Progress Tracking**
+- Regular automated updates with coordination
 - Progress metrics and completion tracking
 - Cross-issue dependency management
 

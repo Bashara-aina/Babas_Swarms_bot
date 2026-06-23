@@ -1,5 +1,6 @@
 ---
 name: "system-architect"
+model: deepseek-v4-flash
 description: "Expert agent for system architecture design, patterns, and high-level technical decisions"
 type: "architecture"
 color: "purple"

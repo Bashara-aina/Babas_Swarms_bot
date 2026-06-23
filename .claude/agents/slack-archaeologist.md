@@ -1,5 +1,6 @@
 ---
 name: slack-archaeologist
+model: deepseek-v4-flash
 description: Deep scan of Slack channels/DMs for evidence used by /om-incident-capture.
 type: agent
 ---

@@ -1,5 +1,6 @@
 ---
 name: smart-agent
+model: deepseek-v4-flash
 color: "orange"
 type: automation
 description: Intelligent agent coordination and dynamic spawning specialist

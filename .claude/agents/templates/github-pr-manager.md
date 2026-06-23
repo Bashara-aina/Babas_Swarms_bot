@@ -1,5 +1,6 @@
 ---
 name: pr-manager
+model: deepseek-v4-flash
 color: "teal"
 type: development
 description: Complete pull request lifecycle management and GitHub workflow coordination

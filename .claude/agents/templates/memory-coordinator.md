@@ -1,5 +1,6 @@
 ---
 name: memory-coordinator
+model: deepseek-v4-flash
 type: coordination
 color: green
 description: Manage persistent memory across sessions and facilitate cross-agent memory sharing

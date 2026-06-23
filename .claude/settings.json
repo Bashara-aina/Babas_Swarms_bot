@@ -84,6 +84,16 @@
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-restore'",
             "timeout": 15000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/session-start-trigger.mjs\"'",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" import'",
+            "timeout": 10000
           }
         ]
       }
@@ -108,13 +118,13 @@
           },
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate'",
-            "timeout": 35000
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
+            "timeout": 10000
           },
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
-            "timeout": 10000
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync'",
+            "timeout": 15000
           },
           {
             "type": "command",
@@ -131,10 +141,7 @@
   },
   "permissions": {
     "allow": [
-      "Bash(npx @claude-flow*)",
-      "Bash(npx claude-flow*)",
-      "Bash(node .claude/*)",
-      "mcp__claude-flow__:*"
+      "Bash(node .claude/*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -163,13 +170,11 @@
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_FLOW_V3_ENABLED": "true",
-    "CLAUDE_FLOW_HOOKS_ENABLED": "true",
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:4001",
     "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
     "ANTHROPIC_MODEL": "deepseek-v4-flash",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "950000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "HERMES_MAX_CONTEXT_TOKENS": "131072",
     "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
@@ -194,107 +199,6 @@
       "env": {
         "WORKING_DIRECTORY": "/home/newadmin/swarm-bot"
       }
-    }
-  },
-  "claudeFlow": {
-    "version": "3.0.0",
-    "enabled": true,
-    "platform": {
-      "os": "linux",
-      "arch": "x64",
-      "shell": "bash"
-    },
-    "modelPreferences": {
-      "default": "deepseek-v4-pro",
-      "routing": "deepseek-v4-flash"
-    },
-    "agentTeams": {
-      "enabled": true,
-      "teammateMode": "auto",
-      "taskListEnabled": true,
-      "mailboxEnabled": true,
-      "coordination": {
-        "autoAssignOnIdle": true,
-        "trainPatternsOnComplete": true,
-        "notifyLeadOnComplete": true,
-        "sharedMemoryNamespace": "agent-teams"
-      },
-      "hooks": {
-        "teammateIdle": {
-          "enabled": true,
-          "autoAssign": true,
-          "checkTaskList": true
-        },
-        "taskCompleted": {
-          "enabled": true,
-          "trainPatterns": true,
-          "notifyLead": true
-        }
-      }
-    },
-    "swarm": {
-      "topology": "hierarchical-mesh",
-      "maxAgents": 5,
-      "maxAgentsExplicitOptIn": 15
-    },
-    "memory": {
-      "backend": "hybrid",
-      "enableHNSW": true,
-      "persistPath": ".claude-flow/data",
-      "learningBridge": {
-        "enabled": true,
-        "sonaMode": "focused",
-        "confidenceDecayRate": 0.02,
-        "accessBoostAmount": 0.1,
-        "consolidationThreshold": 3
-      },
-      "memoryGraph": {
-        "enabled": true,
-        "pageRankDamping": 0.85,
-        "maxNodes": 2000,
-        "similarityThreshold": 0.85
-      },
-      "agentScopes": {
-        "enabled": true,
-        "defaultScope": "project"
-      }
-    },
-    "neural": {
-      "enabled": true
-    },
-    "daemon": {
-      "autoStart": false,
-      "workers": [],
-      "schedules": {}
-    },
-    "learning": {
-      "enabled": true,
-      "autoTrain": false,
-      "patterns": [
-        "coordination",
-        "optimization",
-        "prediction"
-      ],
-      "retention": {
-        "shortTerm": "24h",
-        "longTerm": "90d"
-      }
-    },
-    "adr": {
-      "autoGenerate": true,
-      "directory": "/docs/adr",
-      "template": "madr"
-    },
-    "ddd": {
-      "trackDomains": true,
-      "validateBoundedContexts": true,
-      "directory": "/docs/ddd"
-    },
-    "security": {
-      "autoScan": true,
-      "scanOnEdit": true,
-      "cveCheck": true,
-      "threatModel": true
     }
   }
 }

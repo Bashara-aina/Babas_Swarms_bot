@@ -1,5 +1,6 @@
 ---
 name: task-orchestrator
+model: deepseek-v4-flash
 color: "indigo"
 type: orchestration
 description: Central coordination agent for task decomposition, execution planning, and result synthesis

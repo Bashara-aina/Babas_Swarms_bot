@@ -1,5 +1,6 @@
 ---
 name: code-review-swarm
+model: deepseek-v4-flash
 description: Deploy specialized AI agents to perform comprehensive, intelligent code reviews that go beyond traditional static analysis
 type: development
 color: blue

@@ -9,10 +9,6 @@ capabilities:
   - optimization
   - api_design
   - error_handling
-  - self_learning
-  - context_enhancement
-  - fast_processing
-  - smart_coordination
 priority: high
 hooks:
   pre: |

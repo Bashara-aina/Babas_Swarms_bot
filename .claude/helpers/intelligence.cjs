@@ -157,7 +157,7 @@ function sessionGet(key) {
   try {
     if (!fs.existsSync(SESSION_FILE)) return null;
     const session = JSON.parse(fs.readFileSync(SESSION_FILE, 'utf-8'));
-    return key ? (session.context || {})[key] : session.context;
+    return key ? ((session.context || {})[key] ?? session[key] ?? null) : session.context;
   } catch { return null; }
 }
 
@@ -411,6 +411,21 @@ function init() {
     writeJSON(STORE_PATH, deduped);
   }
 
+  // Ensure every entry has a summary — bootstrapped entries from auto-memory-hook.mjs
+  // often lack them, making them invisible in ranked context display.
+  for (const entry of deduped) {
+    if (!entry.summary) {
+      entry.summary = (entry.content || entry.value || '')
+        .replace(/^[#\s\-*•]+/gm, '')
+        .trim()
+        .split('\n')
+        .filter(l => l.trim().length > 0)
+        .slice(0, 2)
+        .join('; ')
+        .slice(0, 100);
+    }
+  }
+
   // Skip rebuild if graph is fresh and store hasn't changed
   if (graphState && graphState.nodeCount === deduped.length) {
     const age = Date.now() - (graphState.updatedAt || 0);
@@ -540,6 +555,10 @@ function getContext(prompt) {
   const matchedIds = topEntries.map(e => e.id);
   sessionSet('lastMatchedPatterns', matchedIds);
 
+  // Boost currently matched entries — being selected as relevant = evidence of utility.
+  // This is the only positive feedback loop that moves confidence above the initial 0.5.
+  boostConfidence(matchedIds, 0.02);
+
   // Only boost previous if they differ from current (avoid double-boosting)
   if (prevMatched && Array.isArray(prevMatched)) {
     const newSet = new Set(matchedIds);
@@ -666,6 +685,20 @@ function consolidate() {
   // Deduplicate store entries by ID before processing (fixes #1518)
   const preDedupCount = store.length;
   store = deduplicateById(store);
+
+  // Generate summaries for entries that lack them (eg auto-memory entries)
+  for (const entry of store) {
+    if (!entry.summary) {
+      entry.summary = (entry.content || entry.value || '')
+        .replace(/^[#\s\-*•]+/gm, '')
+        .trim()
+        .split('\n')
+        .filter(l => l.trim().length > 0)
+        .slice(0, 2)
+        .join('; ')
+        .slice(0, 100);
+    }
+  }
 
   // 1. Process pending insights
   let newEntries = 0;
