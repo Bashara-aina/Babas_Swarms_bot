@@ -15,12 +15,6 @@ from datetime import datetime
 def log(level: str, message: str, **kwargs):
     """Log with timestamp and level."""
     timestamp = datetime.now().isoformat()
-    log_entry = {
-        "timestamp": timestamp,
-        "level": level,
-        "message": message,
-        **kwargs
-    }
     print(f"[{timestamp}] [{level}] {message}", file=sys.stderr)
     if kwargs:
         print(f"  Context: {kwargs}", file=sys.stderr)
@@ -131,7 +125,6 @@ def main():
     parser.add_argument("--agent", type=str, default="default", help="Agent name")
     args = parser.parse_args()
 
-    timestamp = datetime.now().isoformat()
     log("DEBUG", f"Hook fired: event={args.event}, agent={args.agent}")
 
     # Parse the hook input from stdin

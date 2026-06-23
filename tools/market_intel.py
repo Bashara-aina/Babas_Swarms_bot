@@ -149,7 +149,6 @@ async def _call_mirofish_direct(endpoint: str, payload: dict) -> dict:
         _os.chdir(MIROFISH_BACKEND)
 
         if "/report" in endpoint or "/analyze" in endpoint:
-            from app.config import Config
             from app.services.report_agent import ReportAgent
 
             graph_id = payload.get("graph_id", f"graph_{datetime.now().strftime('%Y%m%d%H%M%S')}")

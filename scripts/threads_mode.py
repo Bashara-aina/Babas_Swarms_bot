@@ -23,8 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.rumahlabuh_scheduler import Scheduler
-from tools.threads_mode_control import is_enabled, open_workspace, set_enabled, toggle
+from tools.rumahlabuh_scheduler import Scheduler  # noqa: E402
+from tools.threads_mode_control import is_enabled, open_workspace, set_enabled, toggle  # noqa: E402
 
 
 async def _run(action: str, open_browser: bool) -> int:

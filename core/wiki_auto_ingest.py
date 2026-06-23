@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -27,11 +26,7 @@ QUALITY_THRESHOLD = 0.65
 SESSION_TURN_THRESHOLD = 3
 
 
-def _now_jst() -> str:
-    from zoneinfo import ZoneInfo
-
-    return datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M JST")
-
+from core.utils.datetime_utils import now_jst as _now_jst  # noqa: E402
 
 # ── Per-turn lightweight check ─────────────────────────────────────────────
 

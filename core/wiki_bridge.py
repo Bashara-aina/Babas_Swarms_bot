@@ -25,11 +25,7 @@ OPENCODE_SESSION_DIR = WIKI_DIR / "opencode" / "sessions"
 OPENCODE_DECISIONS_DIR = WIKI_DIR / "decisions"
 
 
-def _now_jst() -> str:
-    from datetime import datetime
-    from zoneinfo import ZoneInfo
-
-    return datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M JST")
+from core.utils.datetime_utils import now_jst as _now_jst  # noqa: E402
 
 
 async def opencode_write_session_summary(

@@ -29,13 +29,12 @@ logger = logging.getLogger(__name__)
 
 # ── Optional CrewAI import ────────────────────────────────────────────────────
 try:
-    from crewai import Agent, Crew, Process, Task
-    from crewai.tools import BaseTool
+    from crewai import Agent, Crew, Process
 
     _CREWAI_AVAILABLE = True
 except ImportError:
     try:
-        from crewai import Agent, Crew, Process, Task  # type: ignore
+        from crewai import Agent, Crew, Process  # type: ignore
 
         _CREWAI_AVAILABLE = True
     except ImportError:

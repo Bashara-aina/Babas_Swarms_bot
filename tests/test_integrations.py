@@ -13,7 +13,7 @@ import pytest
 
 os.environ.setdefault("MINIMAX_API_KEY", "test-key-for-integration-tests")
 os.environ.setdefault("OPENAI_API_KEY", "test-key-for-integration-tests")
-os.environ.setdefault("OPENAI_BASE_URL", "https://api.minimax.io/v1")
+os.environ.setdefault("OPENAI_BASE_URL", "http://127.0.0.1:4001")
 
 
 class TestMem0:
@@ -73,7 +73,7 @@ class TestLangGraph:
         assert cfg.graph_type == "react_agent"
         assert cfg.max_steps == 5
         agent = LangGraphAgent(cfg)
-        assert agent.model == "minimax-coding-plan/MiniMax-M3"
+        assert agent.model == "deepseek-v4-flash"
         assert agent._checkpointer is None  # Not set until first run
 
     @pytest.mark.asyncio
@@ -153,8 +153,8 @@ class TestPhoenix:
     def test_token_tracker(self):
         from core.integrations.phoenix_observability import TokenUsageTracker
         tracker = TokenUsageTracker()
-        tracker.record_run("minimax-coding-plan/MiniMax-M3", 10, 20, 150.0, cost=0.001)
-        tracker.record_run("minimax-coding-plan/MiniMax-M3", 15, 30, 200.0, cost=0.002)
+        tracker.record_run("deepseek-v4-flash", 10, 20, 150.0, cost=0.001)
+        tracker.record_run("deepseek-v4-flash", 15, 30, 200.0, cost=0.002)
         report = tracker.report()
         assert report["total_runs"] == 2
         assert report["total_tokens"] == 75
@@ -168,7 +168,7 @@ class TestPhoenix:
         from core.integrations.phoenix_observability import PhoenixTracer
         tracer = PhoenixTracer(local_mode=True)
         await tracer.trace_llm_call(
-            model="minimax-coding-plan/MiniMax-M3",
+            model="deepseek-v4-flash",
             prompt="What is 2+2?",
             response="2 plus 2 equals 4",
             latency_ms=150.0,
@@ -190,7 +190,7 @@ class TestBrowserUse:
         assert agent.headless is True
         assert agent.max_steps == 3
         # Model comes from BROWSER_USE_MODEL env var (.env sets it to ollama/llava:13b for local privacy)
-        assert "llava" in agent.model or agent.model == "minimax-coding-plan/MiniMax-M3"
+        assert "llava" in agent.model or agent.model == "deepseek-v4-flash"
 
 
 class TestMCPBridge:

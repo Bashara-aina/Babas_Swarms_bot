@@ -106,7 +106,7 @@ async def cmd_swe(message: Message) -> None:
 
         # Build prompts
         system_prompt = loop.build_system_prompt(repo_path=repo_path)
-        instance_prompt = loop.build_instance_prompt(problem_statement)
+        loop.build_instance_prompt(problem_statement)
 
         # Send initial context
         await message.answer(
@@ -140,7 +140,7 @@ async def cmd_swe(message: Message) -> None:
 
             return step
 
-        final_step = await asyncio.wait_for(run_loop(), timeout=300)
+        await asyncio.wait_for(run_loop(), timeout=300)
 
         # Final summary
         traj = loop.trajectory

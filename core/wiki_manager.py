@@ -9,9 +9,7 @@ import asyncio
 import logging
 import os
 import re
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 import aiofiles
 
@@ -23,8 +21,7 @@ WIKI_DIR = REPO_ROOT / ".wiki"
 _wiki_singleton: WikiManager | None = None
 
 
-def _now_jst() -> str:
-    return datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M JST")
+from core.utils.datetime_utils import now_jst as _now_jst  # noqa: E402
 
 
 def _parse_wiki_plan(text: str) -> list[dict[str, str]]:

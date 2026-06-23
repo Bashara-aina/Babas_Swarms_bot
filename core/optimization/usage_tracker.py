@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 PRICING: dict[str, dict[str, float]] = {
     # MiniMax stack (free)
     "minimax-coding-plan/MiniMax-M3":                        {"input": 0.0, "output": 0.0},
-    "minimax-coding-plan/MiniMax-M3":                           {"input": 0.0, "output": 0.0},
     # Ollama local (free)
     "ollama_chat/gemma3:12b":                         {"input": 0.0, "output": 0.0},
     "ollama_chat/qwen3.5:35b":                        {"input": 0.0, "output": 0.0},

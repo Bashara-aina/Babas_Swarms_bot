@@ -254,7 +254,6 @@ class TriAttention:
         q_centers = calibration.q_centers
         q_norms = calibration.q_norms
         k_centers = calibration.k_centers
-        k_norms = calibration.k_norms
         mrl = calibration.mrl
         safe_bands = torch.clamp(calibration.freq_bands, 0, self.num_bands - 1)
 
@@ -347,7 +346,6 @@ class TriAttention:
         q_centers = calibration.q_centers
         q_norms = calibration.q_norms
         k_centers = calibration.k_centers
-        k_norms = calibration.k_norms
         mrl = calibration.mrl
         selected_bands = calibration.freq_bands
 

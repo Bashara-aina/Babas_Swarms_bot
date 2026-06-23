@@ -70,7 +70,7 @@ class TestCostAwareRouter:
         from swarms_bot.routing.cost_router import CostAwareRouter
 
         router = CostAwareRouter()
-        cost = router.estimate_cost("test task", "minimax-coding-plan/MiniMax-M3")
+        cost = router.estimate_cost("test task", "deepseek-v4-flash")
         assert cost == 0.0
 
     def test_get_routing_stats_empty(self):

@@ -23,12 +23,8 @@ _burr_installed: bool | None = None  # type: ignore[reportAttributeAccessIssue]
 def _check_burr() -> bool:  # type: ignore[reportAttributeAccessIssue]
     global _burr_installed
     if _burr_installed is None:
-        try:
-            import burr.core  # type: ignore[reportAttributeAccessIssue]
-
-            _burr_installed = True  # type: ignore[reportAttributeAccessIssue]
-        except ImportError:
-            _burr_installed = False  # type: ignore[reportAttributeAccessIssue]
+        import importlib.util
+        _burr_installed = importlib.util.find_spec("burr") is not None
     return _burr_installed
 
 

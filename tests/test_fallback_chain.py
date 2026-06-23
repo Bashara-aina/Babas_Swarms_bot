@@ -49,15 +49,15 @@ class TestFallbackChain:
     def test_get_next_available_provider_respects_skip(self, mock_health):
         mock_health.return_value = "healthy"
         model, _name, _idx = FallbackChain.get_next_available_provider(
-            "coding", skip_providers={"minimax-coding-plan"}
+            "coding", skip_providers={"deepseek"}
         )
-        assert "minimax-coding-plan" not in model
+        assert "deepseek" not in model
 
     @patch("core.reliability.fallback_chain.check_provider_health")
     def test_get_optimal_provider_returns_first_healthy(self, mock_health):
         mock_health.side_effect = ["healthy", "unavailable", "unavailable"]
         model, name = FallbackChain.get_optimal_provider("coding")
-        assert "minimax-coding-plan" in model
+        assert "deepseek" in model
 
     @patch("core.reliability.fallback_chain.check_provider_health")
     def test_get_fallback_stats_returns_all_providers(self, mock_health):
@@ -73,9 +73,9 @@ class TestFallbackChain:
 
     @patch("core.reliability.fallback_chain.FallbackChain.get_optimal_provider")
     def test_get_best_provider_returns_model_string(self, mock_optimal):
-        mock_optimal.return_value = ("minimax-coding-plan/MiniMax-M3", "MiniMax M3")
+        mock_optimal.return_value = ("deepseek-v4-flash", "DeepSeek V4 Flash")
         model = get_best_provider("coding")
-        assert model == "minimax-coding-plan/MiniMax-M3"
+        assert model == "deepseek-v4-flash"
 
 
 class TestFallbackChainEdgeCases:

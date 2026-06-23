@@ -136,7 +136,7 @@ class TriAttentionProcessor:
         self.current_position = position
 
         # Score keys
-        scores = tri.score_keys_position_aware(
+        tri.score_keys_position_aware(
             keys=key,
             positions=torch.tensor([position], device=self.device),
             current_position=position,

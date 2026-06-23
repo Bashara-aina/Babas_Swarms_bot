@@ -548,8 +548,8 @@ def save_sharegpt_trajectory(
 # Trajectory compression (hermes TrajectoryCompressor pattern)
 # ---------------------------------------------------------------------------
 
-import asyncio
-from dataclasses import dataclass
+import asyncio  # noqa: E402
+from dataclasses import dataclass  # noqa: E402
 
 try:
     import tiktoken

@@ -20,13 +20,8 @@ class GPTResearcherClient:
             self.search_api = "tavily"
 
     def _check_available(self) -> bool:
-        try:
-            import gpt_researcher
-
-            return True
-        except ImportError:
-            logger.warning("gpt-researcher not installed. Run: pip install gpt-researcher")
-            return False
+        import importlib.util
+        return importlib.util.find_spec("gpt_researcher") is not None
 
     async def research(self, query: str, report_type: str = "research_report", max_sections: int = 5) -> dict:
         if not self.available:

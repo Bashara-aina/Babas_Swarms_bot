@@ -139,8 +139,8 @@ def extract_task_summary(stdout: str, task_id: str) -> str:
     lines = stdout.split('\n')
     # Find key outcome lines
     key_lines = [
-        l for l in lines
-        if any(kw in l.lower() for kw in
+        line for line in lines
+        if any(kw in line.lower() for kw in
                ['done', 'complete', 'error', 'failed', 'passed', 'commit', 'created', 'wrote'])
     ]
     summary = f"Task {task_id}:\n"

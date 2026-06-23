@@ -72,7 +72,7 @@ class TestSelectModel:
         import core.agent_registry as ag_module
         original = getattr(ag_module, 'get_model', None)
         if original:
-            ag_module.get_model = lambda k, use_fallback=False: "minimax-coding-plan/MiniMax-M3"
+            ag_module.get_model = lambda k, use_fallback=False: "deepseek-v4-flash"
         try:
             model = select_model("coding", "hello")
             assert isinstance(model, str)
@@ -84,10 +84,10 @@ class TestSelectModel:
     def test_select_model_force_lightweight(self):
         import core.agent_registry as ag_module
         original = getattr(ag_module, 'get_model', None)
-        ag_module.get_model = lambda k, use_fallback=False: "minimax-coding-plan/MiniMax-M3"
+        ag_module.get_model = lambda k, use_fallback=False: "deepseek-v4-flash"
         try:
             model = select_model("coding", "hi", force_tier="lightweight")
-            assert "minimax-coding-plan" in model
+            assert "deepseek" in model
         finally:
             if original:
                 ag_module.get_model = original
@@ -95,10 +95,10 @@ class TestSelectModel:
     def test_select_model_force_heavyweight(self):
         import core.agent_registry as ag_module
         original = getattr(ag_module, 'get_model', None)
-        ag_module.get_model = lambda k, use_fallback=False: "minimax-coding-plan/MiniMax-M3"
+        ag_module.get_model = lambda k, use_fallback=False: "deepseek-v4-flash"
         try:
             model = select_model("coding", "hello", force_tier="heavyweight")
-            assert "minimax-coding-plan" in model
+            assert "deepseek" in model
         finally:
             if original:
                 ag_module.get_model = original
@@ -112,10 +112,10 @@ class TestRoutingExplanation:
     def test_explanation_contains_model(self):
         import core.agent_registry as ag_module
         original = getattr(ag_module, 'get_model', None)
-        ag_module.get_model = lambda k, use_fallback=False: "minimax-coding-plan/MiniMax-M3"
+        ag_module.get_model = lambda k, use_fallback=False: "deepseek-v4-flash"
         try:
             exp = routing_explanation("coding", "say hi")
-            assert "minimax-coding-plan" in exp
+            assert "deepseek" in exp
         finally:
             if original:
                 ag_module.get_model = original

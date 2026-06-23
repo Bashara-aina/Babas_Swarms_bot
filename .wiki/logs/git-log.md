@@ -1685,3 +1685,14 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 567cd82d
+- Date: Tue Jun 23 05:22:51 PM JST 2026
+- Message: chore: batch model routing fixes and remaining cleanup
+
+- Update remaining MiniMax-M2.7 → deepseek-v4-flash in 38 agent files
+- Add tools field to agent files missing it
+- Fix broken hooks, unquoted tools arrays, content typos
+- Finish orphaned file cleanup
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

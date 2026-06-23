@@ -45,18 +45,18 @@ def main():
                     for sent in sent_list:
                         if sent.get('id') == d.get('id') and sent.get('method') == d.get('method'):
                             return True
-            except:
+            except Exception:
                 pass
             return False
 
         def cleanup():
             try:
                 os.close(master_fd)
-            except:
+            except Exception:
                 pass
             try:
                 os.kill(pid, signal.SIGTERM)
-            except:
+            except Exception:
                 pass
             try:
                 os.waitpid(pid, 0)
@@ -87,12 +87,12 @@ def main():
                                         if 'method' in d and 'id' in d:
                                             with lock:
                                                 sent_requests.append(d)
-                                    except:
+                                    except Exception:
                                         pass
-                        except:
+                        except Exception:
                             pass
                         os.write(master_fd, chunk)
-            except:
+            except Exception:
                 pass
 
         pump_thread = threading.Thread(target=pump_stdin, daemon=True)
@@ -131,7 +131,7 @@ def main():
                                                             sent_requests.remove(sent)
                                                             should_drop = True
                                                             break
-                                            except:
+                                            except Exception:
                                                 pass
                                             if not should_drop:
                                                 os.write(1, (line + '\n').encode('utf-8'))

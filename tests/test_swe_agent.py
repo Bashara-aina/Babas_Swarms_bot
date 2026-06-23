@@ -24,7 +24,7 @@ import pytest
 # Set test env
 os.environ.setdefault("MINIMAX_API_KEY", "test-key-for-integration-tests")
 os.environ.setdefault("OPENAI_API_KEY", "test-key-for-integration-tests")
-os.environ.setdefault("OPENAI_BASE_URL", "https://api.minimax.io/v1")
+os.environ.setdefault("OPENAI_BASE_URL", "http://127.0.0.1:4001")
 
 
 class TestSWETools:
@@ -210,7 +210,7 @@ class TestSWEConfig:
         from core.swe_agent import SWEAgentConfig
 
         config = SWEAgentConfig()
-        assert config.agent.model.name == "minimax-coding-plan/MiniMax-M3"
+        assert config.agent.model.name == "deepseek-v4-flash"
         assert config.agent.max_steps == 30
         assert config.env.repo_path == ""
 
@@ -519,7 +519,7 @@ class TestTrajectoryCompressor:
         assert config.protect_first_gpt is True
         assert config.protect_first_tool is True
         assert config.protect_last_n_turns == 4
-        assert config.summarization_model == "minimax-coding-plan/MiniMax-M3"
+        assert config.summarization_model == "deepseek-v4-flash"
 
     def test_compression_metrics_to_dict(self):
         """Test TrajectoryCompressionMetrics serialization."""

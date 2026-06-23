@@ -68,7 +68,7 @@ def _run_py(code, timeout=15):
     if rc not in (0, -9):
         raise RuntimeError(f"exit {rc}: {out[:100]}")
     # Filter [EMBEDDER] lines
-    lines = [l for l in out.splitlines() if l and not l.startswith('[EMBEDDER]')]
+    lines = [line for line in out.splitlines() if line and not line.startswith('[EMBEDDER]')]
     return '\n'.join(lines)
 
 def _run_py_file(code, timeout=30):
@@ -84,7 +84,7 @@ def _run_py_file(code, timeout=30):
     rc = proc.returncode
     if rc not in (0, -9):
         raise RuntimeError(f"exit {rc}: {out[:100]}")
-    lines = [l for l in out.splitlines() if l and not l.startswith('[EMBEDDER]')]
+    lines = [line for line in out.splitlines() if line and not line.startswith('[EMBEDDER]')]
     return '\n'.join(lines)
 
 def check(label, fn, expected_any=False):
@@ -165,12 +165,14 @@ proc = subprocess.Popen(
 obs_out = _read_with_timeout(proc, 20)
 proc.kill()
 proc.wait()
-clean = [l for l in obs_out.splitlines() if l and not l.startswith('[EMBEDDER]')]
-obs_ok = any('list|' in l for l in clean)
+clean = [line for line in obs_out.splitlines() if line and not line.startswith('[EMBEDDER]')]
+obs_ok = any('list|' in line for line in clean)
 detail = clean[0] if clean else '(no output)'
 print(f"  [observation_store returns list] {'✓ PASS' if obs_ok else '✗ FAIL'} — {detail}" + ("" if obs_ok else " (fn works directly)"))
-if obs_ok: PASS += 1
-else: FAIL += 1
+if obs_ok:
+    PASS += 1
+else:
+    FAIL += 1
 
 section("Layer 5 — graphrag")
 check("keyword search works",
@@ -187,12 +189,16 @@ check("watcher.log recent",
       lambda: last[:20])
 
 section("OpenCode MCP Server")
-import socket
+import socket  # noqa: E402
 def port_open(host, port):
     try:
-        s = socket.socket(); s.settimeout(1)
-        s.connect((host, port)); s.close(); return True
-    except: return False
+        s = socket.socket()
+        s.settimeout(1)
+        s.connect((host, port))
+        s.close()
+        return True
+    except Exception:
+        return False
 check("opencode serve :4096",
       lambda: "OK" if port_open('127.0.0.1', 4096) else "FAIL")
 
@@ -230,12 +236,14 @@ proc = subprocess.Popen(
 full_out = _read_with_timeout(proc, 85)
 proc.kill()
 proc.wait()
-clean = [l for l in full_out.splitlines() if l and not l.startswith('[EMBEDDER]')]
+clean = [line for line in full_out.splitlines() if line and not line.startswith('[EMBEDDER]')]
 full_ok = bool(clean) and clean[0].strip().isdigit() and int(clean[0].strip()) > 100
 detail = clean[0].strip() if clean else '(no output)'
 print(f"  [build_memory_context] {'✓ PASS' if full_ok else '✗ FAIL'} — {detail} chars")
-if full_ok: PASS += 1
-else: FAIL += 1
+if full_ok:
+    PASS += 1
+else:
+    FAIL += 1
 
 section("Crontab @reboot")
 cron = subprocess.run(['crontab', '-l'], capture_output=True, text=True).stdout

@@ -6,7 +6,7 @@ from pathlib import Path
 _root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_root))
 
-from llm_client import (
+from llm_client import (  # noqa: E402
     SYSTEM_PROMPTS,
     TOOL_DEFINITIONS,
     agent_loop,

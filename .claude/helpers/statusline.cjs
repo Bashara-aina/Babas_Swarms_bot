@@ -603,37 +603,56 @@ function getTestStats() {
   return { testFiles };
 }
 
-// Integration status (shared settings + file checks)
-function getIntegrationStatus() {
-  const mcpServers = { total: 0, enabled: 0 };
+// Count MCP servers from all possible config locations
+function getMCPCount() {
+  const servers = new Set();
+  const enabled = new Set();
+
+  // 1. Check settings.mcp (legacy format)
   const settings = getSettings();
-
   if (settings && settings.mcp && typeof settings.mcp === 'object') {
-    const servers = Object.keys(settings.mcp);
-    mcpServers.total = servers.length;
-    mcpServers.enabled = settings.enabledMcpServers
-      ? settings.enabledMcpServers.filter(s => servers.includes(s)).length
-      : servers.length;
-  }
-
-  if (mcpServers.total === 0) {
-    const mcpConfig = readJSON(path.join(CWD, '.mcp', 'servers.json'))
-                   || readJSON(path.join(CWD, '.mcp.json'))
-                   || readJSON(path.join(os.homedir(), '.claude', 'mcp.json'));
-    if (mcpConfig && mcpConfig.mcpServers) {
-      const s = Object.keys(mcpConfig.mcpServers);
-      mcpServers.total = s.length;
-      mcpServers.enabled = s.length;
+    for (const name of Object.keys(settings.mcp)) { servers.add(name); }
+    const enabledList = settings.enabledMcpServers;
+    if (Array.isArray(enabledList)) {
+      for (const name of enabledList) { enabled.add(name); }
+    } else {
+      for (const name of servers) { enabled.add(name); }
     }
   }
 
-  // Count Claude Code plugin MCP servers (separate layer from .mcp/servers.json)
-  // These are stdio servers started by Claude Code plugins, not in .mcp/servers.json
-  // enabledPlugins lives in ~/.claude/settings.json (home), not project settings
-  const pluginMcpCount = (() => {
-    const homeSettings = readJSON(path.join(os.homedir(), '.claude', 'settings.json'));
-    if (!homeSettings) return 0;
-    // enabledPlugins is a dict {pluginName: enabledBool}, not an array
+  // 2. Check settings.mcpServers (Claude Code native format)
+  if (settings && settings.mcpServers && typeof settings.mcpServers === 'object') {
+    for (const name of Object.keys(settings.mcpServers)) {
+      servers.add(name);
+      enabled.add(name); // defined in settings = enabled
+    }
+  }
+
+  // 3. Check .mcp/servers.json / .mcp.json / ~/.claude/mcp.json
+  const mcpConfigFile = readJSON(path.join(CWD, '.mcp', 'servers.json'))
+                     || readJSON(path.join(CWD, '.mcp.json'))
+                     || readJSON(path.join(os.homedir(), '.claude', 'mcp.json'));
+  if (mcpConfigFile && mcpConfigFile.mcpServers) {
+    for (const name of Object.keys(mcpConfigFile.mcpServers)) {
+      servers.add(name);
+      enabled.add(name);
+    }
+  }
+
+  // 4. Check config/mcp_config.json (OpenCode format with servers array)
+  const openCodeMCP = readJSON(path.join(CWD, 'config', 'mcp_config.json'));
+  if (openCodeMCP && Array.isArray(openCodeMCP.servers)) {
+    for (const sv of openCodeMCP.servers) {
+      if (sv && sv.name) {
+        servers.add(sv.name);
+        if (sv.enabled !== false) enabled.add(sv.name);
+      }
+    }
+  }
+
+  // 5. Count Claude Code plugin MCP servers from ~/.claude/settings.json
+  const homeSettings = readJSON(path.join(os.homedir(), '.claude', 'settings.json'));
+  if (homeSettings) {
     const enabledPlugins = homeSettings.enabledPlugins || {};
     const pluginMcps = {
       'playwright@claude-plugins-official': true,
@@ -644,17 +663,26 @@ function getIntegrationStatus() {
       'tavily@claude-plugins-official': true,
       'ddg-mcp-search@claude-plugins-official': true,
     };
-    return Object.keys(enabledPlugins).filter(p => pluginMcps[p] && enabledPlugins[p]).length;
-  })();
-  // Merge: plugin MCPs are in addition to .mcp/servers.json entries
-  const totalMcpServers = mcpServers.total + pluginMcpCount;
-  const enabledMcpServers = mcpServers.enabled + pluginMcpCount;
+    for (const [plugin, isMcp] of Object.entries(pluginMcps)) {
+      if (isMcp && enabledPlugins[plugin]) {
+        servers.add(plugin);
+        enabled.add(plugin);
+      }
+    }
+  }
+
+  return { total: servers.size, enabled: enabled.size };
+}
+
+// Integration status (shared settings + file checks)
+function getIntegrationStatus() {
+  const mcpServers = getMCPCount();
 
   const hasDatabase = ['.swarm/memory.db', '.claude-flow/memory.db', 'data/memory.db']
     .some(p => fs.existsSync(path.join(CWD, p)));
   const hasApi = !!(process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY);
 
-  return { mcpServers: { total: totalMcpServers, enabled: enabledMcpServers }, hasDatabase, hasApi };
+  return { mcpServers, hasDatabase, hasApi };
 }
 
 // Session stats (pure file reads)

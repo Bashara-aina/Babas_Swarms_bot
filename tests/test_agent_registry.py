@@ -55,22 +55,21 @@ class TestGetFallbackChain:
         assert "ollama_chat/gemma4:e4b" in chain
 
     def test_get_fallback_chain_unknown_agent(self):
-        """Unknown agent should return general fallback chain (MiniMax primary)."""
+        """Unknown agent should return general fallback chain (deepseek primary)."""
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain("nonexistent_agent_xyz")
         assert isinstance(chain, list)
         assert len(chain) > 0
-        # Should fall back to general chain (MiniMax primary, MiniMax Text fallback)
-        assert "minimax-coding-plan/MiniMax-M3" in chain
+        # Should fall back to general chain (deepseek primary)
+        assert "deepseek-v4-flash" in chain
 
     def test_get_fallback_chain_coding(self):
-        """Coding agent should have MiniMax primary with MiniMax Text fallback."""
+        """Coding agent should have deepseek primary."""
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain("coding")
-        assert "minimax-coding-plan/MiniMax-M3" in chain
-        assert "minimax-coding-plan/MiniMax-M3" in chain
+        assert "deepseek-v4-flash" in chain
 
 
 class TestSearchByCapability:

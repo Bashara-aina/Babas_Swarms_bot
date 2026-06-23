@@ -8,8 +8,6 @@ from collections.abc import Callable, Coroutine
 from datetime import datetime
 from pathlib import Path
 
-import pytz
-
 logger = logging.getLogger(__name__)
 
 # ── Schedule constants ────────────────────────────────────────────────────────
@@ -30,10 +28,7 @@ QUARANTINE_DIR = WIKI_DIR / "_archive" / "_quarantine"
 QUALITY_REPORT_PATH = WIKI_DIR / "_quality_report.md"
 
 
-def _jst_now() -> datetime:
-    """Return current time in JST."""
-    return datetime.now(pytz.timezone("Asia/Tokyo"))
-
+from core.utils.datetime_utils import jst_now as _jst_now  # noqa: E402
 
 # ── WikiQualityScheduler ──────────────────────────────────────────────────────
 

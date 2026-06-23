@@ -23,7 +23,6 @@ def main():
     )
 
     import threading
-    stderr_drained = []
 
     def drain_stderr():
         try:

@@ -269,7 +269,7 @@ class TriAttentionAttention(nn.Module):
 
         if use_cache:
             # Score keys and potentially prune
-            scores = self.triattention.score_keys(key, position)
+            self.triattention.score_keys(key, position)
 
             # Update cache with pruning if needed
             self.kv_cache_keys.append(key)

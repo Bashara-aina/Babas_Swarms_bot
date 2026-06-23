@@ -1855,7 +1855,6 @@ def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
     # Running loop detected — use run_in_executor but WITHOUT nested asyncio.run.
     # We pass the coroutine object to the thread and let it await directly
     # using the thread's own fresh loop (not the caller's loop).
-    import concurrent.futures
 
     def _thread_await(coro):
         # Create a fresh event loop in this thread to await the coroutine.

@@ -51,9 +51,8 @@ async def _transcribe(ogg_path: str) -> str:
     try:
         from faster_whisper import WhisperModel
     except ImportError:
-        try:
-            import whisper  # pip install openai-whisper  # type: ignore[reportMissingImports]
-        except ImportError:
+        import importlib.util
+        if importlib.util.find_spec("whisper") is None:
             raise RuntimeError(
                 " whisper not installed. Install with: pip install faster-whisper  # recommended"
                 " or pip install openai-whisper"

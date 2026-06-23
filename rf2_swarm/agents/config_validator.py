@@ -120,7 +120,7 @@ class ConfigValidatorAgent(BaseAgent):
             ))
 
         # CV06: Backbone config printed
-        backbone_lines = [l for l in search_text.split("\n") if BACKBONE_RE.search(l)]
+        backbone_lines = [line for line in search_text.split("\n") if BACKBONE_RE.search(line)]
         checks.append(CheckResult(
             "CV06", "ConfigValidator", "Backbone config",
             Verdict.PASS if backbone_lines else Verdict.INFO,
@@ -128,7 +128,7 @@ class ConfigValidatorAgent(BaseAgent):
         ))
 
         # CV07: Precision / AMP
-        amp_lines = [l for l in search_text.split("\n") if AMP_RE.search(l)]
+        amp_lines = [line for line in search_text.split("\n") if AMP_RE.search(line)]
         checks.append(CheckResult(
             "CV07", "ConfigValidator", "Training precision",
             Verdict.PASS if amp_lines else Verdict.INFO,

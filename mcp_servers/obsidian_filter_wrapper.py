@@ -18,7 +18,6 @@ def main():
         sys.exit(1)
 
     node_bin = sys.argv[1]
-    script = sys.argv[2]
     args = sys.argv[2:]
 
     env = {**os.environ}

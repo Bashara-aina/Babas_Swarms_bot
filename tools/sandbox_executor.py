@@ -21,12 +21,8 @@ _e2b_installed: bool | None = None
 def _check_e2b() -> bool:
     global _e2b_installed
     if _e2b_installed is None:
-        try:
-            import e2b
-
-            _e2b_installed = True
-        except ImportError:
-            _e2b_installed = False
+        import importlib.util
+        _e2b_installed = importlib.util.find_spec("e2b") is not None
     return _e2b_installed
 
 

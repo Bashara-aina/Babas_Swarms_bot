@@ -63,8 +63,8 @@ def test_session_watcher_lifecycle():
     STOP_FILE.touch()
     # Run the watcher (it will see stop file and exit immediately)
     run()
-    assert PID_FILE.exists() == False or not Path(PID_FILE).read_text().strip(), "PID file should be cleaned up"
-    assert STOP_FILE.exists() == False, "STOP_FILE should be cleaned up after run()"
+    assert not PID_FILE.exists() or not Path(PID_FILE).read_text().strip(), "PID file should be cleaned up"
+    assert not STOP_FILE.exists(), "STOP_FILE should be cleaned up after run()"
     print("✓ test_session_watcher_lifecycle: start/stop cycle OK")
     shutil.rmtree(SESSION_DIR, ignore_errors=True)
 

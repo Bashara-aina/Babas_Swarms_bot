@@ -135,37 +135,37 @@ def _sanitize_structure_surrogates(payload: Any) -> bool:
     _walk(payload)
     return found
 
-from core.autonomous_router import AutonomousRouter
-from core.character import build_base_persona, build_mode_instructions, get_disagreement_prompt
-from core.cognition_pipeline import build_cognition_system_fragment
-from core.conversation_interface import add_to_thread, detect_agent, get_fallback_chain
-from core.emotion_modulator import (
+from core.autonomous_router import AutonomousRouter  # noqa: E402
+from core.character import build_base_persona, build_mode_instructions, get_disagreement_prompt  # noqa: E402
+from core.cognition_pipeline import build_cognition_system_fragment  # noqa: E402
+from core.conversation_interface import add_to_thread, detect_agent, get_fallback_chain  # noqa: E402
+from core.emotion_modulator import (  # noqa: E402
     build_emotion_modifier,
     detect_emotion_from_context,
     postprocess_response,
 )
-from core.episodic_narrative import build_narrative_context
-from core.hooks import get_hooks
-from core.intent_router import build_intent_hint, classify_intent_fast
-from core.memory.infinite.llm_wrapper import inject_memory_into_messages
-from core.memory.infinite.llm_wrapper import store_response as _store_response
-from core.memory.memory_manager import MemoryManager
-from core.memory.temporal_graph import TemporalKnowledgeGraph
-from core.personality.emotion_engine import EmotionEngine
-from core.reflection.reflection_engine import ReflectionEngine
-from core.relationship_memory import get_relationship_context
-from core.soul_engine import build_soul_context
-from core.system_prompt_builder import SystemPromptBuilder
-from tools.letta_personality import build_persona_block, get_persona_state, update_emotion
-from tools.memory import build_memory_context as _build_memory_context_sync
-from tools.memoryos_client import mos_retrieve_context
-from tools.open_memory import build_om_context, om_search
-from tools.persistence import get_instinct_context
-from tools.skill_loader import get_skills_for_agent
+from core.episodic_narrative import build_narrative_context  # noqa: E402
+from core.hooks import get_hooks  # noqa: E402
+from core.intent_router import build_intent_hint, classify_intent_fast  # noqa: E402
+from core.memory.infinite.llm_wrapper import inject_memory_into_messages  # noqa: E402
+from core.memory.infinite.llm_wrapper import store_response as _store_response  # noqa: E402
+from core.memory.memory_manager import MemoryManager  # noqa: E402
+from core.memory.temporal_graph import TemporalKnowledgeGraph  # noqa: E402
+from core.personality.emotion_engine import EmotionEngine  # noqa: E402
+from core.reflection.reflection_engine import ReflectionEngine  # noqa: E402
+from core.relationship_memory import get_relationship_context  # noqa: E402
+from core.soul_engine import build_soul_context  # noqa: E402
+from core.system_prompt_builder import SystemPromptBuilder  # noqa: E402, F401
+from tools.letta_personality import build_persona_block, get_persona_state, update_emotion  # noqa: E402, F401
+from tools.memory import build_memory_context as _build_memory_context_sync  # noqa: E402, F401
+from tools.memoryos_client import mos_retrieve_context  # noqa: E402, F401
+from tools.open_memory import build_om_context, om_search  # noqa: E402, F401
+from tools.persistence import get_instinct_context  # noqa: E402, F401
+from tools.skill_loader import get_skills_for_agent  # noqa: E402, F401
 
 try:
-    import computer_agent
-    from computer_agent import TOOL_DEFINITIONS as _COMPUTER_TOOLS, execute_tool
+    import computer_agent  # noqa: E402
+    from computer_agent import TOOL_DEFINITIONS as _COMPUTER_TOOLS, execute_tool  # noqa: E402
 
     _COMPUTER_AVAILABLE = True
 except ImportError as _ca_err:
@@ -1072,10 +1072,10 @@ def _microcompact_if_needed(messages: list[dict]) -> list[dict]:
 
 
 # ── Context compaction (async, non-blocking) ────────────────────────────────────
-import concurrent.futures
-import threading
-from collections import OrderedDict
-from pathlib import Path
+import concurrent.futures  # noqa: E402
+import threading  # noqa: E402
+from collections import OrderedDict  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 # LRU cache for compaction — 100x speedup on repeated conversation patterns
 _COMPACT_CACHE: OrderedDict = OrderedDict()
@@ -1190,7 +1190,7 @@ def _deduplicate_mcp_tool_results(messages: list[dict]) -> list[dict]:
 
 async def _aget_memory_context_before_compact(query: str, timeout: float = 10.0) -> str:
     """Async fetch 6-layer memory context — NEVER blocks the compaction pipeline.
-    
+
     Runs memory query in background thread pool and returns empty string on timeout.
     The caller does NOT wait for this — it's fire-and-forget.
     """
@@ -1277,7 +1277,7 @@ async def _async_compact_if_needed(messages: list[dict], user_id: Optional[str],
 
 async def _aget_compaction_memory_layers(query: str, timeout: float = 8.0) -> dict[str, str]:
     """Async query 4 memory layers in parallel — returns {} on any failure.
-    
+
     Does NOT block. Uses run_in_executor so the GIL isn't held during I/O.
     Returns dict with keys: recent_sessions, decisions, open_issues, tools_used
     """
@@ -1347,10 +1347,10 @@ def _sync_build_memory_context(query: str, user_id: str = "bashara") -> str:
 
 def _query_compaction_memory_layers(query: str, timeout: float = 12.0) -> dict[str, str]:
     """Query multiple memory layers with different queries for richer context.
-    
+
     Returns dict with keys: recent_sessions, decisions, open_issues, tools_used
     Each value is a formatted string from that layer's recall.
-    
+
     NOTE: This is sync and BLOCKING. For non-blocking behavior in async context,
     use _aget_compaction_memory_layers() instead.
     """
@@ -1394,7 +1394,7 @@ def _generate_memory_aware_summary(
     timeout: float = 20.0,
 ) -> str:
     """Generate compaction summary enriched with 6-layer memory context + multi-layer pre-query.
-    
+
     Uses run_in_executor to avoid blocking the async caller. Returns "" on any failure
     so the compaction pipeline can proceed without waiting.
     """
@@ -1551,7 +1551,6 @@ def _async_store_compaction_summary(summary: str, message_count: int, cache_key:
     On failure of any individual layer, logs and continues — never propagates.
     """
     def _sync_write() -> None:
-        import asyncio as _asyncio
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         session_dir = Path("/home/newadmin/swarm-bot/.session_state")
         session_dir.mkdir(parents=True, exist_ok=True)

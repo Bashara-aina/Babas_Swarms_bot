@@ -75,7 +75,7 @@ class HeadRecoveryAgent(BaseAgent):
 
         # E06: LR not stuck at 0
         if lr_vals:
-            nonzero = all(l > 0 for l in lr_vals[-5:])
+            nonzero = all(lr > 0 for lr in lr_vals[-5:])
             checks.append(CheckResult("E06", "HeadRecovery", "Learning rate not stuck at zero",
                                       Verdict.FAIL if not nonzero else Verdict.PASS,
                                       "LR is zero" if not nonzero else "LR positive",

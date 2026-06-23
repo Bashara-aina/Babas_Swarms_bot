@@ -29,7 +29,7 @@ def test_record_free_model():
 
 
 def test_record_unknown_model_uses_free_default():
-    # Project is fully migrated to free-tier MiniMax-M3 — no paid models in
+    # Project is fully migrated to free-tier deepseek-v4-flash — no paid models in
     # PRICING. record() must default unknown models to 0.0 cost rather than
     # raising, so telemetry never crashes when a new free model is added.
     t = _tracker()
@@ -42,7 +42,7 @@ def test_record_unknown_model_uses_free_default():
 
 def test_daily_limit_alert():
     t = _tracker()
-    model = "minimax-coding-plan/MiniMax-M3"
+    model = "deepseek-v4-flash"
     limit = DAILY_LIMITS[model]
     # Simulate 85% usage
     t.record(model, requests=int(limit * 0.85))
@@ -64,9 +64,9 @@ def test_daily_report_empty():
 
 def test_daily_report_with_usage():
     t = _tracker()
-    t.record("minimax-coding-plan/MiniMax-M3", input_tokens=100, output_tokens=50, requests=5)
+    t.record("deepseek-v4-flash", input_tokens=100, output_tokens=50, requests=5)
     report = t.daily_report()
-    assert "MiniMax-M3" in report
+    assert "deepseek-v4-flash" in report
     assert "5" in report
 
 

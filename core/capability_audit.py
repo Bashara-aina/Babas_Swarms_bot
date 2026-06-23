@@ -12,11 +12,8 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +44,7 @@ _CAPABILITY_BENCHMARK = [
     ("Browser agent", "tools/browser_agent.py"),
 ]
 
-_JST_TZ = pytz.timezone("Asia/Tokyo")
-
-
-def _jst_now() -> datetime:
-    return datetime.now(_JST_TZ)
+from core.utils.datetime_utils import jst_now as _jst_now  # noqa: E402
 
 
 class CapabilityAudit:

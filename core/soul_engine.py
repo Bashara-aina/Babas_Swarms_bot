@@ -25,8 +25,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import pytz
-
 logger = logging.getLogger(__name__)
 
 _SOUL_ENABLED = os.getenv("LEGION_SOUL_ENABLED", "true").strip().lower() not in (
@@ -75,9 +73,7 @@ _SOUL_CACHE_TTL = 300  # 5 minutes
 _SOUL_CACHE: dict[str, Any] = {"content": "", "ts": 0.0}
 
 
-def _jst_now() -> datetime:
-    """Return current time in JST."""
-    return datetime.now(pytz.timezone("Asia/Tokyo"))
+from core.utils.datetime_utils import jst_now as _jst_now  # noqa: E402
 
 
 def get_cached_soul() -> str:

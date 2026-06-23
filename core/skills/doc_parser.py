@@ -7,13 +7,11 @@ logger = logging.getLogger(__name__)
 
 
 def _check_markitdown() -> bool:
-    try:
-        from markitdown import MarkItDown
-
-        return True
-    except ImportError:
+    import importlib.util
+    available = importlib.util.find_spec("markitdown") is not None
+    if not available:
         logger.warning("markitdown not installed. Run: pip install 'markitdown[all]'")
-        return False
+    return available
 
 
 MARKITDOWN_AVAILABLE = _check_markitdown()

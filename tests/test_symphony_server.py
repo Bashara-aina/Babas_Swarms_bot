@@ -425,11 +425,11 @@ class TestSwarmBotCodexAdapter:
 
         adapter = SwarmBotCodexAdapter(
             workspace="/tmp/test-workspace",
-            model_override="minimax-coding-plan/MiniMax-M3",
+            model_override="deepseek-v4-flash",
             agent_key="coding",
         )
         assert adapter._workspace == "/tmp/test-workspace"
-        assert adapter._model_override == "minimax-coding-plan/MiniMax-M3"
+        assert adapter._model_override == "deepseek-v4-flash"
         assert adapter._agent_key == "coding"
         assert adapter._sessions == {}
 
@@ -541,7 +541,7 @@ class TestSwarmBotCodexAdapter:
         symphony_server_mod._agent_backend = "codex-server"
 
         result = symphony_server_mod.symphony_use_swarmbot_adapter(
-            model="minimax-coding-plan/MiniMax-M3",
+            model="deepseek-v4-flash",
             agent_key="coding",
         )
         assert result["success"] is True

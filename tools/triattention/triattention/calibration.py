@@ -92,7 +92,7 @@ def extract_pre_rope_embeddings(
 
     # Run model
     with torch.no_grad():
-        outputs = model(input_ids)
+        model(input_ids)
         # Clean up hooks
         for hook in hooks:
             hook.remove()

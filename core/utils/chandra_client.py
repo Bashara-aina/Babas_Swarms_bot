@@ -52,23 +52,8 @@ def _check_chandra_available() -> bool:
     global _chandra_available
     if _chandra_available is not None:
         return _chandra_available
-    try:
-        from chandra.input import (
-            load_file,  # type: ignore[reportMissingImports]
-        )
-        from chandra.model.hf import (  # type: ignore[reportMissingImports]
-            load_model as hf_load_model,  # type: ignore[reportMissingImports]
-        )
-        from chandra.model.vllm import (
-            generate_vllm,  # type: ignore[reportMissingImports]
-        )
-        from chandra.output import (  # type: ignore[reportMissingImports]
-            parse_html,
-            parse_markdown,
-        )
-        _chandra_available = True
-    except ImportError:
-        _chandra_available = False
+    import importlib.util
+    _chandra_available = importlib.util.find_spec("chandra") is not None
     return _chandra_available
 
 

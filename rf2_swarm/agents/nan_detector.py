@@ -28,9 +28,9 @@ class NanDetectorAgent(BaseAgent):
         checks: list[CheckResult] = []
 
         all_lines = log_text.split("\n")
-        nan_losses = [l for l in all_lines if NAN_LOSS_RE.search(l) and not EFFICIENCY_RE.search(l)]
-        nan_weights = [l for l in all_lines if NAN_WEIGHT_RE.search(l) and not EFFICIENCY_RE.search(l)]
-        nan_metrics = [l for l in all_lines if NAN_METRIC_RE.search(l) and not EFFICIENCY_RE.search(l)]
+        nan_losses = [line for line in all_lines if NAN_LOSS_RE.search(line) and not EFFICIENCY_RE.search(line)]
+        nan_weights = [line for line in all_lines if NAN_WEIGHT_RE.search(line) and not EFFICIENCY_RE.search(line)]
+        nan_metrics = [line for line in all_lines if NAN_METRIC_RE.search(line) and not EFFICIENCY_RE.search(line)]
         div_zeros = DIV_ZERO_RE.findall(log_text)
 
         # ND01: No NaN in loss values

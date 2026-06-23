@@ -378,7 +378,8 @@ async def main():
 
     logging.basicConfig(level=getattr(logging, LOG_LEVEL), format="%(asctime)s %(levelname)s %(message)s")
 
-    server = await asyncio.start_server(handle_request, HOST, args.port)
+    parsed = parser.parse_args()
+    server = await asyncio.start_server(handle_request, HOST, parsed.port)
     addr = server.sockets[0].getsockname()
     log.info(f"Translation proxy listening on {addr[0]}:{addr[1]}")
     log.info(f"  Upstream (OpenAI-compatible): {LLM_UPSTREAM}")

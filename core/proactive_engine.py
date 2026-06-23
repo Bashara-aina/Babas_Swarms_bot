@@ -41,8 +41,7 @@ def _is_do_not_disturb() -> bool:
     return DO_NOT_DISTURB_START <= now.hour < DO_NOT_DISTURB_END
 
 
-def _jst_now() -> datetime:
-    return datetime.now(JST)
+from core.utils.datetime_utils import jst_now as _jst_now  # noqa: E402
 
 
 async def _send(text: str) -> None:

@@ -21,7 +21,7 @@ class TestRequestThrottle:
         assert RequestThrottle._extract_provider("ollama/qwen2:7b") == "ollama"
 
     def test_extract_provider_slash_format(self):
-        assert RequestThrottle._extract_provider("minimax-coding-plan/MiniMax-M3") == "minimax-coding-plan"
+        assert RequestThrottle._extract_provider("deepseek/deepseek-v4-flash") == "deepseek"
         assert RequestThrottle._extract_provider("openrouter/qwen/qwen3-coder:free") == "openrouter"
 
     def test_extract_provider_no_slash(self):

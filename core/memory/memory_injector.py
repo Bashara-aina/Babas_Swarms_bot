@@ -199,9 +199,9 @@ _LAYER_PRIORITY = {
 # run_in_executor to make it non-blocking to the loop, and process items
 # via call_soon_threadsafe so cancellations propagate correctly.
 
-import queue as _queue
-import threading
-from concurrent.futures import Future
+import queue as _queue  # noqa: E402
+import threading  # noqa: E402
+from concurrent.futures import Future  # noqa: E402
 
 _mcp_loop: asyncio.AbstractEventLoop | None = None
 _mcp_loop_thread: threading.Thread | None = None
@@ -335,12 +335,12 @@ def _fingerprint(text: str) -> str:
 
 def _bm25_score(query: str, text: str, k1: float = 1.5, b: float = 0.75) -> float:
     """Compute BM25 score for query terms against text.
-    
+
     BM25 formula:
       score = sum over qterms of IDF(t) * (tf * (k1+1)) / (tf + k1*(1-b+b*dl/avgdl))
     where tf = term freq in doc, dl = doc len, avgdl = avg doc len across corpus.
     We approximate avgdl from text len (using 100 as corpus avg doc length).
-    
+
     Returns a non-negative score. Higher = more relevant.
     """
     if not query or not text:
@@ -381,11 +381,11 @@ def _bm25_score(query: str, text: str, k1: float = 1.5, b: float = 0.75) -> floa
 
 def _bm25_rerank(query: str, results: list[MemoryResult]) -> list[tuple[MemoryResult, float, bool]]:
     """Re-rank results using BM25 scores as an additional signal.
-    
+
     Returns list of (result, bm25_score) for all results.
     BM25 scores are NOT added to confidence — they're a separate signal
     used to reweight the final ranking when BM25 disagrees with confidence.
-    
+
     Cases where BM25 should override confidence:
     - confidence is near-zero but BM25 is high (keyword-dense content)
     - result came from a low-priority layer but matches query terms exactly

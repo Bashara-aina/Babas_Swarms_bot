@@ -53,12 +53,9 @@ def _estimate_tokens(text: str) -> int:  # type: ignore[reportOptionalMemberAcce
     return len(text) // 4  # type: ignore[reportOptionalMemberAccess]
 
 
-def _jst_now() -> datetime:  # type: ignore[reportOptionalMemberAccess]
-    """Current time in JST."""  # type: ignore[reportOptionalMemberAccess]
-    import pytz
-
-    return datetime.now(pytz.timezone("Asia/Tokyo"))  # type: ignore[reportOptionalMemberAccess]
-
+from core.utils.datetime_utils import (  # noqa: E402
+    jst_now as _jst_now,  # type: ignore[reportOptionalMemberAccess]
+)
 
 # ── Tier 1 — Working Memory ──────────────────────────────────────────────────
 

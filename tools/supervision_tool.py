@@ -16,12 +16,8 @@ _supervision_installed: bool | None = None
 def _check_supervision() -> bool:
     global _supervision_installed
     if _supervision_installed is None:
-        try:
-            import supervision as sv
-
-            _supervision_installed = True
-        except ImportError:
-            _supervision_installed = False
+        import importlib.util
+        _supervision_installed = importlib.util.find_spec("supervision") is not None
     return _supervision_installed
 
 

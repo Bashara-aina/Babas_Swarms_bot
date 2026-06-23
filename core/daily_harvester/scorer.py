@@ -1,19 +1,17 @@
 from __future__ import annotations  # type: ignore[reportGeneralTypeIssues]
 
-from datetime import UTC
-
 """Scorer — feedback-aware relevance scoring for harvest candidates.
 
 Applies bias adjustments derived from user accept/reject feedback collected
 via the Telegram /harvest-review interface.
 """
 
-import json
-import logging
-from datetime import datetime
-from pathlib import Path
+import json  # noqa: E402
+import logging  # noqa: E402
+from datetime import UTC, datetime  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import aiofiles
+import aiofiles  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

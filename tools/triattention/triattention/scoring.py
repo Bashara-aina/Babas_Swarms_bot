@@ -72,7 +72,6 @@ def compute_trig_score_batch(
     Returns:
         Scores [num_keys, num_heads]
     """
-    num_keys = deltas.shape[0]
     num_heads, num_bands = q_centers.shape
 
     # Phase difference [num_heads, num_bands]
@@ -265,7 +264,6 @@ def reconstruct_attention_from_trig_series(
         Tuple of (distances, predicted_logits)
     """
     num_heads, num_bands = q_center.shape
-    num_distances = distances.shape[0]
 
     # Phase difference
     q_phase = torch.angle(q_center)

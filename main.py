@@ -58,7 +58,7 @@ from llm_client import init_humanization_layer, verify_api_keys
 # ── Load env FIRST before any module reads os.getenv() ───────────────────────
 load_dotenv(Path(__file__).parent / ".env", override=True)
 
-import core.memory.litellm_callbacks  # noqa: F401 — registers litellm.input/success_callback
+import core.memory.litellm_callbacks  # noqa: E402, F401 — registers litellm.input/success_callback
 
 _REQUIRED_KEYS = ["TELEGRAM_BOT_TOKEN", "ALLOWED_USER_ID"]
 _missing = [k for k in _REQUIRED_KEYS if not os.getenv(k)]

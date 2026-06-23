@@ -149,9 +149,10 @@ def _check_aiogram() -> bool:
     if _aiogram_available:
         return True
     try:
-        import aiogram
+        import importlib.util
+        if importlib.util.find_spec("aiogram") is None:
+            return False
         from aiogram import Bot
-        from aiogram.methods import EditMessageText, SendMessage
 
         _Bot = Bot
         _TelegramSender = _TelegramSenderImpl

@@ -84,11 +84,11 @@ def _bridge_to_session_state(kwargs: dict, response_obj: litellm.types.utils.Mod
     """
     Bridge LiteLLM call outcomes to .session_state/ so session_watcher
     can pick them up as memory sources.
-    
+
     Writes two files atomically via temp+rename:
     - .session_state/current.json  — used by session_watcher as its state source
     - .session_state/llm_events.log — append-only event log for LLM call patterns
-    
+
     Does NOT call mem0/langmem directly (those are managed by session_watcher).
     """
     try:

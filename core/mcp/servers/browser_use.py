@@ -14,8 +14,5 @@ def command() -> list[str]:
 
 def is_available() -> bool:
     """Check if Browser-Use MCP server is available."""
-    try:
-        from browser_use import Agent
-        return True
-    except ImportError:
-        return False
+    import importlib.util
+    return importlib.util.find_spec("browser_use") is not None

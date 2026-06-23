@@ -10,7 +10,10 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Literal
+
+logger = logging.getLogger(__name__)
 
 # Lazy import — crawl4ai is optional
 _crawl4ai_installed: bool | None = None
@@ -19,12 +22,8 @@ _crawl4ai_installed: bool | None = None
 def _check_crawl4ai() -> bool:
     global _crawl4ai_installed
     if _crawl4ai_installed is None:
-        try:
-            import crawl4ai
-
-            _crawl4ai_installed = True
-        except ImportError:
-            _crawl4ai_installed = False
+        import importlib.util
+        _crawl4ai_installed = importlib.util.find_spec("crawl4ai") is not None
     return _crawl4ai_installed
 
 

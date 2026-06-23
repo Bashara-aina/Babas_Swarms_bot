@@ -17,8 +17,6 @@ import os
 from collections.abc import Callable, Coroutine
 from datetime import datetime
 
-import pytz
-
 logger = logging.getLogger(__name__)
 
 # Config
@@ -27,9 +25,7 @@ DAILY_BRIEFING_HOUR = int(os.getenv("DAILY_BRIEFING_HOUR", "8"))  # 8 AM local
 BUSINESS_ALERT_THRESHOLD = int(os.getenv("BUSINESS_ALERT_THRESHOLD", "5"))  # errors
 
 
-def _jst_now() -> datetime:
-    """Return current time in JST."""
-    return datetime.now(pytz.timezone("Asia/Tokyo"))
+from core.utils.datetime_utils import jst_now as _jst_now  # noqa: E402
 
 
 class ProactiveScheduler:

@@ -53,8 +53,10 @@ async def _transcribe_whisper_api(audio_bytes: bytes, language: str) -> str:
 
 async def _transcribe_whisper_local(audio_bytes: bytes, language: str) -> str:
     try:
-        import numpy as np
-        import soundfile as sf
+        import importlib.util
+
+        _NUMPY_AVAILABLE = importlib.util.find_spec("numpy") is not None
+        _SOUNDFILE_AVAILABLE = importlib.util.find_spec("soundfile") is not None
         import whisper
 
         model = whisper.load_model("base")

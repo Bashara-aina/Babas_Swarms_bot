@@ -30,8 +30,8 @@ except ImportError:
     LocalEnvironment = None
     logging.warning("minisweagent not installed -- some goal-runner features disabled")
 
-from tools.goal_planner import plan_goal
-from tools.goal_auditor import run_full_audit
+from tools.goal_planner import plan_goal  # noqa: E402
+from tools.goal_auditor import run_full_audit  # noqa: E402
 
 GOAL_DIR = Path(".goal")
 STATUS_FILE = GOAL_DIR / "STATUS.md"
@@ -208,7 +208,7 @@ BEGIN. Implement and verify each criterion.
         summary = harness.extract_task_summary(stdout, task_id)
     else:
         lines = stdout.split('\n')
-        key_lines = [l for l in lines if any(kw in l.lower() for kw in
+        key_lines = [line for line in lines if any(kw in line.lower() for kw in
                    ['done', 'complete', 'error', 'failed', 'passed', 'commit', 'created'])]
         summary = f"Task {task_id}: " + (" | ".join(key_lines[-5:]) if key_lines else stdout[-200:])
 

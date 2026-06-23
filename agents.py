@@ -41,12 +41,6 @@ from core.conversation_interface import (
     list_threads,
     list_threads_raw,
 )
-from core.conversation_interface import (
-    detect_agent as detect_agent,
-)
-from core.conversation_interface import (
-    get_fallback_chain as get_fallback_chain,
-)
 
 logger = logging.getLogger(__name__)
 

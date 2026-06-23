@@ -271,7 +271,6 @@ class LlamaCppTriAttention:
         self.llm = llm
 
         # Extract config from llama.cpp model
-        n_ctx = getattr(llm, "n_ctx", 4096)
         n_heads = getattr(llm, "n_heads", 32)
         n_kv_heads = getattr(llm, "n_kv_heads", n_heads)
         head_dim = getattr(llm, "n_embd", 4096) // n_heads if n_heads > 0 else 128

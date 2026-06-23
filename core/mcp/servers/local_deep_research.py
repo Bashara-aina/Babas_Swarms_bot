@@ -18,8 +18,5 @@ def command() -> list[str]:
 
 def is_available() -> bool:
     """Check if Local Deep Research MCP server is available."""
-    try:
-        import local_deep_research
-        return True
-    except ImportError:
-        return False
+    import importlib.util
+    return importlib.util.find_spec("local_deep_research") is not None

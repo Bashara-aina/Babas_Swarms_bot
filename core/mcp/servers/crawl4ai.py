@@ -13,8 +13,5 @@ def command() -> list[str]:
 
 def is_available() -> bool:
     """Check if Crawl4AI MCP server is available."""
-    try:
-        from crawl4ai import AsyncWebCrawler
-        return True
-    except ImportError:
-        return False
+    import importlib.util
+    return importlib.util.find_spec("crawl4ai") is not None
