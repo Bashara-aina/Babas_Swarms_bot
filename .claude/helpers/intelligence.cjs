@@ -22,7 +22,9 @@ const STORE_PATH = path.join(DATA_DIR, 'auto-memory-store.json');
 const GRAPH_PATH = path.join(DATA_DIR, 'graph-state.json');
 const RANKED_PATH = path.join(DATA_DIR, 'ranked-context.json');
 const PENDING_PATH = path.join(DATA_DIR, 'pending-insights.jsonl');
-const SESSION_DIR = path.join(process.cwd(), '.claude-flow', 'sessions');
+const EMBEDDING_CACHE_PATH = path.join(DATA_DIR, 'embedding-cache.json');
+const METRICS_PATH = path.join(process.cwd(), '.claude-flow', 'metrics', 'recall-metrics.jsonl');
+const SESSION_DIR = path.join(process.cwd(), '.claude-flow', 'data', 'sessions');
 // session-start-trigger.mjs writes to data/current.json, not sessions/
 const SESSION_FILE = path.join(DATA_DIR, 'current.json');
 
@@ -43,6 +45,75 @@ const STOP_WORDS = new Set([
   'than', 'too', 'very', 'just', 'because', 'if', 'when', 'which',
   'who', 'whom', 'this', 'that', 'these', 'those', 'it', 'its',
 ]);
+
+// ── Embedding helpers (Ollama nomic-embed-text, 768-dim) ─────────────────────
+
+const _EMBED_CACHE_TTL = 3600000; // 1 hour cache freshness
+let _embeddingCache = null; // lazy-loaded from disk
+
+function _loadEmbeddingCache() {
+  if (_embeddingCache) return _embeddingCache;
+  try {
+    if (fs.existsSync(EMBEDDING_CACHE_PATH)) {
+      _embeddingCache = JSON.parse(fs.readFileSync(EMBEDDING_CACHE_PATH, 'utf-8'));
+      if (typeof _embeddingCache === 'object' && !Array.isArray(_embeddingCache)) return _embeddingCache;
+    }
+  } catch (e) { /* corrupted cache, rebuild */ }
+  _embeddingCache = {};
+  return _embeddingCache;
+}
+
+function _saveEmbeddingCache() {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(EMBEDDING_CACHE_PATH, JSON.stringify(_embeddingCache), 'utf-8');
+  } catch (e) { /* non-critical */ }
+}
+
+function _embedText(text) {
+  if (!text || text.length < 3) return null;
+  const cache = _loadEmbeddingCache();
+  const key = text.replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 256);
+  // Check cache
+  const cached = cache[key];
+  if (cached && (Date.now() - (cached.ts || 0)) < _EMBED_CACHE_TTL) {
+    return cached.vec;
+  }
+  // Call Ollama via Python subprocess (reuses embedder.py, handles errors gracefully)
+  try {
+    const { spawnSync } = require('child_process');
+    const pyCode = `
+import sys, json
+try:
+    import requests
+    r = requests.post("http://localhost:11434/api/embeddings",
+        json={"model": "nomic-embed-text", "prompt": ${JSON.stringify(text)}},
+        timeout=2)
+    if r.status_code == 200:
+        print(json.dumps(r.json()["embedding"]))
+    else:
+        sys.exit(1)
+except Exception:
+    sys.exit(1)
+`;
+    const result = spawnSync('python3', ['-c', pyCode], { timeout: 3000, encoding: 'utf-8' });
+    if (result.status === 0 && result.stdout && result.stdout.trim()) {
+      const resp = JSON.parse(result.stdout.trim());
+      cache[key] = { vec: resp.embedding, ts: Date.now() };
+      _saveEmbeddingCache();
+      return resp.embedding;
+    }
+  } catch (e) { /* Ollama unavailable — embedding disabled */ }
+  return null;
+}
+
+function _cosineSimilarity(a, b) {
+  if (!a || !b || a.length !== b.length) return 0;
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  const mag = Math.sqrt(na) * Math.sqrt(nb);
+  return mag === 0 ? 0 : dot / mag;
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -154,6 +225,47 @@ function deduplicateByContent(entries) {
     }
   }
   return Array.from(seen.values());
+}
+
+// ADR-115 — semantic dedup via embedding cosine similarity.
+// Catches near-duplicates that content-fingerprint misses:
+// "API endpoint timeout" vs "REST API call timed out" have different
+// fingerprints but similar meaning. Threshold 0.92 is conservative —
+// only merges very close semantic matches.
+function deduplicateByEmbedding(entries) {
+  if (!entries || !Array.isArray(entries) || entries.length < 2) return entries;
+  const SIM_THRESHOLD = 0.92;
+  const merged = [];
+  const skip = new Set();
+  for (let i = 0; i < entries.length; i++) {
+    if (skip.has(i)) continue;
+    const a = entries[i];
+    const aText = a.summary || a.content || '';
+    if (!aText || aText.length < 10) { merged.push(a); continue; }
+    const aEmb = _embedText(aText);
+    for (let j = i + 1; j < entries.length; j++) {
+      if (skip.has(j)) continue;
+      const b = entries[j];
+      const bText = b.summary || b.content || '';
+      if (!bText || bText.length < 10) continue;
+      const bEmb = aEmb ? _embedText(bText) : null;
+      if (aEmb && bEmb && _cosineSimilarity(aEmb, bEmb) >= SIM_THRESHOLD) {
+        // Merge: keep entry with higher accessCount, merge tags
+        if ((b.accessCount || 0) > (a.accessCount || 0)) {
+          entries[j].accessCount = (entries[j].accessCount || 0) + (a.accessCount || 0);
+          entries[j].confidence = Math.max(entries[j].confidence || 0.5, a.confidence || 0.5);
+          skip.add(i);
+        } else {
+          entries[i].accessCount = (entries[i].accessCount || 0) + (b.accessCount || 0);
+          entries[i].confidence = Math.max(entries[i].confidence || 0.5, b.confidence || 0.5);
+          skip.add(j);
+        }
+        break; // each entry merges with at most one other
+      }
+    }
+    if (!skip.has(i)) merged.push(a);
+  }
+  return merged;
 }
 
 // ── Session state helpers ────────────────────────────────────────────────────
@@ -274,16 +386,23 @@ function buildEdges(entries) {
     if (group.length < 2) continue;
 
     // Cache trigram sets for every entry in the group.
+    // Strip boilerplate from insight entries — the template "File X was edited N
+    // times this session" produces 45-60 shared trigrams across all insight entries,
+    // causing ~97% false-positive similarity edges at the default threshold.
     const triCache = new Array(group.length);
     for (let i = 0; i < group.length; i++) {
-      triCache[i] = trigrams(tokenize(group[i].content || group[i].summary || ''));
+      let text = group[i].content || group[i].summary || '';
+      if (cat === 'insights' && group[i].summary) {
+        text = group[i].summary; // filename + count only, no boilerplate
+      }
+      triCache[i] = trigrams(tokenize(text));
     }
 
     for (let i = 0; i < group.length; i++) {
       const triA = triCache[i];
       for (let j = i + 1; j < group.length; j++) {
         const sim = jaccardSimilarity(triA, triCache[j]);
-        if (sim > 0.55) {
+        if (sim > 0.70) {
           edges.push({
             sourceId: group[i].id,
             targetId: group[j].id,
@@ -435,7 +554,7 @@ function init() {
   // Skip rebuild if graph is fresh and store hasn't changed
   if (graphState && graphState.nodeCount === deduped.length) {
     const age = Date.now() - (graphState.updatedAt || 0);
-    if (age < 60000) {
+    if (age < 3600000) {
       return {
         nodes: graphState.nodeCount || Object.keys(graphState.nodes || {}).length,
         edges: (graphState.edges || []).length,
@@ -453,7 +572,8 @@ function init() {
       id,
       category: entry.namespace || entry.type || 'default',
       confidence: (entry.metadata && entry.metadata.confidence) || prevNode.confidence || 0.5,
-      accessCount: (entry.metadata && entry.metadata.accessCount) || prevNode.accessCount || 0,
+      accessCount: (entry.metadata && entry.metadata.accessCount) || entry.accessCount || prevNode.accessCount || 0,
+      lastDecayAt: prevNode.lastDecayAt || undefined,
       createdAt: entry.createdAt || Date.now(),
     };
     // Ensure entry has id for edge building
@@ -534,16 +654,33 @@ function getContext(prompt) {
   if (promptWords.length === 0) return null;
   const promptTrigrams = trigrams(promptWords);
 
-  const ALPHA = 0.6; // content match weight
+  const SEMANTIC_GAMMA = 0.35; // embedding similarity weight
+  const MATCH_ALPHA = 0.25; // trigram content match weight
+  const KEYWORD_BETA = 0.25; // word overlap weight
+  const PAGERANK_DELTA = 0.15; // PageRank weight
   const MIN_THRESHOLD = 0.05;
   const TOP_K = 5;
 
-  // Score each entry
+  // Pre-compute prompt embedding once for semantic scoring
+  const promptEmbedding = _embedText(prompt);
+  const promptEmbeddingKey = prompt.replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 256);
+
+  // Score each entry (trigram match + word overlap + embedding similarity + PageRank)
   const scored = [];
   for (const entry of ranked.entries) {
     const entryTrigrams = trigrams(entry.words || []);
     const contentMatch = jaccardSimilarity(promptTrigrams, entryTrigrams);
-    const score = ALPHA * contentMatch + (1 - ALPHA) * (entry.pageRank || 0);
+    const entryWords = entry.words || [];
+    const wordMatches = promptWords.filter(w => entryWords.includes(w)).length;
+    const wordOverlap = promptWords.length > 0 ? wordMatches / promptWords.length : 0;
+    // Semantic similarity: embed the entry content, compare with prompt embedding
+    let semanticSim = 0;
+    if (promptEmbedding) {
+      const entryText = entry.summary || entry.content || '';
+      const entryEmb = _embedText(entryText);
+      if (entryEmb) semanticSim = _cosineSimilarity(promptEmbedding, entryEmb);
+    }
+    const score = MATCH_ALPHA * contentMatch + KEYWORD_BETA * wordOverlap + SEMANTIC_GAMMA * semanticSim + PAGERANK_DELTA * (entry.pageRank || 0);
     if (score >= MIN_THRESHOLD) {
       scored.push({ ...entry, score });
     }
@@ -674,6 +811,24 @@ function boostConfidence(ids, amount) {
       }
     }
     writeJSON(GRAPH_PATH, graph);
+
+    // Also propagate accessCount + confidence back to the store entries
+    // so boost data survives if graph-state.json is rebuilt from scratch
+    const store = readJSON(STORE_PATH);
+    if (store && Array.isArray(store)) {
+      let storeChanged = false;
+      for (const entry of store) {
+        if (graph.nodes[entry.id]) {
+          entry.accessCount = graph.nodes[entry.id].accessCount;
+          entry.confidence = graph.nodes[entry.id].confidence;
+          if (!entry.metadata) entry.metadata = {};
+          entry.metadata.accessCount = entry.accessCount;
+          entry.metadata.confidence = entry.confidence;
+          storeChanged = true;
+        }
+      }
+      if (storeChanged) writeJSON(STORE_PATH, store);
+    }
   }
 }
 
@@ -689,9 +844,11 @@ function consolidate() {
     return { entries: 0, edges: 0, newEntries: 0, message: 'No store to consolidate' };
   }
 
-  // Deduplicate store entries by ID before processing (fixes #1518)
+  // Deduplicate store entries by ID, content, and semantic embedding (fixes #1518, #auto9, ADR-115)
   const preDedupCount = store.length;
   store = deduplicateById(store);
+  store = deduplicateByContent(store);
+  store = deduplicateByEmbedding(store);
 
   // Generate summaries for entries that lack them (eg auto-memory entries)
   for (const entry of store) {
@@ -747,15 +904,19 @@ function consolidate() {
     try { fs.writeFileSync(PENDING_PATH, '', 'utf-8'); } catch (e) { process.stderr.write('[INTELLIGENCE] WARN: Failed to clear pending: ' + e.message + '\n'); }
   }
 
-  // 2. Confidence decay for unaccessed entries
+  // 2. Confidence decay for unaccessed entries (idempotent per lastDecayAt)
   const graph = readJSON(GRAPH_PATH);
   if (graph && graph.nodes) {
     const now = Date.now();
     for (const id of Object.keys(graph.nodes)) {
       const node = graph.nodes[id];
-      const hoursSinceCreation = (now - (node.createdAt || now)) / (1000 * 60 * 60);
-      if (node.accessCount === 0 && hoursSinceCreation > 24) {
-        node.confidence = Math.max(0.05, (node.confidence || 0.5) - 0.005 * Math.floor(hoursSinceCreation / 24));
+      if (node.accessCount > 0) continue; // actively used entries never decay
+      const lastDecay = node.lastDecayAt || node.createdAt || now;
+      const hoursSinceLastDecay = (now - lastDecay) / (1000 * 60 * 60);
+      if (hoursSinceLastDecay > 24) {
+        const decayDays = Math.floor(hoursSinceLastDecay / 24);
+        node.confidence = Math.max(0.05, (node.confidence || 0.5) - 0.005 * decayDays);
+        node.lastDecayAt = now;
       }
     }
   }
@@ -778,6 +939,9 @@ function consolidate() {
       accessCount: (graph && graph.nodes && graph.nodes[entry.id])
         ? graph.nodes[entry.id].accessCount
         : (entry.metadata && entry.metadata.accessCount) || 0,
+      lastDecayAt: (graph && graph.nodes && graph.nodes[entry.id])
+        ? graph.nodes[entry.id].lastDecayAt
+        : undefined,
       createdAt: entry.createdAt || Date.now(),
     };
   }
@@ -849,10 +1013,22 @@ function consolidate() {
     process.stderr.write(`[INTELLIGENCE] [PRUNE] Removed ${staleIds.size} stale entries (never accessed, low confidence, >7d)\n`);
   }
 
-  // 9. Persist updated store (deduped or with new insight entries)
-  if (newEntries > 0 || store.length < storeBefore || staleIds.size > 0) writeJSON(STORE_PATH, store);
+  // 9. Propagate accessCount and confidence from graph nodes back to store entries
+  // so boost/decay data survives future graph rebuilds (fixes persistence gap)
+  for (const entry of store) {
+    if (nodes[entry.id]) {
+      entry.accessCount = nodes[entry.id].accessCount;
+      entry.confidence = nodes[entry.id].confidence;
+      if (!entry.metadata) entry.metadata = {};
+      entry.metadata.accessCount = entry.accessCount;
+      entry.metadata.confidence = entry.confidence;
+    }
+  }
 
-  // 10. Save snapshot for delta tracking
+  // 10. Persist updated store
+  writeJSON(STORE_PATH, store);
+
+  // 11. Save snapshot for delta tracking
   const updatedGraph = readJSON(GRAPH_PATH);
   const updatedRanked = readJSON(RANKED_PATH);
   saveSnapshot(updatedGraph, updatedRanked);

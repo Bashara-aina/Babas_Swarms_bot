@@ -6,7 +6,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/block-dangerous-git.sh",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/hook-profile.sh",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/security-prehook.sh",
             "timeout": 5000
           }
         ]
@@ -14,6 +19,21 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/gateguard-pre-edit.sh",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-config-protection.sh",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-governance-capture.sh",
+            "timeout": 3000
+          },
           {
             "type": "command",
             "command": "echo '[OK] Pre-edit check passed'",
@@ -29,6 +49,31 @@
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" post-edit'",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/capture-observation.sh",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-metrics-bridge.sh",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-quality-gate.sh",
+            "timeout": 30000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-context-monitor.sh",
             "timeout": 3000
           }
         ]
@@ -56,6 +101,11 @@
           },
           {
             "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/consolidate-observations.sh",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-summarize'",
             "timeout": 30000
           }
@@ -68,6 +118,11 @@
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-auto'",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/consolidate-observations.sh",
+            "timeout": 5000
           },
           {
             "type": "command",
@@ -87,8 +142,18 @@
           },
           {
             "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/superpowers-inject.sh",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/session-start-trigger.mjs\"'",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-session-activity.sh",
+            "timeout": 2000
           },
           {
             "type": "command",
@@ -103,43 +168,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end'",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end && exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/create-checkpoint.cjs\"'",
             "timeout": 10000
           },
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/create-checkpoint.cjs\"'",
+            "command": "sh -c 'node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync & python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/index-sessions.py\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" observation-capture & wait'",
+            "timeout": 25000
+          },
+          {
+            "type": "command",
+            "command": "sh -c '\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-evaluate-session.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-cost-tracker.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-desktop-notify.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-format-typecheck.sh & wait'",
             "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\"'",
-            "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
-            "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync'",
-            "timeout": 15000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync'",
-            "timeout": 20000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/index-sessions.py\"'",
-            "timeout": 15000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate'",
-            "timeout": 15000
           }
         ]
       }
@@ -180,14 +220,60 @@
     "pr": "\ud83e\udd16 Generated with [RuFlo](https://github.com/ruvnet/ruflo)"
   },
   "memoryLayers": {
-    "note": "L5 (graphrag) and L6 (mem0cloud) share auto-memory-store.json. No separate mem0 backend is available — add mem0-server and reconfigure l6_mem0cloud if a dedicated layer is needed."
+    "note": "L5 (graphrag) and L6 (mem0cloud) share auto-memory-store.json. No separate mem0 backend is available \u2014 add mem0-server and reconfigure l6_mem0cloud if a dedicated layer is needed."
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "HERMES_MAX_CONTEXT_TOKENS": "131072",
-    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
+    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
+    "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
+    "FABLE5_AUTONOMOUS": "1"
+  },
+  "fable5": {
+    "autonomousExecution": true,
+    "neverEndOnIWill": true,
+    "notWatchingRealtime": true,
+    "noNarrateRouting": true,
+    "noHedging": true,
+    "proceedWithoutAsking": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(python *)",
+      "Bash(make check)",
+      "Bash(pytest *)",
+      "Bash(git *)",
+      "Bash(pip *)",
+      "Bash(npm *)",
+      "Bash(gh *)",
+      "Grep",
+      "Glob",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)",
+      "Bash(tmux *)"
+    ],
+    "requireConfirmation": [
+      "Bash(rm -rf *)",
+      "Bash(rm -r *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(dd *)",
+      "Bash(mkfs *)",
+      "Bash(kill -9 *)",
+      "Bash(> *.db)"
+    ],
+    "blockedPermissionPhrases": [
+      "can i", "should i", "shall i", "may i",
+      "want me to", "do you want me to",
+      "permission to", "would you like me to",
+      "need your permission", "let me know if you want"
+    ],
+    "version": "2.0.0"
   },
   "mcpServers": {
     "hermes-lite": {

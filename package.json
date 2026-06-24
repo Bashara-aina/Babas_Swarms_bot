@@ -2,6 +2,7 @@
   "dependencies": {
     "@claude-flow/aidefence": "^3.0.3",
     "@claude-flow/embeddings": "^3.0.0-alpha.16",
+    "@claude-flow/memory": "^3.0.0-alpha.21",
     "@iflow-mcp/kynlos-obsidian-mcp-server": "^4.0.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "agentic-flow": "^2.0.11",

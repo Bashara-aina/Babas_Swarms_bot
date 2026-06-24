@@ -9,6 +9,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname, extname } from 'path';
+import { homedir } from 'os';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,12 +36,11 @@ const dim = (msg) => console.log(`  ${DIM}${msg}${RESET}`);
 // ── Memory Layer Paths ──────────────────────────────────────────────────────
 // Actual data locations (2026-05-28 audit):
 const MEMORY_LAYERS = {
-  l1_checkpoints: join(DATA_DIR, 'checkpoints'),   // empty dir — sessions moved to sessions/
-  l2_chromadb: join(PROJECT_ROOT, 'data', 'legion_chroma', 'chroma.sqlite3'),  // SQLite file
-  l3_langmem: join(PROJECT_ROOT, '.claude'),        // .md files (2 found)
-  l4_observation: join(PROJECT_ROOT, 'data', 'observations.db'),  // SQLite file
-  l5_graphrag: join(DATA_DIR, 'auto-memory-store.json'),  // JSON with entries
-  l6_mem0cloud: join(DATA_DIR, 'auto-memory-store.json'),  // same as L5
+  l1_checkpoints: join(DATA_DIR, 'checkpoints'),   // session state snapshots
+  l2_chromadb: join(homedir(), '.swarms_memory', 'chroma.sqlite3'),  // vector store
+  l3_langmem: join(PROJECT_ROOT, '.claude'),        // .md memory files
+  l4_observation: join(PROJECT_ROOT, 'data', 'observations.db'),  // SQLite FTS5
+  l5_graphrag: join(DATA_DIR, 'auto-memory-store.json'),  // JSON PageRank graph
 };
 
 // ── Session ID Generation ─────────────────────────────────────────────────
@@ -355,7 +355,7 @@ function buildMemoryInject(session, priorContent) {
 
 // ── Initialize Session ───────────────────────────────────────────────────
 async function initializeSession() {
-  log('Booting 6-layer memory system...');
+  log('Booting 5-layer memory system...');
   ensureDirectories();
 
   // Check if session.js already created a session in the session-restore hook
@@ -443,6 +443,55 @@ async function initializeSession() {
       }
     } catch (e) { /* ignore */ }
   }
+
+  // Background warmup: pre-compute embeddings for auto-memory-store entries
+  // Uses Python embedder which already has LRU cache and file persistence
+  try {
+    const { spawn } = await import('child_process');
+    const warmup = spawn('python3', [
+      '-c', `
+import json, sys
+from pathlib import Path
+
+store_path = Path("${DATA_DIR.replace(/\\/g, '/')}") / "auto-memory-store.json"
+cache_path = Path("${DATA_DIR.replace(/\\/g, '/')}") / "embedding-cache.json"
+if store_path.exists():
+    store = json.loads(store_path.read_text())
+    entries = store if isinstance(store, list) else store.get("entries", [])
+    print(f"[warmup] {len(entries)} entries to pre-warm", flush=True)
+    # Load existing cache
+    cache = {}
+    if cache_path.exists():
+        try: cache = json.loads(cache_path.read_text())
+        except: pass
+    warmed = 0
+    for entry in entries:
+        text = (entry.get("summary") or entry.get("content") or "")[:200]
+        if not text or len(text) < 10: continue
+        key = text.lower().strip()
+        if key in cache: continue  # already cached
+        try:
+            import requests
+            r = requests.post("http://localhost:11434/api/embeddings",
+                json={"model": "nomic-embed-text", "prompt": text}, timeout=2)
+            if r.status_code == 200:
+                cache[key] = {"vec": r.json()["embedding"], "ts": __import__("time").time() * 1000}
+                warmed += 1
+        except: pass
+    if warmed > 0:
+        cache_path.write_text(json.dumps(cache))
+        print(f"[warmup] Pre-computed {warmed} new embeddings", flush=True)
+    else:
+        print(f"[warmup] All embeddings already cached", flush=True)
+`.strip(),
+    ], {
+      cwd: process.cwd(),
+      stdio: ['ignore', 'pipe', 'pipe'],
+      detached: true,
+    });
+    warmup.unref();
+    warmup.stderr.on('data', (d) => process.stderr.write(d));
+  } catch (e) { /* warmup non-critical */ }
 
   ok(`Session ${sessionId} initialized`);
   return sessionId;

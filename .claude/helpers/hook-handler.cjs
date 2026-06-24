@@ -77,6 +77,7 @@ function runWithTimeout(fn, label) {
 
 // ── Global safety timeout ───────────────────────────────────────────────────
 function withSafetyTimeout(fn, label = 'hook', timeoutMs = 5000) {
+  const start = Date.now();
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       process.stderr.write("[WARN] Hook '" + label + "' exceeded " + timeoutMs + "ms, forcing exit\n");
@@ -86,13 +87,19 @@ function withSafetyTimeout(fn, label = 'hook', timeoutMs = 5000) {
     try {
       Promise.resolve(fn()).then(r => {
         clearTimeout(timer);
+        const elapsed = Date.now() - start;
+        if (elapsed > 100) process.stderr.write("[TIMING] Hook '" + label + "' completed in " + elapsed + "ms\n");
         resolve(r);
       }).catch(e => {
         clearTimeout(timer);
+        const elapsed = Date.now() - start;
+        process.stderr.write("[TIMING] Hook '" + label + "' failed at " + elapsed + "ms: " + e.message + "\n");
         resolve({ error: e.message });
       });
     } catch (e) {
       clearTimeout(timer);
+      const elapsed = Date.now() - start;
+      process.stderr.write("[TIMING] Hook '" + label + "' threw at " + elapsed + "ms: " + e.message + "\n");
       resolve({ error: e.message });
     }
   });
@@ -124,7 +131,7 @@ async function readStdin(timeoutMs = 500) {
 
 async function main() {
   // Skip stdin for commands that don't need hookInput data (saves ~500ms per call)
-  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats', 'obsidian-sync', 'dreaming-consolidate', 'store-user-query'];
+  const NO_STDIN_COMMANDS = ['pre-edit', 'compact-manual', 'compact-auto', 'compact-summarize', 'session-restore', 'session-end', 'status', 'notify', 'stats', 'obsidian-sync', 'dreaming-consolidate', 'store-user-query', 'observation-capture'];
   let stdinData = '';
   if (!command || !NO_STDIN_COMMANDS.includes(command)) {
     try { stdinData = await readStdin(500); } catch (e) { /* ignore stdin errors */ }
@@ -148,11 +155,25 @@ async function main() {
       const router = getRouter();
       if (intelligence && intelligence.getContext) {
         try {
-          const ctx = await runWithTimeout(
-            () => getIntelligence().getContext(prompt),
-            'getIntelligence().getContext()'
+          // Use unified recall (queries graph + chroma + dreaming patterns)
+          const unifiedRecall = require('./unified-recall.cjs');
+          const results = await runWithTimeout(
+            () => unifiedRecall.recall(prompt),
+            'unifiedRecall.recall()'
           );
-          if (ctx) console.log(ctx);
+          if (results && results.length > 0) {
+            const lines = ['[UNIFIED] Memory context (graph + vector + patterns):'];
+            for (let i = 0; i < results.length; i++) {
+              const r = results[i];
+              const display = (r.content || '').slice(0, 80);
+              lines.push(`  * (${r.score.toFixed(2)}) [${r.source}] ${display}`);
+            }
+            console.log(lines.join('\n'));
+          } else {
+            // Fallback to graph-only if unified returns nothing
+            const ctx = getIntelligence().getContext(prompt);
+            if (ctx) console.log(ctx);
+          }
         } catch (e) { /* non-fatal */ }
       }
       if (router && router.routeTask) {
@@ -479,6 +500,57 @@ async function main() {
       if (result.stderr && result.stderr.trim()) {
         log('[dreaming] stderr: ' + result.stderr.trim());
       }
+
+      // Feed dreaming patterns back into active memory stores
+      const storeResult = spawn('python3', [
+        '-c', `
+import json, os, glob, sys
+from pathlib import Path
+
+# Read dreaming briefings
+cache_dir = Path("/tmp/hermes_dream_cache")
+if not cache_dir.exists():
+    print(json.dumps({"stored": 0, "source": "no_cache"}))
+    sys.exit(0)
+
+briefings = sorted(cache_dir.glob("*.md"), key=os.path.getmtime, reverse=True)[:3]
+patterns = []
+for b in briefings:
+    text = b.read_text()[:500]
+    # Extract pattern lines (lines starting with - [pattern_type])
+    for line in text.split("\\n"):
+        line = line.strip()
+        if line.startswith("- [") and "]" in line:
+            ptype = line[2:line.index("]")]
+            pdesc = line[line.index("]")+1:].strip()
+            if pdesc:
+                patterns.append({"type": ptype, "desc": pdesc, "source": b.name})
+
+# Store to ChromaDB via MemoryStore
+try:
+    sys.path.insert(0, "${repoRoot}")
+    from core.memory.store import MemoryStore
+    store = MemoryStore()
+    stored_count = 0
+    for p in patterns:
+        content = f"[{p['type']}] {p['desc']}"
+        store.remember(content, metadata={"source": "dreaming", "type": p["type"], "file": p["source"]})
+        stored_count += 1
+    print(json.dumps({"stored": stored_count, "patterns": len(patterns)}))
+except Exception as e:
+    print(json.dumps({"stored": 0, "error": str(e)[:100]}))
+        `.strip(),
+      ], { cwd: repoRoot, encoding: 'utf-8', timeout: 10000 });
+      if (storeResult.stdout && storeResult.stdout.trim()) {
+        try {
+          const storeReport = JSON.parse(storeResult.stdout.trim());
+          if (storeReport.stored > 0) {
+            log('[dreaming] Stored ' + storeReport.stored + ' patterns to vector store');
+          }
+        } catch (e) {
+          log('[dreaming] Store result: ' + storeResult.stdout.trim());
+        }
+      }
     },
 
     'obsidian-sync': () => {
@@ -502,6 +574,39 @@ async function main() {
       ], { cwd: repoRoot, encoding: 'utf-8', timeout: 10000 });
       if (syncResult.stdout && syncResult.stdout.trim()) {
         log(`[obsidian-sync] ${syncResult.stdout.trim()}`);
+      }
+    },
+
+    'observation-capture': () => {
+      // Flush observation queue and store session summary at session end
+      const spawn = require('child_process').spawnSync;
+      const repoRoot = process.env.CLAUDE_PROJECT_DIR || '.';
+      const result = spawn('python3', [
+        '-c', `
+import asyncio, json, sys
+from pathlib import Path
+try:
+    from core.memory.observation_store import DB_PATH, ObservationStore
+    from core.memory.observation_queue import get_observation_queue
+    # Flush queue
+    q = get_observation_queue()
+    if q and hasattr(q, 'shutdown'):
+        asyncio.run(q.shutdown())
+    # Count observations
+    obs_dir = Path("${repoRoot}") / ".superpowers/homunculus/observations"
+    count = len(list(obs_dir.glob("*.json"))) if obs_dir.exists() else 0
+    print(json.dumps({"flushed": True, "observations": count}))
+except Exception as e:
+    print(json.dumps({"flushed": False, "error": str(e)}))
+        `.trim(),
+      ], { cwd: repoRoot, encoding: 'utf-8', timeout: 5000 });
+      if (result.stdout && result.stdout.trim()) {
+        try {
+          const report = JSON.parse(result.stdout.trim());
+          log(`[observations] ${report.observations || 0} files, flushed: ${report.flushed}`);
+        } catch (e) {
+          log(`[observations] ${result.stdout.trim()}`);
+        }
       }
     },
 
@@ -529,7 +634,7 @@ async function main() {
   } else if (command) {
     log(`[OK] Hook: ${command}`);
   } else {
-    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|store-user-query|dreaming-consolidate|obsidian-sync|stats>');
+    log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|compact-manual|compact-auto|compact-summarize|status|notify|cleanup-orphans|store-user-query|dreaming-consolidate|obsidian-sync|observation-capture|stats>');
   }
 }
 
