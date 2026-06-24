@@ -2,7 +2,7 @@
 - **graphify** (`.claude/skills/graphify/SKILL.md`) — knowledge graph for codebase queries.
   Auto-updated via git post-commit hook (AST-only rebuild on changed files, no LLM cost).
   Trigger: `/graphify` for full pipeline (docs/images), or `/graphify query "<question>"` for graph search.
-- Graph at `graphify-out/graph.json` (214K nodes, 318K edges) — rebuilt incrementally on every `git commit`.
+- Graph at `graphify-out/graph.json` (6061 nodes, 9007 links) — rebuilt incrementally on every `git commit`.
 - Rebuild logs: `~/.cache/graphify-rebuild.log` (background, non-blocking).
 - Skip per-commit: `GRAPHIFY_SKIP_HOOK=1 git commit`.
 - MCP server enabled in `config/mcp_config.json` + `.claude/settings.json` — graphify tools available during session.
@@ -28,3 +28,13 @@
   - `.claude/reference/ui-ux-excellence.md` (forbidden patterns, component quality)
   - `.claude/reference/taste-router.md` (variant picker + 3-dial system)
 - Do not auto-load them for non-UI work (Telegram bot logic, ML training, backend code, etc.).
+
+# Fable 5 Session Patterns
+- Fable 5 reference files in `.claude/reference/fable5-*.md` loaded ON DEMAND
+- Core behavioral DNA in root CLAUDE.md (always loaded) and user global CLAUDE.md (~/.claude/CLAUDE.md)
+- **fable5-behavior.md** — identity, outcome-first communication, autonomous execution (not watching), context management, evidence/tool rules. Load when Fable 5 behavior needs reinforcement mid-session
+- **fable5-safety.md** — copyright hard limits (15+ words = severe violation), harmful content blocking, citation rules, visual content safety, evenhandedness
+- **fable5-memory.md** — past_chats recognition cues (possessives, definite articles, past-tense verbs), query construction, memory attribution (never narrate retrieval), user preferences
+- **fable5-workflow.md** — agent dispatch patterns: pipeline/parallel, adversarial verification, judge panel, loop-until-dry, completeness critic, budget-aware execution
+- **fable5-tools.md** — tool choice discipline, CronCreate jitter (avoid :00/:30), monitor coverage (widen alternations, --line-buffered), read/edit discipline
+- Hooks enforce Fable 5 at runtime: `.claude/hooks/ecc-fable5-pre.sh` (blocks permission-asking), `.claude/hooks/ecc-fable5-post.sh` (warns on promise-endings)

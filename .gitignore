@@ -54,6 +54,10 @@ wiki/
 .gitnexus
 lib/legiona/memory/cost_log.jsonl
 
+# Large untracked project dirs (prevent accidental commit)
+cekwajar.id/
+ARCHIVE_cekwajar-src-version/
+
 # Binary blobs — not for version control
 *.flatpak
 skill_labels.zip

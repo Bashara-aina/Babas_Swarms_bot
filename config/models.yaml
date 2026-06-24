@@ -71,6 +71,20 @@ models:
     daily_limit_warning_threshold: 0.8
     avg_latency_ms: null
 
+  # Fallback — all agents reference this as their first fallback
+  # Maps to OpenRouter (different provider) for real cross-provider fallback
+  nemotron-fallback:
+    provider: openrouter
+    model_id: "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free"
+    context_window: 1000000
+    max_tokens: 4096
+    temperature_conversation: 0.3
+    temperature_code: 0.1
+    strengths: [fallback, general, coding, reasoning]
+    cost_per_1m_tokens: 0.0
+    daily_limit_warning_threshold: 0.8
+    avg_latency_ms: null
+
   # Vision ONLY — image/multimodal inputs via RTX 3060
   gemma4-local:
     provider: ollama

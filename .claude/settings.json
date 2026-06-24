@@ -203,7 +203,7 @@
     "global": {
       "allowOnly": [
         "deepseek",
-        "minimax"
+        "opencode-go/minimax-m3"
       ],
       "fallbackTo": "deepseek-v4-pro"
     },
@@ -220,7 +220,7 @@
     "pr": "\ud83e\udd16 Generated with [RuFlo](https://github.com/ruvnet/ruflo)"
   },
   "memoryLayers": {
-    "note": "L5 (graphrag) and L6 (mem0cloud) share auto-memory-store.json. No separate mem0 backend is available \u2014 add mem0-server and reconfigure l6_mem0cloud if a dedicated layer is needed."
+    "note": "L5 (graphrag) and L6 (mem0cloud) share .claude-flow/data/auto-memory-store.json. No separate mem0 backend is available \u2014 add mem0-server and reconfigure l6_mem0cloud if a dedicated layer is needed."
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
