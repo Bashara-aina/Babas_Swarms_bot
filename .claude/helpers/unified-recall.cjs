@@ -139,6 +139,87 @@ except Exception as e:
   return { results: [], latency: Date.now() - start, source: 'chroma' };
 }
 
+function queryWiki(prompt, topK = 3) {
+  const start = Date.now();
+  const WIKI_DIR = path.join(process.cwd(), '.wiki');
+  try {
+    if (!fs.existsSync(WIKI_DIR)) return { results: [], latency: Date.now() - start, source: 'wiki' };
+    // Directories to search (active content only)
+    const searchDirs = ['', 'Sessions', 'memories', 'knowledge', 'decisions', 'architecture', 'legion', 'projects', 'conversations', 'self-knowledge', 'health', 'raw', 'logs'];
+    const promptLower = prompt.toLowerCase();
+    const keywords = promptLower.split(/\s+/).filter(w => w.length > 3);
+    if (keywords.length === 0) return { results: [], latency: Date.now() - start, source: 'wiki' };
+
+    const scored = [];
+    for (const dir of searchDirs) {
+      const dirPath = path.join(WIKI_DIR, dir);
+      if (!fs.existsSync(dirPath)) continue;
+      let files;
+      try { files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md')); } catch (e) { continue; }
+      for (const file of files) {
+        const filePath = path.join(dirPath, file);
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8').slice(0, 2000);
+          const matches = keywords.filter(w => content.toLowerCase().includes(w)).length;
+          if (matches > 0) {
+            const score = matches / keywords.length;
+            // Find matching excerpt
+            const lines = content.split('\n');
+            let excerpt = '';
+            for (const line of lines) {
+              const lc = line.toLowerCase();
+              if (keywords.some(w => lc.includes(w))) { excerpt = line.slice(0, 100); break; }
+            }
+            scored.push({
+              content: excerpt || content.slice(0, 100),
+              score: score * 0.3, // discount — wiki is supplementary
+              source: 'wiki',
+              file: dir ? `${dir}/${file}` : file,
+            });
+          }
+        } catch (e) { /* skip unreadable */ }
+      }
+    }
+    const top = scored.sort((a, b) => b.score - a.score).slice(0, topK);
+    return { results: top, latency: Date.now() - start, source: 'wiki' };
+  } catch (e) {
+    return { results: [], latency: Date.now() - start, source: 'wiki', error: e.message };
+  }
+}
+
+function queryGraphify(prompt, topK = 3) {
+  const start = Date.now();
+  const GRAPH_PATH = path.join(process.cwd(), 'graphify-out', 'graph.json');
+  try {
+    if (!fs.existsSync(GRAPH_PATH)) return { results: [], latency: Date.now() - start, source: 'graphify' };
+    const graph = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf-8'));
+    const nodes = graph.nodes || [];
+    const promptLower = prompt.toLowerCase();
+    const keywords = promptLower.split(/\s+/).filter(w => w.length > 2);
+
+    const scored = [];
+    for (const node of nodes) {
+      const name = (node.name || node.id || node.label || '').toLowerCase();
+      const file = (node.file || node.path || '').toLowerCase();
+      const combined = name + ' ' + file;
+      const matches = keywords.filter(w => combined.includes(w)).length;
+      if (matches > 0) {
+        const score = matches / keywords.length * 0.2; // discount — code structure is reference
+        scored.push({
+          content: `${node.name || node.id || '?'} — ${file || '?'}`,
+          score,
+          source: 'graphify',
+          file: file || '',
+        });
+      }
+    }
+    const top = scored.sort((a, b) => b.score - a.score).slice(0, topK);
+    return { results: top, latency: Date.now() - start, source: 'graphify' };
+  } catch (e) {
+    return { results: [], latency: Date.now() - start, source: 'graphify', error: e.message };
+  }
+}
+
 function queryDreamingPatterns(prompt, topK = 3) {
   const start = Date.now();
   try {
@@ -207,15 +288,19 @@ function recall(prompt) {
   const cached = getCached(prompt);
   if (cached) return cached;
 
-  // Query all layers in parallel (sync spawns, but we use sequential for simplicity)
+  // Query all layers
   const graphResult = queryIntelligence(prompt);
   const chromaResult = queryChroma(prompt);
+  const wikiResult = queryWiki(prompt);
+  const graphifyResult = queryGraphify(prompt);
   const dreamingResult = queryDreamingPatterns(prompt);
 
   // Merge all results
   const allResults = [
     ...graphResult.results,
     ...chromaResult.results,
+    ...wikiResult.results,
+    ...graphifyResult.results,
     ...dreamingResult.results,
   ];
 
@@ -230,6 +315,8 @@ function recall(prompt) {
     layers: {
       graph: { count: graphResult.results.length, latency: graphResult.latency },
       chroma: { count: chromaResult.results.length, latency: chromaResult.latency },
+      wiki: { count: wikiResult.results.length, latency: wikiResult.latency },
+      graphify: { count: graphifyResult.results.length, latency: graphifyResult.latency },
       dreaming: { count: dreamingResult.results.length, latency: dreamingResult.latency },
     },
     dedupedFrom: allResults.length,
