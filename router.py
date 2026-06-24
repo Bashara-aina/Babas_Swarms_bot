@@ -1,92 +1,60 @@
-"""Agent router — thin shim that delegates to agents.py.
+"""Agent router — imports from canonical core modules.
 
-agents.py is the single source of truth for model registry, keywords,
-fallback chains, and thread memory. This file re-exports everything
-for any legacy callers that import from router directly.
-
-MiniMax-only models (no external cloud providers):
-  minimax-coding-plan/MiniMax-M3  ✓ (primary, free tier)
-  minimax-coding-plan/MiniMax-M3     ✓ (complex reasoning, free tier)
-  ollama_chat/llama3.3:70b             ✓ (local fallback, privacy)
-  ollama_chat/gemma4:e4b               ✓ (local vision, RTX 3060)
+Re-exports everything legacy callers need from a single location.
 """
 
 from __future__ import annotations
 
-import importlib.util
 import logging
-import sys
-from pathlib import Path
+
+from core.agent_registry import (
+    _LEGACY_AGENT_MODELS as _LEGACY_AGENT_MODELS,
+)
+from core.agent_registry import (
+    PERSONA_WRAPPER as PERSONALITY_WRAPPER,
+)
+from core.agent_registry import (
+    TASK_KEYWORDS as TASK_KEYWORDS,
+)
+from core.agent_registry import (
+    detect_agent as detect_agent,
+)
+from core.agent_registry import (
+    get_fallback_chain as get_fallback_chain,
+)
+from core.agent_registry import (
+    get_model as get_model,
+)
+from core.agent_registry import (
+    get_thread_context as get_thread_context,
+)
+from core.agent_registry import (
+    list_agents as list_agents,
+)
 
 logger = logging.getLogger(__name__)
 
-_agents_file = Path(__file__).with_name("agents.py")
-_spec = importlib.util.spec_from_file_location("agents_single_source", _agents_file)
-if _spec is None or _spec.loader is None:
-    raise ImportError(f"Unable to load agents module from {_agents_file}")
+# ── Re-exports ───────────────────────────────────────────────────────────────
+AGENT_MODELS = _LEGACY_AGENT_MODELS.copy()
+DEFAULT_AGENT = "general"
 
-_agents_module = importlib.util.module_from_spec(_spec)
-sys.modules[_spec.name] = _agents_module
-_spec.loader.exec_module(_agents_module)
-
-AGENT_MODELS = _agents_module.AGENT_MODELS
-AGENT_REGISTRY = _agents_module.AGENT_REGISTRY
-FALLBACK_CHAIN = _agents_module.FALLBACK_CHAIN
-TASK_KEYWORDS = _agents_module.TASK_KEYWORDS
-DEFAULT_AGENT = _agents_module.DEFAULT_AGENT
-ACTIVE_THREADS = _agents_module.ACTIVE_THREADS
-CONVERSATION_HISTORY = _agents_module.CONVERSATION_HISTORY
-DEBATE_PERSONAS = _agents_module.DEBATE_PERSONAS
-DEBATE_PERSONA_MODELS = _agents_module.DEBATE_PERSONA_MODELS
-DEBATE_ICONS = _agents_module.DEBATE_ICONS
-PERSONALITY_WRAPPER = _agents_module.PERSONALITY_WRAPPER
-
-detect_agent = _agents_module.detect_agent
-get_model = _agents_module.get_model
-get_fallback_chain = _agents_module.get_fallback_chain
-list_agents = _agents_module.list_agents
-list_all_departments = _agents_module.list_all_departments
-add_to_thread = _agents_module.add_to_thread
-get_thread_context = _agents_module.get_thread_context
-list_threads = _agents_module.list_threads
-list_threads_raw = _agents_module.list_threads_raw
-clear_thread = _agents_module.clear_thread
-add_to_conversation = _agents_module.add_to_conversation
-get_conversation_history = _agents_module.get_conversation_history
-clear_conversation = _agents_module.clear_conversation
-get_conversation_summary_prompt = _agents_module.get_conversation_summary_prompt
-
+# Debate personas — from agents package (only source)
 try:
-    from agents import build_system_prompt
+    from agents import (
+        DEBATE_ICONS as DEBATE_ICONS,
+    )
+    from agents import (
+        DEBATE_PERSONA_MODELS as DEBATE_PERSONA_MODELS,
+    )
+    from agents import (
+        DEBATE_PERSONAS as DEBATE_PERSONAS,
+    )
+    from agents import build_system_prompt as build_system_prompt
 except ImportError:
-    logger.warning("build_system_prompt not available from agents package")
-    build_system_prompt = None
+    DEBATE_ICONS: dict = {}
+    DEBATE_PERSONA_MODELS: dict = {}
+    DEBATE_PERSONAS: dict = {}
 
-__all__ = [
-    "ACTIVE_THREADS",
-    "AGENT_MODELS",
-    "AGENT_REGISTRY",
-    "CONVERSATION_HISTORY",
-    "DEBATE_ICONS",
-    "DEBATE_PERSONAS",
-    "DEBATE_PERSONA_MODELS",
-    "DEFAULT_AGENT",
-    "FALLBACK_CHAIN",
-    "PERSONALITY_WRAPPER",
-    "TASK_KEYWORDS",
-    "add_to_conversation",
-    "add_to_thread",
-    "build_system_prompt",
-    "clear_conversation",
-    "clear_thread",
-    "detect_agent",
-    "get_conversation_history",
-    "get_conversation_summary_prompt",
-    "get_fallback_chain",
-    "get_model",
-    "get_thread_context",
-    "list_agents",
-    "list_all_departments",
-    "list_threads",
-    "list_threads_raw",
-]
+    def build_system_prompt(role_prompt: str, user_id: str = "") -> str:
+        wrapper = PERSONALITY_WRAPPER.strip() if PERSONALITY_WRAPPER else ""
+        return f"{wrapper}\n\n{role_prompt}" if wrapper else role_prompt

@@ -99,7 +99,7 @@ async def cmd_swe(message: Message) -> None:
         loop = SWEAgentLoop(
             instance_id=instance_id,
             problem_statement=problem_statement,
-            model="minimax-coding-plan/MiniMax-M3",
+            model="opencode-go/minimax-m3",
             max_steps=30,
             working_dir=repo_path,
         )

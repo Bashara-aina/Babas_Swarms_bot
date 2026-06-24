@@ -31,7 +31,7 @@ from langgraph.checkpoint.memory import MemorySaver
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M3"
+DEFAULT_MODEL = "opencode-go/minimax-m3"
 
 
 class AgentState(TypedDict, total=False):

@@ -70,40 +70,31 @@ function _saveEmbeddingCache() {
   } catch (e) { /* non-critical */ }
 }
 
+function _ollamaEmbed(text) {
+  try {
+    const body = JSON.stringify({ model: 'nomic-embed-text', prompt: text });
+    const { spawnSync } = require('child_process');
+    const result = spawnSync('curl', [
+      '-s', '-X', 'POST', 'http://localhost:11434/api/embeddings',
+      '-H', 'Content-Type: application/json',
+      '-d', body,
+    ], { timeout: 3000, encoding: 'utf-8' });
+    if (result.status === 0 && result.stdout) {
+      const parsed = JSON.parse(result.stdout);
+      if (parsed && parsed.embedding) return parsed.embedding;
+    }
+  } catch (e) { /* ollama unavailable */ }
+  return null;
+}
+
 function _embedText(text) {
   if (!text || text.length < 3) return null;
   const cache = _loadEmbeddingCache();
   const key = text.replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 256);
-  // Check cache
   const cached = cache[key];
-  if (cached && (Date.now() - (cached.ts || 0)) < _EMBED_CACHE_TTL) {
-    return cached.vec;
-  }
-  // Call Ollama via Python subprocess (reuses embedder.py, handles errors gracefully)
-  try {
-    const { spawnSync } = require('child_process');
-    const pyCode = `
-import sys, json
-try:
-    import requests
-    r = requests.post("http://localhost:11434/api/embeddings",
-        json={"model": "nomic-embed-text", "prompt": ${JSON.stringify(text)}},
-        timeout=2)
-    if r.status_code == 200:
-        print(json.dumps(r.json()["embedding"]))
-    else:
-        sys.exit(1)
-except Exception:
-    sys.exit(1)
-`;
-    const result = spawnSync('python3', ['-c', pyCode], { timeout: 3000, encoding: 'utf-8' });
-    if (result.status === 0 && result.stdout && result.stdout.trim()) {
-      const resp = JSON.parse(result.stdout.trim());
-      cache[key] = { vec: resp.embedding, ts: Date.now() };
-      _saveEmbeddingCache();
-      return resp.embedding;
-    }
-  } catch (e) { /* Ollama unavailable — embedding disabled */ }
+  if (cached && (Date.now() - (cached.ts || 0)) < _EMBED_CACHE_TTL) return cached.vec;
+  const vec = _ollamaEmbed(text);
+  if (vec) { cache[key] = { vec, ts: Date.now() }; _saveEmbeddingCache(); return vec; }
   return null;
 }
 
@@ -149,7 +140,8 @@ function tokenize(text) {
   if (!text) return [];
   return [...new Set(
     text.toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, ' ')
+      // Preserve underscores, hyphens, dots for code identifiers (det_mAP50, train.py, cross-entropy)
+      .replace(/[^a-z0-9\s_.-]/g, ' ')
       .split(/\s+/)
       .filter(w => w.length > 2 && !STOP_WORDS.has(w))
   )];
@@ -660,25 +652,44 @@ function getContext(prompt) {
   const PAGERANK_DELTA = 0.15; // PageRank weight
   const MIN_THRESHOLD = 0.05;
   const TOP_K = 5;
+  const FAST_PASS_THRESHOLD = 0.25; // skip embeddings if fast scoring already good
 
-  // Pre-compute prompt embedding once for semantic scoring
-  const promptEmbedding = _embedText(prompt);
-  const promptEmbeddingKey = prompt.replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 256);
-
-  // Score each entry (trigram match + word overlap + embedding similarity + PageRank)
-  const scored = [];
+  // Fast pass: score by trigram + keyword + PageRank only (no embedding)
+  const fastScores = [];
   for (const entry of ranked.entries) {
     const entryTrigrams = trigrams(entry.words || []);
     const contentMatch = jaccardSimilarity(promptTrigrams, entryTrigrams);
-    const entryWords = entry.words || [];
-    const wordMatches = promptWords.filter(w => entryWords.includes(w)).length;
+    const wordMatches = promptWords.filter(w => (entry.words || []).includes(w)).length;
     const wordOverlap = promptWords.length > 0 ? wordMatches / promptWords.length : 0;
-    // Semantic similarity: embed the entry content, compare with prompt embedding
+    const fastScore = MATCH_ALPHA * contentMatch + KEYWORD_BETA * wordOverlap + PAGERANK_DELTA * (entry.pageRank || 0);
+    fastScores.push(fastScore);
+  }
+  const bestFastScore = fastScores.length > 0 ? Math.max(...fastScores) : 0;
+
+  // Only compute prompt embedding if fast scoring is weak (needs semantic help)
+  // Saves ~150ms Ollama call per query when keywords already match well
+  let promptEmbedding = null;
+  if (bestFastScore < FAST_PASS_THRESHOLD) {
+    promptEmbedding = _embedText(prompt);
+  }
+
+  // Score each entry with available signals
+  const scored = [];
+  for (let i = 0; i < ranked.entries.length; i++) {
+    const entry = ranked.entries[i];
+    const contentMatch = jaccardSimilarity(promptTrigrams, trigrams(entry.words || []));
+    const wordMatches = promptWords.filter(w => (entry.words || []).includes(w)).length;
+    const wordOverlap = promptWords.length > 0 ? wordMatches / promptWords.length : 0;
     let semanticSim = 0;
     if (promptEmbedding) {
-      const entryText = entry.summary || entry.content || '';
-      const entryEmb = _embedText(entryText);
-      if (entryEmb) semanticSim = _cosineSimilarity(promptEmbedding, entryEmb);
+      // Use pre-computed embedding from ranked context if available
+      if (entry.embedding) {
+        semanticSim = _cosineSimilarity(promptEmbedding, entry.embedding);
+      } else {
+        // Fallback: compute on demand (cold cache)
+        const entryEmb = _embedText(entry.summary || entry.content || '');
+        if (entryEmb) semanticSim = _cosineSimilarity(promptEmbedding, entryEmb);
+      }
     }
     const score = MATCH_ALPHA * contentMatch + KEYWORD_BETA * wordOverlap + SEMANTIC_GAMMA * semanticSim + PAGERANK_DELTA * (entry.pageRank || 0);
     if (score >= MIN_THRESHOLD) {
@@ -691,6 +702,19 @@ function getContext(prompt) {
   // Sort by score descending, take top-K
   scored.sort((a, b) => b.score - a.score);
   const topEntries = scored.slice(0, TOP_K);
+
+  // Exploration: every ~20 queries, inject a random low-PageRank entry for discovery
+  const explorationRoll = sessionGet('explorationRoll');
+  const explorationCount = ((explorationRoll || 0) + 1) % 20;
+  sessionSet('explorationRoll', explorationCount);
+  if (explorationCount === 0 && scored.length > TOP_K) {
+    const bottomHalf = scored.slice(TOP_K);
+    const randomEntry = bottomHalf[Math.floor(Math.random() * bottomHalf.length)];
+    if (randomEntry) {
+      topEntries[TOP_K - 1] = randomEntry; // replace last slot
+      topEntries.sort((a, b) => b.score - a.score); // re-sort
+    }
+  }
 
   // Boost previously matched patterns (implicit success: user continued working)
   const prevMatched = sessionGet('lastMatchedPatterns');
@@ -878,9 +902,9 @@ function consolidate() {
       } catch { /* skip malformed */ }
     }
 
-    // Create entries for frequently-edited files (3+ edits)
+    // Create entries for frequently-edited files (5+ edits, was 3 — raised to reduce noise)
     for (const [file, count] of Object.entries(editCounts)) {
-      if (count >= 3) {
+      if (count >= 5) {
         const exists = store.some(e =>
           (e.metadata && e.metadata.sourceFile === file && e.metadata.autoGenerated)
         );
@@ -904,22 +928,39 @@ function consolidate() {
     try { fs.writeFileSync(PENDING_PATH, '', 'utf-8'); } catch (e) { process.stderr.write('[INTELLIGENCE] WARN: Failed to clear pending: ' + e.message + '\n'); }
   }
 
-  // 2. Confidence decay for unaccessed entries (idempotent per lastDecayAt)
+  // 2. Confidence decay — proportional to accessCount so popular entries cool slower
+  //    This prevents the rich-get-richer dynamic where 1 hit exempts from decay forever.
+  //    accessCount=0 → -0.005/day, accessCount=50 → -0.001/day, accessCount=100+ → -0.0005/day
   const graph = readJSON(GRAPH_PATH);
   if (graph && graph.nodes) {
     const now = Date.now();
     for (const id of Object.keys(graph.nodes)) {
       const node = graph.nodes[id];
-      if (node.accessCount > 0) continue; // actively used entries never decay
       const lastDecay = node.lastDecayAt || node.createdAt || now;
       const hoursSinceLastDecay = (now - lastDecay) / (1000 * 60 * 60);
       if (hoursSinceLastDecay > 24) {
         const decayDays = Math.floor(hoursSinceLastDecay / 24);
-        node.confidence = Math.max(0.05, (node.confidence || 0.5) - 0.005 * decayDays);
+        const accessCount = node.accessCount || 0;
+        const scale = Math.max(0.1, 1 - (Math.min(accessCount, 100) / 100 * 0.9));
+        node.confidence = Math.max(0.05, (node.confidence || 0.5) - 0.005 * scale * decayDays);
         node.lastDecayAt = now;
       }
     }
   }
+
+  // 2.5. Automatic curation: archive entries not accessed in 60+ days, low confidence, low access
+  const archiveThreshold = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const preCuration = store.length;
+  store = store.filter(entry => {
+    if (!entry.createdAt || entry.createdAt > archiveThreshold) return true;
+    if ((entry.accessCount || 0) >= 2) return true;
+    if ((entry.confidence || 0.5) >= 0.2) return true;
+    entry.archived = true;
+    entry.summary = '[ARCHIVED] ' + (entry.summary || entry.content || '').slice(0, 80);
+    return false;
+  });
+  const curated = preCuration - store.length;
+  if (curated > 0) process.stderr.write('[INTELLIGENCE] Curated ' + curated + ' stale entries\n');
 
   // 3. Rebuild edges with updated store
   for (const entry of store) {
@@ -966,12 +1007,15 @@ function consolidate() {
     pageRanks,
   });
 
-  // 7. Write updated ranked context
+  // 7. Write updated ranked context with pre-computed embeddings
   const rankedEntries = store.map(entry => {
     const id = entry.id;
     const content = entry.content || entry.value || '';
     const summary = entry.summary || entry.key || '';
     const words = tokenize(content + ' ' + summary);
+    // Pre-compute embedding for fast recall (background, non-blocking)
+    const entryText = (summary || content || '').slice(0, 256);
+    const embedding = entryText.length > 10 ? _embedText(entryText) : null;
     return {
       id,
       content,
@@ -981,6 +1025,7 @@ function consolidate() {
       pageRank: pageRanks[id] || 0,
       accessCount: nodes[id] ? nodes[id].accessCount : 0,
       words,
+      embedding, // pre-computed for getContext semantic scoring
     };
   }).sort((a, b) => {
     const scoreA = 0.6 * a.pageRank + 0.4 * a.confidence;

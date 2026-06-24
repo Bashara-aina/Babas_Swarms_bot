@@ -20,6 +20,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+import symphony_server
 
 pytest.skip("symphony_server Python module not implemented — mcp_servers/symphony-of-one is Node.js", allow_module_level=True)
 
@@ -409,7 +410,7 @@ Labels: {{ issue.labels | join(', ') }}
             symphony_server._orchestrator_ref = None
 
 
-import symphony_server as symphony_server_mod
+symphony_server_mod = symphony_server
 
 
 class TestSwarmBotCodexAdapter:

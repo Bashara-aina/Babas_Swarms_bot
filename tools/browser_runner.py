@@ -28,7 +28,7 @@ from browser_use.llm.litellm import ChatLiteLLM
 
 def get_minimax_llm() -> ChatLiteLLM:
     import os
-    model = "minimax-coding-plan/MiniMax-M3"
+    model = "opencode-go/minimax-m3"
     api_key = os.environ.get("MINIMAX_API_KEY", "")
     api_base = "https://api.minimax.io/v1"
     return ChatLiteLLM(

@@ -579,7 +579,7 @@ class CompressionConfig:
     protect_last_n_turns: int = 4
 
     # Summarization (uses swarm-bot's call_llm)
-    summarization_model: str = "minimax-coding-plan/MiniMax-M3"
+    summarization_model: str = "opencode-go/minimax-m3"
     temperature: float = 0.3
     max_retries: int = 3
     retry_delay: int = 2

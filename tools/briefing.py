@@ -204,7 +204,7 @@ async def _conversational_wrap(raw_data: str, now: datetime) -> str:
     try:
         return await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model="minimax-coding-plan/MiniMax-M3",
+            model="opencode-go/minimax-m3",
             temperature=0.7,
             max_tokens=600,
         )

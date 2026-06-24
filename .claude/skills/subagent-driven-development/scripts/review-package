@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Generate a diff package for code review from a task branch
+# Usage: review-package <branch> <base-branch> <output-dir>
+set -euo pipefail
+
+BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
+BASE="${2:-main}"
+OUTPUT_DIR="${3:-.superpowers/sdd/review}"
+
+mkdir -p "$OUTPUT_DIR"
+
+git diff "$BASE...$BRANCH" > "$OUTPUT_DIR/diff.patch"
+git log --oneline "$BASE..$BRANCH" > "$OUTPUT_DIR/commits.txt"
+git diff --stat "$BASE...$BRANCH" > "$OUTPUT_DIR/stats.txt"
+
+echo "[review-package] Generated review package in $OUTPUT_DIR"
+echo "  diff:    $(wc -l < "$OUTPUT_DIR/diff.patch") lines"
+echo "  commits: $(wc -l < "$OUTPUT_DIR/commits.txt")"
+echo "  files:   $(wc -l < "$OUTPUT_DIR/stats.txt")"

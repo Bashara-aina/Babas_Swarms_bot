@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Generate a task brief for a subagent from a plan file
+# Usage: task-brief <plan-file> <task-number> <output-dir>
+set -euo pipefail
+
+PLAN_FILE="${1:?usage: task-brief <plan-file> <task-number> <output-dir>}"
+TASK_NUM="${2:?}"
+OUTPUT_DIR="${3:?}"
+
+mkdir -p "$OUTPUT_DIR"
+
+# Extract the Nth task from the plan (delimited by ## or ---)
+awk -v n="$TASK_NUM" '
+  /^## / { count++ }
+  count == n { print }
+  count > n { exit }
+' "$PLAN_FILE" > "$OUTPUT_DIR/brief.md"
+
+echo "[task-brief] Wrote $OUTPUT_DIR/brief.md ($(wc -l < "$OUTPUT_DIR/brief.md") lines)"

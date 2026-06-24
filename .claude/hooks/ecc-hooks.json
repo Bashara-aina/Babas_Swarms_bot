@@ -1,0 +1,200 @@
+{
+  "version": "2.1.0",
+  "description": "ECC Native Hook Manifest \u2014 26 hooks across 7 events",
+  "profiles": {
+    "minimal": "Security checks only. No observations, no monitoring.",
+    "standard": "Security + governance + quality gate + session activity. Default.",
+    "strict": "Full auditing: all hooks enabled, context monitor active, desktop notify on stop."
+  },
+  "hooks": {
+    "PreToolUse": {
+      "Bash": [
+        {
+          "id": "pre:security",
+          "script": "security-prehook.sh",
+          "profile": "all",
+          "timeout": 5000
+        },
+        {
+          "id": "pre:profile",
+          "script": "hook-profile.sh",
+          "profile": "all",
+          "timeout": 2000
+        },
+        {
+          "id": "pre:fable5-autonomous",
+          "script": "ecc-fable5-pre.sh",
+          "profile": "standard",
+          "timeout": 1000
+        }
+      ],
+      "Write|Edit|MultiEdit": [
+        {
+          "id": "pre:gateguard",
+          "script": "gateguard-pre-edit.sh",
+          "profile": "all",
+          "timeout": 2000
+        },
+        {
+          "id": "pre:config-protection",
+          "script": "ecc-config-protection.sh",
+          "profile": "standard",
+          "timeout": 2000
+        },
+        {
+          "id": "pre:governance-capture",
+          "script": "ecc-governance-capture.sh",
+          "profile": "strict",
+          "timeout": 3000
+        }
+      ],
+      "mcp__*": [
+        {
+          "id": "pre:mcp-health-check",
+          "script": "ecc-mcp-health-check.sh",
+          "profile": "standard",
+          "timeout": 3000
+        }
+      ]
+    },
+    "PostToolUse": {
+      "Write|Edit|MultiEdit|Bash": [
+        {
+          "id": "post:observation",
+          "script": "capture-observation.sh",
+          "profile": "standard",
+          "timeout": 2000
+        },
+        {
+          "id": "post:quality-gate",
+          "script": "ecc-quality-gate.sh",
+          "profile": "strict",
+          "timeout": 30000
+        },
+        {
+          "id": "post:ecc-metrics-bridge",
+          "script": "ecc-metrics-bridge.sh",
+          "profile": "standard",
+          "timeout": 2000
+        },
+        {
+          "id": "post:fable5-autonomous",
+          "script": "ecc-fable5-post.sh",
+          "profile": "standard",
+          "timeout": 1000
+        }
+      ],
+      "*": [
+        {
+          "id": "post:fable5-output-check",
+          "script": "ecc-fable5-post.sh",
+          "profile": "strict",
+          "timeout": 1000
+        }
+      ]
+    },
+    "PostToolUseFailure": {
+      "mcp__*": [
+        {
+          "id": "post-fail:mcp-health",
+          "script": "ecc-mcp-health-check.sh",
+          "profile": "standard",
+          "timeout": 3000
+        }
+      ]
+    },
+    "PreCompact": {
+      "manual": [
+        {
+          "id": "compact:consolidate",
+          "script": "consolidate-observations.sh",
+          "profile": "standard",
+          "timeout": 5000
+        },
+        {
+          "id": "compact:evaluate-session",
+          "script": "ecc-evaluate-session.sh",
+          "profile": "standard",
+          "timeout": 10000
+        }
+      ],
+      "auto": [
+        {
+          "id": "compact:consolidate-auto",
+          "script": "consolidate-observations.sh",
+          "profile": "standard",
+          "timeout": 5000
+        },
+        {
+          "id": "compact:evaluate-session-auto",
+          "script": "ecc-evaluate-session.sh",
+          "profile": "standard",
+          "timeout": 10000
+        }
+      ]
+    },
+    "SessionStart": [
+      {
+        "id": "session:start-superpowers",
+        "script": "superpowers-inject.sh",
+        "profile": "all",
+        "timeout": 3000
+      },
+      {
+        "id": "session:activity-init",
+        "script": "ecc-session-activity.sh",
+        "profile": "standard",
+        "timeout": 2000
+      }
+    ],
+    "Stop": [
+      {
+        "id": "stop:format-typecheck",
+        "script": "ecc-format-typecheck.sh",
+        "profile": "strict",
+        "timeout": 30000
+      },
+      {
+        "id": "stop:cost-tracker",
+        "script": "ecc-cost-tracker.sh",
+        "profile": "standard",
+        "timeout": 5000
+      },
+      {
+        "id": "stop:desktop-notify",
+        "script": "ecc-desktop-notify.sh",
+        "profile": "strict",
+        "timeout": 5000
+      }
+    ],
+    "SessionEnd": [
+      {
+        "id": "session:end-hooks",
+        "script": "ecc-evaluate-session.sh",
+        "profile": "standard",
+        "timeout": 10000
+      },
+      {
+        "id": "session:end-cost",
+        "script": "ecc-cost-tracker.sh",
+        "profile": "standard",
+        "timeout": 5000
+      }
+    ]
+  },
+  "id": "ecc-native-hooks",
+  "events": [
+    "PreToolUse",
+    "PostToolUse",
+    "PostToolUseFailure",
+    "PreCompact",
+    "SessionStart",
+    "Stop",
+    "SessionEnd"
+  ],
+  "profiles_available": [
+    "minimal",
+    "standard",
+    "strict"
+  ]
+}

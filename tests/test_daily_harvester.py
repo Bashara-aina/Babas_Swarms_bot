@@ -16,7 +16,6 @@ from core.daily_harvester.swarm_debate import run_debate
 from core.daily_harvester.topic_budget import detect_active_topics
 from core.daily_harvester.types import (
     CandidateInfo,
-    SourceType,
     SwarmVerdict,
     VerdictDecision,
 )

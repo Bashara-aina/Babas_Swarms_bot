@@ -57,8 +57,8 @@ class TestTriAttentionSmoke:
         k_centers_real = torch.randn(num_heads, num_bands, 2) * 1.5
 
         # Convert to complex centers for noise generation
-        q_centers = torch.view_as_complex(q_centers_real)
-        k_centers = torch.view_as_complex(k_centers_real)
+        q_centers = torch.view_as_complex(q_centers_real)  # noqa: F841
+        k_centers = torch.view_as_complex(k_centers_real)  # noqa: F841
 
         # Generate embeddings around centers (real representation)
         noise_scale = 0.3
@@ -149,7 +149,7 @@ class TestTriAttentionSmoke:
         )
 
         # Naive scoring (all keys same offset)
-        naive_scores = triattention.score_keys(
+        naive_scores = triattention.score_keys(  # noqa: F841
             key_positions,
             calibration=calibration_data,
             future_offsets=[64],

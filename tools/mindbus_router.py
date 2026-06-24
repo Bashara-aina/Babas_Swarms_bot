@@ -103,7 +103,7 @@ Respond as JSON: {{"skill": "<skill>", "confidence": <0.0-1.0>, "reasoning": "<o
             import litellm
             resp = await asyncio.to_thread(
                 litellm.completion,
-                model=os.getenv("ROUTING_MODEL", "minimax-coding-plan/MiniMax-M3"),
+                model=os.getenv("ROUTING_MODEL", "opencode-go/minimax-m3"),
                 messages=[{"role": "user", "content": routing_prompt}],
                 max_tokens=120,
                 temperature=0.0,

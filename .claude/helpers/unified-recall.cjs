@@ -19,13 +19,74 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawnSync, spawn } = require('child_process');
 
 const DATA_DIR = path.join(process.cwd(), '.claude-flow', 'data');
 const METRICS_DIR = path.join(process.cwd(), '.claude-flow', 'metrics');
 const METRICS_PATH = path.join(METRICS_DIR, 'recall-metrics.jsonl');
 const MAX_METRICS_LINES = 1000;
 const CACHE_TTL = 60000; // 60s cache for identical prompts
+
+// ── Persistent ChromaDB daemon (eliminates ~2s Python startup per query) ──────
+// Keeps MemoryStore + embedder loaded between queries for sub-second recall.
+let _chromaDaemon = null;
+let _chromaReqId = 0;
+let _chromaPending = null;
+let _chromaBuf = '';
+const CHROMA_DAEMON_TIMEOUT = 5000;
+
+function _startChromaDaemon() {
+  const daemonPath = path.join(__dirname, 'chroma-daemon.py');
+  if (!fs.existsSync(daemonPath)) return false;
+  try {
+    _chromaDaemon = spawn('python3', [daemonPath], {
+      cwd: process.cwd(),
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, PYTHONPATH: process.cwd(), CLAUDE_PROJECT_DIR: process.cwd() },
+    });
+    _chromaDaemon.on('exit', () => {
+      _chromaDaemon = null;
+      if (_chromaPending) {
+        const p = _chromaPending;
+        _chromaPending = null;
+        clearTimeout(p.timer);
+        p.reject(new Error('daemon exited'));
+      }
+    });
+    _chromaDaemon.stdout.on('data', (d) => {
+      _chromaBuf += d.toString();
+      const nl = _chromaBuf.indexOf('\n');
+      if (nl >= 0) {
+        const line = _chromaBuf.slice(0, nl);
+        _chromaBuf = _chromaBuf.slice(nl + 1);
+        if (_chromaPending) {
+          try { _chromaPending.resolve(JSON.parse(line)); }
+          catch (e) { _chromaPending.reject(e); }
+          _chromaPending = null;
+        }
+      }
+    });
+    _chromaDaemon.stderr.on('data', () => {});
+    return true;
+  } catch (e) { return false; }
+}
+
+function _queryChroma(daemon, query, topK, minScore) {
+  return new Promise((resolve, reject) => {
+    const id = ++_chromaReqId;
+    _chromaPending = { resolve, reject };
+    const timer = setTimeout(() => {
+      if (_chromaPending) {
+        _chromaPending = null;
+        try { daemon.kill(); } catch (e) {}
+        _chromaDaemon = null;
+        reject(new Error('timeout'));
+      }
+    }, CHROMA_DAEMON_TIMEOUT);
+    _chromaPending.timer = timer;
+    daemon.stdin.write(JSON.stringify({ id, query, top_k: topK, min_score: minScore }) + '\n');
+  });
+}
 
 // ── In-memory cache ─────────────────────────────────────────────────────────
 
@@ -97,9 +158,32 @@ function _ollamaAlive() {
 
 function queryChroma(prompt, topK = 5) {
   const start = Date.now();
-  // Skip if Ollama is down (saves 3s timeout per query)
-  if (!_ollamaAlive()) return { results: [], latency: Date.now() - start, source: 'chroma' };
+  // Try daemon if available (fast path), fallback to spawnSync (slow path)
+  if (_chromaDaemon || _startChromaDaemon()) {
+    return _queryChroma(_chromaDaemon, prompt, topK, 0.25).then(response => {
+      const results = _normalizeChromaResults((response.results || []).slice(0, topK));
+      return { results, latency: Date.now() - start, source: 'chroma' };
+    }).catch((err) => {
+      // daemon failed — fall through to spawnSync fallback
+      _chromaDaemon = null;
+      return _queryChromaFallback(prompt, topK, start);
+    });
+  }
+  return _queryChromaFallback(prompt, topK, start);
+}
+
+function _normalizeChromaResults(raw) {
+  // ChromaDB returns relevance scores as 1.0 (not real similarity).
+  // Normalize so they compete fairly with graph/wiki results (0.2-0.44 range).
+  return raw.map(r => {
+    const score = Math.min(0.35, (r.score || 0) * 0.35);
+    return { ...r, score };
+  });
+}
+
+function _queryChromaFallback(prompt, topK, start) {
   try {
+    if (!_ollamaAlive()) return { results: [], latency: Date.now() - start, source: 'chroma' };
     const pyCode = `
 import sys, json
 try:
@@ -116,7 +200,6 @@ try:
                     "content": r.get("content", r.get("text", "")),
                     "score": r.get("score", r.get("relevance", 0)),
                     "source": "chroma",
-                    "metadata": {k: v for k, v in r.items() if k not in ("content", "text", "score", "relevance")}
                 })
         print(json.dumps(out))
 except Exception as e:
@@ -132,52 +215,82 @@ except Exception as e:
     if (result.status === 0 && result.stdout && result.stdout.trim()) {
       const parsed = JSON.parse(result.stdout.trim());
       if (Array.isArray(parsed)) {
-        return { results: parsed.slice(0, topK), latency: Date.now() - start, source: 'chroma' };
+        return { results: _normalizeChromaResults(parsed.slice(0, topK)), latency: Date.now() - start, source: 'chroma' };
       }
     }
   } catch (e) { /* chroma unavailable */ }
   return { results: [], latency: Date.now() - start, source: 'chroma' };
 }
 
+// ── Wiki index cache (build once, query many — avoids 775+ readFileSync per call) ──
+let _wikiIndex = null;
+let _wikiIndexTime = 0;
+const WIKI_INDEX_TTL = 300000; // rebuild index every 5 min
+
+function _buildWikiIndex() {
+  const WIKI_DIR = path.join(process.cwd(), '.wiki');
+  if (!fs.existsSync(WIKI_DIR)) return [];
+  const index = [];
+  // Scan all subdirectories dynamically
+  const dirs = [''];
+  try {
+    const entries = fs.readdirSync(WIKI_DIR, { withFileTypes: true });
+    for (const e of entries) {
+      if (e.isDirectory() && !e.name.startsWith('.') && e.name !== '.obsidian') dirs.push(e.name);
+    }
+  } catch (e) { /* use root only */ }
+  for (const dir of dirs) {
+    const dirPath = path.join(WIKI_DIR, dir);
+    if (!fs.existsSync(dirPath)) continue;
+    let files;
+    try { files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md')); } catch (e) { continue; }
+    for (const file of files) {
+      const filePath = path.join(dirPath, file);
+      try {
+        const fd = fs.openSync(filePath, 'r');
+        const buf = Buffer.alloc(8000);
+        const bytesRead = fs.readSync(fd, buf, 0, 8000, 0);
+        fs.closeSync(fd);
+        const preview = buf.toString('utf-8', 0, bytesRead).toLowerCase();
+        index.push({ file: dir ? `${dir}/${file}` : file, dir, preview, filePath });
+      } catch (e) { /* skip unreadable */ }
+    }
+  }
+  return index;
+}
+
+function _getWikiIndex() {
+  if (_wikiIndex && (Date.now() - _wikiIndexTime) < WIKI_INDEX_TTL) return _wikiIndex;
+  _wikiIndex = _buildWikiIndex();
+  _wikiIndexTime = Date.now();
+  return _wikiIndex;
+}
+
 function queryWiki(prompt, topK = 3) {
   const start = Date.now();
-  const WIKI_DIR = path.join(process.cwd(), '.wiki');
   try {
-    if (!fs.existsSync(WIKI_DIR)) return { results: [], latency: Date.now() - start, source: 'wiki' };
-    // Directories to search (active content only)
-    const searchDirs = ['', 'Sessions', 'memories', 'knowledge', 'decisions', 'architecture', 'legion', 'projects', 'conversations', 'self-knowledge', 'health', 'raw', 'logs'];
-    const promptLower = prompt.toLowerCase();
-    const keywords = promptLower.split(/\s+/).filter(w => w.length > 3);
+    const wikiIndex = _getWikiIndex();
+    if (wikiIndex.length === 0) return { results: [], latency: Date.now() - start, source: 'wiki' };
+    const keywords = prompt.toLowerCase().split(/\s+/).filter(w => w.length > 3);
     if (keywords.length === 0) return { results: [], latency: Date.now() - start, source: 'wiki' };
 
     const scored = [];
-    for (const dir of searchDirs) {
-      const dirPath = path.join(WIKI_DIR, dir);
-      if (!fs.existsSync(dirPath)) continue;
-      let files;
-      try { files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md')); } catch (e) { continue; }
-      for (const file of files) {
-        const filePath = path.join(dirPath, file);
-        try {
-          const content = fs.readFileSync(filePath, 'utf-8').slice(0, 2000);
-          const matches = keywords.filter(w => content.toLowerCase().includes(w)).length;
-          if (matches > 0) {
-            const score = matches / keywords.length;
-            // Find matching excerpt
-            const lines = content.split('\n');
-            let excerpt = '';
-            for (const line of lines) {
-              const lc = line.toLowerCase();
-              if (keywords.some(w => lc.includes(w))) { excerpt = line.slice(0, 100); break; }
-            }
-            scored.push({
-              content: excerpt || content.slice(0, 100),
-              score: score * 0.3, // discount — wiki is supplementary
-              source: 'wiki',
-              file: dir ? `${dir}/${file}` : file,
-            });
-          }
-        } catch (e) { /* skip unreadable */ }
+    for (const entry of wikiIndex) {
+      const matches = keywords.filter(w => entry.preview.includes(w)).length;
+      if (matches > 0) {
+        const score = matches / keywords.length * 0.3;
+        // Extract matching line as excerpt
+        const lines = entry.preview.split('\n');
+        let excerpt = '';
+        for (const line of lines) {
+          if (keywords.some(w => line.includes(w))) { excerpt = line.slice(0, 100); break; }
+        }
+        scored.push({
+          content: excerpt || entry.preview.slice(0, 100),
+          score,
+          source: 'wiki',
+          file: entry.file,
+        });
       }
     }
     const top = scored.sort((a, b) => b.score - a.score).slice(0, topK);
@@ -187,16 +300,32 @@ function queryWiki(prompt, topK = 3) {
   }
 }
 
-function queryGraphify(prompt, topK = 3) {
-  const start = Date.now();
+// ── Graphify graph cache (lazy-loaded, 5MB JSON — load once, reuse) ────────
+let _graphifyGraph = null;
+
+function _getGraphifyGraph() {
+  if (_graphifyGraph) return _graphifyGraph;
   const GRAPH_PATH = path.join(process.cwd(), 'graphify-out', 'graph.json');
   try {
-    if (!fs.existsSync(GRAPH_PATH)) return { results: [], latency: Date.now() - start, source: 'graphify' };
-    const graph = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf-8'));
+    if (fs.existsSync(GRAPH_PATH)) {
+      _graphifyGraph = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf-8'));
+      return _graphifyGraph;
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function queryGraphify(prompt, topK = 3) {
+  const start = Date.now();
+  try {
+    const graph = _getGraphifyGraph();
+    if (!graph) return { results: [], latency: Date.now() - start, source: 'graphify' };
     const nodes = graph.nodes || [];
     const promptLower = prompt.toLowerCase();
     const keywords = promptLower.split(/\s+/).filter(w => w.length > 2);
 
+    // Build community index for neighbor boosting
+    const communityNodes = {};
     const scored = [];
     for (const node of nodes) {
       const name = (node.name || node.id || node.label || '').toLowerCase();
@@ -204,15 +333,50 @@ function queryGraphify(prompt, topK = 3) {
       const combined = name + ' ' + file;
       const matches = keywords.filter(w => combined.includes(w)).length;
       if (matches > 0) {
-        const score = matches / keywords.length * 0.2; // discount — code structure is reference
+        const score = matches / keywords.length * 0.2;
+        const community = node.community || null;
         scored.push({
           content: `${node.name || node.id || '?'} — ${file || '?'}`,
           score,
           source: 'graphify',
           file: file || '',
+          community,
         });
+        if (community) {
+          if (!communityNodes[community]) communityNodes[community] = [];
+          communityNodes[community].push(scored[scored.length - 1]);
+        }
       }
     }
+
+    // Community boost: nodes in same community boost each other
+    if (scored.length > 1) {
+      for (const c of Object.keys(communityNodes)) {
+        const members = communityNodes[c];
+        if (members.length > 1) {
+          const boost = 0.05;
+          for (const m of members) m.score += boost;
+        }
+      }
+    }
+
+    // Link-based neighbor boost: matched nodes boost linked nodes
+    const links = graph.links || [];
+    if (links.length > 0 && scored.length > 0) {
+      const matchedFiles = new Set(scored.map(s => s.file));
+      for (const link of links) {
+        const srcFile = (link.source || '').toLowerCase();
+        const tgtFile = (link.target || '').toLowerCase();
+        const srcMatched = scored.find(s => s.file === srcFile);
+        const tgtMatched = scored.find(s => s.file === tgtFile);
+        if (srcMatched && !matchedFiles.has(tgtFile)) {
+          scored.push({ content: tgtFile, score: srcMatched.score * 0.15, source: 'graphify', file: tgtFile, community: null });
+        } else if (tgtMatched && !matchedFiles.has(srcFile)) {
+          scored.push({ content: srcFile, score: tgtMatched.score * 0.15, source: 'graphify', file: srcFile, community: null });
+        }
+      }
+    }
+
     const top = scored.sort((a, b) => b.score - a.score).slice(0, topK);
     return { results: top, latency: Date.now() - start, source: 'graphify' };
   } catch (e) {
@@ -281,16 +445,16 @@ function logMetrics(entry) {
 
 // ── Main recall function ────────────────────────────────────────────────────
 
-function recall(prompt) {
+async function recall(prompt) {
   if (!prompt || prompt.length < 3) return [];
 
   // Check cache
   const cached = getCached(prompt);
   if (cached) return cached;
 
-  // Query all layers
+  // Query all layers — chroma is async via daemon, rest are sync
   const graphResult = queryIntelligence(prompt);
-  const chromaResult = queryChroma(prompt);
+  const chromaResult = await queryChroma(prompt);
   const wikiResult = queryWiki(prompt);
   const graphifyResult = queryGraphify(prompt);
   const dreamingResult = queryDreamingPatterns(prompt);
@@ -396,8 +560,12 @@ function status() {
 
 const args = process.argv.slice(2);
 if (args[0] === 'query' && args[1]) {
-  const results = recall(args[1]);
-  console.log(JSON.stringify(results, null, 2));
+  recall(args[1]).then(results => {
+    console.log(JSON.stringify(results, null, 2));
+  }).catch(e => {
+    console.error(JSON.stringify({ error: e.message }));
+    process.exit(1);
+  });
 } else if (args[0] === 'status') {
   console.log(JSON.stringify(status(), null, 2));
 } else if (args.length > 0) {

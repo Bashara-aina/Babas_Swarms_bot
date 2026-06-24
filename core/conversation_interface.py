@@ -13,19 +13,23 @@ import asyncio
 import logging
 import os
 import time
-from datetime import datetime
 
 from core.agent_registry import detect_agent as _detect_agent
 from core.agent_registry import get_fallback_chain as _get_fallback_chain
+from core.thread_store import (
+    ACTIVE_THREADS,
+    add_to_thread,
+    clear_thread,
+    get_thread_context,
+    list_threads,
+    list_threads_raw,
+)
 
 logger = logging.getLogger(__name__)
 
 # ── Re-export routing helpers ─────────────────────────────────────────────────
 detect_agent = _detect_agent
 get_fallback_chain = _get_fallback_chain
-
-# ── Thread memory (in-RAM, per-session) ─────────────────────────────────────
-ACTIVE_THREADS: dict[str, list[dict]] = {}
 
 # ── Conversation history ─────────────────────────────────────────────────────
 CONVERSATION_HISTORY: dict[str, list[dict]] = {}
@@ -223,55 +227,6 @@ def get_conversation_summary_prompt(user_id: str) -> str:
         lines.append(f"{role_label}: {snippet}")
     lines.append("[end context]")
     return "\n".join(lines)
-
-
-def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
-    if thread_id not in ACTIVE_THREADS:
-        ACTIVE_THREADS[thread_id] = []
-    ACTIVE_THREADS[thread_id].append(
-        {
-            "agent": agent,
-            "task": task,
-            "result": result[:500],
-            "timestamp": time.time(),
-        }
-    )
-    if len(ACTIVE_THREADS[thread_id]) > 10:
-        ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
-
-
-def get_thread_context(thread_id: str, last_n: int = 3) -> str:
-    if thread_id not in ACTIVE_THREADS or not ACTIVE_THREADS[thread_id]:
-        return ""
-    recent = ACTIVE_THREADS[thread_id][-last_n:]
-    lines = ["<i>Previous in this thread:</i>\n"]
-    for turn in recent:
-        t = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}…")
-        lines.append(f"\u21b3 {turn['result'][:120]}…\n")
-    return "\n".join(lines)
-
-
-def list_threads() -> str:
-    if not ACTIVE_THREADS:
-        return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-    lines = ["<b>\U0001f4cc Active Threads</b>\n"]
-    for tid, turns in ACTIVE_THREADS.items():
-        last = turns[-1]
-        t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
-        lines.append(f"  \U0001f4cc <b>{tid}</b> \u2014 {len(turns)} turns (last: {t})")
-    return "\n".join(lines)
-
-
-def list_threads_raw() -> list[str]:
-    return list(ACTIVE_THREADS.keys())
-
-
-def clear_thread(thread_id: str) -> bool:
-    if thread_id in ACTIVE_THREADS:
-        del ACTIVE_THREADS[thread_id]
-        return True
-    return False
 
 
 def get_last_message_timestamp(user_id: str) -> float:

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class ModelConfig:
     """LLM model configuration."""
 
-    name: str = "minimax-coding-plan/MiniMax-M3"
+    name: str = "opencode-go/minimax-m3"
     temperature: float = 0.0
     max_tokens: int = 8192
     top_p: float = 1.0
@@ -132,7 +132,7 @@ DEFAULT_CONFIG = SWEAgentConfig()
 DEFAULT_CONFIG_MINIMAX = SWEAgentConfig(
     agent=AgentConfig(
         model=ModelConfig(
-            name="minimax-coding-plan/MiniMax-M3",
+            name="opencode-go/minimax-m3",
             temperature=0.0,
             max_tokens=8192,
         ),

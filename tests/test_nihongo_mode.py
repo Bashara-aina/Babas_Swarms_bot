@@ -46,7 +46,7 @@ def test_sensei_prompt_no_legion_content():
 
 def test_furigana_annotation():
     try:
-        import pykakasi
+        import pykakasi  # noqa: F401
     except ImportError:
         print("⚠️ pykakasi not installed, skipping furigana test")
         return

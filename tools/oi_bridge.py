@@ -21,7 +21,7 @@ def _configure_oi() -> None:
     """Configure Open Interpreter with Legion defaults."""
     if not _OI_AVAILABLE or oi is None:
         return
-    oi.llm.model = os.getenv("OI_MODEL", "minimax-coding-plan/MiniMax-M3")
+    oi.llm.model = os.getenv("OI_MODEL", "opencode-go/minimax-m3")
     oi.llm.api_key = os.getenv("MINIMAX_API_KEY", "")
     oi.auto_run = True
     oi.safe_mode = "off"

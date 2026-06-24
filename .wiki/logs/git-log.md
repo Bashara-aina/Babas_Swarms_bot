@@ -1696,3 +1696,66 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: df00f257
+- Date: Tue Jun 23 05:34:50 PM JST 2026
+- Message: fix: resolve lint errors, consolidate duplicated functions, fix test assertions
+
+- Fix 398 auto-fixable + 186 manual ruff lint errors (587 → 41 remaining)
+- Replace stale MiniMax test assertions with deepseek-v4-flash in 11 test files
+- Consolidate 6x _jst_now → 1 shared function in core/utils/datetime_utils.py
+- Consolidate 3x _now_jst → 1 shared function
+- Consolidate 3x _load_env → 1 shared function
+- Create logrotate.conf for bot.log rotation
+- Fix E402 module import ordering in core files
+- Fix E741 ambiguous variable names (l → line)
+- Fix bare except: → except Exception:
+- Fix unused imports with importlib.util.find_spec pattern
+- Fix F601 duplicate dictionary key in usage_tracker.py
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: ce1b8ba9
+- Date: Wed Jun 24 06:15:18 PM JST 2026
+- Message: feat(memory): elite memory overhaul — unified recall, embedding scoring, parallel hooks
+
+- Install @claude-flow/memory (L3 bridge was silently no-oping)
+- Create unified-recall.cjs: queries graph + Chroma + dreaming, dedup, rerank
+- Add embedding similarity to getContext() scoring (0.35 weight)
+- Add deduplicateByEmbedding() in consolidate() (cosine >0.92 merge)
+- Fix SessionEnd: 12 sequential hooks → 3 parallel groups (155s→35s)
+- Fix L2 ChromaDB path, remove L6 Mem0 placeholder (was double-counting)
+- Wire L4 observation capture, dreaming feedback to vector store
+- Add recall quality metrics (recall-metrics.jsonl) + status dashboard
+- Add embedding cache warmup at session start (background, non-blocking)
+- Validate: 8/8 prompts return results, 7/8 relevant, 270ms avg query
+---
+## Commit: 1a38861c
+- Date: Wed Jun 24 06:22:13 PM JST 2026
+- Message: feat(memory): wire wiki + graphify into unified recall, clean 379MB bloat
+
+- Add queryWiki() to unified recall — searches active wiki content
+  (Sessions, memories, knowledge, decisions, architecture, etc.)
+- Add queryGraphify() to unified recall — searches code graph nodes
+- Wiki: remove 379MB dead weight (popw-references, _archive, tools bloat)
+  396MB → 8.7MB, 4893 → 775 markdown files
+- All 5 layers now contribute: graph + chroma + wiki + graphify + dreaming
+- Layers weighted and deduplicated in unified rerank
+---
+## Commit: d6c5ec4c
+- Date: Wed Jun 24 08:04:40 PM JST 2026
+- Message: chore: cleanup disk and dead files - mypy_cache, logs, root dead files, session_state
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 29591a2b
+- Date: Wed Jun 24 08:07:00 PM JST 2026
+- Message: fix: config cleanup - routing, models, permissions, gitignore, docs
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---
+## Commit: 101cf711
+- Date: Wed Jun 24 08:07:13 PM JST 2026
+- Message: fix: update stale minimax-coding-plan model strings to opencode-go
+
+Co-Authored-By: RuFlo <ruv@ruv.net>
+---

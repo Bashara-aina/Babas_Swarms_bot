@@ -119,7 +119,7 @@ function end() {
   const sessionsDir = path.join(DATA_DIR, 'sessions');
   ensureDir(sessionsDir);
   writeJSON(
-    path.join(sessionsDir, `session-${_session.id.slice(8, 22)}.json`),
+    path.join(sessionsDir, `${_session.id}.json`),
     { ..._session, endedAt, duration }
   );
 

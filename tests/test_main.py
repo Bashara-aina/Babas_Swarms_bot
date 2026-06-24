@@ -14,11 +14,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 def test_imports():
     """Test that critical imports work."""
     try:
-        import agents
-        import computer_agent
-        import llm_client
-        import main
-        from handlers import shared
+        import agents  # noqa: F401
+        import computer_agent  # noqa: F401
+        import llm_client  # noqa: F401
+        import main  # noqa: F401
+        from handlers import shared  # noqa: F401
         assert True
     except ImportError as e:
         pytest.fail(f"Import failed: {e}")
@@ -59,7 +59,7 @@ def test_handlers_registered():
 def test_core_modules_exist():
     """Test that core/ modules are accessible."""
     try:
-        from core import health_check, observability
+        from core import health_check, observability  # noqa: F401
         from core.ruflo_manager import start_health_monitor
         assert callable(start_health_monitor)
     except ImportError as e:
@@ -69,7 +69,7 @@ def test_core_modules_exist():
 def test_tools_available():
     """Test that key tool modules exist."""
     try:
-        from tools import persistence, scheduler
+        from tools import persistence, scheduler  # noqa: F401
         assert True
     except ImportError as e:
         pytest.fail(f"Tools import failed: {e}")

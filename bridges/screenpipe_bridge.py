@@ -59,7 +59,7 @@ class ScreenpipeBridge:
 
 Is Bashara likely stuck on the same error or repeating failures?
 Reply with exactly YES or NO.""",
-            model=os.getenv("SCREENPIPE_ASSESS_MODEL", "minimax-coding-plan/MiniMax-M3"),
+            model=os.getenv("SCREENPIPE_ASSESS_MODEL", "opencode-go/minimax-m3"),
             max_tokens=8,
         )
         if "YES" not in (assessment or "").upper():
@@ -71,7 +71,7 @@ Reply with exactly YES or NO.""",
 
 Write ONE short Telegram message as Legion — casual Indonesian-English mix, friendly, not preachy.
 Max 2 sentences. Offer specific help. No markdown.""",
-            model=os.getenv("SCREENPIPE_MESSAGE_MODEL", "minimax-coding-plan/MiniMax-M3"),
+            model=os.getenv("SCREENPIPE_MESSAGE_MODEL", "opencode-go/minimax-m3"),
             max_tokens=120,
         )
         if not (message or "").strip():

@@ -354,9 +354,9 @@ class RecursiveMASOrchestrator:
 
     def setup_sequential_style(
         self,
-        planner_model: str = "minimax-coding-plan/MiniMax-M3",
-        critic_model: str = "minimax-coding-plan/MiniMax-M3",
-        solver_model: str = "minimax-coding-plan/MiniMax-M3",
+        planner_model: str = "opencode-go/minimax-m3",
+        critic_model: str = "opencode-go/minimax-m3",
+        solver_model: str = "opencode-go/minimax-m3",
     ) -> None:
         """Set up Sequential Style: Planner → Critic → Solver."""
         self.agent_order = ["planner", "critic", "solver"]
@@ -381,10 +381,10 @@ class RecursiveMASOrchestrator:
 
     def setup_mixture_style(
         self,
-        math_model: str = "minimax-coding-plan/MiniMax-M3",
-        code_model: str = "minimax-coding-plan/MiniMax-M3",
-        science_model: str = "minimax-coding-plan/MiniMax-M3",
-        summarizer_model: str = "minimax-coding-plan/MiniMax-M3",
+        math_model: str = "opencode-go/minimax-m3",
+        code_model: str = "opencode-go/minimax-m3",
+        science_model: str = "opencode-go/minimax-m3",
+        summarizer_model: str = "opencode-go/minimax-m3",
     ) -> None:
         """Set up Mixture Style: Math/Code/Science specialists → Summarizer."""
         self.agent_order = ["math", "code", "science", "summarizer"]
@@ -410,8 +410,8 @@ class RecursiveMASOrchestrator:
 
     def setup_distillation_style(
         self,
-        expert_model: str = "minimax-coding-plan/MiniMax-M3",
-        learner_model: str = "minimax-coding-plan/MiniMax-M3",
+        expert_model: str = "opencode-go/minimax-m3",
+        learner_model: str = "opencode-go/minimax-m3",
     ) -> None:
         """Set up Distillation Style: Expert → Learner."""
         self.agent_order = ["expert", "learner"]
@@ -435,8 +435,8 @@ class RecursiveMASOrchestrator:
 
     def setup_deliberation_style(
         self,
-        reflector_model: str = "minimax-coding-plan/MiniMax-M3",
-        tool_caller_model: str = "minimax-coding-plan/MiniMax-M3",
+        reflector_model: str = "opencode-go/minimax-m3",
+        tool_caller_model: str = "opencode-go/minimax-m3",
     ) -> None:
         """Set up Deliberation Style: Reflector ↔ Tool-Caller."""
         self.agent_order = ["reflector", "tool_caller"]

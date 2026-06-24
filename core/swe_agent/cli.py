@@ -26,7 +26,7 @@ async def run_swe_agent(
     problem_statement: str,
     repo_path: str,
     *,
-    model: str = "minimax-coding-plan/MiniMax-M3",
+    model: str = "opencode-go/minimax-m3",
     max_steps: int = 30,
     trajectory_dir: str | None = None,
     no_stream: bool = False,
@@ -127,7 +127,7 @@ def main() -> int:
     parser.add_argument("--issue", help="Problem/issue description")
     parser.add_argument("--issue-url", help="GitHub issue URL")
     parser.add_argument("--repo", required=True, help="Path to repository")
-    parser.add_argument("--model", "-m", default="minimax-coding-plan/MiniMax-M3", help="Model to use")
+    parser.add_argument("--model", "-m", default="opencode-go/minimax-m3", help="Model to use")
     parser.add_argument("--max-steps", "-k", type=int, default=30, help="Max steps")
     parser.add_argument("--trajectory-dir", "-t", help="Trajectory output directory")
     parser.add_argument("--config", "-c", help="Path to config YAML")

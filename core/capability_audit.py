@@ -151,7 +151,7 @@ class CapabilityAudit:
         try:
             content = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model=os.getenv("DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M3"),
+                model=os.getenv("DEFAULT_MODEL", "opencode-go/minimax-m3"),
                 temperature=0.3,
                 max_tokens=512,
             )

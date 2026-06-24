@@ -548,7 +548,7 @@ class AutonomousRouter:
             )
             raw = await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="minimax-coding-plan/MiniMax-M3",
+                model="opencode-go/minimax-m3",
                 temperature=0.0,
                 max_tokens=20,
             )

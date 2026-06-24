@@ -140,7 +140,7 @@ class LocationAdvisor:
         try:
             return await call_llm(
                 messages=[{"role": "user", "content": prompt}],
-                model="minimax-coding-plan/MiniMax-M3",
+                model="opencode-go/minimax-m3",
                 temperature=0.5,
                 max_tokens=500,
             )

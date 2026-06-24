@@ -40,7 +40,7 @@ RESEARCH_HINTS = (
 
 AGENT_TEAM = {
     "strategist": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "High-level planning, architecture decisions, business strategy",
         "system": (
             "You are a senior technical strategist. Break complex goals into clear sub-tasks. "
@@ -49,7 +49,7 @@ AGENT_TEAM = {
         ),
     },
     "developer": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Code generation, debugging, refactoring",
         "system": (
             "You are a senior software engineer. Write clean, tested, production-ready code. "
@@ -57,7 +57,7 @@ AGENT_TEAM = {
         ),
     },
     "researcher": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Academic research, paper analysis, competitive intelligence",
         "system": (
             "You are an academic researcher. Analyze papers rigorously, find evidence, "
@@ -65,7 +65,7 @@ AGENT_TEAM = {
         ),
     },
     "marketer": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Content, social media, copywriting, brand strategy",
         "system": (
             "You are a senior marketing strategist. Create compelling content that resonates. "
@@ -73,7 +73,7 @@ AGENT_TEAM = {
         ),
     },
     "analyst": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Data analysis, metrics, benchmarks, performance review",
         "system": (
             "You are a quantitative analyst. Analyze data with statistical rigor. "
@@ -81,7 +81,7 @@ AGENT_TEAM = {
         ),
     },
     "devops": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Infrastructure, deployment, CI/CD, security, monitoring",
         "system": (
             "You are a senior DevOps engineer. Think about reliability, security, scalability. "
@@ -89,7 +89,7 @@ AGENT_TEAM = {
         ),
     },
     "pm": {
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "role": "Project management, task decomposition, deadline tracking",
         "system": (
             "You are a senior PM. Break work into clear tasks with owners and deadlines. "

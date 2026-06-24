@@ -40,7 +40,7 @@ _RULES_DIR = _ECC_ROOT / "rules"
 ECC_AGENTS: dict[str, dict[str, Any]] = {
     "planner": {
         "description": "Expert planning specialist for complex features and refactoring",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "planner.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -48,7 +48,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "code-reviewer": {
         "description": "Senior code reviewer ensuring quality, security, and maintainability",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "code-reviewer.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -56,7 +56,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "security-reviewer": {
         "description": "Vulnerability detection — OWASP Top 10, secrets, injection, SSRF",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "security-reviewer.md",
         "tools": ["Read", "Write", "Edit", "Bash", "Grep", "Glob"],
@@ -64,7 +64,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "tdd-guide": {
         "description": "TDD specialist enforcing write-tests-first with 80%+ coverage",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "tdd-guide.md",
         "tools": ["Read", "Write", "Edit", "Bash", "Grep"],
@@ -72,7 +72,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "build-error-resolver": {
         "description": "General build and type error resolution across all languages",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "build-error-resolver.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -80,7 +80,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "refactor-cleaner": {
         "description": "Dead code detection, cleanup, and refactoring guidance",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "refactor-cleaner.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -88,7 +88,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "e2e-runner": {
         "description": "Playwright end-to-end testing — critical user flow automation",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "e2e-runner.md",
         "tools": ["Read", "Write", "Bash", "Grep"],
@@ -96,7 +96,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "loop-operator": {
         "description": "Autonomous loop execution — monitor for stalls, intervene on failures",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "loop-operator.md",
         "tools": ["Read", "Bash", "Grep", "Glob"],
@@ -104,7 +104,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "performance-optimizer": {
         "description": "Performance profiling, bottleneck detection, optimization",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "performance-optimizer.md",
         "tools": ["Read", "Bash", "Grep", "Glob"],
@@ -112,7 +112,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "harness-optimizer": {
         "description": "Agent harness config tuning — reliability, cost, throughput",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "harness-optimizer.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -120,7 +120,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "architect": {
         "description": "System design and scalability — architectural decision support",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "architect.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -128,7 +128,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "silent-failure-hunter": {
         "description": "Detects silent failures, swallowed exceptions, failed async tasks",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.0,
         "prompt_file": "silent-failure-hunter.md",
         "tools": ["Read", "Grep", "Glob", "Bash"],
@@ -136,7 +136,7 @@ ECC_AGENTS: dict[str, dict[str, Any]] = {
     },
     "type-design-analyzer": {
         "description": "Type system design — API contracts, generic constraints, variance",
-        "model": "minimax-coding-plan/MiniMax-M3",
+        "model": "opencode-go/minimax-m3",
         "temperature": 0.1,
         "prompt_file": "type-design-analyzer.md",
         "tools": ["Read", "Grep", "Glob"],

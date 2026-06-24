@@ -62,14 +62,14 @@ class TestGetFallbackChain:
         assert isinstance(chain, list)
         assert len(chain) > 0
         # Should fall back to general chain (deepseek primary)
-        assert "deepseek-v4-flash" in chain
+        assert "opencode-go/deepseek-v4-pro" in chain
 
     def test_get_fallback_chain_coding(self):
         """Coding agent should have deepseek primary."""
         from core.agent_registry import get_fallback_chain
 
         chain = get_fallback_chain("coding")
-        assert "deepseek-v4-flash" in chain
+        assert "opencode-go/deepseek-v4-pro" in chain
 
 
 class TestSearchByCapability:

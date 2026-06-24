@@ -160,7 +160,7 @@ class SWEAgentLoop:
         self,
         instance_id: str,
         problem_statement: str,
-        model: str = "minimax-coding-plan/MiniMax-M3",
+        model: str = "opencode-go/minimax-m3",
         max_steps: int = 30,
         working_dir: str | None = None,
         repo_url: str = "",

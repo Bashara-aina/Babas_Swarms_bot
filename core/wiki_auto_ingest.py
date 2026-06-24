@@ -69,7 +69,7 @@ async def _llm_quality_check(q: str, a: str) -> tuple[bool, float]:
         from llm_client import chat
 
         prompt = QUALITY_CHECK_PROMPT.format(q=q[:300], a=a[:500])
-        raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax-coding-plan/MiniMax-M3")
+        raw, _model = await chat(task=prompt, agent_key="general", model_override="opencode-go/minimax-m3")
         data = json.loads(raw)
         return bool(data.get("worthy", False)), float(data.get("score", 0.0))
     except Exception as exc:
@@ -168,7 +168,7 @@ async def on_turn_deep_ingest(
         if llm_client is None:
             from llm_client import chat
 
-            raw, _model = await chat(task=prompt, agent_key="general", model_override="minimax-coding-plan/MiniMax-M3")
+            raw, _model = await chat(task=prompt, agent_key="general", model_override="opencode-go/minimax-m3")
         else:
             raw = await llm_client.complete(prompt)
 

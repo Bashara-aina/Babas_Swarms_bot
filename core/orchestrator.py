@@ -326,7 +326,8 @@ class SwarmDebateOrchestrator:
         logger.info("[SwarmDebate] %s", msg)
 
     async def _call_agent(self, agent_name: str, task: str, context: str = "") -> str:
-        from agents import AGENT_MODELS, DEBATE_PERSONA_MODELS, DEBATE_PERSONAS, build_system_prompt
+        from agents import DEBATE_PERSONA_MODELS, DEBATE_PERSONAS, build_system_prompt
+        from core.agent_registry import MODEL_LOOKUP
 
         persona = DEBATE_PERSONAS.get(agent_name, "You are a brilliant expert.")
         system = build_system_prompt(
@@ -339,13 +340,13 @@ class SwarmDebateOrchestrator:
             user_msg += f"\n\nContext from other agents:\n{context}"
         model = DEBATE_PERSONA_MODELS.get(
             agent_name,
-            AGENT_MODELS.get("general", "ollama_chat/gemma4:e4b"),
+            MODEL_LOOKUP.get("minimax-m3", "opencode-go/minimax-m3"),
         )
         try:
             return await self.llm_call(model, system, user_msg)
         except Exception as e:
             logger.warning("Agent %s (model %s) failed: %s — falling back", agent_name, model, e)
-            fallback = AGENT_MODELS.get("general", "ollama_chat/gemma4:e4b")
+            fallback = MODEL_LOOKUP.get("nemotron-free", MODEL_LOOKUP.get("minimax-m3", "opencode-go/minimax-m3"))
             try:
                 return await self.llm_call(fallback, system, user_msg)
             except Exception as e2:
@@ -387,10 +388,10 @@ class SwarmDebateOrchestrator:
         # ── ROUND 3: Judge Synthesis ─────────────────────────────────────────
         await self._progress("🏆 Round 3/4 — Judge synthesizing all positions...")
 
-        from agents import AGENT_MODELS, build_system_prompt
+        from core.agent_registry import MODEL_LOOKUP
 
         round2_summary = "\n\n".join(f"{agent.upper()} (Round 2): {pos}" for agent, pos in round2.items())
-        judge_system = build_system_prompt(
+        judge_system = (
             "You are the debate Judge. You have read all agents' positions across 2 rounds.\n"
             "Produce a structured synthesis with EXACTLY these sections (use these exact labels):\n"
             "CONSENSUS: [what all or most agree on]\n"
@@ -410,7 +411,7 @@ class SwarmDebateOrchestrator:
                 full_len - 12000,
             )
         synthesis_raw = await self.llm_call(
-            AGENT_MODELS["architect"],
+            MODEL_LOOKUP.get("minimax-m3", "opencode-go/minimax-m3"),
             judge_system,
             judge_msg[:12000],
         )
@@ -680,7 +681,7 @@ async def compose_jarvis_response(bundle: dict[str, Any]) -> str:
 
     from llm_client import wiki_raw_completion
 
-    os.getenv("LEGION_JARVIS_MODEL", "minimax-coding-plan/MiniMax-M3")
+    os.getenv("LEGION_JARVIS_MODEL", "opencode-go/minimax-m3")
     prompt = f"""User goal (Bashara):
 {goal}
 
@@ -1013,15 +1014,26 @@ class LegionSwarmOrchestrator:
             await self.progress_fn(msg)
         logger.info("[LegionSwarm] %s", msg)
 
-    def _get_model_for_agent(self, agent_key: str) -> str:
-        from agents import AGENT_MODELS
-
-        return AGENT_MODELS.get(agent_key, AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-M3"))
+    def _get_model_for_agent(self, agent_def: Any) -> str:
+        if hasattr(agent_def, "primary_model_id") and agent_def.primary_model_id:
+            return agent_def.primary_model_id
+        if hasattr(agent_def, "primary_model") and agent_def.primary_model:
+            from core.agent_registry import MODEL_LOOKUP
+            return MODEL_LOOKUP.get(agent_def.primary_model, agent_def.primary_model)
+        from core.agent_registry import MODEL_LOOKUP
+        return MODEL_LOOKUP.get("minimax-m3", "opencode-go/minimax-m3")
 
     def _build_system_prompt(self, agent_def: Any) -> str:
         from core.agent_registry import PERSONA_WRAPPER
 
-        return f"{PERSONA_WRAPPER.strip()}\n\n{agent_def.persona}"
+        persona = (
+            f"You are {agent_def.name.replace('_', ' ')} in the "
+            f"{agent_def.department.replace('_', ' ')} department. "
+            f"{agent_def.description}. "
+            f"Your capabilities: {', '.join(agent_def.capabilities)}. "
+            "Think step-by-step. Be precise and practical."
+        )
+        return f"{PERSONA_WRAPPER.strip()}\n\n{persona}"
 
     async def _call_agent(
         self,
@@ -1034,20 +1046,20 @@ class LegionSwarmOrchestrator:
         user_msg = f"Task: {task}"
         if context:
             user_msg += f"\n\nAdditional context:\n{context}"
-        model = self._get_model_for_agent(agent_def.key)
+        model = self._get_model_for_agent(agent_def)
         try:
             output = await self.llm_call(model, system, user_msg)
             return AgentResult(
-                key=agent_def.key,
+                key=agent_def.name,
                 name=agent_def.name,
                 output=output,
                 latency_ms=(time.perf_counter() - started) * 1000.0,
                 success=True,
             )
         except Exception as exc:
-            logger.warning("Agent %s failed: %s", agent_def.key, exc)
+            logger.warning("Agent %s failed: %s", agent_def.name, exc)
             return AgentResult(
-                key=agent_def.key,
+                key=agent_def.name,
                 name=agent_def.name,
                 output="",
                 latency_ms=(time.perf_counter() - started) * 1000.0,
@@ -1060,11 +1072,10 @@ class LegionSwarmOrchestrator:
         started = time.perf_counter()
         semaphore = asyncio.Semaphore(self.max_parallel)
 
-        # Get dynamic team from AgentRegistry  # type: ignore[reportAttributeAccessIssue]
-        from core.agent_registry import AgentRegistry  # type: ignore[reportAttributeAccessIssue]
+        # Get dynamic team from agent_registry
+        from core.agent_registry import select_team as _select_team
 
-        registry = AgentRegistry()  # type: ignore[reportAttributeAccessIssue]
-        team_defs = await registry.select_team(task_description=task, max_agents=self.max_parallel)
+        team_defs = await _select_team(task_description=task, max_agents=self.max_parallel)
 
         if not team_defs:
             # Fallback to general agent
@@ -1087,9 +1098,9 @@ class LegionSwarmOrchestrator:
 
         for agent_def, result in zip(team_defs, phase1_results, strict=False):
             if isinstance(result, Exception):
-                phase1_outputs[agent_def.key] = f"[Error: {result}]"  # type: ignore[reportAttributeAccessIssue]
+                phase1_outputs[agent_def.name] = f"[Error: {result}]"  # type: ignore[reportAttributeAccessIssue]
             else:
-                phase1_outputs[agent_def.key] = result.output if isinstance(result, AgentResult) else str(result)  # type: ignore[reportAttributeAccessIssue]
+                phase1_outputs[agent_def.name] = result.output if isinstance(result, AgentResult) else str(result)  # type: ignore[reportAttributeAccessIssue]
 
         # ── PHASE 2: Debate Rounds ─────────────────────────────────────────────
         await self._progress(f"🔥 Phase 2/3 — {self.debate_rounds} debate round(s)...")
@@ -1103,12 +1114,12 @@ class LegionSwarmOrchestrator:
             debate_contexts = []
             for agent_def in team_defs:
                 others_text = "\n\n".join(
-                    f"[{key}]: {prop}" for key, prop in current_proposals.items() if key != agent_def.key  # type: ignore[reportAttributeAccessIssue]
+                    f"[{key}]: {prop}" for key, prop in current_proposals.items() if key != agent_def.name  # type: ignore[reportAttributeAccessIssue]
                 )
                 debate_contexts.append(
                     f"You are {agent_def.name}.\n"
                     f"Task: {task}\n\n"
-                    f"Your initial proposal:\n{current_proposals[agent_def.key]}\n\n"  # type: ignore[reportAttributeAccessIssue]
+                    f"Your initial proposal:\n{current_proposals[agent_def.name]}\n\n"  # type: ignore[reportAttributeAccessIssue]
                     f"Other agents' proposals:\n{others_text}\n\n"
                     "Critique the strongest weaknesses in other proposals and refine your own. "
                     "Keep what's strong, fix what's weak. Respond with your refined position."
@@ -1119,9 +1130,9 @@ class LegionSwarmOrchestrator:
 
             for agent_def, result in zip(team_defs, round_results, strict=False):
                 if isinstance(result, Exception):
-                    current_proposals[agent_def.key] = current_proposals.get(agent_def.key, "")  # type: ignore[reportAttributeAccessIssue]
+                    current_proposals[agent_def.name] = current_proposals.get(agent_def.name, "")  # type: ignore[reportAttributeAccessIssue]
                 else:
-                    current_proposals[agent_def.key] = result.output if isinstance(result, AgentResult) else str(result)  # type: ignore[reportAttributeAccessIssue]
+                    current_proposals[agent_def.name] = result.output if isinstance(result, AgentResult) else str(result)  # type: ignore[reportAttributeAccessIssue]
 
         phase2_outputs = dict(current_proposals)
 
@@ -1129,11 +1140,11 @@ class LegionSwarmOrchestrator:
         await self._progress("🏆 Phase 3/3 — Synthesizing final recommendation...")
 
         all_proposals_text = "\n\n".join(
-            f"=== {team_defs[i].name} ({team_defs[i].key}) ===\n{output}"  # type: ignore[reportAttributeAccessIssue]
+            f"=== {team_defs[i].name} ({team_defs[i].name}) ===\n{output}"
             for i, output in enumerate(phase1_outputs.values())
         )
         refined_text = "\n\n".join(
-            f"=== {team_defs[i].name} ({team_defs[i].key}) ===\n{output}"  # type: ignore[reportAttributeAccessIssue]
+            f"=== {team_defs[i].name} ({team_defs[i].name}) ===\n{output}"
             for i, output in enumerate(phase2_outputs.values())
         )
 
@@ -1157,7 +1168,7 @@ class LegionSwarmOrchestrator:
 
         try:
             final_synthesis = await self.llm_call(
-                "minimax-coding-plan/MiniMax-M3",
+                "opencode-go/minimax-m3",
                 synth_system,
                 synth_msg,
             )
@@ -1170,9 +1181,9 @@ class LegionSwarmOrchestrator:
         agent_results: list[AgentResult] = []
         for agent_def in team_defs:
             result = AgentResult(
-                key=agent_def.key,  # type: ignore[reportAttributeAccessIssue]
+                key=agent_def.name,  # type: ignore[reportAttributeAccessIssue]
                 name=agent_def.name,
-                output=phase2_outputs.get(agent_def.key, ""),  # type: ignore[reportAttributeAccessIssue]
+                output=phase2_outputs.get(agent_def.name, ""),  # type: ignore[reportAttributeAccessIssue]
                 latency_ms=0.0,
                 success=True,
             )
@@ -1181,7 +1192,7 @@ class LegionSwarmOrchestrator:
         # Wire self-evolution: record this swarm session
         try:
             from core.swarm_utils import record_swarm_session
-            agent_names = [a.key for a in team_defs]  # type: ignore[reportAttributeAccessIssue]
+            agent_names = [a.name for a in team_defs]
             await record_swarm_session(
                 task=task,
                 agents=agent_names,
@@ -1229,9 +1240,6 @@ class LegionOrchestrator:
     """
 
     def __init__(self) -> None:
-        from core.agent_registry import AgentRegistry  # type: ignore[reportAttributeAccessIssue]
-
-        self.agent_registry = AgentRegistry()  # type: ignore[reportAttributeAccessIssue]
         self.nexus = NexusOrchestrator()
 
     async def run(self, task: str, user_id: int) -> str:
@@ -1244,7 +1252,9 @@ class LegionOrchestrator:
         bundle = await gather_jarvis_bundle(task, user_id)  # type: ignore[reportArgumentType]
 
         # Check if task is complex enough for multi-agent
-        team = await self.agent_registry.select_team(
+        from core.agent_registry import select_team as _select_team
+
+        team = await _select_team(
             task_description=task,
             max_agents=5,
         )

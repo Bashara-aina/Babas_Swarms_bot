@@ -374,7 +374,7 @@ async def _execute_single_task(
 
     agent_key = task.agent
     # BUG FIX: guard against unknown agent keys (e.g. typos from LLM planner)
-    model = AGENT_MODELS.get(agent_key) or AGENT_MODELS.get("general", "minimax-coding-plan/MiniMax-M3")
+    model = AGENT_MODELS.get(agent_key) or AGENT_MODELS.get("general", "opencode-go/minimax-m3")
     system = build_system_prompt(
         f"You are the {agent_key} specialist in an overnight autonomous job. "
         "Work carefully and thoroughly — there's no user to ask follow-up questions. "

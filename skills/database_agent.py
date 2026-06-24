@@ -63,7 +63,7 @@ async def _nl_to_sql(nl_query: str) -> str:
 
         prompt = _build_nl_to_sql_prompt(nl_query, _TABLE_SCHEMAS)
         resp = await litellm.acompletion(
-            model=os.getenv("DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M3"),
+            model=os.getenv("DEFAULT_MODEL", "opencode-go/minimax-m3"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
             max_tokens=256,

@@ -149,7 +149,7 @@ Draft:"""
 
         response = await call_llm(
             messages=[{"role": "user", "content": prompt}],
-            model=os.getenv("DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M3"),
+            model=os.getenv("DEFAULT_MODEL", "opencode-go/minimax-m3"),
             max_tokens=300,
             temperature=0.7,
         )
@@ -283,7 +283,7 @@ def build_rumahlabuh_crew() -> Any | None:
         return None
 
     try:
-        llm_model = os.getenv("CREWAI_MODEL", "minimax-coding-plan/MiniMax-M3")
+        llm_model = os.getenv("CREWAI_MODEL", "opencode-go/minimax-m3")
 
         booking_agent = Agent(
             role="Booking Monitor",

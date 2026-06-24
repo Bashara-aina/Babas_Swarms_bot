@@ -395,7 +395,7 @@ class TestMetaHarnessOptimizer:
             proposals_per_iteration=1,
         )
 
-        frontier = await optimizer.run(
+        await optimizer.run(
             task_description="Solve coding problems with better prompts",
             domain=HarnessDomain.AGENTIC_CODING,
             evaluate_fn=mock_evaluate,

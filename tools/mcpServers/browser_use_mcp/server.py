@@ -42,7 +42,7 @@ VERSION = "1.26.0"
 
 MINIMAX_API_BASE = os.environ.get("MINIMAX_API_BASE", "https://api.minimax.io/v1")
 MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
-MINIMAX_MODEL = "minimax-coding-plan/MiniMax-M3"
+MINIMAX_MODEL = "opencode-go/minimax-m3"
 
 _FORBIDDEN = {"claude", "anthropic", "gpt-4", "gpt-5", "openai", "gemini", "groq", "together"}
 if any(k in MINIMAX_MODEL.lower() for k in _FORBIDDEN):
@@ -55,7 +55,7 @@ mcp = FastMCP(
     name=APP_NAME,
     instructions="MiniMax-native browser automation via browser-use. "
     "Open URLs, click elements, fill forms, scroll, screenshot, and run autonomous browser tasks. "
-    "All LLM calls use minimax-coding-plan/MiniMax-M3 exclusively.",
+    "All LLM calls use opencode-go/minimax-m3 exclusively.",
 )
 
 

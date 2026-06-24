@@ -137,7 +137,7 @@ class TaskRouter:
     def __init__(self) -> None:
         self._classify_model = os.getenv(
             "LEGION_TASK_ROUTER_CLASSIFY_MODEL",
-            "minimax-coding-plan/MiniMax-M3",
+            "opencode-go/minimax-m3",
         )
 
     async def route(

@@ -33,7 +33,6 @@ import subprocess
 import sys
 import time
 from collections.abc import Awaitable, Callable
-from contextvars import copy_context
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -108,7 +107,6 @@ class ActivityLogMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> Any:
         request_id = uuid4().hex[:8]
-        copy_context()
         set_request_id(request_id)
         try:
             user_id = event.from_user.id if event.from_user else None
@@ -177,6 +175,10 @@ def _install_outbound_logging(bot: Bot) -> None:
         )
         return await original_send_photo(chat_id, photo, *args, **kwargs)
 
+    bot.send_message = send_message_logged  # type: ignore[assignment]
+    bot.edit_message_text = edit_message_text_logged  # type: ignore[assignment]
+    bot.send_photo = send_photo_logged  # type: ignore[assignment]
+
 
 
 
@@ -214,24 +216,14 @@ async def _probe_llm() -> tuple[bool, str]:
     try:
         import litellm
 
-        primary = os.getenv("LEGION_LLM_MODEL", "minimax-coding-plan/MiniMax-M3")
-        if primary.lower().startswith("minimax/"):
-            from openai import AsyncOpenAI
-            api_key = os.getenv("MINIMAX_API_KEY", "")
-            base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
-            model_name = primary.replace("minimax/", "").replace("minimax-", "MiniMax-")
-            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-            await client.chat.completions.create(
-                model=model_name,
-                messages=[{"role": "user", "content": "ping"}],
-                max_tokens=5,
-            )
-        else:
-            await litellm.acompletion(
-                model=primary,
-                messages=[{"role": "user", "content": "ping"}],
-                max_tokens=2,
-            )
+        from core.agent_registry import MODEL_LOOKUP
+
+        primary = os.getenv("LEGION_LLM_MODEL") or MODEL_LOOKUP.get("minimax-m3", "opencode-go/minimax-m3")
+        await litellm.acompletion(
+            model=primary,
+            messages=[{"role": "user", "content": "ping"}],
+            max_tokens=2,
+        )
         return True, primary
     except Exception as e:
         return False, str(e)[:80]
@@ -382,6 +374,7 @@ _shared.ALLOWED_USER_ID = ALLOWED_USER_ID
 _shared._start_time = time.time()
 
 bot = Bot(token=BOT_TOKEN)
+_install_outbound_logging(bot)
 dp = Dispatcher()
 dp.message.middleware(ActivityLogMiddleware())
 logger.info("Activity inbound logging middleware installed")

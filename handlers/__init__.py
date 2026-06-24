@@ -25,8 +25,8 @@ from handlers import (
     ecc_compat,
     enterprise,
     github_intel_handler,
-    gstack,
     goal_handler,
+    gstack,
     harvest_review,
     hermes,
     inline,
@@ -46,8 +46,10 @@ from handlers import (
     shortcuts,
     skills,
     swe_commands,
+    swe_handler,
     system,
     tasks,
+    threads_mode,
     upgrade,
     voice,
     whatsapp_handler,
@@ -62,6 +64,7 @@ _ROUTER_ORDER = [
     computer.router,  # /do /screen /click /type /key /cmd /install
     plandex_commands.router,  # /code /diff /apply /abort
     swe_commands.router,  # /fix /fix_dry
+    swe_handler.router,  # /fix (detailed) /fix_dry (detailed) — SWE-bench style patches
     communications.router,  # /emails /inbox /calendar
     runbook_handler.router,  # /runbook
     business_handler.router,  # /db /site_health /bookings /db_schema
@@ -76,6 +79,7 @@ _ROUTER_ORDER = [
     brain.router,  # /memories /briefing /learn /instincts
     session_handler.router,  # /task /task_done /task_sessions /semantic_set /semantic_get
     sessions.router,  # /save /resume /sessions /audit
+    threads_mode.router,  # /threads_mode — per-user thread isolation
     tasks.router,  # /monitor /schedule /tasks /cancel
     dev.router,  # /scaffold /build /vuln_scan /review
     pm.router,  # /task_from /tasks_due /post /email

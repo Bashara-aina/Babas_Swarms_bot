@@ -38,7 +38,7 @@ def _check_ollama_live() -> bool:
     if _ollama_live is not None and now < _ollama_live_expiry:
         return _ollama_live
     try:
-        resp = requests.get(f"{_ollama_base}/api/tags", timeout=3)
+        resp = requests.get(f"{_ollama_base}/api/tags", timeout=2)
         _ollama_live = resp.status_code == 200
     except Exception:
         _ollama_live = False
@@ -61,7 +61,7 @@ def _embed_via_ollama(text: str) -> list[float] | None:
         resp = requests.post(
             f"{_ollama_base}/api/embeddings",
             json=payload,
-            timeout=5,
+            timeout=2,
         )
         resp.raise_for_status()
         embedding = resp.json()["embedding"]

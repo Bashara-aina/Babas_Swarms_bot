@@ -1,0 +1,27 @@
+{
+  "version": "2.1.0",
+  "name": "Babas-Swarms-bot",
+  "description": "Telegram bot with aiogram 3.x + litellm, 84-agent agency swarm",
+  "technicalLevel": "advanced",
+  "preferredStyle": "pragmatic",
+  "domains": ["python", "telegram-bots", "ai-agents", "async-programming"],
+  "tools": {
+    "primary": "oc-cc-proxy",
+    "models": ["deepseek-v4-flash", "deepseek-v4-pro", "minimax-m3"],
+    "provider": "OpenCode Go via oc-cc-proxy"
+  },
+  "hooks": {
+    "profile": "${HOOK_PROFILE:-standard}",
+    "version": "2.1.0"
+  },
+  "memory": {
+    "layers": 6,
+    "storage": "auto-memory-store.json",
+    "indexed": true
+  },
+  "preferences": {
+    "terseResponses": true,
+    "minimalExplanations": true,
+    "noEmojis": true
+  }
+}

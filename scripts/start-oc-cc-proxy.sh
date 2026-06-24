@@ -32,6 +32,38 @@ mkdir -p "$CALLBACK_DIR"
 cat > "$CALLBACK_DIR/__init__.py" << 'PYEOF'
 PYEOF
 
+# Write max_effort callback — forces reasoning_effort: max on all deepseek requests
+cat > "$CALLBACK_DIR/max_effort.py" << 'PYEOF'
+"""LiteLLM callback: force reasoning_effort=max on deepseek models."""
+from __future__ import annotations
+
+from typing import Any
+from litellm.integrations.custom_logger import CustomLogger
+from litellm.types.utils import CallTypes
+
+
+class MaxEffortCallback(CustomLogger):
+    """Force reasoning_effort=max on all deepseek-v4 requests."""
+
+    async def async_pre_call_deployment_hook(
+        self, kwargs: dict[str, Any], call_type: CallTypes | None
+    ) -> dict[str, Any]:
+        if call_type not in {CallTypes.completion, CallTypes.acompletion}:
+            return kwargs
+
+        model = str(kwargs.get("model") or "")
+        if not model.startswith(("deepseek-v4",)):
+            return kwargs
+
+        optional_params = kwargs.get("optional_params") or {}
+        optional_params["reasoning_effort"] = "max"
+        kwargs["optional_params"] = optional_params
+        return kwargs
+
+
+max_effort_callback = MaxEffortCallback()
+PYEOF
+
 # Copy reasoning callback from installed package
 REASONING_SRC="/home/newadmin/miniconda3/lib/python3.13/site-packages/oc_proxy/reasoning.py"
 if [ -f "$REASONING_SRC" ]; then
@@ -52,12 +84,13 @@ model_list:
       api_base: https://opencode.ai/zen/go/v1
       api_key: ${API_KEY}
       max_input_tokens: 1000000
-      max_tokens: 65536
+      max_tokens: 1000000
 
 litellm_settings:
   callbacks:
     - oc_proxy.reasoning.deepseek_reasoning_content_callback
     - oc_proxy.tool_stripper.tool_schema_stripper_callback
+    - oc_proxy.max_effort.max_effort_callback
   drop_params: true
   set_verbose: false
   use_chat_completions_url_for_anthropic_messages: true
@@ -67,7 +100,7 @@ echo "🚀 Starting oc-cc-proxy on http://${HOST}:${PORT}"
 echo "   Models → OpenCode Go wildcard passthrough"
 echo "   Tool schema stripping → enabled (saves ~60K tokens/req)"
 
-export PYTHONPATH="$CONFIG_DIR:$PYTHONPATH"
+export PYTHONPATH="$CONFIG_DIR${PYTHONPATH:+:$PYTHONPATH}"
 export PATH="/home/newadmin/miniconda3/bin:/home/newadmin/.local/bin:$PATH"
 
 exec litellm --config "$CONFIG_PATH" --host "$HOST" --port "$PORT"

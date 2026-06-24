@@ -805,7 +805,7 @@ async def call_llm(
         # FIXED: Use agent key "general" instead of provider name.
         # Provider name (e.g., "minimax") is not a LEGACY_FALLBACK_CHAIN key —
         # it would fall through to LEGACY_FALLBACK_CHAIN["general"] anyway,
-        # but without the correct model_id format (minimax-coding-plan/ prefix).
+        # but without the correct model_id format (opencode-go/ prefix).
         chain = get_fallback_chain("general")
         for fallback_model in chain:
             if not _is_rate_limited(fallback_model):

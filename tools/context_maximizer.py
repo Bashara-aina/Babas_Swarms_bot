@@ -214,7 +214,7 @@ TEXT TO COMPRESS:
 {pruned}"""
 
             response = litellm.completion(
-                model="minimax-coding-plan/MiniMax-M3",
+                model="opencode-go/minimax-m3",
                 api_base="https://api.minimax.chat/v1",
                 api_key=os.environ["MINIMAX_API_KEY"],
                 messages=[{"role": "user", "content": compress_prompt}],

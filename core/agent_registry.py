@@ -12,10 +12,8 @@ import logging
 import os
 import re
 import signal
-import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
@@ -650,7 +648,24 @@ DEBATE_ICONS = _DEBATE_ICONS
 # Compatibility shims — keep existing main.py call-sites working
 # ---------------------------------------------------------------------------
 
-ACTIVE_THREADS: dict[str, list[dict]] = {}
+from core.thread_store import (  # noqa: E402
+    ACTIVE_THREADS as ACTIVE_THREADS,
+)
+from core.thread_store import (  # noqa: E402
+    add_to_thread as add_to_thread,
+)
+from core.thread_store import (  # noqa: E402
+    clear_thread as clear_thread,
+)
+from core.thread_store import (  # noqa: E402
+    get_thread_context as get_thread_context,
+)
+from core.thread_store import (  # noqa: E402
+    list_threads as list_threads,
+)
+from core.thread_store import (  # noqa: E402
+    list_threads_raw as list_threads_raw,
+)
 
 
 def get_model(agent_key: str, use_fallback: bool = False) -> str | None:
@@ -774,59 +789,6 @@ def list_agents() -> str:
             lines.append(f"  … +{len(agent_names) - 5} more (use /dept {dept})")
     lines.append(f"\n<b>Total: {len(AGENT_REGISTRY)} agents across {len(DEPARTMENT_INDEX)} departments</b>")
     return "\n".join(lines)
-
-
-def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
-    """Store a conversation turn in thread history."""
-    ACTIVE_THREADS.setdefault(thread_id, [])
-    ACTIVE_THREADS[thread_id].append(
-        {
-            "agent": agent,
-            "task": task,
-            "result": result[:500],
-            "timestamp": time.time(),
-        }
-    )
-    if len(ACTIVE_THREADS[thread_id]) > 10:
-        ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
-
-
-def get_thread_context(thread_id: str, last_n: int = 3) -> str:
-    """Get recent conversation context from a thread."""
-    turns = ACTIVE_THREADS.get(thread_id)
-    if not turns:
-        return ""
-    recent = turns[-last_n:]
-    lines = ["Previous conversation in this thread:\n"]
-    for turn in recent:
-        time_str = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{time_str}] {turn['agent'].upper()}: {turn['task'][:100]}…")
-        lines.append(f"Response: {turn['result']}\n")
-    return "\n".join(lines)
-
-
-def list_threads_raw() -> list[str]:
-    """Return list of active thread IDs."""
-    return list(ACTIVE_THREADS.keys())
-
-
-def list_threads() -> str:
-    """List all active threads with turn counts."""
-    if not ACTIVE_THREADS:
-        return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-    lines = ["<b>Active Threads</b>\n"]
-    for tid, turns in ACTIVE_THREADS.items():
-        ts = datetime.fromtimestamp(turns[-1]["timestamp"]).strftime("%m/%d %H:%M")
-        lines.append(f"📌 <b>{tid}</b> — {len(turns)} turns (last: {ts})")
-    return "\n".join(lines)
-
-
-def clear_thread(thread_id: str) -> bool:
-    """Delete a thread's history. Returns True if it existed."""
-    if thread_id in ACTIVE_THREADS:
-        del ACTIVE_THREADS[thread_id]
-        return True
-    return False
 
 
 # ---------------------------------------------------------------------------

@@ -35,7 +35,7 @@ def _build_browser_llm(model: str | None = None) -> Any:
     """
     from langchain_openai import ChatOpenAI
 
-    minimax_model = model or os.getenv("BROWSER_USE_MODEL", "minimax-coding-plan/MiniMax-M3")
+    minimax_model = model or os.getenv("BROWSER_USE_MODEL", "opencode-go/minimax-m3")
     if "/" in minimax_model:
         minimax_model = "gpt-4o-mini"
 
@@ -61,7 +61,7 @@ class BrowserUseAgent:
         headless: bool = True,
         max_steps: int = 10,
     ) -> None:
-        self.model = model or os.getenv("BROWSER_USE_MODEL", "minimax-coding-plan/MiniMax-M3")
+        self.model = model or os.getenv("BROWSER_USE_MODEL", "opencode-go/minimax-m3")
         self.headless = headless
         self.max_steps = max_steps
         self._agent = None

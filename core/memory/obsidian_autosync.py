@@ -451,14 +451,21 @@ def full_session_sync(
     except Exception as e:
         logger.warning("Session summary write failed: %s", e)
 
-    # 3. Extract and write important memories
+    # 3. Extract and write important memories (non-blocking, capped at 3s)
     try:
         from core.memory.store import MemoryStore
+        import concurrent.futures
 
         store = MemoryStore()
         count = store.count()
         if count > 0:
-            top_memories = store.recall(query=session_name, top_k=5, min_score=0.3)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(store.recall, query=session_name, top_k=5, min_score=0.3)
+                try:
+                    top_memories = future.result(timeout=3)
+                except concurrent.futures.TimeoutError:
+                    logger.warning("[obsidian_autosync] Memory recall timed out, skipping memory blocks")
+                    top_memories = []
             for mem in top_memories:
                 if len(mem) > 50:
                     try:

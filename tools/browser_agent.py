@@ -204,7 +204,7 @@ async def browse_task(task: str, max_steps: int = 20) -> dict[str, Any]:
         # browser-use uses LangChain-compatible LLMs
         # Support openrouter or openai-compatible providers via BROWSER_USE_MODEL
         if "/" in model_str:
-            # e.g. "minimax-coding-plan/MiniMax-M3" → use OpenAI-compatible client
+            # e.g. "opencode-go/minimax-m3" → use OpenAI-compatible client
             provider, model_id = model_str.split("/", 1)
             if provider == "minimax":
                 llm = ChatOpenAI(

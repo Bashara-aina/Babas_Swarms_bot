@@ -163,7 +163,7 @@ async def run_opencode_task(
     not embedded in the prompt text.
     """
     project_dir = project_dir or "/home/newadmin/swarm-bot"
-    model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M3")
+    model = os.getenv("LEGION_DEFAULT_MODEL", "opencode-go/minimax-m3")
     prompt_with_context = prompt
     context_files: list[str] = []
     session_dir = Path(project_dir) / ".session_state"
@@ -397,7 +397,7 @@ async def stream_opencode_task(
     type="done" marks final output with full stdout.
     """
     project_dir = project_dir or "/home/newadmin/swarm-bot"
-    model = os.getenv("LEGION_DEFAULT_MODEL", "minimax-coding-plan/MiniMax-M3")
+    model = os.getenv("LEGION_DEFAULT_MODEL", "opencode-go/minimax-m3")
     prompt_with_context = prompt
     context_files: list[str] = []
     session_dir = Path(project_dir) / ".session_state"

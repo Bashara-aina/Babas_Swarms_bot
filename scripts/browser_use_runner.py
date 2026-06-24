@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 MINIMAX_API_BASE = os.environ.get("MINIMAX_API_BASE", "https://api.minimax.io/v1")
 MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
-MINIMAX_MODEL = "minimax-coding-plan/MiniMax-M3"
+MINIMAX_MODEL = "opencode-go/minimax-m3"
 
 _FORBIDDEN = {"claude", "anthropic", "gpt-4", "gpt-5", "openai", "gemini", "groq", "together", "o1-", "o3-", "o4-"}
 if any(k in MINIMAX_MODEL.lower() for k in _FORBIDDEN):

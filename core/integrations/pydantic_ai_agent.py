@@ -4,7 +4,7 @@ pydantic-ai provides structured output validation and result schemas.
 This integrates it with our MiniMax litellm infrastructure.
 
 Usage:
-    async with PydanticAIAgent(model="minimax-coding-plan/MiniMax-M3") as agent:
+    async with PydanticAIAgent(model="opencode-go/minimax-m3") as agent:
         result = await agent.run("extract user info", schema=UserSchema)
 """
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "minimax-coding-plan/MiniMax-M3"
+DEFAULT_MODEL = "opencode-go/minimax-m3"
 _MINIMAX_KNOWN_MODEL = "gpt-4o-mini"  # pydantic-ai requires a known OpenAI model name
 
 
