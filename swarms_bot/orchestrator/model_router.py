@@ -44,12 +44,12 @@ class ModelCandidate:
         return bool(os.getenv(self.env_key))
 
 
-# Full model catalogue — MiniMax only + local Ollama fallbacks
+# Full model catalogue — opencode-go + local Ollama fallbacks
 MODEL_CATALOGUE: list[ModelCandidate] = [
     # Primary: MiniMax M3 for all serious tasks (1M context window)
-    ModelCandidate("minimax-coding-plan/MiniMax-M3", "minimax", 9, 10, 0.0, 1048576, "MINIMAX_API_KEY", ["coding", "debug", "general", "reasoning", "complex"]),
+    ModelCandidate("opencode-go/minimax-m3", "minimax", 9, 10, 0.0, 1048576, "MINIMAX_API_KEY", ["coding", "debug", "general", "reasoning", "complex"]),
     # Fallback: MiniMax M3 (rate-limit chain) — same model, different routing slot
-    ModelCandidate("minimax-coding-plan/MiniMax-M3", "minimax", 9, 8, 0.0, 1048576, "MINIMAX_API_KEY", ["speed", "general", "long-context"]),
+    ModelCandidate("opencode-go/minimax-m3", "minimax", 9, 8, 0.0, 1048576, "MINIMAX_API_KEY", ["speed", "general", "long-context"]),
     # Vision: local Ollama gemma4 on RTX 3060
     ModelCandidate("ollama_chat/gemma4:e4b", "ollama", 5, 7, 0.0, 8192, "OLLAMA_BASE_URL", ["vision", "privacy"]),
     # Local fallback for heavy reasoning
@@ -85,7 +85,7 @@ class ModelRouter:
         available = [m for m in MODEL_CATALOGUE if m.is_available()]
 
         if not available:
-            return "minimax-coding-plan/MiniMax-M3", None
+            return "opencode-go/minimax-m3", None
 
         # Privacy: prefer local models
         if prefer_privacy:

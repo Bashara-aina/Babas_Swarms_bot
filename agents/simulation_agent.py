@@ -28,7 +28,7 @@ async def extract_scenario(user_message: str) -> str:
 
     raw = await wiki_raw_completion(
         f"Extract the core scenario to simulate in 1–2 sentences. Message:\n{user_message[:2000]}",
-        model=os.getenv("LEGION_SIM_SCENARIO_MODEL", "minimax-coding-plan/MiniMax-M3"),
+        model=os.getenv("LEGION_SIM_SCENARIO_MODEL", "opencode-go/minimax-m3"),
         max_tokens=120,
     )
     return (raw or user_message).strip()

@@ -189,7 +189,7 @@ async def guard_confidence(content: str, query: str) -> tuple[Verdict, float, st
         response, _ = await chat(
             task=prompt,
             agent_key="general",
-            model_override="minimax-coding-plan/MiniMax-M3",
+            model_override="opencode-go/minimax-m3",
             run_post_hooks=False,
         )
 

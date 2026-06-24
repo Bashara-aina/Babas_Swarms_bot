@@ -11,9 +11,9 @@ Single source of truth for:
 Ollama is ONLY used for vision (local, private, RTX 3060).
 Never used as a text fallback.
 
-Verified working models (MiniMax-only — no external cloud providers):
-  minimax-coding-plan/MiniMax-M3     ✓ (primary, free tier)
-  minimax-coding-plan/MiniMax-M3        ✓ (complex reasoning, free tier)
+Verified working models (opencode-go — no external cloud providers):
+  opencode-go/minimax-m3     ✓ (primary, free tier)
+  opencode-go/minimax-m3        ✓ (complex reasoning, free tier)
   ollama_chat/llama3.3:70b                ✓ (local fallback, privacy)
   ollama_chat/gemma4:e4b                  ✓ (local vision, RTX 3060)
 """
@@ -23,15 +23,18 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-import threading
-import time
 from collections.abc import Coroutine
-from datetime import datetime
+
+from core.thread_store import (
+    ACTIVE_THREADS as ACTIVE_THREADS,
+    add_to_thread as add_to_thread,
+    clear_thread as clear_thread,
+    get_thread_context as get_thread_context,
+    list_threads as list_threads,
+    list_threads_raw as list_threads_raw,
+)
 
 logger = logging.getLogger(__name__)
-
-# ── Thread-safety lock for ACTIVE_THREADS dict ────────────────────────────────
-_THREADS_LOCK = threading.Lock()  # sync lock for use in sync functions accessing shared dict
 
 # ── Personality wrapper injected into EVERY agent system prompt ──────────────
 PERSONALITY_WRAPPER = """
@@ -78,12 +81,12 @@ DEBATE_PERSONAS = {
 
 # Persona → preferred model (different reasoning styles need different models)
 DEBATE_PERSONA_MODELS: dict[str, str] = {
-    "strategist": "minimax-coding-plan/MiniMax-M3",
-    "devil_advocate": "minimax-coding-plan/MiniMax-M3",
-    "researcher": "minimax-coding-plan/MiniMax-M3",
-    "pragmatist": "minimax-coding-plan/MiniMax-M3",
-    "visionary": "minimax-coding-plan/MiniMax-M3",
-    "critic": "minimax-coding-plan/MiniMax-M3",
+    "strategist": "opencode-go/minimax-m3",
+    "devil_advocate": "opencode-go/minimax-m3",
+    "researcher": "opencode-go/minimax-m3",
+    "pragmatist": "opencode-go/minimax-m3",
+    "visionary": "opencode-go/minimax-m3",
+    "critic": "opencode-go/minimax-m3",
 }
 
 DEBATE_ICONS = {
@@ -97,660 +100,660 @@ DEBATE_ICONS = {
 
 # ── Primary model registry ──────────────────────────────────────────────────
 # SINGLE source of truth — router.py and swarm_wire.py import from here.
-# STRATEGY: MiniMax M3 is the ONLY paid API — use it for everything.
+# STRATEGY: opencode-go/minimax-m3 is the ONLY paid API — use it for everything.
 # Local Ollama gemma4:e4b (9.6GB VRAM) ONLY for vision (screen reading).
-# All other free cloud fallbacks (Groq, Gemini, OpenRouter free tier) when MiniMax fails.
+# All other free cloud fallbacks (Groq, Gemini, OpenRouter free tier) when primary fails.
 # RTX 3060: NO llama3.3:70b, NO qwen3.5:35b — these are too heavy.
 AGENT_MODELS: dict[str, str] = {
-    # Vision: local Ollama — MiniMax can't read screenshots
+    # Vision: local Ollama — opencode-go can't read screenshots
     "vision": "ollama_chat/gemma4:e4b",
     # All other agents: MiniMax M3 only (your ONLY paid model)
-    "coding": "minimax-coding-plan/MiniMax-M3",
-    "debug": "minimax-coding-plan/MiniMax-M3",
-    "math": "minimax-coding-plan/MiniMax-M3",
-    "architect": "minimax-coding-plan/MiniMax-M3",
-    "analyst": "minimax-coding-plan/MiniMax-M3",
-    "computer": "minimax-coding-plan/MiniMax-M3",
-    "general": "minimax-coding-plan/MiniMax-M3",
-    "researcher": "minimax-coding-plan/MiniMax-M3",
-    "marketer": "minimax-coding-plan/MiniMax-M3",
-    "devops": "minimax-coding-plan/MiniMax-M3",
-    "pm": "minimax-coding-plan/MiniMax-M3",
-    "humanizer": "minimax-coding-plan/MiniMax-M3",
-    "reviewer": "minimax-coding-plan/MiniMax-M3",
-    "owl": "minimax-coding-plan/MiniMax-M3",
-    "ag2_researcher": "minimax-coding-plan/MiniMax-M3",
-    "ag2_critic": "minimax-coding-plan/MiniMax-M3",
-    "ag2_synthesizer": "minimax-coding-plan/MiniMax-M3",
-    "code_exec": "minimax-coding-plan/MiniMax-M3",
-    "predictor": "minimax-coding-plan/MiniMax-M3",
-    "claude_orchestrator": "minimax-coding-plan/MiniMax-M3",
+    "coding": "opencode-go/minimax-m3",
+    "debug": "opencode-go/minimax-m3",
+    "math": "opencode-go/minimax-m3",
+    "architect": "opencode-go/minimax-m3",
+    "analyst": "opencode-go/minimax-m3",
+    "computer": "opencode-go/minimax-m3",
+    "general": "opencode-go/minimax-m3",
+    "researcher": "opencode-go/minimax-m3",
+    "marketer": "opencode-go/minimax-m3",
+    "devops": "opencode-go/minimax-m3",
+    "pm": "opencode-go/minimax-m3",
+    "humanizer": "opencode-go/minimax-m3",
+    "reviewer": "opencode-go/minimax-m3",
+    "owl": "opencode-go/minimax-m3",
+    "ag2_researcher": "opencode-go/minimax-m3",
+    "ag2_critic": "opencode-go/minimax-m3",
+    "ag2_synthesizer": "opencode-go/minimax-m3",
+    "code_exec": "opencode-go/minimax-m3",
+    "predictor": "opencode-go/minimax-m3",
+    "claude_orchestrator": "opencode-go/minimax-m3",
     # ── Engineering Department ────────────────────────────────────────────────
-    "senior_backend_dev": "minimax-coding-plan/MiniMax-M3",
-    "senior_frontend_dev": "minimax-coding-plan/MiniMax-M3",
-    "devops_sre": "minimax-coding-plan/MiniMax-M3",
-    "security_engineer": "minimax-coding-plan/MiniMax-M3",
-    "ml_engineer": "minimax-coding-plan/MiniMax-M3",
-    "data_engineer": "minimax-coding-plan/MiniMax-M3",
-    "mobile_dev": "minimax-coding-plan/MiniMax-M3",
-    "platform_infra": "minimax-coding-plan/MiniMax-M3",
-    "lead_engineer": "minimax-coding-plan/MiniMax-M3",
+    "senior_backend_dev": "opencode-go/minimax-m3",
+    "senior_frontend_dev": "opencode-go/minimax-m3",
+    "devops_sre": "opencode-go/minimax-m3",
+    "security_engineer": "opencode-go/minimax-m3",
+    "ml_engineer": "opencode-go/minimax-m3",
+    "data_engineer": "opencode-go/minimax-m3",
+    "mobile_dev": "opencode-go/minimax-m3",
+    "platform_infra": "opencode-go/minimax-m3",
+    "lead_engineer": "opencode-go/minimax-m3",
     # ── Design Department ──────────────────────────────────────────────────────
-    "ux_designer": "minimax-coding-plan/MiniMax-M3",
-    "ui_designer": "minimax-coding-plan/MiniMax-M3",
-    "interaction_designer": "minimax-coding-plan/MiniMax-M3",
-    "design_systems_lead": "minimax-coding-plan/MiniMax-M3",
-    "motion_designer": "minimax-coding-plan/MiniMax-M3",
-    "user_researcher": "minimax-coding-plan/MiniMax-M3",
-    "accessibility_expert": "minimax-coding-plan/MiniMax-M3",
-    "brand_designer": "minimax-coding-plan/MiniMax-M3",
-    "design_lead": "minimax-coding-plan/MiniMax-M3",
+    "ux_designer": "opencode-go/minimax-m3",
+    "ui_designer": "opencode-go/minimax-m3",
+    "interaction_designer": "opencode-go/minimax-m3",
+    "design_systems_lead": "opencode-go/minimax-m3",
+    "motion_designer": "opencode-go/minimax-m3",
+    "user_researcher": "opencode-go/minimax-m3",
+    "accessibility_expert": "opencode-go/minimax-m3",
+    "brand_designer": "opencode-go/minimax-m3",
+    "design_lead": "opencode-go/minimax-m3",
     # ── Research Department ────────────────────────────────────────────────────
-    "literature_analyst": "minimax-coding-plan/MiniMax-M3",
-    "domain_expert": "minimax-coding-plan/MiniMax-M3",
-    "data_scientist": "minimax-coding-plan/MiniMax-M3",
-    "fact_checker": "minimax-coding-plan/MiniMax-M3",
-    "trend_analyst": "minimax-coding-plan/MiniMax-M3",
-    "contrarian_scholar": "minimax-coding-plan/MiniMax-M3",
-    "synthesizer": "minimax-coding-plan/MiniMax-M3",
-    "methodology_critic": "minimax-coding-plan/MiniMax-M3",
-    "research_director": "minimax-coding-plan/MiniMax-M3",
+    "literature_analyst": "opencode-go/minimax-m3",
+    "domain_expert": "opencode-go/minimax-m3",
+    "data_scientist": "opencode-go/minimax-m3",
+    "fact_checker": "opencode-go/minimax-m3",
+    "trend_analyst": "opencode-go/minimax-m3",
+    "contrarian_scholar": "opencode-go/minimax-m3",
+    "synthesizer": "opencode-go/minimax-m3",
+    "methodology_critic": "opencode-go/minimax-m3",
+    "research_director": "opencode-go/minimax-m3",
     # ── Marketing Department ──────────────────────────────────────────────────
-    "brand_strategist": "minimax-coding-plan/MiniMax-M3",
-    "growth_hacker": "minimax-coding-plan/MiniMax-M3",
-    "content_strategist": "minimax-coding-plan/MiniMax-M3",
-    "seo_sem_specialist": "minimax-coding-plan/MiniMax-M3",
-    "social_media_lead": "minimax-coding-plan/MiniMax-M3",
-    "pr_strategist": "minimax-coding-plan/MiniMax-M3",
-    "email_marketer": "minimax-coding-plan/MiniMax-M3",
-    "performance_marketer": "minimax-coding-plan/MiniMax-M3",
-    "cmo": "minimax-coding-plan/MiniMax-M3",
+    "brand_strategist": "opencode-go/minimax-m3",
+    "growth_hacker": "opencode-go/minimax-m3",
+    "content_strategist": "opencode-go/minimax-m3",
+    "seo_sem_specialist": "opencode-go/minimax-m3",
+    "social_media_lead": "opencode-go/minimax-m3",
+    "pr_strategist": "opencode-go/minimax-m3",
+    "email_marketer": "opencode-go/minimax-m3",
+    "performance_marketer": "opencode-go/minimax-m3",
+    "cmo": "opencode-go/minimax-m3",
     # ── Operations Department ────────────────────────────────────────────────
-    "process_analyst": "minimax-coding-plan/MiniMax-M3",
-    "supply_chain_expert": "minimax-coding-plan/MiniMax-M3",
-    "finance_analyst": "minimax-coding-plan/MiniMax-M3",
-    "hr_strategist": "minimax-coding-plan/MiniMax-M3",
-    "legal_counsel": "minimax-coding-plan/MiniMax-M3",
-    "risk_manager": "minimax-coding-plan/MiniMax-M3",
-    "customer_success": "minimax-coding-plan/MiniMax-M3",
-    "support_lead": "minimax-coding-plan/MiniMax-M3",
-    "coo": "minimax-coding-plan/MiniMax-M3",
+    "process_analyst": "opencode-go/minimax-m3",
+    "supply_chain_expert": "opencode-go/minimax-m3",
+    "finance_analyst": "opencode-go/minimax-m3",
+    "hr_strategist": "opencode-go/minimax-m3",
+    "legal_counsel": "opencode-go/minimax-m3",
+    "risk_manager": "opencode-go/minimax-m3",
+    "customer_success": "opencode-go/minimax-m3",
+    "support_lead": "opencode-go/minimax-m3",
+    "coo": "opencode-go/minimax-m3",
     # ── Legal & Compliance Department ─────────────────────────────────────────
-    "contract_lawyer": "minimax-coding-plan/MiniMax-M3",
-    "privacy_gdpr_expert": "minimax-coding-plan/MiniMax-M3",
-    "ip_lawyer": "minimax-coding-plan/MiniMax-M3",
-    "regulatory_expert": "minimax-coding-plan/MiniMax-M3",
-    "compliance_officer": "minimax-coding-plan/MiniMax-M3",
-    "ethics_advisor": "minimax-coding-plan/MiniMax-M3",
-    "employment_lawyer": "minimax-coding-plan/MiniMax-M3",
-    "litigation_risk": "minimax-coding-plan/MiniMax-M3",
-    "general_counsel": "minimax-coding-plan/MiniMax-M3",
+    "contract_lawyer": "opencode-go/minimax-m3",
+    "privacy_gdpr_expert": "opencode-go/minimax-m3",
+    "ip_lawyer": "opencode-go/minimax-m3",
+    "regulatory_expert": "opencode-go/minimax-m3",
+    "compliance_officer": "opencode-go/minimax-m3",
+    "ethics_advisor": "opencode-go/minimax-m3",
+    "employment_lawyer": "opencode-go/minimax-m3",
+    "litigation_risk": "opencode-go/minimax-m3",
+    "general_counsel": "opencode-go/minimax-m3",
     # ── Product Department ────────────────────────────────────────────────────
-    "product_manager": "minimax-coding-plan/MiniMax-M3",
-    "ux_researcher": "minimax-coding-plan/MiniMax-M3",
-    "growth_pm": "minimax-coding-plan/MiniMax-M3",
-    "b2b_pm": "minimax-coding-plan/MiniMax-M3",
-    "b2c_pm": "minimax-coding-plan/MiniMax-M3",
-    "platform_pm": "minimax-coding-plan/MiniMax-M3",
-    "monetisation_pm": "minimax-coding-plan/MiniMax-M3",
-    "roadmap_strategist": "minimax-coding-plan/MiniMax-M3",
-    "head_of_product": "minimax-coding-plan/MiniMax-M3",
+    "product_manager": "opencode-go/minimax-m3",
+    "ux_researcher": "opencode-go/minimax-m3",
+    "growth_pm": "opencode-go/minimax-m3",
+    "b2b_pm": "opencode-go/minimax-m3",
+    "b2c_pm": "opencode-go/minimax-m3",
+    "platform_pm": "opencode-go/minimax-m3",
+    "monetisation_pm": "opencode-go/minimax-m3",
+    "roadmap_strategist": "opencode-go/minimax-m3",
+    "head_of_product": "opencode-go/minimax-m3",
     # ── Creative Department ──────────────────────────────────────────────────
-    "copywriter": "minimax-coding-plan/MiniMax-M3",
-    "storyteller": "minimax-coding-plan/MiniMax-M3",
-    "creative_strategist": "minimax-coding-plan/MiniMax-M3",
-    "art_director": "minimax-coding-plan/MiniMax-M3",
-    "video_producer": "minimax-coding-plan/MiniMax-M3",
-    "meme_viral_expert": "minimax-coding-plan/MiniMax-M3",
-    "editor": "minimax-coding-plan/MiniMax-M3",
-    "tone_of_voice_expert": "minimax-coding-plan/MiniMax-M3",
-    "creative_director": "minimax-coding-plan/MiniMax-M3",
+    "copywriter": "opencode-go/minimax-m3",
+    "storyteller": "opencode-go/minimax-m3",
+    "creative_strategist": "opencode-go/minimax-m3",
+    "art_director": "opencode-go/minimax-m3",
+    "video_producer": "opencode-go/minimax-m3",
+    "meme_viral_expert": "opencode-go/minimax-m3",
+    "editor": "opencode-go/minimax-m3",
+    "tone_of_voice_expert": "opencode-go/minimax-m3",
+    "creative_director": "opencode-go/minimax-m3",
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": "ollama_chat/gemma4:e4b",
-    "multimodal_analyst": "minimax-coding-plan/MiniMax-M3",
+    "multimodal_analyst": "opencode-go/minimax-m3",
     # ── Nexus Department ──────────────────────────────────────────────────────
-    "nexus_coordinator": "minimax-coding-plan/MiniMax-M3",
-    "nexus_analyst": "minimax-coding-plan/MiniMax-M3",
+    "nexus_coordinator": "opencode-go/minimax-m3",
+    "nexus_analyst": "opencode-go/minimax-m3",
     # ── Strategy Nexus Department ─────────────────────────────────────────────
-    "corporate_strategist": "minimax-coding-plan/MiniMax-M3",
-    "venture_capitalist": "minimax-coding-plan/MiniMax-M3",
-    "management_consultant": "minimax-coding-plan/MiniMax-M3",
-    "futurist": "minimax-coding-plan/MiniMax-M3",
-    "economist": "minimax-coding-plan/MiniMax-M3",
-    "geopolitical_analyst": "minimax-coding-plan/MiniMax-M3",
-    "first_principles_thinker": "minimax-coding-plan/MiniMax-M3",
-    "chief_strategy_officer": "minimax-coding-plan/MiniMax-M3",
+    "corporate_strategist": "opencode-go/minimax-m3",
+    "venture_capitalist": "opencode-go/minimax-m3",
+    "management_consultant": "opencode-go/minimax-m3",
+    "futurist": "opencode-go/minimax-m3",
+    "economist": "opencode-go/minimax-m3",
+    "geopolitical_analyst": "opencode-go/minimax-m3",
+    "first_principles_thinker": "opencode-go/minimax-m3",
+    "chief_strategy_officer": "opencode-go/minimax-m3",
 }
 
 # ── Fallback chains ────────────────────────────────────────────────────────────
-# MiniMax-only fallback chain. No external cloud providers. Local Ollama for vision/computer.
+# opencode-go fallback chain. No external cloud providers. Local Ollama for vision/computer.
 FALLBACK_CHAIN: dict[str, list[str]] = {
     # Vision/computer: gemma4:e4b local for screen analysis (MiniMax can't do screen reading)
     "vision": [
         "ollama_chat/gemma4:e4b",
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "computer": [
         "ollama_chat/gemma4:e4b",
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
-    # All other agents: MiniMax only, Ollama local for heavy reasoning
+    # All other agents: opencode-go/minimax-m3 only, Ollama local for heavy reasoning
     "coding": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "debug": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "math": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "architect": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "general": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/gemma4:e4b",
     ],
     "researcher": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "marketer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "devops": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "humanizer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "owl": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "ag2_researcher": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "ag2_critic": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ag2_synthesizer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "code_exec": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "predictor": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "claude_orchestrator": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "reviewer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     # ── Engineering Department ─────────────────────────────────────────────────
     "senior_backend_dev": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "senior_frontend_dev": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "devops_sre": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "security_engineer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ml_engineer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "data_engineer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "mobile_dev": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "platform_infra": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     "lead_engineer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
     ],
     # ── Design Department ──────────────────────────────────────────────────────
     "ux_designer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ui_designer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "interaction_designer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "design_systems_lead": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "motion_designer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "user_researcher": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "accessibility_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "brand_designer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "design_lead": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Research Department ────────────────────────────────────────────────────
     "literature_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "domain_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "data_scientist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "fact_checker": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "trend_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "contrarian_scholar": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "synthesizer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "methodology_critic": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "research_director": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Marketing Department ────────────────────────────────────────────────────
     "brand_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "growth_hacker": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "content_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "seo_sem_specialist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "social_media_lead": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "pr_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "email_marketer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "performance_marketer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "cmo": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Operations Department ────────────────────────────────────────────────────
     "process_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "supply_chain_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "finance_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "hr_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "legal_counsel": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "risk_manager": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "customer_success": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "support_lead": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "coo": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Legal & Compliance Department ───────────────────────────────────────────
     "contract_lawyer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "privacy_gdpr_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ip_lawyer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "regulatory_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "compliance_officer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ethics_advisor": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "employment_lawyer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "litigation_risk": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "general_counsel": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Product Department ──────────────────────────────────────────────────────
     "product_manager": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "ux_researcher": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "growth_pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "b2b_pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "b2c_pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "platform_pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "monetisation_pm": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "roadmap_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "head_of_product": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Creative Department ─────────────────────────────────────────────────────
     "copywriter": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "storyteller": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "creative_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "art_director": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "video_producer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "meme_viral_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "editor": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "tone_of_voice_expert": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "creative_director": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Vision/Multimodal Department ───────────────────────────────────────────
     "vision_agent": [
         "ollama_chat/gemma4:e4b",
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "multimodal_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Nexus Department ────────────────────────────────────────────────────────
     "nexus_coordinator": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "nexus_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     # ── Strategy Nexus Department ───────────────────────────────────────────────
     "corporate_strategist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "venture_capitalist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "management_consultant": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "futurist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "economist": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "geopolitical_analyst": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "first_principles_thinker": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
     "chief_strategy_officer": [
-        "minimax-coding-plan/MiniMax-M3",
-        "minimax-coding-plan/MiniMax-M3",
+        "opencode-go/minimax-m3",
+        "opencode-go/minimax-m3",
         "ollama_chat/llama3.3:70b",
     ],
 }
@@ -1754,9 +1757,6 @@ TASK_KEYWORDS: dict[str, list[str]] = {
 
 DEFAULT_AGENT = "general"
 
-# ── Thread memory ───────────────────────────────────────────────────────────
-ACTIVE_THREADS: dict[str, list[dict]] = {}
-
 
 def detect_agent(task: str) -> str:
     task_lower = task.lower().strip()
@@ -1918,61 +1918,6 @@ def list_agents() -> str:
 def list_all_departments() -> list[str]:
     """Return all agent role names."""
     return list(AGENT_MODELS.keys())
-
-
-def add_to_thread(thread_id: str, agent: str, task: str, result: str) -> None:
-    with _THREADS_LOCK:
-        if thread_id not in ACTIVE_THREADS:
-            ACTIVE_THREADS[thread_id] = []
-        ACTIVE_THREADS[thread_id].append(
-            {
-                "agent": agent,
-                "task": task,
-                "result": result[:500],
-                "timestamp": time.time(),
-            }
-        )
-        if len(ACTIVE_THREADS[thread_id]) > 10:
-            ACTIVE_THREADS[thread_id] = ACTIVE_THREADS[thread_id][-10:]
-    logger.info("Added to thread '%s': %s agent", thread_id, agent)
-
-
-def get_thread_context(thread_id: str, last_n: int = 3) -> str:
-    if thread_id not in ACTIVE_THREADS or not ACTIVE_THREADS[thread_id]:
-        return ""
-    recent = ACTIVE_THREADS[thread_id][-last_n:]
-    lines = ["<i>Previous in this thread:</i>\n"]
-    for turn in recent:
-        t = datetime.fromtimestamp(turn["timestamp"]).strftime("%H:%M")
-        lines.append(f"[{t}] {turn['agent'].upper()}: {turn['task'][:80]}…")
-        lines.append(f"↳ {turn['result'][:120]}…\n")
-    return "\n".join(lines)
-
-
-def list_threads() -> str:
-    with _THREADS_LOCK:
-        if not ACTIVE_THREADS:
-            return "<b>No active threads</b>\n\nUse <code>/thread &lt;name&gt;</code> to start one."
-        lines = ["<b>📌 Active Threads</b>\n"]
-        for tid, turns in ACTIVE_THREADS.items():
-            last = turns[-1]
-            t = datetime.fromtimestamp(last["timestamp"]).strftime("%m/%d %H:%M")
-            lines.append(f"  📌 <b>{tid}</b> — {len(turns)} turns (last: {t})")
-        return "\n".join(lines)
-
-
-def list_threads_raw() -> list[str]:
-    with _THREADS_LOCK:
-        return list(ACTIVE_THREADS.keys())
-
-
-def clear_thread(thread_id: str) -> bool:
-    with _THREADS_LOCK:
-        if thread_id in ACTIVE_THREADS:
-            del ACTIVE_THREADS[thread_id]
-            logger.info("Cleared thread '%s'", thread_id)
-            return True
-        return False
 
 
 _LAZY_AGENT_SUBMODULES = frozenset({"owl_agent", "ag2_pipeline"})
