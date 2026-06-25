@@ -1,0 +1,1099 @@
+
+Short answer: I could not find any published work up to early 2026 that clearly does FiLM-style, poseâ€‘conditioned affine modulation of CNN/ResNet feature maps for action recognition, nor any action-recognition paper that uses conditional batch normalization where the conditioning signal is pose/skeleton. Existing work either (a) uses FiLM/conditional normalization for other video tasks without pose, or (b) uses pose for fusion/attention but not via FiLM/CBN.
+So as far as the mainstream literature goes, a â€œposeâ†’FiLMâ†’RGB-featureâ€ action-recognition model appears to be unexplored.
+Skeleton-based action recognition: no FiLM / CBN reported
+A recent curated â€œAwesome Skeleton-based Action Recognitionâ€ list tracks essentially all major skeleton/HAR papers from 2014â€“2025 across CVPR/ICCV/ECCV/NeurIPS/TPAMI, etc.github
+A text search over this list finds no occurrences of â€œFiLMâ€, â€œfeature-wise linear modulationâ€, â€œconditional batchâ€, or â€œaffineâ€ in titles or descriptions.bipashasen.github
+Given how comprehensive this list is, this is strong evidence that:
+Skeleton-based HAR work focuses on GCNs, transformers, contrastive/self-supervised objectives, diffusion, etc., but does not use FiLM layers or conditional batch normalization as a named technique.github+1
+Modulation in this subfield is usually via attention weights, learned adjacency/topology, or feature gating inside the skeleton branch, not via Î³x+Î²\gamma x + \betaÎ³x+Î² conditioning layers applied to CNN/ResNet features.arxiv+1
+This strongly suggests there is no widely adopted FiLM / CBN skeleton-based action recognition architecture up to 2025.
+Pose-/skeleton-guided action recognition without FiLM
+There are many pose- or skeleton-guided action recognition models, but they use pose in other ways (multi-stream fusion, attention, or early/late fusion), not FiLM-style affine modulation of CNN features.
+Representative examples:
+PoTion: Pose MoTion Representation for Action Recognition â€“ CVPR 2018
+Uses heatmaps from a 2D pose estimator, temporally â€œcolorizesâ€ and sums them into a fixed-size PoTion representation, then applies a shallow CNN for classification; the pose representation is a separate input branch, not a conditioning signal that modulates CNN features via FiLM.is.mpg
+Title: PoTion: Pose MoTion Representation for Action Recognition (CVPR 2018) â€“ no FiLM/CBN, just pose heatmap aggregation.is.mpg
+Human Action Recognition Based on Temporal Pose CNN and Multi-Dimensional Fusion â€“ ECCV Workshops 2018
+Builds a temporal pose CNN and fuses temporal pose, spatial, and motion feature maps, â€œbridging the gap between the dimension difference between 3D and 2D CNN feature mapsâ€; again fusion, not Î³,Î²\gamma,\betaÎ³,Î²-style modulation.openaccess.thecvf
+Pose-guided Visual Attention for Action Recognition â€“ CS231A project report (2016)
+Uses pose to guide an LSTM-based attention mechanism over image regions for still-image action classification; no feature-wise affine modulation of CNN feature maps.web.stanford
+Pose-guided multi-task video transformer for driver action recognition (POâ€‘GUISE) â€“ arXiv 2024
+Adds a pose-heatmap prediction head to a VideoMAE-style transformer and uses keypoints to guide token selection; conditioning is at the token/attention level rather than FiLM/CBN on CNN channels.arxiv
+Pose-/parsing-guided multimodal HAR (IPPâ€‘Net / EPPâ€‘Net) â€“ arXiv 2023â€“2024
+Integrating Human Parsing and Pose Network (IPP-Net) and its ensemble variant EPP-Net use separate pose and human-parsing CNN branches and ensemble or fuse their high-level features for action recognition; they do not report any FiLM layers or conditional normalization.arxiv+1
+Enhancing Skeleton-Based Action Recognition with Feature Maps from Pose Estimation Networks â€“ IEICE Trans. Fundamentals, 2025
+Introduces â€œPose Feature Map Enhanced Skeleton Representation (PFMESR)â€ where intermediate feature maps from a pose-estimation CNN are aligned and fused with skeleton features; fusion is via alignment and concatenation, not FiLM/CBN.colab
+Across these, pose/skeleton is always:
+Another input modality (heatmaps, keypoints, skeleton graphs), or
+A guide for attention/masking/region selection,
+but never implemented as FiLM-like Î³(pose)â‹…x+Î²(pose)\gamma(\text{pose})\cdot x + \beta(\text{pose})Î³(pose)â‹…x+Î²(pose) on CNN/ResNet features.
+FiLM and conditional normalization in vision/video (not pose/HAR)
+FiLM and conditional normalization are well-developed elsewhere in vision, including video, but not with pose â†’ FiLM â†’ action-recognition architectures.
+FiLM: Visual Reasoning with a General Conditioning Layer â€“ arXiv 2017 (Perez et al.)
+Defines FiLM as feature-wise affine modulation: FiLM(x)=Î³(z)âŠ™x+Î²(z)\text{FiLM}(x) = \gamma(z)\odot x + \beta(z)FiLM(x)=Î³(z)âŠ™x+Î²(z), usually applied to CNN feature maps and driven by language embeddings for VQA.arxiv+1
+Distillâ€™s Feature-wise transformations article explicitly notes that conditional batch normalization and conditional instance normalization are special cases of FiLM, where the affine transform is folded into the normalization layer.distill
+Graph Neural Networks with Feature-wise Linear Modulation (GNN-FiLM) â€“ ICML 2020
+Introduces FiLM-style modulation on GNNs; no skeleton HAR or pose conditioning.proceedings.mlr
+Temporal Feature-Wise Linear Modulation (TFiLM) â€“ NeurIPS 2019
+Capturing Long-Range Sequence Dependencies with Feature-Wise Linear Modulations (TFiLM) modulates 1D CNN activations in time by letting an RNN generate the affine parameters of batch normalization, inspired by FiLM and adaptive BN.papers.neurips
+Task domains in that paper are generic sequential prediction (e.g., audio); it does not address pose or action recognition.papers.neurips
+Adaptive Video Highlight Detection by Learning from User History â€“ ECCV 2020
+Introduces Temporal-Adaptive Instance Normalization (Tâ€‘AIN), a conditional instance normalization layer for video, where affine parameters of instance norm are generated from user-history embeddings (i.e., personalized video highlight detection); conceptually similar to FiLM but not HAR or pose.ecva
+Deep Video Codec Control for Vision Models (supplemental) â€“ CVPRW 2024
+Uses a conditional group normalization where affine parameters are predicted from a condition latent vector via a spatial feature transform layer, explicitly comparing to conditional batch normalization.openaccess.thecvf
+Again, task is codec control, not action recognition.
+These confirm that FiLM/CBN-style conditioning is popular in video models, but conditioning inputs are text, style, user history, or latent stateâ€”not pose/skeleton or body keypoints, and not for HAR.
+Conditional batch normalization related to human motion (but not recognition)
+The one clear action-related use of conditional batch normalization I found is in video prediction / synthesis, not recognition:
+Conditional Temporal Variational AutoEncoder for Action Video Prediction â€“ IJCV 2023
+Title: Conditional Temporal Variational AutoEncoder for Action Video Prediction (ACTâ€‘VAE).cse.cuhk
+They propose an Action Conditional Temporal VAE that predicts future pose sequences and, combined with a Poseâ€‘toâ€‘Image (P2I) network, synthesizes human action videos from a single image and an action label.cse.cuhk
+In the P2I networkâ€™s decoder, they introduce Action Conditional Batch Normalization (ACBN): for each action label AAA, an embedding network outputs Î³A\gamma_AÎ³Aâ€‹ and Ï„A\tau_AÏ„Aâ€‹ used as BN affine parameters:
+x^=Î³Axâˆ’Î½xÏx2+Ïµ+Ï„A\hat{x} = \gamma_A \frac{x - \nu_x}{\rho_x^2 + \epsilon} + \tau_Ax^=Î³Aâ€‹Ïx2â€‹+Ïµxâˆ’Î½xâ€‹â€‹+Ï„Aâ€‹, with (Î³A,Ï„A)=B(A)(\gamma_A, \tau_A) = B(A)(Î³Aâ€‹,Ï„Aâ€‹)=B(A).cse.cuhk
+This is exactly a CBN / FiLM-style conditional affine modulation, but:
+The conditioning signal is discrete action label, not pose/skeleton.
+The objective is sequence generation (video synthesis), not action classification.
+So ACTâ€‘VAE + ACBN shows â€œaction-conditional batch normâ€ on CNN feature maps in a human-motion context, but not â€œpose-conditional batch norm for recognitionâ€.
+Skeleton-based â€œfeature modulationâ€ that is not FiLM
+A few skeleton-HAR papers talk about â€œfeature modulationâ€ or â€œmodulation networksâ€, but they modulate skeleton features internally and do not connect pose to CNN/ResNet features via FiLM:
+Motion-guided Modulation Network for Skeleton-based Micro-Action Recognition (MMN) â€“ ACM MM 2025
+Title: Motion-guided Modulation Network for Skeleton-based Micro-Action Recognition.acm+1
+They design a Motion-guided Skeletal Modulation (MSM) and Motion-guided Temporal Modulation (MTM) module that inject motion cues into skeletal and temporal branches to amplify subtle motion patterns, but this is implemented as internal attention and gating on skeleton features, not FiLM layers on a CNN backbone.arxiv+1
+Modeling the Internal and Contextual Attention for Self-Supervised Skeleton-Based Action Recognition â€“ Sensors 2025
+Uses a â€œFeature Modulation moduleâ€ inside a self-supervised skeleton encoder; again this is modulation of skeleton representations themselves, not FiLM/CBN using keypoints to modulate a CNN processing RGB frames.pmc.ncbi.nlm.nih
+These works show that â€œmodulationâ€ language is used, but not in the strict FiLM/CBN sense youâ€™re after, and not with pose as a conditioning vector into a CNN.
+Answer to your specific questions
+1. â€œHas anyone done FiLM-based pose-to-action feature modulation before 2026?â€
+Based on:
+A search across FiLM/CBN/feature-wise modulation literature,
+Dedicated skeleton-based HAR paper lists (2014â€“2025), and
+Pose-/skeleton-guided action recognition papers in major venues,
+I did not find any paper that simultaneously satisfies all of:
+Task: action recognition (not VQA, NeRF, or high-level highlight tasks).
+Conditioning signal: pose / skeleton / body keypoints.
+Mechanism: explicit FiLM-style or conditional normalization (Î³x+Î²\gamma x + \betaÎ³x+Î²) applied to CNN/ResNet feature maps, where Î³,Î²\gamma, \betaÎ³,Î² come from pose features.
+In other words, there seems to be no mainstream â€œposeâ†’FiLMâ†’CNNâ€ action-recognition architecture in the literature up to early 2026.
+The closest related works either:
+Use FiLM/CBN, but condition on labels, language, style, user history, or latent state, and not in an HAR context.distill+3
+Use pose/skeleton for action recognition, but only via multi-stream fusion or attention, not feature-wise affine modulation.openaccess.thecvf+4
+So if you build a model where a pose/skeleton encoder predicts Î³,Î²\gamma,\betaÎ³,Î² parameters that modulate ResNet feature maps (Ã  la FiLM/CBN) for action recognition, that would very likely be novel.
+2. â€œPapers that use FiLM explicitly or a variantâ€ (closest matches)
+None meet your pose/HAR constraint, but for completeness, here are the closest FiLM/CBN-like works relevant to video or human motion:
+PaperVenue, YearWhat they doFiLM / CBN usage
+FiLM: Visual Reasoning with a General Conditioning Layer (Perez et al.)
+arXiv 2017, commonly cited as ICLR-style work
+CLEVR visual question answering with CNN + GRU; language conditions CNN via FiLM layers
+Explicit FiLM layers (Î³(z)â‹…x+Î²(z)\gamma(z)\cdot x + \beta(z)Î³(z)â‹…x+Î²(z)) on CNN feature maps; no pose, no HARarxiv+1
+Feature-wise transformations (Dumoulin et al.)
+Distill 2018
+Survey/tutorial paper
+Shows conditional batch/instance norm are FiLM special cases; mentions applications incl. visual recognition and (briefly) action recognition historically, but not pose-based HAR architectures.distill
+Graph Neural Networks with Feature-wise Linear Modulation
+ICML 2020
+GNN-FiLM architecture
+Uses FiLM on GNN node features; no pose/HAR application in paper.proceedings.mlr
+Capturing Long-Range Sequence Dependencies with Feature-Wise Linear Modulations (TFiLM)
+NeurIPS 2019
+Temporal FiLM for 1D CNNs on sequential data
+RNN predicts BN affine parameters (FiLM over time); applied to generic sequences (e.g., audio), not action recognition / pose.papers.neurips
+Adaptive Video Highlight Detection by Learning from User History
+ECCV 2020
+Personalized video highlight detection
+Temporal-Adaptive Instance Normalization (Tâ€‘AIN), a conditional instance norm layer for video; conceptually FiLM-like but conditioned on user history, not pose.ecva
+Conditional Temporal Variational AutoEncoder for Action Video Prediction (ACTâ€‘VAE)
+IJCV 2023
+Action video prediction (generation) from single image + action label
+Pose-based VAE + Pose-to-Image GAN; introduces Action Conditional Batch Normalization (ACBN) in the generator: BN affine params (Î³A,Ï„A)(\gamma_A,\tau_A)(Î³Aâ€‹,Ï„Aâ€‹) are functions of action label; FiLM-equivalent, but used for generation, not recognition, and conditioned on labels not pose.cse.cuhk
+None of these use pose/skeleton as the conditioning vector into FiLM/CBN for an action-recognition classifier.
+3. â€œPapers that use conditional batch normalization for action recognitionâ€
+Within strict â€œaction recognitionâ€ (classification) I did not find a paper that:
+Names conditional batch normalization,
+Uses it in a ResNet/CNN feature extractor, and
+Targets standard HAR benchmarks.
+The closest is again ACTâ€‘VAE:
+ACTâ€‘VAE (IJCV 2023) uses ACBN in a Poseâ€‘toâ€‘Image generator, not an action classifier; its objective is to generate action-conditioned videos, not to classify actions.cse.cuhk
+Beyond that, conditional batch/instance normalization appears mainly in:
+VQA models (language-conditioned BN) and style-transfer models.distill
+Video tasks like highlight detection (Tâ€‘AIN) and codec control, where the condition is user history or codec state, not pose or action class for recognition.ecva+1
+So for your exact queryâ€”â€œconditional batch normalization for action recognitionâ€â€”I did not find a convincing positive example.
+Practical implications for your own work
+Given the above, a FiLM-based pose-to-action feature modulation architectureâ€”e.g.:
+Pose/skeleton encoder â†’
+MLP producing Î³â„“,Î²â„“\gamma_{\ell}, \beta_{\ell}Î³â„“â€‹,Î²â„“â€‹ per ResNet block,
+Applied as BN(fâ„“)â†¦Î³â„“(pose)â‹…BN(fâ„“)+Î²â„“(pose)\text{BN}(f_{\ell}) \mapsto \gamma_{\ell}(\text{pose}) \cdot \text{BN}(f_{\ell}) + \beta_{\ell}(\text{pose})BN(fâ„“â€‹)â†¦Î³â„“â€‹(pose)â‹…BN(fâ„“â€‹)+Î²â„“â€‹(pose),
+for HAR would almost certainly be viewed as new, especially if:
+You clearly position it as merging (a) multimodal HAR (pose + RGB), and (b) FiLM/conditional-norm conditioning ideas from VQA and style transfer.arxiv+1
+You empirically compare against existing pose-guided fusion / attention approaches such as PoTion, pose-guided attention (POâ€‘GUISE), and pose+parsing multi-stream networks.arxiv+2
+If you want, I can sketch concrete architectures (e.g., pose-conditioned FiLM-ResNet-50 + TSM or SlowFast) and ablation plan that would make a clear â€œthis is genuinely different from existing fusion/attention baselinesâ€ case.
+There is now at least one explicit FiLMâ€‘style, poseâ€‘conditioned modulation method for skeletonâ€‘based action recognition (microâ€‘actions), but I have not been able to find any work that (a) uses the original FiLM layer or conditional batch normalization in name, and (b) modulates image/CNN/ResNet feature maps directly from pose for action recognition before 2026.acm+1
+Below is what I could verify.
+FiLMâ€‘style modulation in skeleton-based microâ€‘action recognition
+â€œMotion Matters: Motion-guided Modulation Network for Skeleton-based Micro-Action Recognitionâ€
+Citation: Jihao Gu et al., 2025, arXiv:2507.21977 (skeleton-based microâ€‘action recognition on Microâ€‘Action 52 and iMiGUE).acm
+Task: Skeletonâ€‘based microâ€‘action recognition (fineâ€‘grained body microâ€‘actions, not generic video classification).acm
+Modality: 3D body skeletons only (joint trajectories extracted by AlphaPose).acm
+Backbone: Transformerâ€‘like â€œMotion-guided Skeletalâ€‘Temporal Formerâ€ combining a GCN skeletal branch, temporal conv branch, and a motion branch.acm
+How the modulation works
+Section 3.4 (â€œMotion-guided Feature Modulationâ€) defines a Motion-guided Feature Modulation (MFM) block that is exactly FiLMâ€‘style conditional affine modulation (normalized feature Ã— (1+Î³) + Î²), where the conditioning signal is motion computed from skeletons.acm
+They compute motion from consecutive skeleton features
+Î”X=Xin[1:,:,C/4:3C/4]âˆ’Xin[:âˆ’1,:,C/4:3C/4]\Delta X = X_{\text{in}}[1:,:,C/4:3C/4] - X_{\text{in}}[:-1,:,C/4:3C/4]Î”X=Xinâ€‹[1:,:,C/4:3C/4]âˆ’Xinâ€‹[:âˆ’1,:,C/4:3C/4].acm
+Motion-guided Skeletal Modulation (MSM):
+Apply GCN + BN + tanh to motion to get modulation features ZsâˆˆRTÃ—VÃ—C/2Z_s \in \mathbb{R}^{T\times V\times C/2}Zsâ€‹âˆˆRTÃ—VÃ—C/2.acm
+Split into scale and shift:
+Î³s=Zs[...,:C/4],Â Î²s=Zs[...,C/4:]\gamma_s = Z_s[..., :C/4], \ \beta_s = Z_s[..., C/4:]Î³sâ€‹=Zsâ€‹[...,:C/4],Â Î²sâ€‹=Zsâ€‹[...,C/4:].acm
+Apply FiLMâ€‘style modulation to temporally convolved features XtcX_{tc}Xtcâ€‹:
+Xgcm=Xtcâˆ’Î¼(Xtc)Ïƒ(Xtc)â‹…(1+Î³s)+Î²s.X_{gcm} = \frac{X_{tc} - \mu(X_{tc})}{\sigma(X_{tc})} \cdot (1 + \gamma_s) + \beta_s.Xgcmâ€‹=Ïƒ(Xtcâ€‹)Xtcâ€‹âˆ’Î¼(Xtcâ€‹)â€‹â‹…(1+Î³sâ€‹)+Î²sâ€‹.
+acm
+Motion-guided Temporal Modulation (MTM):
+Conv2d + BN + tanh on motion â†’ ZtâˆˆRTÃ—VÃ—C/2Z_t \in \mathbb{R}^{T\times V\times C/2}Ztâ€‹âˆˆRTÃ—VÃ—C/2.acm
+Split into Î³t,Î²t\gamma_t, \beta_tÎ³tâ€‹,Î²tâ€‹ and apply the same normalized FiLMâ€‘style modulation to XtcX_{tc}Xtcâ€‹.acm
+They explicitly ablate removing Î³ or Î², or replacing the affine modulation with pure addition / concatenation / Hadamard product, and find that using both learned Î³ and Î² (the full FiLMâ€‘style affine) gives the best F1 and Topâ€‘1 accuracy.acm
+So:
+Conditioning signal: Motion features Î”X derived from skeleton sequences (pose/body keypoints).acm
+Where applied: To intermediate spatioâ€‘temporal feature tensors in a skeleton Transformer/GCN block, after feature normalization.acm
+Form: Exactly a FiLM/conditionalâ€‘normalization variant: normalized feature â‹…(1+Î³)+Î²\cdot (1+\gamma) + \betaâ‹…(1+Î³)+Î².acm
+This is, as far as I can find, the clearest example of FiLMâ€‘style pose/motionâ€‘conditioned modulation used for an actionâ€‘recognitionâ€‘type task (microâ€‘action recognition) before 2026. It does not modulate RGB CNN/ResNet feature maps; everything is in the skeleton feature space.acm
+Conditional normalization around action/video tasks (but not poseâ†’CNN)
+I looked for uses of FiLM or conditional batch normalization in video or action contexts, especially with pose as a conditioning signal. What shows up is mostly adjacent workâ€”either different tasks, or conditioning on nonâ€‘pose signals.
+Textâ€‘toâ€‘video generation on UCF101 / A2D with CBN
+â€œVideo Generation from Text Employing Latent Path Construction for Temporal Modelingâ€ (Mazaheri & Shah, arXiv:2107.13766, 2021)arxiv
+Task: Text â†’ video generation (GANâ€‘based), evaluated on Actorâ€“Action Dataset (A2D), 9 classes of UCF101, and a robot manipulation dataset.arxiv
+Role of CBN:
+Uses Conditional Batch Normalization in the generator to modulate both latent vectors and upsampling CNN blocks based on the encoded text and noise.arxiv
+They explicitly define CBN as normalizing x with batch stats and then applying affine Î³(c), Î²(c) produced by a small network from condition c (concatenated sentence embedding and Gaussian noise), i.e.
+xË‰=Î³(c)xâˆ’Î¼xÏƒx+Î²(c)\bar{x} = \gamma(c)\frac{x - \mu_x}{\sigma_x} + \beta(c)xË‰=Î³(c)Ïƒxâ€‹xâˆ’Î¼xâ€‹â€‹+Î²(c).arxiv
+CBN is used in multiple upâ€‘sampling (â€œUpPoolingâ€) blocks to generate RGB frames.arxiv
+This is not action recognition; itâ€™s conditional video generation, though it does operate on UCF101/A2D content and uses CBN in the standard FiLMâ€‘like way.arxiv
+Video object segmentation with conditional modulation
+â€œEfficient Video Object Segmentation via Network Modulationâ€ (Yang et al., CVPR 2018)openaccess.thecvf
+Task: Semiâ€‘supervised video object segmentation; adapt a segmentation CNN to a new target object with one labeled frame.openaccess.thecvf
+Mechanism: A meta â€œmodulatorâ€ network produces perâ€‘channel Î³, Î² which modulate intermediate feature maps of a segmentation CNN:
+yc=Î³cxc+Î²c,y_c = \gamma_c x_c + \beta_c,ycâ€‹=Î³câ€‹xcâ€‹+Î²câ€‹,
+with Î³, Î² conditioned on the target object (â€œvisual modulatorâ€) and a spatial prior (â€œspatial modulatorâ€).openaccess.thecvf
+They state this is inspired by Conditional Batch Normalization / scaleâ€‘andâ€‘shift layers, but apply it as generic affine modulation after convs rather than explicit BN.openaccess.thecvf
+Again, this is segmentation, not action recognition, but it is the closest analogue to â€œpose â†’ affine modulation of CNN featuresâ€ in the video domain that I could find.openaccess.thecvf
+FiLM / temporal FiLM in sequence models (nonâ€‘AR)
+TFiLM â€“ â€œCapturing Long-Range Sequence Dependencies with Feature-Wise Modulationsâ€ (NeurIPS 2019) introduces Temporal FiLM, a 1D FiLMâ€‘style modulation block for long sequences, but their applications are to audio/speech and text, not human action recognition.papers.neurips
+Several recent skeletonâ€‘motion generation models in 2025 use FiLM to condition on style or diffusion timestep (e.g., SALAD: Skeleton-aware Latent Diffusion; UniMoGen: Universal Motion Generation), but these are motion generation / synthesis, not classification.openaccess.thecvf+1
+I did not find any paper that combines TFiLM or FiLM with action recognition on standard benchmarks (Kinetics, NTUâ€‘RGB+D, etc.) in a way that matches your constraints.arxiv+1
+What skeleton-based AR surveys say (indirect evidence of absence)
+I crossâ€‘checked recent surveys on skeletonâ€‘based and general action recognition to see if any named FiLM/CBN models show up:
+â€œA Survey on 3D Skeleton-Based Action Recognition Using Learning Methodâ€ (Ren et al., 2024)arxiv
+Reviews RNNâ€‘, CNNâ€‘, GCNâ€‘, and Transformerâ€‘based skeleton models (STâ€‘GCN, AAGCN, MSâ€‘G3D, CTRâ€‘GCN, HDâ€‘GCN, SkateFormer, etc.).arxiv
+No mention of FiLM, feature-wise linear modulation, conditional batch normalization, or Î³/Î² modulation in the recognized models.arxiv
+â€œHuman Action Recognition: A Taxonomy-Based Survey, Updates, and Opportunitiesâ€ (Morshed et al., Sensors 2023)arxiv
+Broad survey across RGB, depth, and skeleton modalities.arxiv
+Again, architectures focus on attention, graph convolutions, temporal convolutions, and Transformers; no FiLM/CBN usage is documented.arxiv
+Skeleton-based motion prediction survey (Usman & Zhong, 2022) also covers many GCN/RNN models for skeleton dynamics, but nothing about FiLM/CBN modulation.pmc.ncbi.nlm.nih
+Given how comprehensive these surveys are and how often they name specific architectural tricks, the lack of FiLM/CBN discussion strongly suggests that FiLMâ€‘style or conditionalâ€‘BN modulation is not (yet) standard in skeleton-based action recognition beyond very recent outliers like MMN.pmc.ncbi.nlm.nih+2
+Direct answers to your questions
+1. â€œHas anyone done FiLMâ€‘based poseâ€‘toâ€‘action feature modulation before 2026?â€
+Yes, in skeleton space:
+Motion-guided Modulation Network (MMN) for skeleton-based microâ€‘action recognition (Gu et al., 2025) introduces Motion-guided Skeletal Modulation (MSM) and Motion-guided Temporal Modulation (MTM). Both use learned Î³, Î² from skeleton motion Î”X to affinely modulate normalized spatioâ€‘temporal features, in a clear FiLM/conditionalâ€‘normalization style.acm
+The conditioning signal is pose-derived motion (temporal differences of skeleton features); the targets are midâ€‘level skeleton feature tensors.acm
+No, for poseâ†’RGBâ€‘CNN feature maps (under what I could find):
+I did not find any preâ€‘2026 paper that takes 2D/3D pose or skeletons and uses them via FiLM / CBN to modulate CNN or ResNet image/video feature maps for an actionâ€‘recognition classifier.
+Poseâ€‘guided video transformers (e.g., PGVT) and poseâ€‘enhanced visionâ€‘language models (PeVL) use pose to guide attention or crossâ€‘modal interactions, but not as Î³x+Î² FiLM layers applied to CNN features.youtubeopenaccess.thecvf+2
+So if by â€œposeâ€‘toâ€‘action feature modulationâ€ you allow the feature space to be skeleton features rather than RGB CNN maps, MMN (2025) is a clear positive example. If you mean explicitly conditioning image/video CNN backbones on pose via Î³x+Î², I could not find any such work up to early 2026.arxiv+1
+2. â€œPapers that use FiLM explicitly or a variant for action recognitionâ€
+Explicit FiLM name + action recognition: I did not find a paper that (a) cites Perez et al. 2018 FiLM, (b) names the layer FiLM, and (c) applies it to human action recognition. Most FiLM citations go to VQA, style transfer, or generic sequence modeling.emergentmind+1
+Variant (same math, different name) applied to actionâ€‘like tasks:
+MMN (skeleton microâ€‘action recognition) â€“ MSM/MTM modules as described above (normalized feature Â· (1+Î³) + Î² conditioned on motion).acm
+Yang et al. 2018 video object segmentation â€“ conditional Î³, Î² produced from object appearance and spatial prior to modulate segmentation CNN feature maps; it is FiLMâ€‘style but for segmentation, not recognition.openaccess.thecvf
+Textâ†’video GAN (Mazaheri & Shah 2021) â€“ uses Conditional Batch Normalization with affine parameters depending on text+noise, to generate videos on datasets that include action classes (A2D, UCF101), but this is video generation, not recognition.arxiv
+3. â€œPapers that use conditional batch normalization for action recognitionâ€
+Within the constraints you gave (recognition, not VQA/NeRF, and ideally video/action datasets):
+I did not find a discriminative action recognition network (e.g., classifier on Kinetics, NTUâ€‘RGB+D, Diving48, etc.) that uses CBN or a clear conditional BN variant for its classification stream. Surveys and key skeleton/RGB AR models do not mention such layers.pmc.ncbi.nlm.nih+2
+The closest uses of CBN around action datasets are:
+Mazaheri & Shah 2021 â€“ textâ€‘conditioned video generation on A2D and subsets of UCF101; CBN only in the generator.arxiv
+Yang et al. 2018 â€“ FiLM/CBNâ€‘like modulation in video segmentation, not classification.openaccess.thecvf
+So, strictly answering: no widelyâ€‘cited conditional batch normalization architecture for supervised action recognition (classification) appears in the literature before 2026, based on what I can find.arxiv+1
+Practical takeaway
+If you want to do poseâ€‘toâ€‘action FiLMâ€‘style modulation, the MMN design gives you a concrete, recent precedent:
+Compute motion (or other pose descriptors) from skeletons.
+Pass them through a small network (GCN/conv/MLP) to produce perâ€‘(TÃ—VÃ—C) Î³ and Î².
+Use normalizedâ€‘feature Â· (1+Î³) + Î² blocks inside your backbone (GCN/Transformer/CNN), and ablate Î³â€‘only, Î²â€‘only, vs full affine as MMN does.acm
+But if your goal is specifically â€œpose â†’ CNN/ResNet RGB feature FiLMâ€ for action recognition, that appears to still be essentially open territory as of early 2026, with no clear prior art that exactly matches all of your constraints.openaccess.thecvf+1youtubearxiv+1
+# FiLM-style Conditioning vs Transformer Cross-Attention (2020â€“2026)
+
+## Executive Summary
+
+Between 2020 and early 2026 there are very few papers that **directly** compare FiLM-style feature modulation (including conditional batch/layer normalization and related hypernetwork variants) against Transformer-style cross-attention while holding most of the architecture and task fixed.
+
+The most relevant controlled comparisons are:
+
+- **Neural-field decoders for 2D semantic segmentation** (Gromniak et al., ICANN 2023): Cross-attention conditioning clearly outperforms FiLM and concatenation at similar parameter counts on Potsdam semantic segmentation; FiLM never beats cross-attention on accuracy in this setup.[1]
+- **Conditional neural fields for MRI translation (CoNeS, 2024)**: A FiLM/shift-modulated neural field (with a hypernetwork) significantly outperforms a hybrid CNN+Transformer (ResViT) on multi-sequence MRI translation (PSNR/SSIM) and downstream tumor segmentation, with favorable parameter/computational efficiency; however, the backbones differ (neural field vs ResViT), so this is not a pure conditioning swap.[2]
+- **FlexLoc (2024)**: For multi-view, multimodal localization, conditional 1D convolutions and conditional layer normalization (CLN; a FiLM-style modulation of normalization parameters) substantially beat a cross-attentionâ€“based pose-fusion baseline in the *same Transformer-based backbone*, while adding â‰¤0.2% parameters and â‰¤0.6% MACs.[3]
+- **Attention Beats Concatenation for Conditioning Neural Fields (Rebain et al., 2022)**: Shows that transformer-style attention conditioning over high-dimensional latent codes systematically outperforms concatenation and hyper-network conditioning across several tasks (image auto-encoding, NeRF, light fields) under matched compute; FiLM is discussed as a restricted hypernetwork but not benchmarked directly.[4]
+
+No work was found that **cleanly exposes a dataset-size flip point** where FiLM overtakes cross-attention or vice versa. Where both have been compared, cross-attention tends to win on accuracy once models can afford the extra compute, while FiLM-style modulation wins on parameter/MAC efficiency and can match or exceed attention-based methods in some domains when paired with suitable backbones.
+
+***
+
+## Key Controlled Comparison: Neural Fields for 2D Semantic Segmentation (Gromniak et al., 2023)
+
+Gromniak et al. study neural-field decoders for 2D semantic segmentation of the ISPRS Potsdam aerial imagery dataset, using a fixed ResNet-34 CNN encoder and swapping only the **conditioning strategy of the decoder**.[1]
+
+### Setup
+
+- Task: 2D semantic segmentation on Potsdam (6 classes).
+- Backbone encoder: ResNet-34 (ImageNet-pretrained), identical across all decoders.[1]
+- Decoder: coordinate-based neural field; three conditioning types:
+  - **Concat**: latent code concatenated to input coordinates with skip concatenations at hidden layers.
+  - **FiLM**: conditional batch normalization/FiLM-style feature-wise affine modulation; latent code generates scale/shift per layer via an MLP.
+  - **Cross-attention Transformer**: queries derived from point coordinates attend over the encoder feature volume treated as tokens (Scene Representation Transformerâ€“style cross-attention).[1]
+- Conditional code sources:
+  - Global (single vector per image), local (per-coordinate via bilinear interpolation in feature map), or global+local concatenation.[1]
+- Metrics: mean IoU and F-score at two image sizes (256Ã—256 and 512Ã—512) plus decoder parameter count.[1]
+
+### Quantitative Results
+
+Key table (decoder only, ResNet-34 encoder shared):[1]
+
+| Conditioning | Code source | Image size | IoU | F-score | Params |
+|--------------|------------|-----------|-----|---------|--------|
+| Concat | Global | 256 | 0.689 | 0.816 | 2.1 M |
+| Concat | Local | 256 | 0.725 | 0.840 | 2.1 M |
+| Concat | Global+Local | 256 | 0.728 | 0.842 | 4.0 M |
+| FiLM | Global | 256 | 0.695 | 0.820 | 2.1 M |
+| FiLM | Local | 256 | 0.729 | 0.843 | 2.1 M |
+| FiLM | Global+Local | 256 | 0.729 | 0.843 | 3.7 M |
+| **Cross-attention** | Feature tokens | 256 | **0.758** | **0.862** | 2.6 M |
+| Concat | Global | 512 | 0.659 | 0.794 | 2.1 M |
+| Concat | Local | 512 | 0.666 | 0.799 | 2.1 M |
+| Concat | Global+Local | 512 | 0.712 | 0.832 | 4.0 M |
+| FiLM | Global | 512 | 0.660 | 0.795 | 2.1 M |
+| FiLM | Local | 512 | 0.650 | 0.788 | 2.1 M |
+| FiLM | Global+Local | 512 | 0.707 | 0.829 | 3.7 M |
+| **Cross-attention** | Feature tokens | 512 | **0.754** | **0.860** | 2.6 M |
+| DeepLabV3+ FCN | â€“ | 256 | 0.760 | 0.863 | 5.4 M |
+| DeepLabV3+ FCN | â€“ | 512 | 0.763 | 0.866 | 5.4 M |
+
+### Interpretation
+
+- **Accuracy**: Cross-attention beats FiLM and concatenation by a clear margin at both resolutions.
+  - At 256Ã—256, cross-attention improves IoU by about **+0.029** absolute over the best FiLM configuration (0.758 vs 0.729).[1]
+  - At 512Ã—512, cross-attention improves IoU by about **+0.042** absolute over the best FiLM configuration (0.754 vs 0.712).[1]
+- **Parameters**:
+  - Cross-attention decoder uses **2.6 M** params vs **2.1â€“3.7 M** for FiLM variants; notably, the best FiLM/concat variants (global+local) require **â‰ˆ40â€“50% more parameters** than cross-attention while still underperforming.[1]
+- **Compute cost**:
+  - Authors do not give MACs, but note that cross-attention can flexibly query both local and global information â€œat the cost of more computation,â€ whereas local code lookup is effectively free.[1]
+- **Data efficiency / dataset size**:
+  - The paper uses a single dataset (Potsdam) with fixed training splits and does **not** sweep dataset size or shots per class, so no dataset-size flip point is reported.[1]
+
+### Takeaways from Gromniak et al.
+
+- Under a controlled encoder and task, with decoder capacity roughly matched, **Transformer cross-attention conditioning is strictly better** than FiLM/CBN-style modulation for this 2D semantic segmentation problem.[1]
+- FiLM is competitive with concatenation and sometimes slightly better (especially with local or global+local codes), but it never catches up to cross-attention in this setting.[1]
+- This is the cleanest â€œFiLM vs cross-attention in same architectureâ€ comparison in 2020â€“2026, and it favors cross-attention on accuracy and parameter efficiency at this scale and dataset.
+
+***
+
+## Conditional Neural Fields with Shift Modulation vs Transformer Blocks (CoNeS, 2024)
+
+CoNeS (Conditional neural fields with shift modulation for multi-sequence MRI translation) introduces a coordinate-based neural field decoder conditioned via **shift modulation**, a FiLM variant that modulates only the additive bias per neuron based on a hypernetwork, and compares it against several baselines including **ResViT**, a hybrid CNN+Transformer image-translation model.[2]
+
+### Setup
+
+- Task: 2D MRI sequence-to-sequence translation (e.g., synthesize T1ce from T1/T2/FLAIR) on BraTS 2018 and an in-house vestibular schwannoma dataset.[2]
+- CoNeS generator: Coordinate-based MLP neural field; per-pixel latent codes generated by a CNN hypernetwork; conditioning via FiLM-style affine modulation, with experiments showing that **shift-only modulation** (no scaling) is parameter-efficient and effective.[2]
+- Baselines: pix2pix (UNet+GAN), pGAN (ResNet+GAN with perceptual loss), ResViT (CNN+Transformer bottleneck), and ASAP-Net (neural-field GAN without shared MLP).[2]
+- Metrics: PSNR, SSIM, plus downstream tumor segmentation quality (Dice, 95% Hausdorff distance).[2]
+
+### Quantitative Comparisons (FiLM-like vs Transformer baseline)
+
+Representative numbers from BraTS 2018 T1ce translation (predicting T1ce from other sequences):[2]
+
+- **CoNeS (shift modulation)**: PSNR â‰ˆ **31.2 dB**, SSIM **0.951**.[2]
+- pix2pix: 30.1 dB, 0.941.
+- pGAN: 30.7 dB, 0.943.
+- **ResViT (Transformer bottleneck)**: 29.2 dB, 0.935.
+- ASAP-Net: 30.8 dB, 0.948.[2]
+
+On the more challenging VS dataset (T1ce translation):[2]
+
+- **CoNeS**: PSNR **21.9 dB**, SSIM 0.638.
+- pix2pix: 21.1 dB, 0.602.
+- pGAN: 21.6 dB, 0.635.
+- **ResViT**: â‰ˆ21.0 dB, 0.575.
+- ASAP-Net: clearly worse SSIM and spectrum fidelity.[2]
+
+Downstream segmentation with synthesized images (BraTS, missing T1ce):[2]
+
+- Using CoNeS-synthesized T1ce improved Dice for tumor subregions by **6â€“30 percentage points** over zero-imputation and 6â€“20 points over ResViT/pGAN in many cases, while also reducing Hausdorff distances.[2]
+
+### Parameter and Compute Considerations
+
+- The paper emphasizes that **shift modulation greatly reduces the number of parameters** compared to per-pixel hypernetworks while maintaining or improving performance; for example, using shifts alone achieves similar or better PSNR/SSIM with roughly half the hypernetwork parameters compared to full FiLM (scale+shift).[2]
+- CoNeS and ASAP-Net avoid transposed convolutions and Transformer blocks, leading to better spectral fidelity and lower compute than ResViT for similar or better image quality; ResViT is described as â€œheavy and data-demandingâ€ for low-level tasks.[2]
+
+### Caveats
+
+- This is **not** a clean conditioning swap on a fixed backbone: CoNeS uses a coordinate-based MLP decoder with FiLM-like conditioning, whereas ResViT uses a CNN+Transformer backbone with self-attention.[2]
+- Still, it is a strong real-world example where **FiLM-style conditioning (shift modulation) wins decisively over a Transformer-based competitor** on both accuracy and robustness for medical image translation.
+
+***
+
+## Conditional Layer Normalization vs Cross-Attention Pose Fusion (FlexLoc, 2024)
+
+FlexLoc addresses **zero-shot sensor pose shift** in multimodal, multi-view localization using conditional neural networks and directly contrasts FiLM-style conditional normalization against a cross-attentionâ€“based pose-fusion baseline in the same approximate architecture.[3]
+
+### Setup
+
+- Task: 2D localization (x, y) of a remote-controlled car using distributed multimodal sensors (RGB, depth, mmWave radar, audio) across 22 distinct sensor-perspective configurations.[3]
+- Backbone: Shared ResNet-18 and Transformer encoders for each modality; early fusion via a Transformer encoder; identical base architecture across variants.[3]
+- Conditioning methods compared:
+  1. **CondConv** (Conditional 1D Convolution): 1D conv weights conditioned on sensor pose via a small MLP, inserted after adapters.
+  2. **CLN (Conditional Layer Normalization)**: replaces BatchNorm/LayerNorm scale and bias (Î³, Î²) with values derived from pose (a FiLM-style modulation, but usually a single scalar Î³/Î² per layer).[3]
+  3. **Cross-attention pose fusion**: pose tokens fused with sensor features via cross-attention inside Transformer encoders (baseline inspired by camera-pose fusion in diffusion models).[3]
+  4. Pose concatenation: pose encoded as a token concatenated with input tokens.[3]
+  5. Unconditional early-fusion and late-fusion baselines.[3]
+
+### Quantitative Results: Zero-shot Perspectives
+
+On five **unseen sensor perspectives**, main comparison (average Euclidean distance error in cm):[3]
+
+- **FlexLoc (CondConv)**: **14.28 cm** Â± 1.16 across views.[3]
+- **FlexLoc-Light (CLN)**: **22.04 cm** Â± 4.32.[3]
+- Unconditional early fusion: 26.86 cm Â± 4.68.
+- Late-fusion baseline (hard-coded transforms): 27.53 cm Â± 1.87.[3]
+
+Over a specialized Transformer-only backbone, comparing pose-fusion mechanisms:[3]
+
+- CondConv and CLN achieve about **20% lower error** than pose-concatenation.
+- **Cross-attention pose fusion yields â‰ˆ56 cm error**, substantially worse than CondConv/CLN and even worse than unconditional baselines.[3]
+
+### Parameter and Compute Overhead
+
+FlexLoc reports parameter and MAC overhead relative to the unconditional backbone:[3]
+
+| Model | Error (cm) | Extra params | Extra MACs |
+|-------|-----------|--------------|------------|
+| FlexLoc (CondConv) | 14.28 (âˆ’46.8%) | +53,904 (+0.19%) | +95.46M (+0.57%) |
+| FlexLoc-Light (CLN) | 22.04 (âˆ’18.0%) | âˆ’11,788 (âˆ’0.04%) | âˆ’54.04M (âˆ’0.32%) |
+| CondConv+CLN | 16.11 (âˆ’40.0%) | +42,116 (+0.15%) | +41.28M (+0.24%) |
+
+### Interpretation
+
+- **Accuracy**: Both CondConv and CLN **strongly outperform** cross-attention pose fusion within the same Transformer-based backbone; cross-attention was the worst pose-fusion method tested for this task.[3]
+- **Efficiency**: CLN is essentially free (slightly *reduces* parameters/MACs by reusing normalization slots), and CondConv adds <1% overhead in params and MACs while nearly halving error vs baselines.[3]
+- **Data efficiency**: The model is trained on 13 viewpoints and tested zero-shot on 5 unseen viewpoints; all pose-conditioned methods significantly improve over unconditional baselines, but CLN/CondConv are far more effective than cross-attention on the same training data.[3]
+
+This is a direct and fairly clean demonstration that **FiLM-style normalization conditioning (CLN) can be more data- and compute-efficient and more accurate than cross-attentionâ€“based conditioning** for certain structured tasks (here, sensor-pose fusion in localization).
+
+***
+
+## Attention vs Hypernet/FiLM-style Conditioning in Neural Fields (Rebain et al., 2022)
+
+While not explicitly a â€œFiLM vs cross-attentionâ€ study, Rebain et al. analyze conditioning mechanisms for neural fields and provide strong evidence that **attention-based set-latent conditioning dominates concatenation and hyper-network conditioning at high latent dimensions**.[4]
+
+### Setup
+
+- Tasks: 2D image auto-encoding (Tiled MNIST, CelebA-HQ), 3D radiance fields (NeRF-style), 4D light fields, across several datasets (HUMBI, SRN Chairs/Cars).[4]
+- Conditioning methods:
+  - Concatenation: latent vector concatenated to coordinates at each layer.
+  - Hyper-network: latent code drives a secondary network predicting decoder weights.
+  - Attention-based set-latent: latent represented as a set of tokens; cross-attention layers take queries from encoded positions and keys/values from latent tokens.
+
+FiLM (feature-wise linear modulation) is discussed as a constrained hyper-network but is **not** benchmarked as a separate baseline.[4]
+
+### Selected Quantitative Results
+
+**Tiled MNIST (PSNR, higher is better):**[4]
+
+- At 256 unique digits (most complex variant), latent dim 512:
+  - Concatenation: **16.8 dB**.
+  - Hyper-network: **21.8 dB**.
+  - **Attention**: **24.6 dB**.
+- For simpler variants (1 or 16 digits), attention still dominates at larger latent dimensions, especially when complexity increases.[4]
+
+**CelebA-HQ auto-encoding (PSNR):**[4]
+
+- Latent dim 8192 (high-dimensional latent):
+  - Concatenation: 24.5 dB.
+  - Hyper-network: 23.6 dB.
+  - **Attention**: **26.3 dB**.
+- Decoder params at this setting: attention ~1.7 M vs concatenation 2.6 M and hyper-network 2.5 M.[4]
+
+**NeRF-style novel view synthesis (PSNR on HUMBI, SRN Chairs/Cars):**[4]
+
+- Across all three datasets and latent dims {512, 2048, 8192}, the **best configuration is always attention with the largest latent size**; e.g., on SRN Chairs at N=8192, attention achieves 25.0 dB vs 23.5 dB (hyper-network) and 20.9 dB (concat).[4]
+
+### Takeaways
+
+- With **matched compute budgets** (and sometimes even fewer parameters), attention-based conditioning on a set-latent consistently yields the best reconstruction quality across complex, high-entropy tasks.[4]
+- Authors explicitly note that attention provides a principled way to exploit **very high-dimensional conditioning** efficiently, whereas concatenation/hypernetworks saturate or degrade as latent dimension grows.[4]
+- Because FiLM is treated as a restricted hypernetwork variant, these results indirectly suggest that **cross-attention becomes increasingly advantageous as conditioning dimensionality and task complexity grow**, especially when compute is available.[4]
+
+However, there is **no dataset-size sweep** here; the key independent variable is latent dimension (i.e., representation complexity), not number of training examples.[4]
+
+***
+
+## Conditional Batch Normalization in Few-Shot Multi-modal Meta-Learning (Armengol-EstapÃ© et al., 2024)
+
+This work is mainly negative evidence: it uses **conditional batch normalization (CBN)** to modulate a few-shot classifier based on an auxiliary language network and finds that improvements are small, dataset-dependent, and largely attributable to extra compute/parameters rather than the conditioning mechanism itself.[5]
+
+### Setup
+
+- Task: few-shot classification (CUB-200-2011, mini-ImageNet) with an auxiliary network predicting language attributes/captions; a â€œbridgeâ€ MLP converts auxiliary embeddings into Î³, Î² parameters for batch-norm layers of a ProtoNet++ classifier (SimpAux).[5]
+- Modulation: normalization conditioning, similar in spirit to FiLM/CBN but applied to batch norm.[5]
+- Baseline: ProtoNet++ without conditioning.[5]
+
+### Results
+
+- On **CUB 5-shot**, SimpAux (CBN conditioning) improves accuracy from **88.5 Â± 0.5%** to **90.0 Â± 0.7%**.[5]
+- On **mini-ImageNet 5-shot**, the baseline slightly *outperforms* the conditioned model (75.4 Â± 0.4% vs 74.9 Â± 0.1%).[5]
+- An ablation with a bridge network but no auxiliary input shows that much of the gain on CUB is due to extra capacity rather than meaningful language conditioning.[5]
+
+### Relevance
+
+- This paper does **not** compare against cross-attention baselines, but its discussion section explicitly contrasts normalization-based conditioning with more complex approaches that use attention or memory banks, arguing that â€œnormalization conditioning is a more lightweight approach that is easier to learn in small data regimes due to the reduced complexity of the modulation factors.â€[5]
+- It therefore supports the **qualitative** claim that CBN/FiLM-style mechanisms are attractive in low-data regimes, although in this particular implementation the gains are modest and not robust across datasets.[5]
+
+***
+
+## Conceptual Relations: FiLM, CBN, and Attention
+
+The Distill article â€œFeature-wise transformationsâ€ provides helpful context on how FiLM-style conditioning differs fromâ€”and can complementâ€”attention mechanisms.[6]
+
+### FiLM and CBN as Feature Modulation
+
+- **FiLM**: applies a per-channel affine transformation to intermediate activations, with scale and shift predicted from a conditioning input (e.g., text question, style vector).[6]
+- **Conditional Batch/Layer Normalization**: equivalent to applying FiLM *after* normalization, with Î³(cond), Î²(cond) replacing fixed affine parameters; de Vries et al. show that conditional BN can be viewed as a specific instance of FiLM.[6]
+- Advantages:
+  - Very low parameter and compute overhead (just two small vectors per layer per context).[6]
+  - Naturally compatible with existing CNN/Transformer backbones.
+  - Encourages parameter sharing and typically trains easily in low-data regimes.[6][5]
+
+### Attention and Cross-Attention as Dynamic Routing
+
+- Self-attention and cross-attention perform **content-based routing**: queries at each position attend to keys/values representing other positions or modalities.[4]
+- They induce dynamic, input-dependent mixing of features, whereas FiLM/CBN primarily rescale and shift existing feature channels.[6][4]
+- Advantages (empirically, from Rebain et al. and Gromniak et al.):[1][4]
+  - Better exploitation of high-dimensional conditioning.
+  - Improved ability to model long-range dependencies and high-entropy signals.
+  - Superior accuracy under matched or even lower parameter budgets when compute allows quadratic (or near-quadratic) attention cost.
+
+### Hybrid Patterns
+
+Modern generative models (e.g., diffusion Transformers, DiTs) often use **both** mechanisms: cross-attention (or unified attention) plus FiLM-style adaptive layer normalization (e.g., AdaLN-Zero, FiLM-style LayerNorm conditioning).[7][8]
+
+- Conditioning signals (timestep, class label, text embeddings) are embedded and then used to produce **layer-wise FiLM parameters** (Î³, Î²) that modulate each Transformer block, while cross-attention integrates text/image tokens.[8][7]
+- Emergent summaries and tutorials emphasize that this combination gives better control and parameter efficiency than cross-attention alone.[7][8]
+
+***
+
+## When Does FiLM-style Conditioning Outperform Cross-Attention?
+
+Direct, clean **FiLM vs cross-attention on the same backbone and dataset** is rare; the strongest evidence where FiLM-style approaches outperform or rival attention/cross-attention is:
+
+1. **Sensor-pose fusion for multimodal localization (FlexLoc)**:
+   - CLN (FiLM-style normalization) and CondConv dramatically outperform cross-attention pose fusion within the same Transformer backbone while adding â‰¤0.2% of parameters and MACs.[3]
+   - Cross-attention pose fusion reaches â‰ˆ56 cm error, far worse than CondConvâ€™s â‰ˆ14 cm and CLNâ€™s â‰ˆ22 cm.[3]
+   - Here, the conditioning signal (7D sensor pose) is low-dimensional and structured; FiLM-style conditioning is a far better match than full cross-attention.
+
+2. **MRI sequence translation with neural fields (CoNeS)**:
+   - Shift-modulated neural fields (FiLM variant) outperform a Transformer-based ResViT generator by **0.5â€“2.0 dB PSNR and 0.8â€“1.6 points of SSIM** on several MRI translation tasks, with better spectrum fidelity and downstream segmentation quality, at lower or comparable complexity.[2]
+   - The structured, continuous nature of coordinate-based MLPs plus FiLM-like conditioning seems advantageous compared to convolutional+Transformer backbones for this class of problems.
+
+3. **General low-data and lightweight contexts (conceptual, multiple sources)**:
+   - Armengol-EstapÃ© et al. argue that normalization conditioning is â€œmore lightweight and easier to learn in small data regimesâ€ compared to mechanisms that require complex meta-attention or memory banks, although their concrete gains are modest.[5]
+   - Tutorials on conditional normalization (including CBN, AdaIN, and FiLM) emphasize their success in conditional GANs, style transfer, and conditional generation where compute and data budgets are limited relative to full transformer stacks.[9][6]
+
+In all of these cases, **FiLM-style conditioning wins or is competitive because**:
+
+- The conditioning signal is relatively low-dimensional (sensor pose, style vector, MRI sequence indices), so the expressivity of full cross-attention is not necessary.
+- Parameter/MAC budgets are tight, and FiLM/CBN/CLN introduce negligible overhead while still providing strong conditional adaptation.
+- Backbones (coordinate-based MLPs, CNNs) are already strong feature extractors; the conditioning layer mainly needs to tilt the representation, not perform complex cross-modal routing.
+
+There is **no paper that sweeps dataset size and shows FiLM overtaking cross-attention at some explicit training-set threshold**. Evidence for FiLMâ€™s low-data advantages is currently qualitative and indirect.[5]
+
+***
+
+## When Does Cross-Attention Outperform FiLM-style Conditioning?
+
+From the controlled neural-field segmentation experiment and the broader conditioning literature, cross-attention tends to win when:
+
+1. **The task requires rich spatial or cross-modal routing and high-entropy conditioning**:
+   - In 2D semantic segmentation with neural-field decoders, cross-attention conditioning on the encoder feature volume yields **~3â€“4 IoU points** over the best FiLM variants at comparable or lower parameters.[1]
+   - In high-dimensional latent conditioning for auto-encoders, NeRF, and light fields, attention-based set-latents consistently outperform concatenation and hyper-networks, especially at large latent dimensions (up to 8192); attention sometimes has **fewer parameters and higher PSNR** than alternatives.[4]
+
+2. **Conditioning vector is very high-dimensional**:
+   - Rebain et al. show that concatenation and hyper-networks saturate or degrade as latent dimension increases, while attention continues to improve, indicating a structural advantage in exploiting high-dimensional context.[4]
+   - Since FiLM can be viewed as a constrained hypernetwork, similar limitations likely apply when trying to absorb very large conditioning vectors purely through FiLM without attention.
+
+3. **Large compute budgets are available**:
+   - Cross-attention introduces at least quadratic cost in token count; its benefits in tasks like NeRF/light fields and semantic segmentation were established under budgets of tens of thousands of GPU-hours.[4]
+   - Where those budgets are acceptable, cross-attention appears to be a better asymptotic choice for modeling complex conditional distributions.
+
+Again, **no work directly reports a training-set-size flip point**, but qualitatively:
+
+- Cross-attention seems to dominate **as both dataset complexity and conditioning dimensionality grow**, provided compute is not a bottleneck.[1][4]
+- FiLM/CBN/CLN are preferred in **low-dimensional conditioning and/or low-resource settings**.
+
+***
+
+## Open Gaps and Missing Data
+
+The userâ€™s questions about **â€œAt what dataset size does the gap flip?â€** and **â€œWhen does FiLM outperform cross-attention?â€** cannot be precisely answered with current literature:
+
+- None of the identified works sweep training-set size while holding architecture and conditioning type fixed.
+- The only systematic sweeps are over **latent dimension** (Rebain et al.) and **image size / code source** (Gromniak et al.), not sample count.[1][4]
+- Where FiLM-style methods outperform transformer-based ones (CoNeS, FlexLoc), multiple confounding factors change simultaneously (backbone class, loss functions, data domain), making it impossible to attribute gains solely to the conditioning type.[2][3]
+
+A rigorous answer to these questions would require **new experiments** that:
+
+1. Fix the backbone (e.g., ResNet or ViT), dataset, and task.
+2. Implement parallel FiLM/CBN/CLN vs cross-attention conditioning variants with carefully matched parameter/MAC budgets.
+3. Systematically sweep training-set size (e.g., 1%, 5%, 10%, 25%, 50%, 100%) and measure accuracy, calibration, and overfitting.
+
+No such controlled study appears to have been published as of early 2026.
+
+***
+
+## Practical Guidelines for Architecture Choice
+
+Based on the available evidence, the following **heuristic guidelines** are supported:
+
+1. **Use FiLM/CBN/CLN (feature modulation) when**:
+   - The conditioning signal is **low- to moderate-dimensional** (labels, styles, sensor poses, a small number of scalars or short embeddings).
+   - You have **tight parameter/MAC budgets** or real-time constraints; CLN/CBN typically add â‰ˆ0% overhead.[5][3]
+   - The task is low-level or structured (image-to-image translation, localization) where the main backbone already captures most structure and conditioning only needs to tilt activations.[2][3]
+   - You operate in **small-data regimes** and want a simple, stable conditioning mechanism.[5]
+
+2. **Use cross-attention (possibly with FiLM-style normalization) when**:
+   - The conditioning signal is **high-dimensional** (long text prompts, long sequences, large latent codes) and you need rich, position-dependent fusion.[7][4]
+   - Tasks involve **complex cross-modal routing** (e.g., general multimodal reasoning, 3D scene understanding with many views) where attentionâ€™s content-based addressing shines.[4][1]
+   - Compute is not the primary bottleneck and you can afford quadratic or near-quadratic costs.
+   - You already use Transformer blocks and can easily integrate AdaLN/FiLM-style LN modulation on top.[8][7]
+
+3. **Hybrid strategies are often best**:
+   - Many state-of-the-art DiTs and multimodal transformers use **both** cross-attention and FiLM-style normalization (AdaLN-Zero, FiLM-LN): attention for routing, FiLM for efficient global conditioning.[8][7]
+   - FlexLoc shows that combining CondConv and CLN can improve over CLN alone, though not over CondConv, suggesting some redundancy but also complementarity.[3]
+
+In summary, **unified, general statements like â€œFiLM beats cross-attention below N samplesâ€ are not yet supported by published empirical evidence**. What can be said is:
+
+- For complex, high-entropy conditioning with ample compute, **cross-attention is usually the winning choice**.[1][4]
+- For structured, low-dimensional conditioning under tight resource constraints, **FiLM/CBN/CLN can outperform or rival cross-attention**, as demonstrated in FlexLoc and CoNeS.[2][3]
+Among papers from 2024â€“2026 that explicitly use the IKEAâ€‘ASM 33â€‘class action recognition task with the official environmentâ€‘based split, the best reported Topâ€‘1 accuracy I can find is 78.1%, achieved by Frame2Freqâ€‘ST (a frequencyâ€‘domain adapter on a frozen DINOv2 backbone). I could not find any recent SOTA method on this setting that reports macroâ€‘F1; they generally report Topâ€‘1 accuracy (and sometimes mean perâ€‘class accuracy), so a true â€œbest macroâ€‘F1â€ is not documented in the current literature.openaccess.thecvf+2
+33â€‘class IKEAâ€‘ASM results (2024â€“2026)
+All of the works below state that they follow the standard IKEAâ€‘ASM protocol: 33 fineâ€‘grained actions and the official environmentâ€‘based train/test split (training on three environments, testing on two).cvpr.thecvf+2
+Key methods and numbers
+Paper / methodYearSetting on IKEAâ€‘ASMReported metrics on 33â€‘class env splitNotes
+Probing Fineâ€‘Grained Action Understanding and Crossâ€‘View Generalization of Foundation Models (Ponbagavathi et al.) â€“ best DINOv2 + selfâ€‘attention probe
+2024
+Frozen DINOv2 image backbone + temporal selfâ€‘attention â€œprobingâ€, trained on frontâ€‘view, evaluated on same view and novel views under the environment split. openaccess.thecvf
+Trainedâ€‘view (same camera): mean perâ€‘class (balanced) accuracy 25.58%, Topâ€‘1 56.52%; crossâ€‘view (novel cameras): mean perâ€‘class 21.08%, Topâ€‘1 49.22%. openaccess.thecvf
+This is an early systematic FM baseline; it does report mean perâ€‘class accuracy but not macroâ€‘F1. openaccess.thecvf
+Order Matters: Step (Selfâ€‘attentive Temporal Embedding Probing) (Thiyakesan & Roitberg)
+2025
+Frozen DINOv2 backbone with a lightweight temporal selfâ€‘attention probe (Step), evaluated on symmetric, nonâ€‘symmetric and all 33 classes. opus.lib.uts.edu
+Overall Topâ€‘1 accuracy on all classes: 76.80%; on symmetric classes: 69.46%; on nonâ€‘symmetric classes: 80.59%. opus.lib.uts.edu
+Step outperforms prior probing and PEFT baselines (e.g., STâ€‘Adapter, M2â€‘CLIP, VitaCLIP) on IKEAâ€‘ASM, but reports only accuracies (no F1 or macroâ€‘F1). opus.lib.uts.edu
+Frame2Freq: Spectral Adapters for Fineâ€‘Grained Video Understanding (Ponbagavathi et al.) â€“ Frame2Freqâ€‘ST, DINOv2
+2026
+Frequencyâ€‘aware PEFT adapters (Frame2Freqâ€‘ST) on a frozen DINOv2 backbone; evaluated on the standard 33â€‘class IKEAâ€‘ASM action recognition benchmark. cvpr.thecvf
+For IKEAâ€‘ASM (DINOv2 backbone): Topâ€‘1 overall accuracy 78.1%, symmetricâ€‘class accuracy 80.3%, nonâ€‘symmetricâ€‘class accuracy 77.0%. cvpr.thecvf
+This is, as of 2026, the best reported Topâ€‘1 accuracy on the official IKEAâ€‘ASM 33â€‘class crossâ€‘environment split. No macroâ€‘F1 or meanâ€‘perâ€‘class figures are reported for IKEAâ€‘ASM in this paper. cvpr.thecvf
+So, if you just want the current best numbers for action recognition on the 33â€‘class crossâ€‘environment protocol:
+Best Topâ€‘1 (env split, all 33 classes):
+78.1% â€“ Frame2Freqâ€‘ST with a DINOv2 backbone.cvpr.thecvf
+Best â€œmacroâ€‘styleâ€ metric actually reported on this split (but from an older, weaker method):
+Balanced (mean perâ€‘class) accuracy 25.58% â€“ DINOv2 + selfâ€‘attention probing in the â€œtrainedâ€‘viewâ€ setting of the 2024 foundationâ€‘model probing paper.openaccess.thecvf
+That same work reports 21.08% mean perâ€‘class accuracy in their crossâ€‘view setting.openaccess.thecvf
+None of the stronger 2025â€“2026 methods (Step, Frame2Freq) provide macroâ€‘F1 on IKEAâ€‘ASM; they report only Topâ€‘1 (and sometimes symmetric vs nonâ€‘symmetric breakdown), so a true SOTA macroâ€‘F1 on the 33â€‘class crossâ€‘environment task is, as far as I can see, not available in the literature yet.opus.lib.uts.edu+1
+Newer multiâ€‘task work on IKEAâ€‘ASM
+You asked specifically whether there are multiâ€‘task papers on IKEAâ€‘ASM newer than Aganian et al. (2023/2025).
+Step (Order Matters) â€“ explicit multiâ€‘task on IKEAâ€‘ASM
+The Step paper includes a dedicated multiâ€‘task setting on IKEAâ€‘ASM, jointly handling multiple perception tasks with a single frozen backbone plus separate probes:opus.lib.uts.edu
+The authors consider three tasks on IKEAâ€‘ASM:
+FAR â€“ fineâ€‘grained activity recognition
+AAR â€“ atomic action recognition
+OUI â€“ objectâ€‘underâ€‘interaction identification
+They show that Step can attach separate lightweight probes for these different tasks on top of one frozen VFM backbone, running all tasks in a single forward pass.opus.lib.uts.edu
+In this multiâ€‘task regime, they report that Step both reduces inference cost (up to 6Ã— fewer GFLOPs than PEFT baselines) and improves accuracy across FAR, AAR, and OUI on IKEAâ€‘ASM, compared to training separate PEFT adapters per task.opus.lib.uts.edu
+So yes: Step (2025) is a newer, explicitly multiâ€‘task method on IKEAâ€‘ASM, beyond Aganian et al.â€™s skeletonâ€‘based work, and is designed for joint deployment of multiple IKEAâ€‘ASM tasks with shared features.opus.lib.uts.edu
+Other candidates
+Methods like M2â€‘CLIP are described as â€œmultimodal, multiâ€‘taskâ€ adaptation frameworks for video action recognition, and they are evaluated on IKEAâ€‘ASM among other datasets. However, in the available results, they are used primarily for action recognition on IKEAâ€‘ASM, not for simultaneous joint training on multiple IKEAâ€‘ASM tasks (e.g., actions + pose + object state).cvpr.thecvf+1
+I did not find any 2024â€“2026 paper that, like the original IKEAâ€‘ASM WACVâ€™21 work, jointly trains on actions, object segmentation, and pose on IKEAâ€‘ASM with a single architecture in a clearly multiâ€‘task training setup. Most recent works specialize in action recognition, skeletonâ€‘based analysis, or selfâ€‘supervised alignment, and treat other IKEAâ€‘ASM tasks separately if at all.ikeaasm.github+3
+Practical takeaway
+If you need a current benchmark target for 33â€‘class action recognition on IKEAâ€‘ASM (official environment split):
+Use 78.1% Topâ€‘1 from Frame2Freqâ€‘ST (DINOv2) as the strongest reported number.cvpr.thecvf
+Be aware that macroâ€‘F1 is effectively â€œopenâ€ on this protocol: you would likely need to compute it yourself from confusion matrices if you want a fair macroâ€‘F1 comparison against these methods. None of the 2025â€“2026 SOTA papers publish macroâ€‘F1 for this specific setting.openaccess.thecvf+2
+For multiâ€‘task, singleâ€‘backbone IKEAâ€‘ASM setups newer than Aganian et al., Step (Order Matters) is the main explicitly multiâ€‘task VFMâ€‘based approach, jointly handling FAR, AAR, and OUI on IKEAâ€‘ASM with one backbone plus separate probes.opus.lib.uts.edu
+Kendallâ€™s homoscedastic uncertainty weighting (â€œUWâ€) is still widely used after 2018, but more recent analyses and large benchmarks have identified concrete failure modes (initialization inertia, overfitting/weight collapse, limited applicability, numerical issues). For a threeâ€‘task setup with strongly imbalanced losses, the most consistently strong alternatives are: (i) scalarization (small grid search over fixed weights) or its analytic variant UWâ€‘SO, (ii) geometricâ€‘mean losses (GLS, AMTL), and (iii) gradientâ€‘balancing methods such as IMTL or GradNorm, optionally combined with PCGrad for gradient conflicts.openaccess.thecvf+6
+Kendall uncertainty weighting in practice (2019â€“2026)
+Kendall et al. learn taskâ€‘specific log variances sk=logâ¡Ïƒk2s_k = \log\sigma_k^2skâ€‹=logÏƒk2â€‹ and use a joint loss of the form L=âˆ‘k12Ïƒk2Lk+logâ¡ÏƒkL = \sum_k \frac{1}{2\sigma_k^2} L_k + \log\sigma_kL=âˆ‘kâ€‹2Ïƒk2â€‹1â€‹Lkâ€‹+logÏƒkâ€‹, with sks_kskâ€‹ implemented as unconstrained parameters for stability. This has been adopted in many later works as â€œUncertainty Weighting (UW)â€ or â€œhomoscedastic uncertainty weightingâ€ across vision, NLP, and scientific ML.openaccess.thecvf+5
+Concrete 2019â€“2026 examples that explicitly use or modify Kendallâ€‘style UW include:
+MultiNet++ (CVPRW 2019) uses a geometric loss (GLS) instead of UW, but positions it explicitly as an alternative to weighted sums for multiâ€‘task segmentation/depth/motion where convergence rates differ strongly.openaccess.thecvf+1
+Uncertainty Regularized MTL (ACL WASSA 2022) uses Kendallâ€‘style task uncertainty as an additional regularizer to control the tradeâ€‘off between perâ€‘task fineâ€‘tuning and maintaining low uncertainty across all tasks.pdfs.semanticscholar
+Achievementâ€‘Based MTL (AMTL, ICCV 2023) surveys weighting methods and treats homoscedastic uncertainty weighting as a â€œlearningâ€‘basedâ€ baseline, but instead proposes an achievementâ€‘based weighted geometric mean that empirically outperforms many lossâ€‘ and gradientâ€‘based methods on NYUv2 and Cityscapes.openaccess.thecvf
+Analytical Uncertaintyâ€‘Based Loss Weighting (UWâ€‘SO, 2024) takes Kendall UW as starting point, analyzes its weaknesses, and derives an analytic â€œoptimalâ€ inverseâ€‘loss weighting plus a softmax temperature.openaccess.thecvf
+MTGIBâ€‘UNet for ADMET prediction (IJCAI 2025) uses UW explicitly, but replaces logâ¡Ïƒk\log\sigma_klogÏƒkâ€‹ with logâ¡(1+Ïƒk2)\log(1+\sigma_k^2)log(1+Ïƒk2â€‹) to ensure nonâ€‘negative, numerically stable weights; ablations show clear degradation when UW is removed (uniform weights).openaccess.thecvf
+Recent MTL surveys and methods (2024â€“2026) (e.g., robust MTL with excess risks, fairnessâ€‘driven MTL, NTKMTL, etc.) list UW as a standard baseline alongside DWA, GLS, GradNorm, PCGrad, and IMTL, but often do not find it dominant once other methods and LR tuning are carefully controlled.arxiv+2
+These give you a set of postâ€‘2018 papers that both use Kendall weighting and, in several cases, motivate modifications or alternatives.
+Documented failure modes of Kendall uncertainty weighting
+1. Update inertia and sensitivity to initialization
+Kirchdorfer et al. (2024) show that UWâ€™s learned uncertainties can exhibit â€œupdate inertiaâ€: different initializations of the logâ€‘variance parameters lead to very different task weights for a substantial fraction of training, even though the underlying unweighted task losses are identical. On NYUv2, using the common initialization Ï‰k=0.8\omega_k=0.8Ï‰kâ€‹=0.8 vs. initializing near a previously learned optimum yields weight trajectories that only â€œrecoverâ€ and converge after roughly 25% of training (~100 epochs), meaning bad initialization materially changes the early optimization dynamics.openaccess.thecvf
+This inertia means:
+Task weights adapt slowly when the optimal weights differ by orders of magnitude.
+Early training may be biased toward suboptimal task tradeâ€‘offs, especially if you use short training schedules or early stopping.openaccess.thecvf
+2. Overfitting and weight collapse to a few tasks
+On CelebA with 40 attributes, Kirchdorfer et al. find that UW tends to overfit and collapse its weight mass onto a small subset of tasks: train losses go almost to zero for many tasks, but test error stops improving early, and UW ends up worse on average than simple equal weighting (EW), random loss weighting (RLW), or DWA. They show:openaccess.thecvf
+UW concentrates most relative weight on a few tasks; plots of perâ€‘task weights show a small number of tasks dominating.openaccess.thecvf
+For 34 of 40 tasks, their UWâ€‘SO variant achieves lower test loss than UW, even though both use the same backbone and data.openaccess.thecvf
+In practice this looks like â€œpartial trainingâ€: some tasks are fit extremely well on train but underperform on test, while others are effectively neglected.
+3. Misalignment between Ïƒ and â€œtrueâ€ task noise / model complexity
+UWâ€™s interpretation is that Ïƒk\sigma_kÏƒkâ€‹ represents homoscedastic aleatoric noise per task, so higher noise â†’ higher Ïƒk\sigma_kÏƒkâ€‹ â†’ lower weight. Kirchdorfer et al. construct toy examples and find that in realistic deep nets, the learned Ïƒ does not just track data noise; it also depends on function complexity and model capacity, such that tasks with more complex mappings or underâ€‘parameterized heads end up with large Ïƒk\sigma_kÏƒkâ€‹ and are downâ€‘weighted, even when their observation noise is not higher.arxiv+1
+So a â€œhard but importantâ€ task can be systematically deâ€‘emphasized, not because it is noisy, but because it is harder to fit with the shared backbone or limited head capacity.openaccess.thecvf
+4. Limited applicability and taskâ€‘metric dependence
+ICCV 2023â€™s AMTL paper explicitly notes that homoscedastic uncertainty weighting is only straightforwardly applicable when you can derive the task loss from a probabilistic model with a scalar variance parameter, e.g., Gaussian or Laplace regression or standard classification likelihoods. For many modern setups (custom metrics, composite detection/segmentation losses, fairness metrics, etc.) that mapping does not exist, so UW either cannot be applied asâ€‘is or becomes heuristic.openaccess.thecvf
+AMTL therefore does not include Kendall UW in its main benchmark and instead focuses on methods that treat the loss as a black box (GLS, DWA, GradNorm, IMTL, PCGrad, achievementâ€‘based GLS).openaccess.thecvf
+5. Numerical and parametrization issues (logâ€‘variance divergence, Ïƒâ†’0)
+The original CVPR paper already stresses that you should train log variance sk=logâ¡Ïƒk2s_k = \log\sigma_k^2skâ€‹=logÏƒk2â€‹ rather than Ïƒ directly to avoid divisions by zero and to allow unconstrained optimization. In practice, openâ€‘source implementations and teaching material go further:openaccess.thecvf
+A widely used implementation comments that the naÃ¯ve formula (1/(2Ïƒ2))L+logâ¡Ïƒ(1/(2\sigma^2))L + \log\sigma(1/(2Ïƒ2))L+logÏƒ is â€œnot numerically stable/differentiable (e.g. when Ïƒ is predicted to be 0)â€ and instead uses a softplus reparametrization with Ïƒ=softplus(p)+Îµ\sigma = \mathrm{softplus}(p)+\varepsilonÏƒ=softplus(p)+Îµ and then works in logâ¡Ïƒ2\log\sigma^2logÏƒ2 to prevent zero or negative Ïƒ.stackoverflow
+Lecture notes and blog posts on uncertainty weighting emphasize the role of the logâ¡Ïƒ\log\sigmalogÏƒ term as a regularizer â€œto prevent Ïƒâ†’âˆž\sigma \to \inftyÏƒâ†’âˆžâ€ and recommend clipping or carefully initializing logâ€‘Ïƒ.zenn+1
+These are not formal â€œinstability theorems,â€ but they reflect practical failure modes: if Ïƒ is parameterized poorly, you can get exploding gradients (Ïƒâ†’0), NaNs in logâ¡Ïƒ\log\sigmalogÏƒ, or nearâ€‘zero task weights that never recover.
+MTGIBâ€‘UNetâ€™s modification, using Î´k=logâ¡(1+Ïƒk2)\delta_k = \log(1+\sigma_k^2)Î´kâ€‹=log(1+Ïƒk2â€‹) instead of logâ¡Ïƒk\log\sigma_klogÏƒkâ€‹, is another sign that practitioners had to adjust the regularizer for stability and to avoid pathological Ïƒ values.openaccess.thecvf
+6. Diminishing benefit with many tasks or strong backbones
+Analytical UWâ€‘SO finds that:
+With large backbones (ResNetâ€‘50/101) on NYUv2 and Cityscapes, the spread in multiâ€‘task performance Î”â‚˜ across lossâ€‘weighting methods shrinks to â‰ˆ3 percentage points; UW is competitive but not clearly better than EW, GLS, DWA, etc.openaccess.thecvf
+On manyâ€‘task settings like 40â€‘label CelebA, simple methods (EW/RLW/DWA) match or beat UW, which overfits and collapses weights, while their UWâ€‘SO variant and IMTLâ€‘L do better.openaccess.thecvf
+So UWâ€™s value is largest for small/medium networks with a few heterogeneous tasks; as capacity grows or the number of tasks explodes, it can be no betterâ€”or worseâ€”than simpler schemes.
+7. Gradientâ€‘conflict issues remain unsolved
+UW only rescales losses; the sharedâ€‘parameter gradient is still a sum of perâ€‘task gradients weighted by 1/(2Ïƒk2)1/(2\sigma_k^2)1/(2Ïƒk2â€‹). This does not address:
+Gradient conflicts (negative cosine similarity) where optimizing one task actively hurts another.
+Partial training where gradients consistently point in directions that favor a subset of tasks.arxiv+1
+This is exactly why gradientâ€‘based methods like GradNorm, PCGrad, and IMTL were introduced: they operate directly on gradient magnitudes or directions and have been shown to fix cases where lossâ€‘based balancing (including UW) still suffers negative transfer.discovery.ucl.ac+3
+Representative 2019â€“2026 papers touching Kendall UW, issues, and fixes
+Here is a nonâ€‘exhaustive but relevant set you can mine for details and citations:
+Kirchdorfer et al., 2024 â€“ â€œAnalytical Uncertaintyâ€‘Based Loss Weighting in Multiâ€‘Task Learningâ€
+Benchmarks EW, RLW, DWA, GLS, UW, IMTLâ€‘L, Scalarization and introduces UWâ€‘SO (Soft Optimal UW). Identifies UWâ€™s inertia, overfitting (CelebA), and modelâ€‘complexity dependence, and shows UWâ€‘SO plus Scalarization dominate UW across NYUv2, Cityscapes, CelebA.openaccess.thecvf
+Yun & Cho, ICCV 2023 â€“ â€œAchievementâ€‘Based Training Progress Balancing for MTL (AMTL)â€
+Proposes an achievementâ€‘based weighted geometric mean loss; shows on NYUv2 and large partially annotated VOC+NYU that AMTL and GLS often outperform RLW, DWA, GradNorm, PCGrad, CAGrad, and even IMTL variants, without using task gradients.openaccess.thecvf
+Meshgi et al., ACL 2022 â€“ â€œUncertainty Regularized Multiâ€‘Task Learningâ€
+Uses task uncertainty (including homoscedastic) as a regularization term penalizing increases in uncertainty of other tasks while fineâ€‘tuning one task, to better control generalization and catastrophic forgetting on 16 sentiment tasks and 3 sequenceâ€‘labeling tasks.pdfs.semanticscholar
+Li et al., IJCAI 2025 â€“ â€œMTGIBâ€‘UNetâ€
+For 24 ADMET endpoints, uses GNNs plus a UW strategy with modified regularizer logâ¡(1+Ïƒk2)\log(1+\sigma_k^2)log(1+Ïƒk2â€‹) and shows via ablation that removing UW (uniform weights) consistently degrades performance, especially on highâ€‘uncertainty tasks.openaccess.thecvf
+Robust/excessâ€‘risk and fairness MTL works (2024â€“2025)
+E.g. robust MTL with excess risks and fairnessâ€‘driven multitask optimization, which treat homoscedastic UW as a baseline but focus on performanceâ€‘ or riskâ€‘based task weighting that encourages worstâ€‘task improvement rather than pure likelihoodâ€‘based Ïƒ estimates.arxiv+1
+Large surveys (e.g., â€œChallenging Common Paradigms in MTLâ€, MTL 1997â€“2024 review)
+These give broader context on task weighting vs. gradientâ€‘based methods and emphasize that careful LR tuning and architecture choices often matter more than the specific lossâ€‘weighting formula, especially in highâ€‘capacity models.arxiv+2
+Alternatives that work well for 3 tasks with imbalanced losses
+For three tasks with very different raw loss scales (e.g., CE segmentation + L1 depth + some auxiliary regression), you have the luxury that both dynamic methods and small grid searches are tractable. Empirically strong options from 2019â€“2026 are:
+1. Scalarization (small grid search over fixed weights)
+Idea: Choose static weights wkw_kwkâ€‹ on the simplex (e.g., step of 0.05â€“0.1) and train one model per triplet, then pick the best on a multiâ€‘task metric (e.g., Î”â‚˜) or your own scalarized objective.openaccess.thecvf
+Evidence: Both Xin et al. (SLAW) and Kirchdorfer et al. show that such bruteâ€‘force Scalarization often lies on the Pareto front and can match or beat sophisticated dynamic methods, at the cost of many full trainings.arxiv+1
+For 3 tasks: With step 0.1 there are only 36 combinations; even with 2â€“3 random seeds, this is feasible if you really care about optimum tradeâ€‘off.
+Use this when compute is relatively cheap and you want a strong, conceptually simple baseline.
+2. Soft Optimal Uncertainty Weighting (UWâ€‘SO)
+Idea: Derive the analytic Ïƒ that minimizes the UW loss (leading to weights âˆ 1/Lâ‚–) and then smooth with a softmax temperature TTT:
+wkâˆexpâ¡((1/Lk)/T)w_k \propto \exp((1/L_k)/T)wkâ€‹âˆexp((1/Lkâ€‹)/T).openaccess.thecvf
+Behavior: Approximates a principled, scaleâ€‘normalized inverseâ€‘loss weighting while avoiding the inertia and overfitting of gradientâ€‘learned Ïƒ; T controls how peaky vs. uniform the weights are.openaccess.thecvf
+Evidence: Across NYUv2 and Cityscapes with 2â€“3 tasks, UWâ€‘SO is best or secondâ€‘best (often just behind or tied with Scalarization) for multiple backbones, and strongly outperforms original UW, GLS, DWA, RLW, IMTLâ€‘L on average Î”â‚˜.openaccess.thecvf
+If you like the philosophy of Kendallâ€™s method but dislike its failure modes, UWâ€‘SO is currently the clearest â€œdropâ€‘inâ€ upgrade.
+3. Geometricâ€‘mean losses (GLS, AMTL)
+Geometric Loss Strategy (GLS; MultiNet++, 2019): Uses L=(L1L2L3)1/3L = (L_1 L_2 L_3)^{1/3}L=(L1â€‹L2â€‹L3â€‹)1/3 instead of a weighted sum, i.e., the geometric mean of task losses.yiyibooks+1
+Naturally penalizes situations where one loss is much larger: the product is dominated if any task is poorly fit, which encourages balanced progress even when raw loss scales differ markedly.
+On KITTI/Cityscapes 3â€‘task setups, GLS gives better balance and faster convergence than equal weights or heuristic handâ€‘tuned sums.openaccess.thecvf
+AMTL (ICCV 2023): Combines a weighted geometric mean with an achievementâ€‘based weight wtâˆ(1âˆ’Acct/(mpt))Î³w_t \propto (1 - \text{Acc}_t / (m p_t))^\gammawtâ€‹âˆ(1âˆ’Acctâ€‹/(mptâ€‹))Î³ where ptp_tptâ€‹ is singleâ€‘task accuracy and m > 1 a margin.openaccess.thecvf
+On NYUv2 and large partially annotated VOC+NYU (detection + segmentation + depth), AMTL achieves the best or nearâ€‘best multiâ€‘task accuracy across a wide slate of baselines including RLW, DWA, GLS, GradNorm, MGDA, PCGrad, CAGrad, IMTL, and DTP, while adding minimal overhead.openaccess.thecvf
+For 3 imbalanced tasks, GLS/AMTL are very attractive: they handle scale and convergenceâ€‘rate imbalance directly, need no perâ€‘task gradients, and are easy to implement (swap sum for logâ€‘sumâ€‘exp / product).
+4. Gradientâ€‘balancing methods: GradNorm and IMTL
+These are particularly useful if you see clear gradient conflicts or one taskâ€™s gradients are orders of magnitude larger.
+GradNorm (Chen et al. 2018) normalizes perâ€‘task gradient norms to equalize relative training speed; it dynamically adjusts loss weights so that tasks whose losses decrease more slowly get larger effective gradients.proceedings.mlr+1
+IMTL / IMTLâ€‘G (Liu et al. ICLR 2021) solves for scale factors so that the shared gradient has equal projection onto each taskâ€™s gradient, addressing â€œpartial trainingâ€ where some tasks are much more advanced.iclr+1
+Evidence from NYUv2, Cityscapes, and CelebA:
+IMTLâ€‘G often ranks among the top gradientâ€‘based methods and competes closely with GLS and Scalarization, especially for smaller backbones and fewer tasks.openaccess.thecvf
+Gradientâ€‘based methods have clear benefits when lossâ€‘balancing methods (including UW) still suffer from destructive interference, but they incur extra backward passes and are sensitive to dropout/stochastic depth.proceedings.neurips+1
+For 3 tasks, at modest scale, the extra compute is often acceptable. A practical pattern is:
+Use GLS/AMTL or UWâ€‘SO for loss scaling, then optionally plug in IMTL or GradNorm to control gradient magnitudes.
+5. PCGrad and related gradientâ€‘projection methods
+PCGrad (NeurIPS 2020) projects each task gradient to remove components that conflict (negative cosine similarity) with other tasks before summing.proceedings.neurips
+Works well in domains where gradients are frequently antagonistic (MTL RL, some multiâ€‘head vision benchmarks), but large CV benchmarks (e.g., AMTL, UWâ€‘SO) often find PCGrad no better than or worse than simpler lossâ€‘based methods plus good LR tuning, especially under partial annotation or heavy regularization.openaccess.thecvf+1
+PCGrad is a good â€œsafety valveâ€ if you know your three tasksâ€™ gradients are often in conflict, but itâ€™s usually not the first choice solely for handling lossâ€‘scale imbalance.
+Practical recommendations for a 3â€‘task, highly imbalanced setup
+For a concrete 3â€‘task model (e.g., segmentation + depth + some auxiliary regression) with highly imbalanced base losses:
+Normalize perâ€‘task base losses first
+Use mean instead of sum, consider scaleâ€‘invariant variants (e.g., logâ€‘RMSE or SIâ€‘log for depth) so trivial scaling doesnâ€™t dominate.openaccess.thecvf
+This alone greatly reduces the burden on any weighting scheme.
+If you want Kendallâ€‘style but more robust
+Replace UW with UWâ€‘SO: implement inverseâ€‘loss weights with a softmax temperature T, and tune T on a coarse grid (e.g., T âˆˆ {1, 3, 10, 20}) using your preferred multiâ€‘task metric.openaccess.thecvf
+Parameterize Ïƒ or its proxy in logâ€‘space or via softplus to avoid Ïƒâ†’0 and clipping issues; consider a regularizer like logâ¡(1+Ïƒ2)\log(1+\sigma^2)log(1+Ïƒ2) as in MTGIBâ€‘UNet for stability.stackoverflow+1
+If the main issue is scale and convergence imbalance
+Use GLS or AMTL as your primary loss:
+GLS: L=expâ¡(13âˆ‘klogâ¡Lk)L = \exp\big(\frac{1}{3}\sum_k \log L_k\big)L=exp(31â€‹âˆ‘kâ€‹logLkâ€‹).yiyibooks
+AMTL: weighted geometric mean with achievementâ€‘based weights as in Yun & Cho (2023).openaccess.thecvf
+These methods are particularly effective when one task is â€œharderâ€ and otherwise undertrained (e.g., depth) while easier tasks (e.g., segmentation) converge quickly.
+If you suspect or observe strong gradient conflicts
+Keep your preferred loss weighting (GLS/AMTL/UWâ€‘SO), but add IMTLâ€‘G (or GradNorm) or PCGrad to operate on gradients:
+IMTLâ€‘G if you care about equal gradient projections and fairness.discovery.ucl.ac+1
+PCGrad if you mostly want to suppress destructive interference with minimal algorithmic changes.proceedings.neurips
+If you have enough compute and want maximum control
+Run a small Scalarization search on top of one of the above as a sanity check: e.g., fix GLS or UWâ€‘SO, but also train a dozen models with static weight triplets and see whether the dynamic method is close to the best static mixture.openaccess.thecvf
+For 3 tasks, this is still manageable and often confirms that wellâ€‘designed dynamic methods (UWâ€‘SO, AMTL) are within a small margin of the best static combination.
+If you share what your three tasks and base losses actually are (e.g., CE vs. L1 vs. focal, their typical magnitudes), I can suggest a very concrete loss implementation (including stabilization tricks for logâ€‘Ïƒ) tailored to your setting.
+Short answer: I could not find a paper that directly ablates semiâ€‘supervised instanceâ€‘segmentation pseudoâ€‘GT quality versus downstream action recognition accuracy in a joint multiâ€‘task model on IKEA ASM / Assembly101 or similar assembly datasets. However, there are (1) assembly datasets that already use pseudoâ€‘GT for dense labels, (2) strong teacherâ€“student semiâ€‘supervised instanceâ€‘segmentation works that show how sensitive performance is to pseudoâ€‘label quality, and (3) action / HOI / assembly pipelines where object or state predictions are used as inputs or auxiliary tasks and are empirically shown to help or hurt depending on their quality. Taken together, they strongly support the intuition that better pseudoâ€‘GT for detection/segmentation helps action recognition when the action head actually uses those object signals, but that noisy pseudo labels can easily degrade it.
+Below Iâ€™ll first list the most relevant papers/datasets, then answer your core â€œdoes it help?â€ question more mechanistically.
+Assembly datasets with pseudoâ€‘GT segmentation / dense labels
+IKEA ASM: pseudoâ€‘GT for instance segmentation
+IKEA ASM provides full object instance masks only on about 1% of frames (keyframes), and trains Mask Râ€‘CNN (+ PointRend) on those to generate â€œpseudo groundâ€‘truthâ€ segmentation for additional frames.openaccess.thecvf+2
+The WACV paper explicitly shows that adding pseudoâ€‘GT frames and boundary refinement (PointRend) boosts instanceâ€‘segmentation AP and tightens boxes compared to training only on the sparse manual masks.youtubeopenaccess.thecvf
+However, the benchmarks for action recognition on IKEA ASM (e.g., standard clipâ€‘based CNN/TSM baselines) use RGB/pose/multiâ€‘view features and do not report an ablation that varies segmentation pseudoâ€‘GT quality and measures action accuracy.ar5iv.labs.arxiv+1
+So IKEA ASM is a clean example of semiâ€‘supervised instance segmentation in an assembly setting, but the pseudoâ€‘GT analysis is contained within segmentation, not propagated to action recognition metrics.openaccess.thecvf+1
+ENIGMAâ€‘360 / ENIGMAâ€‘51 and SAM-based pseudo labels
+ENIGMAâ€‘360 (egoâ€“exo industrial assembly dataset) generates ~1.4M object masks and ~200k hand masks using SAMâ€‘HQ as an automatic segmenter, essentially providing pseudo segmentation labels for an industrial assembly setup.arxiv+1
+ENIGMAâ€‘51 similarly releases pseudo labels for hands and objects obtained from offâ€‘theâ€‘shelf segmentation/HOI tools, explicitly so others can study HOI and egocentric activity understanding without doing all manual labelling.arxiv
+These datasets are then used for HOI, handâ€‘object interaction detection, etc., but, again, there is no reported systematic sweep over pseudoâ€‘mask quality versus downstream recognition accuracy.arxiv+2
+Teacherâ€“student and pseudoâ€‘label quality for instance segmentation
+Even though theyâ€™re on COCOâ€‘like data, the semiâ€‘supervised instanceâ€‘segmentation literature gives very clear evidence of how decisive pseudoâ€‘label quality is.
+Representative works:
+Soft Teacher (semiâ€‘supervised object detection, instance head optional) â€“ endâ€‘toâ€‘end teacherâ€“student detector where the teacher (EMA of student) generates pseudo boxes/masks on weakly augmented images and the student is trained on strongly augmented views plus labeled data.openaccess.thecvf
+Ablations show that adding softâ€‘teacher weighting and box jittering to improve pseudo labels raises COCO mAP by several points; naive pseudo labels give much smaller gains.openaccess.thecvf
+PAIS â€“ Pseudoâ€‘label Alignment for Semiâ€‘Supervised Instance Segmentation â€“ explicitly studies how mismatches between class and mask quality lead to good pseudo labels being thrown away.openaccess.thecvf
+They introduce alignment and quality filtering so that class scores and mask IoU are jointly considered, and show that better selection/refinement of pseudo boxes/masks gives consistent AP gains over vanilla Meanâ€‘Teacherâ€‘style baselines.openaccess.thecvf
+â€œBetter (pseudoâ€‘)labels for semiâ€‘supervised instance segmentationâ€ â€“ adds adaptive label smoothing and calibrationâ€‘corrected pseudo labels; experiments show notable gains especially on rare classes when pseudo labels are better calibrated.arxiv
+S4M: Boosting Semiâ€‘Supervised Instance Segmentation with SAM â€“ uses SAMâ€‘like masks inside a teacherâ€“student framework and explicitly discusses the tradeâ€‘off between overâ€‘ and underâ€‘segmentation when integrating SAMâ€‘derived pseudo labels.openaccess.thecvf
+These works all show that as you improve pseudoâ€‘label quality (through better scoring/selection, calibration, or auxiliary mask sources), instanceâ€‘segmentation AP climbs substantially; when pseudo labels are noisy, the student can overfit to the noise and underperform plain supervised training.arxiv+3
+None of them couple this directly to a downstream action head, but they give you a fairly hard prior: pseudoâ€‘label noise is harmful enough to hurt even the same task; a multiâ€‘task system that relies on those labels will inherit those issues.
+Action / HOI / assembly pipelines where perception feeds actions
+Here are the closest things to â€œmultiâ€‘task perception + actionâ€ in assembly/manufacturing or HOI, with some evidence about interactions:
+Active object segmentation for egocentric actions
+â€œActive Object Segmentation: A New Modality for Egocentric Action â€¦â€ (ACM 2024): proposes explicitly segmenting the active object per action in egocentric videos and using those masks as an input modality for action recognition.acm
+The abstract/snippet indicates that activeâ€‘object segmentation is more robust for recognising transformed objects during interactions than baselines without that modality.acm
+While we canâ€™t see the full ablation, the reported results imply:
+â€œbetter (or at least wellâ€‘focused) object masks â†’ more robust action recognition, especially when object appearance changes.â€
+Even though segmentation here is trained in a more standard supervised / weakly supervised way (not Softâ€‘Teacherâ€‘style), itâ€™s direct evidence that object masks matter for AR when you actually consume them.
+Industrial assembly AR using detected objects
+A recent reducerâ€‘assemblyâ€‘line paper combines YOLOv5 object detection with human skeleton and temporal modelling to recognise fineâ€‘grained assembly actions and predict process progress.sciencedirect
+YOLOv5 is used to compute dynamic distances between hands and relevant parts; those features are key for disambiguating visually similar actions in industrial settings.sciencedirect
+They report ~99% actionâ€‘recognition accuracy on their line once detection and skeleton features are integrated, but do not sweep detector quality explicitly.sciencedirect
+Other assemblyâ€‘line monitoring datasets (HA4M, HARMA) use RGB + skeleton and occasionally objectâ€‘centric cues for temporal action segmentation, but published baselines focus on TAS, not on varying detection quality.acm+2
+This supports the intuition: when action models explicitly use â€œwhere is the part / toolâ€ features (distances, contact, active object id), perceptual quality is important, though published work rarely quantifies the dependence.
+Egocentric handâ€“object interaction pipelines
+A realâ€‘time egocentric HOI system for industrial scenarios decouples an actionâ€‘recognition module (contact / nonâ€‘contact) from a YOLOWorld detector used to retrieve the active object once contact is detected.arxiv+1
+AR reaches ~38.5% pâ€‘AP on ENIGMAâ€‘51; the detector reaches ~85% AP for hands/objects.arxiv
+The authors stress that their decomposition allows independent optimisation of the two modules and avoids the heavy annotation demands of full segmentation/HOI heads (active object vectors, masks, temporal boundaries), explicitly trading off annotation complexity vs accuracy.arxiv+1
+Classical assemblyâ€‘motion work uses separate modules for inâ€‘hand object identification and action recognition (e.g., LSTMâ€‘based inâ€‘hand object classifier + LSTM action classifier), and shows that correctly identifying manipulated objects improves action recognition accuracy compared to kinematics alone.ixchel-ramirez-alpizar
+These works again donâ€™t provide a curve of detector AP versus AR accuracy, but they do empirically show that richerâ€”or at least correctâ€”object cues (contact, active object id) substantially improve downstream behaviour understanding.
+Assembly state detection + step recognition
+IndustReal (MECCANO/industrial domain) introduces assembly state detection (ASD) and procedure step recognition (PSR) benchmarks; ASD uses YOLOv8 to detect the full assembly object and assign a discrete state, which then feeds into a stepâ€‘recognition pipeline.openaccess.thecvf+1
+STORMâ€‘PSR proposes a dualâ€‘stream model: one stream based on ASD, one on direct spatioâ€‘temporal features, and shows that relying only on ASD fails badly under occlusion; combining both streams reduces delay in recognising step completion and improves F1 / POS on MECCANO/IndustReal.arxiv
+The authors effectively argue that when the stateâ€‘detection stream is noisy/occluded, PSR suffers; adding a direct spatioâ€‘temporal stream makes PSR less sensitive to ASD failures.arxiv
+This is a nice qualitative confirmation: noisy intermediate state detection hurts downstream step recognition; extra streams that bypass that noise help.
+Semiâ€‘supervised action methods and pseudoâ€‘label quality
+There is a separate but very relevant body of work where the action labels themselves are pseudoâ€‘labeled, and people study how pseudoâ€‘label quality affects action recognition / localization:
+Adaptive Pseudoâ€‘label Learning (APL) for Semiâ€‘Supervised Temporal Action Localization (SSâ€‘TAL) â€“ jointly learns classification confidence and localization reliability to rank pseudo proposals, shows that selecting higherâ€‘quality pseudo labels yields significant mAP gains over naive confidence thresholds.arxiv+1
+Pseudoâ€‘Label Refining (PLR) for SSâ€‘TAL â€“ teacherâ€“student for TAL that refines temporal boundaries and weights pseudo labels of different quality; experiments demonstrate consistent improvements over SS baselines on THUMOS14 and ActivityNet as pseudoâ€‘label boundaries are refined.journals.plos+1
+Stable Mean Teacher for semiâ€‘supervised action detection â€“ adapts Mean Teacher to video action detection and introduces mechanisms to make pseudo labels more temporally consistent; better pseudo labels â†’ better spatioâ€‘temporal detection mAP.arxiv
+Teacherâ€‘Referenceâ€‘Student for action quality assessment (AQA) â€“ shows that if the teacher produces lowâ€‘fidelity pseudo labels, student performance degrades, and adds a â€œreferenceâ€ network plus confidence memory explicitly to improve pseudoâ€‘label reliability; this significantly outperforms previous semiâ€‘supervised AQA methods.arxiv+2
+These are all singleâ€‘task on actions, but they give a clear empirical law: poor pseudo labels can make semiâ€‘supervised performance worse than supervised; better pseudo labels are worth several points of mAP / correlation.
+Pseudoâ€‘labels for intermediate cues (contact, active objects, states)
+Some works use pseudo labeling for intermediate signals that are closely tied to actions:
+Handâ€“object contact prediction via motionâ€‘based pseudoâ€‘labeling â€“ generates contact/noâ€‘contact pseudo labels from motion cues and then uses a small set of trusted labels plus guided progressive label correction to denoise them; the corrected pseudo labels significantly improve contact prediction over using raw motion pseudo labels.bmva-archive+2
+ActionVOS â€“ â€œActions as Prompts for Video Object Segmentationâ€ uses action narrations to generate pseudo activeâ€‘object labels and an actionâ€‘aware focal loss; this improves segmentation of active objects relative to training with standard object masks alone.ecva
+Learning Multiple Object States from Actions (MOST) â€“ uses LLMâ€‘generated pseudo state labels from narrations and actions, then trains temporal segmentation models to predict multiâ€‘label object states over time.arxiv+1
+In all of these, the pattern is the same: naÃ¯ve pseudo labels are noisy enough to hurt, and extra mechanisms (motion heuristics + correction, actionâ€‘aware filtering, LLM reasoning) to improve pseudoâ€‘label quality lead to better intermediate predictions and, where reported, better downstream understanding tasks.arxiv+4
+So, does better pseudoâ€‘GT for detection help action recognition in a multiâ€‘task framework?
+Putting all of this together, hereâ€™s the closest we can get to an evidenceâ€‘backed answer.
+1. When the action head explicitly uses object masks/boxes, yes, up to a point
+In pipelines where object information is fed into the action model (e.g., as cropped features, handâ€“object distances, activeâ€‘object ids, state predictions):
+Works that add activeâ€‘object segmentation or objectâ€‘centric HOI signals generally report improved action/interaction recognition compared with global RGB alone.ixchel-ramirez-alpizar+3
+IndustReal / STORMâ€‘PSR show that unreliable assemblyâ€‘state detection harms procedural step recognition, and that bypassing ASD with a separate spatioâ€‘temporal stream mitigates this â€“ i.e., downstream performance is sensitive to intermediate detection/segmentation quality.pure.tue+2
+HOI/egocentric pipelines that rely on bounding boxes and contact/activeâ€‘object signals see notable drops when using predicted boxes instead of ground truth in ablations (reported in HOI papers more broadly, and echoed in egocentric HOI discussions that call out the difficulty of obtaining accurate hand/object/activeâ€‘object annotations).openaccess.thecvf+2
+Given those facts plus the strong evidence from semiâ€‘supervised detection/segmentation and SSâ€‘TAL that better pseudo labels consistently improve task performance, the most reasonable expectation is:ecva+7
+If your multiâ€‘task model consumes object masks/boxes (e.g., TSM/SlowFast over crops, graph over handâ€“object nodes, activeâ€‘object embeddings), then increasing pseudoâ€‘GT quality for detection/segmentation will almost certainly improve action recognition, at least until detection noise is no longer a dominant error source.
+Youâ€™d expect to see this most clearly in:
+Fineâ€‘grained objectâ€‘manipulation classes that differ mainly by which part/tool is touched (e.g., â€œtighten screw Aâ€ vs â€œtighten screw Bâ€).
+Steps whose definition is strongly tied to object state (inserted vs uninserted component) rather than to gross body pose.
+2. When detection is only an auxiliary task sharing a backbone, itâ€™s more nuanced
+If the architecture is more like:
+Shared backbone â†’
+head 1: instance segmentation / detection (trained with semiâ€‘supervised pseudo GT)
+head 2: action classification/segmentation from global features (not using boxes/masks explicitly),
+then improving detection pseudoâ€‘GT affects action recognition indirectly via representation learning:
+Multiâ€‘task learning literature (and specific works like STORMâ€‘PSRâ€™s dual streams, or joint alignment+segmentation with IKEA ASM) show that adding related tasks often improves representation for all tasks if the auxiliary task labels are reasonably clean; if they are very noisy, they can degrade performance due to conflicting gradients.openaccess.thecvf+2
+Semiâ€‘supervised detection/segmentation papers show that pseudo labels below some precision/recall threshold can make the student worse than the supervised baseline.openaccess.thecvf+2
+So in this regime, you can expect:
+Highâ€‘quality pseudoâ€‘GT for detection acts as an extra supervisory signal for the backbone and can help action recognition (better objectâ€‘aware features, more precise boundaries, etc.).
+Lowâ€‘quality pseudoâ€‘GT can hurt action recognition, because the backbone is forced to explain hallucinated objects and wrong masks, effectively regularising it towards the wrong invariances.
+Practically, that suggests you want confidenceâ€‘weighted or filtered pseudo labels (Softâ€‘Teacherâ€‘style soft weighting, PAISâ€‘style quality alignment, or APLâ€‘style quality assessment) to cap the damage from bad detections.arxiv+3
+3. Diminishing returns and robustness
+Several patterns from the literature suggest diminishing returns:
+In IKEA ASM, once you add a reasonable number of pseudoâ€‘GT frames and a refined mask head, segmentation AP improves, but not all failure modes vanish; some objects/panels remain confusable.youtubeopenaccess.thecvf
+In HOI/egocentric works, switching from GT boxes to strong predicted boxes hurts, but once predicted boxes reach a certain AP, further boxâ€‘quality gains yield smaller HOI/AR gains compared to, say, better temporal modelling or representation learning.proceedings.neurips+1
+So in a multiâ€‘task AR model, youâ€™re likely to see:
+Big AR gains when going from â€œno object infoâ€ to â€œgood enough detection/segmentationâ€.
+Smaller gains when going from good to excellent detection (e.g., 70 â†’ 80 mAP), especially if the action head already uses pose and global context.
+Are there papers that directly study â€œsemiâ€‘supervised instance segmentation pseudoâ€‘GT quality vs AR accuracyâ€ on IKEA ASM / Assembly101?
+Based on the searches:
+No paper I found performs a controlled experiment where you:
+Train a semiâ€‘supervised instance segmentation model (e.g., Soft Teacher / PAIS / S4M) on an assembly dataset to generate pseudoâ€‘GT masks/boxes,
+Plug those predictions into a joint actionâ€‘recognition head, and
+Sweep pseudoâ€‘label thresholds / teacher quality to quantify the correlation between segmentation AP and action accuracy on the same dataset (IKEA ASM / Assembly101 / HA4M / IndustReal).ceur-ws+6
+Closest partial evidence:
+IKEA ASMâ€™s use of pseudoâ€‘GT segmentation is confined to segmentation evaluation; the AR benchmark is separate.arxiv+2
+Assembly101 focuses on action recognition, anticipation, TAS, and mistake detection; it does not ship instance masks, and the benchmarks do not couple object segmentation quality to AR performance.assembly-101.github+3
+IndustReal / STORMâ€‘PSR, ENIGMAâ€‘360, ENIGMAâ€‘51, and industrial AR papers show that intermediate detectors and state estimators matter qualitatively and report failures due to occlusion or state ambiguity, but they donâ€™t parametrically vary pseudoâ€‘label quality from semiâ€‘supervised detectors.arxiv+5
+So if you want a clean answer for your specific multiâ€‘task design, you will almost certainly have to run the ablation yourself.
+How Iâ€™d empirically study this in your setting
+Given your question and the existing literature, a practical experimental design could be:
+Choose an assembly dataset with object/part labels
+IKEA ASM (has instance segmentation and actions), IndustReal (assembly states + actions), or an industrial line dataset where you can annotate a subset of masks/boxes.ar5iv.labs.arxiv+3
+Train a semiâ€‘supervised instanceâ€‘segmentation model with a teacherâ€“student framework
+E.g., start from Soft Teacher (for detection) extended with a mask head, or PAIS / S4M / â€œBetter pseudoâ€‘labels â€¦â€ for instance segmentation.openaccess.thecvf+3
+Generate multiple pseudoâ€‘GT regimes by:
+Varying score thresholds / NMS on teacher predictions.
+Turning on/off advanced pseudoâ€‘label calibrations (e.g., PAIS alignment, label smoothing, SAM refinement).openaccess.thecvf+2
+Optionally changing the fraction of labeled frames.
+Build a joint model that actually uses those object predictions:
+Action head consumes:
+objectâ€‘conditioned features (ROI pooled features over predicted masks/boxes),
+handâ€“object distances / contact states, or
+graph over hands/objects as in many HOI works.sciencedirect+2
+Evaluate for each pseudoâ€‘GT regime:
+Instanceâ€‘segmentation AP (and recall for active/rare parts).
+Action recognition / segmentation metrics (Topâ€‘1, F1, mAP, edit distance) on fineâ€‘grained assembly actions.
+Optionally compare:
+GT boxes/masks,
+semiâ€‘supervised pseudoâ€‘GT,
+no object branch (pose/RGB only).
+If the literature is a guide, you should see:
+A monotonic (but possibly saturating) improvement in AR as segmentation pseudoâ€‘GT improves, provided the action head genuinely depends on object information; and
+A regime of lowâ€‘quality pseudo labels where adding the object branch actually hurts AR compared to not using it, mirroring what has been observed in both semiâ€‘supervised detection and actionâ€‘localization studies.pmc.ncbi.nlm.nih+6
+If youâ€™d like, I can help you design a specific multiâ€‘task architecture and training schedule (e.g., IKEA ASM + PAIS/S4M + TSM/ASFormer branch) that would make this ablation as clean and informative as possible.
+Short answer: Your idea of FiLM-based â€œmultiâ€‘context modulationâ€ using pose and object features to modulate an action-recognition head appears to be novel in the IKEA ASM setting and fairly novel more broadly; existing work almost always uses concatenation or attention (not FiLM-style per-channel modulation) to inject pose/context into action features. Below I summarize relevant literature and where your approach sits relative to it, but note that without live search I cannot guarantee Iâ€™ve captured the very latest 2025â€“26 papers or exact SOTA numbers, so please treat the numbers as approximate and doubleâ€‘check them from the original sources.
+Q1: Pose-conditioned action recognition (and FiLM-style ideas)
+Here are five of the most relevant families of work where pose/skeleton features condition RGB or other streams for action recognition; all use attention or gating, not explicit FiLM layers.
+Pose-conditioned Spatio-Temporal Attention for Human Action Recognition
+Fabien Baradel, Christian Wolf, Julien Mille, arXiv:1703.10106, often cited as an ECCV/ICCV-era method, 2017.
+Two-stream model (RGB + 3D pose) where pose is used to define a set of â€œglimpsesâ€ and to condition a soft spatioâ€‘temporal attention mechanism over RGB features; effectively, pose selects where and when to look in the RGB stream.
+Human Activity Recognition with Pose-driven Attention to RGB
+Fabien Baradel, Christian Wolf, Julien Mille, BMVC 2018 (or similar timeframe; followâ€‘up to the above).
+Extends the idea of using pose to drive attention over RGB: a pose stream is processed by a CNN and the resulting features parameterize attention masks applied to a separate RGB CNN; pose thus multiplicatively gates spatial features in RGB feature maps.
+PoTion: Pose MoTion Representation for Action Recognition
+Vasileios Choutas, Philippe Weinzaepfel, JÃ©rÃ´me Revaud, Cordelia Schmid, CVPR 2018.
+Constructs an RGB-like â€œpose motion imageâ€ by aggregating pose heatmaps over time with temporal color encoding; this replaces raw pose sequences with a single 2D representation fed into a CNN, effectively conditioning the classifier on pose dynamics, but without explicit modulation of another modality.
+Pose and Joint-Aware Action Recognition
+Anshul Shah, Shlok Mishra, Ankan Bansal, Junâ€‘Cheng Chen, Rama Chellappa, Abhinav Shrivastava, arXiv:2010.08164 (around 2020).
+Works on joint-based action recognition with a joint selector module that re-weights joints according to their discriminativeness; this is a form of learned per-joint gating (similar in spirit to featureâ€‘wise modulation) applied to skeleton features themselves.
+Pose-driven / Pose-enhanced transformers and visionâ€“language models for actions
+Examples include:
+Pose-conditioned transformers for action recognition (various 2020â€“2024 works, typically in surveillance or sports domains): pose tokens crossâ€‘attend to image tokens.
+PeVL: Pose-Enhanced Vision-Language Model for Fine-Grained Human Action Recognition, Zhang et al., CVPR 2024.
+In these, pose encodings condition visual features via crossâ€‘attention layers, so the conditioning is learned and spatially specific, but implemented as transformer attention rather than FiLM.
+FiLM-style pose modulation?
+I am not aware of a paper that explicitly uses FiLM (or conditional batch norm / conditional affine layers) where pose or skeleton features generate per-channel scale/shift parameters to modulate intermediate CNN features for action recognition.
+FiLM has been widely used for languageâ†’vision conditioning (e.g., Perez et al., â€œFiLM: Visual Reasoning with a General Conditioning Layerâ€, ICLR 2018) and for other modalities (geometry, camera pose, etc.), and there are papers explicitly arguing FiLM as a lighter alternative to crossâ€‘attention in multimodal UNets.
+But in the pose-conditioned action recognition niche, conditioning is almost always via:
+concatenation of pose features with RGB features,
+pose-guided spatial attention masks, or
+crossâ€‘attention between pose tokens and visual tokens.
+So positioning: your â€œmulti-context modulationâ€ (pose/object â†’ FiLM parameters inside an action head built on shared ResNet+FPN features) is meaningfully different from prior pose-driven attention work and, as far as I can see, likely novel.
+Q2: Multi-task models on IKEA ASM (pose + object + action)
+Letâ€™s go through your specific list and what they actually do on IKEA ASM.
+Ben-Shabat et al., WACV 2021 â€“ IKEA ASM dataset paper
+Paper: â€œThe IKEA ASM Dataset: Understanding People Assembling Furniture through Actions, Objects and Poseâ€,
+Y. Ben-Shabat et al., WACV 2021, arXiv:2007.00394.
+They define three main perception tasks (action recognition, instance segmentation/tracking of parts, human pose estimation) and benchmark separate models:
+I3D / P3D / C3D etc. for RGB-based action recognition (per-frame accuracy).
+Mask Râ€‘CNN (+ PointRend) for object instance segmentation; pseudoâ€‘GT masks from 12 overfitted detectors.
+OpenPose, Mask Râ€‘CNN, STAF, VIBE etc. for 2D/3D pose.
+They report some simple multi-view / multi-modal fusion for action recognition (e.g., averages of per-view logits, RGB+pose fusion), but there is no single multi-task network jointly learning pose + objects + actions. The tasks are decoupled and operate on shared data, not shared weights.
+â€œHow Object Information Improves Skeleton-based Human Action Recognition in Assembly Tasksâ€
+Paper: â€œHow Object Information Improves Skeleton-based Human Action Recognition in Assembly Tasksâ€,
+Aganian et al. (or similar authorship, 2023), arXiv:2306.05844.
+They start from two skeleton-only action backbones (2Dâ€‘CNN/VA-CNN and PoseConv3D) and then:
+Treat object centers (from GT masks or Mask Râ€‘CNN/PointRend predictions) as additional joints; encode them as extra rows (2Dâ€‘CNN) or extra heatmap channels (PoseConv3D).
+Train a single-task classifier on pre-trimmed clips: the loss is purely over action labels.
+Object and pose are fused at the input encoding stage of the action model, but object detection is not a learned head and there is no multi-task loss for detection/segmentation.
+This is multi-modal action recognition (skeleton+objects), not multi-task learning.
+3DInAction
+Paper: â€œ3DInAction: Understanding Human Actions in 3D Point Cloudsâ€,
+Ben-Shabat et al., arXiv:2303.06346, 2023.
+They reconstruct 3D point clouds (from multi-view video) and build a point-cloud-based action recognizer.
+IKEA ASM is used as one of the benchmarks; the model operates on 3D point clouds and focuses on action classification only.
+There is no joint head for 2D pose or 2D instance segmentation here; again, single-task.
+AAG+ (Action Anticipation at a Glimpse)
+Paper: â€œAAG+: Single-frame Action Anticipation with Multimodal Fusionâ€ (exact title varies slightly),
+Garcia-Rodriguez et al., around 2024 (journal or major conference).
+Task: action anticipation, not standard recognition: they predict future action labels from a single â€œglimpseâ€ frame.
+They use multiple modalities (RGB, depth, sometimes semantic cues from past actions), with modality-specific encoders and different fusion policies.
+IKEA ASM is one of the benchmarks, but:
+There is no object detection or pose head; pose or segmentation features may enter as auxiliary inputs, not as jointly trained tasks.
+Fusion is via concatenation or learned attention; not multi-task and not cross-modal conditioning in the sense of one head modulating another.
+CASA â€“ Context-Aware Sequence Alignment using 4D skeletal augmentation
+Paper: â€œContext-Aware Sequence Alignment Using 4D Skeletal Augmentationâ€,
+Sungjoon Kwon et al., CVPR 2022.
+CASA is mainly about self-supervised learning and sequence alignment on 4D skeletons (3D pose over time), applied to datasets including IKEA ASM.
+It uses transformers with selfâ€‘ and crossâ€‘attention on skeleton sequences; the evaluated tasks include:
+Phase progression / phase classification in assembly.
+Retrieval/alignment between sequences.
+CASA does not jointly learn pose detection, object segmentation, and action labels; it assumes pose sequences as given, so again not multi-task in your sense.
+Overall answer for Q2
+Among these IKEA ASM papers, none trains a single backbone with three heads for detection, pose estimation, and action recognition in a unified multi-task setting.
+Most do multi-modal fusion at either input or feature level (RGB + depth + pose; skeleton + objects), but the detection/pose modules are either:
+pre-trained and frozen, or
+trained separately with their own datasets and losses.
+Likewise, I am not aware of any IKEAâ€‘ASM paper that uses explicit cross-modal feature conditioning (FiLM, conditional BN, or even systematic crossâ€‘attention) inside an action head where, say, pose/object features modulate an RGB/feature-pyramid action representation; fusion is usually by concatenation, addition, or attention across symmetric streams.
+So your architectureâ€”shared ResNet50+FPN multi-task backbone with FiLM-style modulation of the action head by pose/object featuresâ€”would be a genuine extension beyond existing IKEA ASM multi-modal work, both in multi-tasking and in how the modalities interact.
+Q3: FiLM vs. transformer crossâ€‘attention for multimodal conditioning
+There are not many papers that directly compare FiLM and transformer crossâ€‘attention on the same multimodal vision task, but we can triangulate from multiple sources where both options are discussed.
+Representative FiLM-based conditioning
+FiLM: Visual Reasoning with a General Conditioning Layer
+Ethan Perez et al., ICLR 2018.
+Introduces FiLM as feature-wise affine modulation: Î³(c)â‹…F+Î²(c)\gamma(c)\cdot F + \beta(c)Î³(c)â‹…F+Î²(c), where Î³,Î²\gamma,\betaÎ³,Î² are predicted from a conditioning vector ccc (e.g. a question embedding).
+On CLEVR VQA, FiLM-based CNNs achieve near-SOTA performance with relatively modest parameter counts, showing that simple per-channel modulation is enough for complex reasoning if the backbone is rich.
+Multi-hop FiLM generation for visual dialogue / VQA
+Strub et al., ECCV 2018 (â€œVisual Reasoning with Multi-hop Feature Modulationâ€).
+Alternates between attending to language and generating FiLM parameters for multiple ResBlocks, effectively stacking several FiLM conditioning stages.
+Shows FiLM can scale to longer language inputs and multi-hop reasoning.
+Recent multimodal UNet / diffusion models using FiLM as a lighter alternative to crossâ€‘attention
+E.g., geometry- or pose-conditioned UNets for view synthesis or 3D reconstruction (there are 2024â€“25 papers that explicitly say â€œwe use FiLM instead of cross-attention to condition on context for efficiencyâ€).
+These often report similar visual quality with ~3Ã— fewer parameters and notably lower memory/compute than equivalent cross-attention blocks.
+Crossâ€‘attention-based conditioning
+Vision transformers and crossâ€‘attention in multimodal models
+ViT/VidTr-based AR models, â€œPerceiverâ€â€‘style architectures, CLIP derivatives, and action transformers typically rely on:
+Selfâ€‘attention within each modality.
+Crossâ€‘attention where queries come from one modality (e.g., pose tokens, text tokens) and keys/values from another (image or video tokens).
+Many pose-enhanced action models (e.g., PeVL for fineâ€‘grained action recognition) use crossâ€‘attention to align pose tokens with visual tokens, enabling spatially localized conditioning.
+Tradeoffs: FiLM vs crossâ€‘attention in practice
+Expressivity vs locality
+FiLM:
+Per-channel scaling/shifting is global over spatial locations (and often over time), unless applied at multiple layers of a feature hierarchy.
+It cannot, by itself, choose where in the feature map to emphasize or suppress context; all spatial positions in a channel are scaled equally.
+However, if your backbone (e.g., FPN) already encodes spatial structure and multi-scale context, global per-channel modulation is often sufficient for many tasks.
+Crossâ€‘attention:
+Models full pairwise interactions between query tokens (e.g., joints, text tokens) and key/value tokens (e.g., spatial patches, object features).
+Naturally captures spatially varying influence: a specific joint can attend to particular image regions, enabling localized conditioning that FiLM alone cannot directly express.
+Parameters and compute
+FiLM:
+Very lightweight: a few linear layers from context vector â†’ Î³,Î²\gamma,\betaÎ³,Î² per channel per FiLM layer.
+Parameter count and FLOPs scale linearly with channel count and number of layers; independent of spatial resolution.
+Works well when you want to inject low-dimensional context (e.g. global pose embedding, object summary vector) into an existing CNN/ResNet/FPN without redesigning the architecture.
+Crossâ€‘attention:
+Requires projections of queries, keys, values and computation of attention matrices; complexity roughly O(NqNk)O(N_q N_k)O(Nqâ€‹Nkâ€‹), where NqN_qNqâ€‹ and NkN_kNkâ€‹ are numbers of tokens.
+For video or dense feature maps, this can be significantly more expensive in memory and compute, especially early in the network where spatial resolution is high.
+Parameter count is also higher, with multiple projection matrices and possibly multi-head attention per layer.
+Data efficiency and overfitting
+FiLM:
+Because it is a fairly constrained form of conditioning (no spatial mixing, linear modulation), it tends to be more dataâ€‘efficient and less prone to overfitting in lowâ€‘data regimes like IKEA ASM.
+This is attractive when you have ~17k action clips and want a multi-task model without exploding capacity.
+Crossâ€‘attention:
+More flexible but also higher capacity; can overfit easily on small datasets unless heavily regularized or pretrained.
+Often preferred in large-scale multimodal pretraining where billions of tokens justify the capacity.
+Implementation complexity and integration with FPN/backbones
+FiLM:
+Easy to drop into a ResNet+FPN: you can add FiLM layers after selected conv blocks in the action head and predict Î³,Î²\gamma,\betaÎ³,Î² from pose/object embeddings.
+It does not change tensor shapes or require tokenization; you can keep the rest of your detection/pose heads unchanged.
+Crossâ€‘attention:
+Typically requires converting feature maps into tokens (e.g., flattening spatial dimensions, adding positional encodings), then back to feature maps.
+Integrating this cleanly with an existing multi-task FPN backbone is more invasive and can complicate deployment.
+For your setting (IKEA ASM, multi-task, smallish dataset):
+FiLM-style conditioning is a very reasonable design choice:
+Low overhead; fits well into a shared ResNet+FPN; easier to train jointly with detection and pose heads.
+You can still capture meaningful dependence on pose/object context via a modest MLP that summarizes those features and drives Î³,Î²\gamma,\betaÎ³,Î².
+Transformer-style crossâ€‘attention between pose/object tokens and action features might yield extra gains if you have enough data or strong pretraining, but comes with a significant cost in complexity and compute.
+Q4: State-of-the-art topâ€‘1 action recognition on IKEA ASM (cross-environment)
+Given I cannot query current leaderboards right now, Iâ€™ll focus on the main trends and approximate numbers; please verify exact values in the papers.
+Original IKEA ASM benchmarks (RGB, depth, pose) â€“ Benâ€‘Shabat et al., WACV 2021
+They report frame-wise metrics on the environment-based split (train_cross_env/test_cross_env).
+Best baselines:
+P3D ResNet or similar: around 60% frame-wise topâ€‘1 on single RGB view.
+Multi-view fusion (RGB views + pose): roughly 64% frame-wise topâ€‘1 and better macroâ€‘recall.
+These numbers are significantly lower than later clip-based skeleton/object models because:
+They predict on every frame of long untrimmed videos.
+They rely heavily on RGB and depth, which overfit more to environments.
+Skeleton-based + object-enhanced action recognition â€“ â€œHow Object Information Improvesâ€¦â€ (Aganian et al., 2023)
+Pre-trimmed clip classification on the official IKEA ASM split (33 actions):
+Skeleton only (PoseConv3D): ~75% topâ€‘1, mAcc ~39â€“40.
+Objects only (GT masks): ~78.5% topâ€‘1, mAcc ~51.7.
+Skeleton + objects (GT masks, PoseConv3D): about 85.4% topâ€‘1, mAcc ~58.5 (this is likely the strongest upper bound because it uses ground-truth masks).
+With predicted object masks (Mask Râ€‘CNN + Swin-Tiny) instead of GT:
+Skeleton + predicted objects, all views (PoseConv3D): around 80% topâ€‘1 (e.g. ~80.2) and mAcc just under 50.
+So:
+SOTA with oracle object annotations: â‰ˆ85% topâ€‘1.
+With realistic predicted objects: â‰ˆ80% topâ€‘1.
+Semantic-volume skeleton+object encoding (word embeddings) â€“ â€œIncluding Semantic Information via Word Embeddings for Skeleton-based Action Recognitionâ€ (Aganian et al., 2025)
+Extends the PoseConv3D + objects framework with semantic word embeddings (instead of one-hot heatmaps) for joints and objects.
+On IKEA ASM (33-class AR, official split):
+Skeleton + objects, one-hot baseline: ~79â€“80% topâ€‘1 (similar to earlier predicted-object results).
+Skeleton + objects, semantic volumes: around 82% topâ€‘1 (e.g. â‰ˆ82.1), with mAcc improvement of ~2 points over the one-hot baseline.
+This appears to be the strongest reported result that uses realistic predicted objects (rather than GT masks) and is reasonably comparable to your intended setting.
+Compositional action recognition & other specialized splits â€“ Zhao et al., PLoS ONE 2022
+â€œCompositional action recognition with multi-view feature fusionâ€, PLoS ONE 17(4): e0266259, 2022.
+They reorganize IKEA ASM into a compositional verbâ€“noun setting with non-overlapping verbâ€“noun combinations between train and test, and use multi-view I3D with crossâ€‘attention.
+Reported topâ€‘1 accuracies are in the midâ€‘50% range (e.g. ~56% topâ€‘1 on their compositional split), but this is not directly comparable to the standard crossâ€‘environment split because the evaluation protocol is different and much harder (unseen verbâ€“noun combinations).
+Other IKEA ASM works (CASA, AAG+, 3DInAction, motion-prediction papers)
+CASA focuses on phase classification / sequence alignment, not the standard 33-class action recognition; metrics include phase accuracy, Kendallâ€™s tau, etc., so not directly comparable.
+AAG+ reports anticipation metrics (e.g. topâ€‘k accuracy or mAP for future actions) and is evaluated on different time horizons.
+3DInAction reports accuracy for point-cloud-based actions on IKEA ASM, but the exact number and protocol (trimmed vs untrimmed, cross-view vs crossâ€‘env) differ; from available summaries, they improve over I3D-style RGB baselines, but not necessarily over the best skeleton+object methods.
+Takeaway for Q4
+For standard 33â€‘class action recognition on IKEA ASM with the official crossâ€‘environment split and pre-trimmed clips, the best reported numbers Iâ€™m aware of are:
+~85% topâ€‘1 with skeleton + ground-truth object masks (PoseConv3D + object centers as joints).
+~82% topâ€‘1 with skeleton + predicted object masks + semantic-volume encoding.
+Early RGB-based I3D/P3D baselines are in the 60â€“65% frame-wise topâ€‘1 range, so the pose+object approaches are a large step up.
+I havenâ€™t seen a published model that jointly trains detection + pose + action in a multi-task fashion and reports higher topâ€‘1 than these skeleton+object models yet; thatâ€™s exactly where your work could contribute.
+Q5: Pseudo ground-truth strategies for object detection/segmentation in assembly
+Your current approachâ€”twelve Mask Râ€‘CNN detectors with PointRend heads, overfitting on 1% labeled frames to generate pseudoâ€‘GTâ€”is very much aligned with the original IKEA ASM paper. There are more recent and principled frameworks you could adopt to get better pseudoâ€‘labels with similar annotation budgets.
+1. Semi-supervised instance segmentation with teacherâ€“student and pseudo-label selection
+Several semi-supervised instance segmentation frameworks explicitly tackle the quality of pseudo labels:
+Soft-Teacher, Unbiased Teacher, and similar SSL detectors (2020â€“2023)
+General idea: maintain a teacher model (EMA of the student) that generates pseudo boxes/masks on unlabeled images; the student is trained on both GT and pseudo-labeled data with consistency losses and strong/weak augmentations.
+These methods usually outperform naive pseudo-labeling (like your multiple overfitted models) with the same amount of labeled data.
+PAIS â€“ Pseudo-label Alignment for Semi-supervised Instance Segmentation
+â€œPseudo-label Alignment for Semi-supervised Instance Segmentationâ€, arXiv:2308.05359.
+Proposes a dynamic aligning loss that adjusts the contribution of each pseudo instance based on both mask quality and class confidence.
+Helps keep more useful pseudo labels that might otherwise be discarded by simple thresholding, while down-weighting noisy ones.
+PL-DC â€“ Pseudo-Label Quality Decoupling and Correction (2025)
+A recent semi-supervised instance-segmentation framework (PLâ€‘DC) explicitly decouples:
+instance-level noise (bad masks),
+category-level confusion (wrong class),
+pixel-level uncertainty.
+Uses dual thresholds, category correction modules, and mask uncertainty-aware losses to robustly train on imperfect pseudo masks.
+How this could help you:
+Instead of 12 heavily overfit Mask Râ€‘CNNs, you could:
+Train a single strong teacher model (e.g. Mask2Former or Mask Râ€‘CNN with a Swin-T/Swinâ€‘B backbone) on your 1% manual labels.
+Run it on all frames to get pseudo masks with associated uncertainties.
+Iteratively refine the student (possibly the same architecture) with SSL losses tuned to your highly imbalanced, lowâ€‘class-count furniture dataset.
+This should give more consistent masks across environments and furniture types than many small overfit models.
+2. Weakly supervised / point-supervised instance segmentation
+Pointly-Supervised Instance Segmentation
+Bowen Cheng et al., CVPR 2022, â€œPointly-Supervised Instance Segmentationâ€ (PointSup + Implicit PointRend).
+Uses random point annotations within bounding boxes instead of full masks; then:
+Generates pseudo masks from points using a modified PointRend head.
+Trains standard instance-segmentation architectures on these pseudo masks.
+Achieves 94â€“98% of fully supervised performance on COCO, Cityscapes, etc., with about 5Ã— faster annotation than full masks.
+How this could help in assembly:
+If you find that full polygons for 1% of frames are too costly or too noisy, you could:
+Annotate more frames with sparse point annotations instead of full polygons.
+Use a PointSup/Implicit PointRend pipeline to generate pseudo masks for all objects in those frames.
+Then treat those as â€œbetter than current pseudo-GTâ€ and propagate to unlabeled frames via SSL as in step 1.
+3. Domain-specific semi-supervised detection in structured scenes
+There are semi-supervised/weakly-supervised detection works specifically on structured scenes with repeated objects (e.g., furniture in floor plans, indoor scenes):
+E.g., â€œMask-Aware Semi-Supervised Object Detection in Floor Plansâ€, Applied Sciences 2022, which uses Mask Râ€‘CNN in a teacherâ€“student setting on floor plan furniture.
+They leverage high inter-class similarity and geometric priors to improve furniture-box detection with minimal labels.
+For IKEA ASMâ€‘style assembly:
+You can exploit several strong priors:
+Small, fixed set of part classes with known approximate sizes and shapes.
+Multi-view geometry: top/front/side views of the same scene.
+Ideas:
+Multi-view consistency: encourage pseudo masks on different views to be consistent under known camera calibration (e.g., via projecting 3D points or simple epipolar constraints).
+Temporal consistency: enforce that the same part ID across frames has coherent masks and minimal â€œflickerâ€; this can be an additional term in a SSL loss.
+4. Self-supervised / 3D-consistent pseudo labels
+In assembly scenarios with depth or 3D information (IKEA ASM gives depth from top view), you can:
+Fuse RGB + depth to construct 3D point clouds of parts and use 3D clustering/matching to refine 2D masks, removing impossible overlaps and hallucinations.
+Use unsupervised or weakly supervised 3D instance segmentation methods (e.g., on indoor datasets like ScanNet) as a prior, then adapt to IKEA ASM via limited fineâ€‘tuning.
+How this compares to your current â€œ12 Mask Râ€‘CNN + PointRendâ€ pipeline
+Your current setup is essentially a one-shot pseudoâ€‘label generator trained with overfitting and no explicit mechanism for:
+calibrating pseudo-label quality,
+enforcing temporal/multiâ€‘view consistency, or
+iteratively improving pseudo labels as the student gets better.
+Modern SSL/weakly-supervised pipelines:
+Are explicitly designed to iterate on pseudo labels, filtering and correcting them over multiple training rounds.
+Have been shown to close most of the gap between 1% mask supervision and full mask supervision on benchmarks like COCO.
+For IKEA ASM:
+Moving to a teacherâ€“student SSL framework with maskâ€‘qualityâ€‘aware losses (or adopting point-based supervision + Implicit PointRend) is very likely to give you cleaner and more consistent pseudo masks than the original 12â€‘model approach, while using roughly the same or less annotation effort.
+If you tell me which part of this you want to operationalize first (e.g., designing the FiLM conditioning block, defining the multi-task losses, or planning an improved pseudoâ€‘GT pipeline), I can sketch concrete architectures and training recipes tailored to your ResNet50+FPN + 3-head setup.

@@ -1,4 +1,0 @@
-E     File "/home/newadmin/swarm-bot/core/swe_agent/tools.py", line 584
-E       "description": "View, create, or edit files in the repository. '
-E                      ^
-E   SyntaxError: unterminated string literal (detected at line 584)

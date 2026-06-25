@@ -1,1 +1,0 @@
-cekwajar_id

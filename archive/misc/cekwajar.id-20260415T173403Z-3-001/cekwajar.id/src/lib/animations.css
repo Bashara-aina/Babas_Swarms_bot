@@ -1,0 +1,204 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+ * cekwajar.id — Motion Design System
+ * All animation tokens, keyframes, and easing curves
+ * Inspired by: Civora shimmer, Shadboard motion, nextjs-dashboard-ref
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Motion Tokens ─────────────────────────────────────────────────────── */
+@theme {
+  /* Durations */
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 300ms;
+  --motion-duration-slow: 500ms;
+  --motion-duration-slower: 700ms;
+
+  /* Easings */
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ─── Keyframes ──────────────────────────────────────────────────────── */
+
+  /* fadeInUp: Civora-style page entrance */
+  --animate-fade-in-up: fade-in-up 0.5s var(--motion-ease-out) both;
+
+  /* fadeInDown: slide from top */
+  --animate-fade-in-down: fade-in-down 0.4s var(--motion-ease-out) both;
+
+  /* fadeInLeft / fadeInRight: sidebar / panel entrances */
+  --animate-fade-in-left: fade-in-left 0.4s var(--motion-ease-out) both;
+  --animate-fade-in-right: fade-in-right 0.4s var(--motion-ease-out) both;
+
+  /* scaleIn: modal / tooltip / badge pop */
+  --animate-scale-in: scale-in 0.2s var(--motion-spring) both;
+
+  /* slideInFromBottom: sheet / drawer */
+  --animate-slide-in-bottom: slide-in-bottom 0.35s var(--motion-ease-out) both;
+
+  /* shimmer: Civora skeleton loading sweep */
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  /* float: ambient hover float */
+  --animate-float: float 6s ease-in-out infinite;
+
+  /* gradientShift: premium gradient animation */
+  --animate-gradient-shift: gradient-shift 8s ease infinite;
+
+  /* pulse-soft: subtle breathing */
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+
+  /* spin-slow: loading spinner */
+  --animate-spin-slow: spin 2s linear infinite;
+
+  /* countUp: number ticker (applied via inline animation) */
+}
+
+/* ─── Keyframe Definitions ─────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────── */
+
+/*
+ * Apply fade-in-up with staggered delays for list items.
+ * Usage: <div className="animate-stagger children:animate-fade-in-up">
+ */
+.animate-stagger > * {
+  animation: fade-in-up 0.5s var(--motion-ease-out) both;
+}
+
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 80ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 160ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 240ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 320ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 400ms; }
+.animate-stagger > *:nth-child(7) { animation-delay: 480ms; }
+.animate-stagger > *:nth-child(8) { animation-delay: 560ms; }
+
+/*
+ * Skeleton shimmer gradient
+ * Usage: className="bg-shimmer rounded"
+ */
+.bg-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--slate-100, #f1f5f9) 25%,
+    var(--emerald-50, #ecfdf5) 37%,
+    var(--slate-100, #f1f5f9) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.8s ease infinite;
+}
+
+/* Reduced motion override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

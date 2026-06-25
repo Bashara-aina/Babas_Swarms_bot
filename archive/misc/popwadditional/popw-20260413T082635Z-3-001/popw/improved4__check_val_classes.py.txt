@@ -1,0 +1,125 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+"""
+Val Class Diagnosis: Identify Missing Activity Classes
+======================================================
+Uses the same dataset loading logic as ikea_dataset.py to load the
+val split, count per-class frame labels, and report which of the
+33 classes have zero frames.
+
+Usage:
+    python check_val_classes.py
+
+Author: Bashara
+Date: February 2026
+"""
+
+import logging
+from collections import Counter
+
+import numpy as np
+
+import config as C
+from ikea_dataset import IKEAMultiTaskDataset
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+)
+logger = logging.getLogger(__name__)
+
+
+def main():
+    logger.info('Loading val split ...')
+    val_ds = IKEAMultiTaskDataset(split='val', augment=False)
+    logger.info(f'Val samples: {len(val_ds):,}')
+
+    logger.info('Loading train split ...')
+    train_ds = IKEAMultiTaskDataset(split='train', augment=False)
+    logger.info(f'Train samples: {len(train_ds):,}')
+
+    val_counts = np.bincount(val_ds.activity_ids, minlength=C.NUM_ACT_CLASSES)
+    train_counts = np.bincount(train_ds.activity_ids, minlength=C.NUM_ACT_CLASSES)
+
+    print('\n' + '=' * 70)
+    print('ACTIVITY CLASS DISTRIBUTION')
+    print('=' * 70)
+    print(f'{"ID":>4s}  {"Class Name":<40s}  {"Train":>8s}  {"Val":>8s}  {"Status"}')
+    print('-' * 70)
+
+    missing_val = []
+    missing_both = []
+
+    for i in range(C.NUM_ACT_CLASSES):
+        name = C.ACT_CLASS_NAMES[i] if i < len(C.ACT_CLASS_NAMES) else f'class_{i}'
+        tc = int(train_counts[i])
+        vc = int(val_counts[i])
+
+        if vc == 0 and tc == 0:
+            status = 'MISSING BOTH'
+            missing_both.append((i, name))
+        elif vc == 0:
+            status = 'MISSING VAL'
+            missing_val.append((i, name))
+        else:
+            status = 'OK'
+
+        print(f'{i:4d}  {name:<40s}  {tc:>8,}  {vc:>8,}  {status}')
+
+    val_present = (val_counts > 0).sum()
+    train_present = (train_counts > 0).sum()
+
+    print('\n' + '=' * 70)
+    print('SUMMARY')
+    print('=' * 70)
+    print(f'  Total classes          : {C.NUM_ACT_CLASSES}')
+    print(f'  Present in train       : {train_present}/{C.NUM_ACT_CLASSES}')
+    print(f'  Present in val         : {val_present}/{C.NUM_ACT_CLASSES}')
+    print(f'  Missing from val only  : {len(missing_val)}')
+    print(f'  Missing from both      : {len(missing_both)}')
+
+    if missing_val:
+        print(f'\nClasses MISSING from val (but present in train):')
+        for idx, name in missing_val:
+            print(f'  [{idx:02d}] {name} (train count: {int(train_counts[idx]):,})')
+
+    if missing_both:
+        print(f'\nClasses MISSING from BOTH train and val:')
+        for idx, name in missing_both:
+            print(f'  [{idx:02d}] {name}')
+
+    # Imbalance analysis
+    print('\n' + '=' * 70)
+    print('IMBALANCE ANALYSIS (val split)')
+    print('=' * 70)
+    nonzero_val = val_counts[val_counts > 0]
+    if len(nonzero_val) > 0:
+        print(f'  Max class count  : {nonzero_val.max():,}')
+        print(f'  Min class count  : {nonzero_val.min():,}')
+        print(f'  Imbalance ratio  : {nonzero_val.max() / nonzero_val.min():.1f}:1')
+        print(f'  Total val frames : {val_counts.sum():,}')
+
+    nonzero_indices = np.where(val_counts > 0)[0]
+    sorted_by_count = sorted(nonzero_indices, key=lambda i: val_counts[i], reverse=True)
+
+    print(f'\n  Top-5 classes in val:')
+    for i in sorted_by_count[:5]:
+        name = C.ACT_CLASS_NAMES[i] if i < len(C.ACT_CLASS_NAMES) else f'class_{i}'
+        pct = 100.0 * val_counts[i] / val_counts.sum()
+        print(f'    [{i:02d}] {name:<35s} {int(val_counts[i]):>8,} ({pct:.1f}%)')
+
+    print(f'\n  Bottom-5 classes in val (non-zero):')
+    for i in sorted_by_count[-5:]:
+        name = C.ACT_CLASS_NAMES[i] if i < len(C.ACT_CLASS_NAMES) else f'class_{i}'
+        pct = 100.0 * val_counts[i] / val_counts.sum()
+        print(f'    [{i:02d}] {name:<35s} {int(val_counts[i]):>8,} ({pct:.1f}%)')
+
+    print('\n' + '=' * 70)
+    print('NOTE: Classes missing from val will have undefined Macro-F1.')
+    print('Document these in the paper methods section.')
+    print('=' * 70 + '\n')
+
+
+if __name__ == '__main__':
+    main()

@@ -185,7 +185,12 @@ rf2_checklist.py
 *.pt
 *.pth
 
+# Archive — everything here is superseded/backup/legacy
+archive/
+
 # Ghost submodules no longer tracked
 ext/skills/gstack
 mcp_servers/symphony-of-one
-rustdesk
+
+# Convenience symlinks
+master

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://browser-use.com/schema.json",
+  "headless": true,
+  "useCloud": false,
+  "saveScreenshots": true,
+  "saveTrace": false,
+  "timeoutMs": 60000,
+  "llmProvider": "litellm",
+  "llmModel": "minimax-primary",
+  "llmBaseUrl": "http://localhost:4000",
+  "llmApiKey": "legion-proxy-key",
+  "maxSteps": 20,
+  "maxOutput": 50000,
+  "enablePlanning": false,
+  "useThinking": false,
+  "maxFailures": 3,
+  "allowedDomains": [],
+  "prohibitedDomains": ["localhost", "0.0.0.0", "127.0.0.1"]
+}
