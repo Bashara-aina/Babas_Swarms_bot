@@ -1759,3 +1759,18 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 
 Co-Authored-By: RuFlo <ruv@ruv.net>
 ---
+## Commit: 521141c4
+- Date: Fri Jun 26 12:00:41 AM JST 2026
+- Message: chore: reorganize root directory — archive clutter into archive/ directory
+
+- Moved all backup copies, legacy master prompts, and superseded docs to archive/
+- Moved PDFs (bot_check, papers) to archive/papers/
+- Moved unused tool directories (claw-compactor, markitdown, rustdesk, .headroom, .skills-archive) to archive/tools/
+- Moved strange directories and orphaned files to archive/misc/
+- Moved old project dirs (cekwajar, design-system, orchestration-workflow, etc.) to archive/misc/
+- Moved standalone test files (test_apis.py, test_infinite_memory_e2e.py) to tests/
+- Moved daily_harvester.py to scripts/
+- Restored SOUL.md (actively used by core/soul_engine.py)
+- Removed cekwajar.id symlink, stray 'test' file, and other garbage
+- Updated .gitignore: added archive/, master, cleaned patterns
+---

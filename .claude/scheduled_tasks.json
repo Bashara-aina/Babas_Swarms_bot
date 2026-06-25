@@ -5,8 +5,8 @@
       "cron": "17,37,57 * * * *",
       "prompt": "Run the rf3 training monitor and report current state: bash /media/newadmin/master/POPW/working/code/industreal_improved/src/runs/rf_stages/rf3_monitor.sh. If epoch 0 validation just completed (new VAL_OK entry), highlight the metrics. If training crashed or stage_manager retry escalated, flag it immediately. Keep report under 3 lines.",
       "createdAt": 1782203132603,
-      "recurring": true,
-      "lastFiredAt": 1782398589939
+      "lastFiredAt": 1782399790637,
+      "recurring": true
     }
   ]
 }

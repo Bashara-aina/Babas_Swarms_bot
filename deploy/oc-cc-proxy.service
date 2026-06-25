@@ -1,0 +1,18 @@
+[Unit]
+Description=oc-cc-proxy — LiteLLM proxy bridging Claude Code to OpenCode Go
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newadmin
+WorkingDirectory=/home/newadmin/swarm-bot
+EnvironmentFile=/home/newadmin/swarm-bot/.env
+ExecStart=/home/newadmin/swarm-bot/scripts/start-oc-cc-proxy.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
