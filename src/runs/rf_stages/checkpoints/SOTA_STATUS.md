@@ -34,6 +34,15 @@
 | 10 | 0.183 | 0.70 | 0.4020 |
 | **Macro F1** | | | **0.7499** |
 
+## S5.4 disclosure: Error-state FPR (class 24)
+
+The error-state class (24) has 0 GT instances in the entire IndustReal COCO dataset (categories 1-22 only; 100,000 annotations). The 24-class ASD taxonomy defines error_state as class 24, but no frames in any split were annotated for it. Across 38,036 val frames, YOLOv8m predicts error_state 0 times at any confidence threshold, yielding a frame-level FPR of **0.0%**. WACV's published error-state FPR is 65% that model was trained on actual error instances. The comparison is uninformative: our model was never exposed to the concept during training. The class-24 output channel exists in the detection head by architectural convention but receives no learning signal.
+
+| Model | Error-state FPR | GT instances in train | Published anchor |
+|---|---|---|---|
+| Our YOLOv8m | 0.0% | 0 (never trained) | — |
+| WACV 2024 (Meccano) | 65% | present | WACV S5.4 |
+
 ## Key wins (this session)
 
 1. **Discovered best.pth was a bad checkpoint** — epoch 11's "best" was due to NaN-inflated combined metric. Epoch 18 is the real best with PSR F1=0.83.
