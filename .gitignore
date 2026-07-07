@@ -57,6 +57,7 @@ lib/legiona/memory/cost_log.jsonl
 *.flatpak
 skill_labels.zip
 *.pdf
+textidote.jar
 cekwajar.id-*.zip
 bot_check*.pdf
 bot_tmp.pdf
@@ -102,6 +103,7 @@ node_modules/
 
 # Aider / external tool runtime history
 .aider.chat.history.md
+.aider.input.history
 
 # Mirofish one-off integration status
 .mirofish-integration-status.md
