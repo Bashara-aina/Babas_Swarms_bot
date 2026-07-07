@@ -1,0 +1,69 @@
+{
+  "description": "null_copy_prev F1: predict label[t] = label[t-1]",
+  "method": "For each component, pred[0]=label[0] (init), pred[t]=label[t-1] for t>0. Error only on transition frames where label[t] != label[t-1].",
+  "n_videos_oracle": 16,
+  "n_total_frames_oracle": 38036,
+  "n_total_transitions_oracle": 109,
+  "transition_source": "decoder_oracle_cpu/oracle_f1.json (sustained oracle, F1=0 identifies components with transitions per recording)",
+  "scaling": "Transitions scaled from 38036 oracle frames to eval frame counts",
+  "per_component_transitions_raw_oracle": {
+    "0": 0,
+    "1": 6,
+    "2": 6,
+    "3": 6,
+    "4": 6,
+    "5": 15,
+    "6": 15,
+    "7": 12,
+    "8": 11,
+    "9": 12,
+    "10": 15
+  },
+  "per_component_transitions_scaled_5k": {
+    "0": 0,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 2,
+    "6": 2,
+    "7": 2,
+    "8": 1,
+    "9": 2,
+    "10": 2
+  },
+  "results_10k_optimal": {
+    "macro_f1": 0.999671,
+    "per_component": {
+      "0": 1.0,
+      "1": 0.99989,
+      "2": 0.99989,
+      "3": 0.999816,
+      "4": 0.999295,
+      "5": 0.999683,
+      "6": 0.999632,
+      "7": 0.999775,
+      "8": 0.999775,
+      "9": 0.999715,
+      "10": 0.998906
+    },
+    "n_frames": 10000
+  },
+  "results_5k_global010": {
+    "macro_f1": 0.999662,
+    "per_component": {
+      "0": 1.0,
+      "1": 0.99989,
+      "2": 0.99989,
+      "3": 0.999816,
+      "4": 0.999295,
+      "5": 0.999683,
+      "6": 0.999632,
+      "7": 0.9997,
+      "8": 0.99985,
+      "9": 0.99962,
+      "10": 0.998906
+    },
+    "n_frames": 5000
+  }
+}
