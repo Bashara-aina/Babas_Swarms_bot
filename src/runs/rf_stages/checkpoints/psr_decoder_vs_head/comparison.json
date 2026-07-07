@@ -1,0 +1,650 @@
+{
+  "description": "PSR Decoder vs Head Comparison (Full 38k, cached logits)",
+  "date": "2026-07-07",
+  "total_frames": 38036,
+  "n_recordings": 16,
+  "tolerance": 3,
+  "head_optimal_thresholds": [
+    0.05,
+    0.2,
+    0.15000000000000002,
+    0.8500000000000001,
+    0.8,
+    0.5,
+    0.45,
+    0.9000000000000001,
+    0.9000000000000001,
+    0.05,
+    0.7000000000000001
+  ],
+  "decoder_thresholds_retuned": {
+    "sustain_hi": [
+      0.218,
+      0.516,
+      0.668,
+      0.226,
+      0.228,
+      0.501,
+      0.431,
+      0.218,
+      0.218,
+      0.218,
+      0.231
+    ],
+    "sustain_lo": [
+      0.068,
+      0.085,
+      0.085,
+      0.076,
+      0.078,
+      0.101,
+      0.096,
+      0.068,
+      0.068,
+      0.068,
+      0.081
+    ],
+    "sustain_min": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "methods": {
+    "head_frame_level": {
+      "per_component": {
+        "0": {
+          "f1": 1.0,
+          "tp": 38036,
+          "fp": 0,
+          "fn": 0,
+          "threshold": 0.05
+        },
+        "1": {
+          "f1": 0.950738,
+          "tp": 31999,
+          "fp": 824,
+          "fn": 2492,
+          "threshold": 0.2
+        },
+        "2": {
+          "f1": 0.955067,
+          "tp": 32542,
+          "fp": 1113,
+          "fn": 1949,
+          "threshold": 0.15000000000000002
+        },
+        "3": {
+          "f1": 0.748335,
+          "tp": 17355,
+          "fp": 6875,
+          "fn": 4798,
+          "threshold": 0.8500000000000001
+        },
+        "4": {
+          "f1": 0.197944,
+          "tp": 4178,
+          "fp": 33858,
+          "fn": 0,
+          "threshold": 0.8
+        },
+        "5": {
+          "f1": 0.825647,
+          "tp": 24904,
+          "fp": 10488,
+          "fn": 30,
+          "threshold": 0.5
+        },
+        "6": {
+          "f1": 0.758156,
+          "tp": 21369,
+          "fp": 13543,
+          "fn": 90,
+          "threshold": 0.45
+        },
+        "7": {
+          "f1": 0.622512,
+          "tp": 17186,
+          "fp": 20843,
+          "fn": 0,
+          "threshold": 0.9000000000000001
+        },
+        "8": {
+          "f1": 0.610661,
+          "tp": 16588,
+          "fp": 21152,
+          "fn": 0,
+          "threshold": 0.9000000000000001
+        },
+        "9": {
+          "f1": 0.472051,
+          "tp": 11751,
+          "fp": 26285,
+          "fn": 0,
+          "threshold": 0.05
+        },
+        "10": {
+          "f1": 0.403241,
+          "tp": 9481,
+          "fp": 28062,
+          "fn": 0,
+          "threshold": 0.7000000000000001
+        }
+      },
+      "macro_f1": 0.6858501664092718,
+      "micro_f1": 0.7233511986905871,
+      "n_tp": 225389,
+      "n_fp": 163043,
+      "n_fn": 9359,
+      "type": "frame_level_f1",
+      "description": "Frame-level binary F1 at per-component optimal thresholds"
+    },
+    "decoder_countup": {
+      "per_component": {
+        "0": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 0,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "1": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 9,
+          "sustain_hi": 0.516,
+          "sustain_lo": 0.085,
+          "sustain_min": 2
+        },
+        "2": {
+          "f1": 0.08,
+          "tp": 1,
+          "fp": 15,
+          "fn": 8,
+          "sustain_hi": 0.668,
+          "sustain_lo": 0.085,
+          "sustain_min": 2
+        },
+        "3": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 12,
+          "sustain_hi": 0.226,
+          "sustain_lo": 0.076,
+          "sustain_min": 2
+        },
+        "4": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 6,
+          "sustain_hi": 0.228,
+          "sustain_lo": 0.078,
+          "sustain_min": 2
+        },
+        "5": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 18,
+          "sustain_hi": 0.501,
+          "sustain_lo": 0.101,
+          "sustain_min": 2
+        },
+        "6": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 14,
+          "sustain_hi": 0.431,
+          "sustain_lo": 0.096,
+          "sustain_min": 2
+        },
+        "7": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 9,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "8": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 8,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "9": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 9,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "10": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 15,
+          "sustain_hi": 0.231,
+          "sustain_lo": 0.081,
+          "sustain_min": 2
+        }
+      },
+      "macro_f1": 0.007272727272727273,
+      "micro_f1": 0.007017543859649123,
+      "n_tp": 1,
+      "n_fp": 175,
+      "n_fn": 108,
+      "type": "decoder_countup",
+      "description": "ConvNext-style count-up decoder on raw logits (0->1 only)"
+    },
+    "decoder_monotonic": {
+      "per_component": {
+        "0": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 0,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "1": {
+          "f1": 0.024096,
+          "tp": 2,
+          "fp": 155,
+          "fn": 7,
+          "sustain_hi": 0.516,
+          "sustain_lo": 0.085,
+          "sustain_min": 2
+        },
+        "2": {
+          "f1": 0.034483,
+          "tp": 2,
+          "fp": 105,
+          "fn": 7,
+          "sustain_hi": 0.668,
+          "sustain_lo": 0.085,
+          "sustain_min": 2
+        },
+        "3": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 12,
+          "sustain_hi": 0.226,
+          "sustain_lo": 0.076,
+          "sustain_min": 2
+        },
+        "4": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 6,
+          "sustain_hi": 0.228,
+          "sustain_lo": 0.078,
+          "sustain_min": 2
+        },
+        "5": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 18,
+          "sustain_hi": 0.501,
+          "sustain_lo": 0.101,
+          "sustain_min": 2
+        },
+        "6": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 22,
+          "fn": 14,
+          "sustain_hi": 0.431,
+          "sustain_lo": 0.096,
+          "sustain_min": 2
+        },
+        "7": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 9,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "8": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 8,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "9": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 9,
+          "sustain_hi": 0.218,
+          "sustain_lo": 0.068,
+          "sustain_min": 2
+        },
+        "10": {
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 16,
+          "fn": 15,
+          "sustain_hi": 0.231,
+          "sustain_lo": 0.081,
+          "sustain_min": 2
+        }
+      },
+      "macro_f1": 0.00532537674207803,
+      "micro_f1": 0.015296367112810707,
+      "n_tp": 4,
+      "n_fp": 410,
+      "n_fn": 105,
+      "type": "decoder_monotonic",
+      "description": "Full MonotonicDecoder on sigmoid scores (0<->1 hysteresis)"
+    }
+  },
+  "decoder_sweeps": {
+    "countup": {
+      "best_config": {
+        "hi": 0.7,
+        "lo": 0.1,
+        "mi": 1
+      },
+      "best_macro_f1": 0.0101010101010101,
+      "top_results": [
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 1,
+          "macro_f1": 0.0101010101010101
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.15,
+          "sustain_min": 1,
+          "macro_f1": 0.0101010101010101
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.2,
+          "sustain_min": 1,
+          "macro_f1": 0.0101010101010101
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.25,
+          "sustain_min": 1,
+          "macro_f1": 0.0101010101010101
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.3,
+          "sustain_min": 1,
+          "macro_f1": 0.0101010101010101
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 2,
+          "macro_f1": 0.007272727272727273
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 3,
+          "macro_f1": 0.007272727272727273
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 4,
+          "macro_f1": 0.007272727272727273
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.15,
+          "sustain_min": 2,
+          "macro_f1": 0.007272727272727273
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.15,
+          "sustain_min": 3,
+          "macro_f1": 0.007272727272727273
+        }
+      ]
+    },
+    "monotonic": {
+      "best_config": {
+        "hi": 0.7,
+        "lo": 0.1,
+        "mi": 4
+      },
+      "best_macro_f1": 0.004635665652614806,
+      "top_results": [
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 4,
+          "macro_f1": 0.004635665652614806
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 3,
+          "macro_f1": 0.0046097693156516685
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 1,
+          "macro_f1": 0.004533143084431368
+        },
+        {
+          "sustain_hi": 0.7,
+          "sustain_lo": 0.1,
+          "sustain_min": 2,
+          "macro_f1": 0.004533143084431368
+        },
+        {
+          "sustain_hi": 0.5,
+          "sustain_lo": 0.1,
+          "sustain_min": 4,
+          "macro_f1": 0.004342274963220283
+        },
+        {
+          "sustain_hi": 0.5,
+          "sustain_lo": 0.1,
+          "sustain_min": 3,
+          "macro_f1": 0.004303991697625482
+        },
+        {
+          "sustain_hi": 0.6,
+          "sustain_lo": 0.25,
+          "sustain_min": 4,
+          "macro_f1": 0.004296637941497755
+        },
+        {
+          "sustain_hi": 0.5,
+          "sustain_lo": 0.25,
+          "sustain_min": 4,
+          "macro_f1": 0.0042868933919517575
+        },
+        {
+          "sustain_hi": 0.5,
+          "sustain_lo": 0.1,
+          "sustain_min": 2,
+          "macro_f1": 0.004204450520239994
+        },
+        {
+          "sustain_hi": 0.6,
+          "sustain_lo": 0.25,
+          "sustain_min": 3,
+          "macro_f1": 0.004140086708894048
+        }
+      ]
+    }
+  },
+  "logit_statistics": {
+    "per_component_raw_logit_stats": {
+      "0": {
+        "mean": 3.69,
+        "min": 1.07,
+        "max": 4.15
+      },
+      "1": {
+        "mean": 1.86,
+        "min": -8.85,
+        "max": 3.84
+      },
+      "2": {
+        "mean": 1.97,
+        "min": -8.3,
+        "max": 3.82
+      },
+      "3": {
+        "mean": 1.88,
+        "min": -0.1,
+        "max": 3.71
+      },
+      "4": {
+        "mean": 5.19,
+        "min": 2.67,
+        "max": 6.19
+      },
+      "5": {
+        "mean": 1.96,
+        "min": -1.8,
+        "max": 4.08
+      },
+      "6": {
+        "mean": 1.64,
+        "min": -2.84,
+        "max": 4.74
+      },
+      "7": {
+        "mean": 4.16,
+        "min": 2.0,
+        "max": 4.98
+      },
+      "8": {
+        "mean": 4.1,
+        "min": 0.76,
+        "max": 4.67
+      },
+      "9": {
+        "mean": 4.6,
+        "min": 0.86,
+        "max": 5.21
+      },
+      "10": {
+        "mean": 3.83,
+        "min": -0.99,
+        "max": 5.02
+      }
+    }
+  },
+  "comparison": {
+    "head_frame_macro_f1": 0.6858501664092718,
+    "decoder_countup_macro_f1": 0.007272727272727273,
+    "decoder_monotonic_macro_f1": 0.00532537674207803,
+    "delta_decoder_countup_minus_head": -0.6785774391365444,
+    "countup_sweep_best": 0.0101010101010101,
+    "monotonic_sweep_best": 0.004635665652614806
+  },
+  "per_component_table": [
+    {
+      "component": 0,
+      "head_frame_f1": 1.0,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 1,
+      "head_frame_f1": 0.950738,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.024096
+    },
+    {
+      "component": 2,
+      "head_frame_f1": 0.955067,
+      "decoder_countup_f1": 0.08,
+      "decoder_monotonic_f1": 0.034483
+    },
+    {
+      "component": 3,
+      "head_frame_f1": 0.748335,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 4,
+      "head_frame_f1": 0.197944,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 5,
+      "head_frame_f1": 0.825647,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 6,
+      "head_frame_f1": 0.758156,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 7,
+      "head_frame_f1": 0.622512,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 8,
+      "head_frame_f1": 0.610661,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 9,
+      "head_frame_f1": 0.472051,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    },
+    {
+      "component": 10,
+      "head_frame_f1": 0.403241,
+      "decoder_countup_f1": 0.0,
+      "decoder_monotonic_f1": 0.0
+    }
+  ],
+  "decision": "neither_works_transition",
+  "reasoning": "BOTH the PSR head and decoder achieve near-zero transition F1 (decoder count-up=0.007273, decoder monotonic=0.005325). The cached checkpoint produces saturated raw logits (all positive for all components, min=1.07..-0.99) where sigmoid(h) > 0.5 for nearly all frames. Neither approach can detect 0->1 transitions from these logits. The PSR head repair training (LeakyReLU + zero bias) is in progress and should address this. For the paper: use frame-level F1 (macro F1=0.6859) as the primary PSR result, and note that transition-based F1 evaluation is blocked pending PSR head health restoration. The decoder-vs-head comparison is inconclusive until a checkpoint with clean transition logits is available."
+}
