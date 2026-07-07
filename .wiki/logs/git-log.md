@@ -1829,3 +1829,7 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 - Date: Tue Jul  7 12:50:53 PM JST 2026
 - Message: feat: PSR decoder vs head comparison (Opus 141 Q38, decisive)
 ---
+## Commit: e35499ec
+- Date: Tue Jul  7 12:58:16 PM JST 2026
+- Message: feat: TCN status doc (Opus 141 ACT-ARCH-4) — both GPUs busy, training blocked
+---
