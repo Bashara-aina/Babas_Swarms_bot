@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "date": "2026-07-07",
+    "checkpoint": "src/runs/rf_stages/checkpoints/best.pth (epoch 18)",
+    "n_recordings": 16,
+    "n_total_frames": 38036,
+    "warning": "Detection and head pose per-recording data require GPU inference. Only PSR oracle and activity clip data are available per-recording from existing files.",
+    "sources": {
+      "activity_clip": "src/runs/rf_stages/checkpoints/activity_clip_ep18/eval.log",
+      "psr_oracle_sustained": "src/runs/rf_stages/checkpoints/decoder_oracle_cpu/oracle_f1.json",
+      "psr_oracle_relaxed": "src/runs/rf_stages/checkpoints/decoder_oracle_cpu/oracle_f1.json"
+    }
+  },
+  "recordings": {
+    "05_assy_0_1": {
+      "num_frames": 2918,
+      "num_activity_clips": 344,
+      "psr_oracle_sustained_macro_f1": 0.4545,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "05_assy_2_2": {
+      "num_frames": 2323,
+      "num_activity_clips": 282,
+      "psr_oracle_sustained_macro_f1": 0.5455,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "05_main_0_1": {
+      "num_frames": 1380,
+      "num_activity_clips": 171,
+      "psr_oracle_sustained_macro_f1": 0.7273,
+      "psr_oracle_relaxed_macro_f1": 0.7273
+    },
+    "14_assy_0_1": {
+      "num_frames": 3005,
+      "num_activity_clips": 369,
+      "psr_oracle_sustained_macro_f1": 0.4545,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "14_main_0_1": {
+      "num_frames": 1685,
+      "num_activity_clips": 198,
+      "psr_oracle_sustained_macro_f1": 0.7273,
+      "psr_oracle_relaxed_macro_f1": 0.7273
+    },
+    "14_main_2_2": {
+      "num_frames": 1404,
+      "num_activity_clips": 165,
+      "psr_oracle_sustained_macro_f1": 0.8182,
+      "psr_oracle_relaxed_macro_f1": 0.8182
+    },
+    "14_main_2_3": {
+      "num_frames": 1679,
+      "num_activity_clips": 198,
+      "psr_oracle_sustained_macro_f1": 0.7273,
+      "psr_oracle_relaxed_macro_f1": 0.7273
+    },
+    "20_assy_0_1": {
+      "num_frames": 2854,
+      "num_activity_clips": 289,
+      "psr_oracle_sustained_macro_f1": 0.4545,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "20_assy_3_6": {
+      "num_frames": 2967,
+      "num_activity_clips": 345,
+      "psr_oracle_sustained_macro_f1": 0.5455,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "20_main_0_1": {
+      "num_frames": 2066,
+      "num_activity_clips": 234,
+      "psr_oracle_sustained_macro_f1": 0.7273,
+      "psr_oracle_relaxed_macro_f1": 0.7273
+    },
+    "24_assy_0_1": {
+      "num_frames": 2158,
+      "num_activity_clips": 255,
+      "psr_oracle_sustained_macro_f1": 0.4545,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "24_assy_2_4": {
+      "num_frames": 2952,
+      "num_activity_clips": 348,
+      "psr_oracle_sustained_macro_f1": 0.5455,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "24_main_0_1": {
+      "num_frames": 1371,
+      "num_activity_clips": 161,
+      "psr_oracle_sustained_macro_f1": 0.6364,
+      "psr_oracle_relaxed_macro_f1": 0.6364
+    },
+    "26_assy_0_1": {
+      "num_frames": 3093,
+      "num_activity_clips": 379,
+      "psr_oracle_sustained_macro_f1": 0.4545,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "26_assy_1_5": {
+      "num_frames": 4587,
+      "num_activity_clips": 512,
+      "psr_oracle_sustained_macro_f1": 0.5455,
+      "psr_oracle_relaxed_macro_f1": 1.0
+    },
+    "26_main_0_1": {
+      "num_frames": 1594,
+      "num_activity_clips": 186,
+      "psr_oracle_sustained_macro_f1": 0.7273,
+      "psr_oracle_relaxed_macro_f1": 0.7273
+    }
+  },
+  "activity_zero_accuracy_classes": {
+    "n_total_classes": 69,
+    "n_zero_accuracy_classes": 41,
+    "n_nonzero_accuracy_classes": 28,
+    "zero_accuracy_list": [
+      "2", "3", "4", "5", "6", "7", "8", "11", "14", "16",
+      "17", "18", "19", "20", "21", "24", "25", "27", "30",
+      "31", "32", "33", "34", "35", "36", "37", "38", "39",
+      "41", "42", "43", "44", "46", "50", "51", "52", "53",
+      "54", "57", "58", "59", "60", "61", "62", "63", "65"
+    ],
+    "nonzero_accuracy_classes": {
+      "0": {"acc": 0.672, "n": 122},
+      "1": {"acc": 0.077, "n": 26},
+      "9": {"acc": 0.013, "n": 1002},
+      "10": {"acc": 0.033, "n": 92},
+      "12": {"acc": 1.0, "n": 2},
+      "13": {"acc": 0.474, "n": 19},
+      "15": {"acc": 0.077, "n": 13},
+      "22": {"acc": 0.037, "n": 27},
+      "23": {"acc": 0.059, "n": 17},
+      "28": {"acc": 0.026, "n": 39},
+      "29": {"acc": 0.006, "n": 177},
+      "40": {"acc": 0.024, "n": 124},
+      "47": {"acc": 0.059, "n": 34},
+      "56": {"acc": 0.308, "n": 13}
+    }
+  },
+  "degradation_patterns": {
+    "recording_type_pattern": {
+      "assy_recordings": [
+        "05_assy_0_1", "05_assy_2_2", "14_assy_0_1", "20_assy_0_1",
+        "20_assy_3_6", "24_assy_0_1", "24_assy_2_4", "26_assy_0_1", "26_assy_1_5"
+      ],
+      "main_recordings": [
+        "05_main_0_1", "14_main_0_1", "14_main_2_2", "14_main_2_3",
+        "20_main_0_1", "24_main_0_1", "26_main_0_1"
+      ],
+      "observation": "PSR oracle sustained F1 is systematically lower on assy recordings (0.4545-0.5455) than main recordings (0.6364-0.8182). Assembly recordings have more PSR transitions (8-10 per recording vs 3-5 for main), and the hardcoded procedure-order constraint misses most assembly transitions. This predicts that D3 multi-task PSR degradation will be worst on assy recordings."
+    },
+    "size_correlation": {
+      "observation": "Largest recording (26_assy_1_5, 4587 frames) shows typical degradation — no size-based pattern. Smallest recording (24_main_0_1, 1371 frames) has oracle sustained F1=0.6364, which is mid-range."
+    }
+  }
+}
