@@ -54,7 +54,7 @@
         ]
       },
       {
-        "matcher": "Write|Edit|MultiEdit|Bash",
+        "matcher": "Write|Edit|MultiEdit|Bash|Read|Glob|Grep",
         "hooks": [
           {
             "type": "command",
@@ -75,6 +75,11 @@
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-context-monitor.sh",
             "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" register \"${CLAUDE_TOOL_NAME:-tool}\"",
+            "timeout": 2000
           }
         ]
       }
@@ -85,6 +90,11 @@
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" store-user-query'",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" message user",
             "timeout": 2000
           }
         ]
@@ -159,6 +169,16 @@
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" import'",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/cognee-bridge.mjs\" import'",
+            "timeout": 180000
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" init",
+            "timeout": 2000
           }
         ]
       }
@@ -173,7 +193,7 @@
           },
           {
             "type": "command",
-            "command": "sh -c 'node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync & python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/index-sessions.py\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" observation-capture & wait'",
+            "command": "sh -c 'bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/cognee-bridge.mjs\" sync & python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/index-sessions.py\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" observation-capture & wait'",
             "timeout": 25000
           },
           {
@@ -192,7 +212,10 @@
   "permissions": {
     "allow": [
       "Bash(node .claude/*)",
-      "mcp__graphify__:*"
+      "mcp__graphify__:*",
+      "mcp__cognee__:*",
+      "mcp__hermes__:*",
+      "mcp__hermes-lite__:*"
     ],
     "deny": [
       "Read(./.env)",
@@ -213,6 +236,9 @@
         "deepseek-v4-flash",
         "minimax-m3"
       ]
+    },
+    "opus": {
+      "allowOnly": ["minimax-m3"]
     }
   },
   "attribution": {
@@ -220,13 +246,13 @@
     "pr": "\ud83e\udd16 Generated with [RuFlo](https://github.com/ruvnet/ruflo)"
   },
   "memoryLayers": {
-    "note": "L5 (graphrag) and L6 (mem0cloud) share .claude-flow/data/auto-memory-store.json. No separate mem0 backend is available \u2014 add mem0-server and reconfigure l6_mem0cloud if a dedicated layer is needed."
+    "note": "L5 (graphrag) and L6 (mem0cloud) share .claude-flow/data/auto-memory-store.json. L7 (cognee) provides knowledge-graph-backed memory via cognee-mcp-server.py. Cognee data at data/cognee/."
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "850000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "HERMES_MAX_CONTEXT_TOKENS": "131072",
+    "HERMES_MAX_CONTEXT_TOKENS": "1048576",
     "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
     "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
     "FABLE5_AUTONOMOUS": "1"
@@ -268,33 +294,60 @@
       "Bash(> *.db)"
     ],
     "blockedPermissionPhrases": [
-      "can i", "should i", "shall i", "may i",
-      "want me to", "do you want me to",
-      "permission to", "would you like me to",
-      "need your permission", "let me know if you want"
+      "can i",
+      "should i",
+      "shall i",
+      "may i",
+      "want me to",
+      "do you want me to",
+      "permission to",
+      "would you like me to",
+      "need your permission",
+      "let me know if you want"
     ],
     "version": "2.0.0"
   },
   "mcpServers": {
     "hermes-lite": {
-      "command": "/home/newadmin/miniconda3/bin/python3",
+      "command": "/home/newadmin/.hermes/hermes-agent/venv/bin/python3",
       "args": [
         ".claude-flow/mcp/hermes-lite-mcp-server.py"
       ],
       "env": {
-        "HERMES_REPO_PATH": "/home/newadmin/hermes-agent"
+        "HERMES_REPO_PATH": "/home/newadmin/.hermes/hermes-agent"
       }
     },
-    "graphify": {
-      "command": "/home/newadmin/.local/share/uv/tools/graphifyy/bin/python",
-      "args": [
-        "-m",
-        "graphify.serve",
-        "/home/newadmin/swarm-bot/graphify-out/graph.json"
-      ],
+    "hermes": {
+      "command": "/home/newadmin/.hermes/hermes-agent/venv/bin/hermes",
+      "args": ["mcp", "serve"],
       "env": {
-        "WORKING_DIRECTORY": "/home/newadmin/swarm-bot"
+        "HERMES_REPO_PATH": "/home/newadmin/.hermes/hermes-agent"
       }
+    },
+    "local-deep-research": {
+      "command": "/home/newadmin/miniconda3/bin/ldr-mcp"
+    },
+    "headroom": {
+      "command": "/home/newadmin/miniconda3/bin/headroom",
+      "args": ["mcp"]
+    },
+    "searxng": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/searxng_mcp/server.py"
+      ]
+    },
+    "crawl4ai": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
+      ]
+    },
+    "cognee": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/.claude-flow/mcp/cognee-mcp-server.py"
+      ]
     }
   }
 }

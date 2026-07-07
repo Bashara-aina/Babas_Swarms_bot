@@ -1,5 +1,5 @@
 ---
-description: Load the most recent session file from ~/.claude/session-data/ and resume work with full context from where the last session ended.
+description: Load a saved session from ~/.claude/session-data/ or project metadata. Use /sessions first to list available ones.
 ---
 
 # Resume Session Command
@@ -29,12 +29,25 @@ This command is the counterpart to `/save-session`.
 
 If no argument provided:
 
-1. Check `~/.claude/session-data/`
-2. Pick the most recently modified `*-session.tmp` file
-3. If the folder does not exist or has no matching files, tell the user:
+1. Check `~/.claude/session-data/` for files matching `*-session.tmp`
+2. If multiple files exist, show a numbered picker with dates and first lines of context:
    ```
-   No session files found in ~/.claude/session-data/
-   Run /save-session at the end of a session to create one.
+   Available sessions to resume:
+   [1] 2026-06-26 — "Session: session-20260626-130911-y0w3" [27min, 659 edits]
+   [2] 2026-06-25 — "Session: session-20260625-090000-abcd" [15min, 23 edits]
+   …
+   Enter the number of the session to resume, or 'q' to cancel.
+   ```
+3. If only one file, load it directly
+4. If the folder does not exist or has no matching files, fall back to checking the project's auto-session system:
+   - Check `{project}/.claude-flow/metrics/last-session.json` (session metadata)
+   - Check `{project}/.claude-flow/data/current.json` (active session context)
+   - If found, read these to reconstruct a briefing from available context
+5. If nothing is found in any location, tell the user:
+   ```
+   No session files found in ~/.claude/session-data/ or .claude-flow/data/
+   Sessions are auto-saved at session start/end via session.js. 
+   Start working in a new session — the next /resume-session will have data.
    ```
    Then stop.
 

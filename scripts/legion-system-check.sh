@@ -63,8 +63,8 @@ echo -n "L3 Memory: "; eval "$L3" || fail "L3 Memory: FAIL"
 
 # ── LiteLLM Proxy ─────────────────────────────────────────────
 echo ""
-echo "═══ LiteLLM Proxy (:4000) ═══"
-if curl -s --max-time 3 http://localhost:4000/health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('PASS')" 2>/dev/null; then
+echo "═══ LiteLLM Proxy (:4001) ═══"
+if curl -s --max-time 3 http://localhost:4001/health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('PASS')" 2>/dev/null; then
     pass "LiteLLM Proxy: responding"
 else
     fail "LiteLLM Proxy: not responding"

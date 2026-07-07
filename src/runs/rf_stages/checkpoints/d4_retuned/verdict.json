@@ -1,0 +1,9 @@
+{
+  "f1_at_t_best_global": 0.07474606201878928,
+  "f1_at_t_retuned": 0.06827711645693654,
+  "precision": 0.040867693090560174,
+  "recall": 0.2135858585858586,
+  "overall_f1": 0.17201410562396727,
+  "verdict": "decoder shows marginal benefit \u2014 thresholds partially helpful",
+  "n_videos": 20
+}

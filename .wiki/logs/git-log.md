@@ -1774,3 +1774,58 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 - Removed cekwajar.id symlink, stray 'test' file, and other garbage
 - Updated .gitignore: added archive/, master, cleaned patterns
 ---
+## Commit: efd13be3
+- Date: Fri Jun 26 12:12:30 AM JST 2026
+- Message: chore: deep reorganization — consolidate services, cleanup runtime artifacts, archive dead weight
+
+- Moved systemd services (legion.service, aider-fix-loop.service),
+  deploy scripts (deploy.sh, logrotate.conf) into deploy/
+- Moved docker-compose.yml into docker/
+- Moved rf2_checklist.py, rf2_monitor.py into rf2_swarm/
+  (updated internal path reference in rf2_monitor.py)
+- Moved start-bot.sh, restart.sh into scripts/
+- Moved claude-flow.config.export.json to archive/misc/
+- Archved project/ (176MB external code) to archive/projects/
+- Archved .gstack/, .remember/, .archive/ to archive/tools/
+- Removed 74 tracked browser session snapshot files from .playwright-mcp/
+  (runtime artifacts — added to .gitignore)
+- Removed .swarm runtime state files from tracking (hnsw.index, state.json,
+  model-router-state.json) — kept schema.sql
+- Cleaned .gitignore: consolidated patterns, removed stale entries
+---
+## Commit: cf7bd484
+- Date: Mon Jul  6 07:54:22 PM JST 2026
+- Message: chore: commit workstation evidence + fix stale refs (Opus §7)
+---
+## Commit: 6bf59fbc
+- Date: Mon Jul  6 10:23:23 PM JST 2026
+- Message: docs: error-state FPR analysis (Opus D-7)
+---
+## Commit: 9caf157f
+- Date: Tue Jul  7 12:30:55 PM JST 2026
+- Message: feat: decoder oracle bound CPU verification (Opus 141 Q46, OOM-safe)
+---
+## Commit: 3a4c5a51
+- Date: Tue Jul  7 12:40:22 PM JST 2026
+- Message: docs: PSR repair training monitoring report
+---
+## Commit: c5747609
+- Date: Tue Jul  7 12:41:13 PM JST 2026
+- Message: docs: single-task detection training monitoring report
+---
+## Commit: 61c25f88
+- Date: Tue Jul  7 12:41:35 PM JST 2026
+- Message: docs: file 145 — paper narrative v3 (multi-task cost story)
+---
+## Commit: 598d92a1
+- Date: Tue Jul  7 12:43:57 PM JST 2026
+- Message: feat: multi-task cascade analysis (D3 vs single-task, all 4 heads)
+---
+## Commit: 335ab9e2
+- Date: Tue Jul  7 12:49:59 PM JST 2026
+- Message: feat: PSR true signal quantification (Ours vs copy_prev F1, Opus 141 Q20)
+---
+## Commit: 2b6fcc84
+- Date: Tue Jul  7 12:50:53 PM JST 2026
+- Message: feat: PSR decoder vs head comparison (Opus 141 Q38, decisive)
+---

@@ -132,19 +132,22 @@ class ContextHealthMonitor:
     # Assessment
     # ---------------------------------------------------------------------------
 
-    def assess(self, context_chars: int = 0, total_chars: int = 200_000) -> HealthLevel:
+    def assess(self, context_chars: int = 0, total_chars: int = 4_194_304) -> HealthLevel:
         """Assess current context health level.
 
         Args:
-            context_chars: Estimated current context character count
-            total_chars: Estimated total capacity (default 200k)
+            context_chars: Current context character count (0 = auto-detect).
+            total_chars: Total capacity (default 4,194,304 chars = 1,048,576 tokens,
+                matching deepseek-v4-flash's native 1M context window).
 
         Returns:
-            HealthLevel enum value
+            HealthLevel enum value.
 
-        Note: For Claude Code / OpenCode, context percentage is approximate.
-        For more accurate assessment, count actual messages in conversation.
+        When context_chars is 0 (or not provided), auto-detects by reading
+        session data from .claude-flow/data/.
         """
+        if context_chars <= 0:
+            context_chars = self._auto_detect_context_chars()
         if context_chars <= 0:
             return HealthLevel.HEALTHY
 
@@ -158,6 +161,39 @@ class ContextHealthMonitor:
             return HealthLevel.CRITICAL
         else:
             return HealthLevel.OVERFLOW
+
+    @staticmethod
+    def _auto_detect_context_chars() -> int:
+        """Auto-detect context character count from session data.
+
+        Reads session_messages.json or current.json, same as
+        core.legion_session._estimate_context_chars().
+        """
+        import json
+        from pathlib import Path
+
+        msgs_path = Path(".claude-flow/data/session_messages.json")
+        if msgs_path.exists():
+            try:
+                msgs = json.loads(msgs_path.read_text())
+                if msgs:
+                    return sum(len(m.get("content", "")) for m in msgs[-50:])
+            except Exception:
+                pass
+
+        sess_path = Path(".claude-flow/data/current.json")
+        if sess_path.exists():
+            try:
+                data = json.loads(sess_path.read_text())
+                ctx = data.get("context", {})
+                query = ctx.get("lastUserQuery", "")
+                decisions = ctx.get("decisions", [])
+                files = ctx.get("filesChanged", [])
+                return len(query) + sum(len(d) for d in decisions) + sum(len(f) for f in files)
+            except Exception:
+                pass
+
+        return 0
 
     def should_checkpoint(self, current_health: HealthLevel | None = None) -> bool:
         """Return True if a pre-compaction checkpoint should run.

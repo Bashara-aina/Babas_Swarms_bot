@@ -250,10 +250,13 @@ async function main() {
       if (sessionMod && sessionMod.metric) {
         try { sessionMod.metric('edits'); } catch (e) { /* no active session */ }
       }
+      const file = hookInput.file_path || toolInput.file_path
+        || process.env.TOOL_INPUT_file_path || args[0] || '';
+      if (file && sessionMod && sessionMod.trackFile) {
+        try { sessionMod.trackFile(file); } catch (e) { /* no active session */ }
+      }
       if (intelligenceMod && intelligenceMod.recordEdit) {
         try {
-          const file = hookInput.file_path || toolInput.file_path
-            || process.env.TOOL_INPUT_file_path || args[0] || '';
           runWithTimeout(() => intelligenceMod.recordEdit(file), 'intelligenceMod.recordEdit()');
         } catch (e) { /* non-fatal */ }
       }

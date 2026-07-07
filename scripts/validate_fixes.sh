@@ -8,6 +8,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# NOTE: Old POPW project on /media/newadmin/master/
+# This path is updated to point locally but the source code no longer exists.
 SRC="/media/newadmin/master/POPW/working/code/industreal_improved/src"
 CONFIG="$SRC/config.py"
 TRAIN="$SRC/training/train.py"

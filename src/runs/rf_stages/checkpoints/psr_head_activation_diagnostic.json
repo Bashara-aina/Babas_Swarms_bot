@@ -1,0 +1,272 @@
+{
+  "diagnostics": [
+    {
+      "label": "fresh_init_p0.1",
+      "num_components": 11,
+      "num_dead_components": 0,
+      "dead_component_indices": [],
+      "frac_components_dead": 0.0,
+      "verdict": "ALIVE",
+      "transformer_output": {
+        "mean": -0.0,
+        "std": 1.000486,
+        "min": -3.438393,
+        "max": 3.139098,
+        "frac_non_positive": 0.495117
+      },
+      "per_component": {
+        "component_0": {
+          "pre_gelu_mean": 0.110128,
+          "pre_gelu_min": -1.469268,
+          "pre_gelu_max": 1.782481,
+          "pre_gelu_std": 0.583903,
+          "frac_non_positive": 0.429688,
+          "pre_sigmoid_logit_mean": -0.129321,
+          "sigmoid_output_mean": 0.467829,
+          "dead": false
+        },
+        "component_1": {
+          "pre_gelu_mean": 0.001611,
+          "pre_gelu_min": -1.39966,
+          "pre_gelu_max": 1.269257,
+          "pre_gelu_std": 0.550856,
+          "frac_non_positive": 0.480469,
+          "pre_sigmoid_logit_mean": 0.113013,
+          "sigmoid_output_mean": 0.528183,
+          "dead": false
+        },
+        "component_2": {
+          "pre_gelu_mean": 0.175369,
+          "pre_gelu_min": -1.664901,
+          "pre_gelu_max": 1.463713,
+          "pre_gelu_std": 0.543422,
+          "frac_non_positive": 0.355469,
+          "pre_sigmoid_logit_mean": -0.004639,
+          "sigmoid_output_mean": 0.498866,
+          "dead": false
+        },
+        "component_3": {
+          "pre_gelu_mean": 0.211712,
+          "pre_gelu_min": -1.260264,
+          "pre_gelu_max": 1.552287,
+          "pre_gelu_std": 0.569517,
+          "frac_non_positive": 0.347656,
+          "pre_sigmoid_logit_mean": 0.013744,
+          "sigmoid_output_mean": 0.503424,
+          "dead": false
+        },
+        "component_4": {
+          "pre_gelu_mean": 0.104318,
+          "pre_gelu_min": -1.419756,
+          "pre_gelu_max": 1.448858,
+          "pre_gelu_std": 0.592727,
+          "frac_non_positive": 0.457031,
+          "pre_sigmoid_logit_mean": 0.31972,
+          "sigmoid_output_mean": 0.578616,
+          "dead": false
+        },
+        "component_5": {
+          "pre_gelu_mean": 0.116003,
+          "pre_gelu_min": -1.587544,
+          "pre_gelu_max": 1.610586,
+          "pre_gelu_std": 0.517139,
+          "frac_non_positive": 0.40625,
+          "pre_sigmoid_logit_mean": 0.373771,
+          "sigmoid_output_mean": 0.591474,
+          "dead": false
+        },
+        "component_6": {
+          "pre_gelu_mean": 0.046605,
+          "pre_gelu_min": -1.555735,
+          "pre_gelu_max": 1.513323,
+          "pre_gelu_std": 0.641963,
+          "frac_non_positive": 0.492188,
+          "pre_sigmoid_logit_mean": 0.510232,
+          "sigmoid_output_mean": 0.624573,
+          "dead": false
+        },
+        "component_7": {
+          "pre_gelu_mean": 0.182557,
+          "pre_gelu_min": -1.282407,
+          "pre_gelu_max": 1.861998,
+          "pre_gelu_std": 0.58068,
+          "frac_non_positive": 0.386719,
+          "pre_sigmoid_logit_mean": -0.034809,
+          "sigmoid_output_mean": 0.491324,
+          "dead": false
+        },
+        "component_8": {
+          "pre_gelu_mean": 0.157294,
+          "pre_gelu_min": -1.201824,
+          "pre_gelu_max": 1.861292,
+          "pre_gelu_std": 0.515915,
+          "frac_non_positive": 0.371094,
+          "pre_sigmoid_logit_mean": -0.300188,
+          "sigmoid_output_mean": 0.425615,
+          "dead": false
+        },
+        "component_9": {
+          "pre_gelu_mean": 0.165463,
+          "pre_gelu_min": -1.615256,
+          "pre_gelu_max": 1.414,
+          "pre_gelu_std": 0.590685,
+          "frac_non_positive": 0.417969,
+          "pre_sigmoid_logit_mean": 0.355484,
+          "sigmoid_output_mean": 0.587666,
+          "dead": false
+        },
+        "component_10": {
+          "pre_gelu_mean": 0.128817,
+          "pre_gelu_min": -1.49733,
+          "pre_gelu_max": 1.817172,
+          "pre_gelu_std": 0.598369,
+          "frac_non_positive": 0.398438,
+          "pre_sigmoid_logit_mean": 0.242966,
+          "sigmoid_output_mean": 0.559483,
+          "dead": false
+        }
+      }
+    },
+    {
+      "label": "reinit_init_p0.0",
+      "num_components": 11,
+      "num_dead_components": 6,
+      "dead_component_indices": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "frac_components_dead": 0.5455,
+      "verdict": "DEAD",
+      "transformer_output": {
+        "mean": -0.0,
+        "std": 1.000487,
+        "min": -2.800214,
+        "max": 3.127414,
+        "frac_non_positive": 0.49707
+      },
+      "per_component": {
+        "component_0": {
+          "pre_gelu_mean": 0.00809,
+          "pre_gelu_min": -1.640139,
+          "pre_gelu_max": 1.645452,
+          "pre_gelu_std": 0.57361,
+          "frac_non_positive": 0.503906,
+          "pre_sigmoid_logit_mean": 0.120965,
+          "sigmoid_output_mean": 0.530046,
+          "dead": true
+        },
+        "component_1": {
+          "pre_gelu_mean": -0.029604,
+          "pre_gelu_min": -1.594196,
+          "pre_gelu_max": 1.525494,
+          "pre_gelu_std": 0.570868,
+          "frac_non_positive": 0.523438,
+          "pre_sigmoid_logit_mean": 0.184162,
+          "sigmoid_output_mean": 0.545737,
+          "dead": true
+        },
+        "component_2": {
+          "pre_gelu_mean": -0.067513,
+          "pre_gelu_min": -1.620981,
+          "pre_gelu_max": 1.558312,
+          "pre_gelu_std": 0.616368,
+          "frac_non_positive": 0.53125,
+          "pre_sigmoid_logit_mean": -0.120238,
+          "sigmoid_output_mean": 0.470285,
+          "dead": true
+        },
+        "component_3": {
+          "pre_gelu_mean": 0.032419,
+          "pre_gelu_min": -2.299108,
+          "pre_gelu_max": 1.64982,
+          "pre_gelu_std": 0.618657,
+          "frac_non_positive": 0.480469,
+          "pre_sigmoid_logit_mean": -0.117849,
+          "sigmoid_output_mean": 0.470668,
+          "dead": false
+        },
+        "component_4": {
+          "pre_gelu_mean": 0.013485,
+          "pre_gelu_min": -1.559917,
+          "pre_gelu_max": 1.440426,
+          "pre_gelu_std": 0.559495,
+          "frac_non_positive": 0.511719,
+          "pre_sigmoid_logit_mean": 0.072307,
+          "sigmoid_output_mean": 0.51782,
+          "dead": true
+        },
+        "component_5": {
+          "pre_gelu_mean": -0.030656,
+          "pre_gelu_min": -1.379187,
+          "pre_gelu_max": 1.627111,
+          "pre_gelu_std": 0.552918,
+          "frac_non_positive": 0.542969,
+          "pre_sigmoid_logit_mean": -0.148858,
+          "sigmoid_output_mean": 0.463118,
+          "dead": true
+        },
+        "component_6": {
+          "pre_gelu_mean": -0.043744,
+          "pre_gelu_min": -1.689862,
+          "pre_gelu_max": 1.490612,
+          "pre_gelu_std": 0.59702,
+          "frac_non_positive": 0.542969,
+          "pre_sigmoid_logit_mean": -0.098318,
+          "sigmoid_output_mean": 0.47558,
+          "dead": true
+        },
+        "component_7": {
+          "pre_gelu_mean": 0.06765,
+          "pre_gelu_min": -1.47837,
+          "pre_gelu_max": 1.555333,
+          "pre_gelu_std": 0.607924,
+          "frac_non_positive": 0.433594,
+          "pre_sigmoid_logit_mean": 0.158399,
+          "sigmoid_output_mean": 0.539248,
+          "dead": false
+        },
+        "component_8": {
+          "pre_gelu_mean": 0.05821,
+          "pre_gelu_min": -1.528149,
+          "pre_gelu_max": 1.779276,
+          "pre_gelu_std": 0.560399,
+          "frac_non_positive": 0.449219,
+          "pre_sigmoid_logit_mean": 0.0348,
+          "sigmoid_output_mean": 0.508521,
+          "dead": false
+        },
+        "component_9": {
+          "pre_gelu_mean": 0.006462,
+          "pre_gelu_min": -1.348882,
+          "pre_gelu_max": 1.374383,
+          "pre_gelu_std": 0.536087,
+          "frac_non_positive": 0.492188,
+          "pre_sigmoid_logit_mean": 0.076928,
+          "sigmoid_output_mean": 0.519163,
+          "dead": false
+        },
+        "component_10": {
+          "pre_gelu_mean": -0.052148,
+          "pre_gelu_min": -1.642991,
+          "pre_gelu_max": 1.907932,
+          "pre_gelu_std": 0.587582,
+          "frac_non_positive": 0.5,
+          "pre_sigmoid_logit_mean": -0.09136,
+          "sigmoid_output_mean": 0.477195,
+          "dead": false
+        }
+      }
+    }
+  ],
+  "command": "python src/evaluation/psr_head_activation_diagnostic.py",
+  "architecture": {
+    "per_frame_mlp": "Linear(768,512)->LN->GELU->Drop(0.1)->Linear(512,256)->LN",
+    "transformer": "3Lx4H d_model=256 FFN=1024 pre-norm GELU causal",
+    "output_heads": "11x Sequential(Linear(256,64)->GELU->Drop(0.06)->Linear(64,1))",
+    "bias_init": "+0.1 (fresh) / 0.0 (reinit)"
+  }
+}

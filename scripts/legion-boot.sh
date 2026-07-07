@@ -105,10 +105,10 @@ fi
 # ── 5. LiteLLM Proxy ────────────────────────────────────────────
 log ""
 log "═══ LiteLLM Proxy ═══"
-if curl -s --max-time 3 http://localhost:4000/health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('OK')" 2>/dev/null; then
-    pass "LiteLLM proxy: responding on :4000"
+if curl -s --max-time 3 http://localhost:4001/health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('OK')" 2>/dev/null; then
+    pass "LiteLLM proxy: responding on :4001"
 else
-    warn "LiteLLM proxy: not responding on :4000 (may need manual start)"
+    warn "LiteLLM proxy: not responding on :4001 (may need manual start)"
 fi
 
 # ── 6. OpenCode check ──────────────────────────────────────────
@@ -140,7 +140,23 @@ for name in gitnexus browser-use crawl4ai hermes; do
     fi
 done
 
-# ── 8. Telegram bot ───────────────────────────────────────────
+# ── 8. SearXNG Metasearch ────────────────────────────────────
+log ""
+log "═══ SearXNG ═══"
+if curl -s --max-time 2 http://127.0.0.1:8888/search?q=health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('OK')" 2>/dev/null; then
+    pass "SearXNG: responding on :8888"
+else
+    log "SearXNG: not running — starting via systemd..."
+    systemctl --user start searxng.service
+    sleep 5
+    if curl -s --max-time 2 http://127.0.0.1:8888/search?q=health 2>/dev/null | python3 -c "import sys,json; json.load(sys.stdin); print('OK')" 2>/dev/null; then
+        pass "SearXNG: started on :8888"
+    else
+        warn "SearXNG: failed to start — check 'journalctl --user -u searxng.service'"
+    fi
+fi
+
+# ── 9. Telegram bot ───────────────────────────────────────────
 log ""
 log "═══ Telegram Bot (main.py) ═══"
 if pgrep -f "python.*main.py|python.*mini-swe" &>/dev/null; then

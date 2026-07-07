@@ -47,6 +47,21 @@
       "description": "Browser automation via browser-use - open, click, fill, scroll, screenshot"
     },
     {
+      "name": "browser-use",
+      "command": "/usr/bin/python3",
+      "args": [
+        "-m",
+        "tools.mcpServers.browser_use_mcp.server"
+      ],
+      "workingDirectory": "/home/newadmin/swarm-bot",
+      "env": {
+        "BROWSER_USE_MODEL": "minimax/MiniMax-M3",
+        "LITELLM_BASE_URL": "http://localhost:4001"
+      },
+      "enabled": true,
+      "description": "Browser automation via browser-use - open, click, fill, scroll, screenshot"
+    },
+    {
       "name": "sequential-thinking",
       "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
       "args": [
@@ -91,25 +106,36 @@
     },
     {
       "name": "hermes",
-      "command": "/home/newadmin/swarm-bot/tools/mcpServers/bootstrap/mcp_bootstrap.sh",
+      "command": "/home/newadmin/.hermes/hermes-agent/venv/bin/hermes",
       "args": [
-        "hermes",
         "mcp",
         "serve"
       ],
       "enabled": true,
-      "description": "Hermes messaging bridge - conversations, messages, events",
+      "description": "Hermes Agent - conversations, messages, events, skills, memory",
       "workingDirectory": "/home/newadmin/swarm-bot"
     },
     {
       "name": "local-deep-research",
-      "command": "/home/newadmin/miniconda3/bin/python3",
+      "command": "/home/newadmin/miniconda3/bin/ldr-mcp",
+      "args": [],
+      "enabled": true,
+      "description": "Local deep research - AI-powered research with multiple search engines"
+    },
+    {
+      "name": "headroom",
+      "command": "/home/newadmin/miniconda3/bin/headroom",
       "args": [
-        "-m",
-        "local_deep_research.mcp"
+        "mcp"
       ],
       "enabled": true,
-      "description": "Local deep research MCP server"
+      "description": "Headroom context compression - compress tool outputs, logs, files before LLM",
+      "env": {
+        "HEADROOM_HOST": "127.0.0.1",
+        "HEADROOM_PORT": "8787",
+        "HEADROOM_MEMORY_STORAGE": "project",
+        "HEADROOM_MEMORY_DB_PATH": "/home/newadmin/swarm-bot/.headroom/memory.db"
+      }
     },
     {
       "name": "exa",
@@ -158,6 +184,69 @@
       "workingDirectory": "/home/newadmin/swarm-bot",
       "enabled": true,
       "description": "Graphify knowledge-graph MCP server. Reads graphify-out/graph.json (built by /graphify or `graphify update`). Provides tools: graphify_query, graphify_explain, graphify_path, graphify_graph_stats, graphify_god_nodes, graphify_affected, etc."
+    },
+    {
+      "name": "searxng",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/searxng_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "SearXNG metasearch + Crawl4AI deep crawling MCP server"
+    },
+    {
+      "name": "cognee",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/.claude-flow/mcp/cognee-mcp-server.py"
+      ],
+      "enabled": true,
+      "description": "Cognee knowledge graph memory (L7) - remember/recall/forget across sessions"
+    },
+    {
+      "name": "paperdebugger",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/paperdebugger_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "PaperDebugger academic paper review - reviewer-style analysis, citation verification, literature search, writing enhancement"
+    },
+    {
+      "name": "paperpal",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/paperpal_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "PaperPal academic paper search - arXiv, HuggingFace Papers, Semantic Scholar"
+    },
+    {
+      "name": "textidote",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/textidote_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "Textidote LaTeX linter - spelling, grammar, style checking via LanguageTool"
+    },
+    {
+      "name": "scrapling",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/scrapling_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "Scrapling adaptive web scraping - HTTP, stealth, dynamic, CSS/XPath extraction, parser"
+    },
+    {
+      "name": "jina-reader",
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/jina_reader_mcp/server.py"
+      ],
+      "enabled": true,
+      "description": "Jina Reader - convert URLs to LLM-friendly markdown, web search via s.jina.ai"
     }
   ]
 }

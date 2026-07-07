@@ -45,7 +45,7 @@ TEMPORAL_CTX     = TMP_ROOT / "legion_temporal_context.txt"
 AVAILABLE_SKILLS = TMP_ROOT / "legion_available_skills.txt"
 SESSION_SUMMARY  = TMP_ROOT / "legion_session_summary.txt"
 
-CONTEXT_LIMIT = 22000
+CONTEXT_LIMIT = 4_194_304  # 1,048,576 tokens * 4 chars/token = deepseek-v4-flash native window
 
 # ── Boot Result ────────────────────────────────────────────────────────────────
 
@@ -231,14 +231,43 @@ def assess_context(context_chars: int) -> tuple[str, float]:
 
 
 def _estimate_context_chars() -> int:
-    """Rough estimate of context size in characters."""
-    try:
-        import psutil
-        proc = psutil.Process()
-        mem_info = proc.memory_info()
-        return int(mem_info.rss / 4)
-    except Exception:
-        return 0
+    """Estimate current conversation context in characters.
+
+    Reads actual session data instead of process RSS (which was meaningless).
+    Checks: session messages, session.json, or /tmp/legion_* files.
+    """
+    import json
+    from pathlib import Path
+
+    msgs_path = Path(".claude-flow/data/session_messages.json")
+    if msgs_path.exists():
+        try:
+            msgs = json.loads(msgs_path.read_text())
+            if msgs:
+                return sum(len(m.get("content", "")) for m in msgs[-50:])
+        except Exception:
+            pass
+
+    sess_path = Path(".claude-flow/data/current.json")
+    if sess_path.exists():
+        try:
+            data = json.loads(sess_path.read_text())
+            ctx = data.get("context", {})
+            query = ctx.get("lastUserQuery", "")
+            decisions = ctx.get("decisions", [])
+            files = ctx.get("filesChanged", [])
+            return len(query) + sum(len(d) for d in decisions) + sum(len(f) for f in files) + data.get("metrics", {}).get("edits", 0) * 500
+        except Exception:
+            pass
+
+    total = 0
+    for path in (SESSION_CONTEXT, TEMPORAL_CTX, AVAILABLE_SKILLS, HERMES_SKILLS):
+        if path.exists():
+            try:
+                total += len(path.read_text())
+            except Exception:
+                pass
+    return total
 
 
 # ── STEP 4: Task Classification ───────────────────────────────────────────────

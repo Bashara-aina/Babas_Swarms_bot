@@ -55,6 +55,8 @@ TOOL_PREFIXES: dict[str, str] = {
     "supabase": "supabase_",
     "browser": "browser_",
     "graphify": "graphify_",
+    "scrapling": "scrapling_",
+    "jina_reader": "jina_",
 }
 
 # Reverse map: prefix → server name
@@ -145,9 +147,11 @@ class MCPRouter:
             gitnexus,
             graphify,
             hermes,
+            jina_reader,
             local_deep_research,
             obsidian,
             ruflo,
+            scrapling,
             sequential_thinking,
             supabase,
         )
@@ -168,6 +172,8 @@ class MCPRouter:
             "supabase": supabase,
             "browser": browser,
             "graphify": graphify,
+            "scrapling": scrapling,
+            "jina_reader": jina_reader,
         }
 
         for name, config in server_configs.items():

@@ -1,0 +1,78 @@
+\RequirePackage{snapshot}
+\documentclass[a4paper,10pt,twocolumn]{article}
+% \pagestyle{plain}
+
+\usepackage{graphicx}
+\ifdefined\Draft
+    % NOTE: "draft" enabled here, and not at class-level, to affect figures
+    % only.
+    %
+    \setkeys{Gin}{draft=true}
+\fi
+
+\usepackage{amsmath}
+\usepackage[hyphens]{url}
+
+% NOTE: the following packages are to be loaded after "url"
+\usepackage[hidelinks]{hyperref}
+\usepackage{orcidlink}
+
+% NOTE: the following packages are to be loaded after: "hyperref", "amsmath"
+\usepackage{cleveref}
+
+%%%
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{algorithmic}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage[inline]{enumitem}
+\usepackage{todonotes} % NOTE: use "disable" option to turn todo notes off
+\usepackage{comment}
+\usepackage{booktabs}
+\usepackage[htt]{hyphenat}
+\usepackage{listings}
+\usepackage{minted}
+
+% \usepackage{lineno}
+% \modulolinenumbers[5]
+
+\presetkeys{todonotes}{inline}{}
+
+\newcommand{\midtilde}{\raisebox{-0.25\baselineskip}{\textasciitilde}}
+
+\title{
+    Paper Title
+}
+\author{Giacomo Lanciano~\orcidlink{0000-0002-7431-8041}}
+% \affiliation{
+%     \institution{Scuola Normale Superiore}
+%     \city{Pisa}
+%     \country{Italy}
+% }
+% \email{giacomo.lanciano@sns.it}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    \input{abstract}
+\end{abstract}
+
+\input{intro}
+\input{relwork}
+\input{background}
+\input{approach}
+\input{experiments}
+\input{conclusions}
+
+\bibliographystyle{plain}
+%
+% NOTE: biblio-nourl is not explicitly included to allow for editing from
+% Overleaf (that do not support our Makefile). However, compiling with `make`
+% will automatically switch to biblio-nourl, and generate a more compact PDF
+% by removing URLs from entries like conference/journal papers.
+\bibliography{biblio}
+
+\end{document}

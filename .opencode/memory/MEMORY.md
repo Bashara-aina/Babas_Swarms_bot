@@ -75,7 +75,7 @@ swarm-bot/
 - Updated by OpenCode after each session
 
 ## cekwajar.id Reference
-- Canonical: `/media/newadmin/dataset/home_newadmin/cekwajar.id/`
+- Canonical: `/media/newadmin/dataset/home_newadmin/cekwajar.id/` (OLD HARD DISK — destroyed; no longer exists)
 - Symlinked at: `swarm-bot/cekwajar.id`
 - Research data, OCR pipeline, ML models
 

@@ -98,7 +98,7 @@ def get_mini_agent() -> DefaultAgent:
 def _litellm_running() -> bool:
     try:
         r = subprocess.run(
-            ["curl", "-s", "--max-time", "2", "http://localhost:4000/health"],
+            ["curl", "-s", "--max-time", "2", "http://localhost:4001/health"],
             capture_output=True, timeout=3
         )
         return r.returncode == 0

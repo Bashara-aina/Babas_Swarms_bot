@@ -316,8 +316,10 @@ Always use these tools — do NOT skip MCP calls even for simple tasks.
     try:
         if int(os.getenv("LEGION_CONTEXT_HEALTH_ENABLED", "1")):
             from core.context_health import get_context_monitor
+            from core.legion_session import _estimate_context_chars
             monitor = get_context_monitor("/home/newadmin/swarm-bot")
-            health = monitor.assess()
+            context_chars = _estimate_context_chars()
+            health = monitor.assess(context_chars=context_chars)
             if monitor.should_checkpoint(health):
                 await monitor.run_checkpoint(  # type: ignore[reportCallIssue]
                     session_description=f"opencode: {task_desc or prompt[:100]}",

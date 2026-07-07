@@ -40,8 +40,9 @@ logger = logging.getLogger(__name__)
 # ── Context Window Budget Management (Priority 10) ─────────────────────────────
 
 MODEL_CONTEXT_LIMITS: dict[str, int] = {
-    "default": 1_048_576,  # MiniMax-M3 — 1M context window
+    "default": 1_048_576,  # deepseek-v4-flash — 1M context window
     "opencode-go/deepseek-v4-pro": 1_048_576,
+    "deepseek-v4-flash": 1_048_576,
     "gpt-4o": 128000,
     "claude-3-5-haiku": 200000,
 }

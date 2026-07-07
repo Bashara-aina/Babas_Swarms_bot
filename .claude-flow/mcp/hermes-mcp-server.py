@@ -24,11 +24,21 @@ from pathlib import Path
 # ── Bootstrap hermes-agent path ─────────────────────────────────────────────
 HERMES_REPO_PATH = os.environ.get(
     "HERMES_REPO_PATH",
-    str(Path.home() / "hermes-agent"),
+    str(Path.home() / ".hermes" / "hermes-agent"),
 )
 
 if HERMES_REPO_PATH not in sys.path:
     sys.path.insert(0, HERMES_REPO_PATH)
+
+# Install the editable package finder so model_tools etc. are importable
+_HERMES_VENV_SITE = str(Path.home() / ".hermes" / "hermes-agent" / "venv" / "lib" / "python3.11" / "site-packages")
+if _HERMES_VENV_SITE not in sys.path:
+    sys.path.insert(0, _HERMES_VENV_SITE)
+try:
+    import __editable___hermes_agent_0_17_0_finder as _finder
+    _finder.install()
+except Exception:
+    pass
 
 # ── FastMCP Server ──────────────────────────────────────────────────────────
 from mcp.server.fastmcp import FastMCP

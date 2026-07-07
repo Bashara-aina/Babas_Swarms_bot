@@ -767,9 +767,9 @@ function generateStatusline() {
   header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.purple + modelName + c.reset + tierBadge;
 
   // Context: only show if we have real session data
-  if (ctxInfo && ctxInfo.totalTokens > 0) {
+  if (ctxInfo && ctxInfo.totalTokens > 0 && ctxInfo.usedTokens > 0) {
     const ctxColor = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
-    const used = ctxInfo.usedTokens > 0 ? fmtNum(ctxInfo.usedTokens) : '?';
+    const used = ctxInfo.usedTokens > 0 ? fmtNum(ctxInfo.usedTokens) : '0';
     const total = ctxInfo.totalTokens >= 1000000 ? Math.round(ctxInfo.totalTokens / 1000000) + 'M' : fmtNum(ctxInfo.totalTokens);
     header += '  ' + c.dim + '\u2502' + c.reset + '  ' + ctxColor + used + '/' + total + c.reset;
   }
@@ -839,7 +839,7 @@ function generateStatusline() {
     c.brightGreen + 'Intel' + c.reset + ' ' + intelColor + system.intelligencePct + '%' + c.reset,
     c.cyan + 'Sec' + c.reset + ' ' + secIcon + c.reset + ' ' + secColor + security.status + c.reset,
   ];
-  if (ctxInfo && ctxInfo.totalTokens > 0) {
+  if (ctxInfo && ctxInfo.totalTokens > 0 && ctxInfo.usedTokens > 0) {
     const ctxCol = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
     healthItems.push(c.purple + 'Ctx' + c.reset + ' ' + ctxCol + ctxInfo.usedPct + '%' + c.reset);
   }
@@ -915,28 +915,250 @@ function getModelFromStdin() {
   return null;
 }
 
+// Context cache file — persists context_window data between statusline invocations
+const CONTEXT_CACHE_FILE = path.join(CWD, '.claude-flow', 'data', 'context-cache.json');
+const CONTEXT_CACHE_TTL_MS = 3600000; // 1 hour — survives long sessions, only expires when idle
+
+function readContextCache() {
+  try {
+    if (fs.existsSync(CONTEXT_CACHE_FILE)) {
+      const raw = fs.readFileSync(CONTEXT_CACHE_FILE, 'utf-8');
+      const cached = JSON.parse(raw);
+      const age = Date.now() - (cached._cachedAt || 0);
+      if (age < CONTEXT_CACHE_TTL_MS && cached.totalTokens > 0) {
+        // Only return cache if it belongs to the current session
+        const currentSessionId = getCurrentSessionId();
+        if (!currentSessionId || cached._sessionId === currentSessionId) {
+          return cached;
+        }
+      }
+    }
+  } catch { /* cache read failed */ }
+  return null;
+}
+
+function writeContextCache(ctxInfo) {
+  try {
+    // Never overwrite cache with zero-data — keep last known good values
+    if (ctxInfo.usedPct === 0 && ctxInfo.usedTokens === 0) {
+      const existing = readContextCache();
+      if (existing) return;
+    }
+    // Monotonic: never overwrite a larger cached value with a much smaller one
+    const existing = readContextCache();
+    if (existing && ctxInfo.usedTokens < existing.usedTokens * 0.9) return;
+    const dir = path.dirname(CONTEXT_CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    // Tag cache with current session so it's only used within the same session
+    const sessionId = getCurrentSessionId();
+    fs.writeFileSync(CONTEXT_CACHE_FILE, JSON.stringify({ ...ctxInfo, _sessionId: sessionId || '', _cachedAt: Date.now() }), 'utf-8');
+  } catch { /* cache write failed — non-fatal */ }
+}
+
+// Get default window size from env or settings
+function getDefaultTotalWindow() {
+  return parseInt(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) || 1000000;
+}
+
+// Find the current Claude Code session by walking the process tree.
+// Statusline is spawned as: claude → sh -c 'exec node statusline.cjs'
+// node's PPID = sh, sh's PPID = claude. Read claude's session file.
+// Returns sessionId string or null.
+function getCurrentSessionId() {
+  try {
+    // Walk up to find a PID with a session file matching our CWD
+    let pid = process.ppid;
+    const visited = new Set();
+    for (let depth = 0; depth < 5; depth++) {
+      if (visited.has(pid) || !pid) break;
+      visited.add(pid);
+      const sessionFile = path.join(os.homedir(), '.claude', 'sessions', pid + '.json');
+      const data = readJSON(sessionFile);
+      if (data && data.sessionId && data.cwd === CWD) return data.sessionId;
+      // Walk up to parent
+      const statPath = '/proc/' + pid + '/stat';
+      if (!fs.existsSync(statPath)) break;
+      const stat = fs.readFileSync(statPath, 'utf-8');
+      const m = stat.match(/^\d+\s+\([^)]+\)\s+[A-Za-z]\s+(\d+)/);
+      if (!m) break;
+      pid = parseInt(m[1]);
+    }
+  } catch { /* session lookup failed */ }
+  return null;
+}
+
+// Estimate context from the current session's conversation content.
+// The JSONL is append-only — compaction adds an `away_summary` entry but
+// never removes old messages. The actual LLM context = only messages
+// AFTER the last compaction, plus the summary text that replaces old ones.
+function estimateContextFromConversation(totalWindow) {
+  try {
+    const sessionId = getCurrentSessionId();
+    if (!sessionId) return null;
+
+    const projectDir = path.join(os.homedir(), '.claude', 'projects', CWD.replace(/\//g, '-'));
+    if (!fs.existsSync(projectDir)) return null;
+
+    const convFile = path.join(projectDir, sessionId + '.jsonl');
+    if (!fs.existsSync(convFile)) return null;
+
+    const raw = fs.readFileSync(convFile, 'utf-8');
+    const rawBytes = Buffer.byteLength(raw);
+    if (rawBytes < 100) return null;
+
+    // Parse all lines and find the last compaction boundary
+    let lastCompactIdx = -1;
+    const lines = raw.split('\n');
+    const parsed = [];
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const d = JSON.parse(line);
+      parsed.push(d);
+      if (d.type === 'system' && (d.subtype === 'away_summary' || d.subtype === 'compact')) {
+        lastCompactIdx = parsed.length - 1;
+      }
+    }
+
+    // Count content bytes from the active context only
+    let contentBytes = 0;
+    let userMsgCount = 0;
+    const startIdx = lastCompactIdx >= 0 ? lastCompactIdx : 0;
+
+    for (let i = startIdx; i < parsed.length; i++) {
+      const d = parsed[i];
+      const t = d.type;
+
+      if (t === 'system' && d.subtype === 'away_summary') {
+        contentBytes += Buffer.byteLength(d.content || '');
+        continue;
+      }
+
+      if (t === 'user') {
+        userMsgCount++;
+        const msg = d.message;
+        if (msg && typeof msg === 'object') {
+          // User messages are {role:"user", content:"..."} or {role:"user", content:[{...}]}
+          const content = msg.content;
+          if (typeof content === 'string') {
+            contentBytes += Buffer.byteLength(content);
+          } else if (Array.isArray(content)) {
+            for (const block of content) {
+              if (block && typeof block === 'object') {
+                if (block.content && typeof block.content === 'string') {
+                  contentBytes += Buffer.byteLength(block.content);
+                }
+                if (block.text && typeof block.text === 'string') {
+                  contentBytes += Buffer.byteLength(block.text);
+                }
+              }
+            }
+          }
+        } else if (typeof msg === 'string') {
+          contentBytes += Buffer.byteLength(msg);
+        }
+        // toolUseResult — file content read by the assistant
+        const tur = d.toolUseResult;
+        if (tur && typeof tur === 'object') {
+          for (const v of Object.values(tur)) {
+            if (typeof v === 'string') contentBytes += Buffer.byteLength(v);
+          }
+        }
+      }
+
+      else if (t === 'assistant') {
+        const msg = d.message;
+        if (msg && typeof msg === 'object') {
+          const content = msg.content;
+          if (typeof content === 'string') {
+            contentBytes += Buffer.byteLength(content);
+          } else if (Array.isArray(content)) {
+            for (const block of content) {
+              if (block && typeof block === 'object') {
+                if (block.text) contentBytes += Buffer.byteLength(block.text);
+                if (block.input && typeof block.input === 'object') {
+                  contentBytes += Buffer.byteLength(JSON.stringify(block.input));
+                }
+              }
+            }
+          }
+        }
+      }
+
+      else if (t === 'attachment') {
+        const att = d.attachment;
+        if (att && typeof att === 'object') {
+          const content = att.content || att.text || '';
+          if (typeof content === 'string') contentBytes += Buffer.byteLength(content);
+        }
+      }
+    }
+
+    // Sanity: if there are hardly any user turns but estimated tokens > 50K,
+    // something is wrong — likely the wrong session
+    if (userMsgCount < 2 && contentBytes > 100000) return null;
+
+    // No conversation content at all — truly fresh session
+    if (contentBytes === 0) return null;
+
+    // Estimate tokens at ~3.5 chars per token for mixed code/text
+    // Add system prompt + tool schemas overhead (~30K) only when there's content
+    const estimatedTokens = Math.min(
+      Math.round(contentBytes / 3.5) + 30000,
+      Math.round(totalWindow * 0.95)
+    );
+
+    return {
+      usedPct: Math.floor((estimatedTokens / totalWindow) * 100),
+      remainingPct: Math.floor(((totalWindow - estimatedTokens) / totalWindow) * 100),
+      usedTokens: estimatedTokens,
+      totalTokens: totalWindow,
+    };
+  } catch { /* conversation estimation failed */ }
+  return null;
+}
+
 // Get context window info from Claude Code session
 function getContextFromStdin() {
+  const totalWindow = getDefaultTotalWindow();
   const data = getStdinData();
   if (data && data.context_window) {
     const usedPct = Math.floor(data.context_window.used_percentage || 0);
     const totalTokens = data.context_window.total_tokens
                      || data.context_window.max_tokens
-                     || (process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW ? parseInt(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) : 0)
-                     || 0;
+                     || totalWindow;
     let usedTokens = data.context_window.used_tokens || 0;
     // If Claude Code doesn't report token counts, compute from percentage
     if (usedTokens === 0 && totalTokens > 0 && usedPct > 0) {
       usedTokens = Math.round((usedPct / 100) * totalTokens);
     }
-    return {
+    const ctxInfo = {
       usedPct,
       remainingPct: Math.floor(data.context_window.remaining_percentage || 100),
       usedTokens,
       totalTokens,
     };
+    // Persist to cache so subsequent daemon-driven invocations see real data
+    writeContextCache(ctxInfo);
+    // The oc-cc-proxy doesn't track context — it always reports 0 or tiny
+    // values (usedPct ≤ 2, usedTokens < 50K). When the reported data is
+    // unreliable, estimate from the local conversation files instead.
+    if (usedPct <= 2 || usedTokens < 50000) {
+      const estimated = estimateContextFromConversation(totalTokens || totalWindow);
+      if (estimated) {
+        writeContextCache(estimated);
+        return estimated;
+      }
+      // No session found or estimation failed — return minimal (0%)
+      // rather than stale cache from a different session
+      return { usedPct: 0, remainingPct: 100, usedTokens: 0, totalTokens: totalTokens || totalWindow };
+    }
+    return ctxInfo;
   }
-  return null;
+  // No stdin context data — use session-aware cache if available
+  const cached = readContextCache();
+  if (cached) return cached;
+  const window = getDefaultTotalWindow();
+  return { usedPct: 0, remainingPct: 100, usedTokens: 0, totalTokens: window };
 }
 
 // Get cost info from Claude Code session

@@ -27,7 +27,7 @@ from core.legion_state import (
 )
 from core.self_evolution import get_self_evolution_engine
 
-CONTEXT_LIMIT = 22000
+CONTEXT_LIMIT = 4_194_304  # 1,048,576 tokens * 4 chars/token = deepseek-v4-flash native window
 COMPACTION_TRIGGER_PCT = 0.60
 CRITICAL_COMPACTION_PCT = 0.80
 
@@ -112,14 +112,46 @@ def _refresh_stale_memory_files() -> None:
 
 
 def _estimate_context_chars() -> int:
-    """Rough estimate of current context size in characters."""
-    try:
-        import psutil
-        proc = psutil.Process()
-        mem_info = proc.memory_info()
-        return int(mem_info.rss / 4)
-    except Exception:
-        return 0
+    """Estimate current conversation context in characters.
+
+    Reads actual session data instead of using process RSS (which was meaningless).
+    Checks: session messages, session.json, or /tmp/legion_* files in order.
+    """
+    import json
+    from pathlib import Path
+
+    # Method 1: session_messages.json (ContextCompactor tracking)
+    msgs_path = Path(".claude-flow/data/session_messages.json")
+    if msgs_path.exists():
+        try:
+            msgs = json.loads(msgs_path.read_text())
+            if msgs:
+                return sum(len(m.get("content", "")) for m in msgs[-50:])
+        except Exception:
+            pass
+
+    # Method 2: current.json (session.js tracking)
+    sess_path = Path(".claude-flow/data/current.json")
+    if sess_path.exists():
+        try:
+            data = json.loads(sess_path.read_text())
+            ctx = data.get("context", {})
+            query = ctx.get("lastUserQuery", "")
+            decisions = ctx.get("decisions", [])
+            files = ctx.get("filesChanged", [])
+            return len(query) + sum(len(d) for d in decisions) + sum(len(f) for f in files) + data.get("metrics", {}).get("edits", 0) * 500
+        except Exception:
+            pass
+
+    # Method 3: /tmp/legion_* files
+    total = 0
+    for path in (SESSION_CONTEXT, TEMPORAL_CONTEXT, AVAILABLE_SKILLS, HERMES_SKILLS):
+        if path.exists():
+            try:
+                total += len(path.read_text())
+            except Exception:
+                pass
+    return total
 
 
 class SessionMetrics:

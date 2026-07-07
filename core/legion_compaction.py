@@ -40,7 +40,9 @@ def generate_compaction_summary(
     lines = []
     lines.append("# LEGION COMPACTION SUMMARY\n")
     lines.append(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-    lines.append(f"Context chars: {context_chars} / 22000\n")
+    # Use 1,048,576 tokens * 4 chars/token = 4,194,304 chars (deepseek-v4-flash)
+    max_context_chars = 4_194_304
+    lines.append(f"Context chars: {context_chars} / {max_context_chars}\n")
 
     sections = _analyze_conversation(conversation_content)
 
@@ -81,12 +83,14 @@ def generate_compaction_summary(
 
     lines.append("## 9. CONTEXT BUDGET\n")
     if context_chars and context_chars > 0:
-        pct = f"{(context_chars / 22000) * 100:.0f}%"
-        target_pct = min(int(pct.rstrip("%")) * 0.4, 40)
+        max_ctx = max_context_chars
+        pct_float = (context_chars / max_ctx) * 100
+        pct = f"{pct_float:.0f}%"
+        target_pct = min(pct_float * 0.4, 40)
     else:
         pct = "0%"
         target_pct = 10
-    lines.append(f"Used: ~{pct} | Target after compaction: ~{target_pct}%\n")
+    lines.append(f"Used: ~{pct} | Target after compaction: ~{target_pct:.0f}%\n")
 
     lines.append("## 10. VERBATIM LAST USER PROMPT\n")
     lines.append("**Source of truth — what the user explicitly requested.**\n\n")

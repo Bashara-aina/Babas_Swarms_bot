@@ -23,6 +23,21 @@ if [ -z "$API_KEY" ]; then
   exit 1
 fi
 
+# Kill any existing process on the target port so systemd doesn't loop forever
+if lsof -ti :"$PORT" &>/dev/null; then
+  echo "Killing existing process on port $PORT..."
+  lsof -ti :"$PORT" | xargs kill 2>/dev/null || true
+  sleep 1
+  # Force kill if still alive
+  if lsof -ti :"$PORT" &>/dev/null; then
+    lsof -ti :"$PORT" | xargs kill -9 2>/dev/null || true
+    sleep 0.5
+  fi
+fi
+
+# Clean up stale temp directories (older than 1 hour)
+find /tmp -maxdepth 1 -name 'oc-cc-proxy-*' -mmin +60 -exec rm -rf {} + 2>/dev/null || true
+
 CONFIG_DIR=$(mktemp -d /tmp/oc-cc-proxy-XXXXXX)
 CONFIG_PATH="$CONFIG_DIR/litellm.yaml"
 CALLBACK_DIR="$CONFIG_DIR/oc_proxy"
@@ -65,11 +80,18 @@ max_effort_callback = MaxEffortCallback()
 PYEOF
 
 # Copy reasoning callback from installed package
-REASONING_SRC="/home/newadmin/miniconda3/lib/python3.13/site-packages/oc_proxy/reasoning.py"
-if [ -f "$REASONING_SRC" ]; then
-  cp "$REASONING_SRC" "$CALLBACK_DIR/reasoning.py"
-else
-  echo "WARNING: reasoning.py not found at $REASONING_SRC"
+# (miniconda3 was on destroyed hard disk; local system path is the first check)
+for candidate in \
+  "/home/newadmin/.local/lib/python3.10/site-packages/oc_proxy/reasoning.py" \
+  "/home/newadmin/miniconda3/lib/python3.13/site-packages/oc_proxy/reasoning.py"; do
+  if [ -f "$candidate" ]; then
+    cp "$candidate" "$CALLBACK_DIR/reasoning.py"
+    REASONING_SRC="$candidate"
+    break
+  fi
+done
+if [ -z "${REASONING_SRC:-}" ]; then
+  echo "WARNING: oc_proxy.reasoning not found — callback may fail"
 fi
 
 # Copy tool stripper callback
@@ -78,6 +100,31 @@ cp "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" "$CALLBACK_DIR/tool_
 # Generate LiteLLM config
 cat > "$CONFIG_PATH" << YAMLEOF
 model_list:
+  # Explicit entries with fallbacks for Claude Code model names
+  - model_name: deepseek-v4-flash
+    litellm_params:
+      model: openai/deepseek-v4-flash
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: ${API_KEY}
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+  - model_name: deepseek-v4-pro
+    litellm_params:
+      model: openai/deepseek-v4-pro
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: ${API_KEY}
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+  # MiniMax direct (for opus tier)
+  - model_name: minimax-m3
+    litellm_params:
+      model: anthropic/MiniMax-M3[1m]
+      api_base: https://api.minimax.io/anthropic
+      api_key: ${MINIMAX_API_KEY}
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+
+  # Wildcard catch-all for any other model requests
   - model_name: '*'
     litellm_params:
       model: openai/*
@@ -85,6 +132,16 @@ model_list:
       api_key: ${API_KEY}
       max_input_tokens: 1000000
       max_tokens: 1000000
+
+router_settings:
+  num_retries: 3
+  retry_after: 1
+  allowed_fails: 3
+  cooldown_time: 30
+  fallbacks:
+    - deepseek-v4-flash: [deepseek-v4-pro]
+    - "*": [deepseek-v4-pro]
+  default_fallbacks: [deepseek-v4-pro]
 
 litellm_settings:
   callbacks:
@@ -101,6 +158,11 @@ echo "   Models → OpenCode Go wildcard passthrough"
 echo "   Tool schema stripping → enabled (saves ~60K tokens/req)"
 
 export PYTHONPATH="$CONFIG_DIR${PYTHONPATH:+:$PYTHONPATH}"
-export PATH="/home/newadmin/miniconda3/bin:/home/newadmin/.local/bin:$PATH"
+export PATH="/home/newadmin/miniconda3/bin:/home/newadmin/.local/bin:/usr/bin:$PATH"
 
-exec litellm --config "$CONFIG_PATH" --host "$HOST" --port "$PORT"
+# Use system litellm (conda version has incompatible guardrail deps)
+LITELLM_BIN="/home/newadmin/.local/bin/litellm"
+if [ ! -x "$LITELLM_BIN" ]; then
+  LITELLM_BIN="litellm"
+fi
+exec "$LITELLM_BIN" --config "$CONFIG_PATH" --host "$HOST" --port "$PORT"

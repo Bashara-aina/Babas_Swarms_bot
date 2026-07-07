@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ContextCompactor — Intelligent context utilization monitoring and compaction.
-Monitors context length vs max (128k tokens), triggers compaction at thresholds,
+Monitors context length vs max (1M tokens), triggers compaction at thresholds,
 and manages checkpoint restoration.
 """
 import json
@@ -28,7 +28,7 @@ def _get_max_tokens() -> int:
         return int(_MAX_TOKENS_ENV)
     if _MAX_TOKENS_CONFIG is not None:
         return _MAX_TOKENS_CONFIG
-    return 128000
+    return 1_048_576  # deepseek-v4-flash 1M context window
 
 def _load_config_limits() -> None:
     """Load memory limits from config file if available."""
@@ -93,7 +93,22 @@ def _save_session_state(state: dict[str, Any]) -> None:
 
 def _estimate_tokens(text: str) -> int:
     """Estimate token count using simple heuristic (~4 chars per token)."""
-    return len(text) // 4
+    if not text:
+        return 0
+    return max(1, len(text) // 4)
+
+
+def _size_in_tokens(data: str | list | dict) -> int:
+    """Convert various data types to estimated token count.
+
+    For strings: len // 4 chars-to-tokens heuristic.
+    For lists/dicts: json stringify then estimate.
+    """
+    if isinstance(data, str):
+        return _estimate_tokens(data)
+    if isinstance(data, (list, dict)):
+        return _estimate_tokens(json.dumps(data))
+    return 0
 
 def _determine_level(utilization: float) -> str:
     """Determine compaction level based on utilization."""
@@ -210,14 +225,21 @@ def _write_checkpoint(content: str, level: str) -> str:
     return str(path)
 
 def update_context_length(text_length: int) -> dict[str, Any]:
-    """Update current context length and return utilization state."""
+    """Update current context length and return utilization state.
+
+    text_length is in characters — converted to tokens (÷4) for comparison
+    against MAX_TOKENS which is a token-based limit.
+    """
     with LOCK:
         state = _load_session_state()
+        token_estimate = text_length // 4
         state["context_length"] = text_length
-        state["utilization_pct"] = min(100.0, (text_length / MAX_TOKENS) * 100)
+        state["context_tokens"] = token_estimate
+        state["utilization_pct"] = min(100.0, (token_estimate / MAX_TOKENS) * 100)
         _save_session_state(state)
         return {
             "context_length": text_length,
+            "context_tokens": token_estimate,
             "max_tokens": MAX_TOKENS,
             "utilization_pct": round(state["utilization_pct"], 1),
             "level": _determine_level(state["utilization_pct"] / 100),
@@ -330,10 +352,12 @@ def compactor_register_message(role: str, content: str) -> None:
         # Keep last 200 messages
         msgs = msgs[-200:] if len(msgs) > 200 else msgs
         msgs_path.write_text(json.dumps(msgs))
-        # Update utilization
-        total_len = sum(len(m.get("content", "")) for m in msgs)
-        state["context_length"] = total_len
-        state["utilization_pct"] = min(100.0, (total_len / MAX_TOKENS) * 100)
+        # Update utilization — convert chars to tokens before comparing to MAX_TOKENS
+        total_chars = sum(len(m.get("content", "")) for m in msgs)
+        total_tok = total_chars // 4
+        state["context_length"] = total_chars
+        state["context_tokens"] = total_tok
+        state["utilization_pct"] = min(100.0, (total_tok / MAX_TOKENS) * 100)
         _save_session_state(state)
 
 def handle_context_compactor(args: dict[str, Any]) -> str:

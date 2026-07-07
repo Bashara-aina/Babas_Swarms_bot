@@ -21,24 +21,6 @@ Rule of thumb: if a tool's name matches your task, use it before Bash.
 
 ---
 
-## 2. CronCreate Jitter Pattern
-
-Cron schedules MUST avoid `:00` and `:30` minute marks to reduce load spikes shared by every automated system.
-
-| Natural language | Wrong (crowded) | Right (jittered) |
-|-----------------|-----------------|------------------|
-| "every morning around 9" | `0 9 * * *` | `57 8 * * *` or `3 9 * * *` |
-| "hourly" | `0 * * * *` | `7 * * * *` |
-| "every day at noon" | `0 12 * * *` | `13 12 * * *` |
-| "every 30 minutes" | `*/30 * * * *` | `2-59/30 * * * *` |
-| "weekly on Monday" | `0 9 * * 1` | `17 9 * * 1` |
-
-**Relax only** when the user explicitly says "exactly at 14:00 UTC" and means it. Default to jitter.
-
-**Auto-expiry**: Recurring tasks created by automation expire after 7 days unless the user explicitly requests a permanent schedule. State this up front when creating the schedule.
-
----
-
 ## 3. Monitor Pattern
 
 Monitoring loops and polling scripts -- in hooks, background workflows, or status checks -- must follow these rules:

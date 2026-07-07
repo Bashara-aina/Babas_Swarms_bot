@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const PROJECT_ROOT = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const DATA_DIR = path.join(PROJECT_ROOT, '.claude-flow', 'data');
@@ -57,6 +58,8 @@ function start() {
     metrics: { edits: 0, commands: 0, tasks: 0, errors: 0, filesEdited: [] },
   };
   writeJSON(SESSION_FILE, _session);
+  // Write initial resume file so there's always something to resume
+  writeResumeFile(_session, 0, 'session start');
   return _session;
 }
 
@@ -92,6 +95,60 @@ function prune() {
   }
 }
 
+function writeResumeFile(session, duration, label) {
+  const sessionDataDir = path.join(os.homedir(), '.claude', 'session-data');
+  ensureDir(sessionDataDir);
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const shortId = Math.random().toString(36).slice(2, 10);
+  const filePath = path.join(sessionDataDir, `${dateStr}-${shortId}-session.tmp`);
+
+  const ctx = session.context || {};
+  const metrics = session.metrics || {};
+  const filesChanged = ctx.filesChanged || [];
+  const filesEdited = metrics.filesEdited || [];
+  const allFiles = [...new Set([...filesChanged, ...filesEdited])].filter(Boolean);
+  const lastQuery = ctx.lastUserQuery || '';
+
+  const lines = [];
+  const startDate = session.startedAt ? new Date(session.startedAt).toLocaleString() : 'unknown';
+  lines.push(`SESSION RESUME: ${dateStr}`);
+  lines.push(`Session ID: ${session.id}`);
+  if (label) lines.push(`Label: ${label}`);
+  lines.push('');
+  lines.push('## WHAT WAS WORKED ON');
+  if (lastQuery) lines.push(`Last query: ${lastQuery}`);
+  if (metrics.edits > 0) lines.push(`Edits: ${metrics.edits} files touched`);
+  if (allFiles.length > 0) lines.push(`Files changed: ${allFiles.slice(0, 20).join(', ')}`);
+  if (ctx.tasks && ctx.tasks.length > 0) {
+    lines.push('');
+    lines.push('## TASKS');
+    for (const t of ctx.tasks) lines.push(`- ${typeof t === 'object' ? (t.subject || t.description || JSON.stringify(t)) : t}`);
+  }
+  if (ctx.decisions && ctx.decisions.length > 0) {
+    lines.push('');
+    lines.push('## DECISIONS');
+    for (const d of ctx.decisions) lines.push(`- ${d}`);
+  }
+  if (metrics.errors > 0) {
+    lines.push('');
+    lines.push(`## ERRORS ENCOUNTERED: ${metrics.errors}`);
+  }
+  lines.push('');
+  lines.push('## SESSION INFO');
+  lines.push(`- Started: ${startDate}`);
+  lines.push(`- Duration: ${Math.round(duration / 1000 / 60)} min`);
+  lines.push(`- Commands: ${metrics.commands || 0}`);
+  lines.push('---');
+  lines.push(`_Auto-saved by session.js (${label || 'session end'})._`);
+
+  try {
+    fs.writeFileSync(filePath, lines.join('\n'), 'utf-8');
+    process.stderr.write(`[session] Resume saved: ${filePath}\n`);
+  } catch (e) {
+    process.stderr.write(`[session] WARN: Failed to write resume file: ${e.message}\n`);
+  }
+}
+
 function end() {
   if (!_session && !restore()) return;
 
@@ -114,6 +171,9 @@ function end() {
     },
   };
   writeJSON(LAST_SESSION_FILE, lastSessionData);
+
+  // Write resume markdown file for /resume-session
+  writeResumeFile(_session, duration, 'session end');
 
   // Archive to sessions/ subdirectory
   const sessionsDir = path.join(DATA_DIR, 'sessions');
