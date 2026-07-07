@@ -1833,3 +1833,15 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 - Date: Tue Jul  7 12:58:16 PM JST 2026
 - Message: feat: TCN status doc (Opus 141 ACT-ARCH-4) — both GPUs busy, training blocked
 ---
+## Commit: e0229eee
+- Date: Tue Jul  7 04:59:59 PM JST 2026
+- Message: feat: single-task activity training launch script (Opus 141, 3rd baseline)
+---
+## Commit: eea20811
+- Date: Tue Jul  7 05:00:47 PM JST 2026
+- Message: feat: single-task pose training script (Opus 141, 4th baseline)
+---
+## Commit: bccbd850
+- Date: Tue Jul  7 05:01:53 PM JST 2026
+- Message: feat: single-task PSR training script (Opus 141, 2nd baseline)
+---

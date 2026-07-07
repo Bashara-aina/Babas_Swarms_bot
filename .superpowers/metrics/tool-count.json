@@ -1,1 +1,1 @@
-{"total": 1298, "tools": {"Bash": 882, "Grep": 64, "Read": 219, "Glob": 25, "Edit": 85, "Write": 23}}
+{"total": 627, "tools": {"Bash": 323, "Grep": 71, "Glob": 26, "Read": 147, "Write": 17, "Edit": 43}}
