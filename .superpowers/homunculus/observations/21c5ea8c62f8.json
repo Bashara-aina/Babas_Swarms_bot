@@ -1,0 +1,7 @@
+{
+  "tool": "Write",
+  "command": "/tmp/test.py",
+  "result_preview": "wrote 10 lines",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:11:49Z"
+}

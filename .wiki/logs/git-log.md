@@ -1845,3 +1845,7 @@ Co-Authored-By: RuFlo <ruv@ruv.net>
 - Date: Tue Jul  7 05:01:53 PM JST 2026
 - Message: feat: single-task PSR training script (Opus 141, 2nd baseline)
 ---
+## Commit: 75ef7f82
+- Date: Tue Jul  7 05:08:03 PM JST 2026
+- Message: chore: gitignore .aider.input.history and textidote.jar (large files)
+---

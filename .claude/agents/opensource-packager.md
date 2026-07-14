@@ -1,6 +1,6 @@
 ---
 name: opensource-packager
-description: Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, CONTRIBUTING.md, and GitHub issue templates. Makes any repo immediately usable with Claude Code. Third stage of the opensource-pipeline skill.
+description: Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, and CONTRIBUTING.md. Third stage of the opensource-pipeline skill.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: deepseek-v4-flash
 ---

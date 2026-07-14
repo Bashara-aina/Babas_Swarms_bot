@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "grep -rn \"USE_LDAM_DRW\\|USE_VARIFOCAL\\|USE_WIOU\\|USE_METABALANCE\\|USE_FAMO\" scripts/ 2>/dev/null | head -20",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:45:25Z"
+}

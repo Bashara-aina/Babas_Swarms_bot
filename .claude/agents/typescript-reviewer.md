@@ -1,6 +1,6 @@
 ---
 name: typescript-reviewer
-description: Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.
+description: Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, and security. MUST BE USED for all TypeScript and JavaScript code changes.
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: deepseek-v4-flash
 ---

@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-"""
-Scrapling MCP Server — adaptive web scraping for AI agents.
-
-Provides:
-  scrapling_fetch       — Fast HTTP GET with TLS fingerprint impersonation
-  scrapling_stealth     — Stealth fetch (Cloudflare bypass, anti-bot evasion)
-  scrapling_dynamic     — Full browser automation for JS-rendered pages
-  scrapling_parse       — Parse HTML text locally with CSS/XPath/filter
-  scrapling_extract     — Fetch + extract specific elements (CSS/XPath)
-  scrapling_extract_multi — Batch extract across multiple URLs
-  scrapling_find_selectors — Generate robust selectors from HTML samples
-"""
+"""Scrapling MCP Server — adaptive web scraping for AI agents."""
 
 from __future__ import annotations
 
@@ -23,15 +12,13 @@ from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
 APP_NAME = "scrapling-mcp"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(APP_NAME)
 
 server = Server(APP_NAME)
 
-
-# ── Helper: truncate large text for LLM-friendly output ─────────────────────
 
 def _truncate(text: str, max_len: int = 8000) -> str:
     if len(text) <= max_len:
@@ -41,42 +28,57 @@ def _truncate(text: str, max_len: int = 8000) -> str:
 
 
 def _extract_summary(response) -> dict[str, Any]:
-    """Extract attrs from a Scrapling response object."""
+    """Extract attrs from a Scrapling v0.4.9 Response object."""
+    body = getattr(response, "body", b"")
     return {
         "url": getattr(response, "url", ""),
         "status": getattr(response, "status", 0),
-        "html_length": len(getattr(response, "raw_content", "") or getattr(response, "content", "") or ""),
-        "text_length": len(getattr(response, "text", "") or ""),
+        "html_length": len(body),
+        "text_length": len(getattr(response, "get_all_text", lambda: "")()),
     }
 
 
-# ── Tool definitions ────────────────────────────────────────────────────────
+def _get_html(response) -> str:
+    """Get HTML string from a Scrapling v0.4.9 Response object."""
+    html_content = getattr(response, "html_content", None)
+    if html_content:
+        return str(html_content)
+    body = getattr(response, "body", None)
+    if body:
+        return body.decode("utf-8", errors="replace")
+    return str(response)
+
+
+def _get_text(response) -> str:
+    """Get visible text from a Scrapling v0.4.9 Response object."""
+    text = getattr(response, "text", None)
+    if text:
+        return str(text)
+    return getattr(response, "get_all_text", lambda: "")()
+
+
 
 @server.list_tools()
 async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="scrapling_fetch",
-            description=(
-                "Fetch a URL via Scrapling's fast HTTP engine with browser TLS fingerprint "
-                "impersonation. Best for static HTML pages. Supports stealthy headers, "
-                "proxy rotation, and HTTP/3. Returns full HTML content + metadata."
-            ),
+            description="Fast HTTP GET with TLS impersonation. Use for static pages.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "url": {"type": "string", "description": "URL to fetch"},
+                    "url": {"type": "string", "description": "Target URL"},
                     "impersonate": {
                         "type": "string",
-                        "description": "Browser to impersonate: chrome, edge, safari, firefox, or specific versions like chrome131, safari180, firefox147",
+                        "description": "Browser to impersonate",
                         "default": "chrome",
                     },
-                    "http3": {"type": "boolean", "description": "Enable HTTP/3 (QUIC)", "default": False},
-                    "timeout": {"type": "integer", "description": "Request timeout in seconds", "default": 30},
-                    "retries": {"type": "integer", "description": "Number of retries on failure", "default": 3},
+                    "http3": {"type": "boolean", "description": "Enable HTTP/3", "default": False},
+                    "timeout": {"type": "integer", "description": "Timeout in seconds", "default": 30},
+                    "retries": {"type": "integer", "description": "Retry count", "default": 3},
                     "extract_text": {
                         "type": "boolean",
-                        "description": "Extract visible text only (no HTML tags)",
+                        "description": "Extract visible text only",
                         "default": False,
                     },
                 },
@@ -85,30 +87,25 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_stealth",
-            description=(
-                "Stealth fetch using browser automation with anti-bot evasion. "
-                "Bypasses Cloudflare Turnstile, interstitial pages, and other bot protections. "
-                "Use when scrapling_fetch returns blocked content or challenges. "
-                "Supports adaptive mode that auto-relocates elements after site changes."
-            ),
+            description="Stealth fetch with Cloudflare bypass. Use when scrapling_fetch gets blocked.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "url": {"type": "string", "description": "URL to fetch"},
-                    "headless": {"type": "boolean", "description": "Run browser headless", "default": True},
+                    "url": {"type": "string", "description": "Target URL"},
+                    "headless": {"type": "boolean", "description": "Run headless", "default": True},
                     "solve_cloudflare": {
                         "type": "boolean",
-                        "description": "Attempt Cloudflare Turnstile/Challenge solving",
+                        "description": "Solve Cloudflare challenge",
                         "default": True,
                     },
                     "network_idle": {
                         "type": "boolean",
-                        "description": "Wait for network idle before returning",
+                        "description": "Wait for network idle",
                         "default": True,
                     },
                     "adaptive": {
                         "type": "boolean",
-                        "description": "Enable adaptive mode (survives site redesigns)",
+                        "description": "Adaptive mode for site redesigns",
                         "default": False,
                     },
                 },
@@ -117,22 +114,18 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_dynamic",
-            description=(
-                "Full browser automation for JavaScript-rendered pages. "
-                "Use Playwright's Chromium to execute JS, wait for dynamic content, "
-                "and extract results. Supports custom wait conditions and screenshots."
-            ),
+            description="Browser automation for JS-rendered pages. Waits for dynamic content.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "url": {"type": "string", "description": "URL to load in browser"},
+                    "url": {"type": "string", "description": "Target URL"},
                     "wait_selector": {
                         "type": "string",
-                        "description": "CSS selector to wait for before extracting (e.g. '.content-loaded')",
+                        "description": "CSS selector to wait for",
                     },
                     "wait_time": {
                         "type": "integer",
-                        "description": "Milliseconds to wait after page load",
+                        "description": "Wait after page load (ms)",
                         "default": 2000,
                     },
                     "extract_text": {
@@ -142,7 +135,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "timeout": {
                         "type": "integer",
-                        "description": "Page load timeout in ms",
+                        "description": "Page load timeout (ms)",
                         "default": 30000,
                     },
                 },
@@ -151,31 +144,27 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_extract",
-            description=(
-                "Fetch a URL and extract specific elements using CSS selectors or XPath. "
-                "Scrapling's parser is ~780x faster than BeautifulSoup for extraction. "
-                "The killer feature: one call to fetch + parse any webpage."
-            ),
+            description="Fetch URL + extract with CSS/XPath. One-call fetch-and-parse.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "url": {"type": "string", "description": "URL to fetch and extract from"},
+                    "url": {"type": "string", "description": "Target URL"},
                     "css": {
                         "type": "string",
-                        "description": "CSS selector to extract (e.g. '.article .title::text', 'a::attr(href)'). Use ::text for text content, ::attr(name) for attributes",
+                        "description": "CSS selector (::text, ::attr(name) syntax)",
                     },
                     "xpath": {
                         "type": "string",
-                        "description": "XPath selector (alternative to css). Use one or the other.",
+                        "description": "XPath selector (alternative to css)",
                     },
                     "all_matches": {
                         "type": "boolean",
-                        "description": "Return all matching elements vs just first",
+                        "description": "Return all matches vs first only",
                         "default": True,
                     },
                     "impersonate": {
                         "type": "string",
-                        "description": "Browser impersonation: chrome, edge, safari, firefox",
+                        "description": "Browser to impersonate",
                         "default": "chrome",
                     },
                 },
@@ -184,26 +173,22 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_extract_multi",
-            description=(
-                "Extract data from multiple URLs in a single call. "
-                "Each URL is fetched concurrently and the same selectors are applied. "
-                "Use for batch data collection, price monitoring, aggregator scraping."
-            ),
+            description="Batch extract across multiple URLs concurrently. Same CSS/XPath applied to all.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "urls": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "URLs to extract from",
+                        "description": "List of target URLs",
                     },
                     "css": {
                         "type": "string",
-                        "description": "CSS selector to apply to each page. Use ::text for text, ::attr(name) for attributes",
+                        "description": "CSS selector (::text, ::attr(name) syntax)",
                     },
                     "max_concurrent": {
                         "type": "integer",
-                        "description": "Maximum concurrent fetches",
+                        "description": "Max concurrent fetches",
                         "default": 5,
                     },
                 },
@@ -212,18 +197,14 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_parse",
-            description=(
-                "Parse HTML text content locally using Scrapling's fast parser "
-                "(no network request). Supports CSS selectors, XPath, filter-based "
-                "search, text search, and regex. 780x faster than BeautifulSoup."
-            ),
+            description="Parse HTML locally (no network) with CSS/XPath. Offline extraction.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "html": {"type": "string", "description": "HTML content to parse"},
+                    "html": {"type": "string", "description": "HTML content"},
                     "css": {
                         "type": "string",
-                        "description": "CSS selector (e.g. 'h1::text', 'div.content', 'a::attr(href)')",
+                        "description": "CSS selector (::text, ::attr(name) syntax)",
                     },
                     "xpath": {
                         "type": "string",
@@ -231,7 +212,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "all": {
                         "type": "boolean",
-                        "description": "Return all matches vs just first",
+                        "description": "Return all matches vs first only",
                         "default": True,
                     },
                 },
@@ -240,23 +221,18 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="scrapling_find_selectors",
-            description=(
-                "Given HTML and target text, generate robust CSS selectors that match "
-                "the target elements. Uses Scrapling's adaptive/auto_save feature which "
-                "learns from website structure and can relocate elements after changes. "
-                "Returns multiple selector options ranked by robustness."
-            ),
+            description="Generate CSS selectors from HTML + target text. Ranked by robustness.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "html": {"type": "string", "description": "HTML content containing the target"},
+                    "html": {"type": "string", "description": "HTML content"},
                     "target_text": {
                         "type": "string",
-                        "description": "Text content to find selectors for",
+                        "description": "Text to find selectors for",
                     },
                     "max_selectors": {
                         "type": "integer",
-                        "description": "Maximum number of selectors to return",
+                        "description": "Max selectors to return",
                         "default": 3,
                     },
                 },
@@ -266,10 +242,8 @@ async def list_tools() -> list[Tool]:
     ]
 
 
-# ── Tool implementations ────────────────────────────────────────────────────
 
 async def _do_fetch(url: str, **kwargs) -> dict[str, Any]:
-    """Fast HTTP fetch with Scrapling."""
     from scrapling.fetchers import Fetcher
 
     result = Fetcher.get(
@@ -280,17 +254,15 @@ async def _do_fetch(url: str, **kwargs) -> dict[str, Any]:
         retries=kwargs.get("retries", 3),
     )
     info = _extract_summary(result)
-    info["html"] = result.raw_content if hasattr(result, "raw_content") else str(result)
+    info["html"] = _get_html(result)
     if kwargs.get("extract_text"):
-        info["text"] = result.text if hasattr(result, "text") else ""
+        info["text"] = _get_text(result)
     return info
 
 
 async def _do_stealth(url: str, **kwargs) -> dict[str, Any]:
-    """Stealth fetch with anti-bot bypass."""
     from scrapling.fetchers import StealthyFetcher
 
-    StealthyFetcher.adaptive = kwargs.get("adaptive", False)
     result = StealthyFetcher.fetch(
         url,
         headless=kwargs.get("headless", True),
@@ -298,12 +270,11 @@ async def _do_stealth(url: str, **kwargs) -> dict[str, Any]:
         network_idle=kwargs.get("network_idle", True),
     )
     info = _extract_summary(result)
-    info["html"] = getattr(result, "raw_content", "") or getattr(result, "content", "") or str(result)
+    info["html"] = _get_html(result)
     return info
 
 
 async def _do_dynamic(url: str, **kwargs) -> dict[str, Any]:
-    """Full browser automation fetch."""
     from scrapling.fetchers import DynamicFetcher
 
     result = DynamicFetcher.fetch(
@@ -315,21 +286,17 @@ async def _do_dynamic(url: str, **kwargs) -> dict[str, Any]:
     )
     info = _extract_summary(result)
     if kwargs.get("extract_text", True):
-        info["text"] = getattr(result, "text", "") or ""
-    info["html"] = getattr(result, "raw_content", "") or str(result)
+        info["text"] = _get_text(result)
+    info["html"] = _get_html(result)
     return info
 
 
 async def _do_extract(url: str, **kwargs) -> dict[str, Any]:
-    """Fetch + extract elements via CSS/XPath."""
     from scrapling.fetchers import Fetcher
-
-    result = Fetcher.get(
-        url,
-        impersonate=kwargs.get("impersonate", "chrome"),
-    )
-    html = getattr(result, "raw_content", "") or str(result)
     from scrapling.parser import Selector
+
+    result = Fetcher.get(url, impersonate=kwargs.get("impersonate", "chrome"))
+    html = _get_html(result)
     page = Selector(html)
 
     all_matches = kwargs.get("all_matches", True)
@@ -340,18 +307,18 @@ async def _do_extract(url: str, **kwargs) -> dict[str, Any]:
     if css:
         elements = page.css(css)
         if all_matches:
-            extracted = [e.get() if hasattr(e, "get") else str(e) for e in elements]
+            extracted = [str(e.get()) if hasattr(e, "get") else str(e) for e in elements]
         else:
             e = elements[0] if elements else None
-            extracted = [e.get() if hasattr(e, "get") else str(e)] if e is not None else []
+            extracted = [str(e.get()) if e is not None and hasattr(e, "get") else ""] if e is not None else []
 
     if xpath_sel:
         elements = page.xpath(xpath_sel)
-        if all_matches:
-            extracted = [e.get() if hasattr(e, "get") else str(e) for e in elements]
-        else:
-            e = elements[0] if elements else None
-            extracted = [e.get() if hasattr(e, "get") else str(e)] if e is not None else []
+        names = []
+        for e in elements:
+            val = str(e.get()) if hasattr(e, "get") else str(e)
+            names.append(val)
+        extracted = names if all_matches else (names[:1] if names else [])
 
     info = _extract_summary(result)
     info["extracted"] = extracted
@@ -360,7 +327,6 @@ async def _do_extract(url: str, **kwargs) -> dict[str, Any]:
 
 
 async def _do_extract_multi(urls: list[str], **kwargs) -> list[dict[str, Any]]:
-    """Fetch + extract from multiple URLs concurrently."""
     import asyncio
     from scrapling.fetchers import Fetcher
     from scrapling.parser import Selector
@@ -372,12 +338,11 @@ async def _do_extract_multi(urls: list[str], **kwargs) -> list[dict[str, Any]]:
         try:
             loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(None, lambda: Fetcher.get(session_url, impersonate="chrome"))
-            html = getattr(result, "raw_content", "") or str(result)
-            page = Selector(html)
             info = _extract_summary(result)
             if css:
+                page = Selector(_get_html(result))
                 elements = page.css(css)
-                info["extracted"] = [e.get() if hasattr(e, "get") else str(e) for e in elements]
+                info["extracted"] = [str(e.get()) if hasattr(e, "get") else str(e) for e in elements]
                 info["count"] = len(info["extracted"])
             return info
         except Exception as exc:
@@ -394,7 +359,6 @@ async def _do_extract_multi(urls: list[str], **kwargs) -> list[dict[str, Any]]:
 
 
 async def _do_parse(html: str, **kwargs) -> dict[str, Any]:
-    """Parse HTML text locally with Selector."""
     from scrapling.parser import Selector
 
     page = Selector(html)
@@ -407,56 +371,56 @@ async def _do_parse(html: str, **kwargs) -> dict[str, Any]:
     if css:
         elements = page.css(css)
         if all_matches:
-            result["extracted"] = [e.get() if hasattr(e, "get") else str(e) for e in elements]
+            result["extracted"] = [str(e.get()) if hasattr(e, "get") else str(e) for e in elements]
         else:
             e = elements[0] if elements else None
-            result["extracted"] = [e.get() if hasattr(e, "get") else str(e)] if e is not None else []
+            result["extracted"] = [str(e.get()) if e is not None and hasattr(e, "get") else ""] if e is not None else []
         result["count"] = len(result["extracted"])
 
     if xpath_sel:
         elements = page.xpath(xpath_sel)
-        if all_matches:
-            result["extracted_xpath"] = [e.get() if hasattr(e, "get") else str(e) for e in elements]
-        else:
-            e = elements[0] if elements else None
-            result["extracted_xpath"] = [e.get() if hasattr(e, "get") else str(e)] if e is not None else []
-        result["count_xpath"] = len(result.get("extracted_xpath", []))
+        vals = []
+        for e in elements:
+            val = str(e.get()) if hasattr(e, "get") else str(e)
+            vals.append(val)
+        result["extracted_xpath"] = vals if all_matches else (vals[:1] if vals else [])
+        result["count_xpath"] = len(result["extracted_xpath"])
 
     return result
 
 
 async def _do_find_selectors(html: str, target_text: str, **kwargs) -> dict[str, Any]:
-    """Find robust CSS selectors for target text in HTML."""
     from scrapling.parser import Selector
 
     page = Selector(html)
     max_selectors = kwargs.get("max_selectors", 3)
 
-    # Find the target element
     target_el = page.find_by_text(target_text, first_match=True, partial=True)
     if target_el is None:
         return {"found": False, "target_text": target_text, "selectors": []}
 
-    # Generate robust selector candidates
     selectors = []
-    for i, el in enumerate([target_el] + list(target_el.find_similar()[:max_selectors - 1])):
+    candidates = [target_el]
+    for i, el in enumerate(candidates[:max_selectors]):
         selector_info = {}
-        # Try to build a descriptive selector
         tag = el.tag if hasattr(el, "tag") else "unknown"
         attrs = el.attrib if hasattr(el, "attrib") else {}
-        classes = " ".join(attrs.get("class", [])) if isinstance(attrs.get("class"), list) else attrs.get("class", "")
+        classes = attrs.get("class", "")
         selector_info["tag"] = tag
         selector_info["classes"] = classes
         selector_info["id"] = attrs.get("id", "")
-        selector_info["text_preview"] = str(el.get())[:100] if hasattr(el, "get") else ""
+        selector_info["text_preview"] = str(el.get_all_text())[:100] if hasattr(el, "get_all_text") else str(el.text)[:100]
 
-        # Build CSS selector
-        css_parts = [tag]
-        if attrs.get("id"):
-            css_parts.append(f"#{attrs['id']}")
-        if classes:
-            css_parts.append(f".{classes.replace(' ', '.')}")
-        selector_info["css_selector"] = "".join(css_parts)
+        css_sel = getattr(el, "generate_css_selector", None)
+        if css_sel:
+            selector_info["css_selector"] = css_sel
+        else:
+            css_parts = [tag]
+            if attrs.get("id"):
+                css_parts.append(f"#{attrs['id']}")
+            if classes:
+                css_parts.append(f".{classes.replace(' ', '.')}" if isinstance(classes, str) else "".join(f".{c}" for c in classes))
+            selector_info["css_selector"] = "".join(css_parts)
         selectors.append(selector_info)
 
     return {
@@ -467,7 +431,6 @@ async def _do_find_selectors(html: str, target_text: str, **kwargs) -> dict[str,
     }
 
 
-# ── Call dispatcher ─────────────────────────────────────────────────────────
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> Sequence[TextContent]:
@@ -486,22 +449,20 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> Sequence[TextConten
         return [TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
 
     try:
+        args = dict(arguments)
         if name == "scrapling_extract_multi":
-            result = await handler(arguments["urls"], **arguments)
+            urls = args.pop("urls")
+            result = await handler(urls, **args)
         elif name in ("scrapling_parse", "scrapling_find_selectors"):
-            result = await handler(arguments["html"], **arguments)
-        elif name == "scrapling_fetch":
-            result = await _do_fetch(arguments["url"], **arguments)
-        elif name == "scrapling_stealth":
-            result = await _do_stealth(arguments["url"], **arguments)
-        elif name == "scrapling_dynamic":
-            result = await _do_dynamic(arguments["url"], **arguments)
-        elif name == "scrapling_extract":
-            result = await _do_extract(arguments["url"], **arguments)
+            html = args.pop("html")
+            result = await handler(html, **args)
+        elif name in ("scrapling_fetch", "scrapling_stealth", "scrapling_dynamic", "scrapling_extract"):
+            url = args.pop("url")
+            result = await handler(url, **args)
         else:
-            result = await handler(arguments["url"], **arguments)
+            url = args.pop("url", "")
+            result = await handler(url, **args)
 
-        # Truncate large HTML/text fields
         if isinstance(result, dict):
             if "html" in result:
                 result["html"] = _truncate(result["html"], 8000)
@@ -517,8 +478,6 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> Sequence[TextConten
             text=json.dumps({"error": str(exc), "tool": name, "arguments": {k: v for k, v in arguments.items() if k != "html"}})
         )]
 
-
-# ── Entry point ─────────────────────────────────────────────────────────────
 
 async def main():
     async with stdio_server() as (read_stream, write_stream):

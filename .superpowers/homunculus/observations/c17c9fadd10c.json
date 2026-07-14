@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "echo \"=== More checks ===\" && echo \"\" && echo \"Tier 1 #2 Per-task LR:\" && grep -E \"DET_LR_MULTIPLIER|PSR_LR|HEAD_LR|per_task_lr\" src/config.py | head -10 && echo \"\" && echo \"Tier 1 #3 Balanced Softmax:\" && grep -E \"BalancedSoftmax|BalancedSoftmaxLoss|balanced_softmax\" src/config.py src/losses/balanced_softmax.py 2>/dev/null | head -3 && echo \"\" && echo \"Tier 1 #8 ASL:\" && grep -E \"ASL|AsymmetricLoss|asymmetric_loss\" src/losses/asymmetric_loss.py 2>/dev/null | head -3 && echo \"\" && echo \"Tier 2 #16 OHEM:\" && grep -E \"OHEM|ohem|hard.*example.*mining\" src/config.py | head -5 && echo \"\" && echo \"Tier 2 #15 Gaussian PSR targets:\" && grep -E \"gaussian.*target|PSR.*gaussian|sigma.*target\" src/config.py | head -3 && echo \"\" && echo \"Tier 3 #20 GeometryAwareHeadPose:\" && grep \"USE_GEO_HEAD_POSE\" src/config.py | head -3 && echo \"\" && echo \"Tier 4 #26 Nash-MTL/CAGrad:\" && grep -E \"Nash|CAGrad\" src/config.py src/training/mtl_balancer.py 2>/dev/null | head -5 && echo \"\" && echo \"Pose warm-start:\" && grep -E \"warm_start|WARM_START|warm.start\" src/config.py | head -3",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T04:34:56Z"
+}

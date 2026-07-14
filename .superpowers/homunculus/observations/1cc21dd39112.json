@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "ls -la",
+  "result_preview": "file1\nfile2",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:11:49Z"
+}

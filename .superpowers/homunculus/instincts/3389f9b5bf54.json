@@ -1,0 +1,12 @@
+{
+  "trigger": "tool:Bash",
+  "action_pattern": "execute:Bash",
+  "confidence": 0.9,
+  "scope": "global",
+  "project_id": "cb30c01a3b6a151a",
+  "project_name": ".",
+  "evidence_count": 46,
+  "domain": "workflow",
+  "last_observed": "2026-07-14T02:06:34.223Z",
+  "created": "2026-07-14T02:06:34.223Z"
+}

@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "echo \"=== consult_v2 contents (relative path) ===\" && ls analyses/consult_claude_science/consult_v2/*.md 2>&1 | head -30 && echo \"\" && echo \"Count:\" && ls analyses/consult_claude_science/consult_v2/*.md 2>&1 | wc -l",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:53:56Z"
+}

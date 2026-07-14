@@ -1,7 +1,7 @@
 ---
 name: docs-lookup
-description: When the user asks how to use a library, framework, or API or needs up-to-date code examples, use Context7 MCP to fetch current documentation and return answers with examples. Invoke for docs/API/setup questions.
-tools: ["Read", "Grep", "mcp__hermes__context7_resolve_library_id", "mcp__hermes__context7_query_docs"]
+description: Use when the user asks how to use a library, framework, or API. Uses Context7 MCP to fetch current documentation and return answers with examples.
+tools: ["Read", "Grep"]
 model: deepseek-v4-flash
 ---
 

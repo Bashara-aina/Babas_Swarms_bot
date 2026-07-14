@@ -1,118 +1,87 @@
-model_list:
-  # OpenCode Go via openai-compatible provider
-  # NOTE: Must use 'openai/' prefix for LiteLLM to recognize it as an OpenAI-compatible API
-  - model_name: opencode-go/*
-    litellm_params:
-      model: openai/opencode-go/*
-      api_base: https://opencode.ai/zen/go/v1
-      api_key: os.environ/OPENCODE_GO_API_KEY
-      rpm: 500
-      drop_params: true
-
-  # DeepSeek v4 Flash via OpenCode Go API (OpenAI format)
-  # OpenCode supports tools only through OpenAI endpoint, not Anthropic
-  # FIX 2026-07-07: api_base MUST include /v1 (without /v1 → 404)
-  - model_name: deepseek-v4-flash
-    litellm_params:
-      model: openai/deepseek-v4-flash
-      api_base: https://opencode.ai/zen/go/v1
-      api_key: os.environ/OPENCODE_GO_API_KEY
-      rpm: 500
-      timeout: 300
-      stream_timeout: 300
-      drop_params: true
-
-  # NVIDIA Nemotron via OpenRouter (as OpenAI-compatible)
-  # Short name for Claude Code (ANTHROPIC_MODEL=nemotron)
-  # NOTE: Nemotron is VERY slow — ~30s reasoning before first token
-  - model_name: nemotron
-    litellm_params:
-      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 10
-      timeout: 300
-      stream_timeout: 300
-      drop_params: true
-
-  # Full OpenRouter model name (for OpenCode & other clients that use full model IDs)
-  # CRITICAL: Uses 'openai/' prefix so LiteLLM strips it before sending to OpenRouter.
-  # Without this, the 'openrouter/*' wildcard passes 'openrouter/...' to OpenRouter
-  # which returns "not a valid model ID".
-  - model_name: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
-    litellm_params:
-      model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 30
-      timeout: 180
-      drop_params: true
-
-  - model_name: openrouter/*
-    litellm_params:
-      model: openrouter/*
-      api_base: https://openrouter.ai/api/v1
-      api_key: os.environ/OPENROUTER_API_KEY
-      rpm: 500
-      drop_params: true
-
-  # MiniMax M3 via MiniMax Anthropic-compatible API
-  # MiniMax M3 uses an Anthropic-compatible endpoint, not OpenAI
-  # The sk-cp- key is a MiniMax key for their Anthropic-compatible API
-  # LiteLLM automatically translates OpenAI-format requests to Anthropic format
-  - model_name: minimax-coding-plan/MiniMax-M3
-    litellm_params:
-      model: anthropic/MiniMax-M3
-      api_base: https://api.minimax.io/anthropic
-      api_key: os.environ/MINIMAX_API_KEY
-      rpm: 500
-      timeout: 300
-      stream_timeout: 300
-      drop_params: true
-
-  # Short name used by /model minimax-m3
-  - model_name: minimax-m3
-    litellm_params:
-      model: anthropic/MiniMax-M3
-      api_base: https://api.minimax.io/anthropic
-      api_key: os.environ/MINIMAX_API_KEY
-      rpm: 500
-      timeout: 300
-      stream_timeout: 300
-      drop_params: true
-
-  - model_name: ollama-llama3.3
-    litellm_params:
-      model: ollama/llama3.3:70b
-      api_base: http://localhost:11434
-      api_key: os.environ/OLLAMA_API_KEY
-
-litellm_settings:
-  set_verbose: false
-  drop_params: true
-  store_model_results: false
-  disable_constraints: true
-  no-cache: true
-
-  # OpenRouter recommended headers for model providers
-  default_headers:
-    HTTP-Referer: "https://swarm-bot.ai"
-    X-Title: "swarm-bot"
-
-general_settings:
-  # No master_key: proxy accepts any Authorization header.
-  # Security is via upstream API keys managed by the proxy.
-
 budget_manager:
   planner:
-    max_budget: 0.20
-    budget_duration: "1d"
-  worker:
-    max_budget: 0.50
-    budget_duration: "1d"
+    budget_duration: 1d
+    max_budget: 0.2
   reviewer:
-    max_budget: 0.10
-    budget_duration: "1d"
+    budget_duration: 1d
+    max_budget: 0.1
   wikibot:
+    budget_duration: 1d
     max_budget: 0.05
-    budget_duration: "1d"
+  worker:
+    budget_duration: 1d
+    max_budget: 0.5
+general_settings: null
+litellm_settings:
+  default_headers:
+    HTTP-Referer: https://swarm-bot.ai
+    X-Title: swarm-bot
+  disable_constraints: true
+  drop_params: true
+  no-cache: true
+  set_verbose: false
+  store_model_results: false
+model_list:
+- litellm_params:
+    api_base: https://opencode.ai/zen/go/v1
+    api_key: os.environ/OPENCODE_GO_API_KEY
+    drop_params: true
+    model: openai/opencode-go/*
+    rpm: 500
+  model_name: opencode-go/*
+- litellm_params:
+    api_base: https://opencode.ai/zen/go/v1
+    api_key: os.environ/OPENCODE_GO_API_KEY
+    drop_params: true
+    model: openai/deepseek-v4-flash
+    rpm: 500
+    stream_timeout: 300
+    timeout: 300
+  model_name: deepseek-v4-flash
+- litellm_params:
+    api_base: https://openrouter.ai/api/v1
+    api_key: os.environ/OPENROUTER_API_KEY
+    drop_params: true
+    model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+    rpm: 10
+    stream_timeout: 300
+    timeout: 300
+  model_name: nemotron
+- litellm_params:
+    api_base: https://openrouter.ai/api/v1
+    api_key: os.environ/OPENROUTER_API_KEY
+    drop_params: true
+    model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
+    rpm: 30
+    timeout: 180
+  model_name: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+- litellm_params:
+    api_base: https://openrouter.ai/api/v1
+    api_key: os.environ/OPENROUTER_API_KEY
+    drop_params: true
+    model: openrouter/*
+    rpm: 500
+  model_name: openrouter/*
+- litellm_params:
+    api_base: https://api.minimax.io/anthropic
+    api_key: os.environ/MINIMAX_API_KEY
+    drop_params: true
+    model: anthropic/MiniMax-M3
+    rpm: 500
+    stream_timeout: 300
+    timeout: 300
+  model_name: minimax-coding-plan/MiniMax-M3
+- litellm_params:
+    api_base: https://api.minimax.io/anthropic
+    api_key: os.environ/MINIMAX_API_KEY
+    drop_params: true
+    model: anthropic/MiniMax-M3
+    rpm: 500
+    stream_timeout: 300
+    timeout: 300
+  model_name: minimax-m3
+- litellm_params:
+    api_base: http://localhost:11434
+    api_key: os.environ/OLLAMA_API_KEY
+    model: ollama/llama3.3:70b
+  model_name: ollama-llama3.3

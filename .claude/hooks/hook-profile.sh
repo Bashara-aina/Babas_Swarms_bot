@@ -14,14 +14,14 @@ case "$PROFILE" in
     export HOOK_ENABLE_OBSERVATIONS=false
     export HOOK_ENABLE_GATEGUARD=false
     export HOOK_ENABLE_GITNEXUS=false
-    echo "[hook-profile] minimal — security only"
+    echo "[hook-profile] minimal — security only" >&2
     ;;
   standard)
     export HOOK_ENABLE_SECURITY=true
     export HOOK_ENABLE_OBSERVATIONS=true
     export HOOK_ENABLE_GATEGUARD=true
     export HOOK_ENABLE_GITNEXUS=true
-    echo "[hook-profile] standard — security + observations + gateguard"
+    echo "[hook-profile] standard — security + observations + gateguard" >&2
     ;;
   strict)
     export HOOK_ENABLE_SECURITY=true
@@ -29,10 +29,10 @@ case "$PROFILE" in
     export HOOK_ENABLE_GATEGUARD=true
     export HOOK_ENABLE_GITNEXUS=true
     export HOOK_VERIFY_EVERY_EDIT=true
-    echo "[hook-profile] strict — maximum verification"
+    echo "[hook-profile] strict — maximum verification" >&2
     ;;
   *)
-    echo "[hook-profile] unknown profile '$PROFILE', using standard"
+    echo "[hook-profile] unknown profile '$PROFILE', using standard" >&2
     export HOOK_ENABLE_SECURITY=true
     export HOOK_ENABLE_OBSERVATIONS=true
     export HOOK_ENABLE_GATEGUARD=true

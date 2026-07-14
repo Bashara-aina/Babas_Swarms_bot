@@ -2,8 +2,8 @@
 name: hermes-session-archivist
 description: Cross-session memory agent — uses hermes session_search FTS5 across all conversations to recall context, decisions, and learnings from prior sessions. The memory continuity specialist.
 model: deepseek-v4-flash
-tools: ["mcp__hermes__hermes_session_search", "mcp__hermes__session_archivist", "mcp__hermes__memory_save", "mcp__hermes__memory_recall", "mcp__hermes__memory_sync", "mcp__hermes__synthesize_session_context", "mcp__obsidian__search_notes", "mcp__obsidian__read_note", "mcp__hermes__restore_context", "Read", "Write", "Bash", "Grep", "Glob"]
-memory: [all 6 layers - full access]
+tools: ["", "", "memory_store", "memory_retrieve", "— use ruflo memory bridge", "", "mcp__obsidian__search_notes", "mcp__obsidian__read_note", "", "Read", "Write", "Bash", "Grep", "Glob"]
+memory: [all 5 layers - full access]
 ---
 
 # Hermes Session Archivist Agent

@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "echo \"=== FINAL STATE OF ULTIMATE V2 DEPLOYMENT ===\" && echo \"\" && echo \"Config flags added by swarm:\" && grep -cE \"^USE_\" src/config.py && echo \"\" && echo \"MTL modules wired (changed from 1/14 to 8/14):\" && grep -cE \"FAMOWeighter|RotoGradRotation|MetaBalance|IMTL|RLWWeighter|Varifocal|wiou_v3|tal_assigner|TALD\" src/training/losses.py src/training/mtl_balancer.py 2>/dev/null && echo \"\" && echo \"Scripts created:\" && ls scripts/launch_st_baselines.sh scripts/mediapipe_pose_baseline.py scripts/activity_confusion_matrix.py scripts/launch_uncapped_kendall.sh 2>&1 | head -10 && echo \"\" && echo \"consult_v2 deliverables:\" && ls consult_v2/*.md 2>/dev/null | wc -l && echo \"files\" && echo \"\" && echo \"Modified files:\" && git status --short 2>&1 | wc -l",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:53:51Z"
+}

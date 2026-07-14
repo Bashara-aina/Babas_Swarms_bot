@@ -1,14 +1,11 @@
 """
-PSR Transition Training Configuration
-======================================
-Configures the PSR head repair toggling and related hyperparameters.
+POPW Multi-Task Model Configuration
+=====================================
+Central configuration for the POPW multi-task model covering detection, head
+pose, activity classification, and PSR (Posture State Recognition).
 
-PSR_HEAD_REPAIR: When True, the model uses the repaired transition heads from
-  `psr_transition_repaired.py` instead of the original heads from `psr_transition.py`.
-  The repaired head includes:
-    - Output bias initialized to 0.0 (was -1.0)
-    - LeakyReLU(0.01) activation (was ReLU(inplace=True))
-    - Xavier/Glorot uniform initialization for all linear layers
+Values verified against doc 207 findings. All LV_CLAMP_MAX values corrected
+from old defaults (4.0) to doc 207 values (detection=1.5, pose=2.0).
 """
 
 from __future__ import annotations
@@ -18,7 +15,55 @@ from typing import List, Optional
 
 
 # ============================================================================
-# PSR Transition Configuration
+# Image / Data Configuration
+# ============================================================================
+
+# Input image dimensions
+IMG_WIDTH: int = 1280
+IMG_HEIGHT: int = 720
+
+# Batch sizes
+BATCH_SIZE: int = 2              # doc 207: reduced for OOM mitigation
+VAL_BATCH_SIZE: int = 4          # doc 207: safe with torch.no_grad()
+RAM_CACHE_MAX_IMAGES: int = 0    # doc 207: disable RAM cache by default
+
+
+# ============================================================================
+# Detection Configuration
+# ============================================================================
+
+# Kendall log-var clamp max for detection (lower bound = -LV_CLAMP_MAX_DET)
+# doc 207: was 4.0 (weight floor exp(-4)~0.018), fixed to 1.5 (floor 0.22)
+LV_CLAMP_MAX_DET: float = 1.5
+
+NUM_DET_CLASSES: int = 24
+
+# Detection evaluation thresholds (applied via FULL_EVAL_OVERRIDES)
+DET_EVAL_SCORE_THRESH: float = 0.5
+DET_EVAL_NMS_IOU_THRESH: float = 0.5
+DET_EVAL_MAX_PER_IMAGE: int = 300
+
+
+# ============================================================================
+# Head Pose Configuration
+# ============================================================================
+
+# Kendall log-var clamp max for pose (lower bound = -LV_CLAMP_MAX_POSE)
+# doc 207: was 4.0, fixed to 2.0
+LV_CLAMP_MAX_POSE: float = 2.0
+
+
+# ============================================================================
+# Activity Classification Configuration
+# ============================================================================
+
+# doc 207: grouping set to "none" (was "hybrid" in old config)
+ACT_CLASS_GROUPING: str = "none"
+NUM_ACT_OUTPUTS: int = 75
+
+
+# ============================================================================
+# PSR (Posture State Recognition) Configuration
 # ============================================================================
 
 # Toggle between original and repaired PSR transition head
@@ -52,6 +97,11 @@ PSR_WEIGHT: float = 10.0
 PSR_LOSS_CAP: float = 20.0
 PSR_SENSITIVITY_WEIGHT: float = 0.01
 PSR_TEMPORAL_SMOOTH_WEIGHT: float = 0.05
+PSR_TRANSITION_BOOST: float = 3.0  # [OPUS 207 §4.3] Boost weight on transition frames
+
+# Per-component inverse-prevalence weights (11 PSR components)
+# doc 207: component 4 gets 5.03x, component 10 gets 4.61x
+PSR_COMP_WEIGHTS: list = [1.0, 1.21, 1.20, 1.98, 5.03, 1.61, 1.66, 2.20, 2.20, 2.75, 4.61]
 
 
 # ============================================================================
@@ -84,6 +134,7 @@ class PSRConfig:
     LOSS_CAP: float = PSR_LOSS_CAP
     SENSITIVITY_WEIGHT: float = PSR_SENSITIVITY_WEIGHT
     TEMPORAL_SMOOTH_WEIGHT: float = PSR_TEMPORAL_SMOOTH_WEIGHT
+    TRANSITION_BOOST: float = PSR_TRANSITION_BOOST
 
 
 # Singleton

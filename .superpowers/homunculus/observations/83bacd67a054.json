@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "cd /home/newadmin/swarm-bot && git status --short 2>&1 | head -60 && echo \"---\" && git branch --show-current 2>&1 && echo \"---\" && git remote -v 2>&1 | head -5",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T04:40:40Z"
+}

@@ -57,6 +57,7 @@ TOOL_PREFIXES: dict[str, str] = {
     "graphify": "graphify_",
     "scrapling": "scrapling_",
     "jina_reader": "jina_",
+    "firecrawl": "firecrawl_",
 }
 
 # Reverse map: prefix → server name
@@ -143,6 +144,7 @@ class MCPRouter:
             crawl4ai,
             exa,
             filesystem,
+            firecrawl,
             github,
             gitnexus,
             graphify,
@@ -152,6 +154,7 @@ class MCPRouter:
             obsidian,
             ruflo,
             scrapling,
+            searxng,
             sequential_thinking,
             supabase,
         )
@@ -164,6 +167,7 @@ class MCPRouter:
             "sequential_thinking": sequential_thinking,
             "exa": exa,
             "local_deep_research": local_deep_research,
+            "firecrawl": firecrawl,
             "gitnexus": gitnexus,
             "obsidian": obsidian,
             "filesystem": filesystem,
@@ -174,6 +178,7 @@ class MCPRouter:
             "graphify": graphify,
             "scrapling": scrapling,
             "jina_reader": jina_reader,
+            "searxng": searxng,
         }
 
         for name, config in server_configs.items():

@@ -27,7 +27,7 @@ const ranked = tryRead(path.join(DATA_DIR, 'ranked-context.json'));
 const cp = {
   id: `cp-${Date.now()}`,
   timestamp: Date.now() / 1000,
-  layers: { L1: 'checkpoint', L2: 'chromadb', L3: 'langmem', L4: 'observations', L5: 'graphrag', L6: 'mem0' },
+  layers: { L1: 'checkpoint', L2: 'chromadb', L3: 'langmem', L4: 'observations', L5: 'graphrag', L6: .none. },
   env: { cwd: PROJ },
   snapshot: {
     storeSize: store ? (Array.isArray(store) ? store.length : Object.keys(store).length) : 0,

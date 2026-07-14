@@ -61,7 +61,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="crawl4ai_crawl",
-            description="Crawl a URL and return clean markdown. Use for research, fact-checking, extracting content. Returns LLM-friendly markdown + raw HTML + links + metadata.",
+            description="Crawl URL→clean markdown.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -73,7 +73,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="crawl4ai_search",
-            description="Search and crawl multiple URLs. Use for batch content gathering, product research, competitor analysis.",
+            description="Batch crawl multiple URLs.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -85,7 +85,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="crawl4ai_facts",
-            description="Extract and verify factual claims from a URL. Use for research, journalism, fact-checking, confirming information with citations.",
+            description="Extract & verify claims from URL.",
             inputSchema={
                 "type": "object",
                 "properties": {

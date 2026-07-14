@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "cd /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved && python -c \"\nimport sys\nsys.path.insert(0, 'src')\nsys.path.insert(0, '.')\n# Set some minimal config defaults for import check\nimport types\nC = types.ModuleType('config')\nC.USE_VARIFOCAL = False\nC.FOCAL_ALPHA = 0.5\nC.FOCAL_GAMMA = 2.0\nC.DET_POS_IOU_THRESH = 0.5\nC.DET_NEG_IOU_THRESH = 0.4\nC.DET_CLASS_ALPHAS = {}\nC.DET_OHEM_ENABLED = False\nC.DET_ASYMMETRIC_GAMMA = False\nC.DET_POS_IOU_TOP_K = 9\nC.DET_POS_IOU_IOU_FLOOR = 0.0\nC.DET_EMPTY_BG_SCALE = 0.05\nC.DET_OHEM_RATIO = 3.0\nC.DET_OHEM_MIN_NEG = 64\nC.GIOU_WEIGHT = 2.0\nC.IMG_WIDTH = 1280\nC.IMG_HEIGHT = 720\nC.GRAD_CLIP_NORM = 10.0\nC.DET_POS_ANCHOR_PROBE_EVERY = 0\nC.DET_EMPTY_SAMPLE = 2048\nsys.modules['config'] = C\n\nfrom training.losses import FocalLoss, MultiTaskLoss\nfl = FocalLoss(use_varifocal=False)\nvl = FocalLoss(use_varifocal=True)\nprint('FocalLoss init: OK (standard focal)')\nprint('FocalLoss init: OK (varifocal mode)')\nprint('All imports OK')\n\" 2>&1",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T02:06:19Z"
+}

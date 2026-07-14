@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "ls -la ../../scripts/launch_st_baselines.sh ../../scripts/mediapipe_pose_baseline.py 2>&1 | head -5 && echo \"---\" && mv ../../scripts/launch_st_baselines.sh ../../scripts/mediapipe_pose_baseline.py scripts/ 2>&1 && echo \"Moved\" && ls -la scripts/launch_st_baselines.sh scripts/mediapipe_pose_baseline.py",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:18:33Z"
+}

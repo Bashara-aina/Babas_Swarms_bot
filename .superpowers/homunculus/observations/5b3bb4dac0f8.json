@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "echo \"=== State check ===\" && grep -n \"USE_FAMO\\|USE_ROTOGRAD\\|USE_TAL_ASSIGNER\\|USE_IMTL_L\\|USE_RLW\" src/config.py 2>/dev/null | head -20 && echo \"---\" && grep -n \"FAMO\\|RotoGrad\\|TAL\\|IMTL\\|RLW\" src/training/mtl_balancer.py src/training/train.py 2>/dev/null | head -20",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:19:05Z"
+}

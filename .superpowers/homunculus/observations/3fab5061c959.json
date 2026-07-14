@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "find scripts -name \"*.py\" -newer scripts/overfit_probe.py 2>/dev/null | head -10 && echo \"---\" && find . -name \"mediapipe*\" -o -name \"*confusion_matrix*\" -o -name \"*uncapped*\" 2>/dev/null | head -10",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:18:25Z"
+}

@@ -6,11 +6,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/hook-profile.sh",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/security-prehook.sh",
             "timeout": 5000
           }
@@ -33,28 +28,12 @@
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-governance-capture.sh",
             "timeout": 3000
-          },
-          {
-            "type": "command",
-            "command": "echo '[OK] Pre-edit check passed'",
-            "timeout": 500
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" post-edit'",
-            "timeout": 3000
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit|Bash|Read|Glob|Grep",
         "hooks": [
           {
             "type": "command",
@@ -63,22 +42,17 @@
           },
           {
             "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-metrics-bridge.sh",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" register \"${CLAUDE_TOOL_NAME:-tool}\"",
             "timeout": 2000
           },
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-quality-gate.sh",
-            "timeout": 30000
+            "timeout": 5000
           },
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-context-monitor.sh",
-            "timeout": 3000
-          },
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" register \"${CLAUDE_TOOL_NAME:-tool}\"",
             "timeout": 2000
           }
         ]
@@ -89,12 +63,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" store-user-query'",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" message user",
             "timeout": 2000
           },
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" message user",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" store-user-query'",
             "timeout": 2000
           }
         ]
@@ -102,42 +76,12 @@
     ],
     "PreCompact": [
       {
-        "matcher": "manual",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-manual'",
-            "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/consolidate-observations.sh",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-summarize'",
-            "timeout": 30000
-          }
-        ]
-      },
-      {
         "matcher": "auto",
         "hooks": [
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-auto'",
             "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/consolidate-observations.sh",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-summarize'",
-            "timeout": 30000
           }
         ]
       }
@@ -148,32 +92,22 @@
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-restore'",
-            "timeout": 15000
+            "timeout": 5000
           },
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/superpowers-inject.sh",
-            "timeout": 3000
+            "timeout": 2000
           },
           {
             "type": "command",
             "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/session-start-trigger.mjs\"'",
-            "timeout": 10000
+            "timeout": 5000
           },
           {
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-session-activity.sh",
             "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" import'",
-            "timeout": 10000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/cognee-bridge.mjs\" import'",
-            "timeout": 180000
           },
           {
             "type": "command",
@@ -188,17 +122,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end && exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/create-checkpoint.cjs\"'",
-            "timeout": 10000
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end'",
+            "timeout": 5000
           },
           {
             "type": "command",
-            "command": "sh -c 'bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/memory-sync.sh\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/auto-memory-hook.mjs\" sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/cognee-bridge.mjs\" sync & python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/index-sessions.py\" & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" dreaming-consolidate & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" obsidian-sync & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans & node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" observation-capture & wait'",
-            "timeout": 25000
-          },
-          {
-            "type": "command",
-            "command": "sh -c '\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-evaluate-session.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-cost-tracker.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-desktop-notify.sh & \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-format-typecheck.sh & wait'",
+            "command": "\".\"/.claude/hooks/auto-memory-maintenance.sh",
             "timeout": 10000
           }
         ]
@@ -212,10 +141,12 @@
   "permissions": {
     "allow": [
       "Bash(node .claude/*)",
-      "mcp__graphify__:*",
-      "mcp__cognee__:*",
-      "mcp__hermes__:*",
-      "mcp__hermes-lite__:*"
+      "mcp__scrapling__:*",
+      "mcp__local-deep-research__:*",
+      "Bash(ruflo *)",
+      "mcp__ruflo__:*",
+      "mcp__paper-search__:*",
+      "mcp__academic-search__:*"
     ],
     "deny": [
       "Read(./.env)",
@@ -225,20 +156,22 @@
   "modelRestrictions": {
     "global": {
       "allowOnly": [
-        "deepseek",
-        "opencode-go/minimax-m3"
+        "deepseek-v4-flash",
+        "opencode-go/minimax-m3",
+        "minimax-m3"
       ],
-      "fallbackTo": "deepseek-v4-pro"
+      "fallbackTo": "deepseek-v4-flash"
     },
     "agents": {
       "allowOnly": [
-        "deepseek-v4-pro",
         "deepseek-v4-flash",
         "minimax-m3"
       ]
     },
     "opus": {
-      "allowOnly": ["minimax-m3"]
+      "allowOnly": [
+        "minimax-m3"
+      ]
     }
   },
   "attribution": {
@@ -246,16 +179,7 @@
     "pr": "\ud83e\udd16 Generated with [RuFlo](https://github.com/ruvnet/ruflo)"
   },
   "memoryLayers": {
-    "note": "L5 (graphrag) and L6 (mem0cloud) share .claude-flow/data/auto-memory-store.json. L7 (cognee) provides knowledge-graph-backed memory via cognee-mcp-server.py. Cognee data at data/cognee/."
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "850000",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "HERMES_MAX_CONTEXT_TOKENS": "1048576",
-    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
-    "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
-    "FABLE5_AUTONOMOUS": "1"
+    "note": "Memory: auto-memory-store.json (L5 graphrag + L6 auto)."
   },
   "fable5": {
     "autonomousExecution": true,
@@ -307,29 +231,32 @@
     ],
     "version": "2.0.0"
   },
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:4001",
+    "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
+    "ANTHROPIC_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "minimax-m3",
+    "HOOK_PROFILE": "standard",
+    "HOOK_ENABLE_SECURITY": "true",
+    "HOOK_ENABLE_OBSERVATIONS": "true",
+    "HOOK_ENABLE_GATEGUARD": "true",
+    "HOOK_ENABLE_GITNEXUS": "true",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
+    "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
+    "FABLE5_AUTONOMOUS": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "mcpServers": {
-    "hermes-lite": {
-      "command": "/home/newadmin/.hermes/hermes-agent/venv/bin/python3",
-      "args": [
-        ".claude-flow/mcp/hermes-lite-mcp-server.py"
-      ],
-      "env": {
-        "HERMES_REPO_PATH": "/home/newadmin/.hermes/hermes-agent"
-      }
-    },
-    "hermes": {
-      "command": "/home/newadmin/.hermes/hermes-agent/venv/bin/hermes",
-      "args": ["mcp", "serve"],
-      "env": {
-        "HERMES_REPO_PATH": "/home/newadmin/.hermes/hermes-agent"
-      }
-    },
     "local-deep-research": {
       "command": "/home/newadmin/miniconda3/bin/ldr-mcp"
     },
     "headroom": {
       "command": "/home/newadmin/miniconda3/bin/headroom",
-      "args": ["mcp"]
+      "args": [
+        "mcp"
+      ]
     },
     "searxng": {
       "command": "/home/newadmin/miniconda3/bin/python3",
@@ -343,10 +270,38 @@
         "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
       ]
     },
-    "cognee": {
+    "scrapling": {
       "command": "/home/newadmin/miniconda3/bin/python3",
       "args": [
-        "/home/newadmin/swarm-bot/.claude-flow/mcp/cognee-mcp-server.py"
+        "/home/newadmin/swarm-bot/tools/mcpServers/scrapling_mcp/server.py"
+      ]
+    },
+    "ruflo": {
+      "command": "/home/newadmin/.local/node18/bin/ruflo",
+      "args": [
+        "mcp",
+        "start"
+      ],
+      "env": {
+        "PATH": "/home/newadmin/.local/node18/bin:/usr/bin:/bin"
+      }
+    },
+    "paper-search": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "-m",
+        "paper_search_mcp.server"
+      ],
+      "env": {
+        "PAPER_SEARCH_MCP_CORE_API_KEY": "",
+        "PAPER_SEARCH_MCP_SEMANTIC_SCHOLAR_API_KEY": ""
+      }
+    },
+    "academic-search": {
+      "command": "/home/newadmin/miniconda3/bin/python3",
+      "args": [
+        "-m",
+        "academic_mcp.server"
       ]
     }
   }

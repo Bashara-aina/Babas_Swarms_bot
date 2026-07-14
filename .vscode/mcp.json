@@ -65,6 +65,102 @@
       },
       "description": "Neural search for web and code research",
       "timeout": 60000
+    },
+    "scrapling_mcp": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "scrapling_mcp.server",
+        "--project-root",
+        "/home/newadmin/swarm-bot/tools/mcpServers/scrapling_mcp"
+      ],
+      "description": "Scrapling adaptive web scraping (CSS/XPath, JS rendering, stealth)",
+      "timeout": 30000
+    },
+    "crawl4ai_mcp": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "crawl4ai_mcp.server",
+        "--project-root",
+        "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp"
+      ],
+      "description": "Crawl4AI single URL markdown extractor",
+      "timeout": 60000
+    },
+    "jina_reader_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/jina_reader_mcp/server.py"
+      ],
+      "description": "Jina Reader — URL to clean markdown, web search via s.jina.ai",
+      "timeout": 30000
+    },
+    "searxng_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/searxng_mcp/server.py"
+      ],
+      "description": "SearXNG local metasearch at 127.0.0.1:8888",
+      "timeout": 30000
+    },
+    "browser_use_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/browser_use_mcp/server.py"
+      ],
+      "description": "Browser automation via browser-use (MiniMax-native)",
+      "timeout": 60000
+    },
+    "textidote_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/textidote_mcp/server.py"
+      ],
+      "description": "LaTeX spelling/grammar/style linting via LanguageTool",
+      "timeout": 30000
+    },
+    "paperpal_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/paperpal_mcp/server.py"
+      ],
+      "description": "Academic paper search across arXiv, HuggingFace Papers, Semantic Scholar",
+      "timeout": 30000
+    },
+    "paperdebugger_mcp": {
+      "command": "python3",
+      "args": [
+        "/home/newadmin/swarm-bot/tools/mcpServers/paperdebugger_mcp/server.py"
+      ],
+      "description": "LaTeX paper review, citation verification, prose refinement",
+      "timeout": 60000
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "description": "Step-by-step reasoning with explicit thought chains",
+      "timeout": 30000
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "description": "Generic HTTP fetch as MCP tool (HTML→markdown fallback)",
+      "timeout": 30000
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "description": "Knowledge graph memory with entities and relations",
+      "timeout": 30000
     }
   },
   "inputs": []

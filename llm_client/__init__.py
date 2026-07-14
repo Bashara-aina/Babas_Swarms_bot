@@ -594,7 +594,7 @@ async def _execute_tool_with_self_heal(
             from core.mcp.router import get_mcp_router
             router = get_mcp_router()
             # Check if this tool is registered in the MCP router
-            if tool_name in router._tool_to_server or tool_name.startswith(("ruflo_", "crawl4ai_", "browser_use_", "sequential_thinking_", "exa_", "local_deep_research_", "gitnexus_", "obsidian_", "hermes_")):
+            if tool_name in router._tool_to_server or tool_name.startswith(("ruflo_", "crawl4ai_", "browser_use_", "sequential_thinking_", "exa_", "local_deep_research_", "gitnexus_", "obsidian_", "hermes_", "firecrawl_", "jina_", "scrapling_", "searxng_")):
                 strategy_attempts.append(("mcp_router", f"routing via MCP router for {tool_name}"))
                 mcp_result = await router.execute_tool(tool_name, args or {})
                 if mcp_result:
@@ -607,6 +607,36 @@ async def _execute_tool_with_self_heal(
                         if mcp_result and "error" not in mcp_result.lower():
                             return mcp_result
                     errors.append("strategy_0_mcp_router: returned error result")
+
+                    # ── Web credit exhaustion fallback ────────────────────────────────
+                    # If MCP router returned a credit/rate-limit error for a web tool,
+                    # skip the retry strategies (which won't help) and try alternatives.
+                    from core.web_fallback import (
+                        get_fallback_chain,
+                        is_credit_exhausted,
+                        is_web_tool,
+                        map_args_for_fallback,
+                    )
+                    if is_credit_exhausted(mcp_result) and is_web_tool(tool_name):
+                        for fallback_tool in get_fallback_chain(tool_name):
+                            fallback_args = map_args_for_fallback(tool_name, fallback_tool, args or {})
+                            if not fallback_args or (not fallback_args.get("query") and not fallback_args.get("url")):
+                                continue  # Can't map — skip this fallback
+                            strategy_attempts.append(("web_fallback", f"credit exhausted — trying {fallback_tool}"))
+                            try:
+                                # Route fallback through MCP router (handles all web tools)
+                                fb_result = await router.execute_tool(fallback_tool, fallback_args)
+                                if fb_result:
+                                    try:
+                                        p = json.loads(fb_result)
+                                        if "error" not in p:
+                                            return f"[web fallback: {tool_name} → {fallback_tool}] {fb_result}"
+                                    except (json.JSONDecodeError, TypeError):
+                                        if fb_result and "error" not in fb_result.lower():
+                                            return f"[web fallback: {tool_name} → {fallback_tool}] {fb_result}"
+                            except Exception as fb_e:
+                                errors.append(f"strategy_web_fallback_{fallback_tool}: {fb_e}")
+                                continue
         except Exception as e:
             errors.append(f"strategy_0_mcp_router: {e}")
 

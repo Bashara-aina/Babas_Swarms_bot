@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "cd /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved && python -c \"\nimport torch\nimport sys\nsys.path.insert(0, 'src')\nfrom models.model import BiFPN\n\n# Instantiate BiFPN with typical channel config\nbifpn = BiFPN(in_channels=[512, 1024, 2048], out_channels=256)\nprint('BiFPN instantiated OK')\nprint(f'  Parameters: {sum(p.numel() for p in bifpn.parameters()):,}')\n\n# Forward pass with batch=2, spatial sizes typical of ResNet outputs\nc3 = torch.randn(2, 512, 32, 32)\nc4 = torch.randn(2, 1024, 16, 16)\nc5 = torch.randn(2, 2048, 8, 8)\n\nout = bifpn(c3, c4, c5)\nprint('Forward pass OK')\nprint(f'  Output keys: {sorted(out.keys())}')\nfor k, v in sorted(out.items()):\n    print(f'  {k}: shape={v.shape}, dtype={v.dtype}, device={v.device}')\n\n# Verify spatial sizes follow expected pyramid ratios\nimport math\nfor k, v in sorted(out.items()):\n    level = int(k[1])\n    expected_h = 32 // (2 ** (level - 3))\n    expected_w = 32 // (2 ** (level - 3))\n    assert v.shape[2] == expected_h, f'{k}: height {v.shape[2]} != expected {expected_h}'\n    assert v.shape[3] == expected_w, f'{k}: width {v.shape[3]} != expected {expected_w}'\n\n# Verify all output channels are 256\nfor k, v in sorted(out.items()):\n    assert v.shape[1] == 256, f'{k}: channels {v.shape[1]} != 256'\n\nprint('All assertions passed!')\nprint('BiFPN is fully functional.')\n\" 2>&1",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:39:30Z"
+}

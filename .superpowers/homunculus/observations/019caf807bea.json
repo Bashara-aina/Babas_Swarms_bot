@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "ruff check scripts/mediapipe_pose_baseline.py 2>&1",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:42:49Z"
+}

@@ -1,6 +1,6 @@
 ---
 name: database-reviewer
-description: PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.
+description: PostgreSQL database specialist for query optimization, schema design, security, and performance. Use when writing SQL, creating migrations, or designing schemas. Incorporates Supabase best practices.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: deepseek-v4-flash
 ---

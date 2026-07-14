@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "python3 -c \"import py_compile; py_compile.compile('src/config.py', doraise=True); print('config.py OK')\" && python3 -c \"\nimport ast\nwith open('src/models/model.py') as f:\n    ast.parse(f.read())\nprint('model.py syntax OK')\n\"",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:49:59Z"
+}

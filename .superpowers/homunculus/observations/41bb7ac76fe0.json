@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "ls /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/ 2>/dev/null | head -30",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:46:31Z"
+}

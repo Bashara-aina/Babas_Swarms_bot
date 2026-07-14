@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "git status --short | head -30",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T01:39:58Z"
+}

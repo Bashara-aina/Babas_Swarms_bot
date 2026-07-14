@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "grep -n \"GeoHeadPose\\|column-swap\\|yaw.*pitch.*roll\\|pitch.*roll.*yaw\" code/industreal_improved/src/losses/varifocal_loss.py code/industreal_improved/src/losses/wiou_loss.py 2>/dev/null | head -5",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T03:45:41Z"
+}

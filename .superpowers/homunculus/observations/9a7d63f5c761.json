@@ -1,0 +1,7 @@
+{
+  "tool": "Bash",
+  "command": "echo \"=== Verify code for V1 IMPLEMENTATION_PLAN items ===\" && echo \"\" && echo \"Tier 1 #1 UW-SO:\" && grep -E \"uw_so|UW-SO|softmax.*losses\" src/training/losses.py src/losses/uw_so.py 2>/dev/null | head -5 && echo \"\" && echo \"Tier 1 #6 LDAM-DRW:\" && grep \"USE_LDAM_DRW\" src/config.py | head -3 && echo \"\" && echo \"Tier 1 #11 Varifocal:\" && grep \"USE_VARIFOCAL\" src/config.py | head -3 && echo \"\" && echo \"Tier 1 #13 WIoU:\" && grep \"USE_WIOU\" src/config.py | head -3 && echo \"\" && echo \"Tier 1 #5 EMA warmup:\" && grep -E \"ema_start_epoch|ema_start\" src/config.py src/training/train.py 2>/dev/null | head -5 && echo \"\" && echo \"Tier 1 #7 SWA window:\" && grep -E \"SWA_WINDOW|swa_window|swa_checkpoints\" src/config.py | head -5 && echo \"\" && echo \"Tier 2 #14 Mosaic:\" && grep -E \"USE_MOSAIC|mosaic|MOSAIC\" src/config.py | head -3 && echo \"\" && echo \"Tier 1 #4 Grad clip:\" && grep -E \"clip_grad_norm|grad_clip_norm|max_norm\" src/config.py src/training/train.py 2>/dev/null | head -5 && echo \"\" && echo \"Tier 1 #10 Huberised geodesic:\" && grep -E \"huber|Huber|delta\" src/losses/geodesic_loss.py | head -3",
+  "result_preview": "",
+  "session": "unknown",
+  "timestamp": "2026-07-14T04:34:56Z"
+}

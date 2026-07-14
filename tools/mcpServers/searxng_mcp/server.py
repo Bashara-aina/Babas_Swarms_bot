@@ -56,11 +56,7 @@ async def list_tools() -> list[Tool]:
     tools = [
         Tool(
             name="web_search",
-            description=(
-                "Search the web via SearXNG metasearch engine. "
-                "Returns results from multiple search engines aggregated together. "
-                "Privacy-respecting, no tracking."
-            ),
+            description="Multi-engine web search. Use for general queries needing broad results.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -100,11 +96,7 @@ async def list_tools() -> list[Tool]:
         tools.append(
             Tool(
                 name="search_and_crawl",
-                description=(
-                    "Search the web then deep-crawl the top result pages. "
-                    "Combines SearXNG search with Crawl4AI for full page content extraction. "
-                    "Use when you need more than snippets."
-                ),
+                description="Search + deep-crawl top result URLs. Use when snippets aren't enough.",
                 inputSchema={
                     "type": "object",
                     "properties": {
