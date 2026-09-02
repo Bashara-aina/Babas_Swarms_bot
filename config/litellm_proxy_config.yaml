@@ -1,87 +1,52 @@
-budget_manager:
-  planner:
-    budget_duration: 1d
-    max_budget: 0.2
-  reviewer:
-    budget_duration: 1d
-    max_budget: 0.1
-  wikibot:
-    budget_duration: 1d
-    max_budget: 0.05
-  worker:
-    budget_duration: 1d
-    max_budget: 0.5
-general_settings: null
-litellm_settings:
-  default_headers:
-    HTTP-Referer: https://swarm-bot.ai
-    X-Title: swarm-bot
-  disable_constraints: true
-  drop_params: true
-  no-cache: true
-  set_verbose: false
-  store_model_results: false
 model_list:
-- litellm_params:
-    api_base: https://opencode.ai/zen/go/v1
-    api_key: os.environ/OPENCODE_GO_API_KEY
-    drop_params: true
-    model: openai/opencode-go/*
-    rpm: 500
-  model_name: opencode-go/*
-- litellm_params:
-    api_base: https://opencode.ai/zen/go/v1
-    api_key: os.environ/OPENCODE_GO_API_KEY
-    drop_params: true
-    model: openai/deepseek-v4-flash
-    rpm: 500
-    stream_timeout: 300
-    timeout: 300
-  model_name: deepseek-v4-flash
-- litellm_params:
-    api_base: https://openrouter.ai/api/v1
-    api_key: os.environ/OPENROUTER_API_KEY
-    drop_params: true
-    model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
-    rpm: 10
-    stream_timeout: 300
-    timeout: 300
-  model_name: nemotron
-- litellm_params:
-    api_base: https://openrouter.ai/api/v1
-    api_key: os.environ/OPENROUTER_API_KEY
-    drop_params: true
-    model: openai/nvidia/nemotron-3-ultra-550b-a55b:free
-    rpm: 30
-    timeout: 180
-  model_name: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
-- litellm_params:
-    api_base: https://openrouter.ai/api/v1
-    api_key: os.environ/OPENROUTER_API_KEY
-    drop_params: true
-    model: openrouter/*
-    rpm: 500
-  model_name: openrouter/*
-- litellm_params:
-    api_base: https://api.minimax.io/anthropic
-    api_key: os.environ/MINIMAX_API_KEY
-    drop_params: true
-    model: anthropic/MiniMax-M3
-    rpm: 500
-    stream_timeout: 300
-    timeout: 300
-  model_name: minimax-coding-plan/MiniMax-M3
-- litellm_params:
-    api_base: https://api.minimax.io/anthropic
-    api_key: os.environ/MINIMAX_API_KEY
-    drop_params: true
-    model: anthropic/MiniMax-M3
-    rpm: 500
-    stream_timeout: 300
-    timeout: 300
-  model_name: minimax-m3
-- litellm_params:
-    api_base: http://localhost:11434
-    api_key: os.environ/OLLAMA_API_KEY
-    model: ollama/llama3.3:70b
-  model_name: ollama-llama3.3
+  # Explicit entries with fallbacks for Claude Code model names
+  - model_name: deepseek-v4-flash
+    litellm_params:
+      model: openai/deepseek-v4-flash
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: os.environ/OPENCODE_GO_API_KEY
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+  - model_name: deepseek-v4-pro
+    litellm_params:
+      model: openai/deepseek-v4-pro
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: os.environ/OPENCODE_GO_API_KEY
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+  # MiniMax direct (for opus tier)
+  - model_name: minimax-m3
+    litellm_params:
+      model: anthropic/MiniMax-M3[1m]
+      api_base: https://api.minimax.io/anthropic
+      api_key: os.environ/MINIMAX_API_KEY
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+
+  # Wildcard catch-all for any other model requests
+  - model_name: '*'
+    litellm_params:
+      model: openai/*
+      api_base: https://opencode.ai/zen/go/v1
+      api_key: os.environ/OPENCODE_GO_API_KEY
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+
+router_settings:
+  num_retries: 3
+  retry_after: 1
+  allowed_fails: 3
+  cooldown_time: 30
+  fallbacks:
+    - deepseek-v4-flash: [deepseek-v4-pro]
+    - "*": [deepseek-v4-pro]
+  default_fallbacks: [deepseek-v4-pro]
+
+litellm_settings:
+  callbacks:
+    - oc_proxy.reasoning.deepseek_reasoning_content_callback
+    - oc_proxy.tool_stripper.tool_schema_stripper_callback
+    - oc_proxy.max_effort.max_effort_callback
+  drop_params: true
+  set_verbose: false
+  use_chat_completions_url_for_anthropic_messages: true

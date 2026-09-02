@@ -151,84 +151,31 @@ async function main() {
 
   const handlers = {
     'route': async () => {
+      // NOTE: deliberately quiet — stdout leaks into the transcript as
+      // hook_success attachments. Recall/throttle happens with no output.
+      // IMPORTANT (perf): recall() queries Chroma + Ollama + the graph and
+      // takes ~0.9s. Doing it on EVERY message is pure waste (its result is
+      // not emitted into the model context). Throttle to once per 60s window
+      // so memory stays warm with negligible overhead.
       const intelligence = getIntelligence();
       const router = getRouter();
-      if (intelligence && intelligence.getContext) {
-        try {
-          // Use unified recall (queries graph + chroma + dreaming patterns)
-          const unifiedRecall = require('./unified-recall.cjs');
-          const results = await runWithTimeout(
-            () => unifiedRecall.recall(prompt),
-            'unifiedRecall.recall()'
-          );
-          if (results && results.length > 0) {
-            const lines = ['[UNIFIED] Memory context (graph + vector + patterns):'];
-            for (let i = 0; i < results.length; i++) {
-              const r = results[i];
-              const display = (r.content || '').slice(0, 80);
-              lines.push(`  * (${r.score.toFixed(2)}) [${r.source}] ${display}`);
-            }
-            console.log(lines.join('\n'));
-          } else {
-            // Fallback to graph-only if unified returns nothing
-            const ctx = getIntelligence().getContext(prompt);
-            if (ctx) console.log(ctx);
-          }
-        } catch (e) { /* non-fatal */ }
-      }
-      if (router && router.routeTask) {
-        const result = router.routeTask(prompt);
-        const output = [
-          `[INFO] Routing task: ${prompt.substring(0, 80) || '(no prompt)'}`,
-          '',
-          '+------------------- Primary Recommendation -------------------+',
-          `| Agent: ${result.agent.padEnd(53)}|`,
-          `| Confidence: ${(result.confidence * 100).toFixed(1)}%${' '.repeat(44)}|`,
-          `| Reason: ${(result.reason || '').substring(0, 53).padEnd(53)}|`,
-          '+--------------------------------------------------------------+',
-        ];
-        console.log(output.join('\n'));
-      } else {
-        console.log('[INFO] Router not available, using default routing');
-      }
-      // Skill auto-triggering: match prompt against known skill triggers
-      const skillTriggers = [
-        // Swarm / orchestration
-        { name: 'swarm-advanced', patterns: ['swarm', 'parallel', 'agent team', 'coordination', 'distributed', 'orchestrat', 'multi-agent', 'fan-out', 'hierarchical'] },
-        // GitNexus
-        { name: 'gitnexus-impact-analysis', patterns: ['impact', 'blast radius', 'refactor', 'rename', 'what break', 'affects', 'caller'] },
-        { name: 'gitnexus-debugging', patterns: ['debug', 'trace', 'error', 'crash', 'stack trace', 'failing', 'exception'] },
-        { name: 'gitnexus-refactoring', patterns: ['extract', 'split', 'move', 'inline', 'rename symbol'] },
-        // UI/UX
-        { name: 'frontend-design', patterns: ['design', 'ui ', 'ux', 'component', 'layout', 'beautiful', 'tailwind', 'css', 'dark mode', 'animation', 'premium'] },
-        { name: 'ui-ux-pro-max', patterns: ['linear-style', 'vercel-style', 'gradient', 'button', 'card', 'dashboard', 'landing page', 'responsive'] },
-        // Process
-        { name: 'brainstorming', patterns: ['brainstorm', 'ideate', 'think', 'explore options', 'possible approaches'] },
-        { name: 'debugging', patterns: ['bug', 'fix', 'error', 'not working', 'broken', 'issue', 'incorrect'] },
-        { name: 'tdd', patterns: ['test first', 'tdd', 'write test', 'test-driven'] },
-        { name: 'code-review', patterns: ['review', 'check quality', 'security scan', 'best practice'] },
-        // Architecture
-        { name: 'architecture', patterns: ['architect', 'system design', 'pattern', 'scalability', 'api design'] },
-        { name: 'adr-architect', patterns: ['adr', 'decision record', 'architectural decision'] },
-        // Specialized
-        { name: 'deploy-to-vercel', patterns: ['deploy', 'vercel', 'production', 'hosting'] },
-        { name: 'git-workflow-automation', patterns: ['git ', 'commit', 'branch', 'pull request', 'merge', 'workflow'] },
-        { name: 'github-code-review', patterns: ['github', 'pr ', 'pull request', 'code review'] },
-      ];
-      const promptLower = prompt.toLowerCase();
-      const matchedSkills = [];
-      for (const s of skillTriggers) {
-        for (const p of s.patterns) {
-          if (promptLower.includes(p)) {
-            matchedSkills.push(s.name);
-            break;
+      try {
+        if (intelligence && intelligence.getContext) {
+          const now = Date.now();
+          const last = (global.__lastRecallAt || 0);
+          if (now - last > 60000) {
+            global.__lastRecallAt = now;
+            const unifiedRecall = require('./unified-recall.cjs');
+            await runWithTimeout(
+              () => unifiedRecall.recall(prompt),
+              'unifiedRecall.recall()'
+            ).catch(() => {});
           }
         }
-      }
-      if (matchedSkills.length > 0) {
-        console.log('');
-        console.log('[💡 Skill Auto-Trigger] Consider: ' + matchedSkills.join(', '));
-      }
+        if (router && router.routeTask) {
+          router.routeTask(prompt);
+        }
+      } catch (e) { /* non-fatal */ }
     },
 
     'pre-bash': () => {
@@ -288,10 +235,12 @@ async function main() {
         }
       }
       // Inject top-ranked context into session (read-path fix)
+      // NOTE: intentionally not printed to stdout — that would leak 700+ chars
+      // of ranked context into the conversation history as attachments.
+      // The rank data is available to intelligence module internals only.
       if (intelligenceMod && intelligenceMod.getTopRanked) {
         try {
-          const topContext = intelligenceMod.getTopRanked(5);
-          if (topContext) console.log(topContext);
+          intelligenceMod.getTopRanked(5);
         } catch (e) { /* non-fatal */ }
       }
     },

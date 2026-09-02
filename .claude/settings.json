@@ -129,6 +129,16 @@
             "type": "command",
             "command": "\".\"/.claude/hooks/auto-memory-maintenance.sh",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "\".\"/.claude/hooks/auto-prune-tasks.sh",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
+            "timeout": 10000
           }
         ]
       }
@@ -157,8 +167,10 @@
     "global": {
       "allowOnly": [
         "deepseek-v4-flash",
+        "kimi-k3-free",
+        "minimax-m3",
         "opencode-go/minimax-m3",
-        "minimax-m3"
+        "claude-sonnet-4-6"
       ],
       "fallbackTo": "deepseek-v4-flash"
     },
@@ -246,7 +258,9 @@
     "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
     "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
     "FABLE5_AUTONOMOUS": "1",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k3-free"
   },
   "mcpServers": {
     "local-deep-research": {
@@ -301,7 +315,7 @@
       "command": "/home/newadmin/miniconda3/bin/python3",
       "args": [
         "-m",
-        "academic_mcp.server"
+        "academic_mcp"
       ]
     }
   }

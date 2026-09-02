@@ -4,17 +4,17 @@ set -euo pipefail
 
 HOOK_PROFILE="${HOOK_PROFILE:-standard}"
 
-# Get the command being run
+# Get the command being run (bash-only parsing, no Python subprocess)
 INPUT=$(cat 2>/dev/null || echo "{}")
-CMD=$(echo "$INPUT" | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    tool_input = d.get('toolInput') or d.get('tool_input') or {}
-    print(tool_input.get('command') or tool_input.get('Command') or tool_input.get('bash_command') or '')
-except:
-    print('')
-" 2>/dev/null || echo "")
+if [ -n "$INPUT" ] && [ "$INPUT" != "{}" ]; then
+  # Extract command field from JSON using bash pattern matching
+  # Matches: "command": "the actual command" or "Command": "..." or "bash_command": "..."
+  CMD=$(echo "$INPUT" | grep -oP '"command"\s*:\s*"\K[^"]+' 2>/dev/null | head -1)
+  [ -z "$CMD" ] && CMD=$(echo "$INPUT" | grep -oP '"Command"\s*:\s*"\K[^"]+' 2>/dev/null | head -1)
+  [ -z "$CMD" ] && CMD=$(echo "$INPUT" | grep -oP '"bash_command"\s*:\s*"\K[^"]+' 2>/dev/null | head -1)
+else
+  CMD=""
+fi
 
 # Security denylist patterns
 DANGEROUS_PATTERNS=(
@@ -48,7 +48,7 @@ FILE_PATTERNS=(
 # Check dangerous patterns
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
   if echo "$CMD" | grep -qE "$pattern" 2>/dev/null; then
-    echo "[SECURITY] Blocked dangerous command: '$pattern'"
+    echo "[SECURITY] Blocked dangerous command: '$pattern'" >&2
     exit 1
   fi
 done
@@ -57,10 +57,11 @@ done
 if [ "$HOOK_PROFILE" != "minimal" ]; then
   for pattern in "${FILE_PATTERNS[@]}"; do
     if echo "$CMD" | grep -qE "$pattern" 2>/dev/null; then
-      echo "[SECURITY] Blocked sensitive file access: '$pattern'. Use Read tool instead."
+      echo "[SECURITY] Blocked sensitive file access: '$pattern'. Use Read tool instead." >&2
       exit 1
     fi
   done
 fi
 
+# Silent on success — no stdout so success doesn't attach to the transcript.
 exit 0

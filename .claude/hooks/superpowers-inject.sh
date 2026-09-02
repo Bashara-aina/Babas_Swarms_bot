@@ -5,7 +5,6 @@
 set -euo pipefail
 
 INJECT_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/superpowers_bootstrap.md"
-SKILL_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/skills/using-superpowers/SKILL.md"
 
 # Always write bootstrap file as fallback
 cat > "$INJECT_FILE" << 'INJECT'
@@ -41,30 +40,7 @@ hidden: true
 - You haven't checked gitnexus_impact for changed symbols
 INJECT
 
+# Keep diagnostics on stderr so they never enter model context.
 echo "[superpowers] Injected bootstrap context" >&2
-
-# Attempt to inject SKILL.md content as additional context
-# This works with Claude Code's hookSpecificOutput mechanism
-if [ -f "$SKILL_FILE" ]; then
-  # JSON-escape the SKILL.md content and output as structured context
-  ESCAPED=$(python3 -c "
-import json, sys
-with open('$SKILL_FILE') as f:
-    content = f.read()
-# Output as Claude Code additionalContext
-print(json.dumps({
-    'additionalContext': {
-        'file': '.claude/skills/using-superpowers/SKILL.md',
-        'content': content,
-        'description': 'Superpowers meta-skill: always check skills before acting'
-    }
-}))
-" 2>/dev/null || true)
-
-  if [ -n "$ESCAPED" ]; then
-    # Write to stdout for Claude Code to pick up as hookSpecificOutput
-    echo "$ESCAPED"
-  fi
-fi
 
 exit 0
