@@ -184,3 +184,7 @@ master
 
 # RustDesk (unused cloned tool)
 rustdesk/
+
+# Deprecated Claude Code implementation files (moved to .deprecated/)
+/.claude/hooks/.deprecated/
+/.claude/bin/.deprecated/

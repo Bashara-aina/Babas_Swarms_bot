@@ -9,15 +9,11 @@ if [ "$HOOK_PROFILE" = "minimal" ]; then
 fi
 
 INPUT=$(cat 2>/dev/null || echo "{}")
-FILE_PATH=$(echo "$INPUT" | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    tool_input = d.get('toolInput') or d.get('tool_input') or {}
-    print(tool_input.get('file_path') or tool_input.get('filePath') or '')
-except:
-    print('')
-" 2>/dev/null || echo "")
+if [ -n "$INPUT" ] && [ "$INPUT" != "{}" ]; then
+  FILE_PATH=$(echo "$INPUT" | grep -oP '"(?:file_path|filePath)"\s*:\s*"\K[^"]+' 2>/dev/null | head -1)
+else
+  FILE_PATH=""
+fi
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

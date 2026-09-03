@@ -126,10 +126,24 @@ if changed:
 " 2>&1 | while read -r line; do echo "$line" >&2; done
 }
 
+# ── Prune old session JSONL caches (keep newest 10) — prevents GB accumulation ──
+prune_session_cache() {
+    local cache_dir="$HOME/.claude/projects/-home-newadmin-swarm-bot"
+    [ -d "$cache_dir" ] || return 0
+    local count=0
+    while IFS= read -r f; do
+        rm -f "$f" 2>/dev/null
+        count=$((count + 1))
+        echo "[auto-cleanup] Pruned stale cache: $(basename "$f")" >&2
+    done < <(ls -1t "$cache_dir"/*.jsonl 2>/dev/null | tail -n +11)
+    [ "$count" -gt 0 ] && echo "[auto-cleanup] Removed $count stale session cache files" >&2
+}
+
 # ── Run all maintenance ──────────────────────────────────────────
 prune_l1
 prune_l4
 consolidate_to_l5
 update_l5_feedback
+prune_session_cache
 
 exit 0

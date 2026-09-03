@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "description": "ECC Native Hook Manifest — declarative spec for hook architecture. Settings.json contains the authoritative, active hook chain. This file documents the architecture; it is not consumed by Claude Code directly.",
+  "description": "ECC Native Hook Manifest \u2014 declarative spec for hook architecture. Settings.json contains the authoritative, active hook chain. This file documents the architecture; it is not consumed by Claude Code directly.",
   "active_chain": "see .claude/settings.json hooks block",
   "profiles": {
     "minimal": "Security checks only. No observations, no monitoring.",
@@ -9,18 +9,35 @@
   },
   "active_hooks": {
     "PreToolUse": {
-      "Bash": ["security-prehook.sh"],
-      "Write|Edit|MultiEdit": ["gateguard-pre-edit.sh", "ecc-config-protection.sh", "ecc-governance-capture.sh"]
+      "Bash": [
+        "security-prehook.sh"
+      ],
+      "Write|Edit|MultiEdit": [
+        "gateguard-pre-edit.sh",
+        "ecc-config-protection.sh",
+        "ecc-governance-capture.sh"
+      ]
     },
     "PostToolUse": {
-      "Write|Edit|MultiEdit|Bash": ["capture-observation.sh"],
-      "*": ["ecc-quality-gate.sh", "ecc-context-monitor.sh"]
+      "Write|Edit|MultiEdit|Bash": [
+        "capture-observation.sh"
+      ],
+      "*": [
+        "ecc-quality-gate.sh",
+        "ecc-context-monitor.sh"
+      ]
     },
-    "SessionStart": ["superpowers-inject.sh", "ecc-session-activity.sh"],
-    "SessionEnd": ["auto-memory-maintenance.sh", "auto-prune-tasks.sh"]
+    "SessionStart": [
+      "superpowers-inject.sh",
+      "ecc-session-activity.sh"
+    ],
+    "SessionEnd": [
+      "auto-memory-maintenance.sh",
+      "auto-prune-tasks.sh"
+    ]
   },
   "deprecated_spec_entries": {
-    "note": "These were declared in earlier versions but are not wired into settings.json. They exist on disk for reference but do not fire.",
+    "note": "Moved to .claude/{hooks,bin}/.deprecated/ and excluded from git tracking. Active chain is in .claude/settings.json.",
     "scripts": [
       "hook-profile.sh",
       "ecc-fable5-pre.sh",
@@ -35,8 +52,24 @@
       "ecc-cost-tracker.sh",
       "ecc-desktop-notify.sh",
       "ecc-format-typecheck.sh"
+    ],
+    "deprecated_wrappers": [
+      ".claude/bin/claude-go-wrapper.sh (replaced by scripts/efficient-claude-wrapper.sh)",
+      ".claude/bin/claude-nemotron-wrapper.sh (already self-marked deprecated)",
+      ".claude/bin/claude-openrouter-wrapper.sh (no callers in settings or bashrc)"
     ]
   },
-  "profiles_available": ["minimal", "standard", "strict"],
-  "events": ["PreToolUse", "PostToolUse", "UserPromptSubmit", "PreCompact", "SessionStart", "SessionEnd"]
+  "profiles_available": [
+    "minimal",
+    "standard",
+    "strict"
+  ],
+  "events": [
+    "PreToolUse",
+    "PostToolUse",
+    "UserPromptSubmit",
+    "PreCompact",
+    "SessionStart",
+    "SessionEnd"
+  ]
 }
