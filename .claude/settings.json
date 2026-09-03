@@ -248,19 +248,12 @@
     "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
     "ANTHROPIC_MODEL": "deepseek-v4-flash",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "minimax-m3",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-flash",
     "HOOK_PROFILE": "standard",
-    "HOOK_ENABLE_SECURITY": "true",
-    "HOOK_ENABLE_OBSERVATIONS": "true",
-    "HOOK_ENABLE_GATEGUARD": "true",
-    "HOOK_ENABLE_GITNEXUS": "true",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false",
-    "CLAUDE_CODE_NO_PROMPT_FOR_REVERSIBLE": "1",
-    "FABLE5_AUTONOMOUS": "1",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k3-free"
+    "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
   },
   "mcpServers": {
     "local-deep-research": {
