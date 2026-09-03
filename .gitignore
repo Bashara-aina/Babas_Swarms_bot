@@ -188,3 +188,7 @@ rustdesk/
 # Deprecated Claude Code implementation files (moved to .deprecated/)
 /.claude/hooks/.deprecated/
 /.claude/bin/.deprecated/
+
+# Deprecated Claude Code helper files (moved to .deprecated/)
+/.claude/scripts/.deprecated/
+/.claude-flow/mcp/.deprecated/
