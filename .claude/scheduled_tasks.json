@@ -1,1 +1,22 @@
-{"tasks":[]}
+{
+  "tasks": [
+    {
+      "name": "MTL training status report",
+      "schedule": "*/30 * * * *",
+      "description": "Every 30 minutes: run the training monitor sweep, detect active training, and report key metrics (PID, batch, ETA, latest eval results) for the MTL training runs. Will trigger an automatic Claude invocation to report status to the user.",
+      "command": "bash /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/scripts/monitor/run_monitor.sh && python3 -c \"import json; d=json.load(open('/tmp/monitor_latest.json')); print(json.dumps(d, indent=2))\" && tail -10 /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/logs/PHASE_PROGRESS.md",
+      "enabled": false,
+      "working_dir": "/home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved",
+      "log_file": "/home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/logs/scheduled_task_output.log"
+    },
+    {
+      "name": "MTL training eval trigger",
+      "schedule": "*/20 * * * *",
+      "description": "Every 20 minutes: check for new MTL training checkpoints, trigger eval on RTX 3060 if found. Helps keep the auto-eval pipeline running.",
+      "command": "bash /home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/scripts/monitor/auto_eval.sh",
+      "enabled": false,
+      "working_dir": "/home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved",
+      "log_file": "/home/newadmin/swarm-bot/master/POPW/working/code/industreal_improved/code/industreal_improved/logs/scheduled_task_output.log"
+    }
+  ]
+}
