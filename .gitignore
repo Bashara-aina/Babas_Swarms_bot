@@ -192,3 +192,16 @@ rustdesk/
 # Deprecated Claude Code helper files (moved to .deprecated/)
 /.claude/scripts/.deprecated/
 /.claude-flow/mcp/.deprecated/
+
+# Claude Code efficiency archive — full backup of pruned agents/skills/commands (recoverable, not tracked)
+.claude-disabled-backup-20260906-224005/
+
+# Superpowers gateguard runtime hashes (regenerated per edit)
+.superpowers/.gateguard/
+
+# Session-state prompt snapshots (auto-reinjected, not source-of-truth)
+.session_state/*.md
+.session_state/*.prompt
+
+# Statusline runtime cache (regenerated per session)
+.claude/data/
