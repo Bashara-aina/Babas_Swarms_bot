@@ -1,13 +1,6 @@
 {
-  "dependencies": {
-    "@claude-flow/aidefence": "^3.0.3",
-    "@claude-flow/embeddings": "^3.0.0-alpha.16",
-    "@claude-flow/memory": "^3.0.0-alpha.21",
-    "@iflow-mcp/kynlos-obsidian-mcp-server": "^4.0.2",
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "agentic-flow": "^2.0.11",
-    "ecc-agentshield": "^1.4.0",
-    "ecc-universal": "^1.10.0",
-    "headroom-ai": "^0.22.4"
-  }
+  "name": "babas-swarms-bot",
+  "version": "1.0.0",
+  "description": "POPW MTL research workspace. NOTE: all npm deps here were for decommissioned systems (claude-flow, agentic-flow, ecc, obsidian-mcp). Removed — stale node_modules moved to /tmp/node_modules-stale-20260908. Reinstall only if a live MCP/script needs an npm package.",
+  "private": true
 }
