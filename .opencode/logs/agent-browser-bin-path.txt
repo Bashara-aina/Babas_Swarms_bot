@@ -1,1 +1,0 @@
-/home/newadmin/.local/node18/bin/agent-browser
