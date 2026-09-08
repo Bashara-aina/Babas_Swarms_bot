@@ -23,96 +23,6 @@
             "type": "command",
             "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-config-protection.sh",
             "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-governance-capture.sh",
-            "timeout": 3000
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/capture-observation.sh",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" register \"${CLAUDE_TOOL_NAME:-tool}\"",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-quality-gate.sh",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-context-monitor.sh",
-            "timeout": 2000
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" message user",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" store-user-query'",
-            "timeout": 2000
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "auto",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" compact-auto'",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-restore'",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/superpowers-inject.sh",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/session-start-trigger.mjs\"'",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/ecc-session-activity.sh",
-            "timeout": 2000
-          },
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/track_context.py\" init",
-            "timeout": 2000
           }
         ]
       }
@@ -122,11 +32,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" session-end'",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
             "command": "\".\"/.claude/hooks/auto-memory-maintenance.sh",
             "timeout": 10000
           },
@@ -134,11 +39,6 @@
             "type": "command",
             "command": "\".\"/.claude/hooks/auto-prune-tasks.sh",
             "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "sh -c 'exec node \"${CLAUDE_PROJECT_DIR:-.}/.claude/helpers/hook-handler.cjs\" cleanup-orphans'",
-            "timeout": 10000
           }
         ]
       }
@@ -151,10 +51,6 @@
   "permissions": {
     "allow": [
       "Bash(node .claude/*)",
-      "mcp__scrapling__:*",
-      "mcp__local-deep-research__:*",
-      "Bash(ruflo *)",
-      "mcp__ruflo__:*",
       "mcp__paper-search__:*",
       "mcp__academic-search__:*"
     ],
@@ -170,6 +66,8 @@
         "kimi-k3-free",
         "minimax-m3",
         "opencode-go/minimax-m3",
+        "muse-spark-1.3-contributor",
+        "opencode-go/muse-spark-1.3-contributor",
         "claude-sonnet-4-6"
       ],
       "fallbackTo": "deepseek-v4-flash"
@@ -177,7 +75,8 @@
     "agents": {
       "allowOnly": [
         "deepseek-v4-flash",
-        "minimax-m3"
+        "minimax-m3",
+        "muse-spark-1.3-contributor"
       ]
     },
     "opus": {
@@ -246,9 +145,9 @@
   "env": {
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:4001",
     "ANTHROPIC_API_KEY": "dummy-key-for-claude-code",
-    "ANTHROPIC_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_MODEL": "muse-spark-1.3-contributor",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "minimax-m3",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "muse-spark-1.3-contributor",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-flash",
     "HOOK_PROFILE": "standard",
     "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
@@ -256,9 +155,6 @@
     "CLAUDE_CODE_AGENT_LIST_IN_MESSAGES": "false"
   },
   "mcpServers": {
-    "local-deep-research": {
-      "command": "/home/newadmin/miniconda3/bin/ldr-mcp"
-    },
     "headroom": {
       "command": "/home/newadmin/miniconda3/bin/headroom",
       "args": [
@@ -270,28 +166,6 @@
       "args": [
         "/home/newadmin/swarm-bot/tools/mcpServers/searxng_mcp/server.py"
       ]
-    },
-    "crawl4ai": {
-      "command": "/home/newadmin/miniconda3/bin/python3",
-      "args": [
-        "/home/newadmin/swarm-bot/tools/mcpServers/crawl4ai_mcp/server.py"
-      ]
-    },
-    "scrapling": {
-      "command": "/home/newadmin/miniconda3/bin/python3",
-      "args": [
-        "/home/newadmin/swarm-bot/tools/mcpServers/scrapling_mcp/server.py"
-      ]
-    },
-    "ruflo": {
-      "command": "/home/newadmin/.local/node18/bin/ruflo",
-      "args": [
-        "mcp",
-        "start"
-      ],
-      "env": {
-        "PATH": "/home/newadmin/.local/node18/bin:/usr/bin:/bin"
-      }
     },
     "paper-search": {
       "command": "/home/newadmin/miniconda3/bin/python3",
