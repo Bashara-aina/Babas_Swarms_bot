@@ -43,6 +43,27 @@ CONFIG_PATH="$CONFIG_DIR/litellm.yaml"
 CALLBACK_DIR="$CONFIG_DIR/oc_proxy"
 mkdir -p "$CALLBACK_DIR"
 
+# Start muse-responses-shim (chat-completions -> zen /responses translator for muse-spark)
+MUSE_SHIM_PORT="${MUSE_SHIM_PORT:-4002}"
+if lsof -ti :"$MUSE_SHIM_PORT" &>/dev/null; then
+  echo "Killing existing process on port $MUSE_SHIM_PORT..."
+  lsof -ti :"$MUSE_SHIM_PORT" | xargs kill 2>/dev/null || true
+  sleep 1
+fi
+nohup python3 "$PROJECT_DIR/scripts/muse-responses-shim.py" > "$CONFIG_DIR/shim.log" 2>&1 &
+for i in $(seq 1 20); do
+  if curl -sf "http://127.0.0.1:${MUSE_SHIM_PORT}/healthz" &>/dev/null; then
+    echo "muse-responses-shim healthy on :${MUSE_SHIM_PORT}"
+    break
+  fi
+  sleep 1
+  if [ "$i" = "20" ]; then
+    echo "ERROR: muse shim failed to start. See $CONFIG_DIR/shim.log"
+    tail -n 20 "$CONFIG_DIR/shim.log" || true
+    exit 1
+  fi
+done
+
 # Write callback modules
 cat > "$CALLBACK_DIR/__init__.py" << 'PYEOF'
 PYEOF
@@ -94,8 +115,15 @@ if [ -z "${REASONING_SRC:-}" ]; then
   echo "WARNING: oc_proxy.reasoning not found — callback may fail"
 fi
 
-# Copy tool stripper callback
-cp "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
+# Copy tool stripper callback (canonical: config/oc_proxy/, legacy: .claude-flow/mcp/)
+if [ -f "$PROJECT_DIR/config/oc_proxy/tool_stripper.py" ]; then
+  cp "$PROJECT_DIR/config/oc_proxy/tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
+elif [ -f "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" ]; then
+  cp "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
+else
+  echo "ERROR: tool_stripper.py not found in config/oc_proxy/ or .claude-flow/mcp/ — cannot start proxy."
+  exit 1
+fi
 
 # Generate LiteLLM config
 cat > "$CONFIG_PATH" << YAMLEOF
@@ -106,6 +134,8 @@ model_list:
       model: openai/deepseek-v4-flash
       api_base: https://opencode.ai/zen/go/v1
       api_key: ${API_KEY}
+      extra_headers:
+        x-opencode-session: "8f599165-54d8-415c-b58b-60ba1f421a7c"
       max_input_tokens: 1000000
       max_tokens: 1000000
   - model_name: deepseek-v4-pro
@@ -113,6 +143,17 @@ model_list:
       model: openai/deepseek-v4-pro
       api_base: https://opencode.ai/zen/go/v1
       api_key: ${API_KEY}
+      extra_headers:
+        x-opencode-session: "8f599165-54d8-415c-b58b-60ba1f421a7c"
+      max_input_tokens: 1000000
+      max_tokens: 1000000
+  - model_name: muse-spark-1.3-contributor
+    litellm_params:
+      model: openai/muse-spark-1.3-contributor
+      # via local shim: zen serves muse ONLY on the Responses API (see docs/go)
+      api_base: http://127.0.0.1:${MUSE_SHIM_PORT:-4002}/v1
+      api_key: dummy-key-for-local-shim
+      reasoning_effort: "xhigh"
       max_input_tokens: 1000000
       max_tokens: 1000000
   # MiniMax direct (for opus tier)
@@ -130,6 +171,8 @@ model_list:
       model: openai/*
       api_base: https://opencode.ai/zen/go/v1
       api_key: ${API_KEY}
+      extra_headers:
+        x-opencode-session: "8f599165-54d8-415c-b58b-60ba1f421a7c"
       max_input_tokens: 1000000
       max_tokens: 1000000
 
@@ -139,9 +182,11 @@ router_settings:
   allowed_fails: 3
   cooldown_time: 30
   fallbacks:
-    - deepseek-v4-flash: [deepseek-v4-pro]
-    - "*": [deepseek-v4-pro]
-  default_fallbacks: [deepseek-v4-pro]
+    - deepseek-v4-flash: [muse-spark-1.3-contributor]
+    - muse-spark-1.3-contributor: [deepseek-v4-flash]
+    - deepseek-v4-pro: [deepseek-v4-flash]
+    - "*": [deepseek-v4-flash]
+  default_fallbacks: [deepseek-v4-flash]
 
 litellm_settings:
   callbacks:
