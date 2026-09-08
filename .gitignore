@@ -199,6 +199,16 @@ rustdesk/
 # Superpowers gateguard runtime hashes (regenerated per edit)
 .superpowers/.gateguard/
 
+# Superpowers ECC runtime state (write-only — no active hooks read these)
+.superpowers/homunculus/observations/
+.superpowers/homunculus/instincts/
+.superpowers/homunculus/evaluations/
+.superpowers/homunculus/.consolidation-cursor
+.superpowers/activity/
+.superpowers/metrics/
+.superpowers/mcp-health/
+.superpowers/sdd/
+
 # Session-state prompt snapshots (auto-reinjected, not source-of-truth)
 .session_state/*.md
 .session_state/*.prompt
