@@ -115,15 +115,8 @@ if [ -z "${REASONING_SRC:-}" ]; then
   echo "WARNING: oc_proxy.reasoning not found — callback may fail"
 fi
 
-# Copy tool stripper callback (canonical: config/oc_proxy/, legacy: .claude-flow/mcp/)
-if [ -f "$PROJECT_DIR/config/oc_proxy/tool_stripper.py" ]; then
-  cp "$PROJECT_DIR/config/oc_proxy/tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
-elif [ -f "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" ]; then
-  cp "$PROJECT_DIR/.claude-flow/mcp/litellm_tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
-else
-  echo "ERROR: tool_stripper.py not found in config/oc_proxy/ or .claude-flow/mcp/ — cannot start proxy."
-  exit 1
-fi
+# Copy tool stripper callback (canonical: config/oc_proxy/)
+cp "$PROJECT_DIR/config/oc_proxy/tool_stripper.py" "$CALLBACK_DIR/tool_stripper.py"
 
 # Generate LiteLLM config
 cat > "$CONFIG_PATH" << YAMLEOF

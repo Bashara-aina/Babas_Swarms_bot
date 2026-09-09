@@ -195,15 +195,6 @@
       "description": "SearXNG metasearch + Crawl4AI deep crawling MCP server"
     },
     {
-      "name": "cognee",
-      "command": "/home/newadmin/miniconda3/bin/python3",
-      "args": [
-        "/home/newadmin/swarm-bot/.claude-flow/mcp/cognee-mcp-server.py"
-      ],
-      "enabled": true,
-      "description": "Cognee knowledge graph memory (L7) - remember/recall/forget across sessions"
-    },
-    {
       "name": "paperdebugger",
       "command": "/home/newadmin/miniconda3/bin/python3",
       "args": [
